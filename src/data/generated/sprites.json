@@ -1,0 +1,4 @@
+{
+  "pokemon": { "width": 40, "height": 30, "columns": 16 },
+  "items": { "width": 24, "height": 24, "columns": 16 }
+}
