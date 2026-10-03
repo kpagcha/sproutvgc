@@ -16,11 +16,11 @@ import TypeIcon from '@/components/TypeIcon.vue'
 
 // A table of moves with their type, category, power, accuracy and PP, sortable by any of them, searchable by name and
 // filtered by type and category; with `descriptions`, each move's short description too.
-const props = defineProps<{ ids: readonly MoveId[]; descriptions?: boolean; placeholder: string }>()
+const props = defineProps<{ ids: readonly MoveId[]; descriptions?: boolean; placeholder: string; query?: string }>()
 
 const rows = computed(() => props.ids.map((id) => ({ id, name: refName(move(id)), data: MOVES[id] })))
 
-const query = ref('')
+const query = ref(props.query ?? '')
 const type = ref<TypeId | ''>('')
 const category = ref<Category | ''>('')
 const shown = computed(() => {

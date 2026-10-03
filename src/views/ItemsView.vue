@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { availableIds, item } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { ITEM_KINDS, ITEMS } from '@/data/items'
@@ -17,7 +18,9 @@ const items = computed(() =>
     .sort((a, b) => a.name.localeCompare(b.name, locale.value)),
 )
 
-const query = ref('')
+// The home page's search links here with its query (`?q=`).
+const initial = useRoute().query.q
+const query = ref(typeof initial === 'string' ? initial : '')
 const groups = computed(() => {
   const q = fold(query.value.trim())
   const shown = items.value.flatMap((it) => {

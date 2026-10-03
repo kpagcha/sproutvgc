@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { availableIds, pokemon, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { POKEMON, STATS, total, type StatId } from '@/data/pokemon'
@@ -20,7 +21,9 @@ const rows = computed(() =>
     .map((id) => ({ id, name: refName(pokemon(id)), data: POKEMON[id] })),
 )
 
-const query = ref('')
+// The home page's search links here with its query (`?q=`).
+const initial = useRoute().query.q
+const query = ref(typeof initial === 'string' ? initial : '')
 const type = ref<TypeId | ''>('')
 const shown = computed(() => {
   const q = fold(query.value.trim())

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { ability, availableIds } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { locale, t } from '@/i18n'
@@ -15,7 +16,9 @@ const abilities = computed(() =>
     .sort((a, b) => a.name.localeCompare(b.name, locale.value)),
 )
 
-const query = ref('')
+// The home page's search links here with its query (`?q=`).
+const initial = useRoute().query.q
+const query = ref(typeof initial === 'string' ? initial : '')
 const shown = computed(() => {
   const q = fold(query.value.trim())
   if (!q) return abilities.value.map((a) => ({ ...a, parts: null }))

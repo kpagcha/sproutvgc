@@ -74,7 +74,7 @@ export const messages: Record<keyof typeof en, string> = {
   'format.label': '{game} · Reglamento {reg}',
 
   'desc.home':
-    'Una Pokédex competitiva para {game}, al día con el Reglamento {reg}: tabla de tipos, enfrentamientos de tipos, cada tipo en detalle, un test de tipos y todas las habilidades.',
+    'Una Pokédex competitiva para {game}, al día con el Reglamento {reg}: todos los Pokémon, movimientos, habilidades y objetos, la tabla y los enfrentamientos de tipos, y un test de tipos.',
   'desc.types':
     'Cada tipo de {game} con sus debilidades, resistencias e inmunidades, y las interacciones que van más allá de la tabla de tipos.',
   'desc.type':
@@ -85,8 +85,7 @@ export const messages: Record<keyof typeof en, string> = {
   'desc.quiz':
     'Aprende la tabla de tipos de {game} con repetición espaciada. Los enfrentamientos que falles vuelven hasta que te los sepas.',
 
-  'home.intro':
-    'Una Pokédex competitiva para {game}, al día con el Reglamento {reg}. La parte de Pokémon, movimientos y formatos está en camino; las herramientas de tipos y las habilidades ya están listas.',
+  'home.intro': 'Una Pokédex competitiva para {game}, al día con el Reglamento {reg}.',
   'home.typesDesc': 'Cada tipo con sus debilidades, resistencias e inmunidades.',
   'home.abilitiesDesc': 'Qué hace cada habilidad y qué Pokémon pueden tenerla.',
   'home.search': 'Buscar en la dex',
@@ -516,4 +515,14 @@ export const messages: Record<keyof typeof en, string> = {
   'item.megas': 'Megaevolución',
   'item.users': 'Solo funciona con',
   'item.notFound': 'No hay ningún objeto «{id}» en el Reglamento {reg}.',
+
+  'home.pokemonDesc': 'Cada Pokémon con sus tipos, habilidades, características base y movimientos.',
+  'home.movesDesc': 'Qué hace cada movimiento, sus datos y quién lo aprende.',
+  'home.itemsDesc': 'Cada objeto equipable, baya y megapiedra.',
+  'home.more': '{n} más',
+  'credits.spritesTitle': 'Sprites',
+  'credits.spritesBody':
+    'Los sprites e iconos de Pokémon y objetos y los distintivos de categoría de los movimientos son de {source}.',
+  'credits.dataTitle': 'Datos',
+  'credits.dataBody': 'Los datos del juego son de {showdown} (MIT), y los nombres en otros idiomas de {pokeapi}.',
 }

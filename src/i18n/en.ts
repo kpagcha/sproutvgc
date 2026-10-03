@@ -72,7 +72,7 @@ export const messages = {
   'format.label': '{game} · Regulation {reg}',
 
   'desc.home':
-    'A competitive dex for {game}, up to date with Regulation {reg}: type chart, type matchups, every type in detail, a type quiz and every ability.',
+    'A competitive dex for {game}, up to date with Regulation {reg}: every Pokémon, move, ability and item, the type chart and type matchups, and a type quiz.',
   'desc.types':
     'Every {game} type with its weaknesses, resistances and immunities, and the interactions beyond the type chart.',
   'desc.type':
@@ -82,8 +82,7 @@ export const messages = {
     'Type matchups for {game}: weaknesses and resistances for any type combination, and the coverage of a moveset.',
   'desc.quiz': 'Learn the {game} type chart with spaced repetition. Matchups you miss come back until you know them.',
 
-  'home.intro':
-    'A competitive dex for {game}, up to date with Regulation {reg}. The Pokémon, moves and formats dex is on the way; the type tools and abilities are ready now.',
+  'home.intro': 'A competitive dex for {game}, up to date with Regulation {reg}.',
   'home.typesDesc': 'Every type with its weaknesses, resistances and immunities.',
   'home.abilitiesDesc': 'What every ability does, and which Pokémon can have it.',
   'home.search': 'Search the dex',
@@ -510,4 +509,13 @@ export const messages = {
   'item.megas': 'Mega Evolution',
   'item.users': 'Only works for',
   'item.notFound': 'There is no item "{id}" in Regulation {reg}.',
+
+  'home.pokemonDesc': 'Every Pokémon with its types, abilities, base stats and moves.',
+  'home.movesDesc': 'What every move does, its numbers, and who learns it.',
+  'home.itemsDesc': 'Every held item, berry and Mega Stone.',
+  'home.more': '{n} more',
+  'credits.spritesTitle': 'Sprites',
+  'credits.spritesBody': 'The Pokémon and item sprites, icons and move category badges come from {source}.',
+  'credits.dataTitle': 'Data',
+  'credits.dataBody': 'The game data comes from {showdown} (MIT), and the names in other languages from {pokeapi}.',
 }
