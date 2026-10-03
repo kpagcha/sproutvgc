@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { TYPES } from '@/data/types'
 import type { MessageKey } from '@/i18n'
 import { loadDexNames } from '@/i18n/refName'
-import { loadDescriptions } from '@/i18n/descriptions'
+import { loadDescriptions, type DescribedKind } from '@/i18n/descriptions'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -11,8 +11,8 @@ declare module 'vue-router' {
     descKey?: MessageKey
     /** The page shows dex entries (`DexRef`): navigation waits for the current locale's names. */
     dexNames?: boolean
-    /** The page shows ability descriptions: navigation waits for the current locale's. */
-    descriptions?: boolean
+    /** The categories whose descriptions the page shows: navigation waits for the current locale's. */
+    descriptions?: DescribedKind[]
   }
 }
 
@@ -66,14 +66,55 @@ export const router = createRouter({
       path: '/abilities',
       name: 'abilities',
       component: () => import('@/views/AbilitiesView.vue'),
-      meta: { titleKey: 'title.abilities', descKey: 'desc.abilities', dexNames: true, descriptions: true },
+      meta: { titleKey: 'title.abilities', descKey: 'desc.abilities', dexNames: true, descriptions: ['ability'] },
     },
     {
       path: '/abilities/:id',
       name: 'ability',
       component: () => import('@/views/AbilityView.vue'),
       // The layout describes an ability's own page; the list's description is for an ID the regulation lacks.
-      meta: { titleKey: 'title.abilities', descKey: 'desc.abilities', dexNames: true, descriptions: true },
+      meta: { titleKey: 'title.abilities', descKey: 'desc.abilities', dexNames: true, descriptions: ['ability'] },
+    },
+    {
+      path: '/pokemon',
+      name: 'pokedex',
+      component: () => import('@/views/PokedexView.vue'),
+      meta: { titleKey: 'title.pokemon', descKey: 'desc.pokedex', dexNames: true },
+    },
+    {
+      path: '/pokemon/:id',
+      name: 'pokemon',
+      component: () => import('@/views/PokemonView.vue'),
+      meta: {
+        titleKey: 'title.pokemon',
+        descKey: 'desc.pokedex',
+        dexNames: true,
+        descriptions: ['ability', 'move'],
+      },
+    },
+    {
+      path: '/moves',
+      name: 'moves',
+      component: () => import('@/views/MovesView.vue'),
+      meta: { titleKey: 'title.moves', descKey: 'desc.moves', dexNames: true, descriptions: ['move'] },
+    },
+    {
+      path: '/moves/:id',
+      name: 'move',
+      component: () => import('@/views/MoveView.vue'),
+      meta: { titleKey: 'title.moves', descKey: 'desc.moves', dexNames: true, descriptions: ['move'] },
+    },
+    {
+      path: '/items',
+      name: 'items',
+      component: () => import('@/views/ItemsView.vue'),
+      meta: { titleKey: 'title.items', descKey: 'desc.items', dexNames: true, descriptions: ['item'] },
+    },
+    {
+      path: '/items/:id',
+      name: 'item',
+      component: () => import('@/views/ItemView.vue'),
+      meta: { titleKey: 'title.items', descKey: 'desc.items', dexNames: true, descriptions: ['item'] },
     },
     {
       path: '/settings',
@@ -94,5 +135,8 @@ export const router = createRouter({
 // Pages showing dex entries render with their names (and descriptions) in place, rather than filling them in once
 // they load.
 router.beforeResolve(async (to) => {
-  await Promise.all([to.meta.dexNames && loadDexNames(), to.meta.descriptions && loadDescriptions()])
+  await Promise.all([
+    to.meta.dexNames && loadDexNames(),
+    to.meta.descriptions && loadDescriptions(to.meta.descriptions),
+  ])
 })

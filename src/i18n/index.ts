@@ -73,6 +73,17 @@ export function tSplit(key: MessageKey, slot: string): [string, string] {
   return i < 0 ? [s, ''] : [s.slice(0, i), s.slice(i + slot.length + 2)]
 }
 
+/**
+ * A message split around all its `{slot}`s, so components can be rendered in their places: text parts are strings,
+ * slots `{ slot: name }`. "Mega Evolves from {pokemon} holding {item}." gives the text, `pokemon`, the text, `item`...
+ */
+export function tSlots(key: MessageKey): (string | { slot: string })[] {
+  return t(key)
+    .split(/(\{\w+\})/)
+    .filter(Boolean)
+    .map((part) => (/^\{\w+\}$/.test(part) ? { slot: part.slice(1, -1) } : part))
+}
+
 export function typeName(type: TypeId): string {
   return BUNDLES[locale.value].types[type]
 }

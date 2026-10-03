@@ -5,9 +5,8 @@ import { locale, t, typeName } from '@/i18n'
 import { GAME_NAME, REGULATION } from '@/data/format'
 import { ability, availableIds } from '@/data/dex'
 import { TYPES } from '@/data/types'
-import { abilityDescription } from '@/i18n/descriptions'
+import { description, loadDescriptions } from '@/i18n/descriptions'
 import { loadDexNames, refName } from '@/i18n/refName'
-import { loadDescriptions } from '@/i18n/descriptions'
 import { fold, split } from '@/lib/search'
 import TypeIcon from '@/components/TypeIcon.vue'
 import QuickLinks from '@/components/QuickLinks.vue'
@@ -25,7 +24,7 @@ const query = computed({
 // background, ready to search by the time anyone types.
 onMounted(() => {
   void loadDexNames()
-  void loadDescriptions()
+  void loadDescriptions(['ability'])
 })
 
 /** Each category's entries matching the search, by name in the reader's language; categories without any left out. */
@@ -42,7 +41,7 @@ const results = computed(() => {
     .flatMap((id) => {
       const name = refName(ability(id))
       const parts = split(name, q)
-      return parts ? [{ id, name, parts, text: abilityDescription(id)?.short ?? '' }] : []
+      return parts ? [{ id, name, parts, text: description('ability', id)?.short ?? '' }] : []
     })
     .sort((a, b) => +!!a.parts[0] - +!!b.parts[0] || a.name.localeCompare(b.name, locale.value))
   return { types, abilities }

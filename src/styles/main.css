@@ -371,3 +371,57 @@ details > summary {
     transition: none;
   }
 }
+
+/* A cell of an icon sheet (`PokemonIcon`, `ItemIcon`): its size and position are set inline. */
+.sheet-icon {
+  display: inline-block;
+  flex: none;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+/* Dex tables (Pokémon, moves): a header row of sort buttons, and rows that scroll sideways on phones. */
+.table-wrap {
+  overflow-x: auto;
+  margin: 0 -4px;
+}
+.dex-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.dex-table th,
+.dex-table td {
+  padding: 3px 6px;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+  border-top: 1px solid var(--border);
+}
+.dex-table thead th {
+  border-top: none;
+  font-weight: normal;
+  color: var(--muted);
+}
+.dex-table .r {
+  text-align: right;
+}
+.dex-table .sort {
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.dex-table .sort.active {
+  color: var(--text);
+  font-weight: bold;
+}
+.dex-table .grow {
+  width: 100%;
+  white-space: normal;
+}
+.dex-table .name {
+  font-weight: bold;
+}

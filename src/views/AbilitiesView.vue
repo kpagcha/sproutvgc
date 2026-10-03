@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { ability, availableIds } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { locale, t } from '@/i18n'
-import { abilityDescription } from '@/i18n/descriptions'
+import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
 import DexText from '@/components/DexText.vue'
@@ -11,7 +11,7 @@ import DexText from '@/components/DexText.vue'
 // Every ability the regulation has, by name in the reader's language, with its short description.
 const abilities = computed(() =>
   availableIds('ability')
-    .map((id) => ({ id, name: refName(ability(id)), text: abilityDescription(id)?.short ?? '' }))
+    .map((id) => ({ id, name: refName(ability(id)), text: description('ability', id)?.short ?? '' }))
     .sort((a, b) => a.name.localeCompare(b.name, locale.value)),
 )
 

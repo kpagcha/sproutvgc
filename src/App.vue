@@ -6,6 +6,7 @@ import { FADE, PAGE, SPRING } from '@/lib/motion'
 import { t, typeName, type MessageKey } from '@/i18n'
 import { isType } from '@/data/types'
 import { generatedName } from '@/i18n/refName'
+import type { GeneratedKind } from '@/i18n'
 import { GAME_NAME, REGULATION } from '@/data/format'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
@@ -15,11 +16,20 @@ function setMeta(selector: string, content: string) {
   document.head.querySelector(selector)?.setAttribute('content', content)
 }
 
+/** The entry pages of generated categories, by route name, and the meta description of each. */
+const ENTRY_PAGES: Partial<Record<string, { kind: GeneratedKind; desc: MessageKey }>> = {
+  ability: { kind: 'ability', desc: 'desc.ability' },
+  pokemon: { kind: 'pokemon', desc: 'desc.pokemon' },
+  move: { kind: 'move', desc: 'desc.move' },
+  item: { kind: 'item', desc: 'desc.item' },
+}
+
 watchEffect(() => {
-  // A type's own page (/types/fire) and an ability's (/abilities/levitate) are titled and described as that type or
-  // ability; pages without a description use the home page's.
+  // A type's own page (/types/fire) and a dex entry's (/abilities/levitate) are titled and described as that type or
+  // entry; pages without a description use the home page's.
   const type = typeof route.params.type === 'string' && isType(route.params.type) ? route.params.type : null
-  const entry = route.name === 'ability' ? generatedName('ability', String(route.params.id)) : undefined
+  const page = typeof route.name === 'string' ? ENTRY_PAGES[route.name] : undefined
+  const entry = page ? generatedName(page.kind, String(route.params.id)) : undefined
   const key = route.meta.titleKey
   const name = key ? t(key) : null
   const lead = type ? typeName(type) : entry
@@ -28,13 +38,22 @@ watchEffect(() => {
   const desc = type
     ? t('desc.type', { ...params, type: typeName(type) })
     : entry
-      ? t('desc.ability', { ...params, ability: entry })
+      ? t(page!.desc, { ...params, ability: entry, name: entry })
       : t(route.meta.descKey ?? 'desc.home', params)
   document.title = title
   setMeta('meta[name="description"]', desc)
   setMeta('meta[property="og:title"]', title)
   setMeta('meta[property="og:description"]', desc)
 })
+
+/** Entry pages lead back to their category's list. */
+const LISTS: Partial<Record<string, { to: string; label: MessageKey }>> = {
+  ability: { to: '/abilities', label: 'title.abilities' },
+  pokemon: { to: '/pokemon', label: 'title.pokemon' },
+  move: { to: '/moves', label: 'title.moves' },
+  item: { to: '/items', label: 'title.items' },
+  condition: { to: '/conditions', label: 'title.conditions' },
+}
 
 // Pages under Types get a back link to it, named after it. One side of the matchups page leads back to the whole
 // page instead, keeping the picks (and, with tabs, that side's tab).
@@ -43,19 +62,39 @@ function backLink(r: RouteLocationNormalizedLoaded): { to: RouteLocationRaw; lab
     const query = { ...r.query, mode: r.params.side === 'atk' ? 'atk' : undefined }
     return { to: { path: '/types/matchups', query }, label: 'nav.matchups' }
   }
-  if (r.name === 'ability') return { to: '/abilities', label: 'title.abilities' }
+  const list = typeof r.name === 'string' ? LISTS[r.name] : undefined
+  if (list) return list
   const tool = r.name === 'chart' || r.name === 'matchups' || r.name === 'quiz'
   return tool ? { to: '/types', label: 'nav.types' } : null
 }
 
 // The header link to highlight: the dex section the current page belongs to.
-const section = computed(() => {
-  const name = route.name
-  if (name === 'types' || name === 'chart' || name === 'matchups' || name === 'matchupsSide') return 'types'
-  if (name === 'quiz' || name === 'settings') return name
-  if (name === 'abilities' || name === 'ability') return 'abilities'
-  return null
-})
+const SECTIONS: Partial<Record<string, string>> = {
+  types: 'types',
+  chart: 'types',
+  matchups: 'types',
+  matchupsSide: 'types',
+  quiz: 'types',
+  settings: 'settings',
+  pokedex: 'pokemon',
+  pokemon: 'pokemon',
+  moves: 'moves',
+  move: 'moves',
+  abilities: 'abilities',
+  ability: 'abilities',
+  items: 'items',
+  item: 'items',
+}
+const section = computed(() => (typeof route.name === 'string' ? (SECTIONS[route.name] ?? null) : null))
+
+/** The header's links, one per dex section; Types covers its tools too (chart, matchups, quiz). */
+const NAV: { to: string; section: string; label: MessageKey }[] = [
+  { to: '/pokemon', section: 'pokemon', label: 'nav.pokemon' },
+  { to: '/moves', section: 'moves', label: 'nav.moves' },
+  { to: '/abilities', section: 'abilities', label: 'nav.abilities' },
+  { to: '/items', section: 'items', label: 'nav.items' },
+  { to: '/types', section: 'types', label: 'nav.types' },
+]
 
 // Phones (touch, narrow): pages slide instead of fading.
 const phoneQuery = window.matchMedia('(max-width: 720px) and (hover: none) and (pointer: coarse)')
@@ -92,18 +131,9 @@ const fadeVariants = {
         <span class="format muted">{{ t('format.label', { game: GAME_NAME, reg: REGULATION }) }}</span>
         <nav class="nav font-display">
           <!-- The active highlight is one element that slides between links. -->
-          <!-- Types covers its tools too (chart, matchups); abilities and the quiz have their own links. -->
-          <RouterLink to="/types" :class="{ active: section === 'types' }">
-            <motion.span v-if="section === 'types'" layout-id="nav-pill" class="pill" :transition="SPRING" />
-            <span class="label">{{ t('nav.types') }}</span>
-          </RouterLink>
-          <RouterLink to="/abilities" :class="{ active: section === 'abilities' }">
-            <motion.span v-if="section === 'abilities'" layout-id="nav-pill" class="pill" :transition="SPRING" />
-            <span class="label">{{ t('nav.abilities') }}</span>
-          </RouterLink>
-          <RouterLink to="/types/quiz" :class="{ active: section === 'quiz' }">
-            <motion.span v-if="section === 'quiz'" layout-id="nav-pill" class="pill" :transition="SPRING" />
-            <span class="label">{{ t('nav.quiz') }}</span>
+          <RouterLink v-for="n in NAV" :key="n.to" :to="n.to" :class="{ active: section === n.section }">
+            <motion.span v-if="section === n.section" layout-id="nav-pill" class="pill" :transition="SPRING" />
+            <span class="label">{{ t(n.label) }}</span>
           </RouterLink>
           <RouterLink to="/settings" class="end" :class="{ active: section === 'settings' }">
             <motion.span v-if="section === 'settings'" layout-id="nav-pill" class="pill" :transition="SPRING" />

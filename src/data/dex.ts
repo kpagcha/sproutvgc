@@ -90,6 +90,9 @@ export interface Page {
 export const PAGES: Partial<Record<Kind, Page>> = {
   type: { route: 'types', param: 'type' },
   ability: { route: 'ability' },
+  pokemon: { route: 'pokemon' },
+  move: { route: 'move' },
+  item: { route: 'item' },
 }
 
 /** Whether the current regulation has `ref` (or there's no ref to check), so its interactions are shown. */
