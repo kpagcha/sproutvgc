@@ -1,6 +1,5 @@
 {
   "abomasnow": {
-    "num": 460,
     "types": ["grass", "ice"],
     "stats": [90, 92, 75, 92, 85, 60],
     "abilities": { "0": "snowwarning", "H": "soundproof" },
@@ -10,7 +9,6 @@
     "icon": 0
   },
   "abomasnowmega": {
-    "num": 460,
     "types": ["grass", "ice"],
     "stats": [90, 132, 105, 132, 105, 30],
     "abilities": { "0": "snowwarning" },
@@ -25,7 +23,6 @@
     "item": "abomasite"
   },
   "absol": {
-    "num": 359,
     "types": ["dark"],
     "stats": [65, 130, 60, 75, 60, 75],
     "abilities": { "0": "pressure", "1": "superluck", "H": "justified" },
@@ -35,7 +32,6 @@
     "icon": 2
   },
   "absolmega": {
-    "num": 359,
     "types": ["dark"],
     "stats": [65, 150, 60, 115, 60, 115],
     "abilities": { "0": "magicbounce" },
@@ -50,7 +46,6 @@
     "item": "absolite"
   },
   "absolmegaz": {
-    "num": 359,
     "types": ["dark", "ghost"],
     "stats": [65, 154, 60, 75, 60, 151],
     "abilities": { "0": "sharpness" },
@@ -65,7 +60,6 @@
     "item": "absolitez"
   },
   "aegislash": {
-    "num": 681,
     "types": ["steel", "ghost"],
     "stats": [60, 50, 140, 50, 140, 60],
     "abilities": { "0": "stancechange" },
@@ -75,7 +69,6 @@
     "icon": 5
   },
   "aegislashblade": {
-    "num": 681,
     "types": ["steel", "ghost"],
     "stats": [60, 140, 50, 140, 50, 60],
     "abilities": { "0": "stancechange" },
@@ -88,7 +81,6 @@
     "battleOnly": "aegislash"
   },
   "aerodactyl": {
-    "num": 142,
     "types": ["rock", "flying"],
     "stats": [80, 105, 65, 60, 75, 130],
     "abilities": { "0": "rockhead", "1": "pressure", "H": "unnerve" },
@@ -98,7 +90,6 @@
     "icon": 7
   },
   "aerodactylmega": {
-    "num": 142,
     "types": ["rock", "flying"],
     "stats": [80, 135, 85, 70, 95, 150],
     "abilities": { "0": "toughclaws" },
@@ -113,7 +104,6 @@
     "item": "aerodactylite"
   },
   "aggron": {
-    "num": 306,
     "types": ["steel", "rock"],
     "stats": [70, 110, 180, 60, 60, 50],
     "abilities": { "0": "sturdy", "1": "rockhead", "H": "heavymetal" },
@@ -123,7 +113,6 @@
     "icon": 9
   },
   "aggronmega": {
-    "num": 306,
     "types": ["steel"],
     "stats": [70, 140, 230, 60, 80, 50],
     "abilities": { "0": "filter" },
@@ -138,7 +127,6 @@
     "item": "aggronite"
   },
   "alakazam": {
-    "num": 65,
     "types": ["psychic"],
     "stats": [55, 50, 45, 135, 95, 120],
     "abilities": { "0": "synchronize", "1": "innerfocus", "H": "magicguard" },
@@ -148,7 +136,6 @@
     "icon": 11
   },
   "alakazammega": {
-    "num": 65,
     "types": ["psychic"],
     "stats": [55, 50, 65, 175, 105, 150],
     "abilities": { "0": "trace" },
@@ -163,7 +150,6 @@
     "item": "alakazite"
   },
   "alcremie": {
-    "num": 869,
     "types": ["fairy"],
     "stats": [65, 60, 75, 110, 121, 64],
     "abilities": { "0": "sweetveil", "H": "aromaveil" },
@@ -173,7 +159,6 @@
     "icon": 13
   },
   "alcremiecaramelswirl": {
-    "num": 869,
     "types": ["fairy"],
     "stats": [65, 60, 75, 110, 121, 64],
     "abilities": { "0": "sweetveil", "H": "aromaveil" },
@@ -186,7 +171,6 @@
     "cosmetic": true
   },
   "alcremielemoncream": {
-    "num": 869,
     "types": ["fairy"],
     "stats": [65, 60, 75, 110, 121, 64],
     "abilities": { "0": "sweetveil", "H": "aromaveil" },
@@ -199,7 +183,6 @@
     "cosmetic": true
   },
   "alcremiematchacream": {
-    "num": 869,
     "types": ["fairy"],
     "stats": [65, 60, 75, 110, 121, 64],
     "abilities": { "0": "sweetveil", "H": "aromaveil" },
@@ -212,7 +195,6 @@
     "cosmetic": true
   },
   "alcremiemintcream": {
-    "num": 869,
     "types": ["fairy"],
     "stats": [65, 60, 75, 110, 121, 64],
     "abilities": { "0": "sweetveil", "H": "aromaveil" },
@@ -225,7 +207,6 @@
     "cosmetic": true
   },
   "alcremierainbowswirl": {
-    "num": 869,
     "types": ["fairy"],
     "stats": [65, 60, 75, 110, 121, 64],
     "abilities": { "0": "sweetveil", "H": "aromaveil" },
@@ -238,7 +219,6 @@
     "cosmetic": true
   },
   "alcremierubycream": {
-    "num": 869,
     "types": ["fairy"],
     "stats": [65, 60, 75, 110, 121, 64],
     "abilities": { "0": "sweetveil", "H": "aromaveil" },
@@ -251,7 +231,6 @@
     "cosmetic": true
   },
   "alcremierubyswirl": {
-    "num": 869,
     "types": ["fairy"],
     "stats": [65, 60, 75, 110, 121, 64],
     "abilities": { "0": "sweetveil", "H": "aromaveil" },
@@ -264,7 +243,6 @@
     "cosmetic": true
   },
   "altaria": {
-    "num": 334,
     "types": ["dragon", "flying"],
     "stats": [75, 70, 90, 70, 105, 80],
     "abilities": { "0": "naturalcure", "H": "cloudnine" },
@@ -274,7 +252,6 @@
     "icon": 21
   },
   "altariamega": {
-    "num": 334,
     "types": ["dragon", "fairy"],
     "stats": [75, 110, 110, 110, 105, 80],
     "abilities": { "0": "pixilate" },
@@ -289,7 +266,6 @@
     "item": "altarianite"
   },
   "ampharos": {
-    "num": 181,
     "types": ["electric"],
     "stats": [90, 75, 85, 115, 90, 55],
     "abilities": { "0": "static", "H": "plus" },
@@ -299,7 +275,6 @@
     "icon": 23
   },
   "ampharosmega": {
-    "num": 181,
     "types": ["electric", "dragon"],
     "stats": [90, 95, 105, 165, 110, 45],
     "abilities": { "0": "moldbreaker" },
@@ -314,7 +289,6 @@
     "item": "ampharosite"
   },
   "annihilape": {
-    "num": 979,
     "types": ["fighting", "ghost"],
     "stats": [110, 115, 80, 50, 90, 90],
     "abilities": { "0": "vitalspirit", "1": "innerfocus", "H": "defiant" },
@@ -324,7 +298,6 @@
     "icon": 25
   },
   "appletun": {
-    "num": 842,
     "types": ["grass", "dragon"],
     "stats": [110, 85, 80, 100, 80, 30],
     "abilities": { "0": "ripen", "1": "gluttony", "H": "thickfat" },
@@ -334,7 +307,6 @@
     "icon": 26
   },
   "araquanid": {
-    "num": 752,
     "types": ["water", "bug"],
     "stats": [68, 70, 92, 50, 132, 42],
     "abilities": { "0": "waterbubble", "H": "waterabsorb" },
@@ -344,7 +316,6 @@
     "icon": 27
   },
   "arbok": {
-    "num": 24,
     "types": ["poison"],
     "stats": [60, 95, 69, 65, 79, 80],
     "abilities": { "0": "intimidate", "1": "shedskin", "H": "unnerve" },
@@ -354,7 +325,6 @@
     "icon": 28
   },
   "arboliva": {
-    "num": 930,
     "types": ["grass", "normal"],
     "stats": [78, 69, 90, 125, 109, 39],
     "abilities": { "0": "seedsower", "H": "harvest" },
@@ -364,7 +334,6 @@
     "icon": 29
   },
   "arcanine": {
-    "num": 59,
     "types": ["fire"],
     "stats": [90, 110, 80, 100, 80, 95],
     "abilities": { "0": "intimidate", "1": "flashfire", "H": "justified" },
@@ -374,7 +343,6 @@
     "icon": 30
   },
   "arcaninehisui": {
-    "num": 59,
     "types": ["fire", "rock"],
     "stats": [95, 115, 80, 95, 80, 90],
     "abilities": { "0": "intimidate", "1": "flashfire", "H": "rockhead" },
@@ -386,7 +354,6 @@
     "forme": "Hisui"
   },
   "archaludon": {
-    "num": 1018,
     "types": ["steel", "dragon"],
     "stats": [90, 105, 130, 125, 65, 85],
     "abilities": { "0": "stamina", "1": "sturdy", "H": "stalwart" },
@@ -396,7 +363,6 @@
     "icon": 32
   },
   "ariados": {
-    "num": 168,
     "types": ["bug", "poison"],
     "stats": [70, 90, 70, 60, 70, 40],
     "abilities": { "0": "swarm", "1": "insomnia", "H": "sniper" },
@@ -406,7 +372,6 @@
     "icon": 33
   },
   "armarouge": {
-    "num": 936,
     "types": ["fire", "psychic"],
     "stats": [85, 60, 100, 125, 80, 75],
     "abilities": { "0": "flashfire", "H": "weakarmor" },
@@ -416,7 +381,6 @@
     "icon": 34
   },
   "aromatisse": {
-    "num": 683,
     "types": ["fairy"],
     "stats": [101, 72, 72, 99, 89, 29],
     "abilities": { "0": "healer", "H": "aromaveil" },
@@ -426,7 +390,6 @@
     "icon": 35
   },
   "audino": {
-    "num": 531,
     "types": ["normal"],
     "stats": [103, 60, 86, 60, 86, 50],
     "abilities": { "0": "healer", "1": "regenerator", "H": "klutz" },
@@ -436,7 +399,6 @@
     "icon": 36
   },
   "audinomega": {
-    "num": 531,
     "types": ["normal", "fairy"],
     "stats": [103, 60, 126, 80, 126, 50],
     "abilities": { "0": "healer" },
@@ -451,7 +413,6 @@
     "item": "audinite"
   },
   "aurorus": {
-    "num": 699,
     "types": ["rock", "ice"],
     "stats": [123, 77, 72, 99, 92, 58],
     "abilities": { "0": "refrigerate", "H": "snowwarning" },
@@ -461,7 +422,6 @@
     "icon": 38
   },
   "avalugg": {
-    "num": 713,
     "types": ["ice"],
     "stats": [95, 117, 184, 44, 46, 28],
     "abilities": { "0": "owntempo", "1": "icebody", "H": "sturdy" },
@@ -471,7 +431,6 @@
     "icon": 39
   },
   "avalugghisui": {
-    "num": 713,
     "types": ["ice", "rock"],
     "stats": [95, 127, 184, 34, 36, 38],
     "abilities": { "0": "strongjaw", "1": "icebody", "H": "sturdy" },
@@ -483,7 +442,6 @@
     "forme": "Hisui"
   },
   "azumarill": {
-    "num": 184,
     "types": ["water", "fairy"],
     "stats": [100, 50, 80, 60, 80, 50],
     "abilities": { "0": "thickfat", "1": "hugepower", "H": "sapsipper" },
@@ -493,7 +451,6 @@
     "icon": 41
   },
   "banette": {
-    "num": 354,
     "types": ["ghost"],
     "stats": [64, 115, 65, 83, 63, 65],
     "abilities": { "0": "insomnia", "1": "frisk", "H": "cursedbody" },
@@ -503,7 +460,6 @@
     "icon": 42
   },
   "banettemega": {
-    "num": 354,
     "types": ["ghost"],
     "stats": [64, 165, 75, 93, 83, 75],
     "abilities": { "0": "prankster" },
@@ -518,7 +474,6 @@
     "item": "banettite"
   },
   "barbaracle": {
-    "num": 689,
     "types": ["rock", "water"],
     "stats": [72, 105, 115, 54, 86, 68],
     "abilities": { "0": "toughclaws", "1": "sniper", "H": "pickpocket" },
@@ -528,7 +483,6 @@
     "icon": 44
   },
   "barbaraclemega": {
-    "num": 689,
     "types": ["rock", "fighting"],
     "stats": [72, 140, 130, 64, 106, 88],
     "abilities": { "0": "toughclaws" },
@@ -544,7 +498,6 @@
     "item": "barbaracite"
   },
   "basculegion": {
-    "num": 902,
     "types": ["water", "ghost"],
     "stats": [120, 112, 65, 80, 75, 78],
     "abilities": { "0": "swiftswim", "1": "adaptability", "H": "moldbreaker" },
@@ -554,7 +507,6 @@
     "icon": 46
   },
   "basculegionf": {
-    "num": 902,
     "types": ["water", "ghost"],
     "stats": [120, 92, 65, 100, 75, 78],
     "abilities": { "0": "swiftswim", "1": "adaptability", "H": "moldbreaker" },
@@ -566,7 +518,6 @@
     "forme": "F"
   },
   "bastiodon": {
-    "num": 411,
     "types": ["rock", "steel"],
     "stats": [60, 52, 168, 47, 138, 30],
     "abilities": { "0": "sturdy", "H": "soundproof" },
@@ -576,7 +527,6 @@
     "icon": 48
   },
   "baxcalibur": {
-    "num": 998,
     "types": ["dragon", "ice"],
     "stats": [115, 145, 92, 75, 86, 87],
     "abilities": { "0": "thermalexchange", "H": "icebody" },
@@ -586,7 +536,6 @@
     "icon": 49
   },
   "baxcaliburmega": {
-    "num": 998,
     "types": ["dragon", "ice"],
     "stats": [115, 175, 117, 105, 101, 87],
     "abilities": { "0": "thermalexchange" },
@@ -601,7 +550,6 @@
     "item": "baxcalibrite"
   },
   "beartic": {
-    "num": 614,
     "types": ["ice"],
     "stats": [95, 130, 80, 70, 80, 50],
     "abilities": { "0": "snowcloak", "1": "slushrush", "H": "swiftswim" },
@@ -611,7 +559,6 @@
     "icon": 51
   },
   "beedrill": {
-    "num": 15,
     "types": ["bug", "poison"],
     "stats": [65, 90, 40, 45, 80, 75],
     "abilities": { "0": "swarm", "H": "sniper" },
@@ -621,7 +568,6 @@
     "icon": 52
   },
   "beedrillmega": {
-    "num": 15,
     "types": ["bug", "poison"],
     "stats": [65, 150, 40, 15, 80, 145],
     "abilities": { "0": "adaptability" },
@@ -636,7 +582,6 @@
     "item": "beedrillite"
   },
   "bellibolt": {
-    "num": 939,
     "types": ["electric"],
     "stats": [109, 64, 91, 103, 83, 45],
     "abilities": { "0": "electromorphosis", "1": "static", "H": "damp" },
@@ -646,7 +591,6 @@
     "icon": 54
   },
   "blastoise": {
-    "num": 9,
     "types": ["water"],
     "stats": [79, 83, 100, 85, 105, 78],
     "abilities": { "0": "torrent", "H": "raindish" },
@@ -656,7 +600,6 @@
     "icon": 55
   },
   "blastoisemega": {
-    "num": 9,
     "types": ["water"],
     "stats": [79, 103, 120, 135, 115, 78],
     "abilities": { "0": "megalauncher" },
@@ -671,7 +614,6 @@
     "item": "blastoisinite"
   },
   "blaziken": {
-    "num": 257,
     "types": ["fire", "fighting"],
     "stats": [80, 120, 70, 110, 70, 80],
     "abilities": { "0": "blaze", "H": "speedboost" },
@@ -681,7 +623,6 @@
     "icon": 57
   },
   "blazikenmega": {
-    "num": 257,
     "types": ["fire", "fighting"],
     "stats": [80, 160, 80, 130, 80, 100],
     "abilities": { "0": "speedboost" },
@@ -696,7 +637,6 @@
     "item": "blazikenite"
   },
   "camerupt": {
-    "num": 323,
     "types": ["fire", "ground"],
     "stats": [70, 100, 70, 105, 75, 40],
     "abilities": { "0": "magmaarmor", "1": "solidrock", "H": "angerpoint" },
@@ -706,7 +646,6 @@
     "icon": 59
   },
   "cameruptmega": {
-    "num": 323,
     "types": ["fire", "ground"],
     "stats": [70, 120, 100, 145, 105, 20],
     "abilities": { "0": "sheerforce" },
@@ -721,7 +660,6 @@
     "item": "cameruptite"
   },
   "castform": {
-    "num": 351,
     "types": ["normal"],
     "stats": [70, 70, 70, 70, 70, 70],
     "abilities": { "0": "forecast" },
@@ -731,7 +669,6 @@
     "icon": 61
   },
   "castformrainy": {
-    "num": 351,
     "types": ["water"],
     "stats": [70, 70, 70, 70, 70, 70],
     "abilities": { "0": "forecast" },
@@ -744,7 +681,6 @@
     "battleOnly": "castform"
   },
   "castformsnowy": {
-    "num": 351,
     "types": ["ice"],
     "stats": [70, 70, 70, 70, 70, 70],
     "abilities": { "0": "forecast" },
@@ -757,7 +693,6 @@
     "battleOnly": "castform"
   },
   "castformsunny": {
-    "num": 351,
     "types": ["fire"],
     "stats": [70, 70, 70, 70, 70, 70],
     "abilities": { "0": "forecast" },
@@ -770,7 +705,6 @@
     "battleOnly": "castform"
   },
   "ceruledge": {
-    "num": 937,
     "types": ["fire", "ghost"],
     "stats": [75, 125, 80, 60, 100, 85],
     "abilities": { "0": "flashfire", "H": "weakarmor" },
@@ -780,7 +714,6 @@
     "icon": 65
   },
   "chandelure": {
-    "num": 609,
     "types": ["ghost", "fire"],
     "stats": [60, 55, 90, 145, 90, 80],
     "abilities": { "0": "flashfire", "1": "flamebody", "H": "infiltrator" },
@@ -790,7 +723,6 @@
     "icon": 66
   },
   "chandeluremega": {
-    "num": 609,
     "types": ["ghost", "fire"],
     "stats": [60, 75, 110, 175, 110, 90],
     "abilities": { "0": "infiltrator" },
@@ -805,7 +737,6 @@
     "item": "chandelurite"
   },
   "charizard": {
-    "num": 6,
     "types": ["fire", "flying"],
     "stats": [78, 84, 78, 109, 85, 100],
     "abilities": { "0": "blaze", "H": "solarpower" },
@@ -815,7 +746,6 @@
     "icon": 68
   },
   "charizardmegax": {
-    "num": 6,
     "types": ["fire", "dragon"],
     "stats": [78, 130, 111, 130, 85, 100],
     "abilities": { "0": "toughclaws" },
@@ -830,7 +760,6 @@
     "item": "charizarditex"
   },
   "charizardmegay": {
-    "num": 6,
     "types": ["fire", "flying"],
     "stats": [78, 104, 78, 159, 115, 100],
     "abilities": { "0": "drought" },
@@ -845,7 +774,6 @@
     "item": "charizarditey"
   },
   "chesnaught": {
-    "num": 652,
     "types": ["grass", "fighting"],
     "stats": [88, 107, 122, 74, 75, 64],
     "abilities": { "0": "overgrow", "H": "bulletproof" },
@@ -855,7 +783,6 @@
     "icon": 71
   },
   "chesnaughtmega": {
-    "num": 652,
     "types": ["grass", "fighting"],
     "stats": [88, 137, 172, 74, 115, 44],
     "abilities": { "0": "bulletproof" },
@@ -870,7 +797,6 @@
     "item": "chesnaughtite"
   },
   "chimecho": {
-    "num": 358,
     "types": ["psychic"],
     "stats": [75, 50, 80, 95, 90, 65],
     "abilities": { "0": "levitate" },
@@ -880,7 +806,6 @@
     "icon": 73
   },
   "chimechomega": {
-    "num": 358,
     "types": ["psychic", "steel"],
     "stats": [75, 50, 110, 135, 120, 65],
     "abilities": { "0": "levitate" },
@@ -895,7 +820,6 @@
     "item": "chimechite"
   },
   "cinderace": {
-    "num": 815,
     "types": ["fire"],
     "stats": [80, 116, 75, 65, 75, 119],
     "abilities": { "0": "blaze", "H": "libero" },
@@ -905,7 +829,6 @@
     "icon": 75
   },
   "clawitzer": {
-    "num": 693,
     "types": ["water"],
     "stats": [71, 73, 88, 120, 89, 59],
     "abilities": { "0": "megalauncher" },
@@ -915,7 +838,6 @@
     "icon": 76
   },
   "clefable": {
-    "num": 36,
     "types": ["fairy"],
     "stats": [95, 70, 73, 95, 90, 60],
     "abilities": { "0": "cutecharm", "1": "magicguard", "H": "unaware" },
@@ -925,7 +847,6 @@
     "icon": 77
   },
   "clefablemega": {
-    "num": 36,
     "types": ["fairy", "flying"],
     "stats": [95, 80, 93, 135, 110, 70],
     "abilities": { "0": "magicbounce" },
@@ -940,7 +861,6 @@
     "item": "clefablite"
   },
   "cofagrigus": {
-    "num": 563,
     "types": ["ghost"],
     "stats": [58, 50, 145, 95, 105, 30],
     "abilities": { "0": "mummy" },
@@ -950,7 +870,6 @@
     "icon": 79
   },
   "conkeldurr": {
-    "num": 534,
     "types": ["fighting"],
     "stats": [105, 140, 95, 55, 65, 45],
     "abilities": { "0": "guts", "1": "sheerforce", "H": "ironfist" },
@@ -960,7 +879,6 @@
     "icon": 80
   },
   "corviknight": {
-    "num": 823,
     "types": ["flying", "steel"],
     "stats": [98, 87, 105, 53, 85, 67],
     "abilities": { "0": "pressure", "1": "unnerve", "H": "mirrorarmor" },
@@ -970,7 +888,6 @@
     "icon": 81
   },
   "crabominable": {
-    "num": 740,
     "types": ["fighting", "ice"],
     "stats": [97, 132, 77, 62, 67, 43],
     "abilities": { "0": "hypercutter", "1": "ironfist", "H": "angerpoint" },
@@ -980,7 +897,6 @@
     "icon": 82
   },
   "crabominablemega": {
-    "num": 740,
     "types": ["fighting", "ice"],
     "stats": [97, 157, 122, 62, 107, 33],
     "abilities": { "0": "ironfist" },
@@ -995,7 +911,6 @@
     "item": "crabominite"
   },
   "cramorantgorging": {
-    "num": 845,
     "types": ["flying", "water"],
     "stats": [70, 85, 55, 85, 95, 85],
     "abilities": { "0": "gulpmissile" },
@@ -1008,7 +923,6 @@
     "battleOnly": "cramorant"
   },
   "cramorantgulping": {
-    "num": 845,
     "types": ["flying", "water"],
     "stats": [70, 85, 55, 85, 95, 85],
     "abilities": { "0": "gulpmissile" },
@@ -1021,7 +935,6 @@
     "battleOnly": "cramorant"
   },
   "decidueye": {
-    "num": 724,
     "types": ["grass", "ghost"],
     "stats": [78, 107, 75, 100, 100, 70],
     "abilities": { "0": "overgrow", "H": "longreach" },
@@ -1031,7 +944,6 @@
     "icon": 86
   },
   "decidueyehisui": {
-    "num": 724,
     "types": ["grass", "fighting"],
     "stats": [88, 112, 80, 95, 95, 60],
     "abilities": { "0": "overgrow", "H": "scrappy" },
@@ -1043,7 +955,6 @@
     "forme": "Hisui"
   },
   "dedenne": {
-    "num": 702,
     "types": ["electric", "fairy"],
     "stats": [67, 58, 57, 81, 67, 101],
     "abilities": { "0": "cheekpouch", "1": "pickup", "H": "plus" },
@@ -1053,7 +964,6 @@
     "icon": 88
   },
   "delphox": {
-    "num": 655,
     "types": ["fire", "psychic"],
     "stats": [75, 69, 72, 114, 100, 104],
     "abilities": { "0": "blaze", "H": "magician" },
@@ -1063,7 +973,6 @@
     "icon": 89
   },
   "delphoxmega": {
-    "num": 655,
     "types": ["fire", "psychic"],
     "stats": [75, 69, 72, 159, 125, 134],
     "abilities": { "0": "levitate" },
@@ -1078,7 +987,6 @@
     "item": "delphoxite"
   },
   "diggersby": {
-    "num": 660,
     "types": ["normal", "ground"],
     "stats": [85, 56, 77, 50, 77, 78],
     "abilities": { "0": "pickup", "1": "cheekpouch", "H": "hugepower" },
@@ -1088,7 +996,6 @@
     "icon": 91
   },
   "ditto": {
-    "num": 132,
     "types": ["normal"],
     "stats": [48, 48, 48, 48, 48, 48],
     "abilities": { "0": "limber", "H": "imposter" },
@@ -1098,7 +1005,6 @@
     "icon": 92
   },
   "dragalge": {
-    "num": 691,
     "types": ["poison", "dragon"],
     "stats": [65, 75, 90, 97, 123, 44],
     "abilities": { "0": "poisonpoint", "1": "poisontouch", "H": "adaptability" },
@@ -1108,7 +1014,6 @@
     "icon": 93
   },
   "dragalgemega": {
-    "num": 691,
     "types": ["poison", "dragon"],
     "stats": [65, 85, 105, 132, 163, 44],
     "abilities": { "0": "regenerator" },
@@ -1124,7 +1029,6 @@
     "item": "dragalgite"
   },
   "dragapult": {
-    "num": 887,
     "types": ["dragon", "ghost"],
     "stats": [88, 120, 75, 100, 75, 142],
     "abilities": { "0": "clearbody", "1": "infiltrator", "H": "cursedbody" },
@@ -1134,7 +1038,6 @@
     "icon": 95
   },
   "dragonite": {
-    "num": 149,
     "types": ["dragon", "flying"],
     "stats": [91, 134, 95, 100, 100, 80],
     "abilities": { "0": "innerfocus", "H": "multiscale" },
@@ -1144,7 +1047,6 @@
     "icon": 96
   },
   "dragonitemega": {
-    "num": 149,
     "types": ["dragon", "flying"],
     "stats": [91, 124, 115, 145, 125, 100],
     "abilities": { "0": "multiscale" },
@@ -1159,7 +1061,6 @@
     "item": "dragoninite"
   },
   "drampa": {
-    "num": 780,
     "types": ["normal", "dragon"],
     "stats": [78, 60, 85, 135, 91, 36],
     "abilities": { "0": "berserk", "1": "sapsipper", "H": "cloudnine" },
@@ -1169,7 +1070,6 @@
     "icon": 98
   },
   "drampamega": {
-    "num": 780,
     "types": ["normal", "dragon"],
     "stats": [78, 85, 110, 160, 116, 36],
     "abilities": { "0": "berserk" },
@@ -1184,7 +1084,6 @@
     "item": "drampanite"
   },
   "eelektross": {
-    "num": 604,
     "types": ["electric"],
     "stats": [85, 115, 80, 105, 80, 50],
     "abilities": { "0": "levitate" },
@@ -1194,7 +1093,6 @@
     "icon": 100
   },
   "eelektrossmega": {
-    "num": 604,
     "types": ["electric"],
     "stats": [85, 145, 80, 135, 90, 80],
     "abilities": { "0": "eelevate" },
@@ -1210,7 +1108,6 @@
     "item": "eelektrossite"
   },
   "eiscuenoice": {
-    "num": 875,
     "types": ["ice"],
     "stats": [75, 80, 70, 65, 50, 130],
     "abilities": { "0": "iceface" },
@@ -1223,7 +1120,6 @@
     "battleOnly": "eiscue"
   },
   "emboar": {
-    "num": 500,
     "types": ["fire", "fighting"],
     "stats": [110, 123, 65, 100, 65, 65],
     "abilities": { "0": "blaze", "H": "reckless" },
@@ -1233,7 +1129,6 @@
     "icon": 103
   },
   "emboarmega": {
-    "num": 500,
     "types": ["fire", "fighting"],
     "stats": [110, 148, 75, 110, 110, 75],
     "abilities": { "0": "moldbreaker" },
@@ -1248,7 +1143,6 @@
     "item": "emboarite"
   },
   "emolga": {
-    "num": 587,
     "types": ["electric", "flying"],
     "stats": [55, 75, 60, 75, 60, 103],
     "abilities": { "0": "static", "H": "motordrive" },
@@ -1258,7 +1152,6 @@
     "icon": 105
   },
   "empoleon": {
-    "num": 395,
     "types": ["water", "steel"],
     "stats": [84, 86, 88, 111, 101, 60],
     "abilities": { "0": "torrent", "H": "competitive" },
@@ -1268,7 +1161,6 @@
     "icon": 106
   },
   "espathra": {
-    "num": 956,
     "types": ["psychic"],
     "stats": [95, 60, 60, 101, 60, 105],
     "abilities": { "0": "opportunist", "1": "frisk", "H": "speedboost" },
@@ -1278,7 +1170,6 @@
     "icon": 107
   },
   "espeon": {
-    "num": 196,
     "types": ["psychic"],
     "stats": [65, 65, 60, 130, 95, 110],
     "abilities": { "0": "synchronize", "H": "magicbounce" },
@@ -1288,7 +1179,6 @@
     "icon": 108
   },
   "excadrill": {
-    "num": 530,
     "types": ["ground", "steel"],
     "stats": [110, 135, 60, 50, 65, 88],
     "abilities": { "0": "sandrush", "1": "sandforce", "H": "moldbreaker" },
@@ -1298,7 +1188,6 @@
     "icon": 109
   },
   "excadrillmega": {
-    "num": 530,
     "types": ["ground", "steel"],
     "stats": [110, 165, 100, 65, 65, 103],
     "abilities": { "0": "piercingdrill" },
@@ -1313,7 +1202,6 @@
     "item": "excadrite"
   },
   "falinks": {
-    "num": 870,
     "types": ["fighting"],
     "stats": [65, 100, 100, 70, 60, 75],
     "abilities": { "0": "battlearmor", "H": "defiant" },
@@ -1323,7 +1211,6 @@
     "icon": 111
   },
   "falinksmega": {
-    "num": 870,
     "types": ["fighting"],
     "stats": [65, 135, 135, 70, 65, 100],
     "abilities": { "0": "defiant" },
@@ -1339,7 +1226,6 @@
     "item": "falinksite"
   },
   "farfetchd": {
-    "num": 83,
     "types": ["normal", "flying"],
     "stats": [52, 90, 55, 58, 62, 60],
     "abilities": { "0": "keeneye", "1": "innerfocus", "H": "defiant" },
@@ -1349,7 +1235,6 @@
     "icon": 113
   },
   "farigiraf": {
-    "num": 981,
     "types": ["normal", "psychic"],
     "stats": [120, 90, 70, 110, 70, 60],
     "abilities": { "0": "cudchew", "1": "armortail", "H": "sapsipper" },
@@ -1359,7 +1244,6 @@
     "icon": 114
   },
   "feraligatr": {
-    "num": 160,
     "types": ["water"],
     "stats": [85, 105, 100, 79, 83, 78],
     "abilities": { "0": "torrent", "H": "sheerforce" },
@@ -1369,7 +1253,6 @@
     "icon": 115
   },
   "feraligatrmega": {
-    "num": 160,
     "types": ["water", "dragon"],
     "stats": [85, 160, 125, 89, 93, 78],
     "abilities": { "0": "dragonize" },
@@ -1384,7 +1267,6 @@
     "item": "feraligite"
   },
   "flapple": {
-    "num": 841,
     "types": ["grass", "dragon"],
     "stats": [70, 110, 80, 95, 60, 70],
     "abilities": { "0": "ripen", "1": "gluttony", "H": "hustle" },
@@ -1394,7 +1276,6 @@
     "icon": 117
   },
   "flareon": {
-    "num": 136,
     "types": ["fire"],
     "stats": [65, 130, 60, 95, 110, 65],
     "abilities": { "0": "flashfire", "H": "guts" },
@@ -1404,7 +1285,6 @@
     "icon": 118
   },
   "floetteeternal": {
-    "num": 670,
     "types": ["fairy"],
     "stats": [74, 65, 67, 125, 128, 92],
     "abilities": { "0": "flowerveil", "H": "symbiosis" },
@@ -1416,7 +1296,6 @@
     "forme": "Eternal"
   },
   "floettemega": {
-    "num": 670,
     "types": ["fairy"],
     "stats": [74, 85, 87, 155, 148, 102],
     "abilities": { "0": "fairyaura" },
@@ -1431,7 +1310,6 @@
     "item": "floettite"
   },
   "florges": {
-    "num": 671,
     "types": ["fairy"],
     "stats": [78, 65, 68, 112, 154, 75],
     "abilities": { "0": "flowerveil", "H": "symbiosis" },
@@ -1441,7 +1319,6 @@
     "icon": 121
   },
   "forretress": {
-    "num": 205,
     "types": ["bug", "steel"],
     "stats": [75, 90, 140, 60, 60, 40],
     "abilities": { "0": "sturdy", "H": "overcoat" },
@@ -1451,7 +1328,6 @@
     "icon": 122
   },
   "froslass": {
-    "num": 478,
     "types": ["ice", "ghost"],
     "stats": [70, 80, 70, 80, 70, 110],
     "abilities": { "0": "snowcloak", "H": "cursedbody" },
@@ -1461,7 +1337,6 @@
     "icon": 123
   },
   "froslassmega": {
-    "num": 478,
     "types": ["ice", "ghost"],
     "stats": [70, 80, 70, 140, 100, 120],
     "abilities": { "0": "snowwarning" },
@@ -1476,7 +1351,6 @@
     "item": "froslassite"
   },
   "furfrou": {
-    "num": 676,
     "types": ["normal"],
     "stats": [75, 80, 60, 65, 90, 102],
     "abilities": { "0": "furcoat" },
@@ -1486,7 +1360,6 @@
     "icon": 125
   },
   "gallade": {
-    "num": 475,
     "types": ["psychic", "fighting"],
     "stats": [68, 125, 65, 65, 115, 80],
     "abilities": { "0": "steadfast", "1": "sharpness", "H": "justified" },
@@ -1496,7 +1369,6 @@
     "icon": 126
   },
   "gallademega": {
-    "num": 475,
     "types": ["psychic", "fighting"],
     "stats": [68, 165, 95, 65, 115, 110],
     "abilities": { "0": "innerfocus" },
@@ -1511,7 +1383,6 @@
     "item": "galladite"
   },
   "garbodor": {
-    "num": 569,
     "types": ["poison"],
     "stats": [80, 95, 82, 60, 82, 75],
     "abilities": { "0": "stench", "1": "weakarmor", "H": "aftermath" },
@@ -1521,7 +1392,6 @@
     "icon": 128
   },
   "garchomp": {
-    "num": 445,
     "types": ["dragon", "ground"],
     "stats": [108, 130, 95, 80, 85, 102],
     "abilities": { "0": "sandveil", "H": "roughskin" },
@@ -1531,7 +1401,6 @@
     "icon": 129
   },
   "garchompmega": {
-    "num": 445,
     "types": ["dragon", "ground"],
     "stats": [108, 170, 115, 120, 95, 92],
     "abilities": { "0": "sandforce" },
@@ -1546,7 +1415,6 @@
     "item": "garchompite"
   },
   "garchompmegaz": {
-    "num": 445,
     "types": ["dragon"],
     "stats": [108, 130, 85, 141, 85, 151],
     "abilities": { "0": "levitate" },
@@ -1561,7 +1429,6 @@
     "item": "garchompitez"
   },
   "gardevoir": {
-    "num": 282,
     "types": ["psychic", "fairy"],
     "stats": [68, 65, 65, 125, 115, 80],
     "abilities": { "0": "synchronize", "1": "trace", "H": "telepathy" },
@@ -1571,7 +1438,6 @@
     "icon": 132
   },
   "gardevoirmega": {
-    "num": 282,
     "types": ["psychic", "fairy"],
     "stats": [68, 85, 65, 165, 135, 100],
     "abilities": { "0": "pixilate" },
@@ -1586,7 +1452,6 @@
     "item": "gardevoirite"
   },
   "garganacl": {
-    "num": 934,
     "types": ["rock"],
     "stats": [100, 100, 130, 45, 90, 35],
     "abilities": { "0": "purifyingsalt", "1": "sturdy", "H": "clearbody" },
@@ -1596,7 +1461,6 @@
     "icon": 134
   },
   "gengar": {
-    "num": 94,
     "types": ["ghost", "poison"],
     "stats": [60, 65, 60, 130, 75, 110],
     "abilities": { "0": "cursedbody" },
@@ -1606,7 +1470,6 @@
     "icon": 135
   },
   "gengarmega": {
-    "num": 94,
     "types": ["ghost", "poison"],
     "stats": [60, 65, 80, 170, 95, 130],
     "abilities": { "0": "shadowtag" },
@@ -1621,7 +1484,6 @@
     "item": "gengarite"
   },
   "gholdengo": {
-    "num": 1000,
     "types": ["steel", "ghost"],
     "stats": [87, 60, 95, 133, 91, 84],
     "abilities": { "0": "goodasgold" },
@@ -1631,7 +1493,6 @@
     "icon": 137
   },
   "glaceon": {
-    "num": 471,
     "types": ["ice"],
     "stats": [65, 60, 110, 130, 95, 65],
     "abilities": { "0": "snowcloak", "H": "icebody" },
@@ -1641,7 +1502,6 @@
     "icon": 138
   },
   "glalie": {
-    "num": 362,
     "types": ["ice"],
     "stats": [80, 80, 80, 80, 80, 80],
     "abilities": { "0": "innerfocus", "1": "icebody", "H": "moody" },
@@ -1651,7 +1511,6 @@
     "icon": 139
   },
   "glaliemega": {
-    "num": 362,
     "types": ["ice"],
     "stats": [80, 120, 80, 120, 80, 100],
     "abilities": { "0": "refrigerate" },
@@ -1666,7 +1525,6 @@
     "item": "glalitite"
   },
   "glimmora": {
-    "num": 970,
     "types": ["rock", "poison"],
     "stats": [83, 55, 90, 130, 81, 86],
     "abilities": { "0": "toxicdebris", "H": "corrosion" },
@@ -1676,7 +1534,6 @@
     "icon": 141
   },
   "glimmoramega": {
-    "num": 970,
     "types": ["rock", "poison"],
     "stats": [83, 90, 105, 150, 96, 101],
     "abilities": { "0": "adaptability" },
@@ -1691,7 +1548,6 @@
     "item": "glimmoranite"
   },
   "gliscor": {
-    "num": 472,
     "types": ["ground", "flying"],
     "stats": [75, 95, 125, 45, 75, 95],
     "abilities": { "0": "hypercutter", "1": "sandveil", "H": "poisonheal" },
@@ -1701,7 +1557,6 @@
     "icon": 143
   },
   "gogoat": {
-    "num": 673,
     "types": ["grass"],
     "stats": [123, 100, 62, 97, 81, 68],
     "abilities": { "0": "sapsipper", "H": "grasspelt" },
@@ -1711,7 +1566,6 @@
     "icon": 144
   },
   "golisopod": {
-    "num": 768,
     "types": ["bug", "water"],
     "stats": [75, 125, 140, 60, 90, 40],
     "abilities": { "0": "emergencyexit" },
@@ -1721,7 +1575,6 @@
     "icon": 145
   },
   "golisopodmega": {
-    "num": 768,
     "types": ["bug", "steel"],
     "stats": [75, 150, 175, 70, 120, 40],
     "abilities": { "0": "toughclaws" },
@@ -1736,7 +1589,6 @@
     "item": "golisopite"
   },
   "golurk": {
-    "num": 623,
     "types": ["ground", "ghost"],
     "stats": [89, 124, 80, 55, 80, 55],
     "abilities": { "0": "ironfist", "1": "klutz", "H": "noguard" },
@@ -1746,7 +1598,6 @@
     "icon": 147
   },
   "golurkmega": {
-    "num": 623,
     "types": ["ground", "ghost"],
     "stats": [89, 159, 105, 70, 105, 55],
     "abilities": { "0": "unseenfist" },
@@ -1761,7 +1612,6 @@
     "item": "golurkite"
   },
   "goodra": {
-    "num": 706,
     "types": ["dragon"],
     "stats": [90, 100, 70, 110, 150, 80],
     "abilities": { "0": "sapsipper", "1": "hydration", "H": "gooey" },
@@ -1771,7 +1621,6 @@
     "icon": 149
   },
   "goodrahisui": {
-    "num": 706,
     "types": ["steel", "dragon"],
     "stats": [80, 100, 100, 110, 150, 60],
     "abilities": { "0": "sapsipper", "1": "shellarmor", "H": "gooey" },
@@ -1783,7 +1632,6 @@
     "forme": "Hisui"
   },
   "gourgeist": {
-    "num": 711,
     "types": ["ghost", "grass"],
     "stats": [65, 90, 122, 58, 75, 84],
     "abilities": { "0": "pickup", "1": "frisk", "H": "insomnia" },
@@ -1793,7 +1641,6 @@
     "icon": 151
   },
   "gourgeistlarge": {
-    "num": 711,
     "types": ["ghost", "grass"],
     "stats": [75, 95, 122, 58, 75, 69],
     "abilities": { "0": "pickup", "1": "frisk", "H": "insomnia" },
@@ -1805,7 +1652,6 @@
     "forme": "Large"
   },
   "gourgeistsmall": {
-    "num": 711,
     "types": ["ghost", "grass"],
     "stats": [55, 85, 122, 58, 75, 99],
     "abilities": { "0": "pickup", "1": "frisk", "H": "insomnia" },
@@ -1817,7 +1663,6 @@
     "forme": "Small"
   },
   "gourgeistsuper": {
-    "num": 711,
     "types": ["ghost", "grass"],
     "stats": [85, 100, 122, 58, 75, 54],
     "abilities": { "0": "pickup", "1": "frisk", "H": "insomnia" },
@@ -1829,7 +1674,6 @@
     "forme": "Super"
   },
   "grapploct": {
-    "num": 853,
     "types": ["fighting"],
     "stats": [80, 118, 90, 70, 80, 42],
     "abilities": { "0": "limber", "H": "technician" },
@@ -1839,7 +1683,6 @@
     "icon": 155
   },
   "greninja": {
-    "num": 658,
     "types": ["water", "dark"],
     "stats": [72, 95, 67, 103, 71, 122],
     "abilities": { "0": "torrent", "H": "protean", "S": "battlebond" },
@@ -1849,7 +1692,6 @@
     "icon": 156
   },
   "greninjamega": {
-    "num": 658,
     "types": ["water", "dark"],
     "stats": [72, 125, 77, 133, 81, 142],
     "abilities": { "0": "protean" },
@@ -1864,7 +1706,6 @@
     "item": "greninjite"
   },
   "grimmsnarl": {
-    "num": 861,
     "types": ["dark", "fairy"],
     "stats": [95, 120, 65, 95, 75, 60],
     "abilities": { "0": "prankster", "1": "frisk", "H": "pickpocket" },
@@ -1874,7 +1715,6 @@
     "icon": 158
   },
   "gyarados": {
-    "num": 130,
     "types": ["water", "flying"],
     "stats": [95, 125, 79, 60, 100, 81],
     "abilities": { "0": "intimidate", "H": "moxie" },
@@ -1884,7 +1724,6 @@
     "icon": 159
   },
   "gyaradosmega": {
-    "num": 130,
     "types": ["water", "dark"],
     "stats": [95, 155, 109, 70, 130, 81],
     "abilities": { "0": "moldbreaker" },
@@ -1899,7 +1738,6 @@
     "item": "gyaradosite"
   },
   "hatterene": {
-    "num": 858,
     "types": ["psychic", "fairy"],
     "stats": [57, 90, 95, 136, 103, 29],
     "abilities": { "0": "healer", "1": "anticipation", "H": "magicbounce" },
@@ -1909,7 +1747,6 @@
     "icon": 161
   },
   "hawlucha": {
-    "num": 701,
     "types": ["fighting", "flying"],
     "stats": [78, 92, 75, 74, 63, 118],
     "abilities": { "0": "limber", "1": "unburden", "H": "moldbreaker" },
@@ -1919,7 +1756,6 @@
     "icon": 162
   },
   "hawluchamega": {
-    "num": 701,
     "types": ["fighting", "flying"],
     "stats": [78, 137, 100, 74, 93, 118],
     "abilities": { "0": "noguard" },
@@ -1934,7 +1770,6 @@
     "item": "hawluchanite"
   },
   "heliolisk": {
-    "num": 695,
     "types": ["electric", "normal"],
     "stats": [62, 55, 52, 109, 94, 109],
     "abilities": { "0": "dryskin", "1": "sandveil", "H": "solarpower" },
@@ -1944,7 +1779,6 @@
     "icon": 164
   },
   "heracross": {
-    "num": 214,
     "types": ["bug", "fighting"],
     "stats": [80, 125, 75, 40, 95, 85],
     "abilities": { "0": "swarm", "1": "guts", "H": "moxie" },
@@ -1954,7 +1788,6 @@
     "icon": 165
   },
   "heracrossmega": {
-    "num": 214,
     "types": ["bug", "fighting"],
     "stats": [80, 185, 115, 40, 105, 75],
     "abilities": { "0": "skilllink" },
@@ -1969,7 +1802,6 @@
     "item": "heracronite"
   },
   "hippowdon": {
-    "num": 450,
     "types": ["ground"],
     "stats": [108, 112, 118, 68, 72, 47],
     "abilities": { "0": "sandstream", "H": "sandforce" },
@@ -1979,7 +1811,6 @@
     "icon": 167
   },
   "houndoom": {
-    "num": 229,
     "types": ["dark", "fire"],
     "stats": [75, 90, 50, 110, 80, 95],
     "abilities": { "0": "earlybird", "1": "flashfire", "H": "unnerve" },
@@ -1989,7 +1820,6 @@
     "icon": 168
   },
   "houndoommega": {
-    "num": 229,
     "types": ["dark", "fire"],
     "stats": [75, 90, 90, 140, 90, 115],
     "abilities": { "0": "solarpower" },
@@ -2004,7 +1834,6 @@
     "item": "houndoominite"
   },
   "houndstone": {
-    "num": 972,
     "types": ["ghost"],
     "stats": [72, 101, 100, 50, 97, 68],
     "abilities": { "0": "sandrush", "H": "fluffy" },
@@ -2014,7 +1843,6 @@
     "icon": 170
   },
   "hydrapple": {
-    "num": 1019,
     "types": ["grass", "dragon"],
     "stats": [106, 80, 110, 120, 80, 44],
     "abilities": { "0": "supersweetsyrup", "1": "regenerator", "H": "stickyhold" },
@@ -2024,7 +1852,6 @@
     "icon": 171
   },
   "hydreigon": {
-    "num": 635,
     "types": ["dark", "dragon"],
     "stats": [92, 105, 90, 125, 90, 98],
     "abilities": { "0": "levitate" },
@@ -2034,7 +1861,6 @@
     "icon": 172
   },
   "incineroar": {
-    "num": 727,
     "types": ["fire", "dark"],
     "stats": [95, 115, 90, 80, 90, 60],
     "abilities": { "0": "blaze", "H": "intimidate" },
@@ -2044,7 +1870,6 @@
     "icon": 173
   },
   "indeedee": {
-    "num": 876,
     "types": ["psychic", "normal"],
     "stats": [60, 65, 55, 105, 95, 95],
     "abilities": { "0": "innerfocus", "1": "synchronize", "H": "psychicsurge" },
@@ -2054,7 +1879,6 @@
     "icon": 174
   },
   "indeedeef": {
-    "num": 876,
     "types": ["psychic", "normal"],
     "stats": [70, 55, 65, 95, 105, 85],
     "abilities": { "0": "owntempo", "1": "synchronize", "H": "psychicsurge" },
@@ -2066,7 +1890,6 @@
     "forme": "F"
   },
   "infernape": {
-    "num": 392,
     "types": ["fire", "fighting"],
     "stats": [76, 104, 71, 104, 71, 108],
     "abilities": { "0": "blaze", "H": "ironfist" },
@@ -2076,7 +1899,6 @@
     "icon": 176
   },
   "inteleon": {
-    "num": 818,
     "types": ["water"],
     "stats": [70, 85, 65, 125, 65, 120],
     "abilities": { "0": "torrent", "H": "sniper" },
@@ -2086,7 +1908,6 @@
     "icon": 177
   },
   "jolteon": {
-    "num": 135,
     "types": ["electric"],
     "stats": [65, 65, 60, 110, 95, 130],
     "abilities": { "0": "voltabsorb", "H": "quickfeet" },
@@ -2096,7 +1917,6 @@
     "icon": 178
   },
   "kangaskhan": {
-    "num": 115,
     "types": ["normal"],
     "stats": [105, 95, 80, 40, 80, 90],
     "abilities": { "0": "earlybird", "1": "scrappy", "H": "innerfocus" },
@@ -2106,7 +1926,6 @@
     "icon": 179
   },
   "kangaskhanmega": {
-    "num": 115,
     "types": ["normal"],
     "stats": [105, 125, 100, 60, 100, 100],
     "abilities": { "0": "parentalbond" },
@@ -2121,7 +1940,6 @@
     "item": "kangaskhanite"
   },
   "kingambit": {
-    "num": 983,
     "types": ["dark", "steel"],
     "stats": [100, 135, 120, 60, 85, 50],
     "abilities": { "0": "defiant", "1": "supremeoverlord", "H": "pressure" },
@@ -2131,7 +1949,6 @@
     "icon": 181
   },
   "kleavor": {
-    "num": 900,
     "types": ["bug", "rock"],
     "stats": [70, 135, 95, 45, 70, 85],
     "abilities": { "0": "swarm", "1": "sheerforce", "H": "sharpness" },
@@ -2141,7 +1958,6 @@
     "icon": 182
   },
   "klefki": {
-    "num": 707,
     "types": ["steel", "fairy"],
     "stats": [57, 80, 91, 80, 87, 75],
     "abilities": { "0": "prankster", "H": "magician" },
@@ -2151,7 +1967,6 @@
     "icon": 183
   },
   "kommoo": {
-    "num": 784,
     "types": ["dragon", "fighting"],
     "stats": [75, 110, 125, 100, 105, 85],
     "abilities": { "0": "bulletproof", "1": "soundproof", "H": "overcoat" },
@@ -2161,7 +1976,6 @@
     "icon": 184
   },
   "krookodile": {
-    "num": 553,
     "types": ["ground", "dark"],
     "stats": [95, 117, 80, 65, 70, 92],
     "abilities": { "0": "intimidate", "1": "moxie", "H": "angerpoint" },
@@ -2171,7 +1985,6 @@
     "icon": 185
   },
   "leafeon": {
-    "num": 470,
     "types": ["grass"],
     "stats": [65, 110, 130, 60, 65, 95],
     "abilities": { "0": "leafguard", "H": "chlorophyll" },
@@ -2181,7 +1994,6 @@
     "icon": 186
   },
   "liepard": {
-    "num": 510,
     "types": ["dark"],
     "stats": [64, 88, 50, 88, 50, 106],
     "abilities": { "0": "limber", "1": "unburden", "H": "prankster" },
@@ -2191,7 +2003,6 @@
     "icon": 187
   },
   "lopunny": {
-    "num": 428,
     "types": ["normal"],
     "stats": [65, 76, 84, 54, 96, 105],
     "abilities": { "0": "cutecharm", "1": "klutz", "H": "limber" },
@@ -2201,7 +2012,6 @@
     "icon": 188
   },
   "lopunnymega": {
-    "num": 428,
     "types": ["normal", "fighting"],
     "stats": [65, 136, 94, 54, 96, 135],
     "abilities": { "0": "scrappy" },
@@ -2216,7 +2026,6 @@
     "item": "lopunnite"
   },
   "lucario": {
-    "num": 448,
     "types": ["fighting", "steel"],
     "stats": [70, 110, 70, 115, 70, 90],
     "abilities": { "0": "steadfast", "1": "innerfocus", "H": "justified" },
@@ -2226,7 +2035,6 @@
     "icon": 190
   },
   "lucariomega": {
-    "num": 448,
     "types": ["fighting", "steel"],
     "stats": [70, 145, 88, 140, 70, 112],
     "abilities": { "0": "adaptability" },
@@ -2241,7 +2049,6 @@
     "item": "lucarionite"
   },
   "lucariomegaz": {
-    "num": 448,
     "types": ["fighting", "steel"],
     "stats": [70, 100, 70, 164, 70, 151],
     "abilities": { "0": "auraguard" },
@@ -2256,7 +2063,6 @@
     "item": "lucarionitez"
   },
   "luxray": {
-    "num": 405,
     "types": ["electric"],
     "stats": [80, 120, 79, 95, 79, 70],
     "abilities": { "0": "rivalry", "1": "intimidate", "H": "guts" },
@@ -2266,7 +2072,6 @@
     "icon": 193
   },
   "lycanroc": {
-    "num": 745,
     "types": ["rock"],
     "stats": [75, 115, 65, 55, 65, 112],
     "abilities": { "0": "keeneye", "1": "sandrush", "H": "steadfast" },
@@ -2276,7 +2081,6 @@
     "icon": 194
   },
   "lycanrocdusk": {
-    "num": 745,
     "types": ["rock"],
     "stats": [75, 117, 65, 55, 65, 110],
     "abilities": { "0": "toughclaws" },
@@ -2288,7 +2092,6 @@
     "forme": "Dusk"
   },
   "lycanrocmidnight": {
-    "num": 745,
     "types": ["rock"],
     "stats": [85, 115, 75, 55, 75, 82],
     "abilities": { "0": "keeneye", "1": "vitalspirit", "H": "noguard" },
@@ -2300,7 +2103,6 @@
     "forme": "Midnight"
   },
   "mabosstiff": {
-    "num": 943,
     "types": ["dark"],
     "stats": [80, 120, 90, 60, 70, 85],
     "abilities": { "0": "intimidate", "1": "guarddog", "H": "stakeout" },
@@ -2310,7 +2112,6 @@
     "icon": 197
   },
   "machamp": {
-    "num": 68,
     "types": ["fighting"],
     "stats": [90, 130, 80, 65, 85, 55],
     "abilities": { "0": "guts", "1": "noguard", "H": "steadfast" },
@@ -2320,7 +2121,6 @@
     "icon": 198
   },
   "malamar": {
-    "num": 687,
     "types": ["dark", "psychic"],
     "stats": [86, 92, 88, 68, 75, 73],
     "abilities": { "0": "contrary", "1": "suctioncups", "H": "infiltrator" },
@@ -2330,7 +2130,6 @@
     "icon": 199
   },
   "malamarmega": {
-    "num": 687,
     "types": ["dark", "psychic"],
     "stats": [86, 102, 88, 98, 120, 88],
     "abilities": { "0": "contrary" },
@@ -2346,7 +2145,6 @@
     "item": "malamarite"
   },
   "mamoswine": {
-    "num": 473,
     "types": ["ice", "ground"],
     "stats": [110, 130, 80, 70, 60, 80],
     "abilities": { "0": "oblivious", "1": "snowcloak", "H": "thickfat" },
@@ -2356,7 +2154,6 @@
     "icon": 201
   },
   "manectric": {
-    "num": 310,
     "types": ["electric"],
     "stats": [70, 75, 60, 105, 60, 105],
     "abilities": { "0": "static", "1": "lightningrod", "H": "minus" },
@@ -2366,7 +2163,6 @@
     "icon": 202
   },
   "manectricmega": {
-    "num": 310,
     "types": ["electric"],
     "stats": [70, 75, 80, 135, 80, 135],
     "abilities": { "0": "intimidate" },
@@ -2381,7 +2177,6 @@
     "item": "manectite"
   },
   "maushold": {
-    "num": 925,
     "types": ["normal"],
     "stats": [74, 75, 70, 65, 75, 111],
     "abilities": { "0": "friendguard", "1": "cheekpouch", "H": "technician" },
@@ -2391,7 +2186,6 @@
     "icon": 204
   },
   "mausholdfour": {
-    "num": 925,
     "types": ["normal"],
     "stats": [74, 75, 70, 65, 75, 111],
     "abilities": { "0": "friendguard", "1": "cheekpouch", "H": "technician" },
@@ -2403,7 +2197,6 @@
     "forme": "Four"
   },
   "mawile": {
-    "num": 303,
     "types": ["steel", "fairy"],
     "stats": [50, 85, 85, 55, 55, 50],
     "abilities": { "0": "hypercutter", "1": "intimidate", "H": "sheerforce" },
@@ -2413,7 +2206,6 @@
     "icon": 206
   },
   "mawilemega": {
-    "num": 303,
     "types": ["steel", "fairy"],
     "stats": [50, 105, 125, 55, 95, 50],
     "abilities": { "0": "hugepower" },
@@ -2428,7 +2220,6 @@
     "item": "mawilite"
   },
   "medicham": {
-    "num": 308,
     "types": ["fighting", "psychic"],
     "stats": [60, 60, 75, 60, 75, 80],
     "abilities": { "0": "purepower", "H": "telepathy" },
@@ -2438,7 +2229,6 @@
     "icon": 208
   },
   "medichammega": {
-    "num": 308,
     "types": ["fighting", "psychic"],
     "stats": [60, 100, 85, 80, 85, 100],
     "abilities": { "0": "purepower" },
@@ -2453,7 +2243,6 @@
     "item": "medichamite"
   },
   "meganium": {
-    "num": 154,
     "types": ["grass"],
     "stats": [80, 82, 100, 83, 100, 80],
     "abilities": { "0": "overgrow", "H": "leafguard" },
@@ -2463,7 +2252,6 @@
     "icon": 210
   },
   "meganiummega": {
-    "num": 154,
     "types": ["grass", "fairy"],
     "stats": [80, 92, 115, 143, 115, 80],
     "abilities": { "0": "megasol" },
@@ -2478,7 +2266,6 @@
     "item": "meganiumite"
   },
   "meowscarada": {
-    "num": 908,
     "types": ["grass", "dark"],
     "stats": [76, 110, 70, 81, 70, 123],
     "abilities": { "0": "overgrow", "H": "protean" },
@@ -2488,7 +2275,6 @@
     "icon": 212
   },
   "meowstic": {
-    "num": 678,
     "types": ["psychic"],
     "stats": [74, 48, 76, 83, 81, 104],
     "abilities": { "0": "keeneye", "1": "infiltrator", "H": "prankster" },
@@ -2498,7 +2284,6 @@
     "icon": 213
   },
   "meowsticf": {
-    "num": 678,
     "types": ["psychic"],
     "stats": [74, 48, 76, 83, 81, 104],
     "abilities": { "0": "keeneye", "1": "infiltrator", "H": "competitive" },
@@ -2510,7 +2295,6 @@
     "forme": "F"
   },
   "meowsticfmega": {
-    "num": 678,
     "types": ["psychic"],
     "stats": [74, 48, 76, 143, 101, 124],
     "abilities": { "0": "trace" },
@@ -2525,7 +2309,6 @@
     "item": "meowsticite"
   },
   "meowsticmmega": {
-    "num": 678,
     "types": ["psychic"],
     "stats": [74, 48, 76, 143, 101, 124],
     "abilities": { "0": "trace" },
@@ -2540,7 +2323,6 @@
     "item": "meowsticite"
   },
   "metagross": {
-    "num": 376,
     "types": ["steel", "psychic"],
     "stats": [80, 135, 130, 95, 90, 70],
     "abilities": { "0": "clearbody", "H": "lightmetal" },
@@ -2550,7 +2332,6 @@
     "icon": 217
   },
   "metagrossmega": {
-    "num": 376,
     "types": ["steel", "psychic"],
     "stats": [80, 145, 150, 105, 110, 110],
     "abilities": { "0": "toughclaws" },
@@ -2565,7 +2346,6 @@
     "item": "metagrossite"
   },
   "milotic": {
-    "num": 350,
     "types": ["water"],
     "stats": [95, 60, 79, 100, 125, 81],
     "abilities": { "0": "marvelscale", "1": "competitive", "H": "cutecharm" },
@@ -2575,7 +2355,6 @@
     "icon": 219
   },
   "mimikyu": {
-    "num": 778,
     "types": ["ghost", "fairy"],
     "stats": [55, 90, 80, 50, 105, 96],
     "abilities": { "0": "disguise" },
@@ -2585,7 +2364,6 @@
     "icon": 220
   },
   "mimikyubusted": {
-    "num": 778,
     "types": ["ghost", "fairy"],
     "stats": [55, 90, 80, 50, 105, 96],
     "abilities": { "0": "disguise" },
@@ -2598,7 +2376,6 @@
     "battleOnly": "mimikyu"
   },
   "miniormeteor": {
-    "num": 774,
     "types": ["rock", "flying"],
     "stats": [60, 60, 100, 60, 100, 60],
     "abilities": { "0": "shieldsdown" },
@@ -2611,7 +2388,6 @@
     "battleOnly": "minior"
   },
   "morpeko": {
-    "num": 877,
     "types": ["electric", "dark"],
     "stats": [58, 95, 58, 70, 58, 97],
     "abilities": { "0": "hungerswitch" },
@@ -2621,7 +2397,6 @@
     "icon": 223
   },
   "morpekohangry": {
-    "num": 877,
     "types": ["electric", "dark"],
     "stats": [58, 95, 58, 70, 58, 97],
     "abilities": { "0": "hungerswitch" },
@@ -2634,7 +2409,6 @@
     "battleOnly": "morpeko"
   },
   "mrmime": {
-    "num": 122,
     "types": ["psychic", "fairy"],
     "stats": [40, 45, 65, 100, 120, 90],
     "abilities": { "0": "soundproof", "1": "filter", "H": "technician" },
@@ -2644,7 +2418,6 @@
     "icon": 225
   },
   "mrrime": {
-    "num": 866,
     "types": ["ice", "psychic"],
     "stats": [80, 85, 75, 110, 100, 70],
     "abilities": { "0": "tangledfeet", "1": "screencleaner", "H": "icebody" },
@@ -2654,7 +2427,6 @@
     "icon": 226
   },
   "mudsdale": {
-    "num": 750,
     "types": ["ground"],
     "stats": [100, 125, 100, 55, 85, 35],
     "abilities": { "0": "owntempo", "1": "stamina", "H": "innerfocus" },
@@ -2664,7 +2436,6 @@
     "icon": 227
   },
   "musharna": {
-    "num": 518,
     "types": ["psychic"],
     "stats": [116, 55, 85, 107, 95, 29],
     "abilities": { "0": "forewarn", "1": "synchronize", "H": "telepathy" },
@@ -2674,7 +2445,6 @@
     "icon": 228
   },
   "ninetales": {
-    "num": 38,
     "types": ["fire"],
     "stats": [73, 76, 75, 81, 100, 100],
     "abilities": { "0": "flashfire", "H": "drought" },
@@ -2684,7 +2454,6 @@
     "icon": 229
   },
   "ninetalesalola": {
-    "num": 38,
     "types": ["ice", "fairy"],
     "stats": [73, 67, 75, 81, 100, 109],
     "abilities": { "0": "snowcloak", "H": "snowwarning" },
@@ -2696,7 +2465,6 @@
     "forme": "Alola"
   },
   "noivern": {
-    "num": 715,
     "types": ["flying", "dragon"],
     "stats": [85, 70, 80, 97, 80, 123],
     "abilities": { "0": "frisk", "1": "infiltrator", "H": "telepathy" },
@@ -2706,7 +2474,6 @@
     "icon": 231
   },
   "ogerponcornerstonetera": {
-    "num": 1017,
     "types": ["grass", "rock"],
     "stats": [80, 120, 84, 60, 96, 110],
     "abilities": { "0": "embodyaspectcornerstone" },
@@ -2720,7 +2487,6 @@
     "item": "cornerstonemask"
   },
   "ogerponhearthflametera": {
-    "num": 1017,
     "types": ["grass", "fire"],
     "stats": [80, 120, 84, 60, 96, 110],
     "abilities": { "0": "embodyaspecthearthflame" },
@@ -2734,7 +2500,6 @@
     "item": "hearthflamemask"
   },
   "ogerpontealtera": {
-    "num": 1017,
     "types": ["grass"],
     "stats": [80, 120, 84, 60, 96, 110],
     "abilities": { "0": "embodyaspectteal" },
@@ -2747,7 +2512,6 @@
     "battleOnly": "ogerpon"
   },
   "ogerponwellspringtera": {
-    "num": 1017,
     "types": ["grass", "water"],
     "stats": [80, 120, 84, 60, 96, 110],
     "abilities": { "0": "embodyaspectwellspring" },
@@ -2761,7 +2525,6 @@
     "item": "wellspringmask"
   },
   "oranguru": {
-    "num": 765,
     "types": ["normal", "psychic"],
     "stats": [90, 60, 80, 90, 110, 60],
     "abilities": { "0": "innerfocus", "1": "telepathy", "H": "symbiosis" },
@@ -2771,7 +2534,6 @@
     "icon": 236
   },
   "orthworm": {
-    "num": 968,
     "types": ["steel"],
     "stats": [70, 85, 145, 60, 55, 65],
     "abilities": { "0": "eartheater", "H": "sandveil" },
@@ -2781,7 +2543,6 @@
     "icon": 237
   },
   "overqwil": {
-    "num": 904,
     "types": ["dark", "poison"],
     "stats": [85, 115, 95, 65, 65, 85],
     "abilities": { "0": "poisonpoint", "1": "swiftswim", "H": "intimidate" },
@@ -2791,7 +2552,6 @@
     "icon": 238
   },
   "palafin": {
-    "num": 964,
     "types": ["water"],
     "stats": [100, 70, 72, 53, 62, 100],
     "abilities": { "0": "zerotohero" },
@@ -2801,7 +2561,6 @@
     "icon": 239
   },
   "palafinhero": {
-    "num": 964,
     "types": ["water"],
     "stats": [100, 160, 97, 106, 87, 100],
     "abilities": { "0": "zerotohero" },
@@ -2814,7 +2573,6 @@
     "battleOnly": "palafin"
   },
   "pangoro": {
-    "num": 675,
     "types": ["fighting", "dark"],
     "stats": [95, 124, 78, 69, 71, 58],
     "abilities": { "0": "ironfist", "1": "moldbreaker", "H": "scrappy" },
@@ -2824,7 +2582,6 @@
     "icon": 241
   },
   "passimian": {
-    "num": 766,
     "types": ["fighting"],
     "stats": [100, 120, 90, 40, 60, 80],
     "abilities": { "0": "receiver", "H": "defiant" },
@@ -2834,7 +2591,6 @@
     "icon": 242
   },
   "pawmot": {
-    "num": 923,
     "types": ["electric", "fighting"],
     "stats": [70, 115, 70, 70, 60, 105],
     "abilities": { "0": "voltabsorb", "1": "naturalcure", "H": "ironfist" },
@@ -2844,7 +2600,6 @@
     "icon": 243
   },
   "pelipper": {
-    "num": 279,
     "types": ["water", "flying"],
     "stats": [60, 50, 100, 95, 70, 65],
     "abilities": { "0": "keeneye", "1": "drizzle", "H": "raindish" },
@@ -2854,7 +2609,6 @@
     "icon": 244
   },
   "perrserker": {
-    "num": 863,
     "types": ["steel"],
     "stats": [70, 110, 100, 50, 60, 50],
     "abilities": { "0": "battlearmor", "1": "toughclaws", "H": "steelyspirit" },
@@ -2864,7 +2618,6 @@
     "icon": 245
   },
   "persian": {
-    "num": 53,
     "types": ["normal"],
     "stats": [65, 70, 60, 65, 65, 115],
     "abilities": { "0": "limber", "1": "technician", "H": "unnerve" },
@@ -2874,7 +2627,6 @@
     "icon": 246
   },
   "persianalola": {
-    "num": 53,
     "types": ["dark"],
     "stats": [65, 60, 60, 75, 65, 115],
     "abilities": { "0": "furcoat", "1": "technician", "H": "rattled" },
@@ -2886,7 +2638,6 @@
     "forme": "Alola"
   },
   "pidgeot": {
-    "num": 18,
     "types": ["normal", "flying"],
     "stats": [83, 80, 75, 70, 70, 101],
     "abilities": { "0": "keeneye", "1": "tangledfeet", "H": "bigpecks" },
@@ -2896,7 +2647,6 @@
     "icon": 248
   },
   "pidgeotmega": {
-    "num": 18,
     "types": ["normal", "flying"],
     "stats": [83, 80, 80, 135, 80, 121],
     "abilities": { "0": "noguard" },
@@ -2911,7 +2661,6 @@
     "item": "pidgeotite"
   },
   "pikachu": {
-    "num": 25,
     "types": ["electric"],
     "stats": [35, 55, 40, 50, 50, 90],
     "abilities": { "0": "static", "H": "lightningrod" },
@@ -2922,7 +2671,6 @@
     "evos": ["raichu", "raichualola"]
   },
   "pincurchin": {
-    "num": 871,
     "types": ["electric"],
     "stats": [48, 101, 95, 91, 85, 15],
     "abilities": { "0": "lightningrod", "H": "electricsurge" },
@@ -2932,7 +2680,6 @@
     "icon": 251
   },
   "pinsir": {
-    "num": 127,
     "types": ["bug"],
     "stats": [65, 125, 100, 55, 70, 85],
     "abilities": { "0": "hypercutter", "1": "moldbreaker", "H": "moxie" },
@@ -2942,7 +2689,6 @@
     "icon": 252
   },
   "pinsirmega": {
-    "num": 127,
     "types": ["bug", "flying"],
     "stats": [65, 155, 120, 65, 90, 105],
     "abilities": { "0": "aerilate" },
@@ -2957,7 +2703,6 @@
     "item": "pinsirite"
   },
   "politoed": {
-    "num": 186,
     "types": ["water"],
     "stats": [90, 75, 75, 90, 100, 70],
     "abilities": { "0": "waterabsorb", "1": "damp", "H": "drizzle" },
@@ -2967,7 +2712,6 @@
     "icon": 254
   },
   "polteageist": {
-    "num": 855,
     "types": ["ghost"],
     "stats": [60, 65, 65, 134, 114, 70],
     "abilities": { "0": "weakarmor", "H": "cursedbody" },
@@ -2977,7 +2721,6 @@
     "icon": 255
   },
   "polteageistantique": {
-    "num": 855,
     "types": ["ghost"],
     "stats": [60, 65, 65, 134, 114, 70],
     "abilities": { "0": "weakarmor", "H": "cursedbody" },
@@ -2989,7 +2732,6 @@
     "forme": "Antique"
   },
   "primarina": {
-    "num": 730,
     "types": ["water", "fairy"],
     "stats": [80, 74, 74, 126, 116, 60],
     "abilities": { "0": "torrent", "H": "liquidvoice" },
@@ -2999,7 +2741,6 @@
     "icon": 257
   },
   "pyroar": {
-    "num": 668,
     "types": ["fire", "normal"],
     "stats": [86, 68, 72, 109, 66, 106],
     "abilities": { "0": "rivalry", "1": "unnerve", "H": "moxie" },
@@ -3009,7 +2750,6 @@
     "icon": 258
   },
   "pyroarmega": {
-    "num": 668,
     "types": ["fire", "normal"],
     "stats": [86, 88, 92, 129, 86, 126],
     "abilities": { "0": "firemane" },
@@ -3025,7 +2765,6 @@
     "item": "pyroarite"
   },
   "quaquaval": {
-    "num": 914,
     "types": ["water", "fighting"],
     "stats": [85, 120, 80, 85, 75, 85],
     "abilities": { "0": "torrent", "H": "moxie" },
@@ -3035,7 +2774,6 @@
     "icon": 260
   },
   "qwilfish": {
-    "num": 211,
     "types": ["water", "poison"],
     "stats": [65, 95, 85, 55, 55, 85],
     "abilities": { "0": "poisonpoint", "1": "swiftswim", "H": "intimidate" },
@@ -3045,7 +2783,6 @@
     "icon": 261
   },
   "raichu": {
-    "num": 26,
     "types": ["electric"],
     "stats": [60, 90, 55, 90, 80, 110],
     "abilities": { "0": "static", "H": "lightningrod" },
@@ -3056,7 +2793,6 @@
     "prevo": "pikachu"
   },
   "raichualola": {
-    "num": 26,
     "types": ["electric", "psychic"],
     "stats": [60, 85, 50, 95, 85, 110],
     "abilities": { "0": "surgesurfer" },
@@ -3069,7 +2805,6 @@
     "prevo": "pikachu"
   },
   "raichumegax": {
-    "num": 26,
     "types": ["electric"],
     "stats": [60, 135, 95, 90, 95, 110],
     "abilities": { "0": "electricsurge" },
@@ -3085,7 +2820,6 @@
     "item": "raichunitex"
   },
   "raichumegay": {
-    "num": 26,
     "types": ["electric"],
     "stats": [60, 100, 55, 160, 80, 130],
     "abilities": { "0": "noguard" },
@@ -3101,7 +2835,6 @@
     "item": "raichunitey"
   },
   "rampardos": {
-    "num": 409,
     "types": ["rock"],
     "stats": [97, 165, 60, 65, 50, 58],
     "abilities": { "0": "moldbreaker", "H": "sheerforce" },
@@ -3111,7 +2844,6 @@
     "icon": 266
   },
   "reuniclus": {
-    "num": 579,
     "types": ["psychic"],
     "stats": [110, 65, 75, 125, 85, 30],
     "abilities": { "0": "overcoat", "1": "magicguard", "H": "regenerator" },
@@ -3121,7 +2853,6 @@
     "icon": 267
   },
   "rhyperior": {
-    "num": 464,
     "types": ["ground", "rock"],
     "stats": [115, 140, 130, 55, 55, 40],
     "abilities": { "0": "lightningrod", "1": "solidrock", "H": "reckless" },
@@ -3131,7 +2862,6 @@
     "icon": 268
   },
   "rillaboom": {
-    "num": 812,
     "types": ["grass"],
     "stats": [100, 125, 90, 60, 70, 85],
     "abilities": { "0": "overgrow", "H": "grassysurge" },
@@ -3141,7 +2871,6 @@
     "icon": 269
   },
   "roserade": {
-    "num": 407,
     "types": ["grass", "poison"],
     "stats": [60, 70, 65, 125, 105, 90],
     "abilities": { "0": "naturalcure", "1": "poisonpoint", "H": "technician" },
@@ -3151,7 +2880,6 @@
     "icon": 270
   },
   "rotom": {
-    "num": 479,
     "types": ["electric", "ghost"],
     "stats": [50, 50, 77, 95, 77, 91],
     "abilities": { "0": "levitate" },
@@ -3161,7 +2889,6 @@
     "icon": 271
   },
   "rotomfan": {
-    "num": 479,
     "types": ["electric", "flying"],
     "stats": [50, 65, 107, 105, 107, 86],
     "abilities": { "0": "levitate" },
@@ -3173,7 +2900,6 @@
     "forme": "Fan"
   },
   "rotomfrost": {
-    "num": 479,
     "types": ["electric", "ice"],
     "stats": [50, 65, 107, 105, 107, 86],
     "abilities": { "0": "levitate" },
@@ -3185,7 +2911,6 @@
     "forme": "Frost"
   },
   "rotomheat": {
-    "num": 479,
     "types": ["electric", "fire"],
     "stats": [50, 65, 107, 105, 107, 86],
     "abilities": { "0": "levitate" },
@@ -3197,7 +2922,6 @@
     "forme": "Heat"
   },
   "rotommow": {
-    "num": 479,
     "types": ["electric", "grass"],
     "stats": [50, 65, 107, 105, 107, 86],
     "abilities": { "0": "levitate" },
@@ -3209,7 +2933,6 @@
     "forme": "Mow"
   },
   "rotomwash": {
-    "num": 479,
     "types": ["electric", "water"],
     "stats": [50, 65, 107, 105, 107, 86],
     "abilities": { "0": "levitate" },
@@ -3221,7 +2944,6 @@
     "forme": "Wash"
   },
   "runerigus": {
-    "num": 867,
     "types": ["ground", "ghost"],
     "stats": [58, 95, 145, 50, 105, 30],
     "abilities": { "0": "wanderingspirit" },
@@ -3231,7 +2953,6 @@
     "icon": 277
   },
   "sableye": {
-    "num": 302,
     "types": ["dark", "ghost"],
     "stats": [50, 75, 75, 65, 65, 50],
     "abilities": { "0": "keeneye", "1": "stall", "H": "prankster" },
@@ -3241,7 +2962,6 @@
     "icon": 278
   },
   "sableyemega": {
-    "num": 302,
     "types": ["dark", "ghost"],
     "stats": [50, 85, 125, 85, 115, 20],
     "abilities": { "0": "magicbounce" },
@@ -3256,7 +2976,6 @@
     "item": "sablenite"
   },
   "salamence": {
-    "num": 373,
     "types": ["dragon", "flying"],
     "stats": [95, 135, 80, 110, 80, 100],
     "abilities": { "0": "intimidate", "H": "moxie" },
@@ -3266,7 +2985,6 @@
     "icon": 280
   },
   "salamencemega": {
-    "num": 373,
     "types": ["dragon", "flying"],
     "stats": [95, 145, 130, 120, 90, 120],
     "abilities": { "0": "aerilate" },
@@ -3281,7 +2999,6 @@
     "item": "salamencite"
   },
   "salazzle": {
-    "num": 758,
     "types": ["poison", "fire"],
     "stats": [68, 64, 60, 111, 60, 117],
     "abilities": { "0": "corrosion", "H": "oblivious" },
@@ -3291,7 +3008,6 @@
     "icon": 282
   },
   "samurott": {
-    "num": 503,
     "types": ["water"],
     "stats": [95, 100, 85, 108, 70, 70],
     "abilities": { "0": "torrent", "H": "shellarmor" },
@@ -3301,7 +3017,6 @@
     "icon": 283
   },
   "samurotthisui": {
-    "num": 503,
     "types": ["water", "dark"],
     "stats": [90, 108, 80, 100, 65, 85],
     "abilities": { "0": "torrent", "H": "sharpness" },
@@ -3313,7 +3028,6 @@
     "forme": "Hisui"
   },
   "sandaconda": {
-    "num": 844,
     "types": ["ground"],
     "stats": [72, 107, 125, 65, 70, 71],
     "abilities": { "0": "sandspit", "1": "shedskin", "H": "sandveil" },
@@ -3323,7 +3037,6 @@
     "icon": 285
   },
   "sceptile": {
-    "num": 254,
     "types": ["grass"],
     "stats": [70, 85, 65, 105, 85, 120],
     "abilities": { "0": "overgrow", "H": "unburden" },
@@ -3333,7 +3046,6 @@
     "icon": 286
   },
   "sceptilemega": {
-    "num": 254,
     "types": ["grass", "dragon"],
     "stats": [70, 110, 75, 145, 85, 145],
     "abilities": { "0": "lightningrod" },
@@ -3348,7 +3060,6 @@
     "item": "sceptilite"
   },
   "scizor": {
-    "num": 212,
     "types": ["bug", "steel"],
     "stats": [70, 130, 100, 55, 80, 65],
     "abilities": { "0": "swarm", "1": "technician", "H": "lightmetal" },
@@ -3358,7 +3069,6 @@
     "icon": 288
   },
   "scizormega": {
-    "num": 212,
     "types": ["bug", "steel"],
     "stats": [70, 150, 140, 65, 100, 75],
     "abilities": { "0": "technician" },
@@ -3373,7 +3083,6 @@
     "item": "scizorite"
   },
   "scolipede": {
-    "num": 545,
     "types": ["bug", "poison"],
     "stats": [60, 100, 89, 55, 69, 112],
     "abilities": { "0": "poisonpoint", "1": "swarm", "H": "speedboost" },
@@ -3383,7 +3092,6 @@
     "icon": 290
   },
   "scolipedemega": {
-    "num": 545,
     "types": ["bug", "poison"],
     "stats": [60, 140, 149, 75, 99, 62],
     "abilities": { "0": "shellarmor" },
@@ -3399,7 +3107,6 @@
     "item": "scolipite"
   },
   "scovillain": {
-    "num": 952,
     "types": ["grass", "fire"],
     "stats": [65, 108, 65, 108, 65, 75],
     "abilities": { "0": "chlorophyll", "1": "insomnia", "H": "moody" },
@@ -3409,7 +3116,6 @@
     "icon": 292
   },
   "scovillainmega": {
-    "num": 952,
     "types": ["grass", "fire"],
     "stats": [65, 138, 85, 138, 85, 75],
     "abilities": { "0": "spicyspray" },
@@ -3424,7 +3130,6 @@
     "item": "scovillainite"
   },
   "scrafty": {
-    "num": 560,
     "types": ["dark", "fighting"],
     "stats": [65, 90, 115, 45, 115, 58],
     "abilities": { "0": "shedskin", "1": "moxie", "H": "intimidate" },
@@ -3434,7 +3139,6 @@
     "icon": 294
   },
   "scraftymega": {
-    "num": 560,
     "types": ["dark", "fighting"],
     "stats": [65, 130, 135, 55, 135, 68],
     "abilities": { "0": "intimidate" },
@@ -3450,7 +3154,6 @@
     "item": "scraftinite"
   },
   "serperior": {
-    "num": 497,
     "types": ["grass"],
     "stats": [75, 75, 95, 75, 95, 113],
     "abilities": { "0": "overgrow", "H": "contrary" },
@@ -3460,7 +3163,6 @@
     "icon": 296
   },
   "sharpedo": {
-    "num": 319,
     "types": ["water", "dark"],
     "stats": [70, 120, 40, 95, 40, 95],
     "abilities": { "0": "roughskin", "H": "speedboost" },
@@ -3470,7 +3172,6 @@
     "icon": 297
   },
   "sharpedomega": {
-    "num": 319,
     "types": ["water", "dark"],
     "stats": [70, 140, 70, 110, 65, 105],
     "abilities": { "0": "strongjaw" },
@@ -3485,7 +3186,6 @@
     "item": "sharpedonite"
   },
   "simipour": {
-    "num": 516,
     "types": ["water"],
     "stats": [75, 98, 63, 98, 63, 101],
     "abilities": { "0": "gluttony", "H": "torrent" },
@@ -3495,7 +3195,6 @@
     "icon": 299
   },
   "simisage": {
-    "num": 512,
     "types": ["grass"],
     "stats": [75, 98, 63, 98, 63, 101],
     "abilities": { "0": "gluttony", "H": "overgrow" },
@@ -3505,7 +3204,6 @@
     "icon": 300
   },
   "simisear": {
-    "num": 514,
     "types": ["fire"],
     "stats": [75, 98, 63, 98, 63, 101],
     "abilities": { "0": "gluttony", "H": "blaze" },
@@ -3515,7 +3213,6 @@
     "icon": 301
   },
   "sinistcha": {
-    "num": 1013,
     "types": ["grass", "ghost"],
     "stats": [71, 60, 106, 121, 80, 70],
     "abilities": { "0": "hospitality", "H": "heatproof" },
@@ -3525,7 +3222,6 @@
     "icon": 302
   },
   "sinistchamasterpiece": {
-    "num": 1013,
     "types": ["grass", "ghost"],
     "stats": [71, 60, 106, 121, 80, 70],
     "abilities": { "0": "hospitality", "H": "heatproof" },
@@ -3537,7 +3233,6 @@
     "forme": "Masterpiece"
   },
   "sirfetchd": {
-    "num": 865,
     "types": ["fighting"],
     "stats": [62, 135, 95, 68, 82, 65],
     "abilities": { "0": "steadfast", "H": "scrappy" },
@@ -3547,7 +3242,6 @@
     "icon": 304
   },
   "skarmory": {
-    "num": 227,
     "types": ["steel", "flying"],
     "stats": [65, 80, 140, 40, 70, 70],
     "abilities": { "0": "keeneye", "1": "sturdy", "H": "weakarmor" },
@@ -3557,7 +3251,6 @@
     "icon": 305
   },
   "skarmorymega": {
-    "num": 227,
     "types": ["steel", "flying"],
     "stats": [65, 140, 110, 40, 100, 110],
     "abilities": { "0": "stalwart" },
@@ -3572,7 +3265,6 @@
     "item": "skarmorite"
   },
   "skeledirge": {
-    "num": 911,
     "types": ["fire", "ghost"],
     "stats": [104, 75, 100, 110, 75, 66],
     "abilities": { "0": "blaze", "H": "unaware" },
@@ -3582,7 +3274,6 @@
     "icon": 307
   },
   "slowbro": {
-    "num": 80,
     "types": ["water", "psychic"],
     "stats": [95, 75, 110, 100, 80, 30],
     "abilities": { "0": "oblivious", "1": "owntempo", "H": "regenerator" },
@@ -3592,7 +3283,6 @@
     "icon": 308
   },
   "slowbrogalar": {
-    "num": 80,
     "types": ["poison", "psychic"],
     "stats": [95, 100, 95, 100, 70, 30],
     "abilities": { "0": "quickdraw", "1": "owntempo", "H": "regenerator" },
@@ -3604,7 +3294,6 @@
     "forme": "Galar"
   },
   "slowbromega": {
-    "num": 80,
     "types": ["water", "psychic"],
     "stats": [95, 75, 180, 130, 80, 30],
     "abilities": { "0": "shellarmor" },
@@ -3619,7 +3308,6 @@
     "item": "slowbronite"
   },
   "slowking": {
-    "num": 199,
     "types": ["water", "psychic"],
     "stats": [95, 75, 80, 100, 110, 30],
     "abilities": { "0": "oblivious", "1": "owntempo", "H": "regenerator" },
@@ -3629,7 +3317,6 @@
     "icon": 311
   },
   "slowkinggalar": {
-    "num": 199,
     "types": ["poison", "psychic"],
     "stats": [95, 65, 80, 110, 110, 30],
     "abilities": { "0": "curiousmedicine", "1": "owntempo", "H": "regenerator" },
@@ -3641,7 +3328,6 @@
     "forme": "Galar"
   },
   "slurpuff": {
-    "num": 685,
     "types": ["fairy"],
     "stats": [82, 80, 86, 85, 75, 72],
     "abilities": { "0": "sweetveil", "H": "unburden" },
@@ -3651,7 +3337,6 @@
     "icon": 313
   },
   "sneasler": {
-    "num": 903,
     "types": ["fighting", "poison"],
     "stats": [80, 130, 60, 40, 80, 120],
     "abilities": { "0": "pressure", "1": "unburden", "H": "poisontouch" },
@@ -3661,7 +3346,6 @@
     "icon": 314
   },
   "snorlax": {
-    "num": 143,
     "types": ["normal"],
     "stats": [160, 110, 65, 65, 110, 30],
     "abilities": { "0": "immunity", "1": "thickfat", "H": "gluttony" },
@@ -3671,7 +3355,6 @@
     "icon": 315
   },
   "spiritomb": {
-    "num": 442,
     "types": ["ghost", "dark"],
     "stats": [50, 92, 108, 92, 108, 35],
     "abilities": { "0": "pressure", "H": "infiltrator" },
@@ -3681,7 +3364,6 @@
     "icon": 316
   },
   "squawkabilly": {
-    "num": 931,
     "types": ["normal", "flying"],
     "stats": [82, 96, 51, 45, 51, 92],
     "abilities": { "0": "intimidate", "1": "hustle", "H": "guts" },
@@ -3691,7 +3373,6 @@
     "icon": 317
   },
   "squawkabillyblue": {
-    "num": 931,
     "types": ["normal", "flying"],
     "stats": [82, 96, 51, 45, 51, 92],
     "abilities": { "0": "intimidate", "1": "hustle", "H": "guts" },
@@ -3703,7 +3384,6 @@
     "forme": "Blue"
   },
   "squawkabillywhite": {
-    "num": 931,
     "types": ["normal", "flying"],
     "stats": [82, 96, 51, 45, 51, 92],
     "abilities": { "0": "intimidate", "1": "hustle", "H": "sheerforce" },
@@ -3715,7 +3395,6 @@
     "forme": "White"
   },
   "squawkabillyyellow": {
-    "num": 931,
     "types": ["normal", "flying"],
     "stats": [82, 96, 51, 45, 51, 92],
     "abilities": { "0": "intimidate", "1": "hustle", "H": "sheerforce" },
@@ -3727,7 +3406,6 @@
     "forme": "Yellow"
   },
   "staraptor": {
-    "num": 398,
     "types": ["normal", "flying"],
     "stats": [85, 120, 70, 50, 60, 100],
     "abilities": { "0": "intimidate", "H": "reckless" },
@@ -3737,7 +3415,6 @@
     "icon": 321
   },
   "staraptormega": {
-    "num": 398,
     "types": ["fighting", "flying"],
     "stats": [85, 140, 100, 60, 90, 110],
     "abilities": { "0": "contrary" },
@@ -3753,7 +3430,6 @@
     "item": "staraptite"
   },
   "starmie": {
-    "num": 121,
     "types": ["water", "psychic"],
     "stats": [60, 75, 85, 100, 85, 115],
     "abilities": { "0": "illuminate", "1": "naturalcure", "H": "analytic" },
@@ -3763,7 +3439,6 @@
     "icon": 323
   },
   "starmiemega": {
-    "num": 121,
     "types": ["water", "psychic"],
     "stats": [60, 100, 105, 130, 105, 120],
     "abilities": { "0": "hugepower" },
@@ -3778,7 +3453,6 @@
     "item": "starminite"
   },
   "steelix": {
-    "num": 208,
     "types": ["steel", "ground"],
     "stats": [75, 85, 200, 55, 65, 30],
     "abilities": { "0": "rockhead", "1": "sturdy", "H": "sheerforce" },
@@ -3788,7 +3462,6 @@
     "icon": 325
   },
   "steelixmega": {
-    "num": 208,
     "types": ["steel", "ground"],
     "stats": [75, 125, 230, 55, 95, 30],
     "abilities": { "0": "sandforce" },
@@ -3803,7 +3476,6 @@
     "item": "steelixite"
   },
   "stunfisk": {
-    "num": 618,
     "types": ["ground", "electric"],
     "stats": [109, 66, 84, 81, 99, 32],
     "abilities": { "0": "static", "1": "limber", "H": "sandveil" },
@@ -3813,7 +3485,6 @@
     "icon": 327
   },
   "stunfiskgalar": {
-    "num": 618,
     "types": ["ground", "steel"],
     "stats": [109, 81, 99, 66, 84, 32],
     "abilities": { "0": "mimicry" },
@@ -3825,7 +3496,6 @@
     "forme": "Galar"
   },
   "swalot": {
-    "num": 317,
     "types": ["poison"],
     "stats": [100, 73, 83, 73, 83, 55],
     "abilities": { "0": "liquidooze", "1": "stickyhold", "H": "gluttony" },
@@ -3835,7 +3505,6 @@
     "icon": 329
   },
   "swampert": {
-    "num": 260,
     "types": ["water", "ground"],
     "stats": [100, 110, 90, 85, 90, 60],
     "abilities": { "0": "torrent", "H": "damp" },
@@ -3845,7 +3514,6 @@
     "icon": 330
   },
   "swampertmega": {
-    "num": 260,
     "types": ["water", "ground"],
     "stats": [100, 150, 110, 95, 110, 70],
     "abilities": { "0": "swiftswim" },
@@ -3860,7 +3528,6 @@
     "item": "swampertite"
   },
   "sylveon": {
-    "num": 700,
     "types": ["fairy"],
     "stats": [95, 65, 65, 110, 130, 60],
     "abilities": { "0": "cutecharm", "H": "pixilate" },
@@ -3870,7 +3537,6 @@
     "icon": 332
   },
   "talonflame": {
-    "num": 663,
     "types": ["fire", "flying"],
     "stats": [78, 81, 71, 74, 69, 126],
     "abilities": { "0": "flamebody", "H": "galewings" },
@@ -3880,7 +3546,6 @@
     "icon": 333
   },
   "tauros": {
-    "num": 128,
     "types": ["normal"],
     "stats": [75, 100, 95, 40, 70, 110],
     "abilities": { "0": "intimidate", "1": "angerpoint", "H": "sheerforce" },
@@ -3890,7 +3555,6 @@
     "icon": 334
   },
   "taurospaldeaaqua": {
-    "num": 128,
     "types": ["fighting", "water"],
     "stats": [75, 110, 105, 30, 70, 100],
     "abilities": { "0": "intimidate", "1": "angerpoint", "H": "cudchew" },
@@ -3902,7 +3566,6 @@
     "forme": "Paldea-Aqua"
   },
   "taurospaldeablaze": {
-    "num": 128,
     "types": ["fighting", "fire"],
     "stats": [75, 110, 105, 30, 70, 100],
     "abilities": { "0": "intimidate", "1": "angerpoint", "H": "cudchew" },
@@ -3914,7 +3577,6 @@
     "forme": "Paldea-Blaze"
   },
   "taurospaldeacombat": {
-    "num": 128,
     "types": ["fighting"],
     "stats": [75, 110, 105, 30, 70, 100],
     "abilities": { "0": "intimidate", "1": "angerpoint", "H": "cudchew" },
@@ -3926,7 +3588,6 @@
     "forme": "Paldea-Combat"
   },
   "thievul": {
-    "num": 828,
     "types": ["dark"],
     "stats": [70, 58, 58, 87, 92, 90],
     "abilities": { "0": "runaway", "1": "unburden", "H": "stakeout" },
@@ -3936,7 +3597,6 @@
     "icon": 338
   },
   "tinkaton": {
-    "num": 959,
     "types": ["fairy", "steel"],
     "stats": [85, 75, 77, 70, 105, 94],
     "abilities": { "0": "moldbreaker", "1": "owntempo", "H": "pickpocket" },
@@ -3946,7 +3606,6 @@
     "icon": 339
   },
   "torkoal": {
-    "num": 324,
     "types": ["fire"],
     "stats": [70, 85, 140, 85, 70, 20],
     "abilities": { "0": "whitesmoke", "1": "drought", "H": "shellarmor" },
@@ -3956,7 +3615,6 @@
     "icon": 340
   },
   "torterra": {
-    "num": 389,
     "types": ["grass", "ground"],
     "stats": [95, 109, 105, 75, 85, 56],
     "abilities": { "0": "overgrow", "H": "shellarmor" },
@@ -3966,7 +3624,6 @@
     "icon": 341
   },
   "toucannon": {
-    "num": 733,
     "types": ["normal", "flying"],
     "stats": [80, 120, 75, 75, 75, 60],
     "abilities": { "0": "keeneye", "1": "skilllink", "H": "sheerforce" },
@@ -3976,7 +3633,6 @@
     "icon": 342
   },
   "toxapex": {
-    "num": 748,
     "types": ["poison", "water"],
     "stats": [50, 63, 152, 53, 142, 35],
     "abilities": { "0": "merciless", "1": "limber", "H": "regenerator" },
@@ -3986,7 +3642,6 @@
     "icon": 343
   },
   "toxicroak": {
-    "num": 454,
     "types": ["poison", "fighting"],
     "stats": [83, 106, 65, 86, 65, 85],
     "abilities": { "0": "anticipation", "1": "dryskin", "H": "poisontouch" },
@@ -3996,7 +3651,6 @@
     "icon": 344
   },
   "toxtricity": {
-    "num": 849,
     "types": ["electric", "poison"],
     "stats": [75, 98, 70, 114, 70, 75],
     "abilities": { "0": "punkrock", "1": "plus", "H": "technician" },
@@ -4006,7 +3660,6 @@
     "icon": 345
   },
   "toxtricitylowkey": {
-    "num": 849,
     "types": ["electric", "poison"],
     "stats": [75, 98, 70, 114, 70, 75],
     "abilities": { "0": "punkrock", "1": "minus", "H": "technician" },
@@ -4018,7 +3671,6 @@
     "forme": "Low-Key"
   },
   "trevenant": {
-    "num": 709,
     "types": ["ghost", "grass"],
     "stats": [85, 110, 76, 65, 82, 56],
     "abilities": { "0": "naturalcure", "1": "frisk", "H": "harvest" },
@@ -4028,7 +3680,6 @@
     "icon": 347
   },
   "tsareena": {
-    "num": 763,
     "types": ["grass"],
     "stats": [72, 120, 98, 50, 98, 72],
     "abilities": { "0": "leafguard", "1": "queenlymajesty", "H": "sweetveil" },
@@ -4038,7 +3689,6 @@
     "icon": 348
   },
   "typhlosion": {
-    "num": 157,
     "types": ["fire"],
     "stats": [78, 84, 78, 109, 85, 100],
     "abilities": { "0": "blaze", "H": "flashfire" },
@@ -4048,7 +3698,6 @@
     "icon": 349
   },
   "typhlosionhisui": {
-    "num": 157,
     "types": ["fire", "ghost"],
     "stats": [73, 84, 78, 119, 85, 95],
     "abilities": { "0": "blaze", "H": "frisk" },
@@ -4060,7 +3709,6 @@
     "forme": "Hisui"
   },
   "tyranitar": {
-    "num": 248,
     "types": ["rock", "dark"],
     "stats": [100, 134, 110, 95, 100, 61],
     "abilities": { "0": "sandstream", "H": "unnerve" },
@@ -4070,7 +3718,6 @@
     "icon": 351
   },
   "tyranitarmega": {
-    "num": 248,
     "types": ["rock", "dark"],
     "stats": [100, 164, 150, 95, 120, 71],
     "abilities": { "0": "sandstream" },
@@ -4085,7 +3732,6 @@
     "item": "tyranitarite"
   },
   "tyrantrum": {
-    "num": 697,
     "types": ["rock", "dragon"],
     "stats": [82, 121, 119, 69, 59, 71],
     "abilities": { "0": "strongjaw", "H": "rockhead" },
@@ -4095,7 +3741,6 @@
     "icon": 353
   },
   "umbreon": {
-    "num": 197,
     "types": ["dark"],
     "stats": [95, 65, 110, 60, 130, 65],
     "abilities": { "0": "synchronize", "H": "innerfocus" },
@@ -4105,7 +3750,6 @@
     "icon": 354
   },
   "vanilluxe": {
-    "num": 584,
     "types": ["ice"],
     "stats": [71, 95, 85, 110, 95, 79],
     "abilities": { "0": "icebody", "1": "snowwarning", "H": "weakarmor" },
@@ -4115,7 +3759,6 @@
     "icon": 355
   },
   "vaporeon": {
-    "num": 134,
     "types": ["water"],
     "stats": [130, 65, 60, 110, 95, 65],
     "abilities": { "0": "waterabsorb", "H": "hydration" },
@@ -4125,7 +3768,6 @@
     "icon": 356
   },
   "venusaur": {
-    "num": 3,
     "types": ["grass", "poison"],
     "stats": [80, 82, 83, 100, 100, 80],
     "abilities": { "0": "overgrow", "H": "chlorophyll" },
@@ -4135,7 +3777,6 @@
     "icon": 357
   },
   "venusaurmega": {
-    "num": 3,
     "types": ["grass", "poison"],
     "stats": [80, 100, 123, 122, 120, 80],
     "abilities": { "0": "thickfat" },
@@ -4150,7 +3791,6 @@
     "item": "venusaurite"
   },
   "victreebel": {
-    "num": 71,
     "types": ["grass", "poison"],
     "stats": [80, 105, 65, 100, 70, 70],
     "abilities": { "0": "chlorophyll", "H": "gluttony" },
@@ -4160,7 +3800,6 @@
     "icon": 359
   },
   "victreebelmega": {
-    "num": 71,
     "types": ["grass", "poison"],
     "stats": [80, 125, 85, 135, 95, 70],
     "abilities": { "0": "innardsout" },
@@ -4175,7 +3814,6 @@
     "item": "victreebelite"
   },
   "vileplume": {
-    "num": 45,
     "types": ["grass", "poison"],
     "stats": [75, 80, 85, 110, 90, 50],
     "abilities": { "0": "chlorophyll", "H": "effectspore" },
@@ -4185,7 +3823,6 @@
     "icon": 361
   },
   "vivillon": {
-    "num": 666,
     "types": ["bug", "flying"],
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": { "0": "shielddust", "1": "compoundeyes", "H": "friendguard" },
@@ -4195,7 +3832,6 @@
     "icon": 362
   },
   "vivillonarchipelago": {
-    "num": 666,
     "types": ["bug", "flying"],
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": { "0": "shielddust", "1": "compoundeyes", "H": "friendguard" },
@@ -4208,7 +3844,6 @@
     "cosmetic": true
   },
   "vivilloncontinental": {
-    "num": 666,
     "types": ["bug", "flying"],
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": { "0": "shielddust", "1": "compoundeyes", "H": "friendguard" },
@@ -4221,7 +3856,6 @@
     "cosmetic": true
   },
   "vivillonelegant": {
-    "num": 666,
     "types": ["bug", "flying"],
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": { "0": "shielddust", "1": "compoundeyes", "H": "friendguard" },
@@ -4234,7 +3868,6 @@
     "cosmetic": true
   },
   "vivillonfancy": {
-    "num": 666,
     "types": ["bug", "flying"],
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": { "0": "shielddust", "1": "compoundeyes", "H": "friendguard" },
@@ -4246,7 +3879,6 @@
     "forme": "Fancy"
   },
   "vivillongarden": {
-    "num": 666,
     "types": ["bug", "flying"],
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": { "0": "shielddust", "1": "compoundeyes", "H": "friendguard" },
@@ -4259,7 +3891,6 @@
     "cosmetic": true
   },
   "vivillonhighplains": {
-    "num": 666,
     "types": ["bug", "flying"],
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": { "0": "shielddust", "1": "compoundeyes", "H": "friendguard" },
@@ -4272,7 +3903,6 @@
     "cosmetic": true
   },
   "vivillonicysnow": {
-    "num": 666,
     "types": ["bug", "flying"],
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": { "0": "shielddust", "1": "compoundeyes", "H": "friendguard" },
@@ -4285,7 +3915,6 @@
     "cosmetic": true
   },
   "vivillonjungle": {
-    "num": 666,
     "types": ["bug", "flying"],
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": { "0": "shielddust", "1": "compoundeyes", "H": "friendguard" },
@@ -4298,7 +3927,6 @@
     "cosmetic": true
   },
   "vivillonmarine": {
-    "num": 666,
     "types": ["bug", "flying"],
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": { "0": "shielddust", "1": "compoundeyes", "H": "friendguard" },
@@ -4311,7 +3939,6 @@
     "cosmetic": true
   },
   "vivillonmodern": {
-    "num": 666,
     "types": ["bug", "flying"],
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": { "0": "shielddust", "1": "compoundeyes", "H": "friendguard" },
@@ -4324,7 +3951,6 @@
     "cosmetic": true
   },
   "vivillonmonsoon": {
-    "num": 666,
     "types": ["bug", "flying"],
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": { "0": "shielddust", "1": "compoundeyes", "H": "friendguard" },
@@ -4337,7 +3963,6 @@
     "cosmetic": true
   },
   "vivillonocean": {
-    "num": 666,
     "types": ["bug", "flying"],
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": { "0": "shielddust", "1": "compoundeyes", "H": "friendguard" },
@@ -4350,7 +3975,6 @@
     "cosmetic": true
   },
   "vivillonpokeball": {
-    "num": 666,
     "types": ["bug", "flying"],
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": { "0": "shielddust", "1": "compoundeyes", "H": "friendguard" },
@@ -4362,7 +3986,6 @@
     "forme": "Pokeball"
   },
   "vivillonpolar": {
-    "num": 666,
     "types": ["bug", "flying"],
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": { "0": "shielddust", "1": "compoundeyes", "H": "friendguard" },
@@ -4375,7 +3998,6 @@
     "cosmetic": true
   },
   "vivillonriver": {
-    "num": 666,
     "types": ["bug", "flying"],
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": { "0": "shielddust", "1": "compoundeyes", "H": "friendguard" },
@@ -4388,7 +4010,6 @@
     "cosmetic": true
   },
   "vivillonsandstorm": {
-    "num": 666,
     "types": ["bug", "flying"],
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": { "0": "shielddust", "1": "compoundeyes", "H": "friendguard" },
@@ -4401,7 +4022,6 @@
     "cosmetic": true
   },
   "vivillonsavanna": {
-    "num": 666,
     "types": ["bug", "flying"],
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": { "0": "shielddust", "1": "compoundeyes", "H": "friendguard" },
@@ -4414,7 +4034,6 @@
     "cosmetic": true
   },
   "vivillonsun": {
-    "num": 666,
     "types": ["bug", "flying"],
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": { "0": "shielddust", "1": "compoundeyes", "H": "friendguard" },
@@ -4427,7 +4046,6 @@
     "cosmetic": true
   },
   "vivillontundra": {
-    "num": 666,
     "types": ["bug", "flying"],
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": { "0": "shielddust", "1": "compoundeyes", "H": "friendguard" },
@@ -4440,7 +4058,6 @@
     "cosmetic": true
   },
   "volcarona": {
-    "num": 637,
     "types": ["bug", "fire"],
     "stats": [85, 60, 65, 135, 105, 100],
     "abilities": { "0": "flamebody", "H": "swarm" },
@@ -4450,7 +4067,6 @@
     "icon": 382
   },
   "watchog": {
-    "num": 505,
     "types": ["normal"],
     "stats": [60, 85, 69, 60, 69, 77],
     "abilities": { "0": "illuminate", "1": "keeneye", "H": "analytic" },
@@ -4460,7 +4076,6 @@
     "icon": 383
   },
   "weavile": {
-    "num": 461,
     "types": ["dark", "ice"],
     "stats": [70, 120, 65, 45, 85, 125],
     "abilities": { "0": "pressure", "H": "pickpocket" },
@@ -4470,7 +4085,6 @@
     "icon": 384
   },
   "whimsicott": {
-    "num": 547,
     "types": ["grass", "fairy"],
     "stats": [60, 67, 85, 77, 75, 116],
     "abilities": { "0": "prankster", "1": "infiltrator", "H": "chlorophyll" },
@@ -4480,7 +4094,6 @@
     "icon": 385
   },
   "wigglytuff": {
-    "num": 40,
     "types": ["normal", "fairy"],
     "stats": [140, 70, 45, 85, 50, 45],
     "abilities": { "0": "cutecharm", "1": "competitive", "H": "frisk" },
@@ -4490,7 +4103,6 @@
     "icon": 386
   },
   "wyrdeer": {
-    "num": 899,
     "types": ["normal", "psychic"],
     "stats": [103, 105, 72, 105, 75, 65],
     "abilities": { "0": "intimidate", "1": "frisk", "H": "sapsipper" },
@@ -4500,7 +4112,6 @@
     "icon": 387
   },
   "zoroark": {
-    "num": 571,
     "types": ["dark"],
     "stats": [60, 105, 60, 120, 60, 105],
     "abilities": { "0": "illusion" },
@@ -4510,7 +4121,6 @@
     "icon": 388
   },
   "zoroarkhisui": {
-    "num": 571,
     "types": ["normal", "ghost"],
     "stats": [55, 100, 60, 125, 60, 110],
     "abilities": { "0": "illusion" },

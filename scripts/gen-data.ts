@@ -501,7 +501,6 @@ async function main() {
         const battleOnly = Array.isArray(s.battleOnly) ? s.battleOnly[0] : s.battleOnly
         const st = s.baseStats
         return {
-          num: s.num,
           types: s.types.map(toId),
           stats: [st.hp, st.atk, st.def, st.spa, st.spd, st.spe],
           // By slot: "0" and "1", and "H" for the hidden ability.

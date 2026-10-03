@@ -1,17 +1,24 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { pokemon, type PokemonId } from '@/data/dex'
+import { locale } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import PokemonIcon from '@/components/PokemonIcon.vue'
 
-// Pokémon as a row of links, each with its icon.
-defineProps<{ ids: readonly PokemonId[] }>()
+// Pokémon as a row of links, each with its icon, by name in the reader's language.
+const props = defineProps<{ ids: readonly PokemonId[] }>()
+const mons = computed(() =>
+  props.ids
+    .map((id) => ({ id, name: refName(pokemon(id)) }))
+    .sort((a, b) => a.name.localeCompare(b.name, locale.value)),
+)
 </script>
 
 <template>
   <ul class="pokemon-chips">
-    <li v-for="id in ids" :key="id">
-      <RouterLink :to="{ name: 'pokemon', params: { id } }" class="chip">
-        <PokemonIcon :id="id" />{{ refName(pokemon(id)) }}
+    <li v-for="m in mons" :key="m.id">
+      <RouterLink :to="{ name: 'pokemon', params: { id: m.id } }" class="chip">
+        <PokemonIcon :id="m.id" />{{ m.name }}
       </RouterLink>
     </li>
   </ul>

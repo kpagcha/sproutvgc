@@ -12,8 +12,6 @@ export type StatId = (typeof STATS)[number]
 export type AbilitySlot = '0' | '1' | 'H'
 
 export interface Pokemon {
-  /** National Dex number. */
-  num: number
   types: TypeId[]
   /** Base stats, in `STATS` order. */
   stats: [number, number, number, number, number, number]

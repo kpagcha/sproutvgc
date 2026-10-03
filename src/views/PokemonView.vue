@@ -83,9 +83,7 @@ watchEffect(async () => {
       />
       <span v-else class="sprite icon-sprite"><PokemonIcon :id="id" :scale="2" /></span>
       <div class="facts">
-        <h1>
-          {{ refName(ref_) }} <span class="muted num dexnum">#{{ mon.num }}</span>
-        </h1>
+        <h1>{{ refName(ref_) }}</h1>
         <div class="types">
           <RouterLink v-for="ty in mon.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
             <TypeIcon :type="ty" :scale="2" />
@@ -216,10 +214,6 @@ watchEffect(async () => {
 }
 .facts h1 {
   margin: 0;
-}
-.dexnum {
-  font-size: 0.75em;
-  font-weight: normal;
 }
 .types {
   display: flex;

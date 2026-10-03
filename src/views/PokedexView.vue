@@ -35,13 +35,12 @@ const shown = computed(() => {
   })
 })
 
-type Key = 'num' | 'name' | StatId | 'total'
+type Key = 'name' | StatId | 'total'
 const { key, desc, toggle, sorted } = useSort({
   rows: shown,
-  value: (r, k: Key) =>
-    k === 'num' ? r.data.num : k === 'name' ? r.name : k === 'total' ? total(r.data) : r.data.stats[STATS.indexOf(k)]!,
-  initial: 'num' as Key,
-  startsDesc: (k) => k !== 'num' && k !== 'name',
+  value: (r, k: Key) => (k === 'name' ? r.name : k === 'total' ? total(r.data) : r.data.stats[STATS.indexOf(k)]!),
+  initial: 'name' as Key,
+  startsDesc: (k) => k !== 'name',
   locale,
 })
 
@@ -63,7 +62,6 @@ const link = (id: PokemonId) => ({ name: 'pokemon', params: { id } })
       <table class="dex-table">
         <thead>
           <tr>
-            <SortHeader label="#" right :active="key === 'num'" :desc="desc" @sort="toggle('num')" />
             <SortHeader
               :label="t('pokedex.name')"
               class="grow"
@@ -86,7 +84,6 @@ const link = (id: PokemonId) => ({ name: 'pokemon', params: { id } })
         </thead>
         <tbody>
           <tr v-for="r in sorted" :key="r.id">
-            <td class="r num muted">{{ r.data.num }}</td>
             <td class="grow">
               <RouterLink :to="link(r.id)" class="mon">
                 <PokemonIcon :id="r.id" />
