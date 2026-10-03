@@ -17,6 +17,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createJiti } from 'jiti'
 import * as prettier from 'prettier'
 import { descriptions as ABILITY_DESCRIPTIONS } from '../src/i18n/en/abilities.ts'
+import { descriptions as ITEM_DESCRIPTIONS } from '../src/i18n/en/items.ts'
+import { descriptions as MOVE_DESCRIPTIONS } from '../src/i18n/en/moves.ts'
 import { LOCALES, type Locale } from '../src/i18n/locales.ts'
 import { LANGUAGES, type Language } from './languages.ts'
 import { NAMES, type CategoryKey } from './overrides.ts'
@@ -440,6 +442,8 @@ async function main() {
             available: moveAvailable(m),
           })),
       pokeapi: ['moves', 'move_names', 'move_id'],
+      text: 'Moves',
+      curated: MOVE_DESCRIPTIONS,
       details: (id) => {
         const m = movesById.get(id)!
         return {
@@ -465,6 +469,8 @@ async function main() {
           .filter((i) => i.num > 0)
           .map((i) => ({ ...i, available: itemAvailable(i) })),
       pokeapi: ['items', 'item_names', 'item_id'],
+      text: 'Items',
+      curated: ITEM_DESCRIPTIONS,
       details: (id) => {
         const it = dex.items.get(id)
         const megas = Object.entries(it.megaStone ?? {}).map(([from, to]) => [speciesId(from), speciesId(to)] as const)

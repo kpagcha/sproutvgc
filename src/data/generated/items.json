@@ -1,89 +1,253 @@
 {
   "abilityshield": { "available": false },
-  "abomasite": { "available": true },
-  "absolite": { "available": true },
-  "absolitez": { "available": true },
+  "abomasite": {
+    "available": true,
+    "short": "If held by an Abomasnow, this item allows it to Mega Evolve in battle.",
+    "long": "If held by an Abomasnow, this item allows it to Mega Evolve in battle."
+  },
+  "absolite": {
+    "available": true,
+    "short": "If held by an Absol, this item allows it to Mega Evolve into Mega Absol in battle.",
+    "long": "If held by an Absol, this item allows it to Mega Evolve into Mega Absol in battle."
+  },
+  "absolitez": {
+    "available": true,
+    "short": "If held by an Absol, this item allows it to Mega Evolve into Mega Absol Z in battle.",
+    "long": "If held by an Absol, this item allows it to Mega Evolve into Mega Absol Z in battle."
+  },
   "absorbbulb": { "available": false },
   "adamantcrystal": { "available": false },
   "adamantorb": { "available": false },
   "adrenalineorb": { "available": false },
-  "aerodactylite": { "available": true },
-  "aggronite": { "available": true },
+  "aerodactylite": {
+    "available": true,
+    "short": "If held by an Aerodactyl, this item allows it to Mega Evolve in battle.",
+    "long": "If held by an Aerodactyl, this item allows it to Mega Evolve in battle."
+  },
+  "aggronite": {
+    "available": true,
+    "short": "If held by an Aggron, this item allows it to Mega Evolve in battle.",
+    "long": "If held by an Aggron, this item allows it to Mega Evolve in battle."
+  },
   "aguavberry": { "available": false },
-  "airballoon": { "available": true },
-  "alakazite": { "available": true },
+  "airballoon": {
+    "available": true,
+    "short": "Holder is immune to Ground-type attacks. Pops when holder is hit.",
+    "long": "Holder is immune to Ground-type attacks. Pops when holder is hit."
+  },
+  "alakazite": {
+    "available": true,
+    "short": "If held by an Alakazam, this item allows it to Mega Evolve in battle.",
+    "long": "If held by an Alakazam, this item allows it to Mega Evolve in battle."
+  },
   "aloraichiumz": { "available": false },
-  "altarianite": { "available": true },
-  "ampharosite": { "available": true },
+  "altarianite": {
+    "available": true,
+    "short": "If held by an Altaria, this item allows it to Mega Evolve in battle.",
+    "long": "If held by an Altaria, this item allows it to Mega Evolve in battle."
+  },
+  "ampharosite": {
+    "available": true,
+    "short": "If held by an Ampharos, this item allows it to Mega Evolve in battle.",
+    "long": "If held by an Ampharos, this item allows it to Mega Evolve in battle."
+  },
   "apicotberry": { "available": false },
   "armorfossil": { "available": false },
-  "aspearberry": { "available": true },
+  "aspearberry": {
+    "available": true,
+    "short": "Holder is cured if it is frozen. Single use.",
+    "long": "Holder is cured if it is frozen. Single use."
+  },
   "assaultvest": { "available": false },
-  "audinite": { "available": true },
+  "audinite": {
+    "available": true,
+    "short": "If held by an Audino, this item allows it to Mega Evolve in battle.",
+    "long": "If held by an Audino, this item allows it to Mega Evolve in battle."
+  },
   "auspiciousarmor": { "available": false },
-  "babiriberry": { "available": true },
-  "banettite": { "available": true },
-  "barbaracite": { "available": true },
-  "baxcalibrite": { "available": true },
+  "babiriberry": {
+    "available": true,
+    "short": "Halves damage taken from a supereffective Steel-type attack. Single use.",
+    "long": "Halves damage taken from a supereffective Steel-type attack. Single use."
+  },
+  "banettite": {
+    "available": true,
+    "short": "If held by a Banette, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Banette, this item allows it to Mega Evolve in battle."
+  },
+  "barbaracite": {
+    "available": true,
+    "short": "If held by a Barbaracle, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Barbaracle, this item allows it to Mega Evolve in battle."
+  },
+  "baxcalibrite": {
+    "available": true,
+    "short": "If held by a Baxcalibur, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Baxcalibur, this item allows it to Mega Evolve in battle."
+  },
   "beastball": { "available": false },
-  "beedrillite": { "available": true },
+  "beedrillite": {
+    "available": true,
+    "short": "If held by a Beedrill, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Beedrill, this item allows it to Mega Evolve in battle."
+  },
   "belueberry": { "available": false },
   "berry": { "available": false },
   "berryjuice": { "available": false },
   "berrysweet": { "available": false },
   "bignugget": { "available": false },
-  "bigroot": { "available": true },
-  "bindingband": { "available": true },
+  "bigroot": {
+    "available": true,
+    "short": "Holder gains 1.3× HP from draining/Aqua Ring/Ingrain/Leech Seed/Strength Sap.",
+    "long": "Holder gains 1.3× HP from draining/Aqua Ring/Ingrain/Leech Seed/Strength Sap."
+  },
+  "bindingband": {
+    "available": true,
+    "short": "Holder's partial-trapping moves deal 1/6 max HP per turn instead of 1/8.",
+    "long": "Holder's partial-trapping moves deal 1/6 max HP per turn instead of 1/8."
+  },
   "bitterberry": { "available": false },
-  "blackbelt": { "available": true },
-  "blackglasses": { "available": true },
+  "blackbelt": {
+    "available": true,
+    "short": "Holder's Fighting-type attacks have 1.2× power.",
+    "long": "Holder's Fighting-type attacks have 1.2× power."
+  },
+  "blackglasses": {
+    "available": true,
+    "short": "Holder's Dark-type attacks have 1.2× power.",
+    "long": "Holder's Dark-type attacks have 1.2× power."
+  },
   "blacksludge": { "available": false },
-  "blastoisinite": { "available": true },
-  "blazikenite": { "available": true },
+  "blastoisinite": {
+    "available": true,
+    "short": "If held by a Blastoise, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Blastoise, this item allows it to Mega Evolve in battle."
+  },
+  "blazikenite": {
+    "available": true,
+    "short": "If held by a Blaziken, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Blaziken, this item allows it to Mega Evolve in battle."
+  },
   "blueorb": { "available": false },
   "blukberry": { "available": false },
   "blunderpolicy": { "available": false },
   "boosterenergy": { "available": false },
   "bottlecap": { "available": false },
-  "brightpowder": { "available": true },
+  "brightpowder": {
+    "available": true,
+    "short": "The accuracy of attacks against the holder is 0.9×.",
+    "long": "The accuracy of attacks against the holder is 0.9×."
+  },
   "buggem": { "available": false },
   "buginiumz": { "available": false },
   "bugmemory": { "available": false },
   "burndrive": { "available": false },
   "burntberry": { "available": false },
-  "cameruptite": { "available": true },
+  "cameruptite": {
+    "available": true,
+    "short": "If held by a Camerupt, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Camerupt, this item allows it to Mega Evolve in battle."
+  },
   "cellbattery": { "available": false },
-  "chandelurite": { "available": true },
-  "charcoal": { "available": true },
-  "charizarditex": { "available": true },
-  "charizarditey": { "available": true },
-  "chartiberry": { "available": true },
-  "cheriberry": { "available": true },
+  "chandelurite": {
+    "available": true,
+    "short": "If held by a Chandelure, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Chandelure, this item allows it to Mega Evolve in battle."
+  },
+  "charcoal": {
+    "available": true,
+    "short": "Holder's Fire-type attacks have 1.2× power.",
+    "long": "Holder's Fire-type attacks have 1.2× power."
+  },
+  "charizarditex": {
+    "available": true,
+    "short": "If held by a Charizard, this item allows it to Mega Evolve into Mega Charizard X.",
+    "long": "If held by a Charizard, this item allows it to Mega Evolve into Mega Charizard X."
+  },
+  "charizarditey": {
+    "available": true,
+    "short": "If held by a Charizard, this item allows it to Mega Evolve into Mega Charizard Y.",
+    "long": "If held by a Charizard, this item allows it to Mega Evolve into Mega Charizard Y."
+  },
+  "chartiberry": {
+    "available": true,
+    "short": "Halves damage taken from a supereffective Rock-type attack. Single use.",
+    "long": "Halves damage taken from a supereffective Rock-type attack. Single use."
+  },
+  "cheriberry": {
+    "available": true,
+    "short": "Holder cures itself if it is paralyzed. Single use.",
+    "long": "Holder cures itself if it is paralyzed. Single use."
+  },
   "cherishball": { "available": false },
-  "chesnaughtite": { "available": true },
-  "chestoberry": { "available": true },
-  "chilanberry": { "available": true },
+  "chesnaughtite": {
+    "available": true,
+    "short": "If held by a Chesnaught, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Chesnaught, this item allows it to Mega Evolve in battle."
+  },
+  "chestoberry": {
+    "available": true,
+    "short": "Holder wakes up if it is asleep. Single use.",
+    "long": "Holder wakes up if it is asleep. Single use."
+  },
+  "chilanberry": {
+    "available": true,
+    "short": "Halves damage taken from a Normal-type attack. Single use.",
+    "long": "Halves damage taken from a Normal-type attack. Single use."
+  },
   "chilldrive": { "available": false },
-  "chimechite": { "available": true },
+  "chimechite": {
+    "available": true,
+    "short": "If held by a Chimecho, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Chimecho, this item allows it to Mega Evolve in battle."
+  },
   "chippedpot": { "available": false },
   "choiceband": { "available": false },
-  "choicescarf": { "available": true },
+  "choicescarf": {
+    "available": true,
+    "short": "Holder's Speed is 1.5×, but it can only select the first move it executes.",
+    "long": "Holder's Speed is 1.5×, but it can only select the first move it executes."
+  },
   "choicespecs": { "available": false },
-  "chopleberry": { "available": true },
+  "chopleberry": {
+    "available": true,
+    "short": "Halves damage taken from a supereffective Fighting-type attack. Single use.",
+    "long": "Halves damage taken from a supereffective Fighting-type attack. Single use."
+  },
   "clawfossil": { "available": false },
   "clearamulet": { "available": false },
-  "clefablite": { "available": true },
+  "clefablite": {
+    "available": true,
+    "short": "If held by a Clefable, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Clefable, this item allows it to Mega Evolve in battle."
+  },
   "cloversweet": { "available": false },
-  "cobaberry": { "available": true },
-  "colburberry": { "available": true },
+  "cobaberry": {
+    "available": true,
+    "short": "Halves damage taken from a supereffective Flying-type attack. Single use.",
+    "long": "Halves damage taken from a supereffective Flying-type attack. Single use."
+  },
+  "colburberry": {
+    "available": true,
+    "short": "Halves damage taken from a supereffective Dark-type attack. Single use.",
+    "long": "Halves damage taken from a supereffective Dark-type attack. Single use."
+  },
   "cornerstonemask": { "available": false },
   "cornnberry": { "available": false },
   "coverfossil": { "available": false },
   "covertcloak": { "available": false },
-  "crabominite": { "available": true },
+  "crabominite": {
+    "available": true,
+    "short": "If held by a Crabominable, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Crabominable, this item allows it to Mega Evolve in battle."
+  },
   "crackedpot": { "available": false },
   "custapberry": { "available": false },
-  "damprock": { "available": true },
+  "damprock": {
+    "available": true,
+    "short": "Holder's use of Rain Dance lasts 8 turns instead of 5.",
+    "long": "Holder's use of Rain Dance lasts 8 turns instead of 5."
+  },
   "darkgem": { "available": false },
   "darkiniumz": { "available": false },
   "darkmemory": { "available": false },
@@ -92,21 +256,41 @@
   "decidiumz": { "available": false },
   "deepseascale": { "available": false },
   "deepseatooth": { "available": false },
-  "delphoxite": { "available": true },
+  "delphoxite": {
+    "available": true,
+    "short": "If held by a Delphox, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Delphox, this item allows it to Mega Evolve in battle."
+  },
   "destinyknot": { "available": false },
   "diancite": { "available": false },
   "diveball": { "available": false },
   "domefossil": { "available": false },
   "dousedrive": { "available": false },
   "dracoplate": { "available": false },
-  "dragalgite": { "available": true },
-  "dragonfang": { "available": true },
+  "dragalgite": {
+    "available": true,
+    "short": "If held by a Dragalge, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Dragalge, this item allows it to Mega Evolve in battle."
+  },
+  "dragonfang": {
+    "available": true,
+    "short": "Holder's Dragon-type attacks have 1.2× power.",
+    "long": "Holder's Dragon-type attacks have 1.2× power."
+  },
   "dragongem": { "available": false },
-  "dragoninite": { "available": true },
+  "dragoninite": {
+    "available": true,
+    "short": "If held by a Dragonite, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Dragonite, this item allows it to Mega Evolve in battle."
+  },
   "dragoniumz": { "available": false },
   "dragonmemory": { "available": false },
   "dragonscale": { "available": false },
-  "drampanite": { "available": true },
+  "drampanite": {
+    "available": true,
+    "short": "If held by a Drampa, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Drampa, this item allows it to Mega Evolve in battle."
+  },
   "dreadplate": { "available": false },
   "dreamball": { "available": false },
   "dubiousdisc": { "available": false },
@@ -114,27 +298,63 @@
   "duskball": { "available": false },
   "duskstone": { "available": false },
   "earthplate": { "available": false },
-  "eelektrossite": { "available": true },
+  "eelektrossite": {
+    "available": true,
+    "short": "If held by an Eelektross, this item allows it to Mega Evolve in battle.",
+    "long": "If held by an Eelektross, this item allows it to Mega Evolve in battle."
+  },
   "eeviumz": { "available": false },
-  "ejectbutton": { "available": true },
+  "ejectbutton": {
+    "available": true,
+    "short": "If holder survives a hit, it immediately switches out to a chosen ally. Single use.",
+    "long": "If holder survives a hit, it immediately switches out to a chosen ally. Single use."
+  },
   "ejectpack": { "available": false },
   "electirizer": { "available": false },
   "electricgem": { "available": false },
   "electricmemory": { "available": false },
-  "electricseed": { "available": true },
+  "electricseed": {
+    "available": true,
+    "short": "If the terrain is Electric Terrain, raises holder's Defense by 1 stage. Single use.",
+    "long": "If the terrain is Electric Terrain, raises holder's Defense by 1 stage. Single use."
+  },
   "electriumz": { "available": false },
-  "emboarite": { "available": true },
+  "emboarite": {
+    "available": true,
+    "short": "If held by an Emboar, this item allows it to Mega Evolve in battle.",
+    "long": "If held by an Emboar, this item allows it to Mega Evolve in battle."
+  },
   "enigmaberry": { "available": false },
   "eviolite": { "available": false },
-  "excadrite": { "available": true },
-  "expertbelt": { "available": true },
+  "excadrite": {
+    "available": true,
+    "short": "If held by an Excadrill, this item allows it to Mega Evolve in battle.",
+    "long": "If held by an Excadrill, this item allows it to Mega Evolve in battle."
+  },
+  "expertbelt": {
+    "available": true,
+    "short": "Holder's attacks that are super effective against the target do 1.2× damage.",
+    "long": "Holder's attacks that are super effective against the target do 1.2× damage."
+  },
   "fairiumz": { "available": false },
-  "fairyfeather": { "available": true },
+  "fairyfeather": {
+    "available": true,
+    "short": "Holder's Fairy-type attacks have 1.2× power.",
+    "long": "Holder's Fairy-type attacks have 1.2× power."
+  },
   "fairygem": { "available": false },
   "fairymemory": { "available": false },
-  "falinksite": { "available": true },
+  "falinksite": {
+    "available": true,
+    "short": "If held by a Falinks, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Falinks, this item allows it to Mega Evolve in battle."
+  },
   "fastball": { "available": false },
-  "feraligite": { "available": true },
+  "feraligite": {
+    "available": true,
+    "short": "If held by a Feraligatr, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Feraligatr, this item allows it to Mega Evolve in battle."
+  },
   "fightinggem": { "available": false },
   "fightingmemory": { "available": false },
   "fightiniumz": { "available": false },
@@ -147,43 +367,103 @@
   "flameorb": { "available": false },
   "flameplate": { "available": false },
   "floatstone": { "available": false },
-  "floettite": { "available": true },
+  "floettite": {
+    "available": true,
+    "short": "If held by an Eternal Flower Floette, this item allows it to Mega Evolve in battle.",
+    "long": "If held by an Eternal Flower Floette, this item allows it to Mega Evolve in battle."
+  },
   "flowersweet": { "available": false },
   "flyinggem": { "available": false },
   "flyingmemory": { "available": false },
   "flyiniumz": { "available": false },
-  "focusband": { "available": true },
-  "focussash": { "available": true },
+  "focusband": {
+    "available": true,
+    "short": "Holder has a 10% chance to survive an attack that would KO it with 1 HP.",
+    "long": "Holder has a 10% chance to survive an attack that would KO it with 1 HP."
+  },
+  "focussash": {
+    "available": true,
+    "short": "If holder's HP is full, will survive an attack that would KO it with 1 HP. Single use.",
+    "long": "If holder's HP is full, will survive an attack that would KO it with 1 HP. Single use."
+  },
   "fossilizedbird": { "available": false },
   "fossilizeddino": { "available": false },
   "fossilizeddrake": { "available": false },
   "fossilizedfish": { "available": false },
   "friendball": { "available": false },
-  "froslassite": { "available": true },
+  "froslassite": {
+    "available": true,
+    "short": "If held by a Froslass, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Froslass, this item allows it to Mega Evolve in battle."
+  },
   "fullincense": { "available": false },
   "galaricacuff": { "available": false },
   "galaricawreath": { "available": false },
-  "galladite": { "available": true },
+  "galladite": {
+    "available": true,
+    "short": "If held by a Gallade, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Gallade, this item allows it to Mega Evolve in battle."
+  },
   "ganlonberry": { "available": false },
-  "garchompite": { "available": true },
-  "garchompitez": { "available": true },
-  "gardevoirite": { "available": true },
-  "gengarite": { "available": true },
+  "garchompite": {
+    "available": true,
+    "short": "If held by a Garchomp, this item allows it to Mega Evolve into Mega Garchomp.",
+    "long": "If held by a Garchomp, this item allows it to Mega Evolve into Mega Garchomp."
+  },
+  "garchompitez": {
+    "available": true,
+    "short": "If held by a Garchomp, this item allows it to Mega Evolve into Mega Garchomp Z.",
+    "long": "If held by a Garchomp, this item allows it to Mega Evolve into Mega Garchomp Z."
+  },
+  "gardevoirite": {
+    "available": true,
+    "short": "If held by a Gardevoir, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Gardevoir, this item allows it to Mega Evolve in battle."
+  },
+  "gengarite": {
+    "available": true,
+    "short": "If held by a Gengar, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Gengar, this item allows it to Mega Evolve in battle."
+  },
   "ghostgem": { "available": false },
   "ghostiumz": { "available": false },
   "ghostmemory": { "available": false },
-  "glalitite": { "available": true },
-  "glimmoranite": { "available": true },
+  "glalitite": {
+    "available": true,
+    "short": "If held by a Glalie, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Glalie, this item allows it to Mega Evolve in battle."
+  },
+  "glimmoranite": {
+    "available": true,
+    "short": "If held by a Glimmora, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Glimmora, this item allows it to Mega Evolve in battle."
+  },
   "goldberry": { "available": false },
   "goldbottlecap": { "available": false },
-  "golisopite": { "available": true },
-  "golurkite": { "available": true },
+  "golisopite": {
+    "available": true,
+    "short": "If held by a Golisopod, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Golisopod, this item allows it to Mega Evolve in battle."
+  },
+  "golurkite": {
+    "available": true,
+    "short": "If held by a Golurk, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Golurk, this item allows it to Mega Evolve in battle."
+  },
   "grassgem": { "available": false },
   "grassiumz": { "available": false },
   "grassmemory": { "available": false },
-  "grassyseed": { "available": true },
+  "grassyseed": {
+    "available": true,
+    "short": "If the terrain is Grassy Terrain, raises holder's Defense by 1 stage. Single use.",
+    "long": "If the terrain is Grassy Terrain, raises holder's Defense by 1 stage. Single use."
+  },
   "greatball": { "available": false },
-  "greninjite": { "available": true },
+  "greninjite": {
+    "available": true,
+    "short": "If held by a Greninja, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Greninja, this item allows it to Mega Evolve in battle."
+  },
   "grepaberry": { "available": false },
   "gripclaw": { "available": false },
   "griseouscore": { "available": false },
@@ -191,20 +471,48 @@
   "groundgem": { "available": false },
   "groundiumz": { "available": false },
   "groundmemory": { "available": false },
-  "gyaradosite": { "available": true },
-  "habanberry": { "available": true },
-  "hardstone": { "available": true },
-  "hawluchanite": { "available": true },
+  "gyaradosite": {
+    "available": true,
+    "short": "If held by a Gyarados, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Gyarados, this item allows it to Mega Evolve in battle."
+  },
+  "habanberry": {
+    "available": true,
+    "short": "Halves damage taken from a supereffective Dragon-type attack. Single use.",
+    "long": "Halves damage taken from a supereffective Dragon-type attack. Single use."
+  },
+  "hardstone": {
+    "available": true,
+    "short": "Holder's Rock-type attacks have 1.2× power.",
+    "long": "Holder's Rock-type attacks have 1.2× power."
+  },
+  "hawluchanite": {
+    "available": true,
+    "short": "If held by a Hawlucha, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Hawlucha, this item allows it to Mega Evolve in battle."
+  },
   "healball": { "available": false },
   "hearthflamemask": { "available": false },
   "heatranite": { "available": false },
-  "heatrock": { "available": true },
+  "heatrock": {
+    "available": true,
+    "short": "Holder's use of Sunny Day lasts 8 turns instead of 5.",
+    "long": "Holder's use of Sunny Day lasts 8 turns instead of 5."
+  },
   "heavyball": { "available": false },
   "heavydutyboots": { "available": false },
   "helixfossil": { "available": false },
-  "heracronite": { "available": true },
+  "heracronite": {
+    "available": true,
+    "short": "If held by a Heracross, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Heracross, this item allows it to Mega Evolve in battle."
+  },
   "hondewberry": { "available": false },
-  "houndoominite": { "available": true },
+  "houndoominite": {
+    "available": true,
+    "short": "If held by a Houndoom, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Houndoom, this item allows it to Mega Evolve in battle."
+  },
   "iapapaberry": { "available": false },
   "iceberry": { "available": false },
   "icegem": { "available": false },
@@ -212,19 +520,43 @@
   "icestone": { "available": false },
   "icicleplate": { "available": false },
   "iciumz": { "available": false },
-  "icyrock": { "available": true },
+  "icyrock": {
+    "available": true,
+    "short": "Holder's use of Snowscape lasts 8 turns instead of 5.",
+    "long": "Holder's use of Snowscape lasts 8 turns instead of 5."
+  },
   "inciniumz": { "available": false },
   "insectplate": { "available": false },
-  "ironball": { "available": true },
+  "ironball": {
+    "available": true,
+    "short": "Holder is grounded, Speed halved. If Flying type, takes neutral Ground damage.",
+    "long": "Holder is grounded, Speed halved. If Flying type, takes neutral Ground damage."
+  },
   "ironplate": { "available": false },
   "jabocaberry": { "available": false },
   "jawfossil": { "available": false },
-  "kangaskhanite": { "available": true },
-  "kasibberry": { "available": true },
-  "kebiaberry": { "available": true },
+  "kangaskhanite": {
+    "available": true,
+    "short": "If held by a Kangaskhan, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Kangaskhan, this item allows it to Mega Evolve in battle."
+  },
+  "kasibberry": {
+    "available": true,
+    "short": "Halves damage taken from a supereffective Ghost-type attack. Single use.",
+    "long": "Halves damage taken from a supereffective Ghost-type attack. Single use."
+  },
+  "kebiaberry": {
+    "available": true,
+    "short": "Halves damage taken from a supereffective Poison-type attack. Single use.",
+    "long": "Halves damage taken from a supereffective Poison-type attack. Single use."
+  },
   "keeberry": { "available": false },
   "kelpsyberry": { "available": false },
-  "kingsrock": { "available": true },
+  "kingsrock": {
+    "available": true,
+    "short": "Holder's attacks without a chance to flinch gain a 10% chance to flinch.",
+    "long": "Holder's attacks without a chance to make the target flinch gain a 10% chance to make the target flinch. Evolves Poliwhirl into Politoed and Slowpoke into Slowking when traded."
+  },
   "kommoniumz": { "available": false },
   "laggingtail": { "available": false },
   "lansatberry": { "available": false },
@@ -232,22 +564,62 @@
   "latiosite": { "available": false },
   "laxincense": { "available": false },
   "leafstone": { "available": false },
-  "leek": { "available": true },
-  "leftovers": { "available": true },
-  "leppaberry": { "available": true },
+  "leek": {
+    "available": true,
+    "short": "If held by a Farfetch’d or Sirfetch’d, its critical hit ratio is raised by 2 stages.",
+    "long": "If held by a Farfetch’d or Sirfetch’d, its critical hit ratio is raised by 2 stages."
+  },
+  "leftovers": {
+    "available": true,
+    "short": "At the end of every turn, holder restores 1/16 of its max HP.",
+    "long": "At the end of every turn, holder restores 1/16 of its max HP."
+  },
+  "leppaberry": {
+    "available": true,
+    "short": "Restores 10 PP to the first of the holder's moves to reach 0 PP. Single use.",
+    "long": "Restores 10 PP to the first of the holder's moves to reach 0 PP. Single use."
+  },
   "levelball": { "available": false },
   "liechiberry": { "available": false },
-  "lifeorb": { "available": true },
-  "lightball": { "available": true },
-  "lightclay": { "available": true },
+  "lifeorb": {
+    "available": true,
+    "short": "Holder's attacks do 1.3× damage, and it loses 1/10 its max HP after the attack.",
+    "long": "Holder's attacks do 1.3× damage, and it loses 1/10 its max HP after the attack."
+  },
+  "lightball": {
+    "available": true,
+    "short": "If held by a Pikachu, its Attack and Sp. Atk are doubled.",
+    "long": "If held by a Pikachu, its Attack and Sp. Atk are doubled."
+  },
+  "lightclay": {
+    "available": true,
+    "short": "Holder's use of Aurora Veil, Light Screen, or Reflect lasts 8 turns instead of 5.",
+    "long": "Holder's use of Aurora Veil, Light Screen, or Reflect lasts 8 turns instead of 5."
+  },
   "loadeddice": { "available": false },
-  "lopunnite": { "available": true },
+  "lopunnite": {
+    "available": true,
+    "short": "If held by a Lopunny, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Lopunny, this item allows it to Mega Evolve in battle."
+  },
   "loveball": { "available": false },
   "lovesweet": { "available": false },
-  "lucarionite": { "available": true },
-  "lucarionitez": { "available": true },
+  "lucarionite": {
+    "available": true,
+    "short": "If held by a Lucario, this item allows it to Mega Evolve into Mega Lucario in battle.",
+    "long": "If held by a Lucario, this item allows it to Mega Evolve into Mega Lucario in battle."
+  },
+  "lucarionitez": {
+    "available": true,
+    "short": "If held by a Lucario, this item allows it to Mega Evolve into Mega Lucario Z in battle.",
+    "long": "If held by a Lucario, this item allows it to Mega Evolve into Mega Lucario Z in battle."
+  },
   "luckypunch": { "available": false },
-  "lumberry": { "available": true },
+  "lumberry": {
+    "available": true,
+    "short": "Holder cures itself if it has a non-volatile status or is confused. Single use.",
+    "long": "Holder cures itself if it has a non-volatile status or is confused. Single use."
+  },
   "luminousmoss": { "available": false },
   "lunaliumz": { "available": false },
   "lureball": { "available": false },
@@ -258,28 +630,72 @@
   "machobrace": { "available": false },
   "magearnite": { "available": false },
   "magmarizer": { "available": false },
-  "magnet": { "available": true },
+  "magnet": {
+    "available": true,
+    "short": "Holder's Electric-type attacks have 1.2× power.",
+    "long": "Holder's Electric-type attacks have 1.2× power."
+  },
   "magoberry": { "available": false },
   "magostberry": { "available": false },
   "mail": { "available": false },
-  "malamarite": { "available": true },
+  "malamarite": {
+    "available": true,
+    "short": "If held by a Malamar, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Malamar, this item allows it to Mega Evolve in battle."
+  },
   "maliciousarmor": { "available": false },
-  "manectite": { "available": true },
+  "manectite": {
+    "available": true,
+    "short": "If held by a Manectric, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Manectric, this item allows it to Mega Evolve in battle."
+  },
   "marangaberry": { "available": false },
   "marshadiumz": { "available": false },
   "masterball": { "available": false },
   "masterpieceteacup": { "available": false },
-  "mawilite": { "available": true },
+  "mawilite": {
+    "available": true,
+    "short": "If held by a Mawile, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Mawile, this item allows it to Mega Evolve in battle."
+  },
   "meadowplate": { "available": false },
-  "medichamite": { "available": true },
-  "meganiumite": { "available": true },
-  "mentalherb": { "available": true },
-  "meowsticite": { "available": true },
-  "metagrossite": { "available": true },
+  "medichamite": {
+    "available": true,
+    "short": "If held by a Medicham, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Medicham, this item allows it to Mega Evolve in battle."
+  },
+  "meganiumite": {
+    "available": true,
+    "short": "If held by a Meganium, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Meganium, this item allows it to Mega Evolve in battle."
+  },
+  "mentalherb": {
+    "available": true,
+    "short": "Cures holder of Attract, Disable, Encore, Heal Block, Taunt, Torment. Single use.",
+    "long": "Cures holder of Attract, Disable, Encore, Heal Block, Taunt, Torment. Single use."
+  },
+  "meowsticite": {
+    "available": true,
+    "short": "If held by a Meowstic, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Meowstic, this item allows it to Mega Evolve in battle."
+  },
+  "metagrossite": {
+    "available": true,
+    "short": "If held by a Metagross, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Metagross, this item allows it to Mega Evolve in battle."
+  },
   "metalalloy": { "available": false },
-  "metalcoat": { "available": true },
+  "metalcoat": {
+    "available": true,
+    "short": "Holder's Steel-type attacks have 1.2× power.",
+    "long": "Holder's Steel-type attacks have 1.2× power. Evolves Onix into Steelix and Scyther into Scizor when traded."
+  },
   "metalpowder": { "available": false },
-  "metronome": { "available": true },
+  "metronome": {
+    "available": true,
+    "short": "Damage of moves used on consecutive turns is increased. Max 2× after 5 turns.",
+    "long": "Damage of moves used on consecutive turns is increased. Max 2× after 5 turns."
+  },
   "mewniumz": { "available": false },
   "mewtwonitex": { "available": false },
   "mewtwonitey": { "available": false },
@@ -288,42 +704,102 @@
   "mindplate": { "available": false },
   "mintberry": { "available": false },
   "miracleberry": { "available": false },
-  "miracleseed": { "available": true },
+  "miracleseed": {
+    "available": true,
+    "short": "Holder's Grass-type attacks have 1.2× power.",
+    "long": "Holder's Grass-type attacks have 1.2× power."
+  },
   "mirrorherb": { "available": false },
-  "mistyseed": { "available": true },
+  "mistyseed": {
+    "available": true,
+    "short": "If the terrain is Misty Terrain, raises holder's Sp. Def by 1 stage. Single use.",
+    "long": "If the terrain is Misty Terrain, raises holder's Sp. Def by 1 stage. Single use."
+  },
   "moonball": { "available": false },
   "moonstone": { "available": false },
-  "muscleband": { "available": true },
+  "muscleband": {
+    "available": true,
+    "short": "Holder's physical attacks have 1.1× power.",
+    "long": "Holder's physical attacks have 1.1× power."
+  },
   "mysteryberry": { "available": false },
-  "mysticwater": { "available": true },
+  "mysticwater": {
+    "available": true,
+    "short": "Holder's Water-type attacks have 1.2× power.",
+    "long": "Holder's Water-type attacks have 1.2× power."
+  },
   "nanabberry": { "available": false },
   "nestball": { "available": false },
   "netball": { "available": false },
-  "nevermeltice": { "available": true },
+  "nevermeltice": {
+    "available": true,
+    "short": "Holder's Ice-type attacks have 1.2× power.",
+    "long": "Holder's Ice-type attacks have 1.2× power."
+  },
   "nomelberry": { "available": false },
-  "normalgem": { "available": true },
+  "normalgem": {
+    "available": true,
+    "short": "Holder's first successful Normal-type attack will have 1.3× power. Single use.",
+    "long": "Holder's first successful Normal-type attack will have 1.3× power. Single use."
+  },
   "normaliumz": { "available": false },
-  "occaberry": { "available": true },
+  "occaberry": {
+    "available": true,
+    "short": "Halves damage taken from a supereffective Fire-type attack. Single use.",
+    "long": "Halves damage taken from a supereffective Fire-type attack. Single use."
+  },
   "oddincense": { "available": false },
   "oldamber": { "available": false },
-  "oranberry": { "available": true },
+  "oranberry": {
+    "available": true,
+    "short": "Restores 10 HP when at 1/2 max HP or less. Single use.",
+    "long": "Restores 10 HP when at 1/2 max HP or less. Single use."
+  },
   "ovalstone": { "available": false },
   "pamtreberry": { "available": false },
   "parkball": { "available": false },
-  "passhoberry": { "available": true },
-  "payapaberry": { "available": true },
-  "pechaberry": { "available": true },
-  "persimberry": { "available": true },
+  "passhoberry": {
+    "available": true,
+    "short": "Halves damage taken from a supereffective Water-type attack. Single use.",
+    "long": "Halves damage taken from a supereffective Water-type attack. Single use."
+  },
+  "payapaberry": {
+    "available": true,
+    "short": "Halves damage taken from a supereffective Psychic-type attack. Single use.",
+    "long": "Halves damage taken from a supereffective Psychic-type attack. Single use."
+  },
+  "pechaberry": {
+    "available": true,
+    "short": "Holder is cured if it is poisoned. Single use.",
+    "long": "Holder is cured if it is poisoned. Single use."
+  },
+  "persimberry": {
+    "available": true,
+    "short": "Holder is cured if it is confused. Single use.",
+    "long": "Holder is cured if it is confused. Single use."
+  },
   "petayaberry": { "available": false },
-  "pidgeotite": { "available": true },
+  "pidgeotite": {
+    "available": true,
+    "short": "If held by a Pidgeot, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Pidgeot, this item allows it to Mega Evolve in battle."
+  },
   "pikaniumz": { "available": false },
   "pikashuniumz": { "available": false },
   "pinapberry": { "available": false },
   "pinkbow": { "available": false },
-  "pinsirite": { "available": true },
+  "pinsirite": {
+    "available": true,
+    "short": "If held by a Pinsir, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Pinsir, this item allows it to Mega Evolve in battle."
+  },
   "pixieplate": { "available": false },
   "plumefossil": { "available": false },
-  "poisonbarb": { "available": true },
+  "poisonbarb": {
+    "available": true,
+    "short": "Holder's Poison-type attacks have 1.2× power.",
+    "long": "Holder's Poison-type attacks have 1.2× power."
+  },
   "poisongem": { "available": false },
   "poisoniumz": { "available": false },
   "poisonmemory": { "available": false },
@@ -347,87 +823,223 @@
   "psncureberry": { "available": false },
   "psychicgem": { "available": false },
   "psychicmemory": { "available": false },
-  "psychicseed": { "available": true },
+  "psychicseed": {
+    "available": true,
+    "short": "If the terrain is Psychic Terrain, raises holder's Sp. Def by 1 stage. Single use.",
+    "long": "If the terrain is Psychic Terrain, raises holder's Sp. Def by 1 stage. Single use."
+  },
   "psychiumz": { "available": false },
   "punchingglove": { "available": false },
-  "pyroarite": { "available": true },
+  "pyroarite": {
+    "available": true,
+    "short": "If held by a Pyroar, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Pyroar, this item allows it to Mega Evolve in battle."
+  },
   "qualotberry": { "available": false },
   "quickball": { "available": false },
-  "quickclaw": { "available": true },
+  "quickclaw": {
+    "available": true,
+    "short": "Each turn, holder has a 20% chance to move first in its priority bracket.",
+    "long": "Each turn, holder has a 20% chance to move first in its priority bracket."
+  },
   "quickpowder": { "available": false },
   "rabutaberry": { "available": false },
-  "raichunitex": { "available": true },
-  "raichunitey": { "available": true },
+  "raichunitex": {
+    "available": true,
+    "short": "If held by a Raichu, this item allows it to Mega Evolve into Mega Raichu X in battle.",
+    "long": "If held by a Raichu, this item allows it to Mega Evolve into Mega Raichu X in battle."
+  },
+  "raichunitey": {
+    "available": true,
+    "short": "If held by a Raichu, this item allows it to Mega Evolve into Mega Raichu Y in battle.",
+    "long": "If held by a Raichu, this item allows it to Mega Evolve into Mega Raichu Y in battle."
+  },
   "rarebone": { "available": false },
-  "rawstberry": { "available": true },
+  "rawstberry": {
+    "available": true,
+    "short": "Holder is cured if it is burned. Single use.",
+    "long": "Holder is cured if it is burned. Single use."
+  },
   "razorclaw": { "available": false },
   "razorfang": { "available": false },
   "razzberry": { "available": false },
   "reapercloth": { "available": false },
-  "redcard": { "available": true },
+  "redcard": {
+    "available": true,
+    "short": "If holder survives a hit, attacker is forced to switch to a random ally. Single use.",
+    "long": "If holder survives a hit, attacker is forced to switch to a random ally. Single use."
+  },
   "redorb": { "available": false },
   "repeatball": { "available": false },
   "ribbonsweet": { "available": false },
-  "rindoberry": { "available": true },
+  "rindoberry": {
+    "available": true,
+    "short": "Halves damage taken from a supereffective Grass-type attack. Single use.",
+    "long": "Halves damage taken from a supereffective Grass-type attack. Single use."
+  },
   "ringtarget": { "available": false },
   "rockgem": { "available": false },
   "rockincense": { "available": false },
   "rockiumz": { "available": false },
   "rockmemory": { "available": false },
-  "rockyhelmet": { "available": true },
+  "rockyhelmet": {
+    "available": true,
+    "short": "If holder is hit by a contact move, the attacker loses 1/6 of its max HP.",
+    "long": "If holder is hit by a contact move, the attacker loses 1/6 of its max HP."
+  },
   "roomservice": { "available": false },
   "rootfossil": { "available": false },
   "roseincense": { "available": false },
-  "roseliberry": { "available": true },
+  "roseliberry": {
+    "available": true,
+    "short": "Halves damage taken from a supereffective Fairy-type attack. Single use.",
+    "long": "Halves damage taken from a supereffective Fairy-type attack. Single use."
+  },
   "rowapberry": { "available": false },
   "rustedshield": { "available": false },
   "rustedsword": { "available": false },
-  "sablenite": { "available": true },
+  "sablenite": {
+    "available": true,
+    "short": "If held by a Sableye, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Sableye, this item allows it to Mega Evolve in battle."
+  },
   "sachet": { "available": false },
   "safariball": { "available": false },
   "safetygoggles": { "available": false },
   "sailfossil": { "available": false },
   "salacberry": { "available": false },
-  "salamencite": { "available": true },
-  "sceptilite": { "available": true },
-  "scizorite": { "available": true },
-  "scolipite": { "available": true },
-  "scopelens": { "available": true },
-  "scovillainite": { "available": true },
-  "scraftinite": { "available": true },
+  "salamencite": {
+    "available": true,
+    "short": "If held by a Salamence, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Salamence, this item allows it to Mega Evolve in battle."
+  },
+  "sceptilite": {
+    "available": true,
+    "short": "If held by a Sceptile, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Sceptile, this item allows it to Mega Evolve in battle."
+  },
+  "scizorite": {
+    "available": true,
+    "short": "If held by a Scizor, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Scizor, this item allows it to Mega Evolve in battle."
+  },
+  "scolipite": {
+    "available": true,
+    "short": "If held by a Scolipede, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Scolipede, this item allows it to Mega Evolve in battle."
+  },
+  "scopelens": {
+    "available": true,
+    "short": "Holder's critical hit ratio is raised by 1 stage.",
+    "long": "Holder's critical hit ratio is raised by 1 stage."
+  },
+  "scovillainite": {
+    "available": true,
+    "short": "If held by a Scovillain, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Scovillain, this item allows it to Mega Evolve in battle."
+  },
+  "scraftinite": {
+    "available": true,
+    "short": "If held by a Scrafty, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Scrafty, this item allows it to Mega Evolve in battle."
+  },
   "seaincense": { "available": false },
-  "sharpbeak": { "available": true },
-  "sharpedonite": { "available": true },
-  "shedshell": { "available": true },
-  "shellbell": { "available": true },
+  "sharpbeak": {
+    "available": true,
+    "short": "Holder's Flying-type attacks have 1.2× power.",
+    "long": "Holder's Flying-type attacks have 1.2× power."
+  },
+  "sharpedonite": {
+    "available": true,
+    "short": "If held by a Sharpedo, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Sharpedo, this item allows it to Mega Evolve in battle."
+  },
+  "shedshell": {
+    "available": true,
+    "short": "Holder cannot be prevented from choosing to switch out by any effect.",
+    "long": "Holder cannot be prevented from choosing to switch out by any effect."
+  },
+  "shellbell": {
+    "available": true,
+    "short": "After an attack, holder gains 1/8 of the damage in HP dealt to other Pokemon.",
+    "long": "After an attack, holder gains 1/8 of the damage in HP dealt to other Pokemon."
+  },
   "shinystone": { "available": false },
   "shockdrive": { "available": false },
-  "shucaberry": { "available": true },
-  "silkscarf": { "available": true },
-  "silverpowder": { "available": true },
-  "sitrusberry": { "available": true },
-  "skarmorite": { "available": true },
+  "shucaberry": {
+    "available": true,
+    "short": "Halves damage taken from a supereffective Ground-type attack. Single use.",
+    "long": "Halves damage taken from a supereffective Ground-type attack. Single use."
+  },
+  "silkscarf": {
+    "available": true,
+    "short": "Holder's Normal-type attacks have 1.2× power.",
+    "long": "Holder's Normal-type attacks have 1.2× power."
+  },
+  "silverpowder": {
+    "available": true,
+    "short": "Holder's Bug-type attacks have 1.2× power.",
+    "long": "Holder's Bug-type attacks have 1.2× power."
+  },
+  "sitrusberry": {
+    "available": true,
+    "short": "Restores 1/4 max HP when at 1/2 max HP or less. Single use.",
+    "long": "Restores 1/4 max HP when at 1/2 max HP or less. Single use."
+  },
+  "skarmorite": {
+    "available": true,
+    "short": "If held by a Skarmory, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Skarmory, this item allows it to Mega Evolve in battle."
+  },
   "skullfossil": { "available": false },
   "skyplate": { "available": false },
-  "slowbronite": { "available": true },
-  "smoothrock": { "available": true },
+  "slowbronite": {
+    "available": true,
+    "short": "If held by a Slowbro (not Galarian Slowbro), this item allows it to Mega Evolve.",
+    "long": "If held by a Slowbro (not Galarian Slowbro), this item allows it to Mega Evolve."
+  },
+  "smoothrock": {
+    "available": true,
+    "short": "Holder's use of Sandstorm lasts 8 turns instead of 5.",
+    "long": "Holder's use of Sandstorm lasts 8 turns instead of 5."
+  },
   "snorliumz": { "available": false },
   "snowball": { "available": false },
-  "softsand": { "available": true },
+  "softsand": {
+    "available": true,
+    "short": "Holder's Ground-type attacks have 1.2× power.",
+    "long": "Holder's Ground-type attacks have 1.2× power."
+  },
   "solganiumz": { "available": false },
   "souldew": { "available": false },
-  "spelltag": { "available": true },
+  "spelltag": {
+    "available": true,
+    "short": "Holder's Ghost-type attacks have 1.2× power.",
+    "long": "Holder's Ghost-type attacks have 1.2× power."
+  },
   "spelonberry": { "available": false },
   "splashplate": { "available": false },
   "spookyplate": { "available": false },
   "sportball": { "available": false },
-  "staraptite": { "available": true },
+  "staraptite": {
+    "available": true,
+    "short": "If held by a Staraptor, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Staraptor, this item allows it to Mega Evolve in battle."
+  },
   "starfberry": { "available": false },
-  "starminite": { "available": true },
+  "starminite": {
+    "available": true,
+    "short": "If held by a Starmie, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Starmie, this item allows it to Mega Evolve in battle."
+  },
   "starsweet": { "available": false },
   "steelgem": { "available": false },
   "steeliumz": { "available": false },
-  "steelixite": { "available": true },
+  "steelixite": {
+    "available": true,
+    "short": "If held by a Steelix, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Steelix, this item allows it to Mega Evolve in battle."
+  },
   "steelmemory": { "available": false },
   "stick": { "available": false },
   "stickybarb": { "available": false },
@@ -435,15 +1047,27 @@
   "strangeball": { "available": false },
   "strawberrysweet": { "available": false },
   "sunstone": { "available": false },
-  "swampertite": { "available": true },
+  "swampertite": {
+    "available": true,
+    "short": "If held by a Swampert, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Swampert, this item allows it to Mega Evolve in battle."
+  },
   "sweetapple": { "available": false },
   "syrupyapple": { "available": false },
   "tamatoberry": { "available": false },
-  "tangaberry": { "available": true },
+  "tangaberry": {
+    "available": true,
+    "short": "Halves damage taken from a supereffective Bug-type attack. Single use.",
+    "long": "Halves damage taken from a supereffective Bug-type attack. Single use."
+  },
   "tapuniumz": { "available": false },
   "tartapple": { "available": false },
   "tatsugirinite": { "available": false },
-  "terrainextender": { "available": true },
+  "terrainextender": {
+    "available": true,
+    "short": "Holder's use of Electric/Grassy/Misty/Psychic Terrain lasts 8 turns instead of 5.",
+    "long": "Holder's use of Electric/Grassy/Misty/Psychic Terrain lasts 8 turns instead of 5."
+  },
   "thickclub": { "available": false },
   "throatspray": { "available": false },
   "thunderstone": { "available": false },
@@ -550,16 +1174,36 @@
   "tr97": { "available": false },
   "tr98": { "available": false },
   "tr99": { "available": false },
-  "twistedspoon": { "available": true },
-  "tyranitarite": { "available": true },
+  "twistedspoon": {
+    "available": true,
+    "short": "Holder's Psychic-type attacks have 1.2× power.",
+    "long": "Holder's Psychic-type attacks have 1.2× power."
+  },
+  "tyranitarite": {
+    "available": true,
+    "short": "If held by a Tyranitar, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Tyranitar, this item allows it to Mega Evolve in battle."
+  },
   "ultraball": { "available": false },
   "ultranecroziumz": { "available": false },
   "unremarkableteacup": { "available": false },
   "upgrade": { "available": false },
   "utilityumbrella": { "available": false },
-  "venusaurite": { "available": true },
-  "victreebelite": { "available": true },
-  "wacanberry": { "available": true },
+  "venusaurite": {
+    "available": true,
+    "short": "If held by a Venusaur, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Venusaur, this item allows it to Mega Evolve in battle."
+  },
+  "victreebelite": {
+    "available": true,
+    "short": "If held by a Victreebel, this item allows it to Mega Evolve in battle.",
+    "long": "If held by a Victreebel, this item allows it to Mega Evolve in battle."
+  },
+  "wacanberry": {
+    "available": true,
+    "short": "Halves damage taken from a supereffective Electric-type attack. Single use.",
+    "long": "Halves damage taken from a supereffective Electric-type attack. Single use."
+  },
   "watergem": { "available": false },
   "wateriumz": { "available": false },
   "watermemory": { "available": false },
@@ -570,13 +1214,33 @@
   "wellspringmask": { "available": false },
   "wepearberry": { "available": false },
   "whippeddream": { "available": false },
-  "whiteherb": { "available": true },
-  "widelens": { "available": true },
+  "whiteherb": {
+    "available": true,
+    "short": "Restores all lowered stat stages to 0 when one is less than 0. Single use.",
+    "long": "Restores all lowered stat stages to 0 when one is less than 0. Single use."
+  },
+  "widelens": {
+    "available": true,
+    "short": "The accuracy of attacks by the holder is 1.1×.",
+    "long": "The accuracy of attacks by the holder is 1.1×."
+  },
   "wikiberry": { "available": false },
-  "wiseglasses": { "available": true },
-  "yacheberry": { "available": true },
+  "wiseglasses": {
+    "available": true,
+    "short": "Holder's special attacks have 1.1× power.",
+    "long": "Holder's special attacks have 1.1× power."
+  },
+  "yacheberry": {
+    "available": true,
+    "short": "Halves damage taken from a supereffective Ice-type attack. Single use.",
+    "long": "Halves damage taken from a supereffective Ice-type attack. Single use."
+  },
   "zapplate": { "available": false },
   "zeraorite": { "available": false },
-  "zoomlens": { "available": true },
+  "zoomlens": {
+    "available": true,
+    "short": "The accuracy of attacks by the holder is 1.2× if it moves after its target.",
+    "long": "The accuracy of attacks by the holder is 1.2× if it moves after its target."
+  },
   "zygardite": { "available": false }
 }

@@ -1,314 +1,1018 @@
 {
   "10000000voltthunderbolt": { "available": false },
   "absorb": { "available": false },
-  "accelerock": { "available": true },
+  "accelerock": { "available": true, "short": "Usually goes first.", "long": "No additional effect." },
   "acid": { "available": false },
-  "acidarmor": { "available": true },
+  "acidarmor": {
+    "available": true,
+    "short": "Raises the user's Defense by 2.",
+    "long": "Raises the user's Defense by 2 stages."
+  },
   "aciddownpour": { "available": false },
-  "acidspray": { "available": true },
-  "acrobatics": { "available": true },
-  "acupressure": { "available": true },
-  "aerialace": { "available": true },
+  "acidspray": {
+    "available": true,
+    "short": "100% chance to lower the target's Sp. Def by 2.",
+    "long": "Has a 100% chance to lower the target's Special Defense by 2 stages."
+  },
+  "acrobatics": {
+    "available": true,
+    "short": "Power doubles if the user has no held item.",
+    "long": "Power doubles if the user has no held item."
+  },
+  "acupressure": {
+    "available": true,
+    "short": "Raises a random stat of the user or an ally by 2.",
+    "long": "Raises a random stat by 2 stages as long as the stat is not already at stage 6. The user can choose to use this move on itself or an adjacent ally. Fails if no stat stage can be raised or if used on an ally with a substitute."
+  },
+  "aerialace": {
+    "available": true,
+    "short": "This move does not check accuracy.",
+    "long": "This move does not check accuracy."
+  },
   "aeroblast": { "available": false },
-  "afteryou": { "available": true },
-  "agility": { "available": true },
-  "aircutter": { "available": true },
-  "airslash": { "available": true },
+  "afteryou": {
+    "available": true,
+    "short": "The target makes its move right after the user.",
+    "long": "The target makes its move immediately after the user this turn, no matter the priority of its selected move. Fails if the target would have moved next anyway, or if the target already moved this turn."
+  },
+  "agility": {
+    "available": true,
+    "short": "Raises the user's Speed by 2.",
+    "long": "Raises the user's Speed by 2 stages."
+  },
+  "aircutter": {
+    "available": true,
+    "short": "High critical hit ratio. Hits adjacent foes.",
+    "long": "Has a higher chance for a critical hit."
+  },
+  "airslash": {
+    "available": true,
+    "short": "30% chance to make the target flinch.",
+    "long": "Has a 30% chance to make the target flinch."
+  },
   "alloutpummeling": { "available": false },
-  "alluringvoice": { "available": true },
-  "allyswitch": { "available": true },
-  "amnesia": { "available": true },
+  "alluringvoice": {
+    "available": true,
+    "short": "100% confuse target that had a stat rise this turn.",
+    "long": "Has a 100% chance to confuse the target if it had a stat stage raised this turn."
+  },
+  "allyswitch": {
+    "available": true,
+    "short": "User and ally swap positions; using again can fail.",
+    "long": "The user swaps positions with its ally. Fails if the user is the only Pokemon on its side. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails or if the user's last move used is not Ally Switch."
+  },
+  "amnesia": {
+    "available": true,
+    "short": "Raises the user's Sp. Def by 2.",
+    "long": "Raises the user's Special Defense by 2 stages."
+  },
   "anchorshot": { "available": false },
-  "ancientpower": { "available": true },
-  "appleacid": { "available": true },
-  "aquacutter": { "available": true },
-  "aquajet": { "available": true },
-  "aquaring": { "available": true },
-  "aquastep": { "available": true },
-  "aquatail": { "available": true },
-  "armorcannon": { "available": true },
+  "ancientpower": {
+    "available": true,
+    "short": "10% chance to raise all stats by 1 (not acc/eva).",
+    "long": "Has a 10% chance to raise the user's Attack, Defense, Special Attack, Special Defense, and Speed by 1 stage."
+  },
+  "appleacid": {
+    "available": true,
+    "short": "100% chance to lower the target's Sp. Def by 1.",
+    "long": "Has a 100% chance to lower the target's Special Defense by 1 stage."
+  },
+  "aquacutter": {
+    "available": true,
+    "short": "High critical hit ratio.",
+    "long": "Has a higher chance for a critical hit."
+  },
+  "aquajet": { "available": true, "short": "Usually goes first.", "long": "No additional effect." },
+  "aquaring": {
+    "available": true,
+    "short": "User recovers 1/16 max HP per turn.",
+    "long": "The user has 1/16 of its maximum HP, rounded down, restored at the end of each turn while it remains active. If Big Root is held by the user, the HP recovered is 1.3× normal, rounded half down. If the user uses Baton Pass, the replacement will receive the healing effect."
+  },
+  "aquastep": {
+    "available": true,
+    "short": "100% chance to raise the user's Speed by 1.",
+    "long": "Has a 100% chance to raise the user's Speed by 1 stage."
+  },
+  "aquatail": { "available": true, "short": "No additional effect.", "long": "No additional effect." },
+  "armorcannon": {
+    "available": true,
+    "short": "Lowers the user's Defense and Sp. Def by 1.",
+    "long": "Lowers the user's Defense and Special Defense by 1 stage."
+  },
   "armthrust": { "available": false },
   "aromatherapy": { "available": false },
-  "aromaticmist": { "available": true },
+  "aromaticmist": {
+    "available": true,
+    "short": "Raises an ally's Sp. Def by 1.",
+    "long": "Raises the target's Special Defense by 1 stage. Fails if there is no ally adjacent to the user."
+  },
   "assist": { "available": false },
-  "assurance": { "available": true },
+  "assurance": {
+    "available": true,
+    "short": "Power doubles if target was damaged this turn.",
+    "long": "Power doubles if the target has already taken damage this turn, other than direct damage from Belly Drum, confusion, Curse, or Pain Split."
+  },
   "astonish": { "available": false },
   "astralbarrage": { "available": false },
   "attackorder": { "available": false },
-  "attract": { "available": true },
-  "aurasphere": { "available": true },
-  "aurawheel": { "available": true },
+  "attract": {
+    "available": true,
+    "short": "A target of the opposite gender gets infatuated.",
+    "long": "Causes the target to become infatuated, making it unable to attack 50% of the time. Fails if both the user and the target are the same gender, if either is genderless, or if the target is already infatuated. The effect ends when either the user or the target is no longer active. Pokemon with the Oblivious Ability or protected by the Aroma Veil Ability are immune."
+  },
+  "aurasphere": {
+    "available": true,
+    "short": "This move does not check accuracy.",
+    "long": "This move does not check accuracy."
+  },
+  "aurawheel": {
+    "available": true,
+    "short": "Morpeko: Electric; Hangry: Dark; 100% +1 Spe.",
+    "long": "Has a 100% chance to raise the user's Speed by 1 stage. If the user is a Morpeko in Full Belly Mode, this move is Electric type. If the user is a Morpeko in Hangry Mode, this move is Dark type. This move cannot be used successfully unless the user's current form, while considering Transform, is Full Belly or Hangry Mode Morpeko."
+  },
   "aurorabeam": { "available": false },
-  "auroraveil": { "available": true },
+  "auroraveil": {
+    "available": true,
+    "short": "For 5 turns, damage to allies halved. Snow only.",
+    "long": "For 5 turns, the user and its party members take 0.5× damage from physical and special attacks, or 0.66× damage if in a Double Battle; does not reduce damage further with Reflect or Light Screen. Critical hits ignore this protection. It is removed from the user's side if the user or an ally is successfully hit by Brick Break, Psychic Fangs, or Defog. Brick Break and Psychic Fangs remove the effect before damage is calculated. Lasts for 8 turns if the user is holding Light Clay. Fails unless the weather is Snow."
+  },
   "autotomize": { "available": false },
-  "avalanche": { "available": true },
-  "axekick": { "available": true },
-  "babydolleyes": { "available": true },
+  "avalanche": {
+    "available": true,
+    "short": "Power doubles if user is damaged by the target.",
+    "long": "Power doubles if the user was hit by the target this turn."
+  },
+  "axekick": {
+    "available": true,
+    "short": "30% confusion. User loses 50% max HP if miss.",
+    "long": "Has a 30% chance to confuse the target. If this attack is not successful, the user loses half of its maximum HP, rounded down, as crash damage. Pokemon with the Magic Guard Ability are unaffected by crash damage."
+  },
+  "babydolleyes": {
+    "available": true,
+    "short": "Lowers the target's Attack by 1.",
+    "long": "Lowers the target's Attack by 1 stage."
+  },
   "baddybad": { "available": false },
-  "banefulbunker": { "available": true },
-  "barbbarrage": { "available": true },
+  "banefulbunker": {
+    "available": true,
+    "short": "Protects from moves. Contact: poison.",
+    "long": "The user is protected from most attacks made by other Pokemon during this turn, and Pokemon making contact with the user become poisoned. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Burning Bulwark, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn."
+  },
+  "barbbarrage": {
+    "available": true,
+    "short": "50% psn. 2× power if target already poisoned.",
+    "long": "Has a 50% chance to poison the target. Power doubles if the target is already poisoned."
+  },
   "barrage": { "available": false },
   "barrier": { "available": false },
-  "batonpass": { "available": true },
-  "beakblast": { "available": true },
-  "beatup": { "available": true },
+  "batonpass": {
+    "available": true,
+    "short": "User switches, passing stat changes and more.",
+    "long": "The user is replaced with another Pokemon in its party. The selected Pokemon has the user's stat stage changes transferred to it, as well as the effects of confusion, Aqua Ring, Curse, Dragon Cheer, Embargo, Focus Energy, Gastro Acid, Heal Block, Ingrain, Leech Seed, Lock-On (Mind Reader), Magnet Rise, Perish Song, Power Trick, Telekinesis, and a substitute with its remaining HP. The effect of Gastro Acid is not transferred if the recipient has an Ability that cannot be affected."
+  },
+  "beakblast": {
+    "available": true,
+    "short": "Burns on contact with the user before it moves.",
+    "long": "If the user is hit by a contact move this turn before it can execute this move, the attacker is burned."
+  },
+  "beatup": {
+    "available": true,
+    "short": "All healthy allies aid in damaging the target.",
+    "long": "Hits one time for the user and one time for each unfainted Pokemon without a non-volatile status condition in the user's party. The power of each hit is equal to 5+(X/10), where X is each participating Pokemon's base Attack; each hit is considered to come from the user."
+  },
   "behemothbash": { "available": false },
   "behemothblade": { "available": false },
-  "belch": { "available": true },
-  "bellydrum": { "available": true },
+  "belch": {
+    "available": true,
+    "short": "Fails unless the user has eaten a Berry.",
+    "long": "Fails unless the user has eaten a Berry, either by eating one that was held, stealing and eating one off another Pokemon with Bug Bite or Pluck, or eating one that was thrown at it with Fling. Consuming a Berry with Natural Gift does not count for the purposes of eating one."
+  },
+  "bellydrum": {
+    "available": true,
+    "short": "User loses 50% max HP. Maximizes Attack.",
+    "long": "Raises the user's Attack by 12 stages in exchange for the user losing 1/2 of its maximum HP, rounded down. Fails if the user would faint or if its Attack stat stage is 6."
+  },
   "bestow": { "available": false },
   "bide": { "available": false },
-  "bind": { "available": true },
-  "bite": { "available": true },
-  "bitterblade": { "available": true },
-  "bittermalice": { "available": true },
+  "bind": {
+    "available": true,
+    "short": "Traps and damages the target for 4-5 turns.",
+    "long": "Prevents the target from switching for four or five turns (seven turns if the user is holding Grip Claw). Causes damage to the target equal to 1/8 of its maximum HP (1/6 if the user is holding Binding Band), rounded down, at the end of each turn during effect. The target can still switch out if it is holding Shed Shell or uses Baton Pass, Flip Turn, Parting Shot, Shed Tail, Teleport, U-turn, or Volt Switch. The effect ends if either the user or the target leaves the field, or if the target uses Mortal Spin, Rapid Spin, or Substitute successfully. This effect is not stackable or reset by using this or another binding move."
+  },
+  "bite": {
+    "available": true,
+    "short": "30% chance to make the target flinch.",
+    "long": "Has a 30% chance to make the target flinch."
+  },
+  "bitterblade": {
+    "available": true,
+    "short": "User recovers 50% of the damage dealt.",
+    "long": "The user recovers 1/2 the HP lost by the target, rounded half up. If Big Root is held by the user, the HP recovered is 1.3× normal, rounded half down."
+  },
+  "bittermalice": {
+    "available": true,
+    "short": "100% chance to lower the target's Attack by 1.",
+    "long": "Has a 100% chance to lower the target's Attack by 1 stage."
+  },
   "blackholeeclipse": { "available": false },
-  "blastburn": { "available": true },
-  "blazekick": { "available": true },
+  "blastburn": {
+    "available": true,
+    "short": "User cannot move next turn.",
+    "long": "If this move is successful, the user must recharge on the following turn and cannot select a move."
+  },
+  "blazekick": {
+    "available": true,
+    "short": "High critical hit ratio. 10% chance to burn.",
+    "long": "Has a 10% chance to burn the target and a higher chance for a critical hit."
+  },
   "blazingtorque": { "available": false },
   "bleakwindstorm": { "available": false },
-  "blizzard": { "available": true },
-  "block": { "available": true },
+  "blizzard": {
+    "available": true,
+    "short": "10% chance to freeze foe(s). Can't miss in Snow.",
+    "long": "Has a 10% chance to freeze the target. If the weather is Snow, this move does not check accuracy."
+  },
+  "block": {
+    "available": true,
+    "short": "Prevents the target from switching out.",
+    "long": "Prevents the target from switching out. The target can still switch out if it is holding Shed Shell or uses Baton Pass, Flip Turn, Parting Shot, Teleport, U-turn, or Volt Switch. The effect ends if either the user or the target leaves the field."
+  },
   "bloodmoon": { "available": false },
   "bloomdoom": { "available": false },
   "blueflare": { "available": false },
-  "bodypress": { "available": true },
-  "bodyslam": { "available": true },
+  "bodypress": {
+    "available": true,
+    "short": "Uses user's Def stat as Atk in damage calculation.",
+    "long": "Damage is calculated using the user's Defense stat as its Attack, including stat stage changes. Other effects that modify the Attack stat are used as normal."
+  },
+  "bodyslam": {
+    "available": true,
+    "short": "30% chance to paralyze the target.",
+    "long": "Has a 30% chance to paralyze the target. Damage doubles and no accuracy check is done if the target has used Minimize while active."
+  },
   "boltbeak": { "available": false },
   "boltstrike": { "available": false },
   "boneclub": { "available": false },
   "bonemerang": { "available": false },
-  "bonerush": { "available": true },
-  "boomburst": { "available": true },
-  "bounce": { "available": true },
+  "bonerush": {
+    "available": true,
+    "short": "Hits 2-5 times in one turn.",
+    "long": "Hits two to five times. Has a 35% chance to hit two or three times and a 15% chance to hit four or five times. If one of the hits breaks the target's substitute, it will take damage for the remaining hits. If the user has the Skill Link Ability, this move will always hit five times. If the user is holding Loaded Dice, this move will hit 4-5 times."
+  },
+  "boomburst": {
+    "available": true,
+    "short": "No additional effect. Hits adjacent Pokemon.",
+    "long": "No additional effect."
+  },
+  "bounce": {
+    "available": true,
+    "short": "Bounces turn 1. Hits turn 2. 30% paralyze.",
+    "long": "Has a 30% chance to paralyze the target. This attack charges on the first turn and executes on the second. On the first turn, the user avoids all attacks other than Gust, Hurricane, Sky Uppercut, Smack Down, Thousand Arrows, Thunder, and Twister, and Gust and Twister have doubled power when used against it. If the user is holding a Power Herb, the move completes in one turn."
+  },
   "bouncybubble": { "available": false },
   "branchpoke": { "available": false },
-  "bravebird": { "available": true },
-  "breakingswipe": { "available": true },
+  "bravebird": {
+    "available": true,
+    "short": "Has 33% recoil.",
+    "long": "If the target lost HP, the user takes recoil damage equal to 33% the HP lost by the target, rounded half up, but not less than 1 HP."
+  },
+  "breakingswipe": {
+    "available": true,
+    "short": "100% chance to lower the foe(s) Attack by 1.",
+    "long": "Has a 100% chance to lower the target's Attack by 1 stage."
+  },
   "breakneckblitz": { "available": false },
-  "brickbreak": { "available": true },
+  "brickbreak": {
+    "available": true,
+    "short": "Destroys screens, unless the target is immune.",
+    "long": "If this attack does not miss, the effects of Reflect, Light Screen, and Aurora Veil end for the target's side of the field before damage is calculated."
+  },
   "brine": { "available": false },
-  "brutalswing": { "available": true },
+  "brutalswing": {
+    "available": true,
+    "short": "No additional effect. Hits adjacent Pokemon.",
+    "long": "No additional effect."
+  },
   "bubble": { "available": false },
   "bubblebeam": { "available": false },
-  "bugbite": { "available": true },
-  "bugbuzz": { "available": true },
-  "bulkup": { "available": true },
-  "bulldoze": { "available": true },
-  "bulletpunch": { "available": true },
-  "bulletseed": { "available": true },
+  "bugbite": {
+    "available": true,
+    "short": "User steals and eats the target's Berry.",
+    "long": "If this move is successful and the user has not fainted, it steals the target's held Berry if it is holding one and eats it immediately, gaining its effects even if the user's item is being ignored. Items lost to this move cannot be regained with Recycle or the Harvest Ability."
+  },
+  "bugbuzz": {
+    "available": true,
+    "short": "10% chance to lower the target's Sp. Def by 1.",
+    "long": "Has a 10% chance to lower the target's Special Defense by 1 stage."
+  },
+  "bulkup": {
+    "available": true,
+    "short": "Raises the user's Attack and Defense by 1.",
+    "long": "Raises the user's Attack and Defense by 1 stage."
+  },
+  "bulldoze": {
+    "available": true,
+    "short": "100% chance lower adjacent Pkmn Speed by 1.",
+    "long": "Has a 100% chance to lower the target's Speed by 1 stage."
+  },
+  "bulletpunch": { "available": true, "short": "Usually goes first.", "long": "No additional effect." },
+  "bulletseed": {
+    "available": true,
+    "short": "Hits 2-5 times in one turn.",
+    "long": "Hits two to five times. Has a 35% chance to hit two or three times and a 15% chance to hit four or five times. If one of the hits breaks the target's substitute, it will take damage for the remaining hits. If the user has the Skill Link Ability, this move will always hit five times. If the user is holding Loaded Dice, this move will hit 4-5 times."
+  },
   "burningbulwark": { "available": false },
-  "burningjealousy": { "available": true },
-  "burnup": { "available": true },
+  "burningjealousy": {
+    "available": true,
+    "short": "100% burns a target that had a stat rise this turn.",
+    "long": "Has a 100% chance to burn the target if it had a stat stage raised this turn."
+  },
+  "burnup": {
+    "available": true,
+    "short": "User's Fire type becomes typeless; must be Fire.",
+    "long": "Fails unless the user is a Fire type. If this move is successful and the user is not Terastallized, the user's Fire type becomes typeless as long as it remains active."
+  },
   "buzzybuzz": { "available": false },
-  "calmmind": { "available": true },
+  "calmmind": {
+    "available": true,
+    "short": "Raises the user's Sp. Atk and Sp. Def by 1.",
+    "long": "Raises the user's Special Attack and Special Defense by 1 stage."
+  },
   "camouflage": { "available": false },
   "captivate": { "available": false },
   "catastropika": { "available": false },
-  "ceaselessedge": { "available": true },
+  "ceaselessedge": {
+    "available": true,
+    "short": "Sets a layer of Spikes on the opposing side.",
+    "long": "If this move is successful, it sets up a hazard on the opposing side of the field, damaging each opposing Pokemon that switches in, unless it is a Flying-type Pokemon or has the Levitate Ability. A maximum of three layers may be set, and opponents lose 1/8 of their maximum HP with one layer, 1/6 of their maximum HP with two layers, and 1/4 of their maximum HP with three layers, all rounded down. Can be removed from the opposing side if any Pokemon uses Tidy Up, or if any opposing Pokemon uses Mortal Spin, Rapid Spin, or Defog successfully, or is hit by Defog."
+  },
   "celebrate": { "available": false },
-  "charge": { "available": true },
-  "chargebeam": { "available": true },
-  "charm": { "available": true },
+  "charge": {
+    "available": true,
+    "short": "+1 SpD, user's next Electric move 2× power.",
+    "long": "Raises the user's Special Defense by 1 stage. The user's next Electric-type attack will have its power doubled; the effect ends when the user is no longer active, or after the user attempts to use any Electric-type move besides Charge, even if it is not successful."
+  },
+  "chargebeam": {
+    "available": true,
+    "short": "70% chance to raise the user's Sp. Atk by 1.",
+    "long": "Has a 70% chance to raise the user's Special Attack by 1 stage."
+  },
+  "charm": {
+    "available": true,
+    "short": "Lowers the target's Attack by 2.",
+    "long": "Lowers the target's Attack by 2 stages."
+  },
   "chatter": { "available": false },
-  "chillingwater": { "available": true },
-  "chillyreception": { "available": true },
+  "chillingwater": {
+    "available": true,
+    "short": "100% chance to lower the target's Attack by 1.",
+    "long": "Has a 100% chance to lower the target's Attack by 1 stage."
+  },
+  "chillyreception": {
+    "available": true,
+    "short": "Starts Snow. User switches out.",
+    "long": "For 5 turns, the weather becomes Snow. The user switches out even if it is trapped and is replaced immediately by a selected party member. The user does not switch out if there are no unfainted party members."
+  },
   "chipaway": { "available": false },
   "chloroblast": { "available": false },
-  "circlethrow": { "available": true },
+  "circlethrow": {
+    "available": true,
+    "short": "Forces the target to switch to a random ally.",
+    "long": "If both the user and the target have not fainted, the target is forced to switch out and be replaced with a random unfainted ally. This effect fails if the target is under the effect of Ingrain, has the Suction Cups Ability, or this move hit a substitute."
+  },
   "clamp": { "available": false },
-  "clangingscales": { "available": true },
-  "clangoroussoul": { "available": true },
+  "clangingscales": {
+    "available": true,
+    "short": "Lowers the user's Defense by 1.",
+    "long": "Lowers the user's Defense by 1 stage."
+  },
+  "clangoroussoul": {
+    "available": true,
+    "short": "User loses 33% of its max HP. +1 to all stats.",
+    "long": "Raises the user's Attack, Defense, Special Attack, Special Defense, and Speed by 1 stage in exchange for the user losing 33% of its maximum HP, rounded down. Fails if the user would faint or if its Attack, Defense, Special Attack, Special Defense, and Speed stat stages would not change."
+  },
   "clangoroussoulblaze": { "available": false },
-  "clearsmog": { "available": true },
-  "closecombat": { "available": true },
-  "coaching": { "available": true },
-  "coil": { "available": true },
+  "clearsmog": {
+    "available": true,
+    "short": "Resets all of the target's stat stages to 0.",
+    "long": "Resets all of the target's stat stages to 0."
+  },
+  "closecombat": {
+    "available": true,
+    "short": "Lowers the user's Defense and Sp. Def by 1.",
+    "long": "Lowers the user's Defense and Special Defense by 1 stage."
+  },
+  "coaching": {
+    "available": true,
+    "short": "Raises an ally's Attack and Defense by 1.",
+    "long": "Raises the target's Attack and Defense by 1 stage. Fails if there is no ally adjacent to the user."
+  },
+  "coil": {
+    "available": true,
+    "short": "Raises user's Attack, Defense, accuracy by 1.",
+    "long": "Raises the user's Attack, Defense, and accuracy by 1 stage."
+  },
   "collisioncourse": { "available": false },
   "combattorque": { "available": false },
   "cometpunch": { "available": false },
-  "comeuppance": { "available": true },
+  "comeuppance": {
+    "available": true,
+    "short": "If hit by an attack, returns 1.5× damage.",
+    "long": "Deals damage to the last opposing Pokemon to hit the user with a physical or special attack this turn equal to 1.5 times the HP lost by the user from that attack, rounded down. If the user did not lose HP from that attack, this move deals 1 HP of damage instead. If that opposing Pokemon's position is no longer in use and there is another opposing Pokemon on the field, the damage is done to it instead. Only the last hit of a multi-hit attack is counted. Fails if the user was not hit by an opposing Pokemon's physical or special attack this turn."
+  },
   "confide": { "available": false },
-  "confuseray": { "available": true },
+  "confuseray": { "available": true, "short": "Confuses the target.", "long": "Causes the target to become confused." },
   "confusion": { "available": false },
   "constrict": { "available": false },
   "continentalcrush": { "available": false },
   "conversion": { "available": false },
   "conversion2": { "available": false },
-  "copycat": { "available": true },
+  "copycat": {
+    "available": true,
+    "short": "Uses the last move used in the battle.",
+    "long": "The user uses the last move used by any Pokemon, including itself. Fails if no move has been used, or if the last move used was Assist, Baneful Bunker, Beak Blast, Behemoth Bash, Behemoth Blade, Belch, Bestow, Blazing Torque, Celebrate, Chatter, Circle Throw, Combat Torque, Copycat, Counter, Covet, Destiny Bond, Detect, Dragon Tail, Dynamax Cannon, Endure, Feint, Focus Punch, Follow Me, Helping Hand, Hold Hands, King's Shield, Magical Torque, Mat Block, Me First, Metronome, Mimic, Mirror Move, Nature Power, Noxious Torque, Protect, Rage Powder, Roar, Shell Trap, Sketch, Sleep Talk, Snatch, Spiky Shield, Spotlight, Struggle, Switcheroo, Tera Starstorm, Thief, Transform, Trick, Whirlwind, or Wicked Torque."
+  },
   "coreenforcer": { "available": false },
   "corkscrewcrash": { "available": false },
-  "corrosivegas": { "available": true },
-  "cosmicpower": { "available": true },
-  "cottonguard": { "available": true },
-  "cottonspore": { "available": true },
-  "counter": { "available": true },
-  "courtchange": { "available": true },
-  "covet": { "available": true },
-  "crabhammer": { "available": true },
+  "corrosivegas": {
+    "available": true,
+    "short": "Removes adjacent Pokemon's held items.",
+    "long": "The target loses its held item. This move cannot cause Pokemon with the Sticky Hold Ability to lose their held item or cause a Kyogre, Groudon, Dialga, Palkia, Giratina, Arceus, Genesect, Silvally, Zacian, Zamazenta, Paradox Pokemon, or Ogerpon to lose their Blue Orb, Red Orb, Adamant Crystal, Lustrous Globe, Griseous Core, Plate, Drive, Memory, Rusted Sword, Rusted Shield, Booster Energy, or Mask, respectively. In this case, Paradox Pokemon include every species with the Protosynthesis and Quark Drive Abilities, except Gouging Fire, Raging Bolt, Iron Boulder, and Iron Crown. Items lost to this move cannot be regained with Recycle or the Harvest Ability."
+  },
+  "cosmicpower": {
+    "available": true,
+    "short": "Raises the user's Defense and Sp. Def by 1.",
+    "long": "Raises the user's Defense and Special Defense by 1 stage."
+  },
+  "cottonguard": {
+    "available": true,
+    "short": "Raises the user's Defense by 3.",
+    "long": "Raises the user's Defense by 3 stages."
+  },
+  "cottonspore": {
+    "available": true,
+    "short": "Lowers the target's Speed by 2.",
+    "long": "Lowers the target's Speed by 2 stages."
+  },
+  "counter": {
+    "available": true,
+    "short": "If hit by physical attack, returns double damage.",
+    "long": "Deals damage to the last opposing Pokemon to hit the user with a physical attack this turn equal to twice the HP lost by the user from that attack. If the user did not lose HP from the attack, this move deals 1 HP of damage instead. If that opposing Pokemon's position is no longer in use and there is another opposing Pokemon on the field, the damage is done to it instead. Only the last hit of a multi-hit attack is counted. Fails if the user was not hit by an opposing Pokemon's physical attack this turn."
+  },
+  "courtchange": {
+    "available": true,
+    "short": "Swaps user's field effects with the opposing side.",
+    "long": "Switches the Mist, Light Screen, Reflect, Spikes, Safeguard, Tailwind, Toxic Spikes, Stealth Rock, Water Pledge, Fire Pledge, Grass Pledge, Sticky Web, Aurora Veil, G-Max Steelsurge, G-Max Cannonade, G-Max Vine Lash, and G-Max Wildfire effects from the user's side to the opposing side and vice versa."
+  },
+  "covet": {
+    "available": true,
+    "short": "If the user has no item, it steals the target's.",
+    "long": "If this attack was successful and the user is not holding an item, it steals the target's held item. A target with the Sticky Hold Ability does not lose its held item if it has not fainted. The target's item is not stolen if it is a Mega Stone and either the user or the target is the species that can Mega Evolve with it. Items lost to this move cannot be regained with Recycle or the Harvest Ability."
+  },
+  "crabhammer": {
+    "available": true,
+    "short": "High critical hit ratio.",
+    "long": "Has a higher chance for a critical hit."
+  },
   "craftyshield": { "available": false },
-  "crosschop": { "available": true },
-  "crosspoison": { "available": true },
-  "crunch": { "available": true },
-  "crushclaw": { "available": true },
+  "crosschop": {
+    "available": true,
+    "short": "High critical hit ratio.",
+    "long": "Has a higher chance for a critical hit."
+  },
+  "crosspoison": {
+    "available": true,
+    "short": "High critical hit ratio. 10% chance to poison.",
+    "long": "Has a 10% chance to poison the target and a higher chance for a critical hit."
+  },
+  "crunch": {
+    "available": true,
+    "short": "20% chance to lower the target's Defense by 1.",
+    "long": "Has a 20% chance to lower the target's Defense by 1 stage."
+  },
+  "crushclaw": {
+    "available": true,
+    "short": "50% chance to lower the target's Defense by 1.",
+    "long": "Has a 50% chance to lower the target's Defense by 1 stage."
+  },
   "crushgrip": { "available": false },
-  "curse": { "available": true },
+  "curse": {
+    "available": true,
+    "short": "Curses if Ghost, else -1 Spe, +1 Atk, +1 Def.",
+    "long": "If the user is not a Ghost type, lowers the user's Speed by 1 stage and raises the user's Attack and Defense by 1 stage. If the user is a Ghost type, the user loses 1/2 of its maximum HP, rounded down and even if it would cause fainting, in exchange for the target losing 1/4 of its maximum HP, rounded down, at the end of each turn while it is active. If the target uses Baton Pass, the replacement will continue to be affected. Fails if there is no target or if the target is already affected."
+  },
   "cut": { "available": false },
-  "darkestlariat": { "available": true },
-  "darkpulse": { "available": true },
+  "darkestlariat": {
+    "available": true,
+    "short": "Ignores the target's stat stage changes.",
+    "long": "Ignores the target's stat stage changes, including evasiveness."
+  },
+  "darkpulse": {
+    "available": true,
+    "short": "20% chance to make the target flinch.",
+    "long": "Has a 20% chance to make the target flinch."
+  },
   "darkvoid": { "available": false },
-  "dazzlinggleam": { "available": true },
-  "decorate": { "available": true },
+  "dazzlinggleam": {
+    "available": true,
+    "short": "No additional effect. Hits adjacent foes.",
+    "long": "No additional effect."
+  },
+  "decorate": {
+    "available": true,
+    "short": "Raises the target's Attack and Sp. Atk by 2.",
+    "long": "Raises the target's Attack and Special Attack by 2 stages."
+  },
   "defendorder": { "available": false },
   "defensecurl": { "available": false },
-  "defog": { "available": true },
-  "destinybond": { "available": true },
-  "detect": { "available": true },
+  "defog": {
+    "available": true,
+    "short": "-1 evasion; ends user and target hazards/terrain.",
+    "long": "Lowers the target's evasiveness by 1 stage. If this move is successful and whether or not the target's evasiveness was affected, the effects of Reflect, Light Screen, Aurora Veil, Safeguard, Mist, Spikes, Toxic Spikes, Stealth Rock, and Sticky Web end for the target's side, and the effects of Spikes, Toxic Spikes, Stealth Rock, and Sticky Web end for the user's side. Ignores a target's substitute, although a substitute will still block the lowering of evasiveness. If there is a terrain active and this move is successful, the terrain will be cleared."
+  },
+  "destinybond": {
+    "available": true,
+    "short": "If an opponent knocks out the user, it also faints.",
+    "long": "Until the user's next move, if an opposing Pokemon's attack knocks the user out, that Pokemon faints as well, unless the attack was Doom Desire or Future Sight. Fails if the user used this move successfully as its last move, disregarding moves used through the Dancer Ability."
+  },
+  "detect": {
+    "available": true,
+    "short": "Prevents moves from affecting the user this turn.",
+    "long": "The user is protected from most attacks made by other Pokemon during this turn. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Burning Bulwark, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn."
+  },
   "devastatingdrake": { "available": false },
   "diamondstorm": { "available": false },
-  "dig": { "available": true },
-  "direclaw": { "available": true },
-  "disable": { "available": true },
+  "dig": {
+    "available": true,
+    "short": "Digs underground turn 1, strikes turn 2.",
+    "long": "This attack charges on the first turn and executes on the second. On the first turn, the user avoids all attacks other than Earthquake and Magnitude but takes double damage from them, and is also unaffected by weather. If the user is holding a Power Herb, the move completes in one turn."
+  },
+  "direclaw": {
+    "available": true,
+    "short": "30% chance to sleep, poison, or paralyze target.",
+    "long": "Has a 30% chance to cause the target to either fall asleep, become poisoned, or become paralyzed."
+  },
+  "disable": {
+    "available": true,
+    "short": "For 4 turns, disables the target's last move used.",
+    "long": "For 4 turns, the target's last move used becomes disabled. Fails if one of the target's moves is already disabled, if the target has not made a move, if the target no longer knows the move, or if the move was a Max or G-Max Move."
+  },
   "disarmingvoice": { "available": false },
-  "discharge": { "available": true },
-  "dive": { "available": true },
+  "discharge": {
+    "available": true,
+    "short": "30% chance to paralyze adjacent Pokemon.",
+    "long": "Has a 30% chance to paralyze the target."
+  },
+  "dive": {
+    "available": true,
+    "short": "Dives underwater turn 1, strikes turn 2.",
+    "long": "This attack charges on the first turn and executes on the second. On the first turn, the user avoids all attacks other than Surf and Whirlpool but takes double damage from them, and is also unaffected by weather. If the user is holding a Power Herb, the move completes in one turn."
+  },
   "dizzypunch": { "available": false },
   "doodle": { "available": false },
   "doomdesire": { "available": false },
-  "doubleedge": { "available": true },
-  "doublehit": { "available": true },
+  "doubleedge": {
+    "available": true,
+    "short": "Has 33% recoil.",
+    "long": "If the target lost HP, the user takes recoil damage equal to 33% the HP lost by the target, rounded half up, but not less than 1 HP."
+  },
+  "doublehit": {
+    "available": true,
+    "short": "Hits 2 times in one turn.",
+    "long": "Hits twice. If the first hit breaks the target's substitute, it will take damage for the second hit."
+  },
   "doubleironbash": { "available": false },
   "doublekick": { "available": false },
-  "doubleshock": { "available": true },
+  "doubleshock": {
+    "available": true,
+    "short": "User's Electric type: typeless; must be Electric.",
+    "long": "Fails unless the user is an Electric type. If this move is successful and the user is not Terastallized, the user's Electric type becomes typeless as long as it remains active."
+  },
   "doubleslap": { "available": false },
-  "doubleteam": { "available": true },
-  "dracometeor": { "available": true },
+  "doubleteam": {
+    "available": true,
+    "short": "Raises the user's evasiveness by 1.",
+    "long": "Raises the user's evasiveness by 1 stage."
+  },
+  "dracometeor": {
+    "available": true,
+    "short": "Lowers the user's Sp. Atk by 2.",
+    "long": "Lowers the user's Special Attack by 2 stages."
+  },
   "dragonascent": { "available": false },
   "dragonbreath": { "available": false },
-  "dragoncheer": { "available": true },
-  "dragonclaw": { "available": true },
-  "dragondance": { "available": true },
-  "dragondarts": { "available": true },
+  "dragoncheer": {
+    "available": true,
+    "short": "Ally: Crit ratio +1, or +2 if ally is Dragon type.",
+    "long": "Raises the target's chance for a critical hit by 1 stage, or by 2 stages if the target is Dragon type. Fails if there is no ally adjacent to the user, or if the target already has this effect or the Focus Energy effect. Baton Pass can be used to transfer this effect to an ally."
+  },
+  "dragonclaw": { "available": true, "short": "No additional effect.", "long": "No additional effect." },
+  "dragondance": {
+    "available": true,
+    "short": "Raises the user's Attack and Speed by 1.",
+    "long": "Raises the user's Attack and Speed by 1 stage."
+  },
+  "dragondarts": {
+    "available": true,
+    "short": "Hits twice. Doubles: Tries to hit each foe once.",
+    "long": "Hits twice. If the first hit breaks the target's substitute, it will take damage for the second hit. In Double Battles, this move attempts to hit the targeted Pokemon and its ally once each. If hitting one of these Pokemon would be prevented by immunity, protection, semi-invulnerability, an Ability, or accuracy, it attempts to hit the other Pokemon twice instead. If this move is redirected, it hits that target twice."
+  },
   "dragonenergy": { "available": false },
   "dragonhammer": { "available": false },
-  "dragonpulse": { "available": true },
+  "dragonpulse": { "available": true, "short": "No additional effect.", "long": "No additional effect." },
   "dragonrage": { "available": false },
-  "dragonrush": { "available": true },
-  "dragontail": { "available": true },
-  "drainingkiss": { "available": true },
-  "drainpunch": { "available": true },
+  "dragonrush": {
+    "available": true,
+    "short": "20% chance to make the target flinch.",
+    "long": "Has a 20% chance to make the target flinch. Damage doubles and no accuracy check is done if the target has used Minimize while active."
+  },
+  "dragontail": {
+    "available": true,
+    "short": "Forces the target to switch to a random ally.",
+    "long": "If both the user and the target have not fainted, the target is forced to switch out and be replaced with a random unfainted ally. This effect fails if the target used Ingrain previously, has the Suction Cups Ability, or this move hit a substitute."
+  },
+  "drainingkiss": {
+    "available": true,
+    "short": "User recovers 75% of the damage dealt.",
+    "long": "The user recovers 3/4 the HP lost by the target, rounded half up. If Big Root is held by the user, the HP recovered is 1.3× normal, rounded half down."
+  },
+  "drainpunch": {
+    "available": true,
+    "short": "User recovers 50% of the damage dealt.",
+    "long": "The user recovers 1/2 the HP lost by the target, rounded half up. If Big Root is held by the user, the HP recovered is 1.3× normal, rounded half down."
+  },
   "dreameater": { "available": false },
-  "drillpeck": { "available": true },
-  "drillrun": { "available": true },
-  "drumbeating": { "available": true },
+  "drillpeck": { "available": true, "short": "No additional effect.", "long": "No additional effect." },
+  "drillrun": {
+    "available": true,
+    "short": "High critical hit ratio.",
+    "long": "Has a higher chance for a critical hit."
+  },
+  "drumbeating": {
+    "available": true,
+    "short": "100% chance to lower the target's Speed by 1.",
+    "long": "Has a 100% chance to lower the target's Speed by 1 stage."
+  },
   "dualchop": { "available": false },
-  "dualwingbeat": { "available": true },
+  "dualwingbeat": {
+    "available": true,
+    "short": "Hits 2 times in one turn.",
+    "long": "Hits twice. If the first hit breaks the target's substitute, it will take damage for the second hit."
+  },
   "dynamaxcannon": { "available": false },
-  "dynamicpunch": { "available": true },
-  "earthpower": { "available": true },
-  "earthquake": { "available": true },
+  "dynamicpunch": {
+    "available": true,
+    "short": "100% chance to confuse the target.",
+    "long": "Has a 100% chance to confuse the target."
+  },
+  "earthpower": {
+    "available": true,
+    "short": "10% chance to lower the target's Sp. Def by 1.",
+    "long": "Has a 10% chance to lower the target's Special Defense by 1 stage."
+  },
+  "earthquake": {
+    "available": true,
+    "short": "Hits adjacent Pokemon. Double damage on Dig.",
+    "long": "Damage doubles if the target is using Dig."
+  },
   "echoedvoice": { "available": false },
-  "eerieimpulse": { "available": true },
-  "eeriespell": { "available": true },
+  "eerieimpulse": {
+    "available": true,
+    "short": "Lowers the target's Sp. Atk by 2.",
+    "long": "Lowers the target's Special Attack by 2 stages."
+  },
+  "eeriespell": {
+    "available": true,
+    "short": "Removes 3 PP from the target's last move.",
+    "long": "If this move is successful and the user has not fainted, the target loses 3 PP from its last move."
+  },
   "eggbomb": { "available": false },
-  "electricterrain": { "available": true },
-  "electrify": { "available": true },
-  "electroball": { "available": true },
+  "electricterrain": {
+    "available": true,
+    "short": "5 turns. Grounded: +Electric power, can't sleep.",
+    "long": "For 5 turns, the terrain becomes Electric Terrain. During the effect, the power of Electric-type attacks made by grounded Pokemon is multiplied by 1.3 and grounded Pokemon cannot fall asleep; Pokemon already asleep do not wake up. Grounded Pokemon cannot become affected by Yawn or fall asleep from its effect. Camouflage transforms the user into an Electric type, Nature Power becomes Thunderbolt, and Secret Power has a 30% chance to cause paralysis. Fails if the current terrain is Electric Terrain."
+  },
+  "electrify": {
+    "available": true,
+    "short": "Changes the target's move to Electric this turn.",
+    "long": "Causes the target's move to become Electric type this turn. Among effects that can change a move's type, this effect happens last. Fails if the target already moved this turn."
+  },
+  "electroball": {
+    "available": true,
+    "short": "More power the faster the user is than the target.",
+    "long": "The power of this move depends on (user's current Speed / target's current Speed), rounded down. Power is equal to 150 if the result is 4 or more, 120 if 3, 80 if 2, 60 if 1, 40 if less than 1. If the target's current Speed is 0, this move's power is 40."
+  },
   "electrodrift": { "available": false },
-  "electroshot": { "available": true },
-  "electroweb": { "available": true },
+  "electroshot": {
+    "available": true,
+    "short": "Raises Sp. Atk by 1, hits turn 2. Rain: no charge.",
+    "long": "This attack charges on the first turn and executes on the second. Raises the user's Special Attack by 1 stage on the first turn. If the user is holding a Power Herb or the weather is Heavy Rain or Rain, the move completes in one turn. If the user is holding Utility Umbrella and the weather is Heavy Rain or Rain, the move still requires a turn to charge."
+  },
+  "electroweb": {
+    "available": true,
+    "short": "100% chance to lower the foe(s) Speed by 1.",
+    "long": "Has a 100% chance to lower the target's Speed by 1 stage."
+  },
   "embargo": { "available": false },
   "ember": { "available": false },
-  "encore": { "available": true },
-  "endeavor": { "available": true },
-  "endure": { "available": true },
-  "energyball": { "available": true },
-  "entrainment": { "available": true },
-  "eruption": { "available": true },
+  "encore": {
+    "available": true,
+    "short": "Target repeats its last move for its next 3 turns.",
+    "long": "For its next 3 turns, the target is forced to repeat its last move used. If the affected move runs out of PP, the effect ends. Fails if the target is already under this effect, if it has not made a move, if the move has 0 PP, or if the move is Assist, Blazing Torque, Combat Torque, Copycat, Dynamax Cannon, Encore, Magical Torque, Me First, Metronome, Mimic, Mirror Move, Nature Power, Noxious Torque, Sketch, Sleep Talk, Struggle, Transform, or Wicked Torque."
+  },
+  "endeavor": {
+    "available": true,
+    "short": "Lowers the target's HP to the user's HP.",
+    "long": "Deals damage to the target equal to (target's current HP - user's current HP). The target is unaffected if its current HP is less than or equal to the user's current HP."
+  },
+  "endure": {
+    "available": true,
+    "short": "User survives attacks this turn with at least 1 HP.",
+    "long": "The user will survive attacks made by other Pokemon during this turn with at least 1 HP. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Burning Bulwark, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn."
+  },
+  "energyball": {
+    "available": true,
+    "short": "10% chance to lower the target's Sp. Def by 1.",
+    "long": "Has a 10% chance to lower the target's Special Defense by 1 stage."
+  },
+  "entrainment": {
+    "available": true,
+    "short": "The target's Ability changes to match the user's.",
+    "long": "Causes the target's Ability to become the same as the user's. Fails if the target's Ability is As One, Battle Bond, Comatose, Disguise, Gulp Missile, Ice Face, Multitype, Power Construct, RKS System, Schooling, Shields Down, Stance Change, Tera Shift, Truant, Zen Mode, or Zero to Hero, or the same Ability as the user, or if the user's Ability is As One, Battle Bond, Comatose, Commander, Disguise, Embody Aspect, Flower Gift, Forecast, Hunger Switch, Ice Face, Illusion, Imposter, Multitype, Neutralizing Gas, Poison Puppeteer, Power Construct, Power of Alchemy, Protosynthesis, Quark Drive, Receiver, RKS System, Schooling, Shields Down, Stance Change, Tera Shell, Tera Shift, Teraform Zero, Trace, Wonder Guard, Zen Mode, or Zero to Hero."
+  },
+  "eruption": {
+    "available": true,
+    "short": "Less power as user's HP decreases. Hits foe(s).",
+    "long": "Power is equal to (user's current HP × 150 / user's maximum HP), rounded down, but not less than 1."
+  },
   "esperwing": { "available": false },
   "eternabeam": { "available": false },
-  "expandingforce": { "available": true },
-  "explosion": { "available": true },
-  "extrasensory": { "available": true },
+  "expandingforce": {
+    "available": true,
+    "short": "User on Psychic Terrain: 1.5× power, hits foes.",
+    "long": "If the current terrain is Psychic Terrain and the user is grounded, this move hits all opposing Pokemon and has its power multiplied by 1.5."
+  },
+  "explosion": {
+    "available": true,
+    "short": "Hits adjacent Pokemon. The user faints.",
+    "long": "The user faints after using this move, even if this move fails for having no target. This move is prevented from executing if any active Pokemon has the Damp Ability."
+  },
+  "extrasensory": {
+    "available": true,
+    "short": "10% chance to make the target flinch.",
+    "long": "Has a 10% chance to make the target flinch."
+  },
   "extremeevoboost": { "available": false },
-  "extremespeed": { "available": true },
-  "facade": { "available": true },
-  "fairylock": { "available": true },
+  "extremespeed": { "available": true, "short": "Nearly always goes first.", "long": "No additional effect." },
+  "facade": {
+    "available": true,
+    "short": "Power doubles if user is burn/poison/paralyzed.",
+    "long": "Power doubles if the user is burned, paralyzed, or poisoned. The physical damage halving effect from the user's burn is ignored."
+  },
+  "fairylock": {
+    "available": true,
+    "short": "Prevents all Pokemon from switching next turn.",
+    "long": "Prevents all active Pokemon from switching next turn. A Pokemon can still switch out if it is holding Shed Shell or uses Baton Pass, Flip Turn, Parting Shot, Teleport, U-turn, or Volt Switch. Fails if the effect is already active."
+  },
   "fairywind": { "available": false },
-  "fakeout": { "available": true },
-  "faketears": { "available": true },
+  "fakeout": {
+    "available": true,
+    "short": "Hits first. First turn out only. 100% flinch chance.",
+    "long": "Has a 100% chance to make the target flinch. This move cannot be selected unless it is the user's first turn on the field."
+  },
+  "faketears": {
+    "available": true,
+    "short": "Lowers the target's Sp. Def by 2.",
+    "long": "Lowers the target's Special Defense by 2 stages."
+  },
   "falsesurrender": { "available": false },
   "falseswipe": { "available": false },
-  "featherdance": { "available": true },
-  "feint": { "available": true },
+  "featherdance": {
+    "available": true,
+    "short": "Lowers the target's Attack by 2.",
+    "long": "Lowers the target's Attack by 2 stages."
+  },
+  "feint": {
+    "available": true,
+    "short": "Nullifies Detect, Protect, and Quick/Wide Guard.",
+    "long": "If this move is successful, it breaks through the target's Baneful Bunker, Detect, King's Shield, Protect, or Spiky Shield for this turn, allowing other Pokemon to attack the target normally. If the target's side is protected by Crafty Shield, Mat Block, Quick Guard, or Wide Guard, that protection is also broken for this turn and other Pokemon may attack the target's side normally."
+  },
   "feintattack": { "available": false },
-  "fellstinger": { "available": true },
-  "ficklebeam": { "available": true },
-  "fierydance": { "available": true },
+  "fellstinger": {
+    "available": true,
+    "short": "Raises user's Attack by 3 if this KOes the target.",
+    "long": "Raises the user's Attack by 3 stages if this move knocks out the target."
+  },
+  "ficklebeam": {
+    "available": true,
+    "short": "Has a 30% chance this move's power is doubled.",
+    "long": "Has a 30% chance this move's power is doubled."
+  },
+  "fierydance": {
+    "available": true,
+    "short": "50% chance to raise the user's Sp. Atk by 1.",
+    "long": "Has a 50% chance to raise the user's Special Attack by 1 stage."
+  },
   "fierywrath": { "available": false },
   "filletaway": { "available": false },
-  "finalgambit": { "available": true },
-  "fireblast": { "available": true },
-  "firefang": { "available": true },
-  "firelash": { "available": true },
+  "finalgambit": {
+    "available": true,
+    "short": "Does damage equal to the user's HP. User faints.",
+    "long": "Deals damage to the target equal to the user's current HP. If this move is successful, the user faints."
+  },
+  "fireblast": {
+    "available": true,
+    "short": "10% chance to burn the target.",
+    "long": "Has a 10% chance to burn the target."
+  },
+  "firefang": {
+    "available": true,
+    "short": "10% chance to burn. 10% chance to flinch.",
+    "long": "Has a 10% chance to burn the target and a 10% chance to make it flinch."
+  },
+  "firelash": {
+    "available": true,
+    "short": "100% chance to lower the target's Defense by 1.",
+    "long": "Has a 100% chance to lower the target's Defense by 1 stage."
+  },
   "firepledge": { "available": false },
-  "firepunch": { "available": true },
-  "firespin": { "available": true },
-  "firstimpression": { "available": true },
+  "firepunch": {
+    "available": true,
+    "short": "10% chance to burn the target.",
+    "long": "Has a 10% chance to burn the target."
+  },
+  "firespin": {
+    "available": true,
+    "short": "Traps and damages the target for 4-5 turns.",
+    "long": "Prevents the target from switching for four or five turns (seven turns if the user is holding Grip Claw). Causes damage to the target equal to 1/8 of its maximum HP (1/6 if the user is holding Binding Band), rounded down, at the end of each turn during effect. The target can still switch out if it is holding Shed Shell or uses Baton Pass, Flip Turn, Parting Shot, Shed Tail, Teleport, U-turn, or Volt Switch. The effect ends if either the user or the target leaves the field, or if the target uses Mortal Spin, Rapid Spin, or Substitute successfully. This effect is not stackable or reset by using this or another binding move."
+  },
+  "firstimpression": {
+    "available": true,
+    "short": "Nearly always goes first. First turn out only.",
+    "long": "This move cannot be selected unless it is the user's first turn on the field."
+  },
   "fishiousrend": { "available": false },
-  "fissure": { "available": true },
-  "flail": { "available": true },
+  "fissure": {
+    "available": true,
+    "short": "OHKOs the target. Fails if user is a lower level.",
+    "long": "Deals damage to the target equal to the target's maximum HP. Ignores accuracy and evasiveness modifiers. This attack's accuracy is equal to (user's level - target's level + 30)%, and fails if the target is at a higher level. Pokemon with the Sturdy Ability are immune."
+  },
+  "flail": {
+    "available": true,
+    "short": "More power the less HP the user has left.",
+    "long": "The power of this move is 20 if X is 33 to 48, 40 if X is 17 to 32, 80 if X is 10 to 16, 100 if X is 5 to 9, 150 if X is 2 to 4, and 200 if X is 0 or 1, where X is equal to (user's current HP × 48 / user's maximum HP), rounded down."
+  },
   "flameburst": { "available": false },
-  "flamecharge": { "available": true },
-  "flamethrower": { "available": true },
+  "flamecharge": {
+    "available": true,
+    "short": "100% chance to raise the user's Speed by 1.",
+    "long": "Has a 100% chance to raise the user's Speed by 1 stage."
+  },
+  "flamethrower": {
+    "available": true,
+    "short": "10% chance to burn the target.",
+    "long": "Has a 10% chance to burn the target."
+  },
   "flamewheel": { "available": false },
-  "flareblitz": { "available": true },
+  "flareblitz": {
+    "available": true,
+    "short": "Has 33% recoil. 10% chance to burn. Thaws user.",
+    "long": "Has a 10% chance to burn the target. If the target lost HP, the user takes recoil damage equal to 33% the HP lost by the target, rounded half up, but not less than 1 HP."
+  },
   "flash": { "available": false },
-  "flashcannon": { "available": true },
-  "flatter": { "available": true },
+  "flashcannon": {
+    "available": true,
+    "short": "10% chance to lower the target's Sp. Def by 1.",
+    "long": "Has a 10% chance to lower the target's Special Defense by 1 stage."
+  },
+  "flatter": {
+    "available": true,
+    "short": "Raises the target's Sp. Atk by 1 and confuses it.",
+    "long": "Raises the target's Special Attack by 1 stage and confuses it."
+  },
   "fleurcannon": { "available": false },
-  "fling": { "available": true },
-  "flipturn": { "available": true },
+  "fling": {
+    "available": true,
+    "short": "Flings the user's item at the target. Power varies.",
+    "long": "The power of this move is based on the user's held item. The held item is lost and it activates for the target if applicable. If there is no target or the target avoids this move by protecting itself, the user's held item is still lost. The user can regain a thrown item with Recycle or the Harvest Ability. Fails if the user has no held item, if the held item cannot be thrown, if the user is under the effect of Embargo or Magic Room, or if the user has the Klutz Ability."
+  },
+  "flipturn": {
+    "available": true,
+    "short": "User switches out after damaging the target.",
+    "long": "If this move is successful and the user has not fainted, the user switches out even if it is trapped and is replaced immediately by a selected party member. The user does not switch out if there are no unfainted party members, or if the target switched out using an Eject Button or through the effect of the Emergency Exit or Wimp Out Abilities."
+  },
   "floatyfall": { "available": false },
   "floralhealing": { "available": false },
   "flowershield": { "available": false },
-  "flowertrick": { "available": true },
-  "fly": { "available": true },
-  "flyingpress": { "available": true },
-  "focusblast": { "available": true },
-  "focusenergy": { "available": true },
-  "focuspunch": { "available": true },
-  "followme": { "available": true },
+  "flowertrick": {
+    "available": true,
+    "short": "Always results in a critical hit; no accuracy check.",
+    "long": "This move is always a critical hit unless the target is under the effect of Lucky Chant or has the Battle Armor or Shell Armor Abilities. This move does not check accuracy."
+  },
+  "fly": {
+    "available": true,
+    "short": "Flies up on first turn, then strikes the next turn.",
+    "long": "This attack charges on the first turn and executes on the second. On the first turn, the user avoids all attacks other than Gust, Hurricane, Sky Uppercut, Smack Down, Thousand Arrows, Thunder, and Twister, and Gust and Twister have doubled power when used against it. If the user is holding a Power Herb, the move completes in one turn."
+  },
+  "flyingpress": {
+    "available": true,
+    "short": "Combines Flying in its type effectiveness.",
+    "long": "This move combines Flying in its type effectiveness against the target. Damage doubles and no accuracy check is done if the target has used Minimize while active."
+  },
+  "focusblast": {
+    "available": true,
+    "short": "10% chance to lower the target's Sp. Def by 1.",
+    "long": "Has a 10% chance to lower the target's Special Defense by 1 stage."
+  },
+  "focusenergy": {
+    "available": true,
+    "short": "Raises the user's critical hit ratio by 2.",
+    "long": "Raises the user's chance for a critical hit by 2 stages. Fails if the user already has the effect. Baton Pass can be used to transfer this effect to an ally."
+  },
+  "focuspunch": {
+    "available": true,
+    "short": "Fails if the user takes damage before it hits.",
+    "long": "The user loses its focus and does nothing if it is hit by a damaging attack this turn before it can execute the move."
+  },
+  "followme": {
+    "available": true,
+    "short": "The foes' moves target the user on the turn used.",
+    "long": "Until the end of the turn, all single-target attacks from the opposing side are redirected to the user. Such attacks are redirected to the user before they can be reflected by Magic Coat or the Magic Bounce Ability, or drawn in by the Lightning Rod or Storm Drain Abilities. Fails if it is not a Double Battle or Battle Royal. This effect is ignored while the user is under the effect of Sky Drop."
+  },
   "forcepalm": { "available": false },
   "foresight": { "available": false },
-  "forestscurse": { "available": true },
-  "foulplay": { "available": true },
-  "freezedry": { "available": true },
+  "forestscurse": {
+    "available": true,
+    "short": "Adds Grass to the target's type(s).",
+    "long": "Causes the Grass type to be added to the target, effectively making it have two or three types. Fails if the target is already a Grass type. If Trick-or-Treat adds a type to the target, it replaces the type added by this move and vice versa."
+  },
+  "foulplay": {
+    "available": true,
+    "short": "Uses target's Attack stat in damage calculation.",
+    "long": "Damage is calculated using the target's Attack stat, including stat stage changes. The user's Ability, item, and burn are used as normal."
+  },
+  "freezedry": {
+    "available": true,
+    "short": "Super effective on Water.",
+    "long": "This move's type effectiveness against Water is changed to be super effective no matter what this move's type is."
+  },
   "freezeshock": { "available": false },
   "freezingglare": { "available": false },
   "freezyfrost": { "available": false },
-  "frenzyplant": { "available": true },
-  "frostbreath": { "available": true },
+  "frenzyplant": {
+    "available": true,
+    "short": "User cannot move next turn.",
+    "long": "If this move is successful, the user must recharge on the following turn and cannot select a move."
+  },
+  "frostbreath": {
+    "available": true,
+    "short": "Always results in a critical hit.",
+    "long": "This move is always a critical hit unless the target is under the effect of Lucky Chant or has the Battle Armor or Shell Armor Abilities."
+  },
   "frustration": { "available": false },
   "furyattack": { "available": false },
   "furycutter": { "available": false },
   "furyswipes": { "available": false },
   "fusionbolt": { "available": false },
   "fusionflare": { "available": false },
-  "futuresight": { "available": true },
-  "gastroacid": { "available": true },
+  "futuresight": {
+    "available": true,
+    "short": "Hits two turns after being used.",
+    "long": "Deals damage two turns after this move is used. At the end of that turn, the damage is calculated at that time and dealt to the Pokemon at the position the target had when the move was used. If the user is no longer active at the time, damage is calculated based on the user's natural Special Attack stat, types, and level, with no boosts from its held item or Ability. Fails if this move or Doom Desire is already in effect for the target's position."
+  },
+  "gastroacid": {
+    "available": true,
+    "short": "Nullifies the target's Ability.",
+    "long": "Causes the target's Ability to be rendered ineffective as long as it remains active. If the target uses Baton Pass, the replacement will remain under this effect. If the target's Ability is As One, Battle Bond, Comatose, Disguise, Gulp Missile, Ice Face, Multitype, Power Construct, RKS System, Schooling, Shields Down, Stance Change, Tera Shift, Zen Mode, or Zero to Hero, this move fails, and receiving the effect through Baton Pass ends the effect immediately."
+  },
   "geargrind": { "available": false },
   "gearup": { "available": false },
   "genesissupernova": { "available": false },
   "geomancy": { "available": false },
-  "gigadrain": { "available": true },
-  "gigaimpact": { "available": true },
-  "gigatonhammer": { "available": true },
+  "gigadrain": {
+    "available": true,
+    "short": "User recovers 50% of the damage dealt.",
+    "long": "The user recovers 1/2 the HP lost by the target, rounded half up. If Big Root is held by the user, the HP recovered is 1.3× normal, rounded half down."
+  },
+  "gigaimpact": {
+    "available": true,
+    "short": "User cannot move next turn.",
+    "long": "If this move is successful, the user must recharge on the following turn and cannot select a move."
+  },
+  "gigatonhammer": {
+    "available": true,
+    "short": "Cannot be selected the turn after it's used.",
+    "long": "Cannot be selected the turn after it's used."
+  },
   "gigavolthavoc": { "available": false },
   "glaciallance": { "available": false },
   "glaciate": { "available": false },
-  "glaiverush": { "available": true },
-  "glare": { "available": true },
+  "glaiverush": {
+    "available": true,
+    "short": "User takes sure-hit 2× damage until its next turn.",
+    "long": "If this move is successful, moves targeted at the user deal double damage and do not check accuracy until the user's next turn."
+  },
+  "glare": { "available": true, "short": "Paralyzes the target.", "long": "Paralyzes the target." },
   "glitzyglow": { "available": false },
   "gmaxbefuddle": { "available": false },
   "gmaxcannonade": { "available": false },
@@ -343,147 +1047,455 @@
   "gmaxvoltcrash": { "available": false },
   "gmaxwildfire": { "available": false },
   "gmaxwindrage": { "available": false },
-  "grassknot": { "available": true },
+  "grassknot": {
+    "available": true,
+    "short": "More power the heavier the target.",
+    "long": "This move's power is 20 if the target weighs less than 10 kg, 40 if less than 25 kg, 60 if less than 50 kg, 80 if less than 100 kg, 100 if less than 200 kg, and 120 if greater than or equal to 200 kg."
+  },
   "grasspledge": { "available": false },
   "grasswhistle": { "available": false },
-  "grassyglide": { "available": true },
-  "grassyterrain": { "available": true },
-  "gravapple": { "available": true },
-  "gravity": { "available": true },
+  "grassyglide": {
+    "available": true,
+    "short": "User on Grassy Terrain: +1 priority.",
+    "long": "If the current terrain is Grassy Terrain and the user is grounded, this move has its priority increased by 1."
+  },
+  "grassyterrain": {
+    "available": true,
+    "short": "5 turns. Grounded: +Grass power, +1/16 max HP.",
+    "long": "For 5 turns, the terrain becomes Grassy Terrain. During the effect, the power of Grass-type attacks used by grounded Pokemon is multiplied by 1.3, the power of Bulldoze, Earthquake, and Magnitude used against grounded Pokemon is multiplied by 0.5, and grounded Pokemon have 1/16 of their maximum HP, rounded down, restored at the end of each turn, including the last turn. Camouflage transforms the user into a Grass type, Nature Power becomes Energy Ball, and Secret Power has a 30% chance to cause sleep. Fails if the current terrain is Grassy Terrain."
+  },
+  "gravapple": {
+    "available": true,
+    "short": "Target: 100% -1 Def. During Gravity: 1.5× power.",
+    "long": "Has a 100% chance to lower the target's Defense by 1 stage. Power is multiplied by 1.5 during Gravity's effect."
+  },
+  "gravity": {
+    "available": true,
+    "short": "5 turns: no Ground immunities, 1.67× accuracy.",
+    "long": "For 5 turns, the evasiveness of all active Pokemon is multiplied by 0.6. At the time of use, Bounce, Fly, Magnet Rise, Sky Drop, and Telekinesis end immediately for all active Pokemon. During the effect, Bounce, Fly, Flying Press, High Jump Kick, Jump Kick, Magnet Rise, Sky Drop, Splash, and Telekinesis are prevented from being used by all active Pokemon. Ground-type attacks, Spikes, Toxic Spikes, Sticky Web, and the Arena Trap Ability can affect Flying types or Pokemon with the Levitate Ability. Fails if this move is already in effect."
+  },
   "growl": { "available": false },
-  "growth": { "available": true },
+  "growth": {
+    "available": true,
+    "short": "Raises user's Attack and Sp. Atk by 1; 2 in Sun.",
+    "long": "Raises the user's Attack and Special Attack by 1 stage. If the weather is Sun or Intense Sun, this move raises the user's Attack and Special Attack by 2 stages. If the user is holding Utility Umbrella, this move will only raise the user's Attack and Special Attack by 1 stage, even if the weather is Sun or Intense Sun."
+  },
   "grudge": { "available": false },
   "guardianofalola": { "available": false },
-  "guardsplit": { "available": true },
-  "guardswap": { "available": true },
-  "guillotine": { "available": true },
-  "gunkshot": { "available": true },
+  "guardsplit": {
+    "available": true,
+    "short": "Averages Defense and Sp. Def stats with target.",
+    "long": "The user and the target have their Defense and Special Defense stats set to be equal to the average of the user and the target's Defense and Special Defense stats, respectively, rounded down. Stat stage changes are unaffected."
+  },
+  "guardswap": {
+    "available": true,
+    "short": "Swaps Defense and Sp. Def changes with target.",
+    "long": "The user swaps its Defense and Special Defense stat stage changes with the target."
+  },
+  "guillotine": {
+    "available": true,
+    "short": "OHKOs the target. Fails if user is a lower level.",
+    "long": "Deals damage to the target equal to the target's maximum HP. Ignores accuracy and evasiveness modifiers. This attack's accuracy is equal to (user's level - target's level + 30)%, and fails if the target is at a higher level. Pokemon with the Sturdy Ability are immune."
+  },
+  "gunkshot": {
+    "available": true,
+    "short": "30% chance to poison the target.",
+    "long": "Has a 30% chance to poison the target."
+  },
   "gust": { "available": false },
-  "gyroball": { "available": true },
+  "gyroball": {
+    "available": true,
+    "short": "More power the slower the user than the target.",
+    "long": "Power is equal to (25 * target's current Speed / user's current Speed) + 1, rounded down, but not more than 150. If the user's current Speed is 0, this move's power is 1."
+  },
   "hail": { "available": false },
-  "hammerarm": { "available": true },
+  "hammerarm": {
+    "available": true,
+    "short": "Lowers the user's Speed by 1.",
+    "long": "Lowers the user's Speed by 1 stage."
+  },
   "happyhour": { "available": false },
   "harden": { "available": false },
-  "hardpress": { "available": true },
-  "haze": { "available": true },
+  "hardpress": {
+    "available": true,
+    "short": "More power the more HP the target has left.",
+    "long": "Power is equal to 100 × (target's current HP / target's maximum HP), rounded half down, but not less than 1."
+  },
+  "haze": {
+    "available": true,
+    "short": "Eliminates all stat changes.",
+    "long": "Resets the stat stages of all active Pokemon to 0."
+  },
   "headbutt": { "available": false },
   "headcharge": { "available": false },
-  "headlongrush": { "available": true },
-  "headsmash": { "available": true },
-  "healbell": { "available": true },
+  "headlongrush": {
+    "available": true,
+    "short": "Lowers the user's Defense and Sp. Def by 1.",
+    "long": "Lowers the user's Defense and Special Defense by 1 stage."
+  },
+  "headsmash": {
+    "available": true,
+    "short": "Has 1/2 recoil.",
+    "long": "If the target lost HP, the user takes recoil damage equal to 1/2 the HP lost by the target, rounded half up, but not less than 1 HP."
+  },
+  "healbell": {
+    "available": true,
+    "short": "Cures the user's party of all status conditions.",
+    "long": "Every Pokemon in the user's party is cured of its non-volatile status condition. Active Pokemon with the Soundproof Ability are not cured, unless they are the user."
+  },
   "healblock": { "available": false },
-  "healingwish": { "available": true },
+  "healingwish": {
+    "available": true,
+    "short": "User faints. Next hurt Pokemon is fully healed.",
+    "long": "The user faints, and if the Pokemon brought out to replace it does not have full HP or has a non-volatile status condition, its HP is fully restored along with having any non-volatile status condition cured. The replacement is sent out at the end of the turn, and the healing happens before hazards take effect. This effect continues until a Pokemon that meets either of these conditions switches in at the user's position or gets swapped into the position with Ally Switch. Fails if the user is the last unfainted Pokemon in its party."
+  },
   "healorder": { "available": false },
-  "healpulse": { "available": true },
+  "healpulse": {
+    "available": true,
+    "short": "Heals the target by 50% of its max HP.",
+    "long": "The target restores 1/2 of its maximum HP, rounded half up. If the user has the Mega Launcher Ability, the target instead restores 3/4 of its maximum HP, rounded half down."
+  },
   "heartstamp": { "available": false },
   "heartswap": { "available": false },
-  "heatcrash": { "available": true },
-  "heatwave": { "available": true },
-  "heavyslam": { "available": true },
-  "helpinghand": { "available": true },
-  "hex": { "available": true },
+  "heatcrash": {
+    "available": true,
+    "short": "More power the heavier the user than the target.",
+    "long": "The power of this move depends on (user's weight / target's weight), rounded down. Power is equal to 120 if the result is 5 or more, 100 if 4, 80 if 3, 60 if 2, and 40 if 1 or less. Damage doubles and no accuracy check is done if the target has used Minimize while active."
+  },
+  "heatwave": {
+    "available": true,
+    "short": "10% chance to burn the foe(s).",
+    "long": "Has a 10% chance to burn the target."
+  },
+  "heavyslam": {
+    "available": true,
+    "short": "More power the heavier the user than the target.",
+    "long": "The power of this move depends on (user's weight / target's weight), rounded down. Power is equal to 120 if the result is 5 or more, 100 if 4, 80 if 3, 60 if 2, and 40 if 1 or less. Damage doubles and no accuracy check is done if the target has used Minimize while active."
+  },
+  "helpinghand": {
+    "available": true,
+    "short": "One adjacent ally's move power is 1.5× this turn.",
+    "long": "The power of the target's attack this turn is multiplied by 1.5 (this effect is stackable). Fails if there is no ally adjacent to the user or if the ally already moved this turn, but does not fail if the ally is using a two-turn move."
+  },
+  "hex": {
+    "available": true,
+    "short": "Power doubles if the target has a status ailment.",
+    "long": "Power doubles if the target has a non-volatile status condition."
+  },
   "hiddenpower": { "available": false },
-  "highhorsepower": { "available": true },
-  "highjumpkick": { "available": true },
+  "highhorsepower": { "available": true, "short": "No additional effect.", "long": "No additional effect." },
+  "highjumpkick": {
+    "available": true,
+    "short": "User is hurt by 50% of its max HP if it misses.",
+    "long": "If this attack is not successful, the user loses half of its maximum HP, rounded down, as crash damage. Pokemon with the Magic Guard Ability are unaffected by crash damage."
+  },
   "holdback": { "available": false },
   "holdhands": { "available": false },
   "honeclaws": { "available": false },
   "hornattack": { "available": false },
-  "horndrill": { "available": true },
-  "hornleech": { "available": true },
-  "howl": { "available": true },
-  "hurricane": { "available": true },
-  "hydrocannon": { "available": true },
-  "hydropump": { "available": true },
+  "horndrill": {
+    "available": true,
+    "short": "OHKOs the target. Fails if user is a lower level.",
+    "long": "Deals damage to the target equal to the target's maximum HP. Ignores accuracy and evasiveness modifiers. This attack's accuracy is equal to (user's level - target's level + 30)%, and fails if the target is at a higher level. Pokemon with the Sturdy Ability are immune."
+  },
+  "hornleech": {
+    "available": true,
+    "short": "User recovers 50% of the damage dealt.",
+    "long": "The user recovers 1/2 the HP lost by the target, rounded half up. If Big Root is held by the user, the HP recovered is 1.3× normal, rounded half down."
+  },
+  "howl": {
+    "available": true,
+    "short": "Raises the user's and ally's Attack by 1.",
+    "long": "Raises the Attack of the user and all allies 1 stage."
+  },
+  "hurricane": {
+    "available": true,
+    "short": "30% chance to confuse target. Can't miss in rain.",
+    "long": "Has a 30% chance to confuse the target. This move can hit a target using Bounce, Fly, or Sky Drop, or is under the effect of Sky Drop. If the weather is Heavy Rain or Rain, this move does not check accuracy. If the weather is Intense Sun or Sun, this move's accuracy is 50%. If this move is used against a Pokemon holding Utility Umbrella, this move's accuracy remains at 70%."
+  },
+  "hydrocannon": {
+    "available": true,
+    "short": "User cannot move next turn.",
+    "long": "If this move is successful, the user must recharge on the following turn and cannot select a move."
+  },
+  "hydropump": { "available": true, "short": "No additional effect.", "long": "No additional effect." },
   "hydrosteam": { "available": false },
   "hydrovortex": { "available": false },
-  "hyperbeam": { "available": true },
+  "hyperbeam": {
+    "available": true,
+    "short": "User cannot move next turn.",
+    "long": "If this move is successful, the user must recharge on the following turn and cannot select a move."
+  },
   "hyperdrill": { "available": false },
   "hyperfang": { "available": false },
   "hyperspacefury": { "available": false },
   "hyperspacehole": { "available": false },
-  "hypervoice": { "available": true },
-  "hypnosis": { "available": true },
+  "hypervoice": {
+    "available": true,
+    "short": "No additional effect. Hits adjacent foes.",
+    "long": "No additional effect."
+  },
+  "hypnosis": {
+    "available": true,
+    "short": "Causes the target to fall asleep.",
+    "long": "Causes the target to fall asleep."
+  },
   "iceball": { "available": false },
-  "icebeam": { "available": true },
+  "icebeam": {
+    "available": true,
+    "short": "10% chance to freeze the target.",
+    "long": "Has a 10% chance to freeze the target."
+  },
   "iceburn": { "available": false },
-  "icefang": { "available": true },
-  "icehammer": { "available": true },
-  "icepunch": { "available": true },
-  "iceshard": { "available": true },
-  "icespinner": { "available": true },
-  "iciclecrash": { "available": true },
-  "iciclespear": { "available": true },
-  "icywind": { "available": true },
-  "imprison": { "available": true },
+  "icefang": {
+    "available": true,
+    "short": "10% chance to freeze. 10% chance to flinch.",
+    "long": "Has a 10% chance to freeze the target and a 10% chance to make it flinch."
+  },
+  "icehammer": {
+    "available": true,
+    "short": "Lowers the user's Speed by 1.",
+    "long": "Lowers the user's Speed by 1 stage."
+  },
+  "icepunch": {
+    "available": true,
+    "short": "10% chance to freeze the target.",
+    "long": "Has a 10% chance to freeze the target."
+  },
+  "iceshard": { "available": true, "short": "Usually goes first.", "long": "No additional effect." },
+  "icespinner": {
+    "available": true,
+    "short": "Ends the effects of terrain.",
+    "long": "Ends the effects of Electric Terrain, Grassy Terrain, Misty Terrain, and Psychic Terrain."
+  },
+  "iciclecrash": {
+    "available": true,
+    "short": "30% chance to make the target flinch.",
+    "long": "Has a 30% chance to make the target flinch."
+  },
+  "iciclespear": {
+    "available": true,
+    "short": "Hits 2-5 times in one turn.",
+    "long": "Hits two to five times. Has a 35% chance to hit two or three times and a 15% chance to hit four or five times. If one of the hits breaks the target's substitute, it will take damage for the remaining hits. If the user has the Skill Link Ability, this move will always hit five times. If the user is holding Loaded Dice, this move will hit 4-5 times."
+  },
+  "icywind": {
+    "available": true,
+    "short": "100% chance to lower the foe(s) Speed by 1.",
+    "long": "Has a 100% chance to lower the target's Speed by 1 stage."
+  },
+  "imprison": {
+    "available": true,
+    "short": "No foe can use any move known by the user.",
+    "long": "The user prevents all opposing Pokemon from using any moves that the user also knows as long as the user remains active."
+  },
   "incinerate": { "available": false },
-  "infernalparade": { "available": true },
-  "inferno": { "available": true },
+  "infernalparade": {
+    "available": true,
+    "short": "30% burn. 2× power if target is already statused.",
+    "long": "Has a 30% chance to burn the target. Power doubles if the target has a non-volatile status condition."
+  },
+  "inferno": {
+    "available": true,
+    "short": "100% chance to burn the target.",
+    "long": "Has a 100% chance to burn the target."
+  },
   "infernooverdrive": { "available": false },
-  "infestation": { "available": true },
-  "ingrain": { "available": true },
-  "instruct": { "available": true },
+  "infestation": {
+    "available": true,
+    "short": "Traps and damages the target for 4-5 turns.",
+    "long": "Prevents the target from switching for four or five turns (seven turns if the user is holding Grip Claw). Causes damage to the target equal to 1/8 of its maximum HP (1/6 if the user is holding Binding Band), rounded down, at the end of each turn during effect. The target can still switch out if it is holding Shed Shell or uses Baton Pass, Flip Turn, Parting Shot, Shed Tail, Teleport, U-turn, or Volt Switch. The effect ends if either the user or the target leaves the field, or if the target uses Mortal Spin, Rapid Spin, or Substitute successfully. This effect is not stackable or reset by using this or another binding move."
+  },
+  "ingrain": {
+    "available": true,
+    "short": "Traps/grounds user; heals 1/16 max HP per turn.",
+    "long": "The user has 1/16 of its maximum HP restored at the end of each turn, but it is prevented from switching out and other Pokemon cannot force the user to switch out. The user can still switch out if it uses Baton Pass, Flip Turn, Parting Shot, Teleport, U-turn, or Volt Switch. If the user leaves the field using Baton Pass, the replacement will remain trapped and still receive the healing effect. During the effect, the user can be hit normally by Ground-type attacks and be affected by Spikes, Toxic Spikes, and Sticky Web, even if the user is a Flying type or has the Levitate Ability."
+  },
+  "instruct": {
+    "available": true,
+    "short": "The target immediately uses its last used move.",
+    "long": "The target immediately uses its last used move. Fails if the target has not made a move, if the move has 0 PP, if the target is preparing to use Beak Blast, Focus Punch, or Shell Trap, or if the move is Assist, Beak Blast, Belch, Bide, Blazing Torque, Celebrate, Chatter, Combat Torque, Copycat, Dynamax Cannon, Focus Punch, Hold Hands, Ice Ball, Instruct, King's Shield, Magical Torque, Me First, Metronome, Mimic, Mirror Move, Nature Power, Noxious Torque, Obstruct, Outrage, Petal Dance, Rollout, Shell Trap, Sketch, Sleep Talk, Struggle, Thrash, Transform, Uproar, Wicked Torque, any two-turn move, or any recharge move."
+  },
   "iondeluge": { "available": false },
-  "irondefense": { "available": true },
-  "ironhead": { "available": true },
-  "irontail": { "available": true },
+  "irondefense": {
+    "available": true,
+    "short": "Raises the user's Defense by 2.",
+    "long": "Raises the user's Defense by 2 stages."
+  },
+  "ironhead": {
+    "available": true,
+    "short": "20% chance to make the target flinch.",
+    "long": "Has a 20% chance to make the target flinch."
+  },
+  "irontail": {
+    "available": true,
+    "short": "30% chance to lower the target's Defense by 1.",
+    "long": "Has a 30% chance to lower the target's Defense by 1 stage."
+  },
   "ivycudgel": { "available": false },
-  "jawlock": { "available": true },
-  "jetpunch": { "available": true },
+  "jawlock": {
+    "available": true,
+    "short": "Prevents both user and target from switching out.",
+    "long": "Prevents the user and the target from switching out. The user and the target can still switch out if either of them is holding Shed Shell or uses Baton Pass, Flip Turn, Parting Shot, Teleport, U-turn, or Volt Switch. The effect ends if either the user or the target leaves the field."
+  },
+  "jetpunch": { "available": true, "short": "Usually goes first.", "long": "No additional effect." },
   "judgment": { "available": false },
   "jumpkick": { "available": false },
   "junglehealing": { "available": false },
   "karatechop": { "available": false },
   "kinesis": { "available": false },
-  "kingsshield": { "available": true },
-  "knockoff": { "available": true },
-  "kowtowcleave": { "available": true },
+  "kingsshield": {
+    "available": true,
+    "short": "Protects from damaging attacks. Contact: -1 Atk.",
+    "long": "The user is protected from most attacks made by other Pokemon during this turn, and Pokemon trying to make contact with the user have their Attack lowered by 1 stage. Non-damaging moves go through this protection. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Burning Bulwark, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn."
+  },
+  "knockoff": {
+    "available": true,
+    "short": "1.5× damage if foe holds an item. Removes item.",
+    "long": "This move's power is multiplied by 1.5 if the target is holding an item, and the target loses its held item. A target with the Sticky Hold Ability does not lose its held item if it has not fainted. This move does not increase in power or remove the target's item if it is a Mega Stone held by the species that can Mega Evolve with it. Items lost to this move cannot be regained with Recycle or the Harvest Ability."
+  },
+  "kowtowcleave": {
+    "available": true,
+    "short": "This move does not check accuracy.",
+    "long": "This move does not check accuracy."
+  },
   "landswrath": { "available": false },
   "laserfocus": { "available": false },
-  "lashout": { "available": true },
-  "lastresort": { "available": true },
-  "lastrespects": { "available": true },
-  "lavaplume": { "available": true },
+  "lashout": {
+    "available": true,
+    "short": "2× power if the user had a stat lowered this turn.",
+    "long": "Power doubles if the user had a stat stage lowered this turn."
+  },
+  "lastresort": {
+    "available": true,
+    "short": "Fails unless each known move has been used.",
+    "long": "This move fails unless the user knows this move and at least one other move, and has used all the other moves it knows at least once each since it became active or Transformed."
+  },
+  "lastrespects": {
+    "available": true,
+    "short": "+50 power for each time a party member fainted.",
+    "long": "Power is equal to 50+(X × 50), where X is the total number of times any Pokemon has fainted on the user's side, and X cannot be greater than 100."
+  },
+  "lavaplume": {
+    "available": true,
+    "short": "30% chance to burn adjacent Pokemon.",
+    "long": "Has a 30% chance to burn the target."
+  },
   "leafage": { "available": false },
-  "leafblade": { "available": true },
-  "leafstorm": { "available": true },
+  "leafblade": {
+    "available": true,
+    "short": "High critical hit ratio.",
+    "long": "Has a higher chance for a critical hit."
+  },
+  "leafstorm": {
+    "available": true,
+    "short": "Lowers the user's Sp. Atk by 2.",
+    "long": "Lowers the user's Special Attack by 2 stages."
+  },
   "leaftornado": { "available": false },
-  "leechlife": { "available": true },
-  "leechseed": { "available": true },
+  "leechlife": {
+    "available": true,
+    "short": "User recovers 50% of the damage dealt.",
+    "long": "The user recovers 1/2 the HP lost by the target, rounded half up. If Big Root is held by the user, the HP recovered is 1.3× normal, rounded half down."
+  },
+  "leechseed": {
+    "available": true,
+    "short": "1/8 of target's HP is restored to user every turn.",
+    "long": "The Pokemon at the user's position steals 1/8 of the target's maximum HP, rounded down, at the end of each turn. If Big Root is held by the recipient, the HP recovered is 1.3× normal, rounded half down. If the target uses Baton Pass, the replacement will continue being leeched. If the target switches out or uses Mortal Spin or Rapid Spin successfully, the effect ends. Grass-type Pokemon are immune to this move on use, but not its effect."
+  },
   "leer": { "available": false },
   "letssnuggleforever": { "available": false },
   "lick": { "available": false },
-  "lifedew": { "available": true },
-  "lightofruin": { "available": true },
-  "lightscreen": { "available": true },
+  "lifedew": {
+    "available": true,
+    "short": "Heals the user and its allies by 1/4 their max HP.",
+    "long": "Each Pokemon on the user's side restores 1/4 of its maximum HP, rounded half up."
+  },
+  "lightofruin": {
+    "available": true,
+    "short": "Has 1/2 recoil.",
+    "long": "If the target lost HP, the user takes recoil damage equal to 1/2 the HP lost by the target, rounded half up, but not less than 1 HP."
+  },
+  "lightscreen": {
+    "available": true,
+    "short": "For 5 turns, special damage to allies is halved.",
+    "long": "For 5 turns, the user and its party members take 0.5× damage from special attacks, or 0.66× damage if in a Double Battle. Damage is not reduced further with Aurora Veil. Critical hits ignore this effect. It is removed from the user's side if the user or an ally is successfully hit by Brick Break, Psychic Fangs, or Defog. Lasts for 8 turns if the user is holding Light Clay. Fails if the effect is already active on the user's side."
+  },
   "lightthatburnsthesky": { "available": false },
-  "liquidation": { "available": true },
-  "lockon": { "available": true },
+  "liquidation": {
+    "available": true,
+    "short": "20% chance to lower the target's Defense by 1.",
+    "long": "Has a 20% chance to lower the target's Defense by 1 stage."
+  },
+  "lockon": {
+    "available": true,
+    "short": "User's next move will not miss the target.",
+    "long": "Until the end of the next turn, the target cannot avoid the user's moves, even if the target is in the middle of a two-turn move. The effect ends if either the user or the target leaves the field. Fails if this effect is active for the user."
+  },
   "lovelykiss": { "available": false },
-  "lowkick": { "available": true },
-  "lowsweep": { "available": true },
+  "lowkick": {
+    "available": true,
+    "short": "More power the heavier the target.",
+    "long": "This move's power is 20 if the target weighs less than 10 kg, 40 if less than 25 kg, 60 if less than 50 kg, 80 if less than 100 kg, 100 if less than 200 kg, and 120 if greater than or equal to 200 kg."
+  },
+  "lowsweep": {
+    "available": true,
+    "short": "100% chance to lower the target's Speed by 1.",
+    "long": "Has a 100% chance to lower the target's Speed by 1 stage."
+  },
   "luckychant": { "available": false },
-  "luminacrash": { "available": true },
+  "luminacrash": {
+    "available": true,
+    "short": "100% chance to lower the target's Sp. Def by 2.",
+    "long": "Has a 100% chance to lower the target's Special Defense by 2 stages."
+  },
   "lunarblessing": { "available": false },
   "lunardance": { "available": false },
-  "lunge": { "available": true },
+  "lunge": {
+    "available": true,
+    "short": "100% chance to lower the target's Attack by 1.",
+    "long": "Has a 100% chance to lower the target's Attack by 1 stage."
+  },
   "lusterpurge": { "available": false },
-  "machpunch": { "available": true },
+  "machpunch": { "available": true, "short": "Usually goes first.", "long": "No additional effect." },
   "magicalleaf": { "available": false },
   "magicaltorque": { "available": false },
   "magiccoat": { "available": false },
-  "magicpowder": { "available": true },
-  "magicroom": { "available": true },
+  "magicpowder": {
+    "available": true,
+    "short": "Changes the target's type to Psychic.",
+    "long": "Causes the target to become a Psychic type. Fails if the target is an Arceus or a Silvally, if the target is already purely Psychic type, or if the target is Terastallized."
+  },
+  "magicroom": {
+    "available": true,
+    "short": "For 5 turns, all held items have no effect.",
+    "long": "For 5 turns, the held items of all active Pokemon have no effect. An item's effect of causing forme changes is unaffected, but any other effects from such items are negated. During the effect, Fling and Natural Gift are prevented from being used by all active Pokemon. If this move is used during the effect, the effect ends."
+  },
   "magmastorm": { "available": false },
   "magnetbomb": { "available": false },
-  "magneticflux": { "available": true },
-  "magnetrise": { "available": true },
+  "magneticflux": {
+    "available": true,
+    "short": "Raises Def, Sp. Def of allies with Plus/Minus by 1.",
+    "long": "Raises the Defense and Special Defense of Pokemon on the user's side with the Plus or Minus Abilities by 1 stage."
+  },
+  "magnetrise": {
+    "available": true,
+    "short": "For 5 turns, the user has immunity to Ground.",
+    "long": "For 5 turns, the user is immune to Ground-type attacks and the effects of Spikes, Toxic Spikes, Sticky Web, and the Arena Trap Ability as long as it remains active. If the user uses Baton Pass, the replacement will gain the effect. Ingrain, Smack Down, Thousand Arrows, and Iron Ball override this move if the user is under any of their effects. Fails if the user is already under this effect or the effects of Ingrain, Smack Down, or Thousand Arrows."
+  },
   "magnitude": { "available": false },
-  "makeitrain": { "available": true },
+  "makeitrain": {
+    "available": true,
+    "short": "Lowers the user's Sp. Atk by 2. Hits foe(s).",
+    "long": "Lowers the user's Special Attack by 2 stages."
+  },
   "maliciousmoonsault": { "available": false },
   "malignantchain": { "available": false },
   "matblock": { "available": false },
-  "matchagotcha": { "available": true },
+  "matchagotcha": {
+    "available": true,
+    "short": "20% burn. Recovers 50% dmg dealt. Thaws foe(s).",
+    "long": "Has a 20% chance to burn the target. The user recovers 1/2 the HP lost by the target, rounded half up. If Big Root is held by the user, the HP recovered is 1.3× normal, rounded half down. The target thaws out if it is frozen."
+  },
   "maxairstream": { "available": false },
   "maxdarkness": { "available": false },
   "maxflare": { "available": false },
@@ -503,435 +1515,1351 @@
   "maxsteelspike": { "available": false },
   "maxstrike": { "available": false },
   "maxwyrmwind": { "available": false },
-  "meanlook": { "available": true },
+  "meanlook": {
+    "available": true,
+    "short": "Prevents the target from switching out.",
+    "long": "Prevents the target from switching out. The target can still switch out if it is holding Shed Shell or uses Baton Pass, Flip Turn, Parting Shot, Teleport, U-turn, or Volt Switch. The effect ends if either the user or the target leaves the field."
+  },
   "meditate": { "available": false },
   "mefirst": { "available": false },
   "megadrain": { "available": false },
-  "megahorn": { "available": true },
-  "megakick": { "available": true },
+  "megahorn": { "available": true, "short": "No additional effect.", "long": "No additional effect." },
+  "megakick": { "available": true, "short": "No additional effect.", "long": "No additional effect." },
   "megapunch": { "available": false },
-  "memento": { "available": true },
+  "memento": {
+    "available": true,
+    "short": "Lowers target's Attack, Sp. Atk by 2. User faints.",
+    "long": "Lowers the target's Attack and Special Attack by 2 stages. The user faints unless this move misses or there is no target. Fails entirely if this move hits a substitute, but does not fail if the target's stats cannot be changed."
+  },
   "menacingmoonrazemaelstrom": { "available": false },
-  "metalburst": { "available": true },
+  "metalburst": {
+    "available": true,
+    "short": "If hit by an attack, returns 1.5× damage.",
+    "long": "Deals damage to the last opposing Pokemon to hit the user with a physical or special attack this turn equal to 1.5 times the HP lost by the user from that attack, rounded down. If the user did not lose HP from that attack, this move deals 1 HP of damage instead. If that opposing Pokemon's position is no longer in use and there is another opposing Pokemon on the field, the damage is done to it instead. Only the last hit of a multi-hit attack is counted. Fails if the user was not hit by an opposing Pokemon's physical or special attack this turn."
+  },
   "metalclaw": { "available": false },
-  "metalsound": { "available": true },
-  "meteorassault": { "available": true },
-  "meteorbeam": { "available": true },
-  "meteormash": { "available": true },
+  "metalsound": {
+    "available": true,
+    "short": "Lowers the target's Sp. Def by 2.",
+    "long": "Lowers the target's Special Defense by 2 stages."
+  },
+  "meteorassault": {
+    "available": true,
+    "short": "User cannot move next turn.",
+    "long": "If this move is successful, the user must recharge on the following turn and cannot select a move."
+  },
+  "meteorbeam": {
+    "available": true,
+    "short": "Raises user's Sp. Atk by 1 on turn 1. Hits turn 2.",
+    "long": "This attack charges on the first turn and executes on the second. Raises the user's Special Attack by 1 stage on the first turn. If the user is holding a Power Herb, the move completes in one turn."
+  },
+  "meteormash": {
+    "available": true,
+    "short": "20% chance to raise the user's Attack by 1.",
+    "long": "Has a 20% chance to raise the user's Attack by 1 stage."
+  },
   "metronome": { "available": false },
   "mightycleave": { "available": false },
-  "milkdrink": { "available": true },
+  "milkdrink": {
+    "available": true,
+    "short": "Heals the user by 50% of its max HP.",
+    "long": "The user restores 1/2 of its maximum HP, rounded half up."
+  },
   "mimic": { "available": false },
   "mindblown": { "available": false },
   "mindreader": { "available": false },
-  "minimize": { "available": true },
+  "minimize": {
+    "available": true,
+    "short": "Raises the user's evasiveness by 2.",
+    "long": "Raises the user's evasiveness by 2 stages. Whether or not the user's evasiveness was changed, Body Slam, Dragon Rush, Flying Press, Heat Crash, Heavy Slam, Malicious Moonsault, Steamroller, Stomp, and Supercell Slam will not check accuracy and have their damage doubled if used against the user while it is active."
+  },
   "miracleeye": { "available": false },
-  "mirrorcoat": { "available": true },
+  "mirrorcoat": {
+    "available": true,
+    "short": "If hit by special attack, returns double damage.",
+    "long": "Deals damage to the last opposing Pokemon to hit the user with a special attack this turn equal to twice the HP lost by the user from that attack. If the user did not lose HP from the attack, this move deals 1 HP of damage instead. If that opposing Pokemon's position is no longer in use and there is another opposing Pokemon on the field, the damage is done to it instead. Only the last hit of a multi-hit attack is counted. Fails if the user was not hit by an opposing Pokemon's special attack this turn."
+  },
   "mirrormove": { "available": false },
   "mirrorshot": { "available": false },
   "mist": { "available": false },
   "mistball": { "available": false },
-  "mistyexplosion": { "available": true },
-  "mistyterrain": { "available": true },
-  "moonblast": { "available": true },
+  "mistyexplosion": {
+    "available": true,
+    "short": "User faints. User on Misty Terrain: 1.5× power.",
+    "long": "If the current terrain is Misty Terrain and the user is grounded, this move's power is multiplied by 1.5. The user faints after using this move, even if this move fails for having no target. This move is prevented from executing if any active Pokemon has the Damp Ability."
+  },
+  "mistyterrain": {
+    "available": true,
+    "short": "5 turns. Can't status,-Dragon power vs grounded.",
+    "long": "For 5 turns, the terrain becomes Misty Terrain. During the effect, the power of Dragon-type attacks used against grounded Pokemon is multiplied by 0.5 and grounded Pokemon cannot be inflicted with a non-volatile status condition nor confusion. Grounded Pokemon can become affected by Yawn but cannot fall asleep from its effect. Camouflage transforms the user into a Fairy type, Nature Power becomes Moonblast, and Secret Power has a 30% chance to lower Special Attack by 1 stage. Fails if the current terrain is Misty Terrain."
+  },
+  "moonblast": {
+    "available": true,
+    "short": "10% chance to lower the target's Sp. Atk by 1.",
+    "long": "Has a 10% chance to lower the target's Special Attack by 1 stage."
+  },
   "moongeistbeam": { "available": false },
-  "moonlight": { "available": true },
-  "morningsun": { "available": true },
-  "mortalspin": { "available": true },
-  "mountaingale": { "available": true },
+  "moonlight": {
+    "available": true,
+    "short": "Heals the user by a weather-dependent amount.",
+    "long": "The user restores 1/2 of its maximum HP if Strong Winds or no weather conditions are in effect or if the user is holding Utility Umbrella, 2/3 of its maximum HP if the weather is Intense Sun or Sun, and 1/4 of its maximum HP if the weather is Heavy Rain, Rain, Sandstorm, or Snow, all rounded half down."
+  },
+  "morningsun": {
+    "available": true,
+    "short": "Heals the user by a weather-dependent amount.",
+    "long": "The user restores 1/2 of its maximum HP if Strong Winds or no weather conditions are in effect or if the user is holding Utility Umbrella, 2/3 of its maximum HP if the weather is Intense Sun or Sun, and 1/4 of its maximum HP if the weather is Heavy Rain, Rain, Sandstorm, or Snow, all rounded half down."
+  },
+  "mortalspin": {
+    "available": true,
+    "short": "Poisons foes, frees user from hazards/bind/leech.",
+    "long": "If this move is successful and the user has not fainted, the effects of Leech Seed and binding moves end for the user, and all hazards are removed from the user's side of the field. Has a 100% chance to poison the target."
+  },
+  "mountaingale": {
+    "available": true,
+    "short": "30% chance to make the target flinch.",
+    "long": "Has a 30% chance to make the target flinch."
+  },
   "mudbomb": { "available": false },
-  "muddywater": { "available": true },
-  "mudshot": { "available": true },
-  "mudslap": { "available": true },
+  "muddywater": {
+    "available": true,
+    "short": "30% chance to lower the foe(s) accuracy by 1.",
+    "long": "Has a 30% chance to lower the target's accuracy by 1 stage."
+  },
+  "mudshot": {
+    "available": true,
+    "short": "100% chance to lower the target's Speed by 1.",
+    "long": "Has a 100% chance to lower the target's Speed by 1 stage."
+  },
+  "mudslap": {
+    "available": true,
+    "short": "100% chance to lower the target's accuracy by 1.",
+    "long": "Has a 100% chance to lower the target's accuracy by 1 stage."
+  },
   "mudsport": { "available": false },
   "multiattack": { "available": false },
-  "mysticalfire": { "available": true },
+  "mysticalfire": {
+    "available": true,
+    "short": "100% chance to lower the target's Sp. Atk by 1.",
+    "long": "Has a 100% chance to lower the target's Special Attack by 1 stage."
+  },
   "mysticalpower": { "available": false },
-  "nastyplot": { "available": true },
+  "nastyplot": {
+    "available": true,
+    "short": "Raises the user's Sp. Atk by 2.",
+    "long": "Raises the user's Special Attack by 2 stages."
+  },
   "naturalgift": { "available": false },
   "naturepower": { "available": false },
   "naturesmadness": { "available": false },
   "needlearm": { "available": false },
   "neverendingnightmare": { "available": false },
-  "nightdaze": { "available": true },
+  "nightdaze": {
+    "available": true,
+    "short": "40% chance to lower the target's accuracy by 1.",
+    "long": "Has a 40% chance to lower the target's accuracy by 1 stage."
+  },
   "nightmare": { "available": false },
-  "nightshade": { "available": true },
-  "nightslash": { "available": true },
+  "nightshade": {
+    "available": true,
+    "short": "Does damage equal to the user's level.",
+    "long": "Deals damage to the target equal to the user's level."
+  },
+  "nightslash": {
+    "available": true,
+    "short": "High critical hit ratio.",
+    "long": "Has a higher chance for a critical hit."
+  },
   "nihillight": { "available": false },
-  "nobleroar": { "available": true },
-  "noretreat": { "available": true },
+  "nobleroar": {
+    "available": true,
+    "short": "Lowers the target's Attack and Sp. Atk by 1.",
+    "long": "Lowers the target's Attack and Special Attack by 1 stage."
+  },
+  "noretreat": {
+    "available": true,
+    "short": "Raises all stats by 1 (not acc/eva). Traps user.",
+    "long": "Raises the user's Attack, Defense, Special Attack, Special Defense, and Speed by 1 stage, but it becomes prevented from switching out. The user can still switch out if it uses Baton Pass, Flip Turn, Parting Shot, Teleport, U-turn, or Volt Switch. Fails if the user has already been prevented from switching by this effect."
+  },
   "noxioustorque": { "available": false },
-  "nuzzle": { "available": true },
+  "nuzzle": {
+    "available": true,
+    "short": "100% chance to paralyze the target.",
+    "long": "Has a 100% chance to paralyze the target."
+  },
   "oblivionwing": { "available": false },
   "obstruct": { "available": false },
   "oceanicoperetta": { "available": false },
   "octazooka": { "available": false },
-  "octolock": { "available": true },
+  "octolock": {
+    "available": true,
+    "short": "Traps target, lowers Def and SpD by 1 each turn.",
+    "long": "Prevents the target from switching out. At the end of each turn during effect, the target's Defense and Special Defense are lowered by 1 stage. The target can still switch out if it is holding Shed Shell or uses Baton Pass, Flip Turn, Parting Shot, Teleport, U-turn, or Volt Switch. The effect ends if either the user or the target leaves the field."
+  },
   "odorsleuth": { "available": false },
   "ominouswind": { "available": false },
   "orderup": { "available": false },
   "originpulse": { "available": false },
-  "outrage": { "available": true },
-  "overdrive": { "available": true },
-  "overheat": { "available": true },
-  "painsplit": { "available": true },
-  "paraboliccharge": { "available": true },
-  "partingshot": { "available": true },
-  "payback": { "available": true },
+  "outrage": {
+    "available": true,
+    "short": "Lasts 2-3 turns. Confuses the user afterwards.",
+    "long": "The user spends two or three turns locked into this move and becomes confused immediately after its move on the last turn of the effect if it is not already. This move targets an opposing Pokemon at random on each turn. If the user is prevented from moving, is asleep at the beginning of a turn, or the attack is not successful against the target on the first turn of the effect or the second turn of a three-turn effect, the effect ends without causing confusion. If this move is called by Sleep Talk and the user is asleep, the move is used for one turn and does not confuse the user."
+  },
+  "overdrive": { "available": true, "short": "No additional effect. Hits foe(s).", "long": "No additional effect." },
+  "overheat": {
+    "available": true,
+    "short": "Lowers the user's Sp. Atk by 2.",
+    "long": "Lowers the user's Special Attack by 2 stages."
+  },
+  "painsplit": {
+    "available": true,
+    "short": "Shares HP of user and target equally.",
+    "long": "The user and the target's HP become the average of their current HP, rounded down, but not more than the maximum HP of either one."
+  },
+  "paraboliccharge": {
+    "available": true,
+    "short": "User recovers 50% of the damage dealt.",
+    "long": "The user recovers 1/2 the HP lost by the target, rounded half up. If Big Root is held by the user, the HP recovered is 1.3× normal, rounded half down."
+  },
+  "partingshot": {
+    "available": true,
+    "short": "Lowers target's Atk, Sp. Atk by 1. User switches.",
+    "long": "Lowers the target's Attack and Special Attack by 1 stage. If this move is successful, the user switches out even if it is trapped and is replaced immediately by a selected party member. The user does not switch out if the target's Attack and Special Attack stat stages were both unchanged, or if there are no unfainted party members."
+  },
+  "payback": {
+    "available": true,
+    "short": "Power doubles if the user moves after the target.",
+    "long": "Power doubles if the user moves after the target this turn, including actions taken through Instruct or the Dancer Ability. Switching in does not count as an action."
+  },
   "payday": { "available": false },
   "peck": { "available": false },
-  "perishsong": { "available": true },
-  "petalblizzard": { "available": true },
-  "petaldance": { "available": true },
-  "phantomforce": { "available": true },
+  "perishsong": {
+    "available": true,
+    "short": "All active Pokemon will faint in 3 turns.",
+    "long": "Each active Pokemon receives a perish count of 4 if it doesn't already have a perish count. At the end of each turn including the turn used, the perish count of all active Pokemon lowers by 1 and Pokemon faint if the number reaches 0. The perish count is removed from Pokemon that switch out. If a Pokemon uses Baton Pass while it has a perish count, the replacement will gain the perish count and continue to count down."
+  },
+  "petalblizzard": {
+    "available": true,
+    "short": "No additional effect. Hits adjacent Pokemon.",
+    "long": "No additional effect."
+  },
+  "petaldance": {
+    "available": true,
+    "short": "Lasts 2-3 turns. Confuses the user afterwards.",
+    "long": "The user spends two or three turns locked into this move and becomes confused immediately after its move on the last turn of the effect if it is not already. This move targets an opposing Pokemon at random on each turn. If the user is prevented from moving, is asleep at the beginning of a turn, or the attack is not successful against the target on the first turn of the effect or the second turn of a three-turn effect, the effect ends without causing confusion. If this move is called by Sleep Talk and the user is asleep, the move is used for one turn and does not confuse the user."
+  },
+  "phantomforce": {
+    "available": true,
+    "short": "Disappears turn 1. Hits turn 2. Breaks protection.",
+    "long": "If this move is successful, it breaks through the target's Baneful Bunker, Detect, King's Shield, Protect, or Spiky Shield for this turn, allowing other Pokemon to attack the target normally. If the target's side is protected by Crafty Shield, Mat Block, Quick Guard, or Wide Guard, that protection is also broken for this turn and other Pokemon may attack the target's side normally. This attack charges on the first turn and executes on the second. On the first turn, the user avoids all attacks. If the user is holding a Power Herb, the move completes in one turn."
+  },
   "photongeyser": { "available": false },
   "pikapapow": { "available": false },
-  "pinmissile": { "available": true },
+  "pinmissile": {
+    "available": true,
+    "short": "Hits 2-5 times in one turn.",
+    "long": "Hits two to five times. Has a 35% chance to hit two or three times and a 15% chance to hit four or five times. If one of the hits breaks the target's substitute, it will take damage for the remaining hits. If the user has the Skill Link Ability, this move will always hit five times. If the user is holding Loaded Dice, this move will hit 4-5 times."
+  },
   "plasmafists": { "available": false },
   "playnice": { "available": false },
-  "playrough": { "available": true },
-  "pluck": { "available": true },
-  "poisonfang": { "available": true },
+  "playrough": {
+    "available": true,
+    "short": "10% chance to lower the target's Attack by 1.",
+    "long": "Has a 10% chance to lower the target's Attack by 1 stage."
+  },
+  "pluck": {
+    "available": true,
+    "short": "User steals and eats the target's Berry.",
+    "long": "If this move is successful and the user has not fainted, it steals the target's held Berry if it is holding one and eats it immediately, gaining its effects even if the user's item is being ignored. Items lost to this move cannot be regained with Recycle or the Harvest Ability."
+  },
+  "poisonfang": {
+    "available": true,
+    "short": "50% chance to badly poison the target.",
+    "long": "Has a 50% chance to badly poison the target."
+  },
   "poisongas": { "available": false },
-  "poisonjab": { "available": true },
-  "poisonpowder": { "available": true },
+  "poisonjab": {
+    "available": true,
+    "short": "30% chance to poison the target.",
+    "long": "Has a 30% chance to poison the target."
+  },
+  "poisonpowder": { "available": true, "short": "Poisons the target.", "long": "Poisons the target." },
   "poisonsting": { "available": false },
   "poisontail": { "available": false },
-  "pollenpuff": { "available": true },
-  "poltergeist": { "available": true },
-  "populationbomb": { "available": true },
-  "pounce": { "available": true },
+  "pollenpuff": {
+    "available": true,
+    "short": "If the target is an ally, heals 50% of its max HP.",
+    "long": "If the target is an ally, this move restores 1/2 of its maximum HP, rounded down, instead of dealing damage."
+  },
+  "poltergeist": {
+    "available": true,
+    "short": "Fails if the target has no held item.",
+    "long": "Fails if the target has no held item."
+  },
+  "populationbomb": {
+    "available": true,
+    "short": "Hits 10 times. Each hit can miss.",
+    "long": "Hits ten times. This move checks accuracy for each hit, and the attack ends if the target avoids a hit. If one of the hits breaks the target's substitute, it will take damage for the remaining hits. If the user has the Skill Link Ability, this move will always hit ten times. If the user is holding Loaded Dice, this move hits four to ten times at random without checking accuracy between hits."
+  },
+  "pounce": {
+    "available": true,
+    "short": "100% chance to lower the target's Speed by 1.",
+    "long": "Has a 100% chance to lower the target's Speed by 1 stage."
+  },
   "pound": { "available": false },
   "powder": { "available": false },
   "powdersnow": { "available": false },
-  "powergem": { "available": true },
+  "powergem": { "available": true, "short": "No additional effect.", "long": "No additional effect." },
   "powershift": { "available": false },
-  "powersplit": { "available": true },
-  "powerswap": { "available": true },
-  "powertrick": { "available": true },
-  "powertrip": { "available": true },
+  "powersplit": {
+    "available": true,
+    "short": "Averages Attack and Sp. Atk stats with target.",
+    "long": "The user and the target have their Attack and Special Attack stats set to be equal to the average of the user and the target's Attack and Special Attack stats, respectively, rounded down. Stat stage changes are unaffected."
+  },
+  "powerswap": {
+    "available": true,
+    "short": "Swaps Attack and Sp. Atk stat stages with target.",
+    "long": "The user swaps its Attack and Special Attack stat stage changes with the target."
+  },
+  "powertrick": {
+    "available": true,
+    "short": "Switches user's Attack and Defense stats.",
+    "long": "The user swaps its Attack and Defense stats, and stat stage changes remain on their respective stats. This move can be used again to swap the stats back. If the user uses Baton Pass, the replacement will have its Attack and Defense stats swapped if the effect is active. If the user has its stats recalculated by changing forme while its stats are swapped, this effect is ignored but is still active for the purposes of Baton Pass."
+  },
+  "powertrip": {
+    "available": true,
+    "short": " + 20 power for each of the user's stat boosts.",
+    "long": "Power is equal to 20+(X × 20), where X is the user's total stat stage changes that are greater than 0."
+  },
   "poweruppunch": { "available": false },
-  "powerwhip": { "available": true },
+  "powerwhip": { "available": true, "short": "No additional effect.", "long": "No additional effect." },
   "precipiceblades": { "available": false },
   "present": { "available": false },
   "prismaticlaser": { "available": false },
-  "protect": { "available": true },
+  "protect": {
+    "available": true,
+    "short": "Prevents moves from affecting the user this turn.",
+    "long": "The user is protected from most attacks made by other Pokemon during this turn. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Burning Bulwark, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn."
+  },
   "psybeam": { "available": false },
   "psyblade": { "available": false },
-  "psychic": { "available": true },
-  "psychicfangs": { "available": true },
-  "psychicnoise": { "available": true },
-  "psychicterrain": { "available": true },
+  "psychic": {
+    "available": true,
+    "short": "10% chance to lower the target's Sp. Def by 1.",
+    "long": "Has a 10% chance to lower the target's Special Defense by 1 stage."
+  },
+  "psychicfangs": {
+    "available": true,
+    "short": "Destroys screens, unless the target is immune.",
+    "long": "If this attack does not miss, the effects of Reflect, Light Screen, and Aurora Veil end for the target's side of the field before damage is calculated."
+  },
+  "psychicnoise": {
+    "available": true,
+    "short": "For 2 turns, the target is prevented from healing.",
+    "long": "For 2 turns, the target is prevented from restoring any HP as long as it remains active. During the effect, healing and draining moves are unusable, and Abilities and items that grant healing will not heal the user. If an affected Pokemon uses Baton Pass, the replacement will remain unable to restore its HP. Pain Split and the Regenerator Ability are unaffected."
+  },
+  "psychicterrain": {
+    "available": true,
+    "short": "5 turns. Grounded: +Psychic power, priority-safe.",
+    "long": "For 5 turns, the terrain becomes Psychic Terrain. During the effect, the power of Psychic-type attacks made by grounded Pokemon is multiplied by 1.3 and grounded Pokemon cannot be hit by moves with priority greater than 0, unless the target is an ally. Camouflage transforms the user into a Psychic type, Nature Power becomes Psychic, and Secret Power has a 30% chance to lower the target's Speed by 1 stage. Fails if the current terrain is Psychic Terrain."
+  },
   "psychoboost": { "available": false },
-  "psychocut": { "available": true },
+  "psychocut": {
+    "available": true,
+    "short": "High critical hit ratio.",
+    "long": "Has a higher chance for a critical hit."
+  },
   "psychoshift": { "available": false },
-  "psychup": { "available": true },
-  "psyshieldbash": { "available": true },
-  "psyshock": { "available": true },
+  "psychup": {
+    "available": true,
+    "short": "Copies the target's current stat stages.",
+    "long": "The user copies all of the target's current stat stage changes."
+  },
+  "psyshieldbash": {
+    "available": true,
+    "short": "100% chance to raise the user's Defense by 1.",
+    "long": "Has a 100% chance to raise the user's Defense by 1 stage."
+  },
+  "psyshock": {
+    "available": true,
+    "short": "Damages target based on Defense, not Sp. Def.",
+    "long": "Deals damage to the target based on its Defense instead of Special Defense."
+  },
   "psystrike": { "available": false },
   "psywave": { "available": false },
   "pulverizingpancake": { "available": false },
   "punishment": { "available": false },
   "purify": { "available": false },
   "pursuit": { "available": false },
-  "pyroball": { "available": true },
-  "quash": { "available": true },
-  "quickattack": { "available": true },
-  "quickguard": { "available": true },
-  "quiverdance": { "available": true },
+  "pyroball": {
+    "available": true,
+    "short": "10% chance to burn the target. Thaws user.",
+    "long": "Has a 10% chance to burn the target."
+  },
+  "quash": {
+    "available": true,
+    "short": "Forces the target to move last this turn.",
+    "long": "Causes the target to take its turn after all other Pokemon this turn, no matter the priority of its selected move. Fails if the target already moved this turn."
+  },
+  "quickattack": { "available": true, "short": "Usually goes first.", "long": "No additional effect." },
+  "quickguard": {
+    "available": true,
+    "short": "Protects allies from priority attacks this turn.",
+    "long": "The user and its party members are protected from attacks with original or altered priority greater than 0 made by other Pokemon, including allies, during this turn. This move modifies the same 1/X chance of being successful used by other protection moves, where X starts at 1 and triples each time this move is successfully used, but does not use the chance to check for failure. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Burning Bulwark, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn or if this move is already in effect for the user's side."
+  },
+  "quiverdance": {
+    "available": true,
+    "short": "Raises the user's Sp. Atk, Sp. Def, Speed by 1.",
+    "long": "Raises the user's Special Attack, Special Defense, and Speed by 1 stage."
+  },
   "rage": { "available": false },
-  "ragefist": { "available": true },
-  "ragepowder": { "available": true },
-  "ragingbull": { "available": true },
-  "ragingfury": { "available": true },
-  "raindance": { "available": true },
-  "rapidspin": { "available": true },
+  "ragefist": {
+    "available": true,
+    "short": "+50 BP/hit on user. Max 6 hits. Resets on switch-out.",
+    "long": "Power is equal to 50+(X × 50), where X is the total number of times the user has been hit by a damaging attack during the battle, even if the user did not lose HP from the attack. X cannot be greater than 6 and resets to 0 when the user leaves the field. Each hit of a multi-hit attack is counted, but confusion damage is not counted."
+  },
+  "ragepowder": {
+    "available": true,
+    "short": "The foes' moves target the user on the turn used.",
+    "long": "Until the end of the turn, all single-target attacks from the opposing side are redirected to the user. Such attacks are redirected to the user before they can be reflected by Magic Coat or the Magic Bounce Ability, or drawn in by the Lightning Rod or Storm Drain Abilities. Fails if it is not a Double Battle or Battle Royal. This effect is ignored while the user is under the effect of Sky Drop."
+  },
+  "ragingbull": {
+    "available": true,
+    "short": "Destroys screens. Type depends on user's form.",
+    "long": "If this attack does not miss, the effects of Reflect, Light Screen, and Aurora Veil end for the target's side of the field before damage is calculated. If the user's current form is a Paldean Tauros, this move's type changes to match. Fighting type for Combat Breed, Fire type for Blaze Breed, and Water type for Aqua Breed."
+  },
+  "ragingfury": {
+    "available": true,
+    "short": "Lasts 2-3 turns. Confuses the user afterwards.",
+    "long": "The user spends two or three turns locked into this move and becomes confused immediately after its move on the last turn of the effect if it is not already. This move targets an opposing Pokemon at random on each turn. If the user is prevented from moving, is asleep at the beginning of a turn, or the attack is not successful against the target on the first turn of the effect or the second turn of a three-turn effect, the effect ends without causing confusion. If this move is called by Sleep Talk and the user is asleep, the move is used for one turn and does not confuse the user."
+  },
+  "raindance": {
+    "available": true,
+    "short": "For 5 turns, heavy rain powers Water moves.",
+    "long": "For 5 turns, the weather becomes Rain. The damage of Water-type attacks is multiplied by 1.5 and the damage of Fire-type attacks is multiplied by 0.5 during the effect. Lasts for 8 turns if the user is holding Damp Rock. Fails if the current weather is Rain."
+  },
+  "rapidspin": {
+    "available": true,
+    "short": "Free user from hazards/bind/Leech Seed; +1 Spe.",
+    "long": "If this move is successful and the user has not fainted, the effects of Leech Seed and binding moves end for the user, and all hazards are removed from the user's side of the field. Has a 100% chance to raise the user's Speed by 1 stage."
+  },
   "razorleaf": { "available": false },
-  "razorshell": { "available": true },
+  "razorshell": {
+    "available": true,
+    "short": "50% chance to lower the target's Defense by 1.",
+    "long": "Has a 50% chance to lower the target's Defense by 1 stage."
+  },
   "razorwind": { "available": false },
-  "recover": { "available": true },
-  "recycle": { "available": true },
-  "reflect": { "available": true },
-  "reflecttype": { "available": true },
+  "recover": {
+    "available": true,
+    "short": "Heals the user by 50% of its max HP.",
+    "long": "The user restores 1/2 of its maximum HP, rounded half up."
+  },
+  "recycle": {
+    "available": true,
+    "short": "Restores the item the user last used.",
+    "long": "The user regains the item it last used. Fails if the user is holding an item, if the user has not held an item, if the item was a popped Air Balloon, if the item was picked up by a Pokemon with the Pickup Ability, or if the item was lost to Bug Bite, Corrosive Gas, Covet, Incinerate, Knock Off, Pluck, or Thief. Items thrown with Fling can be regained."
+  },
+  "reflect": {
+    "available": true,
+    "short": "For 5 turns, physical damage to allies is halved.",
+    "long": "For 5 turns, the user and its party members take 0.5× damage from physical attacks, or 0.66× damage if in a Double Battle. Damage is not reduced further with Aurora Veil. Critical hits ignore this effect. It is removed from the user's side if the user or an ally is successfully hit by Brick Break, Psychic Fangs, or Defog. Lasts for 8 turns if the user is holding Light Clay. Fails if the effect is already active on the user's side."
+  },
+  "reflecttype": {
+    "available": true,
+    "short": "User becomes the same type as the target.",
+    "long": "Causes the user's types to become the same as the current types of the target. If the target's current types include typeless and a non-added type, typeless is ignored. If the target's current types include typeless and an added type from Forest's Curse or Trick-or-Treat, typeless is copied as the Normal type instead. Fails if the user is an Arceus or a Silvally, if the user is Terastallized, or if the target's current type is typeless alone."
+  },
   "refresh": { "available": false },
   "relicsong": { "available": false },
-  "rest": { "available": true },
+  "rest": {
+    "available": true,
+    "short": "User sleeps 2 turns and restores HP and status.",
+    "long": "The user falls asleep for the next two turns and restores all of its HP, curing itself of any non-volatile status condition in the process. Fails if the user has full HP, is already asleep, or if another effect is preventing sleep."
+  },
   "retaliate": { "available": false },
   "return": { "available": false },
   "revelationdance": { "available": false },
   "revenge": { "available": false },
-  "reversal": { "available": true },
-  "revivalblessing": { "available": true },
-  "risingvoltage": { "available": true },
-  "roar": { "available": true },
+  "reversal": {
+    "available": true,
+    "short": "More power the less HP the user has left.",
+    "long": "The power of this move is 20 if X is 33 to 48, 40 if X is 17 to 32, 80 if X is 10 to 16, 100 if X is 5 to 9, 150 if X is 2 to 4, and 200 if X is 0 or 1, where X is equal to (user's current HP × 48 / user's maximum HP), rounded down."
+  },
+  "revivalblessing": {
+    "available": true,
+    "short": "Revives a fainted Pokemon to 50% HP.",
+    "long": "A fainted party member is selected and revived with 1/2 its max HP, rounded down. Fails if there are no fainted party members."
+  },
+  "risingvoltage": {
+    "available": true,
+    "short": "2× power if target is grounded in Electric Terrain.",
+    "long": "If the current terrain is Electric Terrain and the target is grounded, this move's power is doubled."
+  },
+  "roar": {
+    "available": true,
+    "short": "Forces the target to switch to a random ally.",
+    "long": "The target is forced to switch out and be replaced with a random unfainted ally. Fails if the target is the last unfainted Pokemon in its party, or if the target used Ingrain previously or has the Suction Cups Ability."
+  },
   "roaroftime": { "available": false },
-  "rockblast": { "available": true },
+  "rockblast": {
+    "available": true,
+    "short": "Hits 2-5 times in one turn.",
+    "long": "Hits two to five times. Has a 35% chance to hit two or three times and a 15% chance to hit four or five times. If one of the hits breaks the target's substitute, it will take damage for the remaining hits. If the user has the Skill Link Ability, this move will always hit five times. If the user is holding Loaded Dice, this move will hit 4-5 times."
+  },
   "rockclimb": { "available": false },
-  "rockpolish": { "available": true },
-  "rockslide": { "available": true },
+  "rockpolish": {
+    "available": true,
+    "short": "Raises the user's Speed by 2.",
+    "long": "Raises the user's Speed by 2 stages."
+  },
+  "rockslide": {
+    "available": true,
+    "short": "30% chance to make the foe(s) flinch.",
+    "long": "Has a 30% chance to make the target flinch."
+  },
   "rocksmash": { "available": false },
   "rockthrow": { "available": false },
-  "rocktomb": { "available": true },
-  "rockwrecker": { "available": true },
-  "roleplay": { "available": true },
+  "rocktomb": {
+    "available": true,
+    "short": "100% chance to lower the target's Speed by 1.",
+    "long": "Has a 100% chance to lower the target's Speed by 1 stage."
+  },
+  "rockwrecker": {
+    "available": true,
+    "short": "User cannot move next turn.",
+    "long": "If this move is successful, the user must recharge on the following turn and cannot select a move."
+  },
+  "roleplay": {
+    "available": true,
+    "short": "User replaces its Ability with the target's.",
+    "long": "The user's Ability changes to match the target's Ability. Fails if the user's Ability is As One, Battle Bond, Comatose, Disguise, Gulp Missile, Ice Face, Multitype, Power Construct, RKS System, Schooling, Shields Down, Stance Change, Tera Shift, Zen Mode, Zero to Hero, or already matches the target, or if the target's Ability is As One, Battle Bond, Comatose, Commander, Disguise, Embody Aspect, Flower Gift, Forecast, Hunger Switch, Ice Face, Illusion, Imposter, Multitype, Neutralizing Gas, Poison Puppeteer, Power Construct, Power of Alchemy, Protosynthesis, Quark Drive, Receiver, RKS System, Schooling, Shields Down, Stance Change, Tera Shell, Tera Shift, Teraform Zero, Trace, Wonder Guard, Zen Mode, or Zero to Hero."
+  },
   "rollingkick": { "available": false },
   "rollout": { "available": false },
-  "roost": { "available": true },
+  "roost": {
+    "available": true,
+    "short": "Heals 50% HP. Flying-type removed 'til turn ends.",
+    "long": "The user restores 1/2 of its maximum HP, rounded half up. If the user is not Terastallized, until the end of the turn Flying-type users lose their Flying type and pure Flying-type users become Normal type. Does nothing if the user's HP is full."
+  },
   "rototiller": { "available": false },
-  "round": { "available": true },
+  "round": {
+    "available": true,
+    "short": "Power doubles if others used Round this turn.",
+    "long": "If there are other active Pokemon that chose this move for use this turn, those Pokemon take their turn immediately after the user, in Speed order, and this move's power is 120 for each other user."
+  },
   "ruination": { "available": false },
   "sacredfire": { "available": false },
-  "sacredsword": { "available": true },
-  "safeguard": { "available": true },
-  "saltcure": { "available": true },
+  "sacredsword": {
+    "available": true,
+    "short": "Ignores the target's stat stage changes.",
+    "long": "Ignores the target's stat stage changes, including evasiveness."
+  },
+  "safeguard": {
+    "available": true,
+    "short": "For 5 turns, protects user's party from status.",
+    "long": "For 5 turns, the user and its party members cannot have non-volatile status conditions or confusion inflicted on them by other Pokemon. Pokemon on the user's side cannot become affected by Yawn but can fall asleep from its effect. It is removed from the user's side if the user or an ally is successfully hit by Defog. Fails if the effect is already active on the user's side."
+  },
+  "saltcure": {
+    "available": true,
+    "short": "Deals 1/16 max HP each turn; 1/8 on Steel, Water.",
+    "long": "Causes damage to the target equal to 1/16 of its maximum HP (1/8 if the target is Steel or Water type), rounded down, at the end of each turn during effect. This effect ends when the target is no longer active."
+  },
   "sandattack": { "available": false },
   "sandsearstorm": { "available": false },
-  "sandstorm": { "available": true },
-  "sandtomb": { "available": true },
+  "sandstorm": {
+    "available": true,
+    "short": "For 5 turns, a sandstorm rages. Rock: 1.5× SpD.",
+    "long": "For 5 turns, the weather becomes Sandstorm. At the end of each turn except the last, all active Pokemon lose 1/16 of their maximum HP, rounded down, unless they are a Ground, Rock, or Steel type, or have the Magic Guard, Overcoat, Sand Force, Sand Rush, or Sand Veil Abilities. During the effect, the Special Defense of Rock-type Pokemon is multiplied by 1.5 when taking damage from a special attack. Lasts for 8 turns if the user is holding Smooth Rock. Fails if the current weather is Sandstorm."
+  },
+  "sandtomb": {
+    "available": true,
+    "short": "Traps and damages the target for 4-5 turns.",
+    "long": "Prevents the target from switching for four or five turns (seven turns if the user is holding Grip Claw). Causes damage to the target equal to 1/8 of its maximum HP (1/6 if the user is holding Binding Band), rounded down, at the end of each turn during effect. The target can still switch out if it is holding Shed Shell or uses Baton Pass, Flip Turn, Parting Shot, Shed Tail, Teleport, U-turn, or Volt Switch. The effect ends if either the user or the target leaves the field, or if the target uses Mortal Spin, Rapid Spin, or Substitute successfully. This effect is not stackable or reset by using this or another binding move."
+  },
   "sappyseed": { "available": false },
   "savagespinout": { "available": false },
-  "scald": { "available": true },
-  "scaleshot": { "available": true },
-  "scaryface": { "available": true },
-  "scorchingsands": { "available": true },
+  "scald": {
+    "available": true,
+    "short": "30% chance to burn the target. Thaws target.",
+    "long": "Has a 30% chance to burn the target. The target thaws out if it is frozen."
+  },
+  "scaleshot": {
+    "available": true,
+    "short": "Hits 2-5 times. User: -1 Def, +1 Spe after last hit.",
+    "long": "Hits two to five times. Lowers the user's Defense by 1 stage and raises the user's Speed by 1 stage after the last hit. Has a 35% chance to hit two or three times and a 15% chance to hit four or five times. If one of the hits breaks the target's substitute, it will take damage for the remaining hits. If the user has the Skill Link Ability, this move will always hit five times. If the user is holding Loaded Dice, this move will hit 4-5 times."
+  },
+  "scaryface": {
+    "available": true,
+    "short": "Lowers the target's Speed by 2.",
+    "long": "Lowers the target's Speed by 2 stages."
+  },
+  "scorchingsands": {
+    "available": true,
+    "short": "30% chance to burn the target. Thaws target.",
+    "long": "Has a 30% chance to burn the target. The target thaws out if it is frozen."
+  },
   "scratch": { "available": false },
-  "screech": { "available": true },
+  "screech": {
+    "available": true,
+    "short": "Lowers the target's Defense by 2.",
+    "long": "Lowers the target's Defense by 2 stages."
+  },
   "searingshot": { "available": false },
   "searingsunrazesmash": { "available": false },
   "secretpower": { "available": false },
   "secretsword": { "available": false },
-  "seedbomb": { "available": true },
+  "seedbomb": { "available": true, "short": "No additional effect.", "long": "No additional effect." },
   "seedflare": { "available": false },
-  "seismictoss": { "available": true },
-  "selfdestruct": { "available": true },
-  "shadowball": { "available": true },
+  "seismictoss": {
+    "available": true,
+    "short": "Does damage equal to the user's level.",
+    "long": "Deals damage to the target equal to the user's level."
+  },
+  "selfdestruct": {
+    "available": true,
+    "short": "Hits adjacent Pokemon. The user faints.",
+    "long": "The user faints after using this move, even if this move fails for having no target. This move is prevented from executing if any active Pokemon has the Damp Ability."
+  },
+  "shadowball": {
+    "available": true,
+    "short": "20% chance to lower the target's Sp. Def by 1.",
+    "long": "Has a 20% chance to lower the target's Special Defense by 1 stage."
+  },
   "shadowbone": { "available": false },
-  "shadowclaw": { "available": true },
+  "shadowclaw": {
+    "available": true,
+    "short": "High critical hit ratio.",
+    "long": "Has a higher chance for a critical hit."
+  },
   "shadowforce": { "available": false },
-  "shadowpunch": { "available": true },
-  "shadowsneak": { "available": true },
+  "shadowpunch": {
+    "available": true,
+    "short": "This move does not check accuracy.",
+    "long": "This move does not check accuracy."
+  },
+  "shadowsneak": { "available": true, "short": "Usually goes first.", "long": "No additional effect." },
   "sharpen": { "available": false },
   "shatteredpsyche": { "available": false },
-  "shedtail": { "available": true },
-  "sheercold": { "available": true },
-  "shellsidearm": { "available": true },
-  "shellsmash": { "available": true },
+  "shedtail": {
+    "available": true,
+    "short": "User takes 1/2 its max HP to pass a substitute.",
+    "long": "The user takes 1/2 of its maximum HP, rounded up, and creates a substitute that has 1/4 of the user's maximum HP, rounded down. The user is replaced with another Pokemon in its party and the selected Pokemon has the substitute transferred to it. Fails if the user would faint, or if there are no unfainted party members."
+  },
+  "sheercold": {
+    "available": true,
+    "short": "OHKOs non-Ice targets. Fails if user's lower level.",
+    "long": "Deals damage to the target equal to the target's maximum HP. Ignores accuracy and evasiveness modifiers. This attack's accuracy is equal to (user's level - target's level + X)%, where X is 30 if the user is an Ice type and 20 otherwise, and fails if the target is at a higher level. Ice-type Pokemon and Pokemon with the Sturdy Ability are immune."
+  },
+  "shellsidearm": {
+    "available": true,
+    "short": "20% psn. Physical+contact if it would be stronger.",
+    "long": "Has a 20% chance to poison the target. This move becomes a physical attack that makes contact if the value of ((((2 × the user's level / 5 + 2) × 90 × X) / Y) / 50), where X is the user's Attack stat and Y is the target's Defense stat, is greater than the same value where X is the user's Special Attack stat and Y is the target's Special Defense stat. No stat modifiers other than stat stage changes are considered for this purpose. If the two values are equal, this move chooses a damage category at random."
+  },
+  "shellsmash": {
+    "available": true,
+    "short": "Lowers Def, SpD by 1; raises Atk, SpA, Spe by 2.",
+    "long": "Lowers the user's Defense and Special Defense by 1 stage. Raises the user's Attack, Special Attack, and Speed by 2 stages."
+  },
   "shelltrap": { "available": false },
-  "shelter": { "available": true },
-  "shiftgear": { "available": true },
+  "shelter": {
+    "available": true,
+    "short": "Raises the user's Defense by 2.",
+    "long": "Raises the user's Defense by 2 stages."
+  },
+  "shiftgear": {
+    "available": true,
+    "short": "Raises the user's Speed by 2 and Attack by 1.",
+    "long": "Raises the user's Speed by 2 stages and its Attack by 1 stage."
+  },
   "shockwave": { "available": false },
   "shoreup": { "available": false },
   "signalbeam": { "available": false },
   "silktrap": { "available": false },
   "silverwind": { "available": false },
-  "simplebeam": { "available": true },
-  "sing": { "available": true },
+  "simplebeam": {
+    "available": true,
+    "short": "The target's Ability becomes Simple.",
+    "long": "Causes the target's Ability to become Simple. Fails if the target's Ability is As One, Battle Bond, Comatose, Disguise, Gulp Missile, Ice Face, Multitype, Power Construct, RKS System, Schooling, Shields Down, Simple, Stance Change, Tera Shift, Truant, Zen Mode, or Zero to Hero."
+  },
+  "sing": {
+    "available": true,
+    "short": "Causes the target to fall asleep.",
+    "long": "Causes the target to fall asleep."
+  },
   "sinisterarrowraid": { "available": false },
   "sizzlyslide": { "available": false },
   "sketch": { "available": false },
-  "skillswap": { "available": true },
-  "skittersmack": { "available": true },
+  "skillswap": {
+    "available": true,
+    "short": "The user and the target trade Abilities.",
+    "long": "The user swaps its Ability with the target's Ability. Fails if either the user or the target's Ability is As One, Battle Bond, Comatose, Commander, Disguise, Embody Aspect, Hunger Switch, Ice Face, Illusion, Multitype, Neutralizing Gas, Poison Puppeteer, Power Construct, Protosynthesis, Quark Drive, RKS System, Schooling, Shields Down, Stance Change, Tera Shell, Tera Shift, Teraform Zero, Wonder Guard, Zen Mode, or Zero to Hero."
+  },
+  "skittersmack": {
+    "available": true,
+    "short": "100% chance to lower target's Sp. Atk by 1.",
+    "long": "Has a 100% chance to lower the target's Special Attack by 1 stage."
+  },
   "skullbash": { "available": false },
-  "skyattack": { "available": true },
+  "skyattack": {
+    "available": true,
+    "short": "Charges, then hits turn 2. 30% flinch. High crit.",
+    "long": "Has a 30% chance to make the target flinch and a higher chance for a critical hit. This attack charges on the first turn and executes on the second. If the user is holding a Power Herb, the move completes in one turn."
+  },
   "skydrop": { "available": false },
   "skyuppercut": { "available": false },
-  "slackoff": { "available": true },
+  "slackoff": {
+    "available": true,
+    "short": "Heals the user by 50% of its max HP.",
+    "long": "The user restores 1/2 of its maximum HP, rounded half up."
+  },
   "slam": { "available": false },
-  "slash": { "available": true },
-  "sleeppowder": { "available": true },
-  "sleeptalk": { "available": true },
+  "slash": {
+    "available": true,
+    "short": "High critical hit ratio.",
+    "long": "Has a higher chance for a critical hit."
+  },
+  "sleeppowder": {
+    "available": true,
+    "short": "Causes the target to fall asleep.",
+    "long": "Causes the target to fall asleep."
+  },
+  "sleeptalk": {
+    "available": true,
+    "short": "User must be asleep. Uses another known move.",
+    "long": "One of the user's known moves, besides this move, is selected for use at random. Fails if the user is not asleep. The selected move does not have PP deducted from it, and can currently have 0 PP. This move cannot select Assist, Beak Blast, Belch, Bide, Blazing Torque, Celebrate, Chatter, Combat Torque, Copycat, Dynamax Cannon, Focus Punch, Hold Hands, Magical Torque, Me First, Metronome, Mimic, Mirror Move, Nature Power, Noxious Torque, Shell Trap, Sketch, Sleep Talk, Struggle, Uproar, Wicked Torque, or any two-turn move."
+  },
   "sludge": { "available": false },
-  "sludgebomb": { "available": true },
-  "sludgewave": { "available": true },
-  "smackdown": { "available": true },
-  "smartstrike": { "available": true },
+  "sludgebomb": {
+    "available": true,
+    "short": "30% chance to poison the target.",
+    "long": "Has a 30% chance to poison the target."
+  },
+  "sludgewave": {
+    "available": true,
+    "short": "10% chance to poison adjacent Pokemon.",
+    "long": "Has a 10% chance to poison the target."
+  },
+  "smackdown": {
+    "available": true,
+    "short": "Removes the target's Ground immunity.",
+    "long": "This move can hit a target using Bounce, Fly, or Sky Drop, or is under the effect of Sky Drop. If this move hits a target under the effect of Bounce, Fly, Magnet Rise, or Telekinesis, the effect ends. If the target is a Flying type that has not used Roost this turn or a Pokemon with the Levitate Ability, it loses its immunity to Ground-type attacks and the Arena Trap Ability as long as it remains active. During the effect, Magnet Rise fails for the target and Telekinesis fails against the target."
+  },
+  "smartstrike": {
+    "available": true,
+    "short": "This move does not check accuracy.",
+    "long": "This move does not check accuracy."
+  },
   "smellingsalts": { "available": false },
   "smog": { "available": false },
   "smokescreen": { "available": false },
-  "snaptrap": { "available": true },
-  "snarl": { "available": true },
+  "snaptrap": {
+    "available": true,
+    "short": "Traps and damages the target for 4-5 turns.",
+    "long": "Prevents the target from switching for four or five turns (seven turns if the user is holding Grip Claw). Causes damage to the target equal to 1/8 of its maximum HP (1/6 if the user is holding Binding Band), rounded down, at the end of each turn during effect. The target can still switch out if it is holding Shed Shell or uses Baton Pass, Flip Turn, Parting Shot, Shed Tail, Teleport, U-turn, or Volt Switch. The effect ends if either the user or the target leaves the field, or if the target uses Mortal Spin, Rapid Spin, or Substitute successfully. This effect is not stackable or reset by using this or another binding move."
+  },
+  "snarl": {
+    "available": true,
+    "short": "100% chance to lower the foe(s) Sp. Atk by 1.",
+    "long": "Has a 100% chance to lower the target's Special Attack by 1 stage."
+  },
   "snatch": { "available": false },
-  "snipeshot": { "available": true },
-  "snore": { "available": true },
-  "snowscape": { "available": true },
-  "soak": { "available": true },
+  "snipeshot": {
+    "available": true,
+    "short": "High critical hit ratio. Cannot be redirected.",
+    "long": "Has a higher chance for a critical hit. This move cannot be redirected to a different target by any effect."
+  },
+  "snore": {
+    "available": true,
+    "short": "User must be asleep. 30% chance to flinch target.",
+    "long": "Has a 30% chance to make the target flinch. Fails if the user is not asleep."
+  },
+  "snowscape": {
+    "available": true,
+    "short": "For 5 turns, snow falls. Ice: 1.5× Def.",
+    "long": "For 5 turns, the weather becomes Snow. During the effect, the Defense of Ice-type Pokemon is multiplied by 1.5 when taking damage from a physical attack. Lasts for 8 turns if the user is holding Icy Rock. Fails if the current weather is Snow."
+  },
+  "soak": {
+    "available": true,
+    "short": "Changes the target's type to Water.",
+    "long": "Causes the target to become a Water type. Fails if the target is an Arceus or a Silvally, if the target is already purely Water type, or if the target is Terastallized."
+  },
   "softboiled": { "available": false },
-  "solarbeam": { "available": true },
-  "solarblade": { "available": true },
+  "solarbeam": {
+    "available": true,
+    "short": "Charges turn 1. Hits turn 2. No charge in sunlight.",
+    "long": "This attack charges on the first turn and executes on the second. Power is halved if the weather is Heavy Rain, Rain, Sandstorm, or Snow and the user is not holding Utility Umbrella. If the user is holding a Power Herb or the weather is Intense Sun or Sun, the move completes in one turn. If the user is holding Utility Umbrella and the weather is Intense Sun or Sun, the move still requires a turn to charge."
+  },
+  "solarblade": {
+    "available": true,
+    "short": "Charges turn 1. Hits turn 2. No charge in sunlight.",
+    "long": "This attack charges on the first turn and executes on the second. Power is halved if the weather is Heavy Rain, Rain, Sandstorm, or Snow and the user is not holding Utility Umbrella. If the user is holding a Power Herb or the weather is Intense Sun or Sun, the move completes in one turn. If the user is holding Utility Umbrella and the weather is Intense Sun or Sun, the move still requires a turn to charge."
+  },
   "sonicboom": { "available": false },
   "soulstealing7starstrike": { "available": false },
   "spacialrend": { "available": false },
   "spark": { "available": false },
-  "sparklingaria": { "available": true },
+  "sparklingaria": {
+    "available": true,
+    "short": "The target is cured of its burn.",
+    "long": "If the user has not fainted, the target is cured of its burn."
+  },
   "sparklyswirl": { "available": false },
   "spectralthief": { "available": false },
-  "speedswap": { "available": true },
-  "spicyextract": { "available": true },
+  "speedswap": {
+    "available": true,
+    "short": "Swaps Speed stat with target.",
+    "long": "The user swaps its Speed stat with the target. Stat stage changes are unaffected."
+  },
+  "spicyextract": {
+    "available": true,
+    "short": "Raises target's Atk by 2 and lowers its Def by 2.",
+    "long": "Raises the target's Attack by 2 stages and lowers its Defense by 2 stages."
+  },
   "spiderweb": { "available": false },
   "spikecannon": { "available": false },
-  "spikes": { "available": true },
-  "spikyshield": { "available": true },
+  "spikes": {
+    "available": true,
+    "short": "Hurts grounded foes on switch-in. Max 3 layers.",
+    "long": "Sets up a hazard on the opposing side of the field, damaging each opposing Pokemon that switches in, unless it is a Flying-type Pokemon or has the Levitate Ability. Can be used up to three times before failing. Opponents lose 1/8 of their maximum HP with one layer, 1/6 of their maximum HP with two layers, and 1/4 of their maximum HP with three layers, all rounded down. Can be removed from the opposing side if any Pokemon uses Tidy Up, or if any opposing Pokemon uses Mortal Spin, Rapid Spin, or Defog successfully, or is hit by Defog."
+  },
+  "spikyshield": {
+    "available": true,
+    "short": "Protects from moves. Contact: loses 1/8 max HP.",
+    "long": "The user is protected from most attacks made by other Pokemon during this turn, and Pokemon making contact with the user lose 1/8 of their maximum HP, rounded down. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Burning Bulwark, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn."
+  },
   "spinout": { "available": false },
-  "spiritbreak": { "available": true },
-  "spiritshackle": { "available": true },
-  "spite": { "available": true },
-  "spitup": { "available": true },
+  "spiritbreak": {
+    "available": true,
+    "short": "100% chance to lower the target's Sp. Atk by 1.",
+    "long": "Has a 100% chance to lower the target's Special Attack by 1 stage."
+  },
+  "spiritshackle": {
+    "available": true,
+    "short": "Prevents the target from switching out.",
+    "long": "Prevents the target from switching out. The target can still switch out if it is holding Shed Shell or uses Baton Pass, Flip Turn, Parting Shot, Teleport, U-turn, or Volt Switch. The effect ends if either the user or the target leaves the field."
+  },
+  "spite": {
+    "available": true,
+    "short": "Lowers the PP of the target's last move by 4.",
+    "long": "Causes the target's last move used to lose 4 PP. Fails if the target has not made a move, if the move has 0 PP, or if it no longer knows the move."
+  },
+  "spitup": {
+    "available": true,
+    "short": "More power with more uses of Stockpile.",
+    "long": "Power is equal to 100 times the user's Stockpile count. Fails if the user's Stockpile count is 0. Whether or not this move is successful, the user's Defense and Special Defense decrease by as many stages as Stockpile had increased them, and the user's Stockpile count resets to 0."
+  },
   "splash": { "available": false },
   "splinteredstormshards": { "available": false },
   "splishysplash": { "available": false },
   "spore": { "available": false },
   "spotlight": { "available": false },
   "springtidestorm": { "available": false },
-  "stealthrock": { "available": true },
+  "stealthrock": {
+    "available": true,
+    "short": "Hurts foes on switch-in. Factors Rock weakness.",
+    "long": "Sets up a hazard on the opposing side of the field, damaging each opposing Pokemon that switches in. Fails if the effect is already active on the opposing side. Foes lose 1/32, 1/16, 1/8, 1/4, or 1/2 of their maximum HP, rounded down, based on their weakness to the Rock type; 0.25×, 0.5×, neutral, 2×, or 4×, respectively. Can be removed from the opposing side if any Pokemon uses Tidy Up, or if any opposing Pokemon uses Mortal Spin, Rapid Spin, or Defog successfully, or is hit by Defog."
+  },
   "steameruption": { "available": false },
   "steamroller": { "available": false },
-  "steelbeam": { "available": true },
-  "steelroller": { "available": true },
-  "steelwing": { "available": true },
-  "stickyweb": { "available": true },
-  "stockpile": { "available": true },
+  "steelbeam": {
+    "available": true,
+    "short": "User loses 50% max HP.",
+    "long": "Whether or not this move is successful and even if it would cause fainting, the user loses 1/2 of its maximum HP, rounded up, unless the user has the Magic Guard Ability."
+  },
+  "steelroller": {
+    "available": true,
+    "short": "Fails if there is no terrain active. Ends the terrain.",
+    "long": "Fails if there is no terrain active. Ends the effects of Electric Terrain, Grassy Terrain, Misty Terrain, and Psychic Terrain."
+  },
+  "steelwing": {
+    "available": true,
+    "short": "10% chance to raise the user's Defense by 1.",
+    "long": "Has a 10% chance to raise the user's Defense by 1 stage."
+  },
+  "stickyweb": {
+    "available": true,
+    "short": "Lowers Speed of grounded foes by 1 on switch-in.",
+    "long": "Sets up a hazard on the opposing side of the field, lowering the Speed by 1 stage of each opposing Pokemon that switches in, unless it is a Flying-type Pokemon or has the Levitate Ability. Fails if the effect is already active on the opposing side. Can be removed from the opposing side if any Pokemon uses Tidy Up, or if any opposing Pokemon uses Mortal Spin, Rapid Spin, or Defog successfully, or is hit by Defog."
+  },
+  "stockpile": {
+    "available": true,
+    "short": "Raises user's Defense, Sp. Def by 1. Max 3 uses.",
+    "long": "Raises the user's Defense and Special Defense by 1 stage. The user's Stockpile count increases by 1. Fails if the user's Stockpile count is 3. The user's Stockpile count is reset to 0 when it is no longer active."
+  },
   "stokedsparksurfer": { "available": false },
   "stomp": { "available": false },
-  "stompingtantrum": { "available": true },
-  "stoneaxe": { "available": true },
-  "stoneedge": { "available": true },
-  "storedpower": { "available": true },
-  "stormthrow": { "available": true },
+  "stompingtantrum": {
+    "available": true,
+    "short": "Power doubles if the user's last move failed.",
+    "long": "Power doubles if the user's last move on the previous turn, including moves called by other moves or those used through Instruct, Magic Coat, Snatch, or the Dancer or Magic Bounce Abilities, failed to do any of its normal effects, not including damage from an unsuccessful High Jump Kick, Jump Kick, or Mind Blown, or if the user was prevented from moving by any effect other than recharging or Sky Drop. A move that was blocked by Baneful Bunker, Detect, King's Shield, Protect, Spiky Shield, Crafty Shield, Mat Block, Quick Guard, or Wide Guard will not double this move's power, nor will Bounce or Fly ending early due to the effect of Gravity, Smack Down, or Thousand Arrows."
+  },
+  "stoneaxe": {
+    "available": true,
+    "short": "Sets Stealth Rock on the target's side.",
+    "long": "If this move is successful, it sets up a hazard on the opposing side of the field, damaging each opposing Pokemon that switches in. Foes lose 1/32, 1/16, 1/8, 1/4, or 1/2 of their maximum HP, rounded down, based on their weakness to the Rock type; 0.25×, 0.5×, neutral, 2×, or 4×, respectively. Can be removed from the opposing side if any Pokemon uses Tidy Up, or if any opposing Pokemon uses Mortal Spin, Rapid Spin, or Defog successfully, or is hit by Defog."
+  },
+  "stoneedge": {
+    "available": true,
+    "short": "High critical hit ratio.",
+    "long": "Has a higher chance for a critical hit."
+  },
+  "storedpower": {
+    "available": true,
+    "short": " + 20 power for each of the user's stat boosts.",
+    "long": "Power is equal to 20+(X × 20), where X is the user's total stat stage changes that are greater than 0."
+  },
+  "stormthrow": {
+    "available": true,
+    "short": "Always results in a critical hit.",
+    "long": "This move is always a critical hit unless the target is under the effect of Lucky Chant or has the Battle Armor or Shell Armor Abilities."
+  },
   "strangesteam": { "available": false },
   "strength": { "available": false },
-  "strengthsap": { "available": true },
-  "stringshot": { "available": true },
+  "strengthsap": {
+    "available": true,
+    "short": "User heals HP=target's Atk stat. Lowers Atk by 1.",
+    "long": "Lowers the target's Attack by 1 stage. The user restores its HP equal to the target's Attack stat calculated with its stat stage before this move was used. If Big Root is held by the user, the HP recovered is 1.3× normal, rounded half down. Fails if the target's Attack stat stage is -6."
+  },
+  "stringshot": {
+    "available": true,
+    "short": "Lowers the foe(s) Speed by 2.",
+    "long": "Lowers the target's Speed by 2 stages."
+  },
   "struggle": { "available": false },
-  "strugglebug": { "available": true },
-  "stuffcheeks": { "available": true },
-  "stunspore": { "available": true },
+  "strugglebug": {
+    "available": true,
+    "short": "100% chance to lower the foe(s) Sp. Atk by 1.",
+    "long": "Has a 100% chance to lower the target's Special Attack by 1 stage."
+  },
+  "stuffcheeks": {
+    "available": true,
+    "short": "Fails unless a Berry is held. User eats Berry, Def +2.",
+    "long": "Fails if the user is not holding a Berry. The user eats its Berry and raises its Defense by 2 stages. This effect is not prevented by the Klutz or Unnerve Abilities, or the effects of Embargo or Magic Room."
+  },
+  "stunspore": { "available": true, "short": "Paralyzes the target.", "long": "Paralyzes the target." },
   "submission": { "available": false },
-  "substitute": { "available": true },
+  "substitute": {
+    "available": true,
+    "short": "User takes 1/4 its max HP to put in a substitute.",
+    "long": "The user takes 1/4 of its maximum HP, rounded down, and puts it into a substitute to take its place in battle. The substitute is removed once enough damage is inflicted on it, if the user switches out or faints, or if any Pokemon uses Tidy Up. Baton Pass can be used to transfer the substitute to an ally, and the substitute will keep its remaining HP. Until the substitute is broken, it receives damage from all attacks made by other Pokemon and shields the user from status effects and stat stage changes caused by other Pokemon. Sound-based moves and Pokemon with the Infiltrator Ability ignore substitutes. The user still takes normal damage from weather and status effects while behind its substitute. If the substitute breaks during a multi-hit attack, the user will take damage from any remaining hits. If a substitute is created while the user is trapped by a binding move, the binding effect ends immediately. Fails if the user does not have enough HP remaining to create a substitute without fainting, or if it already has a substitute."
+  },
   "subzeroslammer": { "available": false },
-  "suckerpunch": { "available": true },
-  "sunnyday": { "available": true },
+  "suckerpunch": {
+    "available": true,
+    "short": "Usually goes first. Fails if target is not attacking.",
+    "long": "Fails if the target did not select a physical attack, special attack, or Me First for use this turn, or if the target moves before the user."
+  },
+  "sunnyday": {
+    "available": true,
+    "short": "For 5 turns, intense sunlight powers Fire moves.",
+    "long": "For 5 turns, the weather becomes Sun. The damage of Fire-type attacks is multiplied by 1.5 and the damage of Water-type attacks is multiplied by 0.5 during the effect. Lasts for 8 turns if the user is holding Heat Rock. Fails if the current weather is Sun."
+  },
   "sunsteelstrike": { "available": false },
-  "supercellslam": { "available": true },
-  "superfang": { "available": true },
-  "superpower": { "available": true },
+  "supercellslam": {
+    "available": true,
+    "short": "User is hurt by 50% of its max HP if it misses.",
+    "long": "If this attack is not successful, the user loses half of its maximum HP, rounded down, as crash damage. Pokemon with the Magic Guard Ability are unaffected by crash damage. Damage doubles and no accuracy check is done if the target has used Minimize while active."
+  },
+  "superfang": {
+    "available": true,
+    "short": "Does damage equal to 1/2 target's current HP.",
+    "long": "Deals damage to the target equal to half of its current HP, rounded down, but not less than 1 HP."
+  },
+  "superpower": {
+    "available": true,
+    "short": "Lowers the user's Attack and Defense by 1.",
+    "long": "Lowers the user's Attack and Defense by 1 stage."
+  },
   "supersonic": { "available": false },
   "supersonicskystrike": { "available": false },
-  "surf": { "available": true },
+  "surf": {
+    "available": true,
+    "short": "Hits adjacent Pokemon. Double damage on Dive.",
+    "long": "Damage doubles if the target is using Dive."
+  },
   "surgingstrikes": { "available": false },
-  "swagger": { "available": true },
-  "swallow": { "available": true },
-  "sweetkiss": { "available": true },
-  "sweetscent": { "available": true },
+  "swagger": {
+    "available": true,
+    "short": "Raises the target's Attack by 2 and confuses it.",
+    "long": "Raises the target's Attack by 2 stages and confuses it."
+  },
+  "swallow": {
+    "available": true,
+    "short": "Heals the user based on uses of Stockpile.",
+    "long": "The user restores its HP based on its Stockpile count. Restores 1/4 of its maximum HP if it's 1, 1/2 of its maximum HP if it's 2, both rounded half down, and all of its HP if it's 3. Fails if the user's Stockpile count is 0. The user's Defense and Special Defense decrease by as many stages as Stockpile had increased them, and the user's Stockpile count resets to 0."
+  },
+  "sweetkiss": {
+    "available": true,
+    "short": "Causes the target to become confused.",
+    "long": "Causes the target to become confused."
+  },
+  "sweetscent": {
+    "available": true,
+    "short": "Lowers the foe(s) evasiveness by 2.",
+    "long": "Lowers the target's evasiveness by 2 stages."
+  },
   "swift": { "available": false },
-  "switcheroo": { "available": true },
-  "swordsdance": { "available": true },
+  "switcheroo": {
+    "available": true,
+    "short": "User switches its held item with the target's.",
+    "long": "The user swaps its held item with the target's held item. Fails if both the user and the target have no held item, or if the user is trying to give or take a Mega Stone to or from the species that can Mega Evolve with it. The target is immune to this move if it has the Sticky Hold Ability."
+  },
+  "swordsdance": {
+    "available": true,
+    "short": "Raises the user's Attack by 2.",
+    "long": "Raises the user's Attack by 2 stages."
+  },
   "synchronoise": { "available": false },
-  "synthesis": { "available": true },
-  "syrupbomb": { "available": true },
+  "synthesis": {
+    "available": true,
+    "short": "Heals the user by a weather-dependent amount.",
+    "long": "The user restores 1/2 of its maximum HP if Strong Winds or no weather conditions are in effect or if the user is holding Utility Umbrella, 2/3 of its maximum HP if the weather is Intense Sun or Sun, and 1/4 of its maximum HP if the weather is Heavy Rain, Rain, Sandstorm, or Snow, all rounded half down."
+  },
+  "syrupbomb": {
+    "available": true,
+    "short": "Target's Speed is lowered by 1 stage for 3 turns.",
+    "long": "If this move is successful, it causes the target's Speed to be lowered by 1 stage at the end of each turn for 3 turns."
+  },
   "tachyoncutter": { "available": false },
   "tackle": { "available": false },
   "tailglow": { "available": false },
-  "tailslap": { "available": true },
+  "tailslap": {
+    "available": true,
+    "short": "Hits 2-5 times in one turn.",
+    "long": "Hits two to five times. Has a 35% chance to hit two or three times and a 15% chance to hit four or five times. If one of the hits breaks the target's substitute, it will take damage for the remaining hits. If the user has the Skill Link Ability, this move will always hit five times. If the user is holding Loaded Dice, this move will hit 4-5 times."
+  },
   "tailwhip": { "available": false },
-  "tailwind": { "available": true },
+  "tailwind": {
+    "available": true,
+    "short": "For 4 turns, allies' Speed is doubled.",
+    "long": "For 4 turns, the user and its party members have their Speed doubled. Fails if this move is already in effect for the user's side."
+  },
   "takedown": { "available": false },
   "takeheart": { "available": false },
   "tarshot": { "available": false },
-  "taunt": { "available": true },
-  "tearfullook": { "available": true },
-  "teatime": { "available": true },
+  "taunt": {
+    "available": true,
+    "short": "Target can't use status moves its next 3 turns.",
+    "long": "Prevents the target from using non-damaging moves for its next three turns. Pokemon with the Oblivious Ability or protected by the Aroma Veil Ability are immune."
+  },
+  "tearfullook": {
+    "available": true,
+    "short": "Lowers the target's Attack and Sp. Atk by 1.",
+    "long": "Lowers the target's Attack and Special Attack by 1 stage."
+  },
+  "teatime": {
+    "available": true,
+    "short": "All active Pokemon consume held Berries.",
+    "long": "All active Pokemon consume their held Berries. This effect is not prevented by substitutes, the Klutz or Unnerve Abilities, or the effects of Embargo or Magic Room. Fails if no active Pokemon is holding a Berry."
+  },
   "technoblast": { "available": false },
   "tectonicrage": { "available": false },
-  "teeterdance": { "available": true },
+  "teeterdance": {
+    "available": true,
+    "short": "Confuses adjacent Pokemon.",
+    "long": "Causes the target to become confused."
+  },
   "telekinesis": { "available": false },
   "teleport": { "available": false },
-  "temperflare": { "available": true },
+  "temperflare": {
+    "available": true,
+    "short": "Power doubles if the user's last move failed.",
+    "long": "Power doubles if the user's last move on the previous turn, including moves called by other moves or those used through Instruct, Magic Coat, Snatch, or the Dancer or Magic Bounce Abilities, failed to do any of its normal effects, not including damage from an unsuccessful High Jump Kick, Jump Kick, or Mind Blown, or if the user was prevented from moving by any effect other than recharging or Sky Drop. A move that was blocked by Baneful Bunker, Detect, King's Shield, Protect, Spiky Shield, Crafty Shield, Mat Block, Quick Guard, or Wide Guard will not double this move's power, nor will Bounce or Fly ending early due to the effect of Gravity, Smack Down, or Thousand Arrows."
+  },
   "terablast": { "available": false },
   "terastarstorm": { "available": false },
-  "terrainpulse": { "available": true },
-  "thief": { "available": true },
+  "terrainpulse": {
+    "available": true,
+    "short": "User on terrain: power doubles, type varies.",
+    "long": "Power doubles if the user is grounded and a terrain is active, and this move's type changes to match. Electric type during Electric Terrain, Grass type during Grassy Terrain, Fairy type during Misty Terrain, and Psychic type during Psychic Terrain."
+  },
+  "thief": {
+    "available": true,
+    "short": "If the user has no item, it steals the target's.",
+    "long": "If this attack was successful and the user is not holding an item, it steals the target's held item. A target with the Sticky Hold Ability does not lose its held item if it has not fainted. The target's item is not stolen if it is a Mega Stone and either the user or the target is the species that can Mega Evolve with it. Items lost to this move cannot be regained with Recycle or the Harvest Ability."
+  },
   "thousandarrows": { "available": false },
   "thousandwaves": { "available": false },
-  "thrash": { "available": true },
-  "throatchop": { "available": true },
-  "thunder": { "available": true },
-  "thunderbolt": { "available": true },
+  "thrash": {
+    "available": true,
+    "short": "Lasts 2-3 turns. Confuses the user afterwards.",
+    "long": "The user spends two or three turns locked into this move and becomes confused immediately after its move on the last turn of the effect if it is not already. This move targets an opposing Pokemon at random on each turn. If the user is prevented from moving, is asleep at the beginning of a turn, or the attack is not successful against the target on the first turn of the effect or the second turn of a three-turn effect, the effect ends without causing confusion. If this move is called by Sleep Talk and the user is asleep, the move is used for one turn and does not confuse the user."
+  },
+  "throatchop": {
+    "available": true,
+    "short": "For 2 turns, the target cannot use sound moves.",
+    "long": "For 2 turns, the target cannot use sound-based moves."
+  },
+  "thunder": {
+    "available": true,
+    "short": "30% chance to paralyze. Can't miss in rain.",
+    "long": "Has a 30% chance to paralyze the target. This move can hit a target using Bounce, Fly, or Sky Drop, or is under the effect of Sky Drop. If the weather is Heavy Rain or Rain, this move does not check accuracy. If the weather is Intense Sun or Sun, this move's accuracy is 50%. If this move is used against a Pokemon holding Utility Umbrella, this move's accuracy remains at 70%."
+  },
+  "thunderbolt": {
+    "available": true,
+    "short": "10% chance to paralyze the target.",
+    "long": "Has a 10% chance to paralyze the target."
+  },
   "thundercage": { "available": false },
   "thunderclap": { "available": false },
-  "thunderfang": { "available": true },
+  "thunderfang": {
+    "available": true,
+    "short": "10% chance to paralyze. 10% chance to flinch.",
+    "long": "Has a 10% chance to paralyze the target and a 10% chance to make it flinch."
+  },
   "thunderouskick": { "available": false },
-  "thunderpunch": { "available": true },
+  "thunderpunch": {
+    "available": true,
+    "short": "10% chance to paralyze the target.",
+    "long": "Has a 10% chance to paralyze the target."
+  },
   "thundershock": { "available": false },
-  "thunderwave": { "available": true },
-  "tickle": { "available": true },
-  "tidyup": { "available": true },
-  "topsyturvy": { "available": true },
-  "torchsong": { "available": true },
-  "torment": { "available": true },
-  "toxic": { "available": true },
-  "toxicspikes": { "available": true },
-  "toxicthread": { "available": true },
-  "trailblaze": { "available": true },
-  "transform": { "available": true },
-  "triattack": { "available": true },
-  "trick": { "available": true },
-  "trickortreat": { "available": true },
-  "trickroom": { "available": true },
-  "triplearrows": { "available": true },
-  "tripleaxel": { "available": true },
+  "thunderwave": {
+    "available": true,
+    "short": "Paralyzes the target.",
+    "long": "Paralyzes the target. This move does not ignore type immunity."
+  },
+  "tickle": {
+    "available": true,
+    "short": "Lowers the target's Attack and Defense by 1.",
+    "long": "Lowers the target's Attack and Defense by 1 stage."
+  },
+  "tidyup": {
+    "available": true,
+    "short": "User +1 Atk, Spe. Clears all substitutes/hazards.",
+    "long": "Raises the user's Attack and Speed by 1 stage. Removes substitutes from all active Pokemon and ends the effects of Spikes, Stealth Rock, Sticky Web, and Toxic Spikes for both sides."
+  },
+  "topsyturvy": {
+    "available": true,
+    "short": "Inverts the target's stat stages.",
+    "long": "The target's positive stat stages become negative and vice versa. Fails if all of the target's stat stages are 0."
+  },
+  "torchsong": {
+    "available": true,
+    "short": "100% chance to raise the user's Sp. Atk by 1.",
+    "long": "Has a 100% chance to raise the user's Special Attack by 1 stage."
+  },
+  "torment": {
+    "available": true,
+    "short": "Target can't select the same move twice in a row.",
+    "long": "Prevents the target from selecting the same move for use two turns in a row. This effect ends when the target is no longer active."
+  },
+  "toxic": {
+    "available": true,
+    "short": "Badly poisons the target. Poison types can't miss.",
+    "long": "Badly poisons the target. If a Poison-type Pokemon uses this move, the target cannot avoid the attack, even if the target is in the middle of a two-turn move."
+  },
+  "toxicspikes": {
+    "available": true,
+    "short": "Poisons grounded foes on switch-in. Max 2 layers.",
+    "long": "Sets up a hazard on the opposing side of the field, poisoning each opposing Pokemon that switches in, unless it is a Flying-type Pokemon or has the Levitate Ability. Can be used up to two times before failing. Opposing Pokemon become poisoned with one layer and badly poisoned with two layers. Can be removed from the opposing side if any Pokemon uses Tidy Up, or if any opposing Pokemon uses Mortal Spin, Rapid Spin, or Defog successfully, is hit by Defog, or a grounded Poison-type Pokemon switches in. Safeguard prevents the opposing party from being poisoned on switch-in, but a substitute does not."
+  },
+  "toxicthread": {
+    "available": true,
+    "short": "Lowers the target's Speed by 2 and poisons it.",
+    "long": "Lowers the target's Speed by 2 stages and poisons it."
+  },
+  "trailblaze": {
+    "available": true,
+    "short": "100% chance to raise the user's Speed by 1.",
+    "long": "Has a 100% chance to raise the user's Speed by 1 stage."
+  },
+  "transform": {
+    "available": true,
+    "short": "Copies target's stats, moves, types, and Ability.",
+    "long": "The user transforms into the target. The target's current stats, stat stages, types, moves, Ability, weight, gender, and sprite are copied. The user's level and HP remain the same and each copied move receives only 5 PP, with a maximum of 5 PP each. The user can no longer change formes if it would have the ability to do so. This move fails if it hits a substitute, if either the user or the target is already transformed, or if either is behind an Illusion."
+  },
+  "triattack": {
+    "available": true,
+    "short": "20% chance to paralyze or burn or freeze target.",
+    "long": "Has a 20% chance to either burn, freeze, or paralyze the target."
+  },
+  "trick": {
+    "available": true,
+    "short": "User switches its held item with the target's.",
+    "long": "The user swaps its held item with the target's held item. Fails if both the user and the target have no held item, or if the user is trying to give or take a Mega Stone to or from the species that can Mega Evolve with it. The target is immune to this move if it has the Sticky Hold Ability."
+  },
+  "trickortreat": {
+    "available": true,
+    "short": "Adds Ghost to the target's type(s).",
+    "long": "Causes the Ghost type to be added to the target, effectively making it have two or three types. Fails if the target is already a Ghost type. If Forest's Curse adds a type to the target, it replaces the type added by this move and vice versa."
+  },
+  "trickroom": {
+    "available": true,
+    "short": "Goes last. For 5 turns, turn order is reversed.",
+    "long": "For 5 turns, the Speed of every Pokemon is recalculated for the purposes of determining turn order. During the effect, each Pokemon's Speed is considered to be (10000 - its normal Speed), and if this value is greater than 8191, 8192 is subtracted from it. If this move is used during the effect, the effect ends."
+  },
+  "triplearrows": {
+    "available": true,
+    "short": "High crit. Target: 50% -1 Defense, 30% flinch.",
+    "long": "Has a 50% chance to lower the target's Defense by 1 stage, a 30% chance to make it flinch, and a higher chance for a critical hit."
+  },
+  "tripleaxel": {
+    "available": true,
+    "short": "Hits 3 times. Each hit can miss, but power rises.",
+    "long": "Hits three times. Power increases to 40 for the second hit and 60 for the third. This move checks accuracy for each hit, and the attack ends if the target avoids a hit. If one of the hits breaks the target's substitute, it will take damage for the remaining hits. If the user has the Skill Link Ability, this move will always hit three times."
+  },
   "tripledive": { "available": false },
   "triplekick": { "available": false },
-  "tropkick": { "available": true },
+  "tropkick": {
+    "available": true,
+    "short": "100% chance to lower the target's Attack by 1.",
+    "long": "Has a 100% chance to lower the target's Attack by 1 stage."
+  },
   "trumpcard": { "available": false },
-  "twinbeam": { "available": true },
+  "twinbeam": {
+    "available": true,
+    "short": "Hits 2 times in one turn.",
+    "long": "Hits twice. If the first hit breaks the target's substitute, it will take damage for the second hit."
+  },
   "twineedle": { "available": false },
   "twinkletackle": { "available": false },
   "twister": { "available": false },
-  "upperhand": { "available": true },
-  "uproar": { "available": true },
-  "uturn": { "available": true },
-  "vacuumwave": { "available": true },
+  "upperhand": {
+    "available": true,
+    "short": "100% flinch. Fails unless target using priority attack.",
+    "long": "Has a 100% chance to make the target flinch. Fails if the target did not select a physical or special attack for use this turn with altered priority greater than 0, or if the target moves before the user."
+  },
+  "uproar": {
+    "available": true,
+    "short": "Lasts 3 turns. Active Pokemon cannot fall asleep.",
+    "long": "The user spends three turns locked into this move. This move targets an opponent at random on each turn. On the first of the three turns, all sleeping active Pokemon wake up. During the three turns, no active Pokemon can fall asleep by any means, and Pokemon switched in during the effect do not wake up. If the user is prevented from moving or the attack is not successful against the target during one of the turns, the effect ends."
+  },
+  "uturn": {
+    "available": true,
+    "short": "User switches out after damaging the target.",
+    "long": "If this move is successful and the user has not fainted, the user switches out even if it is trapped and is replaced immediately by a selected party member. The user does not switch out if there are no unfainted party members, or if the target switched out using an Eject Button or through the effect of the Emergency Exit or Wimp Out Abilities."
+  },
+  "vacuumwave": { "available": true, "short": "Usually goes first.", "long": "No additional effect." },
   "vcreate": { "available": false },
   "veeveevolley": { "available": false },
   "venomdrench": { "available": false },
-  "venoshock": { "available": true },
+  "venoshock": {
+    "available": true,
+    "short": "Power doubles if the target is poisoned.",
+    "long": "Power doubles if the target is poisoned."
+  },
   "victorydance": { "available": false },
   "vinewhip": { "available": false },
   "visegrip": { "available": false },
   "vitalthrow": { "available": false },
-  "voltswitch": { "available": true },
-  "volttackle": { "available": true },
+  "voltswitch": {
+    "available": true,
+    "short": "User switches out after damaging the target.",
+    "long": "If this move is successful and the user has not fainted, the user switches out even if it is trapped and is replaced immediately by a selected party member. The user does not switch out if there are no unfainted party members, or if the target switched out using an Eject Button or through the effect of the Emergency Exit or Wimp Out Abilities."
+  },
+  "volttackle": {
+    "available": true,
+    "short": "Has 33% recoil. 10% chance to paralyze target.",
+    "long": "Has a 10% chance to paralyze the target. If the target lost HP, the user takes recoil damage equal to 33% the HP lost by the target, rounded half up, but not less than 1 HP."
+  },
   "wakeupslap": { "available": false },
-  "waterfall": { "available": true },
+  "waterfall": {
+    "available": true,
+    "short": "20% chance to make the target flinch.",
+    "long": "Has a 20% chance to make the target flinch."
+  },
   "watergun": { "available": false },
   "waterpledge": { "available": false },
-  "waterpulse": { "available": true },
-  "watershuriken": { "available": true },
+  "waterpulse": {
+    "available": true,
+    "short": "20% chance to confuse the target.",
+    "long": "Has a 20% chance to confuse the target."
+  },
+  "watershuriken": {
+    "available": true,
+    "short": "Usually goes first. Hits 2-5 times in one turn.",
+    "long": "Hits two to five times. Has a 35% chance to hit two or three times and a 15% chance to hit four or five times. If one of the hits breaks the target's substitute, it will take damage for the remaining hits. If the user has the Skill Link Ability, this move will always hit five times. If the user is an Ash-Greninja with the Battle Bond Ability, this move has a power of 20 and always hits three times. If the user is holding Loaded Dice, this move will hit 4-5 times."
+  },
   "watersport": { "available": false },
-  "waterspout": { "available": true },
-  "wavecrash": { "available": true },
-  "weatherball": { "available": true },
-  "whirlpool": { "available": true },
-  "whirlwind": { "available": true },
+  "waterspout": {
+    "available": true,
+    "short": "Less power as user's HP decreases. Hits foe(s).",
+    "long": "Power is equal to (user's current HP × 150 / user's maximum HP), rounded down, but not less than 1."
+  },
+  "wavecrash": {
+    "available": true,
+    "short": "Has 33% recoil.",
+    "long": "If the target lost HP, the user takes recoil damage equal to 33% the HP lost by the target, rounded half up, but not less than 1 HP."
+  },
+  "weatherball": {
+    "available": true,
+    "short": "Power doubles and type varies in each weather.",
+    "long": "Power doubles if a weather condition other than Strong Winds is active, and this move's type changes to match. Ice type during Snow, Water type during Heavy Rain or Rain, Rock type during Sandstorm, and Fire type during Intense Sun or Sun. If the user is holding Utility Umbrella and uses Weather Ball during Heavy Rain, Rain, Intense Sun, or Sun, this move remains Normal type and does not double in power."
+  },
+  "whirlpool": {
+    "available": true,
+    "short": "Traps and damages the target for 4-5 turns.",
+    "long": "Prevents the target from switching for four or five turns (seven turns if the user is holding Grip Claw). Causes damage to the target equal to 1/8 of its maximum HP (1/6 if the user is holding Binding Band), rounded down, at the end of each turn during effect. The target can still switch out if it is holding Shed Shell or uses Baton Pass, Flip Turn, Parting Shot, Shed Tail, Teleport, U-turn, or Volt Switch. The effect ends if either the user or the target leaves the field, or if the target uses Mortal Spin, Rapid Spin, or Substitute successfully. This effect is not stackable or reset by using this or another binding move."
+  },
+  "whirlwind": {
+    "available": true,
+    "short": "Forces the target to switch to a random ally.",
+    "long": "The target is forced to switch out and be replaced with a random unfainted ally. Fails if the target is the last unfainted Pokemon in its party, or if the target used Ingrain previously or has the Suction Cups Ability."
+  },
   "wickedblow": { "available": false },
   "wickedtorque": { "available": false },
-  "wideguard": { "available": true },
+  "wideguard": {
+    "available": true,
+    "short": "Protects allies from multi-target moves this turn.",
+    "long": "The user and its party members are protected from moves made by other Pokemon, including allies, during this turn that target all adjacent foes or all adjacent Pokemon. This move modifies the same 1/X chance of being successful used by other protection moves, where X starts at 1 and triples each time this move is successfully used, but does not use the chance to check for failure. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Burning Bulwark, Detect, Endure, King's Shield, Max Guard, Obstruct, Protect, Quick Guard, Silk Trap, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn or if this move is already in effect for the user's side."
+  },
   "wildboltstorm": { "available": false },
-  "wildcharge": { "available": true },
-  "willowisp": { "available": true },
+  "wildcharge": {
+    "available": true,
+    "short": "Has 1/4 recoil.",
+    "long": "If the target lost HP, the user takes recoil damage equal to 1/4 the HP lost by the target, rounded half up, but not less than 1 HP."
+  },
+  "willowisp": { "available": true, "short": "Burns the target.", "long": "Burns the target." },
   "wingattack": { "available": false },
-  "wish": { "available": true },
+  "wish": {
+    "available": true,
+    "short": "Next turn, 50% of the user's max HP is restored.",
+    "long": "At the end of the next turn, the Pokemon at the user's position has 1/2 of the user's maximum HP restored to it, rounded down. Fails if this move is already in effect for the user's position."
+  },
   "withdraw": { "available": false },
-  "wonderroom": { "available": true },
-  "woodhammer": { "available": true },
+  "wonderroom": {
+    "available": true,
+    "short": "For 5 turns, all Defense and Sp. Def stats switch.",
+    "long": "For 5 turns, all active Pokemon have their Defense and Special Defense stats swapped. Stat stage changes are unaffected. If this move is used during the effect, the effect ends."
+  },
+  "woodhammer": {
+    "available": true,
+    "short": "Has 33% recoil.",
+    "long": "If the target lost HP, the user takes recoil damage equal to 33% the HP lost by the target, rounded half up, but not less than 1 HP."
+  },
   "workup": { "available": false },
-  "worryseed": { "available": true },
-  "wrap": { "available": true },
+  "worryseed": {
+    "available": true,
+    "short": "The target's Ability becomes Insomnia.",
+    "long": "Causes the target's Ability to become Insomnia. Fails if the target's Ability is As One, Battle Bond, Comatose, Disguise, Gulp Missile, Ice Face, Insomnia, Multitype, Power Construct, RKS System, Schooling, Shields Down, Stance Change, Tera Shift, Truant, Zen Mode, or Zero to Hero."
+  },
+  "wrap": {
+    "available": true,
+    "short": "Traps and damages the target for 4-5 turns.",
+    "long": "Prevents the target from switching for four or five turns (seven turns if the user is holding Grip Claw). Causes damage to the target equal to 1/8 of its maximum HP (1/6 if the user is holding Binding Band), rounded down, at the end of each turn during effect. The target can still switch out if it is holding Shed Shell or uses Baton Pass, Flip Turn, Parting Shot, Shed Tail, Teleport, U-turn, or Volt Switch. The effect ends if either the user or the target leaves the field, or if the target uses Mortal Spin, Rapid Spin, or Substitute successfully. This effect is not stackable or reset by using this or another binding move."
+  },
   "wringout": { "available": false },
-  "xscissor": { "available": true },
-  "yawn": { "available": true },
-  "zapcannon": { "available": true },
-  "zenheadbutt": { "available": true },
-  "zingzap": { "available": true },
+  "xscissor": { "available": true, "short": "No additional effect.", "long": "No additional effect." },
+  "yawn": {
+    "available": true,
+    "short": "Puts the target to sleep after 1 turn.",
+    "long": "Causes the target to fall asleep at the end of the next turn. Fails when used if the target cannot fall asleep or if it already has a non-volatile status condition. At the end of the next turn, if the target is still active, does not have a non-volatile status condition, and can fall asleep, it falls asleep. If the target becomes affected, this effect cannot be prevented by Safeguard or a substitute, or by falling asleep and waking up during the effect."
+  },
+  "zapcannon": {
+    "available": true,
+    "short": "100% chance to paralyze the target.",
+    "long": "Has a 100% chance to paralyze the target."
+  },
+  "zenheadbutt": {
+    "available": true,
+    "short": "20% chance to make the target flinch.",
+    "long": "Has a 20% chance to make the target flinch."
+  },
+  "zingzap": {
+    "available": true,
+    "short": "30% chance to make the target flinch.",
+    "long": "Has a 30% chance to make the target flinch."
+  },
   "zippyzap": { "available": false }
 }

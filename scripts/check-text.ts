@@ -35,10 +35,13 @@ const KNOWN: Record<Kind, (id: string) => boolean> = {
   pokemon: () => true,
 }
 
-/** The curated text, by file: each entry's strings. Ability descriptions in every language that has them. */
+/** The categories with curated descriptions, in `src/i18n/<locale>/<category>.ts`. */
+const DESCRIBED = ['abilities', 'moves', 'items', 'conditions']
+
+/** The curated text, by file: each entry's strings. Descriptions in every language that has them. */
 const TEXT: Record<string, () => Promise<Record<string, Record<string, unknown>>>> = Object.fromEntries(
   Object.keys(LOCALES)
-    .map((locale) => `src/i18n/${locale}/abilities.ts`)
+    .flatMap((locale) => DESCRIBED.map((category) => `src/i18n/${locale}/${category}.ts`))
     .filter((file) => existsSync(join(ROOT, file)))
     .map((file) => [
       file,
