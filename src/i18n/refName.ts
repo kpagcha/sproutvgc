@@ -42,12 +42,15 @@ export function generatedName(kind: GeneratedKind, id: string): string | undefin
 /** Official name of a type, condition, move, ability, item or Pokémon. Empty until its locale's names load. */
 export function refName(ref: Ref): string {
   if (ref.kind === 'type') return typeName(ref.id)
-  if (ref.kind === 'condition' || ref.kind === 'group') return termName(ref)
+  const term = ref.kind === 'condition' || ref.kind === 'group' ? termName(ref) : undefined
+  if (term !== undefined) return term
   const names = loaded[locale.value]
   if (!names) {
     void loadDexNames()
     return ''
   }
-  // Entries the regulation doesn't have have no name, but are never shown either.
-  return names[ref.kind][ref.id] ?? ref.id
+  // Conditions without a name of their own are named after their move (Taunt). Entries the regulation doesn't have
+  // have no name, but are never shown either.
+  const kind = ref.kind === 'condition' ? 'move' : (ref.kind as GeneratedKind)
+  return names[kind][ref.id] ?? ref.id
 }

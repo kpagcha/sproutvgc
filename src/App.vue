@@ -5,8 +5,9 @@ import { AnimatePresence, MotionConfig, motion } from 'motion-v'
 import { FADE, PAGE, SPRING } from '@/lib/motion'
 import { t, typeName, type MessageKey } from '@/i18n'
 import { isType } from '@/data/types'
-import { generatedName } from '@/i18n/refName'
+import { generatedName, refName } from '@/i18n/refName'
 import type { GeneratedKind } from '@/i18n'
+import type { Ref } from '@/data/dex'
 import { GAME_NAME, REGULATION } from '@/data/format'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
@@ -29,7 +30,13 @@ watchEffect(() => {
   // entry; pages without a description use the home page's.
   const type = typeof route.params.type === 'string' && isType(route.params.type) ? route.params.type : null
   const page = typeof route.name === 'string' ? ENTRY_PAGES[route.name] : undefined
-  const entry = page ? generatedName(page.kind, String(route.params.id)) : undefined
+  const id = String(route.params.id)
+  // Conditions are curated, not generated: named by the locale, or after their move.
+  const entry = page
+    ? generatedName(page.kind, id)
+    : route.name === 'condition'
+      ? refName({ kind: 'condition', id } as Ref)
+      : undefined
   const key = route.meta.titleKey
   const name = key ? t(key) : null
   const lead = type ? typeName(type) : entry
@@ -38,7 +45,7 @@ watchEffect(() => {
   const desc = type
     ? t('desc.type', { ...params, type: typeName(type) })
     : entry
-      ? t(page!.desc, { ...params, ability: entry, name: entry })
+      ? t(page?.desc ?? 'desc.condition', { ...params, ability: entry, name: entry })
       : t(route.meta.descKey ?? 'desc.home', params)
   document.title = title
   setMeta('meta[name="description"]', desc)

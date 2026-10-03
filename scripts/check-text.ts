@@ -16,7 +16,6 @@ const jiti = createJiti(import.meta.url, { alias: { '@': join(ROOT, 'src') } })
 
 type Kind = 'type' | 'condition' | 'group' | 'move' | 'ability' | 'item' | 'pokemon'
 interface Dex {
-  CONDITIONS: readonly string[]
   GROUPS: readonly string[]
   available(ref: { kind: Kind; id: string }): boolean
 }
@@ -26,9 +25,9 @@ const { TYPES } = (await jiti.import('@/data/types.ts')) as { TYPES: readonly st
 /** The entries each kind of marker can name, beyond what `available()` already checks. */
 const KNOWN: Record<Kind, (id: string) => boolean> = {
   type: (id) => TYPES.includes(id),
-  condition: (id) => dex.CONDITIONS.includes(id),
   group: (id) => dex.GROUPS.includes(id),
-  // Generated categories: `available()` is false for IDs that don't exist too.
+  // Generated and curated categories: `available()` is false for IDs that don't exist too.
+  condition: () => true,
   move: () => true,
   ability: () => true,
   item: () => true,

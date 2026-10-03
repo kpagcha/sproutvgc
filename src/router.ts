@@ -117,6 +117,18 @@ export const router = createRouter({
       meta: { titleKey: 'title.items', descKey: 'desc.items', dexNames: true, descriptions: ['item'] },
     },
     {
+      path: '/conditions',
+      name: 'conditions',
+      component: () => import('@/views/ConditionsView.vue'),
+      meta: { titleKey: 'title.conditions', descKey: 'desc.conditions', dexNames: true, descriptions: ['condition'] },
+    },
+    {
+      path: '/conditions/:id',
+      name: 'condition',
+      component: () => import('@/views/ConditionView.vue'),
+      meta: { titleKey: 'title.conditions', descKey: 'desc.conditions', dexNames: true, descriptions: ['condition'] },
+    },
+    {
       path: '/settings',
       name: 'settings',
       component: () => import('@/views/SettingsView.vue'),

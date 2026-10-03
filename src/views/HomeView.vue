@@ -27,10 +27,10 @@ const query = computed({
 // background, ready to search by the time anyone types.
 onMounted(() => {
   void loadDexNames()
-  void loadDescriptions(['ability', 'move', 'item'])
+  void loadDescriptions(['ability', 'move', 'item', 'condition'])
 })
 
-type SectionKind = 'pokemon' | 'move' | 'ability' | 'item'
+type SectionKind = 'pokemon' | 'move' | 'ability' | 'item' | 'condition'
 
 /** The dex's sections, in the order the home page shows them: their list page, and their entries' pages' route. */
 const SECTIONS: { kind: SectionKind; title: MessageKey; desc: MessageKey; list: string; route: string }[] = [
@@ -38,6 +38,13 @@ const SECTIONS: { kind: SectionKind; title: MessageKey; desc: MessageKey; list: 
   { kind: 'move', title: 'title.moves', desc: 'home.movesDesc', list: '/moves', route: 'move' },
   { kind: 'ability', title: 'title.abilities', desc: 'home.abilitiesDesc', list: '/abilities', route: 'ability' },
   { kind: 'item', title: 'title.items', desc: 'home.itemsDesc', list: '/items', route: 'item' },
+  {
+    kind: 'condition',
+    title: 'title.conditions',
+    desc: 'home.conditionsDesc',
+    list: '/conditions',
+    route: 'condition',
+  },
 ]
 
 /** A section shows this many results at most, and links to its list, searched the same way, for the rest. */

@@ -24,26 +24,27 @@ export const types: Record<TypeId, string> = {
   fairy: 'Hada',
 }
 
-/** Official in-game names of the entries of each category, except types (above) and generated ones (abilities, moves, items). */
+/** Official in-game names of conditions and groups; conditions named after their move take its name. */
 export const names: Names = {
   condition: {
-    brn: 'QUE',
-    par: 'PAR',
-    psn: 'ENV',
-    frz: 'CON',
+    brn: 'Quemadura',
+    par: 'Parálisis',
+    psn: 'Envenenamiento',
+    tox: 'Envenenamiento grave',
+    slp: 'Sueño',
+    frz: 'Congelación',
+    confusion: 'Confusión',
+    flinch: 'Retroceso',
+    attract: 'Enamoramiento',
+    partiallytrapped: 'Atrapado',
+    trapped: 'Sin escapatoria',
+    healblock: 'Anticura',
+    lockedmove: 'Movimiento fijado',
+    mustrecharge: 'Recargando',
     sun: 'Sol',
     rain: 'Lluvia',
     sandstorm: 'Tormenta de arena',
     snow: 'Nieve',
-    electricterrain: 'Campo Eléctrico',
-    grassyterrain: 'Campo de Hierba',
-    psychicterrain: 'Campo Psíquico',
-    mistyterrain: 'Campo de Niebla',
-    gravity: 'Gravedad',
-    spikes: 'Púas',
-    toxicspikes: 'Púas Tóxicas',
-    stickyweb: 'Red Viscosa',
-    stealthrock: 'Trampa Rocas',
   },
   group: {
     powder: 'Movimientos de polvo',
@@ -525,4 +526,32 @@ export const messages: Record<keyof typeof en, string> = {
     'Los sprites e iconos de Pokémon y objetos y los distintivos de categoría de los movimientos son de {source}.',
   'credits.dataTitle': 'Datos',
   'credits.dataBody': 'Los datos del juego son de {showdown} (MIT), y los nombres en otros idiomas de {pokeapi}.',
+
+  'desc.conditions':
+    'Todas las condiciones de {game}, Reglamento {reg}: problemas de estado, tiempo atmosférico, campos y efectos de equipo y de campo, y qué los causa.',
+  'desc.condition':
+    '{name} en {game}: qué hace, quién es inmune y los movimientos, habilidades y objetos que lo causan.',
+  'home.conditionsDesc':
+    'Problemas de estado, tiempo, campos, pantallas, trampas y todo lo demás que dejan los movimientos.',
+  'conditions.intro':
+    'Lo que dejan los movimientos, habilidades y objetos en un Pokémon, su equipo o el campo, en el Reglamento {reg}.',
+  'conditions.search': 'Buscar condiciones',
+  'conditions.none': 'Ninguna condición coincide.',
+  'conditions.sub.status': 'Problemas de estado',
+  'conditions.sub.volatile': 'En un Pokémon',
+  'conditions.sub.side': 'En un equipo',
+  'conditions.sub.field': 'En el campo',
+  'conditions.sub.weather': 'Tiempo atmosférico',
+  'conditions.sub.terrain': 'Campos',
+  'conditions.sub1.status': 'Problema de estado',
+  'conditions.sub1.volatile': 'En un Pokémon, hasta que se retira',
+  'conditions.sub1.side': 'En un lado del campo',
+  'conditions.sub1.field': 'En todo el campo',
+  'conditions.sub1.weather': 'Tiempo atmosférico',
+  'conditions.sub1.terrain': 'Campo',
+  'conditions.causedBy': 'Lo causan',
+  'conditions.moves': 'Movimientos',
+  'conditions.abilities': 'Habilidades',
+  'conditions.items': 'Objetos',
+  'conditions.notFound': 'No hay ninguna condición «{id}» en el Reglamento {reg}.',
 }

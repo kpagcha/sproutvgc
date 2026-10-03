@@ -10,41 +10,18 @@ import type ITEMS from '@/data/generated/items.json'
 import type MOVES from '@/data/generated/moves.json'
 import type POKEMON from '@/data/generated/pokemon.json'
 import type { TypeId } from '@/data/types'
+import { CONDITIONS, showdownId, type ConditionId } from '@/data/conditions'
+
+export type { ConditionId }
 
 // Abilities, moves, items and Pokémon are generated: every one in the games, and whether the current regulation has it.
-// Conditions and groups list the entries referenced so far. An ID is only unique within its category: Electric
+// Conditions are curated (`conditions.ts`), and the regulation has one when something it has causes it (generated).
+// Groups list the entries referenced so far. An ID is only unique within its category: Electric
 // Terrain is both a move and the terrain it sets, and Psychic both a type and a move.
-
-/** Statuses, weather, terrains, and field and side effects. */
-export const CONDITIONS = [
-  // Statuses
-  'brn',
-  'par',
-  'psn',
-  'frz',
-  // Weather
-  'sun',
-  'rain',
-  'sandstorm',
-  'snow',
-  // Terrains
-  'electricterrain',
-  'grassyterrain',
-  'psychicterrain',
-  'mistyterrain',
-  // Field
-  'gravity',
-  // Side: hazards
-  'spikes',
-  'toxicspikes',
-  'stickyweb',
-  'stealthrock',
-] as const
 
 /** Groups of moves, abilities or effects, with no entry of their own. */
 export const GROUPS = ['powder', 'trapping', 'terrains'] as const
 
-export type ConditionId = (typeof CONDITIONS)[number]
 export type GroupId = (typeof GROUPS)[number]
 export type MoveId = keyof typeof MOVES
 export type AbilityId = keyof typeof ABILITIES
@@ -93,13 +70,14 @@ export const PAGES: Partial<Record<Kind, Page>> = {
   pokemon: { route: 'pokemon' },
   move: { route: 'move' },
   item: { route: 'item' },
+  condition: { route: 'condition' },
 }
 
 /** Whether the current regulation has `ref` (or there's no ref to check), so its interactions are shown. */
 export function available(ref: Ref | undefined): boolean {
   if (!ref) return true
   const ids = AVAILABLE_IDS[ref.kind as keyof typeof AVAILABLE_IDS] as Set<string> | undefined
-  return ids ? ids.has(ref.id) : true // Types, conditions and groups are all in the game
+  return ids ? ids.has(ref.id) : true // Types and groups are all in the game
 }
 
 /** The entries the current regulation has, of a generated category, in ID order. */
@@ -112,4 +90,7 @@ const AVAILABLE_IDS = {
   move: new Set(AVAILABLE.moves),
   item: new Set(AVAILABLE.items),
   pokemon: new Set(AVAILABLE.pokemon),
+  condition: new Set(
+    (Object.keys(CONDITIONS) as ConditionId[]).filter((id) => AVAILABLE.conditions.includes(showdownId(id))),
+  ),
 }

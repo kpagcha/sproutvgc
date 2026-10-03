@@ -1,6 +1,7 @@
 import { ref, watch } from 'vue'
 import type { TypeId } from '@/data/types'
 import type { Ids, NamedKind, Ref } from '@/data/dex'
+import type { ConditionId, MoveNamedCondition } from '@/data/conditions'
 import * as en from './en'
 import * as es from './es'
 import { LOCALES, type Locale } from './locales'
@@ -10,8 +11,14 @@ export type MessageKey = keyof typeof en.messages
 
 /** Categories whose names are generated from the games' data (`npm run gen-data`), for every locale. */
 export type GeneratedKind = 'ability' | 'move' | 'item' | 'pokemon'
-/** A locale's names of every referenced entry, per category: one missing is a compile error. */
-export type Names = { [K in Exclude<NamedKind, GeneratedKind>]: Record<Ids[K], string> }
+/**
+ * A locale's names of every entry of the categories it names, per category: one missing is a compile error.
+ * Conditions named after their move (Taunt, Tailwind) take its name instead.
+ */
+export type Names = {
+  condition: Record<Exclude<ConditionId, MoveNamedCondition>, string>
+  group: Record<Ids['group'], string>
+}
 
 const BUNDLES: Record<Locale, { messages: Record<MessageKey, string>; types: Record<TypeId, string>; names: Names }> = {
   en,
@@ -88,8 +95,10 @@ export function typeName(type: TypeId): string {
   return BUNDLES[locale.value].types[type]
 }
 
-/** Official name of a condition or group, the categories the locales list. `refName` (`@/i18n/refName`) names any
- * entry. */
-export function termName(ref: Ref<Exclude<NamedKind, GeneratedKind>>): string {
-  return (BUNDLES[locale.value].names[ref.kind] as Record<string, string>)[ref.id]!
+/**
+ * Official name of a condition or group, from the locale's names; `undefined` for conditions named after their move
+ * (`refName` in `@/i18n/refName` names those, and any entry).
+ */
+export function termName(ref: Ref<Exclude<NamedKind, GeneratedKind>>): string | undefined {
+  return (BUNDLES[locale.value].names[ref.kind] as Record<string, string>)[ref.id]
 }

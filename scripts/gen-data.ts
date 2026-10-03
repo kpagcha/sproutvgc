@@ -22,6 +22,7 @@ import { descriptions as MOVE_DESCRIPTIONS } from '../src/i18n/en/moves.ts'
 import { LOCALES, type Locale } from '../src/i18n/locales.ts'
 import { LANGUAGES, type Language } from './languages.ts'
 import { NAMES, type CategoryKey } from './overrides.ts'
+import { ConditionScan } from './conditions.ts'
 import { ITEM_ICONS, POKEMON_ICONS, SpriteSource, iconIndexes, sheetLayout, trimSheet } from './sprites.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -602,6 +603,21 @@ async function main() {
     availableIds[c.key] = available.map((e) => e.id)
     console.log(`${available.length} of ${entries.length} ${c.key} available`)
   }
+  // Conditions: the ones the regulation's moves, abilities and items cause, with those sources (by Showdown's
+  // condition IDs: `sunnyday` for sun). A condition no source causes isn't in the game.
+  const scan = new ConditionScan(toId)
+  for (const id of availableIds.moves!) {
+    scan.declared(id, movesById.get(id)!)
+    scan.code('move', id, movesById.get(id)!)
+  }
+  const abilitiesById = new Map(dex.abilities.all().map((a) => [a.id, a]))
+  for (const id of availableIds.abilities!) scan.code('ability', id, abilitiesById.get(id)!)
+  for (const id of availableIds.items!) scan.code('item', id, dex.items.get(id))
+  const conditions = scan.result()
+  await writeJson('conditions.json', conditions)
+  availableIds.conditions = Object.keys(conditions)
+  console.log(`${availableIds.conditions.length} conditions caused by what the regulation has`)
+
   // The IDs the regulation has, per category: all the app needs to know at run time to hide the rest (the files
   // above give it the types, and the category pages their data).
   await writeJson('available.json', availableIds)
