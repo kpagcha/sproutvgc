@@ -87,6 +87,7 @@ export const messages = {
   'home.typesDesc': 'Every type with its weaknesses, resistances and immunities.',
   'home.abilitiesDesc': 'What every ability does, and which Pokémon can have it.',
   'home.search': 'Search the dex',
+  'search.clear': 'Clear the search',
   'home.none': 'Nothing matches.',
 
   'types.intro': 'Pick a type.',

@@ -12,6 +12,7 @@ import { useSort } from '@/composables/useSort'
 import PokemonIcon from '@/components/PokemonIcon.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon.vue'
+import SearchBox from '@/components/SearchBox.vue'
 
 // Every Pokémon the regulation has, with its types and base stats, sortable by any of them. Formes that only look
 // different (Vivillon's patterns) are left to their species' page.
@@ -52,13 +53,7 @@ const link = (id: PokemonId) => ({ name: 'pokemon', params: { id } })
     <h1>{{ t('title.pokemon') }}</h1>
     <p class="muted">{{ t('pokedex.intro', { reg: REGULATION, n: rows.length }) }}</p>
     <div class="filters">
-      <input
-        v-model="query"
-        type="search"
-        class="search"
-        :placeholder="t('pokedex.search')"
-        :aria-label="t('pokedex.search')"
-      />
+      <SearchBox v-model="query" :placeholder="t('pokedex.search')" :aria-label="t('pokedex.search')" />
       <select v-model="type" class="search type-filter" :aria-label="t('pokedex.type')">
         <option value="">{{ t('pokedex.anyType') }}</option>
         <option v-for="ty in TYPES" :key="ty" :value="ty">{{ typeName(ty) }}</option>

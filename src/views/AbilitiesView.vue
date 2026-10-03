@@ -8,6 +8,7 @@ import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
 import DexText from '@/components/DexText.vue'
+import SearchBox from '@/components/SearchBox.vue'
 
 // Every ability the regulation has, by name in the reader's language, with its short description.
 const abilities = computed(() =>
@@ -33,13 +34,7 @@ const shown = computed(() => {
   <div class="panel">
     <h1>{{ t('title.abilities') }}</h1>
     <p class="muted">{{ t('abilities.intro', { reg: REGULATION }) }}</p>
-    <input
-      v-model="query"
-      type="search"
-      class="search"
-      :placeholder="t('abilities.search')"
-      :aria-label="t('abilities.search')"
-    />
+    <SearchBox v-model="query" :placeholder="t('abilities.search')" :aria-label="t('abilities.search')" />
     <dl v-if="shown.length" class="entries">
       <template v-for="a in shown" :key="a.id">
         <dt>

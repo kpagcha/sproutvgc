@@ -90,6 +90,7 @@ export const messages: Record<keyof typeof en, string> = {
   'home.typesDesc': 'Cada tipo con sus debilidades, resistencias e inmunidades.',
   'home.abilitiesDesc': 'Qué hace cada habilidad y qué Pokémon pueden tenerla.',
   'home.search': 'Buscar en la dex',
+  'search.clear': 'Borrar la búsqueda',
   'home.none': 'No hay resultados.',
 
   'types.intro': 'Elige un tipo.',

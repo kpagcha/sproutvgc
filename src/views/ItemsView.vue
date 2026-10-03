@@ -10,6 +10,7 @@ import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
 import DexText from '@/components/DexText.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
+import SearchBox from '@/components/SearchBox.vue'
 
 // Every item the regulation has, by kind (held items, berries, Mega Stones), with its short description.
 const items = computed(() =>
@@ -37,13 +38,7 @@ const groups = computed(() => {
   <div class="panel">
     <h1>{{ t('title.items') }}</h1>
     <p class="muted">{{ t('items.intro', { reg: REGULATION }) }}</p>
-    <input
-      v-model="query"
-      type="search"
-      class="search"
-      :placeholder="t('items.search')"
-      :aria-label="t('items.search')"
-    />
+    <SearchBox v-model="query" :placeholder="t('items.search')" :aria-label="t('items.search')" />
     <section v-for="g in groups" :key="g.kind">
       <h2>{{ t(`items.kind.${g.kind}`) }}</h2>
       <dl class="entries">

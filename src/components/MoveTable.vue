@@ -13,6 +13,7 @@ import CategoryIcon from '@/components/CategoryIcon.vue'
 import DexText from '@/components/DexText.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon.vue'
+import SearchBox from '@/components/SearchBox.vue'
 
 // A table of moves with their type, category, power, accuracy and PP, sortable by any of them, searchable by name and
 // filtered by type and category; with `descriptions`, each move's short description too.
@@ -59,7 +60,7 @@ const COLUMNS: { k: Key; label: MessageKey; right?: boolean }[] = [
 
 <template>
   <div class="filters">
-    <input v-model="query" type="search" class="search" :placeholder="placeholder" :aria-label="placeholder" />
+    <SearchBox v-model="query" :placeholder="placeholder" :aria-label="placeholder" />
     <select v-model="type" class="search select" :aria-label="t('move.type')">
       <option value="">{{ t('pokedex.anyType') }}</option>
       <option v-for="ty in TYPES" :key="ty" :value="ty">{{ typeName(ty) }}</option>

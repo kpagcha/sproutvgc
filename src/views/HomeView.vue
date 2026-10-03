@@ -14,6 +14,7 @@ import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon.vue'
 import QuickLinks from '@/components/QuickLinks.vue'
 import DexText from '@/components/DexText.vue'
+import SearchBox from '@/components/SearchBox.vue'
 
 // The search is kept in the URL (`?q=`), so coming back from a result brings the results back.
 const route = useRoute()
@@ -108,10 +109,8 @@ const DECOR_ITEMS: ItemId[] = ['choicescarf', 'focussash', 'sitrusberry']
     <div class="intro">
       <h1 class="title">mon<span>dex</span></h1>
       <p class="muted">{{ t('home.intro', { game: GAME_NAME, reg: REGULATION }) }}</p>
-      <input
+      <SearchBox
         v-model="query"
-        type="search"
-        class="search"
         :placeholder="t('home.search')"
         :aria-label="t('home.search')"
         @keydown.enter="openOnly"
@@ -273,7 +272,7 @@ const DECOR_ITEMS: ItemId[] = ['choicescarf', 'focussash', 'sitrusberry']
   color: var(--accent);
 }
 
-.search {
+.search-box {
   margin: 16px 0 0;
 }
 .chip-hits {
