@@ -250,7 +250,7 @@ const TYPE_INFO: Record<TypeId, TypeInfo> = {
   grass: {
     becomes: [when(move('terrainpulse'), 'grassyterrain', 2), when(ability('mimicry'), 'grassyterrain')],
     gives: [{ ref: move('forestscurse'), fx: 'info.fx.adds' }],
-    immune: is(group('powder'), move('leechseed'), ability('effectspore')),
+    immune: is(group('powder'), move('leechseed')),
     ally: [{ ref: ability('flowerveil'), fx: 'info.fx.flowerVeil' }],
     field: [x(condition('grassyterrain'), 1.3)],
     user: [x(ability('overgrow'), 1.5)],
