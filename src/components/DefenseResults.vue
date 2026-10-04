@@ -7,7 +7,8 @@ import { defenseInfo, hasInfo } from '@/lib/interactions'
 import TypeIcon from '@/components/TypeIcon'
 import SideInteractions from '@/components/SideInteractions.vue'
 
-const props = defineProps<{ types: readonly TypeId[] }>()
+// `bare` leaves out the panel, for a page that puts the matchups in a panel of its own.
+const props = defineProps<{ types: readonly TypeId[]; bare?: boolean }>()
 
 const ROWS: { m: Multiplier; label: MessageKey }[] = [
   { m: 4, label: 'matchups.weak' },
@@ -23,7 +24,7 @@ const info = computed(() => defenseInfo(props.types))
 
 <template>
   <!-- The other effects go to the right of the matchups when there's room, below them when there isn't. -->
-  <div class="panel defense">
+  <div class="defense" :class="{ panel: !bare }">
     <div class="split" :class="{ both: hasInfo(info) }">
       <table class="groups">
         <tbody>

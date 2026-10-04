@@ -29,6 +29,25 @@ const mon = computed(() => POKEMON[id.value])
 
 const abilities = computed(() => mon.value.abilities.map(ability))
 
+// The type matchups, collapsed unless opened: whether they're open is remembered across visits, for every Pokémon.
+const MATCHUPS_KEY = 'sproutvgc.pokemon.matchups'
+function readMatchupsOpen(): boolean {
+  try {
+    return localStorage.getItem(MATCHUPS_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+const matchupsOpen = ref(readMatchupsOpen())
+function onMatchupsToggle(e: Event) {
+  matchupsOpen.value = (e.target as HTMLDetailsElement).open
+  try {
+    localStorage.setItem(MATCHUPS_KEY, matchupsOpen.value ? '1' : '0')
+  } catch {
+    // Storage unavailable: the choice lasts for this page load.
+  }
+}
+
 // Each stat's bar, out of 200 (the few above it fill it). Plain (`usePageStatBars`), colored by Showdown's scale for
 // stats: red for low, through yellow, to green and blue for high. Set against a set of Pokémon: a tick at its median, a
 // band over its middle half, the bar blue above the median and red below, and on hover how many it beats.
@@ -180,8 +199,12 @@ watchEffect(async () => {
       </details>
     </div>
 
-    <h2 class="section">{{ t('pokemon.defense') }}</h2>
-    <DefenseResults :types="mon.types" />
+    <details class="panel matchups" :open="matchupsOpen" @toggle="onMatchupsToggle">
+      <summary>
+        <h2>{{ t('pokemon.defense') }}</h2>
+      </summary>
+      <DefenseResults :types="mon.types" bare />
+    </details>
 
     <div class="panel">
       <h2>{{ t('pokemon.moves') }}</h2>
@@ -360,8 +383,21 @@ watchEffect(async () => {
 details {
   margin-top: 8px;
 }
-.section {
-  margin: 4px 0 8px;
+/* The type matchups' panel, its heading the toggle: the marker beside it, the heading inline so it sits on the marker's
+   line. */
+details.matchups {
+  margin-top: 0;
+}
+.matchups > summary {
+  cursor: pointer;
+  width: fit-content;
+}
+.matchups > summary h2 {
+  display: inline;
+  margin: 0;
+}
+.matchups[open] > summary {
+  margin-bottom: 12px;
 }
 @media (max-width: 560px) {
   .sprite {
