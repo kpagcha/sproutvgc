@@ -93,6 +93,10 @@ interface Move extends Entry {
   priority: number
   target: string
   flags: Record<string, 1>
+  /** Its chances of side effects (from `secondary` too), which Sheer Force trades for power. */
+  secondaries: unknown[] | null
+  /** Boosted by Sheer Force with no side effects to lose. */
+  hasSheerForceBoost?: boolean
 }
 interface Item extends Entry {
   /** Its cell on Showdown's item sheet. */
@@ -128,8 +132,10 @@ interface ModdedDex {
 type TextTable = 'Abilities' | 'Moves' | 'Items'
 
 /**
- * The move flags the app shows, of Showdown's: what boosts or blocks a move (Iron Fist, Soundproof, Bulletproof),
- * whether it makes contact, and `protect` inverted: damaging moves that go through Protect.
+ * The move flags the app shows, of Showdown's: what boosts or blocks a move (Iron Fist, Soundproof, Bulletproof,
+ * Gravity), whether it makes contact, takes two turns (`charge`) or can't be used twice in a row, `protect` inverted:
+ * damaging moves that go through Protect, and `sheerforce`, not a flag of Showdown's: moves Sheer Force boosts, as its
+ * code decides them (side effects, or `hasSheerForceBoost`).
  */
 const MOVE_FLAGS = [
   'contact',
@@ -138,14 +144,18 @@ const MOVE_FLAGS = [
   'bite',
   'slicing',
   'pulse',
+  'sheerforce',
   'bullet',
   'wind',
   'powder',
   'dance',
   'heal',
+  'gravity',
   'bypasssub',
   'reflectable',
   'protect',
+  'charge',
+  'cantusetwice',
 ] as const
 
 function git(cwd: string, ...args: string[]): string {
@@ -466,7 +476,13 @@ async function main() {
           pp: m.noPPBoosts ? m.pp : (m.pp / 5 + 1) * 4,
           priority: m.priority,
           target: m.target,
-          flags: MOVE_FLAGS.filter((f) => (f === 'protect' ? !m.flags.protect && m.category !== 'Status' : m.flags[f])),
+          flags: MOVE_FLAGS.filter((f) =>
+            f === 'protect'
+              ? !m.flags.protect && m.category !== 'Status'
+              : f === 'sheerforce'
+                ? !!(m.secondaries || m.hasSheerForceBoost)
+                : m.flags[f],
+          ),
         }
       },
     },

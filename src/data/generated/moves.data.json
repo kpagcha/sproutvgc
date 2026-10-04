@@ -27,7 +27,7 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": ["bullet"]
+    "flags": ["sheerforce", "bullet"]
   },
   "acrobatics": {
     "type": "flying",
@@ -97,7 +97,7 @@
     "pp": 16,
     "priority": 0,
     "target": "any",
-    "flags": ["slicing"]
+    "flags": ["slicing", "sheerforce"]
   },
   "alluringvoice": {
     "type": "fairy",
@@ -107,7 +107,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["sound", "bypasssub"]
+    "flags": ["sound", "sheerforce", "bypasssub"]
   },
   "allyswitch": {
     "type": "psychic",
@@ -137,7 +137,7 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "appleacid": {
     "type": "grass",
@@ -147,7 +147,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "aquacutter": {
     "type": "water",
@@ -187,7 +187,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "dance"]
+    "flags": ["contact", "sheerforce", "dance"]
   },
   "aquatail": {
     "type": "water",
@@ -257,7 +257,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "auroraveil": {
     "type": "ice",
@@ -287,7 +287,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "babydolleyes": {
     "type": "fairy",
@@ -317,7 +317,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "batonpass": {
     "type": "normal",
@@ -387,7 +387,7 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "bite"]
+    "flags": ["contact", "bite", "sheerforce"]
   },
   "bitterblade": {
     "type": "fire",
@@ -407,7 +407,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "blastburn": {
     "type": "fire",
@@ -427,7 +427,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "blizzard": {
     "type": "ice",
@@ -437,7 +437,7 @@
     "pp": 8,
     "priority": 0,
     "target": "allAdjacentFoes",
-    "flags": ["wind"]
+    "flags": ["sheerforce", "wind"]
   },
   "block": {
     "type": "normal",
@@ -467,7 +467,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "bonerush": {
     "type": "ground",
@@ -497,7 +497,7 @@
     "pp": 8,
     "priority": 0,
     "target": "any",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce", "gravity", "charge"]
   },
   "bravebird": {
     "type": "flying",
@@ -517,7 +517,7 @@
     "pp": 16,
     "priority": 0,
     "target": "allAdjacentFoes",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "brickbreak": {
     "type": "fighting",
@@ -557,7 +557,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["sound", "bypasssub"]
+    "flags": ["sound", "sheerforce", "bypasssub"]
   },
   "bulkup": {
     "type": "fighting",
@@ -577,7 +577,7 @@
     "pp": 20,
     "priority": 0,
     "target": "allAdjacent",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "bulletpunch": {
     "type": "steel",
@@ -607,7 +607,7 @@
     "pp": 8,
     "priority": 0,
     "target": "allAdjacentFoes",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "burnup": {
     "type": "fire",
@@ -637,7 +637,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "slicing"]
+    "flags": ["contact", "slicing", "sheerforce"]
   },
   "charge": {
     "type": "electric",
@@ -657,7 +657,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "charm": {
     "type": "fairy",
@@ -677,7 +677,7 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "chillyreception": {
     "type": "ice",
@@ -887,7 +887,7 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "slicing"]
+    "flags": ["contact", "slicing", "sheerforce"]
   },
   "crunch": {
     "type": "dark",
@@ -897,7 +897,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "bite"]
+    "flags": ["contact", "bite", "sheerforce"]
   },
   "crushclaw": {
     "type": "normal",
@@ -907,7 +907,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "slicing"]
+    "flags": ["contact", "slicing", "sheerforce"]
   },
   "curse": {
     "type": "ghost",
@@ -937,7 +937,7 @@
     "pp": 16,
     "priority": 0,
     "target": "any",
-    "flags": ["pulse"]
+    "flags": ["pulse", "sheerforce"]
   },
   "dazzlinggleam": {
     "type": "fairy",
@@ -997,7 +997,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "charge"]
   },
   "direclaw": {
     "type": "poison",
@@ -1007,7 +1007,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "slicing"]
+    "flags": ["contact", "slicing", "sheerforce"]
   },
   "disable": {
     "type": "normal",
@@ -1027,7 +1027,7 @@
     "pp": 16,
     "priority": 0,
     "target": "allAdjacent",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "dive": {
     "type": "water",
@@ -1037,7 +1037,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "charge"]
   },
   "doubleedge": {
     "type": "normal",
@@ -1147,7 +1147,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "dragontail": {
     "type": "dragon",
@@ -1207,7 +1207,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "dualwingbeat": {
     "type": "flying",
@@ -1227,7 +1227,7 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "punch"]
+    "flags": ["contact", "punch", "sheerforce"]
   },
   "earthpower": {
     "type": "ground",
@@ -1237,7 +1237,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "earthquake": {
     "type": "ground",
@@ -1267,7 +1267,7 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": ["sound", "bypasssub"]
+    "flags": ["sound", "sheerforce", "bypasssub"]
   },
   "electricterrain": {
     "type": "electric",
@@ -1307,7 +1307,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce", "charge"]
   },
   "electroweb": {
     "type": "electric",
@@ -1317,7 +1317,7 @@
     "pp": 16,
     "priority": 0,
     "target": "allAdjacentFoes",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "encore": {
     "type": "normal",
@@ -1357,7 +1357,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["bullet"]
+    "flags": ["sheerforce", "bullet"]
   },
   "entrainment": {
     "type": "normal",
@@ -1407,7 +1407,7 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "extremespeed": {
     "type": "normal",
@@ -1447,7 +1447,7 @@
     "pp": 12,
     "priority": 3,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "faketears": {
     "type": "dark",
@@ -1507,7 +1507,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["dance"]
+    "flags": ["sheerforce", "dance"]
   },
   "finalgambit": {
     "type": "fighting",
@@ -1527,7 +1527,7 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "firefang": {
     "type": "fire",
@@ -1537,7 +1537,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "bite"]
+    "flags": ["contact", "bite", "sheerforce"]
   },
   "firelash": {
     "type": "fire",
@@ -1547,7 +1547,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "firepunch": {
     "type": "fire",
@@ -1557,7 +1557,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "punch"]
+    "flags": ["contact", "punch", "sheerforce"]
   },
   "firespin": {
     "type": "fire",
@@ -1607,7 +1607,7 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "flamethrower": {
     "type": "fire",
@@ -1617,7 +1617,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "flareblitz": {
     "type": "fire",
@@ -1627,7 +1627,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "flashcannon": {
     "type": "steel",
@@ -1637,7 +1637,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "flatter": {
     "type": "dark",
@@ -1687,7 +1687,7 @@
     "pp": 16,
     "priority": 0,
     "target": "any",
-    "flags": ["contact"]
+    "flags": ["contact", "gravity", "charge"]
   },
   "flyingpress": {
     "type": "fighting",
@@ -1697,7 +1697,7 @@
     "pp": 12,
     "priority": 0,
     "target": "any",
-    "flags": ["contact"]
+    "flags": ["contact", "gravity"]
   },
   "focusblast": {
     "type": "fighting",
@@ -1707,7 +1707,7 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": ["bullet"]
+    "flags": ["sheerforce", "bullet"]
   },
   "focusenergy": {
     "type": "normal",
@@ -1837,7 +1837,7 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["cantusetwice"]
   },
   "glaiverush": {
     "type": "dragon",
@@ -1897,7 +1897,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "gravity": {
     "type": "psychic",
@@ -1957,7 +1957,7 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "gyroball": {
     "type": "steel",
@@ -2067,7 +2067,7 @@
     "pp": 12,
     "priority": 0,
     "target": "allAdjacentFoes",
-    "flags": ["wind"]
+    "flags": ["sheerforce", "wind"]
   },
   "heavyslam": {
     "type": "steel",
@@ -2117,7 +2117,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "gravity"]
   },
   "horndrill": {
     "type": "normal",
@@ -2157,7 +2157,7 @@
     "pp": 12,
     "priority": 0,
     "target": "any",
-    "flags": ["wind"]
+    "flags": ["sheerforce", "wind"]
   },
   "hydrocannon": {
     "type": "water",
@@ -2217,7 +2217,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "icefang": {
     "type": "ice",
@@ -2227,7 +2227,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "bite"]
+    "flags": ["contact", "bite", "sheerforce"]
   },
   "icehammer": {
     "type": "ice",
@@ -2247,7 +2247,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "punch"]
+    "flags": ["contact", "punch", "sheerforce"]
   },
   "iceshard": {
     "type": "ice",
@@ -2277,7 +2277,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "iciclespear": {
     "type": "ice",
@@ -2297,7 +2297,7 @@
     "pp": 16,
     "priority": 0,
     "target": "allAdjacentFoes",
-    "flags": ["wind"]
+    "flags": ["sheerforce", "wind"]
   },
   "imprison": {
     "type": "psychic",
@@ -2317,7 +2317,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "inferno": {
     "type": "fire",
@@ -2327,7 +2327,7 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "infestation": {
     "type": "bug",
@@ -2377,7 +2377,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "irontail": {
     "type": "steel",
@@ -2387,7 +2387,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "jawlock": {
     "type": "dark",
@@ -2477,7 +2477,7 @@
     "pp": 16,
     "priority": 0,
     "target": "allAdjacent",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "leafblade": {
     "type": "grass",
@@ -2557,7 +2557,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "lockon": {
     "type": "normal",
@@ -2587,7 +2587,7 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "luminacrash": {
     "type": "psychic",
@@ -2597,7 +2597,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "lunge": {
     "type": "bug",
@@ -2607,7 +2607,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "machpunch": {
     "type": "fighting",
@@ -2657,7 +2657,7 @@
     "pp": 12,
     "priority": 0,
     "target": "self",
-    "flags": []
+    "flags": ["gravity"]
   },
   "makeitrain": {
     "type": "steel",
@@ -2677,7 +2677,7 @@
     "pp": 16,
     "priority": 0,
     "target": "allAdjacentFoes",
-    "flags": ["heal"]
+    "flags": ["sheerforce", "heal"]
   },
   "meanlook": {
     "type": "normal",
@@ -2757,7 +2757,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["charge"]
   },
   "meteormash": {
     "type": "steel",
@@ -2767,7 +2767,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "punch"]
+    "flags": ["contact", "punch", "sheerforce"]
   },
   "milkdrink": {
     "type": "normal",
@@ -2827,7 +2827,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "moonlight": {
     "type": "fairy",
@@ -2857,7 +2857,7 @@
     "pp": 16,
     "priority": 0,
     "target": "allAdjacentFoes",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "mountaingale": {
     "type": "ice",
@@ -2867,7 +2867,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "muddywater": {
     "type": "water",
@@ -2877,7 +2877,7 @@
     "pp": 12,
     "priority": 0,
     "target": "allAdjacentFoes",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "mudshot": {
     "type": "ground",
@@ -2887,7 +2887,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "mudslap": {
     "type": "ground",
@@ -2897,7 +2897,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "mysticalfire": {
     "type": "fire",
@@ -2907,7 +2907,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "nastyplot": {
     "type": "dark",
@@ -2927,7 +2927,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "nightshade": {
     "type": "ghost",
@@ -2977,7 +2977,7 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "octolock": {
     "type": "fighting",
@@ -3097,7 +3097,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "protect"]
+    "flags": ["contact", "protect", "charge"]
   },
   "pinmissile": {
     "type": "bug",
@@ -3117,7 +3117,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "pluck": {
     "type": "flying",
@@ -3137,7 +3137,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "bite"]
+    "flags": ["contact", "bite", "sheerforce"]
   },
   "poisonjab": {
     "type": "poison",
@@ -3147,7 +3147,7 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "poisonpowder": {
     "type": "poison",
@@ -3197,7 +3197,7 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "powergem": {
     "type": "rock",
@@ -3277,7 +3277,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "psychicfangs": {
     "type": "psychic",
@@ -3297,7 +3297,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["sound", "bypasssub"]
+    "flags": ["sound", "sheerforce", "bypasssub"]
   },
   "psychicterrain": {
     "type": "psychic",
@@ -3337,7 +3337,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "psyshock": {
     "type": "psychic",
@@ -3357,7 +3357,7 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": ["bullet"]
+    "flags": ["sheerforce", "bullet"]
   },
   "quash": {
     "type": "dark",
@@ -3457,7 +3457,7 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "razorshell": {
     "type": "water",
@@ -3467,7 +3467,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "slicing"]
+    "flags": ["contact", "slicing", "sheerforce"]
   },
   "recover": {
     "type": "normal",
@@ -3587,7 +3587,7 @@
     "pp": 12,
     "priority": 0,
     "target": "allAdjacentFoes",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "rocktomb": {
     "type": "rock",
@@ -3597,7 +3597,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "rockwrecker": {
     "type": "rock",
@@ -3667,7 +3667,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "sandstorm": {
     "type": "rock",
@@ -3697,7 +3697,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "scaleshot": {
     "type": "dragon",
@@ -3727,7 +3727,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "screech": {
     "type": "normal",
@@ -3777,7 +3777,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["bullet"]
+    "flags": ["sheerforce", "bullet"]
   },
   "shadowclaw": {
     "type": "ghost",
@@ -3837,7 +3837,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "shellsmash": {
     "type": "normal",
@@ -3907,7 +3907,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "skyattack": {
     "type": "flying",
@@ -3917,7 +3917,7 @@
     "pp": 8,
     "priority": 0,
     "target": "any",
-    "flags": []
+    "flags": ["sheerforce", "charge"]
   },
   "slackoff": {
     "type": "normal",
@@ -3967,7 +3967,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["bullet"]
+    "flags": ["sheerforce", "bullet"]
   },
   "sludgewave": {
     "type": "poison",
@@ -3977,7 +3977,7 @@
     "pp": 12,
     "priority": 0,
     "target": "allAdjacent",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "smackdown": {
     "type": "rock",
@@ -4017,7 +4017,7 @@
     "pp": 16,
     "priority": 0,
     "target": "allAdjacentFoes",
-    "flags": ["sound", "bypasssub"]
+    "flags": ["sound", "sheerforce", "bypasssub"]
   },
   "snipeshot": {
     "type": "water",
@@ -4037,7 +4037,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["sound", "bypasssub"]
+    "flags": ["sound", "sheerforce", "bypasssub"]
   },
   "snowscape": {
     "type": "ice",
@@ -4067,7 +4067,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["charge"]
   },
   "solarblade": {
     "type": "grass",
@@ -4077,7 +4077,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "slicing"]
+    "flags": ["contact", "slicing", "charge"]
   },
   "sparklingaria": {
     "type": "water",
@@ -4087,7 +4087,7 @@
     "pp": 12,
     "priority": 0,
     "target": "allAdjacent",
-    "flags": ["sound", "bypasssub"]
+    "flags": ["sound", "sheerforce", "bypasssub"]
   },
   "speedswap": {
     "type": "psychic",
@@ -4137,7 +4137,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "spiritshackle": {
     "type": "ghost",
@@ -4147,7 +4147,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "spite": {
     "type": "ghost",
@@ -4207,7 +4207,7 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "stickyweb": {
     "type": "bug",
@@ -4247,7 +4247,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "slicing"]
+    "flags": ["contact", "slicing", "sheerforce"]
   },
   "stoneedge": {
     "type": "rock",
@@ -4307,7 +4307,7 @@
     "pp": 20,
     "priority": 0,
     "target": "allAdjacentFoes",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "stuffcheeks": {
     "type": "normal",
@@ -4477,7 +4477,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["bullet"]
+    "flags": ["sheerforce", "bullet"]
   },
   "tailslap": {
     "type": "normal",
@@ -4587,7 +4587,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "thunder": {
     "type": "electric",
@@ -4597,7 +4597,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "thunderbolt": {
     "type": "electric",
@@ -4607,7 +4607,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "thunderfang": {
     "type": "electric",
@@ -4617,7 +4617,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "bite"]
+    "flags": ["contact", "bite", "sheerforce"]
   },
   "thunderpunch": {
     "type": "electric",
@@ -4627,7 +4627,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "punch"]
+    "flags": ["contact", "punch", "sheerforce"]
   },
   "thunderwave": {
     "type": "electric",
@@ -4677,7 +4677,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["sound", "bypasssub"]
+    "flags": ["sound", "sheerforce", "bypasssub"]
   },
   "torment": {
     "type": "dark",
@@ -4727,7 +4727,7 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "transform": {
     "type": "normal",
@@ -4747,7 +4747,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "trick": {
     "type": "psychic",
@@ -4787,7 +4787,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": ["sheerforce"]
   },
   "tripleaxel": {
     "type": "ice",
@@ -4807,7 +4807,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "twinbeam": {
     "type": "psychic",
@@ -4827,7 +4827,7 @@
     "pp": 16,
     "priority": 3,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "uproar": {
     "type": "normal",
@@ -4887,7 +4887,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "waterfall": {
     "type": "water",
@@ -4897,7 +4897,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "waterpulse": {
     "type": "water",
@@ -4907,7 +4907,7 @@
     "pp": 20,
     "priority": 0,
     "target": "any",
-    "flags": ["pulse"]
+    "flags": ["pulse", "sheerforce"]
   },
   "watershuriken": {
     "type": "water",
@@ -5077,7 +5077,7 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": ["bullet"]
+    "flags": ["sheerforce", "bullet"]
   },
   "zenheadbutt": {
     "type": "psychic",
@@ -5087,7 +5087,7 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   },
   "zingzap": {
     "type": "electric",
@@ -5097,6 +5097,6 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact", "sheerforce"]
   }
 }

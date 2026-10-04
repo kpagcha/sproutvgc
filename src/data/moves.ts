@@ -16,14 +16,18 @@ export const FLAGS = [
   'bite',
   'slicing',
   'pulse',
+  'sheerforce',
   'bullet',
   'wind',
   'powder',
   'dance',
   'heal',
+  'gravity',
   'bypasssub',
   'reflectable',
   'protect',
+  'charge',
+  'cantusetwice',
 ] as const
 export type Flag = (typeof FLAGS)[number]
 
