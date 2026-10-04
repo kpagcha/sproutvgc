@@ -7,10 +7,10 @@ import { ITEMS } from '@/data/items'
 import { t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
-import DexText from '@/components/DexText.vue'
+import DexText from '@/components/DexText'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonChips from '@/components/PokemonChips.vue'
-import PokemonIcon from '@/components/PokemonIcon.vue'
+import PokemonIcon from '@/components/PokemonIcon'
 import RefInteractions from '@/components/RefInteractions.vue'
 
 // One item: its description, the Mega Evolutions it brings out or the Pokémon it's for, and what it does to types

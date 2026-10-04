@@ -5,17 +5,17 @@ import { CATEGORIES, MOVES, type Category, type Move } from '@/data/moves'
 import { TYPES, type TypeId } from '@/data/types'
 import type { MessageKey } from '@/i18n'
 import { locale, t, typeName } from '@/i18n'
-import { description, shortText } from '@/i18n/descriptions'
+import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
-import { parseDexText } from '@/lib/dexText'
-import { follow, hrefOf, refHref } from '@/lib/links'
-import { CATEGORY_ICONS } from '@/lib/sprites'
 import { fold, split } from '@/lib/search'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { useRowColumns } from '@/composables/useRowColumns'
 import { useSort } from '@/composables/useSort'
+import AppLink from '@/components/AppLink'
+import CategoryIcon from '@/components/CategoryIcon'
+import DexText from '@/components/DexText'
 import SortHeader from '@/components/SortHeader.vue'
-import TypeIcon from '@/components/TypeIcon.vue'
+import TypeIcon from '@/components/TypeIcon'
 import SearchBox from '@/components/SearchBox.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 
@@ -23,27 +23,9 @@ import SkeletonRows from '@/components/SkeletonRows.vue'
 // filtered by type and category; with `descriptions`, each move's short description too.
 const props = defineProps<{ ids: readonly MoveId[]; descriptions?: boolean; placeholder: string; query?: string }>()
 
-// Plain markup, with what goes in it worked out here (the links' hrefs, the descriptions' references, as `DexText`
-// would), and the router follows the links (`follow` on the table): components in each of hundreds of rows take a
-// while to mount. References show their entry's short description on hover, where there is hover.
-const canHover = window.matchMedia('(hover: hover)').matches
-const rows = computed(() =>
-  props.ids.map((id) => ({
-    id,
-    name: refName(move(id)),
-    data: MOVES[id],
-    href: hrefOf({ name: 'move', params: { id } }),
-    typeHref: hrefOf({ name: 'types', params: { type: MOVES[id].type } }),
-    category: t(`move.category.${MOVES[id].category}`),
-    desc: props.descriptions
-      ? parseDexText(description('move', id)?.short ?? '').map((part) =>
-          'ref' in part
-            ? { text: refName(part.ref), href: refHref(part.ref), tip: canHover ? shortText(part.ref) : undefined }
-            : { text: part.text, href: undefined, tip: undefined },
-        )
-      : [],
-  })),
-)
+// Its links are `AppLink`s and its icons and descriptions functional components: RouterLinks and full components in
+// each of hundreds of rows take a while to mount.
+const rows = computed(() => props.ids.map((id) => ({ id, name: refName(move(id)), data: MOVES[id] })))
 
 const query = ref(props.query ?? '')
 const type = ref<TypeId | ''>('')
@@ -113,13 +95,7 @@ const skeleton = computed(() => [
       <option v-for="c in CATEGORIES" :key="c" :value="c">{{ t(`move.category.${c}`) }}</option>
     </select>
   </div>
-  <div
-    v-if="sorted.length"
-    class="dex-table"
-    :class="{ described: descriptions, restoring }"
-    role="table"
-    @click="follow"
-  >
+  <div v-if="sorted.length" class="dex-table" :class="{ described: descriptions, restoring }" role="table">
     <div ref="head" class="row head" role="row">
       <SortHeader :label="t('move.name')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
       <SortHeader
@@ -138,42 +114,26 @@ const skeleton = computed(() => [
     <template v-else>
       <div v-for="r in sorted" :key="r.id" class="row" role="row">
         <div role="cell" class="grow">
-          <a :href="r.href" class="name">
+          <AppLink :to="{ name: 'move', params: { id: r.id } }" class="name">
             <template v-if="r.parts"
               >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
               >{{ r.parts[2] }}</template
             >
             <template v-else>{{ r.name }}</template>
-          </a>
+          </AppLink>
           <div v-if="descriptions && phone" class="muted below">
-            <template v-for="(part, i) in r.desc" :key="i"
-              ><a v-if="part.href" v-tip="part.tip" :href="part.href">{{ part.text }}</a
-              ><template v-else>{{ part.text }}</template></template
-            >
+            <DexText :text="description('move', r.id)?.short ?? ''" />
           </div>
         </div>
         <div role="cell">
-          <a :href="r.typeHref"><TypeIcon :type="r.data.type" /></a>
+          <AppLink :to="{ name: 'types', params: { type: r.data.type } }"><TypeIcon :type="r.data.type" /></AppLink>
         </div>
-        <div role="cell">
-          <img
-            v-tip="r.category"
-            class="pixel category"
-            :src="CATEGORY_ICONS[r.data.category]"
-            :alt="r.category"
-            width="32"
-            height="14"
-            draggable="false"
-          />
-        </div>
+        <div role="cell"><CategoryIcon :category="r.data.category" /></div>
         <div role="cell" class="r num">{{ r.data.power || '—' }}</div>
         <div role="cell" class="r num">{{ r.data.accuracy === true ? '—' : r.data.accuracy }}</div>
         <div role="cell" class="wide-only r num">{{ r.data.pp }}</div>
         <div v-if="descriptions && !phone" role="cell" class="grow muted">
-          <template v-for="(part, i) in r.desc" :key="i"
-            ><a v-if="part.href" v-tip="part.tip" :href="part.href">{{ part.text }}</a
-            ><template v-else>{{ part.text }}</template></template
-          >
+          <DexText :text="description('move', r.id)?.short ?? ''" />
         </div>
       </div>
     </template>
@@ -205,9 +165,6 @@ const skeleton = computed(() => [
 }
 .select {
   width: auto;
-}
-.category {
-  vertical-align: middle;
 }
 .below {
   font-size: 0.9em;

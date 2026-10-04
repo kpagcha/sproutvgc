@@ -9,7 +9,7 @@ import { attackProfile, defensiveProfile, formatMult, multClass, type Profile } 
 import { FADE, PRESS, SPRING } from '@/lib/motion'
 import { hintFor } from '@/lib/hints'
 import { reveal } from '@/lib/scroll'
-import TypeIcon from '@/components/TypeIcon.vue'
+import TypeIcon from '@/components/TypeIcon'
 import QuickLinks from '@/components/QuickLinks.vue'
 import SideInteractions from '@/components/SideInteractions.vue'
 

@@ -10,7 +10,7 @@ import { FADE, PRESS } from '@/lib/motion'
 import { checkMulti, explain, matchups, multiPrompt, type Card } from '@/lib/quiz'
 import { hintFor } from '@/lib/hints'
 import { reveal } from '@/lib/scroll'
-import TypeIcon from '@/components/TypeIcon.vue'
+import TypeIcon from '@/components/TypeIcon'
 import TypePicker from '@/components/TypePicker.vue'
 
 const props = defineProps<{

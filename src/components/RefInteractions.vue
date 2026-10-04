@@ -4,8 +4,8 @@ import type { Ref } from '@/data/dex'
 import { t, tSplit, type MessageKey } from '@/i18n'
 import { effectText, interactionsOf } from '@/lib/interactions'
 import { formatMult, multClass } from '@/lib/typecalc'
-import DexRef from '@/components/DexRef.vue'
-import TypeIcon from '@/components/TypeIcon.vue'
+import DexRef from '@/components/DexRef'
+import TypeIcon from '@/components/TypeIcon'
 
 // What an entry (an ability, move, item, condition) does to types beyond the chart, read from the type data rather
 // than written twice: Levitate makes Ground moves miss, Iron Ball grounds Flying types.

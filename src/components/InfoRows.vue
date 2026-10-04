@@ -2,8 +2,8 @@
 import { refKey } from '@/data/dex'
 import { effectText, type InfoRow } from '@/lib/interactions'
 import { formatMult, multClass } from '@/lib/typecalc'
-import DexRef from '@/components/DexRef.vue'
-import TypeIcon from '@/components/TypeIcon.vue'
+import DexRef from '@/components/DexRef'
+import TypeIcon from '@/components/TypeIcon'
 
 defineProps<{ rows: InfoRow[] }>()
 

@@ -7,7 +7,7 @@ import { locale, t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
-import DexText from '@/components/DexText.vue'
+import DexText from '@/components/DexText'
 import SearchBox from '@/components/SearchBox.vue'
 
 // Every ability the regulation has, by name in the reader's language, with its short description.

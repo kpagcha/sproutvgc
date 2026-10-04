@@ -12,7 +12,7 @@ import {
   type FontOption,
 } from '@/dev/fonts'
 import { MULTIPLIERS, formatMult, multClass } from '@/lib/typecalc'
-import TypeIcon from '@/components/TypeIcon.vue'
+import TypeIcon from '@/components/TypeIcon'
 import { STYLES, useStyle, type Style } from '@/composables/useStyle'
 import DevZone from '@/dev/DevZone.vue'
 

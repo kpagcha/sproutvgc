@@ -8,7 +8,7 @@ import { locale, t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
-import DexText from '@/components/DexText.vue'
+import DexText from '@/components/DexText'
 import ItemIcon from '@/components/ItemIcon.vue'
 import SearchBox from '@/components/SearchBox.vue'
 

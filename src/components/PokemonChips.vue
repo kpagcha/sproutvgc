@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { pokemon, type PokemonId } from '@/data/dex'
 import { locale } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import PokemonIcon from '@/components/PokemonIcon.vue'
+import PokemonIcon from '@/components/PokemonIcon'
 
 // Pokémon as a row of links, each with its icon, by name in the reader's language.
 const props = defineProps<{ ids: readonly PokemonId[] }>()

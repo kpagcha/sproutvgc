@@ -8,7 +8,7 @@ import { t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
-import DexText from '@/components/DexText.vue'
+import DexText from '@/components/DexText'
 import SearchBox from '@/components/SearchBox.vue'
 
 // Every condition with an entry of its own, by kind (statuses, volatile effects, side and field effects, weather,

@@ -4,7 +4,7 @@ import type { Multiplier, TypeId } from '@/data/types'
 import { t, type MessageKey } from '@/i18n'
 import { defensiveProfile, formatMult, multClass } from '@/lib/typecalc'
 import { defenseInfo, hasInfo } from '@/lib/interactions'
-import TypeIcon from '@/components/TypeIcon.vue'
+import TypeIcon from '@/components/TypeIcon'
 import SideInteractions from '@/components/SideInteractions.vue'
 
 const props = defineProps<{ types: readonly TypeId[] }>()

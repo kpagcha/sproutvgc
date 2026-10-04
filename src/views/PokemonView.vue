@@ -8,13 +8,13 @@ import { t, tSlots, type MessageKey } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import DefenseResults from '@/components/DefenseResults.vue'
-import DexRef from '@/components/DexRef.vue'
-import DexText from '@/components/DexText.vue'
+import DexRef from '@/components/DexRef'
+import DexText from '@/components/DexText'
 import ItemIcon from '@/components/ItemIcon.vue'
 import MoveTable from '@/components/MoveTable.vue'
 import PokemonChips from '@/components/PokemonChips.vue'
-import PokemonIcon from '@/components/PokemonIcon.vue'
-import TypeIcon from '@/components/TypeIcon.vue'
+import PokemonIcon from '@/components/PokemonIcon'
+import TypeIcon from '@/components/TypeIcon'
 
 // One Pokémon: its sprite, types, abilities and base stats, how it changes (Mega Evolution, other formes) and evolves,
 // how types hit it, and its moves.

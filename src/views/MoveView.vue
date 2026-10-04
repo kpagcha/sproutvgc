@@ -8,11 +8,11 @@ import { POKEMON, loadLearnsets } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
-import CategoryIcon from '@/components/CategoryIcon.vue'
-import DexText from '@/components/DexText.vue'
+import CategoryIcon from '@/components/CategoryIcon'
+import DexText from '@/components/DexText'
 import PokemonChips from '@/components/PokemonChips.vue'
 import RefInteractions from '@/components/RefInteractions.vue'
-import TypeIcon from '@/components/TypeIcon.vue'
+import TypeIcon from '@/components/TypeIcon'
 
 // One move: its numbers, whom it hits, its description and flags, what it does to types beyond the chart, and the
 // legal Pokémon that learn it.

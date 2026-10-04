@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { TYPES, chart, isType } from '@/data/types'
 import { t, typeName } from '@/i18n'
 import { multClass } from '@/lib/typecalc'
-import TypeIcon from '@/components/TypeIcon.vue'
+import TypeIcon from '@/components/TypeIcon'
 
 const rows = TYPES.map((atk) =>
   TYPES.map((def) => {

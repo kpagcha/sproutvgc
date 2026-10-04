@@ -8,8 +8,11 @@ import { router } from '@/router'
 
 const hrefs = new Map<string, string>()
 
+/** A named route with string params: what `hrefOf` and `AppLink` take. */
+export type NamedLocation = RouteLocationNamedRaw & { name: string; params?: Record<string, string> }
+
 /** The href of a named route with string params, resolved once. */
-export function hrefOf(to: RouteLocationNamedRaw & { name: string; params?: Record<string, string> }): string {
+export function hrefOf(to: NamedLocation): string {
   const key = `${to.name}/${Object.values(to.params ?? {}).join('/')}`
   let href = hrefs.get(key)
   if (href === undefined) hrefs.set(key, (href = router.resolve(to).href))

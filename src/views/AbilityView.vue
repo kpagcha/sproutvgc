@@ -7,7 +7,7 @@ import { REGULATION } from '@/data/format'
 import { t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
-import DexText from '@/components/DexText.vue'
+import DexText from '@/components/DexText'
 import PokemonChips from '@/components/PokemonChips.vue'
 import RefInteractions from '@/components/RefInteractions.vue'
 

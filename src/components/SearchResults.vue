@@ -6,10 +6,10 @@ import type { ItemId, PokemonId } from '@/data/dex'
 import { description, isDescribed } from '@/i18n/descriptions'
 import type { SearchResults, SectionKind } from '@/composables/useSearch'
 import { addFilter, isFilterKind, type PokemonFilter } from '@/lib/pokemonFilters'
-import TypeIcon from '@/components/TypeIcon.vue'
+import TypeIcon from '@/components/TypeIcon'
 import ItemIcon from '@/components/ItemIcon.vue'
-import PokemonIcon from '@/components/PokemonIcon.vue'
-import DexText from '@/components/DexText.vue'
+import PokemonIcon from '@/components/PokemonIcon'
+import DexText from '@/components/DexText'
 
 // The dex searched, grouped by category (`useSearch`): the home page's results, the search page's, and the Pokémon
 // list's. On the Pokémon list (given its `filters`), types, abilities and moves filter it rather than open their pages.
