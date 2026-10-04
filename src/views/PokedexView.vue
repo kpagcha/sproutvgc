@@ -1,7 +1,16 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, useTemplateRef, watchEffect } from 'vue'
+import { computed, h, onMounted, ref, useTemplateRef, watchEffect, type FunctionalComponent } from 'vue'
 import { useRouter } from 'vue-router'
-import { ability, availableIds, pokemon, sameRef, type MoveId, type PokemonId, type Ref } from '@/data/dex'
+import {
+  ability,
+  available as isAvailable,
+  availableIds,
+  pokemon,
+  sameRef,
+  type MoveId,
+  type PokemonId,
+  type Ref,
+} from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { POKEMON, STATS, loadLearnsets, speciesOf, total, type StatId } from '@/data/pokemon'
 import { TYPES, type TypeId } from '@/data/types'
@@ -27,16 +36,35 @@ import SearchResults from '@/components/SearchResults.vue'
 // Every Pokémon the regulation has, with its types, abilities and base stats, sortable by its name and stats. Formes
 // that only look different (Vivillon's patterns) are left to their species' page. Its links are `AppLink`s and its
 // icons functional components: RouterLinks and full components in each of hundreds of rows take a while to mount.
+const listed = (id: PokemonId) => !POKEMON[id].cosmetic
 const rows = computed(() =>
   availableIds('pokemon')
-    .filter((id) => !POKEMON[id].cosmetic)
-    .map((id) => ({
-      id,
-      name: refName(pokemon(id)),
-      data: POKEMON[id],
-      abilities: POKEMON[id].abilities.map(ability),
-    })),
+    .filter(listed)
+    .map((id) => {
+      const name = refName(pokemon(id))
+      // A forme's name is its species' plus the forme in brackets ("Garchomp (Mega-Z)"): shown apart.
+      const forme = POKEMON[id].base ? /^(.+) \((.+)\)$/.exec(name) : null
+      return {
+        id,
+        name,
+        species: forme?.[1] ?? name,
+        forme: forme?.[2],
+        parent: parentOf(id),
+        data: POKEMON[id],
+        abilities: POKEMON[id].abilities.map(ability),
+      }
+    }),
 )
+type Row = (typeof rows.value)[number]
+
+// Sorted by name, formes go under their species, or, when the regulation doesn't have it, under the forme they change
+// from in battle (Floette-Mega under Floette-Eternal).
+function parentOf(id: PokemonId): PokemonId | undefined {
+  const { base, battleOnly } = POKEMON[id]
+  const has = (p?: PokemonId) => p && isAvailable(pokemon(p)) && listed(p)
+  return has(base) ? base : has(battleOnly) ? battleOnly : undefined
+}
+const byId = computed(() => new Map(rows.value.map((r) => [r.id, r])))
 
 // The intro counts species, not rows, and Mega Evolutions by their Mega Stone: Showdown splits Mega Meowstic in two,
 // one per gender, though the game has one.
@@ -91,13 +119,82 @@ const shown = computed(() => {
 })
 
 type Key = 'name' | StatId | 'total'
+// By name, a forme sorts as its parent, and the tie keeps it after it (IDs are in alphabetical order, a species' first).
 const { key, desc, toggle, sorted } = useSort({
   rows: shown,
-  value: (r, k: Key) => (k === 'name' ? r.name : k === 'total' ? total(r.data) : r.data.stats[STATS.indexOf(k)]!),
+  value: (r, k: Key) =>
+    k === 'name'
+      ? r.parent
+        ? byId.value.get(r.parent)!.name
+        : r.name
+      : k === 'total'
+        ? total(r.data)
+        : r.data.stats[STATS.indexOf(k)]!,
   initial: 'name' as Key,
   startsDesc: (k) => k !== 'name',
   locale,
 })
+
+type Marks = [string, string, string]
+interface Line {
+  row: Row
+  /** Under its parent, named by its forme alone; `last` of its parent's. */
+  child: boolean
+  last: boolean
+  /** With formes under it. */
+  parent: boolean
+  /** Shown only for a forme under it the search or filters found. */
+  context: boolean
+  title: Marks
+  tag: Marks | null
+}
+
+// The search's match within part of a row's name: `text`, which starts at `at` in it.
+function marks(parts: Marks | null, text: string, at: number): Marks {
+  if (!parts) return [text, '', '']
+  const from = Math.min(text.length, Math.max(0, parts[0].length - at))
+  const to = Math.min(text.length, Math.max(from, parts[0].length + parts[1].length - at))
+  return [text.slice(0, from), text.slice(from, to), text.slice(to)]
+}
+
+// The rows as shown: by name, each species' formes under it, with the species dimmed when only a forme matches; by a
+// stat, every row on its own, a forme's name its species' with the forme as a tag.
+const lines = computed(() => {
+  const grouped = key.value === 'name'
+  const line = (row: Row, parts: Marks | null, context = false): Line => {
+    const child = grouped && !!row.parent
+    const formeAt = row.name.length - (row.forme?.length ?? 0) - 1
+    return {
+      row,
+      child,
+      last: false,
+      parent: false,
+      context,
+      title: child && row.forme ? marks(parts, row.forme, formeAt) : marks(parts, row.species, 0),
+      tag: !child && row.forme ? marks(parts, row.forme, formeAt) : null,
+    }
+  }
+  const out: Line[] = []
+  const seen = new Set<PokemonId>()
+  for (const r of sorted.value) {
+    if (grouped && r.parent && !seen.has(r.parent)) {
+      seen.add(r.parent)
+      out.push(line(byId.value.get(r.parent)!, null, true))
+    }
+    seen.add(r.id)
+    out.push(line(r, r.parts))
+  }
+  out.forEach((l, i) => {
+    const next = !!out[i + 1]?.child
+    l.last = l.child && !next
+    l.parent = !l.child && next
+  })
+  return out
+})
+
+// A name with the search's match marked.
+const Marked: FunctionalComponent<{ p: Marks }> = ({ p }) => [p[0], p[1] ? h('mark', p[1]) : null, p[2]]
+Marked.props = ['p']
 
 // The rows render once the page is in, with a skeleton until then: all of them take over 100ms.
 const { entered, restoring } = usePageEntered()
@@ -162,16 +259,19 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
       </div>
       <SkeletonRows v-if="!entered" :cells="SKELETON" height="2.3em" />
       <template v-else>
-        <div v-for="r in sorted" :key="r.id" class="row" role="row">
-          <div role="cell" class="grow">
+        <div
+          v-for="{ row: r, child, last, parent, context, title, tag } in lines"
+          :key="r.id"
+          class="row"
+          :class="{ child, last, parent, context }"
+          role="row"
+        >
+          <div role="cell" class="grow name-cell">
             <AppLink :to="{ name: 'pokemon', params: { id: r.id } }" class="mon">
               <PokemonIcon :id="r.id" />
-              <span class="name">
-                <template v-if="r.parts"
-                  >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
-                  >{{ r.parts[2] }}</template
-                >
-                <template v-else>{{ r.name }}</template>
+              <span class="label">
+                <span class="name"><Marked :p="title" /></span>
+                <span v-if="tag" class="forme"><Marked :p="tag" /></span>
               </span>
             </AppLink>
           </div>
@@ -200,12 +300,13 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
 </template>
 
 <style scoped>
-/* Name, types (room for two badges), abilities, the six stats and their total; on phones name, types and total. */
+/* Name, types (room for two badges), abilities, the six stats and their total; on phones name, types and total. The
+   name column takes about what the longest names need, and the abilities the rest. */
 .dex-table {
   --types: calc(64px * var(--icon-scale, 1) + 14px);
   --num: minmax(2.6em, auto);
   --row-height: 2.3em;
-  --cols: minmax(11em, 1fr) var(--types) minmax(0, 1fr) repeat(7, var(--num));
+  --cols: minmax(11em, 15em) var(--types) minmax(0, 1fr) repeat(7, var(--num));
 }
 @media (max-width: 720px) {
   .dex-table {
@@ -259,6 +360,71 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
   /* The icon is taller than the row: let it into the cell's padding, but no further, or the last row's overflows the
      table. */
   margin: -3px 0;
+}
+/* A forme under its species: indented, on a line down from the species' icon, the rows of a species run together.
+   The name cells take the row's full height, so the line runs unbroken from row to row; it starts under the species'
+   icon (30px tall) and ends at the last forme's. */
+.name-cell {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  position: relative;
+}
+.mon {
+  min-width: 0;
+}
+.row.child {
+  border-top: none;
+}
+.child .mon {
+  padding-left: 32px;
+}
+.parent .name-cell::before,
+.child .name-cell::before,
+.child .name-cell::after {
+  content: '';
+  position: absolute;
+  left: 26px;
+  border: 0 solid var(--border-strong);
+}
+.parent .name-cell::before {
+  top: calc(50% + 15px);
+  bottom: 0;
+  border-left-width: 1px;
+}
+.child .name-cell::before {
+  top: 0;
+  bottom: 0;
+  border-left-width: 1px;
+}
+.child.last .name-cell::before {
+  bottom: 50%;
+}
+.child .name-cell::after {
+  top: 50%;
+  width: 10px;
+  border-top-width: 1px;
+}
+.child .name {
+  font-weight: normal;
+}
+/* A forme's tag, sorted by a stat, wraps under its species' name when the two don't fit. */
+.label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 4px;
+}
+.forme {
+  padding: 0 5px;
+  font-size: 0.85em;
+  color: var(--muted);
+  white-space: nowrap;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+.context {
+  opacity: 0.55;
 }
 .types {
   display: flex;
