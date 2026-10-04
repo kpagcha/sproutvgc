@@ -18,17 +18,18 @@ import { locale, t, typeName } from '@/i18n'
 import { loadDescriptions, shortText } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
-import { percentiles, type Sample } from '@/lib/statPercentiles'
+import { percentiles } from '@/lib/statPercentiles'
 import { formatFilters, parseFilters, passes, type PokemonFilter } from '@/lib/pokemonFilters'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { useRowColumns } from '@/composables/useRowColumns'
 import { useSearch } from '@/composables/useSearch'
 import { useSort } from '@/composables/useSort'
-import { STAT_REFERENCES, useStatReference } from '@/composables/useStatReference'
+import { LIST_STAT_MARKS, samples, setPercentiles, useListStatMarks } from '@/composables/useStatReference'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
 import SearchBox from '@/components/SearchBox.vue'
+import SegmentedControl from '@/components/SegmentedControl.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 import AppLink from '@/components/AppLink'
 import DexRef from '@/components/DexRef'
@@ -120,19 +121,18 @@ const shown = computed(() => {
   })
 })
 
-// Each stat is marked by where it stands among the Pokémon it's compared with (`useStatReference`), as a bar from the
-// middle of its cell, the median, towards the right above it and the left below. Megas are marked but left out of the
-// reference: one for nearly every species would lift every median.
-const reference = useStatReference()
-const samples = (rs: readonly Row[]): Sample[] =>
-  rs.flatMap((r) => (r.data.mega ? [] : [{ stats: r.data.stats, weight: 1 }]))
+// Each stat is marked by where it stands among the Pokémon it's compared with (`useListStatMarks`), as a bar from the
+// middle of its cell, the median, towards the right above it and the left below.
+const reference = useListStatMarks()
 const percentile = computed(() =>
-  reference.value === 'all'
-    ? percentiles(samples(rows.value))
+  reference.value === 'plain'
+    ? null
     : reference.value === 'shown'
-      ? percentiles(samples(shown.value))
-      : null,
+      ? percentiles(samples(shown.value.map((r) => r.id)))
+      : setPercentiles(reference.value),
 )
+const markLabel = (m: (typeof LIST_STAT_MARKS)[number]) =>
+  m === 'plain' ? t('stats.plain') : m === 'shown' ? t('pokedex.compare.shown') : t(`stats.vs.${m}`)
 interface Mark {
   class: 'hi' | 'lo'
   style: string
@@ -144,7 +144,7 @@ const statMarks = computed(() => {
     rows.value.map((r): [PokemonId, (Mark | null)[]] => [
       r.id,
       r.data.stats.map((v, i) => {
-        let x = p(i, v)
+        let x = p.rank(i, v)
         if (x === null) return null
         x = Math.round(x * 1000) / 1000
         return x >= 0.5
@@ -274,20 +274,13 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
         <option value="">{{ t('pokedex.anyType') }}</option>
         <option v-for="ty in TYPES" :key="ty" :value="ty">{{ typeName(ty) }}</option>
       </select>
-      <div class="view-opts" role="radiogroup" aria-labelledby="compare-label">
-        <span id="compare-label" v-tip="t('pokedex.compareTip')" class="muted">{{ t('pokedex.compare') }}</span>
-        <span class="segments">
-          <label
-            v-for="c in STAT_REFERENCES"
-            :key="c"
-            :class="{ on: reference === c }"
-            :data-text="t(`pokedex.compare.${c}`)"
-          >
-            <input v-model="reference" type="radio" name="stat-reference" :value="c" />
-            {{ t(`pokedex.compare.${c}`) }}
-          </label>
-        </span>
-      </div>
+      <SegmentedControl
+        v-model="reference"
+        class="view-opts"
+        :label="t('pokedex.compare')"
+        :tip="t('pokedex.compareTip')"
+        :options="LIST_STAT_MARKS.map((m) => ({ value: m, label: markLabel(m) }))"
+      />
     </div>
     <ul v-if="filters.length" class="active-filters">
       <li v-for="f in filters" :key="`${f.kind}:${f.id}`" class="active-filter">
@@ -553,50 +546,7 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
    filters, at the far end of their row (or of its own, when it wraps), as one segmented control. As tall as the
    search box, less its margin. Left out on phones along with the stats. */
 .view-opts {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   margin: 0 0 12px auto;
-  font-size: 0.875em;
-}
-.segments {
-  display: flex;
-  border: 2px solid var(--ink);
-  box-shadow: var(--hard-sm);
-}
-.segments label {
-  position: relative;
-  padding: 1px 10px;
-  background: var(--panel-alt);
-  cursor: pointer;
-}
-.segments label + label {
-  border-left: 2px solid var(--ink);
-}
-.segments label:hover {
-  background: var(--hover);
-}
-.segments label.on {
-  font-weight: bold;
-  background: var(--sel);
-}
-/* A hidden bold copy of the label keeps it as wide as when it's picked, so picking one doesn't shift the others. */
-.segments label::after {
-  content: attr(data-text);
-  display: block;
-  height: 0;
-  overflow: hidden;
-  font-weight: bold;
-  visibility: hidden;
-}
-.segments label:has(:focus-visible) {
-  outline: 2px solid var(--accent);
-  outline-offset: -4px;
-}
-.segments input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
 }
 @media (max-width: 720px) {
   .view-opts {

@@ -8,10 +8,14 @@ export interface Sample {
   weight: number
 }
 
-/** A stat's percentile, from 0 to 1, by its index in `STATS`; `null` when the set is empty. */
-export type Percentile = (stat: number, value: number) => number | null
+export interface Percentiles {
+  /** A stat's percentile, from 0 to 1, by its index in `STATS`; `null` when the set is empty. */
+  rank(stat: number, value: number): number | null
+  /** The lowest value of a stat at or above the given share of the set (0.5: the median); `null` when it's empty. */
+  quantile(stat: number, q: number): number | null
+}
 
-export function percentiles(samples: readonly Sample[]): Percentile {
+export function percentiles(samples: readonly Sample[]): Percentiles {
   const total = samples.reduce((a, s) => a + s.weight, 0)
   // Per stat, its distinct values in order, and the weight below each and at it.
   const columns = Array.from({ length: 6 }, (_, i) => {
@@ -26,18 +30,30 @@ export function percentiles(samples: readonly Sample[]): Percentile {
     })
     return { values, below, at }
   })
-  return (stat, value) => {
-    if (!total) return null
-    const { values, below, at } = columns[stat]!
-    // The first value at or above it.
+  // The first of `n` indices that `reaches`, which holds from some index on.
+  const search = (n: number, reaches: (i: number) => boolean) => {
     let lo = 0
-    let hi = values.length
+    let hi = n
     while (lo < hi) {
       const mid = (lo + hi) >> 1
-      if (values[mid]! < value) lo = mid + 1
-      else hi = mid
+      if (reaches(mid)) hi = mid
+      else lo = mid + 1
     }
-    const under = lo < values.length ? below[lo]! : total
-    return (under + (at.get(value) ?? 0) / 2) / total
+    return lo
+  }
+  return {
+    rank(stat, value) {
+      if (!total) return null
+      const { values, below, at } = columns[stat]!
+      const i = search(values.length, (j) => values[j]! >= value)
+      const under = i < values.length ? below[i]! : total
+      return (under + (at.get(value) ?? 0) / 2) / total
+    },
+    quantile(stat, q) {
+      if (!total) return null
+      const { values, below, at } = columns[stat]!
+      const i = search(values.length, (j) => below[j]! + at.get(values[j]!)! >= q * total)
+      return values[Math.min(i, values.length - 1)]!
+    },
   }
 }

@@ -6,6 +6,7 @@ import { REGULATION } from '@/data/format'
 import { POKEMON, STATS, loadLearnsets, movesOf, speciesOf, spriteUrl, total } from '@/data/pokemon'
 import { t, tSlots, type MessageKey } from '@/i18n'
 import { description } from '@/i18n/descriptions'
+import { PAGE_STAT_BARS, setPercentiles, usePageStatBars } from '@/composables/useStatReference'
 import { refName } from '@/i18n/refName'
 import DefenseResults from '@/components/DefenseResults.vue'
 import DexRef from '@/components/DexRef'
@@ -15,6 +16,7 @@ import ItemIcon from '@/components/ItemIcon.vue'
 import MoveTable from '@/components/MoveTable.vue'
 import PokemonChips from '@/components/PokemonChips.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import SegmentedControl from '@/components/SegmentedControl.vue'
 import TypeIcon from '@/components/TypeIcon'
 
 // One Pokémon: its sprite, types, abilities and base stats, how it changes (Mega Evolution, other formes) and evolves,
@@ -27,8 +29,32 @@ const mon = computed(() => POKEMON[id.value])
 
 const abilities = computed(() => mon.value.abilities.map(ability))
 
-/** Showdown's color scale for stats: red for low, through yellow, to green and blue for high. */
+// Each stat's bar, out of 200 (the few above it fill it). Plain (`usePageStatBars`), colored by Showdown's scale for
+// stats: red for low, through yellow, to green and blue for high. Set against a set of Pokémon: a tick at its median, a
+// band over its middle half, the bar blue above the median and red below, and on hover how many it beats.
+const bars = usePageStatBars()
 const statColor = (v: number) => `hsl(${Math.min(Math.floor((v * 180) / 255), 360)}, 75%, 45%)`
+const at = (v: number) => Math.min(100, v / 2)
+const along = (v: number) => `${at(v)}%`
+const stats = computed(() => {
+  const p = bars.value === 'plain' ? null : setPercentiles(bars.value)
+  return STATS.map((s, i) => {
+    const v = mon.value.stats[i]!
+    const rank = p?.rank(i, v) ?? null
+    const median = p?.quantile(i, 0.5) ?? null
+    const low = p?.quantile(i, 0.25) ?? null
+    const high = p?.quantile(i, 0.75) ?? null
+    return {
+      s,
+      v,
+      side: rank === null ? null : rank >= 0.5 ? 'hi' : 'lo',
+      color: p ? undefined : statColor(v),
+      tip: rank === null ? undefined : t('pokemon.statRank', { pct: Math.round(rank * 100) }),
+      median: median === null ? null : along(median),
+      band: low === null || high === null ? null : { left: along(low), width: `${at(high) - at(low)}%` },
+    }
+  })
+})
 
 // The species' formes the regulation has (Megas, regional formes, Rotom's appliances), this one among them, and the
 // ones that only look different, apart. Each list is shown only when it has others.
@@ -98,19 +124,25 @@ watchEffect(async () => {
         </p>
       </div>
       <div class="stats-col">
+        <SegmentedControl
+          v-model="bars"
+          class="bars-mode"
+          :label="t('pokemon.statBars')"
+          :options="
+            PAGE_STAT_BARS.map((b) => ({ value: b, label: b === 'plain' ? t('stats.plain') : t(`stats.vs.${b}`) }))
+          "
+        />
         <table class="stats">
           <tbody>
-            <tr v-for="(s, i) in STATS" :key="s">
-              <th class="muted">{{ t(`stat.${s}`) }}</th>
-              <td class="r num">{{ mon.stats[i] }}</td>
+            <tr v-for="st in stats" :key="st.s" v-tip="st.tip">
+              <th class="muted">{{ t(`stat.${st.s}`) }}</th>
+              <td class="r num">{{ st.v }}</td>
               <td class="bar-cell">
-                <span
-                  class="bar"
-                  :style="{
-                    width: `${Math.min(100, (mon.stats[i]! / 200) * 100)}%`,
-                    background: statColor(mon.stats[i]!),
-                  }"
-                ></span>
+                <span class="track" :class="{ plain: bars === 'plain' }">
+                  <span v-if="st.band" class="band" :style="st.band"></span>
+                  <span class="bar" :class="st.side" :style="{ width: along(st.v), background: st.color }"></span>
+                  <span v-if="st.median" class="median" :style="{ left: st.median }"></span>
+                </span>
               </td>
             </tr>
             <tr class="total">
@@ -120,6 +152,7 @@ watchEffect(async () => {
             </tr>
           </tbody>
         </table>
+        <p v-if="bars !== 'plain'" class="legend muted">{{ t(`stats.about.${bars}`) }} {{ t('pokemon.statLegend') }}</p>
         <p class="weight muted">
           {{ t('pokemon.weight') }} <span class="num">{{ mon.weight }} kg</span>
         </p>
@@ -249,10 +282,60 @@ watchEffect(async () => {
 .bar-cell {
   width: 100%;
 }
-.bar {
+/* A bullet chart: on a faint track, the middle half of every Pokémon's values as a band, the stat's bar over it,
+   thinner, and the median as a tick through both. */
+.bars-mode {
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+.track {
+  position: relative;
   display: block;
+  height: 12px;
+  background: color-mix(in srgb, var(--border) 40%, transparent);
+}
+.band,
+.bar,
+.median {
+  position: absolute;
+  left: 0;
+}
+.band {
+  top: 0;
+  bottom: 0;
+  background: var(--border);
+}
+.bar {
+  top: 3px;
+  bottom: 3px;
+  background: var(--muted);
+}
+.bar.hi {
+  background: var(--stat-hi);
+}
+.bar.lo {
+  background: var(--stat-lo);
+}
+/* Plain, the bar as it was before the comparison: on its own, its full height. */
+.track.plain {
   height: 10px;
+  background: none;
+}
+.plain .bar {
+  top: 0;
+  bottom: 0;
   border-radius: 2px;
+}
+.median {
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--text);
+}
+.legend {
+  margin: 6px 0 0;
+  font-size: 0.8em;
 }
 .stats .total td,
 .stats .total th {
