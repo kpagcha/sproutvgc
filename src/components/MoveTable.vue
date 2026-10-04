@@ -76,62 +76,65 @@ onUnmounted(() => phoneQuery.removeEventListener('change', onPhone))
       <option v-for="c in CATEGORIES" :key="c" :value="c">{{ t(`move.category.${c}`) }}</option>
     </select>
   </div>
-  <table v-if="sorted.length" class="dex-table">
-    <thead>
-      <tr>
-        <SortHeader
-          :label="t('move.name')"
-          :class="descriptions ? 'phone-grow' : 'grow'"
-          :active="key === 'name'"
-          :desc="desc"
-          @sort="toggle('name')"
-        />
-        <SortHeader
-          v-for="c in COLUMNS"
-          :key="c.k"
-          :class="{ 'wide-only': c.wideOnly }"
-          :label="t(c.label)"
-          :right="c.right"
-          :active="key === c.k"
-          :desc="desc"
-          @sort="toggle(c.k)"
-        />
-        <th v-if="descriptions && !phone" class="grow"></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="r in sorted" :key="r.id">
-        <td :class="descriptions ? 'phone-grow' : 'grow'">
-          <RouterLink :to="{ name: 'move', params: { id: r.id } }" class="name">
-            <template v-if="r.parts"
-              >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
-              >{{ r.parts[2] }}</template
-            >
-            <template v-else>{{ r.name }}</template>
-          </RouterLink>
-          <div v-if="descriptions && phone" class="muted below">
-            <DexText :text="description('move', r.id)?.short ?? ''" />
-          </div>
-        </td>
-        <td>
-          <RouterLink :to="{ name: 'types', params: { type: r.data.type } }"
-            ><TypeIcon :type="r.data.type"
-          /></RouterLink>
-        </td>
-        <td><CategoryIcon :category="r.data.category" /></td>
-        <td class="r num">{{ r.data.power || '—' }}</td>
-        <td class="r num">{{ r.data.accuracy === true ? '—' : r.data.accuracy }}</td>
-        <td class="wide-only r num">{{ r.data.pp }}</td>
-        <td v-if="descriptions && !phone" class="grow muted desc">
+  <div v-if="sorted.length" class="dex-table" :class="{ described: descriptions }" role="table">
+    <div class="row head" role="row">
+      <SortHeader :label="t('move.name')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
+      <SortHeader
+        v-for="c in COLUMNS"
+        :key="c.k"
+        :class="{ 'wide-only': c.wideOnly }"
+        :label="t(c.label)"
+        :right="c.right"
+        :active="key === c.k"
+        :desc="desc"
+        @sort="toggle(c.k)"
+      />
+      <div v-if="descriptions && !phone" role="columnheader"></div>
+    </div>
+    <div v-for="r in sorted" :key="r.id" class="row" role="row">
+      <div role="cell" class="grow">
+        <RouterLink :to="{ name: 'move', params: { id: r.id } }" class="name">
+          <template v-if="r.parts"
+            >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
+            >{{ r.parts[2] }}</template
+          >
+          <template v-else>{{ r.name }}</template>
+        </RouterLink>
+        <div v-if="descriptions && phone" class="muted below">
           <DexText :text="description('move', r.id)?.short ?? ''" />
-        </td>
-      </tr>
-    </tbody>
-  </table>
+        </div>
+      </div>
+      <div role="cell">
+        <RouterLink :to="{ name: 'types', params: { type: r.data.type } }"><TypeIcon :type="r.data.type" /></RouterLink>
+      </div>
+      <div role="cell"><CategoryIcon :category="r.data.category" /></div>
+      <div role="cell" class="r num">{{ r.data.power || '—' }}</div>
+      <div role="cell" class="r num">{{ r.data.accuracy === true ? '—' : r.data.accuracy }}</div>
+      <div role="cell" class="wide-only r num">{{ r.data.pp }}</div>
+      <div v-if="descriptions && !phone" role="cell" class="grow muted">
+        <DexText :text="description('move', r.id)?.short ?? ''" />
+      </div>
+    </div>
+  </div>
   <p v-else class="muted">{{ t('moves.none') }}</p>
 </template>
 
 <style scoped>
+/* Name, type, category, power, accuracy, PP and, with descriptions, the description; phones leave out PP and show the
+   descriptions under the names. */
+.dex-table {
+  --num: minmax(2.6em, auto);
+  --cols: minmax(0, 1fr) auto auto repeat(3, var(--num));
+}
+.dex-table.described {
+  --cols: minmax(9em, 1fr) auto auto repeat(3, var(--num)) minmax(0, 2fr);
+}
+@media (max-width: 720px) {
+  .dex-table,
+  .dex-table.described {
+    --cols: minmax(0, 1fr) auto auto repeat(2, var(--num));
+  }
+}
 .filters {
   display: flex;
   flex-wrap: wrap;
@@ -139,9 +142,6 @@ onUnmounted(() => phoneQuery.removeEventListener('change', onPhone))
 }
 .select {
   width: auto;
-}
-.desc {
-  min-width: 240px;
 }
 .below {
   font-size: 0.9em;

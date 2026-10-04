@@ -120,75 +120,76 @@ const link = (id: PokemonId) => ({ name: 'pokemon', params: { id } })
         </button>
       </li>
     </ul>
-    <table v-if="sorted.length" class="dex-table">
-      <thead>
-        <tr>
-          <SortHeader
-            :label="t('pokedex.name')"
-            class="phone-grow"
-            :active="key === 'name'"
-            :desc="desc"
-            @sort="toggle('name')"
-          />
-          <th>{{ t('pokedex.types') }}</th>
-          <th class="wide-only grow">{{ t('pokedex.abilities') }}</th>
-          <SortHeader
-            v-for="s in STATS"
-            :key="s"
-            class="wide-only"
-            :label="t(`stat.${s}`)"
-            right
-            :active="key === s"
-            :desc="desc"
-            @sort="toggle(s)"
-          />
-          <SortHeader
-            :label="t('stat.bst')"
-            :tip="t('stat.bstFull')"
-            right
-            :active="key === 'total'"
-            :desc="desc"
-            @sort="toggle('total')"
-          />
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="r in sorted" :key="r.id">
-          <td class="phone-grow">
-            <RouterLink :to="link(r.id)" class="mon">
-              <PokemonIcon :id="r.id" />
-              <span class="name">
-                <template v-if="r.parts"
-                  >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
-                  >{{ r.parts[2] }}</template
-                >
-                <template v-else>{{ r.name }}</template>
-              </span>
-            </RouterLink>
-          </td>
-          <td>
-            <span class="types">
-              <RouterLink v-for="ty in r.data.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
-                <TypeIcon :type="ty" />
-              </RouterLink>
+    <div v-if="sorted.length" class="dex-table" role="table">
+      <div class="row head" role="row">
+        <SortHeader :label="t('pokedex.name')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
+        <div role="columnheader">{{ t('pokedex.types') }}</div>
+        <div role="columnheader" class="wide-only">{{ t('pokedex.abilities') }}</div>
+        <SortHeader
+          v-for="s in STATS"
+          :key="s"
+          class="wide-only"
+          :label="t(`stat.${s}`)"
+          right
+          :active="key === s"
+          :desc="desc"
+          @sort="toggle(s)"
+        />
+        <SortHeader
+          :label="t('stat.bst')"
+          :tip="t('stat.bstFull')"
+          right
+          :active="key === 'total'"
+          :desc="desc"
+          @sort="toggle('total')"
+        />
+      </div>
+      <div v-for="r in sorted" :key="r.id" class="row" role="row">
+        <div role="cell" class="grow">
+          <RouterLink :to="link(r.id)" class="mon">
+            <PokemonIcon :id="r.id" />
+            <span class="name">
+              <template v-if="r.parts"
+                >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
+                >{{ r.parts[2] }}</template
+              >
+              <template v-else>{{ r.name }}</template>
             </span>
-          </td>
-          <td class="wide-only grow">
-            <ul class="abilities">
-              <li v-for="a in r.abilities" :key="a.id"><DexRef :to="a" :tip="abilityTip(a)" /></li>
-            </ul>
-          </td>
-          <td v-for="(v, i) in r.data.stats" :key="i" class="wide-only r num">{{ v }}</td>
-          <td class="r num total">{{ total(r.data) }}</td>
-        </tr>
-      </tbody>
-    </table>
+          </RouterLink>
+        </div>
+        <div role="cell">
+          <span class="types">
+            <RouterLink v-for="ty in r.data.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
+              <TypeIcon :type="ty" />
+            </RouterLink>
+          </span>
+        </div>
+        <div role="cell" class="wide-only grow">
+          <ul class="abilities">
+            <li v-for="a in r.abilities" :key="a.id"><DexRef :to="a" :tip="abilityTip(a)" /></li>
+          </ul>
+        </div>
+        <div v-for="(v, i) in r.data.stats" :key="i" role="cell" class="wide-only r num">{{ v }}</div>
+        <div role="cell" class="r num total">{{ total(r.data) }}</div>
+      </div>
+    </div>
     <p v-else class="muted">{{ t('pokedex.none') }}</p>
   </div>
   <SearchResults v-if="others" :query :results="others" :filters />
 </template>
 
 <style scoped>
+/* Name, types (room for two badges), abilities, the six stats and their total; on phones name, types and total. */
+.dex-table {
+  --types: calc(64px * var(--icon-scale, 1) + 14px);
+  --num: minmax(2.6em, auto);
+  --cols: minmax(11em, 1fr) var(--types) minmax(0, 1fr) repeat(7, var(--num));
+}
+@media (max-width: 720px) {
+  .dex-table {
+    --cols: minmax(0, 1fr) var(--types) var(--num);
+  }
+}
 .filters {
   display: flex;
   flex-wrap: wrap;
