@@ -18,12 +18,14 @@ import { locale, t, typeName } from '@/i18n'
 import { loadDescriptions, shortText } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
+import { percentiles, type Sample } from '@/lib/statPercentiles'
 import { formatFilters, parseFilters, passes, type PokemonFilter } from '@/lib/pokemonFilters'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { useRowColumns } from '@/composables/useRowColumns'
 import { useSearch } from '@/composables/useSearch'
 import { useSort } from '@/composables/useSort'
+import { STAT_REFERENCES, useStatReference } from '@/composables/useStatReference'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
 import SearchBox from '@/components/SearchBox.vue'
@@ -116,6 +118,41 @@ const shown = computed(() => {
     const parts = q ? split(r.name, q) : null
     return !q || parts ? [{ ...r, parts }] : []
   })
+})
+
+// Each stat is marked by where it stands among the Pokémon it's compared with (`useStatReference`), as a bar from the
+// middle of its cell, the median, towards the right above it and the left below. Megas are marked but left out of the
+// reference: one for nearly every species would lift every median.
+const reference = useStatReference()
+const samples = (rs: readonly Row[]): Sample[] =>
+  rs.flatMap((r) => (r.data.mega ? [] : [{ stats: r.data.stats, weight: 1 }]))
+const percentile = computed(() =>
+  reference.value === 'all'
+    ? percentiles(samples(rows.value))
+    : reference.value === 'shown'
+      ? percentiles(samples(shown.value))
+      : null,
+)
+interface Mark {
+  class: 'hi' | 'lo'
+  style: string
+}
+const statMarks = computed(() => {
+  const p = percentile.value
+  if (!p) return null
+  return new Map(
+    rows.value.map((r): [PokemonId, (Mark | null)[]] => [
+      r.id,
+      r.data.stats.map((v, i) => {
+        let x = p(i, v)
+        if (x === null) return null
+        x = Math.round(x * 1000) / 1000
+        return x >= 0.5
+          ? { class: 'hi', style: `--from: 0.5; --to: ${x}` }
+          : { class: 'lo', style: `--from: ${x}; --to: 0.5` }
+      }),
+    ]),
+  )
 })
 
 type Key = 'name' | StatId | 'total'
@@ -237,6 +274,20 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
         <option value="">{{ t('pokedex.anyType') }}</option>
         <option v-for="ty in TYPES" :key="ty" :value="ty">{{ typeName(ty) }}</option>
       </select>
+      <div class="view-opts" role="radiogroup" aria-labelledby="compare-label">
+        <span id="compare-label" v-tip="t('pokedex.compareTip')" class="muted">{{ t('pokedex.compare') }}</span>
+        <span class="segments">
+          <label
+            v-for="c in STAT_REFERENCES"
+            :key="c"
+            :class="{ on: reference === c }"
+            :data-text="t(`pokedex.compare.${c}`)"
+          >
+            <input v-model="reference" type="radio" name="stat-reference" :value="c" />
+            {{ t(`pokedex.compare.${c}`) }}
+          </label>
+        </span>
+      </div>
     </div>
     <ul v-if="filters.length" class="active-filters">
       <li v-for="f in filters" :key="`${f.kind}:${f.id}`" class="active-filter">
@@ -326,7 +377,16 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
               </li>
             </ul>
           </div>
-          <div v-for="(v, i) in r.data.stats" :key="i" role="cell" class="wide-only r num">{{ v }}</div>
+          <div
+            v-for="(v, i) in r.data.stats"
+            :key="i"
+            role="cell"
+            class="wide-only r num stat"
+            :class="statMarks?.get(r.id)?.[i]?.class"
+            :style="statMarks?.get(r.id)?.[i]?.style"
+          >
+            {{ v }}
+          </div>
           <div role="cell" class="r num total">{{ total(r.data) }}</div>
         </div>
       </template>
@@ -489,6 +549,94 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
 .total {
   font-weight: bold;
 }
+/* What the stats are marked against: how the table shows them, not which rows it shows, so it sits apart from the
+   filters, at the far end of their row (or of its own, when it wraps), as one segmented control. As tall as the
+   search box, less its margin. Left out on phones along with the stats. */
+.view-opts {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px auto;
+  font-size: 0.875em;
+}
+.segments {
+  display: flex;
+  border: 2px solid var(--ink);
+  box-shadow: var(--hard-sm);
+}
+.segments label {
+  position: relative;
+  padding: 1px 10px;
+  background: var(--panel-alt);
+  cursor: pointer;
+}
+.segments label + label {
+  border-left: 2px solid var(--ink);
+}
+.segments label:hover {
+  background: var(--hover);
+}
+.segments label.on {
+  font-weight: bold;
+  background: var(--sel);
+}
+/* A hidden bold copy of the label keeps it as wide as when it's picked, so picking one doesn't shift the others. */
+.segments label::after {
+  content: attr(data-text);
+  display: block;
+  height: 0;
+  overflow: hidden;
+  font-weight: bold;
+  visibility: hidden;
+}
+.segments label:has(:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: -4px;
+}
+.segments input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+@media (max-width: 720px) {
+  .view-opts {
+    display: none;
+  }
+}
+/* A stat's mark: a bar along the bottom of its cell, between the median (the middle) and where the stat stands (the
+   left edge the lowest, the right edge the highest), on a faint track the cell's width. */
+.stat {
+  --inset: 6px;
+  position: relative;
+}
+.stat.hi::before,
+.stat.lo::before,
+.stat.hi::after,
+.stat.lo::after {
+  content: '';
+  position: absolute;
+  left: calc(var(--inset) + (100% - 2 * var(--inset)) * var(--from));
+  width: calc((100% - 2 * var(--inset)) * (var(--to) - var(--from)));
+  bottom: 3px;
+}
+.stat.hi::before,
+.stat.lo::before {
+  --from: 0;
+  --to: 1;
+  height: 1px;
+  bottom: 4px;
+  background: var(--border);
+}
+.stat.hi::after,
+.stat.lo::after {
+  height: 3px;
+}
+.stat.hi::after {
+  background: var(--stat-hi);
+}
+.stat.lo::after {
+  background: var(--stat-lo);
+}
 /* Short of the page's full width, the stats sit closer together, so the abilities keep room for theirs on one line. */
 @media (max-width: 1000px) {
   .dex-table {
@@ -497,6 +645,9 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
   .row > .r {
     padding-left: 3px;
     padding-right: 3px;
+  }
+  .stat {
+    --inset: 3px;
   }
 }
 

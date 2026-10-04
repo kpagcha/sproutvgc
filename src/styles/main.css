@@ -24,6 +24,9 @@
   --good: #2c7a2c;
   --bad: #b3261e;
   --shadow: none;
+  /* A stat above and below the reference's median (the Pokémon list's marks). */
+  --stat-hi: #2d5bd8;
+  --stat-lo: #c0392b;
 
   --m0-bg: #2f2f2f;
   --m0-fg: #ffffff;
@@ -57,6 +60,8 @@
     --sel: #5e4c10;
     --good: #7fd07f;
     --bad: #ff8a80;
+    --stat-hi: #5f88f0;
+    --stat-lo: #dc5a4e;
 
     --m0-bg: #000000;
     --m0-fg: #bbbbbb;
@@ -90,6 +95,8 @@
   --sel: #5e4c10;
   --good: #7fd07f;
   --bad: #ff8a80;
+  --stat-hi: #5f88f0;
+  --stat-lo: #dc5a4e;
 
   --m0-bg: #000000;
   --m0-fg: #bbbbbb;

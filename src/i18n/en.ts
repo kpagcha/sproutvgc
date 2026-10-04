@@ -414,6 +414,12 @@ export const messages = {
   'pokedex.abilities': 'Abilities',
   'pokedex.types': 'Types',
   'pokedex.none': 'No Pokémon matches.',
+  'pokedex.compare': 'Stat bars',
+  'pokedex.compare.all': 'vs. every Pokémon',
+  'pokedex.compare.shown': 'vs. those listed',
+  'pokedex.compare.off': 'Off',
+  'pokedex.compareTip':
+    'Marks each stat by where it stands among the Pokémon compared, Mega Evolutions left out: from the middle of its cell, the median, to the right in blue above it, to the left in red below.',
   'filter.add': 'Filter',
   'filter.remove': 'Remove the filter: {name}',
   'filter.kind.type': 'Type',
