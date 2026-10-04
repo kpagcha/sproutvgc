@@ -3,7 +3,7 @@ import { computed, ref, watch, watchEffect } from 'vue'
 import { useRoute, type RouteLocationNormalizedLoaded, type RouteLocationRaw } from 'vue-router'
 import { AnimatePresence, MotionConfig, motion } from 'motion-v'
 import { FADE, PAGE, SPRING } from '@/lib/motion'
-import { pageExited, setPageWaits } from '@/lib/pageExit'
+import { pageEntered, pageEntering, pageExited, pageKey, setPageWaits } from '@/lib/pageExit'
 import { t, typeName, type MessageKey } from '@/i18n'
 import { isType } from '@/data/types'
 import { generatedName, refName } from '@/i18n/refName'
@@ -134,6 +134,10 @@ watch(
   () => route.path,
   (to, from) => (direction.value = depth(to) >= depth(from) ? 1 : -1),
 )
+// Pages are keyed by route (see the template): a new key is a new page coming in, in place once its animation to
+// `center` completes.
+watch(() => pageKey(route), pageEntering)
+const onPageAnimated = (definition: unknown) => definition === 'center' && pageEntered()
 const pageVariants = {
   enter: (dir: number) => ({ x: dir > 0 ? '100vw' : '-100vw' }),
   center: { x: 0 },
@@ -191,13 +195,14 @@ const fadeVariants = {
           :on-exit-complete="pageExited"
         >
           <motion.div
-            :key="r.matched[0]?.path ?? r.path"
+            :key="pageKey(r)"
             :custom="direction"
             :variants="isPhone ? pageVariants : fadeVariants"
             initial="enter"
             animate="center"
             exit="exit"
             :transition="isPhone ? PAGE : FADE"
+            :on-animation-complete="onPageAnimated"
           >
             <RouterLink v-if="backLink(r)" :to="backLink(r)!.to" class="back font-display">
               <span class="chevron" aria-hidden="true">‹</span> {{ t(backLink(r)!.label) }}

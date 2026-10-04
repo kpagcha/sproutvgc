@@ -10,12 +10,14 @@ import { loadDescriptions, shortText } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
 import { formatFilters, parseFilters, passes, type PokemonFilter } from '@/lib/pokemonFilters'
+import { usePageEntered } from '@/composables/usePageEntered'
 import { useSearch } from '@/composables/useSearch'
 import { useSort } from '@/composables/useSort'
 import PokemonIcon from '@/components/PokemonIcon.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon.vue'
 import SearchBox from '@/components/SearchBox.vue'
+import SkeletonRows from '@/components/SkeletonRows.vue'
 import DexRef from '@/components/DexRef.vue'
 import SearchResults from '@/components/SearchResults.vue'
 
@@ -86,6 +88,10 @@ const { key, desc, toggle, sorted } = useSort({
   locale,
 })
 
+// The rows render once the page is in, with a skeleton until then: all of them take over 100ms.
+const entered = usePageEntered()
+const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r']
+
 const link = (id: PokemonId) => ({ name: 'pokemon', params: { id } })
 </script>
 
@@ -144,34 +150,37 @@ const link = (id: PokemonId) => ({ name: 'pokemon', params: { id } })
           @sort="toggle('total')"
         />
       </div>
-      <div v-for="r in sorted" :key="r.id" class="row" role="row">
-        <div role="cell" class="grow">
-          <RouterLink :to="link(r.id)" class="mon">
-            <PokemonIcon :id="r.id" />
-            <span class="name">
-              <template v-if="r.parts"
-                >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
-                >{{ r.parts[2] }}</template
-              >
-              <template v-else>{{ r.name }}</template>
-            </span>
-          </RouterLink>
-        </div>
-        <div role="cell">
-          <span class="types">
-            <RouterLink v-for="ty in r.data.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
-              <TypeIcon :type="ty" />
+      <SkeletonRows v-if="!entered" :cells="SKELETON" height="2.3em" />
+      <template v-else>
+        <div v-for="r in sorted" :key="r.id" class="row" role="row">
+          <div role="cell" class="grow">
+            <RouterLink :to="link(r.id)" class="mon">
+              <PokemonIcon :id="r.id" />
+              <span class="name">
+                <template v-if="r.parts"
+                  >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
+                  >{{ r.parts[2] }}</template
+                >
+                <template v-else>{{ r.name }}</template>
+              </span>
             </RouterLink>
-          </span>
+          </div>
+          <div role="cell">
+            <span class="types">
+              <RouterLink v-for="ty in r.data.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
+                <TypeIcon :type="ty" />
+              </RouterLink>
+            </span>
+          </div>
+          <div role="cell" class="wide-only grow">
+            <ul class="abilities">
+              <li v-for="a in r.abilities" :key="a.id"><DexRef :to="a" :tip="abilityTip(a)" /></li>
+            </ul>
+          </div>
+          <div v-for="(v, i) in r.data.stats" :key="i" role="cell" class="wide-only r num">{{ v }}</div>
+          <div role="cell" class="r num total">{{ total(r.data) }}</div>
         </div>
-        <div role="cell" class="wide-only grow">
-          <ul class="abilities">
-            <li v-for="a in r.abilities" :key="a.id"><DexRef :to="a" :tip="abilityTip(a)" /></li>
-          </ul>
-        </div>
-        <div v-for="(v, i) in r.data.stats" :key="i" role="cell" class="wide-only r num">{{ v }}</div>
-        <div role="cell" class="r num total">{{ total(r.data) }}</div>
-      </div>
+      </template>
     </div>
     <p v-else class="muted">{{ t('pokedex.none') }}</p>
   </div>

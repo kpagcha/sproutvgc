@@ -8,12 +8,14 @@ import { locale, t, typeName } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
+import { usePageEntered } from '@/composables/usePageEntered'
 import { useSort } from '@/composables/useSort'
 import CategoryIcon from '@/components/CategoryIcon.vue'
 import DexText from '@/components/DexText.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon.vue'
 import SearchBox from '@/components/SearchBox.vue'
+import SkeletonRows from '@/components/SkeletonRows.vue'
 
 // A table of moves with their type, category, power, accuracy and PP, sortable by any of them, searchable by name and
 // filtered by type and category; with `descriptions`, each move's short description too.
@@ -62,6 +64,18 @@ const phone = ref(phoneQuery.matches)
 const onPhone = (e: MediaQueryListEvent) => (phone.value = e.matches)
 phoneQuery.addEventListener('change', onPhone)
 onUnmounted(() => phoneQuery.removeEventListener('change', onPhone))
+
+// The rows render once the page is in, with a skeleton until then: all of them can take over 100ms.
+const entered = usePageEntered()
+const skeleton = computed(() => [
+  'grow',
+  '',
+  '',
+  'r',
+  'r',
+  'wide-only r',
+  ...(props.descriptions && !phone.value ? ['grow'] : []),
+])
 </script>
 
 <template>
@@ -91,30 +105,35 @@ onUnmounted(() => phoneQuery.removeEventListener('change', onPhone))
       />
       <div v-if="descriptions && !phone" role="columnheader"></div>
     </div>
-    <div v-for="r in sorted" :key="r.id" class="row" role="row">
-      <div role="cell" class="grow">
-        <RouterLink :to="{ name: 'move', params: { id: r.id } }" class="name">
-          <template v-if="r.parts"
-            >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
-            >{{ r.parts[2] }}</template
-          >
-          <template v-else>{{ r.name }}</template>
-        </RouterLink>
-        <div v-if="descriptions && phone" class="muted below">
+    <SkeletonRows v-if="!entered" :cells="skeleton" height="2.05em" />
+    <template v-else>
+      <div v-for="r in sorted" :key="r.id" class="row" role="row">
+        <div role="cell" class="grow">
+          <RouterLink :to="{ name: 'move', params: { id: r.id } }" class="name">
+            <template v-if="r.parts"
+              >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
+              >{{ r.parts[2] }}</template
+            >
+            <template v-else>{{ r.name }}</template>
+          </RouterLink>
+          <div v-if="descriptions && phone" class="muted below">
+            <DexText :text="description('move', r.id)?.short ?? ''" />
+          </div>
+        </div>
+        <div role="cell">
+          <RouterLink :to="{ name: 'types', params: { type: r.data.type } }"
+            ><TypeIcon :type="r.data.type"
+          /></RouterLink>
+        </div>
+        <div role="cell"><CategoryIcon :category="r.data.category" /></div>
+        <div role="cell" class="r num">{{ r.data.power || '—' }}</div>
+        <div role="cell" class="r num">{{ r.data.accuracy === true ? '—' : r.data.accuracy }}</div>
+        <div role="cell" class="wide-only r num">{{ r.data.pp }}</div>
+        <div v-if="descriptions && !phone" role="cell" class="grow muted">
           <DexText :text="description('move', r.id)?.short ?? ''" />
         </div>
       </div>
-      <div role="cell">
-        <RouterLink :to="{ name: 'types', params: { type: r.data.type } }"><TypeIcon :type="r.data.type" /></RouterLink>
-      </div>
-      <div role="cell"><CategoryIcon :category="r.data.category" /></div>
-      <div role="cell" class="r num">{{ r.data.power || '—' }}</div>
-      <div role="cell" class="r num">{{ r.data.accuracy === true ? '—' : r.data.accuracy }}</div>
-      <div role="cell" class="wide-only r num">{{ r.data.pp }}</div>
-      <div v-if="descriptions && !phone" role="cell" class="grow muted">
-        <DexText :text="description('move', r.id)?.short ?? ''" />
-      </div>
-    </div>
+    </template>
   </div>
   <p v-else class="muted">{{ t('moves.none') }}</p>
 </template>
