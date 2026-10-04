@@ -2,7 +2,7 @@
 import { computed, ref, watch, watchEffect } from 'vue'
 import { useRoute, type RouteLocationNormalizedLoaded, type RouteLocationRaw } from 'vue-router'
 import { AnimatePresence, MotionConfig, motion } from 'motion-v'
-import { FADE, PAGE, SPRING } from '@/lib/motion'
+import { FADE, PAGE } from '@/lib/motion'
 import { pageEntered, pageEntering, pageExited, pageKey, setPageWaits } from '@/lib/pageExit'
 import { t, typeName, type MessageKey } from '@/i18n'
 import { isType } from '@/data/types'
@@ -12,6 +12,7 @@ import type { Ref } from '@/data/dex'
 import { GAME_NAME, REGULATION } from '@/data/format'
 import { Search, Settings } from '@lucide/vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import NavPill from '@/components/NavPill.vue'
 import SectionMenu from '@/components/SectionMenu.vue'
 import { searchFocus } from '@/composables/useSearch'
 
@@ -138,16 +139,18 @@ watch(
 // `center` completes.
 watch(() => pageKey(route), pageEntering)
 const onPageAnimated = (definition: unknown) => definition === 'center' && pageEntered()
+// Both animate `transform` (and `opacity`) rather than motion's `x` and `y`, which it animates on the main thread: the
+// browser animates these on its own, so the next page rendering can't stall them.
 const pageVariants = {
-  enter: (dir: number) => ({ x: dir > 0 ? '100vw' : '-100vw' }),
-  center: { x: 0 },
-  exit: (dir: number) => ({ x: dir > 0 ? '-100vw' : '100vw' }),
+  enter: (dir: number) => ({ transform: `translateX(${dir > 0 ? 100 : -100}vw)` }),
+  center: { transform: 'translateX(0vw)' },
+  exit: (dir: number) => ({ transform: `translateX(${dir > 0 ? -100 : 100}vw)` }),
 }
 // On desktop, the old page fades out, then the new one fades in from slightly below.
 const fadeVariants = {
-  enter: { opacity: 0, y: 6 },
-  center: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -4 },
+  enter: { opacity: 0, transform: 'translateY(6px)' },
+  center: { opacity: 1, transform: 'translateY(0px)' },
+  exit: { opacity: 0, transform: 'translateY(-4px)' },
 }
 </script>
 
@@ -159,15 +162,14 @@ const fadeVariants = {
         <RouterLink to="/" class="logo font-display">mon<span>dex</span></RouterLink>
         <nav class="nav font-display" :class="{ compact }">
           <!-- The active highlight is one element that slides between links. -->
+          <NavPill :section :compact />
           <RouterLink to="/" :class="{ active: section === 'search' }" @click="searchFocus = true">
-            <motion.span v-if="section === 'search'" layout-id="nav-pill" class="pill" :transition="SPRING" />
             <Search class="label" :size="16" :stroke-width="2.5" aria-hidden="true" />
             <span class="label">{{ t('nav.search') }}</span>
           </RouterLink>
           <SectionMenu v-if="compact" :items="NAV" :section />
           <template v-else>
             <RouterLink v-for="n in NAV" :key="n.to" :to="n.to" :class="{ active: section === n.section }">
-              <motion.span v-if="section === n.section" layout-id="nav-pill" class="pill" :transition="SPRING" />
               <span class="label">{{ t(n.label) }}</span>
             </RouterLink>
           </template>
@@ -177,7 +179,6 @@ const fadeVariants = {
             :class="{ active: section === 'settings' }"
             :aria-label="compact ? t('nav.settings') : undefined"
           >
-            <motion.span v-if="section === 'settings'" layout-id="nav-pill" class="pill" :transition="SPRING" />
             <Settings class="label" :size="16" :stroke-width="2.5" aria-hidden="true" />
             <span v-if="!compact" class="label">{{ t('nav.settings') }}</span>
           </RouterLink>
@@ -260,6 +261,7 @@ const fadeVariants = {
   text-decoration: none;
 }
 .nav {
+  position: relative;
   display: flex;
   gap: 4px;
   /* Sits beside the logo when it fits, else drops to its own row (scrolling sideways as a last resort). */
@@ -284,15 +286,9 @@ const fadeVariants = {
 }
 /* Touch screens fire :hover on tap (and keep it), which would flash under the pill as it slides over. */
 @media (hover: hover) {
-  .nav a:hover {
+  .nav a:hover:not(.active) {
     background: var(--hover);
   }
-}
-.nav .pill {
-  position: absolute;
-  inset: 0;
-  background: var(--sel);
-  border-radius: 3px;
 }
 .nav .end {
   margin-left: auto;

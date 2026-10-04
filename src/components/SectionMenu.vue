@@ -3,11 +3,11 @@ import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { AnimatePresence, motion } from 'motion-v'
 import { ChevronDown } from '@lucide/vue'
-import { FADE, SPRING } from '@/lib/motion'
+import { FADE } from '@/lib/motion'
 import { t, type MessageKey } from '@/i18n'
 
 // The header's dex sections folded into one dropdown, for screens too narrow for a link each. The button is named
-// after the section the current page belongs to, and carries the header's sliding highlight while it's in one.
+// after the section the current page belongs to, and gets the header's sliding highlight (`NavPill`) while it's in one.
 const props = defineProps<{ items: { to: string; section: string; label: MessageKey }[]; section: string | null }>()
 
 const current = computed(() => props.items.find((i) => i.section === props.section))
@@ -53,7 +53,6 @@ onBeforeUnmount(() => listen(false))
       :aria-expanded="open"
       @click="open = !open"
     >
-      <motion.span v-if="current" layout-id="nav-pill" class="pill" :transition="SPRING" />
       <span class="label">{{ t(current?.label ?? 'nav.browse') }}</span>
       <ChevronDown class="label chevron" :class="{ open }" :size="14" :stroke-width="2.5" aria-hidden="true" />
     </button>
@@ -92,15 +91,9 @@ onBeforeUnmount(() => listen(false))
   cursor: pointer;
 }
 @media (hover: hover) {
-  .toggle:hover {
+  .toggle:hover:not(.active) {
     background: var(--hover);
   }
-}
-.pill {
-  position: absolute;
-  inset: 0;
-  background: var(--sel);
-  border-radius: 3px;
 }
 .label {
   position: relative;
