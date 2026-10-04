@@ -190,12 +190,12 @@ watchEffect(async () => {
         </template>
         <template v-if="others(formes)">
           <dt class="muted">{{ t('pokemon.formes') }}</dt>
-          <dd><PokemonChips :ids="formes" :current="id" /></dd>
+          <dd><PokemonChips :ids="formes" :current="id" formes /></dd>
         </template>
       </dl>
       <details v-if="others(looks)">
         <summary class="muted">{{ t('pokemon.looks', { n: looks.length }) }}</summary>
-        <PokemonChips :ids="looks" :current="id" />
+        <PokemonChips :ids="looks" :current="id" formes />
       </details>
     </div>
 

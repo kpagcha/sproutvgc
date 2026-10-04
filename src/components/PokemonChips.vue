@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { pokemon, type PokemonId } from '@/data/dex'
+import { splitForme } from '@/data/pokemon'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
@@ -9,12 +10,14 @@ import PokemonIcon from '@/components/PokemonIcon'
 
 // Pokémon as a row of links, each with its icon, by name in the reader's language. `current`, if among them, is the
 // page's own Pokémon: shown, but not a link. `query`, if given, keeps only the ones whose name it finds, as the dex's
-// searches do, with the match highlighted.
-const props = defineProps<{ ids: readonly PokemonId[]; current?: PokemonId; query?: string }>()
+// searches do, with the match highlighted. `formes` names a species' formes by the forme alone, as the Pokémon list
+// does under their species (its formes listed together, the species first).
+const props = defineProps<{ ids: readonly PokemonId[]; current?: PokemonId; query?: string; formes?: boolean }>()
 const all = computed(() =>
   props.ids
-    .map((id) => ({ id, name: refName(pokemon(id)) }))
-    .sort((a, b) => a.name.localeCompare(b.name, locale.value)),
+    .map((id) => ({ id, full: refName(pokemon(id)) }))
+    .sort((a, b) => a.full.localeCompare(b.full, locale.value))
+    .map(({ id, full }) => ({ id, name: props.formes ? (splitForme(id, full).forme ?? full) : full })),
 )
 const mons = computed(() => {
   const q = fold(props.query?.trim() ?? '')

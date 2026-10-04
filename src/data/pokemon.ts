@@ -46,6 +46,12 @@ export const total = (p: Pokemon) => p.stats.reduce((a, b) => a + b, 0)
 /** The species a Pokémon belongs to: itself, or its base species for a forme. */
 export const speciesOf = (id: PokemonId): PokemonId => POKEMON[id].base ?? id
 
+/** A Pokémon's name, `name`, split in two: a forme's is its species' plus the forme in brackets ("Garchomp (Mega-Z)"). */
+export function splitForme(id: PokemonId, name: string): { species: string; forme?: string } {
+  const m = POKEMON[id].base ? /^(.+) \((.+)\)$/.exec(name) : null
+  return m ? { species: m[1]!, forme: m[2]! } : { species: name }
+}
+
 let learnsets: Promise<Record<PokemonId, MoveId[]>> | undefined
 
 /** Every legal Pokémon's moves the regulation has, loaded once. */

@@ -12,7 +12,7 @@ import {
   type Ref,
 } from '@/data/dex'
 import { REGULATION } from '@/data/format'
-import { POKEMON, STATS, loadLearnsets, speciesOf, total, type StatId } from '@/data/pokemon'
+import { POKEMON, STATS, loadLearnsets, speciesOf, splitForme, total, type StatId } from '@/data/pokemon'
 import { TYPES, type TypeId } from '@/data/types'
 import { locale, t, typeName } from '@/i18n'
 import { loadDescriptions, shortText } from '@/i18n/descriptions'
@@ -45,13 +45,13 @@ const rows = computed(() =>
     .filter(listed)
     .map((id) => {
       const name = refName(pokemon(id))
-      // A forme's name is its species' plus the forme in brackets ("Garchomp (Mega-Z)"): shown apart.
-      const forme = POKEMON[id].base ? /^(.+) \((.+)\)$/.exec(name) : null
+      // A forme's species and forme are shown apart.
+      const { species, forme } = splitForme(id, name)
       return {
         id,
         name,
-        species: forme?.[1] ?? name,
-        forme: forme?.[2],
+        species,
+        forme,
         parent: parentOf(id),
         data: POKEMON[id],
         abilities: POKEMON[id].abilities.map(ability),
