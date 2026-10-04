@@ -98,7 +98,7 @@ export const messages: Record<keyof typeof en, string> = {
   'types.defending': 'Al defender',
   'types.attacking': 'Al atacar',
   'types.selectHint': 'Selecciona un tipo arriba para ver sus enfrentamientos.',
-  'types.learn': 'Aprender',
+  'types.learn': 'Pistas',
 
   'info.immune': 'Inmune',
   'info.bypass': 'Anulado por',

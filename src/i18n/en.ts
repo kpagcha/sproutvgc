@@ -95,7 +95,7 @@ export const messages = {
   'types.defending': 'Defending',
   'types.attacking': 'Attacking',
   'types.selectHint': 'Select a type above to see its matchups.',
-  'types.learn': 'Learn',
+  'types.learn': 'Hints',
 
   'info.immune': 'Immune',
   'info.bypass': 'Bypassed by',
