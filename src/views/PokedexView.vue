@@ -433,6 +433,16 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
 .total {
   font-weight: bold;
 }
+/* Short of the page's full width, the stats sit closer together, so the abilities keep room for theirs on one line. */
+@media (max-width: 1000px) {
+  .dex-table {
+    --num: minmax(2.2em, auto);
+  }
+  .row > .r {
+    padding-left: 3px;
+    padding-right: 3px;
+  }
+}
 
 .abilities {
   display: flex;
