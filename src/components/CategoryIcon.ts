@@ -14,9 +14,9 @@ const GLYPHS: Record<Category, Record<string, string>> = {
   status: { '--glyph': `url(${status})` },
 }
 
-// A move's category badge, styled like a small type badge (in `src/styles/retro.css`), named on hover. Functional, as
-// there can be hundreds on a page.
-const CategoryIcon: FunctionalComponent<{ category: Category }> = (props) => {
+// A move's category badge, styled like a small type badge (in `src/styles/retro.css`), named on hover unless `tip` is
+// false (decorations). Functional, as there can be hundreds on a page.
+const CategoryIcon: FunctionalComponent<{ category: Category; tip?: boolean }> = (props) => {
   const name = t(`move.category.${props.category}`)
   return withDirectives(
     h(
@@ -24,9 +24,9 @@ const CategoryIcon: FunctionalComponent<{ category: Category }> = (props) => {
       { class: 'category-icon category-badge', 'data-category': props.category, role: 'img', 'aria-label': name },
       [h('span', { class: 'glyph', style: GLYPHS[props.category], 'aria-hidden': 'true' })],
     ),
-    [[vTip, name]],
+    props.tip === false ? [] : [[vTip, name]],
   )
 }
-CategoryIcon.props = ['category']
+CategoryIcon.props = ['category', 'tip']
 
 export default CategoryIcon

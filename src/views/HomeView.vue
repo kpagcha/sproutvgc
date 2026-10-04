@@ -6,6 +6,7 @@ import { GAME_NAME, REGULATION } from '@/data/format'
 import type { ItemId, PokemonId } from '@/data/dex'
 import { SECTIONS, preloadSearch, searchFocus, useSearch } from '@/composables/useSearch'
 import TypeIcon from '@/components/TypeIcon'
+import CategoryIcon from '@/components/CategoryIcon'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import QuickLinks from '@/components/QuickLinks.vue'
@@ -70,6 +71,11 @@ const DECOR_ITEMS: ItemId[] = ['choicescarf', 'focussash', 'sitrusberry']
               <span class="section-title font-display">{{ t(s.title) }} <span class="arrow">›</span></span>
               <span v-if="s.kind === 'pokemon'" class="icons" aria-hidden="true">
                 <PokemonIcon v-for="p in DECOR_POKEMON" :id="p" :key="p" />
+              </span>
+              <span v-else-if="s.kind === 'move'" class="icons" aria-hidden="true">
+                <CategoryIcon category="physical" :tip="false" />
+                <CategoryIcon category="special" :tip="false" />
+                <CategoryIcon category="status" :tip="false" />
               </span>
               <span v-else-if="s.kind === 'item'" class="icons" aria-hidden="true">
                 <ItemIcon v-for="i in DECOR_ITEMS" :id="i" :key="i" />
