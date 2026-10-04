@@ -15,6 +15,11 @@ export function formatMult(m: number): string {
   return `${m}×`
 }
 
+/** A type chart cell's text: blank for neutral, so the chart's other multipliers stand out. */
+export function chartCellText(m: number): string {
+  return m === 1 ? '' : m === 0.5 ? '½' : String(m)
+}
+
 /** CSS class used to color a multiplier cell. */
 export function multClass(m: number): string {
   return `m-${String(m).replace('.', '_')}`

@@ -268,6 +268,7 @@ export const messages = {
   'chart.intro': "Rows are the attacking move's type, columns the defending Pokémon's type.",
   'chart.atk': 'Atk',
   'chart.def': 'Def',
+  'chart.download': 'Download image',
 
   'matchups.tabDef': 'Defense',
   'matchups.tabAtk': 'Offense / coverage',

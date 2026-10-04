@@ -3,15 +3,33 @@ import { computed, nextTick, onMounted, ref, useTemplateRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { TYPES, chart, isType } from '@/data/types'
 import { t, typeName } from '@/i18n'
-import { multClass } from '@/lib/typecalc'
+import { chartCellText, multClass } from '@/lib/typecalc'
 import TypeIcon from '@/components/TypeIcon'
+import { Download } from '@lucide/vue'
 
 const rows = TYPES.map((atk) =>
   TYPES.map((def) => {
     const m = chart(atk, def)
-    return { m, cls: multClass(m), text: m === 1 ? '' : m === 0.5 ? '½' : String(m) }
+    return { m, cls: multClass(m), text: chartCellText(m) }
   }),
 )
+
+// The chart as a PNG, drawn on demand (its code loads on the first click), in the page's font.
+const busy = ref(false)
+async function download() {
+  if (busy.value) return
+  busy.value = true
+  try {
+    await document.fonts.ready
+    const { downloadChart } = await import('@/lib/chartImage')
+    const font = table.value ? getComputedStyle(table.value).fontFamily : 'sans-serif'
+    await downloadChart({ title: t('title.chart'), atk: t('chart.atk'), def: t('chart.def'), font })
+  } catch (e) {
+    console.error(e)
+  } finally {
+    busy.value = false
+  }
+}
 
 // Selected cell lives in the URL (?atk=fire&def=water) so it can be shared.
 const route = useRoute()
@@ -97,9 +115,19 @@ onMounted(async () => {
       </tbody>
     </table>
   </div>
+
+  <button type="button" class="btn download" :disabled="busy" @click="download">
+    <Download :size="14" :stroke-width="3" />{{ t('chart.download') }}
+  </button>
 </template>
 
 <style scoped>
+.download {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .scroller {
   overflow-x: auto;
   margin-bottom: 12px;

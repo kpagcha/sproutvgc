@@ -273,6 +273,7 @@ export const messages: Record<keyof typeof en, string> = {
   'chart.intro': 'Las filas son el tipo del movimiento atacante; las columnas, el tipo del Pokémon defensor.',
   'chart.atk': 'Atq',
   'chart.def': 'Def',
+  'chart.download': 'Descargar imagen',
 
   'matchups.tabDef': 'Defensa',
   'matchups.tabAtk': 'Ataque / cobertura',
