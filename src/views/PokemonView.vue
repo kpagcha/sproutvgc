@@ -9,7 +9,7 @@ import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import DefenseResults from '@/components/DefenseResults.vue'
 import DexRef from '@/components/DexRef'
-import DexText from '@/components/DexText'
+import DexText, { hoverTip } from '@/components/DexText'
 import ItemIcon from '@/components/ItemIcon.vue'
 import MoveTable from '@/components/MoveTable.vue'
 import PokemonChips from '@/components/PokemonChips.vue'
@@ -76,7 +76,7 @@ watchEffect(async () => {
         </div>
         <dl class="abilities">
           <template v-for="a in abilities" :key="a.id">
-            <dt><DexRef :to="a" /></dt>
+            <dt><DexRef :to="a" :tip="hoverTip(a)" /></dt>
             <dd class="muted"><DexText :text="description('ability', a.id)?.short ?? ''" /></dd>
           </template>
         </dl>
@@ -211,6 +211,17 @@ watchEffect(async () => {
 }
 .abilities dd {
   margin: 0;
+}
+/* Where there's hover, the descriptions are in the abilities' tooltips. */
+@media (hover: hover) {
+  .abilities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 12px;
+  }
+  .abilities dd {
+    display: none;
+  }
 }
 .stats-col {
   flex: 1 1 260px;
