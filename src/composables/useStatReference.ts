@@ -1,6 +1,6 @@
-import { ref, watch } from 'vue'
 import { availableIds, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
+import { stored } from '@/composables/stored'
 import { percentiles, type Percentiles, type Sample } from '@/lib/statPercentiles'
 
 // The sets of Pokémon base stats can be compared against, each with its percentiles (below), named by `stats.vs.<set>`
@@ -17,25 +17,6 @@ export type ListStatMarks = (typeof LIST_STAT_MARKS)[number]
 // How a Pokémon's page draws its stats: on their own (`plain`), or set against one of the sets.
 export const PAGE_STAT_BARS = ['plain', ...STAT_SETS] as const
 export type PageStatBars = (typeof PAGE_STAT_BARS)[number]
-
-// A choice among `values`, saved under `key`.
-function stored<T extends string>(key: string, values: readonly T[]) {
-  let saved: string | null = null
-  try {
-    saved = localStorage.getItem(key)
-  } catch {
-    // Storage unavailable.
-  }
-  const choice = ref<T>(values.includes(saved as T) ? (saved as T) : values[0]!)
-  watch(choice, (v) => {
-    try {
-      localStorage.setItem(key, v)
-    } catch {
-      // Storage unavailable: the choice lasts until the page is closed.
-    }
-  })
-  return choice
-}
 
 const listMarks = stored('sproutvgc.statReference', LIST_STAT_MARKS)
 const pageBars = stored('sproutvgc.pokemon.statBars', PAGE_STAT_BARS)
