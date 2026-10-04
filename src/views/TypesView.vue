@@ -56,6 +56,10 @@ watch(
   { flush: 'post' },
 )
 
+// The panel fades in the first time it shows on a visit to the page; once it has, moving between types (or closing
+// and reopening it) swaps it at once.
+const revealed = ref(false)
+
 /** Remembered per viewer, and kept on while moving between types. */
 const LEARN_KEY = 'mondex.types.learn'
 const learn = ref(readFlag(LEARN_KEY))
@@ -119,14 +123,15 @@ function writeFlag(key: string, on: boolean) {
   </div>
 
   <div ref="detail">
-    <AnimatePresence mode="wait" :initial="false">
+    <AnimatePresence mode="wait">
       <motion.div
         v-if="type"
         :key="type"
-        :initial="{ opacity: 0, y: 6 }"
+        :initial="revealed ? false : { opacity: 0, y: 6 }"
         :animate="{ opacity: 1, y: 0 }"
-        :exit="{ opacity: 0, y: -4 }"
+        :exit="revealed ? undefined : { opacity: 0, y: -4 }"
         :transition="FADE"
+        :on-animation-complete="() => (revealed = true)"
       >
         <div class="panel">
           <h2 class="name">
