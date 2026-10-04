@@ -22,7 +22,14 @@ import SkeletonRows from '@/components/SkeletonRows.vue'
 // A table of moves with their type, category, power, accuracy and PP, sortable by any of them, searchable by name and
 // filtered by type, category and flag; with `descriptions`, each move's short description too. The category and flag
 // filters are models, for a page that keeps them in its URL; unbound, the table keeps them itself.
-const props = defineProps<{ ids: readonly MoveId[]; descriptions?: boolean; placeholder: string; query?: string }>()
+const props = defineProps<{
+  ids: readonly MoveId[]
+  descriptions?: boolean
+  placeholder: string
+  query?: string
+  /** Keep the sort under this name when the table is mounted again (`useSort`'s `remember`). */
+  remember?: string
+}>()
 
 // Its links are `AppLink`s and its icons and descriptions functional components: RouterLinks and full components in
 // each of hundreds of rows take a while to mount.
@@ -66,6 +73,7 @@ const { key, desc, toggle, sorted } = useSort({
   initial: 'name' as Key,
   startsDesc: (k) => k === 'power' || k === 'accuracy' || k === 'pp',
   locale,
+  remember: props.remember,
 })
 
 // Phones leave out PP, and show the descriptions under the moves' names rather than in a column of their own.

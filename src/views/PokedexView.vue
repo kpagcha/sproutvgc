@@ -170,6 +170,7 @@ const { key, desc, toggle, sorted } = useSort({
   initial: 'name' as Key,
   startsDesc: (k) => k !== 'name',
   locale,
+  remember: 'pokemon',
 })
 
 type Marks = [string, string, string]

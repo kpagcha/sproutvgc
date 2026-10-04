@@ -37,6 +37,7 @@ const flag = param<Flag>('flag', FLAGS)
       descriptions
       :placeholder="t('moves.search')"
       :query="q"
+      remember="moves"
       v-model:category="category"
       v-model:flag="flag"
     />
