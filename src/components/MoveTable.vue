@@ -76,12 +76,13 @@ const { key, desc, toggle, sorted } = useSort({
   remember: props.remember,
 })
 
-// Phones leave out PP, and show the descriptions under the moves' names rather than in a column of their own.
+// Phones leave out accuracy and PP, and show the descriptions under the moves' names rather than in a column of
+// their own.
 const COLUMNS: { k: Key; label: MessageKey; right?: boolean; wideOnly?: boolean }[] = [
   { k: 'type', label: 'move.type' },
   { k: 'category', label: 'move.categoryShort' },
   { k: 'power', label: 'move.power', right: true },
-  { k: 'accuracy', label: 'move.accuracy', right: true },
+  { k: 'accuracy', label: 'move.accuracy', right: true, wideOnly: true },
   { k: 'pp', label: 'move.pp', right: true, wideOnly: true },
 ]
 const phoneQuery = window.matchMedia('(max-width: 720px)')
@@ -98,7 +99,7 @@ const skeleton = computed(() => [
   '',
   '',
   'r',
-  'r',
+  'wide-only r',
   'wide-only r',
   ...(props.descriptions && !phone.value ? ['grow'] : []),
 ])
@@ -159,7 +160,7 @@ const skeleton = computed(() => [
           /></AppLink>
         </div>
         <div role="cell" class="r num">{{ r.data.power || '—' }}</div>
-        <div role="cell" class="r num">{{ r.data.accuracy === true ? '—' : r.data.accuracy }}</div>
+        <div role="cell" class="wide-only r num">{{ r.data.accuracy === true ? '—' : r.data.accuracy }}</div>
         <div role="cell" class="wide-only r num">{{ r.data.pp }}</div>
         <div v-if="descriptions && !phone" role="cell" class="grow muted">
           <DexText :text="description('move', r.id)?.short ?? ''" />
@@ -171,8 +172,8 @@ const skeleton = computed(() => [
 </template>
 
 <style scoped>
-/* Name, type, category, power, accuracy, PP and, with descriptions, the description; phones leave out PP and show the
-   descriptions under the names. */
+/* Name, type, category, power, accuracy, PP and, with descriptions, the description; phones leave out accuracy and PP,
+   show the descriptions under the names, and take the type and category badges down from the phone size. */
 .dex-table {
   --num: minmax(2.6em, auto);
   --row-height: 2.05em;
@@ -184,7 +185,8 @@ const skeleton = computed(() => [
 @media (max-width: 720px) {
   .dex-table,
   .dex-table.described {
-    --cols: minmax(0, 1fr) auto auto repeat(2, var(--num));
+    --icon-scale: 1.25;
+    --cols: minmax(0, 1fr) auto auto var(--num);
   }
 }
 .filters {

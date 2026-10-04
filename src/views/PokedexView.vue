@@ -404,6 +404,8 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
 }
 @media (max-width: 720px) {
   .dex-table {
+    /* Smaller type badges than elsewhere on phones. */
+    --icon-scale: 1.25;
     --name-min: 7em;
     --name-max: 12em;
     --cols: fit-content(var(--name-max)) var(--types) var(--num);
