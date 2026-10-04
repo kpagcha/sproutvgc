@@ -93,7 +93,7 @@ export const router = createRouter({
         titleKey: 'title.pokemon',
         descKey: 'desc.pokedex',
         dexNames: true,
-        descriptions: ['ability'],
+        descriptions: ['ability', 'move'],
       },
     },
     {

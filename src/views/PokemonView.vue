@@ -151,7 +151,7 @@ watchEffect(async () => {
 
     <div class="panel">
       <h2>{{ t('pokemon.moves') }}</h2>
-      <MoveTable v-if="learnset" :ids="learnset" :placeholder="t('pokemon.searchMoves')" />
+      <MoveTable v-if="learnset" :ids="learnset" descriptions :placeholder="t('pokemon.searchMoves')" />
     </div>
   </template>
   <div v-else class="panel">
