@@ -69,7 +69,7 @@ function tiers<T>(items: readonly T[], mult: (x: T) => Multiplier) {
           :class="multClass(0)"
           v-tip:chips="typesLabel(e.def)"
         >
-          <TypeIcon v-for="t in e.def" :key="t" :type="t" lazy />
+          <TypeIcon v-for="t in e.def" :key="t" :type="t" />
         </span>
       </span>
     </div>
@@ -115,7 +115,7 @@ function tiers<T>(items: readonly T[], mult: (x: T) => Multiplier) {
             :key="c.partner"
             v-tip:chips="`${typesLabel(c.entry.def)}: ${formatMult(c.entry.best)}`"
           >
-            <TypeIcon :type="c.partner" lazy />
+            <TypeIcon :type="c.partner" />
           </span>
         </fieldset>
       </template>
@@ -130,7 +130,7 @@ function tiers<T>(items: readonly T[], mult: (x: T) => Multiplier) {
           class="pair"
           v-tip:chips="`${typesLabel(e.def)}: ${formatMult(e.best)}`"
         >
-          <TypeIcon v-for="t in e.def" :key="t" :type="t" lazy />
+          <TypeIcon v-for="t in e.def" :key="t" :type="t" />
         </span>
       </fieldset>
     </div>

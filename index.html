@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-style="retro">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,18 +14,15 @@
       property="og:description"
       content="A competitive Pokémon Champions dex, up to date with Regulation %VITE_REGULATION%."
     />
-    <!-- The type badge names' font (--badge-family in src/styles/retro.css). -->
+    <!-- The type badge names' font (--badge-family in src/styles/main.css). -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&display=swap" />
     <script>
-      // Apply the saved theme and style before first paint to avoid a flash. The style can only be picked in dev, so a
-      // saved one is ignored in production builds.
+      // Apply the saved theme before first paint to avoid a flash.
       try {
         var t = localStorage.getItem('mondex.theme')
         if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t
-        if ('%MODE%' === 'development' && localStorage.getItem('mondex.style') === 'pixel')
-          document.documentElement.dataset.style = 'pixel'
       } catch (e) {}
     </script>
   </head>
