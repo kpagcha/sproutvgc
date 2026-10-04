@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onScopeDispose, ref, useTemplateRef, watch } from 'vue'
+import { computed, onScopeDispose, ref, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { AnimatePresence, motion } from 'motion-v'
 import { isType, type TypeId } from '@/data/types'
@@ -54,17 +54,14 @@ const defResults = useTemplateRef<HTMLElement>('defResults')
 const atkResults = useTemplateRef<HTMLElement>('atkResults')
 const results = computed(() => (side.value === 'def' ? defResults.value : atkResults.value))
 
-// Picks don't scroll, since you may want to pick more; a floating button jumps to the results while they're below
-// the screen. Reaching the maximum does scroll, as there is nothing left to pick.
-async function pick(which: 'def' | 'atk', v: TypeId[], max: number) {
+// Picks never scroll, since you may want to pick more (past the maximum, a pick replaces the oldest); a floating
+// button jumps to the results while they're below the screen.
+function pick(which: 'def' | 'atk', v: TypeId[]) {
   lastPicked.value = which
-  await setQuery({ [which]: v.join(',') })
-  if (v.length < max) return
-  await nextTick()
-  reveal(results.value)
+  void setQuery({ [which]: v.join(',') })
 }
-const setDef = (v: TypeId[]) => pick('def', v, 2)
-const setAtk = (v: TypeId[]) => pick('atk', v, 4)
+const setDef = (v: TypeId[]) => pick('def', v)
+const setAtk = (v: TypeId[]) => pick('atk', v)
 
 // The button shows while the results start low on the screen (below 40%) and run off its bottom edge.
 const resultsBelow = ref(false)
