@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { refKey } from '@/data/dex'
+import { CONDITIONS, type ConditionInfo } from '@/data/conditions'
+import { refKey, type Ref } from '@/data/dex'
+import { t, type MessageKey } from '@/i18n'
+import { refName } from '@/i18n/refName'
 import { effectText, type InfoRow } from '@/lib/interactions'
+import { follow, refHref } from '@/lib/links'
 import { formatMult, multClass } from '@/lib/typecalc'
 import DexRef from '@/components/DexRef'
 import TypeIcon from '@/components/TypeIcon'
@@ -9,6 +13,12 @@ defineProps<{ rows: InfoRow[] }>()
 
 /** In rows mixing several move types, each run of one type's entries starts with its badge. */
 const startsRun = (list: { of?: unknown }[], i: number) => !!list[i]!.of && list[i]!.of !== list[i - 1]?.of
+
+/** A status's abbreviation (PAR), which it goes by in these rows (the type pages'), as in the games. */
+const statusAbbr = (ref: Ref) =>
+  ref.kind === 'condition' && (CONDITIONS[ref.id] as ConditionInfo).sub === 'status'
+    ? t(`status.${ref.id}` as MessageKey)
+    : undefined
 </script>
 
 <template>
@@ -18,7 +28,11 @@ const startsRun = (list: { of?: unknown }[], i: number) => !!list[i]!.of && list
       <dd>
         <template v-for="(e, i) in row.entries" :key="`${e.of ?? ''}/${refKey(e.ref)}/${e.cond?.id ?? ''}`">
           <TypeIcon v-if="startsRun(row.entries!, i)" :type="e.of!" class="of" />
-          <span class="term">
+          <!-- A status is a badge of its own, the whole of it a link, with its full name on hover. -->
+          <a v-if="statusAbbr(e.ref)" v-tip="refName(e.ref)" class="term status" :href="refHref(e.ref)" @click="follow">
+            {{ statusAbbr(e.ref) }}
+          </a>
+          <span v-else class="term">
             <DexRef :to="e.ref" />
             <span v-if="e.cond" class="effect">(<DexRef :to="e.cond" />)</span>
             <span v-if="e.mult !== undefined" class="mult-tag" :class="multClass(e.mult)">
@@ -59,6 +73,18 @@ const startsRun = (list: { of?: unknown }[], i: number) => !!list[i]!.of && list
   background: var(--panel-alt);
   border: 1px solid var(--border);
   border-radius: 3px;
+}
+.status {
+  color: var(--text);
+  font-weight: 600;
+  font-family: var(--font-num, inherit);
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  cursor: pointer;
+}
+.status:hover {
+  background: var(--hover);
+  border-color: var(--muted);
 }
 .term .mult-tag {
   min-width: 0;
