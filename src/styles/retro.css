@@ -349,59 +349,60 @@
   outline-style: dashed;
 }
 
-/* Official type colors, as in Scarlet/Violet's type symbols. */
-:root:root .type-badge[data-type='normal'] {
+/* Official type colors, as in Scarlet/Violet's type symbols: for type badges, and anything else of a type (`data-type`),
+   such as the summary's move plates. */
+:root:root [data-type='normal'] {
   --tc: #9fa19f;
 }
-:root:root .type-badge[data-type='fire'] {
+:root:root [data-type='fire'] {
   --tc: #e62829;
 }
-:root:root .type-badge[data-type='water'] {
+:root:root [data-type='water'] {
   --tc: #2980ef;
 }
-:root:root .type-badge[data-type='electric'] {
+:root:root [data-type='electric'] {
   --tc: #fac000;
 }
-:root:root .type-badge[data-type='grass'] {
+:root:root [data-type='grass'] {
   --tc: #3fa129;
 }
-:root:root .type-badge[data-type='ice'] {
+:root:root [data-type='ice'] {
   --tc: #3fd8ff;
 }
-:root:root .type-badge[data-type='fighting'] {
+:root:root [data-type='fighting'] {
   --tc: #ff8000;
 }
-:root:root .type-badge[data-type='poison'] {
+:root:root [data-type='poison'] {
   --tc: #9141cb;
 }
-:root:root .type-badge[data-type='ground'] {
+:root:root [data-type='ground'] {
   --tc: #915121;
 }
-:root:root .type-badge[data-type='flying'] {
+:root:root [data-type='flying'] {
   --tc: #81b9ef;
 }
-:root:root .type-badge[data-type='psychic'] {
+:root:root [data-type='psychic'] {
   --tc: #ef4179;
 }
-:root:root .type-badge[data-type='bug'] {
+:root:root [data-type='bug'] {
   --tc: #91a119;
 }
-:root:root .type-badge[data-type='rock'] {
+:root:root [data-type='rock'] {
   --tc: #afa981;
 }
-:root:root .type-badge[data-type='ghost'] {
+:root:root [data-type='ghost'] {
   --tc: #704170;
 }
-:root:root .type-badge[data-type='dragon'] {
+:root:root [data-type='dragon'] {
   --tc: #5060e1;
 }
-:root:root .type-badge[data-type='dark'] {
+:root:root [data-type='dark'] {
   --tc: #50413f;
 }
-:root:root .type-badge[data-type='steel'] {
+:root:root [data-type='steel'] {
   --tc: #60a1b8;
 }
-:root:root .type-badge[data-type='fairy'] {
+:root:root [data-type='fairy'] {
   --tc: #ef70ef;
 }
 

@@ -506,3 +506,37 @@ details > summary {
 .dex-table .name {
   font-weight: bold;
 }
+
+/* ---------- Pokémon summary ---------- */
+/* The summary's memo boxes (its info and stats pages): a heading on its type's wash, then lines on ruled paper, as
+   the games' trainer memo. */
+.summary-memo {
+  margin: 12px 0 0;
+  border: 2px solid var(--ink);
+  background: var(--panel);
+}
+.summary-memo h3 {
+  margin: 0;
+  padding: 1px 8px;
+  border-bottom: 2px solid var(--ink);
+  background: var(--summary-tint, var(--panel-alt));
+  color: var(--summary-on-tint, var(--text));
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.summary-memo ul {
+  margin: 0;
+  padding: 0 8px;
+  list-style: none;
+}
+.summary-memo li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+  border-bottom: 1px dashed var(--border);
+}
+.summary-memo li:last-child {
+  border-bottom: none;
+}

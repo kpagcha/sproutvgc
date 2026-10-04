@@ -1,63 +1,97 @@
 <script setup lang="ts">
 import { computed, ref, watchEffect } from 'vue'
-import { useRoute } from 'vue-router'
-import { ability, availableIds, available, item, pokemon, type MoveId, type PokemonId } from '@/data/dex'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { AnimatePresence, motion } from 'motion-v'
+import { ability, availableIds, available, item, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
-import { POKEMON, STATS, loadLearnsets, movesOf, speciesOf, spriteUrl, total } from '@/data/pokemon'
+import { MOVES } from '@/data/moves'
+import { POKEMON, loadLearnsets, movesOf, speciesOf, spriteUrl } from '@/data/pokemon'
 import { t, tSlots, type MessageKey } from '@/i18n'
 import { description } from '@/i18n/descriptions'
-import { PAGE_STAT_BARS, setPercentiles, usePageStatBars } from '@/composables/useStatReference'
 import { refName } from '@/i18n/refName'
+import { FADE } from '@/lib/motion'
+import { weightPower } from '@/lib/stats'
 import DefenseResults from '@/components/DefenseResults.vue'
 import DexRef from '@/components/DexRef'
+import DexText from '@/components/DexText'
 import EntryTitle from '@/components/EntryTitle.vue'
-import DexText, { hoverTip } from '@/components/DexText'
 import ItemIcon from '@/components/ItemIcon.vue'
-import MoveTable from '@/components/MoveTable.vue'
+import OffenseResults from '@/components/OffenseResults.vue'
 import PokemonChips from '@/components/PokemonChips.vue'
 import PokemonIcon from '@/components/PokemonIcon'
-import SegmentedControl from '@/components/SegmentedControl.vue'
+import SummaryMoves from '@/components/summary/SummaryMoves.vue'
+import SummarySkills from '@/components/summary/SummarySkills.vue'
 import TypeIcon from '@/components/TypeIcon'
 
-// One Pokémon: its sprite, types, abilities and base stats, how it changes (Mega Evolution, other formes) and evolves,
-// how types hit it, and its moves.
+// One Pokémon, as the games' summary screen: a card with its sprite, level, types, item and family down the side, and
+// pages beside it (◀ ▶, as the games page through them): its abilities and how it comes about, its stats at level 50,
+// its moves (with a moveset of four to try out) and its type matchups, the moveset's coverage among them. The page and
+// the moveset are in the query (`?tab=`, `?set=`), so they can be shared, and they stay as one switches to another
+// member of the family.
 const route = useRoute()
+const router = useRouter()
 const id = computed(() => String(route.params.id) as PokemonId)
 const ref_ = computed(() => pokemon(id.value))
 const exists = computed(() => available(ref_.value))
 const mon = computed(() => POKEMON[id.value])
 
-const abilities = computed(() => mon.value.abilities.map(ability))
+const TABS = ['info', 'skills', 'moves', 'matchups'] as const
+type Tab = (typeof TABS)[number]
+const TAB_LABELS: Record<Tab, MessageKey> = {
+  info: 'summary.info',
+  skills: 'summary.skills',
+  moves: 'summary.moves',
+  matchups: 'summary.matchups',
+}
+const tab = computed<Tab>(() => {
+  const q = String(route.query.tab ?? '')
+  return (TABS as readonly string[]).includes(q) ? (q as Tab) : 'info'
+})
+function setQuery(patch: Record<string, string | undefined>) {
+  const query = { ...route.query, ...patch }
+  for (const k of Object.keys(patch)) if (!patch[k]) delete query[k]
+  void router.replace({ query })
+}
+const goTo = (to: Tab) => setQuery({ tab: to === 'info' ? undefined : to })
+const step = (by: number) => goTo(TABS[(TABS.indexOf(tab.value) + by + TABS.length) % TABS.length]!)
 
-// Each stat's bar, out of 200 (the few above it fill it). Plain (`usePageStatBars`), colored by Showdown's scale for
-// stats: red for low, through yellow, to green and blue for high. Set against a set of Pokémon: a tick at its median, a
-// band over its middle half, the bar blue above the median and red below, and on hover how many it beats.
-const bars = usePageStatBars()
-const statColor = (v: number) => `hsl(${Math.min(Math.floor((v * 180) / 255), 360)}, 75%, 45%)`
-const at = (v: number) => Math.min(100, v / 2)
-const along = (v: number) => `${at(v)}%`
-const stats = computed(() => {
-  const p = bars.value === 'plain' ? null : setPercentiles(bars.value)
-  return STATS.map((s, i) => {
-    const v = mon.value.stats[i]!
-    const rank = p?.rank(i, v) ?? null
-    const median = p?.quantile(i, 0.5) ?? null
-    const low = p?.quantile(i, 0.25) ?? null
-    const high = p?.quantile(i, 0.75) ?? null
-    return {
-      s,
-      v,
-      side: rank === null ? null : rank >= 0.5 ? 'hi' : 'lo',
-      color: p ? undefined : statColor(v),
-      tip: rank === null ? undefined : t('pokemon.statRank', { pct: Math.round(rank * 100) }),
-      median: median === null ? null : along(median),
-      band: low === null || high === null ? null : { left: along(low), width: `${at(high) - at(low)}%` },
-    }
-  })
+// The tabs take the arrow keys, as a tab list does (and as the games page with the D-pad).
+const tabEls = ref<HTMLElement[]>([])
+function onTabKey(e: KeyboardEvent) {
+  const by = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0
+  if (!by) return
+  e.preventDefault()
+  step(by)
+  tabEls.value[TABS.indexOf(tab.value)]?.focus()
+}
+
+const learnset = ref<MoveId[] | null>(null)
+watchEffect(async () => {
+  const current = id.value
+  const sets = await loadLearnsets()
+  if (id.value === current) learnset.value = movesOf(sets, current)
 })
 
+// The moveset, from the query: moves it learns only (once the learnset is in), each once, four at most.
+const moveset = computed<MoveId[]>({
+  get() {
+    const ids = String(route.query.set ?? '')
+      .split(',')
+      .filter((m): m is MoveId => m in MOVES)
+    const learns = learnset.value
+    return [...new Set(ids)].filter((m) => !learns || learns.includes(m)).slice(0, 4)
+  },
+  set: (ids) => setQuery({ set: ids.join(',') || undefined }),
+})
+// What the moveset's attacks hit: the types of its damaging moves.
+const attacking = computed(() => [
+  ...new Set(moveset.value.filter((m) => MOVES[m].category !== 'status').map((m) => MOVES[m].type)),
+])
+
+const abilities = computed(() => mon.value.abilities.map(ability))
+
 // The species' formes the regulation has (Megas, regional formes, Rotom's appliances), this one among them, and the
-// ones that only look different, apart. Each list is shown only when it has others.
+// ones that only look different, apart.
 const family = computed(() => {
   const species = speciesOf(id.value)
   return availableIds('pokemon').filter((p) => speciesOf(p) === species)
@@ -66,166 +100,346 @@ const formes = computed(() => family.value.filter((p) => !POKEMON[p].cosmetic))
 const looks = computed(() => family.value.filter((p) => POKEMON[p].cosmetic))
 const others = (ids: PokemonId[]) => ids.some((p) => p !== id.value)
 
+// The card's party: its evolution line from the first stage on, then its formes, as the games' party grid.
+const party = computed(() => {
+  let root = speciesOf(id.value)
+  while (POKEMON[root].prevo) root = speciesOf(POKEMON[root].prevo!)
+  const line: PokemonId[] = []
+  const queue = [root]
+  while (queue.length) {
+    const p = queue.shift()!
+    line.push(p)
+    queue.push(...(POKEMON[p].evos ?? []))
+  }
+  return [...new Set([...line, ...formes.value])].filter((p) => available(pokemon(p)))
+})
+
 /** How it comes about, for formes a battle brings out: a Mega Evolution, or another change (Aegislash's Blade). */
 const origin = computed((): { key: MessageKey; from: PokemonId } | null => {
   const from = mon.value.battleOnly
   if (!from) return null
   return { key: mon.value.mega ? 'pokemon.megaFrom' : 'pokemon.changesFrom', from }
 })
-
-const learnset = ref<MoveId[] | null>(null)
-watchEffect(async () => {
-  const current = id.value
-  const sets = await loadLearnsets()
-  if (id.value === current) learnset.value = movesOf(sets, current)
-})
 </script>
 
 <template>
-  <template v-if="exists">
-    <div class="panel head">
-      <img
-        v-if="!mon.noSprite"
-        class="pixel sprite"
-        :src="spriteUrl(id)"
-        :alt="refName(ref_)"
-        width="96"
-        height="96"
-        draggable="false"
-      />
-      <span v-else class="sprite icon-sprite"><PokemonIcon :id="id" :scale="2" /></span>
-      <div class="facts">
-        <EntryTitle :to="ref_" />
+  <div v-if="exists" class="summary panel" :data-type="mon.types[0]">
+    <div class="bar">
+      <div class="tabs" role="tablist" :aria-label="refName(ref_)" @keydown="onTabKey">
+        <button
+          v-for="tb in TABS"
+          :id="`summary-tab-${tb}`"
+          :key="tb"
+          ref="tabEls"
+          type="button"
+          role="tab"
+          class="tab"
+          :class="{ on: tab === tb }"
+          :aria-selected="tab === tb"
+          aria-controls="summary-page"
+          :tabindex="tab === tb ? 0 : -1"
+          @click="goTo(tb)"
+        >
+          {{ t(TAB_LABELS[tb]) }}
+        </button>
+      </div>
+      <div class="pager">
+        <button type="button" class="arrow" :aria-label="t('summary.prev')" @click="step(-1)">◀</button>
+        <span class="dots" aria-hidden="true">
+          <span v-for="tb in TABS" :key="tb" class="dot" :class="{ on: tab === tb }"></span>
+        </span>
+        <button type="button" class="arrow" :aria-label="t('summary.next')" @click="step(1)">▶</button>
+      </div>
+    </div>
+
+    <div class="body">
+      <aside class="card">
+        <div class="card-head">
+          <span class="lv num">{{ t('summary.level') }}</span>
+          <EntryTitle :to="ref_" />
+        </div>
+        <div class="screen">
+          <img
+            v-if="!mon.noSprite"
+            class="pixel sprite"
+            :src="spriteUrl(id)"
+            :alt="refName(ref_)"
+            width="96"
+            height="96"
+            draggable="false"
+          />
+          <span v-else class="sprite icon-sprite"><PokemonIcon :id="id" :scale="2" /></span>
+        </div>
         <div class="types">
           <RouterLink v-for="ty in mon.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
             <TypeIcon :type="ty" :scale="2" />
           </RouterLink>
         </div>
-        <dl class="abilities">
-          <template v-for="a in abilities" :key="a.id">
-            <dt><DexRef :to="a" :tip="hoverTip(a)" /></dt>
-            <dd class="muted"><DexText :text="description('ability', a.id)?.short ?? ''" /></dd>
-          </template>
-        </dl>
-        <p v-if="origin" class="origin">
-          <template v-for="(part, i) in tSlots(origin.key)" :key="i">
-            <template v-if="typeof part === 'string'">{{ part }}</template>
-            <DexRef v-else-if="part.slot === 'pokemon'" :to="pokemon(origin.from)" />
-            <span v-else-if="part.slot === 'item' && mon.item" class="with-icon"
-              ><ItemIcon :id="mon.item" /><DexRef :to="item(mon.item)"
-            /></span>
-          </template>
-        </p>
-        <p v-else-if="mon.item" class="origin">
-          <template v-for="(part, i) in tSlots('pokemon.holds')" :key="i">
-            <template v-if="typeof part === 'string'">{{ part }}</template>
-            <span v-else class="with-icon"><ItemIcon :id="mon.item" /><DexRef :to="item(mon.item)" /></span>
-          </template>
-        </p>
+        <div v-if="mon.item" class="held">
+          <span class="tag">{{ t('summary.item') }}</span>
+          <span class="with-icon"><ItemIcon :id="mon.item" /><DexRef :to="item(mon.item)" /></span>
+        </div>
+        <nav v-if="party.length > 1" class="party" :aria-label="t('summary.family')">
+          <component
+            :is="p === id ? 'span' : RouterLink"
+            v-for="p in party"
+            :key="p"
+            v-tip="refName(pokemon(p))"
+            class="member"
+            :class="{ cur: p === id }"
+            :to="p === id ? undefined : { name: 'pokemon', params: { id: p }, query: route.query }"
+            :aria-label="refName(pokemon(p))"
+            :aria-current="p === id ? 'page' : undefined"
+          >
+            <PokemonIcon :id="p" />
+          </component>
+        </nav>
+      </aside>
+
+      <div id="summary-page" class="page" role="tabpanel" :aria-labelledby="`summary-tab-${tab}`">
+        <AnimatePresence mode="wait" :initial="false">
+          <motion.div
+            :key="tab"
+            :initial="{ opacity: 0, x: 10 }"
+            :animate="{ opacity: 1, x: 0 }"
+            :exit="{ opacity: 0, x: -10 }"
+            :transition="FADE"
+          >
+            <template v-if="tab === 'info'">
+              <section v-for="a in abilities" :key="a.id" class="ability">
+                <h3>
+                  <span class="tag">{{ t('summary.ability') }}</span> <DexRef :to="a" />
+                </h3>
+                <p><DexText :text="description('ability', a.id)?.short ?? ''" /></p>
+              </section>
+
+              <section class="summary-memo">
+                <h3>{{ t('summary.memo') }}</h3>
+                <ul>
+                  <li v-if="origin">
+                    <template v-for="(part, i) in tSlots(origin.key)" :key="i">
+                      <template v-if="typeof part === 'string'">{{ part }}</template>
+                      <DexRef v-else-if="part.slot === 'pokemon'" :to="pokemon(origin.from)" />
+                      <span v-else-if="part.slot === 'item' && mon.item" class="with-icon"
+                        ><ItemIcon :id="mon.item" /><DexRef :to="item(mon.item)"
+                      /></span>
+                    </template>
+                  </li>
+                  <li v-else-if="mon.item">
+                    <template v-for="(part, i) in tSlots('pokemon.holds')" :key="i">
+                      <template v-if="typeof part === 'string'">{{ part }}</template>
+                      <span v-else class="with-icon"><ItemIcon :id="mon.item" /><DexRef :to="item(mon.item)" /></span>
+                    </template>
+                  </li>
+                  <li>
+                    <template v-for="(part, i) in tSlots('summary.weightMemo')" :key="i">
+                      <template v-if="typeof part === 'string'">{{ part }}</template>
+                      <span v-else-if="part.slot === 'kg'" class="num">{{ mon.weight }}</span>
+                      <span v-else-if="part.slot === 'power'" class="num">{{ weightPower(mon.weight) }}</span>
+                      <DexRef v-else-if="part.slot === 'lowkick'" :to="move('lowkick')" />
+                      <DexRef v-else-if="part.slot === 'grassknot'" :to="move('grassknot')" />
+                    </template>
+                  </li>
+                </ul>
+              </section>
+
+              <dl v-if="others(formes) || mon.prevo || mon.evos" class="relations">
+                <template v-if="mon.prevo">
+                  <dt>
+                    <span class="tag">{{ t('pokemon.evolvesFrom') }}</span>
+                  </dt>
+                  <dd><PokemonChips :ids="[mon.prevo]" /></dd>
+                </template>
+                <template v-if="mon.evos">
+                  <dt>
+                    <span class="tag">{{ t('pokemon.evolvesInto') }}</span>
+                  </dt>
+                  <dd><PokemonChips :ids="mon.evos" /></dd>
+                </template>
+                <template v-if="others(formes)">
+                  <dt>
+                    <span class="tag">{{ t('pokemon.formes') }}</span>
+                  </dt>
+                  <dd><PokemonChips :ids="formes" :current="id" /></dd>
+                </template>
+              </dl>
+              <details v-if="others(looks)">
+                <summary class="muted">{{ t('pokemon.looks', { n: looks.length }) }}</summary>
+                <PokemonChips :ids="looks" :current="id" />
+              </details>
+            </template>
+
+            <SummarySkills v-else-if="tab === 'skills'" :id />
+
+            <SummaryMoves v-else-if="tab === 'moves'" v-model:moveset="moveset" :ids="learnset" />
+
+            <template v-else>
+              <h3 class="page-head">{{ t('pokemon.defense') }}</h3>
+              <DefenseResults :types="mon.types" />
+              <h3 class="page-head">{{ t('summary.coverage') }}</h3>
+              <OffenseResults v-if="attacking.length" :types="attacking" />
+              <p v-else class="hint">
+                {{ t('summary.noCoverage') }}
+                <button type="button" class="btn" @click="goTo('moves')">{{ t('summary.toMoves') }}</button>
+              </p>
+            </template>
+          </motion.div>
+        </AnimatePresence>
       </div>
-      <div class="stats-col">
-        <SegmentedControl
-          v-model="bars"
-          class="bars-mode"
-          :label="t('pokemon.statBars')"
-          :options="
-            PAGE_STAT_BARS.map((b) => ({ value: b, label: b === 'plain' ? t('stats.plain') : t(`stats.vs.${b}`) }))
-          "
-        />
-        <table class="stats">
-          <tbody>
-            <tr v-for="st in stats" :key="st.s" v-tip="st.tip">
-              <th class="muted">{{ t(`stat.${st.s}`) }}</th>
-              <td class="r num">{{ st.v }}</td>
-              <td class="bar-cell">
-                <span class="track" :class="{ plain: bars === 'plain' }">
-                  <span v-if="st.band" class="band" :style="st.band"></span>
-                  <span class="bar" :class="st.side" :style="{ width: along(st.v), background: st.color }"></span>
-                  <span v-if="st.median" class="median" :style="{ left: st.median }"></span>
-                </span>
-              </td>
-            </tr>
-            <tr class="total">
-              <th v-tip="t('stat.bstFull')" class="muted">{{ t('stat.bst') }}</th>
-              <td class="r num">{{ total(mon) }}</td>
-              <td></td>
-            </tr>
-          </tbody>
-        </table>
-        <p v-if="bars !== 'plain'" class="legend muted">{{ t(`stats.about.${bars}`) }} {{ t('pokemon.statLegend') }}</p>
-        <p class="weight muted">
-          {{ t('pokemon.weight') }} <span class="num">{{ mon.weight }} kg</span>
-        </p>
-      </div>
     </div>
-
-    <div v-if="others(formes) || others(looks) || mon.prevo || mon.evos" class="panel">
-      <dl class="relations">
-        <template v-if="mon.prevo">
-          <dt class="muted">{{ t('pokemon.evolvesFrom') }}</dt>
-          <dd><PokemonChips :ids="[mon.prevo]" /></dd>
-        </template>
-        <template v-if="mon.evos">
-          <dt class="muted">{{ t('pokemon.evolvesInto') }}</dt>
-          <dd><PokemonChips :ids="mon.evos" /></dd>
-        </template>
-        <template v-if="others(formes)">
-          <dt class="muted">{{ t('pokemon.formes') }}</dt>
-          <dd><PokemonChips :ids="formes" :current="id" /></dd>
-        </template>
-      </dl>
-      <details v-if="others(looks)">
-        <summary class="muted">{{ t('pokemon.looks', { n: looks.length }) }}</summary>
-        <PokemonChips :ids="looks" :current="id" />
-      </details>
-    </div>
-
-    <h2 class="section">{{ t('pokemon.defense') }}</h2>
-    <DefenseResults :types="mon.types" />
-
-    <div class="panel">
-      <h2>{{ t('pokemon.moves') }}</h2>
-      <MoveTable v-if="learnset" :ids="learnset" descriptions :placeholder="t('pokemon.searchMoves')" />
-    </div>
-  </template>
+  </div>
   <div v-else class="panel">
     <p>{{ t('pokemon.notFound', { id, reg: REGULATION }) }}</p>
   </div>
 </template>
 
 <style scoped>
-.head {
+/* The frame takes its first type's color (`--tc`, from `data-type`): the bar along the top in full, the labels'
+   pills (`--summary-tint`, also used by the pages' components) as a wash of it. */
+.summary {
+  --summary-tint: color-mix(in srgb, var(--tc) 32%, var(--panel));
+  --summary-on-tint: var(--text);
+  padding: 0;
+  overflow: hidden;
+}
+.bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 8px 10px 0;
+  background: var(--tc);
+  border-bottom: 2px solid var(--ink);
+}
+.tabs {
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+  overflow-x: auto;
+}
+/* Folder tabs: the open one joins the page below it. */
+.tab {
+  margin-bottom: -2px;
+  padding: 5px 12px 4px;
+  border: 2px solid var(--ink);
+  background: color-mix(in srgb, var(--tc) 55%, var(--panel));
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85em;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.tab:hover {
+  background: color-mix(in srgb, var(--tc) 25%, var(--panel));
+}
+.tab.on {
+  background: var(--panel);
+  border-bottom-color: var(--panel);
+}
+.pager {
+  display: flex;
   align-items: center;
+  gap: 6px;
+  padding-bottom: 6px;
+  color: #fff;
+  text-shadow: 1px 1px 0 rgb(0 0 0 / 0.45);
+}
+.arrow {
+  padding: 0 4px;
+  border: none;
+  background: none;
+  color: inherit;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+.dots {
+  display: flex;
+  gap: 5px;
+}
+.dot {
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--ink);
+  background: color-mix(in srgb, var(--tc) 50%, #000);
+}
+.dot.on {
+  background: #fff;
+}
+.body {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+}
+/* The card down the side: the games' left panel. */
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-right: 2px solid var(--ink);
+  background: var(--summary-tint);
+}
+.card-head {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.card-head :deep(.entry-title) {
+  margin: 0;
+}
+.card-head :deep(.entry-title h1) {
+  font-size: 1.3em;
+  overflow-wrap: anywhere;
+}
+.lv {
+  align-self: flex-start;
+  padding: 0 6px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 0.8em;
+  font-weight: bold;
+}
+/* The sprite on a striped screen, as the GBA games frame it. */
+.screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 196px;
+  max-width: 100%;
+  aspect-ratio: 1;
+  border: 2px solid var(--ink);
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--panel) 0,
+    var(--panel) 4px,
+    color-mix(in srgb, var(--tc) 10%, var(--panel)) 4px,
+    color-mix(in srgb, var(--tc) 10%, var(--panel)) 8px
+  );
 }
 .sprite {
-  flex: none;
   width: 192px;
   height: 192px;
+  max-width: 100%;
 }
 .icon-sprite {
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.facts {
-  flex: 1 1 300px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-}
-.facts .entry-title {
-  margin: 0;
-}
 .types {
   display: flex;
   gap: 4px;
 }
-.origin {
-  margin: 0;
+.held {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  align-self: stretch;
 }
 .with-icon {
   display: inline-flex;
@@ -233,126 +447,62 @@ watchEffect(async () => {
   gap: 2px;
   vertical-align: middle;
 }
-.abilities {
+/* Its family, as the party grid on HeartGold's summary: the one shown framed in red. */
+.party {
   display: grid;
-  grid-template-columns: max-content minmax(0, 1fr);
-  gap: 2px 10px;
-  align-items: baseline;
-  margin: 0;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  align-self: stretch;
 }
-.abilities dt {
-  font-weight: bold;
+.member {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  border: 2px solid var(--ink);
+  background: var(--panel);
+  box-shadow: var(--hard-sm);
 }
-.abilities dd {
-  margin: 0;
+.member:hover {
+  background: var(--hover);
 }
-/* Where there's hover, the descriptions are in the abilities' tooltips. */
-@media (hover: hover) {
-  .abilities {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px 12px;
-  }
-  .abilities dd {
-    display: none;
-  }
+.member.cur {
+  outline: 3px solid var(--bad);
+  outline-offset: 1px;
+  box-shadow: none;
 }
-.stats-col {
-  flex: 1 1 260px;
+.page {
   min-width: 0;
-  max-width: 420px;
-  margin-left: auto;
+  padding: 14px 16px 16px;
 }
-.stats {
-  width: 100%;
-  border-collapse: collapse;
-}
-.stats th {
-  width: 1%;
-  padding: 2px 8px 2px 0;
-  text-align: left;
-  font-weight: normal;
+.tag {
+  display: inline-block;
+  padding: 0 8px;
+  background: var(--summary-tint);
+  color: var(--summary-on-tint);
+  font-size: 0.75em;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  vertical-align: middle;
   white-space: nowrap;
 }
-.stats td.r {
-  width: 1%;
-  padding: 2px 8px 2px 0;
-  text-align: right;
+.ability {
+  margin-bottom: 12px;
 }
-.bar-cell {
-  width: 100%;
+.ability h3 {
+  margin: 0 0 2px;
+  font-size: 1.05em;
 }
-/* A bullet chart: on a faint track, the middle half of every Pokémon's values as a band, the stat's bar over it,
-   thinner, and the median as a tick through both. */
-.bars-mode {
-  justify-content: flex-end;
-  margin-bottom: 8px;
-}
-.track {
-  position: relative;
-  display: block;
-  height: 12px;
-  background: color-mix(in srgb, var(--border) 40%, transparent);
-}
-.band,
-.bar,
-.median {
-  position: absolute;
-  left: 0;
-}
-.band {
-  top: 0;
-  bottom: 0;
-  background: var(--border);
-}
-.bar {
-  top: 3px;
-  bottom: 3px;
-  background: var(--muted);
-}
-.bar.hi {
-  background: var(--stat-hi);
-}
-.bar.lo {
-  background: var(--stat-lo);
-}
-/* Plain, the bar as it was before the comparison: on its own, its full height. */
-.track.plain {
-  height: 10px;
-  background: none;
-}
-.plain .bar {
-  top: 0;
-  bottom: 0;
-  border-radius: 2px;
-}
-.median {
-  top: -3px;
-  bottom: -3px;
-  width: 2px;
-  margin-left: -1px;
-  background: var(--text);
-}
-.legend {
-  margin: 6px 0 0;
-  font-size: 0.8em;
-}
-.stats .total td,
-.stats .total th {
-  padding-top: 6px;
-  font-weight: bold;
-}
-.weight {
-  margin: 6px 0 0;
-  font-size: 0.85em;
-  text-align: right;
+.ability p {
+  margin: 0;
 }
 .relations {
   display: grid;
   grid-template-columns: max-content 1fr;
-  gap: 6px 10px;
+  gap: 8px 10px;
   align-items: baseline;
-  margin: 0;
+  margin: 14px 0 0;
 }
 .relations dd {
   margin: 0;
@@ -360,10 +510,39 @@ watchEffect(async () => {
 details {
   margin-top: 8px;
 }
-.section {
-  margin: 4px 0 8px;
+.page-head {
+  margin: 0 0 8px;
 }
-@media (max-width: 560px) {
+.page-head:not(:first-child) {
+  margin-top: 16px;
+}
+.hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+@media (max-width: 640px) {
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* On phones the card turns on its side: sprite to the left, the rest beside it. */
+  .card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: 'screen head' 'screen types' 'screen held' 'party party';
+    align-items: start;
+    gap: 6px 12px;
+    border-right: none;
+    border-bottom: 2px solid var(--ink);
+  }
+  .card-head {
+    grid-area: head;
+  }
+  .screen {
+    grid-area: screen;
+    width: 100px;
+  }
   .sprite {
     width: 96px;
     height: 96px;
@@ -371,11 +550,18 @@ details {
   .icon-sprite :deep(.sheet-icon) {
     zoom: 0.5;
   }
-  .abilities {
-    grid-template-columns: minmax(0, 1fr);
+  .types {
+    grid-area: types;
   }
-  .abilities dd {
-    margin-bottom: 4px;
+  .held {
+    grid-area: held;
+  }
+  .party {
+    grid-area: party;
+    grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+  }
+  .relations {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 </style>
