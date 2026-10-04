@@ -11,6 +11,7 @@ import type { GeneratedKind } from '@/i18n'
 import type { Ref } from '@/data/dex'
 import { GAME_NAME, REGULATION } from '@/data/format'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import { searchFocus } from '@/composables/useSearch'
 
 const route = useRoute()
 
@@ -78,6 +79,7 @@ function backLink(r: RouteLocationNormalizedLoaded): { to: RouteLocationRaw; lab
 
 // The header link to highlight: the dex section the current page belongs to.
 const SECTIONS: Partial<Record<string, string>> = {
+  home: 'search',
   types: 'types',
   chart: 'types',
   matchups: 'types',
@@ -95,8 +97,12 @@ const SECTIONS: Partial<Record<string, string>> = {
 }
 const section = computed(() => (typeof route.name === 'string' ? (SECTIONS[route.name] ?? null) : null))
 
-/** The header's links, one per dex section; Types covers its tools too (chart, matchups, quiz). */
+/**
+ * The header's links: Search (the home page, with its search box focused), then one per dex section; Types covers its
+ * tools too (chart, matchups, quiz).
+ */
 const NAV: { to: string; section: string; label: MessageKey }[] = [
+  { to: '/', section: 'search', label: 'nav.search' },
   { to: '/pokemon', section: 'pokemon', label: 'nav.pokemon' },
   { to: '/moves', section: 'moves', label: 'nav.moves' },
   { to: '/abilities', section: 'abilities', label: 'nav.abilities' },
@@ -141,7 +147,13 @@ const fadeVariants = {
         <span class="format muted">{{ t('format.label', { game: GAME_NAME, reg: REGULATION }) }}</span>
         <nav class="nav font-display">
           <!-- The active highlight is one element that slides between links. -->
-          <RouterLink v-for="n in NAV" :key="n.to" :to="n.to" :class="{ active: section === n.section }">
+          <RouterLink
+            v-for="n in NAV"
+            :key="n.to"
+            :to="n.to"
+            :class="{ active: section === n.section }"
+            @click="searchFocus = n.section === 'search'"
+          >
             <motion.span v-if="section === n.section" layout-id="nav-pill" class="pill" :transition="SPRING" />
             <span class="label">{{ t(n.label) }}</span>
           </RouterLink>

@@ -65,6 +65,7 @@ export const messages = {
   'theme.auto': 'Auto',
   'theme.light': 'Light',
   'theme.dark': 'Dark',
+  'nav.search': 'Search',
   'nav.settings': 'Settings',
   'title.settings': 'Settings',
   'settings.intro': 'Saved in this browser.',

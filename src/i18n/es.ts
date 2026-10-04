@@ -67,6 +67,7 @@ export const messages: Record<keyof typeof en, string> = {
   'theme.auto': 'Auto',
   'theme.light': 'Claro',
   'theme.dark': 'Oscuro',
+  'nav.search': 'Buscar',
   'nav.settings': 'Ajustes',
   'title.settings': 'Ajustes',
   'settings.intro': 'Se guardan en este navegador.',

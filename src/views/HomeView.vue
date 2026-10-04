@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { t } from '@/i18n'
 import { GAME_NAME, REGULATION } from '@/data/format'
 import type { ItemId, PokemonId } from '@/data/dex'
-import { SECTIONS, preloadSearch, useSearch } from '@/composables/useSearch'
+import { SECTIONS, preloadSearch, searchFocus, useSearch } from '@/composables/useSearch'
 import TypeIcon from '@/components/TypeIcon.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon.vue'
@@ -24,6 +24,17 @@ const query = computed({
 // background, ready to search by the time anyone types.
 onMounted(preloadSearch)
 
+// The header's Search link focuses the box, whether it brought us here or we were here already. Without scrolling:
+// the box is at the top, and on phones the page may still be sliding in.
+const box = useTemplateRef('box')
+function focusBox() {
+  if (!searchFocus.value) return
+  searchFocus.value = false
+  box.value?.focus({ preventScroll: true })
+}
+onMounted(focusBox)
+watch(searchFocus, focusBox)
+
 const { results, only } = useSearch(() => query.value)
 function openOnly() {
   if (only.value) void router.push(only.value)
@@ -41,6 +52,7 @@ const DECOR_ITEMS: ItemId[] = ['choicescarf', 'focussash', 'sitrusberry']
       <h1 class="title">mon<span>dex</span></h1>
       <p class="muted">{{ t('home.intro', { game: GAME_NAME, reg: REGULATION }) }}</p>
       <SearchBox
+        ref="box"
         v-model="query"
         wide
         icon

@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 import { locale, typeName, type MessageKey } from '@/i18n'
 import { availableIds, type PokemonId, type Ref } from '@/data/dex'
@@ -24,6 +24,9 @@ export const SECTIONS: { kind: SectionKind; title: MessageKey; desc: MessageKey;
     route: 'condition',
   },
 ]
+
+/** Set by the header's Search link, for the home page to focus its search box (now, or once it mounts) and clear. */
+export const searchFocus = ref(false)
 
 /** A section shows this many results at most, and links to its list, searched the same way, for the rest. */
 const LIMIT = 8
