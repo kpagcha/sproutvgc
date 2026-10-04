@@ -3,7 +3,9 @@
 // (`meta.descriptions` in the router), and `description` loads them itself if a page shows one before that.
 
 import { shallowReactive } from 'vue'
+import type { Ref } from '@/data/dex'
 import { locale, type Locale } from '@/i18n'
+import { refName } from '@/i18n/refName'
 import type { Description } from '@/i18n/en/abilities'
 
 type Descriptions = Record<string, Pick<Description, 'short' | 'long'>>
@@ -48,3 +50,9 @@ export function description(kind: DescribedKind, id: string): Pick<Description, 
 
 /** Whether a category has descriptions: the kinds of `ref`s `description` can describe. */
 export const isDescribed = (kind: string): kind is DescribedKind => kind in FOLDERS
+
+/** An entry's short description as plain text, its markers swapped for the names they mark: for a tooltip. */
+export function shortText(ref: Ref): string | undefined {
+  const short = isDescribed(ref.kind) ? description(ref.kind, ref.id)?.short : undefined
+  return short?.replace(/\{(\w+):(\w+)\}/g, (_, kind: string, id: string) => refName({ kind, id } as Ref))
+}
