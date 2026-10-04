@@ -16,6 +16,9 @@
   --link: #1f4fd0;
   --accent: #2d5bd8;
   --accent-text: #ffffff;
+  /* The logo's words, in Bellsprout's own colors (from its sprite), darkened in light mode to read on --bg. */
+  --logo-sprout: #526229;
+  --logo-vgc: #9c7320;
   --hover: #fff1b8;
   --sel: #ffdf6e;
   --good: #2c7a2c;
@@ -48,6 +51,8 @@
     --link: #8fb2ff;
     --accent: #4a78ea;
     --accent-text: #ffffff;
+    --logo-sprout: #9cd54a;
+    --logo-vgc: #ffee73;
     --hover: #3a3526;
     --sel: #5e4c10;
     --good: #7fd07f;
@@ -79,6 +84,8 @@
   --link: #8fb2ff;
   --accent: #4a78ea;
   --accent-text: #ffffff;
+  --logo-sprout: #9cd54a;
+  --logo-vgc: #ffee73;
   --hover: #3a3526;
   --sel: #5e4c10;
   --good: #7fd07f;
@@ -350,7 +357,7 @@ mark {
 }
 
 /* ---------- Tooltips (tippy.js) ---------- */
-.tippy-box[data-theme~='mondex'] {
+.tippy-box[data-theme~='sproutvgc'] {
   background: var(--panel);
   color: var(--text);
   border: 1px solid var(--border-strong);
@@ -358,10 +365,10 @@ mark {
   font-size: calc(11px * var(--text-scale));
   line-height: 1.4;
 }
-.tippy-box[data-theme~='mondex'] > .tippy-content {
+.tippy-box[data-theme~='sproutvgc'] > .tippy-content {
   padding: 3px 6px;
 }
-.tippy-box[data-theme~='mondex'] > .tippy-arrow {
+.tippy-box[data-theme~='sproutvgc'] > .tippy-arrow {
   color: var(--panel);
   border-color: var(--border-strong);
 }

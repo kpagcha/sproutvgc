@@ -44,7 +44,7 @@ export const CHOICES = {
 
 export const LIMITS = { newPerDay: [1, 200], learnMoreStep: [1, 200], slow: [0, 120] } as const
 
-const KEY = 'mondex.quiz.settings.v1'
+const KEY = 'sproutvgc.quiz.settings.v1'
 
 const int = (v: unknown, [min, max]: readonly [number, number], d: number) =>
   typeof v === 'number' && Number.isInteger(v) && v >= min && v <= max ? v : d

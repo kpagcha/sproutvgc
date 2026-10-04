@@ -16,7 +16,7 @@ export interface PracticeOptions {
 
 export const PRACTICE_DEFAULTS: PracticeOptions = { single: true, multi: true, dual: false, focus: [], weakOnly: false }
 
-const KEY = 'mondex.quiz.practice.v1'
+const KEY = 'sproutvgc.quiz.practice.v1'
 
 export function loadPractice(): PracticeOptions {
   let raw: unknown = null

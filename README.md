@@ -1,4 +1,4 @@
-# mondex
+# sproutvgc
 
 A competitive Pokémon dex in the spirit of the [Smogon dex](https://www.smogon.com/dex/) and the
 [Showdown dex](https://dex.pokemonshowdown.com/): classic, pixel-style, clean and fast.
@@ -23,6 +23,6 @@ npm run lint       # ESLint
 npm run lint:fix   # ESLint with autofix
 ```
 
-With [just](https://github.com/casey/just), `just` lists shortcuts: `just dev`, `just dev-profile` (dev server with Vue's per-component timings for the browser profiler), `just build`, and `just preview` (build, then serve the production site at http://localhost:4173/mondex/, the place to measure performance).
+With [just](https://github.com/casey/just), `just` lists shortcuts: `just dev`, `just dev-profile` (dev server with Vue's per-component timings for the browser profiler), `just build`, and `just preview` (build, then serve the production site at http://localhost:4173/sproutvgc/, the place to measure performance).
 
 A pre-commit hook lints the staged `.ts` and `.vue` files and blocks the commit on any problem.

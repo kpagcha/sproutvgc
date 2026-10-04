@@ -25,7 +25,7 @@ const BUNDLES: Record<Locale, { messages: Record<MessageKey, string>; types: Rec
   es,
 }
 
-const KEY = 'mondex.lang'
+const KEY = 'sproutvgc.lang'
 
 function isLocale(s: unknown): s is Locale {
   return typeof s === 'string' && s in LOCALES

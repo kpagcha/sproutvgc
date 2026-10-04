@@ -61,7 +61,7 @@ watch(
 const revealed = ref(false)
 
 /** Remembered per viewer, and kept on while moving between types. */
-const LEARN_KEY = 'mondex.types.learn'
+const LEARN_KEY = 'sproutvgc.types.learn'
 const learn = ref(readFlag(LEARN_KEY))
 function toggleLearn() {
   learn.value = !learn.value

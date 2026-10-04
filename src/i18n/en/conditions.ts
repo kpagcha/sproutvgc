@@ -1,4 +1,4 @@
-// Our English condition descriptions, written for mondex (Showdown has no text for conditions: it explains them on
+// Our English condition descriptions, written for sproutvgc (Showdown has no text for conditions: it explains them on
 // the moves that cause them), with markers for references to other dex entries, as in `abilities.ts`. Numbers are
 // Champions' where it changes them (paralysis, sleep, freeze: its mod's `conditions.ts`). No imports.
 

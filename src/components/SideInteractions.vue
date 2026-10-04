@@ -8,7 +8,7 @@ defineProps<{ info: SideInfo }>()
 
 // The key interactions up front; the rest collapsed, with the less common ones at the bottom. Whether it's open is
 // remembered across visits (and shared by every side).
-const OPEN_KEY = 'mondex.info.other'
+const OPEN_KEY = 'sproutvgc.info.other'
 function readOpen(): boolean {
   try {
     return localStorage.getItem(OPEN_KEY) === '1'

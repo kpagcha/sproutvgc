@@ -6,7 +6,7 @@ export type ThemeMode = Theme | 'auto'
 
 export const THEME_MODES: readonly ThemeMode[] = ['auto', 'light', 'dark']
 
-const KEY = 'mondex.theme'
+const KEY = 'sproutvgc.theme'
 
 function readChoice(): Theme | null {
   try {

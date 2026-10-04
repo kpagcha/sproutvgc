@@ -57,11 +57,11 @@
   box-shadow: 6px 6px 0 var(--ink);
 }
 
-:root:root .tippy-box[data-theme~='mondex'] {
+:root:root .tippy-box[data-theme~='sproutvgc'] {
   border: 2px solid var(--ink);
   box-shadow: var(--hard-sm);
 }
-:root:root .tippy-box[data-theme~='mondex'] > .tippy-arrow {
+:root:root .tippy-box[data-theme~='sproutvgc'] > .tippy-arrow {
   border-color: var(--ink);
 }
 

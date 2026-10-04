@@ -207,7 +207,7 @@ export function deckStats(deck: Deck, now = Date.now(), skip?: (id: string) => b
   return { seen: cards.length, learning, due, mature }
 }
 
-const STORAGE_KEY = 'mondex.quiz.v1'
+const STORAGE_KEY = 'sproutvgc.quiz.v1'
 
 export function loadDeck(): Deck {
   try {

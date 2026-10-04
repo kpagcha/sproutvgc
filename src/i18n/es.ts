@@ -371,9 +371,10 @@ export const messages: Record<keyof typeof en, string> = {
   'quiz.resetConfirm': '¿Reiniciar todo el progreso del test?',
 
   'footer.copyright': 'Pokémon © Nintendo',
+  'footer.home': 'Inicio',
 
   'title.credits': 'Créditos',
-  'desc.credits': 'Créditos de mondex, una Pokédex competitiva para {game}.',
+  'desc.credits': 'Créditos de sproutvgc, una Pokédex competitiva para {game}.',
 
   'title.abilities': 'Habilidades',
   'desc.abilities': 'Todas las habilidades que pueden tener los Pokémon en {game}, Reglamento {reg}, y qué hacen.',
@@ -399,9 +400,9 @@ export const messages: Record<keyof typeof en, string> = {
   'entry.row.loses': 'Pierde el tipo {type}',
   'entry.row.specific': 'Movimientos de tipo {type}',
   'credits.intro':
-    'mondex es un proyecto de fans no oficial, sin relación con Nintendo, Game Freak ni The Pokémon Company.',
+    'sproutvgc es un proyecto de fans no oficial, sin relación con Nintendo, Game Freak ni The Pokémon Company.',
   'credits.iconsTitle': 'Iconos de tipos y categorías',
-  'credits.iconsBody': 'Los iconos de tipos y de categorías de movimientos vienen de los {source}.',
+  'credits.iconsBody': 'Los iconos de tipos y de categorías de movimientos, y el logo, vienen de los {source}.',
   'credits.uiIconsTitle': 'Iconos de la interfaz',
   'credits.uiIconsBody': 'Los iconos de la interfaz son {source} (ISC).',
   'credits.trademarks': 'Pokémon y los nombres de los Pokémon y de los tipos son marcas registradas de Nintendo.',

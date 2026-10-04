@@ -33,7 +33,7 @@ export interface FontPicks {
   displayScale: number
 }
 
-const KEY = 'mondex.dev.fonts'
+const KEY = 'sproutvgc.dev.fonts'
 const DEFAULTS: FontPicks = { display: 'default', body: 'default', num: 'default', displayScale: 1 }
 
 function read(): FontPicks {

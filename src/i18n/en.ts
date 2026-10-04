@@ -365,9 +365,10 @@ export const messages = {
   'quiz.resetConfirm': 'Reset all quiz progress?',
 
   'footer.copyright': 'Pokémon © Nintendo',
+  'footer.home': 'Home',
 
   'title.credits': 'Credits',
-  'desc.credits': 'Credits for mondex, a competitive dex for {game}.',
+  'desc.credits': 'Credits for sproutvgc, a competitive dex for {game}.',
 
   'title.abilities': 'Abilities',
   'desc.abilities': 'Every ability Pokémon can have in {game}, Regulation {reg}, and what it does.',
@@ -394,9 +395,9 @@ export const messages = {
   'entry.row.loses': 'Loses {type}',
   'entry.row.specific': '{type} moves',
   'credits.intro':
-    'mondex is an unofficial fan project, not affiliated with Nintendo, Game Freak or The Pokémon Company.',
+    'sproutvgc is an unofficial fan project, not affiliated with Nintendo, Game Freak or The Pokémon Company.',
   'credits.iconsTitle': 'Type and category icons',
-  'credits.iconsBody': 'The type and move category icons come from the {source}.',
+  'credits.iconsBody': 'The type and move category icons, and the logo, come from the {source}.',
   'credits.uiIconsTitle': 'Interface icons',
   'credits.uiIconsBody': 'The interface icons are {source} (ISC).',
   'credits.trademarks': 'Pokémon and Pokémon character and type names are trademarks of Nintendo.',

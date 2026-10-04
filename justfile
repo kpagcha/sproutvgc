@@ -18,7 +18,7 @@ dev-profile $VITE_PROFILE="true":
 build:
     npm run build
 
-# Build, then serve the production site at http://localhost:4173/mondex/ (profile performance here)
+# Build, then serve the production site at http://localhost:4173/sproutvgc/ (profile performance here)
 preview: build
     npm run preview
 

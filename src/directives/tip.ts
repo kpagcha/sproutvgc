@@ -3,7 +3,7 @@ import type { Directive } from 'vue'
 import 'tippy.js/dist/tippy.css'
 import 'tippy.js/dist/border.css'
 
-tippy.setDefaultProps({ theme: 'mondex', delay: [200, 0], duration: [120, 80] })
+tippy.setDefaultProps({ theme: 'sproutvgc', delay: [200, 0], duration: [120, 80] })
 
 type TipEl = HTMLElement & { _tip?: Instance; _tipContent?: string; _tipGroup?: string }
 type TipValue = string | false | null | undefined

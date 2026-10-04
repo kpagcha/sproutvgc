@@ -15,6 +15,7 @@ import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import NavPill from '@/components/NavPill.vue'
 import { KeptPage, Page } from '@/components/PageFrame'
 import SectionMenu from '@/components/SectionMenu.vue'
+import logoUrl from '@/assets/logo.png'
 import { searchFocus } from '@/composables/useSearch'
 
 const route = useRoute()
@@ -46,7 +47,7 @@ watchEffect(() => {
   const key = route.meta.titleKey
   const name = key ? t(key) : null
   const lead = type ? typeName(type) : entry
-  const title = name ? `${lead ? `${lead} · ` : ''}${name} · ${GAME_NAME} · mondex` : `mondex · ${GAME_NAME} dex`
+  const title = name ? `${lead ? `${lead} · ` : ''}${name} · ${GAME_NAME} · sproutvgc` : `sproutvgc · ${GAME_NAME} dex`
   const params = { game: GAME_NAME, reg: REGULATION }
   const desc = type
     ? t('desc.type', { ...params, type: typeName(type) })
@@ -162,7 +163,9 @@ const fadeVariants = {
   <MotionConfig reduced-motion="user">
     <header class="site-header">
       <div class="wrap bar">
-        <RouterLink to="/" class="logo font-display">mon<span>dex</span></RouterLink>
+        <RouterLink to="/" class="logo font-display"
+          ><img :src="logoUrl" alt="" width="45" height="36" />sprout<span>vgc</span></RouterLink
+        >
         <nav class="nav font-display" :class="{ compact }">
           <!-- The active highlight is one element that slides between links. -->
           <NavPill :section :compact />
@@ -239,6 +242,7 @@ const fadeVariants = {
     <footer class="wrap footer muted">
       <div class="credits">
         <span>{{ t('footer.copyright') }}</span>
+        <RouterLink to="/">{{ t('footer.home') }}</RouterLink>
         <RouterLink to="/credits">{{ t('title.credits') }}</RouterLink>
       </div>
     </footer>
@@ -272,13 +276,20 @@ const fadeVariants = {
 }
 
 .logo {
+  display: flex;
+  align-items: center;
+  gap: 2px;
   font-size: calc(20px * var(--display-scale, 1));
   font-weight: bold;
   letter-spacing: -0.5px;
-  color: var(--text);
+  color: var(--logo-sprout);
+}
+.logo img {
+  /* Pixel art, drawn at its own size: scaled to anything but a whole multiple, it loses pixels. */
+  image-rendering: pixelated;
 }
 .logo span {
-  color: var(--accent);
+  color: var(--logo-vgc);
 }
 .logo:hover {
   text-decoration: none;
