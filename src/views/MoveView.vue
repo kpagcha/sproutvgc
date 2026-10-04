@@ -49,7 +49,7 @@ watchEffect(async () => {
         <RouterLink :to="{ name: 'types', params: { type: data.type } }"
           ><TypeIcon :type="data.type" :scale="2"
         /></RouterLink>
-        <CategoryIcon :category="data.category" />
+        <CategoryIcon :category="data.category" :scale="2" />
       </div>
       <dl class="numbers">
         <div>

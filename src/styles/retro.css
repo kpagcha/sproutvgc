@@ -180,7 +180,7 @@
   background: currentColor;
   mask: var(--glyph) center / contain no-repeat;
 }
-:root:root :is(.type-badge.s1, .category-badge) {
+:root:root :is(.type-badge.s1, .category-badge.s1) {
   justify-content: center;
   width: calc(26px * var(--icon-scale, 1));
   height: calc(20px * var(--icon-scale, 1));
@@ -199,6 +199,19 @@
   background: none;
   mask: none;
   filter: drop-shadow(1px 1px 0 rgb(0 0 0 / 0.35));
+}
+:root:root .category-badge.s2 {
+  /* Beside a large type badge (a move's page): its height, frame and shadow, keeping the small badge's proportions. */
+  justify-content: center;
+  width: calc(1.8em * 26 / 20);
+  height: 1.8em;
+  border-width: 2px;
+  box-shadow: 2px 2px 0 var(--ink);
+  font-size: var(--badge-font);
+}
+:root:root .category-badge.s2 .glyph {
+  width: 1.4em;
+  height: 0.95em;
 }
 :root:root .category-badge .glyph::before {
   content: '';
