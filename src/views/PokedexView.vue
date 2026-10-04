@@ -192,6 +192,26 @@ const lines = computed(() => {
   return out
 })
 
+// The name column fits the widest of the names shown, within bounds (`--name-min`, `--name-max`). The rows take their
+// columns from the header (`useRowColumns`), and those off screen aren't laid out, so the header holds a hidden copy of
+// the few names that look widest, measured roughly here, and the browser sizes the column to them exactly.
+const canvas = document.createElement('canvas').getContext('2d')
+const widest = computed(() => {
+  if (!canvas) return []
+  const family = getComputedStyle(document.body).fontFamily
+  const width = (text: string, size: number) => {
+    canvas.font = `bold ${size}px ${family}`
+    return canvas.measureText(text).width
+  }
+  const estimate = (l: Line) =>
+    width(l.title.join(''), 16) + (l.child ? 32 : 0) + (l.tag ? width(l.tag.join(''), 13.6) + 16 : 0)
+  return lines.value
+    .map((l) => ({ l, w: estimate(l) }))
+    .sort((a, b) => b.w - a.w)
+    .slice(0, 3)
+    .map(({ l }) => l)
+})
+
 // A name with the search's match marked.
 const Marked: FunctionalComponent<{ p: Marks }> = ({ p }) => [p[0], p[1] ? h('mark', p[1]) : null, p[2]]
 Marked.props = ['p']
@@ -235,7 +255,24 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
     </ul>
     <div v-if="sorted.length" class="dex-table" :class="{ restoring }" role="table">
       <div ref="head" class="row head" role="row">
-        <SortHeader :label="t('pokedex.name')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
+        <SortHeader
+          class="name-head"
+          :label="t('pokedex.name')"
+          :active="key === 'name'"
+          :desc="desc"
+          @sort="toggle('name')"
+        />
+        <div class="sizer" aria-hidden="true">
+          <div v-for="l in widest" :key="l.row.id" :class="{ child: l.child }">
+            <span class="mon">
+              <PokemonIcon :id="l.row.id" />
+              <span class="label">
+                <span class="name">{{ l.title.join('') }}</span>
+                <span v-if="l.tag" class="forme">{{ l.tag.join('') }}</span>
+              </span>
+            </span>
+          </div>
+        </div>
         <div role="columnheader">{{ t('pokedex.types') }}</div>
         <div role="columnheader" class="wide-only">{{ t('pokedex.abilities') }}</div>
         <SortHeader
@@ -301,17 +338,36 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
 
 <style scoped>
 /* Name, types (room for two badges), abilities, the six stats and their total; on phones name, types and total. The
-   name column takes about what the longest names need, and the abilities the rest. */
+   name column fits the widest name shown (`.sizer`), within bounds, and the abilities take the rest; on phones, the
+   total. */
 .dex-table {
   --types: calc(64px * var(--icon-scale, 1) + 14px);
   --num: minmax(2.6em, auto);
   --row-height: 2.3em;
-  --cols: minmax(11em, 15em) var(--types) minmax(0, 1fr) repeat(7, var(--num));
+  --name-min: 11em;
+  --name-max: 15em;
+  --cols: fit-content(var(--name-max)) var(--types) minmax(0, 1fr) repeat(7, var(--num));
 }
 @media (max-width: 720px) {
   .dex-table {
-    --cols: minmax(0, 1fr) var(--types) var(--num);
+    --name-min: 7em;
+    --name-max: 12em;
+    --cols: fit-content(var(--name-max)) var(--types) var(--num);
   }
+}
+/* The hidden copy of the widest names, in the name header's cell: it sizes the column, at least `--name-min` wide,
+   but takes no height. Its text wraps, so on a narrow screen the column can shrink as the rows' names wrap. */
+.name-head,
+.sizer {
+  grid-area: 1 / 1;
+}
+.dex-table .head > .sizer {
+  min-width: var(--name-min);
+  height: 0;
+  padding-block: 0;
+  overflow: hidden;
+  visibility: hidden;
+  white-space: normal;
 }
 .filters {
   display: flex;
