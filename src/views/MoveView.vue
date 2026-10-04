@@ -49,7 +49,9 @@ watchEffect(async () => {
         <RouterLink :to="{ name: 'types', params: { type: data.type } }"
           ><TypeIcon :type="data.type" :scale="2"
         /></RouterLink>
-        <CategoryIcon :category="data.category" :scale="2" />
+        <RouterLink :to="{ name: 'moves', query: { category: data.category } }"
+          ><CategoryIcon :category="data.category" :scale="2"
+        /></RouterLink>
       </div>
       <dl class="numbers">
         <div>
@@ -76,7 +78,9 @@ watchEffect(async () => {
       <p v-if="text"><DexText :text="text.long ?? text.short" /></p>
       <p v-if="isSpread(data)" class="muted">{{ t('move.spread') }}</p>
       <ul v-if="data.flags.length" class="flags">
-        <li v-for="f in data.flags" :key="f" v-tip="t(`move.flagTip.${f}`)">{{ t(`move.flag.${f}`) }}</li>
+        <li v-for="f in data.flags" :key="f" v-tip="t(`move.flagTip.${f}`)">
+          <RouterLink :to="{ name: 'moves', query: { flag: f } }">{{ t(`move.flag.${f}`) }}</RouterLink>
+        </li>
       </ul>
 
       <RefInteractions :to="ref_" />
@@ -116,12 +120,17 @@ watchEffect(async () => {
   padding: 0;
   list-style: none;
 }
-.flags li {
+.flags a {
+  display: block;
   padding: 1px 6px;
+  color: inherit;
   background: var(--panel-alt);
   border: 1px solid var(--border);
   border-radius: 3px;
-  cursor: help;
+}
+.flags a:hover {
+  border-color: var(--accent);
+  text-decoration: none;
 }
 section {
   margin-top: 16px;

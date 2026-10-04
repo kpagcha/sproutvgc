@@ -301,23 +301,23 @@
 }
 
 /* Badges that are links or buttons lift on hover instead of underlining, settling with a very slight bounce. */
-:root:root a:has(.type-badge):hover {
+:root:root a:has(.type-badge, .category-badge):hover {
   text-decoration: none;
 }
-:root:root :is(a, button) .type-badge {
+:root:root :is(a, button) :is(.type-badge, .category-badge) {
   transition:
     transform 0.2s cubic-bezier(0.3, 1.35, 0.6, 1),
     box-shadow 0.2s cubic-bezier(0.3, 1.35, 0.6, 1);
 }
-:root:root :is(a, button:not(:disabled)):hover .type-badge {
+:root:root :is(a, button:not(:disabled)):hover :is(.type-badge, .category-badge) {
   transform: translate(-1px, -1px);
   box-shadow: 2px 2px 0 var(--ink);
 }
-:root:root :is(a, button:not(:disabled)):hover .type-badge.s2 {
+:root:root :is(a, button:not(:disabled)):hover :is(.type-badge, .category-badge).s2 {
   box-shadow: 3px 3px 0 var(--ink);
 }
 @media (prefers-reduced-motion: reduce) {
-  :root:root :is(a, button) .type-badge {
+  :root:root :is(a, button) :is(.type-badge, .category-badge) {
     transition: none;
   }
 }
