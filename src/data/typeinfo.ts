@@ -163,8 +163,8 @@ const MAJOR = new Set<string>(
 
 export const isMajor = (e: Entry): boolean => e.major ?? MAJOR.has(refKey(e.ref))
 
-/** The interactions a type's page shows up front, of the major ones: status and powder immunities (and what gets past
- * them), weather and terrain. The rest are collapsed. */
+/** The interactions the type pages show up front, of the major ones: status and powder immunities (and what gets
+ * past them), Scrappy and Prankster, weather and terrain. The rest are collapsed. */
 const KEY = new Set<string>(
   [
     condition('brn'),
@@ -173,6 +173,9 @@ const KEY = new Set<string>(
     condition('frz'),
     ability('corrosion'),
     group('powder'),
+    // Common abilities: Scrappy hitting Ghosts (and getting past their immunity), Prankster failing on Dark ones
+    ability('scrappy'),
+    ability('prankster'),
     condition('sun'),
     condition('rain'),
     condition('sandstorm'),
