@@ -129,24 +129,22 @@ const link = (id: PokemonId) => ({ name: 'pokemon', params: { id } })
         </button>
       </li>
     </ul>
-    <!-- Not in a .table-wrap: its sideways scrolling would keep the header from sticking to the top of the page. Phones
-         get a narrower table instead. -->
     <table v-if="sorted.length" class="dex-table">
       <thead>
         <tr>
           <SortHeader
             :label="t('pokedex.name')"
-            class="name-col"
+            class="phone-grow"
             :active="key === 'name'"
             :desc="desc"
             @sort="toggle('name')"
           />
           <th>{{ t('pokedex.types') }}</th>
-          <th class="wide abilities-col">{{ t('pokedex.abilities') }}</th>
+          <th class="wide-only grow">{{ t('pokedex.abilities') }}</th>
           <SortHeader
             v-for="s in STATS"
             :key="s"
-            class="wide"
+            class="wide-only"
             :label="t(`stat.${s}`)"
             right
             :active="key === s"
@@ -165,7 +163,7 @@ const link = (id: PokemonId) => ({ name: 'pokemon', params: { id } })
       </thead>
       <tbody>
         <tr v-for="r in sorted" :key="r.id">
-          <td class="name-col">
+          <td class="phone-grow">
             <RouterLink :to="link(r.id)" class="mon">
               <PokemonIcon :id="r.id" />
               <span class="name">
@@ -184,7 +182,7 @@ const link = (id: PokemonId) => ({ name: 'pokemon', params: { id } })
               </RouterLink>
             </span>
           </td>
-          <td class="wide abilities-col">
+          <td class="wide-only grow">
             <ul class="abilities">
               <li v-for="a in r.abilities" :key="a.ref.id" :class="{ hidden: a.hidden }">
                 <DexRef :to="a.ref" :tip="abilityTip(a)" />
@@ -192,7 +190,7 @@ const link = (id: PokemonId) => ({ name: 'pokemon', params: { id } })
               </li>
             </ul>
           </td>
-          <td v-for="(v, i) in r.data.stats" :key="i" class="wide r num">{{ v }}</td>
+          <td v-for="(v, i) in r.data.stats" :key="i" class="wide-only r num">{{ v }}</td>
           <td class="r num total">{{ total(r.data) }}</td>
         </tr>
       </tbody>
@@ -248,7 +246,7 @@ const link = (id: PokemonId) => ({ name: 'pokemon', params: { id } })
   align-items: center;
   gap: 4px;
   /* The icon is taller than the row: let it into the cell's padding, but no further, or the last row's overflows the
-     table and .table-wrap shows a scroll bar. */
+     table. */
   margin: -3px 0;
 }
 .types {
@@ -259,23 +257,6 @@ const link = (id: PokemonId) => ({ name: 'pokemon', params: { id } })
   font-weight: bold;
 }
 
-/* The header sticks to the top of the page, with a line under it standing in for the first row's, which scrolls
-   away under it. */
-.dex-table thead th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background: var(--panel);
-  box-shadow: inset 0 -1px var(--border);
-}
-.dex-table tbody tr:first-child td {
-  border-top: none;
-}
-/* The abilities take up the room the other columns leave, wrapping when they run out of it. */
-.abilities-col {
-  width: 100%;
-  white-space: normal;
-}
 .abilities {
   display: flex;
   flex-wrap: wrap;
@@ -306,17 +287,5 @@ const link = (id: PokemonId) => ({ name: 'pokemon', params: { id } })
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
-}
-
-/* Phones: just the icon, name, types and stat total, the name taking up the room left, and wrapping when there isn't
-   enough of it ("Abomasnow (Mega)"), as the table has no sideways scrolling to spill into. */
-@media (max-width: 720px) {
-  .dex-table .wide {
-    display: none;
-  }
-  .name-col {
-    width: 100%;
-    white-space: normal;
-  }
 }
 </style>

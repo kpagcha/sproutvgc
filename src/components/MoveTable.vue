@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onUnmounted, ref } from 'vue'
 import { move, type MoveId } from '@/data/dex'
 import { CATEGORIES, MOVES, type Category, type Move } from '@/data/moves'
 import { TYPES, type TypeId } from '@/data/types'
@@ -49,13 +49,19 @@ const { key, desc, toggle, sorted } = useSort({
   locale,
 })
 
-const COLUMNS: { k: Key; label: MessageKey; right?: boolean }[] = [
+// Phones leave out PP, and show the descriptions under the moves' names rather than in a column of their own.
+const COLUMNS: { k: Key; label: MessageKey; right?: boolean; wideOnly?: boolean }[] = [
   { k: 'type', label: 'move.type' },
   { k: 'category', label: 'move.categoryShort' },
   { k: 'power', label: 'move.power', right: true },
   { k: 'accuracy', label: 'move.accuracy', right: true },
-  { k: 'pp', label: 'move.pp', right: true },
+  { k: 'pp', label: 'move.pp', right: true, wideOnly: true },
 ]
+const phoneQuery = window.matchMedia('(max-width: 720px)')
+const phone = ref(phoneQuery.matches)
+const onPhone = (e: MediaQueryListEvent) => (phone.value = e.matches)
+phoneQuery.addEventListener('change', onPhone)
+onUnmounted(() => phoneQuery.removeEventListener('change', onPhone))
 </script>
 
 <template>
@@ -70,56 +76,58 @@ const COLUMNS: { k: Key; label: MessageKey; right?: boolean }[] = [
       <option v-for="c in CATEGORIES" :key="c" :value="c">{{ t(`move.category.${c}`) }}</option>
     </select>
   </div>
-  <div v-if="sorted.length" class="table-wrap">
-    <table class="dex-table">
-      <thead>
-        <tr>
-          <SortHeader
-            :label="t('move.name')"
-            :class="{ grow: !descriptions }"
-            :active="key === 'name'"
-            :desc="desc"
-            @sort="toggle('name')"
-          />
-          <SortHeader
-            v-for="c in COLUMNS"
-            :key="c.k"
-            :label="t(c.label)"
-            :right="c.right"
-            :active="key === c.k"
-            :desc="desc"
-            @sort="toggle(c.k)"
-          />
-          <th v-if="descriptions" class="grow"></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="r in sorted" :key="r.id">
-          <td :class="{ grow: !descriptions }">
-            <RouterLink :to="{ name: 'move', params: { id: r.id } }" class="name">
-              <template v-if="r.parts"
-                >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
-                >{{ r.parts[2] }}</template
-              >
-              <template v-else>{{ r.name }}</template>
-            </RouterLink>
-          </td>
-          <td>
-            <RouterLink :to="{ name: 'types', params: { type: r.data.type } }"
-              ><TypeIcon :type="r.data.type"
-            /></RouterLink>
-          </td>
-          <td><CategoryIcon :category="r.data.category" /></td>
-          <td class="r num">{{ r.data.power || '—' }}</td>
-          <td class="r num">{{ r.data.accuracy === true ? '—' : r.data.accuracy }}</td>
-          <td class="r num">{{ r.data.pp }}</td>
-          <td v-if="descriptions" class="grow muted desc">
+  <table v-if="sorted.length" class="dex-table">
+    <thead>
+      <tr>
+        <SortHeader
+          :label="t('move.name')"
+          :class="descriptions ? 'phone-grow' : 'grow'"
+          :active="key === 'name'"
+          :desc="desc"
+          @sort="toggle('name')"
+        />
+        <SortHeader
+          v-for="c in COLUMNS"
+          :key="c.k"
+          :class="{ 'wide-only': c.wideOnly }"
+          :label="t(c.label)"
+          :right="c.right"
+          :active="key === c.k"
+          :desc="desc"
+          @sort="toggle(c.k)"
+        />
+        <th v-if="descriptions && !phone" class="grow"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="r in sorted" :key="r.id">
+        <td :class="descriptions ? 'phone-grow' : 'grow'">
+          <RouterLink :to="{ name: 'move', params: { id: r.id } }" class="name">
+            <template v-if="r.parts"
+              >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
+              >{{ r.parts[2] }}</template
+            >
+            <template v-else>{{ r.name }}</template>
+          </RouterLink>
+          <div v-if="descriptions && phone" class="muted below">
             <DexText :text="description('move', r.id)?.short ?? ''" />
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+          </div>
+        </td>
+        <td>
+          <RouterLink :to="{ name: 'types', params: { type: r.data.type } }"
+            ><TypeIcon :type="r.data.type"
+          /></RouterLink>
+        </td>
+        <td><CategoryIcon :category="r.data.category" /></td>
+        <td class="r num">{{ r.data.power || '—' }}</td>
+        <td class="r num">{{ r.data.accuracy === true ? '—' : r.data.accuracy }}</td>
+        <td class="wide-only r num">{{ r.data.pp }}</td>
+        <td v-if="descriptions && !phone" class="grow muted desc">
+          <DexText :text="description('move', r.id)?.short ?? ''" />
+        </td>
+      </tr>
+    </tbody>
+  </table>
   <p v-else class="muted">{{ t('moves.none') }}</p>
 </template>
 
@@ -134,5 +142,8 @@ const COLUMNS: { k: Key; label: MessageKey; right?: boolean }[] = [
 }
 .desc {
   min-width: 240px;
+}
+.below {
+  font-size: 0.9em;
 }
 </style>

@@ -402,11 +402,8 @@ details > summary {
   image-rendering: pixelated;
 }
 
-/* Dex tables (Pokémon, moves): a header row of sort buttons, and rows that scroll sideways on phones. */
-.table-wrap {
-  overflow-x: auto;
-  margin: 0 -4px;
-}
+/* Dex tables (Pokémon, moves): a header row of sort buttons that sticks to the top of the page, and rows. They don't
+   scroll sideways, which would keep the header from sticking: phones get fewer columns instead. */
 .dex-table {
   width: 100%;
   border-collapse: collapse;
@@ -420,9 +417,18 @@ details > summary {
   border-top: 1px solid var(--border);
 }
 .dex-table thead th {
-  border-top: none;
+  position: sticky;
+  top: 0;
+  z-index: 1;
   font-weight: normal;
   color: var(--muted);
+  background: var(--panel);
+  /* A line under the header, standing in for the first row's, which scrolls away under it. */
+  border-top: none;
+  box-shadow: inset 0 -1px var(--border);
+}
+.dex-table tbody tr:first-child td {
+  border-top: none;
 }
 .dex-table .r {
   text-align: right;
@@ -439,9 +445,20 @@ details > summary {
   color: var(--text);
   font-weight: bold;
 }
+/* The column that takes up the room the others leave, wrapping when it runs out of it; `phone-grow` on phones, where
+   the columns marked `wide-only` are left out. */
 .dex-table .grow {
   width: 100%;
   white-space: normal;
+}
+@media (max-width: 720px) {
+  .dex-table .wide-only {
+    display: none;
+  }
+  .dex-table .phone-grow {
+    width: 100%;
+    white-space: normal;
+  }
 }
 .dex-table .name {
   font-weight: bold;
