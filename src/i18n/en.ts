@@ -95,7 +95,6 @@ export const messages = {
   'types.defending': 'Defending',
   'types.attacking': 'Attacking',
   'types.selectHint': 'Select a type above to see its matchups.',
-  'types.learn': 'Hints',
 
   'info.immune': 'Immune',
   'info.bypass': 'Bypassed by',
@@ -327,7 +326,7 @@ export const messages = {
   'quiz.about2': '{n}×{n} single-type matchups and tick-all questions come first; dual types unlock after that.',
   'confirm.cancel': 'Cancel',
   'settings.title': 'Advanced settings',
-  'settings.hints': 'Show hints after answering',
+  'quiz.hints': 'Hints',
   'settings.newPerDay': 'New cards per day',
   'settings.learnMoreStep': '"Learn more" adds',
   'settings.multiEvery': 'Tick-all questions',

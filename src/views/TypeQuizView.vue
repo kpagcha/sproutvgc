@@ -266,7 +266,7 @@ async function reset() {
         ref="card"
         :card="current"
         :round="round"
-        :hints="settings.hints"
+        v-model:hints="settings.hints"
         @answered="onAnswered"
         @next="next()"
       />
@@ -350,11 +350,6 @@ async function reset() {
 
       <details class="panel settings small">
         <summary>{{ t('settings.title') }}</summary>
-        <label class="check">
-          <input v-model="settings.hints" type="checkbox" />
-          {{ t('settings.hints') }}
-        </label>
-
         <label class="row">
           <span>{{ t('settings.newPerDay') }}</span>
           <input

@@ -17,9 +17,10 @@ const props = defineProps<{
   card: Card
   /** Bumped for every card shown, so the same card asked twice in a row still starts fresh. */
   round: number
-  /** Show the memory hooks for the card's matchups after answering. */
-  hints: boolean
 }>()
+
+/** Show the memory hooks for the card's matchups after answering; toggled on the card itself. */
+const hints = defineModel<boolean>('hints', { required: true })
 
 const emit = defineEmits<{
   /** `ms` is how long the answer took. */
@@ -95,7 +96,7 @@ defineExpose({ simulate })
 
 /** After answering: the memory hook for each matchup the card is about. */
 const hintLines = computed(() => {
-  if (!result.value || !props.hints) return []
+  if (!result.value || !hints.value) return []
   return matchups(props.card).flatMap(([atk, def]) => {
     const text = hintFor(atk, def)
     return text ? [{ atk, def, text }] : []
@@ -228,7 +229,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
           <span v-if="result.wrong.length">{{ t('quiz.extra', { list: names(result.wrong) }) }}</span>
         </template>
       </div>
-      <!-- Memory hooks to reinforce the answer (Advanced settings > Show hints). -->
+      <!-- Memory hooks to reinforce the answer, when the Hints toggle below is on. -->
       <ul v-if="hintLines.length" class="hints">
         <li v-for="h in hintLines" :key="h.atk + h.def">
           <span class="pair">
@@ -241,6 +242,16 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       </ul>
     </motion.div>
     <div class="actions">
+      <button
+        v-if="result"
+        type="button"
+        class="btn hints-toggle"
+        :class="{ on: hints }"
+        :aria-pressed="hints"
+        @click="hints = !hints"
+      >
+        {{ t('quiz.hints') }}
+      </button>
       <button v-if="result" type="button" class="btn primary" @click="emit('next')">
         {{ t('quiz.next') }} <kbd>Enter</kbd>
       </button>
@@ -346,13 +357,21 @@ kbd {
   margin-top: 10px;
   display: flex;
   justify-content: flex-end;
+  gap: 6px;
+}
+.hints-toggle {
+  margin-right: auto;
+}
+.hints-toggle.on {
+  background: var(--sel);
+  border-color: var(--accent);
 }
 .actions .placeholder {
   visibility: hidden;
 }
 /* Phones: one full-width button at the bottom of the card. */
 @media (max-width: 760px) {
-  .actions .btn {
+  .actions .btn.primary {
     flex: 1;
     min-height: 44px;
   }

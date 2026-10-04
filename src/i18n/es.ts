@@ -98,7 +98,6 @@ export const messages: Record<keyof typeof en, string> = {
   'types.defending': 'Al defender',
   'types.attacking': 'Al atacar',
   'types.selectHint': 'Selecciona un tipo arriba para ver sus enfrentamientos.',
-  'types.learn': 'Pistas',
 
   'info.immune': 'Inmune',
   'info.bypass': 'Anulado por',
@@ -333,7 +332,7 @@ export const messages: Record<keyof typeof en, string> = {
     'Primero van los {n}×{n} enfrentamientos de tipo simple y las preguntas de marcar; después se desbloquean los tipos dobles.',
   'confirm.cancel': 'Cancelar',
   'settings.title': 'Ajustes avanzados',
-  'settings.hints': 'Mostrar pistas al responder',
+  'quiz.hints': 'Pistas',
   'settings.newPerDay': 'Tarjetas nuevas al día',
   'settings.learnMoreStep': '"Aprender más" añade',
   'settings.multiEvery': 'Preguntas de marcar',
