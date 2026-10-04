@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, ref, shallowRef, triggerRef, useTemplateRef, watch } from 'vue'
+import { computed, defineAsyncComponent, nextTick, ref, shallowRef, triggerRef, useTemplateRef, watch } from 'vue'
 import { TYPES } from '@/data/types'
 import { t } from '@/i18n'
 import { deckStats, emptyDeck, grade, loadDeck, pickNext, rollDay, saveDeck } from '@/lib/srs'
@@ -18,6 +18,7 @@ import { loadPractice, pickPractice, practicePool, savePractice } from '@/lib/pr
 import QuizCard from '@/components/QuizCard.vue'
 import TypePicker from '@/components/TypePicker.vue'
 import { confirmDialog } from '@/composables/useConfirm'
+import { toTop } from '@/lib/scroll'
 
 // Dev-only controls to fast-forward the quiz; left out of production builds.
 const QuizDevTools = import.meta.env.DEV ? defineAsyncComponent(() => import('@/dev/QuizDevTools.vue')) : null
@@ -129,11 +130,19 @@ function onAnswered(correct: boolean, ms: number) {
   if (correct) session.value.correct++
 }
 
+// Starting practice and resetting progress start over from the top of the page. It scrolls once the new card is in,
+// replacing the card's own scroll, which only goes as far as bringing the question on screen.
+async function restart() {
+  next()
+  await nextTick()
+  toTop()
+}
+
 function startPractice() {
   practicing.value = true
   practiceStats.value = { seen: 0, correct: 0, streak: 0 }
   recent = []
-  next()
+  void restart()
 }
 function stopPractice() {
   practicing.value = false
@@ -240,7 +249,7 @@ async function reset() {
   saveDeck(deck.value)
   session.value = { seen: 0, correct: 0 }
   current.value = null
-  next()
+  await restart()
 }
 </script>
 

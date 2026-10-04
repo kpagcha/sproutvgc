@@ -6,11 +6,12 @@ import InfoRows from '@/components/InfoRows.vue'
 
 defineProps<{ info: SideInfo }>()
 
-// Whether the less common interactions are open is remembered across visits (and shared by every side).
-const LESS_KEY = 'mondex.info.less'
+// The key interactions up front; the rest collapsed, with the less common ones at the bottom. Whether it's open is
+// remembered across visits (and shared by every side).
+const OPEN_KEY = 'mondex.info.other'
 function readOpen(): boolean {
   try {
-    return localStorage.getItem(LESS_KEY) === '1'
+    return localStorage.getItem(OPEN_KEY) === '1'
   } catch {
     return false
   }
@@ -19,7 +20,7 @@ const open = ref(readOpen())
 function onToggle(e: Event) {
   open.value = (e.target as HTMLDetailsElement).open
   try {
-    localStorage.setItem(LESS_KEY, open.value ? '1' : '0')
+    localStorage.setItem(OPEN_KEY, open.value ? '1' : '0')
   } catch {
     // Storage unavailable: the choice lasts for this page load.
   }
@@ -28,13 +29,18 @@ function onToggle(e: Event) {
 
 <template>
   <InfoRows v-if="info.major.length" :rows="info.major" />
-  <details v-if="info.minor.length || info.more.length" class="less" :open="open" @toggle="onToggle">
-    <summary class="muted">{{ t('info.less') }}</summary>
-    <InfoRows v-if="info.minor.length" :rows="info.minor" />
-    <!-- Specific moves and abilities: the least prominent. -->
-    <div v-if="info.more.length" class="more">
-      <p class="muted">{{ t('info.more') }}</p>
-      <InfoRows :rows="info.more" />
+  <details
+    v-if="info.other.length || info.minor.length || info.more.length"
+    class="less"
+    :open="open"
+    @toggle="onToggle"
+  >
+    <summary class="muted">{{ t('info.other') }}</summary>
+    <InfoRows v-if="info.other.length" :rows="info.other" />
+    <div v-if="info.minor.length || info.more.length" :class="{ more: info.other.length }">
+      <p v-if="info.other.length" class="muted">{{ t('info.less') }}</p>
+      <InfoRows v-if="info.minor.length" :rows="info.minor" />
+      <InfoRows v-if="info.more.length" :rows="info.more" />
     </div>
   </details>
 </template>

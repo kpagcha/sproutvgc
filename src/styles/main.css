@@ -1,21 +1,26 @@
 /* ---------- Tokens ---------- */
 :root {
   color-scheme: light;
-  --bg: #eef0f3;
-  --panel: #ffffff;
-  --panel-alt: #f6f7f9;
-  --text: #1a1a1a;
-  --muted: #666b73;
-  --border: #c4c9d2;
-  --border-strong: #9aa2ae;
-  --link: #1f5bb5;
-  --accent: #2f6fd0;
+  /* Ink outlines and hard offset shadows on the main surfaces (see retro.css), on a warm paper background with a
+     highlighter-yellow selection. */
+  --ink: #141414;
+  --hard: 3px 3px 0 var(--ink);
+  --hard-sm: 2px 2px 0 var(--ink);
+  --bg: #f2eee4;
+  --panel: #fffdf7;
+  --panel-alt: #f6f1e4;
+  --text: #141414;
+  --muted: #5d5850;
+  --border: #c9c1b1;
+  --border-strong: #141414;
+  --link: #1f4fd0;
+  --accent: #2d5bd8;
   --accent-text: #ffffff;
-  --hover: #e6eefb;
-  --sel: #d3e2fa;
+  --hover: #fff1b8;
+  --sel: #ffdf6e;
   --good: #2c7a2c;
   --bad: #b3261e;
-  --shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+  --shadow: none;
 
   --m0-bg: #2f2f2f;
   --m0-fg: #ffffff;
@@ -32,21 +37,21 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --bg: #1b1c1e;
-    --panel: #26272a;
-    --panel-alt: #2d2e32;
-    --text: #e2e2e2;
-    --muted: #9a9ea6;
-    --border: #3f4146;
-    --border-strong: #5a5d64;
-    --link: #82b1ff;
-    --accent: #4d86e0;
+    --ink: #000000;
+    --bg: #1c1b20;
+    --panel: #29282e;
+    --panel-alt: #302f36;
+    --text: #e8e4da;
+    --muted: #a39e94;
+    --border: #45434b;
+    --border-strong: #000000;
+    --link: #8fb2ff;
+    --accent: #4a78ea;
     --accent-text: #ffffff;
-    --hover: #313745;
-    --sel: #2f4466;
+    --hover: #3a3526;
+    --sel: #5e4c10;
     --good: #7fd07f;
     --bad: #ff8a80;
-    --shadow: 0 1px 3px rgb(0 0 0 / 0.35);
 
     --m0-bg: #000000;
     --m0-fg: #bbbbbb;
@@ -63,21 +68,21 @@
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #1b1c1e;
-  --panel: #26272a;
-  --panel-alt: #2d2e32;
-  --text: #e2e2e2;
-  --muted: #9a9ea6;
-  --border: #3f4146;
-  --border-strong: #5a5d64;
-  --link: #82b1ff;
-  --accent: #4d86e0;
+  --ink: #000000;
+  --bg: #1c1b20;
+  --panel: #29282e;
+  --panel-alt: #302f36;
+  --text: #e8e4da;
+  --muted: #a39e94;
+  --border: #45434b;
+  --border-strong: #000000;
+  --link: #8fb2ff;
+  --accent: #4a78ea;
   --accent-text: #ffffff;
-  --hover: #313745;
-  --sel: #2f4466;
+  --hover: #3a3526;
+  --sel: #5e4c10;
   --good: #7fd07f;
   --bad: #ff8a80;
-  --shadow: 0 1px 3px rgb(0 0 0 / 0.35);
 
   --m0-bg: #000000;
   --m0-fg: #bbbbbb;
@@ -95,11 +100,20 @@
 :root {
   --text-scale: 1;
   --icon-scale: 1;
+  /* Large type badges: their font, and their width, which the type grids size their columns from. */
+  --badge-font: calc(12px * var(--text-scale));
+  --badge-w: calc(var(--badge-font) * 8);
+  /* The badge names' font: a web font (loaded in index.html), so they look the same on every platform rather than
+     whatever monospace the system has; the system stack is only the fallback while it loads or if it can't. */
+  --badge-family:
+    'JetBrains Mono', ui-monospace, 'Cascadia Mono', 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
 }
 @media (max-width: 720px) {
   :root {
     --text-scale: 1.15;
     --icon-scale: 1.5;
+    /* A smaller text bump for the badges than the rest of the page, three to a row (retro.css). */
+    --badge-font: 13px;
   }
 }
 
@@ -231,6 +245,27 @@ img.pixel {
 }
 .btn.primary:hover {
   filter: brightness(1.08);
+}
+/* A small action beside an entry in a list (filtering by it): tinted with the selection color, an icon before its
+   label. */
+.btn.chip {
+  min-height: 20px;
+  padding: 0 6px;
+  font-size: 0.8125em;
+  color: var(--text);
+  white-space: nowrap;
+  background: var(--sel);
+}
+.btn.chip:hover {
+  text-decoration: none;
+  filter: brightness(0.96);
+}
+
+/* Lucide's icons, squared off to match the hard edges everywhere else. */
+.lucide {
+  flex: none;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
 }
 
 /* A search box, and the part of each result's name that matches it. */
@@ -370,4 +405,90 @@ details > summary {
   details > summary {
     transition: none;
   }
+}
+
+/* A cell of an icon sheet (`PokemonIcon`, `ItemIcon`): its size and position are set inline. */
+.sheet-icon {
+  display: inline-block;
+  flex: none;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+/* Type and move category badges (`TypeIcon`, `CategoryIcon`), styled in retro.css. */
+.type-icon,
+.category-icon {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Dex tables (Pokémon, moves): a header row of sort buttons that sticks to the top of the page, and rows. They don't
+   scroll sideways, which would keep the header from sticking: phones get fewer columns instead. Not a <table>, which
+   sizes its columns to everything in them, so that rows coming and going (a search, a filter) never resize the
+   columns. The header row sizes them from `--cols`, which each table sets, so that no row could change them: shares of
+   the room (names, abilities), fixed widths, or `auto` where the header is the widest thing in the column (icons;
+   numbers, given room for three digits). The rows take the widths it resolves to (`--row-cols`, `useRowColumns`), so
+   each is laid out on its own, and the browser skips those off screen (`content-visibility`, at about `--row-height`
+   until they've been seen): hundreds of rows otherwise take a while to style and lay out. Not when going back to the
+   page (`restoring`, from `usePageEntered`): the scroll position it restores needs the rows' real heights. Cells marked `wide-only` are
+   left out on phones, so `--cols` lists the columns left there. */
+.dex-table .row {
+  display: grid;
+  grid-template-columns: var(--row-cols, var(--cols));
+  align-items: center;
+  border-top: 1px solid var(--border);
+}
+.dex-table:not(.restoring) .row:not(.head) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto var(--row-height, 2em);
+}
+.dex-table .row > * {
+  min-width: 0;
+  padding: 3px 6px;
+  white-space: nowrap;
+}
+.dex-table .head {
+  grid-template-columns: var(--cols);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  color: var(--muted);
+  background: var(--panel);
+  /* A line under the header, standing in for the first row's, which scrolls away under it. */
+  border-top: none;
+  box-shadow: inset 0 -1px var(--border);
+}
+.dex-table .head + .row {
+  border-top: none;
+}
+.dex-table .r {
+  text-align: right;
+}
+.dex-table .sort {
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.dex-table .sort.active {
+  color: var(--text);
+  font-weight: bold;
+}
+/* Cells whose text wraps when their column runs out of room; `phone-grow` only on phones. */
+.dex-table .grow {
+  white-space: normal;
+}
+@media (max-width: 720px) {
+  .dex-table .wide-only {
+    display: none;
+  }
+  .dex-table .phone-grow {
+    white-space: normal;
+  }
+}
+.dex-table .name {
+  font-weight: bold;
 }

@@ -163,6 +163,36 @@ const MAJOR = new Set<string>(
 
 export const isMajor = (e: Entry): boolean => e.major ?? MAJOR.has(refKey(e.ref))
 
+/** The interactions the type pages show up front, of the major ones: status and powder immunities (and what gets
+ * past them), Scrappy and Prankster, weather and terrain. The rest are collapsed. */
+const KEY = new Set<string>(
+  [
+    condition('brn'),
+    condition('par'),
+    condition('psn'),
+    condition('frz'),
+    ability('corrosion'),
+    group('powder'),
+    // Common abilities: Scrappy hitting Ghosts (and getting past their immunity), Prankster failing on Dark ones
+    ability('scrappy'),
+    ability('prankster'),
+    condition('sun'),
+    condition('rain'),
+    condition('sandstorm'),
+    condition('snow'),
+    group('terrains'),
+    condition('electricterrain'),
+    condition('grassyterrain'),
+    condition('psychicterrain'),
+    condition('mistyterrain'),
+    ability('primordialsea'),
+    ability('desolateland'),
+    ability('deltastream'),
+  ].map(refKey),
+)
+
+export const isKey = (e: Entry): boolean => KEY.has(refKey(e.ref))
+
 /** `type`'s interactions, without the ones whose entry `game` doesn't have. Stealth Rock is left to the caller, as
  * a dual type's damage comes from both types together. */
 export function typeInfo(type: TypeId): TypeInfo {

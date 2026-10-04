@@ -2,7 +2,7 @@
 import { useId } from 'vue'
 import { TYPES, type TypeId } from '@/data/types'
 import { typeName } from '@/i18n'
-import TypeIcon from '@/components/TypeIcon.vue'
+import TypeIcon from '@/components/TypeIcon'
 import { motion } from 'motion-v'
 import { PRESS } from '@/lib/motion'
 

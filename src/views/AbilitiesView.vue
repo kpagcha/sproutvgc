@@ -1,21 +1,25 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { ability, availableIds } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { locale, t } from '@/i18n'
-import { abilityDescription } from '@/i18n/descriptions'
+import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
-import DexText from '@/components/DexText.vue'
+import DexText from '@/components/DexText'
+import SearchBox from '@/components/SearchBox.vue'
 
 // Every ability the regulation has, by name in the reader's language, with its short description.
 const abilities = computed(() =>
   availableIds('ability')
-    .map((id) => ({ id, name: refName(ability(id)), text: abilityDescription(id)?.short ?? '' }))
+    .map((id) => ({ id, name: refName(ability(id)), text: description('ability', id)?.short ?? '' }))
     .sort((a, b) => a.name.localeCompare(b.name, locale.value)),
 )
 
-const query = ref('')
+// The home page's search links here with its query (`?q=`).
+const initial = useRoute().query.q
+const query = ref(typeof initial === 'string' ? initial : '')
 const shown = computed(() => {
   const q = fold(query.value.trim())
   if (!q) return abilities.value.map((a) => ({ ...a, parts: null }))
@@ -30,13 +34,7 @@ const shown = computed(() => {
   <div class="panel">
     <h1>{{ t('title.abilities') }}</h1>
     <p class="muted">{{ t('abilities.intro', { reg: REGULATION }) }}</p>
-    <input
-      v-model="query"
-      type="search"
-      class="search"
-      :placeholder="t('abilities.search')"
-      :aria-label="t('abilities.search')"
-    />
+    <SearchBox v-model="query" :placeholder="t('abilities.search')" :aria-label="t('abilities.search')" />
     <dl v-if="shown.length" class="entries">
       <template v-for="a in shown" :key="a.id">
         <dt>

@@ -1,0 +1,277 @@
+{
+  "allyswitch": { "kind": "volatile", "sources": { "move": ["allyswitch"], "ability": [], "item": [] } },
+  "aquaring": { "kind": "volatile", "sources": { "move": ["aquaring"], "ability": [], "item": [] } },
+  "attract": { "kind": "volatile", "sources": { "move": ["attract"], "ability": ["cutecharm"], "item": [] } },
+  "auroraveil": { "kind": "side", "sources": { "move": ["auroraveil"], "ability": [], "item": [] } },
+  "banefulbunker": { "kind": "volatile", "sources": { "move": ["banefulbunker"], "ability": [], "item": [] } },
+  "beakblast": { "kind": "volatile", "sources": { "move": ["beakblast"], "ability": [], "item": [] } },
+  "brn": {
+    "kind": "status",
+    "sources": {
+      "move": [
+        "beakblast",
+        "blazekick",
+        "burningjealousy",
+        "fireblast",
+        "firefang",
+        "firepunch",
+        "flamethrower",
+        "flareblitz",
+        "heatwave",
+        "infernalparade",
+        "inferno",
+        "lavaplume",
+        "matchagotcha",
+        "pyroball",
+        "scald",
+        "scorchingsands",
+        "willowisp"
+      ],
+      "ability": ["flamebody", "spicyspray"],
+      "item": []
+    }
+  },
+  "charge": { "kind": "volatile", "sources": { "move": ["charge"], "ability": ["electromorphosis"], "item": [] } },
+  "chillyreception": { "kind": "volatile", "sources": { "move": ["chillyreception"], "ability": [], "item": [] } },
+  "choicelock": { "kind": "volatile", "sources": { "move": [], "ability": [], "item": ["choicescarf"] } },
+  "confusion": {
+    "kind": "volatile",
+    "sources": {
+      "move": [
+        "alluringvoice",
+        "axekick",
+        "confuseray",
+        "dynamicpunch",
+        "flatter",
+        "hurricane",
+        "swagger",
+        "sweetkiss",
+        "teeterdance",
+        "waterpulse"
+      ],
+      "ability": [],
+      "item": []
+    }
+  },
+  "counter": { "kind": "volatile", "sources": { "move": ["counter"], "ability": [], "item": [] } },
+  "curse": { "kind": "volatile", "sources": { "move": ["curse"], "ability": [], "item": [] } },
+  "destinybond": { "kind": "volatile", "sources": { "move": ["destinybond"], "ability": [], "item": [] } },
+  "disable": { "kind": "volatile", "sources": { "move": ["disable"], "ability": ["cursedbody"], "item": [] } },
+  "dragoncheer": { "kind": "volatile", "sources": { "move": ["dragoncheer"], "ability": [], "item": [] } },
+  "electricterrain": {
+    "kind": "terrain",
+    "sources": { "move": ["electricterrain"], "ability": ["electricsurge"], "item": [] }
+  },
+  "electrify": { "kind": "volatile", "sources": { "move": ["electrify"], "ability": [], "item": [] } },
+  "encore": { "kind": "volatile", "sources": { "move": ["encore"], "ability": [], "item": [] } },
+  "endure": { "kind": "volatile", "sources": { "move": ["endure"], "ability": [], "item": [] } },
+  "fairylock": { "kind": "field", "sources": { "move": ["fairylock"], "ability": [], "item": [] } },
+  "flashfire": { "kind": "volatile", "sources": { "move": [], "ability": ["flashfire"], "item": [] } },
+  "flinch": {
+    "kind": "volatile",
+    "sources": {
+      "move": [
+        "airslash",
+        "bite",
+        "darkpulse",
+        "dragonrush",
+        "extrasensory",
+        "fakeout",
+        "firefang",
+        "icefang",
+        "iciclecrash",
+        "ironhead",
+        "mountaingale",
+        "rockslide",
+        "skyattack",
+        "snore",
+        "thunderfang",
+        "triplearrows",
+        "upperhand",
+        "waterfall",
+        "zenheadbutt",
+        "zingzap"
+      ],
+      "ability": [],
+      "item": []
+    }
+  },
+  "fling": { "kind": "volatile", "sources": { "move": ["fling"], "ability": [], "item": [] } },
+  "focusenergy": { "kind": "volatile", "sources": { "move": ["focusenergy"], "ability": [], "item": [] } },
+  "focuspunch": { "kind": "volatile", "sources": { "move": ["focuspunch"], "ability": [], "item": [] } },
+  "followme": { "kind": "volatile", "sources": { "move": ["followme"], "ability": [], "item": [] } },
+  "frz": {
+    "kind": "status",
+    "sources": { "move": ["blizzard", "icebeam", "icefang", "icepunch"], "ability": [], "item": [] }
+  },
+  "futuremove": { "kind": "slot", "sources": { "move": ["futuresight"], "ability": [], "item": [] } },
+  "gastroacid": { "kind": "volatile", "sources": { "move": ["gastroacid"], "ability": [], "item": [] } },
+  "gem": { "kind": "volatile", "sources": { "move": [], "ability": [], "item": ["normalgem"] } },
+  "glaiverush": { "kind": "volatile", "sources": { "move": ["glaiverush"], "ability": [], "item": [] } },
+  "grassyterrain": {
+    "kind": "terrain",
+    "sources": { "move": ["grassyterrain"], "ability": ["grassysurge", "seedsower"], "item": [] }
+  },
+  "gravity": { "kind": "field", "sources": { "move": ["gravity"], "ability": [], "item": [] } },
+  "healblock": { "kind": "volatile", "sources": { "move": ["psychicnoise"], "ability": [], "item": [] } },
+  "healingwish": { "kind": "slot", "sources": { "move": ["healingwish"], "ability": [], "item": [] } },
+  "helpinghand": { "kind": "volatile", "sources": { "move": ["helpinghand"], "ability": [], "item": [] } },
+  "imprison": { "kind": "volatile", "sources": { "move": ["imprison"], "ability": [], "item": [] } },
+  "ingrain": { "kind": "volatile", "sources": { "move": ["ingrain"], "ability": [], "item": [] } },
+  "kingsshield": { "kind": "volatile", "sources": { "move": ["kingsshield"], "ability": [], "item": [] } },
+  "leechseed": { "kind": "volatile", "sources": { "move": ["leechseed"], "ability": [], "item": [] } },
+  "lightscreen": { "kind": "side", "sources": { "move": ["lightscreen"], "ability": [], "item": [] } },
+  "lockedmove": {
+    "kind": "volatile",
+    "sources": { "move": ["outrage", "petaldance", "ragingfury", "thrash"], "ability": [], "item": [] }
+  },
+  "lockon": { "kind": "volatile", "sources": { "move": ["lockon"], "ability": [], "item": [] } },
+  "magicroom": { "kind": "field", "sources": { "move": ["magicroom"], "ability": [], "item": [] } },
+  "magnetrise": { "kind": "volatile", "sources": { "move": ["magnetrise"], "ability": [], "item": [] } },
+  "metronome": { "kind": "volatile", "sources": { "move": [], "ability": [], "item": ["metronome"] } },
+  "minimize": { "kind": "volatile", "sources": { "move": ["minimize"], "ability": [], "item": [] } },
+  "mirrorcoat": { "kind": "volatile", "sources": { "move": ["mirrorcoat"], "ability": [], "item": [] } },
+  "mistyterrain": { "kind": "terrain", "sources": { "move": ["mistyterrain"], "ability": [], "item": [] } },
+  "mustrecharge": {
+    "kind": "volatile",
+    "sources": {
+      "move": ["blastburn", "frenzyplant", "gigaimpact", "hydrocannon", "hyperbeam", "meteorassault", "rockwrecker"],
+      "ability": [],
+      "item": []
+    }
+  },
+  "noretreat": { "kind": "volatile", "sources": { "move": ["noretreat"], "ability": [], "item": [] } },
+  "octolock": { "kind": "volatile", "sources": { "move": ["octolock"], "ability": [], "item": [] } },
+  "par": {
+    "kind": "status",
+    "sources": {
+      "move": [
+        "bodyslam",
+        "bounce",
+        "discharge",
+        "glare",
+        "nuzzle",
+        "stunspore",
+        "thunder",
+        "thunderbolt",
+        "thunderfang",
+        "thunderpunch",
+        "thunderwave",
+        "volttackle",
+        "zapcannon"
+      ],
+      "ability": ["effectspore", "static"],
+      "item": []
+    }
+  },
+  "partiallytrapped": {
+    "kind": "volatile",
+    "sources": {
+      "move": ["bind", "firespin", "infestation", "sandtomb", "snaptrap", "whirlpool", "wrap"],
+      "ability": [],
+      "item": []
+    }
+  },
+  "perishsong": { "kind": "volatile", "sources": { "move": ["perishsong"], "ability": [], "item": [] } },
+  "powertrick": { "kind": "volatile", "sources": { "move": ["powertrick"], "ability": [], "item": [] } },
+  "protect": { "kind": "volatile", "sources": { "move": ["detect", "protect"], "ability": [], "item": [] } },
+  "psn": {
+    "kind": "status",
+    "sources": {
+      "move": [
+        "banefulbunker",
+        "barbbarrage",
+        "crosspoison",
+        "gunkshot",
+        "mortalspin",
+        "poisonjab",
+        "poisonpowder",
+        "shellsidearm",
+        "sludgebomb",
+        "sludgewave",
+        "toxicspikes",
+        "toxicthread"
+      ],
+      "ability": ["effectspore", "poisonpoint", "poisontouch"],
+      "item": []
+    }
+  },
+  "psychicterrain": {
+    "kind": "terrain",
+    "sources": { "move": ["psychicterrain"], "ability": ["psychicsurge"], "item": [] }
+  },
+  "quickguard": { "kind": "side", "sources": { "move": ["quickguard"], "ability": [], "item": [] } },
+  "ragepowder": { "kind": "volatile", "sources": { "move": ["ragepowder"], "ability": [], "item": [] } },
+  "raindance": { "kind": "weather", "sources": { "move": ["raindance"], "ability": ["drizzle"], "item": [] } },
+  "reflect": { "kind": "side", "sources": { "move": ["reflect"], "ability": [], "item": [] } },
+  "revivalblessing": { "kind": "slot", "sources": { "move": ["revivalblessing"], "ability": [], "item": [] } },
+  "roost": { "kind": "volatile", "sources": { "move": ["roost"], "ability": [], "item": [] } },
+  "safeguard": { "kind": "side", "sources": { "move": ["safeguard"], "ability": [], "item": [] } },
+  "saltcure": { "kind": "volatile", "sources": { "move": ["saltcure"], "ability": [], "item": [] } },
+  "sandstorm": {
+    "kind": "weather",
+    "sources": { "move": ["sandstorm"], "ability": ["sandspit", "sandstream"], "item": [] }
+  },
+  "slp": {
+    "kind": "status",
+    "sources": { "move": ["hypnosis", "rest", "sing", "sleeppowder", "yawn"], "ability": ["effectspore"], "item": [] }
+  },
+  "smackdown": { "kind": "volatile", "sources": { "move": ["smackdown"], "ability": [], "item": [] } },
+  "snowscape": {
+    "kind": "weather",
+    "sources": { "move": ["chillyreception", "snowscape"], "ability": ["snowwarning"], "item": [] }
+  },
+  "sparklingaria": { "kind": "volatile", "sources": { "move": ["sparklingaria"], "ability": [], "item": [] } },
+  "spikes": { "kind": "side", "sources": { "move": ["ceaselessedge", "spikes"], "ability": [], "item": [] } },
+  "spikyshield": { "kind": "volatile", "sources": { "move": ["spikyshield"], "ability": [], "item": [] } },
+  "stall": {
+    "kind": "volatile",
+    "sources": {
+      "move": ["banefulbunker", "detect", "endure", "kingsshield", "protect", "quickguard", "spikyshield", "wideguard"],
+      "ability": [],
+      "item": []
+    }
+  },
+  "stealthrock": { "kind": "side", "sources": { "move": ["stealthrock", "stoneaxe"], "ability": [], "item": [] } },
+  "stickyweb": { "kind": "side", "sources": { "move": ["stickyweb"], "ability": [], "item": [] } },
+  "stockpile": { "kind": "volatile", "sources": { "move": ["stockpile"], "ability": [], "item": [] } },
+  "substitute": { "kind": "volatile", "sources": { "move": ["shedtail", "substitute"], "ability": [], "item": [] } },
+  "sunnyday": { "kind": "weather", "sources": { "move": ["sunnyday"], "ability": ["drought"], "item": [] } },
+  "syrupbomb": { "kind": "volatile", "sources": { "move": ["syrupbomb"], "ability": [], "item": [] } },
+  "tailwind": { "kind": "side", "sources": { "move": ["tailwind"], "ability": [], "item": [] } },
+  "taunt": { "kind": "volatile", "sources": { "move": ["taunt"], "ability": [], "item": [] } },
+  "throatchop": { "kind": "volatile", "sources": { "move": ["throatchop"], "ability": [], "item": [] } },
+  "torment": { "kind": "volatile", "sources": { "move": ["torment"], "ability": [], "item": [] } },
+  "tox": { "kind": "status", "sources": { "move": ["poisonfang", "toxic", "toxicspikes"], "ability": [], "item": [] } },
+  "toxicspikes": { "kind": "side", "sources": { "move": ["toxicspikes"], "ability": ["toxicdebris"], "item": [] } },
+  "trapped": {
+    "kind": "volatile",
+    "sources": { "move": ["block", "jawlock", "meanlook", "spiritshackle"], "ability": [], "item": [] }
+  },
+  "trickroom": { "kind": "field", "sources": { "move": ["trickroom"], "ability": [], "item": [] } },
+  "twoturnmove": {
+    "kind": "volatile",
+    "sources": {
+      "move": [
+        "bounce",
+        "dig",
+        "dive",
+        "electroshot",
+        "fly",
+        "meteorbeam",
+        "phantomforce",
+        "skyattack",
+        "solarbeam",
+        "solarblade"
+      ],
+      "ability": [],
+      "item": []
+    }
+  },
+  "unburden": { "kind": "volatile", "sources": { "move": [], "ability": ["unburden"], "item": [] } },
+  "uproar": { "kind": "volatile", "sources": { "move": ["uproar"], "ability": [], "item": [] } },
+  "wideguard": { "kind": "side", "sources": { "move": ["wideguard"], "ability": [], "item": [] } },
+  "wish": { "kind": "slot", "sources": { "move": ["wish"], "ability": [], "item": [] } },
+  "wonderroom": { "kind": "field", "sources": { "move": ["wonderroom"], "ability": [], "item": [] } },
+  "yawn": { "kind": "volatile", "sources": { "move": ["yawn"], "ability": [], "item": [] } }
+}

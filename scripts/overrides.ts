@@ -22,6 +22,8 @@ export const NAMES: { [L in Exclude<Locale, 'en'>]?: { [C in CategoryKey]?: Reco
       embodyaspectwellspring: 'Evocarrecuerdos (Fuente)',
       embodyaspectcornerstone: 'Evocarrecuerdos (Cimiento)',
       // Not in PokéAPI yet (new in Champions).
+      // https://bulbapedia.bulbagarden.net/wiki/Aura_Guard_(Ability)
+      auraguard: 'Aura Protectora',
       // https://bulbapedia.bulbagarden.net/wiki/Eelevate_(Ability)
       eelevate: 'Impulso Anguila',
       // https://bulbapedia.bulbagarden.net/wiki/Fire_Mane_(Ability)

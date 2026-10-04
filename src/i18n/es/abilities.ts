@@ -51,6 +51,11 @@ export const descriptions: Record<string, Description> = {
     long: 'Este Pokémon y sus aliados no pueden verse afectados por {move:attract}, {move:disable}, {move:encore}, Anticura, {move:taunt} ni {move:torment}.',
     source: '899845d2',
   },
+  auraguard: {
+    short: 'Este Pokémon recibe la mitad del daño de los movimientos de contacto.',
+    long: 'Este Pokémon recibe la mitad del daño de los movimientos de contacto.',
+    source: '685b560b',
+  },
   battlearmor: {
     short: 'Este Pokémon no puede recibir golpes críticos.',
     source: '9a7097d1',
@@ -537,8 +542,8 @@ export const descriptions: Record<string, Description> = {
   },
   moldbreaker: {
     short: 'Los movimientos de este Pokémon y sus efectos ignoran las habilidades de los demás Pokémon.',
-    long: 'Los movimientos de este Pokémon y sus efectos ignoran ciertas habilidades de los demás Pokémon. Las habilidades que pueden anularse son {ability:armortail}, {ability:aromaveil}, Rompeaura, {ability:battlearmor}, {ability:bigpecks}, {ability:bulletproof}, {ability:clearbody}, {ability:contrary}, {ability:damp}, Cuerpo Vívido, {ability:disguise}, {ability:dryskin}, {ability:eartheater}, {ability:filter}, {ability:flashfire}, Don Floral, {ability:flowerveil}, {ability:fluffy}, {ability:friendguard}, {ability:furcoat}, {ability:goodasgold}, {ability:grasspelt}, {ability:guarddog}, {ability:heatproof}, {ability:heavymetal}, {ability:hypercutter}, {ability:iceface}, Escama de Hielo, {ability:illuminate}, {ability:immunity}, {ability:innerfocus}, {ability:insomnia}, {ability:keeneye}, {ability:leafguard}, {ability:levitate}, {ability:lightmetal}, {ability:lightningrod}, {ability:limber}, {ability:magicbounce}, {ability:magmaarmor}, {ability:marvelscale}, Ojo Mental, {ability:mirrorarmor}, {ability:motordrive}, {ability:multiscale}, {ability:oblivious}, {ability:overcoat}, {ability:owntempo}, Velo Pastel, {ability:punkrock}, {ability:purifyingsalt}, {ability:queenlymajesty}, {ability:sandveil}, {ability:sapsipper}, {ability:shellarmor}, {ability:shielddust}, Simple, {ability:snowcloak}, {ability:solidrock}, {ability:soundproof}, {ability:stickyhold}, Colector, {ability:sturdy}, {ability:suctioncups}, {ability:sweetveil}, {ability:tangledfeet}, {ability:telepathy}, Teracaparazón, {ability:thermalexchange}, {ability:thickfat}, {ability:unaware}, {ability:vitalspirit}, {ability:voltabsorb}, {ability:waterabsorb}, {ability:waterbubble}, Velo Agua, Cuerpo Horneado, {ability:whitesmoke}, Surcavientos, Superguarda y Piel Milagro. Afecta a todos los demás Pokémon en el campo, sean o no objetivo del movimiento de este Pokémon, y tanto si su habilidad le beneficia como si no.',
-    source: 'd5ca0a62',
+    long: 'Los movimientos de este Pokémon y sus efectos ignoran ciertas habilidades de los demás Pokémon. Las habilidades que pueden anularse son {ability:armortail}, {ability:aromaveil}, Rompeaura, {ability:battlearmor}, {ability:bigpecks}, {ability:bulletproof}, {ability:clearbody}, {ability:contrary}, {ability:damp}, Cuerpo Vívido, {ability:disguise}, {ability:dryskin}, {ability:eartheater}, {ability:filter}, {ability:flashfire}, Don Floral, {ability:flowerveil}, {ability:fluffy}, {ability:friendguard}, {ability:furcoat}, {ability:goodasgold}, {ability:grasspelt}, {ability:guarddog}, {ability:heatproof}, {ability:heavymetal}, {ability:hypercutter}, Cara de Hielo, Escama de Hielo, {ability:illuminate}, {ability:immunity}, {ability:innerfocus}, {ability:insomnia}, {ability:keeneye}, {ability:leafguard}, {ability:levitate}, {ability:lightmetal}, {ability:lightningrod}, {ability:limber}, {ability:magicbounce}, {ability:magmaarmor}, {ability:marvelscale}, Ojo Mental, {ability:mirrorarmor}, {ability:motordrive}, {ability:multiscale}, {ability:oblivious}, {ability:overcoat}, {ability:owntempo}, Velo Pastel, {ability:punkrock}, {ability:purifyingsalt}, {ability:queenlymajesty}, {ability:sandveil}, {ability:sapsipper}, {ability:shellarmor}, {ability:shielddust}, Simple, {ability:snowcloak}, {ability:solidrock}, {ability:soundproof}, {ability:stickyhold}, Colector, {ability:sturdy}, {ability:suctioncups}, {ability:sweetveil}, {ability:tangledfeet}, {ability:telepathy}, Teracaparazón, {ability:thermalexchange}, {ability:thickfat}, {ability:unaware}, {ability:vitalspirit}, {ability:voltabsorb}, {ability:waterabsorb}, {ability:waterbubble}, Velo Agua, Cuerpo Horneado, {ability:whitesmoke}, Surcavientos, Superguarda y Piel Milagro. Afecta a todos los demás Pokémon en el campo, sean o no objetivo del movimiento de este Pokémon, y tanto si su habilidad le beneficia como si no.',
+    source: '618c00f6',
   },
   moody: {
     short: 'Cada turno sube 2 niveles una estadística al azar (salvo precisión y evasión) y baja 1 nivel otra.',
@@ -561,8 +566,8 @@ export const descriptions: Record<string, Description> = {
   },
   mummy: {
     short: 'Los Pokémon que establecen contacto con este Pokémon pasan a tener la habilidad Momia.',
-    long: 'Los Pokémon que establecen contacto con este Pokémon pasan a tener la habilidad Momia. No afecta a los Pokémon con las habilidades Unidad Ecuestre, {ability:battlebond}, Letargo Perenne, {ability:disguise}, {ability:gulpmissile}, {ability:iceface}, Multitipo, Momia, Agrupamiento, Sistema Alfa, Banco, {ability:shieldsdown}, {ability:stancechange}, Teracambio, Modo Daruma o {ability:zerotohero}.',
-    source: 'bcbdb22b',
+    long: 'Los Pokémon que establecen contacto con este Pokémon pasan a tener la habilidad Momia. No afecta a los Pokémon con las habilidades Unidad Ecuestre, {ability:battlebond}, Letargo Perenne, {ability:disguise}, Tragamisil, Cara de Hielo, Multitipo, Momia, Agrupamiento, Sistema Alfa, Banco, Escudo Limitado, {ability:stancechange}, Teracambio, Modo Daruma o {ability:zerotohero}.',
+    source: 'af148062',
   },
   naturalcure: {
     short: 'Este Pokémon se cura de su problema de estado al cambiarse.',
@@ -706,8 +711,8 @@ export const descriptions: Record<string, Description> = {
   },
   receiver: {
     short: 'Este Pokémon copia la habilidad de un aliado que se debilita.',
-    long: 'Este Pokémon copia la habilidad de un aliado que se debilita. No pueden copiarse Unidad Ecuestre, {ability:battlebond}, Letargo Perenne, Comandar, {ability:disguise}, Evocarrecuerdos, Don Floral, {ability:forecast}, {ability:hungerswitch}, {ability:iceface}, {ability:illusion}, {ability:imposter}, Multitipo, Gas Reactivo, Títere Tóxico, Agrupamiento, Reacción Química, Paleosíntesis, Carga Cuark, Receptor, Sistema Alfa, Banco, {ability:shieldsdown}, {ability:stancechange}, Teracaparazón, Teracambio, Teraformación 0, {ability:trace}, Superguarda, Modo Daruma ni {ability:zerotohero}.',
-    source: '0dfd6b12',
+    long: 'Este Pokémon copia la habilidad de un aliado que se debilita. No pueden copiarse Unidad Ecuestre, {ability:battlebond}, Letargo Perenne, Comandar, {ability:disguise}, Evocarrecuerdos, Don Floral, {ability:forecast}, {ability:hungerswitch}, Cara de Hielo, {ability:illusion}, {ability:imposter}, Multitipo, Gas Reactivo, Títere Tóxico, Agrupamiento, Reacción Química, Paleosíntesis, Carga Cuark, Receptor, Sistema Alfa, Banco, Escudo Limitado, {ability:stancechange}, Teracaparazón, Teracambio, Teraformación 0, {ability:trace}, Superguarda, Modo Daruma ni {ability:zerotohero}.',
+    source: 'a3a909c0',
   },
   reckless: {
     short: 'Los ataques de este Pokémon con daño de retroceso o por fallo tienen 1,2× potencia; no Forcejeo.',
@@ -1013,8 +1018,8 @@ export const descriptions: Record<string, Description> = {
   },
   trace: {
     short: 'Al entrar en combate, o cuando puede, este Pokémon copia la habilidad de un rival adyacente al azar.',
-    long: 'Al entrar en combate, este Pokémon copia la habilidad de un rival al azar. No pueden copiarse Unidad Ecuestre, {ability:battlebond}, Letargo Perenne, Comandar, {ability:disguise}, Evocarrecuerdos, Don Floral, {ability:forecast}, {ability:hungerswitch}, {ability:iceface}, {ability:illusion}, {ability:imposter}, Multitipo, Gas Reactivo, Títere Tóxico, Agrupamiento, Reacción Química, Paleosíntesis, Carga Cuark, {ability:receiver}, Sistema Alfa, Banco, {ability:shieldsdown}, {ability:stancechange}, Teraformación 0, Teracaparazón, Teracambio, Calco, Modo Daruma ni {ability:zerotohero}. Si ningún rival tiene una habilidad que pueda copiarse, esta habilidad se activa en cuanto alguno la tenga.',
-    source: 'bec5dbf5',
+    long: 'Al entrar en combate, este Pokémon copia la habilidad de un rival al azar. No pueden copiarse Unidad Ecuestre, {ability:battlebond}, Letargo Perenne, Comandar, {ability:disguise}, Evocarrecuerdos, Don Floral, {ability:forecast}, {ability:hungerswitch}, Cara de Hielo, {ability:illusion}, {ability:imposter}, Multitipo, Gas Reactivo, Títere Tóxico, Agrupamiento, Reacción Química, Paleosíntesis, Carga Cuark, {ability:receiver}, Sistema Alfa, Banco, Escudo Limitado, {ability:stancechange}, Teraformación 0, Teracaparazón, Teracambio, Calco, Modo Daruma ni {ability:zerotohero}. Si ningún rival tiene una habilidad que pueda copiarse, esta habilidad se activa en cuanto alguno la tenga.',
+    source: '0a9d7697',
   },
   unaware: {
     short: 'Este Pokémon ignora los cambios en las estadísticas de los demás al recibir o causar daño.',
@@ -1048,8 +1053,8 @@ export const descriptions: Record<string, Description> = {
   },
   wanderingspirit: {
     short: 'Los Pokémon que establecen contacto con este Pokémon intercambian su habilidad con la suya.',
-    long: 'Los Pokémon que establecen contacto con este Pokémon intercambian su habilidad con la suya. No afecta a los Pokémon con las habilidades Unidad Ecuestre, {ability:battlebond}, Letargo Perenne, Comandar, {ability:disguise}, Evocarrecuerdos, {ability:hungerswitch}, {ability:iceface}, {ability:illusion}, Multitipo, Gas Reactivo, Títere Tóxico, Agrupamiento, Paleosíntesis, Carga Cuark, Sistema Alfa, Banco, {ability:shieldsdown}, {ability:stancechange}, Teracaparazón, Teracambio, Teraformación 0, Superguarda, Modo Daruma o {ability:zerotohero}.',
-    source: 'bb583691',
+    long: 'Los Pokémon que establecen contacto con este Pokémon intercambian su habilidad con la suya. No afecta a los Pokémon con las habilidades Unidad Ecuestre, {ability:battlebond}, Letargo Perenne, Comandar, {ability:disguise}, Evocarrecuerdos, {ability:hungerswitch}, Cara de Hielo, {ability:illusion}, Multitipo, Gas Reactivo, Títere Tóxico, Agrupamiento, Paleosíntesis, Carga Cuark, Sistema Alfa, Banco, Escudo Limitado, {ability:stancechange}, Teracaparazón, Teracambio, Teraformación 0, Superguarda, Modo Daruma o {ability:zerotohero}.',
+    source: '35ec76a8',
   },
   waterabsorb: {
     short:

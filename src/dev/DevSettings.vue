@@ -12,16 +12,8 @@ import {
   type FontOption,
 } from '@/dev/fonts'
 import { MULTIPLIERS, formatMult, multClass } from '@/lib/typecalc'
-import TypeIcon from '@/components/TypeIcon.vue'
-import { STYLES, useStyle, type Style } from '@/composables/useStyle'
+import TypeIcon from '@/components/TypeIcon'
 import DevZone from '@/dev/DevZone.vue'
-
-const { style, setStyle } = useStyle()
-
-const STYLE_INFO: Record<Style, { label: string; note: string }> = {
-  retro: { label: 'Retro', note: 'Square corners, ink outlines and hard shadows, with flat type badges. The default.' },
-  pixel: { label: 'Pixel', note: 'Softer panels with the classic pixel-art type sprites.' },
-}
 
 const GROUPS: { key: 'display' | 'body' | 'num'; title: string; hint: string; options: FontOption[] }[] = [
   { key: 'display', title: 'Display', hint: 'Logo, headings, nav, tabs.', options: DISPLAY_FONTS },
@@ -41,22 +33,9 @@ onMounted(loadAll)
   <!-- Fenced off from the public settings above. -->
   <DevZone class="zone">
     <p class="muted intro">
-      Only shown in <code>npm run dev</code>. Style and font picks apply across the whole app and are saved in this
-      browser, so you can browse the real pages with them. Production builds always use the retro style.
+      Only shown in <code>npm run dev</code>. Font picks apply across the whole app and are saved in this browser, so
+      you can browse the real pages with them.
     </p>
-
-    <div class="panel">
-      <h2>Style</h2>
-      <div class="styles">
-        <label v-for="s in STYLES" :key="s" class="opt" :class="{ on: style === s }">
-          <input type="radio" name="style" :value="s" :checked="style === s" @change="setStyle(s)" />
-          <span class="opt-text">
-            <span class="opt-name">{{ STYLE_INFO[s].label }}</span>
-            <span class="muted small">{{ STYLE_INFO[s].note }}</span>
-          </span>
-        </label>
-      </div>
-    </div>
 
     <div class="panel">
       <div class="head">
@@ -160,11 +139,6 @@ select {
   margin: 0 0 12px;
 }
 
-.styles {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 4px 12px;
-}
 .groups {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));

@@ -57,6 +57,11 @@ export const descriptions: Record<string, Description> = {
     long: 'This Pokémon and its allies cannot become affected by {move:attract}, {move:disable}, {move:encore}, Heal Block, {move:taunt}, or {move:torment}.',
     source: '3c0f2da6',
   },
+  auraguard: {
+    short: 'This Pokémon takes 1/2 damage from contact moves.',
+    long: 'This Pokémon receives 1/2 damage from contact moves.',
+    source: 'f4a6aecc',
+  },
   battlearmor: {
     short: 'This Pokémon cannot be struck by a critical hit.',
     source: 'e450823c',
@@ -530,7 +535,7 @@ export const descriptions: Record<string, Description> = {
   },
   moldbreaker: {
     short: "This Pokémon's moves and their effects ignore the Abilities of other Pokémon.",
-    long: "This Pokémon's moves and their effects ignore certain Abilities of other Pokémon. The Abilities that can be negated are {ability:armortail}, {ability:aromaveil}, Aura Break, {ability:battlearmor}, {ability:bigpecks}, {ability:bulletproof}, {ability:clearbody}, {ability:contrary}, {ability:damp}, Dazzling, {ability:disguise}, {ability:dryskin}, {ability:eartheater}, {ability:filter}, {ability:flashfire}, Flower Gift, {ability:flowerveil}, {ability:fluffy}, {ability:friendguard}, {ability:furcoat}, {ability:goodasgold}, {ability:grasspelt}, {ability:guarddog}, {ability:heatproof}, {ability:heavymetal}, {ability:hypercutter}, {ability:iceface}, Ice Scales, {ability:illuminate}, {ability:immunity}, {ability:innerfocus}, {ability:insomnia}, {ability:keeneye}, {ability:leafguard}, {ability:levitate}, {ability:lightmetal}, {ability:lightningrod}, {ability:limber}, {ability:magicbounce}, {ability:magmaarmor}, {ability:marvelscale}, Mind's Eye, {ability:mirrorarmor}, {ability:motordrive}, {ability:multiscale}, {ability:oblivious}, {ability:overcoat}, {ability:owntempo}, Pastel Veil, {ability:punkrock}, {ability:purifyingsalt}, {ability:queenlymajesty}, {ability:sandveil}, {ability:sapsipper}, {ability:shellarmor}, {ability:shielddust}, Simple, {ability:snowcloak}, {ability:solidrock}, {ability:soundproof}, {ability:stickyhold}, Storm Drain, {ability:sturdy}, {ability:suctioncups}, {ability:sweetveil}, {ability:tangledfeet}, {ability:telepathy}, Tera Shell, {ability:thermalexchange}, {ability:thickfat}, {ability:unaware}, {ability:vitalspirit}, {ability:voltabsorb}, {ability:waterabsorb}, {ability:waterbubble}, Water Veil, Well-Baked Body, {ability:whitesmoke}, Wind Rider, Wonder Guard, and Wonder Skin. This affects every other Pokémon on the field, whether or not it is a target of this Pokémon's move, and whether or not their Ability is beneficial to this Pokémon.",
+    long: "This Pokémon's moves and their effects ignore certain Abilities of other Pokémon. The Abilities that can be negated are {ability:armortail}, {ability:aromaveil}, Aura Break, {ability:battlearmor}, {ability:bigpecks}, {ability:bulletproof}, {ability:clearbody}, {ability:contrary}, {ability:damp}, Dazzling, {ability:disguise}, {ability:dryskin}, {ability:eartheater}, {ability:filter}, {ability:flashfire}, Flower Gift, {ability:flowerveil}, {ability:fluffy}, {ability:friendguard}, {ability:furcoat}, {ability:goodasgold}, {ability:grasspelt}, {ability:guarddog}, {ability:heatproof}, {ability:heavymetal}, {ability:hypercutter}, Ice Face, Ice Scales, {ability:illuminate}, {ability:immunity}, {ability:innerfocus}, {ability:insomnia}, {ability:keeneye}, {ability:leafguard}, {ability:levitate}, {ability:lightmetal}, {ability:lightningrod}, {ability:limber}, {ability:magicbounce}, {ability:magmaarmor}, {ability:marvelscale}, Mind's Eye, {ability:mirrorarmor}, {ability:motordrive}, {ability:multiscale}, {ability:oblivious}, {ability:overcoat}, {ability:owntempo}, Pastel Veil, {ability:punkrock}, {ability:purifyingsalt}, {ability:queenlymajesty}, {ability:sandveil}, {ability:sapsipper}, {ability:shellarmor}, {ability:shielddust}, Simple, {ability:snowcloak}, {ability:solidrock}, {ability:soundproof}, {ability:stickyhold}, Storm Drain, {ability:sturdy}, {ability:suctioncups}, {ability:sweetveil}, {ability:tangledfeet}, {ability:telepathy}, Tera Shell, {ability:thermalexchange}, {ability:thickfat}, {ability:unaware}, {ability:vitalspirit}, {ability:voltabsorb}, {ability:waterabsorb}, {ability:waterbubble}, Water Veil, Well-Baked Body, {ability:whitesmoke}, Wind Rider, Wonder Guard, and Wonder Skin. This affects every other Pokémon on the field, whether or not it is a target of this Pokémon's move, and whether or not their Ability is beneficial to this Pokémon.",
     source: '83dd4a35',
   },
   moody: {
@@ -554,7 +559,7 @@ export const descriptions: Record<string, Description> = {
   },
   mummy: {
     short: 'Pokémon making contact with this Pokémon have their Ability changed to Mummy.',
-    long: 'Pokémon making contact with this Pokémon have their Ability changed to Mummy. Does not affect Pokémon with the As One, {ability:battlebond}, Comatose, {ability:disguise}, {ability:gulpmissile}, {ability:iceface}, Multitype, Mummy, Power Construct, RKS System, Schooling, {ability:shieldsdown}, {ability:stancechange}, Tera Shift, Zen Mode, or {ability:zerotohero} Abilities.',
+    long: 'Pokémon making contact with this Pokémon have their Ability changed to Mummy. Does not affect Pokémon with the As One, {ability:battlebond}, Comatose, {ability:disguise}, Gulp Missile, Ice Face, Multitype, Mummy, Power Construct, RKS System, Schooling, Shields Down, {ability:stancechange}, Tera Shift, Zen Mode, or {ability:zerotohero} Abilities.',
     source: 'a6ac88ef',
   },
   naturalcure: {
@@ -692,7 +697,7 @@ export const descriptions: Record<string, Description> = {
   },
   receiver: {
     short: 'This Pokémon copies the Ability of an ally that faints.',
-    long: 'This Pokémon copies the Ability of an ally that faints. Abilities that cannot be copied are As One, {ability:battlebond}, Comatose, Commander, {ability:disguise}, Embody Aspect, Flower Gift, {ability:forecast}, {ability:hungerswitch}, {ability:iceface}, {ability:illusion}, {ability:imposter}, Multitype, Neutralizing Gas, Poison Puppeteer, Power Construct, Power of Alchemy, Protosynthesis, Quark Drive, Receiver, RKS System, Schooling, {ability:shieldsdown}, {ability:stancechange}, Tera Shell, Tera Shift, Teraform Zero, {ability:trace}, Wonder Guard, Zen Mode, and {ability:zerotohero}.',
+    long: 'This Pokémon copies the Ability of an ally that faints. Abilities that cannot be copied are As One, {ability:battlebond}, Comatose, Commander, {ability:disguise}, Embody Aspect, Flower Gift, {ability:forecast}, {ability:hungerswitch}, Ice Face, {ability:illusion}, {ability:imposter}, Multitype, Neutralizing Gas, Poison Puppeteer, Power Construct, Power of Alchemy, Protosynthesis, Quark Drive, Receiver, RKS System, Schooling, Shields Down, {ability:stancechange}, Tera Shell, Tera Shift, Teraform Zero, {ability:trace}, Wonder Guard, Zen Mode, and {ability:zerotohero}.',
     source: '10449fa8',
   },
   reckless: {
@@ -991,7 +996,7 @@ export const descriptions: Record<string, Description> = {
   },
   trace: {
     short: "On switch-in, or when it can, this Pokémon copies a random adjacent foe's Ability.",
-    long: "On switch-in, this Pokémon copies a random opposing Pokémon's Ability. Abilities that cannot be copied are As One, {ability:battlebond}, Comatose, Commander, {ability:disguise}, Embody Aspect, Flower Gift, {ability:forecast}, {ability:hungerswitch}, {ability:iceface}, {ability:illusion}, {ability:imposter}, Multitype, Neutralizing Gas, Poison Puppeteer, Power Construct, Power of Alchemy, Protosynthesis, Quark Drive, {ability:receiver}, RKS System, Schooling, {ability:shieldsdown}, {ability:stancechange}, Teraform Zero, Tera Shell, Tera Shift, Trace, Zen Mode, and {ability:zerotohero}. If no opposing Pokémon has an Ability that can be copied, this Ability will activate as soon as one does.",
+    long: "On switch-in, this Pokémon copies a random opposing Pokémon's Ability. Abilities that cannot be copied are As One, {ability:battlebond}, Comatose, Commander, {ability:disguise}, Embody Aspect, Flower Gift, {ability:forecast}, {ability:hungerswitch}, Ice Face, {ability:illusion}, {ability:imposter}, Multitype, Neutralizing Gas, Poison Puppeteer, Power Construct, Power of Alchemy, Protosynthesis, Quark Drive, {ability:receiver}, RKS System, Schooling, Shields Down, {ability:stancechange}, Teraform Zero, Tera Shell, Tera Shift, Trace, Zen Mode, and {ability:zerotohero}. If no opposing Pokémon has an Ability that can be copied, this Ability will activate as soon as one does.",
     source: '07dde57f',
   },
   unaware: {
@@ -1024,7 +1029,7 @@ export const descriptions: Record<string, Description> = {
   },
   wanderingspirit: {
     short: 'Pokémon making contact with this Pokémon have their Ability swapped with this one.',
-    long: 'Pokémon making contact with this Pokémon have their Ability swapped with this one. Does not affect Pokémon with the Abilities As One, {ability:battlebond}, Comatose, Commander, {ability:disguise}, Embody Aspect, {ability:hungerswitch}, {ability:iceface}, {ability:illusion}, Multitype, Neutralizing Gas, Poison Puppeteer, Power Construct, Protosynthesis, Quark Drive, RKS System, Schooling, {ability:shieldsdown}, {ability:stancechange}, Tera Shell, Tera Shift, Teraform Zero, Wonder Guard, Zen Mode, or {ability:zerotohero}.',
+    long: 'Pokémon making contact with this Pokémon have their Ability swapped with this one. Does not affect Pokémon with the Abilities As One, {ability:battlebond}, Comatose, Commander, {ability:disguise}, Embody Aspect, {ability:hungerswitch}, Ice Face, {ability:illusion}, Multitype, Neutralizing Gas, Poison Puppeteer, Power Construct, Protosynthesis, Quark Drive, RKS System, Schooling, Shields Down, {ability:stancechange}, Tera Shell, Tera Shift, Teraform Zero, Wonder Guard, Zen Mode, or {ability:zerotohero}.',
     source: '6844330d',
   },
   waterabsorb: {

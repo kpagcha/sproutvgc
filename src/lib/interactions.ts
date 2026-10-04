@@ -1,6 +1,6 @@
 // Interactions beyond the type chart for one side of a matchup: a Pokémon's types defending, or a set of move types
-// attacking. Each side is split by relevance: the major rows up front, the minor ones collapsed, and last the "more"
-// rows about specific moves and abilities.
+// attacking. Each side is split by relevance: the key rows up front (statuses, weather and terrain); the other major
+// ones collapsed, then the minor ones, and last the "more" rows about specific moves and abilities.
 
 import { condition, move, refKey, sameRef, type Ref } from '@/data/dex'
 import { chart, TYPES, type TypeId } from '@/data/types'
@@ -8,6 +8,7 @@ import {
   ATK_ROWS,
   DEF_ROWS,
   MORE_ROWS,
+  isKey,
   isMajor,
   resistBerry,
   typeInfo,
@@ -33,11 +34,28 @@ export interface InfoRow {
 }
 export interface SideInfo {
   major: InfoRow[]
+  /** The major rows that aren't key (`isKey`), shown collapsed ahead of the minor ones. */
+  other: InfoRow[]
   minor: InfoRow[]
   more: InfoRow[]
 }
 
-export const hasInfo = (i: SideInfo) => i.major.length + i.minor.length + i.more.length > 0
+export const hasInfo = (i: SideInfo) => i.major.length + i.other.length + i.minor.length + i.more.length > 0
+
+/** `info` with only the key interactions up front (`isKey`), and the rest of the major ones in `other`: the type
+ * pages keep to the essentials. Notes are never key. */
+function keyOnly(info: SideInfo): SideInfo {
+  const major: InfoRow[] = []
+  const other: InfoRow[] = []
+  for (const row of info.major) {
+    const key = row.entries?.filter(isKey) ?? []
+    const rest = row.entries?.filter((e) => !isKey(e)) ?? []
+    if (key.length) major.push({ label: row.label, entries: key })
+    if (rest.length) other.push({ label: row.label, entries: rest })
+    if (row.notes) other.push(row)
+  }
+  return { ...info, major, other }
+}
 
 /** What an entry does besides its multiplier: "+1 SpA", "Def 1.5×", "+1 priority", "sound moves", or several of
  * them ("redirects, +1 SpA"). */
@@ -115,7 +133,7 @@ const FREEZE_DRY = move('freezedry')
 
 /** What a Pokémon of `types` (one or two) takes from beyond the chart. */
 export function defenseInfo(types: readonly TypeId[]): SideInfo {
-  const out: SideInfo = { major: [], minor: [], more: [] }
+  const out: SideInfo = { major: [], other: [], minor: [], more: [] }
   const infos = types.map((ty) => [ty, typeInfo(ty)] as [TypeId, TypeInfo])
   const flying = types.includes('flying')
 
@@ -151,12 +169,12 @@ export function defenseInfo(types: readonly TypeId[]): SideInfo {
   )
   // What changes the Pokémon's own types.
   addMore(out, infos, ['gives', 'loses'])
-  return out
+  return keyOnly(out)
 }
 
 /** What changes how moves of `types` (up to four) hit. Rows mixing several types tag each entry with its type. */
 export function attackInfo(types: readonly TypeId[]): SideInfo {
-  const out: SideInfo = { major: [], minor: [], more: [] }
+  const out: SideInfo = { major: [], other: [], minor: [], more: [] }
   const infos = types.map((ty) => [ty, typeInfo(ty)] as [TypeId, TypeInfo])
   const tag = types.length > 1
   for (const k of ATK_ROWS) {
@@ -176,5 +194,5 @@ export function attackInfo(types: readonly TypeId[]): SideInfo {
   )
   // What turns into the type, and moves of it with their own conditions.
   addMore(out, infos, ['becomes', 'specific'])
-  return out
+  return keyOnly(out)
 }

@@ -25,28 +25,6 @@ export type TypeId = (typeof TYPES)[number]
 
 export type Multiplier = 0 | 0.25 | 0.5 | 1 | 2 | 4
 
-// Showdown sprite file names (English, regardless of UI language).
-const SPRITE_NAMES: Record<TypeId, string> = {
-  normal: 'Normal',
-  fire: 'Fire',
-  water: 'Water',
-  electric: 'Electric',
-  grass: 'Grass',
-  ice: 'Ice',
-  fighting: 'Fighting',
-  poison: 'Poison',
-  ground: 'Ground',
-  flying: 'Flying',
-  psychic: 'Psychic',
-  bug: 'Bug',
-  rock: 'Rock',
-  ghost: 'Ghost',
-  dragon: 'Dragon',
-  dark: 'Dark',
-  steel: 'Steel',
-  fairy: 'Fairy',
-}
-
 // Attacker -> defender -> multiplier. Omitted pairs are neutral (1×).
 const SPARSE: Record<TypeId, Partial<Record<TypeId, number>>> = {
   normal: { rock: 0.5, ghost: 0, steel: 0.5 },
@@ -109,8 +87,4 @@ export function chart(atk: TypeId, def: TypeId): number {
 
 export function isType(s: string): s is TypeId {
   return (TYPES as readonly string[]).includes(s)
-}
-
-export function iconUrl(t: TypeId): string {
-  return `https://play.pokemonshowdown.com/sprites/types/${SPRITE_NAMES[t]}.png`
 }

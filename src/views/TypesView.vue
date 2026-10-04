@@ -9,7 +9,7 @@ import { attackProfile, defensiveProfile, formatMult, multClass, type Profile } 
 import { FADE, PRESS, SPRING } from '@/lib/motion'
 import { hintFor } from '@/lib/hints'
 import { reveal } from '@/lib/scroll'
-import TypeIcon from '@/components/TypeIcon.vue'
+import TypeIcon from '@/components/TypeIcon'
 import QuickLinks from '@/components/QuickLinks.vue'
 import SideInteractions from '@/components/SideInteractions.vue'
 
@@ -55,6 +55,10 @@ watch(
   },
   { flush: 'post' },
 )
+
+// The panel fades in the first time it shows on a visit to the page; once it has, moving between types (or closing
+// and reopening it) swaps it at once.
+const revealed = ref(false)
 
 /** Remembered per viewer, and kept on while moving between types. */
 const LEARN_KEY = 'mondex.types.learn'
@@ -119,15 +123,17 @@ function writeFlag(key: string, on: boolean) {
   </div>
 
   <div ref="detail">
-    <AnimatePresence mode="wait" :initial="false">
+    <AnimatePresence mode="wait">
       <motion.div
         v-if="type"
         :key="type"
-        :initial="{ opacity: 0, y: 6 }"
+        :initial="revealed ? false : { opacity: 0, y: 6 }"
         :animate="{ opacity: 1, y: 0 }"
-        :exit="{ opacity: 0, y: -4 }"
+        :exit="revealed ? undefined : { opacity: 0, y: -4 }"
         :transition="FADE"
+        :on-animation-complete="() => (revealed = true)"
       >
+        <!-- The type's name, then its two sides in panels of their own, side by side where there's room. -->
         <div class="panel">
           <h2 class="name">
             <TypeIcon :type="type" :scale="2" />
@@ -136,35 +142,35 @@ function writeFlag(key: string, on: boolean) {
               {{ t('types.learn') }}
             </button>
           </h2>
-          <div class="sides">
-            <section v-for="s in sections" :key="s.title">
-              <h3>{{ t(s.title) }}</h3>
-              <table class="groups">
-                <tbody>
-                  <tr v-for="row in s.rows" :key="row.m">
-                    <th>
-                      <span class="mult-tag" :class="multClass(row.m)">{{ formatMult(row.m) }}</span>
-                    </th>
-                    <td>
-                      <!-- Learn mode: one line per matchup, with its memory hook. -->
-                      <ul v-if="learn" class="hints">
-                        <li v-for="x in row.types" :key="x">
-                          <RouterLink :to="`/types/${x}`"><TypeIcon :type="x" /></RouterLink>
-                          <span>{{ hint(s.side, x) }}</span>
-                        </li>
-                      </ul>
-                      <span v-else class="icons">
-                        <RouterLink v-for="x in row.types" :key="x" :to="`/types/${x}`">
-                          <TypeIcon :type="x" />
-                        </RouterLink>
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <div v-if="hasInfo(s.info)" class="info"><SideInteractions :info="s.info" /></div>
-            </section>
-          </div>
+        </div>
+        <div class="sides">
+          <section v-for="s in sections" :key="s.title" class="panel">
+            <h3>{{ t(s.title) }}</h3>
+            <table class="groups">
+              <tbody>
+                <tr v-for="row in s.rows" :key="row.m">
+                  <th>
+                    <span class="mult-tag" :class="multClass(row.m)">{{ formatMult(row.m) }}</span>
+                  </th>
+                  <td>
+                    <!-- Learn mode: one line per matchup, with its memory hook. -->
+                    <ul v-if="learn" class="hints">
+                      <li v-for="x in row.types" :key="x">
+                        <RouterLink :to="`/types/${x}`"><TypeIcon :type="x" /></RouterLink>
+                        <span>{{ hint(s.side, x) }}</span>
+                      </li>
+                    </ul>
+                    <span v-else class="icons">
+                      <RouterLink v-for="x in row.types" :key="x" :to="`/types/${x}`">
+                        <TypeIcon :type="x" />
+                      </RouterLink>
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div v-if="hasInfo(s.info)" class="info"><SideInteractions :info="s.info" /></div>
+          </section>
         </div>
       </motion.div>
     </AnimatePresence>
@@ -226,7 +232,7 @@ function writeFlag(key: string, on: boolean) {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
+  margin: 0;
 }
 
 .learn {
@@ -260,13 +266,16 @@ function writeFlag(key: string, on: boolean) {
 
 .sides {
   display: grid;
-  gap: 20px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
-/* Side by side where there's room, at the same width as the matchups page's two columns. */
+.sides > .panel {
+  margin: 0;
+}
+/* Side by side where there's room, at the same width as the matchups page's two columns, and the same height. */
 @media (min-width: 860px) {
   .sides {
     grid-template-columns: 1fr 1fr;
-    align-items: start;
   }
   .sides > * {
     min-width: 0;

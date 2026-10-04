@@ -1,17 +1,16 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
-import { locale, t, typeName } from '@/i18n'
+import { computed, onMounted, useTemplateRef, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { t } from '@/i18n'
 import { GAME_NAME, REGULATION } from '@/data/format'
-import { ability, availableIds } from '@/data/dex'
-import { TYPES } from '@/data/types'
-import { abilityDescription } from '@/i18n/descriptions'
-import { loadDexNames, refName } from '@/i18n/refName'
-import { loadDescriptions } from '@/i18n/descriptions'
-import { fold, split } from '@/lib/search'
-import TypeIcon from '@/components/TypeIcon.vue'
+import type { ItemId, PokemonId } from '@/data/dex'
+import { SECTIONS, preloadSearch, searchFocus, useSearch } from '@/composables/useSearch'
+import TypeIcon from '@/components/TypeIcon'
+import ItemIcon from '@/components/ItemIcon.vue'
+import PokemonIcon from '@/components/PokemonIcon'
 import QuickLinks from '@/components/QuickLinks.vue'
-import DexText from '@/components/DexText.vue'
+import SearchResults from '@/components/SearchResults.vue'
+import SearchBox from '@/components/SearchBox.vue'
 
 // The search is kept in the URL (`?q=`), so coming back from a result brings the results back.
 const route = useRoute()
@@ -23,42 +22,27 @@ const query = computed({
 
 // The page itself shows no dex entries, so it doesn't wait for their names (or descriptions); they load in the
 // background, ready to search by the time anyone types.
-onMounted(() => {
-  void loadDexNames()
-  void loadDescriptions()
-})
+onMounted(preloadSearch)
 
-/** Each category's entries matching the search, by name in the reader's language; categories without any left out. */
-const results = computed(() => {
-  const q = fold(query.value.trim())
-  if (!q) return null
-  const types = TYPES.flatMap((id) => {
-    const name = typeName(id)
-    const parts = split(name, q)
-    return parts ? [{ id, parts }] : []
-  })
-  // Names starting with the search first, then the rest, each alphabetically.
-  const abilities = availableIds('ability')
-    .flatMap((id) => {
-      const name = refName(ability(id))
-      const parts = split(name, q)
-      return parts ? [{ id, name, parts, text: abilityDescription(id)?.short ?? '' }] : []
-    })
-    .sort((a, b) => +!!a.parts[0] - +!!b.parts[0] || a.name.localeCompare(b.name, locale.value))
-  return { types, abilities }
-})
+// The header's Search link focuses the box, whether it brought us here or we were here already. Without scrolling:
+// the box is at the top, and on phones the page may still be sliding in.
+const box = useTemplateRef('box')
+function focusBox() {
+  if (!searchFocus.value) return
+  searchFocus.value = false
+  box.value?.focus({ preventScroll: true })
+}
+onMounted(focusBox)
+watch(searchFocus, focusBox)
 
-/** The only result, if the search has exactly one: Enter opens it. */
-const only = computed((): RouteLocationRaw | null => {
-  const r = results.value
-  if (!r) return null
-  if (r.types.length === 1 && !r.abilities.length) return `/types/${r.types[0]!.id}`
-  if (r.abilities.length === 1 && !r.types.length) return { name: 'ability', params: { id: r.abilities[0]!.id } }
-  return null
-})
+const { results, only } = useSearch(() => query.value)
 function openOnly() {
   if (only.value) void router.push(only.value)
 }
+
+// The cards' decorations: a few entries of their sections.
+const DECOR_POKEMON: PokemonId[] = ['incineroar', 'garchomp', 'whimsicott']
+const DECOR_ITEMS: ItemId[] = ['choicescarf', 'focussash', 'sitrusberry']
 </script>
 
 <template>
@@ -67,51 +51,34 @@ function openOnly() {
     <div class="intro">
       <h1 class="title">mon<span>dex</span></h1>
       <p class="muted">{{ t('home.intro', { game: GAME_NAME, reg: REGULATION }) }}</p>
-      <input
+      <SearchBox
+        ref="box"
         v-model="query"
-        type="search"
-        class="search"
+        wide
+        icon
         :placeholder="t('home.search')"
         :aria-label="t('home.search')"
         @keydown.enter="openOnly"
       />
     </div>
-    <template v-if="results">
-      <section v-if="results.types.length" class="panel section">
-        <RouterLink to="/types" class="section-head">
-          <span class="section-title font-display">{{ t('title.types') }} <span class="arrow">›</span></span>
-        </RouterLink>
-        <ul class="type-hits">
-          <li v-for="ty in results.types" :key="ty.id">
-            <RouterLink :to="`/types/${ty.id}`" class="type-hit">
-              <TypeIcon :type="ty.id" />
-              <span
-                >{{ ty.parts[0] }}<mark>{{ ty.parts[1] }}</mark
-                >{{ ty.parts[2] }}</span
-              >
-            </RouterLink>
-          </li>
-        </ul>
-      </section>
-      <section v-if="results.abilities.length" class="panel section">
-        <RouterLink to="/abilities" class="section-head">
-          <span class="section-title font-display">{{ t('title.abilities') }} <span class="arrow">›</span></span>
-        </RouterLink>
-        <dl class="entries">
-          <template v-for="a in results.abilities" :key="a.id">
-            <dt>
-              <RouterLink :to="{ name: 'ability', params: { id: a.id } }"
-                >{{ a.parts[0] }}<mark>{{ a.parts[1] }}</mark
-                >{{ a.parts[2] }}</RouterLink
-              >
-            </dt>
-            <dd class="muted"><DexText :text="a.text" /></dd>
-          </template>
-        </dl>
-      </section>
-      <p v-if="!results.types.length && !results.abilities.length" class="muted none">{{ t('home.none') }}</p>
-    </template>
+    <SearchResults v-if="results" :query :results />
     <template v-else>
+      <section v-for="s in SECTIONS" :key="s.kind" class="panel section">
+        <RouterLink :to="s.list" class="section-head">
+          <span class="section-text">
+            <span class="section-title-row">
+              <span class="section-title font-display">{{ t(s.title) }} <span class="arrow">›</span></span>
+              <span v-if="s.kind === 'pokemon'" class="icons" aria-hidden="true">
+                <PokemonIcon v-for="p in DECOR_POKEMON" :id="p" :key="p" />
+              </span>
+              <span v-else-if="s.kind === 'item'" class="icons" aria-hidden="true">
+                <ItemIcon v-for="i in DECOR_ITEMS" :id="i" :key="i" />
+              </span>
+            </span>
+            <span class="muted">{{ t(s.desc) }}</span>
+          </span>
+        </RouterLink>
+      </section>
       <section class="panel section">
         <RouterLink to="/types" class="section-head">
           <span class="section-text">
@@ -127,14 +94,6 @@ function openOnly() {
           </span>
         </RouterLink>
         <QuickLinks />
-      </section>
-      <section class="panel section">
-        <RouterLink to="/abilities" class="section-head">
-          <span class="section-text">
-            <span class="section-title font-display">{{ t('title.abilities') }} <span class="arrow">›</span></span>
-            <span class="muted">{{ t('home.abilitiesDesc') }}</span>
-          </span>
-        </RouterLink>
       </section>
     </template>
   </div>
@@ -207,38 +166,8 @@ function openOnly() {
   color: var(--accent);
 }
 
-.search {
+.search-box {
   margin: 16px 0 0;
-}
-.type-hits {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 14px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.type-hit {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: bold;
-}
-/* As on the abilities page: each name beside its description. */
-.entries {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 6px 16px;
-  margin: 0;
-}
-.entries dt {
-  font-weight: bold;
-}
-.entries dd {
-  margin: 0;
-}
-.none {
-  text-align: center;
 }
 
 @media (max-width: 560px) {
@@ -254,13 +183,6 @@ function openOnly() {
   /* Just the title and its icons; the description goes. */
   .section-text .muted {
     display: none;
-  }
-  .entries {
-    grid-template-columns: 1fr;
-    gap: 2px;
-  }
-  .entries dd {
-    margin-bottom: 8px;
   }
 }
 </style>

@@ -16,7 +16,6 @@ const jiti = createJiti(import.meta.url, { alias: { '@': join(ROOT, 'src') } })
 
 type Kind = 'type' | 'condition' | 'group' | 'move' | 'ability' | 'item' | 'pokemon'
 interface Dex {
-  CONDITIONS: readonly string[]
   GROUPS: readonly string[]
   available(ref: { kind: Kind; id: string }): boolean
 }
@@ -26,19 +25,22 @@ const { TYPES } = (await jiti.import('@/data/types.ts')) as { TYPES: readonly st
 /** The entries each kind of marker can name, beyond what `available()` already checks. */
 const KNOWN: Record<Kind, (id: string) => boolean> = {
   type: (id) => TYPES.includes(id),
-  condition: (id) => dex.CONDITIONS.includes(id),
   group: (id) => dex.GROUPS.includes(id),
-  // Generated categories: `available()` is false for IDs that don't exist too.
+  // Generated and curated categories: `available()` is false for IDs that don't exist too.
+  condition: () => true,
   move: () => true,
   ability: () => true,
   item: () => true,
   pokemon: () => true,
 }
 
-/** The curated text, by file: each entry's strings. Ability descriptions in every language that has them. */
+/** The categories with curated descriptions, in `src/i18n/<locale>/<category>.ts`. */
+const DESCRIBED = ['abilities', 'moves', 'items', 'conditions']
+
+/** The curated text, by file: each entry's strings. Descriptions in every language that has them. */
 const TEXT: Record<string, () => Promise<Record<string, Record<string, unknown>>>> = Object.fromEntries(
   Object.keys(LOCALES)
-    .map((locale) => `src/i18n/${locale}/abilities.ts`)
+    .flatMap((locale) => DESCRIBED.map((category) => `src/i18n/${locale}/${category}.ts`))
     .filter((file) => existsSync(join(ROOT, file)))
     .map((file) => [
       file,
