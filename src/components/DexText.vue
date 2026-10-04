@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import type { Ref } from '@/data/dex'
 import DexRef from '@/components/DexRef.vue'
 import { shortText } from '@/i18n/descriptions'
+import { parseDexText } from '@/lib/dexText'
 
 // Curated text with references to dex entries embedded as markers (`{type:flying}`, `{move:taunt}`): the markers
 // render as the entries' names, in the reader's language, linked once their category has pages. `npm run check-text`
@@ -14,17 +15,12 @@ const props = defineProps<{ text: string }>()
 const canHover = window.matchMedia('(hover: hover)').matches
 const tip = (ref: Ref) => (canHover ? shortText(ref) : undefined)
 
-const parts = computed(() =>
-  props.text.split(/(\{\w+:\w+\})/).map((part) => {
-    const marker = part.match(/^\{(\w+):(\w+)\}$/)
-    return marker ? { ref: { kind: marker[1], id: marker[2] } as Ref } : { text: part }
-  }),
-)
+const parts = computed(() => parseDexText(props.text))
 </script>
 
 <template>
   <template v-for="(part, i) in parts" :key="i">
-    <DexRef v-if="part.ref" :to="part.ref" :tip="tip(part.ref)" />
+    <DexRef v-if="'ref' in part" :to="part.ref" :tip="tip(part.ref)" />
     <template v-else>{{ part.text }}</template>
   </template>
 </template>

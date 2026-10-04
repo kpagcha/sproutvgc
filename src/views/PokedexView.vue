@@ -8,12 +8,13 @@ import { TYPES, type TypeId } from '@/data/types'
 import { locale, t, typeName } from '@/i18n'
 import { loadDescriptions, shortText } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
+import { follow, hrefOf, refHref } from '@/lib/links'
 import { fold, split } from '@/lib/search'
+import { cellStyle } from '@/lib/sprites'
 import { formatFilters, parseFilters, passes, type PokemonFilter } from '@/lib/pokemonFilters'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { useSearch } from '@/composables/useSearch'
 import { useSort } from '@/composables/useSort'
-import PokemonIcon from '@/components/PokemonIcon.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon.vue'
 import SearchBox from '@/components/SearchBox.vue'
@@ -22,7 +23,9 @@ import DexRef from '@/components/DexRef.vue'
 import SearchResults from '@/components/SearchResults.vue'
 
 // Every Pokémon the regulation has, with its types, abilities and base stats, sortable by its name and stats. Formes
-// that only look different (Vivillon's patterns) are left to their species' page.
+// that only look different (Vivillon's patterns) are left to their species' page. The rows are plain markup, with
+// their links' hrefs and the icon's style worked out here, and the router follows the links (`follow` on the table):
+// components (RouterLinks, icons) in each of hundreds of rows take a while to mount.
 const rows = computed(() =>
   availableIds('pokemon')
     .filter((id) => !POKEMON[id].cosmetic)
@@ -30,7 +33,13 @@ const rows = computed(() =>
       id,
       name: refName(pokemon(id)),
       data: POKEMON[id],
-      abilities: POKEMON[id].abilities.map(ability),
+      href: hrefOf({ name: 'pokemon', params: { id } }),
+      icon: cellStyle('pokemon', POKEMON[id].icon),
+      types: POKEMON[id].types.map((type) => ({ type, href: hrefOf({ name: 'types', params: { type } }) })),
+      abilities: POKEMON[id].abilities.map((a) => {
+        const ref = ability(a)
+        return { ref, name: refName(ref), href: refHref(ref) }
+      }),
     })),
 )
 
@@ -91,8 +100,6 @@ const { key, desc, toggle, sorted } = useSort({
 // The rows render once the page is in, with a skeleton until then: all of them take over 100ms.
 const entered = usePageEntered()
 const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r']
-
-const link = (id: PokemonId) => ({ name: 'pokemon', params: { id } })
 </script>
 
 <template>
@@ -126,7 +133,7 @@ const link = (id: PokemonId) => ({ name: 'pokemon', params: { id } })
         </button>
       </li>
     </ul>
-    <div v-if="sorted.length" class="dex-table" role="table">
+    <div v-if="sorted.length" class="dex-table" role="table" @click="follow">
       <div class="row head" role="row">
         <SortHeader :label="t('pokedex.name')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
         <div role="columnheader">{{ t('pokedex.types') }}</div>
@@ -154,8 +161,8 @@ const link = (id: PokemonId) => ({ name: 'pokemon', params: { id } })
       <template v-else>
         <div v-for="r in sorted" :key="r.id" class="row" role="row">
           <div role="cell" class="grow">
-            <RouterLink :to="link(r.id)" class="mon">
-              <PokemonIcon :id="r.id" />
+            <a :href="r.href" class="mon">
+              <span class="sheet-icon" :style="r.icon" aria-hidden="true"></span>
               <span class="name">
                 <template v-if="r.parts"
                   >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
@@ -163,18 +170,18 @@ const link = (id: PokemonId) => ({ name: 'pokemon', params: { id } })
                 >
                 <template v-else>{{ r.name }}</template>
               </span>
-            </RouterLink>
+            </a>
           </div>
           <div role="cell">
             <span class="types">
-              <RouterLink v-for="ty in r.data.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
-                <TypeIcon :type="ty" />
-              </RouterLink>
+              <a v-for="ty in r.types" :key="ty.type" :href="ty.href"><TypeIcon :type="ty.type" /></a>
             </span>
           </div>
           <div role="cell" class="wide-only grow">
             <ul class="abilities">
-              <li v-for="a in r.abilities" :key="a.id"><DexRef :to="a" :tip="abilityTip(a)" /></li>
+              <li v-for="a in r.abilities" :key="a.ref.id">
+                <a v-tip="abilityTip(a.ref)" :href="a.href">{{ a.name }}</a>
+              </li>
             </ul>
           </div>
           <div v-for="(v, i) in r.data.stats" :key="i" role="cell" class="wide-only r num">{{ v }}</div>
