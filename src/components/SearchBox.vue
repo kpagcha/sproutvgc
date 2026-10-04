@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { useTemplateRef } from 'vue'
+import { Search } from '@lucide/vue'
 import { t } from '@/i18n'
 
 // A search field with a button that clears it, in every browser: phones' own clear button only shows on some, and
 // desktop browsers show it on hover at best, so the native one is hidden in favour of this. Attributes go to the field.
+// `wide` fills the width it's given (the home page's search); `icon` puts a magnifying glass at the start.
 defineOptions({ inheritAttrs: false })
+defineProps<{ wide?: boolean; icon?: boolean }>()
 const query = defineModel<string>({ default: '' })
 
 const input = useTemplateRef('input')
@@ -16,7 +19,8 @@ defineExpose({ focus: () => input.value?.focus() })
 </script>
 
 <template>
-  <span class="search-box">
+  <span class="search-box" :class="{ wide, icon }">
+    <Search v-if="icon" class="glass" :size="16" :stroke-width="2.5" aria-hidden="true" />
     <input ref="input" v-model="query" type="search" class="search" v-bind="$attrs" />
     <button v-if="query" type="button" class="clear" :aria-label="t('search.clear')" @click="clear">×</button>
   </span>
@@ -36,6 +40,20 @@ defineExpose({ focus: () => input.value?.focus() })
   max-width: none;
   margin: 0;
   padding-right: 32px;
+}
+.wide {
+  max-width: none;
+}
+.icon .search {
+  padding-left: 32px;
+}
+.glass {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
 }
 .search::-webkit-search-cancel-button {
   display: none;

@@ -42,6 +42,8 @@ const DECOR_ITEMS: ItemId[] = ['choicescarf', 'focussash', 'sitrusberry']
       <p class="muted">{{ t('home.intro', { game: GAME_NAME, reg: REGULATION }) }}</p>
       <SearchBox
         v-model="query"
+        wide
+        icon
         :placeholder="t('home.search')"
         :aria-label="t('home.search')"
         @keydown.enter="openOnly"
