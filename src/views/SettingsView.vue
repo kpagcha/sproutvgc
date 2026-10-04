@@ -1,12 +1,8 @@
 <script setup lang="ts">
-import { defineAsyncComponent } from 'vue'
 import { THEME_MODES, useTheme } from '@/composables/useTheme'
 import { LOCALES, locale, setLocale, t, type Locale } from '@/i18n'
 
 const { mode, setMode } = useTheme()
-
-// Dev-only font lab; the import is dropped from production builds.
-const DevSettings = import.meta.env.DEV ? defineAsyncComponent(() => import('@/dev/DevSettings.vue')) : null
 </script>
 
 <template>
@@ -39,8 +35,6 @@ const DevSettings = import.meta.env.DEV ? defineAsyncComponent(() => import('@/d
       </label>
     </div>
   </div>
-
-  <component :is="DevSettings" v-if="DevSettings" />
 </template>
 
 <style scoped>

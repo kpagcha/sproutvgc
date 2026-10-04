@@ -33,7 +33,7 @@ There is no test suite, and none should be added. Verify changes with `npm run b
 - **Tooltips**: the global `v-tip` directive (`src/directives/tip.ts`, tippy.js) replaces native `title`. `v-tip:group="..."` makes elements share one singleton tooltip that glides between them (used for table cells).
 - **Env files**: `.env` (tracked) holds shared settings the build needs, such as `VITE_REGULATION`; `.env.development` (tracked) holds dev-server-only defaults; a gitignored `.env.local` is for personal overrides. Nothing secret goes in any of them, since `VITE_` values end up in the shipped app.
 - **Profiling**: `VITE_PROFILE=true` (`just dev-profile`, or `.env.local`) turns on `app.config.performance` in dev, for Vue's per-component timings in the Performance panel. They inflate durations, so measure speed on `just preview` instead.
-- **Dev-only**: the settings page's dev section (`src/dev/DevSettings.vue`: the font lab) and `src/dev/fonts.ts` (a lab for trying fonts through `--font-display`/`--font-body`/`--font-num`) are loaded only when `import.meta.env.DEV` is true and are left out of production builds.
+- **Dev-only**: the type quiz's dev tools (`src/dev/QuizDevTools.vue`, with `quizSim.ts` and `DevZone.vue`) are loaded only when `import.meta.env.DEV` is true and are left out of production builds.
 
 ## Conventions
 
