@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watchEffect } from 'vue'
+import { computed, onMounted, ref, useTemplateRef, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ability, availableIds, pokemon, sameRef, type MoveId, type PokemonId, type Ref } from '@/data/dex'
 import { REGULATION } from '@/data/format'
@@ -13,6 +13,7 @@ import { fold, split } from '@/lib/search'
 import { cellStyle } from '@/lib/sprites'
 import { formatFilters, parseFilters, passes, type PokemonFilter } from '@/lib/pokemonFilters'
 import { usePageEntered } from '@/composables/usePageEntered'
+import { useRowColumns } from '@/composables/useRowColumns'
 import { useSearch } from '@/composables/useSearch'
 import { useSort } from '@/composables/useSort'
 import SortHeader from '@/components/SortHeader.vue'
@@ -98,7 +99,8 @@ const { key, desc, toggle, sorted } = useSort({
 })
 
 // The rows render once the page is in, with a skeleton until then: all of them take over 100ms.
-const entered = usePageEntered()
+const { entered, restoring } = usePageEntered()
+useRowColumns(useTemplateRef('head'))
 const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r']
 </script>
 
@@ -133,8 +135,8 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
         </button>
       </li>
     </ul>
-    <div v-if="sorted.length" class="dex-table" role="table" @click="follow">
-      <div class="row head" role="row">
+    <div v-if="sorted.length" class="dex-table" :class="{ restoring }" role="table" @click="follow">
+      <div ref="head" class="row head" role="row">
         <SortHeader :label="t('pokedex.name')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
         <div role="columnheader">{{ t('pokedex.types') }}</div>
         <div role="columnheader" class="wide-only">{{ t('pokedex.abilities') }}</div>
@@ -199,6 +201,7 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
 .dex-table {
   --types: calc(64px * var(--icon-scale, 1) + 14px);
   --num: minmax(2.6em, auto);
+  --row-height: 2.3em;
   --cols: minmax(11em, 1fr) var(--types) minmax(0, 1fr) repeat(7, var(--num));
 }
 @media (max-width: 720px) {

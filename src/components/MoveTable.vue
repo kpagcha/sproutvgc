@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref } from 'vue'
+import { computed, onUnmounted, ref, useTemplateRef } from 'vue'
 import { move, type MoveId } from '@/data/dex'
 import { CATEGORIES, MOVES, type Category, type Move } from '@/data/moves'
 import { TYPES, type TypeId } from '@/data/types'
@@ -12,6 +12,7 @@ import { follow, hrefOf, refHref } from '@/lib/links'
 import { CATEGORY_ICONS } from '@/lib/sprites'
 import { fold, split } from '@/lib/search'
 import { usePageEntered } from '@/composables/usePageEntered'
+import { useRowColumns } from '@/composables/useRowColumns'
 import { useSort } from '@/composables/useSort'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon.vue'
@@ -87,7 +88,8 @@ phoneQuery.addEventListener('change', onPhone)
 onUnmounted(() => phoneQuery.removeEventListener('change', onPhone))
 
 // The rows render once the page is in, with a skeleton until then: all of them can take over 100ms.
-const entered = usePageEntered()
+const { entered, restoring } = usePageEntered()
+useRowColumns(useTemplateRef('head'))
 const skeleton = computed(() => [
   'grow',
   '',
@@ -111,8 +113,14 @@ const skeleton = computed(() => [
       <option v-for="c in CATEGORIES" :key="c" :value="c">{{ t(`move.category.${c}`) }}</option>
     </select>
   </div>
-  <div v-if="sorted.length" class="dex-table" :class="{ described: descriptions }" role="table" @click="follow">
-    <div class="row head" role="row">
+  <div
+    v-if="sorted.length"
+    class="dex-table"
+    :class="{ described: descriptions, restoring }"
+    role="table"
+    @click="follow"
+  >
+    <div ref="head" class="row head" role="row">
       <SortHeader :label="t('move.name')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
       <SortHeader
         v-for="c in COLUMNS"
@@ -178,6 +186,7 @@ const skeleton = computed(() => [
    descriptions under the names. */
 .dex-table {
   --num: minmax(2.6em, auto);
+  --row-height: 2.05em;
   --cols: minmax(0, 1fr) auto auto repeat(3, var(--num));
 }
 .dex-table.described {

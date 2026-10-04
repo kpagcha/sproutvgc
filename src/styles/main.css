@@ -405,20 +405,22 @@ details > summary {
 /* Dex tables (Pokémon, moves): a header row of sort buttons that sticks to the top of the page, and rows. They don't
    scroll sideways, which would keep the header from sticking: phones get fewer columns instead. Not a <table>, which
    sizes its columns to everything in them, so that rows coming and going (a search, a filter) never resize the
-   columns. Here the columns, `--cols`, which each table sets, are shared by the rows (a subgrid) and sized so no row
-   can change them: shares of the room (names, abilities), fixed widths, or `auto` where the header is the widest thing
-   in the column (icons; numbers, given room for three digits). Cells marked `wide-only` are left out on phones, so
-   `--cols` lists the columns left there. */
-.dex-table {
-  display: grid;
-  grid-template-columns: var(--cols);
-}
+   columns. The header row sizes them from `--cols`, which each table sets, so that no row could change them: shares of
+   the room (names, abilities), fixed widths, or `auto` where the header is the widest thing in the column (icons;
+   numbers, given room for three digits). The rows take the widths it resolves to (`--row-cols`, `useRowColumns`), so
+   each is laid out on its own, and the browser skips those off screen (`content-visibility`, at about `--row-height`
+   until they've been seen): hundreds of rows otherwise take a while to style and lay out. Not when going back to the
+   page (`restoring`, from `usePageEntered`): the scroll position it restores needs the rows' real heights. Cells marked `wide-only` are
+   left out on phones, so `--cols` lists the columns left there. */
 .dex-table .row {
   display: grid;
-  grid-template-columns: subgrid;
-  grid-column: 1 / -1;
+  grid-template-columns: var(--row-cols, var(--cols));
   align-items: center;
   border-top: 1px solid var(--border);
+}
+.dex-table:not(.restoring) .row:not(.head) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto var(--row-height, 2em);
 }
 .dex-table .row > * {
   min-width: 0;
@@ -426,6 +428,7 @@ details > summary {
   white-space: nowrap;
 }
 .dex-table .head {
+  grid-template-columns: var(--cols);
   position: sticky;
   top: 0;
   z-index: 1;
