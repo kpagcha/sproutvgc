@@ -14,11 +14,8 @@ export interface Pokemon {
   stats: [number, number, number, number, number, number]
   /** In slot order; whether one is hidden is left out, as it makes no difference in competitive play. */
   abilities: AbilityId[]
-  /** In kilograms and meters. */
+  /** In kilograms (what Low Kick, Grass Knot and Heavy Slam go by). */
   weight: number
-  height: number
-  /** Its male share (0 to 1), or "M", "F" or "N" (genderless) when it only has one. */
-  gender: number | 'M' | 'F' | 'N'
   /** Its cell on the icon sheet. */
   icon: number
   /** Showdown has no gen5 sprite of it yet (some new Megas): its page shows its icon instead. */

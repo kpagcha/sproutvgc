@@ -4,8 +4,6 @@
     "stats": [90, 92, 75, 92, 85, 60],
     "abilities": ["snowwarning", "soundproof"],
     "weight": 135.5,
-    "height": 2.2,
-    "gender": 0.5,
     "icon": 0
   },
   "abomasnowmega": {
@@ -13,8 +11,6 @@
     "stats": [90, 132, 105, 132, 105, 30],
     "abilities": ["snowwarning"],
     "weight": 185,
-    "height": 2.7,
-    "gender": 0.5,
     "icon": 1,
     "base": "abomasnow",
     "forme": "Mega",
@@ -27,8 +23,6 @@
     "stats": [65, 130, 60, 75, 60, 75],
     "abilities": ["pressure", "superluck", "justified"],
     "weight": 47,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 2
   },
   "absolmega": {
@@ -36,8 +30,6 @@
     "stats": [65, 150, 60, 115, 60, 115],
     "abilities": ["magicbounce"],
     "weight": 49,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 3,
     "base": "absol",
     "forme": "Mega",
@@ -50,8 +42,6 @@
     "stats": [65, 154, 60, 75, 60, 151],
     "abilities": ["sharpness"],
     "weight": 49,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 4,
     "base": "absol",
     "forme": "Mega-Z",
@@ -64,8 +54,6 @@
     "stats": [60, 50, 140, 50, 140, 60],
     "abilities": ["stancechange"],
     "weight": 53,
-    "height": 1.7,
-    "gender": 0.5,
     "icon": 5
   },
   "aegislashblade": {
@@ -73,8 +61,6 @@
     "stats": [60, 140, 50, 140, 50, 60],
     "abilities": ["stancechange"],
     "weight": 53,
-    "height": 1.7,
-    "gender": 0.5,
     "icon": 6,
     "base": "aegislash",
     "forme": "Blade",
@@ -85,8 +71,6 @@
     "stats": [80, 105, 65, 60, 75, 130],
     "abilities": ["rockhead", "pressure", "unnerve"],
     "weight": 59,
-    "height": 1.8,
-    "gender": 0.875,
     "icon": 7
   },
   "aerodactylmega": {
@@ -94,8 +78,6 @@
     "stats": [80, 135, 85, 70, 95, 150],
     "abilities": ["toughclaws"],
     "weight": 79,
-    "height": 2.1,
-    "gender": 0.875,
     "icon": 8,
     "base": "aerodactyl",
     "forme": "Mega",
@@ -108,8 +90,6 @@
     "stats": [70, 110, 180, 60, 60, 50],
     "abilities": ["sturdy", "rockhead", "heavymetal"],
     "weight": 360,
-    "height": 2.1,
-    "gender": 0.5,
     "icon": 9
   },
   "aggronmega": {
@@ -117,8 +97,6 @@
     "stats": [70, 140, 230, 60, 80, 50],
     "abilities": ["filter"],
     "weight": 395,
-    "height": 2.2,
-    "gender": 0.5,
     "icon": 10,
     "base": "aggron",
     "forme": "Mega",
@@ -131,8 +109,6 @@
     "stats": [55, 50, 45, 135, 95, 120],
     "abilities": ["synchronize", "innerfocus", "magicguard"],
     "weight": 48,
-    "height": 1.5,
-    "gender": 0.75,
     "icon": 11
   },
   "alakazammega": {
@@ -140,8 +116,6 @@
     "stats": [55, 50, 65, 175, 105, 150],
     "abilities": ["trace"],
     "weight": 48,
-    "height": 1.2,
-    "gender": 0.75,
     "icon": 12,
     "base": "alakazam",
     "forme": "Mega",
@@ -154,8 +128,6 @@
     "stats": [65, 60, 75, 110, 121, 64],
     "abilities": ["sweetveil", "aromaveil"],
     "weight": 0.5,
-    "height": 0.3,
-    "gender": "F",
     "icon": 13
   },
   "alcremiecaramelswirl": {
@@ -163,8 +135,6 @@
     "stats": [65, 60, 75, 110, 121, 64],
     "abilities": ["sweetveil", "aromaveil"],
     "weight": 0.5,
-    "height": 0.3,
-    "gender": "F",
     "icon": 14,
     "base": "alcremie",
     "forme": "Caramel-Swirl",
@@ -175,8 +145,6 @@
     "stats": [65, 60, 75, 110, 121, 64],
     "abilities": ["sweetveil", "aromaveil"],
     "weight": 0.5,
-    "height": 0.3,
-    "gender": "F",
     "icon": 15,
     "base": "alcremie",
     "forme": "Lemon-Cream",
@@ -187,8 +155,6 @@
     "stats": [65, 60, 75, 110, 121, 64],
     "abilities": ["sweetveil", "aromaveil"],
     "weight": 0.5,
-    "height": 0.3,
-    "gender": "F",
     "icon": 16,
     "base": "alcremie",
     "forme": "Matcha-Cream",
@@ -199,8 +165,6 @@
     "stats": [65, 60, 75, 110, 121, 64],
     "abilities": ["sweetveil", "aromaveil"],
     "weight": 0.5,
-    "height": 0.3,
-    "gender": "F",
     "icon": 17,
     "base": "alcremie",
     "forme": "Mint-Cream",
@@ -211,8 +175,6 @@
     "stats": [65, 60, 75, 110, 121, 64],
     "abilities": ["sweetveil", "aromaveil"],
     "weight": 0.5,
-    "height": 0.3,
-    "gender": "F",
     "icon": 18,
     "base": "alcremie",
     "forme": "Rainbow-Swirl",
@@ -223,8 +185,6 @@
     "stats": [65, 60, 75, 110, 121, 64],
     "abilities": ["sweetveil", "aromaveil"],
     "weight": 0.5,
-    "height": 0.3,
-    "gender": "F",
     "icon": 19,
     "base": "alcremie",
     "forme": "Ruby-Cream",
@@ -235,8 +195,6 @@
     "stats": [65, 60, 75, 110, 121, 64],
     "abilities": ["sweetveil", "aromaveil"],
     "weight": 0.5,
-    "height": 0.3,
-    "gender": "F",
     "icon": 20,
     "base": "alcremie",
     "forme": "Ruby-Swirl",
@@ -247,8 +205,6 @@
     "stats": [75, 70, 90, 70, 105, 80],
     "abilities": ["naturalcure", "cloudnine"],
     "weight": 20.6,
-    "height": 1.1,
-    "gender": 0.5,
     "icon": 21
   },
   "altariamega": {
@@ -256,8 +212,6 @@
     "stats": [75, 110, 110, 110, 105, 80],
     "abilities": ["pixilate"],
     "weight": 20.6,
-    "height": 1.5,
-    "gender": 0.5,
     "icon": 22,
     "base": "altaria",
     "forme": "Mega",
@@ -270,8 +224,6 @@
     "stats": [90, 75, 85, 115, 90, 55],
     "abilities": ["static", "plus"],
     "weight": 61.5,
-    "height": 1.4,
-    "gender": 0.5,
     "icon": 23
   },
   "ampharosmega": {
@@ -279,8 +231,6 @@
     "stats": [90, 95, 105, 165, 110, 45],
     "abilities": ["moldbreaker"],
     "weight": 61.5,
-    "height": 1.4,
-    "gender": 0.5,
     "icon": 24,
     "base": "ampharos",
     "forme": "Mega",
@@ -293,8 +243,6 @@
     "stats": [110, 115, 80, 50, 90, 90],
     "abilities": ["vitalspirit", "innerfocus", "defiant"],
     "weight": 56,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 25
   },
   "appletun": {
@@ -302,8 +250,6 @@
     "stats": [110, 85, 80, 100, 80, 30],
     "abilities": ["ripen", "gluttony", "thickfat"],
     "weight": 13,
-    "height": 0.4,
-    "gender": 0.5,
     "icon": 26
   },
   "araquanid": {
@@ -311,8 +257,6 @@
     "stats": [68, 70, 92, 50, 132, 42],
     "abilities": ["waterbubble", "waterabsorb"],
     "weight": 82,
-    "height": 1.8,
-    "gender": 0.5,
     "icon": 27
   },
   "arbok": {
@@ -320,8 +264,6 @@
     "stats": [60, 95, 69, 65, 79, 80],
     "abilities": ["intimidate", "shedskin", "unnerve"],
     "weight": 65,
-    "height": 3.5,
-    "gender": 0.5,
     "icon": 28
   },
   "arboliva": {
@@ -329,8 +271,6 @@
     "stats": [78, 69, 90, 125, 109, 39],
     "abilities": ["seedsower", "harvest"],
     "weight": 48.2,
-    "height": 1.4,
-    "gender": 0.5,
     "icon": 29
   },
   "arcanine": {
@@ -338,8 +278,6 @@
     "stats": [90, 110, 80, 100, 80, 95],
     "abilities": ["intimidate", "flashfire", "justified"],
     "weight": 155,
-    "height": 1.9,
-    "gender": 0.75,
     "icon": 30
   },
   "arcaninehisui": {
@@ -347,8 +285,6 @@
     "stats": [95, 115, 80, 95, 80, 90],
     "abilities": ["intimidate", "flashfire", "rockhead"],
     "weight": 168,
-    "height": 2,
-    "gender": 0.75,
     "icon": 31,
     "base": "arcanine",
     "forme": "Hisui"
@@ -358,8 +294,6 @@
     "stats": [90, 105, 130, 125, 65, 85],
     "abilities": ["stamina", "sturdy", "stalwart"],
     "weight": 60,
-    "height": 2,
-    "gender": 0.5,
     "icon": 32
   },
   "ariados": {
@@ -367,8 +301,6 @@
     "stats": [70, 90, 70, 60, 70, 40],
     "abilities": ["swarm", "insomnia", "sniper"],
     "weight": 33.5,
-    "height": 1.1,
-    "gender": 0.5,
     "icon": 33
   },
   "armarouge": {
@@ -376,8 +308,6 @@
     "stats": [85, 60, 100, 125, 80, 75],
     "abilities": ["flashfire", "weakarmor"],
     "weight": 85,
-    "height": 1.5,
-    "gender": 0.5,
     "icon": 34
   },
   "aromatisse": {
@@ -385,8 +315,6 @@
     "stats": [101, 72, 72, 99, 89, 29],
     "abilities": ["healer", "aromaveil"],
     "weight": 15.5,
-    "height": 0.8,
-    "gender": 0.5,
     "icon": 35
   },
   "audino": {
@@ -394,8 +322,6 @@
     "stats": [103, 60, 86, 60, 86, 50],
     "abilities": ["healer", "regenerator", "klutz"],
     "weight": 31,
-    "height": 1.1,
-    "gender": 0.5,
     "icon": 36
   },
   "audinomega": {
@@ -403,8 +329,6 @@
     "stats": [103, 60, 126, 80, 126, 50],
     "abilities": ["healer"],
     "weight": 32,
-    "height": 1.5,
-    "gender": 0.5,
     "icon": 37,
     "base": "audino",
     "forme": "Mega",
@@ -417,8 +341,6 @@
     "stats": [123, 77, 72, 99, 92, 58],
     "abilities": ["refrigerate", "snowwarning"],
     "weight": 225,
-    "height": 2.7,
-    "gender": 0.875,
     "icon": 38
   },
   "avalugg": {
@@ -426,8 +348,6 @@
     "stats": [95, 117, 184, 44, 46, 28],
     "abilities": ["owntempo", "icebody", "sturdy"],
     "weight": 505,
-    "height": 2,
-    "gender": 0.5,
     "icon": 39
   },
   "avalugghisui": {
@@ -435,8 +355,6 @@
     "stats": [95, 127, 184, 34, 36, 38],
     "abilities": ["strongjaw", "icebody", "sturdy"],
     "weight": 262.4,
-    "height": 1.4,
-    "gender": 0.5,
     "icon": 40,
     "base": "avalugg",
     "forme": "Hisui"
@@ -446,8 +364,6 @@
     "stats": [100, 50, 80, 60, 80, 50],
     "abilities": ["thickfat", "hugepower", "sapsipper"],
     "weight": 28.5,
-    "height": 0.8,
-    "gender": 0.5,
     "icon": 41
   },
   "banette": {
@@ -455,8 +371,6 @@
     "stats": [64, 115, 65, 83, 63, 65],
     "abilities": ["insomnia", "frisk", "cursedbody"],
     "weight": 12.5,
-    "height": 1.1,
-    "gender": 0.5,
     "icon": 42
   },
   "banettemega": {
@@ -464,8 +378,6 @@
     "stats": [64, 165, 75, 93, 83, 75],
     "abilities": ["prankster"],
     "weight": 13,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 43,
     "base": "banette",
     "forme": "Mega",
@@ -478,8 +390,6 @@
     "stats": [72, 105, 115, 54, 86, 68],
     "abilities": ["toughclaws", "sniper", "pickpocket"],
     "weight": 96,
-    "height": 1.3,
-    "gender": 0.5,
     "icon": 44
   },
   "barbaraclemega": {
@@ -487,8 +397,6 @@
     "stats": [72, 140, 130, 64, 106, 88],
     "abilities": ["toughclaws"],
     "weight": 100,
-    "height": 2.2,
-    "gender": 0.5,
     "icon": 45,
     "noSprite": true,
     "base": "barbaracle",
@@ -502,8 +410,6 @@
     "stats": [120, 112, 65, 80, 75, 78],
     "abilities": ["swiftswim", "adaptability", "moldbreaker"],
     "weight": 110,
-    "height": 3,
-    "gender": "M",
     "icon": 46
   },
   "basculegionf": {
@@ -511,8 +417,6 @@
     "stats": [120, 92, 65, 100, 75, 78],
     "abilities": ["swiftswim", "adaptability", "moldbreaker"],
     "weight": 110,
-    "height": 3,
-    "gender": "F",
     "icon": 47,
     "base": "basculegion",
     "forme": "F"
@@ -522,8 +426,6 @@
     "stats": [60, 52, 168, 47, 138, 30],
     "abilities": ["sturdy", "soundproof"],
     "weight": 149.5,
-    "height": 1.3,
-    "gender": 0.875,
     "icon": 48
   },
   "baxcalibur": {
@@ -531,8 +433,6 @@
     "stats": [115, 145, 92, 75, 86, 87],
     "abilities": ["thermalexchange", "icebody"],
     "weight": 210,
-    "height": 2.1,
-    "gender": 0.5,
     "icon": 49
   },
   "baxcaliburmega": {
@@ -540,8 +440,6 @@
     "stats": [115, 175, 117, 105, 101, 87],
     "abilities": ["thermalexchange"],
     "weight": 315,
-    "height": 2.1,
-    "gender": 0.5,
     "icon": 50,
     "base": "baxcalibur",
     "forme": "Mega",
@@ -554,8 +452,6 @@
     "stats": [95, 130, 80, 70, 80, 50],
     "abilities": ["snowcloak", "slushrush", "swiftswim"],
     "weight": 260,
-    "height": 2.6,
-    "gender": 0.5,
     "icon": 51
   },
   "beedrill": {
@@ -563,8 +459,6 @@
     "stats": [65, 90, 40, 45, 80, 75],
     "abilities": ["swarm", "sniper"],
     "weight": 29.5,
-    "height": 1,
-    "gender": 0.5,
     "icon": 52
   },
   "beedrillmega": {
@@ -572,8 +466,6 @@
     "stats": [65, 150, 40, 15, 80, 145],
     "abilities": ["adaptability"],
     "weight": 40.5,
-    "height": 1.4,
-    "gender": 0.5,
     "icon": 53,
     "base": "beedrill",
     "forme": "Mega",
@@ -586,8 +478,6 @@
     "stats": [109, 64, 91, 103, 83, 45],
     "abilities": ["electromorphosis", "static", "damp"],
     "weight": 113,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 54
   },
   "blastoise": {
@@ -595,8 +485,6 @@
     "stats": [79, 83, 100, 85, 105, 78],
     "abilities": ["torrent", "raindish"],
     "weight": 85.5,
-    "height": 1.6,
-    "gender": 0.875,
     "icon": 55
   },
   "blastoisemega": {
@@ -604,8 +492,6 @@
     "stats": [79, 103, 120, 135, 115, 78],
     "abilities": ["megalauncher"],
     "weight": 101.1,
-    "height": 1.6,
-    "gender": 0.875,
     "icon": 56,
     "base": "blastoise",
     "forme": "Mega",
@@ -618,8 +504,6 @@
     "stats": [80, 120, 70, 110, 70, 80],
     "abilities": ["blaze", "speedboost"],
     "weight": 52,
-    "height": 1.9,
-    "gender": 0.875,
     "icon": 57
   },
   "blazikenmega": {
@@ -627,8 +511,6 @@
     "stats": [80, 160, 80, 130, 80, 100],
     "abilities": ["speedboost"],
     "weight": 52,
-    "height": 1.9,
-    "gender": 0.875,
     "icon": 58,
     "base": "blaziken",
     "forme": "Mega",
@@ -641,8 +523,6 @@
     "stats": [70, 100, 70, 105, 75, 40],
     "abilities": ["magmaarmor", "solidrock", "angerpoint"],
     "weight": 220,
-    "height": 1.9,
-    "gender": 0.5,
     "icon": 59
   },
   "cameruptmega": {
@@ -650,8 +530,6 @@
     "stats": [70, 120, 100, 145, 105, 20],
     "abilities": ["sheerforce"],
     "weight": 320.5,
-    "height": 2.5,
-    "gender": 0.5,
     "icon": 60,
     "base": "camerupt",
     "forme": "Mega",
@@ -664,8 +542,6 @@
     "stats": [70, 70, 70, 70, 70, 70],
     "abilities": ["forecast"],
     "weight": 0.8,
-    "height": 0.3,
-    "gender": 0.5,
     "icon": 61
   },
   "castformrainy": {
@@ -673,8 +549,6 @@
     "stats": [70, 70, 70, 70, 70, 70],
     "abilities": ["forecast"],
     "weight": 0.8,
-    "height": 0.3,
-    "gender": 0.5,
     "icon": 62,
     "base": "castform",
     "forme": "Rainy",
@@ -685,8 +559,6 @@
     "stats": [70, 70, 70, 70, 70, 70],
     "abilities": ["forecast"],
     "weight": 0.8,
-    "height": 0.3,
-    "gender": 0.5,
     "icon": 63,
     "base": "castform",
     "forme": "Snowy",
@@ -697,8 +569,6 @@
     "stats": [70, 70, 70, 70, 70, 70],
     "abilities": ["forecast"],
     "weight": 0.8,
-    "height": 0.3,
-    "gender": 0.5,
     "icon": 64,
     "base": "castform",
     "forme": "Sunny",
@@ -709,8 +579,6 @@
     "stats": [75, 125, 80, 60, 100, 85],
     "abilities": ["flashfire", "weakarmor"],
     "weight": 62,
-    "height": 1.6,
-    "gender": 0.5,
     "icon": 65
   },
   "chandelure": {
@@ -718,8 +586,6 @@
     "stats": [60, 55, 90, 145, 90, 80],
     "abilities": ["flashfire", "flamebody", "infiltrator"],
     "weight": 34.3,
-    "height": 1,
-    "gender": 0.5,
     "icon": 66
   },
   "chandeluremega": {
@@ -727,8 +593,6 @@
     "stats": [60, 75, 110, 175, 110, 90],
     "abilities": ["infiltrator"],
     "weight": 69.6,
-    "height": 2.5,
-    "gender": 0.5,
     "icon": 67,
     "base": "chandelure",
     "forme": "Mega",
@@ -741,8 +605,6 @@
     "stats": [78, 84, 78, 109, 85, 100],
     "abilities": ["blaze", "solarpower"],
     "weight": 90.5,
-    "height": 1.7,
-    "gender": 0.875,
     "icon": 68
   },
   "charizardmegax": {
@@ -750,8 +612,6 @@
     "stats": [78, 130, 111, 130, 85, 100],
     "abilities": ["toughclaws"],
     "weight": 110.5,
-    "height": 1.7,
-    "gender": 0.875,
     "icon": 69,
     "base": "charizard",
     "forme": "Mega-X",
@@ -764,8 +624,6 @@
     "stats": [78, 104, 78, 159, 115, 100],
     "abilities": ["drought"],
     "weight": 100.5,
-    "height": 1.7,
-    "gender": 0.875,
     "icon": 70,
     "base": "charizard",
     "forme": "Mega-Y",
@@ -778,8 +636,6 @@
     "stats": [88, 107, 122, 74, 75, 64],
     "abilities": ["overgrow", "bulletproof"],
     "weight": 90,
-    "height": 1.6,
-    "gender": 0.875,
     "icon": 71
   },
   "chesnaughtmega": {
@@ -787,8 +643,6 @@
     "stats": [88, 137, 172, 74, 115, 44],
     "abilities": ["bulletproof"],
     "weight": 90,
-    "height": 1.6,
-    "gender": 0.875,
     "icon": 72,
     "base": "chesnaught",
     "forme": "Mega",
@@ -801,8 +655,6 @@
     "stats": [75, 50, 80, 95, 90, 65],
     "abilities": ["levitate"],
     "weight": 1,
-    "height": 0.6,
-    "gender": 0.5,
     "icon": 73
   },
   "chimechomega": {
@@ -810,8 +662,6 @@
     "stats": [75, 50, 110, 135, 120, 65],
     "abilities": ["levitate"],
     "weight": 8,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 74,
     "base": "chimecho",
     "forme": "Mega",
@@ -824,8 +674,6 @@
     "stats": [80, 116, 75, 65, 75, 119],
     "abilities": ["blaze", "libero"],
     "weight": 33,
-    "height": 1.4,
-    "gender": 0.875,
     "icon": 75
   },
   "clawitzer": {
@@ -833,8 +681,6 @@
     "stats": [71, 73, 88, 120, 89, 59],
     "abilities": ["megalauncher"],
     "weight": 35.3,
-    "height": 1.3,
-    "gender": 0.5,
     "icon": 76
   },
   "clefable": {
@@ -842,8 +688,6 @@
     "stats": [95, 70, 73, 95, 90, 60],
     "abilities": ["cutecharm", "magicguard", "unaware"],
     "weight": 40,
-    "height": 1.3,
-    "gender": 0.25,
     "icon": 77
   },
   "clefablemega": {
@@ -851,8 +695,6 @@
     "stats": [95, 80, 93, 135, 110, 70],
     "abilities": ["magicbounce"],
     "weight": 42.3,
-    "height": 1.7,
-    "gender": 0.25,
     "icon": 78,
     "base": "clefable",
     "forme": "Mega",
@@ -865,8 +707,6 @@
     "stats": [58, 50, 145, 95, 105, 30],
     "abilities": ["mummy"],
     "weight": 76.5,
-    "height": 1.7,
-    "gender": 0.5,
     "icon": 79
   },
   "conkeldurr": {
@@ -874,8 +714,6 @@
     "stats": [105, 140, 95, 55, 65, 45],
     "abilities": ["guts", "sheerforce", "ironfist"],
     "weight": 87,
-    "height": 1.4,
-    "gender": 0.75,
     "icon": 80
   },
   "corviknight": {
@@ -883,8 +721,6 @@
     "stats": [98, 87, 105, 53, 85, 67],
     "abilities": ["pressure", "unnerve", "mirrorarmor"],
     "weight": 75,
-    "height": 2.2,
-    "gender": 0.5,
     "icon": 81
   },
   "crabominable": {
@@ -892,8 +728,6 @@
     "stats": [97, 132, 77, 62, 67, 43],
     "abilities": ["hypercutter", "ironfist", "angerpoint"],
     "weight": 180,
-    "height": 1.7,
-    "gender": 0.5,
     "icon": 82
   },
   "crabominablemega": {
@@ -901,8 +735,6 @@
     "stats": [97, 157, 122, 62, 107, 33],
     "abilities": ["ironfist"],
     "weight": 252.8,
-    "height": 2.6,
-    "gender": 0.5,
     "icon": 83,
     "base": "crabominable",
     "forme": "Mega",
@@ -915,8 +747,6 @@
     "stats": [78, 107, 75, 100, 100, 70],
     "abilities": ["overgrow", "longreach"],
     "weight": 36.6,
-    "height": 1.6,
-    "gender": 0.875,
     "icon": 84
   },
   "decidueyehisui": {
@@ -924,8 +754,6 @@
     "stats": [88, 112, 80, 95, 95, 60],
     "abilities": ["overgrow", "scrappy"],
     "weight": 37,
-    "height": 1.6,
-    "gender": 0.875,
     "icon": 85,
     "base": "decidueye",
     "forme": "Hisui"
@@ -935,8 +763,6 @@
     "stats": [67, 58, 57, 81, 67, 101],
     "abilities": ["cheekpouch", "pickup", "plus"],
     "weight": 2.2,
-    "height": 0.2,
-    "gender": 0.5,
     "icon": 86
   },
   "delphox": {
@@ -944,8 +770,6 @@
     "stats": [75, 69, 72, 114, 100, 104],
     "abilities": ["blaze", "magician"],
     "weight": 39,
-    "height": 1.5,
-    "gender": 0.875,
     "icon": 87
   },
   "delphoxmega": {
@@ -953,8 +777,6 @@
     "stats": [75, 69, 72, 159, 125, 134],
     "abilities": ["levitate"],
     "weight": 39,
-    "height": 1.5,
-    "gender": 0.875,
     "icon": 88,
     "base": "delphox",
     "forme": "Mega",
@@ -967,8 +789,6 @@
     "stats": [85, 56, 77, 50, 77, 78],
     "abilities": ["pickup", "cheekpouch", "hugepower"],
     "weight": 42.4,
-    "height": 1,
-    "gender": 0.5,
     "icon": 89
   },
   "ditto": {
@@ -976,8 +796,6 @@
     "stats": [48, 48, 48, 48, 48, 48],
     "abilities": ["limber", "imposter"],
     "weight": 4,
-    "height": 0.3,
-    "gender": "N",
     "icon": 90
   },
   "dragalge": {
@@ -985,8 +803,6 @@
     "stats": [65, 75, 90, 97, 123, 44],
     "abilities": ["poisonpoint", "poisontouch", "adaptability"],
     "weight": 81.5,
-    "height": 1.8,
-    "gender": 0.5,
     "icon": 91
   },
   "dragalgemega": {
@@ -994,8 +810,6 @@
     "stats": [65, 85, 105, 132, 163, 44],
     "abilities": ["regenerator"],
     "weight": 100.3,
-    "height": 2.1,
-    "gender": 0.5,
     "icon": 92,
     "noSprite": true,
     "base": "dragalge",
@@ -1009,8 +823,6 @@
     "stats": [88, 120, 75, 100, 75, 142],
     "abilities": ["clearbody", "infiltrator", "cursedbody"],
     "weight": 50,
-    "height": 3,
-    "gender": 0.5,
     "icon": 93
   },
   "dragonite": {
@@ -1018,8 +830,6 @@
     "stats": [91, 134, 95, 100, 100, 80],
     "abilities": ["innerfocus", "multiscale"],
     "weight": 210,
-    "height": 2.2,
-    "gender": 0.5,
     "icon": 94
   },
   "dragonitemega": {
@@ -1027,8 +837,6 @@
     "stats": [91, 124, 115, 145, 125, 100],
     "abilities": ["multiscale"],
     "weight": 290,
-    "height": 2.2,
-    "gender": 0.5,
     "icon": 95,
     "base": "dragonite",
     "forme": "Mega",
@@ -1041,8 +849,6 @@
     "stats": [78, 60, 85, 135, 91, 36],
     "abilities": ["berserk", "sapsipper", "cloudnine"],
     "weight": 185,
-    "height": 3,
-    "gender": 0.5,
     "icon": 96
   },
   "drampamega": {
@@ -1050,8 +856,6 @@
     "stats": [78, 85, 110, 160, 116, 36],
     "abilities": ["berserk"],
     "weight": 240.5,
-    "height": 3,
-    "gender": 0.5,
     "icon": 97,
     "base": "drampa",
     "forme": "Mega",
@@ -1064,8 +868,6 @@
     "stats": [85, 115, 80, 105, 80, 50],
     "abilities": ["levitate"],
     "weight": 80.5,
-    "height": 2.1,
-    "gender": 0.5,
     "icon": 98
   },
   "eelektrossmega": {
@@ -1073,8 +875,6 @@
     "stats": [85, 145, 80, 135, 90, 80],
     "abilities": ["eelevate"],
     "weight": 180,
-    "height": 3,
-    "gender": 0.5,
     "icon": 99,
     "noSprite": true,
     "base": "eelektross",
@@ -1088,8 +888,6 @@
     "stats": [110, 123, 65, 100, 65, 65],
     "abilities": ["blaze", "reckless"],
     "weight": 150,
-    "height": 1.6,
-    "gender": 0.875,
     "icon": 100
   },
   "emboarmega": {
@@ -1097,8 +895,6 @@
     "stats": [110, 148, 75, 110, 110, 75],
     "abilities": ["moldbreaker"],
     "weight": 180.3,
-    "height": 1.8,
-    "gender": 0.875,
     "icon": 101,
     "base": "emboar",
     "forme": "Mega",
@@ -1111,8 +907,6 @@
     "stats": [55, 75, 60, 75, 60, 103],
     "abilities": ["static", "motordrive"],
     "weight": 5,
-    "height": 0.4,
-    "gender": 0.5,
     "icon": 102
   },
   "empoleon": {
@@ -1120,8 +914,6 @@
     "stats": [84, 86, 88, 111, 101, 60],
     "abilities": ["torrent", "competitive"],
     "weight": 84.5,
-    "height": 1.7,
-    "gender": 0.875,
     "icon": 103
   },
   "espathra": {
@@ -1129,8 +921,6 @@
     "stats": [95, 60, 60, 101, 60, 105],
     "abilities": ["opportunist", "frisk", "speedboost"],
     "weight": 90,
-    "height": 1.9,
-    "gender": 0.5,
     "icon": 104
   },
   "espeon": {
@@ -1138,8 +928,6 @@
     "stats": [65, 65, 60, 130, 95, 110],
     "abilities": ["synchronize", "magicbounce"],
     "weight": 26.5,
-    "height": 0.9,
-    "gender": 0.875,
     "icon": 105
   },
   "excadrill": {
@@ -1147,8 +935,6 @@
     "stats": [110, 135, 60, 50, 65, 88],
     "abilities": ["sandrush", "sandforce", "moldbreaker"],
     "weight": 40.4,
-    "height": 0.7,
-    "gender": 0.5,
     "icon": 106
   },
   "excadrillmega": {
@@ -1156,8 +942,6 @@
     "stats": [110, 165, 100, 65, 65, 103],
     "abilities": ["piercingdrill"],
     "weight": 60,
-    "height": 0.9,
-    "gender": 0.5,
     "icon": 107,
     "base": "excadrill",
     "forme": "Mega",
@@ -1170,8 +954,6 @@
     "stats": [65, 100, 100, 70, 60, 75],
     "abilities": ["battlearmor", "defiant"],
     "weight": 62,
-    "height": 3,
-    "gender": "N",
     "icon": 108
   },
   "falinksmega": {
@@ -1179,8 +961,6 @@
     "stats": [65, 135, 135, 70, 65, 100],
     "abilities": ["defiant"],
     "weight": 99,
-    "height": 1.6,
-    "gender": "N",
     "icon": 109,
     "noSprite": true,
     "base": "falinks",
@@ -1194,8 +974,6 @@
     "stats": [52, 90, 55, 58, 62, 60],
     "abilities": ["keeneye", "innerfocus", "defiant"],
     "weight": 15,
-    "height": 0.8,
-    "gender": 0.5,
     "icon": 110
   },
   "farigiraf": {
@@ -1203,8 +981,6 @@
     "stats": [120, 90, 70, 110, 70, 60],
     "abilities": ["cudchew", "armortail", "sapsipper"],
     "weight": 160,
-    "height": 3.2,
-    "gender": 0.5,
     "icon": 111
   },
   "feraligatr": {
@@ -1212,8 +988,6 @@
     "stats": [85, 105, 100, 79, 83, 78],
     "abilities": ["torrent", "sheerforce"],
     "weight": 88.8,
-    "height": 2.3,
-    "gender": 0.875,
     "icon": 112
   },
   "feraligatrmega": {
@@ -1221,8 +995,6 @@
     "stats": [85, 160, 125, 89, 93, 78],
     "abilities": ["dragonize"],
     "weight": 108.8,
-    "height": 2.3,
-    "gender": 0.875,
     "icon": 113,
     "base": "feraligatr",
     "forme": "Mega",
@@ -1235,8 +1007,6 @@
     "stats": [70, 110, 80, 95, 60, 70],
     "abilities": ["ripen", "gluttony", "hustle"],
     "weight": 1,
-    "height": 0.3,
-    "gender": 0.5,
     "icon": 114
   },
   "flareon": {
@@ -1244,8 +1014,6 @@
     "stats": [65, 130, 60, 95, 110, 65],
     "abilities": ["flashfire", "guts"],
     "weight": 25,
-    "height": 0.9,
-    "gender": 0.875,
     "icon": 115
   },
   "floetteeternal": {
@@ -1253,8 +1021,6 @@
     "stats": [74, 65, 67, 125, 128, 92],
     "abilities": ["flowerveil", "symbiosis"],
     "weight": 0.9,
-    "height": 0.2,
-    "gender": "F",
     "icon": 116,
     "base": "floette",
     "forme": "Eternal"
@@ -1264,8 +1030,6 @@
     "stats": [74, 85, 87, 155, 148, 102],
     "abilities": ["fairyaura"],
     "weight": 100.8,
-    "height": 0.2,
-    "gender": "F",
     "icon": 117,
     "base": "floette",
     "forme": "Mega",
@@ -1278,8 +1042,6 @@
     "stats": [78, 65, 68, 112, 154, 75],
     "abilities": ["flowerveil", "symbiosis"],
     "weight": 10,
-    "height": 1.1,
-    "gender": "F",
     "icon": 118
   },
   "forretress": {
@@ -1287,8 +1049,6 @@
     "stats": [75, 90, 140, 60, 60, 40],
     "abilities": ["sturdy", "overcoat"],
     "weight": 125.8,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 119
   },
   "froslass": {
@@ -1296,8 +1056,6 @@
     "stats": [70, 80, 70, 80, 70, 110],
     "abilities": ["snowcloak", "cursedbody"],
     "weight": 26.6,
-    "height": 1.3,
-    "gender": "F",
     "icon": 120
   },
   "froslassmega": {
@@ -1305,8 +1063,6 @@
     "stats": [70, 80, 70, 140, 100, 120],
     "abilities": ["snowwarning"],
     "weight": 29.6,
-    "height": 2.6,
-    "gender": "F",
     "icon": 121,
     "base": "froslass",
     "forme": "Mega",
@@ -1319,8 +1075,6 @@
     "stats": [75, 80, 60, 65, 90, 102],
     "abilities": ["furcoat"],
     "weight": 28,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 122
   },
   "gallade": {
@@ -1328,8 +1082,6 @@
     "stats": [68, 125, 65, 65, 115, 80],
     "abilities": ["steadfast", "sharpness", "justified"],
     "weight": 52,
-    "height": 1.6,
-    "gender": "M",
     "icon": 123
   },
   "gallademega": {
@@ -1337,8 +1089,6 @@
     "stats": [68, 165, 95, 65, 115, 110],
     "abilities": ["innerfocus"],
     "weight": 56.4,
-    "height": 1.6,
-    "gender": "M",
     "icon": 124,
     "base": "gallade",
     "forme": "Mega",
@@ -1351,8 +1101,6 @@
     "stats": [80, 95, 82, 60, 82, 75],
     "abilities": ["stench", "weakarmor", "aftermath"],
     "weight": 107.3,
-    "height": 1.9,
-    "gender": 0.5,
     "icon": 125
   },
   "garchomp": {
@@ -1360,8 +1108,6 @@
     "stats": [108, 130, 95, 80, 85, 102],
     "abilities": ["sandveil", "roughskin"],
     "weight": 95,
-    "height": 1.9,
-    "gender": 0.5,
     "icon": 126
   },
   "garchompmega": {
@@ -1369,8 +1115,6 @@
     "stats": [108, 170, 115, 120, 95, 92],
     "abilities": ["sandforce"],
     "weight": 95,
-    "height": 1.9,
-    "gender": 0.5,
     "icon": 127,
     "base": "garchomp",
     "forme": "Mega",
@@ -1383,8 +1127,6 @@
     "stats": [108, 130, 85, 141, 85, 151],
     "abilities": ["levitate"],
     "weight": 99,
-    "height": 1.9,
-    "gender": 0.5,
     "icon": 128,
     "base": "garchomp",
     "forme": "Mega-Z",
@@ -1397,8 +1139,6 @@
     "stats": [68, 65, 65, 125, 115, 80],
     "abilities": ["synchronize", "trace", "telepathy"],
     "weight": 48.4,
-    "height": 1.6,
-    "gender": 0.5,
     "icon": 129
   },
   "gardevoirmega": {
@@ -1406,8 +1146,6 @@
     "stats": [68, 85, 65, 165, 135, 100],
     "abilities": ["pixilate"],
     "weight": 48.4,
-    "height": 1.6,
-    "gender": 0.5,
     "icon": 130,
     "base": "gardevoir",
     "forme": "Mega",
@@ -1420,8 +1158,6 @@
     "stats": [100, 100, 130, 45, 90, 35],
     "abilities": ["purifyingsalt", "sturdy", "clearbody"],
     "weight": 240,
-    "height": 2.3,
-    "gender": 0.5,
     "icon": 131
   },
   "gengar": {
@@ -1429,8 +1165,6 @@
     "stats": [60, 65, 60, 130, 75, 110],
     "abilities": ["cursedbody"],
     "weight": 40.5,
-    "height": 1.5,
-    "gender": 0.5,
     "icon": 132
   },
   "gengarmega": {
@@ -1438,8 +1172,6 @@
     "stats": [60, 65, 80, 170, 95, 130],
     "abilities": ["shadowtag"],
     "weight": 40.5,
-    "height": 1.4,
-    "gender": 0.5,
     "icon": 133,
     "base": "gengar",
     "forme": "Mega",
@@ -1452,8 +1184,6 @@
     "stats": [87, 60, 95, 133, 91, 84],
     "abilities": ["goodasgold"],
     "weight": 30,
-    "height": 1.2,
-    "gender": "N",
     "icon": 134
   },
   "glaceon": {
@@ -1461,8 +1191,6 @@
     "stats": [65, 60, 110, 130, 95, 65],
     "abilities": ["snowcloak", "icebody"],
     "weight": 25.9,
-    "height": 0.8,
-    "gender": 0.875,
     "icon": 135
   },
   "glalie": {
@@ -1470,8 +1198,6 @@
     "stats": [80, 80, 80, 80, 80, 80],
     "abilities": ["innerfocus", "icebody", "moody"],
     "weight": 256.5,
-    "height": 1.5,
-    "gender": 0.5,
     "icon": 136
   },
   "glaliemega": {
@@ -1479,8 +1205,6 @@
     "stats": [80, 120, 80, 120, 80, 100],
     "abilities": ["refrigerate"],
     "weight": 350.2,
-    "height": 2.1,
-    "gender": 0.5,
     "icon": 137,
     "base": "glalie",
     "forme": "Mega",
@@ -1493,8 +1217,6 @@
     "stats": [83, 55, 90, 130, 81, 86],
     "abilities": ["toxicdebris", "corrosion"],
     "weight": 45,
-    "height": 1.5,
-    "gender": 0.5,
     "icon": 138
   },
   "glimmoramega": {
@@ -1502,8 +1224,6 @@
     "stats": [83, 90, 105, 150, 96, 101],
     "abilities": ["adaptability"],
     "weight": 77,
-    "height": 2.8,
-    "gender": 0.5,
     "icon": 139,
     "base": "glimmora",
     "forme": "Mega",
@@ -1516,8 +1236,6 @@
     "stats": [75, 95, 125, 45, 75, 95],
     "abilities": ["hypercutter", "sandveil", "poisonheal"],
     "weight": 42.5,
-    "height": 2,
-    "gender": 0.5,
     "icon": 140
   },
   "gogoat": {
@@ -1525,8 +1243,6 @@
     "stats": [123, 100, 62, 97, 81, 68],
     "abilities": ["sapsipper", "grasspelt"],
     "weight": 91,
-    "height": 1.7,
-    "gender": 0.5,
     "icon": 141
   },
   "golisopod": {
@@ -1534,8 +1250,6 @@
     "stats": [75, 125, 140, 60, 90, 40],
     "abilities": ["emergencyexit"],
     "weight": 108,
-    "height": 2,
-    "gender": 0.5,
     "icon": 142
   },
   "golisopodmega": {
@@ -1543,8 +1257,6 @@
     "stats": [75, 150, 175, 70, 120, 40],
     "abilities": ["toughclaws"],
     "weight": 148,
-    "height": 2.3,
-    "gender": 0.5,
     "icon": 143,
     "base": "golisopod",
     "forme": "Mega",
@@ -1557,8 +1269,6 @@
     "stats": [89, 124, 80, 55, 80, 55],
     "abilities": ["ironfist", "klutz", "noguard"],
     "weight": 330,
-    "height": 2.8,
-    "gender": "N",
     "icon": 144
   },
   "golurkmega": {
@@ -1566,8 +1276,6 @@
     "stats": [89, 159, 105, 70, 105, 55],
     "abilities": ["unseenfist"],
     "weight": 330,
-    "height": 4,
-    "gender": "N",
     "icon": 145,
     "base": "golurk",
     "forme": "Mega",
@@ -1580,8 +1288,6 @@
     "stats": [90, 100, 70, 110, 150, 80],
     "abilities": ["sapsipper", "hydration", "gooey"],
     "weight": 150.5,
-    "height": 2,
-    "gender": 0.5,
     "icon": 146
   },
   "goodrahisui": {
@@ -1589,8 +1295,6 @@
     "stats": [80, 100, 100, 110, 150, 60],
     "abilities": ["sapsipper", "shellarmor", "gooey"],
     "weight": 334.1,
-    "height": 1.7,
-    "gender": 0.5,
     "icon": 147,
     "base": "goodra",
     "forme": "Hisui"
@@ -1600,8 +1304,6 @@
     "stats": [65, 90, 122, 58, 75, 84],
     "abilities": ["pickup", "frisk", "insomnia"],
     "weight": 12.5,
-    "height": 0.9,
-    "gender": 0.5,
     "icon": 148
   },
   "gourgeistlarge": {
@@ -1609,8 +1311,6 @@
     "stats": [75, 95, 122, 58, 75, 69],
     "abilities": ["pickup", "frisk", "insomnia"],
     "weight": 14,
-    "height": 1.1,
-    "gender": 0.5,
     "icon": 149,
     "base": "gourgeist",
     "forme": "Large"
@@ -1620,8 +1320,6 @@
     "stats": [55, 85, 122, 58, 75, 99],
     "abilities": ["pickup", "frisk", "insomnia"],
     "weight": 9.5,
-    "height": 0.7,
-    "gender": 0.5,
     "icon": 150,
     "base": "gourgeist",
     "forme": "Small"
@@ -1631,8 +1329,6 @@
     "stats": [85, 100, 122, 58, 75, 54],
     "abilities": ["pickup", "frisk", "insomnia"],
     "weight": 39,
-    "height": 1.7,
-    "gender": 0.5,
     "icon": 151,
     "base": "gourgeist",
     "forme": "Super"
@@ -1642,8 +1338,6 @@
     "stats": [80, 118, 90, 70, 80, 42],
     "abilities": ["limber", "technician"],
     "weight": 39,
-    "height": 1.6,
-    "gender": 0.5,
     "icon": 152
   },
   "greninja": {
@@ -1651,8 +1345,6 @@
     "stats": [72, 95, 67, 103, 71, 122],
     "abilities": ["torrent", "protean", "battlebond"],
     "weight": 40,
-    "height": 1.5,
-    "gender": 0.875,
     "icon": 153
   },
   "greninjamega": {
@@ -1660,8 +1352,6 @@
     "stats": [72, 125, 77, 133, 81, 142],
     "abilities": ["protean"],
     "weight": 40,
-    "height": 1.5,
-    "gender": 0.875,
     "icon": 154,
     "base": "greninja",
     "forme": "Mega",
@@ -1674,8 +1364,6 @@
     "stats": [95, 120, 65, 95, 75, 60],
     "abilities": ["prankster", "frisk", "pickpocket"],
     "weight": 61,
-    "height": 1.5,
-    "gender": "M",
     "icon": 155
   },
   "gyarados": {
@@ -1683,8 +1371,6 @@
     "stats": [95, 125, 79, 60, 100, 81],
     "abilities": ["intimidate", "moxie"],
     "weight": 235,
-    "height": 6.5,
-    "gender": 0.5,
     "icon": 156
   },
   "gyaradosmega": {
@@ -1692,8 +1378,6 @@
     "stats": [95, 155, 109, 70, 130, 81],
     "abilities": ["moldbreaker"],
     "weight": 305,
-    "height": 6.5,
-    "gender": 0.5,
     "icon": 157,
     "base": "gyarados",
     "forme": "Mega",
@@ -1706,8 +1390,6 @@
     "stats": [57, 90, 95, 136, 103, 29],
     "abilities": ["healer", "anticipation", "magicbounce"],
     "weight": 5.1,
-    "height": 2.1,
-    "gender": "F",
     "icon": 158
   },
   "hawlucha": {
@@ -1715,8 +1397,6 @@
     "stats": [78, 92, 75, 74, 63, 118],
     "abilities": ["limber", "unburden", "moldbreaker"],
     "weight": 21.5,
-    "height": 0.8,
-    "gender": 0.5,
     "icon": 159
   },
   "hawluchamega": {
@@ -1724,8 +1404,6 @@
     "stats": [78, 137, 100, 74, 93, 118],
     "abilities": ["noguard"],
     "weight": 25,
-    "height": 1,
-    "gender": 0.5,
     "icon": 160,
     "base": "hawlucha",
     "forme": "Mega",
@@ -1738,8 +1416,6 @@
     "stats": [62, 55, 52, 109, 94, 109],
     "abilities": ["dryskin", "sandveil", "solarpower"],
     "weight": 21,
-    "height": 1,
-    "gender": 0.5,
     "icon": 161
   },
   "heracross": {
@@ -1747,8 +1423,6 @@
     "stats": [80, 125, 75, 40, 95, 85],
     "abilities": ["swarm", "guts", "moxie"],
     "weight": 54,
-    "height": 1.5,
-    "gender": 0.5,
     "icon": 162
   },
   "heracrossmega": {
@@ -1756,8 +1430,6 @@
     "stats": [80, 185, 115, 40, 105, 75],
     "abilities": ["skilllink"],
     "weight": 62.5,
-    "height": 1.7,
-    "gender": 0.5,
     "icon": 163,
     "base": "heracross",
     "forme": "Mega",
@@ -1770,8 +1442,6 @@
     "stats": [108, 112, 118, 68, 72, 47],
     "abilities": ["sandstream", "sandforce"],
     "weight": 300,
-    "height": 2,
-    "gender": 0.5,
     "icon": 164
   },
   "houndoom": {
@@ -1779,8 +1449,6 @@
     "stats": [75, 90, 50, 110, 80, 95],
     "abilities": ["earlybird", "flashfire", "unnerve"],
     "weight": 35,
-    "height": 1.4,
-    "gender": 0.5,
     "icon": 165
   },
   "houndoommega": {
@@ -1788,8 +1456,6 @@
     "stats": [75, 90, 90, 140, 90, 115],
     "abilities": ["solarpower"],
     "weight": 49.5,
-    "height": 1.9,
-    "gender": 0.5,
     "icon": 166,
     "base": "houndoom",
     "forme": "Mega",
@@ -1802,8 +1468,6 @@
     "stats": [72, 101, 100, 50, 97, 68],
     "abilities": ["sandrush", "fluffy"],
     "weight": 15,
-    "height": 2,
-    "gender": 0.5,
     "icon": 167
   },
   "hydrapple": {
@@ -1811,8 +1475,6 @@
     "stats": [106, 80, 110, 120, 80, 44],
     "abilities": ["supersweetsyrup", "regenerator", "stickyhold"],
     "weight": 93,
-    "height": 1.8,
-    "gender": 0.5,
     "icon": 168
   },
   "hydreigon": {
@@ -1820,8 +1482,6 @@
     "stats": [92, 105, 90, 125, 90, 98],
     "abilities": ["levitate"],
     "weight": 160,
-    "height": 1.8,
-    "gender": 0.5,
     "icon": 169
   },
   "incineroar": {
@@ -1829,8 +1489,6 @@
     "stats": [95, 115, 90, 80, 90, 60],
     "abilities": ["blaze", "intimidate"],
     "weight": 83,
-    "height": 1.8,
-    "gender": 0.875,
     "icon": 170
   },
   "indeedee": {
@@ -1838,8 +1496,6 @@
     "stats": [60, 65, 55, 105, 95, 95],
     "abilities": ["innerfocus", "synchronize", "psychicsurge"],
     "weight": 28,
-    "height": 0.9,
-    "gender": "M",
     "icon": 171
   },
   "indeedeef": {
@@ -1847,8 +1503,6 @@
     "stats": [70, 55, 65, 95, 105, 85],
     "abilities": ["owntempo", "synchronize", "psychicsurge"],
     "weight": 28,
-    "height": 0.9,
-    "gender": "F",
     "icon": 172,
     "base": "indeedee",
     "forme": "F"
@@ -1858,8 +1512,6 @@
     "stats": [76, 104, 71, 104, 71, 108],
     "abilities": ["blaze", "ironfist"],
     "weight": 55,
-    "height": 1.2,
-    "gender": 0.875,
     "icon": 173
   },
   "inteleon": {
@@ -1867,8 +1519,6 @@
     "stats": [70, 85, 65, 125, 65, 120],
     "abilities": ["torrent", "sniper"],
     "weight": 45.2,
-    "height": 1.9,
-    "gender": 0.875,
     "icon": 174
   },
   "jolteon": {
@@ -1876,8 +1526,6 @@
     "stats": [65, 65, 60, 110, 95, 130],
     "abilities": ["voltabsorb", "quickfeet"],
     "weight": 24.5,
-    "height": 0.8,
-    "gender": 0.875,
     "icon": 175
   },
   "kangaskhan": {
@@ -1885,8 +1533,6 @@
     "stats": [105, 95, 80, 40, 80, 90],
     "abilities": ["earlybird", "scrappy", "innerfocus"],
     "weight": 80,
-    "height": 2.2,
-    "gender": "F",
     "icon": 176
   },
   "kangaskhanmega": {
@@ -1894,8 +1540,6 @@
     "stats": [105, 125, 100, 60, 100, 100],
     "abilities": ["parentalbond"],
     "weight": 100,
-    "height": 2.2,
-    "gender": "F",
     "icon": 177,
     "base": "kangaskhan",
     "forme": "Mega",
@@ -1908,8 +1552,6 @@
     "stats": [100, 135, 120, 60, 85, 50],
     "abilities": ["defiant", "supremeoverlord", "pressure"],
     "weight": 120,
-    "height": 2,
-    "gender": 0.5,
     "icon": 178
   },
   "kleavor": {
@@ -1917,8 +1559,6 @@
     "stats": [70, 135, 95, 45, 70, 85],
     "abilities": ["swarm", "sheerforce", "sharpness"],
     "weight": 89,
-    "height": 1.8,
-    "gender": 0.5,
     "icon": 179
   },
   "klefki": {
@@ -1926,8 +1566,6 @@
     "stats": [57, 80, 91, 80, 87, 75],
     "abilities": ["prankster", "magician"],
     "weight": 3,
-    "height": 0.2,
-    "gender": 0.5,
     "icon": 180
   },
   "kommoo": {
@@ -1935,8 +1573,6 @@
     "stats": [75, 110, 125, 100, 105, 85],
     "abilities": ["bulletproof", "soundproof", "overcoat"],
     "weight": 78.2,
-    "height": 1.6,
-    "gender": 0.5,
     "icon": 181
   },
   "krookodile": {
@@ -1944,8 +1580,6 @@
     "stats": [95, 117, 80, 65, 70, 92],
     "abilities": ["intimidate", "moxie", "angerpoint"],
     "weight": 96.3,
-    "height": 1.5,
-    "gender": 0.5,
     "icon": 182
   },
   "leafeon": {
@@ -1953,8 +1587,6 @@
     "stats": [65, 110, 130, 60, 65, 95],
     "abilities": ["leafguard", "chlorophyll"],
     "weight": 25.5,
-    "height": 1,
-    "gender": 0.875,
     "icon": 183
   },
   "liepard": {
@@ -1962,8 +1594,6 @@
     "stats": [64, 88, 50, 88, 50, 106],
     "abilities": ["limber", "unburden", "prankster"],
     "weight": 37.5,
-    "height": 1.1,
-    "gender": 0.5,
     "icon": 184
   },
   "lopunny": {
@@ -1971,8 +1601,6 @@
     "stats": [65, 76, 84, 54, 96, 105],
     "abilities": ["cutecharm", "klutz", "limber"],
     "weight": 33.3,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 185
   },
   "lopunnymega": {
@@ -1980,8 +1608,6 @@
     "stats": [65, 136, 94, 54, 96, 135],
     "abilities": ["scrappy"],
     "weight": 28.3,
-    "height": 1.3,
-    "gender": 0.5,
     "icon": 186,
     "base": "lopunny",
     "forme": "Mega",
@@ -1994,8 +1620,6 @@
     "stats": [70, 110, 70, 115, 70, 90],
     "abilities": ["steadfast", "innerfocus", "justified"],
     "weight": 54,
-    "height": 1.2,
-    "gender": 0.875,
     "icon": 187
   },
   "lucariomega": {
@@ -2003,8 +1627,6 @@
     "stats": [70, 145, 88, 140, 70, 112],
     "abilities": ["adaptability"],
     "weight": 57.5,
-    "height": 1.3,
-    "gender": 0.875,
     "icon": 188,
     "base": "lucario",
     "forme": "Mega",
@@ -2017,8 +1639,6 @@
     "stats": [70, 100, 70, 164, 70, 151],
     "abilities": ["auraguard"],
     "weight": 49.4,
-    "height": 1.3,
-    "gender": 0.875,
     "icon": 189,
     "base": "lucario",
     "forme": "Mega-Z",
@@ -2031,8 +1651,6 @@
     "stats": [80, 120, 79, 95, 79, 70],
     "abilities": ["rivalry", "intimidate", "guts"],
     "weight": 42,
-    "height": 1.4,
-    "gender": 0.5,
     "icon": 190
   },
   "lycanroc": {
@@ -2040,8 +1658,6 @@
     "stats": [75, 115, 65, 55, 65, 112],
     "abilities": ["keeneye", "sandrush", "steadfast"],
     "weight": 25,
-    "height": 0.8,
-    "gender": 0.5,
     "icon": 191
   },
   "lycanrocdusk": {
@@ -2049,8 +1665,6 @@
     "stats": [75, 117, 65, 55, 65, 110],
     "abilities": ["toughclaws"],
     "weight": 25,
-    "height": 0.8,
-    "gender": 0.5,
     "icon": 192,
     "base": "lycanroc",
     "forme": "Dusk"
@@ -2060,8 +1674,6 @@
     "stats": [85, 115, 75, 55, 75, 82],
     "abilities": ["keeneye", "vitalspirit", "noguard"],
     "weight": 25,
-    "height": 1.1,
-    "gender": 0.5,
     "icon": 193,
     "base": "lycanroc",
     "forme": "Midnight"
@@ -2071,8 +1683,6 @@
     "stats": [80, 120, 90, 60, 70, 85],
     "abilities": ["intimidate", "guarddog", "stakeout"],
     "weight": 61,
-    "height": 1.1,
-    "gender": 0.5,
     "icon": 194
   },
   "machamp": {
@@ -2080,8 +1690,6 @@
     "stats": [90, 130, 80, 65, 85, 55],
     "abilities": ["guts", "noguard", "steadfast"],
     "weight": 130,
-    "height": 1.6,
-    "gender": 0.75,
     "icon": 195
   },
   "malamar": {
@@ -2089,8 +1697,6 @@
     "stats": [86, 92, 88, 68, 75, 73],
     "abilities": ["contrary", "suctioncups", "infiltrator"],
     "weight": 47,
-    "height": 1.5,
-    "gender": 0.5,
     "icon": 196
   },
   "malamarmega": {
@@ -2098,8 +1704,6 @@
     "stats": [86, 102, 88, 98, 120, 88],
     "abilities": ["contrary"],
     "weight": 69.8,
-    "height": 2.9,
-    "gender": 0.5,
     "icon": 197,
     "noSprite": true,
     "base": "malamar",
@@ -2113,8 +1717,6 @@
     "stats": [110, 130, 80, 70, 60, 80],
     "abilities": ["oblivious", "snowcloak", "thickfat"],
     "weight": 291,
-    "height": 2.5,
-    "gender": 0.5,
     "icon": 198
   },
   "manectric": {
@@ -2122,8 +1724,6 @@
     "stats": [70, 75, 60, 105, 60, 105],
     "abilities": ["static", "lightningrod", "minus"],
     "weight": 40.2,
-    "height": 1.5,
-    "gender": 0.5,
     "icon": 199
   },
   "manectricmega": {
@@ -2131,8 +1731,6 @@
     "stats": [70, 75, 80, 135, 80, 135],
     "abilities": ["intimidate"],
     "weight": 44,
-    "height": 1.8,
-    "gender": 0.5,
     "icon": 200,
     "base": "manectric",
     "forme": "Mega",
@@ -2145,8 +1743,6 @@
     "stats": [74, 75, 70, 65, 75, 111],
     "abilities": ["friendguard", "cheekpouch", "technician"],
     "weight": 2.3,
-    "height": 0.3,
-    "gender": "N",
     "icon": 201
   },
   "mausholdfour": {
@@ -2154,8 +1750,6 @@
     "stats": [74, 75, 70, 65, 75, 111],
     "abilities": ["friendguard", "cheekpouch", "technician"],
     "weight": 2.8,
-    "height": 0.3,
-    "gender": "N",
     "icon": 202,
     "base": "maushold",
     "forme": "Four"
@@ -2165,8 +1759,6 @@
     "stats": [50, 85, 85, 55, 55, 50],
     "abilities": ["hypercutter", "intimidate", "sheerforce"],
     "weight": 11.5,
-    "height": 0.6,
-    "gender": 0.5,
     "icon": 203
   },
   "mawilemega": {
@@ -2174,8 +1766,6 @@
     "stats": [50, 105, 125, 55, 95, 50],
     "abilities": ["hugepower"],
     "weight": 23.5,
-    "height": 1,
-    "gender": 0.5,
     "icon": 204,
     "base": "mawile",
     "forme": "Mega",
@@ -2188,8 +1778,6 @@
     "stats": [60, 60, 75, 60, 75, 80],
     "abilities": ["purepower", "telepathy"],
     "weight": 31.5,
-    "height": 1.3,
-    "gender": 0.5,
     "icon": 205
   },
   "medichammega": {
@@ -2197,8 +1785,6 @@
     "stats": [60, 100, 85, 80, 85, 100],
     "abilities": ["purepower"],
     "weight": 31.5,
-    "height": 1.3,
-    "gender": 0.5,
     "icon": 206,
     "base": "medicham",
     "forme": "Mega",
@@ -2211,8 +1797,6 @@
     "stats": [80, 82, 100, 83, 100, 80],
     "abilities": ["overgrow", "leafguard"],
     "weight": 100.5,
-    "height": 1.8,
-    "gender": 0.875,
     "icon": 207
   },
   "meganiummega": {
@@ -2220,8 +1804,6 @@
     "stats": [80, 92, 115, 143, 115, 80],
     "abilities": ["megasol"],
     "weight": 201,
-    "height": 2.4,
-    "gender": 0.875,
     "icon": 208,
     "base": "meganium",
     "forme": "Mega",
@@ -2234,8 +1816,6 @@
     "stats": [76, 110, 70, 81, 70, 123],
     "abilities": ["overgrow", "protean"],
     "weight": 31.2,
-    "height": 1.5,
-    "gender": 0.875,
     "icon": 209
   },
   "meowstic": {
@@ -2243,8 +1823,6 @@
     "stats": [74, 48, 76, 83, 81, 104],
     "abilities": ["keeneye", "infiltrator", "prankster"],
     "weight": 8.5,
-    "height": 0.6,
-    "gender": "M",
     "icon": 210
   },
   "meowsticf": {
@@ -2252,8 +1830,6 @@
     "stats": [74, 48, 76, 83, 81, 104],
     "abilities": ["keeneye", "infiltrator", "competitive"],
     "weight": 8.5,
-    "height": 0.6,
-    "gender": "F",
     "icon": 211,
     "base": "meowstic",
     "forme": "F"
@@ -2263,8 +1839,6 @@
     "stats": [74, 48, 76, 143, 101, 124],
     "abilities": ["trace"],
     "weight": 10.1,
-    "height": 0.8,
-    "gender": "F",
     "icon": 212,
     "base": "meowstic",
     "forme": "F-Mega",
@@ -2277,8 +1851,6 @@
     "stats": [74, 48, 76, 143, 101, 124],
     "abilities": ["trace"],
     "weight": 10.1,
-    "height": 0.8,
-    "gender": "M",
     "icon": 213,
     "base": "meowstic",
     "forme": "M-Mega",
@@ -2291,8 +1863,6 @@
     "stats": [80, 135, 130, 95, 90, 70],
     "abilities": ["clearbody", "lightmetal"],
     "weight": 550,
-    "height": 1.6,
-    "gender": "N",
     "icon": 214
   },
   "metagrossmega": {
@@ -2300,8 +1870,6 @@
     "stats": [80, 145, 150, 105, 110, 110],
     "abilities": ["toughclaws"],
     "weight": 942.9,
-    "height": 2.5,
-    "gender": "N",
     "icon": 215,
     "base": "metagross",
     "forme": "Mega",
@@ -2314,8 +1882,6 @@
     "stats": [95, 60, 79, 100, 125, 81],
     "abilities": ["marvelscale", "competitive", "cutecharm"],
     "weight": 162,
-    "height": 6.2,
-    "gender": 0.5,
     "icon": 216
   },
   "mimikyu": {
@@ -2323,8 +1889,6 @@
     "stats": [55, 90, 80, 50, 105, 96],
     "abilities": ["disguise"],
     "weight": 0.7,
-    "height": 0.2,
-    "gender": 0.5,
     "icon": 217
   },
   "mimikyubusted": {
@@ -2332,8 +1896,6 @@
     "stats": [55, 90, 80, 50, 105, 96],
     "abilities": ["disguise"],
     "weight": 0.7,
-    "height": 0.2,
-    "gender": 0.5,
     "icon": 218,
     "base": "mimikyu",
     "forme": "Busted",
@@ -2344,8 +1906,6 @@
     "stats": [58, 95, 58, 70, 58, 97],
     "abilities": ["hungerswitch"],
     "weight": 3,
-    "height": 0.3,
-    "gender": 0.5,
     "icon": 219
   },
   "morpekohangry": {
@@ -2353,8 +1913,6 @@
     "stats": [58, 95, 58, 70, 58, 97],
     "abilities": ["hungerswitch"],
     "weight": 3,
-    "height": 0.3,
-    "gender": 0.5,
     "icon": 220,
     "base": "morpeko",
     "forme": "Hangry",
@@ -2365,8 +1923,6 @@
     "stats": [40, 45, 65, 100, 120, 90],
     "abilities": ["soundproof", "filter", "technician"],
     "weight": 54.5,
-    "height": 1.3,
-    "gender": 0.5,
     "icon": 221
   },
   "mrrime": {
@@ -2374,8 +1930,6 @@
     "stats": [80, 85, 75, 110, 100, 70],
     "abilities": ["tangledfeet", "screencleaner", "icebody"],
     "weight": 58.2,
-    "height": 1.5,
-    "gender": 0.5,
     "icon": 222
   },
   "mudsdale": {
@@ -2383,8 +1937,6 @@
     "stats": [100, 125, 100, 55, 85, 35],
     "abilities": ["owntempo", "stamina", "innerfocus"],
     "weight": 920,
-    "height": 2.5,
-    "gender": 0.5,
     "icon": 223
   },
   "musharna": {
@@ -2392,8 +1944,6 @@
     "stats": [116, 55, 85, 107, 95, 29],
     "abilities": ["forewarn", "synchronize", "telepathy"],
     "weight": 60.5,
-    "height": 1.1,
-    "gender": 0.5,
     "icon": 224
   },
   "ninetales": {
@@ -2401,8 +1951,6 @@
     "stats": [73, 76, 75, 81, 100, 100],
     "abilities": ["flashfire", "drought"],
     "weight": 19.9,
-    "height": 1.1,
-    "gender": 0.25,
     "icon": 225
   },
   "ninetalesalola": {
@@ -2410,8 +1958,6 @@
     "stats": [73, 67, 75, 81, 100, 109],
     "abilities": ["snowcloak", "snowwarning"],
     "weight": 19.9,
-    "height": 1.1,
-    "gender": 0.25,
     "icon": 226,
     "base": "ninetales",
     "forme": "Alola"
@@ -2421,8 +1967,6 @@
     "stats": [85, 70, 80, 97, 80, 123],
     "abilities": ["frisk", "infiltrator", "telepathy"],
     "weight": 85,
-    "height": 1.5,
-    "gender": 0.5,
     "icon": 227
   },
   "oranguru": {
@@ -2430,8 +1974,6 @@
     "stats": [90, 60, 80, 90, 110, 60],
     "abilities": ["innerfocus", "telepathy", "symbiosis"],
     "weight": 76,
-    "height": 1.5,
-    "gender": 0.5,
     "icon": 228
   },
   "orthworm": {
@@ -2439,8 +1981,6 @@
     "stats": [70, 85, 145, 60, 55, 65],
     "abilities": ["eartheater", "sandveil"],
     "weight": 310,
-    "height": 2.5,
-    "gender": 0.5,
     "icon": 229
   },
   "overqwil": {
@@ -2448,8 +1988,6 @@
     "stats": [85, 115, 95, 65, 65, 85],
     "abilities": ["poisonpoint", "swiftswim", "intimidate"],
     "weight": 60.5,
-    "height": 2.5,
-    "gender": 0.5,
     "icon": 230
   },
   "palafin": {
@@ -2457,8 +1995,6 @@
     "stats": [100, 70, 72, 53, 62, 100],
     "abilities": ["zerotohero"],
     "weight": 60.2,
-    "height": 1.3,
-    "gender": 0.5,
     "icon": 231
   },
   "palafinhero": {
@@ -2466,8 +2002,6 @@
     "stats": [100, 160, 97, 106, 87, 100],
     "abilities": ["zerotohero"],
     "weight": 97.4,
-    "height": 1.8,
-    "gender": 0.5,
     "icon": 232,
     "base": "palafin",
     "forme": "Hero",
@@ -2478,8 +2012,6 @@
     "stats": [95, 124, 78, 69, 71, 58],
     "abilities": ["ironfist", "moldbreaker", "scrappy"],
     "weight": 136,
-    "height": 2.1,
-    "gender": 0.5,
     "icon": 233
   },
   "passimian": {
@@ -2487,8 +2019,6 @@
     "stats": [100, 120, 90, 40, 60, 80],
     "abilities": ["receiver", "defiant"],
     "weight": 82.8,
-    "height": 2,
-    "gender": 0.5,
     "icon": 234
   },
   "pawmot": {
@@ -2496,8 +2026,6 @@
     "stats": [70, 115, 70, 70, 60, 105],
     "abilities": ["voltabsorb", "naturalcure", "ironfist"],
     "weight": 41,
-    "height": 0.9,
-    "gender": 0.5,
     "icon": 235
   },
   "pelipper": {
@@ -2505,8 +2033,6 @@
     "stats": [60, 50, 100, 95, 70, 65],
     "abilities": ["keeneye", "drizzle", "raindish"],
     "weight": 28,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 236
   },
   "perrserker": {
@@ -2514,8 +2040,6 @@
     "stats": [70, 110, 100, 50, 60, 50],
     "abilities": ["battlearmor", "toughclaws", "steelyspirit"],
     "weight": 28,
-    "height": 0.8,
-    "gender": 0.5,
     "icon": 237
   },
   "persian": {
@@ -2523,8 +2047,6 @@
     "stats": [65, 70, 60, 65, 65, 115],
     "abilities": ["limber", "technician", "unnerve"],
     "weight": 32,
-    "height": 1,
-    "gender": 0.5,
     "icon": 238
   },
   "persianalola": {
@@ -2532,8 +2054,6 @@
     "stats": [65, 60, 60, 75, 65, 115],
     "abilities": ["furcoat", "technician", "rattled"],
     "weight": 33,
-    "height": 1.1,
-    "gender": 0.5,
     "icon": 239,
     "base": "persian",
     "forme": "Alola"
@@ -2543,8 +2063,6 @@
     "stats": [83, 80, 75, 70, 70, 101],
     "abilities": ["keeneye", "tangledfeet", "bigpecks"],
     "weight": 39.5,
-    "height": 1.5,
-    "gender": 0.5,
     "icon": 240
   },
   "pidgeotmega": {
@@ -2552,8 +2070,6 @@
     "stats": [83, 80, 80, 135, 80, 121],
     "abilities": ["noguard"],
     "weight": 50.5,
-    "height": 2.2,
-    "gender": 0.5,
     "icon": 241,
     "base": "pidgeot",
     "forme": "Mega",
@@ -2566,8 +2082,6 @@
     "stats": [35, 55, 40, 50, 50, 90],
     "abilities": ["static", "lightningrod"],
     "weight": 6,
-    "height": 0.4,
-    "gender": 0.5,
     "icon": 242,
     "evos": ["raichu", "raichualola"]
   },
@@ -2576,8 +2090,6 @@
     "stats": [48, 101, 95, 91, 85, 15],
     "abilities": ["lightningrod", "electricsurge"],
     "weight": 1,
-    "height": 0.3,
-    "gender": 0.5,
     "icon": 243
   },
   "pinsir": {
@@ -2585,8 +2097,6 @@
     "stats": [65, 125, 100, 55, 70, 85],
     "abilities": ["hypercutter", "moldbreaker", "moxie"],
     "weight": 55,
-    "height": 1.5,
-    "gender": 0.5,
     "icon": 244
   },
   "pinsirmega": {
@@ -2594,8 +2104,6 @@
     "stats": [65, 155, 120, 65, 90, 105],
     "abilities": ["aerilate"],
     "weight": 59,
-    "height": 1.7,
-    "gender": 0.5,
     "icon": 245,
     "base": "pinsir",
     "forme": "Mega",
@@ -2608,8 +2116,6 @@
     "stats": [90, 75, 75, 90, 100, 70],
     "abilities": ["waterabsorb", "damp", "drizzle"],
     "weight": 33.9,
-    "height": 1.1,
-    "gender": 0.5,
     "icon": 246
   },
   "polteageist": {
@@ -2617,8 +2123,6 @@
     "stats": [60, 65, 65, 134, 114, 70],
     "abilities": ["weakarmor", "cursedbody"],
     "weight": 0.4,
-    "height": 0.2,
-    "gender": "N",
     "icon": 247
   },
   "polteageistantique": {
@@ -2626,8 +2130,6 @@
     "stats": [60, 65, 65, 134, 114, 70],
     "abilities": ["weakarmor", "cursedbody"],
     "weight": 0.4,
-    "height": 0.2,
-    "gender": "N",
     "icon": 248,
     "base": "polteageist",
     "forme": "Antique"
@@ -2637,8 +2139,6 @@
     "stats": [80, 74, 74, 126, 116, 60],
     "abilities": ["torrent", "liquidvoice"],
     "weight": 44,
-    "height": 1.8,
-    "gender": 0.875,
     "icon": 249
   },
   "pyroar": {
@@ -2646,8 +2146,6 @@
     "stats": [86, 68, 72, 109, 66, 106],
     "abilities": ["rivalry", "unnerve", "moxie"],
     "weight": 81.5,
-    "height": 1.5,
-    "gender": 0.125,
     "icon": 250
   },
   "pyroarmega": {
@@ -2655,8 +2153,6 @@
     "stats": [86, 88, 92, 129, 86, 126],
     "abilities": ["firemane"],
     "weight": 93.3,
-    "height": 1.5,
-    "gender": 0.125,
     "icon": 251,
     "noSprite": true,
     "base": "pyroar",
@@ -2670,8 +2166,6 @@
     "stats": [85, 120, 80, 85, 75, 85],
     "abilities": ["torrent", "moxie"],
     "weight": 61.9,
-    "height": 1.8,
-    "gender": 0.875,
     "icon": 252
   },
   "qwilfish": {
@@ -2679,8 +2173,6 @@
     "stats": [65, 95, 85, 55, 55, 85],
     "abilities": ["poisonpoint", "swiftswim", "intimidate"],
     "weight": 3.9,
-    "height": 0.5,
-    "gender": 0.5,
     "icon": 253
   },
   "raichu": {
@@ -2688,8 +2180,6 @@
     "stats": [60, 90, 55, 90, 80, 110],
     "abilities": ["static", "lightningrod"],
     "weight": 30,
-    "height": 0.8,
-    "gender": 0.5,
     "icon": 254,
     "prevo": "pikachu"
   },
@@ -2698,8 +2188,6 @@
     "stats": [60, 85, 50, 95, 85, 110],
     "abilities": ["surgesurfer"],
     "weight": 21,
-    "height": 0.7,
-    "gender": 0.5,
     "icon": 255,
     "base": "raichu",
     "forme": "Alola",
@@ -2710,8 +2198,6 @@
     "stats": [60, 135, 95, 90, 95, 110],
     "abilities": ["electricsurge"],
     "weight": 38,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 256,
     "noSprite": true,
     "base": "raichu",
@@ -2725,8 +2211,6 @@
     "stats": [60, 100, 55, 160, 80, 130],
     "abilities": ["noguard"],
     "weight": 26,
-    "height": 1,
-    "gender": 0.5,
     "icon": 257,
     "noSprite": true,
     "base": "raichu",
@@ -2740,8 +2224,6 @@
     "stats": [97, 165, 60, 65, 50, 58],
     "abilities": ["moldbreaker", "sheerforce"],
     "weight": 102.5,
-    "height": 1.6,
-    "gender": 0.875,
     "icon": 258
   },
   "reuniclus": {
@@ -2749,8 +2231,6 @@
     "stats": [110, 65, 75, 125, 85, 30],
     "abilities": ["overcoat", "magicguard", "regenerator"],
     "weight": 20.1,
-    "height": 1,
-    "gender": 0.5,
     "icon": 259
   },
   "rhyperior": {
@@ -2758,8 +2238,6 @@
     "stats": [115, 140, 130, 55, 55, 40],
     "abilities": ["lightningrod", "solidrock", "reckless"],
     "weight": 282.8,
-    "height": 2.4,
-    "gender": 0.5,
     "icon": 260
   },
   "rillaboom": {
@@ -2767,8 +2245,6 @@
     "stats": [100, 125, 90, 60, 70, 85],
     "abilities": ["overgrow", "grassysurge"],
     "weight": 90,
-    "height": 2.1,
-    "gender": 0.875,
     "icon": 261
   },
   "roserade": {
@@ -2776,8 +2252,6 @@
     "stats": [60, 70, 65, 125, 105, 90],
     "abilities": ["naturalcure", "poisonpoint", "technician"],
     "weight": 14.5,
-    "height": 0.9,
-    "gender": 0.5,
     "icon": 262
   },
   "rotom": {
@@ -2785,8 +2259,6 @@
     "stats": [50, 50, 77, 95, 77, 91],
     "abilities": ["levitate"],
     "weight": 0.3,
-    "height": 0.3,
-    "gender": "N",
     "icon": 263
   },
   "rotomfan": {
@@ -2794,8 +2266,6 @@
     "stats": [50, 65, 107, 105, 107, 86],
     "abilities": ["levitate"],
     "weight": 0.3,
-    "height": 0.3,
-    "gender": "N",
     "icon": 264,
     "base": "rotom",
     "forme": "Fan"
@@ -2805,8 +2275,6 @@
     "stats": [50, 65, 107, 105, 107, 86],
     "abilities": ["levitate"],
     "weight": 0.3,
-    "height": 0.3,
-    "gender": "N",
     "icon": 265,
     "base": "rotom",
     "forme": "Frost"
@@ -2816,8 +2284,6 @@
     "stats": [50, 65, 107, 105, 107, 86],
     "abilities": ["levitate"],
     "weight": 0.3,
-    "height": 0.3,
-    "gender": "N",
     "icon": 266,
     "base": "rotom",
     "forme": "Heat"
@@ -2827,8 +2293,6 @@
     "stats": [50, 65, 107, 105, 107, 86],
     "abilities": ["levitate"],
     "weight": 0.3,
-    "height": 0.3,
-    "gender": "N",
     "icon": 267,
     "base": "rotom",
     "forme": "Mow"
@@ -2838,8 +2302,6 @@
     "stats": [50, 65, 107, 105, 107, 86],
     "abilities": ["levitate"],
     "weight": 0.3,
-    "height": 0.3,
-    "gender": "N",
     "icon": 268,
     "base": "rotom",
     "forme": "Wash"
@@ -2849,8 +2311,6 @@
     "stats": [58, 95, 145, 50, 105, 30],
     "abilities": ["wanderingspirit"],
     "weight": 66.6,
-    "height": 1.6,
-    "gender": 0.5,
     "icon": 269
   },
   "sableye": {
@@ -2858,8 +2318,6 @@
     "stats": [50, 75, 75, 65, 65, 50],
     "abilities": ["keeneye", "stall", "prankster"],
     "weight": 11,
-    "height": 0.5,
-    "gender": 0.5,
     "icon": 270
   },
   "sableyemega": {
@@ -2867,8 +2325,6 @@
     "stats": [50, 85, 125, 85, 115, 20],
     "abilities": ["magicbounce"],
     "weight": 161,
-    "height": 0.5,
-    "gender": 0.5,
     "icon": 271,
     "base": "sableye",
     "forme": "Mega",
@@ -2881,8 +2337,6 @@
     "stats": [95, 135, 80, 110, 80, 100],
     "abilities": ["intimidate", "moxie"],
     "weight": 102.6,
-    "height": 1.5,
-    "gender": 0.5,
     "icon": 272
   },
   "salamencemega": {
@@ -2890,8 +2344,6 @@
     "stats": [95, 145, 130, 120, 90, 120],
     "abilities": ["aerilate"],
     "weight": 112.6,
-    "height": 1.8,
-    "gender": 0.5,
     "icon": 273,
     "base": "salamence",
     "forme": "Mega",
@@ -2904,8 +2356,6 @@
     "stats": [68, 64, 60, 111, 60, 117],
     "abilities": ["corrosion", "oblivious"],
     "weight": 22.2,
-    "height": 1.2,
-    "gender": "F",
     "icon": 274
   },
   "samurott": {
@@ -2913,8 +2363,6 @@
     "stats": [95, 100, 85, 108, 70, 70],
     "abilities": ["torrent", "shellarmor"],
     "weight": 94.6,
-    "height": 1.5,
-    "gender": 0.875,
     "icon": 275
   },
   "samurotthisui": {
@@ -2922,8 +2370,6 @@
     "stats": [90, 108, 80, 100, 65, 85],
     "abilities": ["torrent", "sharpness"],
     "weight": 58.2,
-    "height": 1.5,
-    "gender": 0.875,
     "icon": 276,
     "base": "samurott",
     "forme": "Hisui"
@@ -2933,8 +2379,6 @@
     "stats": [72, 107, 125, 65, 70, 71],
     "abilities": ["sandspit", "shedskin", "sandveil"],
     "weight": 65.5,
-    "height": 3.8,
-    "gender": 0.5,
     "icon": 277
   },
   "sceptile": {
@@ -2942,8 +2386,6 @@
     "stats": [70, 85, 65, 105, 85, 120],
     "abilities": ["overgrow", "unburden"],
     "weight": 52.2,
-    "height": 1.7,
-    "gender": 0.875,
     "icon": 278
   },
   "sceptilemega": {
@@ -2951,8 +2393,6 @@
     "stats": [70, 110, 75, 145, 85, 145],
     "abilities": ["lightningrod"],
     "weight": 55.2,
-    "height": 1.9,
-    "gender": 0.875,
     "icon": 279,
     "base": "sceptile",
     "forme": "Mega",
@@ -2965,8 +2405,6 @@
     "stats": [70, 130, 100, 55, 80, 65],
     "abilities": ["swarm", "technician", "lightmetal"],
     "weight": 118,
-    "height": 1.8,
-    "gender": 0.5,
     "icon": 280
   },
   "scizormega": {
@@ -2974,8 +2412,6 @@
     "stats": [70, 150, 140, 65, 100, 75],
     "abilities": ["technician"],
     "weight": 125,
-    "height": 2,
-    "gender": 0.5,
     "icon": 281,
     "base": "scizor",
     "forme": "Mega",
@@ -2988,8 +2424,6 @@
     "stats": [60, 100, 89, 55, 69, 112],
     "abilities": ["poisonpoint", "swarm", "speedboost"],
     "weight": 200.5,
-    "height": 2.5,
-    "gender": 0.5,
     "icon": 282
   },
   "scolipedemega": {
@@ -2997,8 +2431,6 @@
     "stats": [60, 140, 149, 75, 99, 62],
     "abilities": ["shellarmor"],
     "weight": 230.5,
-    "height": 3.2,
-    "gender": 0.5,
     "icon": 283,
     "noSprite": true,
     "base": "scolipede",
@@ -3012,8 +2444,6 @@
     "stats": [65, 108, 65, 108, 65, 75],
     "abilities": ["chlorophyll", "insomnia", "moody"],
     "weight": 15,
-    "height": 0.9,
-    "gender": 0.5,
     "icon": 284
   },
   "scovillainmega": {
@@ -3021,8 +2451,6 @@
     "stats": [65, 138, 85, 138, 85, 75],
     "abilities": ["spicyspray"],
     "weight": 22,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 285,
     "base": "scovillain",
     "forme": "Mega",
@@ -3035,8 +2463,6 @@
     "stats": [65, 90, 115, 45, 115, 58],
     "abilities": ["shedskin", "moxie", "intimidate"],
     "weight": 30,
-    "height": 1.1,
-    "gender": 0.5,
     "icon": 286
   },
   "scraftymega": {
@@ -3044,8 +2470,6 @@
     "stats": [65, 130, 135, 55, 135, 68],
     "abilities": ["intimidate"],
     "weight": 31,
-    "height": 1.1,
-    "gender": 0.5,
     "icon": 287,
     "noSprite": true,
     "base": "scrafty",
@@ -3059,8 +2483,6 @@
     "stats": [75, 75, 95, 75, 95, 113],
     "abilities": ["overgrow", "contrary"],
     "weight": 63,
-    "height": 3.3,
-    "gender": 0.875,
     "icon": 288
   },
   "sharpedo": {
@@ -3068,8 +2490,6 @@
     "stats": [70, 120, 40, 95, 40, 95],
     "abilities": ["roughskin", "speedboost"],
     "weight": 88.8,
-    "height": 1.8,
-    "gender": 0.5,
     "icon": 289
   },
   "sharpedomega": {
@@ -3077,8 +2497,6 @@
     "stats": [70, 140, 70, 110, 65, 105],
     "abilities": ["strongjaw"],
     "weight": 130.3,
-    "height": 2.5,
-    "gender": 0.5,
     "icon": 290,
     "base": "sharpedo",
     "forme": "Mega",
@@ -3091,8 +2509,6 @@
     "stats": [75, 98, 63, 98, 63, 101],
     "abilities": ["gluttony", "torrent"],
     "weight": 29,
-    "height": 1,
-    "gender": 0.875,
     "icon": 291
   },
   "simisage": {
@@ -3100,8 +2516,6 @@
     "stats": [75, 98, 63, 98, 63, 101],
     "abilities": ["gluttony", "overgrow"],
     "weight": 30.5,
-    "height": 1.1,
-    "gender": 0.875,
     "icon": 292
   },
   "simisear": {
@@ -3109,8 +2523,6 @@
     "stats": [75, 98, 63, 98, 63, 101],
     "abilities": ["gluttony", "blaze"],
     "weight": 28,
-    "height": 1,
-    "gender": 0.875,
     "icon": 293
   },
   "sinistcha": {
@@ -3118,8 +2530,6 @@
     "stats": [71, 60, 106, 121, 80, 70],
     "abilities": ["hospitality", "heatproof"],
     "weight": 2.2,
-    "height": 0.2,
-    "gender": "N",
     "icon": 294
   },
   "sinistchamasterpiece": {
@@ -3127,8 +2537,6 @@
     "stats": [71, 60, 106, 121, 80, 70],
     "abilities": ["hospitality", "heatproof"],
     "weight": 2.2,
-    "height": 0.2,
-    "gender": "N",
     "icon": 295,
     "base": "sinistcha",
     "forme": "Masterpiece"
@@ -3138,8 +2546,6 @@
     "stats": [62, 135, 95, 68, 82, 65],
     "abilities": ["steadfast", "scrappy"],
     "weight": 117,
-    "height": 0.8,
-    "gender": 0.5,
     "icon": 296
   },
   "skarmory": {
@@ -3147,8 +2553,6 @@
     "stats": [65, 80, 140, 40, 70, 70],
     "abilities": ["keeneye", "sturdy", "weakarmor"],
     "weight": 50.5,
-    "height": 1.7,
-    "gender": 0.5,
     "icon": 297
   },
   "skarmorymega": {
@@ -3156,8 +2560,6 @@
     "stats": [65, 140, 110, 40, 100, 110],
     "abilities": ["stalwart"],
     "weight": 40.4,
-    "height": 1.7,
-    "gender": 0.5,
     "icon": 298,
     "base": "skarmory",
     "forme": "Mega",
@@ -3170,8 +2572,6 @@
     "stats": [104, 75, 100, 110, 75, 66],
     "abilities": ["blaze", "unaware"],
     "weight": 326.5,
-    "height": 1.6,
-    "gender": 0.875,
     "icon": 299
   },
   "slowbro": {
@@ -3179,8 +2579,6 @@
     "stats": [95, 75, 110, 100, 80, 30],
     "abilities": ["oblivious", "owntempo", "regenerator"],
     "weight": 78.5,
-    "height": 1.6,
-    "gender": 0.5,
     "icon": 300
   },
   "slowbrogalar": {
@@ -3188,8 +2586,6 @@
     "stats": [95, 100, 95, 100, 70, 30],
     "abilities": ["quickdraw", "owntempo", "regenerator"],
     "weight": 70.5,
-    "height": 1.6,
-    "gender": 0.5,
     "icon": 301,
     "base": "slowbro",
     "forme": "Galar"
@@ -3199,8 +2595,6 @@
     "stats": [95, 75, 180, 130, 80, 30],
     "abilities": ["shellarmor"],
     "weight": 120,
-    "height": 2,
-    "gender": 0.5,
     "icon": 302,
     "base": "slowbro",
     "forme": "Mega",
@@ -3213,8 +2607,6 @@
     "stats": [95, 75, 80, 100, 110, 30],
     "abilities": ["oblivious", "owntempo", "regenerator"],
     "weight": 79.5,
-    "height": 2,
-    "gender": 0.5,
     "icon": 303
   },
   "slowkinggalar": {
@@ -3222,8 +2614,6 @@
     "stats": [95, 65, 80, 110, 110, 30],
     "abilities": ["curiousmedicine", "owntempo", "regenerator"],
     "weight": 79.5,
-    "height": 1.8,
-    "gender": 0.5,
     "icon": 304,
     "base": "slowking",
     "forme": "Galar"
@@ -3233,8 +2623,6 @@
     "stats": [82, 80, 86, 85, 75, 72],
     "abilities": ["sweetveil", "unburden"],
     "weight": 5,
-    "height": 0.8,
-    "gender": 0.5,
     "icon": 305
   },
   "sneasler": {
@@ -3242,8 +2630,6 @@
     "stats": [80, 130, 60, 40, 80, 120],
     "abilities": ["pressure", "unburden", "poisontouch"],
     "weight": 43,
-    "height": 1.3,
-    "gender": 0.5,
     "icon": 306
   },
   "snorlax": {
@@ -3251,8 +2637,6 @@
     "stats": [160, 110, 65, 65, 110, 30],
     "abilities": ["immunity", "thickfat", "gluttony"],
     "weight": 460,
-    "height": 2.1,
-    "gender": 0.875,
     "icon": 307
   },
   "spiritomb": {
@@ -3260,8 +2644,6 @@
     "stats": [50, 92, 108, 92, 108, 35],
     "abilities": ["pressure", "infiltrator"],
     "weight": 108,
-    "height": 1,
-    "gender": 0.5,
     "icon": 308
   },
   "squawkabilly": {
@@ -3269,8 +2651,6 @@
     "stats": [82, 96, 51, 45, 51, 92],
     "abilities": ["intimidate", "hustle", "guts"],
     "weight": 2.4,
-    "height": 0.6,
-    "gender": 0.5,
     "icon": 309
   },
   "squawkabillyblue": {
@@ -3278,8 +2658,6 @@
     "stats": [82, 96, 51, 45, 51, 92],
     "abilities": ["intimidate", "hustle", "guts"],
     "weight": 2.4,
-    "height": 0.6,
-    "gender": 0.5,
     "icon": 310,
     "base": "squawkabilly",
     "forme": "Blue"
@@ -3289,8 +2667,6 @@
     "stats": [82, 96, 51, 45, 51, 92],
     "abilities": ["intimidate", "hustle", "sheerforce"],
     "weight": 2.4,
-    "height": 0.6,
-    "gender": 0.5,
     "icon": 311,
     "base": "squawkabilly",
     "forme": "White"
@@ -3300,8 +2676,6 @@
     "stats": [82, 96, 51, 45, 51, 92],
     "abilities": ["intimidate", "hustle", "sheerforce"],
     "weight": 2.4,
-    "height": 0.6,
-    "gender": 0.5,
     "icon": 312,
     "base": "squawkabilly",
     "forme": "Yellow"
@@ -3311,8 +2685,6 @@
     "stats": [85, 120, 70, 50, 60, 100],
     "abilities": ["intimidate", "reckless"],
     "weight": 24.9,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 313
   },
   "staraptormega": {
@@ -3320,8 +2692,6 @@
     "stats": [85, 140, 100, 60, 90, 110],
     "abilities": ["contrary"],
     "weight": 50,
-    "height": 1.9,
-    "gender": 0.5,
     "icon": 314,
     "noSprite": true,
     "base": "staraptor",
@@ -3335,8 +2705,6 @@
     "stats": [60, 75, 85, 100, 85, 115],
     "abilities": ["illuminate", "naturalcure", "analytic"],
     "weight": 80,
-    "height": 1.1,
-    "gender": "N",
     "icon": 315
   },
   "starmiemega": {
@@ -3344,8 +2712,6 @@
     "stats": [60, 100, 105, 130, 105, 120],
     "abilities": ["hugepower"],
     "weight": 80,
-    "height": 2.3,
-    "gender": "N",
     "icon": 316,
     "base": "starmie",
     "forme": "Mega",
@@ -3358,8 +2724,6 @@
     "stats": [75, 85, 200, 55, 65, 30],
     "abilities": ["rockhead", "sturdy", "sheerforce"],
     "weight": 400,
-    "height": 9.2,
-    "gender": 0.5,
     "icon": 317
   },
   "steelixmega": {
@@ -3367,8 +2731,6 @@
     "stats": [75, 125, 230, 55, 95, 30],
     "abilities": ["sandforce"],
     "weight": 740,
-    "height": 10.5,
-    "gender": 0.5,
     "icon": 318,
     "base": "steelix",
     "forme": "Mega",
@@ -3381,8 +2743,6 @@
     "stats": [109, 66, 84, 81, 99, 32],
     "abilities": ["static", "limber", "sandveil"],
     "weight": 11,
-    "height": 0.7,
-    "gender": 0.5,
     "icon": 319
   },
   "stunfiskgalar": {
@@ -3390,8 +2750,6 @@
     "stats": [109, 81, 99, 66, 84, 32],
     "abilities": ["mimicry"],
     "weight": 20.5,
-    "height": 0.7,
-    "gender": 0.5,
     "icon": 320,
     "base": "stunfisk",
     "forme": "Galar"
@@ -3401,8 +2759,6 @@
     "stats": [100, 73, 83, 73, 83, 55],
     "abilities": ["liquidooze", "stickyhold", "gluttony"],
     "weight": 80,
-    "height": 1.7,
-    "gender": 0.5,
     "icon": 321
   },
   "swampert": {
@@ -3410,8 +2766,6 @@
     "stats": [100, 110, 90, 85, 90, 60],
     "abilities": ["torrent", "damp"],
     "weight": 81.9,
-    "height": 1.5,
-    "gender": 0.875,
     "icon": 322
   },
   "swampertmega": {
@@ -3419,8 +2773,6 @@
     "stats": [100, 150, 110, 95, 110, 70],
     "abilities": ["swiftswim"],
     "weight": 102,
-    "height": 1.9,
-    "gender": 0.875,
     "icon": 323,
     "base": "swampert",
     "forme": "Mega",
@@ -3433,8 +2785,6 @@
     "stats": [95, 65, 65, 110, 130, 60],
     "abilities": ["cutecharm", "pixilate"],
     "weight": 23.5,
-    "height": 1,
-    "gender": 0.875,
     "icon": 324
   },
   "talonflame": {
@@ -3442,8 +2792,6 @@
     "stats": [78, 81, 71, 74, 69, 126],
     "abilities": ["flamebody", "galewings"],
     "weight": 24.5,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 325
   },
   "tauros": {
@@ -3451,8 +2799,6 @@
     "stats": [75, 100, 95, 40, 70, 110],
     "abilities": ["intimidate", "angerpoint", "sheerforce"],
     "weight": 88.4,
-    "height": 1.4,
-    "gender": "M",
     "icon": 326
   },
   "taurospaldeaaqua": {
@@ -3460,8 +2806,6 @@
     "stats": [75, 110, 105, 30, 70, 100],
     "abilities": ["intimidate", "angerpoint", "cudchew"],
     "weight": 110,
-    "height": 1.4,
-    "gender": "M",
     "icon": 327,
     "base": "tauros",
     "forme": "Paldea-Aqua"
@@ -3471,8 +2815,6 @@
     "stats": [75, 110, 105, 30, 70, 100],
     "abilities": ["intimidate", "angerpoint", "cudchew"],
     "weight": 85,
-    "height": 1.4,
-    "gender": "M",
     "icon": 328,
     "base": "tauros",
     "forme": "Paldea-Blaze"
@@ -3482,8 +2824,6 @@
     "stats": [75, 110, 105, 30, 70, 100],
     "abilities": ["intimidate", "angerpoint", "cudchew"],
     "weight": 115,
-    "height": 1.4,
-    "gender": "M",
     "icon": 329,
     "base": "tauros",
     "forme": "Paldea-Combat"
@@ -3493,8 +2833,6 @@
     "stats": [70, 58, 58, 87, 92, 90],
     "abilities": ["runaway", "unburden", "stakeout"],
     "weight": 19.9,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 330
   },
   "tinkaton": {
@@ -3502,8 +2840,6 @@
     "stats": [85, 75, 77, 70, 105, 94],
     "abilities": ["moldbreaker", "owntempo", "pickpocket"],
     "weight": 112.8,
-    "height": 0.7,
-    "gender": "F",
     "icon": 331
   },
   "torkoal": {
@@ -3511,8 +2847,6 @@
     "stats": [70, 85, 140, 85, 70, 20],
     "abilities": ["whitesmoke", "drought", "shellarmor"],
     "weight": 80.4,
-    "height": 0.5,
-    "gender": 0.5,
     "icon": 332
   },
   "torterra": {
@@ -3520,8 +2854,6 @@
     "stats": [95, 109, 105, 75, 85, 56],
     "abilities": ["overgrow", "shellarmor"],
     "weight": 310,
-    "height": 2.2,
-    "gender": 0.875,
     "icon": 333
   },
   "toucannon": {
@@ -3529,8 +2861,6 @@
     "stats": [80, 120, 75, 75, 75, 60],
     "abilities": ["keeneye", "skilllink", "sheerforce"],
     "weight": 26,
-    "height": 1.1,
-    "gender": 0.5,
     "icon": 334
   },
   "toxapex": {
@@ -3538,8 +2868,6 @@
     "stats": [50, 63, 152, 53, 142, 35],
     "abilities": ["merciless", "limber", "regenerator"],
     "weight": 14.5,
-    "height": 0.7,
-    "gender": 0.5,
     "icon": 335
   },
   "toxicroak": {
@@ -3547,8 +2875,6 @@
     "stats": [83, 106, 65, 86, 65, 85],
     "abilities": ["anticipation", "dryskin", "poisontouch"],
     "weight": 44.4,
-    "height": 1.3,
-    "gender": 0.5,
     "icon": 336
   },
   "toxtricity": {
@@ -3556,8 +2882,6 @@
     "stats": [75, 98, 70, 114, 70, 75],
     "abilities": ["punkrock", "plus", "technician"],
     "weight": 40,
-    "height": 1.6,
-    "gender": 0.5,
     "icon": 337
   },
   "toxtricitylowkey": {
@@ -3565,8 +2889,6 @@
     "stats": [75, 98, 70, 114, 70, 75],
     "abilities": ["punkrock", "minus", "technician"],
     "weight": 40,
-    "height": 1.6,
-    "gender": 0.5,
     "icon": 338,
     "base": "toxtricity",
     "forme": "Low-Key"
@@ -3576,8 +2898,6 @@
     "stats": [85, 110, 76, 65, 82, 56],
     "abilities": ["naturalcure", "frisk", "harvest"],
     "weight": 71,
-    "height": 1.5,
-    "gender": 0.5,
     "icon": 339
   },
   "tsareena": {
@@ -3585,8 +2905,6 @@
     "stats": [72, 120, 98, 50, 98, 72],
     "abilities": ["leafguard", "queenlymajesty", "sweetveil"],
     "weight": 21.4,
-    "height": 1.2,
-    "gender": "F",
     "icon": 340
   },
   "typhlosion": {
@@ -3594,8 +2912,6 @@
     "stats": [78, 84, 78, 109, 85, 100],
     "abilities": ["blaze", "flashfire"],
     "weight": 79.5,
-    "height": 1.7,
-    "gender": 0.875,
     "icon": 341
   },
   "typhlosionhisui": {
@@ -3603,8 +2919,6 @@
     "stats": [73, 84, 78, 119, 85, 95],
     "abilities": ["blaze", "frisk"],
     "weight": 69.8,
-    "height": 1.6,
-    "gender": 0.875,
     "icon": 342,
     "base": "typhlosion",
     "forme": "Hisui"
@@ -3614,8 +2928,6 @@
     "stats": [100, 134, 110, 95, 100, 61],
     "abilities": ["sandstream", "unnerve"],
     "weight": 202,
-    "height": 2,
-    "gender": 0.5,
     "icon": 343
   },
   "tyranitarmega": {
@@ -3623,8 +2935,6 @@
     "stats": [100, 164, 150, 95, 120, 71],
     "abilities": ["sandstream"],
     "weight": 255,
-    "height": 2.5,
-    "gender": 0.5,
     "icon": 344,
     "base": "tyranitar",
     "forme": "Mega",
@@ -3637,8 +2947,6 @@
     "stats": [82, 121, 119, 69, 59, 71],
     "abilities": ["strongjaw", "rockhead"],
     "weight": 270,
-    "height": 2.5,
-    "gender": 0.875,
     "icon": 345
   },
   "umbreon": {
@@ -3646,8 +2954,6 @@
     "stats": [95, 65, 110, 60, 130, 65],
     "abilities": ["synchronize", "innerfocus"],
     "weight": 27,
-    "height": 1,
-    "gender": 0.875,
     "icon": 346
   },
   "vanilluxe": {
@@ -3655,8 +2961,6 @@
     "stats": [71, 95, 85, 110, 95, 79],
     "abilities": ["icebody", "snowwarning", "weakarmor"],
     "weight": 57.5,
-    "height": 1.3,
-    "gender": 0.5,
     "icon": 347
   },
   "vaporeon": {
@@ -3664,8 +2968,6 @@
     "stats": [130, 65, 60, 110, 95, 65],
     "abilities": ["waterabsorb", "hydration"],
     "weight": 29,
-    "height": 1,
-    "gender": 0.875,
     "icon": 348
   },
   "venusaur": {
@@ -3673,8 +2975,6 @@
     "stats": [80, 82, 83, 100, 100, 80],
     "abilities": ["overgrow", "chlorophyll"],
     "weight": 100,
-    "height": 2,
-    "gender": 0.875,
     "icon": 349
   },
   "venusaurmega": {
@@ -3682,8 +2982,6 @@
     "stats": [80, 100, 123, 122, 120, 80],
     "abilities": ["thickfat"],
     "weight": 155.5,
-    "height": 2.4,
-    "gender": 0.875,
     "icon": 350,
     "base": "venusaur",
     "forme": "Mega",
@@ -3696,8 +2994,6 @@
     "stats": [80, 105, 65, 100, 70, 70],
     "abilities": ["chlorophyll", "gluttony"],
     "weight": 15.5,
-    "height": 1.7,
-    "gender": 0.5,
     "icon": 351
   },
   "victreebelmega": {
@@ -3705,8 +3001,6 @@
     "stats": [80, 125, 85, 135, 95, 70],
     "abilities": ["innardsout"],
     "weight": 125.5,
-    "height": 4.5,
-    "gender": 0.5,
     "icon": 352,
     "base": "victreebel",
     "forme": "Mega",
@@ -3719,8 +3013,6 @@
     "stats": [75, 80, 85, 110, 90, 50],
     "abilities": ["chlorophyll", "effectspore"],
     "weight": 18.6,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 353
   },
   "vivillon": {
@@ -3728,8 +3020,6 @@
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": ["shielddust", "compoundeyes", "friendguard"],
     "weight": 17,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 354
   },
   "vivillonarchipelago": {
@@ -3737,8 +3027,6 @@
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": ["shielddust", "compoundeyes", "friendguard"],
     "weight": 17,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 355,
     "base": "vivillon",
     "forme": "Archipelago",
@@ -3749,8 +3037,6 @@
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": ["shielddust", "compoundeyes", "friendguard"],
     "weight": 17,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 356,
     "base": "vivillon",
     "forme": "Continental",
@@ -3761,8 +3047,6 @@
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": ["shielddust", "compoundeyes", "friendguard"],
     "weight": 17,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 357,
     "base": "vivillon",
     "forme": "Elegant",
@@ -3773,8 +3057,6 @@
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": ["shielddust", "compoundeyes", "friendguard"],
     "weight": 17,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 358,
     "base": "vivillon",
     "forme": "Fancy"
@@ -3784,8 +3066,6 @@
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": ["shielddust", "compoundeyes", "friendguard"],
     "weight": 17,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 359,
     "base": "vivillon",
     "forme": "Garden",
@@ -3796,8 +3076,6 @@
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": ["shielddust", "compoundeyes", "friendguard"],
     "weight": 17,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 360,
     "base": "vivillon",
     "forme": "High Plains",
@@ -3808,8 +3086,6 @@
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": ["shielddust", "compoundeyes", "friendguard"],
     "weight": 17,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 361,
     "base": "vivillon",
     "forme": "Icy Snow",
@@ -3820,8 +3096,6 @@
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": ["shielddust", "compoundeyes", "friendguard"],
     "weight": 17,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 362,
     "base": "vivillon",
     "forme": "Jungle",
@@ -3832,8 +3106,6 @@
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": ["shielddust", "compoundeyes", "friendguard"],
     "weight": 17,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 363,
     "base": "vivillon",
     "forme": "Marine",
@@ -3844,8 +3116,6 @@
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": ["shielddust", "compoundeyes", "friendguard"],
     "weight": 17,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 364,
     "base": "vivillon",
     "forme": "Modern",
@@ -3856,8 +3126,6 @@
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": ["shielddust", "compoundeyes", "friendguard"],
     "weight": 17,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 365,
     "base": "vivillon",
     "forme": "Monsoon",
@@ -3868,8 +3136,6 @@
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": ["shielddust", "compoundeyes", "friendguard"],
     "weight": 17,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 366,
     "base": "vivillon",
     "forme": "Ocean",
@@ -3880,8 +3146,6 @@
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": ["shielddust", "compoundeyes", "friendguard"],
     "weight": 17,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 367,
     "base": "vivillon",
     "forme": "Pokeball"
@@ -3891,8 +3155,6 @@
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": ["shielddust", "compoundeyes", "friendguard"],
     "weight": 17,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 368,
     "base": "vivillon",
     "forme": "Polar",
@@ -3903,8 +3165,6 @@
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": ["shielddust", "compoundeyes", "friendguard"],
     "weight": 17,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 369,
     "base": "vivillon",
     "forme": "River",
@@ -3915,8 +3175,6 @@
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": ["shielddust", "compoundeyes", "friendguard"],
     "weight": 17,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 370,
     "base": "vivillon",
     "forme": "Sandstorm",
@@ -3927,8 +3185,6 @@
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": ["shielddust", "compoundeyes", "friendguard"],
     "weight": 17,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 371,
     "base": "vivillon",
     "forme": "Savanna",
@@ -3939,8 +3195,6 @@
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": ["shielddust", "compoundeyes", "friendguard"],
     "weight": 17,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 372,
     "base": "vivillon",
     "forme": "Sun",
@@ -3951,8 +3205,6 @@
     "stats": [80, 52, 50, 90, 50, 89],
     "abilities": ["shielddust", "compoundeyes", "friendguard"],
     "weight": 17,
-    "height": 1.2,
-    "gender": 0.5,
     "icon": 373,
     "base": "vivillon",
     "forme": "Tundra",
@@ -3963,8 +3215,6 @@
     "stats": [85, 60, 65, 135, 105, 100],
     "abilities": ["flamebody", "swarm"],
     "weight": 46,
-    "height": 1.6,
-    "gender": 0.5,
     "icon": 374
   },
   "watchog": {
@@ -3972,8 +3222,6 @@
     "stats": [60, 85, 69, 60, 69, 77],
     "abilities": ["illuminate", "keeneye", "analytic"],
     "weight": 27,
-    "height": 1.1,
-    "gender": 0.5,
     "icon": 375
   },
   "weavile": {
@@ -3981,8 +3229,6 @@
     "stats": [70, 120, 65, 45, 85, 125],
     "abilities": ["pressure", "pickpocket"],
     "weight": 34,
-    "height": 1.1,
-    "gender": 0.5,
     "icon": 376
   },
   "whimsicott": {
@@ -3990,8 +3236,6 @@
     "stats": [60, 67, 85, 77, 75, 116],
     "abilities": ["prankster", "infiltrator", "chlorophyll"],
     "weight": 6.6,
-    "height": 0.7,
-    "gender": 0.5,
     "icon": 377
   },
   "wigglytuff": {
@@ -3999,8 +3243,6 @@
     "stats": [140, 70, 45, 85, 50, 45],
     "abilities": ["cutecharm", "competitive", "frisk"],
     "weight": 12,
-    "height": 1,
-    "gender": 0.25,
     "icon": 378
   },
   "wyrdeer": {
@@ -4008,8 +3250,6 @@
     "stats": [103, 105, 72, 105, 75, 65],
     "abilities": ["intimidate", "frisk", "sapsipper"],
     "weight": 95.1,
-    "height": 1.8,
-    "gender": 0.5,
     "icon": 379
   },
   "zoroark": {
@@ -4017,8 +3257,6 @@
     "stats": [60, 105, 60, 120, 60, 105],
     "abilities": ["illusion"],
     "weight": 81.1,
-    "height": 1.6,
-    "gender": 0.875,
     "icon": 380
   },
   "zoroarkhisui": {
@@ -4026,8 +3264,6 @@
     "stats": [55, 100, 60, 125, 60, 110],
     "abilities": ["illusion"],
     "weight": 73,
-    "height": 1.6,
-    "gender": 0.875,
     "icon": 381,
     "base": "zoroark",
     "forme": "Hisui"

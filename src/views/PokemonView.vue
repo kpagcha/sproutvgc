@@ -29,22 +29,15 @@ const abilities = computed(() => mon.value.abilities.map(ability))
 /** Showdown's color scale for stats: red for low, through yellow, to green and blue for high. */
 const statColor = (v: number) => `hsl(${Math.min(Math.floor((v * 180) / 255), 360)}, 75%, 45%)`
 
-const gender = computed(() => {
-  const g = mon.value.gender
-  if (g === 'N') return t('pokemon.genderless')
-  if (g === 'M' || g === 1) return t('pokemon.maleOnly')
-  if (g === 'F' || g === 0) return t('pokemon.femaleOnly')
-  return t('pokemon.genderRatio', { m: g * 100, f: 100 - g * 100 })
-})
-
-// The species' other formes the regulation has (Megas, regional formes, Rotom's appliances), and the ones that only
-// look different, apart.
+// The species' formes the regulation has (Megas, regional formes, Rotom's appliances), this one among them, and the
+// ones that only look different, apart. Each list is shown only when it has others.
 const family = computed(() => {
   const species = speciesOf(id.value)
-  return availableIds('pokemon').filter((p) => p !== id.value && speciesOf(p) === species)
+  return availableIds('pokemon').filter((p) => speciesOf(p) === species)
 })
 const formes = computed(() => family.value.filter((p) => !POKEMON[p].cosmetic))
 const looks = computed(() => family.value.filter((p) => POKEMON[p].cosmetic))
+const others = (ids: PokemonId[]) => ids.some((p) => p !== id.value)
 
 /** How it comes about, for formes a battle brings out: a Mega Evolution, or another change (Aegislash's Blade). */
 const origin = computed((): { key: MessageKey; from: PokemonId } | null => {
@@ -81,6 +74,12 @@ watchEffect(async () => {
             <TypeIcon :type="ty" :scale="2" />
           </RouterLink>
         </div>
+        <dl class="abilities">
+          <template v-for="a in abilities" :key="a.id">
+            <dt><DexRef :to="a" /></dt>
+            <dd class="muted"><DexText :text="description('ability', a.id)?.short ?? ''" /></dd>
+          </template>
+        </dl>
         <p v-if="origin" class="origin">
           <template v-for="(part, i) in tSlots(origin.key)" :key="i">
             <template v-if="typeof part === 'string'">{{ part }}</template>
@@ -96,30 +95,8 @@ watchEffect(async () => {
             <span v-else class="with-icon"><ItemIcon :id="mon.item" /><DexRef :to="item(mon.item)" /></span>
           </template>
         </p>
-        <dl class="misc">
-          <dt class="muted">{{ t('pokemon.height') }}</dt>
-          <dd class="num">{{ mon.height }} m</dd>
-          <dt class="muted">{{ t('pokemon.weight') }}</dt>
-          <dd class="num">{{ mon.weight }} kg</dd>
-          <dt class="muted">{{ t('pokemon.gender') }}</dt>
-          <dd>{{ gender }}</dd>
-        </dl>
       </div>
-    </div>
-
-    <div class="cols">
-      <div class="panel">
-        <h2>{{ t('pokemon.abilities') }}</h2>
-        <dl class="abilities">
-          <template v-for="a in abilities" :key="a.id">
-            <dt><DexRef :to="a" /></dt>
-            <dd class="muted"><DexText :text="description('ability', a.id)?.short ?? ''" /></dd>
-          </template>
-        </dl>
-      </div>
-
-      <div class="panel">
-        <h2>{{ t('pokemon.stats') }}</h2>
+      <div class="stats-col">
         <table class="stats">
           <tbody>
             <tr v-for="(s, i) in STATS" :key="s">
@@ -136,16 +113,19 @@ watchEffect(async () => {
               </td>
             </tr>
             <tr class="total">
-              <th class="muted">{{ t('stat.total') }}</th>
+              <th v-tip="t('stat.bstFull')" class="muted">{{ t('stat.bst') }}</th>
               <td class="r num">{{ total(mon) }}</td>
               <td></td>
             </tr>
           </tbody>
         </table>
+        <p class="weight muted">
+          {{ t('pokemon.weight') }} <span class="num">{{ mon.weight }} kg</span>
+        </p>
       </div>
     </div>
 
-    <div v-if="formes.length || looks.length || mon.prevo || mon.evos" class="panel">
+    <div v-if="others(formes) || others(looks) || mon.prevo || mon.evos" class="panel">
       <dl class="relations">
         <template v-if="mon.prevo">
           <dt class="muted">{{ t('pokemon.evolvesFrom') }}</dt>
@@ -155,14 +135,14 @@ watchEffect(async () => {
           <dt class="muted">{{ t('pokemon.evolvesInto') }}</dt>
           <dd><PokemonChips :ids="mon.evos" /></dd>
         </template>
-        <template v-if="formes.length">
+        <template v-if="others(formes)">
           <dt class="muted">{{ t('pokemon.formes') }}</dt>
-          <dd><PokemonChips :ids="formes" /></dd>
+          <dd><PokemonChips :ids="formes" :current="id" /></dd>
         </template>
       </dl>
-      <details v-if="looks.length">
+      <details v-if="others(looks)">
         <summary class="muted">{{ t('pokemon.looks', { n: looks.length }) }}</summary>
-        <PokemonChips :ids="looks" />
+        <PokemonChips :ids="looks" :current="id" />
       </details>
     </div>
 
@@ -182,6 +162,7 @@ watchEffect(async () => {
 <style scoped>
 .head {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   align-items: center;
 }
@@ -196,6 +177,7 @@ watchEffect(async () => {
   justify-content: center;
 }
 .facts {
+  flex: 1 1 300px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -217,28 +199,24 @@ watchEffect(async () => {
   gap: 2px;
   vertical-align: middle;
 }
-.misc {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 2px 10px;
-  margin: 0;
-}
-.misc dd {
-  margin: 0;
-}
-.cols {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0 12px;
-}
 .abilities {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 2px 10px;
+  align-items: baseline;
   margin: 0;
 }
 .abilities dt {
   font-weight: bold;
 }
 .abilities dd {
-  margin: 0 0 8px;
+  margin: 0;
+}
+.stats-col {
+  flex: 1 1 260px;
+  min-width: 0;
+  max-width: 420px;
+  margin-left: auto;
 }
 .stats {
   width: 100%;
@@ -269,6 +247,11 @@ watchEffect(async () => {
   padding-top: 6px;
   font-weight: bold;
 }
+.weight {
+  margin: 6px 0 0;
+  font-size: 0.85em;
+  text-align: right;
+}
 .relations {
   display: grid;
   grid-template-columns: max-content 1fr;
@@ -293,8 +276,11 @@ details {
   .icon-sprite :deep(.sheet-icon) {
     zoom: 0.5;
   }
-  .cols {
-    grid-template-columns: 1fr;
+  .abilities {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .abilities dd {
+    margin-bottom: 4px;
   }
 }
 </style>

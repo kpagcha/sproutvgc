@@ -63,10 +63,6 @@ interface Species {
   types: string[]
   baseStats: Record<'hp' | 'atk' | 'def' | 'spa' | 'spd' | 'spe', number>
   weightkg: number
-  heightm: number
-  /** Male share of the species, or `gender` when it only has one ("M", "F", "N" for genderless). */
-  genderRatio: { M: number; F: number }
-  gender: string
   /** The name of its sprites on Showdown's server: `garchomp-megaz`. */
   spriteid: string
   /** The item it needs: a Mega Stone, or Ogerpon's masks. */
@@ -526,9 +522,6 @@ async function main() {
             ),
           ],
           weight: s.weightkg,
-          height: s.heightm,
-          // Its male share, or "M", "F" or "N" (genderless) when it only has one.
-          gender: s.gender || s.genderRatio.M,
           icon: pokemonCell.get(id),
           ...(!ownSprites.has(id) && { noSprite: true }),
           ...(s.forme && { base: toId(s.baseSpecies), forme: s.forme }),

@@ -22,34 +22,61 @@ const info = computed(() => defenseInfo(props.types))
 </script>
 
 <template>
-  <div class="panel">
-    <table class="groups">
-      <tbody>
-        <tr v-for="row in rows" :key="row.m">
-          <th>
-            <span class="tier">
-              <span class="mult-tag" :class="multClass(row.m)">{{ formatMult(row.m) }}</span>
-              <span class="lbl muted">{{ t(row.label) }}</span>
-            </span>
-          </th>
-          <td>
-            <span class="icons">
-              <TypeIcon v-for="t in profile[row.m]" :key="t" :type="t" />
-            </span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <!-- The other effects go to the right of the matchups when there's room, below them when there isn't. -->
+  <div class="panel defense">
+    <div class="split" :class="{ both: hasInfo(info) }">
+      <table class="groups">
+        <tbody>
+          <tr v-for="row in rows" :key="row.m">
+            <th>
+              <span class="tier">
+                <span class="mult-tag" :class="multClass(row.m)">{{ formatMult(row.m) }}</span>
+                <span class="lbl muted">{{ t(row.label) }}</span>
+              </span>
+            </th>
+            <td>
+              <span class="icons">
+                <TypeIcon v-for="t in profile[row.m]" :key="t" :type="t" />
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-  <div v-if="hasInfo(info)" class="panel">
-    <h2>{{ t('matchups.effects') }}</h2>
-    <SideInteractions :info="info" />
+      <div v-if="hasInfo(info)" class="effects">
+        <h2>{{ t('matchups.effects') }}</h2>
+        <SideInteractions :info="info" />
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.defense {
+  container-type: inline-size;
+}
+.split {
+  display: grid;
+  gap: 12px 24px;
+}
+.effects {
+  min-width: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+@container (min-width: 720px) {
+  .split.both {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+  .effects {
+    padding: 0 0 0 24px;
+    border-top: none;
+    border-left: 1px solid var(--border);
+  }
+}
 .groups {
+  align-self: start;
   border-collapse: collapse;
   width: 100%;
 }
