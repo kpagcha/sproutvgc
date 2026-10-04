@@ -45,7 +45,11 @@
   "asoneglastrier": { "available": false },
   "asonespectrier": { "available": false },
   "aurabreak": { "available": false },
-  "auraguard": { "available": false },
+  "auraguard": {
+    "available": true,
+    "short": "This Pokemon receives 1/2 damage from contact moves.",
+    "long": "This Pokemon receives 1/2 damage from contact moves."
+  },
   "baddreams": { "available": false },
   "ballfetch": { "available": false },
   "battery": { "available": false },
@@ -221,26 +225,10 @@
     "short": "This Pokemon gains the Charge effect when it takes a hit from an attack.",
     "long": "This Pokemon gains the Charge effect when it takes a hit from an attack."
   },
-  "embodyaspectcornerstone": {
-    "available": true,
-    "short": "On switch-in, this Pokemon's Defense is raised by 1 stage.",
-    "long": "On switch-in, this Pokemon's Defense is raised by 1 stage."
-  },
-  "embodyaspecthearthflame": {
-    "available": true,
-    "short": "On switch-in, this Pokemon's Attack is raised by 1 stage.",
-    "long": "On switch-in, this Pokemon's Attack is raised by 1 stage."
-  },
-  "embodyaspectteal": {
-    "available": true,
-    "short": "On switch-in, this Pokemon's Speed is raised by 1 stage.",
-    "long": "On switch-in, this Pokemon's Speed is raised by 1 stage."
-  },
-  "embodyaspectwellspring": {
-    "available": true,
-    "short": "On switch-in, this Pokemon's Special Defense is raised by 1 stage.",
-    "long": "On switch-in, this Pokemon's Special Defense is raised by 1 stage."
-  },
+  "embodyaspectcornerstone": { "available": false },
+  "embodyaspecthearthflame": { "available": false },
+  "embodyaspectteal": { "available": false },
+  "embodyaspectwellspring": { "available": false },
   "emergencyexit": {
     "available": true,
     "short": "This Pokemon switches out when it reaches 1/2 or less of its maximum HP.",
@@ -347,11 +335,7 @@
     "short": "Immune to Intimidate. Intimidated: +1 Attack. Cannot be forced to switch out.",
     "long": "This Pokemon is immune to the effect of the Intimidate Ability and raises its Attack by 1 stage instead. This Pokemon cannot be forced to switch out by another Pokemon's attack or item."
   },
-  "gulpmissile": {
-    "available": true,
-    "short": "When hit after Surf/Dive, attacker takes 1/4 max HP and -1 Defense or paralysis.",
-    "long": "If this Pokemon is a Cramorant, it changes forme when it hits a target with Surf or uses the first turn of Dive successfully. It becomes Gulping Form with an Arrokuda in its mouth if it has more than 1/2 of its maximum HP remaining, or Gorging Form with a Pikachu in its mouth if it has 1/2 or less of its maximum HP remaining. If Cramorant gets hit in Gulping or Gorging Form, it spits the Arrokuda or Pikachu at its attacker, even if it has no HP remaining. The projectile deals damage equal to 1/4 of the target's maximum HP, rounded down; this damage is blocked by the Magic Guard Ability but not by a substitute. An Arrokuda also lowers the target's Defense by 1 stage, and a Pikachu paralyzes the target. Cramorant will return to normal if it spits out a projectile, switches out, or Dynamaxes."
-  },
+  "gulpmissile": { "available": false },
   "guts": {
     "available": true,
     "short": "If this Pokemon is statused, its Attack is 1.5×; ignores burn halving physical damage.",
@@ -414,11 +398,7 @@
     "short": "If Snow is active, this Pokemon heals 1/16 of its max HP each turn.",
     "long": "If Snow is active, this Pokemon restores 1/16 of its maximum HP, rounded down, at the end of each turn."
   },
-  "iceface": {
-    "available": true,
-    "short": "If Eiscue, the first physical hit it takes deals 0 damage. Effect is restored in Snow.",
-    "long": "If this Pokemon is an Eiscue, the first physical hit it takes in battle deals 0 neutral damage. Its ice face is then broken and it changes forme to Noice Face. Eiscue regains its Ice Face forme when Snow begins or when Eiscue switches in while Snow is active. Confusion damage also breaks the ice face."
-  },
+  "iceface": { "available": false },
   "icescales": { "available": false },
   "illuminate": {
     "available": true,
@@ -899,11 +879,7 @@
     "short": "This Pokemon is not affected by the secondary effect of another Pokemon's attack.",
     "long": "This Pokemon is not affected by the secondary effect of another Pokemon's attack. Attacks with secondary effects that are prevented include those with a chance (even 100%) to paralyze, sleep, freeze, burn, poison, confuse, cause this Pokemon to flinch, cause this Pokemon's stat stages to be lowered, as well as Anchor Shot, Eerie Spell, Fling, Psychic Noise, Salt Cure, Spirit Shackle, Syrup Bomb, and Throat Chop. The effect of Sparkling Aria is prevented if this Pokemon is the only target. Secondary effects added by King's Rock, Razor Fang, and the Poison Touch, Stench, and Toxic Chain Abilities are also prevented against this Pokemon."
   },
-  "shieldsdown": {
-    "available": true,
-    "short": "If Minior, switch-in/end of turn it changes to Core at 1/2 max HP or less, else Meteor.",
-    "long": "If this Pokemon is a Minior, it changes to its Core forme if it has 1/2 or less of its maximum HP, and changes to Meteor Form if it has more than 1/2 its maximum HP. This check is done on switch-in and at the end of each turn. While in its Meteor Form, it cannot become affected by a non-volatile status condition or Yawn."
-  },
+  "shieldsdown": { "available": false },
   "simple": { "available": false },
   "skilllink": {
     "available": true,

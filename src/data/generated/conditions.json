@@ -160,7 +160,7 @@
         "volttackle",
         "zapcannon"
       ],
-      "ability": ["effectspore", "gulpmissile", "static"],
+      "ability": ["effectspore", "static"],
       "item": []
     }
   },

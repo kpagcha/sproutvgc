@@ -910,30 +910,6 @@
     "battleOnly": "crabominable",
     "item": "crabominite"
   },
-  "cramorantgorging": {
-    "types": ["flying", "water"],
-    "stats": [70, 85, 55, 85, 95, 85],
-    "abilities": ["gulpmissile"],
-    "weight": 18,
-    "height": 0.8,
-    "gender": 0.5,
-    "icon": 84,
-    "base": "cramorant",
-    "forme": "Gorging",
-    "battleOnly": "cramorant"
-  },
-  "cramorantgulping": {
-    "types": ["flying", "water"],
-    "stats": [70, 85, 55, 85, 95, 85],
-    "abilities": ["gulpmissile"],
-    "weight": 18,
-    "height": 0.8,
-    "gender": 0.5,
-    "icon": 85,
-    "base": "cramorant",
-    "forme": "Gulping",
-    "battleOnly": "cramorant"
-  },
   "decidueye": {
     "types": ["grass", "ghost"],
     "stats": [78, 107, 75, 100, 100, 70],
@@ -941,7 +917,7 @@
     "weight": 36.6,
     "height": 1.6,
     "gender": 0.875,
-    "icon": 86
+    "icon": 84
   },
   "decidueyehisui": {
     "types": ["grass", "fighting"],
@@ -950,7 +926,7 @@
     "weight": 37,
     "height": 1.6,
     "gender": 0.875,
-    "icon": 87,
+    "icon": 85,
     "base": "decidueye",
     "forme": "Hisui"
   },
@@ -961,7 +937,7 @@
     "weight": 2.2,
     "height": 0.2,
     "gender": 0.5,
-    "icon": 88
+    "icon": 86
   },
   "delphox": {
     "types": ["fire", "psychic"],
@@ -970,7 +946,7 @@
     "weight": 39,
     "height": 1.5,
     "gender": 0.875,
-    "icon": 89
+    "icon": 87
   },
   "delphoxmega": {
     "types": ["fire", "psychic"],
@@ -979,7 +955,7 @@
     "weight": 39,
     "height": 1.5,
     "gender": 0.875,
-    "icon": 90,
+    "icon": 88,
     "base": "delphox",
     "forme": "Mega",
     "mega": true,
@@ -993,7 +969,7 @@
     "weight": 42.4,
     "height": 1,
     "gender": 0.5,
-    "icon": 91
+    "icon": 89
   },
   "ditto": {
     "types": ["normal"],
@@ -1002,7 +978,7 @@
     "weight": 4,
     "height": 0.3,
     "gender": "N",
-    "icon": 92
+    "icon": 90
   },
   "dragalge": {
     "types": ["poison", "dragon"],
@@ -1011,7 +987,7 @@
     "weight": 81.5,
     "height": 1.8,
     "gender": 0.5,
-    "icon": 93
+    "icon": 91
   },
   "dragalgemega": {
     "types": ["poison", "dragon"],
@@ -1020,7 +996,7 @@
     "weight": 100.3,
     "height": 2.1,
     "gender": 0.5,
-    "icon": 94,
+    "icon": 92,
     "noSprite": true,
     "base": "dragalge",
     "forme": "Mega",
@@ -1035,7 +1011,7 @@
     "weight": 50,
     "height": 3,
     "gender": 0.5,
-    "icon": 95
+    "icon": 93
   },
   "dragonite": {
     "types": ["dragon", "flying"],
@@ -1044,7 +1020,7 @@
     "weight": 210,
     "height": 2.2,
     "gender": 0.5,
-    "icon": 96
+    "icon": 94
   },
   "dragonitemega": {
     "types": ["dragon", "flying"],
@@ -1053,7 +1029,7 @@
     "weight": 290,
     "height": 2.2,
     "gender": 0.5,
-    "icon": 97,
+    "icon": 95,
     "base": "dragonite",
     "forme": "Mega",
     "mega": true,
@@ -1067,7 +1043,7 @@
     "weight": 185,
     "height": 3,
     "gender": 0.5,
-    "icon": 98
+    "icon": 96
   },
   "drampamega": {
     "types": ["normal", "dragon"],
@@ -1076,7 +1052,7 @@
     "weight": 240.5,
     "height": 3,
     "gender": 0.5,
-    "icon": 99,
+    "icon": 97,
     "base": "drampa",
     "forme": "Mega",
     "mega": true,
@@ -1090,7 +1066,7 @@
     "weight": 80.5,
     "height": 2.1,
     "gender": 0.5,
-    "icon": 100
+    "icon": 98
   },
   "eelektrossmega": {
     "types": ["electric"],
@@ -1099,25 +1075,13 @@
     "weight": 180,
     "height": 3,
     "gender": 0.5,
-    "icon": 101,
+    "icon": 99,
     "noSprite": true,
     "base": "eelektross",
     "forme": "Mega",
     "mega": true,
     "battleOnly": "eelektross",
     "item": "eelektrossite"
-  },
-  "eiscuenoice": {
-    "types": ["ice"],
-    "stats": [75, 80, 70, 65, 50, 130],
-    "abilities": ["iceface"],
-    "weight": 89,
-    "height": 1.4,
-    "gender": 0.5,
-    "icon": 102,
-    "base": "eiscue",
-    "forme": "Noice",
-    "battleOnly": "eiscue"
   },
   "emboar": {
     "types": ["fire", "fighting"],
@@ -1126,7 +1090,7 @@
     "weight": 150,
     "height": 1.6,
     "gender": 0.875,
-    "icon": 103
+    "icon": 100
   },
   "emboarmega": {
     "types": ["fire", "fighting"],
@@ -1135,7 +1099,7 @@
     "weight": 180.3,
     "height": 1.8,
     "gender": 0.875,
-    "icon": 104,
+    "icon": 101,
     "base": "emboar",
     "forme": "Mega",
     "mega": true,
@@ -1149,7 +1113,7 @@
     "weight": 5,
     "height": 0.4,
     "gender": 0.5,
-    "icon": 105
+    "icon": 102
   },
   "empoleon": {
     "types": ["water", "steel"],
@@ -1158,7 +1122,7 @@
     "weight": 84.5,
     "height": 1.7,
     "gender": 0.875,
-    "icon": 106
+    "icon": 103
   },
   "espathra": {
     "types": ["psychic"],
@@ -1167,7 +1131,7 @@
     "weight": 90,
     "height": 1.9,
     "gender": 0.5,
-    "icon": 107
+    "icon": 104
   },
   "espeon": {
     "types": ["psychic"],
@@ -1176,7 +1140,7 @@
     "weight": 26.5,
     "height": 0.9,
     "gender": 0.875,
-    "icon": 108
+    "icon": 105
   },
   "excadrill": {
     "types": ["ground", "steel"],
@@ -1185,7 +1149,7 @@
     "weight": 40.4,
     "height": 0.7,
     "gender": 0.5,
-    "icon": 109
+    "icon": 106
   },
   "excadrillmega": {
     "types": ["ground", "steel"],
@@ -1194,7 +1158,7 @@
     "weight": 60,
     "height": 0.9,
     "gender": 0.5,
-    "icon": 110,
+    "icon": 107,
     "base": "excadrill",
     "forme": "Mega",
     "mega": true,
@@ -1208,7 +1172,7 @@
     "weight": 62,
     "height": 3,
     "gender": "N",
-    "icon": 111
+    "icon": 108
   },
   "falinksmega": {
     "types": ["fighting"],
@@ -1217,7 +1181,7 @@
     "weight": 99,
     "height": 1.6,
     "gender": "N",
-    "icon": 112,
+    "icon": 109,
     "noSprite": true,
     "base": "falinks",
     "forme": "Mega",
@@ -1232,7 +1196,7 @@
     "weight": 15,
     "height": 0.8,
     "gender": 0.5,
-    "icon": 113
+    "icon": 110
   },
   "farigiraf": {
     "types": ["normal", "psychic"],
@@ -1241,7 +1205,7 @@
     "weight": 160,
     "height": 3.2,
     "gender": 0.5,
-    "icon": 114
+    "icon": 111
   },
   "feraligatr": {
     "types": ["water"],
@@ -1250,7 +1214,7 @@
     "weight": 88.8,
     "height": 2.3,
     "gender": 0.875,
-    "icon": 115
+    "icon": 112
   },
   "feraligatrmega": {
     "types": ["water", "dragon"],
@@ -1259,7 +1223,7 @@
     "weight": 108.8,
     "height": 2.3,
     "gender": 0.875,
-    "icon": 116,
+    "icon": 113,
     "base": "feraligatr",
     "forme": "Mega",
     "mega": true,
@@ -1273,7 +1237,7 @@
     "weight": 1,
     "height": 0.3,
     "gender": 0.5,
-    "icon": 117
+    "icon": 114
   },
   "flareon": {
     "types": ["fire"],
@@ -1282,7 +1246,7 @@
     "weight": 25,
     "height": 0.9,
     "gender": 0.875,
-    "icon": 118
+    "icon": 115
   },
   "floetteeternal": {
     "types": ["fairy"],
@@ -1291,7 +1255,7 @@
     "weight": 0.9,
     "height": 0.2,
     "gender": "F",
-    "icon": 119,
+    "icon": 116,
     "base": "floette",
     "forme": "Eternal"
   },
@@ -1302,7 +1266,7 @@
     "weight": 100.8,
     "height": 0.2,
     "gender": "F",
-    "icon": 120,
+    "icon": 117,
     "base": "floette",
     "forme": "Mega",
     "mega": true,
@@ -1316,7 +1280,7 @@
     "weight": 10,
     "height": 1.1,
     "gender": "F",
-    "icon": 121
+    "icon": 118
   },
   "forretress": {
     "types": ["bug", "steel"],
@@ -1325,7 +1289,7 @@
     "weight": 125.8,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 122
+    "icon": 119
   },
   "froslass": {
     "types": ["ice", "ghost"],
@@ -1334,7 +1298,7 @@
     "weight": 26.6,
     "height": 1.3,
     "gender": "F",
-    "icon": 123
+    "icon": 120
   },
   "froslassmega": {
     "types": ["ice", "ghost"],
@@ -1343,7 +1307,7 @@
     "weight": 29.6,
     "height": 2.6,
     "gender": "F",
-    "icon": 124,
+    "icon": 121,
     "base": "froslass",
     "forme": "Mega",
     "mega": true,
@@ -1357,7 +1321,7 @@
     "weight": 28,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 125
+    "icon": 122
   },
   "gallade": {
     "types": ["psychic", "fighting"],
@@ -1366,7 +1330,7 @@
     "weight": 52,
     "height": 1.6,
     "gender": "M",
-    "icon": 126
+    "icon": 123
   },
   "gallademega": {
     "types": ["psychic", "fighting"],
@@ -1375,7 +1339,7 @@
     "weight": 56.4,
     "height": 1.6,
     "gender": "M",
-    "icon": 127,
+    "icon": 124,
     "base": "gallade",
     "forme": "Mega",
     "mega": true,
@@ -1389,7 +1353,7 @@
     "weight": 107.3,
     "height": 1.9,
     "gender": 0.5,
-    "icon": 128
+    "icon": 125
   },
   "garchomp": {
     "types": ["dragon", "ground"],
@@ -1398,7 +1362,7 @@
     "weight": 95,
     "height": 1.9,
     "gender": 0.5,
-    "icon": 129
+    "icon": 126
   },
   "garchompmega": {
     "types": ["dragon", "ground"],
@@ -1407,7 +1371,7 @@
     "weight": 95,
     "height": 1.9,
     "gender": 0.5,
-    "icon": 130,
+    "icon": 127,
     "base": "garchomp",
     "forme": "Mega",
     "mega": true,
@@ -1421,7 +1385,7 @@
     "weight": 99,
     "height": 1.9,
     "gender": 0.5,
-    "icon": 131,
+    "icon": 128,
     "base": "garchomp",
     "forme": "Mega-Z",
     "mega": true,
@@ -1435,7 +1399,7 @@
     "weight": 48.4,
     "height": 1.6,
     "gender": 0.5,
-    "icon": 132
+    "icon": 129
   },
   "gardevoirmega": {
     "types": ["psychic", "fairy"],
@@ -1444,7 +1408,7 @@
     "weight": 48.4,
     "height": 1.6,
     "gender": 0.5,
-    "icon": 133,
+    "icon": 130,
     "base": "gardevoir",
     "forme": "Mega",
     "mega": true,
@@ -1458,7 +1422,7 @@
     "weight": 240,
     "height": 2.3,
     "gender": 0.5,
-    "icon": 134
+    "icon": 131
   },
   "gengar": {
     "types": ["ghost", "poison"],
@@ -1467,7 +1431,7 @@
     "weight": 40.5,
     "height": 1.5,
     "gender": 0.5,
-    "icon": 135
+    "icon": 132
   },
   "gengarmega": {
     "types": ["ghost", "poison"],
@@ -1476,7 +1440,7 @@
     "weight": 40.5,
     "height": 1.4,
     "gender": 0.5,
-    "icon": 136,
+    "icon": 133,
     "base": "gengar",
     "forme": "Mega",
     "mega": true,
@@ -1490,7 +1454,7 @@
     "weight": 30,
     "height": 1.2,
     "gender": "N",
-    "icon": 137
+    "icon": 134
   },
   "glaceon": {
     "types": ["ice"],
@@ -1499,7 +1463,7 @@
     "weight": 25.9,
     "height": 0.8,
     "gender": 0.875,
-    "icon": 138
+    "icon": 135
   },
   "glalie": {
     "types": ["ice"],
@@ -1508,7 +1472,7 @@
     "weight": 256.5,
     "height": 1.5,
     "gender": 0.5,
-    "icon": 139
+    "icon": 136
   },
   "glaliemega": {
     "types": ["ice"],
@@ -1517,7 +1481,7 @@
     "weight": 350.2,
     "height": 2.1,
     "gender": 0.5,
-    "icon": 140,
+    "icon": 137,
     "base": "glalie",
     "forme": "Mega",
     "mega": true,
@@ -1531,7 +1495,7 @@
     "weight": 45,
     "height": 1.5,
     "gender": 0.5,
-    "icon": 141
+    "icon": 138
   },
   "glimmoramega": {
     "types": ["rock", "poison"],
@@ -1540,7 +1504,7 @@
     "weight": 77,
     "height": 2.8,
     "gender": 0.5,
-    "icon": 142,
+    "icon": 139,
     "base": "glimmora",
     "forme": "Mega",
     "mega": true,
@@ -1554,7 +1518,7 @@
     "weight": 42.5,
     "height": 2,
     "gender": 0.5,
-    "icon": 143
+    "icon": 140
   },
   "gogoat": {
     "types": ["grass"],
@@ -1563,7 +1527,7 @@
     "weight": 91,
     "height": 1.7,
     "gender": 0.5,
-    "icon": 144
+    "icon": 141
   },
   "golisopod": {
     "types": ["bug", "water"],
@@ -1572,7 +1536,7 @@
     "weight": 108,
     "height": 2,
     "gender": 0.5,
-    "icon": 145
+    "icon": 142
   },
   "golisopodmega": {
     "types": ["bug", "steel"],
@@ -1581,7 +1545,7 @@
     "weight": 148,
     "height": 2.3,
     "gender": 0.5,
-    "icon": 146,
+    "icon": 143,
     "base": "golisopod",
     "forme": "Mega",
     "mega": true,
@@ -1595,7 +1559,7 @@
     "weight": 330,
     "height": 2.8,
     "gender": "N",
-    "icon": 147
+    "icon": 144
   },
   "golurkmega": {
     "types": ["ground", "ghost"],
@@ -1604,7 +1568,7 @@
     "weight": 330,
     "height": 4,
     "gender": "N",
-    "icon": 148,
+    "icon": 145,
     "base": "golurk",
     "forme": "Mega",
     "mega": true,
@@ -1618,7 +1582,7 @@
     "weight": 150.5,
     "height": 2,
     "gender": 0.5,
-    "icon": 149
+    "icon": 146
   },
   "goodrahisui": {
     "types": ["steel", "dragon"],
@@ -1627,7 +1591,7 @@
     "weight": 334.1,
     "height": 1.7,
     "gender": 0.5,
-    "icon": 150,
+    "icon": 147,
     "base": "goodra",
     "forme": "Hisui"
   },
@@ -1638,7 +1602,7 @@
     "weight": 12.5,
     "height": 0.9,
     "gender": 0.5,
-    "icon": 151
+    "icon": 148
   },
   "gourgeistlarge": {
     "types": ["ghost", "grass"],
@@ -1647,7 +1611,7 @@
     "weight": 14,
     "height": 1.1,
     "gender": 0.5,
-    "icon": 152,
+    "icon": 149,
     "base": "gourgeist",
     "forme": "Large"
   },
@@ -1658,7 +1622,7 @@
     "weight": 9.5,
     "height": 0.7,
     "gender": 0.5,
-    "icon": 153,
+    "icon": 150,
     "base": "gourgeist",
     "forme": "Small"
   },
@@ -1669,7 +1633,7 @@
     "weight": 39,
     "height": 1.7,
     "gender": 0.5,
-    "icon": 154,
+    "icon": 151,
     "base": "gourgeist",
     "forme": "Super"
   },
@@ -1680,7 +1644,7 @@
     "weight": 39,
     "height": 1.6,
     "gender": 0.5,
-    "icon": 155
+    "icon": 152
   },
   "greninja": {
     "types": ["water", "dark"],
@@ -1689,7 +1653,7 @@
     "weight": 40,
     "height": 1.5,
     "gender": 0.875,
-    "icon": 156
+    "icon": 153
   },
   "greninjamega": {
     "types": ["water", "dark"],
@@ -1698,7 +1662,7 @@
     "weight": 40,
     "height": 1.5,
     "gender": 0.875,
-    "icon": 157,
+    "icon": 154,
     "base": "greninja",
     "forme": "Mega",
     "mega": true,
@@ -1712,7 +1676,7 @@
     "weight": 61,
     "height": 1.5,
     "gender": "M",
-    "icon": 158
+    "icon": 155
   },
   "gyarados": {
     "types": ["water", "flying"],
@@ -1721,7 +1685,7 @@
     "weight": 235,
     "height": 6.5,
     "gender": 0.5,
-    "icon": 159
+    "icon": 156
   },
   "gyaradosmega": {
     "types": ["water", "dark"],
@@ -1730,7 +1694,7 @@
     "weight": 305,
     "height": 6.5,
     "gender": 0.5,
-    "icon": 160,
+    "icon": 157,
     "base": "gyarados",
     "forme": "Mega",
     "mega": true,
@@ -1744,7 +1708,7 @@
     "weight": 5.1,
     "height": 2.1,
     "gender": "F",
-    "icon": 161
+    "icon": 158
   },
   "hawlucha": {
     "types": ["fighting", "flying"],
@@ -1753,7 +1717,7 @@
     "weight": 21.5,
     "height": 0.8,
     "gender": 0.5,
-    "icon": 162
+    "icon": 159
   },
   "hawluchamega": {
     "types": ["fighting", "flying"],
@@ -1762,7 +1726,7 @@
     "weight": 25,
     "height": 1,
     "gender": 0.5,
-    "icon": 163,
+    "icon": 160,
     "base": "hawlucha",
     "forme": "Mega",
     "mega": true,
@@ -1776,7 +1740,7 @@
     "weight": 21,
     "height": 1,
     "gender": 0.5,
-    "icon": 164
+    "icon": 161
   },
   "heracross": {
     "types": ["bug", "fighting"],
@@ -1785,7 +1749,7 @@
     "weight": 54,
     "height": 1.5,
     "gender": 0.5,
-    "icon": 165
+    "icon": 162
   },
   "heracrossmega": {
     "types": ["bug", "fighting"],
@@ -1794,7 +1758,7 @@
     "weight": 62.5,
     "height": 1.7,
     "gender": 0.5,
-    "icon": 166,
+    "icon": 163,
     "base": "heracross",
     "forme": "Mega",
     "mega": true,
@@ -1808,7 +1772,7 @@
     "weight": 300,
     "height": 2,
     "gender": 0.5,
-    "icon": 167
+    "icon": 164
   },
   "houndoom": {
     "types": ["dark", "fire"],
@@ -1817,7 +1781,7 @@
     "weight": 35,
     "height": 1.4,
     "gender": 0.5,
-    "icon": 168
+    "icon": 165
   },
   "houndoommega": {
     "types": ["dark", "fire"],
@@ -1826,7 +1790,7 @@
     "weight": 49.5,
     "height": 1.9,
     "gender": 0.5,
-    "icon": 169,
+    "icon": 166,
     "base": "houndoom",
     "forme": "Mega",
     "mega": true,
@@ -1840,7 +1804,7 @@
     "weight": 15,
     "height": 2,
     "gender": 0.5,
-    "icon": 170
+    "icon": 167
   },
   "hydrapple": {
     "types": ["grass", "dragon"],
@@ -1849,7 +1813,7 @@
     "weight": 93,
     "height": 1.8,
     "gender": 0.5,
-    "icon": 171
+    "icon": 168
   },
   "hydreigon": {
     "types": ["dark", "dragon"],
@@ -1858,7 +1822,7 @@
     "weight": 160,
     "height": 1.8,
     "gender": 0.5,
-    "icon": 172
+    "icon": 169
   },
   "incineroar": {
     "types": ["fire", "dark"],
@@ -1867,7 +1831,7 @@
     "weight": 83,
     "height": 1.8,
     "gender": 0.875,
-    "icon": 173
+    "icon": 170
   },
   "indeedee": {
     "types": ["psychic", "normal"],
@@ -1876,7 +1840,7 @@
     "weight": 28,
     "height": 0.9,
     "gender": "M",
-    "icon": 174
+    "icon": 171
   },
   "indeedeef": {
     "types": ["psychic", "normal"],
@@ -1885,7 +1849,7 @@
     "weight": 28,
     "height": 0.9,
     "gender": "F",
-    "icon": 175,
+    "icon": 172,
     "base": "indeedee",
     "forme": "F"
   },
@@ -1896,7 +1860,7 @@
     "weight": 55,
     "height": 1.2,
     "gender": 0.875,
-    "icon": 176
+    "icon": 173
   },
   "inteleon": {
     "types": ["water"],
@@ -1905,7 +1869,7 @@
     "weight": 45.2,
     "height": 1.9,
     "gender": 0.875,
-    "icon": 177
+    "icon": 174
   },
   "jolteon": {
     "types": ["electric"],
@@ -1914,7 +1878,7 @@
     "weight": 24.5,
     "height": 0.8,
     "gender": 0.875,
-    "icon": 178
+    "icon": 175
   },
   "kangaskhan": {
     "types": ["normal"],
@@ -1923,7 +1887,7 @@
     "weight": 80,
     "height": 2.2,
     "gender": "F",
-    "icon": 179
+    "icon": 176
   },
   "kangaskhanmega": {
     "types": ["normal"],
@@ -1932,7 +1896,7 @@
     "weight": 100,
     "height": 2.2,
     "gender": "F",
-    "icon": 180,
+    "icon": 177,
     "base": "kangaskhan",
     "forme": "Mega",
     "mega": true,
@@ -1946,7 +1910,7 @@
     "weight": 120,
     "height": 2,
     "gender": 0.5,
-    "icon": 181
+    "icon": 178
   },
   "kleavor": {
     "types": ["bug", "rock"],
@@ -1955,7 +1919,7 @@
     "weight": 89,
     "height": 1.8,
     "gender": 0.5,
-    "icon": 182
+    "icon": 179
   },
   "klefki": {
     "types": ["steel", "fairy"],
@@ -1964,7 +1928,7 @@
     "weight": 3,
     "height": 0.2,
     "gender": 0.5,
-    "icon": 183
+    "icon": 180
   },
   "kommoo": {
     "types": ["dragon", "fighting"],
@@ -1973,7 +1937,7 @@
     "weight": 78.2,
     "height": 1.6,
     "gender": 0.5,
-    "icon": 184
+    "icon": 181
   },
   "krookodile": {
     "types": ["ground", "dark"],
@@ -1982,7 +1946,7 @@
     "weight": 96.3,
     "height": 1.5,
     "gender": 0.5,
-    "icon": 185
+    "icon": 182
   },
   "leafeon": {
     "types": ["grass"],
@@ -1991,7 +1955,7 @@
     "weight": 25.5,
     "height": 1,
     "gender": 0.875,
-    "icon": 186
+    "icon": 183
   },
   "liepard": {
     "types": ["dark"],
@@ -2000,7 +1964,7 @@
     "weight": 37.5,
     "height": 1.1,
     "gender": 0.5,
-    "icon": 187
+    "icon": 184
   },
   "lopunny": {
     "types": ["normal"],
@@ -2009,7 +1973,7 @@
     "weight": 33.3,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 188
+    "icon": 185
   },
   "lopunnymega": {
     "types": ["normal", "fighting"],
@@ -2018,7 +1982,7 @@
     "weight": 28.3,
     "height": 1.3,
     "gender": 0.5,
-    "icon": 189,
+    "icon": 186,
     "base": "lopunny",
     "forme": "Mega",
     "mega": true,
@@ -2032,7 +1996,7 @@
     "weight": 54,
     "height": 1.2,
     "gender": 0.875,
-    "icon": 190
+    "icon": 187
   },
   "lucariomega": {
     "types": ["fighting", "steel"],
@@ -2041,7 +2005,7 @@
     "weight": 57.5,
     "height": 1.3,
     "gender": 0.875,
-    "icon": 191,
+    "icon": 188,
     "base": "lucario",
     "forme": "Mega",
     "mega": true,
@@ -2055,7 +2019,7 @@
     "weight": 49.4,
     "height": 1.3,
     "gender": 0.875,
-    "icon": 192,
+    "icon": 189,
     "base": "lucario",
     "forme": "Mega-Z",
     "mega": true,
@@ -2069,7 +2033,7 @@
     "weight": 42,
     "height": 1.4,
     "gender": 0.5,
-    "icon": 193
+    "icon": 190
   },
   "lycanroc": {
     "types": ["rock"],
@@ -2078,7 +2042,7 @@
     "weight": 25,
     "height": 0.8,
     "gender": 0.5,
-    "icon": 194
+    "icon": 191
   },
   "lycanrocdusk": {
     "types": ["rock"],
@@ -2087,7 +2051,7 @@
     "weight": 25,
     "height": 0.8,
     "gender": 0.5,
-    "icon": 195,
+    "icon": 192,
     "base": "lycanroc",
     "forme": "Dusk"
   },
@@ -2098,7 +2062,7 @@
     "weight": 25,
     "height": 1.1,
     "gender": 0.5,
-    "icon": 196,
+    "icon": 193,
     "base": "lycanroc",
     "forme": "Midnight"
   },
@@ -2109,7 +2073,7 @@
     "weight": 61,
     "height": 1.1,
     "gender": 0.5,
-    "icon": 197
+    "icon": 194
   },
   "machamp": {
     "types": ["fighting"],
@@ -2118,7 +2082,7 @@
     "weight": 130,
     "height": 1.6,
     "gender": 0.75,
-    "icon": 198
+    "icon": 195
   },
   "malamar": {
     "types": ["dark", "psychic"],
@@ -2127,7 +2091,7 @@
     "weight": 47,
     "height": 1.5,
     "gender": 0.5,
-    "icon": 199
+    "icon": 196
   },
   "malamarmega": {
     "types": ["dark", "psychic"],
@@ -2136,7 +2100,7 @@
     "weight": 69.8,
     "height": 2.9,
     "gender": 0.5,
-    "icon": 200,
+    "icon": 197,
     "noSprite": true,
     "base": "malamar",
     "forme": "Mega",
@@ -2151,7 +2115,7 @@
     "weight": 291,
     "height": 2.5,
     "gender": 0.5,
-    "icon": 201
+    "icon": 198
   },
   "manectric": {
     "types": ["electric"],
@@ -2160,7 +2124,7 @@
     "weight": 40.2,
     "height": 1.5,
     "gender": 0.5,
-    "icon": 202
+    "icon": 199
   },
   "manectricmega": {
     "types": ["electric"],
@@ -2169,7 +2133,7 @@
     "weight": 44,
     "height": 1.8,
     "gender": 0.5,
-    "icon": 203,
+    "icon": 200,
     "base": "manectric",
     "forme": "Mega",
     "mega": true,
@@ -2183,7 +2147,7 @@
     "weight": 2.3,
     "height": 0.3,
     "gender": "N",
-    "icon": 204
+    "icon": 201
   },
   "mausholdfour": {
     "types": ["normal"],
@@ -2192,7 +2156,7 @@
     "weight": 2.8,
     "height": 0.3,
     "gender": "N",
-    "icon": 205,
+    "icon": 202,
     "base": "maushold",
     "forme": "Four"
   },
@@ -2203,7 +2167,7 @@
     "weight": 11.5,
     "height": 0.6,
     "gender": 0.5,
-    "icon": 206
+    "icon": 203
   },
   "mawilemega": {
     "types": ["steel", "fairy"],
@@ -2212,7 +2176,7 @@
     "weight": 23.5,
     "height": 1,
     "gender": 0.5,
-    "icon": 207,
+    "icon": 204,
     "base": "mawile",
     "forme": "Mega",
     "mega": true,
@@ -2226,7 +2190,7 @@
     "weight": 31.5,
     "height": 1.3,
     "gender": 0.5,
-    "icon": 208
+    "icon": 205
   },
   "medichammega": {
     "types": ["fighting", "psychic"],
@@ -2235,7 +2199,7 @@
     "weight": 31.5,
     "height": 1.3,
     "gender": 0.5,
-    "icon": 209,
+    "icon": 206,
     "base": "medicham",
     "forme": "Mega",
     "mega": true,
@@ -2249,7 +2213,7 @@
     "weight": 100.5,
     "height": 1.8,
     "gender": 0.875,
-    "icon": 210
+    "icon": 207
   },
   "meganiummega": {
     "types": ["grass", "fairy"],
@@ -2258,7 +2222,7 @@
     "weight": 201,
     "height": 2.4,
     "gender": 0.875,
-    "icon": 211,
+    "icon": 208,
     "base": "meganium",
     "forme": "Mega",
     "mega": true,
@@ -2272,7 +2236,7 @@
     "weight": 31.2,
     "height": 1.5,
     "gender": 0.875,
-    "icon": 212
+    "icon": 209
   },
   "meowstic": {
     "types": ["psychic"],
@@ -2281,7 +2245,7 @@
     "weight": 8.5,
     "height": 0.6,
     "gender": "M",
-    "icon": 213
+    "icon": 210
   },
   "meowsticf": {
     "types": ["psychic"],
@@ -2290,7 +2254,7 @@
     "weight": 8.5,
     "height": 0.6,
     "gender": "F",
-    "icon": 214,
+    "icon": 211,
     "base": "meowstic",
     "forme": "F"
   },
@@ -2301,7 +2265,7 @@
     "weight": 10.1,
     "height": 0.8,
     "gender": "F",
-    "icon": 215,
+    "icon": 212,
     "base": "meowstic",
     "forme": "F-Mega",
     "mega": true,
@@ -2315,7 +2279,7 @@
     "weight": 10.1,
     "height": 0.8,
     "gender": "M",
-    "icon": 216,
+    "icon": 213,
     "base": "meowstic",
     "forme": "M-Mega",
     "mega": true,
@@ -2329,7 +2293,7 @@
     "weight": 550,
     "height": 1.6,
     "gender": "N",
-    "icon": 217
+    "icon": 214
   },
   "metagrossmega": {
     "types": ["steel", "psychic"],
@@ -2338,7 +2302,7 @@
     "weight": 942.9,
     "height": 2.5,
     "gender": "N",
-    "icon": 218,
+    "icon": 215,
     "base": "metagross",
     "forme": "Mega",
     "mega": true,
@@ -2352,7 +2316,7 @@
     "weight": 162,
     "height": 6.2,
     "gender": 0.5,
-    "icon": 219
+    "icon": 216
   },
   "mimikyu": {
     "types": ["ghost", "fairy"],
@@ -2361,7 +2325,7 @@
     "weight": 0.7,
     "height": 0.2,
     "gender": 0.5,
-    "icon": 220
+    "icon": 217
   },
   "mimikyubusted": {
     "types": ["ghost", "fairy"],
@@ -2370,22 +2334,10 @@
     "weight": 0.7,
     "height": 0.2,
     "gender": 0.5,
-    "icon": 221,
+    "icon": 218,
     "base": "mimikyu",
     "forme": "Busted",
     "battleOnly": "mimikyu"
-  },
-  "miniormeteor": {
-    "types": ["rock", "flying"],
-    "stats": [60, 60, 100, 60, 100, 60],
-    "abilities": ["shieldsdown"],
-    "weight": 40,
-    "height": 0.3,
-    "gender": "N",
-    "icon": 222,
-    "base": "minior",
-    "forme": "Meteor",
-    "battleOnly": "minior"
   },
   "morpeko": {
     "types": ["electric", "dark"],
@@ -2394,7 +2346,7 @@
     "weight": 3,
     "height": 0.3,
     "gender": 0.5,
-    "icon": 223
+    "icon": 219
   },
   "morpekohangry": {
     "types": ["electric", "dark"],
@@ -2403,7 +2355,7 @@
     "weight": 3,
     "height": 0.3,
     "gender": 0.5,
-    "icon": 224,
+    "icon": 220,
     "base": "morpeko",
     "forme": "Hangry",
     "battleOnly": "morpeko"
@@ -2415,7 +2367,7 @@
     "weight": 54.5,
     "height": 1.3,
     "gender": 0.5,
-    "icon": 225
+    "icon": 221
   },
   "mrrime": {
     "types": ["ice", "psychic"],
@@ -2424,7 +2376,7 @@
     "weight": 58.2,
     "height": 1.5,
     "gender": 0.5,
-    "icon": 226
+    "icon": 222
   },
   "mudsdale": {
     "types": ["ground"],
@@ -2433,7 +2385,7 @@
     "weight": 920,
     "height": 2.5,
     "gender": 0.5,
-    "icon": 227
+    "icon": 223
   },
   "musharna": {
     "types": ["psychic"],
@@ -2442,7 +2394,7 @@
     "weight": 60.5,
     "height": 1.1,
     "gender": 0.5,
-    "icon": 228
+    "icon": 224
   },
   "ninetales": {
     "types": ["fire"],
@@ -2451,7 +2403,7 @@
     "weight": 19.9,
     "height": 1.1,
     "gender": 0.25,
-    "icon": 229
+    "icon": 225
   },
   "ninetalesalola": {
     "types": ["ice", "fairy"],
@@ -2460,7 +2412,7 @@
     "weight": 19.9,
     "height": 1.1,
     "gender": 0.25,
-    "icon": 230,
+    "icon": 226,
     "base": "ninetales",
     "forme": "Alola"
   },
@@ -2471,58 +2423,7 @@
     "weight": 85,
     "height": 1.5,
     "gender": 0.5,
-    "icon": 231
-  },
-  "ogerponcornerstonetera": {
-    "types": ["grass", "rock"],
-    "stats": [80, 120, 84, 60, 96, 110],
-    "abilities": ["embodyaspectcornerstone"],
-    "weight": 39.8,
-    "height": 1.2,
-    "gender": "F",
-    "icon": 232,
-    "base": "ogerpon",
-    "forme": "Cornerstone-Tera",
-    "battleOnly": "ogerponcornerstone",
-    "item": "cornerstonemask"
-  },
-  "ogerponhearthflametera": {
-    "types": ["grass", "fire"],
-    "stats": [80, 120, 84, 60, 96, 110],
-    "abilities": ["embodyaspecthearthflame"],
-    "weight": 39.8,
-    "height": 1.2,
-    "gender": "F",
-    "icon": 233,
-    "base": "ogerpon",
-    "forme": "Hearthflame-Tera",
-    "battleOnly": "ogerponhearthflame",
-    "item": "hearthflamemask"
-  },
-  "ogerpontealtera": {
-    "types": ["grass"],
-    "stats": [80, 120, 84, 60, 96, 110],
-    "abilities": ["embodyaspectteal"],
-    "weight": 39.8,
-    "height": 1.2,
-    "gender": "F",
-    "icon": 234,
-    "base": "ogerpon",
-    "forme": "Teal-Tera",
-    "battleOnly": "ogerpon"
-  },
-  "ogerponwellspringtera": {
-    "types": ["grass", "water"],
-    "stats": [80, 120, 84, 60, 96, 110],
-    "abilities": ["embodyaspectwellspring"],
-    "weight": 39.8,
-    "height": 1.2,
-    "gender": "F",
-    "icon": 235,
-    "base": "ogerpon",
-    "forme": "Wellspring-Tera",
-    "battleOnly": "ogerponwellspring",
-    "item": "wellspringmask"
+    "icon": 227
   },
   "oranguru": {
     "types": ["normal", "psychic"],
@@ -2531,7 +2432,7 @@
     "weight": 76,
     "height": 1.5,
     "gender": 0.5,
-    "icon": 236
+    "icon": 228
   },
   "orthworm": {
     "types": ["steel"],
@@ -2540,7 +2441,7 @@
     "weight": 310,
     "height": 2.5,
     "gender": 0.5,
-    "icon": 237
+    "icon": 229
   },
   "overqwil": {
     "types": ["dark", "poison"],
@@ -2549,7 +2450,7 @@
     "weight": 60.5,
     "height": 2.5,
     "gender": 0.5,
-    "icon": 238
+    "icon": 230
   },
   "palafin": {
     "types": ["water"],
@@ -2558,7 +2459,7 @@
     "weight": 60.2,
     "height": 1.3,
     "gender": 0.5,
-    "icon": 239
+    "icon": 231
   },
   "palafinhero": {
     "types": ["water"],
@@ -2567,7 +2468,7 @@
     "weight": 97.4,
     "height": 1.8,
     "gender": 0.5,
-    "icon": 240,
+    "icon": 232,
     "base": "palafin",
     "forme": "Hero",
     "battleOnly": "palafin"
@@ -2579,7 +2480,7 @@
     "weight": 136,
     "height": 2.1,
     "gender": 0.5,
-    "icon": 241
+    "icon": 233
   },
   "passimian": {
     "types": ["fighting"],
@@ -2588,7 +2489,7 @@
     "weight": 82.8,
     "height": 2,
     "gender": 0.5,
-    "icon": 242
+    "icon": 234
   },
   "pawmot": {
     "types": ["electric", "fighting"],
@@ -2597,7 +2498,7 @@
     "weight": 41,
     "height": 0.9,
     "gender": 0.5,
-    "icon": 243
+    "icon": 235
   },
   "pelipper": {
     "types": ["water", "flying"],
@@ -2606,7 +2507,7 @@
     "weight": 28,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 244
+    "icon": 236
   },
   "perrserker": {
     "types": ["steel"],
@@ -2615,7 +2516,7 @@
     "weight": 28,
     "height": 0.8,
     "gender": 0.5,
-    "icon": 245
+    "icon": 237
   },
   "persian": {
     "types": ["normal"],
@@ -2624,7 +2525,7 @@
     "weight": 32,
     "height": 1,
     "gender": 0.5,
-    "icon": 246
+    "icon": 238
   },
   "persianalola": {
     "types": ["dark"],
@@ -2633,7 +2534,7 @@
     "weight": 33,
     "height": 1.1,
     "gender": 0.5,
-    "icon": 247,
+    "icon": 239,
     "base": "persian",
     "forme": "Alola"
   },
@@ -2644,7 +2545,7 @@
     "weight": 39.5,
     "height": 1.5,
     "gender": 0.5,
-    "icon": 248
+    "icon": 240
   },
   "pidgeotmega": {
     "types": ["normal", "flying"],
@@ -2653,7 +2554,7 @@
     "weight": 50.5,
     "height": 2.2,
     "gender": 0.5,
-    "icon": 249,
+    "icon": 241,
     "base": "pidgeot",
     "forme": "Mega",
     "mega": true,
@@ -2667,7 +2568,7 @@
     "weight": 6,
     "height": 0.4,
     "gender": 0.5,
-    "icon": 250,
+    "icon": 242,
     "evos": ["raichu", "raichualola"]
   },
   "pincurchin": {
@@ -2677,7 +2578,7 @@
     "weight": 1,
     "height": 0.3,
     "gender": 0.5,
-    "icon": 251
+    "icon": 243
   },
   "pinsir": {
     "types": ["bug"],
@@ -2686,7 +2587,7 @@
     "weight": 55,
     "height": 1.5,
     "gender": 0.5,
-    "icon": 252
+    "icon": 244
   },
   "pinsirmega": {
     "types": ["bug", "flying"],
@@ -2695,7 +2596,7 @@
     "weight": 59,
     "height": 1.7,
     "gender": 0.5,
-    "icon": 253,
+    "icon": 245,
     "base": "pinsir",
     "forme": "Mega",
     "mega": true,
@@ -2709,7 +2610,7 @@
     "weight": 33.9,
     "height": 1.1,
     "gender": 0.5,
-    "icon": 254
+    "icon": 246
   },
   "polteageist": {
     "types": ["ghost"],
@@ -2718,7 +2619,7 @@
     "weight": 0.4,
     "height": 0.2,
     "gender": "N",
-    "icon": 255
+    "icon": 247
   },
   "polteageistantique": {
     "types": ["ghost"],
@@ -2727,7 +2628,7 @@
     "weight": 0.4,
     "height": 0.2,
     "gender": "N",
-    "icon": 256,
+    "icon": 248,
     "base": "polteageist",
     "forme": "Antique"
   },
@@ -2738,7 +2639,7 @@
     "weight": 44,
     "height": 1.8,
     "gender": 0.875,
-    "icon": 257
+    "icon": 249
   },
   "pyroar": {
     "types": ["fire", "normal"],
@@ -2747,7 +2648,7 @@
     "weight": 81.5,
     "height": 1.5,
     "gender": 0.125,
-    "icon": 258
+    "icon": 250
   },
   "pyroarmega": {
     "types": ["fire", "normal"],
@@ -2756,7 +2657,7 @@
     "weight": 93.3,
     "height": 1.5,
     "gender": 0.125,
-    "icon": 259,
+    "icon": 251,
     "noSprite": true,
     "base": "pyroar",
     "forme": "Mega",
@@ -2771,7 +2672,7 @@
     "weight": 61.9,
     "height": 1.8,
     "gender": 0.875,
-    "icon": 260
+    "icon": 252
   },
   "qwilfish": {
     "types": ["water", "poison"],
@@ -2780,7 +2681,7 @@
     "weight": 3.9,
     "height": 0.5,
     "gender": 0.5,
-    "icon": 261
+    "icon": 253
   },
   "raichu": {
     "types": ["electric"],
@@ -2789,7 +2690,7 @@
     "weight": 30,
     "height": 0.8,
     "gender": 0.5,
-    "icon": 262,
+    "icon": 254,
     "prevo": "pikachu"
   },
   "raichualola": {
@@ -2799,7 +2700,7 @@
     "weight": 21,
     "height": 0.7,
     "gender": 0.5,
-    "icon": 263,
+    "icon": 255,
     "base": "raichu",
     "forme": "Alola",
     "prevo": "pikachu"
@@ -2811,7 +2712,7 @@
     "weight": 38,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 264,
+    "icon": 256,
     "noSprite": true,
     "base": "raichu",
     "forme": "Mega-X",
@@ -2826,7 +2727,7 @@
     "weight": 26,
     "height": 1,
     "gender": 0.5,
-    "icon": 265,
+    "icon": 257,
     "noSprite": true,
     "base": "raichu",
     "forme": "Mega-Y",
@@ -2841,7 +2742,7 @@
     "weight": 102.5,
     "height": 1.6,
     "gender": 0.875,
-    "icon": 266
+    "icon": 258
   },
   "reuniclus": {
     "types": ["psychic"],
@@ -2850,7 +2751,7 @@
     "weight": 20.1,
     "height": 1,
     "gender": 0.5,
-    "icon": 267
+    "icon": 259
   },
   "rhyperior": {
     "types": ["ground", "rock"],
@@ -2859,7 +2760,7 @@
     "weight": 282.8,
     "height": 2.4,
     "gender": 0.5,
-    "icon": 268
+    "icon": 260
   },
   "rillaboom": {
     "types": ["grass"],
@@ -2868,7 +2769,7 @@
     "weight": 90,
     "height": 2.1,
     "gender": 0.875,
-    "icon": 269
+    "icon": 261
   },
   "roserade": {
     "types": ["grass", "poison"],
@@ -2877,7 +2778,7 @@
     "weight": 14.5,
     "height": 0.9,
     "gender": 0.5,
-    "icon": 270
+    "icon": 262
   },
   "rotom": {
     "types": ["electric", "ghost"],
@@ -2886,7 +2787,7 @@
     "weight": 0.3,
     "height": 0.3,
     "gender": "N",
-    "icon": 271
+    "icon": 263
   },
   "rotomfan": {
     "types": ["electric", "flying"],
@@ -2895,7 +2796,7 @@
     "weight": 0.3,
     "height": 0.3,
     "gender": "N",
-    "icon": 272,
+    "icon": 264,
     "base": "rotom",
     "forme": "Fan"
   },
@@ -2906,7 +2807,7 @@
     "weight": 0.3,
     "height": 0.3,
     "gender": "N",
-    "icon": 273,
+    "icon": 265,
     "base": "rotom",
     "forme": "Frost"
   },
@@ -2917,7 +2818,7 @@
     "weight": 0.3,
     "height": 0.3,
     "gender": "N",
-    "icon": 274,
+    "icon": 266,
     "base": "rotom",
     "forme": "Heat"
   },
@@ -2928,7 +2829,7 @@
     "weight": 0.3,
     "height": 0.3,
     "gender": "N",
-    "icon": 275,
+    "icon": 267,
     "base": "rotom",
     "forme": "Mow"
   },
@@ -2939,7 +2840,7 @@
     "weight": 0.3,
     "height": 0.3,
     "gender": "N",
-    "icon": 276,
+    "icon": 268,
     "base": "rotom",
     "forme": "Wash"
   },
@@ -2950,7 +2851,7 @@
     "weight": 66.6,
     "height": 1.6,
     "gender": 0.5,
-    "icon": 277
+    "icon": 269
   },
   "sableye": {
     "types": ["dark", "ghost"],
@@ -2959,7 +2860,7 @@
     "weight": 11,
     "height": 0.5,
     "gender": 0.5,
-    "icon": 278
+    "icon": 270
   },
   "sableyemega": {
     "types": ["dark", "ghost"],
@@ -2968,7 +2869,7 @@
     "weight": 161,
     "height": 0.5,
     "gender": 0.5,
-    "icon": 279,
+    "icon": 271,
     "base": "sableye",
     "forme": "Mega",
     "mega": true,
@@ -2982,7 +2883,7 @@
     "weight": 102.6,
     "height": 1.5,
     "gender": 0.5,
-    "icon": 280
+    "icon": 272
   },
   "salamencemega": {
     "types": ["dragon", "flying"],
@@ -2991,7 +2892,7 @@
     "weight": 112.6,
     "height": 1.8,
     "gender": 0.5,
-    "icon": 281,
+    "icon": 273,
     "base": "salamence",
     "forme": "Mega",
     "mega": true,
@@ -3005,7 +2906,7 @@
     "weight": 22.2,
     "height": 1.2,
     "gender": "F",
-    "icon": 282
+    "icon": 274
   },
   "samurott": {
     "types": ["water"],
@@ -3014,7 +2915,7 @@
     "weight": 94.6,
     "height": 1.5,
     "gender": 0.875,
-    "icon": 283
+    "icon": 275
   },
   "samurotthisui": {
     "types": ["water", "dark"],
@@ -3023,7 +2924,7 @@
     "weight": 58.2,
     "height": 1.5,
     "gender": 0.875,
-    "icon": 284,
+    "icon": 276,
     "base": "samurott",
     "forme": "Hisui"
   },
@@ -3034,7 +2935,7 @@
     "weight": 65.5,
     "height": 3.8,
     "gender": 0.5,
-    "icon": 285
+    "icon": 277
   },
   "sceptile": {
     "types": ["grass"],
@@ -3043,7 +2944,7 @@
     "weight": 52.2,
     "height": 1.7,
     "gender": 0.875,
-    "icon": 286
+    "icon": 278
   },
   "sceptilemega": {
     "types": ["grass", "dragon"],
@@ -3052,7 +2953,7 @@
     "weight": 55.2,
     "height": 1.9,
     "gender": 0.875,
-    "icon": 287,
+    "icon": 279,
     "base": "sceptile",
     "forme": "Mega",
     "mega": true,
@@ -3066,7 +2967,7 @@
     "weight": 118,
     "height": 1.8,
     "gender": 0.5,
-    "icon": 288
+    "icon": 280
   },
   "scizormega": {
     "types": ["bug", "steel"],
@@ -3075,7 +2976,7 @@
     "weight": 125,
     "height": 2,
     "gender": 0.5,
-    "icon": 289,
+    "icon": 281,
     "base": "scizor",
     "forme": "Mega",
     "mega": true,
@@ -3089,7 +2990,7 @@
     "weight": 200.5,
     "height": 2.5,
     "gender": 0.5,
-    "icon": 290
+    "icon": 282
   },
   "scolipedemega": {
     "types": ["bug", "poison"],
@@ -3098,7 +2999,7 @@
     "weight": 230.5,
     "height": 3.2,
     "gender": 0.5,
-    "icon": 291,
+    "icon": 283,
     "noSprite": true,
     "base": "scolipede",
     "forme": "Mega",
@@ -3113,7 +3014,7 @@
     "weight": 15,
     "height": 0.9,
     "gender": 0.5,
-    "icon": 292
+    "icon": 284
   },
   "scovillainmega": {
     "types": ["grass", "fire"],
@@ -3122,7 +3023,7 @@
     "weight": 22,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 293,
+    "icon": 285,
     "base": "scovillain",
     "forme": "Mega",
     "mega": true,
@@ -3136,7 +3037,7 @@
     "weight": 30,
     "height": 1.1,
     "gender": 0.5,
-    "icon": 294
+    "icon": 286
   },
   "scraftymega": {
     "types": ["dark", "fighting"],
@@ -3145,7 +3046,7 @@
     "weight": 31,
     "height": 1.1,
     "gender": 0.5,
-    "icon": 295,
+    "icon": 287,
     "noSprite": true,
     "base": "scrafty",
     "forme": "Mega",
@@ -3160,7 +3061,7 @@
     "weight": 63,
     "height": 3.3,
     "gender": 0.875,
-    "icon": 296
+    "icon": 288
   },
   "sharpedo": {
     "types": ["water", "dark"],
@@ -3169,7 +3070,7 @@
     "weight": 88.8,
     "height": 1.8,
     "gender": 0.5,
-    "icon": 297
+    "icon": 289
   },
   "sharpedomega": {
     "types": ["water", "dark"],
@@ -3178,7 +3079,7 @@
     "weight": 130.3,
     "height": 2.5,
     "gender": 0.5,
-    "icon": 298,
+    "icon": 290,
     "base": "sharpedo",
     "forme": "Mega",
     "mega": true,
@@ -3192,7 +3093,7 @@
     "weight": 29,
     "height": 1,
     "gender": 0.875,
-    "icon": 299
+    "icon": 291
   },
   "simisage": {
     "types": ["grass"],
@@ -3201,7 +3102,7 @@
     "weight": 30.5,
     "height": 1.1,
     "gender": 0.875,
-    "icon": 300
+    "icon": 292
   },
   "simisear": {
     "types": ["fire"],
@@ -3210,7 +3111,7 @@
     "weight": 28,
     "height": 1,
     "gender": 0.875,
-    "icon": 301
+    "icon": 293
   },
   "sinistcha": {
     "types": ["grass", "ghost"],
@@ -3219,7 +3120,7 @@
     "weight": 2.2,
     "height": 0.2,
     "gender": "N",
-    "icon": 302
+    "icon": 294
   },
   "sinistchamasterpiece": {
     "types": ["grass", "ghost"],
@@ -3228,7 +3129,7 @@
     "weight": 2.2,
     "height": 0.2,
     "gender": "N",
-    "icon": 303,
+    "icon": 295,
     "base": "sinistcha",
     "forme": "Masterpiece"
   },
@@ -3239,7 +3140,7 @@
     "weight": 117,
     "height": 0.8,
     "gender": 0.5,
-    "icon": 304
+    "icon": 296
   },
   "skarmory": {
     "types": ["steel", "flying"],
@@ -3248,7 +3149,7 @@
     "weight": 50.5,
     "height": 1.7,
     "gender": 0.5,
-    "icon": 305
+    "icon": 297
   },
   "skarmorymega": {
     "types": ["steel", "flying"],
@@ -3257,7 +3158,7 @@
     "weight": 40.4,
     "height": 1.7,
     "gender": 0.5,
-    "icon": 306,
+    "icon": 298,
     "base": "skarmory",
     "forme": "Mega",
     "mega": true,
@@ -3271,7 +3172,7 @@
     "weight": 326.5,
     "height": 1.6,
     "gender": 0.875,
-    "icon": 307
+    "icon": 299
   },
   "slowbro": {
     "types": ["water", "psychic"],
@@ -3280,7 +3181,7 @@
     "weight": 78.5,
     "height": 1.6,
     "gender": 0.5,
-    "icon": 308
+    "icon": 300
   },
   "slowbrogalar": {
     "types": ["poison", "psychic"],
@@ -3289,7 +3190,7 @@
     "weight": 70.5,
     "height": 1.6,
     "gender": 0.5,
-    "icon": 309,
+    "icon": 301,
     "base": "slowbro",
     "forme": "Galar"
   },
@@ -3300,7 +3201,7 @@
     "weight": 120,
     "height": 2,
     "gender": 0.5,
-    "icon": 310,
+    "icon": 302,
     "base": "slowbro",
     "forme": "Mega",
     "mega": true,
@@ -3314,7 +3215,7 @@
     "weight": 79.5,
     "height": 2,
     "gender": 0.5,
-    "icon": 311
+    "icon": 303
   },
   "slowkinggalar": {
     "types": ["poison", "psychic"],
@@ -3323,7 +3224,7 @@
     "weight": 79.5,
     "height": 1.8,
     "gender": 0.5,
-    "icon": 312,
+    "icon": 304,
     "base": "slowking",
     "forme": "Galar"
   },
@@ -3334,7 +3235,7 @@
     "weight": 5,
     "height": 0.8,
     "gender": 0.5,
-    "icon": 313
+    "icon": 305
   },
   "sneasler": {
     "types": ["fighting", "poison"],
@@ -3343,7 +3244,7 @@
     "weight": 43,
     "height": 1.3,
     "gender": 0.5,
-    "icon": 314
+    "icon": 306
   },
   "snorlax": {
     "types": ["normal"],
@@ -3352,7 +3253,7 @@
     "weight": 460,
     "height": 2.1,
     "gender": 0.875,
-    "icon": 315
+    "icon": 307
   },
   "spiritomb": {
     "types": ["ghost", "dark"],
@@ -3361,7 +3262,7 @@
     "weight": 108,
     "height": 1,
     "gender": 0.5,
-    "icon": 316
+    "icon": 308
   },
   "squawkabilly": {
     "types": ["normal", "flying"],
@@ -3370,7 +3271,7 @@
     "weight": 2.4,
     "height": 0.6,
     "gender": 0.5,
-    "icon": 317
+    "icon": 309
   },
   "squawkabillyblue": {
     "types": ["normal", "flying"],
@@ -3379,7 +3280,7 @@
     "weight": 2.4,
     "height": 0.6,
     "gender": 0.5,
-    "icon": 318,
+    "icon": 310,
     "base": "squawkabilly",
     "forme": "Blue"
   },
@@ -3390,7 +3291,7 @@
     "weight": 2.4,
     "height": 0.6,
     "gender": 0.5,
-    "icon": 319,
+    "icon": 311,
     "base": "squawkabilly",
     "forme": "White"
   },
@@ -3401,7 +3302,7 @@
     "weight": 2.4,
     "height": 0.6,
     "gender": 0.5,
-    "icon": 320,
+    "icon": 312,
     "base": "squawkabilly",
     "forme": "Yellow"
   },
@@ -3412,7 +3313,7 @@
     "weight": 24.9,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 321
+    "icon": 313
   },
   "staraptormega": {
     "types": ["fighting", "flying"],
@@ -3421,7 +3322,7 @@
     "weight": 50,
     "height": 1.9,
     "gender": 0.5,
-    "icon": 322,
+    "icon": 314,
     "noSprite": true,
     "base": "staraptor",
     "forme": "Mega",
@@ -3436,7 +3337,7 @@
     "weight": 80,
     "height": 1.1,
     "gender": "N",
-    "icon": 323
+    "icon": 315
   },
   "starmiemega": {
     "types": ["water", "psychic"],
@@ -3445,7 +3346,7 @@
     "weight": 80,
     "height": 2.3,
     "gender": "N",
-    "icon": 324,
+    "icon": 316,
     "base": "starmie",
     "forme": "Mega",
     "mega": true,
@@ -3459,7 +3360,7 @@
     "weight": 400,
     "height": 9.2,
     "gender": 0.5,
-    "icon": 325
+    "icon": 317
   },
   "steelixmega": {
     "types": ["steel", "ground"],
@@ -3468,7 +3369,7 @@
     "weight": 740,
     "height": 10.5,
     "gender": 0.5,
-    "icon": 326,
+    "icon": 318,
     "base": "steelix",
     "forme": "Mega",
     "mega": true,
@@ -3482,7 +3383,7 @@
     "weight": 11,
     "height": 0.7,
     "gender": 0.5,
-    "icon": 327
+    "icon": 319
   },
   "stunfiskgalar": {
     "types": ["ground", "steel"],
@@ -3491,7 +3392,7 @@
     "weight": 20.5,
     "height": 0.7,
     "gender": 0.5,
-    "icon": 328,
+    "icon": 320,
     "base": "stunfisk",
     "forme": "Galar"
   },
@@ -3502,7 +3403,7 @@
     "weight": 80,
     "height": 1.7,
     "gender": 0.5,
-    "icon": 329
+    "icon": 321
   },
   "swampert": {
     "types": ["water", "ground"],
@@ -3511,7 +3412,7 @@
     "weight": 81.9,
     "height": 1.5,
     "gender": 0.875,
-    "icon": 330
+    "icon": 322
   },
   "swampertmega": {
     "types": ["water", "ground"],
@@ -3520,7 +3421,7 @@
     "weight": 102,
     "height": 1.9,
     "gender": 0.875,
-    "icon": 331,
+    "icon": 323,
     "base": "swampert",
     "forme": "Mega",
     "mega": true,
@@ -3534,7 +3435,7 @@
     "weight": 23.5,
     "height": 1,
     "gender": 0.875,
-    "icon": 332
+    "icon": 324
   },
   "talonflame": {
     "types": ["fire", "flying"],
@@ -3543,7 +3444,7 @@
     "weight": 24.5,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 333
+    "icon": 325
   },
   "tauros": {
     "types": ["normal"],
@@ -3552,7 +3453,7 @@
     "weight": 88.4,
     "height": 1.4,
     "gender": "M",
-    "icon": 334
+    "icon": 326
   },
   "taurospaldeaaqua": {
     "types": ["fighting", "water"],
@@ -3561,7 +3462,7 @@
     "weight": 110,
     "height": 1.4,
     "gender": "M",
-    "icon": 335,
+    "icon": 327,
     "base": "tauros",
     "forme": "Paldea-Aqua"
   },
@@ -3572,7 +3473,7 @@
     "weight": 85,
     "height": 1.4,
     "gender": "M",
-    "icon": 336,
+    "icon": 328,
     "base": "tauros",
     "forme": "Paldea-Blaze"
   },
@@ -3583,7 +3484,7 @@
     "weight": 115,
     "height": 1.4,
     "gender": "M",
-    "icon": 337,
+    "icon": 329,
     "base": "tauros",
     "forme": "Paldea-Combat"
   },
@@ -3594,7 +3495,7 @@
     "weight": 19.9,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 338
+    "icon": 330
   },
   "tinkaton": {
     "types": ["fairy", "steel"],
@@ -3603,7 +3504,7 @@
     "weight": 112.8,
     "height": 0.7,
     "gender": "F",
-    "icon": 339
+    "icon": 331
   },
   "torkoal": {
     "types": ["fire"],
@@ -3612,7 +3513,7 @@
     "weight": 80.4,
     "height": 0.5,
     "gender": 0.5,
-    "icon": 340
+    "icon": 332
   },
   "torterra": {
     "types": ["grass", "ground"],
@@ -3621,7 +3522,7 @@
     "weight": 310,
     "height": 2.2,
     "gender": 0.875,
-    "icon": 341
+    "icon": 333
   },
   "toucannon": {
     "types": ["normal", "flying"],
@@ -3630,7 +3531,7 @@
     "weight": 26,
     "height": 1.1,
     "gender": 0.5,
-    "icon": 342
+    "icon": 334
   },
   "toxapex": {
     "types": ["poison", "water"],
@@ -3639,7 +3540,7 @@
     "weight": 14.5,
     "height": 0.7,
     "gender": 0.5,
-    "icon": 343
+    "icon": 335
   },
   "toxicroak": {
     "types": ["poison", "fighting"],
@@ -3648,7 +3549,7 @@
     "weight": 44.4,
     "height": 1.3,
     "gender": 0.5,
-    "icon": 344
+    "icon": 336
   },
   "toxtricity": {
     "types": ["electric", "poison"],
@@ -3657,7 +3558,7 @@
     "weight": 40,
     "height": 1.6,
     "gender": 0.5,
-    "icon": 345
+    "icon": 337
   },
   "toxtricitylowkey": {
     "types": ["electric", "poison"],
@@ -3666,7 +3567,7 @@
     "weight": 40,
     "height": 1.6,
     "gender": 0.5,
-    "icon": 346,
+    "icon": 338,
     "base": "toxtricity",
     "forme": "Low-Key"
   },
@@ -3677,7 +3578,7 @@
     "weight": 71,
     "height": 1.5,
     "gender": 0.5,
-    "icon": 347
+    "icon": 339
   },
   "tsareena": {
     "types": ["grass"],
@@ -3686,7 +3587,7 @@
     "weight": 21.4,
     "height": 1.2,
     "gender": "F",
-    "icon": 348
+    "icon": 340
   },
   "typhlosion": {
     "types": ["fire"],
@@ -3695,7 +3596,7 @@
     "weight": 79.5,
     "height": 1.7,
     "gender": 0.875,
-    "icon": 349
+    "icon": 341
   },
   "typhlosionhisui": {
     "types": ["fire", "ghost"],
@@ -3704,7 +3605,7 @@
     "weight": 69.8,
     "height": 1.6,
     "gender": 0.875,
-    "icon": 350,
+    "icon": 342,
     "base": "typhlosion",
     "forme": "Hisui"
   },
@@ -3715,7 +3616,7 @@
     "weight": 202,
     "height": 2,
     "gender": 0.5,
-    "icon": 351
+    "icon": 343
   },
   "tyranitarmega": {
     "types": ["rock", "dark"],
@@ -3724,7 +3625,7 @@
     "weight": 255,
     "height": 2.5,
     "gender": 0.5,
-    "icon": 352,
+    "icon": 344,
     "base": "tyranitar",
     "forme": "Mega",
     "mega": true,
@@ -3738,7 +3639,7 @@
     "weight": 270,
     "height": 2.5,
     "gender": 0.875,
-    "icon": 353
+    "icon": 345
   },
   "umbreon": {
     "types": ["dark"],
@@ -3747,7 +3648,7 @@
     "weight": 27,
     "height": 1,
     "gender": 0.875,
-    "icon": 354
+    "icon": 346
   },
   "vanilluxe": {
     "types": ["ice"],
@@ -3756,7 +3657,7 @@
     "weight": 57.5,
     "height": 1.3,
     "gender": 0.5,
-    "icon": 355
+    "icon": 347
   },
   "vaporeon": {
     "types": ["water"],
@@ -3765,7 +3666,7 @@
     "weight": 29,
     "height": 1,
     "gender": 0.875,
-    "icon": 356
+    "icon": 348
   },
   "venusaur": {
     "types": ["grass", "poison"],
@@ -3774,7 +3675,7 @@
     "weight": 100,
     "height": 2,
     "gender": 0.875,
-    "icon": 357
+    "icon": 349
   },
   "venusaurmega": {
     "types": ["grass", "poison"],
@@ -3783,7 +3684,7 @@
     "weight": 155.5,
     "height": 2.4,
     "gender": 0.875,
-    "icon": 358,
+    "icon": 350,
     "base": "venusaur",
     "forme": "Mega",
     "mega": true,
@@ -3797,7 +3698,7 @@
     "weight": 15.5,
     "height": 1.7,
     "gender": 0.5,
-    "icon": 359
+    "icon": 351
   },
   "victreebelmega": {
     "types": ["grass", "poison"],
@@ -3806,7 +3707,7 @@
     "weight": 125.5,
     "height": 4.5,
     "gender": 0.5,
-    "icon": 360,
+    "icon": 352,
     "base": "victreebel",
     "forme": "Mega",
     "mega": true,
@@ -3820,7 +3721,7 @@
     "weight": 18.6,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 361
+    "icon": 353
   },
   "vivillon": {
     "types": ["bug", "flying"],
@@ -3829,7 +3730,7 @@
     "weight": 17,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 362
+    "icon": 354
   },
   "vivillonarchipelago": {
     "types": ["bug", "flying"],
@@ -3838,7 +3739,7 @@
     "weight": 17,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 363,
+    "icon": 355,
     "base": "vivillon",
     "forme": "Archipelago",
     "cosmetic": true
@@ -3850,7 +3751,7 @@
     "weight": 17,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 364,
+    "icon": 356,
     "base": "vivillon",
     "forme": "Continental",
     "cosmetic": true
@@ -3862,7 +3763,7 @@
     "weight": 17,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 365,
+    "icon": 357,
     "base": "vivillon",
     "forme": "Elegant",
     "cosmetic": true
@@ -3874,7 +3775,7 @@
     "weight": 17,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 366,
+    "icon": 358,
     "base": "vivillon",
     "forme": "Fancy"
   },
@@ -3885,7 +3786,7 @@
     "weight": 17,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 367,
+    "icon": 359,
     "base": "vivillon",
     "forme": "Garden",
     "cosmetic": true
@@ -3897,7 +3798,7 @@
     "weight": 17,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 368,
+    "icon": 360,
     "base": "vivillon",
     "forme": "High Plains",
     "cosmetic": true
@@ -3909,7 +3810,7 @@
     "weight": 17,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 369,
+    "icon": 361,
     "base": "vivillon",
     "forme": "Icy Snow",
     "cosmetic": true
@@ -3921,7 +3822,7 @@
     "weight": 17,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 370,
+    "icon": 362,
     "base": "vivillon",
     "forme": "Jungle",
     "cosmetic": true
@@ -3933,7 +3834,7 @@
     "weight": 17,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 371,
+    "icon": 363,
     "base": "vivillon",
     "forme": "Marine",
     "cosmetic": true
@@ -3945,7 +3846,7 @@
     "weight": 17,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 372,
+    "icon": 364,
     "base": "vivillon",
     "forme": "Modern",
     "cosmetic": true
@@ -3957,7 +3858,7 @@
     "weight": 17,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 373,
+    "icon": 365,
     "base": "vivillon",
     "forme": "Monsoon",
     "cosmetic": true
@@ -3969,7 +3870,7 @@
     "weight": 17,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 374,
+    "icon": 366,
     "base": "vivillon",
     "forme": "Ocean",
     "cosmetic": true
@@ -3981,7 +3882,7 @@
     "weight": 17,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 375,
+    "icon": 367,
     "base": "vivillon",
     "forme": "Pokeball"
   },
@@ -3992,7 +3893,7 @@
     "weight": 17,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 376,
+    "icon": 368,
     "base": "vivillon",
     "forme": "Polar",
     "cosmetic": true
@@ -4004,7 +3905,7 @@
     "weight": 17,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 377,
+    "icon": 369,
     "base": "vivillon",
     "forme": "River",
     "cosmetic": true
@@ -4016,7 +3917,7 @@
     "weight": 17,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 378,
+    "icon": 370,
     "base": "vivillon",
     "forme": "Sandstorm",
     "cosmetic": true
@@ -4028,7 +3929,7 @@
     "weight": 17,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 379,
+    "icon": 371,
     "base": "vivillon",
     "forme": "Savanna",
     "cosmetic": true
@@ -4040,7 +3941,7 @@
     "weight": 17,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 380,
+    "icon": 372,
     "base": "vivillon",
     "forme": "Sun",
     "cosmetic": true
@@ -4052,7 +3953,7 @@
     "weight": 17,
     "height": 1.2,
     "gender": 0.5,
-    "icon": 381,
+    "icon": 373,
     "base": "vivillon",
     "forme": "Tundra",
     "cosmetic": true
@@ -4064,7 +3965,7 @@
     "weight": 46,
     "height": 1.6,
     "gender": 0.5,
-    "icon": 382
+    "icon": 374
   },
   "watchog": {
     "types": ["normal"],
@@ -4073,7 +3974,7 @@
     "weight": 27,
     "height": 1.1,
     "gender": 0.5,
-    "icon": 383
+    "icon": 375
   },
   "weavile": {
     "types": ["dark", "ice"],
@@ -4082,7 +3983,7 @@
     "weight": 34,
     "height": 1.1,
     "gender": 0.5,
-    "icon": 384
+    "icon": 376
   },
   "whimsicott": {
     "types": ["grass", "fairy"],
@@ -4091,7 +3992,7 @@
     "weight": 6.6,
     "height": 0.7,
     "gender": 0.5,
-    "icon": 385
+    "icon": 377
   },
   "wigglytuff": {
     "types": ["normal", "fairy"],
@@ -4100,7 +4001,7 @@
     "weight": 12,
     "height": 1,
     "gender": 0.25,
-    "icon": 386
+    "icon": 378
   },
   "wyrdeer": {
     "types": ["normal", "psychic"],
@@ -4109,7 +4010,7 @@
     "weight": 95.1,
     "height": 1.8,
     "gender": 0.5,
-    "icon": 387
+    "icon": 379
   },
   "zoroark": {
     "types": ["dark"],
@@ -4118,7 +4019,7 @@
     "weight": 81.1,
     "height": 1.6,
     "gender": 0.875,
-    "icon": 388
+    "icon": 380
   },
   "zoroarkhisui": {
     "types": ["normal", "ghost"],
@@ -4127,7 +4028,7 @@
     "weight": 73,
     "height": 1.6,
     "gender": 0.875,
-    "icon": 389,
+    "icon": 381,
     "base": "zoroark",
     "forme": "Hisui"
   }

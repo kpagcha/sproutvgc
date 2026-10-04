@@ -679,7 +679,7 @@ export const descriptions: Record<string, Description> = {
   },
   entrainment: {
     short: "The target's Ability changes to match the user's.",
-    long: "Causes the target's Ability to become the same as the user's. Fails if the target's Ability is As One, {ability:battlebond}, {ability:disguise}, {ability:gulpmissile}, {ability:iceface}, {ability:shieldsdown}, {ability:stancechange}, or {ability:zerotohero}, or the same Ability as the user, or if the user's Ability is As One, {ability:battlebond}, Comatose, Commander, {ability:disguise}, Embody Aspect, Flower Gift, {ability:forecast}, {ability:hungerswitch}, {ability:iceface}, {ability:illusion}, {ability:imposter}, Multitype, Neutralizing Gas, Poison Puppeteer, Power Construct, Power of Alchemy, {ability:receiver}, {ability:shieldsdown}, {ability:stancechange}, {ability:trace}, or {ability:zerotohero}.",
+    long: "Causes the target's Ability to become the same as the user's. Fails if the target's Ability is As One, {ability:battlebond}, {ability:disguise}, Gulp Missile, Ice Face, Shields Down, {ability:stancechange}, or {ability:zerotohero}, or the same Ability as the user, or if the user's Ability is As One, {ability:battlebond}, Comatose, Commander, {ability:disguise}, Embody Aspect, Flower Gift, {ability:forecast}, {ability:hungerswitch}, Ice Face, {ability:illusion}, {ability:imposter}, Multitype, Neutralizing Gas, Poison Puppeteer, Power Construct, Power of Alchemy, {ability:receiver}, Shields Down, {ability:stancechange}, {ability:trace}, or {ability:zerotohero}.",
     source: 'f980255f',
   },
   eruption: {
@@ -897,7 +897,7 @@ export const descriptions: Record<string, Description> = {
   },
   gastroacid: {
     short: "Nullifies the target's Ability.",
-    long: "Causes the target's Ability to be rendered ineffective as long as it remains active. If the target uses {move:batonpass}, the replacement will remain under this effect. If the target's Ability is As One, {ability:battlebond}, {ability:disguise}, {ability:gulpmissile}, {ability:iceface}, {ability:shieldsdown}, {ability:stancechange}, or {ability:zerotohero}, this move fails, and receiving the effect through {move:batonpass} ends the effect immediately.",
+    long: "Causes the target's Ability to be rendered ineffective as long as it remains active. If the target uses {move:batonpass}, the replacement will remain under this effect. If the target's Ability is As One, {ability:battlebond}, {ability:disguise}, Gulp Missile, Ice Face, Shields Down, {ability:stancechange}, or {ability:zerotohero}, this move fails, and receiving the effect through {move:batonpass} ends the effect immediately.",
     source: '0e6c3057',
   },
   gigadrain: {
@@ -1783,7 +1783,7 @@ export const descriptions: Record<string, Description> = {
   },
   roleplay: {
     short: "User replaces its Ability with the target's.",
-    long: "The user's Ability changes to match the target's Ability. Fails if the user's Ability is As One, {ability:battlebond}, Comatose, {ability:disguise}, {ability:gulpmissile}, {ability:iceface}, Multitype, Power Construct, RKS System, Schooling, {ability:shieldsdown}, {ability:stancechange}, Tera Shift, Zen Mode, {ability:zerotohero}, or already matches the target, or if the target's Ability is As One, {ability:battlebond}, Comatose, Commander, {ability:disguise}, Embody Aspect, Flower Gift, {ability:forecast}, {ability:hungerswitch}, {ability:iceface}, {ability:illusion}, {ability:imposter}, Multitype, Neutralizing Gas, Poison Puppeteer, Power Construct, Power of Alchemy, {ability:receiver}, {ability:shieldsdown}, {ability:stancechange}, {ability:trace}, or {ability:zerotohero}.",
+    long: "The user's Ability changes to match the target's Ability. Fails if the user's Ability is As One, {ability:battlebond}, Comatose, {ability:disguise}, Gulp Missile, Ice Face, Multitype, Power Construct, RKS System, Schooling, Shields Down, {ability:stancechange}, Tera Shift, Zen Mode, {ability:zerotohero}, or already matches the target, or if the target's Ability is As One, {ability:battlebond}, Comatose, Commander, {ability:disguise}, Embody Aspect, Flower Gift, {ability:forecast}, {ability:hungerswitch}, Ice Face, {ability:illusion}, {ability:imposter}, Multitype, Neutralizing Gas, Poison Puppeteer, Power Construct, Power of Alchemy, {ability:receiver}, Shields Down, {ability:stancechange}, {ability:trace}, or {ability:zerotohero}.",
     source: '3934586c',
   },
   roost: {
@@ -1910,7 +1910,7 @@ export const descriptions: Record<string, Description> = {
   },
   simplebeam: {
     short: "The target's Ability becomes Simple.",
-    long: "Causes the target's Ability to become Simple. Fails if the target's Ability is As One, {ability:battlebond}, {ability:disguise}, {ability:gulpmissile}, {ability:iceface}, {ability:shieldsdown}, {ability:stancechange}, or {ability:zerotohero}.",
+    long: "Causes the target's Ability to become Simple. Fails if the target's Ability is As One, {ability:battlebond}, {ability:disguise}, Gulp Missile, Ice Face, Shields Down, {ability:stancechange}, or {ability:zerotohero}.",
     source: '4e1802c3',
   },
   sing: {
@@ -1919,7 +1919,7 @@ export const descriptions: Record<string, Description> = {
   },
   skillswap: {
     short: 'The user and the target trade Abilities.',
-    long: "The user swaps its Ability with the target's Ability. Fails if either the user or the target's Ability is As One, {ability:battlebond}, {ability:disguise}, Embody Aspect, {ability:hungerswitch}, {ability:iceface}, {ability:illusion}, {ability:shieldsdown}, {ability:stancechange}, or {ability:zerotohero}.",
+    long: "The user swaps its Ability with the target's Ability. Fails if either the user or the target's Ability is As One, {ability:battlebond}, {ability:disguise}, Embody Aspect, {ability:hungerswitch}, Ice Face, {ability:illusion}, Shields Down, {ability:stancechange}, or {ability:zerotohero}.",
     source: 'f754c4c1',
   },
   skittersmack: {
@@ -2482,7 +2482,7 @@ export const descriptions: Record<string, Description> = {
   },
   worryseed: {
     short: "The target's Ability becomes {ability:insomnia}.",
-    long: "Causes the target's Ability to become {ability:insomnia}. Fails if the target's Ability is As One, {ability:battlebond}, {ability:disguise}, {ability:gulpmissile}, {ability:iceface}, {ability:insomnia}, {ability:shieldsdown}, {ability:stancechange}, or {ability:zerotohero}.",
+    long: "Causes the target's Ability to become {ability:insomnia}. Fails if the target's Ability is As One, {ability:battlebond}, {ability:disguise}, Gulp Missile, Ice Face, {ability:insomnia}, Shields Down, {ability:stancechange}, or {ability:zerotohero}.",
     source: 'c6a2a773',
   },
   wrap: {

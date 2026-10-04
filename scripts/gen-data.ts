@@ -376,11 +376,21 @@ async function main() {
   const rules = dex.formats.getRuleTable(format)
   console.log(`${format.name} (mod: ${format.mod})`)
 
-  // The regulation's legal Pokémon, Mega Evolutions included.
-  const roster = dex.species.all().filter((s) => s.exists && !rules.isBannedSpecies(s))
+  // The regulation's legal Pokémon, Mega Evolutions included. A forme battles change it into is legal when one it
+  // changes from is: the format bans Ogerpon, not its Tera formes, which no team can bring anyway.
+  const allowed = dex.species.all().filter((s) => s.exists && !rules.isBannedSpecies(s))
+  const allowedIds = new Set(allowed.map((s) => s.id))
+  const roster = allowed.filter(
+    (s) => !s.battleOnly || [s.battleOnly].flat().some((from) => allowedIds.has(dex.species.get(from).id)),
+  )
   console.log(`${roster.length} legal Pokémon`)
   const legal = new Set(roster.map((s) => s.id))
   const abilitiesHeld = new Set(roster.flatMap((s) => Object.values(s.abilities).map(toId)))
+  // Abilities only battle-only formes have (Megas'), which team validation never checks: Showdown still tags some new
+  // ones as not in the game yet (Mega Lucario Z's Aura Guard) though the formes that have them are legal.
+  const battleOnlyAbilities = new Set(
+    roster.filter((s) => s.battleOnly).flatMap((s) => Object.values(s.abilities).map(toId)),
+  )
   /** The legal Pokémon that can have an ability, in Pokédex order. */
   const holders = (ability: string) =>
     roster.filter((s) => Object.values(s.abilities).some((a) => toId(a) === ability)).map((s) => s.id)
@@ -423,7 +433,10 @@ async function main() {
           .filter((a) => a.num > 0)
           .map((a) => ({
             ...a,
-            available: abilitiesHeld.has(a.id) && !a.isNonstandard && !rules.isBanned(`ability:${a.id}`),
+            available:
+              abilitiesHeld.has(a.id) &&
+              (!a.isNonstandard || battleOnlyAbilities.has(a.id)) &&
+              !rules.isBanned(`ability:${a.id}`),
           })),
       pokeapi: ['abilities', 'ability_names', 'ability_id'],
       text: 'Abilities',
