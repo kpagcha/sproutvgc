@@ -657,11 +657,6 @@ async function main() {
     legalItems.map((i) => i.spritenum),
   )
   writeFileSync(join(SPRITES_OUT, 'items.webp'), itemSheet)
-  for (const category of ['Physical', 'Special', 'Status']) {
-    const badge = await sprites.file(`categories/${category}.png`)
-    if (!badge) throw new Error(`Showdown has no badge for the ${category} category`)
-    writeFileSync(join(SPRITES_OUT, `${category.toLowerCase()}.png`), badge)
-  }
   await writeJson('sprites.json', { pokemon: sheetLayout(POKEMON_ICONS), items: sheetLayout(ITEM_ICONS) })
   // Each legal Pokémon's own sprite, by its ID; the folder only ever holds the current regulation's.
   rmSync(join(PUBLIC_SPRITES, 'pokemon'), { recursive: true, force: true })

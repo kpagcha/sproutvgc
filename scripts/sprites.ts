@@ -1,7 +1,7 @@
 // The sprites `gen-data.ts` takes from Pokémon Showdown's server, trimmed to what the regulation has: its icon sheets
-// (every Pokémon and every item, one sheet each) cut down to the regulation's entries, its gen5 sprite of each legal
-// Pokémon, and the move category badges. Showdown's sprites aren't versioned, so a fetch is cached under the date it
-// was made (`sprites` in `sources.json`): reruns read the cache, and `--update` fetches them again.
+// (every Pokémon and every item, one sheet each) cut down to the regulation's entries, and its gen5 sprite of each
+// legal Pokémon. Showdown's sprites aren't versioned, so a fetch is cached under the date it was made (`sprites` in
+// `sources.json`): reruns read the cache, and `--update` fetches them again.
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'

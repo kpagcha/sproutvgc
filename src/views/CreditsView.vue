@@ -37,7 +37,6 @@ const uiIcons = tSplit('credits.uiIconsBody', 'source')
     <h2>{{ t('credits.iconsTitle') }}</h2>
     <p>
       {{ icons[0] }}<a href="https://archives.bulbagarden.net/" rel="noopener">Bulbagarden Archives</a>{{ icons[1] }}
-      <a href="https://bulbapedia.bulbagarden.net/wiki/Type" rel="noopener">Bulbapedia</a>.
     </p>
   </div>
 

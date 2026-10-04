@@ -157,11 +157,12 @@
   border: 2px solid var(--ink);
 }
 
-/* ---------- Type badges ---------- */
-/* Fixed-width badges: the type's official color in an ink frame with a hard shadow and the white type glyph. Large
-   badges add the name in white bold monospace, centered beside the glyph, with a light drop for readability on pale
-   fills like Electric and Ice. Small badges are just the glyph on its color. */
-:root:root .type-badge {
+/* ---------- Type and move category badges ---------- */
+/* Fixed-width badges: the type's (or category's) official color in an ink frame with a hard shadow and the white
+   glyph. Large type badges add the name in white bold monospace, centered beside the glyph, with a light drop for
+   readability on pale fills like Electric and Ice. Small badges, and category badges, are just the glyph on its
+   color. */
+:root:root :is(.type-badge, .category-badge) {
   display: inline-flex;
   align-items: center;
   flex: none;
@@ -172,14 +173,14 @@
   box-shadow: 1px 1px 0 var(--ink);
   user-select: none;
 }
-:root:root .type-badge .glyph {
-  /* The glyph image, set inline per type by TypeIcon. */
+:root:root :is(.type-badge, .category-badge) .glyph {
+  /* The glyph image, set inline per type by TypeIcon, per category by CategoryIcon. */
   --glyph: none;
   flex: none;
   background: currentColor;
   mask: var(--glyph) center / contain no-repeat;
 }
-:root:root .type-badge.s1 {
+:root:root :is(.type-badge.s1, .category-badge) {
   justify-content: center;
   width: calc(26px * var(--icon-scale, 1));
   height: calc(20px * var(--icon-scale, 1));
@@ -187,6 +188,25 @@
 :root:root .type-badge.s1 .glyph {
   width: calc(14px * var(--icon-scale, 1));
   height: calc(14px * var(--icon-scale, 1));
+}
+/* The category glyphs are wider than tall and fill their image, where the type glyphs leave a margin: a box this size
+   gives them about the same weight as a type glyph. */
+:root:root .category-badge .glyph {
+  width: calc(16px * var(--icon-scale, 1));
+  height: calc(11px * var(--icon-scale, 1));
+  /* A light drop under the glyph, like the type names'. A mask would cut a shadow away, so the glyph is drawn by
+     ::before and the shadow is a filter on this box, which applies after its child's mask. */
+  background: none;
+  mask: none;
+  filter: drop-shadow(1px 1px 0 rgb(0 0 0 / 0.35));
+}
+:root:root .category-badge .glyph::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: currentColor;
+  mask: var(--glyph) center / contain no-repeat;
 }
 :root:root .type-badge.s2 {
   width: var(--badge-w);
@@ -370,4 +390,17 @@
 }
 :root:root .type-badge[data-type='fairy'] {
   --tc: #ef70ef;
+}
+
+/* Move category colors, the glyph (`color`) as well as the fill, as in the games' category badges. */
+:root:root .category-badge[data-category='physical'] {
+  --tc: #f75231;
+  color: #ffc631;
+}
+:root:root .category-badge[data-category='special'] {
+  --tc: #5273ad;
+  color: #c6deff;
+}
+:root:root .category-badge[data-category='status'] {
+  --tc: #ada594;
 }

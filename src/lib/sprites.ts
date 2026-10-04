@@ -4,17 +4,10 @@
 import LAYOUT from '@/data/generated/sprites.json'
 import pokemonSheet from '@/assets/sprites/pokemon.webp'
 import itemSheet from '@/assets/sprites/items.webp'
-import physical from '@/assets/sprites/physical.png'
-import special from '@/assets/sprites/special.png'
-import status from '@/assets/sprites/status.png'
-import type { Category } from '@/data/moves'
 
 export type Sheet = keyof typeof LAYOUT
 
 const URLS: Record<Sheet, string> = { pokemon: pokemonSheet, items: itemSheet }
-
-/** The move category badges (Showdown's), the size of a type badge. */
-export const CATEGORY_ICONS: Record<Category, string> = { physical, special, status }
 
 /** The size of a sheet's cells. */
 export const cellSize = (sheet: Sheet) => ({ width: LAYOUT[sheet].width, height: LAYOUT[sheet].height })

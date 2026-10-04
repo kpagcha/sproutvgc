@@ -416,7 +416,7 @@ details > summary {
   image-rendering: pixelated;
 }
 
-/* Type and move category badges (`TypeIcon`, `CategoryIcon`); the type badges are styled in retro.css. */
+/* Type and move category badges (`TypeIcon`, `CategoryIcon`), styled in retro.css. */
 .type-icon,
 .category-icon {
   display: inline-block;

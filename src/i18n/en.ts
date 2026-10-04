@@ -395,8 +395,8 @@ export const messages = {
   'entry.row.specific': '{type} moves',
   'credits.intro':
     'mondex is an unofficial fan project, not affiliated with Nintendo, Game Freak or The Pokémon Company.',
-  'credits.iconsTitle': 'Type icons',
-  'credits.iconsBody': 'The type icons come from the {source}, as used on',
+  'credits.iconsTitle': 'Type and category icons',
+  'credits.iconsBody': 'The type and move category icons come from the {source}.',
   'credits.uiIconsTitle': 'Interface icons',
   'credits.uiIconsBody': 'The interface icons are {source} (ISC).',
   'credits.trademarks': 'Pokémon and Pokémon character and type names are trademarks of Nintendo.',
@@ -534,7 +534,7 @@ export const messages = {
   'home.itemsDesc': 'Every held item, berry and Mega Stone.',
   'home.more': '{n} more',
   'credits.spritesTitle': 'Sprites',
-  'credits.spritesBody': 'The Pokémon and item sprites, icons and move category badges come from {source}.',
+  'credits.spritesBody': 'The Pokémon and item sprites and icons come from {source}.',
   'credits.dataTitle': 'Data',
   'credits.dataBody': 'The game data comes from {showdown} (MIT), and the names in other languages from {pokeapi}.',
 

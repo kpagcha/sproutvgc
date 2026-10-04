@@ -400,8 +400,8 @@ export const messages: Record<keyof typeof en, string> = {
   'entry.row.specific': 'Movimientos de tipo {type}',
   'credits.intro':
     'mondex es un proyecto de fans no oficial, sin relación con Nintendo, Game Freak ni The Pokémon Company.',
-  'credits.iconsTitle': 'Iconos de tipos',
-  'credits.iconsBody': 'Los iconos de tipos vienen de los {source}, tal y como se usan en',
+  'credits.iconsTitle': 'Iconos de tipos y categorías',
+  'credits.iconsBody': 'Los iconos de tipos y de categorías de movimientos vienen de los {source}.',
   'credits.uiIconsTitle': 'Iconos de la interfaz',
   'credits.uiIconsBody': 'Los iconos de la interfaz son {source} (ISC).',
   'credits.trademarks': 'Pokémon y los nombres de los Pokémon y de los tipos son marcas registradas de Nintendo.',
@@ -540,8 +540,7 @@ export const messages: Record<keyof typeof en, string> = {
   'home.itemsDesc': 'Cada objeto equipable, baya y megapiedra.',
   'home.more': '{n} más',
   'credits.spritesTitle': 'Sprites',
-  'credits.spritesBody':
-    'Los sprites e iconos de Pokémon y objetos y los distintivos de categoría de los movimientos son de {source}.',
+  'credits.spritesBody': 'Los sprites e iconos de Pokémon y objetos son de {source}.',
   'credits.dataTitle': 'Datos',
   'credits.dataBody': 'Los datos del juego son de {showdown} (MIT), y los nombres en otros idiomas de {pokeapi}.',
 
