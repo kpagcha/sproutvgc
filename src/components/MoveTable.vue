@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import { move, type MoveId } from '@/data/dex'
-import { CATEGORIES, MOVES, type Category, type Move } from '@/data/moves'
+import { CATEGORIES, FLAGS, MOVES, type Category, type Flag, type Move } from '@/data/moves'
 import { TYPES, type TypeId } from '@/data/types'
 import type { MessageKey } from '@/i18n'
 import { locale, t, typeName } from '@/i18n'
@@ -20,7 +20,7 @@ import SearchBox from '@/components/SearchBox.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 
 // A table of moves with their type, category, power, accuracy and PP, sortable by any of them, searchable by name and
-// filtered by type and category; with `descriptions`, each move's short description too.
+// filtered by type, category and flag; with `descriptions`, each move's short description too.
 const props = defineProps<{ ids: readonly MoveId[]; descriptions?: boolean; placeholder: string; query?: string }>()
 
 // Its links are `AppLink`s and its icons and descriptions functional components: RouterLinks and full components in
@@ -36,10 +36,16 @@ watch(
 )
 const type = ref<TypeId | ''>('')
 const category = ref<Category | ''>('')
+const flag = ref<Flag | ''>('')
+// The flags by name, in the reader's language.
+const flags = computed(() =>
+  FLAGS.map((f) => ({ f, name: t(`move.flag.${f}`) })).sort((a, b) => a.name.localeCompare(b.name, locale.value)),
+)
 const shown = computed(() => {
   const q = fold(query.value.trim())
   return rows.value.flatMap((r) => {
     if ((type.value && r.data.type !== type.value) || (category.value && r.data.category !== category.value)) return []
+    if (flag.value && !r.data.flags.includes(flag.value)) return []
     const parts = q ? split(r.name, q) : null
     return !q || parts ? [{ ...r, parts }] : []
   })
@@ -99,6 +105,10 @@ const skeleton = computed(() => [
     <select v-model="category" class="search select" :aria-label="t('move.category')">
       <option value="">{{ t('moves.anyCategory') }}</option>
       <option v-for="c in CATEGORIES" :key="c" :value="c">{{ t(`move.category.${c}`) }}</option>
+    </select>
+    <select v-model="flag" class="search select" :aria-label="t('move.flags')">
+      <option value="">{{ t('moves.anyFlag') }}</option>
+      <option v-for="{ f, name } in flags" :key="f" :value="f">{{ name }}</option>
     </select>
   </div>
   <div v-if="sorted.length" class="dex-table" :class="{ described: descriptions, restoring }" role="table">

@@ -459,6 +459,8 @@ export const messages = {
   'moves.intro': 'The {n} moves Pokémon can learn in Regulation {reg}. PP are as in the game, with PP Ups applied.',
   'moves.search': 'Search moves',
   'moves.anyCategory': 'Any category',
+  'moves.anyFlag': 'Any flag',
+  'move.flags': 'Flags',
   'move.category': 'Category',
   'move.priority': 'Priority',
   'move.target': 'Target',

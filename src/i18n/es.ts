@@ -466,6 +466,8 @@ export const messages: Record<keyof typeof en, string> = {
     'Los {n} movimientos que pueden aprender los Pokémon en el Reglamento {reg}. Los PP son los del juego, con los Más PP aplicados.',
   'moves.search': 'Buscar movimientos',
   'moves.anyCategory': 'Cualquier categoría',
+  'moves.anyFlag': 'Cualquier propiedad',
+  'move.flags': 'Propiedades',
   'move.category': 'Categoría',
   'move.priority': 'Prioridad',
   'move.target': 'Objetivo',
