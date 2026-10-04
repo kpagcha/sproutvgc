@@ -400,7 +400,39 @@ details.matchups {
   margin-bottom: 12px;
 }
 @media (max-width: 560px) {
+  /* Phones: the name and types beside the sprite, then the rest of the facts and the stats below, at the left. */
+  .head {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    grid-template-areas:
+      'sprite title'
+      'sprite types';
+    gap: 8px 12px;
+  }
+  .facts {
+    display: contents;
+  }
+  .facts > * {
+    grid-column: 1 / -1;
+  }
+  .facts .entry-title {
+    grid-area: title;
+    align-self: end;
+  }
+  .types {
+    grid-area: types;
+    align-self: start;
+    flex-wrap: wrap;
+  }
+  .stats-col {
+    grid-column: 1 / -1;
+    margin: 8px 0 0;
+  }
+  .bars-mode {
+    justify-content: flex-start;
+  }
   .sprite {
+    grid-area: sprite;
     width: 96px;
     height: 96px;
   }
