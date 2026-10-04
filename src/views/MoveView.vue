@@ -12,6 +12,7 @@ import CategoryIcon from '@/components/CategoryIcon'
 import DexText from '@/components/DexText'
 import PokemonChips from '@/components/PokemonChips.vue'
 import RefInteractions from '@/components/RefInteractions.vue'
+import SearchBox from '@/components/SearchBox.vue'
 import TypeIcon from '@/components/TypeIcon'
 
 // One move: its numbers, whom it hits, its description and flags, what it does to types beyond the chart, and the
@@ -28,10 +29,12 @@ const priority = computed(() => (data.value.priority > 0 ? `+${data.value.priori
 // The Pokémon that learn it, by species: formes a battle brings out (Megas) learn what their base forme does, and
 // formes that only look different what their species does, so they'd only repeat it.
 const learners = ref<PokemonId[]>([])
+const query = ref('')
 watchEffect(async () => {
   const current = id.value
   const sets = await loadLearnsets()
   if (id.value !== current) return
+  query.value = ''
   learners.value = (Object.keys(sets) as PokemonId[]).filter(
     (p) => !POKEMON[p].battleOnly && !POKEMON[p].cosmetic && sets[p].includes(current),
   )
@@ -80,7 +83,8 @@ watchEffect(async () => {
 
       <section v-if="learners.length">
         <h2>{{ t('move.pokemon', { n: learners.length }) }}</h2>
-        <PokemonChips :ids="learners" />
+        <SearchBox v-model="query" :placeholder="t('pokedex.search')" :aria-label="t('pokedex.search')" />
+        <PokemonChips :ids="learners" :query />
       </section>
     </template>
     <p v-else>{{ t('move.notFound', { id, reg: REGULATION }) }}</p>

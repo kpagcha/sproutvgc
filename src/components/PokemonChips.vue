@@ -1,31 +1,50 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { RouterLink } from 'vue-router'
 import { pokemon, type PokemonId } from '@/data/dex'
-import { locale } from '@/i18n'
+import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
+import { fold, split } from '@/lib/search'
 import PokemonIcon from '@/components/PokemonIcon'
 
 // Pokémon as a row of links, each with its icon, by name in the reader's language. `current`, if among them, is the
-// page's own Pokémon: shown, but not a link.
-const props = defineProps<{ ids: readonly PokemonId[]; current?: PokemonId }>()
-const mons = computed(() =>
+// page's own Pokémon: shown, but not a link. `query`, if given, keeps only the ones whose name it finds, as the dex's
+// searches do, with the match highlighted.
+const props = defineProps<{ ids: readonly PokemonId[]; current?: PokemonId; query?: string }>()
+const all = computed(() =>
   props.ids
     .map((id) => ({ id, name: refName(pokemon(id)) }))
     .sort((a, b) => a.name.localeCompare(b.name, locale.value)),
 )
+const mons = computed(() => {
+  const q = fold(props.query?.trim() ?? '')
+  return all.value.flatMap((m) => {
+    const parts = q ? split(m.name, q) : null
+    return !q || parts ? [{ ...m, parts }] : []
+  })
+})
 </script>
 
 <template>
-  <ul class="pokemon-chips">
+  <ul v-if="mons.length || !all.length" class="pokemon-chips">
     <li v-for="m in mons" :key="m.id">
-      <span v-if="m.id === current" class="chip current" aria-current="page"
-        ><PokemonIcon :id="m.id" />{{ m.name }}</span
+      <component
+        :is="m.id === current ? 'span' : RouterLink"
+        :to="m.id === current ? undefined : { name: 'pokemon', params: { id: m.id } }"
+        class="chip"
+        :class="{ current: m.id === current }"
+        :aria-current="m.id === current ? 'page' : undefined"
       >
-      <RouterLink v-else :to="{ name: 'pokemon', params: { id: m.id } }" class="chip">
-        <PokemonIcon :id="m.id" />{{ m.name }}
-      </RouterLink>
+        <PokemonIcon :id="m.id" />
+        <template v-if="m.parts"
+          >{{ m.parts[0] }}<mark>{{ m.parts[1] }}</mark
+          >{{ m.parts[2] }}</template
+        >
+        <template v-else>{{ m.name }}</template>
+      </component>
     </li>
   </ul>
+  <p v-else class="muted">{{ t('pokedex.none') }}</p>
 </template>
 
 <style scoped>
