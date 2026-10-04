@@ -38,13 +38,12 @@ const rows = computed(() =>
     })),
 )
 
-// The intro counts species, not rows: one row per species, plus its Megas and its other formes (a species whose base
-// forme isn't allowed, Floette-Eternal's, counts once).
-const counts = computed(() => {
-  const species = new Set(rows.value.map((r) => speciesOf(r.id))).size
-  const megas = rows.value.filter((r) => r.data.mega).length
-  return { n: species, megas, forms: rows.value.length - species - megas }
-})
+// The intro counts species, not rows, and Mega Evolutions by their Mega Stone: Showdown splits Mega Meowstic in two,
+// one per gender, though the game has one.
+const counts = computed(() => ({
+  n: new Set(rows.value.map((r) => speciesOf(r.id))).size,
+  megas: new Set(rows.value.flatMap((r) => (r.data.mega ? [r.data.item] : []))).size,
+}))
 
 // An ability's short description on hover. Not on touch screens, where a tap follows the link.
 const canHover = window.matchMedia('(hover: hover)').matches
