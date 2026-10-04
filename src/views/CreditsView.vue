@@ -3,6 +3,7 @@ import { t, tSplit, tSlots } from '@/i18n'
 
 const icons = tSplit('credits.iconsBody', 'source')
 const sprites = tSplit('credits.spritesBody', 'source')
+const uiIcons = tSplit('credits.uiIconsBody', 'source')
 </script>
 
 <template>
@@ -38,6 +39,11 @@ const sprites = tSplit('credits.spritesBody', 'source')
       {{ icons[0] }}<a href="https://archives.bulbagarden.net/" rel="noopener">Bulbagarden Archives</a>{{ icons[1] }}
       <a href="https://bulbapedia.bulbagarden.net/wiki/Type" rel="noopener">Bulbapedia</a>.
     </p>
+  </div>
+
+  <div class="panel">
+    <h2>{{ t('credits.uiIconsTitle') }}</h2>
+    <p>{{ uiIcons[0] }}<a href="https://lucide.dev/" rel="noopener">Lucide</a>{{ uiIcons[1] }}</p>
   </div>
 
   <div class="panel">

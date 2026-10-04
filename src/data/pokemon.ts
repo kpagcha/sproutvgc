@@ -59,3 +59,8 @@ export function loadLearnsets(): Promise<Record<PokemonId, MoveId[]>> {
     (m) => m.default as unknown as Record<PokemonId, MoveId[]>,
   ))
 }
+
+/** A Pokémon's moves, from the learnsets: battle-only formes (Megas) learn what their base forme does. */
+export function movesOf(sets: Record<PokemonId, MoveId[]>, id: PokemonId): MoveId[] {
+  return sets[id]?.length ? sets[id] : (sets[POKEMON[id]?.battleOnly ?? id] ?? [])
+}

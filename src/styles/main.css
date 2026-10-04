@@ -232,6 +232,27 @@ img.pixel {
 .btn.primary:hover {
   filter: brightness(1.08);
 }
+/* A small action beside an entry in a list (filtering by it): tinted with the selection color, an icon before its
+   label. */
+.btn.chip {
+  min-height: 20px;
+  padding: 0 6px;
+  font-size: 0.8125em;
+  color: var(--text);
+  white-space: nowrap;
+  background: var(--sel);
+}
+.btn.chip:hover {
+  text-decoration: none;
+  filter: brightness(0.96);
+}
+
+/* Lucide's icons, squared off to match the hard edges everywhere else. */
+.lucide {
+  flex: none;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
 
 /* A search box, and the part of each result's name that matches it. */
 .search {

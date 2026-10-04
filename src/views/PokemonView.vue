@@ -3,7 +3,7 @@ import { computed, ref, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { ability, availableIds, available, item, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
-import { POKEMON, STATS, loadLearnsets, speciesOf, spriteUrl, total, type AbilitySlot } from '@/data/pokemon'
+import { POKEMON, STATS, loadLearnsets, movesOf, speciesOf, spriteUrl, total, type AbilitySlot } from '@/data/pokemon'
 import { t, tSlots, type MessageKey } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
@@ -62,10 +62,8 @@ const origin = computed((): { key: MessageKey; from: PokemonId } | null => {
 const learnset = ref<MoveId[] | null>(null)
 watchEffect(async () => {
   const current = id.value
-  // Battle-only formes learn what their base forme does.
-  const source = mon.value?.battleOnly ?? current
   const sets = await loadLearnsets()
-  if (id.value === current) learnset.value = sets[current]?.length ? sets[current]! : (sets[source] ?? [])
+  if (id.value === current) learnset.value = movesOf(sets, current)
 })
 </script>
 
