@@ -164,7 +164,9 @@ const fadeVariants = {
     <header class="site-header">
       <div class="wrap bar">
         <RouterLink to="/" class="logo font-display"
-          ><img :src="logoUrl" alt="" width="45" height="36" />sprout<span>vgc</span></RouterLink
+          ><img :src="logoUrl" alt="" width="45" height="36" /><span class="word"
+            >sprout<span>vgc</span></span
+          ></RouterLink
         >
         <nav class="nav font-display" :class="{ compact }">
           <!-- The active highlight is one element that slides between links. -->
@@ -288,7 +290,7 @@ const fadeVariants = {
   /* Pixel art, drawn at its own size: scaled to anything but a whole multiple, it loses pixels. */
   image-rendering: pixelated;
 }
-.logo span {
+.logo .word span {
   color: var(--logo-vgc);
 }
 .logo:hover {
@@ -359,8 +361,20 @@ const fadeVariants = {
   text-decoration: none;
 }
 
-/* Narrow screens: the links sit together at the end of the logo's row. */
+/* Narrow screens: one row, the logo's picture alone (its name kept for screen readers) and the links together at the
+   end. */
 @media (max-width: 560px) {
+  .bar {
+    flex-wrap: nowrap;
+  }
+  .logo .word {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
   .nav {
     flex: 0 1 auto;
     margin-left: auto;
