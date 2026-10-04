@@ -503,8 +503,15 @@ async function main() {
         return {
           types: s.types.map(toId),
           stats: [st.hp, st.atk, st.def, st.spa, st.spd, st.spe],
-          // By slot: "0" and "1", and "H" for the hidden ability.
-          abilities: Object.fromEntries(Object.entries(s.abilities).map(([slot, a]) => [slot, toId(a)])),
+          // In slot order. Whether one is the hidden ability makes no difference in competitive play, so it isn't kept.
+          abilities: [
+            ...new Set(
+              (['0', '1', 'H', 'S'] as const).flatMap((slot) => {
+                const a = (s.abilities as Record<string, string | undefined>)[slot]
+                return a ? [toId(a)] : []
+              }),
+            ),
+          ],
           weight: s.weightkg,
           height: s.heightm,
           // Its male share, or "M", "F" or "N" (genderless) when it only has one.

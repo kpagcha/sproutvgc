@@ -47,7 +47,7 @@ export function passes(
     !filters.length ||
     filters.some((f) => {
       if (f.kind === 'type') return mon.types.includes(f.id)
-      if (f.kind === 'ability') return Object.values(mon.abilities).includes(f.id)
+      if (f.kind === 'ability') return mon.abilities.includes(f.id)
       return !!learnsets && movesOf(learnsets, id).includes(f.id)
     })
   )

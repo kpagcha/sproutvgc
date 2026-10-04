@@ -8,14 +8,12 @@ import type { TypeId } from '@/data/types'
 export const STATS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as const
 export type StatId = (typeof STATS)[number]
 
-/** Ability slots: the two regular ones, and the hidden one. */
-export type AbilitySlot = '0' | '1' | 'H'
-
 export interface Pokemon {
   types: TypeId[]
   /** Base stats, in `STATS` order. */
   stats: [number, number, number, number, number, number]
-  abilities: Partial<Record<AbilitySlot, AbilityId>>
+  /** In slot order; whether one is hidden is left out, as it makes no difference in competitive play. */
+  abilities: AbilityId[]
   /** In kilograms and meters. */
   weight: number
   height: number

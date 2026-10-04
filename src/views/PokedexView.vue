@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ability, availableIds, pokemon, sameRef, type MoveId, type PokemonId, type Ref } from '@/data/dex'
 import { REGULATION } from '@/data/format'
-import { POKEMON, STATS, loadLearnsets, total, type AbilitySlot, type StatId } from '@/data/pokemon'
+import { POKEMON, STATS, loadLearnsets, total, type StatId } from '@/data/pokemon'
 import { TYPES, type TypeId } from '@/data/types'
 import { locale, t, typeName } from '@/i18n'
 import { loadDescriptions, shortText } from '@/i18n/descriptions'
@@ -21,7 +21,6 @@ import SearchResults from '@/components/SearchResults.vue'
 
 // Every Pokémon the regulation has, with its types, abilities and base stats, sortable by its name and stats. Formes
 // that only look different (Vivillon's patterns) are left to their species' page.
-const SLOTS: AbilitySlot[] = ['0', '1', 'H']
 const rows = computed(() =>
   availableIds('pokemon')
     .filter((id) => !POKEMON[id].cosmetic)
@@ -29,21 +28,13 @@ const rows = computed(() =>
       id,
       name: refName(pokemon(id)),
       data: POKEMON[id],
-      abilities: SLOTS.flatMap((slot) => {
-        const a = POKEMON[id].abilities[slot]
-        return a ? [{ ref: ability(a), hidden: slot === 'H' }] : []
-      }),
+      abilities: POKEMON[id].abilities.map(ability),
     })),
 )
 
-// An ability's short description on hover, saying first when it's a hidden one. Not on touch screens, where a tap
-// follows the link.
+// An ability's short description on hover. Not on touch screens, where a tap follows the link.
 const canHover = window.matchMedia('(hover: hover)').matches
-function abilityTip(a: { ref: Ref; hidden: boolean }) {
-  if (!canHover) return undefined
-  const short = shortText(a.ref)
-  return a.hidden ? [t('pokedex.hidden'), short].filter(Boolean).join(': ') : short
-}
+const abilityTip = (a: Ref) => (canHover ? shortText(a) : undefined)
 
 // The search (`?q=`) and the filters (`?f=`) are kept in the URL, so the home page's search can link here with them.
 const route = useRoute()
@@ -184,10 +175,7 @@ const link = (id: PokemonId) => ({ name: 'pokemon', params: { id } })
           </td>
           <td class="wide-only grow">
             <ul class="abilities">
-              <li v-for="a in r.abilities" :key="a.ref.id" :class="{ hidden: a.hidden }">
-                <DexRef :to="a.ref" :tip="abilityTip(a)" />
-                <span v-if="a.hidden" class="sr-only">{{ t('pokemon.hidden') }}</span>
-              </li>
+              <li v-for="a in r.abilities" :key="a.id"><DexRef :to="a" :tip="abilityTip(a)" /></li>
             </ul>
           </td>
           <td v-for="(v, i) in r.data.stats" :key="i" class="wide-only r num">{{ v }}</td>
@@ -275,17 +263,5 @@ const link = (id: PokemonId) => ({ name: 'pokemon', params: { id } })
 }
 .abilities a {
   color: inherit;
-}
-.abilities .hidden {
-  font-style: italic;
-  border-style: dashed;
-}
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
 }
 </style>

@@ -3,7 +3,7 @@ import { computed, ref, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { ability, availableIds, available, item, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
-import { POKEMON, STATS, loadLearnsets, movesOf, speciesOf, spriteUrl, total, type AbilitySlot } from '@/data/pokemon'
+import { POKEMON, STATS, loadLearnsets, movesOf, speciesOf, spriteUrl, total } from '@/data/pokemon'
 import { t, tSlots, type MessageKey } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
@@ -24,13 +24,7 @@ const ref_ = computed(() => pokemon(id.value))
 const exists = computed(() => available(ref_.value))
 const mon = computed(() => POKEMON[id.value])
 
-const SLOTS: AbilitySlot[] = ['0', '1', 'H']
-const abilities = computed(() =>
-  SLOTS.flatMap((slot) => {
-    const a = mon.value.abilities[slot]
-    return a ? [{ slot, ref: ability(a) }] : []
-  }),
-)
+const abilities = computed(() => mon.value.abilities.map(ability))
 
 /** Showdown's color scale for stats: red for low, through yellow, to green and blue for high. */
 const statColor = (v: number) => `hsl(${Math.min(Math.floor((v * 180) / 255), 360)}, 75%, 45%)`
@@ -117,12 +111,9 @@ watchEffect(async () => {
       <div class="panel">
         <h2>{{ t('pokemon.abilities') }}</h2>
         <dl class="abilities">
-          <template v-for="a in abilities" :key="a.slot">
-            <dt>
-              <DexRef :to="a.ref" />
-              <span v-if="a.slot === 'H'" class="muted hidden">{{ t('pokemon.hidden') }}</span>
-            </dt>
-            <dd class="muted"><DexText :text="description('ability', a.ref.id)?.short ?? ''" /></dd>
+          <template v-for="a in abilities" :key="a.id">
+            <dt><DexRef :to="a" /></dt>
+            <dd class="muted"><DexText :text="description('ability', a.id)?.short ?? ''" /></dd>
           </template>
         </dl>
       </div>
@@ -248,10 +239,6 @@ watchEffect(async () => {
 }
 .abilities dd {
   margin: 0 0 8px;
-}
-.hidden {
-  font-weight: normal;
-  font-size: 0.9em;
 }
 .stats {
   width: 100%;
