@@ -19,6 +19,7 @@ import { t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import DexRef from '@/components/DexRef'
+import EntryTitle from '@/components/EntryTitle.vue'
 import DexText from '@/components/DexText'
 import ItemIcon from '@/components/ItemIcon.vue'
 import RefInteractions from '@/components/RefInteractions.vue'
@@ -49,7 +50,7 @@ const sources = computed(() => {
 <template>
   <div class="panel">
     <template v-if="exists">
-      <h1>{{ refName(ref_) }}</h1>
+      <EntryTitle :to="ref_" />
       <p class="muted kind">{{ t(`conditions.sub1.${CONDITIONS[id].sub}`) }}</p>
       <p v-if="text"><DexText :text="text.long ?? text.short" /></p>
 

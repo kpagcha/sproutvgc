@@ -9,6 +9,7 @@ import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import DefenseResults from '@/components/DefenseResults.vue'
 import DexRef from '@/components/DexRef'
+import EntryTitle from '@/components/EntryTitle.vue'
 import DexText, { hoverTip } from '@/components/DexText'
 import ItemIcon from '@/components/ItemIcon.vue'
 import MoveTable from '@/components/MoveTable.vue'
@@ -68,7 +69,7 @@ watchEffect(async () => {
       />
       <span v-else class="sprite icon-sprite"><PokemonIcon :id="id" :scale="2" /></span>
       <div class="facts">
-        <h1>{{ refName(ref_) }}</h1>
+        <EntryTitle :to="ref_" />
         <div class="types">
           <RouterLink v-for="ty in mon.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
             <TypeIcon :type="ty" :scale="2" />
@@ -183,7 +184,7 @@ watchEffect(async () => {
   gap: 8px;
   min-width: 0;
 }
-.facts h1 {
+.facts .entry-title {
   margin: 0;
 }
 .types {

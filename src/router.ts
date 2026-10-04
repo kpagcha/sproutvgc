@@ -4,6 +4,7 @@ import { afterPageExit } from '@/lib/pageExit'
 import { TYPES } from '@/data/types'
 import type { MessageKey } from '@/i18n'
 import { loadDexNames } from '@/i18n/refName'
+import { hasFavorites } from '@/composables/useFavorites'
 import { loadDescriptions, type DescribedKind } from '@/i18n/descriptions'
 
 declare module 'vue-router' {
@@ -11,8 +12,8 @@ declare module 'vue-router' {
     titleKey?: MessageKey
     /** The page's meta description, for search results and link previews. */
     descKey?: MessageKey
-    /** The page shows dex entries (`DexRef`): navigation waits for the current locale's names. */
-    dexNames?: boolean
+    /** The page shows dex entries (`DexRef`), or will when this says so: navigation waits for the current locale's names. */
+    dexNames?: boolean | (() => boolean)
     /** The categories whose descriptions the page shows: navigation waits for the current locale's. */
     descriptions?: DescribedKind[]
     /** Moving between the route's own URLs keeps the scroll: the page brings what changed into view itself. */
@@ -23,7 +24,12 @@ declare module 'vue-router' {
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path: '/', name: 'home', component: () => import('@/views/HomeView.vue'), meta: { descKey: 'desc.home' } },
+    {
+      path: '/',
+      name: 'home',
+      component: () => import('@/views/HomeView.vue'),
+      meta: { descKey: 'desc.home', dexNames: hasFavorites },
+    },
     {
       // `/types` lists every type; `/types/fire` also shows that type's matchups.
       path: `/types/:type(${TYPES.join('|')})?`,
@@ -165,7 +171,7 @@ export const router = createRouter({
 // they load.
 router.beforeResolve(async (to) => {
   await Promise.all([
-    to.meta.dexNames && loadDexNames(),
+    (typeof to.meta.dexNames === 'function' ? to.meta.dexNames() : to.meta.dexNames) && loadDexNames(),
     to.meta.descriptions && loadDescriptions(to.meta.descriptions),
   ])
 })

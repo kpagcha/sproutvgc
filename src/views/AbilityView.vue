@@ -6,7 +6,7 @@ import HOLDERS from '@/data/generated/abilities.holders.json'
 import { REGULATION } from '@/data/format'
 import { t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
-import { refName } from '@/i18n/refName'
+import EntryTitle from '@/components/EntryTitle.vue'
 import DexText from '@/components/DexText'
 import PokemonChips from '@/components/PokemonChips.vue'
 import RefInteractions from '@/components/RefInteractions.vue'
@@ -24,7 +24,7 @@ const holders = computed(() => (HOLDERS as Record<string, PokemonId[]>)[id.value
 <template>
   <div class="panel">
     <template v-if="exists">
-      <h1>{{ refName(ref) }}</h1>
+      <EntryTitle :to="ref" />
       <!-- The long description; the short one is for the list, and stands in when there's nothing more to say. -->
       <p v-if="text"><DexText :text="text.long ?? text.short" /></p>
 

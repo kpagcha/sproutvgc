@@ -7,8 +7,8 @@ import { isSpread, MOVES } from '@/data/moves'
 import { POKEMON, loadLearnsets } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
-import { refName } from '@/i18n/refName'
 import CategoryIcon from '@/components/CategoryIcon'
+import EntryTitle from '@/components/EntryTitle.vue'
 import DexText from '@/components/DexText'
 import PokemonChips from '@/components/PokemonChips.vue'
 import RefInteractions from '@/components/RefInteractions.vue'
@@ -44,7 +44,7 @@ watchEffect(async () => {
 <template>
   <div class="panel">
     <template v-if="exists">
-      <h1>{{ refName(ref_) }}</h1>
+      <EntryTitle :to="ref_" />
       <div class="badges">
         <RouterLink :to="{ name: 'types', params: { type: data.type } }"
           ><TypeIcon :type="data.type" :scale="2"

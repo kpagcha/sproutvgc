@@ -7,6 +7,7 @@ import { ITEMS } from '@/data/items'
 import { t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
+import EntryTitle from '@/components/EntryTitle.vue'
 import DexText from '@/components/DexText'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonChips from '@/components/PokemonChips.vue'
@@ -30,7 +31,7 @@ const megas = computed(() => Object.entries(data.value.megas ?? {}) as [PokemonI
       <div class="head">
         <ItemIcon :id="id" :scale="2" />
         <div>
-          <h1>{{ refName(ref_) }}</h1>
+          <EntryTitle :to="ref_" />
           <span class="muted">{{ t(`items.kind1.${data.kind}`) }}</span>
         </div>
       </div>
@@ -68,7 +69,7 @@ const megas = computed(() => Object.entries(data.value.megas ?? {}) as [PokemonI
   gap: 8px;
   margin-bottom: 12px;
 }
-.head h1 {
+.head .entry-title {
   margin: 0;
 }
 section {

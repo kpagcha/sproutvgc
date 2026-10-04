@@ -9,6 +9,7 @@ import TypeIcon from '@/components/TypeIcon'
 import CategoryIcon from '@/components/CategoryIcon'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import FavoritesPanel from '@/components/FavoritesPanel.vue'
 import QuickLinks from '@/components/QuickLinks.vue'
 import SearchResults from '@/components/SearchResults.vue'
 import SearchBox from '@/components/SearchBox.vue'
@@ -64,6 +65,7 @@ const DECOR_ITEMS: ItemId[] = ['choicescarf', 'focussash', 'sitrusberry']
     </div>
     <SearchResults v-if="results" :query :results />
     <template v-else>
+      <FavoritesPanel />
       <section v-for="s in SECTIONS" :key="s.kind" class="panel section">
         <RouterLink :to="s.list" class="section-head">
           <span class="section-text">
