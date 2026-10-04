@@ -13,6 +13,7 @@ import { GAME_NAME, REGULATION } from '@/data/format'
 import { Search, Settings } from '@lucide/vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import NavPill from '@/components/NavPill.vue'
+import { KeptPage, Page } from '@/components/PageFrame'
 import SectionMenu from '@/components/SectionMenu.vue'
 import { searchFocus } from '@/composables/useSearch'
 
@@ -138,6 +139,8 @@ watch(
 // Pages are keyed by route (see the template): a new key is a new page coming in, in place once its animation to
 // `center` completes.
 watch(() => pageKey(route), pageEntering)
+// The pages kept when left, by route name (see the template).
+const KEPT = new Set<unknown>(['pokedex', 'moves'])
 const onPageAnimated = (definition: unknown) => definition === 'center' && pageEntered()
 // Both animate `transform` (and `opacity`) rather than motion's `x` and `y`, which it animates on the main thread: the
 // browser animates these on its own, so the next page rendering can't stall them.
@@ -195,14 +198,34 @@ const fadeVariants = {
           :custom="direction"
           :on-exit-complete="pageExited"
         >
+          <!-- On desktop the dex tables' pages are kept when left (`KeptPage`), so coming back doesn't render them again.
+               Not on phones, whose sliding pages (a TransitionGroup) can't hold a KeepAlive. -->
+          <KeepAlive v-if="!isPhone" include="KeptPage">
+            <component
+              :is="KEPT.has(r.name) ? KeptPage : Page"
+              :key="pageKey(r)"
+              :variants="fadeVariants"
+              initial="enter"
+              animate="center"
+              exit="exit"
+              :transition="FADE"
+              :on-animation-complete="onPageAnimated"
+            >
+              <RouterLink v-if="backLink(r)" :to="backLink(r)!.to" class="back font-display">
+                <span class="chevron" aria-hidden="true">‹</span> {{ t(backLink(r)!.label) }}
+              </RouterLink>
+              <component :is="Component" />
+            </component>
+          </KeepAlive>
           <motion.div
+            v-else
             :key="pageKey(r)"
             :custom="direction"
-            :variants="isPhone ? pageVariants : fadeVariants"
+            :variants="pageVariants"
             initial="enter"
             animate="center"
             exit="exit"
-            :transition="isPhone ? PAGE : FADE"
+            :transition="PAGE"
             :on-animation-complete="onPageAnimated"
           >
             <RouterLink v-if="backLink(r)" :to="backLink(r)!.to" class="back font-display">

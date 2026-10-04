@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, useTemplateRef, watchEffect } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { ability, availableIds, pokemon, sameRef, type MoveId, type PokemonId, type Ref } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { POKEMON, STATS, loadLearnsets, total, type StatId } from '@/data/pokemon'
@@ -10,6 +10,7 @@ import { loadDescriptions, shortText } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
 import { formatFilters, parseFilters, passes, type PokemonFilter } from '@/lib/pokemonFilters'
+import { useActiveQuery } from '@/composables/useActiveQuery'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { useRowColumns } from '@/composables/useRowColumns'
 import { useSearch } from '@/composables/useSearch'
@@ -42,16 +43,16 @@ const canHover = window.matchMedia('(hover: hover)').matches
 const abilityTip = (a: Ref) => (canHover ? shortText(a) : undefined)
 
 // The search (`?q=`) and the filters (`?f=`) are kept in the URL, so the home page's search can link here with them.
-const route = useRoute()
+const route = useActiveQuery()
 const router = useRouter()
 const query = computed({
-  get: () => (typeof route.query.q === 'string' ? route.query.q : ''),
-  set: (q: string) => void router.replace({ query: { ...route.query, q: q || undefined } }),
+  get: () => (typeof route.value.q === 'string' ? route.value.q : ''),
+  set: (q: string) => void router.replace({ query: { ...route.value, q: q || undefined } }),
 })
-const filters = computed(() => parseFilters(route.query.f))
+const filters = computed(() => parseFilters(route.value.f))
 function removeFilter(filter: PokemonFilter) {
   const f = formatFilters(filters.value.filter((x) => !sameRef(x, filter)))
-  void router.replace({ query: { ...route.query, f } })
+  void router.replace({ query: { ...route.value, f } })
 }
 // Backspace in an empty search box takes off the last filter, as if it were part of the search.
 function removeLastFilter() {

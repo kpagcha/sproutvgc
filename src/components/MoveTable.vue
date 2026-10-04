@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref, useTemplateRef } from 'vue'
+import { computed, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import { move, type MoveId } from '@/data/dex'
 import { CATEGORIES, MOVES, type Category, type Move } from '@/data/moves'
 import { TYPES, type TypeId } from '@/data/types'
@@ -27,7 +27,13 @@ const props = defineProps<{ ids: readonly MoveId[]; descriptions?: boolean; plac
 // each of hundreds of rows take a while to mount.
 const rows = computed(() => props.ids.map((id) => ({ id, name: refName(move(id)), data: MOVES[id] })))
 
+// The search starts from `query`, and takes it again whenever it changes (a search from the home page coming back to
+// the page kept alive).
 const query = ref(props.query ?? '')
+watch(
+  () => props.query,
+  (q) => (query.value = q ?? ''),
+)
 const type = ref<TypeId | ''>('')
 const category = ref<Category | ''>('')
 const shown = computed(() => {
