@@ -177,7 +177,9 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
           </div>
           <div role="cell" class="wide-only grow">
             <ul class="abilities">
-              <li v-for="a in r.abilities" :key="a.id"><DexRef :to="a" :tip="abilityTip(a)" /></li>
+              <li v-for="a in r.abilities" :key="a.id">
+                <DexRef :to="a" :tip="abilityTip(a)" :tip-group="`abilities:${r.id}`" />
+              </li>
             </ul>
           </div>
           <div v-for="(v, i) in r.data.stats" :key="i" role="cell" class="wide-only r num">{{ v }}</div>
