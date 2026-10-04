@@ -24,9 +24,18 @@ export function reveal(from: Element | null | undefined, to: Element | null | un
   let delta = 0
   if (top < MARGIN) delta = top - MARGIN
   else if (bottom > vh - MARGIN) delta = Math.min(bottom - vh + MARGIN, top - MARGIN)
+  scrollToY(window.scrollY + delta)
+}
+
+/** Smoothly scrolls to the top of the page; the user scrolling or touching the screen takes over. */
+export function toTop() {
+  scrollToY(0)
+}
+
+function scrollToY(y: number) {
   const start = window.scrollY
-  const max = document.documentElement.scrollHeight - vh
-  const target = Math.max(0, Math.min(max, start + delta))
+  const max = document.documentElement.scrollHeight - window.innerHeight
+  const target = Math.max(0, Math.min(max, y))
   if (Math.abs(target - start) < 1) return
 
   stop()
