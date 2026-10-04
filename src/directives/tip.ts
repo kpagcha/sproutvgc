@@ -5,7 +5,7 @@ import 'tippy.js/dist/border.css'
 
 tippy.setDefaultProps({ theme: 'mondex', delay: [200, 0], duration: [120, 80] })
 
-type TipEl = HTMLElement & { _tip?: Instance }
+type TipEl = HTMLElement & { _tip?: Instance; _tipContent?: string }
 type TipValue = string | false | null | undefined
 
 // Grouped tips share one singleton tooltip that glides between its targets.
@@ -55,19 +55,43 @@ function destroy(el: TipEl, groupName?: string) {
   delete el._tip
 }
 
+// A tip outside a group is only created once its element is first pointed at or focused, then given that same event:
+// long lists (the Pokémon's abilities, the references in descriptions) would otherwise create hundreds on mounting.
+const TRIGGERS = ['mouseenter', 'focus'] as const
+function arm(el: TipEl, content: string) {
+  el._tipContent = content
+  for (const type of TRIGGERS) el.addEventListener(type, wake)
+}
+function disarm(el: TipEl) {
+  delete el._tipContent
+  for (const type of TRIGGERS) el.removeEventListener(type, wake)
+}
+function wake(this: TipEl, e: Event) {
+  const content = this._tipContent!
+  disarm(this)
+  create(this, content)
+  this.dispatchEvent(new (e.constructor as typeof Event)(e.type, e))
+}
+
 // v-tip="text": a tooltip in place of the native title. A falsy value shows none.
 // v-tip:group="text": joins a named group sharing one moving tooltip.
 export const vTip: Directive<TipEl, TipValue> = {
   mounted(el, { value, arg }) {
-    if (value) create(el, value, arg)
+    if (!value) return
+    if (arg) create(el, value, arg)
+    else arm(el, value)
   },
   updated(el, { value, oldValue, arg }) {
     if (value === oldValue) return
-    if (!value) destroy(el, arg)
-    else if (el._tip) el._tip.setContent(value)
-    else create(el, value, arg)
+    if (!value) {
+      disarm(el)
+      destroy(el, arg)
+    } else if (el._tip) el._tip.setContent(value)
+    else if (arg) create(el, value, arg)
+    else arm(el, value)
   },
   beforeUnmount(el, { arg }) {
+    disarm(el)
     destroy(el, arg)
   },
 }
