@@ -3,7 +3,7 @@ import { computed, onMounted, ref, useTemplateRef, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import { ability, availableIds, pokemon, sameRef, type MoveId, type PokemonId, type Ref } from '@/data/dex'
 import { REGULATION } from '@/data/format'
-import { POKEMON, STATS, loadLearnsets, total, type StatId } from '@/data/pokemon'
+import { POKEMON, STATS, loadLearnsets, speciesOf, total, type StatId } from '@/data/pokemon'
 import { TYPES, type TypeId } from '@/data/types'
 import { locale, t, typeName } from '@/i18n'
 import { loadDescriptions, shortText } from '@/i18n/descriptions'
@@ -37,6 +37,14 @@ const rows = computed(() =>
       abilities: POKEMON[id].abilities.map(ability),
     })),
 )
+
+// The intro counts species, not rows: one row per species, plus its Megas and its other formes (a species whose base
+// forme isn't allowed, Floette-Eternal's, counts once).
+const counts = computed(() => {
+  const species = new Set(rows.value.map((r) => speciesOf(r.id))).size
+  const megas = rows.value.filter((r) => r.data.mega).length
+  return { n: species, megas, forms: rows.value.length - species - megas }
+})
 
 // An ability's short description on hover. Not on touch screens, where a tap follows the link.
 const canHover = window.matchMedia('(hover: hover)').matches
@@ -101,7 +109,7 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
 <template>
   <div class="panel">
     <h1>{{ t('title.pokemon') }}</h1>
-    <p class="muted">{{ t('pokedex.intro', { reg: REGULATION, n: rows.length }) }}</p>
+    <p class="muted">{{ t('pokedex.intro', { reg: REGULATION, ...counts }) }}</p>
     <div class="filters">
       <SearchBox
         v-model="query"

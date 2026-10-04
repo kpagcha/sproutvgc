@@ -405,7 +405,8 @@ export const messages: Record<keyof typeof en, string> = {
   'desc.pokedex':
     'Todos los Pokémon de {game}, Reglamento {reg}: tipos, habilidades, características base y movimientos.',
   'desc.pokemon': '{name} en {game}: sus tipos, habilidades, características base, debilidades y movimientos.',
-  'pokedex.intro': 'Los {n} Pokémon permitidos en el Reglamento {reg}, megaevoluciones y otras formas incluidas.',
+  'pokedex.intro':
+    'Los {n} Pokémon permitidos en el Reglamento {reg}, más {megas} megaevoluciones y otras {forms} formas.',
   'pokedex.search': 'Buscar Pokémon',
   'pokedex.type': 'Tipo',
   'pokedex.anyType': 'Cualquier tipo',

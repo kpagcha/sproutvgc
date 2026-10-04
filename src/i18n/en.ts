@@ -399,7 +399,7 @@ export const messages = {
   'title.pokemon': 'Pokémon',
   'desc.pokedex': 'Every Pokémon in {game}, Regulation {reg}: types, abilities, base stats and moves.',
   'desc.pokemon': '{name} in {game}: its types, abilities, base stats, weaknesses and moves.',
-  'pokedex.intro': 'The {n} Pokémon allowed in Regulation {reg}, Mega Evolutions and other forms included.',
+  'pokedex.intro': 'The {n} Pokémon allowed in Regulation {reg}, plus {megas} Mega Evolutions and {forms} other forms.',
   'pokedex.search': 'Search Pokémon',
   'pokedex.type': 'Type',
   'pokedex.anyType': 'Any type',
