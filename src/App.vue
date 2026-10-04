@@ -3,6 +3,7 @@ import { computed, ref, watch, watchEffect } from 'vue'
 import { useRoute, type RouteLocationNormalizedLoaded, type RouteLocationRaw } from 'vue-router'
 import { AnimatePresence, MotionConfig, motion } from 'motion-v'
 import { FADE, PAGE, SPRING } from '@/lib/motion'
+import { pageExited, setPageWaits } from '@/lib/pageExit'
 import { t, typeName, type MessageKey } from '@/i18n'
 import { isType } from '@/data/types'
 import { generatedName, refName } from '@/i18n/refName'
@@ -107,6 +108,8 @@ const NAV: { to: string; section: string; label: MessageKey }[] = [
 const phoneQuery = window.matchMedia('(max-width: 720px) and (hover: none) and (pointer: coarse)')
 const isPhone = ref(phoneQuery.matches)
 phoneQuery.addEventListener('change', (e) => (isPhone.value = e.matches))
+// Only desktop's fade has the next page wait for the leaving one, and so its scroll too.
+watchEffect(() => setPageWaits(!isPhone.value))
 
 // On phones, pages push each other sideways: going deeper, the new page comes in from the right as
 // the old one leaves to the left; going back, the reverse. Both travel a full screen width in lockstep.
@@ -153,7 +156,12 @@ const fadeVariants = {
       <RouterView v-slot="{ Component, route: r }">
         <!-- Keyed by route rather than URL so query and param changes (matchup picks, the selected type) don't replay it.
              On phones, popLayout lifts the leaving page out of the flow so both pages slide side by side. -->
-        <AnimatePresence :mode="isPhone ? 'popLayout' : 'wait'" :initial="false" :custom="direction">
+        <AnimatePresence
+          :mode="isPhone ? 'popLayout' : 'wait'"
+          :initial="false"
+          :custom="direction"
+          :on-exit-complete="pageExited"
+        >
           <motion.div
             :key="r.matched[0]?.path ?? r.path"
             :custom="direction"

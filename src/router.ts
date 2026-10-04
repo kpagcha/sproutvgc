@@ -1,4 +1,6 @@
+import { nextTick } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
+import { afterPageExit } from '@/lib/pageExit'
 import { TYPES } from '@/data/types'
 import type { MessageKey } from '@/i18n'
 import { loadDexNames } from '@/i18n/refName'
@@ -13,6 +15,8 @@ declare module 'vue-router' {
     dexNames?: boolean
     /** The categories whose descriptions the page shows: navigation waits for the current locale's. */
     descriptions?: DescribedKind[]
+    /** Moving between the route's own URLs keeps the scroll: the page brings what changed into view itself. */
+    keepScroll?: boolean
   }
 }
 
@@ -25,7 +29,7 @@ export const router = createRouter({
       path: `/types/:type(${TYPES.join('|')})?`,
       name: 'types',
       component: () => import('@/views/TypesView.vue'),
-      meta: { titleKey: 'title.types', descKey: 'desc.types', dexNames: true },
+      meta: { titleKey: 'title.types', descKey: 'desc.types', dexNames: true, keepScroll: true },
       // The chart used to live at `/types`: keep its shared cell links (?atk=…&def=…) working.
       beforeEnter: (to) => (!to.params.type && to.query.atk ? { path: '/types/chart', query: to.query } : undefined),
     },
@@ -142,6 +146,19 @@ export const router = createRouter({
     },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
+  // A new page opens at the top, and going back or forward returns to where it was left. Query changes (matchup
+  // picks, filters, the search) stay put.
+  async scrollBehavior(to, from, savedPosition) {
+    // Between entries of one kind (one Pokémon to another) the page stays, with no transition to wait for.
+    const samePage = (to.matched[0]?.path ?? to.path) === (from.matched[0]?.path ?? from.path)
+    if (!savedPosition && (to.path === from.path || (samePage && to.meta.keepScroll))) return false
+    // On first load (a reload restoring its position) there's no page leaving.
+    if (!samePage && from.matched.length) {
+      await afterPageExit()
+      await nextTick()
+    }
+    return savedPosition ?? { top: 0 }
+  },
 })
 
 // Pages showing dex entries render with their names (and descriptions) in place, rather than filling them in once
