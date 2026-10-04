@@ -145,7 +145,11 @@ const skeleton = computed(() => [
         <div role="cell">
           <AppLink :to="{ name: 'types', params: { type: r.data.type } }"><TypeIcon :type="r.data.type" /></AppLink>
         </div>
-        <div role="cell"><CategoryIcon :category="r.data.category" /></div>
+        <div role="cell">
+          <AppLink :to="{ name: 'moves', query: { category: r.data.category } }"
+            ><CategoryIcon :category="r.data.category"
+          /></AppLink>
+        </div>
         <div role="cell" class="r num">{{ r.data.power || '—' }}</div>
         <div role="cell" class="r num">{{ r.data.accuracy === true ? '—' : r.data.accuracy }}</div>
         <div role="cell" class="wide-only r num">{{ r.data.pp }}</div>

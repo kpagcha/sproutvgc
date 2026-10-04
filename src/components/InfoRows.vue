@@ -27,7 +27,9 @@ const statusAbbr = (ref: Ref) =>
       <dt class="muted">{{ row.label }}</dt>
       <dd>
         <template v-for="(e, i) in row.entries" :key="`${e.of ?? ''}/${refKey(e.ref)}/${e.cond?.id ?? ''}`">
-          <TypeIcon v-if="startsRun(row.entries!, i)" :type="e.of!" class="of" />
+          <RouterLink v-if="startsRun(row.entries!, i)" :to="{ name: 'types', params: { type: e.of! } }" class="of"
+            ><TypeIcon :type="e.of!"
+          /></RouterLink>
           <!-- A status is a badge of its own, the whole of it a link, with its full name on hover. -->
           <a v-if="statusAbbr(e.ref)" v-tip="refName(e.ref)" class="term status" :href="refHref(e.ref)" @click="follow">
             {{ statusAbbr(e.ref) }}
@@ -38,12 +40,16 @@ const statusAbbr = (ref: Ref) =>
             <span v-if="e.mult !== undefined" class="mult-tag" :class="multClass(e.mult)">
               {{ formatMult(e.mult) }}
             </span>
-            <TypeIcon v-if="e.vs" :type="e.vs" />
+            <RouterLink v-if="e.vs" :to="{ name: 'types', params: { type: e.vs } }"
+              ><TypeIcon :type="e.vs"
+            /></RouterLink>
             <span v-if="effectText(e)" class="effect num">{{ effectText(e) }}</span>
           </span>
         </template>
         <template v-for="(n, i) in row.notes" :key="`${n.of ?? ''}/${n.text}`">
-          <TypeIcon v-if="startsRun(row.notes!, i)" :type="n.of!" class="of" />
+          <RouterLink v-if="startsRun(row.notes!, i)" :to="{ name: 'types', params: { type: n.of! } }" class="of"
+            ><TypeIcon :type="n.of!"
+          /></RouterLink>
           <span class="term">{{ n.text }}</span>
         </template>
       </dd>

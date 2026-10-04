@@ -36,7 +36,9 @@ const info = computed(() => defenseInfo(props.types))
             </th>
             <td>
               <span class="icons">
-                <TypeIcon v-for="t in profile[row.m]" :key="t" :type="t" />
+                <RouterLink v-for="t in profile[row.m]" :key="t" :to="{ name: 'types', params: { type: t } }"
+                  ><TypeIcon :type="t"
+                /></RouterLink>
               </span>
             </td>
           </tr>
