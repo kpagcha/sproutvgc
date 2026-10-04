@@ -68,12 +68,12 @@ export const messages: Record<keyof typeof en, string> = {
   'theme.light': 'Claro',
   'theme.dark': 'Oscuro',
   'nav.search': 'Buscar',
+  'nav.browse': 'Explorar',
   'nav.settings': 'Ajustes',
   'title.settings': 'Ajustes',
   'settings.intro': 'Se guardan en este navegador.',
   'theme.autoDesc': 'Sigue a tu dispositivo.',
   'lang.label': 'Idioma',
-  'format.label': '{game} · Reglamento {reg}',
 
   'desc.home':
     'Una Pokédex competitiva para {game}, al día con el Reglamento {reg}: todos los Pokémon, movimientos, habilidades y objetos, la tabla y los enfrentamientos de tipos, y un test de tipos.',
@@ -456,6 +456,7 @@ export const messages: Record<keyof typeof en, string> = {
   'pokemon.notFound': 'No hay ningún Pokémon «{id}» en el Reglamento {reg}.',
 
   'nav.moves': 'Movimientos',
+  'nav.conditions': 'Condiciones',
   'nav.items': 'Objetos',
   'title.moves': 'Movimientos',
   'title.items': 'Objetos',

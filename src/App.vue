@@ -10,7 +10,9 @@ import { generatedName, refName } from '@/i18n/refName'
 import type { GeneratedKind } from '@/i18n'
 import type { Ref } from '@/data/dex'
 import { GAME_NAME, REGULATION } from '@/data/format'
+import { Search, Settings } from '@lucide/vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import SectionMenu from '@/components/SectionMenu.vue'
 import { searchFocus } from '@/composables/useSearch'
 
 const route = useRoute()
@@ -94,21 +96,28 @@ const SECTIONS: Partial<Record<string, string>> = {
   ability: 'abilities',
   items: 'items',
   item: 'items',
+  conditions: 'conditions',
+  condition: 'conditions',
 }
 const section = computed(() => (typeof route.name === 'string' ? (SECTIONS[route.name] ?? null) : null))
 
 /**
- * The header's links: Search (the home page, with its search box focused), then one per dex section; Types covers its
- * tools too (chart, matchups, quiz).
+ * The header's links: Search (the home page, with its search box focused), one per dex section, and Settings. Types
+ * covers its tools too (chart, matchups, quiz).
  */
 const NAV: { to: string; section: string; label: MessageKey }[] = [
-  { to: '/', section: 'search', label: 'nav.search' },
   { to: '/pokemon', section: 'pokemon', label: 'nav.pokemon' },
   { to: '/moves', section: 'moves', label: 'nav.moves' },
   { to: '/abilities', section: 'abilities', label: 'nav.abilities' },
   { to: '/items', section: 'items', label: 'nav.items' },
+  { to: '/conditions', section: 'conditions', label: 'nav.conditions' },
   { to: '/types', section: 'types', label: 'nav.types' },
 ]
+
+// Narrow screens fold the sections into a dropdown, and show Settings as just its icon.
+const compactQuery = window.matchMedia('(max-width: 760px)')
+const compact = ref(compactQuery.matches)
+compactQuery.addEventListener('change', (e) => (compact.value = e.matches))
 
 // Phones (touch, narrow): pages slide instead of fading.
 const phoneQuery = window.matchMedia('(max-width: 720px) and (hover: none) and (pointer: coarse)')
@@ -144,22 +153,29 @@ const fadeVariants = {
     <header class="site-header">
       <div class="wrap bar">
         <RouterLink to="/" class="logo font-display">mon<span>dex</span></RouterLink>
-        <span class="format muted">{{ t('format.label', { game: GAME_NAME, reg: REGULATION }) }}</span>
-        <nav class="nav font-display">
+        <nav class="nav font-display" :class="{ compact }">
           <!-- The active highlight is one element that slides between links. -->
-          <RouterLink
-            v-for="n in NAV"
-            :key="n.to"
-            :to="n.to"
-            :class="{ active: section === n.section }"
-            @click="searchFocus = n.section === 'search'"
-          >
-            <motion.span v-if="section === n.section" layout-id="nav-pill" class="pill" :transition="SPRING" />
-            <span class="label">{{ t(n.label) }}</span>
+          <RouterLink to="/" :class="{ active: section === 'search' }" @click="searchFocus = true">
+            <motion.span v-if="section === 'search'" layout-id="nav-pill" class="pill" :transition="SPRING" />
+            <Search class="label" :size="16" :stroke-width="2.5" aria-hidden="true" />
+            <span class="label">{{ t('nav.search') }}</span>
           </RouterLink>
-          <RouterLink to="/settings" class="end" :class="{ active: section === 'settings' }">
+          <SectionMenu v-if="compact" :items="NAV" :section />
+          <template v-else>
+            <RouterLink v-for="n in NAV" :key="n.to" :to="n.to" :class="{ active: section === n.section }">
+              <motion.span v-if="section === n.section" layout-id="nav-pill" class="pill" :transition="SPRING" />
+              <span class="label">{{ t(n.label) }}</span>
+            </RouterLink>
+          </template>
+          <RouterLink
+            to="/settings"
+            class="end"
+            :class="{ active: section === 'settings' }"
+            :aria-label="compact ? t('nav.settings') : undefined"
+          >
             <motion.span v-if="section === 'settings'" layout-id="nav-pill" class="pill" :transition="SPRING" />
-            <span class="label">{{ t('nav.settings') }}</span>
+            <Settings class="label" :size="16" :stroke-width="2.5" aria-hidden="true" />
+            <span v-if="!compact" class="label">{{ t('nav.settings') }}</span>
           </RouterLink>
         </nav>
       </div>
@@ -238,11 +254,6 @@ const fadeVariants = {
 .logo:hover {
   text-decoration: none;
 }
-.format {
-  font-size: calc(11px * var(--text-scale));
-  white-space: nowrap;
-}
-
 .nav {
   display: flex;
   gap: 4px;
@@ -253,6 +264,9 @@ const fadeVariants = {
   scrollbar-width: none;
 }
 .nav a {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   flex: none;
   white-space: nowrap;
   position: relative;
@@ -277,6 +291,10 @@ const fadeVariants = {
 }
 .nav .end {
   margin-left: auto;
+}
+/* The dropdown's menu hangs below the bar, so nothing may clip it (and the three links never need scrolling). */
+.nav.compact {
+  overflow: visible;
 }
 .nav .label {
   position: relative;
@@ -306,11 +324,8 @@ const fadeVariants = {
   text-decoration: none;
 }
 
-/* Narrow screens: the logo and the links share one row, so the format label goes. */
+/* Narrow screens: the links sit together at the end of the logo's row. */
 @media (max-width: 560px) {
-  .format {
-    display: none;
-  }
   .nav {
     flex: 0 1 auto;
     margin-left: auto;

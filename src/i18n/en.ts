@@ -66,12 +66,12 @@ export const messages = {
   'theme.light': 'Light',
   'theme.dark': 'Dark',
   'nav.search': 'Search',
+  'nav.browse': 'Browse',
   'nav.settings': 'Settings',
   'title.settings': 'Settings',
   'settings.intro': 'Saved in this browser.',
   'theme.autoDesc': 'Follows your device.',
   'lang.label': 'Language',
-  'format.label': '{game} · Regulation {reg}',
 
   'desc.home':
     'A competitive dex for {game}, up to date with Regulation {reg}: every Pokémon, move, ability and item, the type chart and type matchups, and a type quiz.',
@@ -450,6 +450,7 @@ export const messages = {
   'pokemon.notFound': 'There is no Pokémon "{id}" in Regulation {reg}.',
 
   'nav.moves': 'Moves',
+  'nav.conditions': 'Conditions',
   'nav.items': 'Items',
   'title.moves': 'Moves',
   'title.items': 'Items',
