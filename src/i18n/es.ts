@@ -648,8 +648,8 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.modTip.paralysis': 'Reduce la Velocidad a la mitad.',
   'speed.stage': 'Nivel de Velocidad',
   'speed.find': 'Buscar un Pokémon',
-  'speed.allNote':
-    'Cada Pokémon en cuatro Velocidades: los 32 puntos de estadística y una naturaleza que la sube (Máx+), todos los puntos y una naturaleza neutra (Máx), ninguno (0), y ninguno con una naturaleza que la baja, para Espacio Raro (Mín−).',
+  'speed.allNote': 'Todos los Pokémon una vez, con el mismo reparto: {build}.',
+  'speed.at': 'Con',
   'speed.invest': '{points} puntos en Velocidad y naturaleza {nature}{effect}: el {pct} de sus sets',
   'speed.rowLink': 'Enlace a esta Velocidad: lo copia',
   'speed.copied': 'Enlace copiado',

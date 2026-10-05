@@ -640,8 +640,8 @@ export const messages = {
   'speed.modTip.paralysis': 'Halves Speed.',
   'speed.stage': 'Speed stage',
   'speed.find': 'Find a Pokémon',
-  'speed.allNote':
-    'Each Pokémon at four Speeds: all 32 stat points and a nature for Speed (Max+), all points and a neutral nature (Max), none (0), and none with a nature against it, for Trick Room (Min−).',
+  'speed.allNote': 'Every Pokémon once, at the same build: {build}.',
+  'speed.at': 'At',
   'speed.invest': '{points} Speed points and a {nature} nature{effect}: {pct} of its sets',
   'speed.rowLink': 'Link to this Speed: copies it',
   'speed.copied': 'Link copied',

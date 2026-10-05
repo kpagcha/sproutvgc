@@ -59,6 +59,15 @@ const metaAvailable = computed(() => !!snapshot.value && has(snapshot.value, 'sp
 const showAll = computed(() => !metaAvailable.value || flag('all'))
 const trickRoom = computed(() => flag('trickroom'))
 
+// The benchmark every Pokémon is at, showing them all: as picked (`?bench=`), else the fastest build, or the slowest
+// under Trick Room, which is what matters then.
+const isBench = (b: unknown): b is Benchmark => (BENCHMARKS as readonly unknown[]).includes(b)
+const defaultBench = computed<Benchmark>(() => (trickRoom.value ? 'min' : 'max'))
+const bench = computed<Benchmark>({
+  get: () => (isBench(query.value.bench) ? query.value.bench : defaultBench.value),
+  set: (b) => set('bench', b === defaultBench.value ? undefined : b),
+})
+
 // The modifiers, applied to everyone: shown when the reader opens them, or when the URL sets one; closing them clears
 // them, so the ladder is never modified out of sight.
 const STAGES = ['-1', '0', '1', '2'] as const
@@ -177,18 +186,17 @@ const entries = computed<Entry[]>(() => {
         return list
       })
   }
+  // Every Pokémon once, at the benchmark picked.
   const ranks = data.value
   return availableIds('pokemon')
     .filter((id) => !POKEMON[id].cosmetic)
-    .flatMap((id) =>
-      BENCHMARKS.map((bench) => ({
-        id,
-        ...named(id),
-        speed: benchmark(POKEMON[id].stats[5], bench),
-        bench,
-        rank: ranks?.[id]?.rank ?? Infinity,
-      })),
-    )
+    .map((id) => ({
+      id,
+      ...named(id),
+      speed: benchmark(POKEMON[id].stats[5], bench.value),
+      bench: bench.value,
+      rank: ranks?.[id]?.rank ?? Infinity,
+    }))
 })
 
 const find = shallowRef(typeof query.value.q === 'string' ? query.value.q : '')
@@ -250,7 +258,7 @@ function boostTip(e: Entry) {
     build: t('speed.build', { nature: natureName(e.nature!), points: e.points! }),
   })
 }
-const tip = (e: Entry) => (e.bench ? benchTip(e.bench) : e.boost ? boostTip(e) : investTip(e))
+const tip = (e: Entry) => (e.bench ? undefined : e.boost ? boostTip(e) : investTip(e))
 const chipKey = (e: Entry) =>
   `${e.id}:${e.bench ?? (e.boost ? `${e.boost.ref.kind}:${e.boost.ref.id}` : `${e.points}:${e.nature}`)}`
 
@@ -360,6 +368,12 @@ const { entered } = usePageEntered()
           ]"
           @update:model-value="(v: string) => set('all', v === 'all' ? '1' : undefined)"
         />
+        <SegmentedControl
+          v-if="showAll"
+          v-model="bench"
+          :label="t('speed.at')"
+          :options="BENCHMARKS.map((b) => ({ value: b, label: benchLabel(b) }))"
+        />
         <div class="find">
           <SearchBox v-model="find" :placeholder="t('speed.find')" :aria-label="t('speed.find')" />
         </div>
@@ -430,7 +444,7 @@ const { entered } = usePageEntered()
         <dd class="muted">{{ t('speed.legendBoost') }}</dd>
       </template>
     </dl>
-    <p v-else class="muted small">{{ t('speed.allNote') }}</p>
+    <p v-else class="muted small">{{ t('speed.allNote', { build: benchTip(bench) }) }}</p>
 
     <!-- Pinned over the ladder once the controls are scrolled away; takes no room of its own. -->
     <div class="pin">
@@ -480,8 +494,7 @@ const { entered } = usePageEntered()
               <PokemonIcon :id="e.id" />
               <span>{{ e.species }}</span>
               <span v-if="e.forme" class="forme">{{ e.forme }}</span>
-              <span v-if="e.bench" class="tag">{{ benchLabel(e.bench) }}</span>
-              <template v-else-if="e.boost">
+              <template v-if="e.boost">
                 <span class="tag boost-label"
                   ><ItemIcon v-if="e.boost.ref.kind === 'item'" :id="e.boost.ref.id" :scale="0.67" />{{
                     boostLabel(e.boost)
@@ -490,7 +503,7 @@ const { entered } = usePageEntered()
                 <span v-if="field(e.boost)" class="tag">{{ field(e.boost) }}</span>
                 <span class="tag">{{ percent(e.share!) }}</span>
               </template>
-              <template v-else>
+              <template v-else-if="!e.bench">
                 <span class="tag">{{ natureName(e.nature!) }}</span>
                 <span class="tag">{{ t('speed.points', { n: e.points! }) }}</span>
                 <span class="tag">{{ percent(e.share!) }}</span>
