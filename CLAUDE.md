@@ -13,9 +13,10 @@ npm run lint        # ESLint (lint:fix to autofix)
 npm run format      # Prettier (no semicolons, single quotes, 120 columns)
 npm run gen-data    # regenerate src/data/generated/ (add `-- --update` to repin the sources to their latest commits)
 npm run check-text  # check the markers in our curated text (also part of `build`)
+npm run bench-search  # time the search's matching over every language's names, at 1×, 10× and 50× the dex (`-- 1 100` for other scales)
 ```
 
-The `justfile` wraps these for the user (`just dev`, `just dev-profile`, `just build`, `just preview`, which builds and then serves the production site at `http://localhost:4173/sproutvgc/`, `just gen-data`, `just check-text`); keep it in sync when scripts change.
+The `justfile` wraps these for the user (`just dev`, `just dev-profile`, `just build`, `just preview`, which builds and then serves the production site at `http://localhost:4173/sproutvgc/`, `just gen-data`, `just check-text`, `just bench-search`); keep it in sync when scripts change.
 
 There is no test suite, and none should be added. Verify changes with `npm run build` plus checking the app in the browser. The pre-commit hook (simple-git-hooks + lint-staged) runs `eslint --max-warnings=0` and Prettier on staged files, so any lint warning blocks a commit. CI (`.github/workflows/deploy.yml`) runs lint + build on every push to `main` and deploys, copying `index.html` to `404.html` so deep links work.
 

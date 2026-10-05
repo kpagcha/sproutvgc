@@ -29,3 +29,7 @@ gen-data *args:
 # Check the markers in the curated text ({type:flying}, {move:taunt}...) in every language: quicker than a build
 check-text:
     npm run check-text
+
+# Time the search's matching over every language's names, at 1×, 10× and 50× the dex (`just bench-search 1 100` for others)
+bench-search *args:
+    npm run bench-search -- {{args}}

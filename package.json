@@ -7,6 +7,7 @@
     "dev": "vite",
     "gen-data": "node scripts/gen-data.ts",
     "check-text": "node scripts/check-text.ts",
+    "bench-search": "node scripts/bench-search.ts",
     "build": "run-p check-text type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
