@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ability, availableIds, condition, item, pokemon, type PokemonId, type Ref } from '@/data/dex'
 import { REGULATION } from '@/data/format'
@@ -88,6 +88,8 @@ const boostsAvailable = computed(
   () => !!snapshot.value && has(snapshot.value, 'items') && has(snapshot.value, 'abilities'),
 )
 const showBoosts = computed(() => !showAll.value && boostsAvailable.value && !flag('noboosts'))
+const toggleBoosts = () => set('noboosts', showBoosts.value ? '1' : undefined)
+const toggleTrickRoom = () => set('trickroom', trickRoom.value ? undefined : '1')
 
 interface Entry {
   id: PokemonId
@@ -253,6 +255,25 @@ watch(
   },
 )
 
+// Once the controls scroll away, a slim bar pinned over the ladder keeps the search and the switches in reach (not on
+// phones, where it would take too much of the screen).
+const controls = useTemplateRef<HTMLElement>('controls')
+const controlsGone = shallowRef(false)
+let observer: IntersectionObserver | undefined
+watch(
+  controls,
+  (el) => {
+    observer?.disconnect()
+    if (!el) return
+    observer = new IntersectionObserver(([e]) => {
+      controlsGone.value = !e!.isIntersecting && e!.boundingClientRect.top < 0
+    })
+    observer.observe(el)
+  },
+  { flush: 'post' },
+)
+onBeforeUnmount(() => observer?.disconnect())
+
 const { entered } = usePageEntered()
 </script>
 
@@ -260,7 +281,7 @@ const { entered } = usePageEntered()
   <div class="panel">
     <h1>{{ t('title.speedTiers') }}</h1>
     <p class="muted">{{ t('speed.intro', { reg: REGULATION }) }}</p>
-    <div class="controls">
+    <div ref="controls" class="controls">
       <!-- What's shown: the data, which Pokémon, and finding one. -->
       <div class="view-row">
         <MetaPicker v-if="snapshot" />
@@ -283,14 +304,14 @@ const { entered } = usePageEntered()
       <div class="options">
         <div v-if="!showAll && boostsAvailable" class="option">
           <label class="btn switch" :class="{ on: showBoosts }">
-            <input type="checkbox" :checked="showBoosts" @change="set('noboosts', showBoosts ? '1' : undefined)" />
+            <input type="checkbox" :checked="showBoosts" @change="toggleBoosts" />
             {{ t('speed.boosts') }}
           </label>
           <span class="muted">{{ t('speed.boostsDesc') }}</span>
         </div>
         <div class="option">
           <label class="btn switch" :class="{ on: trickRoom }">
-            <input type="checkbox" :checked="trickRoom" @change="set('trickroom', trickRoom ? undefined : '1')" />
+            <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
             {{ t('speed.mod.trickroom') }}
           </label>
           <span class="muted">{{ t('speed.modTip.trickroom') }}</span>
@@ -343,6 +364,23 @@ const { entered } = usePageEntered()
       </template>
     </dl>
     <p v-else class="muted small">{{ t('speed.allNote') }}</p>
+
+    <!-- Pinned over the ladder once the controls are scrolled away; takes no room of its own. -->
+    <div class="pin">
+      <div v-if="controlsGone" class="pinned">
+        <div class="find">
+          <SearchBox v-model="find" :placeholder="t('speed.find')" :aria-label="t('speed.find')" />
+        </div>
+        <label v-if="!showAll && boostsAvailable" class="btn switch" :class="{ on: showBoosts }">
+          <input type="checkbox" :checked="showBoosts" @change="toggleBoosts" />
+          {{ t('speed.boosts') }}
+        </label>
+        <label class="btn switch" :class="{ on: trickRoom }">
+          <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
+          {{ t('speed.mod.trickroom') }}
+        </label>
+      </div>
+    </div>
 
     <div v-if="!entered || (!showAll && !data)" class="ladder" aria-hidden="true">
       <div v-for="i in 12" :key="i" class="tier skeleton"><span class="bone"></span></div>
@@ -508,6 +546,31 @@ const { entered } = usePageEntered()
 }
 .speed:hover {
   text-decoration: underline;
+}
+/* The bar pinned over the ladder: sticks to the top with no height, the bar itself drawn over the rows. */
+.pin {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: 0;
+}
+.pinned {
+  position: absolute;
+  inset: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border-strong);
+}
+.pinned .switch {
+  width: auto;
+}
+@media (max-width: 720px) {
+  .pin {
+    display: none;
+  }
 }
 /* The row a link picked. */
 .tier.at {
