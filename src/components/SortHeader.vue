@@ -29,6 +29,7 @@ defineEmits<{ sort: [] }>()
 .right .arrow {
   position: absolute;
   right: 100%;
+  margin-right: 0.2em;
 }
 .arrow {
   font-size: 0.8em;

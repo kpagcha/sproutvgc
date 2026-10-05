@@ -78,6 +78,27 @@ const shown = computed(() => {
 /** The most used, the full length of the usage bars. */
 const top = computed(() => Math.max(0, ...rows.value.map((r) => r.usage ?? 0)))
 
+// Each Pokémon's most common set, where its columns don't fit (under 1100px), shows on a line of its own under the
+// row only when the reader asks for it (`Sets`, remembered), so the list stays easy to scan down.
+const hasSets = computed(() => showItem.value || showAbility.value || showMoves.value)
+const SETS_KEY = 'sproutvgc.usage.sets'
+function savedSets(): boolean {
+  try {
+    return localStorage.getItem(SETS_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+const showSets = shallowRef(savedSets())
+function toggleSets() {
+  showSets.value = !showSets.value
+  try {
+    localStorage.setItem(SETS_KEY, showSets.value ? '1' : '0')
+  } catch {
+    // Storage unavailable: the choice lasts until the page reloads.
+  }
+}
+
 const { entered, restoring } = usePageEntered()
 useRowColumns(useTemplateRef('head'))
 // The columns, as the snapshot has them, and their widths on wide screens, on narrower ones and on phones (null where
@@ -115,7 +136,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 <template>
   <div class="panel">
     <h1>{{ t('title.usage') }}</h1>
-    <p class="muted">{{ t('usage.intro', { reg: REGULATION }) }}</p>
+    <p class="muted intro">{{ t('usage.intro', { reg: REGULATION }) }}</p>
     <template v-if="snapshot">
       <div class="source">
         <MetaPicker />
@@ -123,8 +144,26 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
           {{ t('usage.battles', { n: snapshot.battles.toLocaleString(locale) }) }}
         </span>
       </div>
-      <SearchBox v-model="search" :placeholder="t('usage.search')" :aria-label="t('usage.search')" />
-      <div v-if="!data || shown.length" class="dex-table" :class="{ restoring }" :style="colVars" role="table">
+      <!-- The search, and beside it, where the set columns don't fit, the switch that shows sets. -->
+      <div class="find-row">
+        <div class="find">
+          <SearchBox v-model="search" :placeholder="t('usage.search')" :aria-label="t('usage.search')" />
+        </div>
+        <template v-if="hasSets">
+          <label class="btn switch sets-switch" :class="{ on: showSets }">
+            <input type="checkbox" :checked="showSets" @change="toggleSets" />
+            {{ t('usage.sets') }}
+          </label>
+          <span class="muted sets-desc">{{ t('usage.setsDesc') }}</span>
+        </template>
+      </div>
+      <div
+        v-if="!data || shown.length"
+        class="dex-table"
+        :class="{ restoring, 'with-sets': showSets && hasSets }"
+        :style="colVars"
+        role="table"
+      >
         <div ref="head" class="row head" role="row">
           <SortHeader
             :label="t('usage.rank')"
@@ -190,10 +229,10 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
                 <ItemIcon :id="r.item.id" />
               </AppLink>
             </div>
-            <div v-if="showAbility" role="cell" class="xl-only clip">
+            <div v-if="showAbility" role="cell" class="xl-only grow">
               <DexRef v-if="r.ability" :to="r.ability" />
             </div>
-            <div v-if="showMoves" role="cell" class="xl-only clip">
+            <div v-if="showMoves" role="cell" class="xl-only grow">
               <template v-for="(m, i) in r.moves" :key="m.id"
                 ><span v-if="i" class="sep" aria-hidden="true"> · </span><DexRef :to="m"
               /></template>
@@ -202,15 +241,36 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
               <span class="bar" aria-hidden="true"
                 ><span :style="{ width: `${((r.usage ?? 0) / (top || 1)) * 100}%` }"></span
               ></span>
-              {{ r.usage === undefined ? '—' : percent(r.usage) }}
+              <span class="usage-pct">
+                {{ r.usage === undefined ? '—' : percent(r.usage) }}
+                <!-- On phones, how often it's brought, under its usage: the column doesn't fit. -->
+                <span v-if="showSets && showBrought && r.brought !== undefined" class="brought-sm phone-only"
+                  >{{ percent(r.brought) }} {{ t('usage.broughtShort') }}</span
+                >
+              </span>
             </div>
             <div v-if="showBrought" role="cell" class="wide-only r num">
               {{ r.brought === undefined ? '—' : percent(r.brought) }}
+            </div>
+            <!-- Under xl, what the set columns hold, on a line of its own, when the reader shows sets. -->
+            <div v-if="showSets && hasSets" role="cell" class="set-line">
+              <AppLink v-if="r.item" :to="{ name: 'item', params: { id: r.item.id } }" class="part item-name">
+                <ItemIcon :id="r.item.id" :scale="0.67" />{{ refName(r.item) }}
+              </AppLink>
+              <span v-if="r.ability" class="part"><DexRef :to="r.ability" /></span>
+              <span v-if="r.moves.length" class="part">
+                <template v-for="(m, i) in r.moves" :key="m.id">{{ i ? ', ' : '' }}<DexRef :to="m" /></template>
+              </span>
             </div>
           </div>
         </template>
       </div>
       <p v-else class="muted">{{ t('usage.noMatch') }}</p>
+      <p class="muted note phone-only-block">
+        {{ t('usage.usage') }}: {{ t('usage.usageTip') }}.
+        <template v-if="showSets && showBrought">{{ t('usage.brought') }}: {{ t('usage.broughtTip') }}.</template>
+        <template v-if="hasSets">{{ t('usage.sets') }}: {{ t('usage.setsDesc') }}.</template>
+      </p>
       <p v-if="broughtAll && snapshot.cutoff" class="muted note">
         {{ t('usage.broughtAll', { players: players(snapshot.cutoff) }) }}
       </p>
@@ -224,7 +284,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 
 <style scoped>
 /* Rank, name, types (room for two badges), the most common set on wide screens (item, ability, moves), usage (its
-   bar and number) and brought; on phones without brought. The names don't size their column (the rows take the
+   bar and number) and brought. Narrower, the set goes on a line under the row, and on phones brought joins it. The names don't size their column (the rows take the
    header's widths, see `.dex-table`), so it's as wide as most names, and the longest wrap their forme. */
 .dex-table {
   --types: calc(64px * var(--icon-scale, 1) + 14px);
@@ -248,15 +308,73 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
     display: none;
   }
 }
+/* Phones: no usage bar (the number says it), and the rank and usage columns as narrow as their numbers. */
 @media (max-width: 720px) {
   .dex-table {
     --icon-scale: 1.25;
     --cols: var(--cols-sm);
+    --num: minmax(1.8em, auto);
+    --usage-sm: 4em;
+  }
+  .bar {
+    display: none;
+  }
+  /* The rank from the panel's edge: left-aligned, so a short one leaves no gap before it. */
+  .dex-table .row > :first-child {
+    padding-inline: 0 4px;
+    text-align: left;
+  }
+  .dex-table .row > :nth-child(2) {
+    padding-left: 4px;
+  }
+  /* The set's line across the whole row. */
+  .dex-table .set-line {
+    grid-column: 1 / -1;
+    padding-left: 0;
   }
 }
-.clip {
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* The set's line: under the row, from the name's column on, when the set columns don't fit. */
+.dex-table .set-line {
+  display: none;
+  grid-column: 2 / -1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 6px;
+  padding-top: 0;
+  font-size: 0.9em;
+  white-space: normal;
+}
+/* Dots after each part but the last, so a wrapped line never starts with one. */
+.part:not(:last-child)::after {
+  content: '·';
+  margin-left: 6px;
+  color: var(--muted);
+}
+.item-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.phone-only,
+.phone-only-block {
+  display: none;
+}
+@media (max-width: 1099px) {
+  .dex-table .set-line {
+    display: flex;
+  }
+  /* Two lines a row: the size the skipped rows are laid out at until they're seen. */
+  .dex-table.with-sets {
+    --row-height: 3.6em;
+  }
+}
+@media (max-width: 720px) {
+  .phone-only {
+    display: inline;
+  }
+  .phone-only-block {
+    display: block;
+  }
 }
 .sep {
   color: var(--muted);
@@ -304,6 +422,69 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   justify-content: flex-end;
   gap: 8px;
   font-weight: bold;
+}
+.usage-pct {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.brought-sm {
+  font-size: 0.75em;
+  font-weight: normal;
+  color: var(--muted);
+}
+/* The search and the Sets switch in a row; the switch and what it does only where the set columns don't fit. */
+.find-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin-bottom: 12px;
+}
+.find {
+  flex: 0 1 320px;
+  min-width: 0;
+}
+.find :deep(.search-box) {
+  margin: 0;
+}
+@media (min-width: 1100px) {
+  .sets-switch,
+  .sets-desc {
+    display: none;
+  }
+}
+/* Phones: the switch beside the search, its description with the notes under the table; no intro. */
+@media (max-width: 720px) {
+  .find {
+    flex: 1 1 0;
+  }
+  .sets-desc,
+  .intro {
+    display: none;
+  }
+  .source {
+    margin-bottom: 8px;
+  }
+  .find-row {
+    margin-bottom: 8px;
+  }
+}
+.switch {
+  flex: none;
+  justify-content: flex-start;
+  gap: 6px;
+  font-weight: bold;
+}
+.switch.on {
+  background: var(--sel);
+}
+.switch input {
+  margin: 0;
+}
+/* The set's line, quieter than the names: still links, in the muted color. */
+.set-line :deep(a) {
+  color: var(--muted);
 }
 /* The share against the most used Pokémon's, so the top of the meta reads at a glance. */
 .bar {
