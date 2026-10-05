@@ -6,18 +6,29 @@ import {
   available as isAvailable,
   availableIds,
   pokemon,
+  sameRef,
   type MoveId,
   type PokemonId,
   type Ref,
 } from '@/data/dex'
 import { REGULATION } from '@/data/format'
+import { TYPES, type TypeId } from '@/data/types'
 import { POKEMON, STATS, loadLearnsets, speciesOf, splitForme, statColor, total, type StatId } from '@/data/pokemon'
-import { locale, t } from '@/i18n'
+import { locale, t, typeName } from '@/i18n'
 import { loadDescriptions, shortText } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
 import { percentiles } from '@/lib/statPercentiles'
-import { allTerms, formatFilters, parseFilters, passes, type Filters } from '@/lib/pokemonFilters'
+import {
+  NO_FILTERS,
+  allTerms,
+  formatFilters,
+  isPlain,
+  parseFilters,
+  passes,
+  type Filters,
+  type PokemonFilter,
+} from '@/lib/pokemonFilters'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { useRowColumns } from '@/composables/useRowColumns'
@@ -34,6 +45,7 @@ import DexRef from '@/components/DexRef'
 import PokemonIcon from '@/components/PokemonIcon'
 import SearchResults from '@/components/SearchResults.vue'
 import FilterGroups from '@/components/FilterGroups.vue'
+import { confirmDialog } from '@/composables/useConfirm'
 
 // Every Pokémon the regulation has, with its types, abilities and base stats, sortable by its name and stats. Formes
 // that only look different (Vivillon's patterns) are left to their species' page. Its links are `AppLink`s and its
@@ -90,6 +102,56 @@ const filters = computed({
   get: () => parseFilters(route.value.f, route.value.fm),
   set: (f: Filters) => void router.replace({ query: { ...route.value, ...formatFilters(f) } }),
 })
+
+// Plainly, the filters are a list, a Pokémon passing any of them, beside a pick of one type it has to have. In the
+// advanced mode (`FilterGroups`), they're groups, joined by AND or OR, any of them negated: the mode is on when the
+// reader turns it on (remembered), or when the URL's filters need it.
+const ADVANCED_KEY = 'sproutvgc.pokedex.advancedFilters'
+function readAdvanced() {
+  try {
+    return localStorage.getItem(ADVANCED_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+const advancedPicked = ref(readAdvanced())
+const advanced = computed(() => advancedPicked.value || !isPlain(filters.value))
+function pickAdvanced(on: boolean) {
+  advancedPicked.value = on
+  try {
+    localStorage.setItem(ADVANCED_KEY, on ? '1' : '0')
+  } catch {
+    // Storage unavailable: the choice lasts until the page is closed.
+  }
+}
+const type = ref<TypeId | ''>('')
+async function toggleAdvanced() {
+  if (!advanced.value) {
+    // The type picked becomes a group of its own, which the others have to pass as well.
+    if (type.value) {
+      const groups = [
+        ...filters.value.groups,
+        { join: 'any' as const, terms: [{ kind: 'type' as const, id: type.value }] },
+      ]
+      filters.value = { join: 'all', groups }
+      type.value = ''
+    }
+    pickAdvanced(true)
+    return
+  }
+  // Filters the plain list can't show are cleared on the way back, once confirmed.
+  if (!isPlain(filters.value)) {
+    if (!(await confirmDialog({ message: t('filter.plainConfirm'), confirm: t('filter.clear'), danger: true }))) return
+    filters.value = NO_FILTERS
+  }
+  pickAdvanced(false)
+}
+const plainFilters = computed(() => filters.value.groups[0]?.terms ?? [])
+function removeFilter(filter: PokemonFilter) {
+  const terms = plainFilters.value.filter((x) => !sameRef(x, filter))
+  filters.value = terms.length ? { join: 'all', groups: [{ join: 'any', terms }] } : NO_FILTERS
+}
+
 // Backspace in an empty search box takes off the last filter, as if it were part of the search.
 function removeLastFilter() {
   const groups = filters.value.groups
@@ -118,6 +180,7 @@ onMounted(() => void loadDescriptions(['ability', 'move']))
 const shown = computed(() => {
   const q = fold(query.value.trim())
   return rows.value.flatMap((r) => {
+    if (!advanced.value && type.value && !r.data.types.includes(type.value)) return []
     if (!passes(r.id, filters.value, learnsets.value)) return []
     const parts = q ? split(r.name, q) : null
     return !q || parts ? [{ ...r, parts }] : []
@@ -275,6 +338,19 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
         :aria-label="t('pokedex.search')"
         @keydown.backspace="removeLastFilter"
       />
+      <select v-if="!advanced" v-model="type" class="search type-filter" :aria-label="t('pokedex.type')">
+        <option value="">{{ t('pokedex.anyType') }}</option>
+        <option v-for="ty in TYPES" :key="ty" :value="ty">{{ typeName(ty) }}</option>
+      </select>
+      <button
+        type="button"
+        class="btn advanced-toggle"
+        :class="{ on: advanced }"
+        :aria-pressed="advanced"
+        @click="toggleAdvanced"
+      >
+        {{ t('filter.advanced') }}
+      </button>
       <SegmentedControl
         v-model="reference"
         class="view-opts"
@@ -283,7 +359,22 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
         :options="LIST_STAT_MARKS.map((m) => ({ value: m, label: markLabel(m) }))"
       />
     </div>
-    <FilterGroups v-model="filters" />
+    <FilterGroups v-if="advanced" v-model="filters" />
+    <ul v-else-if="plainFilters.length" class="active-filters">
+      <li v-for="f in plainFilters" :key="`${f.kind}:${f.id}`" class="active-filter">
+        <span class="muted">{{ t(`filter.kind.${f.kind}`) }}:</span>
+        <TypeIcon v-if="f.kind === 'type'" :type="f.id" />
+        <DexRef :to="f" />
+        <button
+          type="button"
+          class="remove"
+          :aria-label="t('filter.remove', { name: refName(f) })"
+          @click="removeFilter(f)"
+        >
+          ×
+        </button>
+      </li>
+    </ul>
     <div v-if="sorted.length" class="dex-table" :class="{ restoring }" role="table">
       <div ref="head" class="row head" role="row">
         <SortHeader
@@ -415,6 +506,51 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
   display: flex;
   flex-wrap: wrap;
   gap: 0 8px;
+}
+.type-filter {
+  width: auto;
+}
+.advanced-toggle {
+  align-self: flex-start;
+  min-height: 0;
+  margin-bottom: 12px;
+  padding: 6px 10px;
+  line-height: inherit;
+}
+.advanced-toggle.on {
+  background: var(--sel);
+}
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+.active-filters li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.active-filter {
+  padding: 2px 2px 2px 8px;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+.remove {
+  padding: 0 6px;
+  font: inherit;
+  font-size: 1.15em;
+  line-height: 1;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.remove:hover {
+  color: inherit;
 }
 .mon {
   display: flex;

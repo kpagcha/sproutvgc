@@ -81,6 +81,13 @@ export function addFilter(filter: PokemonFilter, current: Filters): RouteLocatio
   return { name: 'pokedex', query: formatFilters(withFilter(current, filter)) }
 }
 
+/**
+ * Whether `filters` are the plain kind, which the list shows without its advanced mode: one group, any of its filters,
+ * none negated.
+ */
+export const isPlain = (filters: Filters) =>
+  filters.groups.length <= 1 && filters.groups.every((g) => g.join === 'any' && !g.terms.some((t) => t.not))
+
 /** Every filter in `filters`. */
 export const allTerms = (filters: Filters) => filters.groups.flatMap((g) => g.terms)
 
