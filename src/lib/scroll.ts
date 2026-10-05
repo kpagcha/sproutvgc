@@ -27,6 +27,13 @@ export function reveal(from: Element | null | undefined, to: Element | null | un
   scrollToY(window.scrollY + delta)
 }
 
+/** Smoothly scrolls the page to bring `el` to the middle of the screen; the user scrolling or touching it takes over. */
+export function center(el: Element | null | undefined) {
+  if (!el) return
+  const r = el.getBoundingClientRect()
+  scrollToY(window.scrollY + r.top + r.height / 2 - window.innerHeight / 2)
+}
+
 /** Smoothly scrolls to the top of the page; the user scrolling or touching the screen takes over. */
 export function toTop() {
   scrollToY(0)

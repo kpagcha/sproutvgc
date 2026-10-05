@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
+import { AnimatePresence, motion } from 'motion-v'
 import { useRouter } from 'vue-router'
 import { ability, availableIds, condition, item, pokemon, type PokemonId, type Ref } from '@/data/dex'
 import { REGULATION } from '@/data/format'
@@ -8,6 +9,8 @@ import { has, percent } from '@/data/meta'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { fold } from '@/lib/search'
+import { center } from '@/lib/scroll'
+import { FADE, PRESS } from '@/lib/motion'
 import { natureEffects, natureName } from '@/data/natures'
 import {
   BENCHMARKS,
@@ -269,16 +272,52 @@ async function share(speed: number) {
   }
 }
 const ladder = useTemplateRef<HTMLElement>('ladder')
+// A shared link brings what it points at into view once the ladder is in: its picked row, or else the first Speed its
+// search finds.
 let scrolled = false
 watch(
   () => [ladder.value, tiers.value.length] as const,
   async ([el, n]) => {
-    if (scrolled || !el || !n || at.value === null) return
+    if (scrolled || !el || !n || (at.value === null && !finding.value)) return
     scrolled = true
     await nextTick()
-    el.querySelector(`[data-speed="${at.value}"]`)?.scrollIntoView({ block: 'center' })
+    const target = at.value !== null ? el.querySelector(`[data-speed="${at.value}"]`) : el.querySelector('.tier.hit')
+    target?.scrollIntoView({ block: 'center' })
   },
 )
+
+// Finding a Pokémon, a floating button goes to the Speed it's at nearest the screen while none of them is on it, an
+// arrow saying which way.
+const match = shallowRef<{ el: Element; up: boolean; name: string } | null>(null)
+function checkMatch() {
+  const el = ladder.value
+  const hits = finding.value && el ? [...el.querySelectorAll('.tier.hit')] : []
+  const vh = window.innerHeight
+  let nearest: { el: Element; up: boolean; d: number } | null = null
+  for (const hit of hits) {
+    const r = hit.getBoundingClientRect()
+    if (r.bottom > 0 && r.top < vh) return void (match.value = null)
+    const up = r.bottom <= 0
+    const d = up ? -r.bottom : r.top - vh
+    if (!nearest || d < nearest.d) nearest = { el: hit, up, d }
+  }
+  // Named after the Pokémon found there.
+  const tier = nearest && tiers.value.find((t) => t.speed === Number((nearest.el as HTMLElement).dataset.speed))
+  const e = tier?.list.find(isHit)
+  match.value = nearest && {
+    el: nearest.el,
+    up: nearest.up,
+    name: e ? [e.species, e.forme].filter(Boolean).join(' ') : '',
+  }
+}
+watch([tiers, find, ladder], () => void nextTick(checkMatch), { flush: 'post' })
+window.addEventListener('scroll', checkMatch, { passive: true })
+window.addEventListener('resize', checkMatch)
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', checkMatch)
+  window.removeEventListener('resize', checkMatch)
+})
+const toMatch = () => center(match.value?.el)
 
 // Once the controls scroll away, a slim bar pinned over the ladder keeps the search and the switches in reach (not on
 // phones, where it would take too much of the screen).
@@ -455,6 +494,25 @@ const { entered } = usePageEntered()
       </li>
     </ol>
 
+    <!-- Outside the page so the page transition's transform can't move it. -->
+    <Teleport to="body">
+      <AnimatePresence>
+        <motion.button
+          v-if="match"
+          type="button"
+          class="btn primary to-match"
+          :initial="{ opacity: 0, y: 8 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :exit="{ opacity: 0, y: 8 }"
+          :transition="FADE"
+          :while-press="PRESS"
+          @click="toMatch"
+        >
+          {{ match.name }} {{ match.up ? '↑' : '↓' }}
+        </motion.button>
+      </AnimatePresence>
+    </Teleport>
+
     <p class="muted small note">{{ t('speed.megaNote') }}</p>
     <p v-if="!showAll && snapshot" class="muted small note">
       {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
@@ -596,6 +654,17 @@ const { entered } = usePageEntered()
   .pin {
     display: none;
   }
+}
+/* The button to the nearest match, floating at the bottom of the screen as the matchups page's to its results. */
+.to-match {
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 10;
+  translate: -50% 0;
+  min-height: 40px;
+  padding: 6px 16px;
+  font-weight: bold;
 }
 /* The row a link picked. */
 .tier.at {
