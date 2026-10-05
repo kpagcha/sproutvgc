@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { metaProviders } from '@/data/meta'
 import { t, tSplit, tSlots } from '@/i18n'
 
 const icons = tSplit('credits.iconsBody', 'source')
 const sprites = tSplit('credits.spritesBody', 'source')
 const uiIcons = tSplit('credits.uiIconsBody', 'source')
+const meta = tSplit('credits.metaBody', 'sources')
+const providers = metaProviders()
 </script>
 
 <template>
@@ -22,6 +25,16 @@ const uiIcons = tSplit('credits.uiIconsBody', 'source')
         >
         <a v-else href="https://pokeapi.co/" rel="noopener">PokéAPI</a>
       </template>
+    </p>
+  </div>
+
+  <div v-if="providers.length" class="panel">
+    <h2>{{ t('credits.metaTitle') }}</h2>
+    <p>
+      {{ meta[0]
+      }}<template v-for="(p, i) in providers" :key="p.url"
+        >{{ i ? ', ' : '' }}<a :href="p.url" rel="noopener">{{ p.name }}</a></template
+      >{{ meta[1] }}
     </p>
   </div>
 

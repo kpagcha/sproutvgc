@@ -618,6 +618,14 @@ export const messages: Record<keyof typeof en, string> = {
   'credits.spritesBody': 'Los sprites e iconos de Pokémon y objetos son de {source}.',
   'credits.dataTitle': 'Datos',
   'credits.dataBody': 'Los datos del juego son de {showdown} (MIT), y los nombres en otros idiomas de {pokeapi}.',
+  'credits.metaTitle': 'Datos de uso',
+  'credits.metaBody': 'Las estadísticas de uso son de {sources}.',
+
+  'meta.kind.showdown': 'Ladder de Showdown',
+  'meta.kind.ingame': 'Combates clasificatorios',
+  'meta.kind.tournament': 'Torneos',
+  'meta.season': 'Temporada {season}',
+  'meta.bo3': 'Bo3',
 
   'desc.conditions':
     'Todas las condiciones de {game}, Reglamento {reg}: problemas de estado, tiempo atmosférico, campos y efectos de equipo y de campo, y qué los causa.',

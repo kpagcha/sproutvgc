@@ -611,6 +611,14 @@ export const messages = {
   'credits.spritesBody': 'The Pokémon and item sprites and icons come from {source}.',
   'credits.dataTitle': 'Data',
   'credits.dataBody': 'The game data comes from {showdown} (MIT), and the names in other languages from {pokeapi}.',
+  'credits.metaTitle': 'Usage data',
+  'credits.metaBody': 'The usage stats come from {sources}.',
+
+  'meta.kind.showdown': 'Showdown ladder',
+  'meta.kind.ingame': 'In-game ranked',
+  'meta.kind.tournament': 'Tournaments',
+  'meta.season': 'Season {season}',
+  'meta.bo3': 'Bo3',
 
   'desc.conditions':
     'Every condition in {game}, Regulation {reg}: statuses, weather, terrains and side and field effects, and what causes them.',
