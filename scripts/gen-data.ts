@@ -21,7 +21,7 @@ import { descriptions as ITEM_DESCRIPTIONS } from '../src/i18n/en/items.ts'
 import { descriptions as MOVE_DESCRIPTIONS } from '../src/i18n/en/moves.ts'
 import { LOCALES, type Locale } from '../src/i18n/locales.ts'
 import { LANGUAGES, type Language } from './languages.ts'
-import { NAMES, type CategoryKey } from './overrides.ts'
+import { MOVES_EVERYONE_USES, NAMES, type CategoryKey } from './overrides.ts'
 import { ConditionScan } from './conditions.ts'
 import { ITEM_ICONS, POKEMON_ICONS, SpriteSource, iconIndexes, sheetLayout, trimSheet } from './sprites.ts'
 
@@ -400,7 +400,7 @@ async function main() {
   /** The legal Pokémon that can have an ability, in Pokédex order. */
   const holders = (ability: string) =>
     roster.filter((s) => Object.values(s.abilities).some((a) => toId(a) === ability)).map((s) => s.id)
-  const movesLearned = new Set(roster.flatMap((s) => [...dex.species.getMovePool(s.id)]))
+  const movesLearned = new Set([...roster.flatMap((s) => [...dex.species.getMovePool(s.id)]), ...MOVES_EVERYONE_USES])
   const moveAvailable = (m: Move) => movesLearned.has(m.id) && !m.isNonstandard && !rules.isBanned(`move:${m.id}`)
   const itemAvailable = (i: Item) => !i.isNonstandard && !rules.isBanned(`item:${i.id}`)
   const movesById = new Map(dex.moves.all().map((m) => [m.id, m]))

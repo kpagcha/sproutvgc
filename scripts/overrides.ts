@@ -47,3 +47,9 @@ export const NAMES: { [L in Exclude<Locale, 'en'>]?: { [C in CategoryKey]?: Reco
     },
   },
 }
+
+/**
+ * Moves every Pokémon can use, though none learns them, so learnsets can't make them available: Struggle, which a
+ * Pokémon uses once out of PP (or locked out of its moves). Still subject to the game having them and the format's bans.
+ */
+export const MOVES_EVERYONE_USES: string[] = ['struggle']

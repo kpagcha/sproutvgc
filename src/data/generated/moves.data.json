@@ -4299,6 +4299,16 @@
     "target": "allAdjacentFoes",
     "flags": ["reflectable"]
   },
+  "struggle": {
+    "type": "normal",
+    "category": "physical",
+    "power": 50,
+    "accuracy": true,
+    "pp": 1,
+    "priority": 0,
+    "target": "randomNormal",
+    "flags": ["contact"]
+  },
   "strugglebug": {
     "type": "bug",
     "category": "special",

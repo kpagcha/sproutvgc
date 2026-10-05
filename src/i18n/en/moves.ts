@@ -2120,6 +2120,11 @@ export const descriptions: Record<string, Description> = {
     long: "Lowers the target's Speed by 2 stages.",
     source: 'a11fbea5',
   },
+  struggle: {
+    short: 'User loses 1/4 of its max HP.',
+    long: "Deals typeless damage to a random opposing Pokémon. If this move is successful, the user loses 1/4 of its maximum HP, rounded half up, and the {ability:rockhead} Ability does not prevent this. This move is automatically used if none of the user's known moves can be selected.",
+    source: '93f12dd2',
+  },
   strugglebug: {
     short: '100% chance to lower the foe(s) Sp. Atk by 1.',
     long: "Has a 100% chance to lower the target's Special Attack by 1 stage.",
