@@ -18,7 +18,7 @@ function parseTypes(v: unknown, max: number): TypeId[] {
   return [...new Set(s.split(',').filter(isType))].slice(0, max)
 }
 
-// `/types/matchups/def` and `/types/matchups/atk` show just that side, with no tabs or columns.
+// `/tools/matchups/def` and `/tools/matchups/atk` show just that side, with no tabs or columns.
 const single = computed(() => {
   const s = route.params.side
   return s === 'def' || s === 'atk' ? s : null
@@ -36,7 +36,7 @@ wideQuery.addEventListener('change', onWide)
 onScopeDispose(() => wideQuery.removeEventListener('change', onWide))
 const cols = computed(() => wide.value && !single.value)
 // The column headings open their side on its own, keeping the picks.
-const sideLink = (s: 'def' | 'atk') => ({ path: `/types/matchups/${s}`, query: { ...route.query, mode: undefined } })
+const sideLink = (s: 'def' | 'atk') => ({ path: `/tools/matchups/${s}`, query: { ...route.query, mode: undefined } })
 
 function setQuery(patch: Record<string, string | undefined>) {
   const q: Record<string, string> = {}

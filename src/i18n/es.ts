@@ -75,6 +75,37 @@ export const messages: Record<keyof typeof en, string> = {
   'theme.autoDesc': 'Sigue a tu dispositivo.',
   'lang.label': 'Idioma',
 
+  'nav.dex': 'Dex',
+  'nav.competitive': 'Competitivo',
+  'nav.tools': 'Herramientas',
+  'nav.areas': 'Secciones',
+  'nav.sections': 'Apartados',
+  'title.dex': 'Dex',
+  'title.competitive': 'Competitivo',
+  'title.tools': 'Herramientas',
+  'desc.dex': 'Todo lo de {game}, Reglamento {reg}: Pokémon, movimientos, habilidades, objetos, condiciones y tipos.',
+  'desc.competitive': 'El metajuego de {game}: qué se usa, qué gana y lo rápido que es cada cosa.',
+  'desc.tools':
+    'Herramientas para jugadores de {game}: una calculadora de daño, un creador de equipos, los enfrentamientos de tipos y un test de tipos.',
+  'nav.usage': 'Uso',
+  'nav.reports': 'Torneos',
+  'nav.speedTiers': 'Velocidades',
+  'nav.calc': 'Calculadora',
+  'nav.teamBuilder': 'Equipos',
+  'title.usage': 'Estadísticas de uso',
+  'title.reports': 'Informes de torneos',
+  'title.speedTiers': 'Escalas de velocidad',
+  'title.calc': 'Calculadora de daño',
+  'title.teamBuilder': 'Creador de equipos',
+  'desc.usage': 'Qué Pokémon, movimientos, habilidades y objetos se usan más en {game}, Reglamento {reg}.',
+  'desc.reports': 'Resultados y equipos ganadores de los torneos de {game}.',
+  'desc.speedTiers':
+    'Todos los Pokémon de {game}, Reglamento {reg}, ordenados por su Velocidad con las distribuciones habituales.',
+  'desc.calc': 'El daño que cualquier Pokémon hace a cualquier otro en {game}, combates dobles incluidos.',
+  'desc.teamBuilder': 'Crea equipos de {game}, comprueba sus debilidades y compártelos.',
+  'soon.title': 'Próximamente…',
+  'soon.tag': 'Pronto',
+
   'desc.home':
     'Una Pokédex competitiva para {game}, al día con el Reglamento {reg}: todos los Pokémon, movimientos, habilidades y objetos, la tabla y los enfrentamientos de tipos, y un test de tipos.',
   'desc.types':

@@ -63,12 +63,12 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
     </RouterLink>
   </section>
   <section v-if="results.types.length" class="panel section">
-    <RouterLink to="/types" class="section-head">
+    <RouterLink to="/dex/types" class="section-head">
       <span class="section-title font-display">{{ t('title.types') }} <span class="arrow">›</span></span>
     </RouterLink>
     <ul class="chip-hits">
       <li v-for="ty in results.types" :key="ty.id">
-        <RouterLink :to="target('type', ty.id, `/types/${ty.id}`)" :replace="filtering('type')" class="chip-hit">
+        <RouterLink :to="target('type', ty.id, `/dex/types/${ty.id}`)" :replace="filtering('type')" class="chip-hit">
           <TypeIcon :type="ty.id" />
           <span
             >{{ ty.parts[0] }}<mark>{{ ty.parts[1] }}</mark

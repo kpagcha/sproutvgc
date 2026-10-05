@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { t, type MessageKey } from '@/i18n'
 
-// Links to the type tools, as a row of cards.
+// Links to the type chart (in the dex) and the type tools (in Tools), as a row of cards.
 const LINKS: { to: string; label: MessageKey }[] = [
-  { to: '/types/chart', label: 'nav.chart' },
-  { to: '/types/matchups', label: 'nav.matchups' },
-  { to: '/types/quiz', label: 'nav.quiz' },
+  { to: '/dex/types/chart', label: 'nav.chart' },
+  { to: '/tools/matchups', label: 'nav.matchups' },
+  { to: '/tools/quiz', label: 'nav.quiz' },
 ]
 </script>
 

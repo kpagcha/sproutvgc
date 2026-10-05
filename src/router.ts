@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { afterPageExit } from '@/lib/pageExit'
 import { TYPES } from '@/data/types'
 import type { MessageKey } from '@/i18n'
+import type { AreaId } from '@/lib/areas'
 import { loadDexNames } from '@/i18n/refName'
 import { hasFavorites } from '@/composables/useFavorites'
 import { loadDescriptions, type DescribedKind } from '@/i18n/descriptions'
@@ -18,8 +19,30 @@ declare module 'vue-router' {
     descriptions?: DescribedKind[]
     /** Moving between the route's own URLs keeps the scroll: the page brings what changed into view itself. */
     keepScroll?: boolean
+    /** The area the page belongs to (`src/lib/areas.ts`), and its section there: the header highlights them. */
+    area?: AreaId
+    section?: string
   }
 }
+
+// The meta of a page in an area's section.
+const inArea = (area: AreaId, section?: string) => ({ area, section })
+
+// A page of the area's not built yet, which says so.
+const soon = (area: AreaId, section: string, path: string, titleKey: MessageKey, descKey: MessageKey) => ({
+  path,
+  name: section,
+  component: () => import('@/views/ComingSoonView.vue'),
+  meta: { titleKey, descKey, ...inArea(area, section) },
+})
+
+// An area's own page, listing its sections.
+const area = (id: AreaId, titleKey: MessageKey, descKey: MessageKey) => ({
+  path: `/${id}`,
+  name: id,
+  component: () => import('@/views/AreaView.vue'),
+  meta: { titleKey, descKey, ...inArea(id) },
+})
 
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -30,69 +53,61 @@ export const router = createRouter({
       component: () => import('@/views/HomeView.vue'),
       meta: { descKey: 'desc.home', dexNames: hasFavorites },
     },
+
+    // The dex: what exists in the regulation.
+    area('dex', 'title.dex', 'desc.dex'),
     {
-      // `/types` lists every type; `/types/fire` also shows that type's matchups.
-      path: `/types/:type(${TYPES.join('|')})?`,
+      // `/dex/types` lists every type; `/dex/types/fire` also shows that type's matchups.
+      path: `/dex/types/:type(${TYPES.join('|')})?`,
       name: 'types',
       component: () => import('@/views/TypesView.vue'),
-      meta: { titleKey: 'title.types', descKey: 'desc.types', dexNames: true, keepScroll: true },
-      // The chart used to live at `/types`: keep its shared cell links (?atk=…&def=…) working.
-      beforeEnter: (to) => (!to.params.type && to.query.atk ? { path: '/types/chart', query: to.query } : undefined),
+      meta: {
+        titleKey: 'title.types',
+        descKey: 'desc.types',
+        dexNames: true,
+        keepScroll: true,
+        ...inArea('dex', 'types'),
+      },
     },
     {
-      path: '/types/chart',
+      path: '/dex/types/chart',
       name: 'chart',
       component: () => import('@/views/TypeChartView.vue'),
-      meta: { titleKey: 'title.chart', descKey: 'desc.chart' },
+      meta: { titleKey: 'title.chart', descKey: 'desc.chart', ...inArea('dex', 'chart') },
     },
     {
-      path: '/types/matchups',
-      name: 'matchups',
-      component: () => import('@/views/TypeMatchupsView.vue'),
-      meta: { titleKey: 'title.matchups', descKey: 'desc.matchups', dexNames: true },
-    },
-    {
-      // One side of the matchups page on its own, linked from the side-by-side headings.
-      path: '/types/matchups/:side(def|atk)',
-      name: 'matchupsSide',
-      component: () => import('@/views/TypeMatchupsView.vue'),
-      meta: { titleKey: 'title.matchups', descKey: 'desc.matchups', dexNames: true },
-    },
-    {
-      // The matchups page used to be the calculator: keep its shared links working.
-      path: '/types/calc/:side(def|atk)?',
-      redirect: (to) => ({
-        path: to.params.side ? `/types/matchups/${to.params.side}` : '/types/matchups',
-        query: to.query,
-      }),
-    },
-    {
-      path: '/types/quiz',
-      name: 'quiz',
-      component: () => import('@/views/TypeQuizView.vue'),
-      meta: { titleKey: 'title.quiz', descKey: 'desc.quiz' },
-    },
-    {
-      path: '/abilities',
+      path: '/dex/abilities',
       name: 'abilities',
       component: () => import('@/views/AbilitiesView.vue'),
-      meta: { titleKey: 'title.abilities', descKey: 'desc.abilities', dexNames: true, descriptions: ['ability'] },
+      meta: {
+        titleKey: 'title.abilities',
+        descKey: 'desc.abilities',
+        dexNames: true,
+        descriptions: ['ability'],
+        ...inArea('dex', 'abilities'),
+      },
     },
     {
-      path: '/abilities/:id',
+      path: '/dex/abilities/:id',
       name: 'ability',
       component: () => import('@/views/AbilityView.vue'),
       // The layout describes an ability's own page; the list's description is for an ID the regulation lacks.
-      meta: { titleKey: 'title.abilities', descKey: 'desc.abilities', dexNames: true, descriptions: ['ability'] },
+      meta: {
+        titleKey: 'title.abilities',
+        descKey: 'desc.abilities',
+        dexNames: true,
+        descriptions: ['ability'],
+        ...inArea('dex', 'abilities'),
+      },
     },
     {
-      path: '/pokemon',
+      path: '/dex/pokemon',
       name: 'pokedex',
       component: () => import('@/views/PokedexView.vue'),
-      meta: { titleKey: 'title.pokemon', descKey: 'desc.pokedex', dexNames: true },
+      meta: { titleKey: 'title.pokemon', descKey: 'desc.pokedex', dexNames: true, ...inArea('dex', 'pokemon') },
     },
     {
-      path: '/pokemon/:id',
+      path: '/dex/pokemon/:id',
       name: 'pokemon',
       component: () => import('@/views/PokemonView.vue'),
       meta: {
@@ -100,44 +115,112 @@ export const router = createRouter({
         descKey: 'desc.pokedex',
         dexNames: true,
         descriptions: ['ability', 'move'],
+        ...inArea('dex', 'pokemon'),
       },
     },
     {
-      path: '/moves',
+      path: '/dex/moves',
       name: 'moves',
       component: () => import('@/views/MovesView.vue'),
-      meta: { titleKey: 'title.moves', descKey: 'desc.moves', dexNames: true, descriptions: ['move'] },
+      meta: {
+        titleKey: 'title.moves',
+        descKey: 'desc.moves',
+        dexNames: true,
+        descriptions: ['move'],
+        ...inArea('dex', 'moves'),
+      },
     },
     {
-      path: '/moves/:id',
+      path: '/dex/moves/:id',
       name: 'move',
       component: () => import('@/views/MoveView.vue'),
-      meta: { titleKey: 'title.moves', descKey: 'desc.moves', dexNames: true, descriptions: ['move'] },
+      meta: {
+        titleKey: 'title.moves',
+        descKey: 'desc.moves',
+        dexNames: true,
+        descriptions: ['move'],
+        ...inArea('dex', 'moves'),
+      },
     },
     {
-      path: '/items',
+      path: '/dex/items',
       name: 'items',
       component: () => import('@/views/ItemsView.vue'),
-      meta: { titleKey: 'title.items', descKey: 'desc.items', dexNames: true, descriptions: ['item'] },
+      meta: {
+        titleKey: 'title.items',
+        descKey: 'desc.items',
+        dexNames: true,
+        descriptions: ['item'],
+        ...inArea('dex', 'items'),
+      },
     },
     {
-      path: '/items/:id',
+      path: '/dex/items/:id',
       name: 'item',
       component: () => import('@/views/ItemView.vue'),
-      meta: { titleKey: 'title.items', descKey: 'desc.items', dexNames: true, descriptions: ['item'] },
+      meta: {
+        titleKey: 'title.items',
+        descKey: 'desc.items',
+        dexNames: true,
+        descriptions: ['item'],
+        ...inArea('dex', 'items'),
+      },
     },
     {
-      path: '/conditions',
+      path: '/dex/conditions',
       name: 'conditions',
       component: () => import('@/views/ConditionsView.vue'),
-      meta: { titleKey: 'title.conditions', descKey: 'desc.conditions', dexNames: true, descriptions: ['condition'] },
+      meta: {
+        titleKey: 'title.conditions',
+        descKey: 'desc.conditions',
+        dexNames: true,
+        descriptions: ['condition'],
+        ...inArea('dex', 'conditions'),
+      },
     },
     {
-      path: '/conditions/:id',
+      path: '/dex/conditions/:id',
       name: 'condition',
       component: () => import('@/views/ConditionView.vue'),
-      meta: { titleKey: 'title.conditions', descKey: 'desc.conditions', dexNames: true, descriptions: ['condition'] },
+      meta: {
+        titleKey: 'title.conditions',
+        descKey: 'desc.conditions',
+        dexNames: true,
+        descriptions: ['condition'],
+        ...inArea('dex', 'conditions'),
+      },
     },
+
+    // Competitive: what players use, and how it does.
+    area('competitive', 'title.competitive', 'desc.competitive'),
+    soon('competitive', 'usage', '/competitive/usage', 'title.usage', 'desc.usage'),
+    soon('competitive', 'reports', '/competitive/reports', 'title.reports', 'desc.reports'),
+    soon('competitive', 'speedTiers', '/competitive/speed-tiers', 'title.speedTiers', 'desc.speedTiers'),
+
+    // Tools: what you interact with.
+    area('tools', 'title.tools', 'desc.tools'),
+    soon('tools', 'calc', '/tools/calc', 'title.calc', 'desc.calc'),
+    soon('tools', 'teamBuilder', '/tools/team-builder', 'title.teamBuilder', 'desc.teamBuilder'),
+    {
+      path: '/tools/matchups',
+      name: 'matchups',
+      component: () => import('@/views/TypeMatchupsView.vue'),
+      meta: { titleKey: 'title.matchups', descKey: 'desc.matchups', dexNames: true, ...inArea('tools', 'matchups') },
+    },
+    {
+      // One side of the matchups page on its own, linked from the side-by-side headings.
+      path: '/tools/matchups/:side(def|atk)',
+      name: 'matchupsSide',
+      component: () => import('@/views/TypeMatchupsView.vue'),
+      meta: { titleKey: 'title.matchups', descKey: 'desc.matchups', dexNames: true, ...inArea('tools', 'matchups') },
+    },
+    {
+      path: '/tools/quiz',
+      name: 'quiz',
+      component: () => import('@/views/TypeQuizView.vue'),
+      meta: { titleKey: 'title.quiz', descKey: 'desc.quiz', ...inArea('tools', 'quiz') },
+    },
+
     {
       path: '/settings',
       name: 'settings',

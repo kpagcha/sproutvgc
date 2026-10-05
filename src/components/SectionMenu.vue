@@ -6,8 +6,8 @@ import { ChevronDown } from '@lucide/vue'
 import { FADE } from '@/lib/motion'
 import { t, type MessageKey } from '@/i18n'
 
-// The header's dex sections folded into one dropdown, for screens too narrow for a link each. The button is named
-// after the section the current page belongs to, and gets the header's sliding highlight (`NavPill`) while it's in one.
+// The header's areas folded into one dropdown, for screens too narrow for a link each. The button is named after the
+// area the current page belongs to, and gets the header's sliding highlight (`NavPill`) while it's in one.
 const props = defineProps<{ items: { to: string; section: string; label: MessageKey }[]; section: string | null }>()
 
 const current = computed(() => props.items.find((i) => i.section === props.section))

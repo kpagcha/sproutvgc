@@ -87,7 +87,7 @@ onMounted(async () => {
             <span>{{ t('chart.atk') }} ↓</span><span>{{ t('chart.def') }} →</span>
           </th>
           <th v-for="(def, j) in TYPES" :key="def" :class="{ hl: hc === j }">
-            <RouterLink :to="{ path: '/types/matchups', query: { def } }">
+            <RouterLink :to="{ path: '/tools/matchups', query: { def } }">
               <TypeIcon :type="def" />
             </RouterLink>
           </th>
@@ -96,7 +96,7 @@ onMounted(async () => {
       <tbody>
         <tr v-for="(atk, i) in TYPES" :key="atk" :class="{ hl: hr === i }">
           <th class="rowh">
-            <RouterLink :to="{ path: '/types/matchups', query: { mode: 'atk', atk } }">
+            <RouterLink :to="{ path: '/tools/matchups', query: { mode: 'atk', atk } }">
               <TypeIcon :type="atk" />
             </RouterLink>
           </th>

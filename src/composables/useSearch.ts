@@ -12,15 +12,15 @@ export type SectionKind = 'pokemon' | 'move' | 'ability' | 'item' | 'condition'
 
 /** The dex's sections, in the order the home page shows them: their list page, and their entries' pages' route. */
 export const SECTIONS: { kind: SectionKind; title: MessageKey; desc: MessageKey; list: string; route: string }[] = [
-  { kind: 'pokemon', title: 'title.pokemon', desc: 'home.pokemonDesc', list: '/pokemon', route: 'pokemon' },
-  { kind: 'move', title: 'title.moves', desc: 'home.movesDesc', list: '/moves', route: 'move' },
-  { kind: 'ability', title: 'title.abilities', desc: 'home.abilitiesDesc', list: '/abilities', route: 'ability' },
-  { kind: 'item', title: 'title.items', desc: 'home.itemsDesc', list: '/items', route: 'item' },
+  { kind: 'pokemon', title: 'title.pokemon', desc: 'home.pokemonDesc', list: '/dex/pokemon', route: 'pokemon' },
+  { kind: 'move', title: 'title.moves', desc: 'home.movesDesc', list: '/dex/moves', route: 'move' },
+  { kind: 'ability', title: 'title.abilities', desc: 'home.abilitiesDesc', list: '/dex/abilities', route: 'ability' },
+  { kind: 'item', title: 'title.items', desc: 'home.itemsDesc', list: '/dex/items', route: 'item' },
   {
     kind: 'condition',
     title: 'title.conditions',
     desc: 'home.conditionsDesc',
-    list: '/conditions',
+    list: '/dex/conditions',
     route: 'condition',
   },
 ]
@@ -83,7 +83,7 @@ export function useSearch(query: () => string, kinds: readonly SectionKind[] = S
     const r = results.value
     if (!r) return null
     const hits = r.sections.flatMap((s) => s.hits)
-    if (r.types.length === 1 && !hits.length) return `/types/${r.types[0]!.id}`
+    if (r.types.length === 1 && !hits.length) return `/dex/types/${r.types[0]!.id}`
     if (hits.length === 1 && !r.types.length && !r.sections[0]!.more) return hits[0]!.to
     return null
   })

@@ -15,6 +15,8 @@ import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import NavPill from '@/components/NavPill.vue'
 import { KeptPage, Page } from '@/components/PageFrame'
 import SectionMenu from '@/components/SectionMenu.vue'
+import AreaNav from '@/components/AreaNav.vue'
+import { AREAS } from '@/lib/areas'
 import logoUrl from '@/assets/logo.png'
 import { searchFocus } from '@/composables/useSearch'
 
@@ -61,64 +63,38 @@ watchEffect(() => {
 })
 
 /** Entry pages lead back to their category's list. */
-const LISTS: Partial<Record<string, { to: string; label: MessageKey }>> = {
-  ability: { to: '/abilities', label: 'title.abilities' },
-  pokemon: { to: '/pokemon', label: 'title.pokemon' },
-  move: { to: '/moves', label: 'title.moves' },
-  item: { to: '/items', label: 'title.items' },
-  condition: { to: '/conditions', label: 'title.conditions' },
+const LISTS: Partial<Record<string, { to: RouteLocationRaw; label: MessageKey }>> = {
+  ability: { to: { name: 'abilities' }, label: 'title.abilities' },
+  pokemon: { to: { name: 'pokedex' }, label: 'title.pokemon' },
+  move: { to: { name: 'moves' }, label: 'title.moves' },
+  item: { to: { name: 'items' }, label: 'title.items' },
+  condition: { to: { name: 'conditions' }, label: 'title.conditions' },
 }
 
-// Pages under Types get a back link to it, named after it. One side of the matchups page leads back to the whole
-// page instead, keeping the picks (and, with tabs, that side's tab).
+// One side of the matchups page leads back to the whole page, keeping the picks (and, with tabs, that side's tab).
 function backLink(r: RouteLocationNormalizedLoaded): { to: RouteLocationRaw; label: MessageKey } | null {
   if (r.name === 'matchupsSide') {
     const query = { ...r.query, mode: r.params.side === 'atk' ? 'atk' : undefined }
-    return { to: { path: '/types/matchups', query }, label: 'nav.matchups' }
+    return { to: { name: 'matchups', query }, label: 'nav.matchups' }
   }
-  const list = typeof r.name === 'string' ? LISTS[r.name] : undefined
-  if (list) return list
-  const tool = r.name === 'chart' || r.name === 'matchups' || r.name === 'quiz'
-  return tool ? { to: '/types', label: 'nav.types' } : null
+  return (typeof r.name === 'string' ? LISTS[r.name] : undefined) ?? null
 }
 
-// The header link to highlight: the dex section the current page belongs to.
-const SECTIONS: Partial<Record<string, string>> = {
-  home: 'search',
-  types: 'types',
-  chart: 'types',
-  matchups: 'types',
-  matchupsSide: 'types',
-  quiz: 'types',
-  settings: 'settings',
-  pokedex: 'pokemon',
-  pokemon: 'pokemon',
-  moves: 'moves',
-  move: 'moves',
-  abilities: 'abilities',
-  ability: 'abilities',
-  items: 'items',
-  item: 'items',
-  conditions: 'conditions',
-  condition: 'conditions',
-}
-const section = computed(() => (typeof route.name === 'string' ? (SECTIONS[route.name] ?? null) : null))
+// The header link to highlight: Search on the home page, Settings on its own, else the area the page is in (its
+// section is the sub-navigation's, `AreaNav`).
+const section = computed(() =>
+  route.name === 'home' ? 'search' : route.name === 'settings' ? 'settings' : (route.meta.area ?? null),
+)
 
-/**
- * The header's links: Search (the home page, with its search box focused), one per dex section, and Settings. Types
- * covers its tools too (chart, matchups, quiz).
- */
-const NAV: { to: string; section: string; label: MessageKey }[] = [
-  { to: '/pokemon', section: 'pokemon', label: 'nav.pokemon' },
-  { to: '/moves', section: 'moves', label: 'nav.moves' },
-  { to: '/abilities', section: 'abilities', label: 'nav.abilities' },
-  { to: '/items', section: 'items', label: 'nav.items' },
-  { to: '/conditions', section: 'conditions', label: 'nav.conditions' },
-  { to: '/types', section: 'types', label: 'nav.types' },
-]
+/** The header's links: Search (the home page, with its search box focused), one per area, and Settings. */
+const NAV: { to: string; section: string; label: MessageKey }[] = AREAS.map((a) => ({
+  to: `/${a.id}`,
+  section: a.id,
+  label: a.label,
+}))
 
-// Narrow screens fold the sections into a dropdown, and show Settings as just its icon.
-const compactQuery = window.matchMedia('(max-width: 760px)')
+// Narrow screens fold the areas into a dropdown, and show Settings as just its icon.
+const compactQuery = window.matchMedia('(max-width: 560px)')
 const compact = ref(compactQuery.matches)
 compactQuery.addEventListener('change', (e) => (compact.value = e.matches))
 
@@ -191,6 +167,9 @@ const fadeVariants = {
             <span v-if="!compact" class="label">{{ t('nav.settings') }}</span>
           </RouterLink>
         </nav>
+      </div>
+      <div v-if="route.meta.area" class="wrap sub">
+        <AreaNav />
       </div>
     </header>
     <main class="wrap">
@@ -335,6 +314,11 @@ const fadeVariants = {
 }
 .nav .label {
   position: relative;
+}
+
+/* The area's sections, a row of their own under the bar, apart from it by a faint line. */
+.sub {
+  border-top: 1px solid var(--border);
 }
 
 .back {

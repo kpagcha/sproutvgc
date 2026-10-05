@@ -3,12 +3,8 @@ import { computed, onMounted, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { t } from '@/i18n'
 import { GAME_NAME, REGULATION } from '@/data/format'
-import type { ItemId, PokemonId } from '@/data/dex'
 import { SECTIONS, preloadSearch, searchFocus, useSearch } from '@/composables/useSearch'
-import TypeIcon from '@/components/TypeIcon'
-import CategoryIcon from '@/components/CategoryIcon'
-import ItemIcon from '@/components/ItemIcon.vue'
-import PokemonIcon from '@/components/PokemonIcon'
+import SectionDecor from '@/components/SectionDecor.vue'
 import FavoritesPanel from '@/components/FavoritesPanel.vue'
 import QuickLinks from '@/components/QuickLinks.vue'
 import SearchResults from '@/components/SearchResults.vue'
@@ -42,9 +38,8 @@ function openOnly() {
   if (only.value) void router.push(only.value)
 }
 
-// The cards' decorations: a few entries of their sections.
-const DECOR_POKEMON: PokemonId[] = ['incineroar', 'garchomp', 'whimsicott']
-const DECOR_ITEMS: ItemId[] = ['choicescarf', 'focussash', 'sitrusberry']
+// The search's sections by the dex's: the cards' decorations go by the latter.
+const DEX_SECTION: Record<string, string> = { pokemon: 'pokemon', move: 'moves', item: 'items' }
 </script>
 
 <template>
@@ -71,32 +66,18 @@ const DECOR_ITEMS: ItemId[] = ['choicescarf', 'focussash', 'sitrusberry']
           <span class="section-text">
             <span class="section-title-row">
               <span class="section-title font-display">{{ t(s.title) }} <span class="arrow">›</span></span>
-              <span v-if="s.kind === 'pokemon'" class="icons" aria-hidden="true">
-                <PokemonIcon v-for="p in DECOR_POKEMON" :id="p" :key="p" />
-              </span>
-              <span v-else-if="s.kind === 'move'" class="icons" aria-hidden="true">
-                <CategoryIcon category="physical" :tip="false" />
-                <CategoryIcon category="special" :tip="false" />
-                <CategoryIcon category="status" :tip="false" />
-              </span>
-              <span v-else-if="s.kind === 'item'" class="icons" aria-hidden="true">
-                <ItemIcon v-for="i in DECOR_ITEMS" :id="i" :key="i" />
-              </span>
+              <SectionDecor :section="DEX_SECTION[s.kind] ?? s.kind" />
             </span>
             <span class="muted">{{ t(s.desc) }}</span>
           </span>
         </RouterLink>
       </section>
       <section class="panel section">
-        <RouterLink to="/types" class="section-head">
+        <RouterLink to="/dex/types" class="section-head">
           <span class="section-text">
             <span class="section-title-row">
               <span class="section-title font-display">{{ t('title.types') }} <span class="arrow">›</span></span>
-              <span class="icons" aria-hidden="true">
-                <TypeIcon type="fire" />
-                <TypeIcon type="water" />
-                <TypeIcon type="grass" />
-              </span>
+              <SectionDecor section="types" />
             </span>
             <span class="muted">{{ t('home.typesDesc') }}</span>
           </span>
@@ -150,13 +131,6 @@ const DECOR_ITEMS: ItemId[] = ['choicescarf', 'focussash', 'sitrusberry']
   align-items: center;
   gap: 16px;
 }
-/* Badges decorate the title rather than lead the card: a bit smaller than elsewhere, and on one row with it. */
-.icons {
-  --icon-scale: 1;
-  display: flex;
-  gap: 3px;
-  flex: none;
-}
 .section-text {
   display: flex;
   flex-direction: column;
@@ -184,9 +158,6 @@ const DECOR_ITEMS: ItemId[] = ['choicescarf', 'focussash', 'sitrusberry']
   }
   .title {
     font-size: calc(40px * var(--display-scale, 1) * var(--text-scale));
-  }
-  .icons {
-    --icon-scale: 1.2;
   }
   /* Just the title and its icons; the description goes. */
   .section-text .muted {

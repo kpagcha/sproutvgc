@@ -12,7 +12,7 @@ import TypeIcon from '@/components/TypeIcon'
 import QuickLinks from '@/components/QuickLinks.vue'
 import SideInteractions from '@/components/SideInteractions.vue'
 
-// The selected type is the route param (`/types/fire`), validated by the route itself.
+// The selected type is the route param (`/dex/types/fire`), validated by the route itself.
 const route = useRoute()
 const type = computed(() => {
   const p = route.params.type
@@ -69,7 +69,7 @@ const revealed = ref(false)
         v-for="ty in TYPES"
         :key="ty"
         v-slot="{ href, navigate }"
-        :to="ty === type ? '/types' : `/types/${ty}`"
+        :to="ty === type ? '/dex/types' : `/dex/types/${ty}`"
         custom
       >
         <motion.a
@@ -117,7 +117,7 @@ const revealed = ref(false)
                   </th>
                   <td>
                     <span class="icons">
-                      <RouterLink v-for="x in row.types" :key="x" :to="`/types/${x}`">
+                      <RouterLink v-for="x in row.types" :key="x" :to="`/dex/types/${x}`">
                         <TypeIcon :type="x" />
                       </RouterLink>
                     </span>

@@ -1,0 +1,79 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { GAME_NAME, REGULATION } from '@/data/format'
+import { t } from '@/i18n'
+import { areaOf } from '@/lib/areas'
+import SectionDecor from '@/components/SectionDecor.vue'
+
+// An area's own page (`/dex`, `/competitive`, `/tools`): a card per section, what it is, and whether it's coming.
+const route = useRoute()
+const area = computed(() => areaOf(route.meta.area)!)
+const params = { game: GAME_NAME, reg: REGULATION }
+</script>
+
+<template>
+  <div class="area">
+    <h1>{{ t(area.title) }}</h1>
+    <p class="muted intro">{{ t(route.meta.descKey!, params) }}</p>
+    <div class="cards">
+      <RouterLink v-for="s in area.sections" :key="s.key" :to="{ name: s.route }" class="panel card">
+        <span class="card-title font-display">
+          {{ t(s.label) }} <span class="arrow" aria-hidden="true">›</span>
+          <SectionDecor v-if="area.id === 'dex'" :section="s.key" class="decor" />
+          <span v-if="s.soon" class="soon">{{ t('soon.tag') }}</span>
+        </span>
+        <span class="muted">{{ t(s.desc, params) }}</span>
+      </RouterLink>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.intro {
+  margin: 0 0 16px;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 14px 16px;
+  color: var(--text);
+}
+.card:hover {
+  text-decoration: none;
+}
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: bold;
+  font-size: calc(18px * var(--display-scale, 1) * var(--text-scale));
+}
+.card:hover .card-title {
+  text-decoration: underline;
+}
+.arrow {
+  color: var(--accent);
+}
+.decor {
+  margin-left: 10px;
+}
+/* A section not built yet: a tag after its name. */
+.soon {
+  margin-left: auto;
+  padding: 0 6px;
+  font-size: 0.6em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  background: var(--sel);
+}
+</style>
