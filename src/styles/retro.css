@@ -22,13 +22,19 @@
      top, the whole panel when the <details> is closed.
    - `tinted`: a faint wash of the accent color, a thick accent stripe down its left edge in place of the outline and
      shadow.
-   - `sunken`: a tray rather than a card: no shadow, a darker background, an inset shadow along its top and left. */
+   - `sunken`: a tray rather than a card: no shadow, a darker background, an inset shadow along its top and left.
+   - `warm`, with `banded`: the strip in the selection color rather than the accent, for a card that should stand out
+     without taking the accent's place. */
 :root:root .panel.banded > :is(summary, .band) {
   margin: calc(-1 * var(--panel-pad)) calc(-1 * var(--panel-pad)) var(--panel-pad);
   padding: 6px var(--panel-pad);
   color: var(--accent-text);
   background: var(--accent);
   border-bottom: 2px solid var(--ink);
+}
+:root:root .panel.banded.warm > :is(summary, .band) {
+  color: var(--text);
+  background: var(--sel);
 }
 :root:root .panel.banded:not([open]) > summary {
   margin-bottom: calc(-1 * var(--panel-pad));
