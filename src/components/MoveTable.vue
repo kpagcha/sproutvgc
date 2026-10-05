@@ -62,7 +62,7 @@ const shown = computed(() => {
 type Key = 'name' | 'type' | 'category' | 'power' | 'accuracy' | 'pp'
 const value = (r: { name: string; data: Move }, k: Key): number | string => {
   if (k === 'name') return r.name
-  if (k === 'type') return typeName(r.data.type)
+  if (k === 'type') return TYPES.indexOf(r.data.type)
   if (k === 'category') return CATEGORIES.indexOf(r.data.category)
   if (k === 'accuracy') return r.data.accuracy === true ? 101 : r.data.accuracy
   return r.data[k]
