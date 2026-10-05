@@ -8,6 +8,9 @@ import type { TypeId } from '@/data/types'
 export const STATS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as const
 export type StatId = (typeof STATS)[number]
 
+/** A base stat's color, by Showdown's scale: red for low, through yellow, to green and blue for high. */
+export const statColor = (v: number) => `hsl(${Math.min(Math.floor((v * 180) / 255), 360)}, 75%, 45%)`
+
 export interface Pokemon {
   types: TypeId[]
   /** Base stats, in `STATS` order. */

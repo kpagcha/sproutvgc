@@ -3,7 +3,7 @@ import { computed, ref, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { ability, availableIds, available, item, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
-import { POKEMON, STATS, loadLearnsets, movesOf, speciesOf, spriteUrl, total } from '@/data/pokemon'
+import { POKEMON, STATS, loadLearnsets, movesOf, speciesOf, spriteUrl, statColor, total } from '@/data/pokemon'
 import { t, tSlots, type MessageKey } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { PAGE_STAT_BARS, setPercentiles, usePageStatBars } from '@/composables/useStatReference'
@@ -48,11 +48,10 @@ function onMatchupsToggle(e: Event) {
   }
 }
 
-// Each stat's bar, out of 200 (the few above it fill it). Plain (`usePageStatBars`), colored by Showdown's scale for
-// stats: red for low, through yellow, to green and blue for high. Set against a set of Pokémon: a tick at its median, a
-// band over its middle half, the bar blue above the median and red below, and on hover how many it beats.
+// Each stat's bar, out of 200 (the few above it fill it), colored by `statColor`. Plain (`usePageStatBars`), on its
+// own; set against a set of Pokémon, also a tick at its median, a band over its middle half, and on hover how many it
+// beats.
 const bars = usePageStatBars()
-const statColor = (v: number) => `hsl(${Math.min(Math.floor((v * 180) / 255), 360)}, 75%, 45%)`
 const at = (v: number) => Math.min(100, v / 2)
 const along = (v: number) => `${at(v)}%`
 const stats = computed(() => {
@@ -66,8 +65,7 @@ const stats = computed(() => {
     return {
       s,
       v,
-      side: rank === null ? null : rank >= 0.5 ? 'hi' : 'lo',
-      color: p ? undefined : statColor(v),
+      color: statColor(v),
       tip: rank === null ? undefined : t('pokemon.statRank', { pct: Math.round(rank * 100) }),
       median: median === null ? null : along(median),
       band: low === null || high === null ? null : { left: along(low), width: `${at(high) - at(low)}%` },
@@ -159,7 +157,7 @@ watchEffect(async () => {
               <td class="bar-cell">
                 <span class="track" :class="{ plain: bars === 'plain' }">
                   <span v-if="st.band" class="band" :style="st.band"></span>
-                  <span class="bar" :class="st.side" :style="{ width: along(st.v), background: st.color }"></span>
+                  <span class="bar" :style="{ width: along(st.v), background: st.color }"></span>
                   <span v-if="st.median" class="median" :style="{ left: st.median }"></span>
                 </span>
               </td>
@@ -331,13 +329,6 @@ watchEffect(async () => {
 .bar {
   top: 3px;
   bottom: 3px;
-  background: var(--muted);
-}
-.bar.hi {
-  background: var(--stat-hi);
-}
-.bar.lo {
-  background: var(--stat-lo);
 }
 /* Plain, the bar as it was before the comparison: on its own, its full height. */
 .track.plain {

@@ -12,7 +12,7 @@ import {
   type Ref,
 } from '@/data/dex'
 import { REGULATION } from '@/data/format'
-import { POKEMON, STATS, loadLearnsets, speciesOf, splitForme, total, type StatId } from '@/data/pokemon'
+import { POKEMON, STATS, loadLearnsets, speciesOf, splitForme, statColor, total, type StatId } from '@/data/pokemon'
 import { TYPES, type TypeId } from '@/data/types'
 import { locale, t, typeName } from '@/i18n'
 import { loadDescriptions, shortText } from '@/i18n/descriptions'
@@ -122,7 +122,7 @@ const shown = computed(() => {
 })
 
 // Each stat is marked by where it stands among the Pokémon it's compared with (`useListStatMarks`), as a bar from the
-// middle of its cell, the median, towards the right above it and the left below.
+// middle of its cell, the median, towards the right above it and the left below, colored by `statColor`.
 const reference = useListStatMarks()
 const percentile = computed(() =>
   reference.value === 'plain'
@@ -147,9 +147,10 @@ const statMarks = computed(() => {
         let x = p.rank(i, v)
         if (x === null) return null
         x = Math.round(x * 1000) / 1000
+        const color = `--color: ${statColor(v)}`
         return x >= 0.5
-          ? { class: 'hi', style: `--from: 0.5; --to: ${x}` }
-          : { class: 'lo', style: `--from: ${x}; --to: 0.5` }
+          ? { class: 'hi', style: `--from: 0.5; --to: ${x}; ${color}` }
+          : { class: 'lo', style: `--from: ${x}; --to: 0.5; ${color}` }
       }),
     ]),
   )
@@ -583,12 +584,7 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
 .stat.hi::after,
 .stat.lo::after {
   height: 3px;
-}
-.stat.hi::after {
-  background: var(--stat-hi);
-}
-.stat.lo::after {
-  background: var(--stat-lo);
+  background: var(--color);
 }
 /* Short of the page's full width, the stats sit closer together, so the abilities keep room for theirs on one line. */
 @media (max-width: 1000px) {
