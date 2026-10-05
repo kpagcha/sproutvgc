@@ -17,6 +17,35 @@
   box-shadow: var(--hard);
 }
 
+/* Panel variants, for what isn't one of the dex's cards (add the class beside `panel`):
+   - `banded`: its heading (a <details>' <summary>, or an element with `band`) a strip of the accent color across the
+     top, the whole panel when the <details> is closed.
+   - `tinted`: a faint wash of the accent color, a thick accent stripe down its left edge in place of the outline and
+     shadow.
+   - `sunken`: a tray rather than a card: no shadow, a darker background, an inset shadow along its top and left. */
+:root:root .panel.banded > :is(summary, .band) {
+  margin: -12px -12px 12px;
+  padding: 6px 12px;
+  color: var(--accent-text);
+  background: var(--accent);
+  border-bottom: 2px solid var(--ink);
+}
+:root:root .panel.banded:not([open]) > summary {
+  margin-bottom: -12px;
+  border-bottom: none;
+}
+:root:root .panel.tinted {
+  background: color-mix(in srgb, var(--accent) 10%, var(--panel));
+  border: none;
+  border-left: 6px solid var(--accent);
+  box-shadow: none;
+}
+:root:root .panel.sunken {
+  background: color-mix(in srgb, var(--ink) 6%, var(--bg));
+  border: 2px solid var(--ink);
+  box-shadow: inset 3px 3px 0 color-mix(in srgb, var(--ink) 25%, transparent);
+}
+
 :root:root .site-header {
   border-bottom: 2px solid var(--ink);
   box-shadow: none;
