@@ -72,6 +72,13 @@ export const messages = {
   'settings.intro': 'Saved in this browser.',
   'theme.autoDesc': 'Follows your device.',
   'lang.label': 'Language',
+  'settings.clearTitle': 'Clear all data',
+  'settings.clearWarning':
+    'Erases everything this site has saved in this browser: your favorites, your recently viewed pages, your type quiz progress, and every setting and preference (theme, language, filters, open and closed panels).',
+  'settings.clearUndo': "This can't be undone.",
+  'settings.clearConfirm':
+    'Erase all your sproutvgc data in this browser? Your favorites and your type quiz progress will be lost for good.',
+  'settings.clearConfirmButton': 'Erase everything',
 
   // The site's areas (src/lib/areas.ts) and the pages not built yet.
   'nav.dex': 'Dex',

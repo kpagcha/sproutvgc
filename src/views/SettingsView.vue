@@ -1,8 +1,29 @@
 <script setup lang="ts">
 import { THEME_MODES, useTheme } from '@/composables/useTheme'
 import { LOCALES, locale, setLocale, t, type Locale } from '@/i18n'
+import { confirmDialog } from '@/composables/useConfirm'
 
 const { mode, setMode } = useTheme()
+
+// Erases everything the site has saved in this browser (every `sproutvgc.` key: favorites, recently viewed, the quiz's
+// deck, settings and preferences), once confirmed, then reloads so nothing read from it lingers in memory.
+async function clearAll() {
+  if (
+    !(await confirmDialog({
+      message: t('settings.clearConfirm'),
+      confirm: t('settings.clearConfirmButton'),
+      danger: true,
+    }))
+  )
+    return
+  try {
+    const keys = Object.keys(localStorage).filter((k) => k.startsWith('sproutvgc.'))
+    for (const k of keys) localStorage.removeItem(k)
+  } catch {
+    // Storage unavailable: nothing was saved to clear.
+  }
+  location.reload()
+}
 </script>
 
 <template>
@@ -33,6 +54,15 @@ const { mode, setMode } = useTheme()
           <span v-if="m === 'auto'" class="muted small">{{ t('theme.autoDesc') }}</span>
         </span>
       </label>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>{{ t('settings.clearTitle') }}</h2>
+    <div class="warning">
+      <p>{{ t('settings.clearWarning') }}</p>
+      <p class="strong">{{ t('settings.clearUndo') }}</p>
+      <button type="button" class="btn danger" @click="clearAll">{{ t('settings.clearTitle') }}</button>
     </div>
   </div>
 </template>
@@ -67,5 +97,32 @@ const { mode, setMode } = useTheme()
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+/* Clearing all data: the warning on a red wash with a red outline, the button the confirm dialog's destructive red. */
+.warning {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  background: color-mix(in srgb, var(--m025-bg) 12%, transparent);
+  border: 2px solid var(--m025-bg);
+}
+.warning p {
+  margin: 0;
+}
+.strong {
+  font-weight: bold;
+}
+.btn.danger {
+  margin-top: 4px;
+  background: var(--m025-bg);
+  border-color: var(--m025-bg);
+  color: var(--m025-fg);
+  font-weight: bold;
+}
+.btn.danger:hover {
+  background: var(--m025-bg);
+  filter: brightness(1.08);
 }
 </style>
