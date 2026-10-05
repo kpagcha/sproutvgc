@@ -5,7 +5,7 @@ import { t } from '@/i18n'
 import type { ItemId, PokemonId } from '@/data/dex'
 import { description, isDescribed } from '@/i18n/descriptions'
 import type { SearchResults, SectionKind } from '@/composables/useSearch'
-import { addFilter, isFilterKind, type PokemonFilter } from '@/lib/pokemonFilters'
+import { addFilter, isFilterKind, type Filters, type PokemonFilter } from '@/lib/pokemonFilters'
 import TypeIcon from '@/components/TypeIcon'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -13,7 +13,7 @@ import DexText from '@/components/DexText'
 
 // The dex searched, grouped by category (`useSearch`): the home page's results, the search page's, and the Pokémon
 // list's. On the Pokémon list (given its `filters`), types, abilities and moves filter it rather than open their pages.
-const props = defineProps<{ query: string; results: SearchResults; filters?: readonly PokemonFilter[] }>()
+const props = defineProps<{ query: string; results: SearchResults; filters?: Filters }>()
 
 /** Where a result leads: its page, or on the Pokémon list, the list filtered by it. */
 function target(kind: SectionKind | 'type', id: string, page: RouteLocationRaw): RouteLocationRaw {

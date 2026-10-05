@@ -6,20 +6,18 @@ import {
   available as isAvailable,
   availableIds,
   pokemon,
-  sameRef,
   type MoveId,
   type PokemonId,
   type Ref,
 } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { POKEMON, STATS, loadLearnsets, speciesOf, splitForme, statColor, total, type StatId } from '@/data/pokemon'
-import { TYPES, type TypeId } from '@/data/types'
-import { locale, t, typeName } from '@/i18n'
+import { locale, t } from '@/i18n'
 import { loadDescriptions, shortText } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
 import { percentiles } from '@/lib/statPercentiles'
-import { formatFilters, parseFilters, passes, type PokemonFilter } from '@/lib/pokemonFilters'
+import { allTerms, formatFilters, parseFilters, passes, type Filters } from '@/lib/pokemonFilters'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { useRowColumns } from '@/composables/useRowColumns'
@@ -35,6 +33,7 @@ import AppLink from '@/components/AppLink'
 import DexRef from '@/components/DexRef'
 import PokemonIcon from '@/components/PokemonIcon'
 import SearchResults from '@/components/SearchResults.vue'
+import FilterGroups from '@/components/FilterGroups.vue'
 
 // Every Pokémon the regulation has, with its types, abilities and base stats, sortable by its name and stats. Formes
 // that only look different (Vivillon's patterns) are left to their species' page. Its links are `AppLink`s and its
@@ -80,28 +79,34 @@ const counts = computed(() => ({
 const canHover = window.matchMedia('(hover: hover)').matches
 const abilityTip = (a: Ref) => (canHover ? shortText(a) : undefined)
 
-// The search (`?q=`) and the filters (`?f=`) are kept in the URL, so the home page's search can link here with them.
+// The search (`?q=`) and the filters (`?f=`, `?fm=`) are kept in the URL, so the home page's search can link here with them.
 const route = useActiveQuery()
 const router = useRouter()
 const query = computed({
   get: () => (typeof route.value.q === 'string' ? route.value.q : ''),
   set: (q: string) => void router.replace({ query: { ...route.value, q: q || undefined } }),
 })
-const filters = computed(() => parseFilters(route.value.f))
-function removeFilter(filter: PokemonFilter) {
-  const f = formatFilters(filters.value.filter((x) => !sameRef(x, filter)))
-  void router.replace({ query: { ...route.value, f } })
-}
+const filters = computed({
+  get: () => parseFilters(route.value.f, route.value.fm),
+  set: (f: Filters) => void router.replace({ query: { ...route.value, ...formatFilters(f) } }),
+})
 // Backspace in an empty search box takes off the last filter, as if it were part of the search.
 function removeLastFilter() {
-  const last = filters.value.at(-1)
-  if (!query.value && last) removeFilter(last)
+  const groups = filters.value.groups
+  const last = groups.at(-1)
+  if (query.value || !last) return
+  const terms = last.terms.slice(0, -1)
+  filters.value = {
+    ...filters.value,
+    groups: terms.length ? [...groups.slice(0, -1), { ...last, terms }] : groups.slice(0, -1),
+  }
 }
 
 // Filtering by move needs the learnsets, which only load then.
 const learnsets = ref<Record<PokemonId, MoveId[]> | null>(null)
 watchEffect(async () => {
-  if (!learnsets.value && filters.value.some((f) => f.kind === 'move')) learnsets.value = await loadLearnsets()
+  if (!learnsets.value && allTerms(filters.value).some((f) => f.kind === 'move'))
+    learnsets.value = await loadLearnsets()
 })
 
 // What else the search finds, grouped as on the home page: abilities, moves and types, each with a link to filter by
@@ -110,11 +115,9 @@ const { results } = useSearch(() => query.value, ['ability', 'move'])
 const others = computed(() => (results.value?.types.length || results.value?.sections.length ? results.value : null))
 onMounted(() => void loadDescriptions(['ability', 'move']))
 
-const type = ref<TypeId | ''>('')
 const shown = computed(() => {
   const q = fold(query.value.trim())
   return rows.value.flatMap((r) => {
-    if (type.value && !r.data.types.includes(type.value)) return []
     if (!passes(r.id, filters.value, learnsets.value)) return []
     const parts = q ? split(r.name, q) : null
     return !q || parts ? [{ ...r, parts }] : []
@@ -272,10 +275,6 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
         :aria-label="t('pokedex.search')"
         @keydown.backspace="removeLastFilter"
       />
-      <select v-model="type" class="search type-filter" :aria-label="t('pokedex.type')">
-        <option value="">{{ t('pokedex.anyType') }}</option>
-        <option v-for="ty in TYPES" :key="ty" :value="ty">{{ typeName(ty) }}</option>
-      </select>
       <SegmentedControl
         v-model="reference"
         class="view-opts"
@@ -284,21 +283,7 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
         :options="LIST_STAT_MARKS.map((m) => ({ value: m, label: markLabel(m) }))"
       />
     </div>
-    <ul v-if="filters.length" class="active-filters">
-      <li v-for="f in filters" :key="`${f.kind}:${f.id}`" class="active-filter">
-        <span class="muted">{{ t(`filter.kind.${f.kind}`) }}:</span>
-        <TypeIcon v-if="f.kind === 'type'" :type="f.id" />
-        <DexRef :to="f" />
-        <button
-          type="button"
-          class="remove"
-          :aria-label="t('filter.remove', { name: refName(f) })"
-          @click="removeFilter(f)"
-        >
-          ×
-        </button>
-      </li>
-    </ul>
+    <FilterGroups v-model="filters" />
     <div v-if="sorted.length" class="dex-table" :class="{ restoring }" role="table">
       <div ref="head" class="row head" role="row">
         <SortHeader
@@ -430,41 +415,6 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
   display: flex;
   flex-wrap: wrap;
   gap: 0 8px;
-}
-.type-filter {
-  width: auto;
-}
-.active-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 16px;
-  margin: 0 0 12px;
-  padding: 0;
-  list-style: none;
-}
-.active-filters li {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.active-filter {
-  padding: 2px 2px 2px 8px;
-  background: var(--panel-alt);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-}
-.remove {
-  padding: 0 6px;
-  font: inherit;
-  font-size: 1.15em;
-  line-height: 1;
-  color: var(--muted);
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-.remove:hover {
-  color: inherit;
 }
 .mon {
   display: flex;
