@@ -1,7 +1,7 @@
 // Generates `src/data/generated/` from Pokémon Showdown's Champions mod, at the commit pinned in `sources.json`, and
 // names in every locale from PokéAPI's data (`languages.ts` says where) and `overrides.ts`, which fills in what
 // PokéAPI lacks or has outdated. The regulation is `VITE_REGULATION` in `.env`. Run with `npm run gen-data`; `npm run gen-data -- --update` first moves every pin to
-// the latest version.
+// the latest version, and `-- --update-smogon` only Smogon's month (what the monthly refresh workflow runs).
 //
 // Showdown's own code loads the data (through jiti, which runs its TypeScript), so the Champions mod is merged over
 // Gen 9 and the format's rules apply exactly as on Showdown. Availability comes from the regulation's legal Pokémon:
@@ -660,7 +660,7 @@ async function main() {
   // The meta: Smogon's usage stats for the format, a snapshot per rating cutoff (`meta/<id>.json`, listed in
   // `meta/index.json`). Which of them the app shows is `VITE_META_SETS` in `.env`.
   const smogon = new Smogon(join(CACHE, 'smogon'), (url) => getBinary(url, true), toId(format.name))
-  if (!sources.smogon || process.argv.includes('--update')) {
+  if (!sources.smogon || process.argv.includes('--update') || process.argv.includes('--update-smogon')) {
     sources.smogon = await smogon.latestMonth()
     console.log(`Pinned Smogon's stats of ${sources.smogon}`)
   }

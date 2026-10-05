@@ -1,0 +1,52 @@
+name: Refresh usage stats
+
+# Smogon publishes a month's usage stats early the next month (September's on 1 October). This moves the pin to the
+# newest month that has the regulation's format (`gen-data --update-smogon`) and, when it moved, opens a pull request
+# with the regenerated data. The second run of the month catches a late publication; a month already proposed isn't
+# proposed again.
+on:
+  schedule:
+    - cron: '0 6 2,9 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # The generator's downloads (Showdown's checkout, PokéAPI's CSVs, the sprites, Smogon's files), so a run
+      # regenerates from the same pins without fetching them all again.
+      - uses: actions/cache@v4
+        with:
+          path: node_modules/.cache
+          key: gen-data-${{ hashFiles('scripts/sources.json') }}
+          restore-keys: gen-data-
+      - run: npm run gen-data -- --update-smogon
+      - run: npm run lint
+      - run: npm run build
+      - name: Open a pull request if the month moved
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then echo 'No new month of stats.'; exit 0; fi
+          month=$(node -p "require('./scripts/sources.json').smogon")
+          branch="usage-stats/$month"
+          if git ls-remote --exit-code origin "refs/heads/$branch" > /dev/null; then echo "$month already proposed."; exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898099+github-actions[bot]@users.noreply.github.com'
+          git switch -c "$branch"
+          git add -A scripts/sources.json src/data/generated
+          git commit -m "data: Smogon's usage stats of $month"
+          git push origin "$branch"
+          gh pr create --base main --head "$branch" --title "data: Smogon's usage stats of $month" --body "The meta moves to Smogon's usage stats of $month (\`gen-data --update-smogon\`), opened by the monthly refresh workflow. Lint and build passed on it.
+
+          Check the diff touches only \`src/data/generated/meta/\`, \`source.json\` and \`sources.json\`: anything else means a regenerated file changed with the same pins (most likely Showdown's sprites, fetched again when the cache is empty)."
