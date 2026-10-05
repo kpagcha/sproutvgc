@@ -1,23 +1,14 @@
 <script setup lang="ts">
-import { computed, shallowRef, useTemplateRef, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, shallowRef, useTemplateRef } from 'vue'
 import { ability, item, move, pokemon, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
-import {
-  currentSnapshots,
-  has,
-  loadMeta,
-  metaLabel,
-  percent,
-  players,
-  type MetaData,
-  type MetaSnapshot,
-} from '@/data/meta'
+import { has, percent, players } from '@/data/meta'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { fold } from '@/lib/search'
 import { useActiveQuery } from '@/composables/useActiveQuery'
+import { useMeta } from '@/composables/useMeta'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { useRowColumns } from '@/composables/useRowColumns'
 import { useSort } from '@/composables/useSort'
@@ -26,35 +17,16 @@ import DexRef from '@/components/DexRef'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import SearchBox from '@/components/SearchBox.vue'
+import MetaPicker from '@/components/MetaPicker.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
 
-// The regulation's Pokémon by usage, from the meta snapshot shown: the first of `VITE_META_SETS` for the regulation,
-// or the one picked (`?set=`) when there are several. Columns come and go with what the snapshot has. Its links are
-// `AppLink`s and its icons functional components, as in the other dex tables.
-const router = useRouter()
+// The regulation's Pokémon by usage, from the meta snapshot shown (`useMeta`: the one picked, on this page or another,
+// when there are several). Columns come and go with what the snapshot has. Its links are `AppLink`s and its icons
+// functional components, as in the other dex tables.
 const query = useActiveQuery()
-const snapshots = computed(currentSnapshots)
-const snapshot = computed<MetaSnapshot | undefined>(
-  () => snapshots.value.find((s) => s.id === query.value.set) ?? snapshots.value[0],
-)
-function pick(id: string) {
-  const set = id === snapshots.value[0]?.id ? undefined : id
-  void router.replace({ query: { ...query.value, set } })
-}
-
-const data = shallowRef<MetaData | null>(null)
-watch(
-  snapshot,
-  async (s) => {
-    data.value = null
-    if (!s) return
-    const d = await loadMeta(s)
-    if (snapshot.value === s) data.value = d
-  },
-  { immediate: true },
-)
+const { snapshot, data } = useMeta()
 
 const can = (c: Parameters<typeof has>[1]) => computed(() => !!snapshot.value && has(snapshot.value, c))
 const showUsage = can('usage')
@@ -146,16 +118,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
     <p class="muted">{{ t('usage.intro', { reg: REGULATION }) }}</p>
     <template v-if="snapshot">
       <div class="source">
-        <select
-          v-if="snapshots.length > 1"
-          class="search pick"
-          :value="snapshot.id"
-          :aria-label="t('usage.source')"
-          @change="pick(($event.target as HTMLSelectElement).value)"
-        >
-          <option v-for="s in snapshots" :key="s.id" :value="s.id">{{ metaLabel(s) }}</option>
-        </select>
-        <span v-else class="label">{{ metaLabel(snapshot) }}</span>
+        <MetaPicker />
         <span v-if="snapshot.battles" class="muted">
           {{ t('usage.battles', { n: snapshot.battles.toLocaleString(locale) }) }}
         </span>
@@ -308,13 +271,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   align-items: center;
   gap: 4px 16px;
   margin-bottom: 12px;
-}
-.source .label {
-  font-weight: bold;
-}
-.pick {
-  width: auto;
-  margin: 0;
 }
 .mon {
   display: flex;

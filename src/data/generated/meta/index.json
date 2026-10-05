@@ -9,7 +9,7 @@
     "period": "month",
     "cutoff": 1760,
     "battles": 1631943,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads"],
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
     "unweighted": ["brought"]
   },
   "smogon-1630": {
@@ -22,7 +22,7 @@
     "period": "month",
     "cutoff": 1630,
     "battles": 1631943,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads"],
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
     "unweighted": ["brought"]
   },
   "smogon-1500": {
@@ -35,7 +35,7 @@
     "period": "month",
     "cutoff": 1500,
     "battles": 1631943,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads"],
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
     "unweighted": ["brought"]
   },
   "smogon-0": {
@@ -48,7 +48,7 @@
     "period": "month",
     "cutoff": 0,
     "battles": 1631943,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads"],
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
     "unweighted": ["brought"]
   }
 }

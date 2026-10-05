@@ -123,6 +123,7 @@ interface ModdedDex {
   /** `getMovePool`: every move a species can learn, its pre-evolutions' and base forme's included. */
   species: { all(): readonly Species[]; get(name: string): Species; getMovePool(id: string): Set<string> }
   abilities: { all(): readonly Entry[] }
+  natures: { all(): readonly { id: string; name: string; plus?: string; minus?: string }[] }
   moves: { all(): readonly Move[] }
   items: { all(): readonly Item[]; get(name: string): Item }
   formats: { all(): readonly Format[]; getRuleTable(format: Format): RuleTable }
@@ -654,6 +655,22 @@ async function main() {
   // The IDs the regulation has, per category: all the app needs to know at run time to hide the rest (the files
   // above give it the types, and the category pages their data).
   await writeJson('available.json', availableIds)
+
+  // The natures, by Showdown ID: the stat each raises and lowers (none for the neutral ones), and their names, every
+  // locale's (English Showdown's, the others PokéAPI's). Few enough for one small file.
+  const natures = [...dex.natures.all()].sort((a, b) => a.id.localeCompare(b.id))
+  const natureNames: Record<string, Record<string, string>> = Object.fromEntries(
+    natures.map((n) => [n.id, { ...(n.plus && { plus: n.plus, minus: n.minus! }), en: n.name }]),
+  )
+  for (const [locale, language] of languages) {
+    const names = await pokeapiNames(sources.pokeapi, language.pokeapi, 'natures', 'nature_names', 'nature_id')
+    for (const n of natures) {
+      const name = names.get(n.id)
+      if (!name) throw new Error(`PokéAPI has no ${locale} name for the nature ${n.name}`)
+      natureNames[n.id]![locale] = name
+    }
+  }
+  await writeJson('natures.json', natureNames)
   // Each legal Pokémon's moves, for its page (and the other way round, for a move's).
   await writeJson('pokemon.learnsets.json', Object.fromEntries(byId(roster).map((s) => [s.id, learnset(s.id)])))
 

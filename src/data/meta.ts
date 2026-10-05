@@ -18,7 +18,7 @@ export type MetaKind = 'showdown' | 'ingame' | 'tournament'
 
 /** What a snapshot has besides each Pokémon's rank, which they all have. */
 export type MetaCapability =
-  'usage' | 'brought' | 'winRate' | 'leads' | 'moves' | 'items' | 'abilities' | 'teammates' | 'spreads'
+  'usage' | 'brought' | 'winRate' | 'leads' | 'moves' | 'items' | 'abilities' | 'teammates' | 'spreads' | 'speeds'
 
 /** Smogon's rating cutoffs: the players whose teams count most. */
 export type Cutoff = 0 | 1500 | 1630 | 1760
@@ -74,6 +74,9 @@ export interface PokemonMeta {
   abilities?: Share<AbilityId>[]
   teammates?: Share<PokemonId>[]
   spreads?: Spread[]
+  /** What its sets put into Speed, from all of them: stat points and nature (by Showdown ID), most common first.
+   * Its Speed stat follows from its base Speed (`speedStat`, with `natureEffect`). */
+  speeds?: { points: number; nature: string; share: number }[]
 }
 
 export type MetaData = Partial<Record<PokemonId, PokemonMeta>>
@@ -132,8 +135,33 @@ export const snapshots = computed<MetaSnapshot[]>(() => active.value.flatMap((id
 /** The current regulation's snapshots, the one to show by default first. */
 export const currentSnapshots = (): MetaSnapshot[] => snapshots.value.filter((s) => s.regulation === REGULATION)
 
-/** The snapshot to show by default, if there's any for the current regulation. */
-export const currentSnapshot = (): MetaSnapshot | undefined => currentSnapshots()[0]
+const PICK_KEY = 'sproutvgc.metaSet'
+
+function savedPick(): string | null {
+  try {
+    return localStorage.getItem(PICK_KEY)
+  } catch {
+    return null
+  }
+}
+
+const picked = ref<string | null>(savedPick())
+
+/** The snapshot every page shows: the one the reader picked, while it's still shown, or else the first. */
+export const selectedSnapshot = computed<MetaSnapshot | undefined>(() => {
+  const list = currentSnapshots()
+  return list.find((s) => s.id === picked.value) ?? list[0]
+})
+
+/** Shows `id`'s snapshot on every page, remembered in this browser. */
+export function selectSnapshot(id: string) {
+  picked.value = id
+  try {
+    localStorage.setItem(PICK_KEY, id)
+  } catch {
+    // Storage unavailable: the choice lasts until the page reloads.
+  }
+}
 
 export const has = (s: MetaSnapshot, c: MetaCapability) => s.capabilities.includes(c)
 

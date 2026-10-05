@@ -61,7 +61,7 @@ export const AREAS: Area[] = [
         desc: 'desc.reports',
         soon: true,
       },
-      { key: 'speedTiers', route: 'speedTiers', label: 'nav.speedTiers', desc: 'desc.speedTiers', soon: true },
+      { key: 'speedTiers', route: 'speedTiers', label: 'nav.speedTiers', desc: 'desc.speedTiers' },
     ],
   },
   {

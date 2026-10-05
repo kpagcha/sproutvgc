@@ -202,7 +202,18 @@ export const router = createRouter({
       meta: { titleKey: 'title.usage', descKey: 'desc.usage', dexNames: true, ...inArea('competitive', 'usage') },
     },
     soon('competitive', 'reports', '/competitive/reports', 'title.reports', 'desc.reports'),
-    soon('competitive', 'speedTiers', '/competitive/speed-tiers', 'title.speedTiers', 'desc.speedTiers'),
+    {
+      path: '/competitive/speed-tiers',
+      name: 'speedTiers',
+      component: () => import('@/views/SpeedTiersView.vue'),
+      meta: {
+        titleKey: 'title.speedTiers',
+        descKey: 'desc.speedTiers',
+        dexNames: true,
+        keepScroll: true,
+        ...inArea('competitive', 'speedTiers'),
+      },
+    },
 
     // Tools: what you interact with.
     area('tools', 'title.tools', 'desc.tools'),

@@ -14,7 +14,7 @@ const PROVIDER = { name: 'Smogon', url: 'https://www.smogon.com/' }
 const CUTOFFS = [1760, 1630, 1500, 0] as const
 
 /** How much of each list to keep: Smogon's own moveset files show about as much. Less than 1% is noise. */
-const KEEP = { list: 10, spreads: 6, min: 0.01 }
+const KEEP = { list: 10, spreads: 6, speeds: 20, min: 0.01 }
 
 // What `src/data/meta.ts` reads (`MetaSnapshot`, `PokemonMeta`), with IDs as plain strings.
 interface Snapshot {
@@ -43,6 +43,7 @@ interface PokemonMeta {
   abilities: Share[]
   teammates: Share[]
   spreads: { nature: string; points: number[]; share: number }[]
+  speeds: { points: number; nature: string; share: number }[]
 }
 
 /** What the dex has, to check Smogon's names and IDs against: a Pokémon's ID by its name, or whether an ID exists. */
@@ -134,6 +135,24 @@ export class Smogon {
           .filter(([id, w]) => w / total >= KEEP.min && keep(id))
           .slice(0, n)
           .map(([id, w]) => ({ id, share: round(w / total) }))
+      /** What its sets put into Speed, from every spread (the long tail of them is most of the sets): stat points and
+       * nature, as shares. */
+      const speeds = (spreads: Record<string, number>, total: number) => {
+        const weights = new Map<string, number>()
+        for (const [spread, w] of Object.entries(spreads)) {
+          const [nature, points] = spread.split(':') as [string, string]
+          const key = `${points.split('/')[5]}:${nature.toLowerCase()}`
+          weights.set(key, (weights.get(key) ?? 0) + w)
+        }
+        return [...weights]
+          .sort((a, b) => b[1] - a[1])
+          .filter(([, w]) => w / total >= KEEP.min)
+          .slice(0, KEEP.speeds)
+          .map(([key, w]) => {
+            const [points, nature] = key.split(':') as [string, string]
+            return { points: Number(points), nature, share: round(w / total) }
+          })
+      }
       const check = (set: ReadonlySet<string>, what: string) => (id: string) => {
         if (!set.has(id)) unknown.add(`${what} "${id}"`)
         return set.has(id)
@@ -160,6 +179,7 @@ export class Smogon {
             const [nature, points] = id.split(':') as [string, string]
             return { nature: nature.toLowerCase(), points: points.split('/').map(Number), share }
           }),
+          speeds: speeds(d.Spreads, total),
         }
       })
       result.push({
@@ -173,7 +193,7 @@ export class Smogon {
           period: 'month' as const,
           cutoff,
           battles: chaos.info['number of battles'],
-          capabilities: ['usage', 'brought', 'moves', 'items', 'abilities', 'teammates', 'spreads'],
+          capabilities: ['usage', 'brought', 'moves', 'items', 'abilities', 'teammates', 'spreads', 'speeds'],
           unweighted: ['brought'],
         },
         data,
