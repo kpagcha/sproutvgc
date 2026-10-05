@@ -83,12 +83,37 @@ function onModsToggle(e: Event) {
   }
   modsOpen.value = open
 }
-/** Boosts show unless turned off (`?noboosts=1`), when the snapshot has the items and abilities they come from. */
+/**
+ * Whether boosts show, when the snapshot has the items and abilities they come from: as the URL says (`?boosts=0` or
+ * `1`, a shared link), else as the reader last left them, remembered in this browser; on at first.
+ */
 const boostsAvailable = computed(
   () => !!snapshot.value && has(snapshot.value, 'items') && has(snapshot.value, 'abilities'),
 )
-const showBoosts = computed(() => !showAll.value && boostsAvailable.value && !flag('noboosts'))
-const toggleBoosts = () => set('noboosts', showBoosts.value ? '1' : undefined)
+const BOOSTS_KEY = 'sproutvgc.speedTiers.boosts'
+function savedBoosts(): boolean {
+  try {
+    return localStorage.getItem(BOOSTS_KEY) !== '0'
+  } catch {
+    return true
+  }
+}
+const boostsPref = shallowRef(savedBoosts())
+const boostsOn = computed(() =>
+  query.value.boosts === '0' ? false : query.value.boosts === '1' ? true : boostsPref.value,
+)
+const showBoosts = computed(() => !showAll.value && boostsAvailable.value && boostsOn.value)
+function toggleBoosts() {
+  const on = !boostsOn.value
+  boostsPref.value = on
+  try {
+    localStorage.setItem(BOOSTS_KEY, on ? '1' : '0')
+  } catch {
+    // Storage unavailable: the choice lasts until the page reloads.
+  }
+  // The URL says so only when it differs from the default, so links stay short.
+  set('boosts', on ? undefined : '0')
+}
 const toggleTrickRoom = () => set('trickroom', trickRoom.value ? undefined : '1')
 
 interface Entry {
