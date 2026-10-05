@@ -1,19 +1,16 @@
 <script setup lang="ts">
-import { computed, ref, shallowRef, watchEffect } from 'vue'
+import { computed } from 'vue'
 import { Star } from '@lucide/vue'
-import { available, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
-import type { Move } from '@/data/moves'
+import { available } from '@/data/dex'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { SECTIONS } from '@/composables/useSearch'
 import { useFavorites } from '@/composables/useFavorites'
-import { follow, refHref } from '@/lib/links'
-import ItemIcon from '@/components/ItemIcon.vue'
-import PokemonIcon from '@/components/PokemonIcon'
-import TypeIcon from '@/components/TypeIcon'
+import { useOpenState } from '@/composables/useOpenState'
+import EntryChip from '@/components/EntryChip.vue'
 
-// The home page's favorites: the entries starred on their pages, a panel above the dex's sections, one row per category
-// (in the sections' order), each alphabetically, with its icon (a move its type). Those the regulation doesn't have are
+// The home page's favorites: the entries starred on their pages, one row per category (in the search's order), each
+// alphabetically, as chips (`EntryChip`). Those the regulation doesn't have are
 // left out (and kept, for when it has them again). Nothing shows until something is starred. It folds away, and stays
 // as the reader left it.
 const { favorites } = useFavorites()
@@ -29,30 +26,7 @@ const groups = computed(() =>
 )
 const count = computed(() => groups.value.reduce((n, g) => n + g.refs.length, 0))
 
-// The moves' data, for their types, loads only once a move is starred: the home page doesn't need it otherwise.
-const moves = shallowRef<Record<MoveId, Move> | null>(null)
-watchEffect(async () => {
-  if (!moves.value && favorites.value.some((r) => r.kind === 'move')) moves.value = (await import('@/data/moves')).MOVES
-})
-const moveType = (id: string) => moves.value?.[id as MoveId]?.type
-
-const OPEN_KEY = 'sproutvgc.favorites.open'
-function readOpen() {
-  try {
-    return localStorage.getItem(OPEN_KEY) !== '0'
-  } catch {
-    return true
-  }
-}
-const open = ref(readOpen())
-function onToggle(e: Event) {
-  open.value = (e.target as HTMLDetailsElement).open
-  try {
-    localStorage.setItem(OPEN_KEY, open.value ? '1' : '0')
-  } catch {
-    // Storage unavailable: the choice lasts for this page load.
-  }
-}
+const { open, onToggle } = useOpenState('sproutvgc.favorites.open')
 </script>
 
 <template>
@@ -67,12 +41,7 @@ function onToggle(e: Event) {
       <template v-for="g in groups" :key="g.kind">
         <dt class="muted">{{ t(g.title) }}</dt>
         <dd>
-          <a v-for="{ ref: r, name } in g.refs" :key="r.id" :href="refHref(r)" class="fav" @click="follow">
-            <PokemonIcon v-if="r.kind === 'pokemon'" :id="r.id as PokemonId" />
-            <ItemIcon v-else-if="r.kind === 'item'" :id="r.id as ItemId" />
-            <TypeIcon v-else-if="r.kind === 'move' && moveType(r.id)" :type="moveType(r.id)!" />
-            {{ name }}
-          </a>
+          <EntryChip v-for="{ ref: r } in g.refs" :key="r.id" :to="r" />
         </dd>
       </template>
     </dl>
@@ -133,26 +102,6 @@ dd {
   flex-wrap: wrap;
   gap: 6px;
   margin: 0;
-}
-/* Flat chips, like the filters', all the same height whether or not they have an icon. */
-.fav {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 30px;
-  padding: 0 10px;
-  color: var(--text);
-  background: var(--panel-alt);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-}
-.fav:hover {
-  text-decoration: none;
-  background: var(--hover);
-  border-color: var(--border-strong);
-}
-.fav :deep(.sheet-icon) {
-  margin: -4px 0;
 }
 /* Phones: each category's name above its favorites. */
 @media (max-width: 560px) {

@@ -6,6 +6,7 @@ import type { MessageKey } from '@/i18n'
 import type { AreaId } from '@/lib/areas'
 import { loadDexNames } from '@/i18n/refName'
 import { hasFavorites } from '@/composables/useFavorites'
+import { hasRecent } from '@/composables/useRecent'
 import { loadDescriptions, type DescribedKind } from '@/i18n/descriptions'
 
 declare module 'vue-router' {
@@ -51,7 +52,8 @@ export const router = createRouter({
       path: '/',
       name: 'home',
       component: () => import('@/views/HomeView.vue'),
-      meta: { descKey: 'desc.home', dexNames: hasFavorites },
+      // Its favorites and recently viewed show dex entries.
+      meta: { descKey: 'desc.home', dexNames: () => hasFavorites() || hasRecent() },
     },
 
     // The dex: what exists in the regulation.

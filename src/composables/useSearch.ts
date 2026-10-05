@@ -1,12 +1,13 @@
 import { computed, ref } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
-import { locale, typeName, type MessageKey } from '@/i18n'
+import { locale, t, typeName, type MessageKey } from '@/i18n'
 import { availableIds, type PokemonId, type Ref } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
 import { TYPES, type TypeId } from '@/data/types'
 import { loadDescriptions } from '@/i18n/descriptions'
 import { loadDexNames, refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
+import { AREAS } from '@/lib/areas'
 
 export type SectionKind = 'pokemon' | 'move' | 'ability' | 'item' | 'condition'
 
@@ -38,7 +39,19 @@ export interface Hit {
   to: RouteLocationRaw
 }
 
+/** A page of the site found by its name: an area's, or a section's (`src/lib/areas.ts`). */
+export interface PageHit {
+  key: string
+  name: string
+  parts: [string, string, string]
+  to: RouteLocationRaw
+  /** The area it's in, for a section's page. */
+  area?: MessageKey
+  soon?: boolean
+}
+
 export interface SearchResults {
+  pages: PageHit[]
   types: { id: TypeId; parts: [string, string, string] }[]
   sections: ((typeof SECTIONS)[number] & { hits: Hit[]; more: number })[]
 }
@@ -49,8 +62,32 @@ export function preloadSearch() {
   void loadDescriptions(['ability', 'move', 'item', 'condition'])
 }
 
-/** The dex searched by name in the reader's language, as the home and search pages do it: types, and `kinds`. */
-export function useSearch(query: () => string, kinds: readonly SectionKind[] = SECTIONS.map((s) => s.kind)) {
+/** The site's pages whose name (or, for a section, its page's longer title) matches the folded query `q`. */
+function searchPages(q: string): PageHit[] {
+  return AREAS.flatMap((a) => {
+    const own = split(t(a.label), q)
+    const area: PageHit[] = own ? [{ key: a.id, name: t(a.label), parts: own, to: { name: a.route } }] : []
+    const sections = a.sections.flatMap((s): PageHit[] => {
+      const names = [t(s.label), ...(s.title ? [t(s.title)] : [])]
+      for (const name of names) {
+        const parts = split(name, q)
+        if (parts) return [{ key: `${a.id}.${s.key}`, name, parts, to: { name: s.route }, area: a.label, soon: s.soon }]
+      }
+      return []
+    })
+    return [...area, ...sections]
+  })
+}
+
+/**
+ * The dex searched by name in the reader's language, as the home and search pages do it: types, and `kinds`; with
+ * `pages`, the site's pages too.
+ */
+export function useSearch(
+  query: () => string,
+  kinds: readonly SectionKind[] = SECTIONS.map((s) => s.kind),
+  { pages = false } = {},
+) {
   /** Each category's entries matching the search; categories without any left out. */
   const results = computed((): SearchResults | null => {
     const q = fold(query().trim())
@@ -75,7 +112,7 @@ export function useSearch(query: () => string, kinds: readonly SectionKind[] = S
         return { ...section, hits: hits.slice(0, LIMIT), more: Math.max(0, hits.length - LIMIT) }
       })
       .filter((s) => s.hits.length)
-    return { types, sections }
+    return { pages: pages ? searchPages(q) : [], types, sections }
   })
 
   /** The only result, if the search has exactly one: Enter opens it. */
@@ -83,6 +120,8 @@ export function useSearch(query: () => string, kinds: readonly SectionKind[] = S
     const r = results.value
     if (!r) return null
     const hits = r.sections.flatMap((s) => s.hits)
+    if (r.pages.length === 1 && !r.types.length && !hits.length) return r.pages[0]!.to
+    if (r.pages.length) return null
     if (r.types.length === 1 && !hits.length) return `/dex/types/${r.types[0]!.id}`
     if (hits.length === 1 && !r.types.length && !r.sections[0]!.more) return hits[0]!.to
     return null

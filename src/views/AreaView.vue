@@ -1,22 +1,49 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { GAME_NAME, REGULATION } from '@/data/format'
 import { t } from '@/i18n'
 import { areaOf } from '@/lib/areas'
+import { preloadSearch, useSearch } from '@/composables/useSearch'
+import SearchBox from '@/components/SearchBox.vue'
+import SearchResults from '@/components/SearchResults.vue'
 import SectionDecor from '@/components/SectionDecor.vue'
 
-// An area's own page (`/dex`, `/competitive`, `/tools`): a card per section, what it is, and whether it's coming.
+// An area's own page (`/dex`, `/competitive`, `/tools`): a card per section, what it is, and whether it's coming. The
+// dex's has the home page's search too (kept in `?q=`), its results in place of the cards.
 const route = useRoute()
+const router = useRouter()
 const area = computed(() => areaOf(route.meta.area)!)
 const params = { game: GAME_NAME, reg: REGULATION }
+
+const searchable = computed(() => area.value.id === 'dex')
+const query = computed({
+  get: () => (typeof route.query.q === 'string' ? route.query.q : ''),
+  set: (q: string) => void router.replace({ query: { ...route.query, q: q || undefined } }),
+})
+const { results, only } = useSearch(() => (searchable.value ? query.value : ''), undefined, { pages: true })
+function openOnly() {
+  if (only.value) void router.push(only.value)
+}
+onMounted(() => searchable.value && preloadSearch())
 </script>
 
 <template>
   <div class="area">
     <h1>{{ t(area.title) }}</h1>
     <p class="muted intro">{{ t(route.meta.descKey!, params) }}</p>
-    <div class="cards">
+    <SearchBox
+      v-if="searchable"
+      v-model="query"
+      wide
+      icon
+      class="search"
+      :placeholder="t('home.search')"
+      :aria-label="t('home.search')"
+      @keydown.enter="openOnly"
+    />
+    <SearchResults v-if="results" :query :results />
+    <div v-else class="cards">
       <RouterLink v-for="s in area.sections" :key="s.key" :to="{ name: s.route }" class="panel card">
         <span class="card-title font-display">
           {{ t(s.label) }} <span class="arrow" aria-hidden="true">›</span>
@@ -32,6 +59,9 @@ const params = { game: GAME_NAME, reg: REGULATION }
 <style scoped>
 .intro {
   margin: 0 0 16px;
+}
+.search {
+  margin-bottom: 16px;
 }
 .cards {
   display: grid;

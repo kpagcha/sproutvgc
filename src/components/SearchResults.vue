@@ -26,6 +26,22 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
 </script>
 
 <template>
+  <!-- The site's pages the search names ("moves", "damage calc"), each after its area. -->
+  <section v-if="results.pages.length" class="panel section">
+    <span class="section-title font-display">{{ t('search.pages') }}</span>
+    <ul class="chip-hits">
+      <li v-for="p in results.pages" :key="p.key">
+        <RouterLink :to="p.to" class="chip-hit">
+          <span v-if="p.area" class="muted">{{ t(p.area) }} ›</span>
+          <span
+            >{{ p.parts[0] }}<mark>{{ p.parts[1] }}</mark
+            >{{ p.parts[2] }}</span
+          >
+          <span v-if="p.soon" class="soon">{{ t('soon.tag') }}</span>
+        </RouterLink>
+      </li>
+    </ul>
+  </section>
   <section v-for="s in results.sections" :key="s.kind" class="panel section">
     <RouterLink :to="{ path: s.list, query: { q: query } }" class="section-head">
       <span class="section-title font-display">{{ t(s.title) }} <span class="arrow">›</span></span>
@@ -81,7 +97,9 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
       </li>
     </ul>
   </section>
-  <p v-if="!results.types.length && !results.sections.length" class="muted none">{{ t('home.none') }}</p>
+  <p v-if="!results.pages.length && !results.types.length && !results.sections.length" class="muted none">
+    {{ t('home.none') }}
+  </p>
 </template>
 
 <style scoped>
@@ -125,6 +143,18 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
   align-items: center;
   gap: 6px;
   font-weight: bold;
+}
+.chip-hit .muted {
+  font-weight: normal;
+}
+/* A page not built yet. */
+.soon {
+  padding: 0 6px;
+  font-size: 0.7em;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  background: var(--sel);
 }
 /* As on the abilities page: each name beside its description. */
 .entries {

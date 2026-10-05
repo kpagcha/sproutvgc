@@ -1,14 +1,19 @@
 <script setup lang="ts">
+import { watch } from 'vue'
 import { Star } from '@lucide/vue'
 import type { Ref } from '@/data/dex'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { useFavorites } from '@/composables/useFavorites'
+import { useRecent } from '@/composables/useRecent'
 
 // An entry page's title: the entry's name, and a star to add it to the reader's favorites (shown on the home page).
-defineProps<{ to: Ref }>()
+// It records the visit too, for the home page's recently viewed.
+const props = defineProps<{ to: Ref }>()
 
 const { isFavorite, toggle } = useFavorites()
+const { visit } = useRecent()
+watch(() => props.to, visit, { immediate: true })
 </script>
 
 <template>

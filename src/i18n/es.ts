@@ -118,7 +118,13 @@ export const messages: Record<keyof typeof en, string> = {
   'desc.quiz':
     'Aprende la tabla de tipos de {game} con repetición espaciada. Los enfrentamientos que falles vuelven hasta que te los sepas.',
 
-  'home.intro': 'Una Pokédex competitiva para {game}, al día con el Reglamento {reg}.',
+  'home.intro': 'Una herramienta competitiva para {game}, al día con el Reglamento {reg}.',
+  'home.dexPitch': 'Qué hay en el Reglamento {reg} y qué hace.',
+  'home.competitivePitch': 'Qué usan los jugadores y cómo les va.',
+  'home.toolsPitch': 'Calcula, crea y practica.',
+  'search.pages': 'Páginas',
+  'recent.title': 'Vistos recientemente',
+  'recent.clear': 'Borrar',
   'home.typesDesc': 'Cada tipo con sus debilidades, resistencias e inmunidades.',
   'home.abilitiesDesc': 'Qué hace cada habilidad y qué Pokémon pueden tenerla.',
   'home.search': 'Buscar en la dex',
