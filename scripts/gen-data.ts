@@ -24,6 +24,7 @@ import { LOCALES, type Locale } from '../src/i18n/locales.ts'
 import { LANGUAGES, type Language } from './languages.ts'
 import { MOVES_EVERYONE_USES, NAMES, type CategoryKey } from './overrides.ts'
 import { ConditionScan } from './conditions.ts'
+import { SPEED_ABILITIES, SPEED_ITEMS } from '../src/lib/speed.ts'
 import { Smogon } from './smogon.ts'
 import { ITEM_ICONS, POKEMON_ICONS, SpriteSource, iconIndexes, sheetLayout, trimSheet } from './sprites.ts'
 
@@ -649,6 +650,20 @@ async function main() {
   for (const id of availableIds.items!) scan.code('item', id, dex.items.get(id))
   const conditions = scan.result()
   await writeJson('conditions.json', conditions)
+
+  // The abilities and items the regulation has whose code changes Speed (`onModifySpe`), and those the speed tiers'
+  // table of them (`src/lib/speed.ts`) lacks: their multiplier and condition are to fill in there by hand.
+  const changesSpeed = (e: object) => typeof (e as { onModifySpe?: unknown }).onModifySpe === 'function'
+  const speedGaps = [
+    ...availableIds
+      .abilities!.filter((id) => changesSpeed(abilitiesById.get(id)!) && !SPEED_ABILITIES[id])
+      .map((id) => `ability ${id}`),
+    ...availableIds
+      .items!.filter((id) => changesSpeed(dex.items.get(id)) && !SPEED_ITEMS[id])
+      .map((id) => `item ${id}`),
+  ]
+  if (speedGaps.length)
+    console.warn(`What changes Speed in the regulation, missing from src/lib/speed.ts: ${speedGaps.join(', ')}`)
   availableIds.conditions = Object.keys(conditions)
   console.log(`${availableIds.conditions.length} conditions caused by what the regulation has`)
 

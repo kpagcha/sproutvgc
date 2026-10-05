@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { availableIds, pokemon, type PokemonId } from '@/data/dex'
+import { ability, availableIds, condition, item, pokemon, type PokemonId, type Ref } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
 import { has, percent } from '@/data/meta'
@@ -9,7 +9,19 @@ import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { fold } from '@/lib/search'
 import { natureEffects, natureName } from '@/data/natures'
-import { BENCHMARKS, benchmark, inBattle, natureEffect, speedStat, type Benchmark, type SpeedMods } from '@/lib/speed'
+import {
+  BENCHMARKS,
+  SPEED_ABILITIES,
+  SPEED_ITEMS,
+  benchmark,
+  inBattle,
+  natureEffect,
+  speedStat,
+  type Benchmark,
+  type SpeedEffect,
+  type SpeedMods,
+  withEffect,
+} from '@/lib/speed'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useMeta } from '@/composables/useMeta'
 import { usePageEntered } from '@/composables/usePageEntered'
@@ -21,8 +33,10 @@ import SegmentedControl from '@/components/SegmentedControl.vue'
 
 // The regulation's Pokémon ordered by Speed, as a ladder of Speed values with the Pokémon at each. By default the
 // meta: the most used Pokémon at the Speeds their sets actually run (from the meta snapshot shown, when it has them);
-// or every Pokémon at the Speeds that mark its range (`BENCHMARKS`). Battle modifiers apply to everyone shown. Every
-// choice is kept in the URL, so a view can be shared.
+// with the items and abilities they run that change Speed as chips of their own (boosts); or every Pokémon at
+// the Speeds that mark its range (`BENCHMARKS`). Trick Room turns the ladder over; the modifiers, when the reader
+// opens them, apply to every Pokémon shown, to read Speeds as they'd be under Tailwind, at +1... Every choice is kept
+// in the URL, so a view can be shared.
 const router = useRouter()
 const query = useActiveQuery()
 const flag = (k: string) => query.value[k] === '1'
@@ -39,23 +53,41 @@ const { snapshot, data } = useMeta()
 const metaAvailable = computed(() => !!snapshot.value && has(snapshot.value, 'speeds'))
 
 const showAll = computed(() => !metaAvailable.value || flag('all'))
+const trickRoom = computed(() => flag('trickroom'))
+
+// The modifiers, applied to everyone: shown when the reader opens them, or when the URL sets one; closing them clears
+// them, so the ladder is never modified out of sight.
 const STAGES = ['-1', '0', '1', '2'] as const
 const stage = computed({
   get: () => ((STAGES as readonly string[]).includes(String(query.value.stage)) ? String(query.value.stage) : '0'),
   set: (v: string) => set('stage', v === '0' ? undefined : v),
 })
-const TOGGLES = ['tailwind', 'trickroom', 'scarf', 'doubled', 'paralysis'] as const
+const TOGGLES = ['tailwind', 'scarf', 'doubled', 'paralysis'] as const
 type Toggle = (typeof TOGGLES)[number]
-const on = (k: Toggle) => flag(k)
-const toggle = (k: Toggle) => set(k, on(k) ? undefined : '1')
+const toggleMod = (k: Toggle) => set(k, flag(k) ? undefined : '1')
 const mods = computed<SpeedMods>(() => ({
-  tailwind: on('tailwind'),
-  scarf: on('scarf'),
-  doubled: on('doubled'),
-  paralysis: on('paralysis'),
+  tailwind: flag('tailwind'),
+  scarf: flag('scarf'),
+  doubled: flag('doubled'),
+  paralysis: flag('paralysis'),
   stage: Number(stage.value),
 }))
-const trickRoom = computed(() => on('trickroom'))
+const modded = computed(() => TOGGLES.some(flag) || stage.value !== '0')
+const modsOpen = shallowRef(modded.value)
+function onModsToggle(e: Event) {
+  const open = (e.target as HTMLDetailsElement).open
+  if (!open && modded.value) {
+    const q = { ...query.value }
+    for (const k of [...TOGGLES, 'stage']) delete q[k]
+    void router.replace({ query: q })
+  }
+  modsOpen.value = open
+}
+/** Boosts show unless turned off (`?noboosts=1`), when the snapshot has the items and abilities they come from. */
+const boostsAvailable = computed(
+  () => !!snapshot.value && has(snapshot.value, 'items') && has(snapshot.value, 'abilities'),
+)
+const showBoosts = computed(() => !showAll.value && boostsAvailable.value && !flag('noboosts'))
 
 interface Entry {
   id: PokemonId
@@ -68,6 +100,9 @@ interface Entry {
   nature?: string
   share?: number
   bench?: Benchmark
+  /** An item or ability its sets run that changes Speed (`SPEED_ITEMS`, `SPEED_ABILITIES`), at its most common
+   * Speed build. */
+  boost?: { ref: Ref<'item' | 'ability'> } & SpeedEffect
   /** Its usage rank, to order the Pokémon at the same Speed. */
   rank: number
 }
@@ -80,18 +115,35 @@ const entries = computed<Entry[]>(() => {
       .filter(([, m]) => m!.rank <= TOP)
       .flatMap(([key, m]) => {
         const id = key as PokemonId
+        const base = POKEMON[id].stats[5]
         // A chip per investment: stat points and nature.
-        return (m!.speeds ?? [])
+        const list: Entry[] = (m!.speeds ?? [])
           .filter((s) => s.share >= MIN_SHARE)
           .map((s) => ({
             id,
             ...named(id),
-            speed: speedStat(POKEMON[id].stats[5], s.points, natureEffect(s.nature)),
+            speed: speedStat(base, s.points, natureEffect(s.nature)),
             points: s.points,
             nature: s.nature,
             share: s.share,
             rank: m!.rank,
           }))
+        // Its boosts, at its most common build: the data counts items, abilities and spreads apart, so it doesn't say
+        // which build goes with them.
+        const build = m!.speeds?.[0]
+        if (showBoosts.value && build) {
+          const speed = speedStat(base, build.points, natureEffect(build.nature))
+          const at = { id, ...named(id), points: build.points, nature: build.nature, rank: m!.rank }
+          const effects = [
+            ...(m!.items ?? []).map((i) => ({ ref: item(i.id), share: i.share, effect: SPEED_ITEMS[i.id] })),
+            ...(m!.abilities ?? []).map((a) => ({ ref: ability(a.id), share: a.share, effect: SPEED_ABILITIES[a.id] })),
+          ]
+          for (const { ref, share, effect } of effects) {
+            if (effect && (share ?? 0) >= MIN_SHARE)
+              list.push({ ...at, speed: withEffect(speed, effect), share, boost: { ref, ...effect } })
+          }
+        }
+        return list
       })
   }
   const ranks = data.value
@@ -115,7 +167,7 @@ const isHit = (e: Entry) => {
   return !!q && fold(`${e.species} ${e.forme ?? ''}`).includes(q)
 }
 
-/** The ladder: each Speed in battle with the Pokémon at it, fastest first (slowest under Trick Room). */
+/** The ladder: each Speed (with the modifiers) with the Pokémon at it, fastest first (slowest under Trick Room). */
 const tiers = computed(() => {
   const bySpeed = new Map<number, Entry[]>()
   for (const e of entries.value) {
@@ -146,6 +198,30 @@ function investTip(e: Entry) {
     pct: percent(e.share!),
   })
 }
+type Boost = NonNullable<Entry['boost']>
+const factor = (b: Boost) => b.factor.toLocaleString(locale.value)
+const boostLabel = (b: Boost) => t('speed.boostLabel', { effect: refName(b.ref), factor: factor(b) })
+/** The weather or terrain a boost needs, by name. */
+const field = (b: Boost) =>
+  b.when === 'always' || b.when === 'itemLost' || b.when === 'status' ? undefined : refName(condition(b.when))
+function boostTip(e: Entry) {
+  const b = e.boost!
+  const f = field(b)
+  const when =
+    b.when === 'always'
+      ? ''
+      : ` ${f ? t('speed.when.field', { field: f }) : t(`speed.when.${b.when as 'itemLost' | 'status'}`)}`
+  return t('speed.boostTip', {
+    effect: refName(b.ref),
+    pct: percent(e.share!),
+    factor: factor(b),
+    when,
+    build: t('speed.build', { nature: natureName(e.nature!), points: e.points! }),
+  })
+}
+const tip = (e: Entry) => (e.bench ? benchTip(e.bench) : e.boost ? boostTip(e) : investTip(e))
+const chipKey = (e: Entry) =>
+  `${e.id}:${e.bench ?? (e.boost ? `${e.boost.ref.kind}:${e.boost.ref.id}` : `${e.points}:${e.nature}`)}`
 
 // A Speed's row links to the page as it is with that row picked (`?at=`): clicking its number picks it (or drops it,
 // when picked already) and copies the link. A shared link brings the row into view once the ladder is in.
@@ -200,27 +276,56 @@ const { entered } = usePageEntered()
       </div>
       <div class="mods">
         <button
-          v-for="k in TOGGLES"
-          :key="k"
-          v-tip="t(`speed.modTip.${k}`)"
+          v-tip="t('speed.modTip.trickroom')"
           type="button"
           class="btn mod"
-          :class="{ on: on(k) }"
-          :aria-pressed="on(k)"
-          @click="toggle(k)"
+          :class="{ on: trickRoom }"
+          :aria-pressed="trickRoom"
+          @click="set('trickroom', trickRoom ? undefined : '1')"
         >
-          {{ t(`speed.mod.${k}`) }}
+          {{ t('speed.mod.trickroom') }}
         </button>
-        <SegmentedControl
-          v-model="stage"
-          :label="t('speed.stage')"
-          :options="STAGES.map((s) => ({ value: s, label: Number(s) > 0 ? `+${s}` : s.replace('-', '−') }))"
-        />
+        <button
+          v-if="!showAll && boostsAvailable"
+          v-tip="t('speed.boostsTip')"
+          type="button"
+          class="btn mod"
+          :class="{ on: showBoosts }"
+          :aria-pressed="showBoosts"
+          @click="set('noboosts', showBoosts ? '1' : undefined)"
+        >
+          {{ t('speed.boosts') }}
+        </button>
       </div>
+      <details class="modifiers" :open="modsOpen" @toggle="onModsToggle">
+        <summary>
+          {{ t('speed.modifiers') }} <span class="muted small">{{ t('speed.modifiersTip') }}</span>
+        </summary>
+        <div class="mods all-mods">
+          <button
+            v-for="k in TOGGLES"
+            :key="k"
+            v-tip="t(`speed.modTip.${k}`)"
+            type="button"
+            class="btn mod"
+            :class="{ on: flag(k) }"
+            :aria-pressed="flag(k)"
+            @click="toggleMod(k)"
+          >
+            {{ t(`speed.mod.${k}`) }}
+          </button>
+          <SegmentedControl
+            v-model="stage"
+            :label="t('speed.stage')"
+            :options="STAGES.map((s) => ({ value: s, label: Number(s) > 0 ? `+${s}` : s.replace('-', '−') }))"
+          />
+        </div>
+      </details>
       <SearchBox v-model="find" :placeholder="t('speed.find')" :aria-label="t('speed.find')" />
     </div>
     <p v-if="!showAll && snapshot" class="muted small">
       {{ t('speed.metaNote', { pct: percent(MIN_SHARE) }) }}
+      <template v-if="showBoosts">{{ t('speed.boostNote') }}</template>
     </p>
     <p v-else class="muted small">{{ t('speed.allNote') }}</p>
 
@@ -245,17 +350,22 @@ const { entered } = usePageEntered()
           }}<span v-if="copied === tier.speed" class="copied" role="status">{{ t('speed.copied') }}</span></a
         >
         <ul class="mons">
-          <li v-for="e in tier.list" :key="`${e.id}:${e.bench ?? `${e.points}:${e.nature}`}`">
+          <li v-for="e in tier.list" :key="chipKey(e)">
             <AppLink
-              v-tip="e.bench ? benchTip(e.bench) : investTip(e)"
+              v-tip="tip(e)"
               :to="{ name: 'pokemon', params: { id: e.id } }"
               class="chip"
-              :class="{ hit: isHit(e) }"
+              :class="{ hit: isHit(e), boost: e.boost }"
             >
               <PokemonIcon :id="e.id" />
               <span>{{ e.species }}</span>
               <span v-if="e.forme" class="forme">{{ e.forme }}</span>
               <span v-if="e.bench" class="tag">{{ benchLabel(e.bench) }}</span>
+              <template v-else-if="e.boost">
+                <span class="tag">{{ boostLabel(e.boost) }}</span>
+                <span v-if="field(e.boost)" class="tag">{{ field(e.boost) }}</span>
+                <span class="tag">{{ percent(e.share!) }}</span>
+              </template>
               <template v-else>
                 <span class="tag">{{ natureName(e.nature!) }}</span>
                 <span class="tag">{{ t('speed.points', { n: e.points! }) }}</span>
@@ -299,6 +409,19 @@ const { entered } = usePageEntered()
 }
 .mod.on {
   background: var(--sel);
+}
+/* The modifiers that apply to everyone: a section that opens, set off from the switches above it. */
+.modifiers > summary {
+  cursor: pointer;
+  font-weight: bold;
+}
+.modifiers > summary .muted {
+  font-weight: normal;
+}
+.all-mods {
+  padding: 8px;
+  background: var(--panel-alt);
+  border: 1px dashed var(--border-strong);
 }
 .small {
   font-size: calc(13px * var(--text-scale));
@@ -372,6 +495,11 @@ const { entered } = usePageEntered()
 .tag {
   padding-left: 4px;
   border-left: 1px solid var(--border);
+}
+/* An item or ability its sets run that changes Speed, told apart from its builds. */
+.chip.boost {
+  border-style: dashed;
+  border-color: var(--border-strong);
 }
 /* Finding a Pokémon: its chips marked, the Speeds without it faded. */
 .chip.hit {

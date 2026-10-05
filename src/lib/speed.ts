@@ -38,6 +38,40 @@ export function benchmark(base: number, b: Benchmark): number {
   }
 }
 
+/**
+ * When an item's or ability's effect on Speed applies: always, in a weather or terrain (its condition's ID in the dex),
+ * once the holder's item is gone (Unburden), or while it has a status condition (Quick Feet).
+ */
+export type SpeedWhen = 'always' | 'rain' | 'sun' | 'sandstorm' | 'snow' | 'electricterrain' | 'itemLost' | 'status'
+
+/** An item's or ability's effect on Speed: what it multiplies it by, and when. */
+export interface SpeedEffect {
+  factor: number
+  when: SpeedWhen
+}
+
+/**
+ * The items and abilities that change Speed, by Showdown ID: those the regulation has whose code changes it
+ * (`onModifySpe`). Kept by hand, as the multiplier and its condition are in the code; `npm run gen-data` lists any the
+ * regulation has that are missing here.
+ */
+export const SPEED_ITEMS: Record<string, SpeedEffect> = {
+  choicescarf: { factor: 1.5, when: 'always' },
+  ironball: { factor: 0.5, when: 'always' },
+}
+export const SPEED_ABILITIES: Record<string, SpeedEffect> = {
+  swiftswim: { factor: 2, when: 'rain' },
+  chlorophyll: { factor: 2, when: 'sun' },
+  sandrush: { factor: 2, when: 'sandstorm' },
+  slushrush: { factor: 2, when: 'snow' },
+  surgesurfer: { factor: 2, when: 'electricterrain' },
+  unburden: { factor: 2, when: 'itemLost' },
+  quickfeet: { factor: 1.5, when: 'status' },
+}
+
+/** A Speed stat with an item's or ability's effect, rounded down. */
+export const withEffect = (speed: number, e: SpeedEffect) => Math.floor(speed * e.factor)
+
 /** What changes Speed in battle. */
 export interface SpeedMods {
   tailwind?: boolean
