@@ -640,8 +640,6 @@ export const messages = {
   'speed.modTip.paralysis': 'Halves Speed.',
   'speed.stage': 'Speed stage',
   'speed.find': 'Find a Pokémon',
-  'speed.metaNote':
-    'Each of the most used Pokémon as its sets run it, when at least {pct} of them do: nature, stat points in Speed and their share of its sets.',
   'speed.allNote':
     'Each Pokémon at four Speeds: all 32 stat points and a nature for Speed (Max+), all points and a neutral nature (Max), none (0), and none with a nature against it, for Trick Room (Min−).',
   'speed.invest': '{points} Speed points and a {nature} nature{effect}: {pct} of its sets',
@@ -655,9 +653,12 @@ export const messages = {
   'speed.when.field': 'in {field}',
   'speed.when.itemLost': 'once its item is used or lost',
   'speed.when.status': 'while it has a status condition',
-  'speed.boostsTip': 'The items and abilities their sets run that change Speed, as chips of their own.',
   'speed.boostNote':
     "Dashed chips are the items and abilities their sets run that change Speed, at each Pokémon's most common Speed build: the data doesn't say which build goes with them.",
+  'speed.boostsDesc': 'Items and abilities their sets run that change Speed: Choice Scarf, Unburden, Swift Swim…',
+  'speed.legendChip': 'Nature, stat points in Speed and the share of its sets running them; under {pct}, left out',
+  'speed.legendBoostLabel': 'Choice Scarf ×1.5',
+  'speed.legendBoost': 'An item or ability its sets run that changes Speed, at its most common Speed build',
   'speed.build': '{nature}, {points} points',
   'speed.bench.max': 'Max+',
   'speed.bench.maxNeutral': 'Max',

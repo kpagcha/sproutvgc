@@ -648,8 +648,6 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.modTip.paralysis': 'Reduce la Velocidad a la mitad.',
   'speed.stage': 'Nivel de Velocidad',
   'speed.find': 'Buscar un Pokémon',
-  'speed.metaNote':
-    'Cada uno de los Pokémon más usados como lo llevan sus sets, cuando lo hace al menos el {pct}: naturaleza, puntos de estadística en Velocidad y su proporción de sus sets.',
   'speed.allNote':
     'Cada Pokémon en cuatro Velocidades: los 32 puntos de estadística y una naturaleza que la sube (Máx+), todos los puntos y una naturaleza neutra (Máx), ninguno (0), y ninguno con una naturaleza que la baja, para Espacio Raro (Mín−).',
   'speed.invest': '{points} puntos en Velocidad y naturaleza {nature}{effect}: el {pct} de sus sets',
@@ -663,9 +661,15 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.when.field': 'con {field}',
   'speed.when.itemLost': 'al gastar o perder su objeto',
   'speed.when.status': 'mientras sufre un problema de estado',
-  'speed.boostsTip': 'Los objetos y habilidades que llevan sus sets y cambian la Velocidad, como fichas aparte.',
   'speed.boostNote':
     'Las fichas discontinuas son los objetos y habilidades que llevan sus sets y cambian la Velocidad, con el reparto de Velocidad más común de cada Pokémon: los datos no dicen qué reparto va con ellos.',
+  'speed.boostsDesc':
+    'Objetos y habilidades que llevan sus sets y cambian la Velocidad: Pañuelo Elegido, Liviano, Nado Rápido…',
+  'speed.legendChip':
+    'Naturaleza, puntos de estadística en Velocidad y la proporción de sus sets que los llevan; por debajo del {pct}, no se muestran',
+  'speed.legendBoostLabel': 'Pañuelo Elegido ×1,5',
+  'speed.legendBoost':
+    'Un objeto o habilidad que llevan sus sets y cambia la Velocidad, con su reparto de Velocidad más común',
   'speed.build': '{nature}, {points} puntos',
   'speed.bench.max': 'Máx+',
   'speed.bench.maxNeutral': 'Máx',

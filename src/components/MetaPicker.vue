@@ -22,8 +22,10 @@ const snapshots = computed(currentSnapshots)
 </template>
 
 <style scoped>
+/* As wide as its label: the search fields' width limit would cut it off. */
 .pick {
   width: auto;
+  max-width: 100%;
   margin: 0;
 }
 .label {

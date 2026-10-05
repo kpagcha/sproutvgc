@@ -261,8 +261,9 @@ const { entered } = usePageEntered()
     <h1>{{ t('title.speedTiers') }}</h1>
     <p class="muted">{{ t('speed.intro', { reg: REGULATION }) }}</p>
     <div class="controls">
-      <div v-if="snapshot" class="segment-row">
-        <MetaPicker />
+      <!-- What's shown: the data, which Pokémon, and finding one. -->
+      <div class="view-row">
+        <MetaPicker v-if="snapshot" />
         <SegmentedControl
           v-if="metaAvailable"
           :model-value="showAll ? 'all' : 'meta'"
@@ -273,60 +274,74 @@ const { entered } = usePageEntered()
           ]"
           @update:model-value="(v: string) => set('all', v === 'all' ? '1' : undefined)"
         />
-      </div>
-      <div class="mods">
-        <button
-          v-tip="t('speed.modTip.trickroom')"
-          type="button"
-          class="btn mod"
-          :class="{ on: trickRoom }"
-          :aria-pressed="trickRoom"
-          @click="set('trickroom', trickRoom ? undefined : '1')"
-        >
-          {{ t('speed.mod.trickroom') }}
-        </button>
-        <button
-          v-if="!showAll && boostsAvailable"
-          v-tip="t('speed.boostsTip')"
-          type="button"
-          class="btn mod"
-          :class="{ on: showBoosts }"
-          :aria-pressed="showBoosts"
-          @click="set('noboosts', showBoosts ? '1' : undefined)"
-        >
-          {{ t('speed.boosts') }}
-        </button>
-      </div>
-      <details class="modifiers" :open="modsOpen" @toggle="onModsToggle">
-        <summary>
-          {{ t('speed.modifiers') }} <span class="muted small">{{ t('speed.modifiersTip') }}</span>
-        </summary>
-        <div class="mods all-mods">
-          <button
-            v-for="k in TOGGLES"
-            :key="k"
-            v-tip="t(`speed.modTip.${k}`)"
-            type="button"
-            class="btn mod"
-            :class="{ on: flag(k) }"
-            :aria-pressed="flag(k)"
-            @click="toggleMod(k)"
-          >
-            {{ t(`speed.mod.${k}`) }}
-          </button>
-          <SegmentedControl
-            v-model="stage"
-            :label="t('speed.stage')"
-            :options="STAGES.map((s) => ({ value: s, label: Number(s) > 0 ? `+${s}` : s.replace('-', '−') }))"
-          />
+        <div class="find">
+          <SearchBox v-model="find" :placeholder="t('speed.find')" :aria-label="t('speed.find')" />
         </div>
-      </details>
-      <SearchBox v-model="find" :placeholder="t('speed.find')" :aria-label="t('speed.find')" />
+      </div>
+
+      <!-- How it's shown: each option with what it does beside it, as tooltips get missed. -->
+      <div class="options">
+        <div v-if="!showAll && boostsAvailable" class="option">
+          <label class="btn switch" :class="{ on: showBoosts }">
+            <input type="checkbox" :checked="showBoosts" @change="set('noboosts', showBoosts ? '1' : undefined)" />
+            {{ t('speed.boosts') }}
+          </label>
+          <span class="muted">{{ t('speed.boostsDesc') }}</span>
+        </div>
+        <div class="option">
+          <label class="btn switch" :class="{ on: trickRoom }">
+            <input type="checkbox" :checked="trickRoom" @change="set('trickroom', trickRoom ? undefined : '1')" />
+            {{ t('speed.mod.trickroom') }}
+          </label>
+          <span class="muted">{{ t('speed.modTip.trickroom') }}</span>
+        </div>
+        <details class="modifiers" :open="modsOpen" @toggle="onModsToggle">
+          <summary>
+            <span class="option-name">{{ t('speed.modifiers') }}</span>
+            <span class="muted">{{ t('speed.modifiersTip') }}</span>
+          </summary>
+          <div class="mods all-mods">
+            <button
+              v-for="k in TOGGLES"
+              :key="k"
+              v-tip="t(`speed.modTip.${k}`)"
+              type="button"
+              class="btn mod"
+              :class="{ on: flag(k) }"
+              :aria-pressed="flag(k)"
+              @click="toggleMod(k)"
+            >
+              {{ t(`speed.mod.${k}`) }}
+            </button>
+            <SegmentedControl
+              v-model="stage"
+              :label="t('speed.stage')"
+              :options="STAGES.map((s) => ({ value: s, label: Number(s) > 0 ? `+${s}` : s.replace('-', '−') }))"
+            />
+          </div>
+        </details>
+      </div>
     </div>
-    <p v-if="!showAll && snapshot" class="muted small">
-      {{ t('speed.metaNote', { pct: percent(MIN_SHARE) }) }}
-      <template v-if="showBoosts">{{ t('speed.boostNote') }}</template>
-    </p>
+
+    <!-- How to read a chip: samples, each with what its parts mean. -->
+    <dl v-if="!showAll && snapshot" class="legend small">
+      <dt>
+        <span class="chip sample"
+          ><span class="tag">{{ natureName('timid') }}</span
+          ><span class="tag">{{ t('speed.points', { n: 32 }) }}</span
+          ><span class="tag">{{ percent(0.461) }}</span></span
+        >
+      </dt>
+      <dd class="muted">{{ t('speed.legendChip', { pct: percent(MIN_SHARE) }) }}</dd>
+      <template v-if="showBoosts">
+        <dt>
+          <span v-tip="t('speed.boostNote')" class="chip sample boost"
+            ><span class="tag">{{ t('speed.legendBoostLabel') }}</span></span
+          >
+        </dt>
+        <dd class="muted">{{ t('speed.legendBoost') }}</dd>
+      </template>
+    </dl>
     <p v-else class="muted small">{{ t('speed.allNote') }}</p>
 
     <div v-if="!entered || (!showAll && !data)" class="ladder" aria-hidden="true">
@@ -390,11 +405,52 @@ const { entered } = usePageEntered()
   flex-direction: column;
   gap: 8px;
 }
-.segment-row {
+.view-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 16px;
+}
+.find {
+  flex: 1 1 14em;
+  max-width: 22em;
+}
+.find :deep(.search-box) {
+  margin: 0;
+}
+/* The options: a name lined up in a column of its own, what it does beside it. */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+/* An option: a switch (a button holding its checkbox), as wide as the others, and what it does beside it. */
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.switch {
+  flex: none;
+  justify-content: flex-start;
+  gap: 6px;
+  width: var(--switch-width);
+  font-weight: bold;
+}
+.switch.on {
+  background: var(--sel);
+}
+.switch input {
+  margin: 0;
+}
+.options {
+  --switch-width: 9.5em;
+}
+/* The name of the section that opens, lined up with the switches: as wide, less its marker. */
+.option-name {
+  display: inline-block;
+  width: calc(var(--switch-width) - 1em);
+  font-weight: bold;
 }
 .mods {
   display: flex;
@@ -410,13 +466,15 @@ const { entered } = usePageEntered()
 .mod.on {
   background: var(--sel);
 }
-/* The modifiers that apply to everyone: a section that opens, set off from the switches above it. */
+/* The modifiers that apply to everyone: a section that opens, its marker in the checkboxes' column. */
 .modifiers > summary {
   cursor: pointer;
-  font-weight: bold;
 }
-.modifiers > summary .muted {
-  font-weight: normal;
+.modifiers > summary .option-name {
+  margin-right: 10px;
+}
+.modifiers[open] > summary {
+  margin-bottom: 6px;
 }
 .all-mods {
   padding: 8px;
@@ -523,6 +581,25 @@ const { entered } = usePageEntered()
 }
 .note {
   margin: 12px 0 0;
+}
+/* The legend: sample chips, each with what its parts mean. */
+.legend {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  align-items: center;
+  gap: 4px 10px;
+  margin: 12px 0 0;
+}
+.legend dt,
+.legend dd {
+  margin: 0;
+}
+.sample {
+  padding: 1px 6px;
+}
+.sample .tag:first-child {
+  padding-left: 0;
+  border-left: none;
 }
 .note + .note {
   margin-top: 4px;
