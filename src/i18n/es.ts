@@ -626,6 +626,11 @@ export const messages: Record<keyof typeof en, string> = {
   'meta.kind.tournament': 'Torneos',
   'meta.season': 'Temporada {season}',
   'meta.bo3': 'Bo3',
+  'meta.cutoff': '{players} ({cutoff}+)',
+  'meta.players.0': 'Todos los jugadores',
+  'meta.players.1500': 'Jugadores medios',
+  'meta.players.1630': 'Buenos jugadores',
+  'meta.players.1760': 'Jugadores fuertes',
 
   'desc.conditions':
     'Todas las condiciones de {game}, Reglamento {reg}: problemas de estado, tiempo atmosférico, campos y efectos de equipo y de campo, y qué los causa.',

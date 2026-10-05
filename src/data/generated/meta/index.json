@@ -1,0 +1,54 @@
+{
+  "smogon-1760": {
+    "id": "smogon-1760",
+    "kind": "showdown",
+    "provider": { "name": "Smogon", "url": "https://www.smogon.com/stats/" },
+    "regulation": "M-C",
+    "from": "2026-09-01",
+    "to": "2026-09-30",
+    "period": "month",
+    "cutoff": 1760,
+    "battles": 1631943,
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads"],
+    "unweighted": ["brought"]
+  },
+  "smogon-1630": {
+    "id": "smogon-1630",
+    "kind": "showdown",
+    "provider": { "name": "Smogon", "url": "https://www.smogon.com/stats/" },
+    "regulation": "M-C",
+    "from": "2026-09-01",
+    "to": "2026-09-30",
+    "period": "month",
+    "cutoff": 1630,
+    "battles": 1631943,
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads"],
+    "unweighted": ["brought"]
+  },
+  "smogon-1500": {
+    "id": "smogon-1500",
+    "kind": "showdown",
+    "provider": { "name": "Smogon", "url": "https://www.smogon.com/stats/" },
+    "regulation": "M-C",
+    "from": "2026-09-01",
+    "to": "2026-09-30",
+    "period": "month",
+    "cutoff": 1500,
+    "battles": 1631943,
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads"],
+    "unweighted": ["brought"]
+  },
+  "smogon-0": {
+    "id": "smogon-0",
+    "kind": "showdown",
+    "provider": { "name": "Smogon", "url": "https://www.smogon.com/stats/" },
+    "regulation": "M-C",
+    "from": "2026-09-01",
+    "to": "2026-09-30",
+    "period": "month",
+    "cutoff": 0,
+    "battles": 1631943,
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads"],
+    "unweighted": ["brought"]
+  }
+}

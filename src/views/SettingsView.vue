@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { defineAsyncComponent } from 'vue'
 import { THEME_MODES, useTheme } from '@/composables/useTheme'
 import { LOCALES, locale, setLocale, t, type Locale } from '@/i18n'
 import { confirmDialog } from '@/composables/useConfirm'
 
 const { mode, setMode } = useTheme()
+const MetaDevTools = import.meta.env.DEV ? defineAsyncComponent(() => import('@/dev/MetaDevTools.vue')) : null
 
 // Erases everything the site has saved in this browser (every `sproutvgc.` key: favorites, recently viewed, the quiz's
 // deck, settings and preferences), once confirmed, then reloads so nothing read from it lingers in memory.
@@ -56,6 +58,8 @@ async function clearAll() {
       </label>
     </div>
   </div>
+
+  <component :is="MetaDevTools" v-if="MetaDevTools" />
 
   <div class="panel">
     <h2>{{ t('settings.clearTitle') }}</h2>

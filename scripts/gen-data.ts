@@ -7,7 +7,8 @@
 // Gen 9 and the format's rules apply exactly as on Showdown. Availability comes from the regulation's legal Pokémon:
 // an ability is available when one of them can have it, a move when one of them learns it.
 //
-// Sprites come from Showdown's server, trimmed to the regulation's entries (`sprites.ts`).
+// Sprites come from Showdown's server, trimmed to the regulation's entries (`sprites.ts`), and the meta from Smogon's
+// usage stats for the regulation's format, a month of them (`smogon.ts`).
 
 import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
@@ -23,6 +24,7 @@ import { LOCALES, type Locale } from '../src/i18n/locales.ts'
 import { LANGUAGES, type Language } from './languages.ts'
 import { MOVES_EVERYONE_USES, NAMES, type CategoryKey } from './overrides.ts'
 import { ConditionScan } from './conditions.ts'
+import { Smogon } from './smogon.ts'
 import { ITEM_ICONS, POKEMON_ICONS, SpriteSource, iconIndexes, sheetLayout, trimSheet } from './sprites.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -47,6 +49,8 @@ interface Sources {
   client: string
   /** The day Showdown's sprites were fetched: they aren't versioned, so this keys their cache. */
   sprites: string
+  /** The month of Smogon's usage stats ("2026-09"). */
+  smogon: string
 }
 
 // The little of Showdown's API used here.
@@ -272,7 +276,7 @@ async function writeJson(file: string, data: Record<string, unknown>) {
   const path = join(OUT, file)
   const lines = Object.entries(data).map(([k, v]) => `${JSON.stringify(k)}: ${JSON.stringify(v)}`)
   const options = await prettier.resolveConfig(path)
-  mkdirSync(OUT, { recursive: true })
+  mkdirSync(dirname(path), { recursive: true })
   writeFileSync(path, await prettier.format(`{\n${lines.join(',\n')}\n}`, { ...options, filepath: path }))
   console.log(`Wrote ${file}`)
 }
@@ -355,6 +359,7 @@ async function main() {
     pokeapi: parsed.pokeapi!,
     client: parsed.client ?? latestCommit(CLIENT_REPO),
     sprites: parsed.sprites ?? today,
+    smogon: parsed.smogon ?? '',
   }
   if (process.argv.includes('--update')) {
     sources.showdown = latestCommit(SHOWDOWN_REPO)
@@ -652,6 +657,23 @@ async function main() {
   // Each legal Pokémon's moves, for its page (and the other way round, for a move's).
   await writeJson('pokemon.learnsets.json', Object.fromEntries(byId(roster).map((s) => [s.id, learnset(s.id)])))
 
+  // The meta: Smogon's usage stats for the format, a snapshot per rating cutoff (`meta/<id>.json`, listed in
+  // `meta/index.json`). Which of them the app shows is `VITE_META_SETS` in `.env`.
+  const smogon = new Smogon(join(CACHE, 'smogon'), (url) => getBinary(url, true), toId(format.name))
+  if (!sources.smogon || process.argv.includes('--update')) {
+    sources.smogon = await smogon.latestMonth()
+    console.log(`Pinned Smogon's stats of ${sources.smogon}`)
+  }
+  const snapshots = await smogon.snapshots(sources.smogon, reg, {
+    pokemon: (name) => (legal.has(speciesId(name)) ? speciesId(name) : undefined),
+    moves: new Set(availableIds.moves),
+    items: new Set(availableIds.items),
+    abilities: new Set(availableIds.abilities),
+  })
+  rmSync(join(OUT, 'meta'), { recursive: true, force: true })
+  for (const { snapshot, data } of snapshots) await writeJson(`meta/${snapshot.id}.json`, data)
+  await writeJson('meta/index.json', Object.fromEntries(snapshots.map((s) => [s.snapshot.id, s.snapshot])))
+
   // Sprites: the icon sheets cut down to the regulation's entries, in ID order, and each legal Pokémon's own sprite.
   const clientData = await get(`${CLIENT_RAW}/${sources.client}/play.pokemonshowdown.com/src/battle-dex-data.ts`)
   const iconIndex = iconIndexes(clientData)
@@ -682,6 +704,7 @@ async function main() {
     pokeapi: sources.pokeapi,
     client: sources.client,
     sprites: sources.sprites,
+    smogon: sources.smogon,
   })
   const pinned = JSON.stringify(sources, null, 2) + '\n'
   if (pinned !== saved) {

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { metaProviders } from '@/data/meta'
 import { t, tSplit, tSlots } from '@/i18n'
 
@@ -6,7 +7,7 @@ const icons = tSplit('credits.iconsBody', 'source')
 const sprites = tSplit('credits.spritesBody', 'source')
 const uiIcons = tSplit('credits.uiIconsBody', 'source')
 const meta = tSplit('credits.metaBody', 'sources')
-const providers = metaProviders()
+const providers = computed(metaProviders)
 </script>
 
 <template>

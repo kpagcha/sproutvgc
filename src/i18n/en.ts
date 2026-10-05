@@ -619,6 +619,11 @@ export const messages = {
   'meta.kind.tournament': 'Tournaments',
   'meta.season': 'Season {season}',
   'meta.bo3': 'Bo3',
+  'meta.cutoff': '{players} ({cutoff}+)',
+  'meta.players.0': 'All players',
+  'meta.players.1500': 'Average players',
+  'meta.players.1630': 'Good players',
+  'meta.players.1760': 'Strong players',
 
   'desc.conditions':
     'Every condition in {game}, Regulation {reg}: statuses, weather, terrains and side and field effects, and what causes them.',
