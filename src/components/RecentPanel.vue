@@ -28,6 +28,7 @@ const { open, onToggle } = useOpenState('sproutvgc.recent.open')
 
 <style scoped>
 .recent > summary {
+  position: relative;
   cursor: pointer;
 }
 /* Inline, so the marker sits on the heading's line. */
@@ -37,7 +38,10 @@ const { open, onToggle } = useOpenState('sproutvgc.recent.open')
 }
 /* Clearing sits at the band's end, quiet until hovered. */
 .clear {
-  float: right;
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
   padding: 0 4px;
   font: inherit;
   font-size: 0.8em;

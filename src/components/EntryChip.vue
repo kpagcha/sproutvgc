@@ -39,7 +39,9 @@ defineProps<{ to: Ref }>()
 </template>
 
 <style scoped>
+/* Type badges at their desktop size on phones too: the chip's height is the icons'. */
 .entry-chip {
+  --icon-scale: 1;
   display: flex;
   align-items: center;
   gap: 6px;

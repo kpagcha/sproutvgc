@@ -42,7 +42,8 @@ function openOnly() {
   if (only.value) void router.push(only.value)
 }
 
-const params = { game: GAME_NAME, reg: REGULATION }
+// The regulation's hyphens don't break ("M-C" stays on one line): U+2011, the non-breaking hyphen.
+const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharCode(0x2011)) }
 </script>
 
 <template>
