@@ -27,6 +27,7 @@ import {
 } from '@/lib/speed'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useMeta } from '@/composables/useMeta'
+import { useOpenState } from '@/composables/useOpenState'
 import { usePageEntered } from '@/composables/usePageEntered'
 import AppLink from '@/components/AppLink'
 import ItemIcon from '@/components/ItemIcon.vue'
@@ -87,8 +88,8 @@ const mods = computed<SpeedMods>(() => ({
 }))
 const modded = computed(() => TOGGLES.some(flag) || stage.value !== '0')
 const modsOpen = shallowRef(modded.value)
-function onModsToggle(e: Event) {
-  const open = (e.target as HTMLDetailsElement).open
+function toggleMods() {
+  const open = !modsOpen.value
   if (!open && modded.value) {
     const q = { ...query.value }
     for (const k of [...TOGGLES, 'stage']) delete q[k]
@@ -243,6 +244,8 @@ const boostLabel = (b: Boost) => t('speed.boostLabel', { effect: refName(b.ref),
 /** The weather or terrain a boost needs, by name. */
 const field = (b: Boost) =>
   b.when === 'always' || b.when === 'itemLost' || b.when === 'status' ? undefined : refName(condition(b.when))
+/** When a boost applies, in short, for its chip: the weather or terrain, or what has to happen first. */
+const whenTag = (b: Boost) => (b.when === 'itemLost' || b.when === 'status' ? t(`speed.whenShort.${b.when}`) : field(b))
 function boostTip(e: Entry) {
   const b = e.boost!
   const f = field(b)
@@ -271,13 +274,35 @@ let copiedTimer: ReturnType<typeof setTimeout> | undefined
 async function share(speed: number) {
   if (at.value === speed) return set('at', undefined)
   set('at', String(speed))
+  if (!(await copy(new URL(rowHref(speed), location.href).href))) return
+  copied.value = speed
+  clearTimeout(copiedTimer)
+  copiedTimer = setTimeout(() => (copied.value = null), 1500)
+}
+
+/**
+ * Copies `text`, saying whether it could. The clipboard API only exists on secure pages (not the dev server opened
+ * over the LAN, as on a phone), so elsewhere it goes through a hidden field and the older copy command. When neither
+ * works, the address bar still has the link.
+ */
+async function copy(text: string): Promise<boolean> {
   try {
-    await navigator.clipboard.writeText(new URL(rowHref(speed), location.href).href)
-    copied.value = speed
-    clearTimeout(copiedTimer)
-    copiedTimer = setTimeout(() => (copied.value = null), 1500)
+    await navigator.clipboard.writeText(text)
+    return true
   } catch {
-    // No clipboard (an insecure page, or permission denied): the address bar has the link.
+    const field = document.createElement('textarea')
+    field.value = text
+    field.setAttribute('readonly', '')
+    field.style.cssText = 'position: fixed; opacity: 0; pointer-events: none'
+    document.body.append(field)
+    field.select()
+    try {
+      return document.execCommand('copy')
+    } catch {
+      return false
+    } finally {
+      field.remove()
+    }
   }
 }
 const ladder = useTemplateRef<HTMLElement>('ladder')
@@ -328,18 +353,18 @@ onBeforeUnmount(() => {
 })
 const toMatch = () => center(match.value?.el)
 
-// Once the controls scroll away, a slim bar pinned over the ladder keeps the search and the switches in reach (not on
-// phones, where it would take too much of the screen).
-const controls = useTemplateRef<HTMLElement>('controls')
-const controlsGone = shallowRef(false)
+// Once the ladder's top scrolls past the screen's (the controls and the legend gone), a slim bar pinned over it keeps
+// the search and the switches in reach. A marker where the ladder starts says when.
+const pinMark = useTemplateRef<HTMLElement>('pinMark')
+const pinned = shallowRef(false)
 let observer: IntersectionObserver | undefined
 watch(
-  controls,
+  pinMark,
   (el) => {
     observer?.disconnect()
     if (!el) return
     observer = new IntersectionObserver(([e]) => {
-      controlsGone.value = !e!.isIntersecting && e!.boundingClientRect.top < 0
+      pinned.value = !e!.isIntersecting && e!.boundingClientRect.top < 0
     })
     observer.observe(el)
   },
@@ -347,14 +372,29 @@ watch(
 )
 onBeforeUnmount(() => observer?.disconnect())
 
+// How to read the page (the intro, what each option does, the chips' legend): on wide screens, laid out beside what
+// they explain; on phones, gathered in one section, closed unless the reader opens it (remembered), so the ladder
+// starts close to the top.
+const wideQuery = window.matchMedia('(min-width: 721px)')
+const wide = shallowRef(wideQuery.matches)
+const onWide = (e: MediaQueryListEvent) => (wide.value = e.matches)
+wideQuery.addEventListener('change', onWide)
+onBeforeUnmount(() => wideQuery.removeEventListener('change', onWide))
+const { open: helpOpen, onToggle: onHelpSaved } = useOpenState('sproutvgc.speedTiers.helpOpen', false)
+// Wide screens hold it open themselves: only a phone's reader opening or closing it is remembered.
+const onHelpToggle = (e: Event) => !wide.value && onHelpSaved(e)
+
+/** Whether the screen has hover, for tooltips: touch screens show what matters inline instead. */
+const canHover = window.matchMedia('(hover: hover)').matches
+
 const { entered } = usePageEntered()
 </script>
 
 <template>
   <div class="panel">
     <h1>{{ t('title.speedTiers') }}</h1>
-    <p class="muted">{{ t('speed.intro', { reg: REGULATION }) }}</p>
-    <div ref="controls" class="controls">
+    <p class="muted wide-only">{{ t('speed.intro', { reg: REGULATION }) }}</p>
+    <div class="controls">
       <!-- What's shown: the data, which Pokémon, and finding one. -->
       <div class="view-row">
         <MetaPicker v-if="snapshot" />
@@ -381,84 +421,108 @@ const { entered } = usePageEntered()
 
       <!-- How it's shown: each option with what it does beside it, as tooltips get missed. -->
       <div class="options">
-        <div v-if="!showAll && boostsAvailable" class="option">
+        <template v-if="!showAll && boostsAvailable">
           <label class="btn switch" :class="{ on: showBoosts }">
             <input type="checkbox" :checked="showBoosts" @change="toggleBoosts" />
             {{ t('speed.boosts') }}
           </label>
           <span class="muted">{{ t('speed.boostsDesc') }}</span>
+        </template>
+        <label class="btn switch" :class="{ on: trickRoom }">
+          <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
+          {{ t('speed.mod.trickroom') }}
+        </label>
+        <span class="muted">{{ t('speed.modTip.trickroom') }}</span>
+        <button type="button" class="disclosure" :aria-expanded="modsOpen" @click="toggleMods">
+          <span class="marker" aria-hidden="true">{{ modsOpen ? '▾' : '▸' }}</span> {{ t('speed.modifiers') }}
+        </button>
+        <span class="muted">{{ t('speed.modifiersTip') }}</span>
+        <div v-if="modsOpen" class="mods all-mods">
+          <button
+            v-for="k in TOGGLES"
+            :key="k"
+            v-tip="canHover && t(`speed.modTip.${k}`)"
+            type="button"
+            class="btn mod"
+            :class="{ on: flag(k) }"
+            :aria-pressed="flag(k)"
+            @click="toggleMod(k)"
+          >
+            {{ t(`speed.mod.${k}`) }}
+          </button>
+          <SegmentedControl
+            v-model="stage"
+            :label="t('speed.stage')"
+            :options="STAGES.map((s) => ({ value: s, label: Number(s) > 0 ? `+${s}` : s.replace('-', '−') }))"
+          />
         </div>
-        <div class="option">
-          <label class="btn switch" :class="{ on: trickRoom }">
-            <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
-            {{ t('speed.mod.trickroom') }}
-          </label>
-          <span class="muted">{{ t('speed.modTip.trickroom') }}</span>
-        </div>
-        <details class="modifiers" :open="modsOpen" @toggle="onModsToggle">
-          <summary>
-            <span class="option-name">{{ t('speed.modifiers') }}</span>
-            <span class="muted">{{ t('speed.modifiersTip') }}</span>
-          </summary>
-          <div class="mods all-mods">
-            <button
-              v-for="k in TOGGLES"
-              :key="k"
-              v-tip="t(`speed.modTip.${k}`)"
-              type="button"
-              class="btn mod"
-              :class="{ on: flag(k) }"
-              :aria-pressed="flag(k)"
-              @click="toggleMod(k)"
-            >
-              {{ t(`speed.mod.${k}`) }}
-            </button>
-            <SegmentedControl
-              v-model="stage"
-              :label="t('speed.stage')"
-              :options="STAGES.map((s) => ({ value: s, label: Number(s) > 0 ? `+${s}` : s.replace('-', '−') }))"
-            />
-          </div>
-        </details>
       </div>
     </div>
 
     <!-- How to read a chip: samples, each with what its parts mean. -->
-    <dl v-if="!showAll && snapshot" class="legend small">
-      <dt>
-        <span class="chip sample"
-          ><span class="tag">{{ natureName('timid') }}</span
-          ><span class="tag">{{ t('speed.points', { n: 32 }) }}</span
-          ><span class="tag">{{ percent(0.461) }}</span></span
-        >
-      </dt>
-      <dd class="muted">{{ t('speed.legendChip', { pct: percent(MIN_SHARE) }) }}</dd>
-      <template v-if="showBoosts">
+    <details class="help" :open="wide || helpOpen" @toggle="onHelpToggle">
+      <summary>
+        <span class="marker" aria-hidden="true">{{ helpOpen ? '▾' : '▸' }}</span> {{ t('speed.help') }}
+      </summary>
+      <div class="phone-only-block small">
+        <p class="muted">{{ t('speed.intro', { reg: REGULATION }) }}</p>
+        <dl class="help-options">
+          <template v-if="!showAll && boostsAvailable">
+            <dt>{{ t('speed.boosts') }}</dt>
+            <dd class="muted">{{ t('speed.boostsDesc') }}</dd>
+          </template>
+          <dt>{{ t('speed.mod.trickroom') }}</dt>
+          <dd class="muted">{{ t('speed.modTip.trickroom') }}</dd>
+          <dt>{{ t('speed.modifiers') }}</dt>
+          <dd class="muted">{{ t('speed.modifiersTip') }}</dd>
+        </dl>
+      </div>
+      <dl v-if="!showAll && snapshot" class="legend small">
         <dt>
-          <span v-tip="t('speed.boostNote')" class="chip sample boost"
-            ><span class="tag boost-label"
-              ><ItemIcon id="choicescarf" :scale="0.67" />{{ t('speed.legendBoostLabel') }}</span
-            ></span
+          <span class="chip sample"
+            ><span class="tag">{{ natureName('timid') }}</span
+            ><span class="tag">{{ t('speed.points', { n: 32 }) }}</span
+            ><span class="tag">{{ percent(0.461) }}</span></span
           >
         </dt>
-        <dd class="muted">{{ t('speed.legendBoost') }}</dd>
-      </template>
-    </dl>
-    <p v-else class="muted small">{{ t('speed.allNote', { build: benchTip(bench) }) }}</p>
+        <dd class="muted">{{ t('speed.legendChip', { pct: percent(MIN_SHARE) }) }}</dd>
+        <template v-if="showBoosts">
+          <dt>
+            <span class="chip sample boost"
+              ><span class="tag boost-label"
+                ><ItemIcon id="choicescarf" :scale="0.67" />{{ t('speed.legendBoostLabel') }}</span
+              ></span
+            >
+          </dt>
+          <dd class="muted">
+            {{ t('speed.legendBoost') }}
+          </dd>
+        </template>
+      </dl>
+      <p v-else class="muted small">{{ t('speed.allNote', { build: benchTip(bench) }) }}</p>
+    </details>
 
     <!-- Pinned over the ladder once the controls are scrolled away; takes no room of its own. -->
+    <div ref="pinMark" aria-hidden="true"></div>
     <div class="pin">
-      <div v-if="controlsGone" class="pinned">
+      <div v-if="pinned" class="pinned">
         <div class="find">
-          <SearchBox v-model="find" :placeholder="t('speed.find')" :aria-label="t('speed.find')" />
+          <SearchBox v-model="find" :placeholder="t('speed.findShort')" :aria-label="t('speed.find')" />
         </div>
         <label v-if="!showAll && boostsAvailable" class="btn switch" :class="{ on: showBoosts }">
           <input type="checkbox" :checked="showBoosts" @change="toggleBoosts" />
           {{ t('speed.boosts') }}
         </label>
         <label class="btn switch" :class="{ on: trickRoom }">
-          <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
-          {{ t('speed.mod.trickroom') }}
+          <input
+            type="checkbox"
+            :checked="trickRoom"
+            :aria-label="t('speed.mod.trickroom')"
+            @change="toggleTrickRoom"
+          />
+          <!-- "TR" on phones, the usual shorthand, so the bar fits on one line. -->
+          <span class="long" aria-hidden="true">{{ t('speed.mod.trickroom') }}</span>
+          <span class="short" aria-hidden="true">{{ t('speed.trShort') }}</span>
         </label>
       </div>
     </div>
@@ -475,7 +539,7 @@ const { entered } = usePageEntered()
         :data-speed="tier.speed"
       >
         <a
-          v-tip="t('speed.rowLink')"
+          v-tip="canHover && t('speed.rowLink')"
           :href="rowHref(tier.speed)"
           class="speed num"
           :aria-current="tier.speed === at ? 'true' : undefined"
@@ -486,28 +550,30 @@ const { entered } = usePageEntered()
         <ul class="mons">
           <li v-for="e in tier.list" :key="chipKey(e)">
             <AppLink
-              v-tip="tip(e)"
+              v-tip="canHover && tip(e)"
               :to="{ name: 'pokemon', params: { id: e.id } }"
               class="chip"
               :class="{ hit: isHit(e), boost: e.boost }"
             >
-              <PokemonIcon :id="e.id" />
-              <span>{{ e.species }}</span>
-              <span v-if="e.forme" class="forme">{{ e.forme }}</span>
-              <template v-if="e.boost">
+              <span class="who">
+                <PokemonIcon :id="e.id" />
+                <span>{{ e.species }}</span>
+                <span v-if="e.forme" class="forme">{{ e.forme }}</span>
+              </span>
+              <span v-if="e.boost" class="tags">
                 <span class="tag boost-label"
                   ><ItemIcon v-if="e.boost.ref.kind === 'item'" :id="e.boost.ref.id" :scale="0.67" />{{
                     boostLabel(e.boost)
                   }}</span
                 >
-                <span v-if="field(e.boost)" class="tag">{{ field(e.boost) }}</span>
+                <span v-if="whenTag(e.boost)" class="tag">{{ whenTag(e.boost) }}</span>
                 <span class="tag">{{ percent(e.share!) }}</span>
-              </template>
-              <template v-else-if="!e.bench">
+              </span>
+              <span v-else-if="!e.bench" class="tags">
                 <span class="tag">{{ natureName(e.nature!) }}</span>
                 <span class="tag">{{ t('speed.points', { n: e.points! }) }}</span>
                 <span class="tag">{{ percent(e.share!) }}</span>
-              </template>
+              </span>
             </AppLink>
           </li>
         </ul>
@@ -559,23 +625,17 @@ const { entered } = usePageEntered()
 .find :deep(.search-box) {
   margin: 0;
 }
-/* The options: a name lined up in a column of its own, what it does beside it. */
+/* The options: a grid of switches (buttons holding their checkbox) and the modifiers' disclosure, as wide as the
+   widest of them, each with what it does beside it; on phones, under it. */
 .options {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-/* An option: a switch (a button holding its checkbox), as wide as the others, and what it does beside it. */
-.option {
-  display: flex;
+  display: grid;
+  grid-template-columns: max-content 1fr;
   align-items: center;
-  gap: 10px;
+  gap: 4px 10px;
 }
 .switch {
-  flex: none;
   justify-content: flex-start;
   gap: 6px;
-  width: var(--switch-width);
   font-weight: bold;
 }
 .switch.on {
@@ -584,14 +644,24 @@ const { entered } = usePageEntered()
 .switch input {
   margin: 0;
 }
-.options {
-  --switch-width: 9.5em;
-}
-/* The name of the section that opens, lined up with the switches: as wide, less its marker. */
-.option-name {
-  display: inline-block;
-  width: calc(var(--switch-width) - 1em);
+.disclosure {
+  margin-top: 6px;
+  padding: 0;
+  font: inherit;
   font-weight: bold;
+  text-align: left;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.disclosure + .muted {
+  margin-top: 6px;
+}
+.marker {
+  display: inline-block;
+  width: 1em;
+  font-size: 0.8em;
 }
 .mods {
   display: flex;
@@ -607,17 +677,9 @@ const { entered } = usePageEntered()
 .mod.on {
   background: var(--sel);
 }
-/* The modifiers that apply to everyone: a section that opens, its marker in the checkboxes' column. */
-.modifiers > summary {
-  cursor: pointer;
-}
-.modifiers > summary .option-name {
-  margin-right: 10px;
-}
-.modifiers[open] > summary {
-  margin-bottom: 6px;
-}
+/* The modifiers that apply to everyone, under the options, across both columns. */
 .all-mods {
+  grid-column: 1 / -1;
   padding: 8px;
   background: var(--panel-alt);
   border: 1px dashed var(--border-strong);
@@ -631,9 +693,17 @@ const { entered } = usePageEntered()
   list-style: none;
 }
 /* A Speed, and the Pokémon at it: the number in a column of its own, the chips wrapping beside it. */
+.ladder {
+  --speed-col: 3.5em;
+}
+@media (max-width: 720px) {
+  .ladder {
+    --speed-col: 2.2em;
+  }
+}
 .tier {
   display: grid;
-  grid-template-columns: 3.5em 1fr;
+  grid-template-columns: var(--speed-col) 1fr;
   align-items: start;
   gap: 8px;
   padding: 4px 0;
@@ -667,12 +737,28 @@ const { entered } = usePageEntered()
   background: var(--panel);
   border-bottom: 1px solid var(--border-strong);
 }
-.pinned .switch {
-  width: auto;
+.pinned .short {
+  display: none;
 }
+/* On phones, one line: the search takes what the compact switches leave. */
 @media (max-width: 720px) {
-  .pin {
+  .pinned {
+    gap: 6px;
+  }
+  .pinned .find {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: none;
+  }
+  .pinned .switch {
+    flex: none;
+    padding-inline: 6px;
+  }
+  .pinned .long {
     display: none;
+  }
+  .pinned .short {
+    display: inline;
   }
 }
 /* The button to the nearest match, floating at the bottom of the screen as the matchups page's to its results. */
@@ -712,24 +798,123 @@ const { entered } = usePageEntered()
   padding: 0;
   list-style: none;
 }
+/* A chip: who (icon, name, forme), then its tags, which go under it when the two don't fit on a line. */
 .chip {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
+  gap: 0 4px;
+  max-width: 100%;
   padding: 0 6px 0 2px;
   background: var(--panel-alt);
   border: 1px solid var(--border);
   border-radius: 3px;
+}
+.who,
+.tags {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.who {
   white-space: nowrap;
+}
+.tags {
+  flex-wrap: wrap;
+}
+.tag {
+  white-space: nowrap;
+}
+/* On phones only: what wider screens show in a tooltip, or beside what it explains. */
+.phone-only,
+.phone-only-block {
+  display: none;
+}
+/* The section on how to read the page: no heading on wide screens, where it's always open. */
+.help > summary {
+  display: none;
+}
+.help-options {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2px 10px;
+  margin: 8px 0 0;
+}
+.help-options dt {
+  font-weight: bold;
+}
+.help-options dd {
+  margin: 0;
+}
+@media (max-width: 720px) {
+  .phone-only {
+    display: inline;
+  }
+  .phone-only-block {
+    display: block;
+  }
+  .wide-only {
+    display: none;
+  }
+  .help {
+    margin-top: 8px;
+  }
+  /* Its arrow drawn as the modifiers' is, rather than the browser's marker, so the two match. */
+  .help > summary {
+    display: block;
+    list-style: none;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .help > summary::-webkit-details-marker {
+    display: none;
+  }
+  .help-options {
+    grid-template-columns: 1fr;
+  }
+  .help-options dd {
+    margin-bottom: 4px;
+  }
+  /* The switches and the modifiers' disclosure in a row, their descriptions in the section above. */
+  .options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+  }
+  .options > .muted {
+    display: none;
+  }
+  .disclosure {
+    margin-top: 0;
+  }
+  .all-mods {
+    flex-basis: 100%;
+  }
+  /* Each legend sample's description under it rather than squeezed beside it. */
+  .help .legend {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .help .legend dd {
+    margin-bottom: 8px;
+  }
+  /* The tags under the name, with room beside the icon. */
+  .chip {
+    padding-bottom: 2px;
+  }
+  .tags {
+    padding-left: 4px;
+  }
 }
 .forme,
 .tag {
   font-size: 0.85em;
   color: var(--muted);
 }
-.tag {
-  padding-left: 4px;
-  border-left: 1px solid var(--border);
+.tag + .tag::before {
+  content: '·';
+  margin-right: 4px;
 }
 /* An item's icon before its name. */
 .boost-label {
@@ -740,12 +925,15 @@ const { entered } = usePageEntered()
 /* An item or ability its sets run that changes Speed, told apart from its builds. */
 .chip.boost {
   border-style: dashed;
-  border-color: var(--border-strong);
+  border-color: var(--muted);
 }
 /* Finding a Pokémon: its chips marked, the Speeds without it faded. */
 .chip.hit {
   background: var(--sel);
   border-color: var(--border-strong);
+}
+.chip.boost.hit {
+  border-color: var(--muted);
 }
 .finding .tier:not(.hit) {
   opacity: 0.4;
@@ -757,7 +945,7 @@ const { entered } = usePageEntered()
   display: inline-block;
   width: 40%;
   height: 0.8em;
-  margin-left: calc(3.5em + 8px);
+  margin-left: calc(var(--speed-col) + 8px);
   background: var(--border);
   border-radius: 2px;
   opacity: 0.6;
@@ -779,10 +967,6 @@ const { entered } = usePageEntered()
 }
 .sample {
   padding: 1px 6px;
-}
-.sample .tag:first-child {
-  padding-left: 0;
-  border-left: none;
 }
 .note + .note {
   margin-top: 4px;

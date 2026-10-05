@@ -637,16 +637,19 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.modifiers': 'Modificadores',
   'speed.modifiersTip':
     'La Velocidad de todos los Pokémon mostrados con Viento Afín, un Pañuelo Elegido, un nivel de estadística…',
-  'speed.mod.tailwind': 'Viento Afín',
-  'speed.mod.scarf': 'Pañuelo Elegido',
+  'speed.mod.tailwind': 'Viento Afín ×2',
+  'speed.mod.scarf': 'Pañuelo Elegido ×1,5',
   'speed.mod.doubled': 'Habilidad ×2',
-  'speed.mod.paralysis': 'Parálisis',
+  'speed.mod.paralysis': 'Parálisis ×0,5',
   'speed.modTip.tailwind': 'Duplica la Velocidad.',
   'speed.modTip.scarf': 'Velocidad ×1,5.',
   'speed.modTip.doubled':
     'Nado Rápido, Clorofila, Ímpetu Arena o Quitanieves con su clima, o Liviano tras perder su objeto: Velocidad ×2.',
   'speed.modTip.paralysis': 'Reduce la Velocidad a la mitad.',
   'speed.stage': 'Nivel de Velocidad',
+  'speed.findShort': 'Buscar…',
+  'speed.trShort': 'TR',
+  'speed.help': 'Cómo leer esto',
   'speed.find': 'Buscar un Pokémon',
   'speed.allNote': 'Todos los Pokémon una vez, con el mismo reparto: {build}.',
   'speed.at': 'Con',
@@ -661,15 +664,15 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.when.field': 'con {field}',
   'speed.when.itemLost': 'al gastar o perder su objeto',
   'speed.when.status': 'mientras sufre un problema de estado',
-  'speed.boostNote':
-    'Las fichas discontinuas son los objetos y habilidades que llevan sus sets y cambian la Velocidad, con el reparto de Velocidad más común de cada Pokémon: los datos no dicen qué reparto va con ellos.',
   'speed.boostsDesc':
     'Objetos y habilidades que llevan sus sets y cambian la Velocidad: Pañuelo Elegido, Liviano, Nado Rápido…',
   'speed.legendChip':
     'Naturaleza, puntos de estadística en Velocidad y la proporción de sus sets que los llevan; por debajo del {pct}, no se muestran',
   'speed.legendBoostLabel': 'Pañuelo Elegido ×1,5',
   'speed.legendBoost':
-    'Un objeto o habilidad que llevan sus sets y cambia la Velocidad, con su reparto de Velocidad más común',
+    'Un objeto o habilidad que llevan sus sets y cambia la Velocidad, con su reparto de Velocidad más común, ya que los datos no dicen qué reparto va con él',
+  'speed.whenShort.itemLost': 'Sin objeto',
+  'speed.whenShort.status': 'Con estado',
   'speed.build': '{nature}, {points} puntos',
   'speed.bench.max': 'Máx+',
   'speed.bench.maxNeutral': 'Máx',

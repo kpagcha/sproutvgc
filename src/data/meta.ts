@@ -182,7 +182,10 @@ const date = (iso: string, opts: Intl.DateTimeFormatOptions) =>
   new Date(`${iso}T00:00:00Z`).toLocaleDateString(locale.value, { ...opts, timeZone: 'UTC' })
 
 /** What a snapshot is, to label every number from it with: "Showdown ladder · Sep 2026 · 1760+". */
-export function metaLabel(s: MetaSnapshot): string {
+export const metaLabel = (s: MetaSnapshot): string => metaParts(s).join(' · ')
+
+/** What a snapshot is, part by part: its kind, season, period, players and format. */
+export function metaParts(s: MetaSnapshot): string[] {
   const parts = [t(`meta.kind.${s.kind}`)]
   if (s.season) parts.push(t('meta.season', { season: s.season }))
   parts.push(
@@ -192,7 +195,7 @@ export function metaLabel(s: MetaSnapshot): string {
   )
   if (s.cutoff !== undefined) parts.push(players(s.cutoff))
   if (s.bestOf === 3) parts.push(t('meta.bo3'))
-  return parts.join(' · ')
+  return parts
 }
 
 /** Whose teams a cutoff counts most: "Strong players (1760+)". */
