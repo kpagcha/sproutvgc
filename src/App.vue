@@ -117,7 +117,7 @@ watch(
 // `center` completes.
 watch(() => pageKey(route), pageEntering)
 // The pages kept when left, by route name (see the template).
-const KEPT = new Set<unknown>(['pokedex', 'moves'])
+const KEPT = new Set<unknown>(['pokedex', 'moves', 'usage'])
 const onPageAnimated = (definition: unknown) => definition === 'center' && pageEntered()
 // Both animate `transform` (and `opacity`) rather than motion's `x` and `y`, which it animates on the main thread: the
 // browser animates these on its own, so the next page rendering can't stall them.

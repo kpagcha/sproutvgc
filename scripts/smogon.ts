@@ -8,7 +8,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
 const STATS = 'https://www.smogon.com/stats'
-const PROVIDER = { name: 'Smogon', url: `${STATS}/` }
+const PROVIDER = { name: 'Smogon', url: 'https://www.smogon.com/' }
 
 /** The rating cutoffs Smogon publishes, a snapshot each. */
 const CUTOFFS = [1760, 1630, 1500, 0] as const

@@ -195,7 +195,12 @@ export const router = createRouter({
 
     // Competitive: what players use, and how it does.
     area('competitive', 'title.competitive', 'desc.competitive'),
-    soon('competitive', 'usage', '/competitive/usage', 'title.usage', 'desc.usage'),
+    {
+      path: '/competitive/usage',
+      name: 'usage',
+      component: () => import('@/views/UsageView.vue'),
+      meta: { titleKey: 'title.usage', descKey: 'desc.usage', dexNames: true, ...inArea('competitive', 'usage') },
+    },
     soon('competitive', 'reports', '/competitive/reports', 'title.reports', 'desc.reports'),
     soon('competitive', 'speedTiers', '/competitive/speed-tiers', 'title.speedTiers', 'desc.speedTiers'),
 

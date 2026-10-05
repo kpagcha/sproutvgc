@@ -175,3 +175,10 @@ export const players = (c: Cutoff) =>
 export const metaProviders = (): MetaSnapshot['provider'][] => [
   ...new Map(snapshots.value.map((s) => [s.provider.url, s.provider])).values(),
 ]
+
+/** A share as a percentage in the reader's language, to one decimal: "46.6%", "<0.1%" below that. */
+export function percent(share: number): string {
+  const f = (x: number) =>
+    x.toLocaleString(locale.value, { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 })
+  return share > 0 && share < 0.0005 ? `<${f(0.001)}` : f(share)
+}

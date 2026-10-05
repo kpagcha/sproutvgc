@@ -52,7 +52,7 @@ export const AREAS: Area[] = [
     label: 'nav.competitive',
     title: 'title.competitive',
     sections: [
-      { key: 'usage', route: 'usage', label: 'nav.usage', title: 'title.usage', desc: 'desc.usage', soon: true },
+      { key: 'usage', route: 'usage', label: 'nav.usage', title: 'title.usage', desc: 'desc.usage' },
       {
         key: 'reports',
         route: 'reports',

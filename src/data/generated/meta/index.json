@@ -2,7 +2,7 @@
   "smogon-1760": {
     "id": "smogon-1760",
     "kind": "showdown",
-    "provider": { "name": "Smogon", "url": "https://www.smogon.com/stats/" },
+    "provider": { "name": "Smogon", "url": "https://www.smogon.com/" },
     "regulation": "M-C",
     "from": "2026-09-01",
     "to": "2026-09-30",
@@ -15,7 +15,7 @@
   "smogon-1630": {
     "id": "smogon-1630",
     "kind": "showdown",
-    "provider": { "name": "Smogon", "url": "https://www.smogon.com/stats/" },
+    "provider": { "name": "Smogon", "url": "https://www.smogon.com/" },
     "regulation": "M-C",
     "from": "2026-09-01",
     "to": "2026-09-30",
@@ -28,7 +28,7 @@
   "smogon-1500": {
     "id": "smogon-1500",
     "kind": "showdown",
-    "provider": { "name": "Smogon", "url": "https://www.smogon.com/stats/" },
+    "provider": { "name": "Smogon", "url": "https://www.smogon.com/" },
     "regulation": "M-C",
     "from": "2026-09-01",
     "to": "2026-09-30",
@@ -41,7 +41,7 @@
   "smogon-0": {
     "id": "smogon-0",
     "kind": "showdown",
-    "provider": { "name": "Smogon", "url": "https://www.smogon.com/stats/" },
+    "provider": { "name": "Smogon", "url": "https://www.smogon.com/" },
     "regulation": "M-C",
     "from": "2026-09-01",
     "to": "2026-09-30",
