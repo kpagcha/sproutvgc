@@ -29,6 +29,7 @@ import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useMeta } from '@/composables/useMeta'
 import { usePageEntered } from '@/composables/usePageEntered'
 import AppLink from '@/components/AppLink'
+import ItemIcon from '@/components/ItemIcon.vue'
 import MetaPicker from '@/components/MetaPicker.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import SearchBox from '@/components/SearchBox.vue'
@@ -421,7 +422,9 @@ const { entered } = usePageEntered()
       <template v-if="showBoosts">
         <dt>
           <span v-tip="t('speed.boostNote')" class="chip sample boost"
-            ><span class="tag">{{ t('speed.legendBoostLabel') }}</span></span
+            ><span class="tag boost-label"
+              ><ItemIcon id="choicescarf" :scale="0.67" />{{ t('speed.legendBoostLabel') }}</span
+            ></span
           >
         </dt>
         <dd class="muted">{{ t('speed.legendBoost') }}</dd>
@@ -479,7 +482,11 @@ const { entered } = usePageEntered()
               <span v-if="e.forme" class="forme">{{ e.forme }}</span>
               <span v-if="e.bench" class="tag">{{ benchLabel(e.bench) }}</span>
               <template v-else-if="e.boost">
-                <span class="tag">{{ boostLabel(e.boost) }}</span>
+                <span class="tag boost-label"
+                  ><ItemIcon v-if="e.boost.ref.kind === 'item'" :id="e.boost.ref.id" :scale="0.67" />{{
+                    boostLabel(e.boost)
+                  }}</span
+                >
                 <span v-if="field(e.boost)" class="tag">{{ field(e.boost) }}</span>
                 <span class="tag">{{ percent(e.share!) }}</span>
               </template>
@@ -710,6 +717,12 @@ const { entered } = usePageEntered()
 .tag {
   padding-left: 4px;
   border-left: 1px solid var(--border);
+}
+/* An item's icon before its name. */
+.boost-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
 }
 /* An item or ability its sets run that changes Speed, told apart from its builds. */
 .chip.boost {
