@@ -250,7 +250,8 @@ interface Entry {
   boost?: { ref: Ref<'item' | 'ability'> } & SpeedEffect
   /** Your Pokémon, with its own modifiers rather than the others'. */
   mine?: true
-  /** Its usage rank, to order the Pokémon at the same Speed. */
+  /** Its usage rank, to order the Pokémon at the same Speed: the same for all of them when every one shows, which
+   * shows no usage, so they go by name. */
   rank: number
 }
 
@@ -294,7 +295,6 @@ const entries = computed<Entry[]>(() => {
       })
   }
   // Every Pokémon once, at the benchmark picked.
-  const ranks = data.value
   return availableIds('pokemon')
     .filter((id) => !POKEMON[id].cosmetic && (showMegas.value || !POKEMON[id].mega))
     .map((id) => ({
@@ -302,7 +302,7 @@ const entries = computed<Entry[]>(() => {
       ...named(id),
       speed: benchmark(POKEMON[id].stats[5], bench.value),
       bench: bench.value,
-      rank: ranks?.[id]?.rank ?? Infinity,
+      rank: 0,
     }))
 })
 
@@ -347,9 +347,14 @@ const tiers = computed(() => {
   return [...bySpeed]
     .sort((a, b) => (a[0] - b[0]) * dir)
     .map(([speed, list]) => {
+      // Yours first, then by usage and by how many of its sets are at that Speed, then by name: species, then forme,
+      // the species' own first.
       const sorted = list.sort(
         (a, b) =>
-          a.rank - b.rank || (b.share ?? 0) - (a.share ?? 0) || a.species.localeCompare(b.species, locale.value),
+          a.rank - b.rank ||
+          (b.share ?? 0) - (a.share ?? 0) ||
+          a.species.localeCompare(b.species, locale.value) ||
+          (a.forme ?? '').localeCompare(b.forme ?? '', locale.value),
       )
       return { speed, list: sorted, hit: sorted.some(isHit) }
     })
