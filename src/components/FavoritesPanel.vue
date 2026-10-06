@@ -7,13 +7,14 @@ import { refName } from '@/i18n/refName'
 import { SECTIONS } from '@/composables/useSearch'
 import { useFavorites } from '@/composables/useFavorites'
 import { useOpenState } from '@/composables/useOpenState'
+import { confirmDialog } from '@/composables/useConfirm'
 import EntryChip from '@/components/EntryChip.vue'
 
 // The home page's favorites: the entries starred on their pages, one row per category (in the search's order), each
 // alphabetically, as chips (`EntryChip`). Those the regulation doesn't have are
 // left out (and kept, for when it has them again). Nothing shows until something is starred. It folds away, and stays
-// as the reader left it.
-const { favorites } = useFavorites()
+// as the reader left it. It can be cleared, once confirmed, as starring them again would take a while.
+const { favorites, clear } = useFavorites()
 
 const groups = computed(() =>
   SECTIONS.flatMap((s) => {
@@ -27,6 +28,15 @@ const groups = computed(() =>
 const count = computed(() => groups.value.reduce((n, g) => n + g.refs.length, 0))
 
 const { open, onToggle } = useOpenState('sproutvgc.favorites.open')
+
+async function confirmClear() {
+  const ok = await confirmDialog({
+    message: t('favorites.clearConfirm', { n: favorites.value.length }),
+    confirm: t('favorites.clearConfirmButton'),
+    danger: true,
+  })
+  if (ok) clear()
+}
 </script>
 
 <template>
@@ -36,6 +46,7 @@ const { open, onToggle } = useOpenState('sproutvgc.favorites.open')
         <Star :size="16" :stroke-width="2.5" aria-hidden="true" />{{ t('favorites.title') }}
         <span class="count muted">{{ count }}</span>
       </h2>
+      <button type="button" class="clear" @click.prevent="confirmClear">{{ t('favorites.clear') }}</button>
     </summary>
     <dl>
       <template v-for="g in groups" :key="g.kind">
@@ -52,7 +63,27 @@ const { open, onToggle } = useOpenState('sproutvgc.favorites.open')
 /* Not one of the dex's sections: a panel variant (retro.css), `banded` (its heading a band of the accent color across
    the top), `tinted` or `sunken`. Not banded, the heading is only as wide as its text, and spaced from the favorites. */
 .favorites > summary {
+  position: relative;
   cursor: pointer;
+}
+/* Clearing sits at the band's end, quiet until hovered, as on the recently viewed. */
+.clear {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  padding: 0 4px;
+  font: inherit;
+  font-size: 0.8em;
+  color: inherit;
+  background: none;
+  border: none;
+  opacity: 0.75;
+  cursor: pointer;
+}
+.clear:hover {
+  opacity: 1;
+  text-decoration: underline;
 }
 .favorites:not(.banded) > summary {
   width: fit-content;

@@ -64,5 +64,10 @@ export function useFavorites() {
     keys.value = set.value.has(key) ? keys.value.filter((k) => k !== key) : [...keys.value, key]
     save()
   }
-  return { favorites, isFavorite, toggle }
+  /** Unstars everything, the entries the regulation doesn't have included. */
+  const clear = () => {
+    keys.value = []
+    save()
+  }
+  return { favorites, isFavorite, toggle, clear }
 }
