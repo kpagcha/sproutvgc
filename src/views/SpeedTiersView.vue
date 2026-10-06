@@ -314,17 +314,17 @@ const found = computed(() => {
 const setFound = (id: PokemonId | null) => set('find', id ?? undefined)
 const onLadder = computed(() => [...new Set(entries.value.map((e) => e.id))])
 const isHit = (e: Entry) => !e.mine && e.id === found.value
-// What finding does: mark its chips among the rest, or show only them (and yours, to compare): only them by default
-// with yours picked, marking them otherwise; the URL says so (`?findmode=`) only when it differs.
+// What finding does: mark its chips among the rest, or show only them (and yours, to compare): only them by default;
+// the URL says so (`?findmode=`) only when it differs.
 const FIND_MODES = ['mark', 'only'] as const
 type FindMode = (typeof FIND_MODES)[number]
-const defaultFindMode = computed<FindMode>(() => (mine.value ? 'only' : 'mark'))
+const defaultFindMode: FindMode = 'only'
 const findMode = computed<FindMode>({
   get: () =>
     (FIND_MODES as readonly unknown[]).includes(query.value.findmode)
       ? (query.value.findmode as FindMode)
-      : defaultFindMode.value,
-  set: (m) => set('findmode', m === defaultFindMode.value ? undefined : m),
+      : defaultFindMode,
+  set: (m) => set('findmode', m === defaultFindMode ? undefined : m),
 })
 const onlyFound = computed(() => found.value !== null && findMode.value === 'only')
 // The toggle's label around the found Pokémon's icon, the same width whatever its name (which the search shows).
