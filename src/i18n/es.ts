@@ -685,7 +685,6 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.vsAny': 'mueve antes con cualquier número de puntos',
   'speed.vsTies': 'no puede moverse antes; empata con {points} puntos',
   'speed.vsNever': 'no puede moverse antes',
-  'speed.opponents': 'rivales',
   'speed.mod.ironball': 'Bola Férrea ×0,5',
   'speed.modTip.ironball': 'Reduce la Velocidad a la mitad.',
   'speed.vsClose': 'Cerrar',

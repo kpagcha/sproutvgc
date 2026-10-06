@@ -629,11 +629,12 @@ const { entered } = usePageEntered()
          itself (finding text in it) is followed. -->
     <details class="panel instant" :open="controlsOpen" @toggle="controlsOpen = isOpen($event)">
       <summary class="head" @click.prevent="toggleControls">
-        <!-- With yours picked, everything the controls set is for the others: its opponents. -->
+        <!-- With yours picked, everything the controls set is for the others: its opponents, tagged as on the ladder. -->
         <!-- On phones, the arrow before the heading folds them, with no words beside it. -->
         <h1>
           <span class="marker head-marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
-          >{{ t('title.speedTiers') }}<span v-if="mine" class="opponents"> ({{ t('speed.opponents') }})</span>
+          >{{ t('title.speedTiers')
+          }}<span v-if="mine" class="opponents-tag head-tag">{{ t('speed.opponentsHead') }}</span>
         </h1>
         <ul v-if="!controlsOpen" class="active" :aria-label="t('speed.active')">
           <li v-for="a in active" :key="a">{{ a }}</li>
@@ -1130,9 +1131,11 @@ const { entered } = usePageEntered()
 .head::-webkit-details-marker {
   display: none;
 }
-.opponents {
-  font-weight: normal;
-  color: var(--muted);
+/* Beside the heading, with yours picked: the opponents tag, as small as the text under it. */
+.head .head-tag {
+  margin-left: 10px;
+  font-size: 0.55em;
+  vertical-align: middle;
 }
 .head h1 {
   grid-area: title;
@@ -1434,7 +1437,7 @@ const { entered } = usePageEntered()
   padding: 4px 12px;
   font-weight: bold;
 }
-/* The opponents band, in short, on the button to them. */
+/* The opponents band, in short: beside the page's heading, and on the button to them. */
 .opponents-tag {
   flex: none;
   padding: 1px 6px;
