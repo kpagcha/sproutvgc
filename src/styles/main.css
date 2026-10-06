@@ -23,6 +23,9 @@
   --sel: #ffdf6e;
   --good: #2c7a2c;
   --bad: #b3261e;
+  /* What stands against yours: the speed tiers' opponents band. */
+  --opponent: #b3261e;
+  --opponent-text: #ffffff;
   --shadow: none;
 
   --m0-bg: #2f2f2f;
@@ -57,6 +60,8 @@
     --sel: #5e4c10;
     --good: #7fd07f;
     --bad: #ff8a80;
+    --opponent: #a1302a;
+    --opponent-text: #ffffff;
 
     --m0-bg: #000000;
     --m0-fg: #bbbbbb;
@@ -90,6 +95,8 @@
   --sel: #5e4c10;
   --good: #7fd07f;
   --bad: #ff8a80;
+  --opponent: #a1302a;
+  --opponent-text: #ffffff;
 
   --m0-bg: #000000;
   --m0-fg: #bbbbbb;

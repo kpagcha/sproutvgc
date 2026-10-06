@@ -188,8 +188,8 @@ const mySpeed = computed(() =>
 )
 
 /**
- * Picks your Pokémon, at the meta's most common build of it when there is one, else the fastest, and brings the Speed
- * it lands at into view.
+ * Picks your Pokémon, at the meta's most common build of it when there is one, else the fastest, and on narrower screens
+ * brings the Speed it lands at into view.
  */
 async function pickMine(id: PokemonId | null) {
   if (!id) return
@@ -203,6 +203,9 @@ async function pickMine(id: PokemonId | null) {
       vs: undefined,
     },
   })
+  // Beside the ladder, the page stays where it is, the opponents band over the ladder in view; the Speed's button
+  // shows where it landed.
+  if (side.value) return
   await nextTick()
   toMine()
 }
@@ -761,6 +764,11 @@ const { entered } = usePageEntered()
 
     <div class="speed-layout">
       <div class="panel banded soft list">
+        <!-- With yours picked, the ladder is its opponents: said over it, with what tapping one does. -->
+        <div v-if="mine" class="band opponents-head">
+          <strong>{{ t('speed.opponentsHead') }}</strong>
+          <span>{{ t('speed.opponentsHint') }}</span>
+        </div>
         <!-- What the ladder is: its numbers, which way it runs, and how many Pokémon it holds. -->
         <div class="band ladder-head">
           <span>{{ t('speed.column') }}</span>
@@ -1046,7 +1054,7 @@ const { entered } = usePageEntered()
               @update:model-value="(v: string) => setMyStage(v)"
             />
           </section>
-          <section v-if="summary || !versus || side" class="yours-section">
+          <section v-if="summary || (versus && side)" class="yours-section">
             <p v-if="summary" class="small">
               {{
                 t('speed.summary', {
@@ -1083,7 +1091,6 @@ const { entered } = usePageEntered()
                 </template>
               </dl>
             </div>
-            <p v-else-if="!versus" class="muted small">{{ t('speed.vsHint') }}</p>
           </section>
         </template>
       </details>
@@ -1258,6 +1265,19 @@ const { entered } = usePageEntered()
   .list {
     --speed-col: 2.2em;
   }
+}
+/* The opponents band: red, on top of the panel, the ladder's header joining it. Beats retro.css's bands. */
+:root:root .list.banded > .band.opponents-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  margin-bottom: 0;
+  color: var(--opponent-text);
+  background: var(--opponent);
+}
+:root:root .list.banded > .opponents-head + .ladder-head {
+  margin-top: 0;
 }
 /* The ladder's header: its columns' labels, in a soft band (retro.css), its first, "Speed", bold. */
 .ladder-head {
