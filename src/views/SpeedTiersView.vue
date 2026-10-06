@@ -1033,7 +1033,8 @@ const { entered } = usePageEntered()
                 showAll ? t('speed.summaryAll', { bench: benchLabel(bench) }) : t('speed.summaryMeta', { n: TOP })
               }}</span>
             </p>
-            <div v-if="versus" class="versus small">
+            <!-- Narrower, the comparison shows in its card over the ladder instead. -->
+            <div v-if="versus && side" class="versus small">
               <p>
                 <strong
                   ><template v-for="(part, i) in vsTitle" :key="i"
@@ -1056,7 +1057,7 @@ const { entered } = usePageEntered()
                 </template>
               </dl>
             </div>
-            <p v-else class="muted small">{{ t('speed.vsHint') }}</p>
+            <p v-else-if="!versus" class="muted small">{{ t('speed.vsHint') }}</p>
           </section>
         </template>
       </details>
