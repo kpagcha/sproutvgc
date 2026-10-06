@@ -259,34 +259,20 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
             >
               {{ r.brought === undefined ? '—' : percent(r.brought) }}
             </div>
-            <!-- Under xl, what the set columns hold, on a line of its own, as chips grouped by what they are, when the
-                 reader shows sets; on phones, each group labeled on a line of its own, and how often it's brought too:
-                 the column doesn't fit. -->
+            <!-- Under xl, what the set columns hold, on a line of its own, as chips, when the reader shows sets: the
+                 item (told by its icon) and the ability, then the moves. On phones, the moves on a line of their own,
+                 and how often it's brought at the end of the first, under its usage: the column doesn't fit. -->
             <div v-if="showSets && hasSets" role="cell" class="set-line">
-              <div v-if="r.item" class="group">
-                <span class="group-label">{{ t('usage.item') }}</span>
-                <span class="chips">
-                  <AppLink :to="{ name: 'item', params: { id: r.item.id } }" class="part">
-                    <ItemIcon :id="r.item.id" :scale="0.67" />{{ refName(r.item) }}
-                  </AppLink>
-                </span>
-              </div>
-              <div v-if="r.ability" class="group">
-                <span class="group-label">{{ t('usage.ability') }}</span>
-                <span class="chips"
-                  ><span class="part"><DexRef :to="r.ability" /></span
-                ></span>
-              </div>
-              <div v-if="r.moves.length" class="group">
-                <span class="group-label">{{ t('usage.movesShort') }}</span>
-                <span class="chips">
-                  <span v-for="m in r.moves" :key="m.id" class="part"><DexRef :to="m" /></span>
-                </span>
-              </div>
-              <div v-if="showBrought && r.brought !== undefined" class="group phone-only-group">
-                <span class="group-label">{{ t('usage.brought') }}</span>
-                <span class="brought-sm">{{ percent(r.brought) }}</span>
-              </div>
+              <AppLink v-if="r.item" :to="{ name: 'item', params: { id: r.item.id } }" class="part">
+                <ItemIcon :id="r.item.id" :scale="0.67" />{{ refName(r.item) }}
+              </AppLink>
+              <span v-if="r.ability" class="part"><DexRef :to="r.ability" /></span>
+              <span v-if="showBrought && r.brought !== undefined" class="brought-sm"
+                >{{ percent(r.brought) }} {{ t('usage.broughtShort') }}</span
+              >
+              <span v-if="r.moves.length" class="moves">
+                <span v-for="m in r.moves" :key="m.id" class="part"><DexRef :to="m" /></span>
+              </span>
             </div>
           </div>
         </template>
@@ -352,37 +338,30 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
     padding-left: 0;
   }
 }
-/* The set's line: under the row, from the name's column on, when the set columns don't fit; its groups (item,
-   ability, moves) further apart than the chips in them. */
+/* The set's line: under the row, from the name's column on, when the set columns don't fit. */
 .dex-table .set-line {
   display: none;
   grid-column: 2 / -1;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px 12px;
-  padding-top: 0;
+  gap: 4px;
+  /* Clear of the name over it, which reaches into its cell's padding (the icon's room) when its forme wraps. */
+  padding-top: 4px;
   padding-bottom: 6px;
   font-size: 0.85em;
   white-space: normal;
 }
-.set-line .group,
-.set-line .chips {
+/* The moves together, a little apart from the item and the ability. */
+.set-line .moves {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
+  margin-left: 8px;
 }
-/* Labeled on phones only, where each group has a line of its own; brought, there only. */
-.set-line .group-label,
-.set-line .phone-only-group {
+/* Brought, on phones only. */
+.set-line .brought-sm {
   display: none;
-}
-.set-line .group-label {
-  font-size: 0.85em;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--muted);
 }
 /* Each part of the set a chip: the item (its icon before its name), the ability, each move. */
 .set-line .part {
@@ -414,25 +393,25 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   .phone-only-block {
     display: block;
   }
-  /* The set's lines across the whole row: a line per group, its label before it (here, after the rules for
-     narrower screens, to win over them). */
+  /* The set's lines across the whole row: the item, the ability and, at the end, how often it's brought (under its
+     usage); then the moves, on a line of their own. */
   .dex-table .set-line {
-    display: grid;
-    grid-template-columns: max-content 1fr;
-    align-items: center;
-    gap: 3px 8px;
     grid-column: 1 / -1;
     padding-left: 0;
   }
-  .set-line .group,
-  .set-line .phone-only-group {
-    display: contents;
+  .set-line .brought-sm {
+    display: inline;
+    margin-left: auto;
+    color: var(--muted);
+    white-space: nowrap;
   }
-  .set-line .group-label {
-    display: block;
+  .set-line .moves {
+    flex-basis: 100%;
+    margin-left: 0;
   }
+  /* Three lines a row (here, after the rule for narrower screens, to win over it). */
   .dex-table.with-sets {
-    --row-height: 7em;
+    --row-height: 5.4em;
   }
 }
 .sep {
@@ -477,9 +456,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 }
 .usage {
   font-weight: bold;
-}
-.brought-sm {
-  justify-self: start;
 }
 /* The search and the Sets switch in a row; the switch and what it does only where the set columns don't fit. */
 .find-row {

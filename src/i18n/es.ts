@@ -704,7 +704,7 @@ export const messages: Record<keyof typeof en, string> = {
   'usage.item': 'Objeto',
   'usage.ability': 'Habilidad',
   'usage.moves': 'Movimientos más usados',
-  'usage.movesShort': 'Movimientos',
+  'usage.broughtShort': 'sacado',
   'usage.usage': 'Uso',
   'usage.usageTip': 'La proporción de equipos que lo llevan',
   'usage.brought': 'Sacado',

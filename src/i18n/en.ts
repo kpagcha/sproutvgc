@@ -694,7 +694,7 @@ export const messages = {
   'usage.item': 'Item',
   'usage.ability': 'Ability',
   'usage.moves': 'Top moves',
-  'usage.movesShort': 'Moves',
+  'usage.broughtShort': 'brought',
   'usage.usage': 'Usage',
   'usage.usageTip': 'The share of teams with it',
   'usage.brought': 'Brought',
