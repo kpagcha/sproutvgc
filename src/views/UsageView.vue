@@ -103,12 +103,12 @@ const { entered, restoring } = usePageEntered()
 useRowColumns(useTemplateRef('head'))
 // The columns, as the snapshot has them, and their widths on wide screens, on narrower ones and on phones (null where
 // they're left out). On wide screens each Pokémon's most common set fills the room, its moves taking what's left; on
-// narrower ones the usage bar does.
+// narrower ones the names do.
 const columns = computed(() => {
   const set = showItem.value || showAbility.value || showMoves.value
   const list: { cell: string; xl: string | null; md: string | null; sm: string | null }[] = [
     { cell: 'r', xl: 'var(--num)', md: 'var(--num)', sm: 'var(--num)' },
-    { cell: 'grow', xl: 'var(--name)', md: 'var(--name)', sm: 'minmax(0, 1fr)' },
+    { cell: 'grow', xl: 'var(--name)', md: 'minmax(var(--name), 1fr)', sm: 'minmax(0, 1fr)' },
     { cell: '', xl: 'var(--types)', md: 'var(--types)', sm: 'var(--types)' },
   ]
   if (showItem.value) list.push({ cell: 'xl-only', xl: 'auto', md: null, sm: null })
@@ -118,8 +118,8 @@ const columns = computed(() => {
     list.push({
       cell: 'r',
       xl: set ? 'var(--usage)' : 'minmax(var(--usage), 1fr)',
-      md: 'minmax(var(--usage), 1fr)',
-      sm: 'var(--usage-sm)',
+      md: 'var(--usage)',
+      sm: 'var(--usage)',
     })
   if (showBrought.value) list.push({ cell: 'wide-only r', xl: 'var(--num)', md: 'var(--num)', sm: null })
   return list
@@ -134,29 +134,35 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 </script>
 
 <template>
-  <div class="panel">
-    <h1>{{ t('title.usage') }}</h1>
-    <p class="muted intro">{{ t('usage.intro', { reg: REGULATION }) }}</p>
-    <template v-if="snapshot">
-      <div class="source">
-        <MetaPicker />
-        <span v-if="snapshot.battles" class="muted">
-          {{ t('usage.battles', { n: snapshot.battles.toLocaleString(locale) }) }}
-        </span>
-      </div>
-      <!-- The search, and beside it, where the set columns don't fit, the switch that shows sets. -->
-      <div class="find-row">
-        <div class="find">
-          <SearchBox v-model="search" :placeholder="t('usage.search')" :aria-label="t('usage.search')" />
+  <!-- The controls and the table in panels of their own. -->
+  <div>
+    <div class="panel">
+      <h1>{{ t('title.usage') }}</h1>
+      <p class="muted intro">{{ t('usage.intro', { reg: REGULATION }) }}</p>
+      <template v-if="snapshot">
+        <div class="source">
+          <MetaPicker />
+          <span v-if="snapshot.battles" class="muted">
+            {{ t('usage.battles', { n: snapshot.battles.toLocaleString(locale) }) }}
+          </span>
         </div>
-        <template v-if="hasSets">
-          <label class="btn switch sets-switch" :class="{ on: showSets }">
-            <input type="checkbox" :checked="showSets" @change="toggleSets" />
-            {{ t('usage.sets') }}
-          </label>
-          <span class="muted sets-desc">{{ t('usage.setsDesc') }}</span>
-        </template>
-      </div>
+        <!-- The search, and beside it, where the set columns don't fit, the switch that shows sets. -->
+        <div class="find-row">
+          <div class="find">
+            <SearchBox v-model="search" :placeholder="t('usage.search')" :aria-label="t('usage.search')" />
+          </div>
+          <template v-if="hasSets">
+            <label class="btn switch sets-switch" :class="{ on: showSets }">
+              <input type="checkbox" :checked="showSets" @change="toggleSets" />
+              {{ t('usage.sets') }}
+            </label>
+            <span class="muted sets-desc">{{ t('usage.setsDesc') }}</span>
+          </template>
+        </div>
+      </template>
+      <p v-else class="muted">{{ t('usage.none', { reg: REGULATION }) }}</p>
+    </div>
+    <div v-if="snapshot" class="panel">
       <div
         v-if="!data || shown.length"
         class="dex-table"
@@ -237,30 +243,50 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
                 ><span v-if="i" class="sep" aria-hidden="true"> · </span><DexRef :to="m"
               /></template>
             </div>
-            <div v-if="showUsage" role="cell" class="r num usage">
-              <span class="bar" aria-hidden="true"
-                ><span :style="{ width: `${((r.usage ?? 0) / (top || 1)) * 100}%` }"></span
-              ></span>
-              <span class="usage-pct">
-                {{ r.usage === undefined ? '—' : percent(r.usage) }}
-                <!-- On phones, how often it's brought, under its usage: the column doesn't fit. -->
-                <span v-if="showSets && showBrought && r.brought !== undefined" class="brought-sm phone-only"
-                  >{{ percent(r.brought) }} {{ t('usage.broughtShort') }}</span
-                >
-              </span>
+            <div
+              v-if="showUsage"
+              role="cell"
+              class="r num meter usage"
+              :style="{ '--share': (r.usage ?? 0) / (top || 1) }"
+            >
+              {{ r.usage === undefined ? '—' : percent(r.usage) }}
             </div>
-            <div v-if="showBrought" role="cell" class="wide-only r num">
+            <div
+              v-if="showBrought"
+              role="cell"
+              class="wide-only r num meter brought"
+              :style="{ '--share': r.brought ?? 0 }"
+            >
               {{ r.brought === undefined ? '—' : percent(r.brought) }}
             </div>
-            <!-- Under xl, what the set columns hold, on a line of its own, when the reader shows sets. -->
+            <!-- Under xl, what the set columns hold, on a line of its own, as chips grouped by what they are, when the
+                 reader shows sets; on phones, each group labeled on a line of its own, and how often it's brought too:
+                 the column doesn't fit. -->
             <div v-if="showSets && hasSets" role="cell" class="set-line">
-              <AppLink v-if="r.item" :to="{ name: 'item', params: { id: r.item.id } }" class="part item-name">
-                <ItemIcon :id="r.item.id" :scale="0.67" />{{ refName(r.item) }}
-              </AppLink>
-              <span v-if="r.ability" class="part"><DexRef :to="r.ability" /></span>
-              <span v-if="r.moves.length" class="part">
-                <template v-for="(m, i) in r.moves" :key="m.id">{{ i ? ', ' : '' }}<DexRef :to="m" /></template>
-              </span>
+              <div v-if="r.item" class="group">
+                <span class="group-label">{{ t('usage.item') }}</span>
+                <span class="chips">
+                  <AppLink :to="{ name: 'item', params: { id: r.item.id } }" class="part">
+                    <ItemIcon :id="r.item.id" :scale="0.67" />{{ refName(r.item) }}
+                  </AppLink>
+                </span>
+              </div>
+              <div v-if="r.ability" class="group">
+                <span class="group-label">{{ t('usage.ability') }}</span>
+                <span class="chips"
+                  ><span class="part"><DexRef :to="r.ability" /></span
+                ></span>
+              </div>
+              <div v-if="r.moves.length" class="group">
+                <span class="group-label">{{ t('usage.movesShort') }}</span>
+                <span class="chips">
+                  <span v-for="m in r.moves" :key="m.id" class="part"><DexRef :to="m" /></span>
+                </span>
+              </div>
+              <div v-if="showBrought && r.brought !== undefined" class="group phone-only-group">
+                <span class="group-label">{{ t('usage.brought') }}</span>
+                <span class="brought-sm">{{ percent(r.brought) }}</span>
+              </div>
             </div>
           </div>
         </template>
@@ -277,30 +303,26 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
       <p class="muted note">
         {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
       </p>
-    </template>
-    <p v-else class="muted">{{ t('usage.none', { reg: REGULATION }) }}</p>
+    </div>
   </div>
 </template>
 
 <style scoped>
 /* Rank, name, types (room for two badges), the most common set on wide screens (item, ability, moves), usage (its
-   bar and number) and brought. Narrower, the set goes on a line under the row, and on phones brought joins it. The names don't size their column (the rows take the
+   number, with its bar under it) and brought. Narrower, the set goes on a line under the row, and on phones brought joins it. The names don't size their column (the rows take the
    header's widths, see `.dex-table`), so it's as wide as most names, and the longest wrap their forme. */
 .dex-table {
   --types: calc(64px * var(--icon-scale, 1) + 14px);
   --num: minmax(3em, auto);
   --name: 13em;
   --ability: 9em;
-  --usage: 10em;
-  --usage-sm: 6.5em;
-  --bar-max: none;
+  --usage: 4.5em;
   --row-height: 2.3em;
   --cols: var(--cols-md);
 }
 @media (min-width: 1100px) {
   .dex-table {
     --cols: var(--cols-xl);
-    --bar-max: 4.5em;
   }
 }
 @media (max-width: 1099px) {
@@ -308,16 +330,13 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
     display: none;
   }
 }
-/* Phones: no usage bar (the number says it), and the rank and usage columns as narrow as their numbers. */
+/* Phones: the rank and usage columns as narrow as their numbers. */
 @media (max-width: 720px) {
   .dex-table {
     --icon-scale: 1.25;
     --cols: var(--cols-sm);
     --num: minmax(1.8em, auto);
-    --usage-sm: 4em;
-  }
-  .bar {
-    display: none;
+    --usage: 4em;
   }
   /* The rank from the panel's edge: left-aligned, so a short one leaves no gap before it. */
   .dex-table .row > :first-child {
@@ -333,29 +352,52 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
     padding-left: 0;
   }
 }
-/* The set's line: under the row, from the name's column on, when the set columns don't fit. */
+/* The set's line: under the row, from the name's column on, when the set columns don't fit; its groups (item,
+   ability, moves) further apart than the chips in them. */
 .dex-table .set-line {
   display: none;
   grid-column: 2 / -1;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0 6px;
+  gap: 4px 12px;
   padding-top: 0;
-  font-size: 0.9em;
+  padding-bottom: 6px;
+  font-size: 0.85em;
   white-space: normal;
 }
-/* Dots after each part but the last, so a wrapped line never starts with one. */
-.part:not(:last-child)::after {
-  content: '·';
-  margin-left: 6px;
+.set-line .group,
+.set-line .chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+/* Labeled on phones only, where each group has a line of its own; brought, there only. */
+.set-line .group-label,
+.set-line .phone-only-group {
+  display: none;
+}
+.set-line .group-label {
+  font-size: 0.85em;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   color: var(--muted);
 }
-.item-name {
+/* Each part of the set a chip: the item (its icon before its name), the ability, each move. */
+.set-line .part {
   display: inline-flex;
   align-items: center;
   gap: 2px;
+  padding: 0 6px;
+  white-space: nowrap;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 3px;
 }
-.phone-only,
+.set-line .part:has(.sheet-icon) {
+  padding-left: 2px;
+}
 .phone-only-block {
   display: none;
 }
@@ -369,11 +411,28 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   }
 }
 @media (max-width: 720px) {
-  .phone-only {
-    display: inline;
-  }
   .phone-only-block {
     display: block;
+  }
+  /* The set's lines across the whole row: a line per group, its label before it (here, after the rules for
+     narrower screens, to win over them). */
+  .dex-table .set-line {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    align-items: center;
+    gap: 3px 8px;
+    grid-column: 1 / -1;
+    padding-left: 0;
+  }
+  .set-line .group,
+  .set-line .phone-only-group {
+    display: contents;
+  }
+  .set-line .group-label {
+    display: block;
+  }
+  .dex-table.with-sets {
+    --row-height: 7em;
   }
 }
 .sep {
@@ -417,21 +476,10 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   gap: 2px;
 }
 .usage {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
   font-weight: bold;
 }
-.usage-pct {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
 .brought-sm {
-  font-size: 0.75em;
-  font-weight: normal;
-  color: var(--muted);
+  justify-self: start;
 }
 /* The search and the Sets switch in a row; the switch and what it does only where the set columns don't fit. */
 .find-row {
@@ -482,22 +530,35 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 .switch input {
   margin: 0;
 }
-/* The set's line, quieter than the names: still links, in the muted color. */
-.set-line :deep(a) {
-  color: var(--muted);
+/* As the dex's stats, a bar along the bottom of the cell, from the left, on a faint track the cell's width (`--share`,
+   0 to 1). Usage's, solid, against the most used Pokémon's, so the top of the meta reads at a glance; brought's, a
+   rate of its own, out of every team that had it, thinner and in the muted color, so the two don't read as one. */
+.meter {
+  --inset: 6px;
+  position: relative;
 }
-/* The share against the most used Pokémon's, so the top of the meta reads at a glance. */
-.bar {
-  flex: 1;
-  max-width: var(--bar-max);
-  height: 0.5em;
-  background: var(--panel-alt);
-  border: 1px solid var(--border);
+.meter::before,
+.meter::after {
+  content: '';
+  position: absolute;
+  left: var(--inset);
 }
-.bar > span {
-  display: block;
-  height: 100%;
+.meter::before {
+  right: var(--inset);
+  bottom: 4px;
+  height: 1px;
+  background: var(--border);
+}
+.meter::after {
+  bottom: 3px;
+  width: calc((100% - 2 * var(--inset)) * var(--share, 0));
+  height: 3px;
   background: var(--accent);
+}
+.brought::after {
+  bottom: 4px;
+  height: 2px;
+  background: var(--muted);
 }
 .note {
   margin: 12px 0 0;
