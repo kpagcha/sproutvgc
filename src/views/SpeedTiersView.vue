@@ -769,14 +769,8 @@ const { entered } = usePageEntered()
           <strong>{{ t('speed.opponentsHead') }}</strong>
           <span>{{ t('speed.opponentsHint') }}</span>
         </div>
-        <!-- What the ladder is: its numbers, which way it runs, and how many Pokémon it holds. -->
-        <div class="band ladder-head">
-          <span>{{ t('speed.column') }}</span>
-          <span>{{ t(trickRoom ? 'speed.slowestFirst' : 'speed.fastestFirst') }}</span>
-          <span v-if="entered && (showAll || data)" class="muted">{{ t('speed.count', { n: monCount }) }}</span>
-        </div>
-        <!-- Finding a Pokémon on it, in a row of its own under the band, as it's the ladder it searches. -->
-        <div class="find find-row">
+        <!-- Finding a Pokémon on the ladder: a band on top, over its header, which sits on the rows as a table's does. -->
+        <div class="band find find-row">
           <PokemonPicker
             :model-value="found"
             :ids="onLadder"
@@ -792,6 +786,13 @@ const { entered } = usePageEntered()
             />
             {{ onlyLabel[0] }}<PokemonIcon :id="found" />{{ onlyLabel[1] }}
           </label>
+        </div>
+        <!-- What the ladder is: its numbers, which way it runs, and how many Pokémon it holds. -->
+        <div class="band ladder-head">
+          <!-- The stat's shorthand, as narrow as the column of Speeds it heads. -->
+          <span v-tip="canHover && t('speed.column')" :aria-label="t('speed.column')">{{ t('stat.spe') }}</span>
+          <span>{{ t(trickRoom ? 'speed.slowestFirst' : 'speed.fastestFirst') }}</span>
+          <span v-if="entered && (showAll || data)" class="muted">{{ t('speed.count', { n: monCount }) }}</span>
         </div>
         <!-- Pinned over the ladder once the controls are scrolled away; takes no room of its own. -->
         <div ref="pinMark" aria-hidden="true"></div>
@@ -1259,14 +1260,9 @@ const { entered } = usePageEntered()
 /* A Speed, and the Pokémon at it: the number in a column of its own, the chips wrapping beside it. The band over the
    ladder's header heads that column too. */
 .list {
-  --speed-col: 3.5em;
+  --speed-col: 2.2em;
 }
-@media (max-width: 720px) {
-  .list {
-    --speed-col: 2.2em;
-  }
-}
-/* The opponents band: red, on top of the panel, the ladder's header joining it. Beats retro.css's bands. */
+/* The opponents band: red, on top of the panel. Beats retro.css's bands. */
 :root:root .list.banded > .band.opponents-head {
   display: flex;
   flex-wrap: wrap;
@@ -1276,28 +1272,39 @@ const { entered } = usePageEntered()
   color: var(--opponent-text);
   background: var(--opponent);
 }
-:root:root .list.banded > .opponents-head + .ladder-head {
+/* The panel's bands, stacked: the opponents' (with yours picked), the find's, the ladder's header on the rows. */
+:root:root .list.banded > .band.find-row {
+  margin-bottom: 0;
+  padding-block: 8px;
+}
+:root:root .list.banded > .opponents-head + .band.find-row,
+:root:root .list.banded > .band.ladder-head {
   margin-top: 0;
 }
-/* The ladder's header: its columns' labels, in a soft band (retro.css), its first, "Speed", bold. */
+:root:root .list.banded > .band.ladder-head {
+  margin-bottom: 0;
+}
+/* The find's band and the header: the panel's own color, darker, rather than the accent's tint. */
+:root:root .list.banded > .band:is(.find-row, .ladder-head) {
+  background: color-mix(in srgb, var(--ink) 25%, var(--panel));
+}
+/* The ladder's header: its columns' labels, its first, the stat's shorthand, bold, over the Speeds. */
 .ladder-head {
   display: grid;
-  grid-template-columns: minmax(var(--speed-col), max-content) 1fr auto;
+  grid-template-columns: var(--speed-col) 1fr auto;
   align-items: baseline;
   gap: 8px;
 }
 .ladder-head > :first-child {
   font-weight: bold;
+  text-align: right;
 }
-/* The find's row: under the band, over a line as the ladder's rows are, its edges the ladder's. */
+/* The find's band. */
 .find-row {
   display: flex;
   align-items: center;
   gap: 8px;
   max-width: none;
-  margin: 0 calc(-1 * var(--panel-bleed));
-  padding: 0 var(--panel-bleed) 8px;
-  border-bottom: 1px solid var(--border);
 }
 /* The toggle as tall as the search beside it. */
 .find-row > .find-mode {
