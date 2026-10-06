@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
 import { AnimatePresence, motion } from 'motion-v'
 import { useRouter } from 'vue-router'
+import { CircleHelp } from '@lucide/vue'
 import { ability, availableIds, condition, item, pokemon, type PokemonId, type Ref } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
@@ -377,8 +378,8 @@ onBeforeUnmount(() => observer?.disconnect())
 
 // How to read the page, in a section closed unless the reader opens it (remembered), so the ladder starts close to the
 // top: the chips' legend, and on phones the intro and what each option does too (wide screens show them beside what
-// they explain).
-const { open: helpOpen, onToggle: onHelpToggle } = useOpenState('sproutvgc.speedTiers.helpOpen', false)
+// they explain). Opened from the intro's line, apart from the controls, as it changes nothing shown.
+const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.speedTiers.helpOpen', false)
 
 /** Whether the screen has hover, for tooltips: touch screens show what matters inline instead. */
 const canHover = window.matchMedia('(hover: hover)').matches
@@ -391,7 +392,61 @@ const { entered } = usePageEntered()
   <div>
     <div class="panel">
       <h1>{{ t('title.speedTiers') }}</h1>
-      <p class="muted wide-only">{{ t('speed.intro', { reg: REGULATION }) }}</p>
+      <!-- The intro, and how to read the page: a link-like toggle beside it, apart from the controls. -->
+      <p class="lede">
+        <span class="muted wide-only">{{ t('speed.intro', { reg: REGULATION }) }}</span>
+        <button
+          type="button"
+          class="help-toggle"
+          :aria-expanded="helpOpen"
+          aria-controls="speed-help"
+          @click="toggleHelp"
+        >
+          <CircleHelp :size="16" aria-hidden="true" /><span>{{ t('speed.help') }}</span>
+        </button>
+      </p>
+      <!-- How to read a chip: samples, each with what its parts mean; on phones, the intro and the options too. -->
+      <div v-if="helpOpen" id="speed-help" class="help-body panel sunken">
+        <div class="phone-only-block small">
+          <p class="muted">{{ t('speed.intro', { reg: REGULATION }) }}</p>
+          <dl class="help-options">
+            <template v-if="!showAll && boostsAvailable">
+              <dt>{{ t('speed.boosts') }}</dt>
+              <dd class="muted">{{ t('speed.boostsDesc') }}</dd>
+            </template>
+            <dt>{{ t('speed.megas') }}</dt>
+            <dd class="muted">{{ t('speed.megasDesc') }}</dd>
+            <dt>{{ t('speed.mod.trickroom') }}</dt>
+            <dd class="muted">{{ t('speed.modTip.trickroom') }}</dd>
+            <dt>{{ t('speed.modifiers') }}</dt>
+            <dd class="muted">{{ t('speed.modifiersTip') }}</dd>
+          </dl>
+        </div>
+        <p class="formula muted small">{{ t('speed.formula') }}</p>
+        <dl v-if="!showAll && snapshot" class="legend small">
+          <dt>
+            <span class="chip sample"
+              ><span class="tag">{{ natureName('timid') }}</span
+              ><span class="tag">{{ t('speed.points', { n: 32 }) }}</span
+              ><span class="tag">{{ percent(0.461) }}</span></span
+            >
+          </dt>
+          <dd class="muted">{{ t('speed.legendChip', { pct: percent(MIN_SHARE) }) }}</dd>
+          <template v-if="showBoosts">
+            <dt>
+              <span class="chip sample boost"
+                ><span class="tag boost-label"
+                  ><ItemIcon id="choicescarf" :scale="0.67" />{{ t('speed.legendBoostLabel') }}</span
+                ></span
+              >
+            </dt>
+            <dd class="muted">
+              {{ t('speed.legendBoost') }}
+            </dd>
+          </template>
+        </dl>
+        <p v-else class="muted small">{{ t('speed.allNote', { build: benchTip(bench) }) }}</p>
+      </div>
       <div class="controls">
         <!-- What's shown: the data, which Pokémon, and finding one. -->
         <div class="view-row">
@@ -462,56 +517,6 @@ const { entered } = usePageEntered()
           </div>
         </div>
       </div>
-
-      <!-- How to read a chip: samples, each with what its parts mean. -->
-      <details class="help" :open="helpOpen" @toggle="onHelpToggle">
-        <summary>
-          <span class="marker" aria-hidden="true">{{ helpOpen ? '▾' : '▸' }}</span
-          >{{ t('speed.help') }}
-        </summary>
-        <!-- On phones, in a well under its heading. -->
-        <div class="help-body panel sunken">
-          <div class="phone-only-block small">
-            <p class="muted">{{ t('speed.intro', { reg: REGULATION }) }}</p>
-            <dl class="help-options">
-              <template v-if="!showAll && boostsAvailable">
-                <dt>{{ t('speed.boosts') }}</dt>
-                <dd class="muted">{{ t('speed.boostsDesc') }}</dd>
-              </template>
-              <dt>{{ t('speed.megas') }}</dt>
-              <dd class="muted">{{ t('speed.megasDesc') }}</dd>
-              <dt>{{ t('speed.mod.trickroom') }}</dt>
-              <dd class="muted">{{ t('speed.modTip.trickroom') }}</dd>
-              <dt>{{ t('speed.modifiers') }}</dt>
-              <dd class="muted">{{ t('speed.modifiersTip') }}</dd>
-            </dl>
-          </div>
-          <p class="formula muted small">{{ t('speed.formula') }}</p>
-          <dl v-if="!showAll && snapshot" class="legend small">
-            <dt>
-              <span class="chip sample"
-                ><span class="tag">{{ natureName('timid') }}</span
-                ><span class="tag">{{ t('speed.points', { n: 32 }) }}</span
-                ><span class="tag">{{ percent(0.461) }}</span></span
-              >
-            </dt>
-            <dd class="muted">{{ t('speed.legendChip', { pct: percent(MIN_SHARE) }) }}</dd>
-            <template v-if="showBoosts">
-              <dt>
-                <span class="chip sample boost"
-                  ><span class="tag boost-label"
-                    ><ItemIcon id="choicescarf" :scale="0.67" />{{ t('speed.legendBoostLabel') }}</span
-                  ></span
-                >
-              </dt>
-              <dd class="muted">
-                {{ t('speed.legendBoost') }}
-              </dd>
-            </template>
-          </dl>
-          <p v-else class="muted small">{{ t('speed.allNote', { build: benchTip(bench) }) }}</p>
-        </div>
-      </details>
     </div>
 
     <div class="panel banded list">
@@ -873,22 +878,39 @@ const { entered } = usePageEntered()
 .phone-only-block {
   display: none;
 }
-/* The section on how to read the page: its arrow drawn as the modifiers' is, rather than the browser's marker, so the
-   two match; its content in a well under it. */
-.help {
-  margin-top: 10px;
+/* The intro's line: the intro, then the toggle for how to read the page, a link rather than a control. */
+.lede {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
 }
-.help > summary {
-  width: fit-content;
-  list-style: none;
+.help-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  font: inherit;
+  color: var(--text);
+  background: none;
+  border: none;
   cursor: pointer;
-  font-weight: bold;
+  align-self: center;
 }
-.help > summary::-webkit-details-marker {
-  display: none;
+/* Ink rather than a link's blue, which nothing else on the page has: dotted, as what explains, solid on hover. */
+.help-toggle > span {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
 }
+.help-toggle:hover > span {
+  text-decoration-style: solid;
+}
+.help-toggle > .lucide {
+  color: var(--muted);
+}
+/* How to read the page, in a well between the intro and the controls. */
 .help-body {
-  margin: 6px 0 0;
+  margin: 0 0 12px;
   padding: 8px 10px;
 }
 .help-body > :is(.legend, p) {
@@ -921,9 +943,6 @@ const { entered } = usePageEntered()
   }
   .wide-only {
     display: none;
-  }
-  .help {
-    margin-top: 8px;
   }
   .help-body .phone-only-block > :first-child {
     margin-top: 0;
@@ -958,11 +977,11 @@ const { entered } = usePageEntered()
     flex-basis: 100%;
   }
   /* Each legend sample's description under it rather than squeezed beside it. */
-  .help .legend {
+  .help-body .legend {
     grid-template-columns: 1fr;
     gap: 2px;
   }
-  .help .legend dd {
+  .help-body .legend dd {
     margin-bottom: 8px;
   }
   /* The tags under the name, with room beside the icon. */

@@ -1,8 +1,8 @@
 import { ref } from 'vue'
 
 /**
- * A <details>' open state, remembered under `key` (`initially` until the reader opens or closes it; open by default):
- * bind `open` and `@toggle="onToggle"`.
+ * A section's open state, remembered under `key` (`initially` until the reader opens or closes it; open by default):
+ * for a <details>, bind `open` and `@toggle="onToggle"`; for a button, call `toggle`.
  */
 export function useOpenState(key: string, initially = true) {
   let saved: string | null = null
@@ -12,13 +12,19 @@ export function useOpenState(key: string, initially = true) {
     // Storage unavailable: open.
   }
   const open = ref(saved === null ? initially : saved !== '0')
-  function onToggle(e: Event) {
-    open.value = (e.target as HTMLDetailsElement).open
+  function set(value: boolean) {
+    open.value = value
     try {
-      localStorage.setItem(key, open.value ? '1' : '0')
+      localStorage.setItem(key, value ? '1' : '0')
     } catch {
       // Storage unavailable: the choice lasts for this page load.
     }
   }
-  return { open, onToggle }
+  function onToggle(e: Event) {
+    set((e.target as HTMLDetailsElement).open)
+  }
+  function toggle() {
+    set(!open.value)
+  }
+  return { open, onToggle, toggle }
 }
