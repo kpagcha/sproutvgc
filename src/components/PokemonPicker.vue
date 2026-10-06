@@ -69,11 +69,13 @@ function pick(id: PokemonId) {
   open.value = false
   if (touch.matches) field.value?.querySelector('input')?.blur()
 }
-// On touch screens, focusing the field brings it to the top of the screen, so the list has all the room between it and
-// the keyboard coming up.
+// On touch screens, focusing the field brings the panel it's in to the top of the screen (its heading showing where it
+// is), so the list has all the room between it and the keyboard coming up; not in something stuck to the screen, which
+// the page scrolls under.
+const anchor = () => field.value?.closest('.panel') ?? field.value
 function onFocus() {
   open.value = true
-  if (touch.matches) toTopOf(field.value)
+  if (touch.matches && !stuck(field.value)) toTopOf(anchor())
 }
 // On touch screens, tapping the field again while it's in use puts it away: the list closes and the keyboard goes.
 let wasFocused = false
@@ -127,10 +129,11 @@ function measure() {
     along = { left: box.left + pl, width: box.width - pl - pr }
   }
   // As tall as the room left under the field, a dozen rows at most: down to what shows of the page, above the keyboard.
-  // On touch screens, from the top of the screen, where focusing it brings the field.
+  // On touch screens, from where focusing it brings the field: its panel at the top of the screen.
   const vv = window.visualViewport
   const [shownTop, shownBottom] = vv ? [vv.offsetTop, vv.offsetTop + vv.height] : [0, window.innerHeight]
-  const fieldBottom = touch.matches && !fixed.value ? shownTop + 12 + r.height : r.bottom
+  const below = r.bottom - (anchor()?.getBoundingClientRect().top ?? r.top)
+  const fieldBottom = touch.matches && !fixed.value ? shownTop + 12 + below : r.bottom
   const [dx, dy] = fixed.value ? [0, 0] : [window.scrollX, window.scrollY]
   place.value = {
     top: r.bottom + 4 + dy,
