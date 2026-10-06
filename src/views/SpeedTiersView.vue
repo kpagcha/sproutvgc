@@ -1539,9 +1539,12 @@ const { entered } = usePageEntered()
   align-items: center;
   gap: 6px 10px;
 }
+/* The search takes what Clear leaves, as the find's does. */
 .yours-pick .picker {
   flex: 1 1 12em;
-  max-width: 20em;
+}
+.yours-pick :deep(.search-box) {
+  max-width: none;
 }
 /* Its heading, with an arrow drawn as the modifiers' is, rather than the browser's marker. */
 .yours-title {
