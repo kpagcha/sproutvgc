@@ -100,10 +100,20 @@ function onBlur() {
   text.value = nameOf(model.value)
 }
 
-// Where the list goes: under the field, as wide (or as `listWidthOf`), following it as the page scrolls or resizes
-// while it's open.
+// Where the list goes: under the field, as wide (or as `listWidthOf`). Placed on the page, so it scrolls with it as
+// the field does, with nothing to follow (phones' keyboards move what's fixed to the screen about, and following the
+// page by its scroll events lags behind it); fixed to the screen only when the field is in something stuck to it (a
+// sticky bar), following it as the page scrolls then.
 const field = useTemplateRef<HTMLElement>('field')
 const place = ref({ top: 0, left: 0, width: 0, height: 0 })
+const fixed = ref(false)
+function stuck(el: Element | null): boolean {
+  for (; el && el !== document.body; el = el.parentElement) {
+    const { position } = getComputedStyle(el)
+    if (position === 'sticky' || position === 'fixed') return true
+  }
+  return false
+}
 function measure() {
   const r = field.value?.getBoundingClientRect()
   if (!r) return
@@ -117,27 +127,38 @@ function measure() {
     along = { left: box.left + pl, width: box.width - pl - pr }
   }
   // As tall as the room left under the field, a dozen rows at most: down to what shows of the page, above the keyboard.
+  // On touch screens, from the top of the screen, where focusing it brings the field.
   const vv = window.visualViewport
-  const bottom = vv ? vv.offsetTop + vv.height : window.innerHeight
-  place.value = { top: r.bottom + 4, left: along.left, width: along.width, height: bottom - r.bottom - 16 }
+  const [shownTop, shownBottom] = vv ? [vv.offsetTop, vv.offsetTop + vv.height] : [0, window.innerHeight]
+  const fieldBottom = touch.matches && !fixed.value ? shownTop + 12 + r.height : r.bottom
+  const [dx, dy] = fixed.value ? [0, 0] : [window.scrollX, window.scrollY]
+  place.value = {
+    top: r.bottom + 4 + dy,
+    left: along.left + dx,
+    width: along.width,
+    height: shownBottom - fieldBottom - 16,
+  }
 }
+// Only what's stuck to the screen follows the page's scrolling, and anything scrolling the field within the page.
+const onScroll = (e: Event) => (fixed.value || e.target !== document) && measure()
 watch(
   () => results.value.length > 0,
   (shown) => {
     if (shown) {
+      fixed.value = stuck(field.value)
       measure()
-      window.addEventListener('scroll', measure, { passive: true, capture: true })
+      window.addEventListener('scroll', onScroll, { passive: true, capture: true })
       window.addEventListener('resize', measure)
       window.visualViewport?.addEventListener('resize', measure)
     } else {
-      window.removeEventListener('scroll', measure, { capture: true })
+      window.removeEventListener('scroll', onScroll, { capture: true })
       window.removeEventListener('resize', measure)
       window.visualViewport?.removeEventListener('resize', measure)
     }
   },
 )
 onBeforeUnmount(() => {
-  window.removeEventListener('scroll', measure, { capture: true })
+  window.removeEventListener('scroll', onScroll, { capture: true })
   window.removeEventListener('resize', measure)
   window.visualViewport?.removeEventListener('resize', measure)
 })
@@ -171,6 +192,7 @@ const optionId = (i: number) => `${listId}-${i}`
         v-if="results.length"
         :id="listId"
         class="options"
+        :class="{ fixed }"
         role="listbox"
         :style="{
           top: `${place.top}px`,
@@ -210,7 +232,7 @@ const optionId = (i: number) => `${listId}-${i}`
 }
 /* The options: a card under the field, as the site's surfaces are. */
 .options {
-  position: fixed;
+  position: absolute;
   z-index: 20;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -220,6 +242,16 @@ const optionId = (i: number) => `${listId}-${i}`
   background: var(--panel);
   border: 2px solid var(--ink);
   box-shadow: var(--hard);
+  /* Following the room left as the keyboard comes and goes, rather than jumping to it. */
+  transition: max-height 0.2s ease-out;
+}
+.options.fixed {
+  position: fixed;
+}
+@media (prefers-reduced-motion: reduce) {
+  .options {
+    transition: none;
+  }
 }
 .option {
   display: flex;
