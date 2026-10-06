@@ -1,13 +1,15 @@
 <script setup lang="ts" generic="T extends string">
-import { useId } from 'vue'
+import { useId, type Component } from 'vue'
 
 // A choice of how something is shown, rather than of what is (a filter): a label and its options joined in one
-// outlined strip, the picked one highlighted. Radio buttons underneath, so arrow keys move between them.
+// outlined strip, the picked one highlighted. Radio buttons underneath, so arrow keys move between them. An option
+// can show an icon in place of its label, with a short text beside it, the label then naming it to screen readers and
+// in a tooltip.
 defineProps<{
   label: string
   /** Explains the choice, on the label's hover. */
   tip?: string
-  options: readonly { value: T; label: string }[]
+  options: readonly { value: T; label: string; icon?: Component; short?: string }[]
 }>()
 const model = defineModel<T>({ required: true })
 const id = useId()
@@ -17,9 +19,18 @@ const id = useId()
   <div class="segmented" role="radiogroup" :aria-labelledby="id">
     <span :id v-tip="tip" class="muted">{{ label }}</span>
     <span class="segments">
-      <label v-for="o in options" :key="o.value" :class="{ on: model === o.value }">
-        <input v-model="model" type="radio" :name="id" :value="o.value" />
-        {{ o.label }}
+      <label
+        v-for="o in options"
+        :key="o.value"
+        v-tip="o.icon && o.label"
+        :class="{ on: model === o.value, icon: o.icon }"
+      >
+        <input v-model="model" type="radio" :name="id" :value="o.value" :aria-label="o.icon ? o.label : undefined" />
+        <template v-if="o.icon">
+          <component :is="o.icon" :size="16" aria-hidden="true" />
+          <span v-if="o.short" aria-hidden="true">{{ o.short }}</span>
+        </template>
+        <template v-else>{{ o.label }}</template>
       </label>
     </span>
   </div>
@@ -42,6 +53,11 @@ const id = useId()
   padding: 1px 10px;
   background: var(--panel-alt);
   cursor: pointer;
+}
+.segments label.icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
 }
 .segments label + label {
   border-left: 2px solid var(--ink);

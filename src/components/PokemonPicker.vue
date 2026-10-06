@@ -10,10 +10,15 @@ import SearchBox from '@/components/SearchBox.vue'
 
 // Picks one of the regulation's Pokémon by name: the site's search box, with the Pokémon its text finds listed under
 // it (their icons, the match marked; every one while it's empty), in a list that scrolls, picked by clicking or with
-// the arrow keys and Enter. Shows the
-// one picked once it's picked. The list is drawn on the page's body, placed under the field, so no container it's in
-// (a <details>, which clips its content to animate it; a scrolling one) can cut it off.
-const props = defineProps<{ placeholder: string }>()
+// the arrow keys and Enter. Shows the one picked once it's picked. The list is drawn on
+// the page's body, placed under the field, so no container it's in (a <details>, which clips its content to animate
+// it; a scrolling one) can cut it off.
+const props = defineProps<{
+  placeholder: string
+  /** The element around the field (a selector, for its closest ancestor) whose width the list takes, rather than the
+   * field's, so it keeps one width as what's beside the field comes and goes. */
+  listWidthOf?: string
+}>()
 const model = defineModel<PokemonId | null>({ required: true })
 
 const ALL = computed(() =>
@@ -66,13 +71,16 @@ function onBlur() {
   text.value = nameOf(model.value)
 }
 
-// Where the list goes: under the field, as wide, following it as the page scrolls or resizes while it's open.
+// Where the list goes: under the field, as wide (or as `listWidthOf`), following it as the page scrolls or resizes
+// while it's open.
 const field = useTemplateRef<HTMLElement>('field')
 const place = ref({ top: 0, left: 0, width: 0, height: 0 })
 function measure() {
   const r = field.value?.getBoundingClientRect()
+  if (!r) return
+  const along = (props.listWidthOf && field.value?.closest(props.listWidthOf)?.getBoundingClientRect()) || r
   // As tall as the room left under the field, a dozen rows at most.
-  if (r) place.value = { top: r.bottom + 4, left: r.left, width: r.width, height: window.innerHeight - r.bottom - 16 }
+  place.value = { top: r.bottom + 4, left: along.left, width: along.width, height: window.innerHeight - r.bottom - 16 }
 }
 watch(
   () => results.value.length > 0,
