@@ -464,8 +464,8 @@ export const messages: Record<keyof typeof en, string> = {
   'pokedex.abilities': 'Habilidades',
   'pokedex.types': 'Tipos',
   'pokedex.none': 'Ningún Pokémon coincide.',
-  'pokedex.compare': 'Comparar',
-  'pokedex.compare.plain': 'Sin comparar',
+  'pokedex.compare': 'Estadísticas frente a',
+  'pokedex.compare.plain': 'Nada',
   'pokedex.compare.shown': 'Los Pokémon mostrados',
   'pokedex.compare.all': 'Todos los Pokémon',
   'pokedex.compareTip':

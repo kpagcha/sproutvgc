@@ -457,8 +457,8 @@ export const messages = {
   'pokedex.abilities': 'Abilities',
   'pokedex.types': 'Types',
   'pokedex.none': 'No Pokémon matches.',
-  'pokedex.compare': 'Compare',
-  'pokedex.compare.plain': 'No comparison',
+  'pokedex.compare': 'Stats vs.',
+  'pokedex.compare.plain': 'Nothing',
   'pokedex.compare.shown': 'The Pokémon shown',
   'pokedex.compare.all': 'Every Pokémon',
   'pokedex.compareTip':
