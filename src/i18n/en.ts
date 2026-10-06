@@ -682,6 +682,7 @@ export const messages = {
   'speed.modTip.ironball': 'Halves Speed.',
   'speed.vsClose': 'Close',
   'speed.find': 'Find a Pokémon',
+  'speed.findOnly': 'Only {name}',
   'speed.allNote': 'Every Pokémon once, at the same build: {build}.',
   'speed.at': 'At',
   'speed.invest': '{points} Speed points and a {nature} nature{effect}: {pct} of its sets',

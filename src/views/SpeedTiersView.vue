@@ -7,7 +7,7 @@ import { ability, availableIds, condition, item, pokemon, type PokemonId, type R
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
 import { currentSnapshots, distinctLabel, has, percent } from '@/data/meta'
-import { locale, t } from '@/i18n'
+import { locale, t, tSplit } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { center } from '@/lib/scroll'
 import { FADE, PRESS } from '@/lib/motion'
@@ -296,11 +296,27 @@ const found = computed(() => {
 const setFound = (id: PokemonId | null) => set('find', id ?? undefined)
 const onLadder = computed(() => [...new Set(entries.value.map((e) => e.id))])
 const isHit = (e: Entry) => !e.mine && e.id === found.value
+// What finding does: mark its chips among the rest, or show only them (and yours, to compare): only them by default
+// with yours picked, marking them otherwise; the URL says so (`?findmode=`) only when it differs.
+const FIND_MODES = ['mark', 'only'] as const
+type FindMode = (typeof FIND_MODES)[number]
+const defaultFindMode = computed<FindMode>(() => (mine.value ? 'only' : 'mark'))
+const findMode = computed<FindMode>({
+  get: () =>
+    (FIND_MODES as readonly unknown[]).includes(query.value.findmode)
+      ? (query.value.findmode as FindMode)
+      : defaultFindMode.value,
+  set: (m) => set('findmode', m === defaultFindMode.value ? undefined : m),
+})
+const onlyFound = computed(() => found.value !== null && findMode.value === 'only')
+// The toggle's label around the found Pokémon's icon, the same width whatever its name (which the search shows).
+const onlyLabel = computed(() => tSplit('speed.findOnly', 'name'))
 
 /** The ladder: each Speed (with the modifiers) with the Pokémon at it, fastest first (slowest under Trick Room). */
 const tiers = computed(() => {
   const bySpeed = new Map<number, Entry[]>()
   for (const e of entries.value) {
+    if (onlyFound.value && e.id !== found.value) continue
     const s = inBattle(e.speed, mods.value)
     bySpeed.set(s, [...(bySpeed.get(s) ?? []), e])
   }
@@ -322,7 +338,9 @@ const tiers = computed(() => {
 })
 const finding = computed(() => found.value !== null)
 /** How many Pokémon the ladder holds, each once however many Speeds it's at. */
-const monCount = computed(() => new Set(entries.value.map((e) => e.id)).size)
+const monCount = computed(
+  () => new Set(tiers.value.flatMap((t) => t.list.filter((e) => !e.mine).map((e) => e.id))).size,
+)
 const ladder = useTemplateRef<HTMLElement>('ladder')
 
 // How yours does against the others shown: the share of them it moves before, ties and moves after, weighted by usage
@@ -712,20 +730,29 @@ const { entered } = usePageEntered()
 
     <div class="speed-layout">
       <div class="panel banded soft list">
-        <!-- What the ladder is: its numbers, which way it runs, finding a Pokémon on it, and how many Pokémon it holds. -->
+        <!-- What the ladder is: its numbers, which way it runs, and how many Pokémon it holds. -->
         <div class="band ladder-head">
           <span>{{ t('speed.column') }}</span>
           <span>{{ t(trickRoom ? 'speed.slowestFirst' : 'speed.fastestFirst') }}</span>
-          <!-- Finding a Pokémon on it, as it's the ladder it searches. -->
-          <div class="find">
-            <PokemonPicker
-              :model-value="found"
-              :ids="onLadder"
-              :placeholder="t('speed.find')"
-              @update:model-value="setFound"
+          <span v-if="entered && (showAll || data)" class="muted">{{ t('speed.count', { n: monCount }) }}</span>
+        </div>
+        <!-- Finding a Pokémon on it, in a row of its own under the band, as it's the ladder it searches. -->
+        <div class="find find-row">
+          <PokemonPicker
+            :model-value="found"
+            :ids="onLadder"
+            :placeholder="t('speed.find')"
+            @update:model-value="setFound"
+          />
+          <label v-if="found" class="btn switch find-mode" :class="{ on: onlyFound }">
+            <input
+              type="checkbox"
+              :checked="onlyFound"
+              :aria-label="t('speed.findOnly', { name: refName(pokemon(found)) })"
+              @change="findMode = onlyFound ? 'mark' : 'only'"
             />
-          </div>
-          <span v-if="entered && (showAll || data)" class="muted count">{{ t('speed.count', { n: monCount }) }}</span>
+            {{ onlyLabel[0] }}<PokemonIcon :id="found" />{{ onlyLabel[1] }}
+          </label>
         </div>
         <!-- Pinned over the ladder once the controls are scrolled away; takes no room of its own. -->
         <div ref="pinMark" aria-hidden="true"></div>
@@ -738,6 +765,15 @@ const { entered } = usePageEntered()
                 :placeholder="t('speed.findShort')"
                 @update:model-value="setFound"
               />
+              <label v-if="found" class="btn switch find-mode" :class="{ on: onlyFound }">
+                <input
+                  type="checkbox"
+                  :checked="onlyFound"
+                  :aria-label="t('speed.findOnly', { name: refName(pokemon(found)) })"
+                  @change="findMode = onlyFound ? 'mark' : 'only'"
+                />
+                {{ onlyLabel[0] }}<PokemonIcon :id="found" />{{ onlyLabel[1] }}
+              </label>
             </div>
             <label v-if="!showAll && boostsAvailable" class="btn switch" :class="{ on: showBoosts }">
               <input type="checkbox" :checked="showBoosts" @change="toggleBoosts" />
@@ -760,7 +796,7 @@ const { entered } = usePageEntered()
         <div v-if="!entered || (!showAll && !data)" class="ladder" aria-hidden="true">
           <div v-for="i in 12" :key="i" class="tier skeleton"><span class="bone"></span></div>
         </div>
-        <ol v-else ref="ladder" class="ladder" :class="{ finding }">
+        <ol v-else ref="ladder" class="ladder" :class="{ finding: finding && !onlyFound }">
           <li
             v-for="tier in tiers"
             :key="tier.speed"
@@ -785,7 +821,12 @@ const { entered } = usePageEntered()
                   v-tip="canHover && !e.mine && tip(e)"
                   :to="{ name: 'pokemon', params: { id: e.id } }"
                   class="chip"
-                  :class="{ hit: isHit(e), boost: e.boost, yours: e.mine, versus: query.vs === chipKey(e) }"
+                  :class="{
+                    hit: isHit(e) && !onlyFound,
+                    boost: e.boost,
+                    yours: e.mine,
+                    versus: query.vs === chipKey(e),
+                  }"
                 >
                   <span class="who">
                     <PokemonIcon :id="e.id" />
@@ -1078,7 +1119,7 @@ const { entered } = usePageEntered()
 }
 .find {
   flex: 1 1 14em;
-  max-width: 22em;
+  max-width: 30em;
 }
 .find :deep(.search-box) {
   max-width: none;
@@ -1168,38 +1209,36 @@ const { entered } = usePageEntered()
 /* The ladder's header: its columns' labels, in a soft band (retro.css), its first, "Speed", bold. */
 .ladder-head {
   display: grid;
-  grid-template-columns: minmax(var(--speed-col), max-content) auto minmax(0, 1fr) auto;
-  grid-template-areas: 'column order find count';
-  align-items: center;
-  gap: 4px 8px;
-}
-.ladder-head > :first-child {
-  grid-area: column;
-}
-.ladder-head > :nth-child(2) {
-  grid-area: order;
-}
-.ladder-head > .find {
-  grid-area: find;
-  justify-self: end;
-  width: 100%;
-  max-width: 18em;
-}
-.ladder-head > .count {
-  grid-area: count;
-}
-/* On phones, the find under the rest, across the band. */
-@media (max-width: 720px) {
-  .ladder-head {
-    grid-template-columns: minmax(var(--speed-col), max-content) 1fr auto;
-    grid-template-areas: 'column order count' 'find find find';
-  }
-  .ladder-head > .find {
-    max-width: none;
-  }
+  grid-template-columns: minmax(var(--speed-col), max-content) 1fr auto;
+  align-items: baseline;
+  gap: 8px;
 }
 .ladder-head > :first-child {
   font-weight: bold;
+}
+/* The find's row: under the band, over a line as the ladder's rows are, its edges the ladder's. */
+.find-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: none;
+  margin: 0 calc(-1 * var(--panel-bleed));
+  padding: 0 var(--panel-bleed) 8px;
+  border-bottom: 1px solid var(--border);
+}
+/* The toggle as tall as the search beside it. */
+.find-row > .find-mode {
+  align-self: stretch;
+}
+/* The found Pokémon's icon over the toggle's padding, so the toggle takes the height around it: the search's in its
+   row, the switches' pinned. */
+.find-mode :deep(.sheet-icon) {
+  margin-block: -6px;
+}
+/* The search takes what the toggle leaves. */
+.find.find-row > .picker {
+  flex: 1 1 0;
+  min-width: 0;
 }
 /* The band's line stands in for the first Speed's. */
 .tier:first-child {
@@ -1246,6 +1285,17 @@ const { entered } = usePageEntered()
 .pinned .short {
   display: none;
 }
+/* The find, how it shows beside it, the search taking what the switches leave, as in its row. */
+.pinned .find {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: none;
+}
+.pinned .find > .picker {
+  flex: 1 1 0;
+  min-width: 0;
+}
 /* On phones, one line: the search takes what the compact switches leave. */
 @media (max-width: 720px) {
   .pinned {
@@ -1255,6 +1305,10 @@ const { entered } = usePageEntered()
     flex: 1 1 0;
     min-width: 0;
     max-width: none;
+  }
+  /* No room for how a find shows beside it, the switches too: the find's row has it. */
+  .pinned .find-mode {
+    display: none;
   }
   .pinned .switch {
     flex: none;

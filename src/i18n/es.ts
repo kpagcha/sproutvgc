@@ -690,6 +690,7 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.modTip.ironball': 'Reduce la Velocidad a la mitad.',
   'speed.vsClose': 'Cerrar',
   'speed.find': 'Buscar un Pokémon',
+  'speed.findOnly': 'Solo {name}',
   'speed.allNote': 'Todos los Pokémon una vez, con el mismo reparto: {build}.',
   'speed.at': 'Con',
   'speed.invest': '{points} puntos en Velocidad y naturaleza {nature}{effect}: el {pct} de sus sets',
