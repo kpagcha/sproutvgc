@@ -188,13 +188,13 @@ const mySpeed = computed(() =>
 )
 
 /**
- * Picks your Pokémon, at the meta's most common build of it when there is one, else the fastest, and on narrower screens
- * brings the Speed it lands at into view.
+ * Picks your Pokémon, at the meta's most common build of it when there is one, else the fastest. The page stays where
+ * it is, so the ladder's opponents band is the first of it you see; the Speed's button shows where it landed.
  */
-async function pickMine(id: PokemonId | null) {
+function pickMine(id: PokemonId | null) {
   if (!id) return
   const build = data.value?.[id]?.speeds?.[0]
-  await router.replace({
+  void router.replace({
     query: {
       ...query.value,
       mine: id,
@@ -203,11 +203,6 @@ async function pickMine(id: PokemonId | null) {
       vs: undefined,
     },
   })
-  // Beside the ladder, the page stays where it is, the opponents band over the ladder in view; the Speed's button
-  // shows where it landed.
-  if (side.value) return
-  await nextTick()
-  toMine()
 }
 function clearMine() {
   const q = { ...query.value }
