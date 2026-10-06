@@ -34,6 +34,14 @@ export function center(el: Element | null | undefined) {
   scrollToY(window.scrollY + r.top + r.height / 2 - window.innerHeight / 2)
 }
 
+/** Smoothly scrolls the page to bring `el`'s top to the top of the screen; the user scrolling or touching it takes
+ * over. */
+export function toTopOf(el: Element | null | undefined) {
+  if (!el) return
+  const top = el.getBoundingClientRect().top
+  if (Math.abs(top - MARGIN) > 8) scrollToY(window.scrollY + top - MARGIN)
+}
+
 /** Smoothly scrolls to the top of the page; the user scrolling or touching the screen takes over. */
 export function toTop() {
   scrollToY(0)

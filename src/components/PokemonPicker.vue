@@ -4,6 +4,7 @@ import { availableIds, pokemon, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
 import { locale } from '@/i18n'
 import { refName } from '@/i18n/refName'
+import { toTopOf } from '@/lib/scroll'
 import { fold, split } from '@/lib/search'
 import PokemonIcon from '@/components/PokemonIcon'
 import SearchBox from '@/components/SearchBox.vue'
@@ -68,6 +69,12 @@ function pick(id: PokemonId) {
   open.value = false
   if (touch.matches) field.value?.querySelector('input')?.blur()
 }
+// On touch screens, focusing the field brings it to the top of the screen, so the list has all the room between it and
+// the keyboard coming up.
+function onFocus() {
+  open.value = true
+  if (touch.matches) toTopOf(field.value)
+}
 function onKey(e: KeyboardEvent) {
   const n = results.value.length
   if (e.key === 'ArrowDown' && n) active.value = (active.value + 1) % n
@@ -103,8 +110,10 @@ function measure() {
     const [pl, pr] = [parseFloat(style.paddingLeft), parseFloat(style.paddingRight)]
     along = { left: box.left + pl, width: box.width - pl - pr }
   }
-  // As tall as the room left under the field, a dozen rows at most.
-  place.value = { top: r.bottom + 4, left: along.left, width: along.width, height: window.innerHeight - r.bottom - 16 }
+  // As tall as the room left under the field, a dozen rows at most: down to what shows of the page, above the keyboard.
+  const vv = window.visualViewport
+  const bottom = vv ? vv.offsetTop + vv.height : window.innerHeight
+  place.value = { top: r.bottom + 4, left: along.left, width: along.width, height: bottom - r.bottom - 16 }
 }
 watch(
   () => results.value.length > 0,
@@ -113,15 +122,18 @@ watch(
       measure()
       window.addEventListener('scroll', measure, { passive: true, capture: true })
       window.addEventListener('resize', measure)
+      window.visualViewport?.addEventListener('resize', measure)
     } else {
       window.removeEventListener('scroll', measure, { capture: true })
       window.removeEventListener('resize', measure)
+      window.visualViewport?.removeEventListener('resize', measure)
     }
   },
 )
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', measure, { capture: true })
   window.removeEventListener('resize', measure)
+  window.visualViewport?.removeEventListener('resize', measure)
 })
 
 watch(active, (i) => queueMicrotask(() => document.getElementById(optionId(i))?.scrollIntoView({ block: 'nearest' })))
@@ -142,7 +154,7 @@ const optionId = (i: number) => `${listId}-${i}`
       :aria-controls="listId"
       :aria-activedescendant="results.length ? optionId(active) : undefined"
       @input="open = true"
-      @focus="open = true"
+      @focus="onFocus"
       @blur="onBlur"
       @keydown="onKey"
     />
