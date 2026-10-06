@@ -1564,10 +1564,14 @@ const { entered } = usePageEntered()
     align-items: start;
     gap: 0 12px;
   }
+  /* Beside the ladder, stuck as it scrolls; scrolling itself when taller than the screen. */
   .yours {
     order: 0;
     position: sticky;
     top: 12px;
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 }
 /* The comparison's card, at the bottom of the screen where yours isn't beside the ladder. */
