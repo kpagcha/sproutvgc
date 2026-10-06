@@ -775,6 +775,7 @@ const { entered } = usePageEntered()
             :model-value="found"
             :ids="onLadder"
             :placeholder="t('speed.find')"
+            list-width-of=".find-row"
             @update:model-value="setFound"
           />
           <label v-if="found" class="btn switch find-mode" :class="{ on: onlyFound }">
@@ -804,6 +805,7 @@ const { entered } = usePageEntered()
                 :model-value="found"
                 :ids="onLadder"
                 :placeholder="t('speed.findShort')"
+                list-width-of=".pinned"
                 @update:model-value="setFound"
               />
               <label v-if="found" class="btn switch find-mode" :class="{ on: onlyFound }">

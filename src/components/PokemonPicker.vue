@@ -17,8 +17,8 @@ const props = defineProps<{
   placeholder: string
   /** The Pokémon to pick from, when not every one of the regulation's. */
   ids?: readonly PokemonId[]
-  /** The element around the field (a selector, for its closest ancestor) whose width the list takes, rather than the
-   * field's, so it keeps one width as what's beside the field comes and goes. */
+  /** The element around the field (a selector, for its closest ancestor) whose width the list takes (inside its
+   * padding), rather than the field's, so it keeps one width as what's beside the field comes and goes. */
   listWidthOf?: string
 }>()
 const model = defineModel<PokemonId | null>({ required: true })
@@ -94,7 +94,15 @@ const place = ref({ top: 0, left: 0, width: 0, height: 0 })
 function measure() {
   const r = field.value?.getBoundingClientRect()
   if (!r) return
-  const along = (props.listWidthOf && field.value?.closest(props.listWidthOf)?.getBoundingClientRect()) || r
+  // `listWidthOf`'s content: inside its padding, where the field is.
+  const el = props.listWidthOf ? field.value?.closest(props.listWidthOf) : null
+  let along = { left: r.left, width: r.width }
+  if (el) {
+    const box = el.getBoundingClientRect()
+    const style = getComputedStyle(el)
+    const [pl, pr] = [parseFloat(style.paddingLeft), parseFloat(style.paddingRight)]
+    along = { left: box.left + pl, width: box.width - pl - pr }
+  }
   // As tall as the room left under the field, a dozen rows at most.
   place.value = { top: r.bottom + 4, left: along.left, width: along.width, height: window.innerHeight - r.bottom - 16 }
 }
