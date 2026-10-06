@@ -1128,6 +1128,21 @@ const { entered } = usePageEntered()
   list-style: none;
   cursor: pointer;
 }
+/* Where yours isn't beside the ladder, the heading sticks to the top while the options are in view, as yours' does:
+   across the panel, over what scrolls under it. */
+@media (max-width: 1099px) {
+  .head {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    margin: calc(-1 * var(--panel-pad)) calc(-1 * var(--panel-pad)) 0;
+    padding: var(--panel-pad);
+    background: var(--panel);
+  }
+  details[open] > .head {
+    border-bottom: 1px solid var(--border);
+  }
+}
 .head::-webkit-details-marker {
   display: none;
 }
@@ -1545,6 +1560,14 @@ const { entered } = usePageEntered()
 }
 .yours-pick :deep(.search-box) {
   max-width: none;
+}
+/* Where yours isn't beside the ladder, its heading sticks to the top while its card is in view, saying where you are. */
+@media (max-width: 1099px) {
+  .yours-title {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+  }
 }
 /* Its heading, with an arrow drawn as the modifiers' is, rather than the browser's marker. */
 .yours-title {
