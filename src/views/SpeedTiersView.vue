@@ -229,6 +229,8 @@ const tiers = computed(() => {
     })
 })
 const finding = computed(() => !!find.value.trim())
+/** How many Pokémon the ladder holds, each once however many Speeds it's at. */
+const monCount = computed(() => new Set(entries.value.map((e) => e.id)).size)
 
 const benchLabel = (b: Benchmark) => t(`speed.bench.${b}`)
 const benchTip = (b: Benchmark) => t(`speed.benchTip.${b}`)
@@ -513,7 +515,13 @@ const { entered } = usePageEntered()
       </details>
     </div>
 
-    <div class="panel">
+    <div class="panel banded list">
+      <!-- What the ladder is: its numbers, which way it runs, and how many Pokémon it holds. -->
+      <div class="band">
+        <span class="band-speed">{{ t('speed.column') }}</span>
+        <span>{{ t(trickRoom ? 'speed.slowestFirst' : 'speed.fastestFirst') }}</span>
+        <span v-if="entered && (showAll || data)" class="band-count">{{ t('speed.count', { n: monCount }) }}</span>
+      </div>
       <!-- Pinned over the ladder once the controls are scrolled away; takes no room of its own. -->
       <div ref="pinMark" aria-hidden="true"></div>
       <div class="pin">
@@ -708,14 +716,30 @@ const { entered } = usePageEntered()
   padding: 0;
   list-style: none;
 }
-/* A Speed, and the Pokémon at it: the number in a column of its own, the chips wrapping beside it. */
-.ladder {
+/* A Speed, and the Pokémon at it: the number in a column of its own, the chips wrapping beside it. The band over the
+   ladder heads that column too. */
+.list {
   --speed-col: 3.5em;
 }
 @media (max-width: 720px) {
-  .ladder {
+  .list {
     --speed-col: 2.2em;
   }
+}
+.band {
+  display: grid;
+  grid-template-columns: minmax(var(--speed-col), max-content) 1fr auto;
+  align-items: baseline;
+  gap: 8px;
+  font-weight: bold;
+}
+.band-count {
+  font-weight: normal;
+  opacity: 0.75;
+}
+/* The band leads straight into the first Speed. */
+.tier:first-child {
+  border-top: none;
 }
 .tier {
   display: grid;
