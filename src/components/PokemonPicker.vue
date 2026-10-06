@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, useId, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, useId, useTemplateRef, watch } from 'vue'
 import { availableIds, pokemon, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
 import { locale } from '@/i18n'
@@ -10,9 +10,9 @@ import SearchBox from '@/components/SearchBox.vue'
 
 // Picks one of the regulation's Pokémon by name: the site's search box, with the Pokémon its text finds listed under
 // it (their icons, the match marked; every one while it's empty), in a list that scrolls, picked by clicking or with
-// the arrow keys and Enter. Shows the one picked once it's picked; emptying the field unpicks it. The list is drawn on
-// the page's body, placed under the field, so no container it's in (a <details>, which clips its content to animate
-// it; a scrolling one) can cut it off.
+// the arrow keys and Enter. Shows the one picked once it's picked, and opening the list again brings it into view,
+// ready; emptying the field unpicks it. The list is drawn on the page's body, placed under the field, so no container
+// it's in (a <details>, which clips its content to animate it; a scrolling one) can cut it off.
 const props = defineProps<{
   placeholder: string
   /** The Pokémon to pick from, when not every one of the regulation's. */
@@ -50,7 +50,14 @@ const results = computed(() => {
     return parts ? [{ ...m, parts }] : []
   })
 })
-watch(results, () => (active.value = 0))
+// The field shows the one picked as it is, not a search being typed.
+const showsPicked = computed(() => !!model.value && text.value === nameOf(model.value))
+// Browsing every Pokémon from the one picked: it, in view; else the first.
+watch(results, (list) => {
+  const i = showsPicked.value ? list.findIndex((r) => r.id === model.value) : -1
+  active.value = Math.max(i, 0)
+  if (i > 0) void nextTick(() => document.getElementById(optionId(i))?.scrollIntoView({ block: 'center' }))
+})
 
 // On touch screens, picking one leaves the field, so the keyboard goes away and the page it was covering shows; with a
 // mouse or keys, the focus stays for picking another.

@@ -955,6 +955,7 @@ const { entered } = usePageEntered()
         <summary class="yours-title" @click.prevent="!side && toggleYours()">
           <span class="marker yours-marker" aria-hidden="true">{{ yoursOpen ? '▾' : '▸' }}</span>
           {{ t('speed.yours') }}
+          <PokemonIcon v-if="mine" :id="mine" :scale="0.75" class="yours-icon" />
         </summary>
         <div class="yours-pick">
           <PokemonPicker
@@ -1456,10 +1457,17 @@ const { entered } = usePageEntered()
 }
 /* Its heading, with an arrow drawn as the modifiers' is, rather than the browser's marker. */
 .yours-title {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   list-style: none;
   font-weight: bold;
   cursor: pointer;
+}
+/* Yours' icon in the band, right after the heading (its cell has room of its own around the sprite), at three quarters
+   of its size to fit the band, and taking no height of its own, so the band is as tall with it as without. */
+.yours-icon {
+  margin-block: -6px;
 }
 .yours-title::-webkit-details-marker {
   display: none;
