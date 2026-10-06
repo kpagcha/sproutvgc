@@ -10,11 +10,13 @@ import SearchBox from '@/components/SearchBox.vue'
 
 // Picks one of the regulation's Pokémon by name: the site's search box, with the Pokémon its text finds listed under
 // it (their icons, the match marked; every one while it's empty), in a list that scrolls, picked by clicking or with
-// the arrow keys and Enter. Shows the one picked once it's picked. The list is drawn on
+// the arrow keys and Enter. Shows the one picked once it's picked; emptying the field unpicks it. The list is drawn on
 // the page's body, placed under the field, so no container it's in (a <details>, which clips its content to animate
 // it; a scrolling one) can cut it off.
 const props = defineProps<{
   placeholder: string
+  /** The Pokémon to pick from, when not every one of the regulation's. */
+  ids?: readonly PokemonId[]
   /** The element around the field (a selector, for its closest ancestor) whose width the list takes, rather than the
    * field's, so it keeps one width as what's beside the field comes and goes. */
   listWidthOf?: string
@@ -22,7 +24,7 @@ const props = defineProps<{
 const model = defineModel<PokemonId | null>({ required: true })
 
 const ALL = computed(() =>
-  availableIds('pokemon')
+  (props.ids ?? availableIds('pokemon'))
     .filter((id) => !POKEMON[id].cosmetic)
     .map((id) => ({ id, name: refName(pokemon(id)) }))
     .sort((a, b) => a.name.localeCompare(b.name, locale.value)),
@@ -31,6 +33,9 @@ const nameOf = (id: PokemonId | null) => (id ? refName(pokemon(id)) : '')
 
 const text = ref(nameOf(model.value))
 watch(model, (id) => (text.value = nameOf(id)))
+watch(text, (v) => {
+  if (!v.trim() && model.value) model.value = null
+})
 const open = ref(false)
 const active = ref(0)
 

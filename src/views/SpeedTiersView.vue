@@ -9,7 +9,6 @@ import { POKEMON, splitForme } from '@/data/pokemon'
 import { currentSnapshots, distinctLabel, has, percent } from '@/data/meta'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import { fold } from '@/lib/search'
 import { center } from '@/lib/scroll'
 import { FADE, PRESS } from '@/lib/motion'
 import { natureEffects, natureName } from '@/data/natures'
@@ -36,7 +35,6 @@ import ItemIcon from '@/components/ItemIcon.vue'
 import MetaPicker from '@/components/MetaPicker.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import PokemonPicker from '@/components/PokemonPicker.vue'
-import SearchBox from '@/components/SearchBox.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 
 // The regulation's Pokémon ordered by Speed, as a ladder of Speed values with the Pokémon at each. By default the
@@ -290,12 +288,14 @@ const entries = computed<Entry[]>(() => {
     }))
 })
 
-const find = shallowRef(typeof query.value.q === 'string' ? query.value.q : '')
-watch(find, (q) => set('q', q.trim() || undefined))
-const isHit = (e: Entry) => {
-  const q = fold(find.value.trim())
-  return !!q && fold(`${e.species} ${e.forme ?? ''}`).includes(q)
-}
+// Finding a Pokémon: one picked from those on the ladder (`?find=`), its chips marked and the rest dimmed.
+const found = computed(() => {
+  const id = query.value.find
+  return typeof id === 'string' && id in POKEMON ? (id as PokemonId) : null
+})
+const setFound = (id: PokemonId | null) => set('find', id ?? undefined)
+const onLadder = computed(() => [...new Set(entries.value.map((e) => e.id))])
+const isHit = (e: Entry) => !e.mine && e.id === found.value
 
 /** The ladder: each Speed (with the modifiers) with the Pokémon at it, fastest first (slowest under Trick Room). */
 const tiers = computed(() => {
@@ -320,7 +320,7 @@ const tiers = computed(() => {
       return { speed, list: sorted, hit: sorted.some(isHit) }
     })
 })
-const finding = computed(() => !!find.value.trim())
+const finding = computed(() => found.value !== null)
 /** How many Pokémon the ladder holds, each once however many Speeds it's at. */
 const monCount = computed(() => new Set(entries.value.map((e) => e.id)).size)
 const ladder = useTemplateRef<HTMLElement>('ladder')
@@ -494,7 +494,7 @@ function checkMatch() {
     name: e ? [e.species, e.forme].filter(Boolean).join(' ') : '',
   }
 }
-watch([tiers, find, ladder], () => void nextTick(checkMatch), { flush: 'post' })
+watch([tiers, found, ladder], () => void nextTick(checkMatch), { flush: 'post' })
 window.addEventListener('scroll', checkMatch, { passive: true })
 window.addEventListener('resize', checkMatch)
 onBeforeUnmount(() => {
@@ -641,7 +641,7 @@ const { entered } = usePageEntered()
           <p v-else class="muted small">{{ t('speed.allNote', { build: benchTip(bench) }) }}</p>
         </div>
         <div class="controls">
-          <!-- What's shown: the data, which Pokémon, and finding one. -->
+          <!-- What's shown: the data, and which Pokémon. -->
           <div class="view-row">
             <MetaPicker v-if="snapshot" />
             <SegmentedControl
@@ -660,9 +660,6 @@ const { entered } = usePageEntered()
               :label="t('speed.at')"
               :options="BENCHMARKS.map((b) => ({ value: b, label: benchLabel(b) }))"
             />
-            <div class="find">
-              <SearchBox v-model="find" :placeholder="t('speed.find')" :aria-label="t('speed.find')" />
-            </div>
           </div>
 
           <!-- How it's shown: each option with what it does beside it, as tooltips get missed. -->
@@ -715,18 +712,32 @@ const { entered } = usePageEntered()
 
     <div class="speed-layout">
       <div class="panel banded soft list">
-        <!-- What the ladder is: its numbers, which way it runs, and how many Pokémon it holds. -->
+        <!-- What the ladder is: its numbers, which way it runs, finding a Pokémon on it, and how many Pokémon it holds. -->
         <div class="band ladder-head">
           <span>{{ t('speed.column') }}</span>
           <span>{{ t(trickRoom ? 'speed.slowestFirst' : 'speed.fastestFirst') }}</span>
-          <span v-if="entered && (showAll || data)" class="muted">{{ t('speed.count', { n: monCount }) }}</span>
+          <!-- Finding a Pokémon on it, as it's the ladder it searches. -->
+          <div class="find">
+            <PokemonPicker
+              :model-value="found"
+              :ids="onLadder"
+              :placeholder="t('speed.find')"
+              @update:model-value="setFound"
+            />
+          </div>
+          <span v-if="entered && (showAll || data)" class="muted count">{{ t('speed.count', { n: monCount }) }}</span>
         </div>
         <!-- Pinned over the ladder once the controls are scrolled away; takes no room of its own. -->
         <div ref="pinMark" aria-hidden="true"></div>
         <div class="pin">
           <div v-if="pinned" class="pinned">
             <div class="find">
-              <SearchBox v-model="find" :placeholder="t('speed.findShort')" :aria-label="t('speed.find')" />
+              <PokemonPicker
+                :model-value="found"
+                :ids="onLadder"
+                :placeholder="t('speed.findShort')"
+                @update:model-value="setFound"
+              />
             </div>
             <label v-if="!showAll && boostsAvailable" class="btn switch" :class="{ on: showBoosts }">
               <input type="checkbox" :checked="showBoosts" @change="toggleBoosts" />
@@ -1070,7 +1081,7 @@ const { entered } = usePageEntered()
   max-width: 22em;
 }
 .find :deep(.search-box) {
-  margin: 0;
+  max-width: none;
 }
 /* The options: a grid of switches (buttons holding their checkbox) and the modifiers' disclosure, as wide as the
    widest of them, each with what it does beside it; on phones, under it. */
@@ -1157,9 +1168,35 @@ const { entered } = usePageEntered()
 /* The ladder's header: its columns' labels, in a soft band (retro.css), its first, "Speed", bold. */
 .ladder-head {
   display: grid;
-  grid-template-columns: minmax(var(--speed-col), max-content) 1fr auto;
-  align-items: baseline;
-  gap: 8px;
+  grid-template-columns: minmax(var(--speed-col), max-content) auto minmax(0, 1fr) auto;
+  grid-template-areas: 'column order find count';
+  align-items: center;
+  gap: 4px 8px;
+}
+.ladder-head > :first-child {
+  grid-area: column;
+}
+.ladder-head > :nth-child(2) {
+  grid-area: order;
+}
+.ladder-head > .find {
+  grid-area: find;
+  justify-self: end;
+  width: 100%;
+  max-width: 18em;
+}
+.ladder-head > .count {
+  grid-area: count;
+}
+/* On phones, the find under the rest, across the band. */
+@media (max-width: 720px) {
+  .ladder-head {
+    grid-template-columns: minmax(var(--speed-col), max-content) 1fr auto;
+    grid-template-areas: 'column order count' 'find find find';
+  }
+  .ladder-head > .find {
+    max-width: none;
+  }
 }
 .ladder-head > :first-child {
   font-weight: bold;
