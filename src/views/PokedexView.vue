@@ -328,141 +328,146 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
 </script>
 
 <template>
-  <div class="panel">
-    <h1>{{ t('title.pokemon') }}</h1>
-    <p class="muted">{{ t('pokedex.intro', { reg: REGULATION, ...counts }) }}</p>
-    <div class="filters">
-      <SearchBox
-        v-model="query"
-        :placeholder="t('pokedex.search')"
-        :aria-label="t('pokedex.search')"
-        @keydown.backspace="removeLastFilter"
-      />
-      <select v-if="!advanced" v-model="type" class="search type-filter" :aria-label="t('pokedex.type')">
-        <option value="">{{ t('pokedex.anyType') }}</option>
-        <option v-for="ty in TYPES" :key="ty" :value="ty">{{ typeName(ty) }}</option>
-      </select>
-      <button
-        type="button"
-        class="btn advanced-toggle"
-        :class="{ on: advanced }"
-        :aria-pressed="advanced"
-        @click="toggleAdvanced"
-      >
-        {{ t('filter.advanced') }}
-      </button>
-      <SegmentedControl
-        v-model="reference"
-        class="view-opts"
-        :label="t('pokedex.compare')"
-        :tip="t('pokedex.compareTip')"
-        :options="LIST_STAT_MARKS.map((m) => ({ value: m, label: markLabel(m) }))"
-      />
-    </div>
-    <FilterGroups v-if="advanced" v-model="filters" />
-    <ul v-else-if="plainFilters.length" class="active-filters">
-      <li v-for="f in plainFilters" :key="`${f.kind}:${f.id}`" class="active-filter">
-        <span class="muted">{{ t(`filter.kind.${f.kind}`) }}:</span>
-        <TypeIcon v-if="f.kind === 'type'" :type="f.id" />
-        <DexRef :to="f" />
+  <!-- The heading and the filters, and the table, in panels of their own on phones, one panel on wider screens. -->
+  <div class="panels">
+    <div class="panel">
+      <h1>{{ t('title.pokemon') }}</h1>
+      <p class="muted">{{ t('pokedex.intro', { reg: REGULATION, ...counts }) }}</p>
+      <div class="filters">
+        <SearchBox
+          v-model="query"
+          :placeholder="t('pokedex.search')"
+          :aria-label="t('pokedex.search')"
+          @keydown.backspace="removeLastFilter"
+        />
+        <select v-if="!advanced" v-model="type" class="search type-filter" :aria-label="t('pokedex.type')">
+          <option value="">{{ t('pokedex.anyType') }}</option>
+          <option v-for="ty in TYPES" :key="ty" :value="ty">{{ typeName(ty) }}</option>
+        </select>
         <button
           type="button"
-          class="remove"
-          :aria-label="t('filter.remove', { name: refName(f) })"
-          @click="removeFilter(f)"
+          class="btn advanced-toggle"
+          :class="{ on: advanced }"
+          :aria-pressed="advanced"
+          @click="toggleAdvanced"
         >
-          ×
+          {{ t('filter.advanced') }}
         </button>
-      </li>
-    </ul>
-    <div v-if="sorted.length" class="dex-table" :class="{ restoring }" role="table">
-      <div ref="head" class="row head" role="row">
-        <SortHeader
-          class="name-head"
-          :label="t('pokedex.name')"
-          :active="key === 'name'"
-          :desc="desc"
-          @sort="toggle('name')"
-        />
-        <div class="sizer" aria-hidden="true">
-          <div v-for="l in widest" :key="l.row.id" :class="{ child: l.child }">
-            <span class="mon">
-              <PokemonIcon :id="l.row.id" />
-              <span class="label">
-                <span class="name">{{ l.title.join('') }}</span>
-                <span v-if="l.tag" class="forme">{{ l.tag.join('') }}</span>
-              </span>
-            </span>
-          </div>
-        </div>
-        <div role="columnheader">{{ t('pokedex.types') }}</div>
-        <div role="columnheader" class="wide-only">{{ t('pokedex.abilities') }}</div>
-        <SortHeader
-          v-for="s in STATS"
-          :key="s"
-          class="wide-only"
-          :label="t(`stat.${s}`)"
-          right
-          :active="key === s"
-          :desc="desc"
-          @sort="toggle(s)"
-        />
-        <SortHeader
-          :label="t('stat.bst')"
-          :tip="t('stat.bstFull')"
-          right
-          :active="key === 'total'"
-          :desc="desc"
-          @sort="toggle('total')"
+        <SegmentedControl
+          v-model="reference"
+          class="view-opts"
+          :label="t('pokedex.compare')"
+          :tip="t('pokedex.compareTip')"
+          :options="LIST_STAT_MARKS.map((m) => ({ value: m, label: markLabel(m) }))"
         />
       </div>
-      <SkeletonRows v-if="!entered" :cells="SKELETON" height="2.3em" />
-      <template v-else>
-        <div
-          v-for="{ row: r, child, last, parent, context, title, tag } in lines"
-          :key="r.id"
-          class="row"
-          :class="{ child, last, parent, context }"
-          role="row"
-        >
-          <div role="cell" class="grow name-cell">
-            <AppLink :to="{ name: 'pokemon', params: { id: r.id } }" class="mon">
-              <PokemonIcon :id="r.id" />
-              <span class="label">
-                <span class="name"><Marked :p="title" /></span>
-                <span v-if="tag" class="forme"><Marked :p="tag" /></span>
-              </span>
-            </AppLink>
-          </div>
-          <div role="cell">
-            <span class="types">
-              <AppLink v-for="ty in r.data.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
-                <TypeIcon :type="ty" />
-              </AppLink>
-            </span>
-          </div>
-          <div role="cell" class="wide-only grow">
-            <ul class="abilities">
-              <li v-for="a in r.abilities" :key="a.id">
-                <DexRef :to="a" :tip="abilityTip(a)" :tip-group="`abilities:${r.id}`" />
-              </li>
-            </ul>
-          </div>
-          <div
-            v-for="(v, i) in r.data.stats"
-            :key="i"
-            role="cell"
-            class="wide-only r num stat"
-            :class="statMarks?.get(r.id)?.[i]?.class"
-            :style="statMarks?.get(r.id)?.[i]?.style"
+      <FilterGroups v-if="advanced" v-model="filters" />
+      <ul v-else-if="plainFilters.length" class="active-filters">
+        <li v-for="f in plainFilters" :key="`${f.kind}:${f.id}`" class="active-filter">
+          <span class="muted">{{ t(`filter.kind.${f.kind}`) }}:</span>
+          <TypeIcon v-if="f.kind === 'type'" :type="f.id" />
+          <DexRef :to="f" />
+          <button
+            type="button"
+            class="remove"
+            :aria-label="t('filter.remove', { name: refName(f) })"
+            @click="removeFilter(f)"
           >
-            {{ v }}
-          </div>
-          <div role="cell" class="r num total">{{ total(r.data) }}</div>
-        </div>
-      </template>
+            ×
+          </button>
+        </li>
+      </ul>
     </div>
-    <p v-else class="muted">{{ t('pokedex.none') }}</p>
+    <div class="panel">
+      <div v-if="sorted.length" class="dex-table" :class="{ restoring }" role="table">
+        <div ref="head" class="row head" role="row">
+          <SortHeader
+            class="name-head"
+            :label="t('pokedex.name')"
+            :active="key === 'name'"
+            :desc="desc"
+            @sort="toggle('name')"
+          />
+          <div class="sizer" aria-hidden="true">
+            <div v-for="l in widest" :key="l.row.id" :class="{ child: l.child }">
+              <span class="mon">
+                <PokemonIcon :id="l.row.id" />
+                <span class="label">
+                  <span class="name">{{ l.title.join('') }}</span>
+                  <span v-if="l.tag" class="forme">{{ l.tag.join('') }}</span>
+                </span>
+              </span>
+            </div>
+          </div>
+          <div role="columnheader">{{ t('pokedex.types') }}</div>
+          <div role="columnheader" class="wide-only">{{ t('pokedex.abilities') }}</div>
+          <SortHeader
+            v-for="s in STATS"
+            :key="s"
+            class="wide-only"
+            :label="t(`stat.${s}`)"
+            right
+            :active="key === s"
+            :desc="desc"
+            @sort="toggle(s)"
+          />
+          <SortHeader
+            :label="t('stat.bst')"
+            :tip="t('stat.bstFull')"
+            right
+            :active="key === 'total'"
+            :desc="desc"
+            @sort="toggle('total')"
+          />
+        </div>
+        <SkeletonRows v-if="!entered" :cells="SKELETON" height="2.3em" />
+        <template v-else>
+          <div
+            v-for="{ row: r, child, last, parent, context, title, tag } in lines"
+            :key="r.id"
+            class="row"
+            :class="{ child, last, parent, context }"
+            role="row"
+          >
+            <div role="cell" class="grow name-cell">
+              <AppLink :to="{ name: 'pokemon', params: { id: r.id } }" class="mon">
+                <PokemonIcon :id="r.id" />
+                <span class="label">
+                  <span class="name"><Marked :p="title" /></span>
+                  <span v-if="tag" class="forme"><Marked :p="tag" /></span>
+                </span>
+              </AppLink>
+            </div>
+            <div role="cell">
+              <span class="types">
+                <AppLink v-for="ty in r.data.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
+                  <TypeIcon :type="ty" />
+                </AppLink>
+              </span>
+            </div>
+            <div role="cell" class="wide-only grow">
+              <ul class="abilities">
+                <li v-for="a in r.abilities" :key="a.id">
+                  <DexRef :to="a" :tip="abilityTip(a)" :tip-group="`abilities:${r.id}`" />
+                </li>
+              </ul>
+            </div>
+            <div
+              v-for="(v, i) in r.data.stats"
+              :key="i"
+              role="cell"
+              class="wide-only r num stat"
+              :class="statMarks?.get(r.id)?.[i]?.class"
+              :style="statMarks?.get(r.id)?.[i]?.style"
+            >
+              {{ v }}
+            </div>
+            <div role="cell" class="r num total">{{ total(r.data) }}</div>
+          </div>
+        </template>
+      </div>
+      <p v-else class="muted">{{ t('pokedex.none') }}</p>
+    </div>
   </div>
   <SearchResults v-if="others" :query :results="others" :filters />
 </template>

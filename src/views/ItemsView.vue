@@ -35,31 +35,36 @@ const groups = computed(() => {
 </script>
 
 <template>
-  <div class="panel">
-    <h1>{{ t('title.items') }}</h1>
-    <p class="muted">{{ t('items.intro', { reg: REGULATION }) }}</p>
-    <SearchBox v-model="query" :placeholder="t('items.search')" :aria-label="t('items.search')" />
-    <section v-for="g in groups" :key="g.kind">
-      <h2>{{ t(`items.kind.${g.kind}`) }}</h2>
-      <dl class="entries">
-        <template v-for="it in g.items" :key="it.id">
-          <dt>
-            <RouterLink :to="{ name: 'item', params: { id: it.id } }" class="name">
-              <ItemIcon :id="it.id" />
-              <span>
-                <template v-if="it.parts"
-                  >{{ it.parts[0] }}<mark>{{ it.parts[1] }}</mark
-                  >{{ it.parts[2] }}</template
-                >
-                <template v-else>{{ it.name }}</template>
-              </span>
-            </RouterLink>
-          </dt>
-          <dd class="muted"><DexText :text="it.text" /></dd>
-        </template>
-      </dl>
-    </section>
-    <p v-if="!groups.length" class="muted">{{ t('items.none') }}</p>
+  <!-- The heading and the search, and the list, in panels of their own on phones, one panel on wider screens. -->
+  <div class="panels">
+    <div class="panel">
+      <h1>{{ t('title.items') }}</h1>
+      <p class="muted">{{ t('items.intro', { reg: REGULATION }) }}</p>
+      <SearchBox v-model="query" :placeholder="t('items.search')" :aria-label="t('items.search')" />
+    </div>
+    <div class="panel">
+      <section v-for="g in groups" :key="g.kind">
+        <h2>{{ t(`items.kind.${g.kind}`) }}</h2>
+        <dl class="entries">
+          <template v-for="it in g.items" :key="it.id">
+            <dt>
+              <RouterLink :to="{ name: 'item', params: { id: it.id } }" class="name">
+                <ItemIcon :id="it.id" />
+                <span>
+                  <template v-if="it.parts"
+                    >{{ it.parts[0] }}<mark>{{ it.parts[1] }}</mark
+                    >{{ it.parts[2] }}</template
+                  >
+                  <template v-else>{{ it.name }}</template>
+                </span>
+              </RouterLink>
+            </dt>
+            <dd class="muted"><DexText :text="it.text" /></dd>
+          </template>
+        </dl>
+      </section>
+      <p v-if="!groups.length" class="muted">{{ t('items.none') }}</p>
+    </div>
   </div>
 </template>
 

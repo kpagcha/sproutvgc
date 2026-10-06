@@ -36,28 +36,33 @@ const groups = computed(() => {
 </script>
 
 <template>
-  <div class="panel">
-    <h1>{{ t('title.conditions') }}</h1>
-    <p class="muted">{{ t('conditions.intro', { reg: REGULATION }) }}</p>
-    <SearchBox v-model="query" :placeholder="t('conditions.search')" :aria-label="t('conditions.search')" />
-    <section v-for="g in groups" :key="g.sub">
-      <h2>{{ t(`conditions.sub.${g.sub}`) }}</h2>
-      <dl class="entries">
-        <template v-for="c in g.items" :key="c.id">
-          <dt>
-            <RouterLink :to="{ name: 'condition', params: { id: c.id } }">
-              <template v-if="c.parts"
-                >{{ c.parts[0] }}<mark>{{ c.parts[1] }}</mark
-                >{{ c.parts[2] }}</template
-              >
-              <template v-else>{{ c.name }}</template>
-            </RouterLink>
-          </dt>
-          <dd class="muted"><DexText :text="c.text" /></dd>
-        </template>
-      </dl>
-    </section>
-    <p v-if="!groups.length" class="muted">{{ t('conditions.none') }}</p>
+  <!-- The heading and the search, and the list, in panels of their own on phones, one panel on wider screens. -->
+  <div class="panels">
+    <div class="panel">
+      <h1>{{ t('title.conditions') }}</h1>
+      <p class="muted">{{ t('conditions.intro', { reg: REGULATION }) }}</p>
+      <SearchBox v-model="query" :placeholder="t('conditions.search')" :aria-label="t('conditions.search')" />
+    </div>
+    <div class="panel">
+      <section v-for="g in groups" :key="g.sub">
+        <h2>{{ t(`conditions.sub.${g.sub}`) }}</h2>
+        <dl class="entries">
+          <template v-for="c in g.items" :key="c.id">
+            <dt>
+              <RouterLink :to="{ name: 'condition', params: { id: c.id } }">
+                <template v-if="c.parts"
+                  >{{ c.parts[0] }}<mark>{{ c.parts[1] }}</mark
+                  >{{ c.parts[2] }}</template
+                >
+                <template v-else>{{ c.name }}</template>
+              </RouterLink>
+            </dt>
+            <dd class="muted"><DexText :text="c.text" /></dd>
+          </template>
+        </dl>
+      </section>
+      <p v-if="!groups.length" class="muted">{{ t('conditions.none') }}</p>
+    </div>
   </div>
 </template>
 

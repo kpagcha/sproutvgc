@@ -31,25 +31,30 @@ const shown = computed(() => {
 </script>
 
 <template>
-  <div class="panel">
-    <h1>{{ t('title.abilities') }}</h1>
-    <p class="muted">{{ t('abilities.intro', { reg: REGULATION }) }}</p>
-    <SearchBox v-model="query" :placeholder="t('abilities.search')" :aria-label="t('abilities.search')" />
-    <dl v-if="shown.length" class="entries">
-      <template v-for="a in shown" :key="a.id">
-        <dt>
-          <RouterLink :to="{ name: 'ability', params: { id: a.id } }">
-            <template v-if="a.parts"
-              >{{ a.parts[0] }}<mark>{{ a.parts[1] }}</mark
-              >{{ a.parts[2] }}</template
-            >
-            <template v-else>{{ a.name }}</template>
-          </RouterLink>
-        </dt>
-        <dd class="muted"><DexText :text="a.text" /></dd>
-      </template>
-    </dl>
-    <p v-else class="muted">{{ t('abilities.none') }}</p>
+  <!-- The heading and the search, and the list, in panels of their own on phones, one panel on wider screens. -->
+  <div class="panels">
+    <div class="panel">
+      <h1>{{ t('title.abilities') }}</h1>
+      <p class="muted">{{ t('abilities.intro', { reg: REGULATION }) }}</p>
+      <SearchBox v-model="query" :placeholder="t('abilities.search')" :aria-label="t('abilities.search')" />
+    </div>
+    <div class="panel">
+      <dl v-if="shown.length" class="entries">
+        <template v-for="a in shown" :key="a.id">
+          <dt>
+            <RouterLink :to="{ name: 'ability', params: { id: a.id } }">
+              <template v-if="a.parts"
+                >{{ a.parts[0] }}<mark>{{ a.parts[1] }}</mark
+                >{{ a.parts[2] }}</template
+              >
+              <template v-else>{{ a.name }}</template>
+            </RouterLink>
+          </dt>
+          <dd class="muted"><DexText :text="a.text" /></dd>
+        </template>
+      </dl>
+      <p v-else class="muted">{{ t('abilities.none') }}</p>
+    </div>
   </div>
 </template>
 

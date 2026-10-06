@@ -29,17 +29,20 @@ const flag = param<Flag>('flag', FLAGS)
 </script>
 
 <template>
-  <div class="panel">
-    <h1>{{ t('title.moves') }}</h1>
-    <p class="muted">{{ t('moves.intro', { reg: REGULATION, n: ids.length }) }}</p>
+  <!-- The heading and the filters, and the table, in panels of their own on phones, one panel on wider screens. -->
+  <div class="panels">
     <MoveTable
       :ids="ids"
       descriptions
+      panels
       :placeholder="t('moves.search')"
       :query="q"
       remember="moves"
       v-model:category="category"
       v-model:flag="flag"
-    />
+    >
+      <h1>{{ t('title.moves') }}</h1>
+      <p class="muted">{{ t('moves.intro', { reg: REGULATION, n: ids.length }) }}</p>
+    </MoveTable>
   </div>
 </template>

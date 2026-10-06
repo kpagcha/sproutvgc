@@ -46,6 +46,19 @@
   box-shadow: inset 3px 3px 0 color-mix(in srgb, var(--ink) 25%, transparent);
 }
 
+/* `panels`: the panels in it (the heading and the controls, then the list) apart on phones, and on wider screens joined
+   into one: no border nor gap between them, the second's top padding left to what ends the first. */
+@media (min-width: 721px) {
+  :root:root .panels > .panel:not(:last-child) {
+    margin-bottom: 0;
+    border-bottom: none;
+  }
+  :root:root .panels > .panel:not(:first-child) {
+    padding-top: 0;
+    border-top: none;
+  }
+}
+
 :root:root .site-header {
   border-bottom: 2px solid var(--ink);
   box-shadow: none;

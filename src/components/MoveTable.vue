@@ -21,7 +21,9 @@ import SkeletonRows from '@/components/SkeletonRows.vue'
 
 // A table of moves with their type, category, power, accuracy and PP, sortable by any of them, searchable by name and
 // filtered by type, category and flag; with `descriptions`, each move's short description too. The category and flag
-// filters are models, for a page that keeps them in its URL; unbound, the table keeps them itself.
+// filters are models, for a page that keeps them in its URL; unbound, the table keeps them itself. With `panels`, the
+// filters (after what's given in the slot: the page's heading) and the table go in panels of their own (for `.panels`);
+// without, both go in the caller's.
 const props = defineProps<{
   ids: readonly MoveId[]
   descriptions?: boolean
@@ -29,6 +31,7 @@ const props = defineProps<{
   query?: string
   /** Keep the sort under this name when the table is mounted again (`useSort`'s `remember`). */
   remember?: string
+  panels?: boolean
 }>()
 
 // Its links are `AppLink`s and its icons and descriptions functional components: RouterLinks and full components in
@@ -106,69 +109,74 @@ const skeleton = computed(() => [
 </script>
 
 <template>
-  <div class="filters">
-    <SearchBox v-model="query" :placeholder="placeholder" :aria-label="placeholder" />
-    <select v-model="type" class="search select" :aria-label="t('move.type')">
-      <option value="">{{ t('pokedex.anyType') }}</option>
-      <option v-for="ty in TYPES" :key="ty" :value="ty">{{ typeName(ty) }}</option>
-    </select>
-    <select v-model="category" class="search select" :aria-label="t('move.category')">
-      <option value="">{{ t('moves.anyCategory') }}</option>
-      <option v-for="c in CATEGORIES" :key="c" :value="c">{{ t(`move.category.${c}`) }}</option>
-    </select>
-    <select v-model="flag" class="search select" :aria-label="t('move.flags')">
-      <option value="">{{ t('moves.anyFlag') }}</option>
-      <option v-for="{ f, name } in flags" :key="f" :value="f">{{ name }}</option>
-    </select>
-  </div>
-  <div v-if="sorted.length" class="dex-table" :class="{ described: descriptions, restoring }" role="table">
-    <div ref="head" class="row head" role="row">
-      <SortHeader :label="t('move.name')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
-      <SortHeader
-        v-for="c in COLUMNS"
-        :key="c.k"
-        :class="{ 'wide-only': c.wideOnly }"
-        :label="t(c.label)"
-        :right="c.right"
-        :active="key === c.k"
-        :desc="desc"
-        @sort="toggle(c.k)"
-      />
-      <div v-if="descriptions && !phone" role="columnheader"></div>
+  <div :class="{ panel: panels }">
+    <slot />
+    <div class="filters">
+      <SearchBox v-model="query" :placeholder="placeholder" :aria-label="placeholder" />
+      <select v-model="type" class="search select" :aria-label="t('move.type')">
+        <option value="">{{ t('pokedex.anyType') }}</option>
+        <option v-for="ty in TYPES" :key="ty" :value="ty">{{ typeName(ty) }}</option>
+      </select>
+      <select v-model="category" class="search select" :aria-label="t('move.category')">
+        <option value="">{{ t('moves.anyCategory') }}</option>
+        <option v-for="c in CATEGORIES" :key="c" :value="c">{{ t(`move.category.${c}`) }}</option>
+      </select>
+      <select v-model="flag" class="search select" :aria-label="t('move.flags')">
+        <option value="">{{ t('moves.anyFlag') }}</option>
+        <option v-for="{ f, name } in flags" :key="f" :value="f">{{ name }}</option>
+      </select>
     </div>
-    <SkeletonRows v-if="!entered" :cells="skeleton" height="2.05em" />
-    <template v-else>
-      <div v-for="r in sorted" :key="r.id" class="row" role="row">
-        <div role="cell" class="grow">
-          <AppLink :to="{ name: 'move', params: { id: r.id } }" class="name">
-            <template v-if="r.parts"
-              >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
-              >{{ r.parts[2] }}</template
-            >
-            <template v-else>{{ r.name }}</template>
-          </AppLink>
-          <div v-if="descriptions && phone" class="muted below">
+  </div>
+  <div :class="{ panel: panels }">
+    <div v-if="sorted.length" class="dex-table" :class="{ described: descriptions, restoring }" role="table">
+      <div ref="head" class="row head" role="row">
+        <SortHeader :label="t('move.name')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
+        <SortHeader
+          v-for="c in COLUMNS"
+          :key="c.k"
+          :class="{ 'wide-only': c.wideOnly }"
+          :label="t(c.label)"
+          :right="c.right"
+          :active="key === c.k"
+          :desc="desc"
+          @sort="toggle(c.k)"
+        />
+        <div v-if="descriptions && !phone" role="columnheader"></div>
+      </div>
+      <SkeletonRows v-if="!entered" :cells="skeleton" height="2.05em" />
+      <template v-else>
+        <div v-for="r in sorted" :key="r.id" class="row" role="row">
+          <div role="cell" class="grow">
+            <AppLink :to="{ name: 'move', params: { id: r.id } }" class="name">
+              <template v-if="r.parts"
+                >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
+                >{{ r.parts[2] }}</template
+              >
+              <template v-else>{{ r.name }}</template>
+            </AppLink>
+            <div v-if="descriptions && phone" class="muted below">
+              <DexText :text="description('move', r.id)?.short ?? ''" />
+            </div>
+          </div>
+          <div role="cell">
+            <AppLink :to="{ name: 'types', params: { type: r.data.type } }"><TypeIcon :type="r.data.type" /></AppLink>
+          </div>
+          <div role="cell">
+            <AppLink :to="{ name: 'moves', query: { category: r.data.category } }"
+              ><CategoryIcon :category="r.data.category"
+            /></AppLink>
+          </div>
+          <div role="cell" class="r num">{{ r.data.power || '—' }}</div>
+          <div role="cell" class="wide-only r num">{{ r.data.accuracy === true ? '—' : r.data.accuracy }}</div>
+          <div role="cell" class="wide-only r num">{{ r.data.pp }}</div>
+          <div v-if="descriptions && !phone" role="cell" class="grow muted">
             <DexText :text="description('move', r.id)?.short ?? ''" />
           </div>
         </div>
-        <div role="cell">
-          <AppLink :to="{ name: 'types', params: { type: r.data.type } }"><TypeIcon :type="r.data.type" /></AppLink>
-        </div>
-        <div role="cell">
-          <AppLink :to="{ name: 'moves', query: { category: r.data.category } }"
-            ><CategoryIcon :category="r.data.category"
-          /></AppLink>
-        </div>
-        <div role="cell" class="r num">{{ r.data.power || '—' }}</div>
-        <div role="cell" class="wide-only r num">{{ r.data.accuracy === true ? '—' : r.data.accuracy }}</div>
-        <div role="cell" class="wide-only r num">{{ r.data.pp }}</div>
-        <div v-if="descriptions && !phone" role="cell" class="grow muted">
-          <DexText :text="description('move', r.id)?.short ?? ''" />
-        </div>
-      </div>
-    </template>
+      </template>
+    </div>
+    <p v-else class="muted">{{ t('moves.none') }}</p>
   </div>
-  <p v-else class="muted">{{ t('moves.none') }}</p>
 </template>
 
 <style scoped>
