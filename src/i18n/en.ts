@@ -656,6 +656,8 @@ export const messages = {
   'speed.when.field': 'in {field}',
   'speed.when.itemLost': 'once its item is used or lost',
   'speed.when.status': 'while it has a status condition',
+  'speed.megas': 'Megas',
+  'speed.megasDesc': "Mega Evolutions, at their Mega's Speed.",
   'speed.boostsDesc': 'Items and abilities their sets run that change Speed: Choice Scarf, Unburden, Swift Swim…',
   'speed.legendChip': 'Nature, stat points in Speed and the share of its sets running them; under {pct}, left out',
   'speed.legendBoostLabel': 'Choice Scarf ×1.5',

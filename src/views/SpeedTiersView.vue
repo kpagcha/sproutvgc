@@ -129,6 +129,9 @@ function toggleBoosts() {
   set('boosts', on ? undefined : '0')
 }
 const toggleTrickRoom = () => set('trickroom', trickRoom.value ? undefined : '1')
+// Megas show unless the URL turns them off (`?megas=0`).
+const showMegas = computed(() => query.value.megas !== '0')
+const toggleMegas = () => set('megas', showMegas.value ? '0' : undefined)
 
 interface Entry {
   id: PokemonId
@@ -153,7 +156,7 @@ const entries = computed<Entry[]>(() => {
   if (!showAll.value) {
     if (!data.value) return []
     return Object.entries(data.value)
-      .filter(([, m]) => m!.rank <= TOP)
+      .filter(([key, m]) => m!.rank <= TOP && (showMegas.value || !POKEMON[key as PokemonId].mega))
       .flatMap(([key, m]) => {
         const id = key as PokemonId
         const base = POKEMON[id].stats[5]
@@ -190,7 +193,7 @@ const entries = computed<Entry[]>(() => {
   // Every Pokémon once, at the benchmark picked.
   const ranks = data.value
   return availableIds('pokemon')
-    .filter((id) => !POKEMON[id].cosmetic)
+    .filter((id) => !POKEMON[id].cosmetic && (showMegas.value || !POKEMON[id].mega))
     .map((id) => ({
       id,
       ...named(id),
@@ -428,6 +431,11 @@ const { entered } = usePageEntered()
           </label>
           <span class="muted">{{ t('speed.boostsDesc') }}</span>
         </template>
+        <label class="btn switch" :class="{ on: showMegas }">
+          <input type="checkbox" :checked="showMegas" @change="toggleMegas" />
+          {{ t('speed.megas') }}
+        </label>
+        <span class="muted">{{ t('speed.megasDesc') }}</span>
         <label class="btn switch" :class="{ on: trickRoom }">
           <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
           {{ t('speed.mod.trickroom') }}
@@ -471,6 +479,8 @@ const { entered } = usePageEntered()
             <dt>{{ t('speed.boosts') }}</dt>
             <dd class="muted">{{ t('speed.boostsDesc') }}</dd>
           </template>
+          <dt>{{ t('speed.megas') }}</dt>
+          <dd class="muted">{{ t('speed.megasDesc') }}</dd>
           <dt>{{ t('speed.mod.trickroom') }}</dt>
           <dd class="muted">{{ t('speed.modTip.trickroom') }}</dd>
           <dt>{{ t('speed.modifiers') }}</dt>
@@ -599,7 +609,7 @@ const { entered } = usePageEntered()
       </AnimatePresence>
     </Teleport>
 
-    <p class="muted small note">{{ t('speed.megaNote') }}</p>
+    <p v-if="showMegas" class="muted small note">{{ t('speed.megaNote') }}</p>
     <p v-if="!showAll && snapshot" class="muted small note">
       {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
     </p>

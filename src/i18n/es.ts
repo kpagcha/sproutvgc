@@ -664,6 +664,8 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.when.field': 'con {field}',
   'speed.when.itemLost': 'al gastar o perder su objeto',
   'speed.when.status': 'mientras sufre un problema de estado',
+  'speed.megas': 'Megas',
+  'speed.megasDesc': 'Las megaevoluciones, con la Velocidad de la mega.',
   'speed.boostsDesc':
     'Objetos y habilidades que llevan sus sets y cambian la Velocidad: Pañuelo Elegido, Liviano, Nado Rápido…',
   'speed.legendChip':
