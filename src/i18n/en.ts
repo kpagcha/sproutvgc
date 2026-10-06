@@ -664,7 +664,6 @@ export const messages = {
   'speed.effect.down': 'Lowers Speed',
   'speed.naturesNeutral': 'Any other nature',
   'speed.pointsLabel': 'Speed points',
-  'speed.yourSpeed': 'Speed: {speed}',
   'speed.showYours': 'Show on the ladder',
   'speed.summary': 'Moves first against {first} · ties {ties} · moves after {after}',
   'speed.summaryMeta': "of the top {n}'s sets, by usage",

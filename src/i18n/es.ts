@@ -672,7 +672,6 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.effect.down': 'Baja la Velocidad',
   'speed.naturesNeutral': 'Cualquier otra naturaleza',
   'speed.pointsLabel': 'Puntos en Velocidad',
-  'speed.yourSpeed': 'Velocidad: {speed}',
   'speed.showYours': 'Ver en la escala',
   'speed.summary': 'Mueve antes que el {first} · empata con el {ties} · mueve después que el {after}',
   'speed.summaryMeta': 'de los sets de los {n} más usados, según su uso',

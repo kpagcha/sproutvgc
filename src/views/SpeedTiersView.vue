@@ -967,8 +967,12 @@ const { entered } = usePageEntered()
         </div>
         <p v-if="!mine" class="muted small wide-only yours-intro">{{ t('speed.yoursIntro') }}</p>
         <template v-else>
-          <!-- Where it landed, right under the pick: a button as the one that goes to a Pokémon found. -->
-          <button type="button" class="btn primary to-mine" @click="toMine">{{ t('speed.showYours') }}</button>
+          <!-- Its Speed, right under the pick, following the build below as it changes; a tap shows where it landed on
+               the ladder. -->
+          <button type="button" class="btn primary big-go" @click="toMine">
+            <span class="big-go-speed">{{ mySpeed }}</span>
+            <span>{{ t('speed.showYours') }}</span>
+          </button>
           <!-- Its build and modifiers, then what they come to: each a section of its own, labeled above. -->
           <section class="yours-section">
             <SegmentedControl
@@ -1036,8 +1040,7 @@ const { entered } = usePageEntered()
               @update:model-value="(v: string) => setMyStage(v)"
             />
           </section>
-          <section class="yours-section">
-            <p class="yours-speed">{{ t('speed.yourSpeed', { speed: mySpeed! }) }}</p>
+          <section v-if="summary || !versus || side" class="yours-section">
             <p v-if="summary" class="small">
               {{
                 t('speed.summary', {
@@ -1365,12 +1368,20 @@ const { entered } = usePageEntered()
     display: inline;
   }
 }
-/* The button to the nearest match, floating at the bottom of the screen as the matchups page's to its results. */
-.to-mine {
-  margin-top: 8px;
-  padding: 3px 12px;
+/* Your Pokémon's Speed: one big primary button, its number large. */
+.big-go {
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 10px;
+  padding: 4px 12px;
   font-weight: bold;
 }
+.big-go-speed {
+  font-size: 1.75em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+/* The button to the nearest match, floating at the bottom of the screen as the matchups page's to its results. */
 .to-match {
   position: fixed;
   left: 50%;
@@ -1509,10 +1520,6 @@ const { entered } = usePageEntered()
 .yours .mod {
   padding: 3px 8px;
   font-size: 0.875em;
-}
-.yours-speed {
-  font-size: 1.1em;
-  font-weight: bold;
 }
 .points-box {
   width: 4em;
