@@ -394,10 +394,12 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
     display: block;
   }
   /* The set's lines across the whole row: the item, the ability and, at the end, how often it's brought (under its
-     usage); then the moves, on a line of their own. */
+     usage); then the moves, on a line of their own. More room between the lines than wider screens give, so the chips
+     don't run together. */
   .dex-table .set-line {
     grid-column: 1 / -1;
-    padding-left: 6px;
+    row-gap: 6px;
+    padding: 6px 6px 8px;
   }
   .set-line .brought-sm {
     display: inline;
@@ -407,11 +409,16 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   }
   .set-line .moves {
     flex-basis: 100%;
+    row-gap: 6px;
     margin-left: 0;
   }
-  /* Three lines a row (here, after the rule for narrower screens, to win over it). */
+  /* Three lines a row (here, after the rule for narrower screens, to win over it), each Pokémon a little apart from
+     the next. */
   .dex-table.with-sets {
-    --row-height: 5.4em;
+    --row-height: 6.6em;
+  }
+  .dex-table.with-sets .row:not(.head) {
+    padding-block: 6px 4px;
   }
 }
 .sep {
