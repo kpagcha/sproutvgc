@@ -38,7 +38,6 @@ import { LIST_STAT_MARKS, samples, setPercentiles, useListStatMarks } from '@/co
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
 import SearchBox from '@/components/SearchBox.vue'
-import SegmentedControl from '@/components/SegmentedControl.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 import AppLink from '@/components/AppLink'
 import DexRef from '@/components/DexRef'
@@ -197,8 +196,6 @@ const percentile = computed(() =>
       ? percentiles(samples(shown.value.map((r) => r.id)))
       : setPercentiles(reference.value),
 )
-const markLabel = (m: (typeof LIST_STAT_MARKS)[number]) =>
-  m === 'plain' ? t('stats.plain') : m === 'shown' ? t('pokedex.compare.shown') : t(`stats.vs.${m}`)
 interface Mark {
   class: 'hi' | 'lo'
   style: string
@@ -353,13 +350,12 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
         >
           {{ t('filter.advanced') }}
         </button>
-        <SegmentedControl
-          v-model="reference"
-          class="view-opts"
-          :label="t('pokedex.compare')"
-          :tip="t('pokedex.compareTip')"
-          :options="LIST_STAT_MARKS.map((m) => ({ value: m, label: markLabel(m) }))"
-        />
+        <label class="view-opts">
+          <span v-tip="t('pokedex.compareTip')" class="muted">{{ t('pokedex.compare') }}</span>
+          <select v-model="reference" class="search">
+            <option v-for="m in LIST_STAT_MARKS" :key="m" :value="m">{{ t(`pokedex.compare.${m}`) }}</option>
+          </select>
+        </label>
       </div>
       <FilterGroups v-if="advanced" v-model="filters" />
       <ul v-else-if="plainFilters.length" class="active-filters">
@@ -641,7 +637,14 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
    filters, at the far end of their row (or of its own, when it wraps), as one segmented control. As tall as the
    search box, less its margin. Left out on phones along with the stats. */
 .view-opts {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0 0 12px auto;
+}
+.view-opts .search {
+  width: auto;
+  margin: 0;
 }
 @media (max-width: 720px) {
   .view-opts {

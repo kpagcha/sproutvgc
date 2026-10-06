@@ -464,8 +464,10 @@ export const messages: Record<keyof typeof en, string> = {
   'pokedex.abilities': 'Habilidades',
   'pokedex.types': 'Tipos',
   'pokedex.none': 'Ningún Pokémon coincide.',
-  'pokedex.compare': 'Barras de estadísticas',
-  'pokedex.compare.shown': 'frente a la lista',
+  'pokedex.compare': 'Comparar',
+  'pokedex.compare.plain': 'Sin comparar',
+  'pokedex.compare.shown': 'Los Pokémon mostrados',
+  'pokedex.compare.all': 'Todos los Pokémon',
   'pokedex.compareTip':
     'Marca cada estadística según su posición entre los Pokémon comparados, sin contar las megaevoluciones: desde el centro de la celda, la mediana, hacia la derecha en azul si la supera y hacia la izquierda en rojo si no llega.',
   'filter.add': 'Filtrar',

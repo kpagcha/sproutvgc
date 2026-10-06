@@ -4,14 +4,15 @@ import { POKEMON } from '@/data/pokemon'
 import { percentiles, type Percentiles, type Sample } from '@/lib/statPercentiles'
 
 // The sets of Pokémon base stats can be compared against, each with its percentiles (below), named by `stats.vs.<set>`
-// and described by `stats.about.<set>`. For now every Pokémon equally; sets weighted by usage (a regulation's meta, a
-// championship) join this list.
+// and described by `stats.about.<set>` (and in the Pokémon list's choice by `pokedex.compare.<set>`). For now every
+// Pokémon equally; sets weighted by usage (a regulation's meta, a championship) join this list, before it, which the
+// list's choice keeps last.
 export const STAT_SETS = ['all'] as const
 export type StatSet = (typeof STAT_SETS)[number]
 
-// How the Pokémon list shows stats: on their own (`plain`), or marked against a set, or against the Pokémon it shows at
-// the moment (`shown`).
-export const LIST_STAT_MARKS = ['plain', ...STAT_SETS, 'shown'] as const
+// How the Pokémon list shows stats: on their own (`plain`), or marked against the Pokémon it shows at the moment
+// (`shown`), or against a set.
+export const LIST_STAT_MARKS = ['plain', 'shown', ...STAT_SETS] as const
 export type ListStatMarks = (typeof LIST_STAT_MARKS)[number]
 
 // How a Pokémon's page draws its stats: on their own (`plain`), or set against one of the sets.
