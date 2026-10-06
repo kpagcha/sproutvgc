@@ -375,17 +375,10 @@ watch(
 )
 onBeforeUnmount(() => observer?.disconnect())
 
-// How to read the page (the intro, what each option does, the chips' legend): on wide screens, laid out beside what
-// they explain; on phones, gathered in one section, closed unless the reader opens it (remembered), so the ladder
-// starts close to the top.
-const wideQuery = window.matchMedia('(min-width: 721px)')
-const wide = shallowRef(wideQuery.matches)
-const onWide = (e: MediaQueryListEvent) => (wide.value = e.matches)
-wideQuery.addEventListener('change', onWide)
-onBeforeUnmount(() => wideQuery.removeEventListener('change', onWide))
-const { open: helpOpen, onToggle: onHelpSaved } = useOpenState('sproutvgc.speedTiers.helpOpen', false)
-// Wide screens hold it open themselves: only a phone's reader opening or closing it is remembered.
-const onHelpToggle = (e: Event) => !wide.value && onHelpSaved(e)
+// How to read the page, in a section closed unless the reader opens it (remembered), so the ladder starts close to the
+// top: the chips' legend, and on phones the intro and what each option does too (wide screens show them beside what
+// they explain).
+const { open: helpOpen, onToggle: onHelpToggle } = useOpenState('sproutvgc.speedTiers.helpOpen', false)
 
 /** Whether the screen has hover, for tooltips: touch screens show what matters inline instead. */
 const canHover = window.matchMedia('(hover: hover)').matches
@@ -394,225 +387,235 @@ const { entered } = usePageEntered()
 </script>
 
 <template>
-  <div class="panel">
-    <h1>{{ t('title.speedTiers') }}</h1>
-    <p class="muted wide-only">{{ t('speed.intro', { reg: REGULATION }) }}</p>
-    <div class="controls">
-      <!-- What's shown: the data, which Pokémon, and finding one. -->
-      <div class="view-row">
-        <MetaPicker v-if="snapshot" />
-        <SegmentedControl
-          v-if="metaAvailable"
-          :model-value="showAll ? 'all' : 'meta'"
-          :label="t('speed.show')"
-          :options="[
-            { value: 'meta', label: t('speed.meta', { n: TOP }) },
-            { value: 'all', label: t('speed.all') },
-          ]"
-          @update:model-value="(v: string) => set('all', v === 'all' ? '1' : undefined)"
-        />
-        <SegmentedControl
-          v-if="showAll"
-          v-model="bench"
-          :label="t('speed.at')"
-          :options="BENCHMARKS.map((b) => ({ value: b, label: benchLabel(b) }))"
-        />
-        <div class="find">
-          <SearchBox v-model="find" :placeholder="t('speed.find')" :aria-label="t('speed.find')" />
+  <!-- The controls and the ladder in panels of their own. -->
+  <div>
+    <div class="panel">
+      <h1>{{ t('title.speedTiers') }}</h1>
+      <p class="muted wide-only">{{ t('speed.intro', { reg: REGULATION }) }}</p>
+      <div class="controls">
+        <!-- What's shown: the data, which Pokémon, and finding one. -->
+        <div class="view-row">
+          <MetaPicker v-if="snapshot" />
+          <SegmentedControl
+            v-if="metaAvailable"
+            :model-value="showAll ? 'all' : 'meta'"
+            :label="t('speed.show')"
+            :options="[
+              { value: 'meta', label: t('speed.meta', { n: TOP }) },
+              { value: 'all', label: t('speed.all') },
+            ]"
+            @update:model-value="(v: string) => set('all', v === 'all' ? '1' : undefined)"
+          />
+          <SegmentedControl
+            v-if="showAll"
+            v-model="bench"
+            :label="t('speed.at')"
+            :options="BENCHMARKS.map((b) => ({ value: b, label: benchLabel(b) }))"
+          />
+          <div class="find">
+            <SearchBox v-model="find" :placeholder="t('speed.find')" :aria-label="t('speed.find')" />
+          </div>
+        </div>
+
+        <!-- How it's shown: each option with what it does beside it, as tooltips get missed. -->
+        <div class="options">
+          <template v-if="!showAll && boostsAvailable">
+            <label class="btn switch" :class="{ on: showBoosts }">
+              <input type="checkbox" :checked="showBoosts" @change="toggleBoosts" />
+              {{ t('speed.boosts') }}
+            </label>
+            <span class="muted">{{ t('speed.boostsDesc') }}</span>
+          </template>
+          <label class="btn switch" :class="{ on: showMegas }">
+            <input type="checkbox" :checked="showMegas" @change="toggleMegas" />
+            {{ t('speed.megas') }}
+          </label>
+          <span class="muted">{{ t('speed.megasDesc') }}</span>
+          <label class="btn switch" :class="{ on: trickRoom }">
+            <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
+            {{ t('speed.mod.trickroom') }}
+          </label>
+          <span class="muted">{{ t('speed.modTip.trickroom') }}</span>
+          <button type="button" class="disclosure" :aria-expanded="modsOpen" @click="toggleMods">
+            <span class="marker" aria-hidden="true">{{ modsOpen ? '▾' : '▸' }}</span
+            >{{ t('speed.modifiers') }}
+          </button>
+          <span class="muted">{{ t('speed.modifiersTip') }}</span>
+          <div v-if="modsOpen" class="mods all-mods">
+            <button
+              v-for="k in TOGGLES"
+              :key="k"
+              v-tip="canHover && t(`speed.modTip.${k}`)"
+              type="button"
+              class="btn mod"
+              :class="{ on: flag(k) }"
+              :aria-pressed="flag(k)"
+              @click="toggleMod(k)"
+            >
+              {{ t(`speed.mod.${k}`) }}
+            </button>
+            <SegmentedControl
+              v-model="stage"
+              :label="t('speed.stage')"
+              :options="STAGES.map((s) => ({ value: s, label: Number(s) > 0 ? `+${s}` : s.replace('-', '−') }))"
+            />
+          </div>
         </div>
       </div>
 
-      <!-- How it's shown: each option with what it does beside it, as tooltips get missed. -->
-      <div class="options">
-        <template v-if="!showAll && boostsAvailable">
-          <label class="btn switch" :class="{ on: showBoosts }">
+      <!-- How to read a chip: samples, each with what its parts mean. -->
+      <details class="help" :open="helpOpen" @toggle="onHelpToggle">
+        <summary>
+          <span class="marker" aria-hidden="true">{{ helpOpen ? '▾' : '▸' }}</span
+          >{{ t('speed.help') }}
+        </summary>
+        <!-- On phones, in a well under its heading. -->
+        <div class="help-body panel sunken">
+          <div class="phone-only-block small">
+            <p class="muted">{{ t('speed.intro', { reg: REGULATION }) }}</p>
+            <dl class="help-options">
+              <template v-if="!showAll && boostsAvailable">
+                <dt>{{ t('speed.boosts') }}</dt>
+                <dd class="muted">{{ t('speed.boostsDesc') }}</dd>
+              </template>
+              <dt>{{ t('speed.megas') }}</dt>
+              <dd class="muted">{{ t('speed.megasDesc') }}</dd>
+              <dt>{{ t('speed.mod.trickroom') }}</dt>
+              <dd class="muted">{{ t('speed.modTip.trickroom') }}</dd>
+              <dt>{{ t('speed.modifiers') }}</dt>
+              <dd class="muted">{{ t('speed.modifiersTip') }}</dd>
+            </dl>
+          </div>
+          <dl v-if="!showAll && snapshot" class="legend small">
+            <dt>
+              <span class="chip sample"
+                ><span class="tag">{{ natureName('timid') }}</span
+                ><span class="tag">{{ t('speed.points', { n: 32 }) }}</span
+                ><span class="tag">{{ percent(0.461) }}</span></span
+              >
+            </dt>
+            <dd class="muted">{{ t('speed.legendChip', { pct: percent(MIN_SHARE) }) }}</dd>
+            <template v-if="showBoosts">
+              <dt>
+                <span class="chip sample boost"
+                  ><span class="tag boost-label"
+                    ><ItemIcon id="choicescarf" :scale="0.67" />{{ t('speed.legendBoostLabel') }}</span
+                  ></span
+                >
+              </dt>
+              <dd class="muted">
+                {{ t('speed.legendBoost') }}
+              </dd>
+            </template>
+          </dl>
+          <p v-else class="muted small">{{ t('speed.allNote', { build: benchTip(bench) }) }}</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="panel">
+      <!-- Pinned over the ladder once the controls are scrolled away; takes no room of its own. -->
+      <div ref="pinMark" aria-hidden="true"></div>
+      <div class="pin">
+        <div v-if="pinned" class="pinned">
+          <div class="find">
+            <SearchBox v-model="find" :placeholder="t('speed.findShort')" :aria-label="t('speed.find')" />
+          </div>
+          <label v-if="!showAll && boostsAvailable" class="btn switch" :class="{ on: showBoosts }">
             <input type="checkbox" :checked="showBoosts" @change="toggleBoosts" />
             {{ t('speed.boosts') }}
           </label>
-          <span class="muted">{{ t('speed.boostsDesc') }}</span>
-        </template>
-        <label class="btn switch" :class="{ on: showMegas }">
-          <input type="checkbox" :checked="showMegas" @change="toggleMegas" />
-          {{ t('speed.megas') }}
-        </label>
-        <span class="muted">{{ t('speed.megasDesc') }}</span>
-        <label class="btn switch" :class="{ on: trickRoom }">
-          <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
-          {{ t('speed.mod.trickroom') }}
-        </label>
-        <span class="muted">{{ t('speed.modTip.trickroom') }}</span>
-        <button type="button" class="disclosure" :aria-expanded="modsOpen" @click="toggleMods">
-          <span class="marker" aria-hidden="true">{{ modsOpen ? '▾' : '▸' }}</span> {{ t('speed.modifiers') }}
-        </button>
-        <span class="muted">{{ t('speed.modifiersTip') }}</span>
-        <div v-if="modsOpen" class="mods all-mods">
-          <button
-            v-for="k in TOGGLES"
-            :key="k"
-            v-tip="canHover && t(`speed.modTip.${k}`)"
+          <label class="btn switch" :class="{ on: trickRoom }">
+            <input
+              type="checkbox"
+              :checked="trickRoom"
+              :aria-label="t('speed.mod.trickroom')"
+              @change="toggleTrickRoom"
+            />
+            <!-- "TR" on phones, the usual shorthand, so the bar fits on one line. -->
+            <span class="long" aria-hidden="true">{{ t('speed.mod.trickroom') }}</span>
+            <span class="short" aria-hidden="true">{{ t('speed.trShort') }}</span>
+          </label>
+        </div>
+      </div>
+
+      <div v-if="!entered || (!showAll && !data)" class="ladder" aria-hidden="true">
+        <div v-for="i in 12" :key="i" class="tier skeleton"><span class="bone"></span></div>
+      </div>
+      <ol v-else ref="ladder" class="ladder" :class="{ finding }">
+        <li
+          v-for="tier in tiers"
+          :key="tier.speed"
+          class="tier"
+          :class="{ hit: tier.hit, at: tier.speed === at }"
+          :data-speed="tier.speed"
+        >
+          <a
+            v-tip="canHover && t('speed.rowLink')"
+            :href="rowHref(tier.speed)"
+            class="speed num"
+            :aria-current="tier.speed === at ? 'true' : undefined"
+            @click.prevent="share(tier.speed)"
+            >{{ tier.speed
+            }}<span v-if="copied === tier.speed" class="copied" role="status">{{ t('speed.copied') }}</span></a
+          >
+          <ul class="mons">
+            <li v-for="e in tier.list" :key="chipKey(e)">
+              <AppLink
+                v-tip="canHover && tip(e)"
+                :to="{ name: 'pokemon', params: { id: e.id } }"
+                class="chip"
+                :class="{ hit: isHit(e), boost: e.boost }"
+              >
+                <span class="who">
+                  <PokemonIcon :id="e.id" />
+                  <span>{{ e.species }}</span>
+                  <span v-if="e.forme" class="forme">{{ e.forme }}</span>
+                </span>
+                <span v-if="e.boost" class="tags">
+                  <span class="tag boost-label"
+                    ><ItemIcon v-if="e.boost.ref.kind === 'item'" :id="e.boost.ref.id" :scale="0.67" />{{
+                      boostLabel(e.boost)
+                    }}</span
+                  >
+                  <span v-if="whenTag(e.boost)" class="tag">{{ whenTag(e.boost) }}</span>
+                  <span class="tag">{{ percent(e.share!) }}</span>
+                </span>
+                <span v-else-if="!e.bench" class="tags">
+                  <span class="tag">{{ natureName(e.nature!) }}</span>
+                  <span class="tag">{{ t('speed.points', { n: e.points! }) }}</span>
+                  <span class="tag">{{ percent(e.share!) }}</span>
+                </span>
+              </AppLink>
+            </li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-- Outside the page so the page transition's transform can't move it. -->
+      <Teleport to="body">
+        <AnimatePresence>
+          <motion.button
+            v-if="match"
             type="button"
-            class="btn mod"
-            :class="{ on: flag(k) }"
-            :aria-pressed="flag(k)"
-            @click="toggleMod(k)"
+            class="btn primary to-match"
+            :initial="{ opacity: 0, y: 8 }"
+            :animate="{ opacity: 1, y: 0 }"
+            :exit="{ opacity: 0, y: 8 }"
+            :transition="FADE"
+            :while-press="PRESS"
+            @click="toMatch"
           >
-            {{ t(`speed.mod.${k}`) }}
-          </button>
-          <SegmentedControl
-            v-model="stage"
-            :label="t('speed.stage')"
-            :options="STAGES.map((s) => ({ value: s, label: Number(s) > 0 ? `+${s}` : s.replace('-', '−') }))"
-          />
-        </div>
-      </div>
+            {{ match.name }} {{ match.up ? '↑' : '↓' }}
+          </motion.button>
+        </AnimatePresence>
+      </Teleport>
+
+      <p v-if="showMegas" class="muted small note">{{ t('speed.megaNote') }}</p>
+      <p v-if="!showAll && snapshot" class="muted small note">
+        {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
+      </p>
     </div>
-
-    <!-- How to read a chip: samples, each with what its parts mean. -->
-    <details class="help" :open="wide || helpOpen" @toggle="onHelpToggle">
-      <summary>
-        <span class="marker" aria-hidden="true">{{ helpOpen ? '▾' : '▸' }}</span> {{ t('speed.help') }}
-      </summary>
-      <div class="phone-only-block small">
-        <p class="muted">{{ t('speed.intro', { reg: REGULATION }) }}</p>
-        <dl class="help-options">
-          <template v-if="!showAll && boostsAvailable">
-            <dt>{{ t('speed.boosts') }}</dt>
-            <dd class="muted">{{ t('speed.boostsDesc') }}</dd>
-          </template>
-          <dt>{{ t('speed.megas') }}</dt>
-          <dd class="muted">{{ t('speed.megasDesc') }}</dd>
-          <dt>{{ t('speed.mod.trickroom') }}</dt>
-          <dd class="muted">{{ t('speed.modTip.trickroom') }}</dd>
-          <dt>{{ t('speed.modifiers') }}</dt>
-          <dd class="muted">{{ t('speed.modifiersTip') }}</dd>
-        </dl>
-      </div>
-      <dl v-if="!showAll && snapshot" class="legend small">
-        <dt>
-          <span class="chip sample"
-            ><span class="tag">{{ natureName('timid') }}</span
-            ><span class="tag">{{ t('speed.points', { n: 32 }) }}</span
-            ><span class="tag">{{ percent(0.461) }}</span></span
-          >
-        </dt>
-        <dd class="muted">{{ t('speed.legendChip', { pct: percent(MIN_SHARE) }) }}</dd>
-        <template v-if="showBoosts">
-          <dt>
-            <span class="chip sample boost"
-              ><span class="tag boost-label"
-                ><ItemIcon id="choicescarf" :scale="0.67" />{{ t('speed.legendBoostLabel') }}</span
-              ></span
-            >
-          </dt>
-          <dd class="muted">
-            {{ t('speed.legendBoost') }}
-          </dd>
-        </template>
-      </dl>
-      <p v-else class="muted small">{{ t('speed.allNote', { build: benchTip(bench) }) }}</p>
-    </details>
-
-    <!-- Pinned over the ladder once the controls are scrolled away; takes no room of its own. -->
-    <div ref="pinMark" aria-hidden="true"></div>
-    <div class="pin">
-      <div v-if="pinned" class="pinned">
-        <div class="find">
-          <SearchBox v-model="find" :placeholder="t('speed.findShort')" :aria-label="t('speed.find')" />
-        </div>
-        <label v-if="!showAll && boostsAvailable" class="btn switch" :class="{ on: showBoosts }">
-          <input type="checkbox" :checked="showBoosts" @change="toggleBoosts" />
-          {{ t('speed.boosts') }}
-        </label>
-        <label class="btn switch" :class="{ on: trickRoom }">
-          <input
-            type="checkbox"
-            :checked="trickRoom"
-            :aria-label="t('speed.mod.trickroom')"
-            @change="toggleTrickRoom"
-          />
-          <!-- "TR" on phones, the usual shorthand, so the bar fits on one line. -->
-          <span class="long" aria-hidden="true">{{ t('speed.mod.trickroom') }}</span>
-          <span class="short" aria-hidden="true">{{ t('speed.trShort') }}</span>
-        </label>
-      </div>
-    </div>
-
-    <div v-if="!entered || (!showAll && !data)" class="ladder" aria-hidden="true">
-      <div v-for="i in 12" :key="i" class="tier skeleton"><span class="bone"></span></div>
-    </div>
-    <ol v-else ref="ladder" class="ladder" :class="{ finding }">
-      <li
-        v-for="tier in tiers"
-        :key="tier.speed"
-        class="tier"
-        :class="{ hit: tier.hit, at: tier.speed === at }"
-        :data-speed="tier.speed"
-      >
-        <a
-          v-tip="canHover && t('speed.rowLink')"
-          :href="rowHref(tier.speed)"
-          class="speed num"
-          :aria-current="tier.speed === at ? 'true' : undefined"
-          @click.prevent="share(tier.speed)"
-          >{{ tier.speed
-          }}<span v-if="copied === tier.speed" class="copied" role="status">{{ t('speed.copied') }}</span></a
-        >
-        <ul class="mons">
-          <li v-for="e in tier.list" :key="chipKey(e)">
-            <AppLink
-              v-tip="canHover && tip(e)"
-              :to="{ name: 'pokemon', params: { id: e.id } }"
-              class="chip"
-              :class="{ hit: isHit(e), boost: e.boost }"
-            >
-              <span class="who">
-                <PokemonIcon :id="e.id" />
-                <span>{{ e.species }}</span>
-                <span v-if="e.forme" class="forme">{{ e.forme }}</span>
-              </span>
-              <span v-if="e.boost" class="tags">
-                <span class="tag boost-label"
-                  ><ItemIcon v-if="e.boost.ref.kind === 'item'" :id="e.boost.ref.id" :scale="0.67" />{{
-                    boostLabel(e.boost)
-                  }}</span
-                >
-                <span v-if="whenTag(e.boost)" class="tag">{{ whenTag(e.boost) }}</span>
-                <span class="tag">{{ percent(e.share!) }}</span>
-              </span>
-              <span v-else-if="!e.bench" class="tags">
-                <span class="tag">{{ natureName(e.nature!) }}</span>
-                <span class="tag">{{ t('speed.points', { n: e.points! }) }}</span>
-                <span class="tag">{{ percent(e.share!) }}</span>
-              </span>
-            </AppLink>
-          </li>
-        </ul>
-      </li>
-    </ol>
-
-    <!-- Outside the page so the page transition's transform can't move it. -->
-    <Teleport to="body">
-      <AnimatePresence>
-        <motion.button
-          v-if="match"
-          type="button"
-          class="btn primary to-match"
-          :initial="{ opacity: 0, y: 8 }"
-          :animate="{ opacity: 1, y: 0 }"
-          :exit="{ opacity: 0, y: 8 }"
-          :transition="FADE"
-          :while-press="PRESS"
-          @click="toMatch"
-        >
-          {{ match.name }} {{ match.up ? '↑' : '↓' }}
-        </motion.button>
-      </AnimatePresence>
-    </Teleport>
-
-    <p v-if="showMegas" class="muted small note">{{ t('speed.megaNote') }}</p>
-    <p v-if="!showAll && snapshot" class="muted small note">
-      {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
-    </p>
   </div>
 </template>
 
@@ -668,10 +671,13 @@ const { entered } = usePageEntered()
 .disclosure + .muted {
   margin-top: 6px;
 }
+/* The disclosures' arrows: as large as the text, close to it, in a column as wide as either so the text doesn't shift
+   when one turns. */
 .marker {
   display: inline-block;
-  width: 1em;
-  font-size: 0.8em;
+  width: 0.85em;
+  font-size: 1.15em;
+  line-height: 1;
 }
 .mods {
   display: flex;
@@ -698,7 +704,7 @@ const { entered } = usePageEntered()
   font-size: calc(13px * var(--text-scale));
 }
 .ladder {
-  margin: 12px 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
@@ -840,9 +846,29 @@ const { entered } = usePageEntered()
 .phone-only-block {
   display: none;
 }
-/* The section on how to read the page: no heading on wide screens, where it's always open. */
+/* The section on how to read the page: its arrow drawn as the modifiers' is, rather than the browser's marker, so the
+   two match; its content in a well under it. */
+.help {
+  margin-top: 10px;
+}
 .help > summary {
+  width: fit-content;
+  list-style: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+.help > summary::-webkit-details-marker {
   display: none;
+}
+.help-body {
+  margin: 6px 0 0;
+  padding: 8px 10px;
+}
+.help-body > :is(.legend, p) {
+  margin-top: 0;
+}
+.help-body .legend dd:last-child {
+  margin-bottom: 0;
 }
 .help-options {
   display: grid;
@@ -869,15 +895,15 @@ const { entered } = usePageEntered()
   .help {
     margin-top: 8px;
   }
-  /* Its arrow drawn as the modifiers' is, rather than the browser's marker, so the two match. */
-  .help > summary {
-    display: block;
-    list-style: none;
-    cursor: pointer;
-    font-weight: bold;
+  .help-body .phone-only-block > :first-child {
+    margin-top: 0;
   }
-  .help > summary::-webkit-details-marker {
-    display: none;
+  /* Under the intro and the options. */
+  .help-body > .legend {
+    margin-top: 12px;
+  }
+  .help-body > p {
+    margin-top: 1em;
   }
   .help-options {
     grid-template-columns: 1fr;
@@ -896,7 +922,7 @@ const { entered } = usePageEntered()
     display: none;
   }
   .disclosure {
-    margin-top: 0;
+    margin-top: 6px;
   }
   .all-mods {
     flex-basis: 100%;
@@ -962,6 +988,10 @@ const { entered } = usePageEntered()
 }
 .note {
   margin: 12px 0 0;
+}
+/* Nothing below the top panel's last line but its padding. */
+.help-body > :last-child {
+  margin-bottom: 0;
 }
 /* The legend: sample chips, each with what its parts mean. */
 .legend {
