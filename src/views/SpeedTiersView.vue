@@ -570,7 +570,10 @@ const { entered } = usePageEntered()
          itself (finding text in it) is followed. -->
     <details class="panel instant" :open="controlsOpen" @toggle="controlsOpen = isOpen($event)">
       <summary class="head" @click.prevent="toggleControls">
-        <h1>{{ t('title.speedTiers') }}</h1>
+        <!-- With yours picked, everything the controls set is for the others: its opponents. -->
+        <h1>
+          {{ t('title.speedTiers') }}<span v-if="mine" class="opponents"> ({{ t('speed.opponents') }})</span>
+        </h1>
         <ul v-if="!controlsOpen" class="active" :aria-label="t('speed.active')">
           <li v-for="a in active" :key="a">{{ a }}</li>
         </ul>
@@ -681,7 +684,7 @@ const { entered } = usePageEntered()
             <span class="muted">{{ t('speed.modTip.trickroom') }}</span>
             <button type="button" class="disclosure" :aria-expanded="modsOpen" @click="toggleMods">
               <span class="marker" aria-hidden="true">{{ modsOpen ? '▾' : '▸' }}</span
-              >{{ mine ? t('speed.theirModifiers') : t('speed.modifiers') }}
+              >{{ t('speed.modifiers') }}
             </button>
             <span class="muted">{{ t('speed.modifiersTip') }}</span>
             <div v-if="modsOpen" class="mods all-mods">
@@ -974,6 +977,10 @@ const { entered } = usePageEntered()
 }
 .head::-webkit-details-marker {
   display: none;
+}
+.opponents {
+  font-weight: normal;
+  color: var(--muted);
 }
 .head h1 {
   grid-area: title;

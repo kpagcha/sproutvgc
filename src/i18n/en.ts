@@ -678,7 +678,7 @@ export const messages = {
   'speed.vsAny': 'moves first with any points',
   'speed.vsTies': "can't move first; ties at {points} points",
   'speed.vsNever': "can't move first",
-  'speed.theirModifiers': "Opponents' modifiers",
+  'speed.opponents': 'opponents',
   'speed.mod.ironball': 'Iron Ball ×0.5',
   'speed.modTip.ironball': 'Halves Speed.',
   'speed.vsClose': 'Close',
