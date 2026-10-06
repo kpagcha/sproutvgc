@@ -6,7 +6,7 @@ import { CircleHelp } from '@lucide/vue'
 import { ability, availableIds, condition, item, pokemon, type PokemonId, type Ref } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
-import { has, percent } from '@/data/meta'
+import { currentSnapshots, distinctLabel, has, percent } from '@/data/meta'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { fold } from '@/lib/search'
@@ -525,14 +525,30 @@ onBeforeUnmount(() => observer?.disconnect())
 // they explain). Opened from the intro's line, apart from the controls, as it changes nothing shown.
 const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.speedTiers.helpOpen', false)
 
+// The controls fold away (open at first, then as the reader last left them) once the reader has the view they want,
+// what's active then said in short beside the heading: what's shown, and every switch and modifier away from its default.
+const isOpen = (e: Event) => (e.target as HTMLDetailsElement).open
+const { open: controlsOpen, toggle: toggleControls } = useOpenState('sproutvgc.speedTiers.controlsOpen', true)
+const stageLabel = (s: string) => (Number(s) > 0 ? `+${s}` : s.replace('-', '−'))
+const active = computed(() => {
+  const list: string[] = []
+  if (snapshot.value && !showAll.value && currentSnapshots().length > 1) list.push(distinctLabel(snapshot.value))
+  list.push(showAll.value ? `${t('speed.all')} · ${benchLabel(bench.value)}` : t('speed.meta', { n: TOP }))
+  if (showBoosts.value) list.push(t('speed.boosts'))
+  if (!showMegas.value) list.push(t('speed.noMegas'))
+  if (trickRoom.value) list.push(t('speed.mod.trickroom'))
+  for (const k of TOGGLES) if (flag(k)) list.push(t(`speed.mod.${k}`))
+  if (stage.value !== '0') list.push(t('speed.stageShort', { stage: stageLabel(stage.value) }))
+  return list
+})
+
 /** Whether the screen has hover, for tooltips: touch screens show what matters inline instead. */
 const canHover = window.matchMedia('(hover: hover)').matches
 
 // Yours' card: always open beside the ladder; narrower, it opens and closes, closed at first (remembered), but open
 // when the page comes with yours set (a shared link).
-const { open: yoursOpen, onToggle: onYoursSaved } = useOpenState('sproutvgc.speedTiers.yoursOpen', false)
+const { open: yoursOpen, toggle: toggleYours } = useOpenState('sproutvgc.speedTiers.yoursOpen', false)
 if (query.value.mine) yoursOpen.value = true
-const onYoursToggle = (e: Event) => !side.value && onYoursSaved(e)
 
 /** Whether the sidebar (yours) shows beside the ladder: from 1100px. Narrower, a comparison shows in a card. */
 const sideQuery = window.matchMedia('(min-width: 1100px)')
@@ -547,134 +563,150 @@ const { entered } = usePageEntered()
 <template>
   <!-- The controls and the ladder in panels of their own. -->
   <div>
-    <div class="panel">
-      <h1>{{ t('title.speedTiers') }}</h1>
-      <!-- The intro, and how to read the page: a link-like toggle beside it, apart from the controls. -->
-      <p class="lede">
-        <span class="muted wide-only">{{ t('speed.intro', { reg: REGULATION }) }}</span>
-        <button
-          type="button"
-          class="help-toggle"
-          :aria-expanded="helpOpen"
-          aria-controls="speed-help"
-          @click="toggleHelp"
-        >
-          <CircleHelp :size="16" aria-hidden="true" /><span>{{ t('speed.help') }}</span>
-        </button>
-      </p>
-      <!-- How to read a chip: samples, each with what its parts mean; on phones, the intro and the options too. -->
-      <div v-if="helpOpen" id="speed-help" class="help-body panel sunken">
-        <div class="phone-only-block small">
-          <p class="muted">{{ t('speed.intro', { reg: REGULATION }) }}</p>
-          <dl class="help-options">
-            <template v-if="!showAll && boostsAvailable">
-              <dt>{{ t('speed.boosts') }}</dt>
-              <dd class="muted">{{ t('speed.boostsDesc') }}</dd>
-            </template>
-            <dt>{{ t('speed.megas') }}</dt>
-            <dd class="muted">{{ t('speed.megasDesc') }}</dd>
-            <dt>{{ t('speed.mod.trickroom') }}</dt>
-            <dd class="muted">{{ t('speed.modTip.trickroom') }}</dd>
-            <dt>{{ t('speed.modifiers') }}</dt>
-            <dd class="muted">{{ t('speed.modifiersTip') }}</dd>
-          </dl>
-        </div>
-        <p class="formula muted small">{{ t('speed.formula') }}</p>
-        <dl v-if="!showAll && snapshot" class="legend small">
-          <dt>
-            <span class="chip sample"
-              ><span class="tag">{{ natureName('timid') }}</span
-              ><span class="tag">{{ t('speed.points', { n: 32 }) }}</span
-              ><span class="tag">{{ percent(0.461) }}</span></span
-            >
-          </dt>
-          <dd class="muted">{{ t('speed.legendChip', { pct: percent(MIN_SHARE) }) }}</dd>
-          <template v-if="showBoosts">
+    <!-- A section that folds, as yours does: its heading, with what's active in short beside it while folded (under it
+         on phones), and what folds it. -->
+    <!-- Their headings open and close them themselves, rather than leaving it to the browser, so the section and what
+         changes with it (what's active, the arrow) change at once, however fast the taps come; the browser opening one
+         itself (finding text in it) is followed. -->
+    <details class="panel instant" :open="controlsOpen" @toggle="controlsOpen = isOpen($event)">
+      <summary class="head" @click.prevent="toggleControls">
+        <h1>{{ t('title.speedTiers') }}</h1>
+        <ul v-if="!controlsOpen" class="active" :aria-label="t('speed.active')">
+          <li v-for="a in active" :key="a">{{ a }}</li>
+        </ul>
+        <span class="fold">
+          <span class="marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
+          >{{ t(controlsOpen ? 'speed.hideControls' : 'speed.showControls') }}
+        </span>
+      </summary>
+      <div class="fold-body">
+        <!-- The intro, and how to read the page: a link-like toggle beside it, apart from the controls. -->
+        <p class="lede">
+          <span class="muted wide-only">{{ t('speed.intro', { reg: REGULATION }) }}</span>
+          <button
+            type="button"
+            class="help-toggle"
+            :aria-expanded="helpOpen"
+            aria-controls="speed-help"
+            @click="toggleHelp"
+          >
+            <CircleHelp :size="16" aria-hidden="true" /><span>{{ t('speed.help') }}</span>
+          </button>
+        </p>
+        <!-- How to read a chip: samples, each with what its parts mean; on phones, the intro and the options too. -->
+        <div v-if="helpOpen" id="speed-help" class="help-body panel sunken">
+          <div class="phone-only-block small">
+            <p class="muted">{{ t('speed.intro', { reg: REGULATION }) }}</p>
+            <dl class="help-options">
+              <template v-if="!showAll && boostsAvailable">
+                <dt>{{ t('speed.boosts') }}</dt>
+                <dd class="muted">{{ t('speed.boostsDesc') }}</dd>
+              </template>
+              <dt>{{ t('speed.megas') }}</dt>
+              <dd class="muted">{{ t('speed.megasDesc') }}</dd>
+              <dt>{{ t('speed.mod.trickroom') }}</dt>
+              <dd class="muted">{{ t('speed.modTip.trickroom') }}</dd>
+              <dt>{{ t('speed.modifiers') }}</dt>
+              <dd class="muted">{{ t('speed.modifiersTip') }}</dd>
+            </dl>
+          </div>
+          <p class="formula muted small">{{ t('speed.formula') }}</p>
+          <dl v-if="!showAll && snapshot" class="legend small">
             <dt>
-              <span class="chip sample boost"
-                ><span class="tag boost-label"
-                  ><ItemIcon id="choicescarf" :scale="0.67" />{{ t('speed.legendBoostLabel') }}</span
-                ></span
+              <span class="chip sample"
+                ><span class="tag">{{ natureName('timid') }}</span
+                ><span class="tag">{{ t('speed.points', { n: 32 }) }}</span
+                ><span class="tag">{{ percent(0.461) }}</span></span
               >
             </dt>
-            <dd class="muted">
-              {{ t('speed.legendBoost') }}
-            </dd>
-          </template>
-        </dl>
-        <p v-else class="muted small">{{ t('speed.allNote', { build: benchTip(bench) }) }}</p>
-      </div>
-      <div class="controls">
-        <!-- What's shown: the data, which Pokémon, and finding one. -->
-        <div class="view-row">
-          <MetaPicker v-if="snapshot" />
-          <SegmentedControl
-            v-if="metaAvailable"
-            :model-value="showAll ? 'all' : 'meta'"
-            :label="t('speed.show')"
-            :options="[
-              { value: 'meta', label: t('speed.meta', { n: TOP }) },
-              { value: 'all', label: t('speed.all') },
-            ]"
-            @update:model-value="(v: string) => set('all', v === 'all' ? '1' : undefined)"
-          />
-          <SegmentedControl
-            v-if="showAll"
-            v-model="bench"
-            :label="t('speed.at')"
-            :options="BENCHMARKS.map((b) => ({ value: b, label: benchLabel(b) }))"
-          />
-          <div class="find">
-            <SearchBox v-model="find" :placeholder="t('speed.find')" :aria-label="t('speed.find')" />
-          </div>
+            <dd class="muted">{{ t('speed.legendChip', { pct: percent(MIN_SHARE) }) }}</dd>
+            <template v-if="showBoosts">
+              <dt>
+                <span class="chip sample boost"
+                  ><span class="tag boost-label"
+                    ><ItemIcon id="choicescarf" :scale="0.67" />{{ t('speed.legendBoostLabel') }}</span
+                  ></span
+                >
+              </dt>
+              <dd class="muted">
+                {{ t('speed.legendBoost') }}
+              </dd>
+            </template>
+          </dl>
+          <p v-else class="muted small">{{ t('speed.allNote', { build: benchTip(bench) }) }}</p>
         </div>
-
-        <!-- How it's shown: each option with what it does beside it, as tooltips get missed. -->
-        <div class="options">
-          <template v-if="!showAll && boostsAvailable">
-            <label class="btn switch" :class="{ on: showBoosts }">
-              <input type="checkbox" :checked="showBoosts" @change="toggleBoosts" />
-              {{ t('speed.boosts') }}
-            </label>
-            <span class="muted">{{ t('speed.boostsDesc') }}</span>
-          </template>
-          <label class="btn switch" :class="{ on: showMegas }">
-            <input type="checkbox" :checked="showMegas" @change="toggleMegas" />
-            {{ t('speed.megas') }}
-          </label>
-          <span class="muted">{{ t('speed.megasDesc') }}</span>
-          <label class="btn switch" :class="{ on: trickRoom }">
-            <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
-            {{ t('speed.mod.trickroom') }}
-          </label>
-          <span class="muted">{{ t('speed.modTip.trickroom') }}</span>
-          <button type="button" class="disclosure" :aria-expanded="modsOpen" @click="toggleMods">
-            <span class="marker" aria-hidden="true">{{ modsOpen ? '▾' : '▸' }}</span
-            >{{ mine ? t('speed.theirModifiers') : t('speed.modifiers') }}
-          </button>
-          <span class="muted">{{ t('speed.modifiersTip') }}</span>
-          <div v-if="modsOpen" class="mods all-mods">
-            <button
-              v-for="k in TOGGLES"
-              :key="k"
-              v-tip="canHover && t(`speed.modTip.${k}`)"
-              type="button"
-              class="btn mod"
-              :class="{ on: flag(k) }"
-              :aria-pressed="flag(k)"
-              @click="toggleMod(k)"
-            >
-              {{ t(`speed.mod.${k}`) }}
-            </button>
+        <div class="controls">
+          <!-- What's shown: the data, which Pokémon, and finding one. -->
+          <div class="view-row">
+            <MetaPicker v-if="snapshot" />
             <SegmentedControl
-              v-model="stage"
-              :label="t('speed.stage')"
-              :options="STAGES.map((s) => ({ value: s, label: Number(s) > 0 ? `+${s}` : s.replace('-', '−') }))"
+              v-if="metaAvailable"
+              :model-value="showAll ? 'all' : 'meta'"
+              :label="t('speed.show')"
+              :options="[
+                { value: 'meta', label: t('speed.meta', { n: TOP }) },
+                { value: 'all', label: t('speed.all') },
+              ]"
+              @update:model-value="(v: string) => set('all', v === 'all' ? '1' : undefined)"
             />
+            <SegmentedControl
+              v-if="showAll"
+              v-model="bench"
+              :label="t('speed.at')"
+              :options="BENCHMARKS.map((b) => ({ value: b, label: benchLabel(b) }))"
+            />
+            <div class="find">
+              <SearchBox v-model="find" :placeholder="t('speed.find')" :aria-label="t('speed.find')" />
+            </div>
+          </div>
+
+          <!-- How it's shown: each option with what it does beside it, as tooltips get missed. -->
+          <div class="options">
+            <template v-if="!showAll && boostsAvailable">
+              <label class="btn switch" :class="{ on: showBoosts }">
+                <input type="checkbox" :checked="showBoosts" @change="toggleBoosts" />
+                {{ t('speed.boosts') }}
+              </label>
+              <span class="muted">{{ t('speed.boostsDesc') }}</span>
+            </template>
+            <label class="btn switch" :class="{ on: showMegas }">
+              <input type="checkbox" :checked="showMegas" @change="toggleMegas" />
+              {{ t('speed.megas') }}
+            </label>
+            <span class="muted">{{ t('speed.megasDesc') }}</span>
+            <label class="btn switch" :class="{ on: trickRoom }">
+              <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
+              {{ t('speed.mod.trickroom') }}
+            </label>
+            <span class="muted">{{ t('speed.modTip.trickroom') }}</span>
+            <button type="button" class="disclosure" :aria-expanded="modsOpen" @click="toggleMods">
+              <span class="marker" aria-hidden="true">{{ modsOpen ? '▾' : '▸' }}</span
+              >{{ mine ? t('speed.theirModifiers') : t('speed.modifiers') }}
+            </button>
+            <span class="muted">{{ t('speed.modifiersTip') }}</span>
+            <div v-if="modsOpen" class="mods all-mods">
+              <button
+                v-for="k in TOGGLES"
+                :key="k"
+                v-tip="canHover && t(`speed.modTip.${k}`)"
+                type="button"
+                class="btn mod"
+                :class="{ on: flag(k) }"
+                :aria-pressed="flag(k)"
+                @click="toggleMod(k)"
+              >
+                {{ t(`speed.mod.${k}`) }}
+              </button>
+              <SegmentedControl
+                v-model="stage"
+                :label="t('speed.stage')"
+                :options="STAGES.map((s) => ({ value: s, label: stageLabel(s) }))"
+              />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </details>
 
     <div class="speed-layout">
       <div class="panel banded list">
@@ -824,9 +856,13 @@ const { entered } = usePageEntered()
       </div>
       <!-- Your Pokémon: where it lands among the others, and what it takes to move before one of them. A sidebar that
            stays in view beside the ladder on wide screens, so tapping a chip anywhere shows the answer; above it, narrower. -->
-      <details class="panel banded warm yours" :open="side || yoursOpen" @toggle="onYoursToggle">
+      <details
+        class="panel banded warm yours instant"
+        :open="side || yoursOpen"
+        @toggle="!side && (yoursOpen = isOpen($event))"
+      >
         <!-- A heading that opens and closes the card on phones; beside the ladder it's always open. -->
-        <summary class="yours-title" @click="side && $event.preventDefault()">
+        <summary class="yours-title" @click.prevent="!side && toggleYours()">
           <span class="marker yours-marker" aria-hidden="true">{{ yoursOpen ? '▾' : '▸' }}</span>
           {{ t('speed.yours') }}
         </summary>
@@ -880,7 +916,7 @@ const { entered } = usePageEntered()
             <SegmentedControl
               :model-value="myStage"
               :label="t('speed.stage')"
-              :options="STAGES.map((s) => ({ value: s, label: Number(s) > 0 ? `+${s}` : s.replace('-', '−') }))"
+              :options="STAGES.map((s) => ({ value: s, label: stageLabel(s) }))"
               @update:model-value="(v: string) => setMyStage(v)"
             />
           </div>
@@ -925,6 +961,69 @@ const { entered } = usePageEntered()
 </template>
 
 <style scoped>
+/* The heading's row: the heading, what's active (taking what room is left, on one line, scrolling sideways when it
+   doesn't fit), and the toggle at the end. On phones, what's active goes to a line of its own. */
+.head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: 'title active fold';
+  align-items: center;
+  gap: 4px 12px;
+  list-style: none;
+  cursor: pointer;
+}
+.head::-webkit-details-marker {
+  display: none;
+}
+.head h1 {
+  grid-area: title;
+  margin: 0;
+}
+.active {
+  grid-area: active;
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  list-style: none;
+}
+.active::-webkit-scrollbar {
+  display: none;
+}
+.active li {
+  flex: none;
+  padding: 1px 6px;
+  font-size: 0.85em;
+  white-space: nowrap;
+  background: var(--panel-alt);
+  border: 1px solid var(--border-strong);
+}
+.fold {
+  grid-area: fold;
+  font-weight: bold;
+  white-space: nowrap;
+}
+/* These sections open and close at once, without the slide and fade collapsible sections have (main.css). Their
+   headings take taps as taps: quick ones neither select the text nor zoom. */
+.instant::details-content,
+.instant > summary {
+  transition: none;
+}
+.instant > summary {
+  touch-action: manipulation;
+  user-select: none;
+}
+.fold-body {
+  padding-top: 8px;
+}
+@media (max-width: 720px) {
+  .head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'title fold' 'active active';
+  }
+}
 .controls {
   display: flex;
   flex-direction: column;

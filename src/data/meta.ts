@@ -135,6 +135,16 @@ export const snapshots = computed<MetaSnapshot[]>(() => active.value.flatMap((id
 /** The current regulation's snapshots, the one to show by default first. */
 export const currentSnapshots = (): MetaSnapshot[] => snapshots.value.filter((s) => s.regulation === REGULATION)
 
+/** What tells a snapshot apart from the others shown ("Strong players (1760+)"), or its whole label when nothing does. */
+export function distinctLabel(s: MetaSnapshot): string {
+  const all = currentSnapshots().map(metaParts)
+  return (
+    metaParts(s)
+      .filter((p) => !all.every((ps) => ps.includes(p)))
+      .join(' · ') || metaLabel(s)
+  )
+}
+
 const PICK_KEY = 'sproutvgc.metaSet'
 
 function savedPick(): string | null {
