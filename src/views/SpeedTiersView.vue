@@ -475,13 +475,15 @@ async function copy(text: string): Promise<boolean> {
   }
 }
 // A shared link brings what it points at into view once the ladder is in: its picked row, or else the first Speed its
-// search finds.
+// search finds. Only the link it came with: a row or a Pokémon picked later doesn't move the page (the floating
+// button, below, goes to the Pokémon found).
 let scrolled = false
 watch(
   () => [ladder.value, tiers.value.length] as const,
   async ([el, n]) => {
-    if (scrolled || !el || !n || (at.value === null && !finding.value)) return
+    if (scrolled || !el || !n) return
     scrolled = true
+    if (at.value === null && !finding.value) return
     await nextTick()
     const target = at.value !== null ? el.querySelector(`[data-speed="${at.value}"]`) : el.querySelector('.tier.hit')
     target?.scrollIntoView({ block: 'center' })
