@@ -24,14 +24,14 @@
      shadow.
    - `sunken`: a tray rather than a card: no shadow, a darker background, an inset shadow along its top and left. */
 :root:root .panel.banded > :is(summary, .band) {
-  margin: -12px -12px 12px;
-  padding: 6px 12px;
+  margin: calc(-1 * var(--panel-pad)) calc(-1 * var(--panel-pad)) var(--panel-pad);
+  padding: 6px var(--panel-pad);
   color: var(--accent-text);
   background: var(--accent);
   border-bottom: 2px solid var(--ink);
 }
 :root:root .panel.banded:not([open]) > summary {
-  margin-bottom: -12px;
+  margin-bottom: calc(-1 * var(--panel-pad));
   border-bottom: none;
 }
 :root:root .panel.tinted {

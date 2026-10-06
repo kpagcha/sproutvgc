@@ -107,6 +107,11 @@
 :root {
   --text-scale: 1;
   --icon-scale: 1;
+  /* A panel's padding, which what runs to its edges (a band) takes back; and how far into it the long lists (the dex
+     tables, the speed ladder) run: on phones all the way, so their row lines meet the panel's border, which saves the
+     room. */
+  --panel-pad: 12px;
+  --panel-bleed: 0px;
   /* Large type badges: their font, and their width, which the type grids size their columns from. */
   --badge-font: calc(12px * var(--text-scale));
   --badge-w: calc(var(--badge-font) * 8);
@@ -121,6 +126,7 @@
     --icon-scale: 1.5;
     /* A smaller text bump for the badges than the rest of the page, three to a row (retro.css). */
     --badge-font: 13px;
+    --panel-bleed: var(--panel-pad);
   }
 }
 
@@ -217,7 +223,7 @@ img.pixel {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 4px;
-  padding: 12px;
+  padding: var(--panel-pad);
   margin-bottom: 12px;
 }
 
@@ -498,4 +504,19 @@ details > summary {
 }
 .dex-table .name {
   font-weight: bold;
+}
+/* In a panel, on phones, the table runs to its edges (`--panel-bleed`), so its row lines meet the panel's border, while
+   the rows' padding keeps the cells lined up with the rest of the panel (with their own 6px). One at the panel's top or
+   bottom meets that border too. */
+.panel .dex-table {
+  margin-inline: calc(-1 * var(--panel-bleed));
+}
+.panel .dex-table .row {
+  padding-inline: max(0px, var(--panel-bleed) - 6px);
+}
+.panel > .dex-table:first-child {
+  margin-top: calc(-1 * var(--panel-bleed));
+}
+.panel > .dex-table:last-child {
+  margin-bottom: calc(-1 * var(--panel-bleed));
 }

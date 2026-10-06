@@ -711,8 +711,10 @@ const { entered } = usePageEntered()
 .small {
   font-size: calc(13px * var(--text-scale));
 }
+/* On phones, runs to the panel's edges (`--panel-bleed`), so the row lines and a picked row's highlight meet its
+   border. */
 .ladder {
-  margin: 0;
+  margin: 0 calc(-1 * var(--panel-bleed));
   padding: 0;
   list-style: none;
 }
@@ -746,7 +748,7 @@ const { entered } = usePageEntered()
   grid-template-columns: var(--speed-col) 1fr;
   align-items: start;
   gap: 8px;
-  padding: 4px 0;
+  padding: 4px var(--panel-bleed);
   border-top: 1px solid var(--border);
 }
 .speed {
@@ -766,6 +768,8 @@ const { entered } = usePageEntered()
   top: 0;
   z-index: 2;
   height: 0;
+  /* As wide as the ladder. */
+  margin-inline: calc(-1 * var(--panel-bleed));
 }
 .pinned {
   position: absolute;
@@ -773,7 +777,7 @@ const { entered } = usePageEntered()
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 0;
+  padding: 6px var(--panel-bleed);
   background: var(--panel);
   border-bottom: 1px solid var(--border-strong);
 }

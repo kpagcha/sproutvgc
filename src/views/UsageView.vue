@@ -324,9 +324,9 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
     --num: minmax(1.8em, auto);
     --usage: 4em;
   }
-  /* The rank from the panel's edge: left-aligned, so a short one leaves no gap before it. */
+  /* The rank in line with the panel's text: left-aligned, so a short one leaves no gap before it. */
   .dex-table .row > :first-child {
-    padding-inline: 0 4px;
+    padding-inline: 6px 4px;
     text-align: left;
   }
   .dex-table .row > :nth-child(2) {
@@ -335,7 +335,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   /* The set's line across the whole row. */
   .dex-table .set-line {
     grid-column: 1 / -1;
-    padding-left: 0;
+    padding-left: 6px;
   }
 }
 /* The set's line: under the row, from the name's column on, when the set columns don't fit. */
@@ -397,7 +397,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
      usage); then the moves, on a line of their own. */
   .dex-table .set-line {
     grid-column: 1 / -1;
-    padding-left: 0;
+    padding-left: 6px;
   }
   .set-line .brought-sm {
     display: inline;
