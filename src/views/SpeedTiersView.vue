@@ -9,7 +9,7 @@ import { POKEMON, splitForme } from '@/data/pokemon'
 import { currentSnapshots, distinctLabel, has, percent } from '@/data/meta'
 import { locale, t, tSlots, tSplit } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import { center } from '@/lib/scroll'
+import { center, reveal } from '@/lib/scroll'
 import { FADE, PRESS } from '@/lib/motion'
 import { natureEffects, natureName } from '@/data/natures'
 import {
@@ -420,6 +420,16 @@ function versusText(r: ReturnType<typeof pointsToMoveFirst>) {
   return t('speed.vsTies', { points: r.ties })
 }
 const toMine = () => center(ladder.value?.querySelector('.tier.has-mine'))
+// To the ladder from yours' card, when it isn't beside it: the ladder's top brought up, its find flashing once (not
+// focused, so no keyboard comes up) to say it's where to look for an opponent.
+const listPanel = useTemplateRef<HTMLElement>('listPanel')
+const flashFind = shallowRef(false)
+async function toOpponents() {
+  reveal(listPanel.value, listPanel.value)
+  flashFind.value = false
+  await nextTick()
+  flashFind.value = true
+}
 
 const benchLabel = (b: Benchmark) => t(`stat.bench.${b}`)
 const benchTip = (b: Benchmark) => t(`speed.benchTip.${b}`)
@@ -758,14 +768,14 @@ const { entered } = usePageEntered()
     </details>
 
     <div class="speed-layout">
-      <div class="panel banded soft list">
+      <div ref="listPanel" class="panel banded soft list">
         <!-- With yours picked, the ladder is its opponents: said over it, with what tapping one does. -->
         <div v-if="mine" class="band opponents-head">
           <strong>{{ t('speed.opponentsHead') }}</strong>
           <span>{{ t('speed.opponentsHint') }}</span>
         </div>
         <!-- Finding a Pokémon on the ladder: a band on top, over its header, which sits on the rows as a table's does. -->
-        <div class="band find find-row">
+        <div class="band find find-row" :class="{ flash: flashFind }" @animationend="flashFind = false">
           <PokemonPicker
             :model-value="found"
             :ids="onLadder"
@@ -985,6 +995,12 @@ const { entered } = usePageEntered()
           <button type="button" class="btn primary big-go" @click="toMine">
             <span class="big-go-speed">{{ mySpeed }}</span>
             <span>{{ t('speed.showYours') }}</span>
+          </button>
+          <!-- Narrower, the ladder is under this card, its opponents band out of view: a way to it, said as it's
+               picked. -->
+          <button v-if="!side" type="button" class="btn opponents-go" @click="toOpponents">
+            <span class="opponents-tag">{{ t('speed.opponentsHead') }}</span>
+            <span>{{ t('speed.opponentsGo') }}</span>
           </button>
           <!-- Its build and modifiers, then what they come to: each a section of its own, labeled above. -->
           <section class="yours-section">
@@ -1406,6 +1422,34 @@ const { entered } = usePageEntered()
   margin-top: 10px;
   padding: 4px 12px;
   font-weight: bold;
+}
+/* The opponents band, in short, on the button to them. */
+.opponents-tag {
+  flex: none;
+  padding: 1px 6px;
+  font-size: 0.8125em;
+  font-weight: bold;
+  color: var(--opponent-text);
+  background: var(--opponent);
+  border: 1px solid var(--ink);
+}
+/* The way to the opponents: a plain button beside yours' primary one, in red. */
+.opponents-go {
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 8px;
+  padding: 4px 6px 4px 4px;
+  font-weight: bold;
+  color: var(--bad);
+}
+/* The find, flashed once in the opponents' red after the page scrolls to it. */
+.find-row.flash :deep(.search) {
+  animation: find-flash 1.2s ease-out 0.35s;
+}
+@keyframes find-flash {
+  30% {
+    box-shadow: 0 0 0 3px var(--opponent);
+  }
 }
 .big-go-speed {
   font-size: 1.75em;
