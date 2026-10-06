@@ -709,12 +709,12 @@ const { entered } = usePageEntered()
     </details>
 
     <div class="speed-layout">
-      <div class="panel banded list">
+      <div class="panel banded soft list">
         <!-- What the ladder is: its numbers, which way it runs, and how many Pokémon it holds. -->
-        <div class="band">
-          <span class="band-speed">{{ t('speed.column') }}</span>
+        <div class="band ladder-head">
+          <span>{{ t('speed.column') }}</span>
           <span>{{ t(trickRoom ? 'speed.slowestFirst' : 'speed.fastestFirst') }}</span>
-          <span v-if="entered && (showAll || data)" class="band-count">{{ t('speed.count', { n: monCount }) }}</span>
+          <span v-if="entered && (showAll || data)" class="muted">{{ t('speed.count', { n: monCount }) }}</span>
         </div>
         <!-- Pinned over the ladder once the controls are scrolled away; takes no room of its own. -->
         <div ref="pinMark" aria-hidden="true"></div>
@@ -857,7 +857,7 @@ const { entered } = usePageEntered()
       <!-- Your Pokémon: where it lands among the others, and what it takes to move before one of them. A sidebar that
            stays in view beside the ladder on wide screens, so tapping a chip anywhere shows the answer; above it, narrower. -->
       <details
-        class="panel banded warm yours instant"
+        class="panel banded yours instant"
         :open="side || yoursOpen"
         @toggle="!side && (yoursOpen = isOpen($event))"
       >
@@ -1115,7 +1115,7 @@ const { entered } = usePageEntered()
   list-style: none;
 }
 /* A Speed, and the Pokémon at it: the number in a column of its own, the chips wrapping beside it. The band over the
-   ladder heads that column too. */
+   ladder's header heads that column too. */
 .list {
   --speed-col: 3.5em;
 }
@@ -1124,18 +1124,17 @@ const { entered } = usePageEntered()
     --speed-col: 2.2em;
   }
 }
-.band {
+/* The ladder's header: its columns' labels, in a soft band (retro.css), its first, "Speed", bold. */
+.ladder-head {
   display: grid;
   grid-template-columns: minmax(var(--speed-col), max-content) 1fr auto;
   align-items: baseline;
   gap: 8px;
+}
+.ladder-head > :first-child {
   font-weight: bold;
 }
-.band-count {
-  font-weight: normal;
-  opacity: 0.75;
-}
-/* The band leads straight into the first Speed. */
+/* The band's line stands in for the first Speed's. */
 .tier:first-child {
   border-top: none;
 }
