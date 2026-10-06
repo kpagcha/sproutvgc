@@ -52,10 +52,14 @@ const results = computed(() => {
 })
 watch(results, () => (active.value = 0))
 
+// On touch screens, picking one leaves the field, so the keyboard goes away and the page it was covering shows; with a
+// mouse or keys, the focus stays for picking another.
+const touch = window.matchMedia('(pointer: coarse)')
 function pick(id: PokemonId) {
   model.value = id
   text.value = nameOf(id)
   open.value = false
+  if (touch.matches) field.value?.querySelector('input')?.blur()
 }
 function onKey(e: KeyboardEvent) {
   const n = results.value.length
