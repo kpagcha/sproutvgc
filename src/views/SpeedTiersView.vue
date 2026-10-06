@@ -174,11 +174,14 @@ const mySpeed = computed(() =>
     : inBattle(speedStat(POKEMON[mine.value].stats[5], myPoints.value, myNature.value), myMods.value),
 )
 
-/** Picks your Pokémon, at the meta's most common build of it when there is one, else the fastest. */
-function pickMine(id: PokemonId | null) {
+/**
+ * Picks your Pokémon, at the meta's most common build of it when there is one, else the fastest, and brings the Speed
+ * it lands at into view.
+ */
+async function pickMine(id: PokemonId | null) {
   if (!id) return
   const build = data.value?.[id]?.speeds?.[0]
-  void router.replace({
+  await router.replace({
     query: {
       ...query.value,
       mine: id,
@@ -187,6 +190,8 @@ function pickMine(id: PokemonId | null) {
       vs: undefined,
     },
   })
+  await nextTick()
+  toMine()
 }
 function clearMine() {
   const q = { ...query.value }
