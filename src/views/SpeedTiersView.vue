@@ -841,6 +841,16 @@ const { entered } = usePageEntered()
               <span class="long" aria-hidden="true">{{ t('speed.mod.trickroom') }}</span>
               <span class="short" aria-hidden="true">{{ t('speed.trShort') }}</span>
             </label>
+            <!-- The ladder's header, scrolled away under it: in a strip of its own, red with yours picked, saying the
+                 ladder is its opponents. -->
+            <div class="pinned-head small" :class="{ opponents: mine }" aria-hidden="true">
+              <span>{{ t('stat.spe') }}</span>
+              <span
+                ><strong v-if="mine">{{ t('speed.opponentsHead') }} · </strong
+                >{{ t(trickRoom ? 'speed.slowestFirst' : 'speed.fastestFirst') }}</span
+              >
+              <span v-if="showAll || data" class="count">{{ t('speed.count', { n: monCount }) }}</span>
+            </div>
           </div>
         </div>
 
@@ -1399,6 +1409,7 @@ const { entered } = usePageEntered()
   position: absolute;
   inset: 0 0 auto;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   padding: 6px var(--panel-bleed);
@@ -1407,6 +1418,30 @@ const { entered } = usePageEntered()
 }
 .pinned .short {
   display: none;
+}
+/* The header's strip, across the bar's bottom, its columns the ladder's. */
+.pinned-head {
+  display: grid;
+  flex: 1 0 100%;
+  grid-template-columns: var(--speed-col) 1fr auto;
+  gap: 8px;
+  margin: 0 calc(-1 * var(--panel-bleed)) -6px;
+  padding: 2px var(--panel-bleed);
+  background: color-mix(in srgb, var(--ink) 25%, var(--panel));
+}
+.pinned-head > :first-child {
+  font-weight: bold;
+  text-align: right;
+}
+.pinned-head .count {
+  color: var(--muted);
+}
+.pinned-head.opponents {
+  color: var(--opponent-text);
+  background: var(--opponent);
+}
+.pinned-head.opponents .count {
+  color: inherit;
 }
 /* The find, how it shows beside it, the search taking what the switches leave, as in its row. */
 .pinned .find {
