@@ -630,8 +630,10 @@ const { entered } = usePageEntered()
     <details class="panel instant" :open="controlsOpen" @toggle="controlsOpen = isOpen($event)">
       <summary class="head" @click.prevent="toggleControls">
         <!-- With yours picked, everything the controls set is for the others: its opponents. -->
+        <!-- On phones, the arrow before the heading folds them, with no words beside it. -->
         <h1>
-          {{ t('title.speedTiers') }}<span v-if="mine" class="opponents"> ({{ t('speed.opponents') }})</span>
+          <span class="marker head-marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
+          >{{ t('title.speedTiers') }}<span v-if="mine" class="opponents"> ({{ t('speed.opponents') }})</span>
         </h1>
         <ul v-if="!controlsOpen" class="active" :aria-label="t('speed.active')">
           <li v-for="a in active" :key="a">{{ a }}</li>
@@ -1175,10 +1177,19 @@ const { entered } = usePageEntered()
 .fold-body {
   padding-top: 8px;
 }
+.head-marker {
+  display: none;
+}
 @media (max-width: 720px) {
   .head {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: 'title fold' 'active active';
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'title' 'active';
+  }
+  .head-marker {
+    display: inline-block;
+  }
+  .fold {
+    display: none;
   }
 }
 .controls {
