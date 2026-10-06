@@ -656,7 +656,7 @@ export const messages = {
   'speed.yoursPick': 'Pick a Pokémon',
   'speed.yoursIntro':
     'Pick one to see where it lands among the others, with its own modifiers, and what it takes to move before any of them.',
-  'speed.yoursClear': 'Clear',
+  'speed.clear': 'Clear',
   'speed.yoursTag': 'Yours',
   'speed.natureLabel': 'Nature',
   'speed.effect.up': 'Raises Speed',

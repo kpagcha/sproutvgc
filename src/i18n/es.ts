@@ -664,7 +664,7 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.yoursPick': 'Elige un Pokémon',
   'speed.yoursIntro':
     'Elige uno para ver dónde queda entre los demás, con sus propios modificadores, y qué necesita para moverse antes que cualquiera de ellos.',
-  'speed.yoursClear': 'Quitar',
+  'speed.clear': 'Quitar',
   'speed.yoursTag': 'El tuyo',
   'speed.natureLabel': 'Naturaleza',
   'speed.effect.up': 'Sube la Velocidad',

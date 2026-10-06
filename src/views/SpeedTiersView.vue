@@ -786,6 +786,7 @@ const { entered } = usePageEntered()
             />
             {{ onlyLabel[0] }}<PokemonIcon :id="found" />{{ onlyLabel[1] }}
           </label>
+          <button v-if="found" type="button" class="btn" @click="setFound(null)">{{ t('speed.clear') }}</button>
         </div>
         <!-- What the ladder is: its numbers, which way it runs, and how many Pokémon it holds. -->
         <div class="band ladder-head">
@@ -978,7 +979,7 @@ const { entered } = usePageEntered()
             list-width-of=".yours-pick"
             @update:model-value="pickMine"
           />
-          <button v-if="mine" type="button" class="btn" @click="clearMine">{{ t('speed.yoursClear') }}</button>
+          <button v-if="mine" type="button" class="btn" @click="clearMine">{{ t('speed.clear') }}</button>
         </div>
         <p v-if="!mine" class="muted small wide-only yours-intro">{{ t('speed.yoursIntro') }}</p>
         <template v-else>
