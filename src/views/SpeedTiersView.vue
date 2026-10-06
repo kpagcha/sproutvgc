@@ -1296,7 +1296,7 @@ const { entered } = usePageEntered()
   margin-top: 0;
 }
 :root:root .list.banded > .band.ladder-head {
-  margin-bottom: 0;
+  margin-bottom: 6px;
 }
 /* The find's band and the header: the panel's own color, darker, rather than the accent's tint. */
 :root:root .list.banded > .band:is(.find-row, .ladder-head) {
