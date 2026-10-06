@@ -13,18 +13,16 @@ import { center } from '@/lib/scroll'
 import { FADE, PRESS } from '@/lib/motion'
 import { natureEffects, natureName } from '@/data/natures'
 import {
-  BENCHMARKS,
   SPEED_ABILITIES,
   SPEED_ITEMS,
-  benchmark,
   inBattle,
   natureEffect,
   speedStat,
-  type Benchmark,
   type SpeedEffect,
   type SpeedMods,
   withEffect,
 } from '@/lib/speed'
+import { BENCHMARKS, benchmark, type Benchmark } from '@/lib/stats'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useMeta } from '@/composables/useMeta'
 import { useOpenState } from '@/composables/useOpenState'
@@ -232,7 +230,7 @@ const finding = computed(() => !!find.value.trim())
 /** How many Pokémon the ladder holds, each once however many Speeds it's at. */
 const monCount = computed(() => new Set(entries.value.map((e) => e.id)).size)
 
-const benchLabel = (b: Benchmark) => t(`speed.bench.${b}`)
+const benchLabel = (b: Benchmark) => t(`stat.bench.${b}`)
 const benchTip = (b: Benchmark) => t(`speed.benchTip.${b}`)
 function investTip(e: Entry) {
   const effects = natureEffects(e.nature!)
@@ -488,6 +486,7 @@ const { entered } = usePageEntered()
               <dd class="muted">{{ t('speed.modifiersTip') }}</dd>
             </dl>
           </div>
+          <p class="formula muted small">{{ t('speed.formula') }}</p>
           <dl v-if="!showAll && snapshot" class="legend small">
             <dt>
               <span class="chip sample"
@@ -894,6 +893,9 @@ const { entered } = usePageEntered()
 }
 .help-body > :is(.legend, p) {
   margin-top: 0;
+}
+.help-body > .formula {
+  margin-bottom: 8px;
 }
 .help-body .legend dd:last-child {
   margin-bottom: 0;
