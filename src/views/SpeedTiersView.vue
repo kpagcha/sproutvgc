@@ -7,7 +7,7 @@ import { ability, availableIds, condition, item, pokemon, type PokemonId, type R
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
 import { currentSnapshots, distinctLabel, has, percent } from '@/data/meta'
-import { locale, t, tSplit } from '@/i18n'
+import { locale, t, tSlots, tSplit } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { center } from '@/lib/scroll'
 import { FADE, PRESS } from '@/lib/motion'
@@ -384,7 +384,13 @@ const versus = computed(() => {
     })),
   }
 })
-const pickVersus = (e: Entry) => set('vs', query.value.vs === chipKey(e) ? undefined : chipKey(e))
+// Its title, the Pokémon's name (with its icon) a link to its page.
+const vsTitle = computed(() => tSlots('speed.vs'))
+// Picking one finds it too, the find showing as its "Only" switch says.
+function pickVersus(e: Entry) {
+  const vs = query.value.vs === chipKey(e) ? undefined : chipKey(e)
+  void router.replace({ query: { ...query.value, vs, ...(vs && { find: e.id }) } })
+}
 function onChip(ev: MouseEvent, e: Entry) {
   if (mine.value === null || ev.ctrlKey || ev.metaKey || ev.shiftKey) return
   ev.preventDefault()
@@ -879,12 +885,19 @@ const { entered } = usePageEntered()
               :transition="FADE"
             >
               <p>
-                <strong>{{
-                  t('speed.vs', {
-                    name: [versus.e.species, versus.e.forme].filter(Boolean).join(' '),
-                    speed: versus.target,
-                  })
-                }}</strong>
+                <strong
+                  ><template v-for="(part, i) in vsTitle" :key="i"
+                    ><template v-if="typeof part === 'string'">{{ part }}</template
+                    ><AppLink
+                      v-else-if="part.slot === 'name'"
+                      :to="{ name: 'pokemon', params: { id: versus.e.id } }"
+                      class="vs-mon"
+                      ><PokemonIcon :id="versus.e.id" />{{
+                        [versus.e.species, versus.e.forme].filter(Boolean).join(' ')
+                      }}</AppLink
+                    ><template v-else>{{ versus.target }}</template></template
+                  ></strong
+                >
                 <button type="button" class="link-button" @click="set('vs', undefined)">
                   {{ t('speed.vsClose') }}
                 </button>
@@ -1022,13 +1035,19 @@ const { entered } = usePageEntered()
             </p>
             <div v-if="versus" class="versus small">
               <p>
-                <strong>{{
-                  t('speed.vs', {
-                    name: [versus.e.species, versus.e.forme].filter(Boolean).join(' '),
-                    speed: versus.target,
-                  })
-                }}</strong>
-                <AppLink :to="{ name: 'pokemon', params: { id: versus.e.id } }">{{ t('speed.openPage') }}</AppLink>
+                <strong
+                  ><template v-for="(part, i) in vsTitle" :key="i"
+                    ><template v-if="typeof part === 'string'">{{ part }}</template
+                    ><AppLink
+                      v-else-if="part.slot === 'name'"
+                      :to="{ name: 'pokemon', params: { id: versus.e.id } }"
+                      class="vs-mon"
+                      ><PokemonIcon :id="versus.e.id" />{{
+                        [versus.e.species, versus.e.forme].filter(Boolean).join(' ')
+                      }}</AppLink
+                    ><template v-else>{{ versus.target }}</template></template
+                  ></strong
+                >
               </p>
               <dl>
                 <template v-for="v in versus.byEffect" :key="v.effect">
@@ -1382,6 +1401,7 @@ const { entered } = usePageEntered()
 .versus-card p {
   display: flex;
   flex-wrap: wrap;
+  align-items: baseline;
   justify-content: space-between;
   gap: 4px 10px;
   margin: 0;
@@ -1483,8 +1503,16 @@ const { entered } = usePageEntered()
 .versus p {
   display: flex;
   flex-wrap: wrap;
+  align-items: baseline;
   gap: 4px 10px;
   margin: 0;
+}
+/* The Pokémon it's against, in its title: its name on the text's line, its icon centered on it. */
+.vs-mon {
+  white-space: nowrap;
+}
+.vs-mon :deep(.sheet-icon) {
+  margin-block: -6px;
 }
 .versus dl {
   display: grid;

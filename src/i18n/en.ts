@@ -671,7 +671,6 @@ export const messages = {
   'speed.summaryAll': 'of every Pokémon at {bench}',
   'speed.vsHint': 'Tap a Pokémon on the ladder to see what it takes to move before it.',
   'speed.vs': 'Against {name} at {speed}',
-  'speed.openPage': 'Open its page',
   'speed.vsFrom': 'moves first from {points} points',
   'speed.vsUpTo': 'moves first up to {points} points',
   'speed.vsAny': 'moves first with any points',
