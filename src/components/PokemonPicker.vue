@@ -75,6 +75,12 @@ function onFocus() {
   open.value = true
   if (touch.matches) toTopOf(field.value)
 }
+// On touch screens, tapping the field again while it's in use puts it away: the list closes and the keyboard goes.
+let wasFocused = false
+const onPointerDown = (e: PointerEvent) => (wasFocused = document.activeElement === e.currentTarget)
+function onTap(e: MouseEvent) {
+  if (touch.matches && wasFocused) (e.currentTarget as HTMLInputElement).blur()
+}
 function onKey(e: KeyboardEvent) {
   const n = results.value.length
   if (e.key === 'ArrowDown' && n) active.value = (active.value + 1) % n
@@ -155,6 +161,8 @@ const optionId = (i: number) => `${listId}-${i}`
       :aria-activedescendant="results.length ? optionId(active) : undefined"
       @input="open = true"
       @focus="onFocus"
+      @pointerdown="onPointerDown"
+      @click="onTap"
       @blur="onBlur"
       @keydown="onKey"
     />
