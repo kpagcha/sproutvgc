@@ -168,6 +168,19 @@ const myMods = computed<SpeedMods>(() => ({
   paralysis: myToggles.value.has('paralysis'),
   stage: Number(myStage.value),
 }))
+// Its modifiers fold away as the others' do: shown when the page comes with some on, folding them turns them off.
+const myModded = computed(() => myToggles.value.size > 0 || myStage.value !== '0')
+const myModsOpen = shallowRef(myModded.value)
+function toggleMyMods() {
+  const open = !myModsOpen.value
+  if (!open && myModded.value) {
+    const q = { ...query.value }
+    delete q.mymods
+    delete q.mystage
+    void router.replace({ query: q })
+  }
+  myModsOpen.value = open
+}
 const mySpeed = computed(() =>
   mine.value === null
     ? null
@@ -997,8 +1010,11 @@ const { entered } = usePageEntered()
             </label>
           </section>
           <section class="yours-section">
-            <span class="muted small">{{ t('speed.modifiers') }}</span>
-            <div class="mods">
+            <button type="button" class="disclosure" :aria-expanded="myModsOpen" @click="toggleMyMods">
+              <span class="marker" aria-hidden="true">{{ myModsOpen ? '▾' : '▸' }}</span
+              >{{ t('speed.modifiers') }}
+            </button>
+            <div v-if="myModsOpen" class="mods">
               <button
                 v-for="k in MY_TOGGLES"
                 :key="k"
@@ -1013,6 +1029,7 @@ const { entered } = usePageEntered()
               </button>
             </div>
             <SegmentedControl
+              v-if="myModsOpen"
               :model-value="myStage"
               :label="t('speed.stage')"
               :options="STAGES.map((s) => ({ value: s, label: stageLabel(s) }))"
@@ -1453,6 +1470,9 @@ const { entered } = usePageEntered()
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
+}
+.yours-section > .disclosure {
+  margin-top: 0;
 }
 .yours-section > p,
 .yours p.small {
