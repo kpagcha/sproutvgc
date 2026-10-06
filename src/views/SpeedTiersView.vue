@@ -952,7 +952,16 @@ const { entered } = usePageEntered()
               </p>
               <dl>
                 <template v-for="v in versus.byEffect" :key="v.effect">
-                  <dt>{{ t(`speed.effect.${v.effect}`) }}</dt>
+                  <!-- The effect as the nature's choice shows it: arrows beside "Spe", neutral as a word. -->
+                  <dt v-tip="canHover && !!EFFECT_ICONS[v.effect] && t(`speed.effect.${v.effect}`)" class="effect">
+                    <template v-if="EFFECT_ICONS[v.effect]"
+                      ><component :is="EFFECT_ICONS[v.effect]" :size="14" aria-hidden="true" /><span
+                        aria-hidden="true"
+                        >{{ t('stat.spe') }}</span
+                      ><span class="visually-hidden">{{ t(`speed.effect.${v.effect}`) }}</span></template
+                    >
+                    <template v-else>{{ t(`speed.effect.${v.effect}`) }}</template>
+                  </dt>
                   <dd>{{ versusText(v.result) }}</dd>
                 </template>
               </dl>
@@ -1114,7 +1123,16 @@ const { entered } = usePageEntered()
               </p>
               <dl>
                 <template v-for="v in versus.byEffect" :key="v.effect">
-                  <dt>{{ t(`speed.effect.${v.effect}`) }}</dt>
+                  <!-- The effect as the nature's choice shows it: arrows beside "Spe", neutral as a word. -->
+                  <dt v-tip="canHover && !!EFFECT_ICONS[v.effect] && t(`speed.effect.${v.effect}`)" class="effect">
+                    <template v-if="EFFECT_ICONS[v.effect]"
+                      ><component :is="EFFECT_ICONS[v.effect]" :size="14" aria-hidden="true" /><span
+                        aria-hidden="true"
+                        >{{ t('stat.spe') }}</span
+                      ><span class="visually-hidden">{{ t(`speed.effect.${v.effect}`) }}</span></template
+                    >
+                    <template v-else>{{ t(`speed.effect.${v.effect}`) }}</template>
+                  </dt>
                   <dd>{{ versusText(v.result) }}</dd>
                 </template>
               </dl>
@@ -1579,6 +1597,20 @@ const { entered } = usePageEntered()
   grid-template-columns: max-content 1fr;
   gap: 2px 10px;
   margin: 6px 0 0;
+}
+/* A nature effect, in the comparison: its arrows and "Spe" together, the effect's name read out in their place. */
+.effect {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 .versus-card dd {
   margin: 0;
