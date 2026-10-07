@@ -1030,6 +1030,7 @@ const { entered } = usePageEntered()
               class="stacked"
               :model-value="myNature"
               :label="t('speed.natureLabel')"
+              no-tips
               :options="
                 NATURE_EFFECTS.map((e) => ({
                   value: e,
