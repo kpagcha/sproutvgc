@@ -747,16 +747,18 @@ const { open: controlsOpen, toggle: toggleControls } = useOpenState('sproutvgc.s
 // On phones they start folded on each visit, the ladder first in view, whatever was left last time.
 if (window.matchMedia('(max-width: 720px)').matches) controlsOpen.value = false
 const stageLabel = (s: string) => (Number(s) > 0 ? `+${s}` : s.replace('-', '−'))
+// In two kinds: what's shown (the data, which Pokémon), and the options on (as their switches show when on).
 const active = computed(() => {
-  const list: string[] = []
-  if (snapshot.value && !showAll.value && currentSnapshots().length > 1) list.push(distinctLabel(snapshot.value))
-  list.push(showAll.value ? `${t('speed.all')} · ${benchLabel(bench.value)}` : t('speed.meta', { n: TOP }))
-  if (showBoosts.value) list.push(t('speed.boosts'))
-  if (!showMegas.value) list.push(t('speed.noMegas'))
-  if (trickRoom.value) list.push(t('speed.mod.trickroom'))
-  for (const k of TOGGLES) if (flag(k)) list.push(t(`speed.mod.${k}`))
-  if (stage.value !== '0') list.push(t('speed.stageShort', { stage: stageLabel(stage.value) }))
-  return list
+  const view: string[] = []
+  const options: string[] = []
+  if (snapshot.value && !showAll.value && currentSnapshots().length > 1) view.push(distinctLabel(snapshot.value))
+  view.push(showAll.value ? `${t('speed.all')} · ${benchLabel(bench.value)}` : t('speed.meta', { n: TOP }))
+  if (showBoosts.value) options.push(t('speed.boosts'))
+  if (!showMegas.value) options.push(t('speed.noMegas'))
+  if (trickRoom.value) options.push(t('speed.mod.trickroom'))
+  for (const k of TOGGLES) if (flag(k)) options.push(t(`speed.mod.${k}`))
+  if (stage.value !== '0') options.push(t('speed.stageShort', { stage: stageLabel(stage.value) }))
+  return [...view.map((label) => ({ label, kind: 'view' })), ...options.map((label) => ({ label, kind: 'option' }))]
 })
 
 /** Whether the screen has hover, for tooltips: touch screens show what matters inline instead. */
@@ -902,7 +904,7 @@ const { entered } = usePageEntered()
           }}<span v-if="mine" class="opponents-tag head-tag">{{ t('speed.opponentsHead') }}</span>
         </h1>
         <ul v-if="!controlsOpen" class="active" :aria-label="t('speed.active')">
-          <li v-for="a in active" :key="a">{{ a }}</li>
+          <li v-for="a in active" :key="a.label" :class="a.kind">{{ a.label }}</li>
         </ul>
       </summary>
       <div class="fold-body">
@@ -1618,6 +1620,12 @@ const { entered } = usePageEntered()
   white-space: nowrap;
   background: var(--panel-alt);
   border: 1px solid var(--border-strong);
+}
+/* The options on, as their switches show when on. */
+.active li.option {
+  font-weight: bold;
+  background: var(--sel);
+  border-color: var(--ink);
 }
 /* These sections open and close at once, without the slide and fade collapsible sections have (main.css). Their
    headings take taps as taps: quick ones neither select the text nor zoom. */

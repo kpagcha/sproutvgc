@@ -189,10 +189,12 @@ const isOpen = (e: Event) => (e.target as HTMLDetailsElement).open
 const { open: controlsOpen, toggle: toggleControls } = useOpenState('sproutvgc.compare.controlsOpen', true)
 if (window.matchMedia('(max-width: 720px)').matches) controlsOpen.value = false
 const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.compare.helpOpen', false)
+// In two kinds, as the speed tiers': what's shown (the data), and the options on.
 const active = computed(() => {
-  const list: string[] = []
-  if (snapshot.value && metaSpeeds.value && currentSnapshots().length > 1) list.push(distinctLabel(snapshot.value))
-  if (trickRoom.value) list.push(t('speed.mod.trickroom'))
+  const list: { label: string; kind: 'view' | 'option' }[] = []
+  if (snapshot.value && metaSpeeds.value && currentSnapshots().length > 1)
+    list.push({ label: distinctLabel(snapshot.value), kind: 'view' })
+  if (trickRoom.value) list.push({ label: t('speed.mod.trickroom'), kind: 'option' })
   return list
 })
 const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
@@ -211,7 +213,7 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
           >{{ t('title.speedCompare') }}
         </h1>
         <ul v-if="!controlsOpen && active.length" class="active" :aria-label="t('speed.active')">
-          <li v-for="a in active" :key="a">{{ a }}</li>
+          <li v-for="a in active" :key="a.label" :class="a.kind">{{ a.label }}</li>
         </ul>
       </summary>
       <div class="fold-body">
@@ -470,6 +472,11 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
   white-space: nowrap;
   background: var(--panel-alt);
   border: 1px solid var(--border-strong);
+}
+.active li.option {
+  font-weight: bold;
+  background: var(--sel);
+  border-color: var(--ink);
 }
 /* It opens and closes at once, without the slide and fade collapsible sections have (main.css); its heading takes
    taps as taps. */
