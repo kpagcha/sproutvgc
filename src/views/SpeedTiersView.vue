@@ -41,6 +41,7 @@ import { useMeta } from '@/composables/useMeta'
 import { useOpenState } from '@/composables/useOpenState'
 import { usePageEntered } from '@/composables/usePageEntered'
 import AppLink from '@/components/AppLink'
+import BuildSummary from '@/components/BuildSummary.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import MetaPicker from '@/components/MetaPicker.vue'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -797,46 +798,6 @@ watch(
 onBeforeUnmount(() => sidebarObserver?.disconnect())
 const barShown = computed(() => !side.value || !sidebarSeen.value)
 const onBarYours = () => (side.value ? reveal(yoursCard.value) : toggleYours())
-// The bar names yours only when the name fits whole beside everything else it shows: cut, it goes; gone, it comes
-// back once the room left at the row's end (before the arrow) takes it, as measured when it was there.
-const barYours = useTemplateRef<HTMLElement>('barYours')
-const barName = useTemplateRef<HTMLElement>('barName')
-const nameFits = shallowRef(true)
-let nameWidth = 0
-const BAR_GAP = 6
-function fitName() {
-  const btn = barYours.value
-  const name = barName.value
-  if (!btn || !name || !btn.offsetParent) return
-  if (nameFits.value) {
-    if (name.scrollWidth > name.clientWidth) {
-      nameWidth = name.scrollWidth
-      nameFits.value = false
-    }
-    return
-  }
-  const marker = btn.querySelector('.marker')
-  const before = marker?.previousElementSibling
-  if (!marker || !before) return
-  const room = marker.getBoundingClientRect().left - before.getBoundingClientRect().right - BAR_GAP
-  if (room >= nameWidth + BAR_GAP) nameFits.value = true
-}
-watch([mine, myToggles, myStage, myNature, myPoints, locale], () => {
-  nameFits.value = true
-  void nextTick(fitName)
-})
-let barYoursObserver: ResizeObserver | undefined
-watch(
-  barYours,
-  (el) => {
-    barYoursObserver?.disconnect()
-    if (!el) return
-    barYoursObserver = new ResizeObserver(() => fitName())
-    barYoursObserver.observe(el)
-  },
-  { flush: 'post' },
-)
-onBeforeUnmount(() => barYoursObserver?.disconnect())
 // The bar's height, for what sticks to the top under it (the controls' heading, the ladder's bar), and where its card
 // drops to: the screen under the bar, the card scrolling within that.
 const bar = useTemplateRef<HTMLElement>('bar')
@@ -878,43 +839,13 @@ const { entered } = usePageEntered()
     <div v-show="barShown" ref="bar" class="yours-bar">
       <button
         type="button"
-        ref="barYours"
         class="btn primary bar-yours"
         :aria-expanded="side ? undefined : yoursOpen"
         @click="onBarYours"
       >
         <template v-if="mine">
-          <!-- Its name where the row has room for it once its modifiers have theirs; else its icon stands for it (the
-               name still read out). -->
-          <PokemonIcon :id="mine" />
-          <span class="visually-hidden">{{ refName(pokemon(mine)) }}</span>
-          <span ref="barName" class="bar-name" :class="{ gone: !nameFits }" aria-hidden="true">{{
-            refName(pokemon(mine))
-          }}</span>
-          <span class="bar-speed">{{ mySpeed }}</span>
-          <!-- Its build, but for a neutral nature and no points, which go without saying. -->
-          <span v-if="myNature !== 'neutral' || myPoints > 0" class="bar-build"
-            ><template v-if="myNature !== 'neutral'"
-              ><component :is="EFFECT_ICONS[myNature]" :size="14" aria-hidden="true" /><span class="visually-hidden">{{
-                t(`speed.effect.${myNature}`)
-              }}</span></template
-            ><template v-if="myPoints > 0"> {{ t('speed.points', { n: myPoints }) }}</template></span
-          >
-          <span v-if="myModded" class="bar-mods">
-            <!-- Items by their icon, named to screen readers. -->
-            <span
-              v-for="k in MY_TOGGLES.filter((m) => myToggles.has(m))"
-              :key="k"
-              class="bar-mod"
-              :class="{ item: MOD_ITEMS[k] }"
-              ><template v-if="MOD_ITEMS[k]"
-                ><ItemIcon :id="MOD_ITEMS[k]!" :scale="0.67" /><span class="visually-hidden">{{
-                  t(`speed.modShort.${k}`)
-                }}</span></template
-              ><template v-else>{{ t(`speed.modShort.${k}`) }}</template></span
-            >
-            <span v-if="myStage !== '0'" class="bar-mod">{{ stageLabel(myStage) }}</span>
-          </span>
+          <!-- Yours in short: its name where the row has room for it, else its icon stands for it. -->
+          <BuildSummary :id="mine" :speed="mySpeed!" :build="myBuild" />
         </template>
         <template v-else>
           <Plus :size="16" aria-hidden="true" />
@@ -1559,52 +1490,11 @@ const { entered } = usePageEntered()
   justify-content: flex-start;
   gap: 6px;
 }
-.bar-yours :deep(.sheet-icon) {
-  flex: none;
-  margin-block: -6px;
-}
-/* Yours' name, the first to give way to what follows it: once it would be cut, it goes (`nameFits`). */
+/* Its text with none picked, as the summary's name with one. */
 .bar-name {
-  flex: 0 100000 auto;
   min-width: 0;
   overflow: hidden;
   white-space: nowrap;
-}
-.bar-name.gone {
-  display: none;
-}
-.bar-speed {
-  font-size: 1.2em;
-  font-variant-numeric: tabular-nums;
-}
-.bar-build {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  font-weight: normal;
-  opacity: 0.85;
-}
-/* Yours' modifiers, in short, each in an outline of the bar's text color; an ellipsis at the end standing for those
-   that don't fit. */
-.bar-mods {
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.bar-mod {
-  display: inline-flex;
-  align-items: center;
-  height: 20px;
-  margin-right: 4px;
-  padding: 0 4px;
-  font-size: 0.8125em;
-  font-weight: normal;
-  vertical-align: middle;
-  border: 1px solid currentColor;
-}
-.bar-mod.item {
-  padding: 0 2px;
 }
 .bar-yours .marker {
   margin-left: auto;

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeftRight, ChevronsDown, ChevronsUp } from '@lucide/vue'
+import { ArrowLeftRight, ChevronsDown, ChevronsUp, Trash2 } from '@lucide/vue'
 import { pokemon, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
 import { has, percent } from '@/data/meta'
@@ -24,6 +24,7 @@ import {
 import { TIERS_PICKS, lastTiersQuery } from '@/lib/tiersState'
 import { useMeta } from '@/composables/useMeta'
 import AppLink from '@/components/AppLink'
+import BuildSummary from '@/components/BuildSummary.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import MetaPicker from '@/components/MetaPicker.vue'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -222,11 +223,20 @@ const canHover = window.matchMedia('(hover: hover)').matches
         class="panel banded side"
         :class="{ first: verdict && !verdict.tie && verdict.first === side.s, opponent: side.s === 'b' }"
       >
-        <!-- Yours, and its opponent, red as on the speed tiers. -->
+        <!-- Yours, and its opponent, red as on the speed tiers. On phones, where one is under the other, each stuck to
+             the top while its panel is in view, with its Pokémon in short as on the speed tiers' bar. -->
         <div class="band">
-          <span>{{ side.s === 'a' ? t('speed.yours') : t('compare.opponent') }}</span>
-          <button v-if="side.id" type="button" class="btn on-band inverted" @click="clear(side.s)">
-            {{ t('speed.clear') }}
+          <span class="band-label">{{ side.s === 'a' ? t('speed.yours') : t('compare.opponent') }}</span>
+          <BuildSummary v-if="side.id" :id="side.id" :speed="side.speed!" :build="side.build" class="band-summary" />
+          <!-- On phones, its icon alone, leaving the band's room to the summary. -->
+          <button
+            v-if="side.id"
+            type="button"
+            class="btn on-band inverted band-clear"
+            :aria-label="t('speed.clear')"
+            @click="clear(side.s)"
+          >
+            <Trash2 :size="14" aria-hidden="true" /><span class="clear-text">{{ t('speed.clear') }}</span>
           </button>
         </div>
         <PokemonPicker
@@ -420,6 +430,46 @@ const canHover = window.matchMedia('(hover: hover)').matches
 :root:root .side.opponent > .band {
   color: var(--opponent-text);
   background: var(--opponent);
+}
+.band-label {
+  flex: none;
+}
+.band-summary {
+  display: none;
+}
+.band > .btn {
+  flex: none;
+  gap: 4px;
+  margin-left: auto;
+}
+@media (max-width: 720px) {
+  :root:root .side > .band {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+  }
+  .band-summary {
+    display: flex;
+    overflow: hidden;
+  }
+  .clear-text {
+    display: none;
+  }
+}
+/* Wider, the common builds on one line, scrolling sideways when they don't fit (room under them for the buttons'
+   shadows). */
+@media (min-width: 721px) {
+  .part:has(> .builds) {
+    align-items: stretch;
+  }
+  .part > .builds {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+  .part > .builds > .btn {
+    flex: none;
+  }
 }
 .band {
   display: flex;

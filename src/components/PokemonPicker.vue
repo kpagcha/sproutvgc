@@ -109,7 +109,7 @@ function onBlur() {
 // page by its scroll events lags behind it); fixed to the screen only when the field is in something stuck to it (a
 // sticky bar), following it as the page scrolls then.
 const field = useTemplateRef<HTMLElement>('field')
-const place = ref({ top: 0, left: 0, width: 0, height: 0 })
+const place = ref({ top: 0, left: 0, width: 0, height: 0, up: false })
 const fixed = ref(false)
 function stuck(el: Element | null): boolean {
   for (; el && el !== document.body; el = el.parentElement) {
@@ -130,19 +130,31 @@ function measure() {
     const [pl, pr] = [parseFloat(style.paddingLeft), parseFloat(style.paddingRight)]
     along = { left: box.left + pl, width: box.width - pl - pr }
   }
-  // As tall as the room left under the field, a dozen rows at most: down to the bottom of the screen, whatever a
-  // keyboard covers of it (following the keyboard as it slides in makes the list jump about). On touch screens, from
-  // where focusing it brings the field: its panel at the top of the screen.
-  const below = r.bottom - (anchor()?.getBoundingClientRect().top ?? r.top)
-  const fieldBottom = touch.matches && !fixed.value ? 12 + below : r.bottom
+  // Under the field, as tall as the room left under it (a dozen rows at most): down to the bottom of the screen,
+  // whatever a keyboard covers of it (following the keyboard as it slides in makes the list jump about). Over it
+  // instead when there's too little room under it and more over it: a field low on the page, which focusing can't
+  // bring up. On touch screens, the room from where focusing brings the field: its panel at the top of the screen, or
+  // as near as the page's end lets it.
+  let shift = 0
+  if (touch.matches && !fixed.value) {
+    const want = (anchor()?.getBoundingClientRect().top ?? r.top) - 12
+    const max = document.documentElement.scrollHeight - window.innerHeight
+    shift = Math.max(-window.scrollY, Math.min(max - window.scrollY, want))
+  }
+  const below = window.innerHeight - (r.bottom - shift) - 16
+  const above = r.top - shift - 16
+  const up = below < MIN_ROOM && above > below
   const [dx, dy] = fixed.value ? [0, 0] : [window.scrollX, window.scrollY]
   place.value = {
-    top: r.bottom + 4 + dy,
+    top: (up ? r.top - 4 : r.bottom + 4) + dy,
     left: along.left + dx,
     width: along.width,
-    height: window.innerHeight - fieldBottom - 16,
+    height: up ? above : below,
+    up,
   }
 }
+/** The room under the field below which the list goes over it, when there's more there. */
+const MIN_ROOM = 200
 // Only what's stuck to the screen follows the page's scrolling, and anything scrolling the field within the page.
 const onScroll = (e: Event) => (fixed.value || e.target !== document) && measure()
 // The reader scrolling anything but the list or the field (a swipe, a wheel; not the page scrolling itself, as it does to bring the
@@ -212,7 +224,7 @@ const optionId = (i: number) => `${listId}-${i}`
         :id="listId"
         ref="list"
         class="options"
-        :class="{ fixed }"
+        :class="{ fixed, up: place.up }"
         role="listbox"
         :style="{
           top: `${place.top}px`,
@@ -268,6 +280,10 @@ const optionId = (i: number) => `${listId}-${i}`
 }
 .options.fixed {
   position: fixed;
+}
+/* Over the field: placed by its bottom edge, at the field's top. */
+.options.up {
+  transform: translateY(-100%);
 }
 .option {
   display: flex;
