@@ -135,6 +135,30 @@
 :root:root .btn:disabled {
   box-shadow: none;
 }
+/* A quiet button, for what undoes (clears, resets): no fill or shadow, muted, so it's pressed only on purpose; a
+   regular button on hover. Not red, which the speed tiers keep for opponents. */
+:root:root .btn.quiet {
+  color: var(--muted);
+  background: transparent;
+  border-color: var(--border);
+  box-shadow: none;
+  font-weight: normal;
+}
+:root:root .btn.quiet:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--panel-alt);
+  border-color: var(--ink);
+  box-shadow: var(--hard-sm);
+}
+/* An inverted button, for what undoes on a page where it matters (resets, clears): the regular button's colors
+   flipped, the page's text color behind its panel color, so it stands as strongly as the primary but apart from it. */
+:root:root .btn.inverted {
+  color: var(--panel);
+  background: var(--text);
+}
+:root:root .btn.inverted:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--text) 85%, var(--panel));
+}
 /* A button on a panel's band: in the band's own text color, outlined in it, flat; a wash of it on hover, more pressed.
    Small, so the band is as tall with it as without. */
 :root:root .btn.on-band {
@@ -154,6 +178,18 @@
 :root:root .btn.on-band:active:not(:disabled) {
   transform: none;
   background: color-mix(in srgb, currentColor 30%, transparent);
+}
+/* Inverted, on the accent's band: filled with the band's text color, in the accent's; a touch dimmer on hover. */
+:root:root .btn.on-band.inverted {
+  color: var(--accent);
+  background: var(--accent-text);
+  border-color: var(--accent-text);
+}
+:root:root .btn.on-band.inverted:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent-text) 85%, var(--accent));
+}
+:root:root .btn.on-band.inverted:active:not(:disabled) {
+  background: color-mix(in srgb, var(--accent-text) 70%, var(--accent));
 }
 :root:root .btn.primary,
 :root:root .btn.danger {

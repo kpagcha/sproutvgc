@@ -2,7 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
 import { AnimatePresence, motion } from 'motion-v'
 import { useRouter } from 'vue-router'
-import { ChevronsDown, ChevronsUp, CircleHelp, Plus, X } from '@lucide/vue'
+import { ChevronsDown, ChevronsUp, CircleHelp, Plus, RotateCcw, Trash2, X } from '@lucide/vue'
 import { ability, availableIds, condition, item, pokemon, type ItemId, type PokemonId, type Ref } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
@@ -999,8 +999,8 @@ const { entered } = usePageEntered()
               />
             </div>
           </div>
-          <button v-if="controlsChanged" type="button" class="btn reset" @click="resetControls">
-            {{ t('speed.resetControls') }}
+          <button v-if="controlsChanged" type="button" class="btn inverted reset" @click="resetControls">
+            <RotateCcw :size="16" aria-hidden="true" />{{ t('speed.resetControls') }}
           </button>
         </div>
       </div>
@@ -1035,8 +1035,8 @@ const { entered } = usePageEntered()
             <input type="checkbox" :checked="kept.includes(found)" @change="toggleKept(found)" />
             {{ t('speed.keep') }}
           </label>
-          <button v-if="found" type="button" class="btn find-clear" @click="setFound(null)">
-            {{ t('speed.clear') }}
+          <button v-if="found" type="button" class="btn inverted find-clear" @click="setFound(null)">
+            <Trash2 :size="16" aria-hidden="true" />{{ t('speed.clear') }}
           </button>
           <p v-if="foundNote" class="find-note muted small">{{ foundNote }}</p>
           <!-- The Pokémon kept: each finds it, or leaves the ladder. -->
@@ -1058,7 +1058,7 @@ const { entered } = usePageEntered()
             </li>
             <li>
               <button type="button" class="link-button" @click="set('keep', undefined)">
-                {{ t('speed.unkeepAll') }}
+                <Trash2 :size="14" aria-hidden="true" />{{ t('speed.unkeepAll') }}
               </button>
             </li>
           </ul>
@@ -1277,8 +1277,8 @@ const { entered } = usePageEntered()
             <span class="marker yours-marker" aria-hidden="true">{{ yoursOpen ? '▾' : '▸' }}</span>
             {{ t('speed.yours') }}
             <!-- Unpicking yours, at the band's end: its own click, not the heading's. -->
-            <button v-if="mine" type="button" class="btn on-band band-clear" @click.stop.prevent="clearMine">
-              {{ t('speed.clear') }}
+            <button v-if="mine" type="button" class="btn on-band inverted band-clear" @click.stop.prevent="clearMine">
+              <Trash2 :size="14" aria-hidden="true" />{{ t('speed.clear') }}
             </button>
           </summary>
           <div class="yours-pick">
@@ -1353,8 +1353,8 @@ const { entered } = usePageEntered()
                   <Plus :size="16" aria-hidden="true" />{{ t('speed.modifiers')
                   }}<span class="marker" aria-hidden="true">{{ myModsOpen ? '▾' : '▸' }}</span>
                 </button>
-                <button v-if="myChanged" type="button" class="btn" @click="resetMine">
-                  {{ t('speed.resetYours') }}
+                <button v-if="myChanged" type="button" class="btn inverted" @click="resetMine">
+                  <RotateCcw :size="16" aria-hidden="true" />{{ t('speed.resetYours') }}
                 </button>
               </div>
               <div v-if="myModsOpen" class="mods">
@@ -1432,7 +1432,9 @@ const { entered } = usePageEntered()
           <!-- Dropped from the bar, the card has no band: its actions at its foot instead,
                Confirm putting it away (Close, a plain button, with none picked). -->
           <div v-if="!side" class="drop-actions">
-            <button v-if="mine" type="button" class="btn" @click="clearMine">{{ t('speed.clear') }}</button>
+            <button v-if="mine" type="button" class="btn inverted" @click="clearMine">
+              <Trash2 :size="16" aria-hidden="true" />{{ t('speed.clear') }}
+            </button>
             <button type="button" class="btn" :class="{ primary: mine }" @click="yoursOpen = false">
               {{ t(mine ? 'speed.confirm' : 'speed.close') }}
             </button>
@@ -1814,7 +1816,7 @@ const { entered } = usePageEntered()
   align-items: center;
   gap: 2px;
 }
-.kept-mon .link-button {
+.kept .link-button {
   display: inline-flex;
   align-items: center;
 }
