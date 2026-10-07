@@ -182,7 +182,6 @@ const fadeVariants = {
             <span class="label">{{ locale.toUpperCase() }}</span>
           </button>
           <button
-            v-tip="t('theme.label')"
             type="button"
             class="quick"
             :class="{ first: compact }"
