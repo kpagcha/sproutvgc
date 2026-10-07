@@ -5,23 +5,29 @@ import { t } from '@/i18n'
 import { useRecent } from '@/composables/useRecent'
 import { useOpenState } from '@/composables/useOpenState'
 import EntryChip from '@/components/EntryChip.vue'
+import PageChip, { shownVisit } from '@/components/PageChip.vue'
 
-// The home page's recently viewed: the entries whose pages the reader opened lately, most recent first, as chips
-// (`EntryChip`), beside the favorites and in the same panel. Those the regulation doesn't have are left out. Nothing
-// shows until a page has been opened; it folds away, and can be cleared.
+// The home page's recently viewed: the entries whose pages the reader opened lately, and the pages with a view of
+// their own (the speed tiers, a comparison, the type matchups) as they were left, most recent first, as chips
+// (`EntryChip`, `PageChip`), beside the favorites and in the same panel. Those the regulation doesn't have are left
+// out. Nothing shows until a page has been opened; it folds away, and can be cleared.
 const { recent, clear } = useRecent()
-const refs = computed(() => recent.value.filter((r) => available(r)))
+const items = computed(() => recent.value.filter((r) => (r.kind === 'entry' ? available(r.ref) : shownVisit(r))))
+const keyOf = (r: (typeof items.value)[number]) => (r.kind === 'entry' ? `${r.ref.kind}:${r.ref.id}` : `page:${r.page}`)
 const { open, onToggle } = useOpenState('sproutvgc.recent.open')
 </script>
 
 <template>
-  <details v-if="refs.length" class="panel banded recent" :open @toggle="onToggle">
+  <details v-if="items.length" class="panel banded recent" :open @toggle="onToggle">
     <summary>
       <h2 class="title">{{ t('recent.title') }}</h2>
       <button type="button" class="clear" @click.prevent="clear">{{ t('recent.clear') }}</button>
     </summary>
     <div class="chips">
-      <EntryChip v-for="r in refs" :key="`${r.kind}:${r.id}`" :to="r" />
+      <template v-for="r in items" :key="keyOf(r)">
+        <EntryChip v-if="r.kind === 'entry'" :to="r.ref" />
+        <PageChip v-else :visit="r" />
+      </template>
     </div>
   </details>
 </template>

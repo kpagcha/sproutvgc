@@ -1,12 +1,12 @@
 import { nextTick } from 'vue'
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type RouteLocationNormalized } from 'vue-router'
 import { afterPageExit } from '@/lib/pageExit'
 import { TYPES } from '@/data/types'
 import type { MessageKey } from '@/i18n'
 import type { AreaId } from '@/lib/areas'
 import { loadDexNames } from '@/i18n/refName'
 import { hasFavorites } from '@/composables/useFavorites'
-import { hasRecent } from '@/composables/useRecent'
+import { hasRecent, visitPage } from '@/composables/useRecent'
 import { loadDescriptions, type DescribedKind } from '@/i18n/descriptions'
 
 declare module 'vue-router' {
@@ -23,8 +23,14 @@ declare module 'vue-router' {
     /** The area the page belongs to (`src/lib/areas.ts`), and its section there: the header highlights them. */
     area?: AreaId
     section?: string
+    /** Recorded among the home page's recently viewed, as it's left, a page whose view is in its URL: what counts as
+     * the same visit (one per page, or a comparison per pair), or nothing while there's nothing to record. */
+    recent?: (to: RouteLocationNormalized) => string | null
   }
 }
+
+// The page's one visit among the recently viewed, whatever its view.
+const once = (page: string) => () => page
 
 // The meta of a page in an area's section.
 const inArea = (area: AreaId, section?: string) => ({ area, section })
@@ -199,7 +205,13 @@ export const router = createRouter({
       path: '/competitive/usage',
       name: 'usage',
       component: () => import('@/views/UsageView.vue'),
-      meta: { titleKey: 'title.usage', descKey: 'desc.usage', dexNames: true, ...inArea('competitive', 'usage') },
+      meta: {
+        titleKey: 'title.usage',
+        descKey: 'desc.usage',
+        dexNames: true,
+        recent: once('usage'),
+        ...inArea('competitive', 'usage'),
+      },
     },
     soon('competitive', 'reports', '/competitive/reports', 'title.reports', 'desc.reports'),
     {
@@ -211,6 +223,7 @@ export const router = createRouter({
         descKey: 'desc.speedTiers',
         dexNames: true,
         keepScroll: true,
+        recent: once('speedTiers'),
         ...inArea('competitive', 'speedTiers'),
       },
     },
@@ -223,6 +236,9 @@ export const router = createRouter({
         titleKey: 'title.speedCompare',
         descKey: 'desc.speedCompare',
         dexNames: true,
+        // One per pair, once both are picked.
+        recent: ({ query: { a, b } }) =>
+          typeof a === 'string' && typeof b === 'string' ? `speedCompare:${a}:${b}` : null,
         ...inArea('competitive', 'speedCompare'),
       },
     },
@@ -235,14 +251,26 @@ export const router = createRouter({
       path: '/tools/matchups',
       name: 'matchups',
       component: () => import('@/views/TypeMatchupsView.vue'),
-      meta: { titleKey: 'title.matchups', descKey: 'desc.matchups', dexNames: true, ...inArea('tools', 'matchups') },
+      meta: {
+        titleKey: 'title.matchups',
+        descKey: 'desc.matchups',
+        dexNames: true,
+        recent: once('matchups'),
+        ...inArea('tools', 'matchups'),
+      },
     },
     {
       // One side of the matchups page on its own, linked from the side-by-side headings.
       path: '/tools/matchups/:side(def|atk)',
       name: 'matchupsSide',
       component: () => import('@/views/TypeMatchupsView.vue'),
-      meta: { titleKey: 'title.matchups', descKey: 'desc.matchups', dexNames: true, ...inArea('tools', 'matchups') },
+      meta: {
+        titleKey: 'title.matchups',
+        descKey: 'desc.matchups',
+        dexNames: true,
+        recent: once('matchups'),
+        ...inArea('tools', 'matchups'),
+      },
     },
     {
       path: '/tools/quiz',
@@ -278,6 +306,17 @@ export const router = createRouter({
     }
     return savedPosition ?? { top: 0 }
   },
+})
+
+// Pages whose view is in their URL go among the recently viewed as they're opened, each change to the view (a
+// `router.replace`) keeping the visit where it's left.
+router.afterEach((to, _from, failure) => {
+  const page = !failure && to.meta.recent?.(to)
+  if (!page) return
+  const query = Object.fromEntries(
+    Object.entries(to.query).filter((e): e is [string, string] => typeof e[1] === 'string'),
+  )
+  visitPage({ page, path: to.path, query })
 })
 
 // Pages showing dex entries render with their names (and descriptions) in place, rather than filling them in once
