@@ -1238,6 +1238,7 @@ const { entered } = usePageEntered()
                     extra: e.extra,
                     yours: e.mine,
                     versus: query.vs === chipKey(e),
+                    rival: !!versus && e.id === versus.e.id && query.vs !== chipKey(e),
                   }"
                 >
                   <span class="who">
@@ -2190,14 +2191,10 @@ const { entered } = usePageEntered()
   border: none;
   cursor: pointer;
 }
-/* Yours on the ladder: solid and strong; the one it's measured against, picked. */
+/* Yours on the ladder: solid and strong. */
 .chip.yours {
   border: 2px solid var(--text);
   font-weight: bold;
-}
-.chip.versus {
-  background: var(--sel);
-  border-color: var(--text);
 }
 /* The chip found from the comparison: a ring in the opponents' red pulsing twice, softly. */
 .chip.flash {
@@ -2426,6 +2423,21 @@ const { entered } = usePageEntered()
 }
 .chip.boost.hit {
   border-color: var(--muted);
+}
+/* The opponent yours is measured against: its chip in the opponents' red, all its text the band's; the same Pokémon's
+   other chips in a faint wash of it. */
+.chip.versus {
+  color: var(--opponent-text);
+  background: var(--opponent);
+  border-color: var(--ink);
+}
+.chip.versus :is(.forme, .tag) {
+  color: inherit;
+  opacity: 0.85;
+}
+.chip.rival {
+  background: color-mix(in srgb, var(--opponent) 14%, var(--panel-alt));
+  border-color: color-mix(in srgb, var(--opponent) 55%, var(--panel-alt));
 }
 .finding .tier:not(.hit, .has-mine),
 .finding .tier.has-mine:not(.hit) li:not(:has(.yours)) {
