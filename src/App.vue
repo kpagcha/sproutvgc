@@ -62,8 +62,9 @@ watchEffect(() => {
   setMeta('meta[property="og:description"]', desc)
 })
 
-/** Entry pages lead back to their category's list. */
+/** Entry pages lead back to their category's list; the speed tiers, to Competitive. */
 const LISTS: Partial<Record<string, { to: RouteLocationRaw; label: MessageKey }>> = {
+  speedTiers: { to: { name: 'competitive' }, label: 'nav.competitive' },
   ability: { to: { name: 'abilities' }, label: 'title.abilities' },
   pokemon: { to: { name: 'pokedex' }, label: 'title.pokemon' },
   move: { to: { name: 'moves' }, label: 'title.moves' },

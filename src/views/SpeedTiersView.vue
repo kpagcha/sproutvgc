@@ -3,7 +3,7 @@ import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch 
 import { AnimatePresence, motion } from 'motion-v'
 import { useRouter } from 'vue-router'
 import { ChevronsDown, ChevronsUp, CircleHelp, Plus, X } from '@lucide/vue'
-import { ability, availableIds, condition, item, pokemon, type PokemonId, type Ref } from '@/data/dex'
+import { ability, availableIds, condition, item, pokemon, type ItemId, type PokemonId, type Ref } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
 import { currentSnapshots, distinctLabel, has, percent, type PokemonMeta } from '@/data/meta'
@@ -80,6 +80,8 @@ const stage = computed({
 const TOGGLES = ['tailwind', 'scarf', 'doubled', 'paralysis'] as const
 type Toggle = (typeof TOGGLES)[number]
 const toggleMod = (k: Toggle) => set(k, flag(k) ? undefined : '1')
+/** The modifiers that are items, shown with their icon. */
+const MOD_ITEMS: Partial<Record<string, ItemId>> = { scarf: 'choicescarf', ironball: 'ironball' }
 const mods = computed<SpeedMods>(() => ({
   tailwind: flag('tailwind'),
   scarf: flag('scarf'),
@@ -508,12 +510,16 @@ function versusText(r: ReturnType<typeof pointsToMoveFirst>) {
   if ('upTo' in r) return r.upTo === MAX_POINTS ? t('speed.vsAny') : t('speed.vsUpTo', { points: r.upTo })
   return t('speed.vsTies', { points: r.ties })
 }
-const toMine = () => center(ladder.value?.querySelector('.tier.has-mine'))
+function toMine() {
+  if (!side.value) yoursOpen.value = false
+  center(ladder.value?.querySelector('.tier.has-mine'))
+}
 // To the ladder from yours' card, when it isn't beside it: the ladder's top brought up, its find flashing once (not
 // focused, so no keyboard comes up) to say it's where to look for an opponent.
 const listPanel = useTemplateRef<HTMLElement>('listPanel')
 const flashFind = shallowRef(false)
 async function toOpponents() {
+  yoursOpen.value = false
   reveal(listPanel.value, listPanel.value)
   flashFind.value = false
   await nextTick()
@@ -693,11 +699,6 @@ const active = computed(() => {
 /** Whether the screen has hover, for tooltips: touch screens show what matters inline instead. */
 const canHover = window.matchMedia('(hover: hover)').matches
 
-// Yours' card: always open beside the ladder; narrower, it opens and closes, closed at first (remembered), but open
-// when the page comes with yours set (a shared link).
-const { open: yoursOpen, toggle: toggleYours } = useOpenState('sproutvgc.speedTiers.yoursOpen', false)
-if (query.value.mine) yoursOpen.value = true
-
 /** Whether the sidebar (yours) shows beside the ladder: from 1100px. Narrower, a comparison shows in a card. */
 const sideQuery = window.matchMedia('(min-width: 1100px)')
 const side = shallowRef(sideQuery.matches)
@@ -705,12 +706,153 @@ const onSide = (e: MediaQueryListEvent) => (side.value = e.matches)
 sideQuery.addEventListener('change', onSide)
 onBeforeUnmount(() => sideQuery.removeEventListener('change', onSide))
 
+// Yours, narrower than the sidebar: a bar stuck to the top of the page, the way back to Competitive and yours in
+// short, its card dropping from it when tapped (over the page, which a tap beside it closes). Beside the ladder, the
+// card is the sidebar, and the bar shows only while it's out of view, bringing it in.
+const yoursOpen = shallowRef(false)
+const toggleYours = () => (yoursOpen.value = !yoursOpen.value)
+watch(side, (s) => s && (yoursOpen.value = false))
+const yoursCard = useTemplateRef<HTMLElement>('yoursCard')
+const sidebarSeen = shallowRef(true)
+let sidebarObserver: IntersectionObserver | undefined
+watch(
+  [yoursCard, side],
+  ([el, s]) => {
+    sidebarObserver?.disconnect()
+    sidebarSeen.value = true
+    if (!el || !s) return
+    sidebarObserver = new IntersectionObserver(([e]) => (sidebarSeen.value = e!.isIntersecting))
+    sidebarObserver.observe(el)
+  },
+  { flush: 'post' },
+)
+onBeforeUnmount(() => sidebarObserver?.disconnect())
+const barShown = computed(() => !side.value || !sidebarSeen.value)
+const onBarYours = () => (side.value ? reveal(yoursCard.value) : toggleYours())
+// The bar names yours only when the name fits whole beside everything else it shows: cut, it goes; gone, it comes
+// back once the room left at the row's end (before the arrow) takes it, as measured when it was there.
+const barYours = useTemplateRef<HTMLElement>('barYours')
+const barName = useTemplateRef<HTMLElement>('barName')
+const nameFits = shallowRef(true)
+let nameWidth = 0
+const BAR_GAP = 6
+function fitName() {
+  const btn = barYours.value
+  const name = barName.value
+  if (!btn || !name || !btn.offsetParent) return
+  if (nameFits.value) {
+    if (name.scrollWidth > name.clientWidth) {
+      nameWidth = name.scrollWidth
+      nameFits.value = false
+    }
+    return
+  }
+  const marker = btn.querySelector('.marker')
+  const before = marker?.previousElementSibling
+  if (!marker || !before) return
+  const room = marker.getBoundingClientRect().left - before.getBoundingClientRect().right - BAR_GAP
+  if (room >= nameWidth + BAR_GAP) nameFits.value = true
+}
+watch([mine, myToggles, myStage, myNature, myPoints, locale], () => {
+  nameFits.value = true
+  void nextTick(fitName)
+})
+let barYoursObserver: ResizeObserver | undefined
+watch(
+  barYours,
+  (el) => {
+    barYoursObserver?.disconnect()
+    if (!el) return
+    barYoursObserver = new ResizeObserver(() => fitName())
+    barYoursObserver.observe(el)
+  },
+  { flush: 'post' },
+)
+onBeforeUnmount(() => barYoursObserver?.disconnect())
+// The bar's height, for what sticks to the top under it (the controls' heading, the ladder's bar), and where its card
+// drops to: the screen under the bar, the card scrolling within that.
+const bar = useTemplateRef<HTMLElement>('bar')
+const barHeight = shallowRef(0)
+const dropHeight = shallowRef(0)
+let barObserver: ResizeObserver | undefined
+watch(
+  bar,
+  (el) => {
+    barObserver?.disconnect()
+    if (!el) return
+    barObserver = new ResizeObserver(() => (barHeight.value = el.offsetHeight))
+    barObserver.observe(el)
+  },
+  { flush: 'post' },
+)
+onBeforeUnmount(() => barObserver?.disconnect())
+watch(yoursOpen, (open) => {
+  if (open && bar.value) dropHeight.value = window.innerHeight - bar.value.getBoundingClientRect().bottom - 8
+})
+
 const { entered } = usePageEntered()
 </script>
 
 <template>
-  <!-- The controls and the ladder in panels of their own. -->
-  <div>
+  <!-- The controls and the ladder in panels of their own, under yours' bar. -->
+  <div :style="{ '--bar-h': `${barHeight}px` }">
+    <!-- Yours' bar: yours in short, opening its card (dropped under it, narrower than the sidebar; the sidebar brought
+         in, beside the ladder). -->
+    <div v-show="barShown" ref="bar" class="yours-bar">
+      <button
+        type="button"
+        ref="barYours"
+        class="btn primary bar-yours"
+        :aria-expanded="side ? undefined : yoursOpen"
+        @click="onBarYours"
+      >
+        <template v-if="mine">
+          <!-- Its name where the row has room for it once its modifiers have theirs; else its icon stands for it (the
+               name still read out). -->
+          <PokemonIcon :id="mine" />
+          <span class="visually-hidden">{{ refName(pokemon(mine)) }}</span>
+          <span ref="barName" class="bar-name" :class="{ gone: !nameFits }" aria-hidden="true">{{
+            refName(pokemon(mine))
+          }}</span>
+          <span class="bar-speed">{{ mySpeed }}</span>
+          <!-- Its build, but for a neutral nature and no points, which go without saying. -->
+          <span v-if="myNature !== 'neutral' || myPoints > 0" class="bar-build"
+            ><template v-if="myNature !== 'neutral'"
+              ><component :is="EFFECT_ICONS[myNature]" :size="14" aria-hidden="true" /><span class="visually-hidden">{{
+                t(`speed.effect.${myNature}`)
+              }}</span></template
+            ><template v-if="myPoints > 0"> {{ t('speed.points', { n: myPoints }) }}</template></span
+          >
+          <span v-if="myModded" class="bar-mods">
+            <!-- Items by their icon, named to screen readers. -->
+            <span
+              v-for="k in MY_TOGGLES.filter((m) => myToggles.has(m))"
+              :key="k"
+              class="bar-mod"
+              :class="{ item: MOD_ITEMS[k] }"
+              ><template v-if="MOD_ITEMS[k]"
+                ><ItemIcon :id="MOD_ITEMS[k]!" :scale="0.67" /><span class="visually-hidden">{{
+                  t(`speed.modShort.${k}`)
+                }}</span></template
+              ><template v-else>{{ t(`speed.modShort.${k}`) }}</template></span
+            >
+            <span v-if="myStage !== '0'" class="bar-mod">{{ stageLabel(myStage) }}</span>
+          </span>
+        </template>
+        <template v-else>
+          <Plus :size="16" aria-hidden="true" />
+          <span class="bar-name">{{ t('speed.yours') }}</span>
+        </template>
+        <span class="marker" aria-hidden="true">{{ yoursOpen ? '▾' : '▸' }}</span>
+      </button>
+      <div v-if="yoursOpen && !side" class="yours-backdrop" @click="yoursOpen = false"></div>
+      <div
+        v-show="yoursOpen && !side"
+        id="yours-drop"
+        class="yours-drop"
+        :style="{ maxHeight: `${dropHeight}px` }"
+      ></div>
+    </div>
     <!-- A section that folds, as yours does: its heading, with what's active in short beside it while folded (under it
          on phones), and what folds it. -->
     <!-- Their headings open and close them themselves, rather than leaving it to the browser, so the section and what
@@ -846,7 +988,9 @@ const { entered } = usePageEntered()
                 :aria-pressed="flag(k)"
                 @click="toggleMod(k)"
               >
-                {{ t(`speed.mod.${k}`) }}
+                <ItemIcon v-if="MOD_ITEMS[k]" :id="MOD_ITEMS[k]!" :scale="0.75" class="mod-item" />{{
+                  t(`speed.mod.${k}`)
+                }}
               </button>
               <SegmentedControl
                 v-model="stage"
@@ -1120,169 +1264,301 @@ const { entered } = usePageEntered()
       </div>
       <!-- Your Pokémon: where it lands among the others, and what it takes to move before one of them. A sidebar that
            stays in view beside the ladder on wide screens, so tapping a chip anywhere shows the answer; above it, narrower. -->
-      <details
-        class="panel banded yours instant"
-        :open="side || yoursOpen"
-        @toggle="!side && (yoursOpen = isOpen($event))"
-      >
-        <!-- A heading that opens and closes the card on phones; beside the ladder it's always open. -->
-        <summary class="yours-title" @click.prevent="!side && toggleYours()">
-          <span class="marker yours-marker" aria-hidden="true">{{ yoursOpen ? '▾' : '▸' }}</span>
-          {{ t('speed.yours') }}
-          <!-- Unpicking yours, at the band's end: its own click, not the heading's. -->
-          <button v-if="mine" type="button" class="btn on-band band-clear" @click.stop.prevent="clearMine">
-            {{ t('speed.clear') }}
-          </button>
-        </summary>
-        <div class="yours-pick">
-          <PokemonPicker
-            :model-value="mine"
-            :placeholder="t('speed.yoursPick')"
-            list-width-of=".yours-pick"
-            icon
-            class="yours-picker"
-            @update:model-value="pickMine"
-          />
-        </div>
-        <p v-if="!mine" class="muted small wide-only yours-intro">{{ t('speed.yoursIntro') }}</p>
-        <template v-else>
-          <!-- Its Speed, right under the pick, following the build below as it changes; a tap shows where it landed on
+      <!-- Narrower, it's the card dropping from yours' bar. -->
+      <Teleport to="#yours-drop" :disabled="side" defer>
+        <details
+          ref="yoursCard"
+          class="panel banded yours instant"
+          :open="side || yoursOpen"
+          @toggle="!side && (yoursOpen = isOpen($event))"
+        >
+          <!-- A heading that closes the card dropped from the bar; beside the ladder it's always open. -->
+          <summary class="yours-title" @click.prevent="!side && toggleYours()">
+            <span class="marker yours-marker" aria-hidden="true">{{ yoursOpen ? '▾' : '▸' }}</span>
+            {{ t('speed.yours') }}
+            <!-- Unpicking yours, at the band's end: its own click, not the heading's. -->
+            <button v-if="mine" type="button" class="btn on-band band-clear" @click.stop.prevent="clearMine">
+              {{ t('speed.clear') }}
+            </button>
+          </summary>
+          <div class="yours-pick">
+            <PokemonPicker
+              :model-value="mine"
+              :placeholder="t('speed.yoursPick')"
+              list-width-of=".yours-pick"
+              icon
+              class="yours-picker"
+              @update:model-value="pickMine"
+            />
+          </div>
+          <p v-if="!mine" class="muted small wide-only yours-intro">{{ t('speed.yoursIntro') }}</p>
+          <template v-else>
+            <!-- Its Speed, right under the pick, following the build below as it changes; a tap shows where it landed on
                the ladder. -->
-          <button type="button" class="btn primary big-go" @click="toMine">
-            <span class="big-go-speed">{{ mySpeed }}</span>
-            <span>{{ t('speed.showYours') }}</span>
-          </button>
-          <!-- Narrower, the ladder is under this card, its opponents band out of view: a way to it, said as it's
+            <button type="button" class="btn primary big-go" @click="toMine">
+              <span class="big-go-speed">{{ mySpeed }}</span>
+              <span>{{ t('speed.showYours') }}</span>
+            </button>
+            <!-- Narrower, the ladder is under this card, its opponents band out of view: a way to it, said as it's
                picked. -->
-          <button v-if="!side" type="button" class="btn opponents-go" @click="toOpponents">
-            <span class="opponents-tag">{{ t('speed.opponentsHead') }}</span>
-            <span>{{ t('speed.opponentsGo') }}</span>
-          </button>
-          <!-- Its build and modifiers, then what they come to: each a section of its own, labeled above. -->
-          <section class="yours-section">
-            <SegmentedControl
-              class="stacked"
-              :model-value="myNature"
-              :label="t('speed.natureLabel')"
-              no-tips
-              :options="
-                NATURE_EFFECTS.map((e) => ({
-                  value: e,
-                  label: t(`speed.effect.${e}`),
-                  icon: EFFECT_ICONS[e],
-                  short: t('stat.spe'),
-                }))
-              "
-              @update:model-value="(v: string) => setMyNature(v as NatureEffect)"
-            />
-            <p class="muted small">{{ naturesOf(myNature) }}</p>
-          </section>
-          <section class="yours-section">
-            <label class="yours-field">
-              <span class="muted small">{{ t('speed.pointsLabel') }}</span>
-              <span class="yours-points">
-                <input
-                  type="range"
-                  min="0"
-                  :max="MAX_POINTS"
-                  :value="myPoints"
-                  @input="setMyPoints(($event.target as HTMLInputElement).value)"
-                />
-                <input
-                  type="number"
-                  class="points-box"
-                  min="0"
-                  :max="MAX_POINTS"
-                  :value="myPoints"
-                  @change="setMyPoints(($event.target as HTMLInputElement).value)"
-                />
-              </span>
-            </label>
-          </section>
-          <section class="yours-section">
-            <button type="button" class="btn disclosure" :aria-expanded="myModsOpen" @click="toggleMyMods">
-              <Plus :size="16" aria-hidden="true" />{{ t('speed.modifiers')
-              }}<span class="marker" aria-hidden="true">{{ myModsOpen ? '▾' : '▸' }}</span>
+            <button v-if="!side" type="button" class="btn opponents-go" @click="toOpponents">
+              <span class="opponents-tag">{{ t('speed.opponentsHead') }}</span>
+              <span>{{ t('speed.opponentsGo') }}</span>
             </button>
-            <div v-if="myModsOpen" class="mods">
-              <button
-                v-for="k in MY_TOGGLES"
-                :key="k"
-                v-tip="canHover && t(`speed.modTip.${k}`)"
-                type="button"
-                class="btn mod"
-                :class="{ on: myToggles.has(k) }"
-                :aria-pressed="myToggles.has(k)"
-                @click="toggleMine(k)"
-              >
-                {{ t(`speed.mod.${k}`) }}
-              </button>
-            </div>
-            <SegmentedControl
-              v-if="myModsOpen"
-              :model-value="myStage"
-              :label="t('speed.stage')"
-              :options="STAGES.map((s) => ({ value: s, label: stageLabel(s) }))"
-              @update:model-value="(v: string) => setMyStage(v)"
-            />
-            <button v-if="myChanged" type="button" class="btn reset" @click="resetMine">
-              {{ t('speed.resetYours') }}
-            </button>
-          </section>
-          <section v-if="summary || (versus && side)" class="yours-section">
-            <p v-if="summary" class="small">
-              {{
-                t('speed.summary', {
-                  first: percent(summary.first),
-                  ties: percent(summary.ties),
-                  after: percent(summary.after),
-                })
-              }}
-              <span class="muted">{{
-                showAll ? t('speed.summaryAll', { bench: benchLabel(bench) }) : t('speed.summaryMeta', { n: TOP })
-              }}</span>
-            </p>
-            <!-- Narrower, the comparison shows in its card over the ladder instead. -->
-            <div v-if="versus && side" class="versus small">
-              <p>
-                <strong
-                  ><template v-for="(part, i) in vsTitle" :key="i"
-                    ><template v-if="typeof part === 'string'">{{ part }}</template
-                    ><AppLink
-                      v-else-if="part.slot === 'name'"
-                      :to="{ name: 'pokemon', params: { id: versus.e.id } }"
-                      class="vs-mon"
-                      ><PokemonIcon :id="versus.e.id" />{{
-                        [versus.e.species, versus.e.forme].filter(Boolean).join(' ')
-                      }}</AppLink
-                    ><template v-else>{{ versus.target }}</template></template
-                  ></strong
+            <!-- Its build and modifiers, then what they come to: each a section of its own, labeled above. -->
+            <section class="yours-section">
+              <SegmentedControl
+                class="stacked"
+                :model-value="myNature"
+                :label="t('speed.natureLabel')"
+                no-tips
+                :options="
+                  NATURE_EFFECTS.map((e) => ({
+                    value: e,
+                    label: t(`speed.effect.${e}`),
+                    icon: EFFECT_ICONS[e],
+                    short: t('stat.spe'),
+                  }))
+                "
+                @update:model-value="(v: string) => setMyNature(v as NatureEffect)"
+              />
+              <p class="muted small">{{ naturesOf(myNature) }}</p>
+            </section>
+            <section class="yours-section">
+              <label class="yours-field">
+                <span class="muted small">{{ t('speed.pointsLabel') }}</span>
+                <span class="yours-points">
+                  <input
+                    type="range"
+                    min="0"
+                    :max="MAX_POINTS"
+                    :value="myPoints"
+                    @input="setMyPoints(($event.target as HTMLInputElement).value)"
+                  />
+                  <input
+                    type="number"
+                    class="points-box"
+                    min="0"
+                    :max="MAX_POINTS"
+                    :value="myPoints"
+                    @change="setMyPoints(($event.target as HTMLInputElement).value)"
+                  />
+                </span>
+              </label>
+            </section>
+            <section class="yours-section">
+              <!-- The modifiers' disclosure, and Reset build at the row's end. -->
+              <div class="mods-head">
+                <button type="button" class="btn disclosure" :aria-expanded="myModsOpen" @click="toggleMyMods">
+                  <Plus :size="16" aria-hidden="true" />{{ t('speed.modifiers')
+                  }}<span class="marker" aria-hidden="true">{{ myModsOpen ? '▾' : '▸' }}</span>
+                </button>
+                <button v-if="myChanged" type="button" class="btn" @click="resetMine">
+                  {{ t('speed.resetYours') }}
+                </button>
+              </div>
+              <div v-if="myModsOpen" class="mods">
+                <button
+                  v-for="k in MY_TOGGLES"
+                  :key="k"
+                  v-tip="canHover && t(`speed.modTip.${k}`)"
+                  type="button"
+                  class="btn mod"
+                  :class="{ on: myToggles.has(k) }"
+                  :aria-pressed="myToggles.has(k)"
+                  @click="toggleMine(k)"
                 >
+                  <ItemIcon v-if="MOD_ITEMS[k]" :id="MOD_ITEMS[k]!" :scale="0.75" class="mod-item" />{{
+                    t(`speed.mod.${k}`)
+                  }}
+                </button>
+              </div>
+              <SegmentedControl
+                v-if="myModsOpen"
+                :model-value="myStage"
+                :label="t('speed.stage')"
+                :options="STAGES.map((s) => ({ value: s, label: stageLabel(s) }))"
+                @update:model-value="(v: string) => setMyStage(v)"
+              />
+            </section>
+            <section v-if="summary || (versus && side)" class="yours-section">
+              <p v-if="summary" class="small">
+                {{
+                  t('speed.summary', {
+                    first: percent(summary.first),
+                    ties: percent(summary.ties),
+                    after: percent(summary.after),
+                  })
+                }}
+                <span class="muted">{{
+                  showAll ? t('speed.summaryAll', { bench: benchLabel(bench) }) : t('speed.summaryMeta', { n: TOP })
+                }}</span>
               </p>
-              <dl>
-                <template v-for="v in versus.byEffect" :key="v.effect">
-                  <!-- The effect as the nature's choice shows it: arrows beside "Spe", neutral as a word. -->
-                  <dt v-tip="canHover && !!EFFECT_ICONS[v.effect] && t(`speed.effect.${v.effect}`)" class="effect">
-                    <template v-if="EFFECT_ICONS[v.effect]"
-                      ><component :is="EFFECT_ICONS[v.effect]" :size="14" aria-hidden="true" /><span
-                        aria-hidden="true"
-                        >{{ t('stat.spe') }}</span
-                      ><span class="visually-hidden">{{ t(`speed.effect.${v.effect}`) }}</span></template
-                    >
-                    <template v-else>{{ t(`speed.effect.${v.effect}`) }}</template>
-                  </dt>
-                  <dd>{{ versusText(v.result) }}</dd>
-                </template>
-              </dl>
-            </div>
-          </section>
-        </template>
-      </details>
+              <!-- Narrower, the comparison shows in its card over the ladder instead. -->
+              <div v-if="versus && side" class="versus small">
+                <p>
+                  <strong
+                    ><template v-for="(part, i) in vsTitle" :key="i"
+                      ><template v-if="typeof part === 'string'">{{ part }}</template
+                      ><AppLink
+                        v-else-if="part.slot === 'name'"
+                        :to="{ name: 'pokemon', params: { id: versus.e.id } }"
+                        class="vs-mon"
+                        ><PokemonIcon :id="versus.e.id" />{{
+                          [versus.e.species, versus.e.forme].filter(Boolean).join(' ')
+                        }}</AppLink
+                      ><template v-else>{{ versus.target }}</template></template
+                    ></strong
+                  >
+                </p>
+                <dl>
+                  <template v-for="v in versus.byEffect" :key="v.effect">
+                    <!-- The effect as the nature's choice shows it: arrows beside "Spe", neutral as a word. -->
+                    <dt v-tip="canHover && !!EFFECT_ICONS[v.effect] && t(`speed.effect.${v.effect}`)" class="effect">
+                      <template v-if="EFFECT_ICONS[v.effect]"
+                        ><component :is="EFFECT_ICONS[v.effect]" :size="14" aria-hidden="true" /><span
+                          aria-hidden="true"
+                          >{{ t('stat.spe') }}</span
+                        ><span class="visually-hidden">{{ t(`speed.effect.${v.effect}`) }}</span></template
+                      >
+                      <template v-else>{{ t(`speed.effect.${v.effect}`) }}</template>
+                    </dt>
+                    <dd>{{ versusText(v.result) }}</dd>
+                  </template>
+                </dl>
+              </div>
+            </section>
+          </template>
+          <!-- Dropped from the bar, the card has no band: its actions at its foot instead,
+               Confirm putting it away (Close, a plain button, with none picked). -->
+          <div v-if="!side" class="drop-actions">
+            <button v-if="mine" type="button" class="btn" @click="clearMine">{{ t('speed.clear') }}</button>
+            <button type="button" class="btn" :class="{ primary: mine }" @click="yoursOpen = false">
+              {{ t(mine ? 'speed.confirm' : 'speed.close') }}
+            </button>
+          </div>
+        </details>
+      </Teleport>
     </div>
   </div>
 </template>
 
 <style scoped>
+/* Yours' bar: stuck to the top of the page over what scrolls under it, on the page's own color; back to Competitive,
+   then yours in short taking the rest, its name giving way first. */
+.yours-bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 6px 0;
+  background: var(--bg);
+}
+.bar-yours {
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: flex-start;
+  gap: 6px;
+}
+.bar-yours :deep(.sheet-icon) {
+  flex: none;
+  margin-block: -6px;
+}
+/* Yours' name, the first to give way to what follows it: once it would be cut, it goes (`nameFits`). */
+.bar-name {
+  flex: 0 100000 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.bar-name.gone {
+  display: none;
+}
+.bar-speed {
+  font-size: 1.2em;
+  font-variant-numeric: tabular-nums;
+}
+.bar-build {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-weight: normal;
+  opacity: 0.85;
+}
+/* Yours' modifiers, in short, each in an outline of the bar's text color; an ellipsis at the end standing for those
+   that don't fit. */
+.bar-mods {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.bar-mod {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  margin-right: 4px;
+  padding: 0 4px;
+  font-size: 0.8125em;
+  font-weight: normal;
+  vertical-align: middle;
+  border: 1px solid currentColor;
+}
+.bar-mod.item {
+  padding: 0 2px;
+}
+.bar-yours .marker {
+  margin-left: auto;
+}
+/* A modifier's item icon, before its name, taking no more height than the text. */
+.mod-item {
+  margin-block: -2px;
+}
+/* Its actions, at the foot of the card, Confirm at the end. */
+.drop-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 12px calc(-1 * var(--panel-pad)) calc(-1 * var(--panel-pad));
+  padding: 10px var(--panel-pad);
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+}
+/* Dropped from the bar, which says what it is and closes it, the card's own band is left out. */
+.yours-drop .yours-title {
+  display: none;
+}
+/* Its card, dropped under it over the page, as tall as the screen leaves, scrolling within that (room kept for its
+   shadow); the page dimmed behind it, a tap there closing it, and not scrolling. */
+.yours-drop {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  padding: 0 4px 4px 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.yours-drop > .yours {
+  margin: 0;
+}
+/* Spreading sideways to the screen's edges by its shadow, which, unlike its box, can't widen the page; clipped at its
+   top, so the bar isn't dimmed. */
+.yours-backdrop {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 100dvh;
+  background: var(--dim);
+  box-shadow: 0 0 0 100vmax var(--dim);
+  clip-path: inset(0 -100vmax -100vmax);
+  touch-action: none;
+  --dim: color-mix(in srgb, var(--ink) 40%, transparent);
+}
 /* The heading's row: the heading, what's active (taking what room is left, on one line, scrolling sideways when it
    doesn't fit), and the toggle at the end. On phones, what's active goes to a line of its own. */
 .head {
@@ -1299,7 +1575,7 @@ const { entered } = usePageEntered()
 @media (max-width: 1099px) {
   .head {
     position: sticky;
-    top: 0;
+    top: var(--bar-h);
     z-index: 3;
     margin: calc(-1 * var(--panel-pad)) calc(-1 * var(--panel-pad)) 0;
     padding: var(--panel-pad);
@@ -1583,7 +1859,7 @@ const { entered } = usePageEntered()
 /* The bar pinned over the ladder: sticks to the top with no height, the bar itself drawn over the rows. */
 .pin {
   position: sticky;
-  top: 0;
+  top: var(--bar-h);
   z-index: 2;
   height: 0;
   /* As wide as the ladder. */
@@ -1720,9 +1996,6 @@ const { entered } = usePageEntered()
   display: flex;
   flex-direction: column;
 }
-.yours {
-  order: -1;
-}
 @media (min-width: 1100px) {
   .speed-layout {
     display: grid;
@@ -1798,14 +2071,6 @@ const { entered } = usePageEntered()
 .yours-pick :deep(.search-box) {
   max-width: none;
 }
-/* Where yours isn't beside the ladder, its heading sticks to the top while its card is in view, saying where you are. */
-@media (max-width: 1099px) {
-  .yours-title {
-    position: sticky;
-    top: 0;
-    z-index: 3;
-  }
-}
 /* Its heading, with an arrow drawn as the modifiers' is, rather than the browser's marker. */
 .yours-title {
   display: flex;
@@ -1850,7 +2115,15 @@ const { entered } = usePageEntered()
   padding-top: 12px;
   border-top: 1px solid var(--border);
 }
-.yours-section > .disclosure {
+.mods-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  align-self: stretch;
+}
+.mods-head > .disclosure {
   margin-top: 0;
 }
 .yours-section > p,
