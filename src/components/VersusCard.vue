@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { ArrowRight, Columns2, X } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
-import { t, tSlots } from '@/i18n'
+import { t } from '@/i18n'
 import type { NamedLocation } from '@/lib/links'
 import type { pointsToMoveFirst } from '@/lib/speed'
 import { pointsText } from '@/lib/speedBuild'
@@ -12,16 +12,15 @@ import PokemonIcon from '@/components/PokemonIcon'
 // Yours against a Pokémon on the speed tiers' ladder (the chip tapped): its name (a link to its page) on top; then
 // whether yours moves first as it's built, at what Speeds (its own finding its chip), and for its nature the points that
 // do it (what's left to spare, or, when none do, what another nature would need); and the way to the comparison of the
-// two, where every nature's shown. A panel of its own under yours beside the ladder; narrower, a card floating at the foot of the
-// screen.
+// two, where every nature's shown. A panel of its own under yours beside the ladder; narrower, a card floating at the
+// foot of the screen.
 type Result = ReturnType<typeof pointsToMoveFirst>
 const props = defineProps<{
   /** The Pokémon it's against, its name as the ladder shows it, and its Speed there. */
   id: PokemonId
   name: string
   speed: number
-  /** Yours: its name, Speed, and Speed points. */
-  mineName: string
+  /** Yours: its Speed, and Speed points. */
   mineSpeed: number
   points: number
   trickRoom: boolean
@@ -33,7 +32,6 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ close: []; locate: [] }>()
 
-const title = tSlots('speed.vs')
 /** Whether yours moves first as it is: the faster, or under Trick Room the slower. */
 const verdict = computed(() =>
   props.mineSpeed === props.speed ? 'tie' : props.mineSpeed > props.speed !== props.trickRoom ? 'first' : 'after',
@@ -50,25 +48,22 @@ const plan = computed(() => {
 </script>
 
 <template>
-  <!-- A band of the opponents' red: the Pokémon it's against (a link to its page), and a way to close it, as yours'
-       band clears it. -->
+  <!-- A band of the opponents' red: the Pokémon it's against (a link to its page), under a small "Against" so a long
+       name has the band's width to wrap in, and a way to close it, as yours' band clears it. -->
   <section class="panel banded versus-card small" role="status">
     <div class="band">
-      <strong
-        ><template v-for="(part, i) in title" :key="i"
-          ><template v-if="typeof part === 'string'">{{ part }}</template
-          ><AppLink v-else-if="part.slot === 'name'" :to="{ name: 'pokemon', params: { id: props.id } }" class="mon"
-            ><PokemonIcon :id="props.id" />{{ props.name }}</AppLink
-          ></template
-        ></strong
-      >
+      <div class="title">
+        <AppLink :to="{ name: 'pokemon', params: { id: props.id } }" class="mon"
+          ><PokemonIcon :id="props.id" /><strong>{{ props.name }}</strong></AppLink
+        >
+      </div>
       <button type="button" class="btn on-band inverted close" @click="emit('close')">
         <X :size="14" aria-hidden="true" />{{ t('speed.vsClose') }}
       </button>
     </div>
     <!-- Yours as it's built: moves first, ties or moves after, at what Speeds (its, finding its chip on the ladder). -->
     <p class="verdict" :class="verdict">
-      {{ t(`speed.vsNow.${verdict}`, { name: props.mineName }) }}
+      {{ t(`speed.vsNow.${verdict}`) }}
       <span class="speeds"
         >{{ props.mineSpeed }} <span class="vs">vs</span>{{ ' '
         }}<button type="button" class="speed" :aria-label="t('speed.vsLocate')" @click="emit('locate')">
@@ -103,18 +98,29 @@ const plan = computed(() => {
   color: var(--opponent-text);
   background: var(--opponent);
 }
-.band > strong {
+.title {
   flex: 1;
   min-width: 0;
+}
+/* "Against", small above the name. */
+.eyebrow {
+  display: block;
+  font-size: 0.75em;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
 }
 .band a {
   color: inherit;
 }
-/* The Pokémon it's against, in its title: its name on the text's line, its icon centered on it. */
+/* The Pokémon it's against: its icon beside its name, which wraps beside it when long, the icon centered on it. */
 .mon {
-  white-space: nowrap;
+  display: flex;
+  align-items: center;
 }
 .mon :deep(.sheet-icon) {
+  flex: none;
   margin-block: -6px;
 }
 /* Its Speed, which finds its chip on the ladder: underlined as a link is, dotted as what shows rather than goes. */

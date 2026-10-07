@@ -520,7 +520,6 @@ const versus = computed(() => {
       id: e.id,
       name: [e.species, e.forme].filter(Boolean).join(' '),
       speed: target,
-      mineName: refName(pokemon(mine.value)),
       mineSpeed: mySpeed.value!,
       trickRoom: trickRoom.value,
       points: myPoints.value,
