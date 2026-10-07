@@ -7,7 +7,7 @@ import { ability, availableIds, condition, item, pokemon, type ItemId, type Poke
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
 import { currentSnapshots, distinctLabel, has, percent, type PokemonMeta } from '@/data/meta'
-import { locale, t, tSlots, tSplit } from '@/i18n'
+import { locale, t, tSplit } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { center, reveal } from '@/lib/scroll'
 import { FADE, PRESS } from '@/lib/motion'
@@ -26,15 +26,7 @@ import {
   withEffect,
 } from '@/lib/speed'
 import { BENCHMARKS, MAX_POINTS, benchmark, type Benchmark, type NatureEffect } from '@/lib/stats'
-import {
-  FASTEST,
-  benchBuild,
-  buildQuery,
-  pointsText,
-  toggled,
-  type BuildToggle,
-  type SpeedBuild,
-} from '@/lib/speedBuild'
+import { FASTEST, benchBuild, buildQuery, toggled, type BuildToggle, type SpeedBuild } from '@/lib/speedBuild'
 import { lastTiersQuery } from '@/lib/tiersState'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useMeta } from '@/composables/useMeta'
@@ -48,6 +40,7 @@ import MetaPicker from '@/components/MetaPicker.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import PokemonPicker from '@/components/PokemonPicker.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
+import VersusCard from '@/components/VersusCard.vue'
 
 // The regulation's Pokémon ordered by Speed, as a ladder of Speed values with the Pokémon at each. By default the
 // meta: the most used Pokémon at the Speeds their sets actually run (from the meta snapshot shown, when it has them);
@@ -521,7 +514,6 @@ const versus = computed(() => {
   }
 })
 // Its title, the Pokémon's name (with its icon) a link to its page.
-const vsTitle = computed(() => tSlots('speed.vs'))
 // Picking one finds it too, the find showing as its "Only" switch says.
 function pickVersus(e: Entry) {
   const vs = query.value.vs === chipKey(e) ? undefined : chipKey(e)
@@ -1250,49 +1242,20 @@ const { entered } = usePageEntered()
             <motion.div
               v-if="versus && !side"
               key="versus"
-              class="versus-card small"
-              role="status"
+              class="versus-float"
               :initial="{ opacity: 0, y: 8 }"
               :animate="{ opacity: 1, y: 0 }"
               :exit="{ opacity: 0, y: 8 }"
               :transition="FADE"
             >
-              <p>
-                <strong
-                  ><template v-for="(part, i) in vsTitle" :key="i"
-                    ><template v-if="typeof part === 'string'">{{ part }}</template
-                    ><AppLink
-                      v-else-if="part.slot === 'name'"
-                      :to="{ name: 'pokemon', params: { id: versus.e.id } }"
-                      class="vs-mon"
-                      ><PokemonIcon :id="versus.e.id" />{{
-                        [versus.e.species, versus.e.forme].filter(Boolean).join(' ')
-                      }}</AppLink
-                    ><template v-else>{{ versus.target }}</template></template
-                  ></strong
-                >
-                <button type="button" class="link-button" @click="set('vs', undefined)">
-                  {{ t('speed.vsClose') }}
-                </button>
-              </p>
-              <dl>
-                <template v-for="v in versus.byEffect" :key="v.effect">
-                  <!-- The effect as the nature's choice shows it: arrows beside "Spe", neutral as a word. -->
-                  <dt v-tip="canHover && !!EFFECT_ICONS[v.effect] && t(`speed.effect.${v.effect}`)" class="effect">
-                    <template v-if="EFFECT_ICONS[v.effect]"
-                      ><component :is="EFFECT_ICONS[v.effect]" :size="14" aria-hidden="true" /><span
-                        aria-hidden="true"
-                        >{{ t('stat.spe') }}</span
-                      ><span class="visually-hidden">{{ t(`speed.effect.${v.effect}`) }}</span></template
-                    >
-                    <template v-else>{{ t(`speed.effect.${v.effect}`) }}</template>
-                  </dt>
-                  <dd>{{ pointsText(v.result) }}</dd>
-                </template>
-              </dl>
-              <AppLink :to="compareLink({ id: versus.e.id, build: chipBuild(versus.e) })" class="compare-link">{{
-                t('compare.open')
-              }}</AppLink>
+              <VersusCard
+                :id="versus.e.id"
+                :name="[versus.e.species, versus.e.forme].filter(Boolean).join(' ')"
+                :speed="versus.target"
+                :rows="versus.byEffect"
+                :compare-to="compareLink({ id: versus.e.id, build: chipBuild(versus.e) })"
+                @close="set('vs', undefined)"
+              />
             </motion.div>
             <motion.button
               v-else-if="match"
@@ -1319,189 +1282,167 @@ const { entered } = usePageEntered()
       <!-- Your Pokémon: where it lands among the others, and what it takes to move before one of them. A sidebar that
            stays in view beside the ladder on wide screens, so tapping a chip anywhere shows the answer; above it, narrower. -->
       <!-- Narrower, it's the card dropping from yours' bar; on phones, on a screen of its own. -->
-      <Teleport :to="phone ? '#yours-sheet' : '#yours-drop'" :disabled="side" defer>
-        <details
-          ref="yoursCard"
-          class="panel banded yours instant"
-          :open="side || yoursOpen"
-          @toggle="!side && (yoursOpen = isOpen($event))"
-        >
-          <!-- A heading that closes the card dropped from the bar; beside the ladder it's always open. -->
-          <summary class="yours-title" @click.prevent="!side && toggleYours()">
-            <span class="marker yours-marker" aria-hidden="true">{{ yoursOpen ? '▾' : '▸' }}</span>
-            {{ t('speed.yours') }}
-            <!-- Unpicking yours, at the band's end: its own click, not the heading's. -->
-            <button v-if="mine" type="button" class="btn on-band inverted band-clear" @click.stop.prevent="clearMine">
-              <Trash2 :size="14" aria-hidden="true" />{{ t('speed.clear') }}
-            </button>
-          </summary>
-          <div class="yours-pick">
-            <PokemonPicker
-              :model-value="mine"
-              ref="yoursPicker"
-              :placeholder="t('speed.yoursPick')"
-              :title="t('speed.yours')"
-              tone="yours"
-              list-width-of=".yours-pick"
-              icon
-              class="yours-picker"
-              @update:model-value="pickMine"
-            />
-          </div>
-          <p v-if="!mine" class="muted small wide-only yours-intro">{{ t('speed.yoursIntro') }}</p>
-          <template v-else>
-            <!-- Its Speed, right under the pick, following the build below as it changes; a tap shows where it landed on
+      <!-- Beside the ladder, yours and under it, in a panel of its own, the comparison with the chip tapped; both
+           stuck as the ladder scrolls. Narrower, the card goes to the bar's drop (or a dialog) and the comparison
+           floats at the foot of the screen. -->
+      <div class="side-col">
+        <Teleport :to="phone ? '#yours-sheet' : '#yours-drop'" :disabled="side" defer>
+          <details
+            ref="yoursCard"
+            class="panel banded yours instant"
+            :open="side || yoursOpen"
+            @toggle="!side && (yoursOpen = isOpen($event))"
+          >
+            <!-- A heading that closes the card dropped from the bar; beside the ladder it's always open. -->
+            <summary class="yours-title" @click.prevent="!side && toggleYours()">
+              <span class="marker yours-marker" aria-hidden="true">{{ yoursOpen ? '▾' : '▸' }}</span>
+              {{ t('speed.yours') }}
+              <!-- Unpicking yours, at the band's end: its own click, not the heading's. -->
+              <button v-if="mine" type="button" class="btn on-band inverted band-clear" @click.stop.prevent="clearMine">
+                <Trash2 :size="14" aria-hidden="true" />{{ t('speed.clear') }}
+              </button>
+            </summary>
+            <div class="yours-pick">
+              <PokemonPicker
+                :model-value="mine"
+                ref="yoursPicker"
+                :placeholder="t('speed.yoursPick')"
+                :title="t('speed.yours')"
+                tone="yours"
+                list-width-of=".yours-pick"
+                icon
+                class="yours-picker"
+                @update:model-value="pickMine"
+              />
+            </div>
+            <p v-if="!mine" class="muted small wide-only yours-intro">{{ t('speed.yoursIntro') }}</p>
+            <template v-else>
+              <!-- Its Speed, right under the pick, following the build below as it changes; a tap shows where it landed on
                the ladder. -->
-            <button type="button" class="btn primary big-go" @click="toMine">
-              <span class="big-go-speed">{{ mySpeed }}</span>
-              <span>{{ t('speed.showYours') }}</span>
-            </button>
-            <!-- Narrower, the ladder is under this card, its opponents band out of view: a way to it, said as it's
+              <button type="button" class="btn primary big-go" @click="toMine">
+                <span class="big-go-speed">{{ mySpeed }}</span>
+                <span>{{ t('speed.showYours') }}</span>
+              </button>
+              <!-- Narrower, the ladder is under this card, its opponents band out of view: a way to it, said as it's
                picked. -->
-            <button v-if="!side" type="button" class="btn opponents-go" @click="toOpponents">
-              <span class="opponents-tag">{{ t('speed.opponentsHead') }}</span>
-              <span>{{ t('speed.opponentsGo') }}</span>
-            </button>
-            <!-- Its build and modifiers, then what they come to: each a section of its own, labeled above. -->
-            <section class="yours-section">
-              <SegmentedControl
-                class="stacked"
-                :model-value="myNature"
-                :label="t('speed.natureLabel')"
-                no-tips
-                :options="
-                  NATURE_EFFECTS.map((e) => ({
-                    value: e,
-                    label: t(`speed.effect.${e}`),
-                    icon: EFFECT_ICONS[e],
-                    short: t('stat.spe'),
-                  }))
-                "
-                @update:model-value="(v: string) => setMyNature(v as NatureEffect)"
-              />
-              <p class="muted small">{{ naturesOf(myNature) }}</p>
-            </section>
-            <section class="yours-section">
-              <label class="yours-field">
-                <span class="muted small">{{ t('speed.pointsLabel') }}</span>
-                <span class="yours-points">
-                  <input
-                    type="range"
-                    min="0"
-                    :max="MAX_POINTS"
-                    :value="myPoints"
-                    @input="setMyPoints(($event.target as HTMLInputElement).value)"
-                  />
-                  <input
-                    type="number"
-                    class="points-box"
-                    min="0"
-                    :max="MAX_POINTS"
-                    :value="myPoints"
-                    @change="setMyPoints(($event.target as HTMLInputElement).value)"
-                  />
-                </span>
-              </label>
-            </section>
-            <section class="yours-section">
-              <!-- The modifiers' disclosure, and Reset build at the row's end. -->
-              <div class="mods-head">
-                <button type="button" class="btn disclosure" :aria-expanded="myModsOpen" @click="toggleMyMods">
-                  <Plus :size="16" aria-hidden="true" />{{ t('speed.modifiers')
-                  }}<span class="marker" aria-hidden="true">{{ myModsOpen ? '▾' : '▸' }}</span>
-                </button>
-                <button v-if="myChanged" type="button" class="btn inverted" @click="resetMine">
-                  <RotateCcw :size="16" aria-hidden="true" />{{ t('speed.resetYours') }}
-                </button>
-              </div>
-              <div v-if="myModsOpen" class="mods">
-                <button
-                  v-for="k in MY_TOGGLES"
-                  :key="k"
-                  v-tip="canHover && t(`speed.modTip.${k}`)"
-                  type="button"
-                  class="btn mod"
-                  :class="{ on: myToggles.has(k) }"
-                  :aria-pressed="myToggles.has(k)"
-                  @click="toggleMine(k)"
-                >
-                  <ItemIcon v-if="MOD_ITEMS[k]" :id="MOD_ITEMS[k]!" :scale="0.75" class="mod-item" />{{
-                    t(`speed.mod.${k}`)
-                  }}
-                </button>
-              </div>
-              <SegmentedControl
-                class="phone-stacked"
-                v-if="myModsOpen"
-                :model-value="myStage"
-                :label="t('speed.stage')"
-                :options="STAGES.map((s) => ({ value: s, label: stageLabel(s) }))"
-                @update:model-value="(v: string) => setMyStage(v)"
-              />
-            </section>
-            <section v-if="summary || (versus && side)" class="yours-section">
-              <p v-if="summary" class="small">
-                {{
-                  t('speed.summary', {
-                    first: percent(summary.first),
-                    ties: percent(summary.ties),
-                    after: percent(summary.after),
-                  })
-                }}
-                <span class="muted">{{
-                  showAll ? t('speed.summaryAll', { bench: benchLabel(bench) }) : t('speed.summaryMeta', { n: TOP })
-                }}</span>
-              </p>
-              <!-- Narrower, the comparison shows in its card over the ladder instead. -->
-              <div v-if="versus && side" class="versus small">
-                <p>
-                  <strong
-                    ><template v-for="(part, i) in vsTitle" :key="i"
-                      ><template v-if="typeof part === 'string'">{{ part }}</template
-                      ><AppLink
-                        v-else-if="part.slot === 'name'"
-                        :to="{ name: 'pokemon', params: { id: versus.e.id } }"
-                        class="vs-mon"
-                        ><PokemonIcon :id="versus.e.id" />{{
-                          [versus.e.species, versus.e.forme].filter(Boolean).join(' ')
-                        }}</AppLink
-                      ><template v-else>{{ versus.target }}</template></template
-                    ></strong
+              <button v-if="!side" type="button" class="btn opponents-go" @click="toOpponents">
+                <span class="opponents-tag">{{ t('speed.opponentsHead') }}</span>
+                <span>{{ t('speed.opponentsGo') }}</span>
+              </button>
+              <!-- Its build and modifiers, then what they come to: each a section of its own, labeled above. -->
+              <section class="yours-section">
+                <SegmentedControl
+                  class="stacked"
+                  :model-value="myNature"
+                  :label="t('speed.natureLabel')"
+                  no-tips
+                  :options="
+                    NATURE_EFFECTS.map((e) => ({
+                      value: e,
+                      label: t(`speed.effect.${e}`),
+                      icon: EFFECT_ICONS[e],
+                      short: t('stat.spe'),
+                    }))
+                  "
+                  @update:model-value="(v: string) => setMyNature(v as NatureEffect)"
+                />
+                <p class="muted small">{{ naturesOf(myNature) }}</p>
+              </section>
+              <section class="yours-section">
+                <label class="yours-field">
+                  <span class="muted small">{{ t('speed.pointsLabel') }}</span>
+                  <span class="yours-points">
+                    <input
+                      type="range"
+                      min="0"
+                      :max="MAX_POINTS"
+                      :value="myPoints"
+                      @input="setMyPoints(($event.target as HTMLInputElement).value)"
+                    />
+                    <input
+                      type="number"
+                      class="points-box"
+                      min="0"
+                      :max="MAX_POINTS"
+                      :value="myPoints"
+                      @change="setMyPoints(($event.target as HTMLInputElement).value)"
+                    />
+                  </span>
+                </label>
+              </section>
+              <section class="yours-section">
+                <!-- The modifiers' disclosure, and Reset build at the row's end. -->
+                <div class="mods-head">
+                  <button type="button" class="btn disclosure" :aria-expanded="myModsOpen" @click="toggleMyMods">
+                    <Plus :size="16" aria-hidden="true" />{{ t('speed.modifiers')
+                    }}<span class="marker" aria-hidden="true">{{ myModsOpen ? '▾' : '▸' }}</span>
+                  </button>
+                  <button v-if="myChanged" type="button" class="btn inverted" @click="resetMine">
+                    <RotateCcw :size="16" aria-hidden="true" />{{ t('speed.resetYours') }}
+                  </button>
+                </div>
+                <div v-if="myModsOpen" class="mods">
+                  <button
+                    v-for="k in MY_TOGGLES"
+                    :key="k"
+                    v-tip="canHover && t(`speed.modTip.${k}`)"
+                    type="button"
+                    class="btn mod"
+                    :class="{ on: myToggles.has(k) }"
+                    :aria-pressed="myToggles.has(k)"
+                    @click="toggleMine(k)"
                   >
+                    <ItemIcon v-if="MOD_ITEMS[k]" :id="MOD_ITEMS[k]!" :scale="0.75" class="mod-item" />{{
+                      t(`speed.mod.${k}`)
+                    }}
+                  </button>
+                </div>
+                <SegmentedControl
+                  class="phone-stacked"
+                  v-if="myModsOpen"
+                  :model-value="myStage"
+                  :label="t('speed.stage')"
+                  :options="STAGES.map((s) => ({ value: s, label: stageLabel(s) }))"
+                  @update:model-value="(v: string) => setMyStage(v)"
+                />
+              </section>
+              <section v-if="summary" class="yours-section">
+                <p class="small">
+                  {{
+                    t('speed.summary', {
+                      first: percent(summary.first),
+                      ties: percent(summary.ties),
+                      after: percent(summary.after),
+                    })
+                  }}
+                  <span class="muted">{{
+                    showAll ? t('speed.summaryAll', { bench: benchLabel(bench) }) : t('speed.summaryMeta', { n: TOP })
+                  }}</span>
                 </p>
-                <dl>
-                  <template v-for="v in versus.byEffect" :key="v.effect">
-                    <!-- The effect as the nature's choice shows it: arrows beside "Spe", neutral as a word. -->
-                    <dt v-tip="canHover && !!EFFECT_ICONS[v.effect] && t(`speed.effect.${v.effect}`)" class="effect">
-                      <template v-if="EFFECT_ICONS[v.effect]"
-                        ><component :is="EFFECT_ICONS[v.effect]" :size="14" aria-hidden="true" /><span
-                          aria-hidden="true"
-                          >{{ t('stat.spe') }}</span
-                        ><span class="visually-hidden">{{ t(`speed.effect.${v.effect}`) }}</span></template
-                      >
-                      <template v-else>{{ t(`speed.effect.${v.effect}`) }}</template>
-                    </dt>
-                    <dd>{{ pointsText(v.result) }}</dd>
-                  </template>
-                </dl>
-                <AppLink :to="compareLink({ id: versus.e.id, build: chipBuild(versus.e) })" class="compare-link">{{
-                  t('compare.open')
-                }}</AppLink>
-              </div>
-            </section>
-          </template>
-          <!-- Dropped from the bar, the card has no band: its actions at its foot instead,
+              </section>
+            </template>
+            <!-- Dropped from the bar, the card has no band: its actions at its foot instead,
                Confirm putting it away (Close, a plain button, with none picked). -->
-          <div v-if="!side && !phone" class="drop-actions">
-            <button v-if="mine" type="button" class="btn inverted" @click="clearMine">
-              <Trash2 :size="16" aria-hidden="true" />{{ t('speed.clear') }}
-            </button>
-            <button type="button" class="btn" :class="{ primary: mine }" @click="yoursOpen = false">
-              {{ t(mine ? 'speed.confirm' : 'speed.close') }}
-            </button>
-          </div>
-        </details>
-      </Teleport>
+            <div v-if="!side && !phone" class="drop-actions">
+              <button v-if="mine" type="button" class="btn inverted" @click="clearMine">
+                <Trash2 :size="16" aria-hidden="true" />{{ t('speed.clear') }}
+              </button>
+              <button type="button" class="btn" :class="{ primary: mine }" @click="yoursOpen = false">
+                {{ t(mine ? 'speed.confirm' : 'speed.close') }}
+              </button>
+            </div>
+          </details>
+        </Teleport>
+        <VersusCard
+          v-if="versus && side"
+          :id="versus.e.id"
+          :name="[versus.e.species, versus.e.forme].filter(Boolean).join(' ')"
+          :speed="versus.target"
+          :rows="versus.byEffect"
+          :compare-to="compareLink({ id: versus.e.id, build: chipBuild(versus.e) })"
+          @close="set('vs', undefined)"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -2040,18 +1981,24 @@ const { entered } = usePageEntered()
     align-items: start;
     gap: 0 12px;
   }
-  /* Beside the ladder, stuck as it scrolls; scrolling itself when taller than the screen. */
-  .yours {
-    order: 0;
+  /* Beside the ladder, yours and the comparison under it, stuck as it scrolls; scrolling when taller than the screen. */
+  .side-col {
     position: sticky;
     top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     max-height: calc(100dvh - 24px);
+    padding: 0 4px 4px 0;
     overflow-y: auto;
     overscroll-behavior: contain;
   }
+  .side-col > .yours {
+    margin: 0;
+  }
 }
 /* The comparison's card, at the bottom of the screen where yours isn't beside the ladder. */
-.versus-card {
+.versus-float {
   position: fixed;
   left: 12px;
   right: 12px;
@@ -2059,24 +2006,6 @@ const { entered } = usePageEntered()
   z-index: 10;
   max-width: 32em;
   margin: 0 auto;
-  padding: 10px 12px;
-  background: var(--panel);
-  border: 1px solid var(--border-strong);
-  box-shadow: var(--shadow);
-}
-.versus-card p {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 4px 10px;
-  margin: 0;
-}
-.versus-card dl {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 2px 10px;
-  margin: 6px 0 0;
 }
 /* A nature effect, in the comparison: its arrows and "Spe" together, the effect's name read out in their place. */
 .effect {
@@ -2091,9 +2020,6 @@ const { entered } = usePageEntered()
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
-}
-.versus-card dd {
-  margin: 0;
 }
 .yours-pick {
   display: flex;
@@ -2211,37 +2137,7 @@ const { entered } = usePageEntered()
   width: 4em;
   font: inherit;
 }
-.versus {
-  margin: 0;
-}
-.versus p {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 10px;
-  margin: 0;
-}
-/* The Pokémon it's against, in its title: its name on the text's line, its icon centered on it. */
-.vs-mon {
-  white-space: nowrap;
-}
-.vs-mon :deep(.sheet-icon) {
-  margin-block: -6px;
-}
-.versus dl {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 2px 10px;
-  margin: 4px 0 0;
-}
-.versus dd {
-  margin: 0;
-}
-.compare-link {
-  display: inline-block;
-  margin-top: 6px;
-  font-weight: bold;
-}
+
 .link-button {
   padding: 0;
   font: inherit;
