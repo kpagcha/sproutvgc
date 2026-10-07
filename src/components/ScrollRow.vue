@@ -80,7 +80,7 @@ function onWheel(e: WheelEvent) {
       class="btn arrow left"
       tabindex="-1"
       :aria-label="t('scroll.back')"
-      @click="step(-1)"
+      @click.stop.prevent="step(-1)"
     >
       <ChevronLeft :size="16" aria-hidden="true" />
     </button>
@@ -90,7 +90,7 @@ function onWheel(e: WheelEvent) {
       class="btn arrow right"
       tabindex="-1"
       :aria-label="t('scroll.more')"
-      @click="step(1)"
+      @click.stop.prevent="step(1)"
     >
       <ChevronRight :size="16" aria-hidden="true" />
     </button>

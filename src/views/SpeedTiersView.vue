@@ -39,6 +39,7 @@ import ItemIcon from '@/components/ItemIcon.vue'
 import MetaPicker from '@/components/MetaPicker.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import PokemonPicker from '@/components/PokemonPicker.vue'
+import ScrollRow from '@/components/ScrollRow.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 import VersusCard from '@/components/VersusCard.vue'
 
@@ -903,9 +904,10 @@ const { entered } = usePageEntered()
           >{{ t('title.speedTiers')
           }}<span v-if="mine" class="opponents-tag head-tag">{{ t('speed.opponentsHead') }}</span>
         </h1>
-        <ul v-if="!controlsOpen" class="active" :aria-label="t('speed.active')">
-          <li v-for="a in active" :key="a.label" :class="a.kind">{{ a.label }}</li>
-        </ul>
+        <!-- On one line, scrolling sideways when it doesn't fit. -->
+        <ScrollRow v-if="!controlsOpen" class="active" role="list" :aria-label="t('speed.active')">
+          <span v-for="a in active" :key="a.label" role="listitem" class="item" :class="a.kind">{{ a.label }}</span>
+        </ScrollRow>
       </summary>
       <div class="fold-body">
         <!-- The intro, and how to read the page: a link-like toggle beside it, apart from the controls. -->
@@ -1602,18 +1604,9 @@ const { entered } = usePageEntered()
 }
 .active {
   grid-area: active;
-  display: flex;
-  gap: 4px;
-  margin: 0;
-  padding: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-  list-style: none;
+  --gap: 4px;
 }
-.active::-webkit-scrollbar {
-  display: none;
-}
-.active li {
+.active .item {
   flex: none;
   padding: 1px 6px;
   font-size: 0.85em;
@@ -1622,7 +1615,7 @@ const { entered } = usePageEntered()
   border: 1px solid var(--border-strong);
 }
 /* The options on, as their switches show when on. */
-.active li.option {
+.active .item.option {
   font-weight: bold;
   background: var(--sel);
   border-color: var(--ink);

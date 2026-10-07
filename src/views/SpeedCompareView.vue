@@ -212,9 +212,10 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
           <span class="marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
           >{{ t('title.speedCompare') }}
         </h1>
-        <ul v-if="!controlsOpen && active.length" class="active" :aria-label="t('speed.active')">
-          <li v-for="a in active" :key="a.label" :class="a.kind">{{ a.label }}</li>
-        </ul>
+        <!-- On one line, scrolling sideways when it doesn't fit. -->
+        <ScrollRow v-if="!controlsOpen && active.length" class="active" role="list" :aria-label="t('speed.active')">
+          <span v-for="a in active" :key="a.label" role="listitem" class="item" :class="a.kind">{{ a.label }}</span>
+        </ScrollRow>
       </summary>
       <div class="fold-body">
         <!-- The intro, and how to read the page: a link-like toggle beside it. -->
@@ -454,18 +455,9 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 }
 .active {
   grid-area: active;
-  display: flex;
-  gap: 4px;
-  margin: 0;
-  padding: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-  list-style: none;
+  --gap: 4px;
 }
-.active::-webkit-scrollbar {
-  display: none;
-}
-.active li {
+.active .item {
   flex: none;
   padding: 1px 6px;
   font-size: 0.85em;
@@ -473,7 +465,7 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
   background: var(--panel-alt);
   border: 1px solid var(--border-strong);
 }
-.active li.option {
+.active .item.option {
   font-weight: bold;
   background: var(--sel);
   border-color: var(--ink);
