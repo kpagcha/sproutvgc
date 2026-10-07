@@ -775,7 +775,7 @@ export const messages: Record<keyof typeof en, string> = {
     'Tu Pokémon y un rival, cada uno con su distribución y sus modificadores: cuál mueve antes, y los puntos que necesita cada uno para mover antes que el otro.',
   'compare.pick': 'Elige un Pokémon',
   'compare.opponent': 'Rival',
-  'compare.baseStat': 'Base {base} · característica {stat}',
+  'compare.stat': 'Característica {stat}',
   'compare.common': 'Distribuciones habituales',
   'compare.first': '{name} mueve antes',
   'compare.tie': 'Empate de velocidad: cualquiera mueve antes, al azar',

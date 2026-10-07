@@ -1094,6 +1094,7 @@ const { entered } = usePageEntered()
             :title="findTitle"
             :tone="mine ? 'opponent' : undefined"
             list-width-of=".find-row"
+            speed
             @update:model-value="setFound"
           />
           <label v-if="found" class="btn switch find-mode" :class="{ on: onlyFound }">
@@ -1164,6 +1165,7 @@ const { entered } = usePageEntered()
                 :title="findTitle"
                 :tone="mine ? 'opponent' : undefined"
                 list-width-of=".pinned"
+                speed
                 @update:model-value="setFound"
               />
               <label v-if="found" class="btn switch find-mode" :class="{ on: onlyFound }">
@@ -1345,6 +1347,7 @@ const { entered } = usePageEntered()
                 :title="t('speed.yours')"
                 tone="yours"
                 list-width-of=".yours-pick"
+                speed
                 icon
                 class="yours-picker"
                 @update:model-value="pickMine"

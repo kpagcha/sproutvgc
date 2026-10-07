@@ -765,7 +765,7 @@ export const messages = {
     'Your Pokémon and an opponent, each with its own build and modifiers: which moves first, and the points each needs to move before the other.',
   'compare.pick': 'Pick a Pokémon',
   'compare.opponent': 'Opponent',
-  'compare.baseStat': 'Base {base} · stat {stat}',
+  'compare.stat': 'Stat {stat}',
   'compare.common': 'Common builds',
   'compare.first': '{name} moves first',
   'compare.tie': 'Speed tie: either moves first, at random',

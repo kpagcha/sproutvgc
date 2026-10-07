@@ -2,7 +2,9 @@
 import { nextTick, onBeforeUnmount, ref, useId, useTemplateRef, watch } from 'vue'
 import { Star } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
+import { POKEMON } from '@/data/pokemon'
 import { t } from '@/i18n'
+import { benchmark } from '@/lib/stats'
 import { pokemonName as nameOf, usePokemonSearch } from '@/composables/usePokemonSearch'
 import ModalDialog from '@/components/ModalDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -28,6 +30,8 @@ const props = defineProps<{
   /** On phones, the band on top of the dialog's card saying what it's picking for, in its side's color. */
   title?: string
   tone?: 'yours' | 'opponent'
+  /** Shows each one's Speed at the end of its row, with no points and a neutral nature: a quick preview of how fast. */
+  speed?: boolean
 }>()
 const model = defineModel<PokemonId | null>({ required: true })
 
@@ -228,6 +232,9 @@ function showOption(i: number, center = false) {
 }
 watch(active, (i) => queueMicrotask(() => showOption(i)))
 
+/** Its Speed with no points and a neutral nature. */
+const speedOf = (id: PokemonId) => benchmark(POKEMON[id].stats[5], 'none')
+
 const listId = useId()
 const optionId = (i: number) => `${listId}-${i}`
 </script>
@@ -290,7 +297,11 @@ const optionId = (i: number) => `${listId}-${i}`
             <span
               >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
               >{{ r.parts[2] }}</span
-            ><Star v-if="r.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" />
+            ><Star v-if="r.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" /><span
+              v-if="props.speed"
+              class="option-speed"
+              >{{ speedOf(r.id) }}</span
+            >
           </li>
         </template>
       </ul>
@@ -305,6 +316,7 @@ const optionId = (i: number) => `${listId}-${i}`
         :icon="props.icon"
         :title="props.title"
         :tone="props.tone"
+        :speed="props.speed"
         @pick="pick"
         @close="sheet = false"
       />
@@ -349,6 +361,12 @@ const optionId = (i: number) => `${listId}-${i}`
   gap: 4px;
   padding: 0 6px 0 2px;
   cursor: pointer;
+}
+.option-speed {
+  margin-left: auto;
+  padding-left: 8px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
 }
 .option.active {
   background: var(--sel);

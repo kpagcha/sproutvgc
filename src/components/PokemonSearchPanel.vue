@@ -2,7 +2,9 @@
 import { nextTick, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 import { Star, X } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
+import { POKEMON } from '@/data/pokemon'
 import { t } from '@/i18n'
+import { benchmark } from '@/lib/stats'
 import { pokemonName, usePokemonSearch } from '@/composables/usePokemonSearch'
 import PokemonIcon from '@/components/PokemonIcon'
 import SearchBox from '@/components/SearchBox.vue'
@@ -22,6 +24,8 @@ const props = defineProps<{
   /** A band on top saying what it's picking for, in its side's color: yours blue, an opponent red. */
   title?: string
   tone?: 'yours' | 'opponent'
+  /** Shows each one's Speed at the end of its row, with no points and a neutral nature: a quick preview of how fast. */
+  speed?: boolean
 }>()
 const emit = defineEmits<{ pick: [id: PokemonId]; close: [] }>()
 
@@ -77,6 +81,9 @@ function showOption(i: number, center = false) {
 }
 watch(active, (i) => queueMicrotask(() => showOption(i)))
 
+/** Its Speed with no points and a neutral nature. */
+const speedOf = (id: PokemonId) => benchmark(POKEMON[id].stats[5], 'none')
+
 const listId = useId()
 const optionId = (i: number) => `${listId}-${i}`
 </script>
@@ -122,7 +129,11 @@ const optionId = (i: number) => `${listId}-${i}`
           <span
             >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
             >{{ r.parts[2] }}</span
-          ><Star v-if="r.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" />
+          ><Star v-if="r.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" /><span
+            v-if="props.speed"
+            class="option-speed"
+            >{{ speedOf(r.id) }}</span
+          >
         </li>
       </template>
     </ul>
@@ -188,6 +199,12 @@ const optionId = (i: number) => `${listId}-${i}`
   padding: 0 6px 0 2px;
   border-bottom: 1px solid var(--border);
   cursor: pointer;
+}
+.option-speed {
+  margin-left: auto;
+  padding-left: 8px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
 }
 .option.active {
   background: var(--sel);

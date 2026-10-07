@@ -63,7 +63,6 @@ const sides = computed(() =>
       id,
       build,
       name: id ? refName(pokemon(id)) : null,
-      base: id ? POKEMON[id].stats[5] : null,
       stat: id ? speedStat(POKEMON[id].stats[5], build.points, build.effect) : null,
       speed: id ? buildSpeed(id, build) : null,
     }
@@ -306,14 +305,17 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
           :title="side.s === 'a' ? t('speed.yours') : t('compare.opponent')"
           :tone="side.s === 'a' ? 'yours' : 'opponent'"
           icon
+          speed
           class="picker"
           @update:model-value="(id: PokemonId | null) => pick(side.s, id)"
         />
         <template v-if="side.id">
-          <!-- Its Speed, large, with what it comes from. -->
+          <!-- Its Speed, large, with its stat as built when modifiers change it (its base is the dex's). -->
           <p class="speed">
             <span class="speed-number">{{ side.speed }}</span>
-            <span class="muted small">{{ t('compare.baseStat', { base: side.base!, stat: side.stat! }) }}</span>
+            <span v-if="side.stat !== side.speed" class="muted small">{{
+              t('compare.stat', { stat: side.stat! })
+            }}</span>
           </p>
 
           <!-- The meta's builds of it, to pick one in a tap. -->
