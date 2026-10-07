@@ -707,6 +707,7 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.rowLink': 'Enlace a esta Velocidad: lo copia',
   'speed.copied': 'Enlace copiado',
   'speed.points': '{n} pts',
+  'speed.boostAt': 'con {nature} {points} pts',
   'speed.boosts': 'Mejoras',
   'speed.boostLabel': '{effect} ×{factor}',
   'speed.boostTip':

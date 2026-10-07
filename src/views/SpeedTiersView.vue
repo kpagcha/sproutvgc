@@ -1030,6 +1030,10 @@ const { entered } = usePageEntered()
                     >
                     <span v-if="whenTag(e.boost)" class="tag">{{ whenTag(e.boost) }}</span>
                     <span class="tag">{{ percent(e.share!) }}</span>
+                    <!-- The build it's placed at, its most common, which the data doesn't tie to the boost: said as such. -->
+                    <span class="tag boost-at">{{
+                      t('speed.boostAt', { nature: natureName(e.nature!), points: e.points! })
+                    }}</span>
                   </span>
                   <span v-else-if="e.bench && e.extra" class="tags">
                     <span class="tag">{{ benchLabel(e.bench) }}</span>
@@ -2105,6 +2109,10 @@ const { entered } = usePageEntered()
   display: inline-flex;
   align-items: center;
   gap: 2px;
+}
+/* The build a boost is placed at: assumed, so quieter than the rest. */
+.boost-at {
+  font-style: italic;
 }
 /* An item or ability its sets run that changes Speed, told apart from its builds. */
 .chip.boost {

@@ -699,6 +699,7 @@ export const messages = {
   'speed.rowLink': 'Link to this Speed: copies it',
   'speed.copied': 'Link copied',
   'speed.points': '{n} pts',
+  'speed.boostAt': 'at {nature} {points} pts',
   'speed.boosts': 'Boosts',
   'speed.boostLabel': '{effect} ×{factor}',
   'speed.boostTip':
