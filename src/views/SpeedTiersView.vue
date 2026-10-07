@@ -292,7 +292,7 @@ interface Entry {
   share?: number
   bench?: Benchmark
   /** An item or ability its sets run that changes Speed (`SPEED_ITEMS`, `SPEED_ABILITIES`), at its most common
-   * Speed build. */
+   * Speed build: `speed` is the build's, the effect applied with the modifiers (`chipSpeed`). */
   boost?: { ref: Ref<'item' | 'ability'> } & SpeedEffect
   /** Your Pokémon, with its own modifiers rather than the others'. */
   mine?: true
@@ -320,7 +320,7 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
       extra,
     }))
   // Its boosts, at its most common build: the data counts items, abilities and spreads apart, so it doesn't say which
-  // build goes with them.
+  // build goes with them. Those the modifiers rule out (Unburden with a Choice Scarf on everyone) are left out.
   const build = m.speeds?.[0]
   if (showBoosts.value && build) {
     const speed = speedStat(base, build.points, natureEffect(build.nature))
@@ -330,12 +330,14 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
       ...(m.abilities ?? []).map((a) => ({ ref: ability(a.id), share: a.share, effect: SPEED_ABILITIES[a.id] })),
     ]
     for (const { ref, share, effect } of effects) {
-      if (effect && (share ?? 0) >= MIN_SHARE)
-        list.push({ ...at, speed: withEffect(speed, effect), share, boost: { ref, ...effect } })
+      if (effect && (share ?? 0) >= MIN_SHARE && withEffect(mods.value, effect))
+        list.push({ ...at, speed, share, boost: { ref, ...effect } })
     }
   }
   return list
 }
+/** A chip's Speed in battle: with the modifiers, and its boost's effect among them, counted once if they have it. */
+const chipSpeed = (e: Entry) => inBattle(e.speed, (e.boost && withEffect(mods.value, e.boost)) || mods.value)
 const megaShown = (id: PokemonId) => showMegas.value || !POKEMON[id].mega
 const entries = computed<Entry[]>(() => {
   if (!showAll.value) {
@@ -449,7 +451,7 @@ const tiers = computed(() => {
   const bySpeed = new Map<number, Entry[]>()
   for (const e of entries.value) {
     if (onlyFound.value && e.id !== found.value) continue
-    const s = inBattle(e.speed, mods.value)
+    const s = chipSpeed(e)
     bySpeed.set(s, [...(bySpeed.get(s) ?? []), e])
   }
   // Yours, first at its Speed.
@@ -490,7 +492,7 @@ const summary = computed(() => {
   for (const e of entries.value) {
     if (e.boost || e.extra) continue
     const w = showAll.value ? 1 : (data.value?.[e.id]?.usage ?? 0) * (e.share ?? 0)
-    const theirs = inBattle(e.speed, mods.value)
+    const theirs = chipSpeed(e)
     const k = theirs === mySpeed.value ? 'ties' : mySpeed.value > theirs !== trickRoom.value ? 'first' : 'after'
     tally[k] += w
     total += w
@@ -505,7 +507,7 @@ const versus = computed(() => {
   if (mine.value === null || typeof query.value.vs !== 'string') return null
   const e = entries.value.find((x) => chipKey(x) === query.value.vs)
   if (!e) return null
-  const target = inBattle(e.speed, mods.value)
+  const target = chipSpeed(e)
   const base = POKEMON[mine.value].stats[5]
   const at = (effect: NatureEffect) => pointsToMoveFirst(base, effect, myMods.value, target, trickRoom.value)
   // Yours' nature, and when no points do it with that one, the nature that would: raising Speed (lowering it, under
@@ -562,18 +564,16 @@ const myBuild = computed<SpeedBuild>(() => ({
   toggles: [...myToggles.value],
   stage: Number(myStage.value),
 }))
+/** A boost's toggle in a build: Quick Feet has none. */
+const BOOST_TOGGLES: Partial<Record<SpeedEffect['mod'], BuildToggle>> = {
+  scarf: 'scarf',
+  ironBall: 'ironball',
+  doubled: 'doubled',
+}
 /** The ladder's modifiers for everyone, with an item or ability a chip's sets run. */
 function othersBuild(b: Pick<SpeedBuild, 'effect' | 'points'>, boost?: Entry['boost']): SpeedBuild {
   let toggles: BuildToggle[] = TOGGLES.filter(flag)
-  const k: BuildToggle | null = !boost
-    ? null
-    : boost.ref.id === 'choicescarf'
-      ? 'scarf'
-      : boost.ref.id === 'ironball'
-        ? 'ironball'
-        : boost.factor === 2
-          ? 'doubled'
-          : null
+  const k: BuildToggle | null = !boost ? null : (BOOST_TOGGLES[boost.mod] ?? null)
   if (k && !toggles.includes(k)) toggles = toggled(toggles, k)
   return { ...b, toggles, stage: Number(stage.value) }
 }
