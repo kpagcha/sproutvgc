@@ -23,13 +23,15 @@ const dialog = useTemplateRef<HTMLDialogElement>('dialog')
 // is taken from there as it opens and given back here without scrolling.
 let before: HTMLElement | null = null
 
-// It covers what's on the screen, its card centered there: the visual viewport, which a phone's address bar hiding or
-// its keyboard coming up change, where the layout's (which a fixed box follows on its own) can be taller, its top
-// then off the screen.
+// It covers what's on the screen, its card centered there. Pinned to the window's edges, it follows the address bar
+// showing and hiding on its own, and (with `interactive-widget=resizes-content`, index.html) Chrome's keyboard. Where
+// what's on the screen is less than the window all the same (an iPhone's keyboard, which only shrinks the visual
+// viewport; a pinch zoom), it's placed over that instead.
 const area = shallowRef<{ top: number; height: number } | null>(null)
 function follow() {
   const vv = window.visualViewport
-  area.value = vv ? { top: vv.offsetTop, height: vv.height } : null
+  area.value =
+    vv && (vv.offsetTop > 0.5 || window.innerHeight - vv.height > 0.5) ? { top: vv.offsetTop, height: vv.height } : null
 }
 function following(on: boolean) {
   const vv = window.visualViewport
@@ -91,7 +93,7 @@ onBeforeUnmount(() => {
       ref="dialog"
       class="modal-dialog"
       :class="{ fill }"
-      :style="area && { top: `${area.top}px`, height: `${area.height}px` }"
+      :style="area ? { top: `${area.top}px`, bottom: 'auto', height: `${area.height}px` } : undefined"
       :aria-label="label"
       @close="onClose"
       @click="onClick"
@@ -109,19 +111,20 @@ html.dialog-open {
 </style>
 
 <style scoped>
-/* Over what's on the screen (the visual viewport, set as it changes), with no look of its own: it centers its card,
-   a margin all round (room for the card's shadow too), the card no wider than reads well. */
+/* Over what's on the screen, pinned to the window's edges (or placed over the visual viewport, above), with no look of
+   its own: it centers its card, an even gap all round (and the screen's safe area, by a notch or round corners), the
+   card no wider than reads well. */
 .modal-dialog {
   position: fixed;
-  top: 0;
-  bottom: auto;
-  left: 0;
-  width: 100%;
+  inset: 0;
+  width: auto;
   max-width: none;
-  height: 100dvh;
+  height: auto;
   max-height: none;
   margin: 0;
-  padding: 24px 12px;
+  /* The same gap on every side to the card's edge; right and bottom also hold its 4px shadow. */
+  padding: max(16px, env(safe-area-inset-top)) calc(max(16px, env(safe-area-inset-right)) + 4px)
+    calc(max(16px, env(safe-area-inset-bottom)) + 4px) max(16px, env(safe-area-inset-left));
   overflow: visible;
   color: var(--text);
   background: none;
@@ -139,6 +142,7 @@ html.dialog-open {
   max-width: 560px;
   max-height: 100%;
   min-height: 0;
+  margin: 0;
 }
 .modal-dialog.fill > :slotted(*) {
   height: 100%;
