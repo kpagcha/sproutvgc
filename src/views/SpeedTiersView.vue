@@ -930,9 +930,10 @@ const { entered } = usePageEntered()
         <!-- With yours picked, everything the controls set is for the others: its opponents, tagged as on the ladder. -->
         <!-- The heading folds them, its arrow saying whether they're open. -->
         <h1>
-          <span class="marker head-marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
-          >{{ t('title.speedTiers')
-          }}<span v-if="mine" class="opponents-tag head-tag">{{ t('speed.opponentsHead') }}</span>
+          <span
+            ><span class="marker head-marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
+            >{{ t('title.speedTiers') }}</span
+          ><span v-if="mine" class="opponents-tag head-tag">{{ t('speed.opponentsHead') }}</span>
         </h1>
         <!-- On one line, scrolling sideways when it doesn't fit. -->
         <ScrollRow v-if="!controlsOpen" class="active" role="list" :aria-label="t('speed.active')">
@@ -1614,15 +1615,24 @@ const { entered } = usePageEntered()
 .head .head-tag {
   margin-left: 10px;
   font-size: 0.55em;
-  vertical-align: middle;
 }
+/* Its line's items centered on it, so the tag lines up with what's active beside it, centered on the heading too. */
 .head h1 {
   grid-area: title;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   margin: 0;
 }
 .active {
   grid-area: active;
   --gap: 4px;
+}
+/* Beside the heading, centered on it by its chips, not the room under them for their shadows. */
+@media (min-width: 721px) {
+  .active {
+    margin-bottom: -4px;
+  }
 }
 .active .item {
   flex: none;
