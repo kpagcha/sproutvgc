@@ -691,7 +691,13 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.modTip.ironball': 'Reduce la Velocidad a la mitad.',
   'speed.vsClose': 'Cerrar',
   'speed.find': 'Buscar un Pokémon',
+  'speed.keep': 'Dejar en la escala',
+  'speed.kept': 'En la escala:',
+  'speed.unkeep': 'Quitar a {name} de la escala',
   'speed.findOnly': 'Solo {name}',
+  'speed.findBeyond': 'Fuera de los {n} más usados: se muestra con sus sets, sin contar en cuánto mueve antes el tuyo.',
+  'speed.findNoData':
+    'Sin sets en estas estadísticas: se muestra con los repartos de referencia, sin contar en cuánto mueve antes el tuyo.',
   'speed.allNote': 'Todos los Pokémon una vez, con el mismo reparto: {build}.',
   'speed.at': 'Con',
   'speed.invest': '{points} puntos en Velocidad y naturaleza {nature}{effect}: el {pct} de sus sets',

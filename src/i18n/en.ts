@@ -683,7 +683,13 @@ export const messages = {
   'speed.modTip.ironball': 'Halves Speed.',
   'speed.vsClose': 'Close',
   'speed.find': 'Find a Pokémon',
+  'speed.keep': 'Keep on the ladder',
+  'speed.kept': 'Kept:',
+  'speed.unkeep': 'Take {name} off the ladder',
   'speed.findOnly': 'Only {name}',
+  'speed.findBeyond': 'Outside the top {n}: shown at its sets, and left out of how often yours moves first.',
+  'speed.findNoData':
+    'No sets of it in these stats: shown at the standard builds, and left out of how often yours moves first.',
   'speed.allNote': 'Every Pokémon once, at the same build: {build}.',
   'speed.at': 'At',
   'speed.invest': '{points} Speed points and a {nature} nature{effect}: {pct} of its sets',

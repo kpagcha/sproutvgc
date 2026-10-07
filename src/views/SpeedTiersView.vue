@@ -2,11 +2,11 @@
 import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
 import { AnimatePresence, motion } from 'motion-v'
 import { useRouter } from 'vue-router'
-import { ChevronsDown, ChevronsUp, CircleHelp } from '@lucide/vue'
+import { ChevronsDown, ChevronsUp, CircleHelp, X } from '@lucide/vue'
 import { ability, availableIds, condition, item, pokemon, type PokemonId, type Ref } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
-import { currentSnapshots, distinctLabel, has, percent } from '@/data/meta'
+import { currentSnapshots, distinctLabel, has, percent, type PokemonMeta } from '@/data/meta'
 import { locale, t, tSlots, tSplit } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { center, reveal } from '@/lib/scroll'
@@ -248,53 +248,77 @@ interface Entry {
   boost?: { ref: Ref<'item' | 'ability'> } & SpeedEffect
   /** Your Pokémon, with its own modifiers rather than the others'. */
   mine?: true
+  /** The Pokémon found, shown though the top leaves it out: not counted in how yours does against the others. */
+  extra?: true
   /** Its usage rank, to order the Pokémon at the same Speed: the same for all of them when every one shows, which
    * shows no usage, so they go by name. */
   rank: number
 }
 
 const named = (id: PokemonId) => splitForme(id, refName(pokemon(id)))
+/** A Pokémon's chips in the meta: one per Speed investment (stat points and nature), and its boosts. */
+function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
+  const base = POKEMON[id].stats[5]
+  const list: Entry[] = (m.speeds ?? [])
+    .filter((s) => s.share >= MIN_SHARE)
+    .map((s) => ({
+      id,
+      ...named(id),
+      speed: speedStat(base, s.points, natureEffect(s.nature)),
+      points: s.points,
+      nature: s.nature,
+      share: s.share,
+      rank: m.rank,
+      extra,
+    }))
+  // Its boosts, at its most common build: the data counts items, abilities and spreads apart, so it doesn't say which
+  // build goes with them.
+  const build = m.speeds?.[0]
+  if (showBoosts.value && build) {
+    const speed = speedStat(base, build.points, natureEffect(build.nature))
+    const at = { id, ...named(id), points: build.points, nature: build.nature, rank: m.rank, extra }
+    const effects = [
+      ...(m.items ?? []).map((i) => ({ ref: item(i.id), share: i.share, effect: SPEED_ITEMS[i.id] })),
+      ...(m.abilities ?? []).map((a) => ({ ref: ability(a.id), share: a.share, effect: SPEED_ABILITIES[a.id] })),
+    ]
+    for (const { ref, share, effect } of effects) {
+      if (effect && (share ?? 0) >= MIN_SHARE)
+        list.push({ ...at, speed: withEffect(speed, effect), share, boost: { ref, ...effect } })
+    }
+  }
+  return list
+}
+const megaShown = (id: PokemonId) => showMegas.value || !POKEMON[id].mega
 const entries = computed<Entry[]>(() => {
   if (!showAll.value) {
     if (!data.value) return []
-    return Object.entries(data.value)
-      .filter(([key, m]) => m!.rank <= TOP && (showMegas.value || !POKEMON[key as PokemonId].mega))
-      .flatMap(([key, m]) => {
-        const id = key as PokemonId
-        const base = POKEMON[id].stats[5]
-        // A chip per investment: stat points and nature.
-        const list: Entry[] = (m!.speeds ?? [])
-          .filter((s) => s.share >= MIN_SHARE)
-          .map((s) => ({
-            id,
-            ...named(id),
-            speed: speedStat(base, s.points, natureEffect(s.nature)),
-            points: s.points,
-            nature: s.nature,
-            share: s.share,
-            rank: m!.rank,
-          }))
-        // Its boosts, at its most common build: the data counts items, abilities and spreads apart, so it doesn't say
-        // which build goes with them.
-        const build = m!.speeds?.[0]
-        if (showBoosts.value && build) {
-          const speed = speedStat(base, build.points, natureEffect(build.nature))
-          const at = { id, ...named(id), points: build.points, nature: build.nature, rank: m!.rank }
-          const effects = [
-            ...(m!.items ?? []).map((i) => ({ ref: item(i.id), share: i.share, effect: SPEED_ITEMS[i.id] })),
-            ...(m!.abilities ?? []).map((a) => ({ ref: ability(a.id), share: a.share, effect: SPEED_ABILITIES[a.id] })),
-          ]
-          for (const { ref, share, effect } of effects) {
-            if (effect && (share ?? 0) >= MIN_SHARE)
-              list.push({ ...at, speed: withEffect(speed, effect), share, boost: { ref, ...effect } })
-          }
-        }
-        return list
-      })
+    const list = Object.entries(data.value)
+      .filter(([key, m]) => m!.rank <= TOP && megaShown(key as PokemonId))
+      .flatMap(([key, m]) => metaChips(key as PokemonId, m!))
+    // The Pokémon kept and the one found, when the top leaves them out: at their sets, or, with none in the snapshot,
+    // at every benchmark.
+    const extras = new Set([...kept.value, ...(found.value ? [found.value] : [])])
+    for (const id of extras) {
+      const m = data.value[id]
+      if (!beyondTop(id) || !findable.value.has(id)) continue
+      list.push(
+        ...(m
+          ? metaChips(id, m, true)
+          : BENCHMARKS.map((b) => ({
+              id,
+              ...named(id),
+              speed: benchmark(POKEMON[id].stats[5], b),
+              bench: b,
+              rank: Infinity,
+              extra: true as const,
+            }))),
+      )
+    }
+    return list
   }
   // Every Pokémon once, at the benchmark picked.
   return availableIds('pokemon')
-    .filter((id) => !POKEMON[id].cosmetic && (showMegas.value || !POKEMON[id].mega))
+    .filter((id) => !POKEMON[id].cosmetic && megaShown(id))
     .map((id) => ({
       id,
       ...named(id),
@@ -310,7 +334,49 @@ const found = computed(() => {
   return typeof id === 'string' && id in POKEMON ? (id as PokemonId) : null
 })
 const setFound = (id: PokemonId | null) => set('find', id ?? undefined)
-const onLadder = computed(() => [...new Set(entries.value.map((e) => e.id))])
+/** Formes found though they battle as their base species does: Squawkabilly's plumages, which go together (two of
+ * them have an ability of their own). */
+const FINDABLE_ALIKE: ReadonlySet<PokemonId> = new Set<PokemonId>(['squawkabillyblue'])
+/** A forme that battles as its base species does: the same types, base stats and abilities (Vivillon's patterns). */
+function playsAsBase(id: PokemonId): boolean {
+  if (FINDABLE_ALIKE.has(id)) return false
+  const p = POKEMON[id]
+  const b = p.base && POKEMON[p.base]
+  const same = (x: readonly unknown[], y: readonly unknown[]) => x.length === y.length && x.every((v, i) => v === y[i])
+  return !!b && same(p.types, b.types) && same(p.stats, b.stats) && same(p.abilities, b.abilities)
+}
+// What can be found: every Pokémon shown, and in the meta every other one too, beyond the top (at its sets) or with
+// none in the snapshot (at the benchmarks); but for the formes a battle changes it into, Megas aside (picked before
+// it), and those battling as their base species, which say nothing it doesn't.
+const findableIds = computed<PokemonId[]>(() =>
+  availableIds('pokemon').filter(
+    (id) =>
+      !POKEMON[id].cosmetic &&
+      megaShown(id) &&
+      (showAll.value || !!data.value?.[id] || ((!POKEMON[id].battleOnly || !!POKEMON[id].mega) && !playsAsBase(id))),
+  ),
+)
+const findable = computed(() => new Set(findableIds.value))
+/** In the meta, a Pokémon its top leaves out: below it, or with no sets in the snapshot. */
+const beyondTop = (id: PokemonId) => !showAll.value && !!data.value && (data.value[id]?.rank ?? Infinity) > TOP
+// Pokémon beyond the top kept on the ladder once found (`?keep=`, comma-separated), to compare several of them; in the
+// order kept.
+const kept = computed<PokemonId[]>(() => {
+  const v = query.value.keep
+  return typeof v === 'string' ? (v.split(',').filter((id) => id in POKEMON) as PokemonId[]) : []
+})
+const keptShown = computed(() => kept.value.filter((id) => beyondTop(id) && findable.value.has(id)))
+function toggleKept(id: PokemonId) {
+  const list = kept.value.includes(id) ? kept.value.filter((k) => k !== id) : [...kept.value, id]
+  set('keep', list.length ? list.join(',') : undefined)
+}
+/** The Pokémon found has no sets in the snapshot, or isn't in its top: why, said under the find. */
+const foundNote = computed(() => {
+  const id = found.value
+  if (!id || showAll.value || !data.value) return null
+  const m = data.value[id]
+  return !m ? t('speed.findNoData') : m.rank > TOP ? t('speed.findBeyond', { n: TOP }) : null
+})
 const isHit = (e: Entry) => !e.mine && e.id === found.value
 // What finding does: mark its chips among the rest, or show only them (and yours, to compare): only them by default;
 // the URL says so (`?findmode=`) only when it differs.
@@ -372,7 +438,7 @@ const summary = computed(() => {
   const tally = { first: 0, ties: 0, after: 0 }
   let total = 0
   for (const e of entries.value) {
-    if (e.boost) continue
+    if (e.boost || e.extra) continue
     const w = showAll.value ? 1 : (data.value?.[e.id]?.usage ?? 0) * (e.share ?? 0)
     const theirs = inBattle(e.speed, mods.value)
     const k = theirs === mySpeed.value ? 'ties' : mySpeed.value > theirs !== trickRoom.value ? 'first' : 'after'
@@ -465,7 +531,7 @@ function boostTip(e: Entry) {
     build: t('speed.build', { nature: natureName(e.nature!), points: e.points! }),
   })
 }
-const tip = (e: Entry) => (e.bench ? undefined : e.boost ? boostTip(e) : investTip(e))
+const tip = (e: Entry) => (e.bench ? (e.extra ? benchTip(e.bench) : undefined) : e.boost ? boostTip(e) : investTip(e))
 const chipKey = (e: Entry) =>
   e.mine
     ? 'mine'
@@ -781,7 +847,7 @@ const { entered } = usePageEntered()
         <div class="band find find-row" :class="{ flash: flashFind }" @animationend="flashFind = false">
           <PokemonPicker
             :model-value="found"
-            :ids="onLadder"
+            :ids="findableIds"
             :placeholder="t('speed.find')"
             list-width-of=".find-row"
             @update:model-value="setFound"
@@ -795,7 +861,32 @@ const { entered } = usePageEntered()
             />
             {{ onlyLabel[0] }}<PokemonIcon :id="found" />{{ onlyLabel[1] }}
           </label>
-          <button v-if="found" type="button" class="btn" @click="setFound(null)">{{ t('speed.clear') }}</button>
+          <label v-if="found && beyondTop(found)" class="btn switch find-mode" :class="{ on: kept.includes(found) }">
+            <input type="checkbox" :checked="kept.includes(found)" @change="toggleKept(found)" />
+            {{ t('speed.keep') }}
+          </label>
+          <button v-if="found" type="button" class="btn find-clear" @click="setFound(null)">
+            {{ t('speed.clear') }}
+          </button>
+          <p v-if="foundNote" class="find-note muted small">{{ foundNote }}</p>
+          <!-- The Pokémon kept: each finds it, or leaves the ladder. -->
+          <ul v-if="keptShown.length" class="kept small">
+            <li class="muted">{{ t('speed.kept') }}</li>
+            <li v-for="id in keptShown" :key="id" class="kept-mon">
+              <button type="button" class="link-button" @click="setFound(id)">
+                <PokemonIcon :id />{{ refName(pokemon(id)) }}
+              </button>
+              <button
+                v-tip="canHover && t('speed.unkeep', { name: refName(pokemon(id)) })"
+                type="button"
+                class="link-button"
+                :aria-label="t('speed.unkeep', { name: refName(pokemon(id)) })"
+                @click="toggleKept(id)"
+              >
+                <X :size="14" aria-hidden="true" />
+              </button>
+            </li>
+          </ul>
         </div>
         <!-- What the ladder is: its numbers, which way it runs, and how many Pokémon it holds. -->
         <div class="band ladder-head">
@@ -811,7 +902,7 @@ const { entered } = usePageEntered()
             <div class="find">
               <PokemonPicker
                 :model-value="found"
-                :ids="onLadder"
+                :ids="findableIds"
                 :placeholder="t('speed.findShort')"
                 list-width-of=".pinned"
                 @update:model-value="setFound"
@@ -885,6 +976,7 @@ const { entered } = usePageEntered()
                   :class="{
                     hit: isHit(e) && !onlyFound,
                     boost: e.boost,
+                    extra: e.extra,
                     yours: e.mine,
                     versus: query.vs === chipKey(e),
                   }"
@@ -907,6 +999,9 @@ const { entered } = usePageEntered()
                     >
                     <span v-if="whenTag(e.boost)" class="tag">{{ whenTag(e.boost) }}</span>
                     <span class="tag">{{ percent(e.share!) }}</span>
+                  </span>
+                  <span v-else-if="e.bench && e.extra" class="tags">
+                    <span class="tag">{{ benchLabel(e.bench) }}</span>
                   </span>
                   <span v-else-if="!e.bench" class="tags">
                     <span class="tag">{{ natureName(e.nature!) }}</span>
@@ -1371,15 +1466,40 @@ const { entered } = usePageEntered()
   font-weight: bold;
   text-align: right;
 }
-/* The find's band. */
+/* The find's band, with why the Pokémon found shows as it does, when it isn't in the top, on a line of its own. */
 .find-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   max-width: none;
 }
-/* The toggle as tall as the search beside it. */
-.find-row > .find-mode {
+.find-note {
+  flex-basis: 100%;
+  margin: 0;
+}
+/* The Pokémon kept, on a line of their own: each its name, which finds it, and a cross. */
+.kept {
+  display: flex;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.kept-mon {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.kept-mon .link-button {
+  display: inline-flex;
+  align-items: center;
+}
+/* The toggles and the clear button as tall as the search beside them. */
+.find-row > :is(.find-mode, .find-clear) {
   align-self: stretch;
 }
 /* The found Pokémon's icon over the toggle's padding, so the toggle takes the height around it: the search's in its
@@ -1387,10 +1507,11 @@ const { entered } = usePageEntered()
 .find-mode :deep(.sheet-icon) {
   margin-block: -6px;
 }
-/* The search takes what the toggle leaves. */
+/* The search takes what the toggles leave, but never less than room for a name: what doesn't fit beside it then goes
+   to the next line. */
 .find.find-row > .picker {
-  flex: 1 1 0;
-  min-width: 0;
+  flex: 1 1 9em;
+  min-width: 9em;
 }
 /* The band's line stands in for the first Speed's. */
 .tier:first-child {
@@ -1953,6 +2074,12 @@ const { entered } = usePageEntered()
 .chip.boost {
   border-style: dashed;
   border-color: var(--muted);
+}
+/* A Pokémon beyond the top, found or kept: on the panel's own color, a dotted line around it. */
+.chip.extra {
+  background: var(--panel);
+  border-style: dotted;
+  border-color: var(--border-strong);
 }
 /* Finding a Pokémon: its chips marked, the Speeds without it faded, but for yours: at its Speed, only the others. */
 .chip.hit {
