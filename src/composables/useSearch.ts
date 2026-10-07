@@ -6,7 +6,7 @@ import { POKEMON } from '@/data/pokemon'
 import { TYPES, type TypeId } from '@/data/types'
 import { loadDescriptions } from '@/i18n/descriptions'
 import { loadDexNames, refName } from '@/i18n/refName'
-import { fold, split } from '@/lib/search'
+import { fold, split, type Marks } from '@/lib/search'
 import { AREAS } from '@/lib/areas'
 
 export type SectionKind = 'pokemon' | 'move' | 'ability' | 'item' | 'condition'
@@ -35,7 +35,7 @@ const LIMIT = 8
 export interface Hit {
   id: string
   name: string
-  parts: [string, string, string]
+  parts: Marks
   to: RouteLocationRaw
 }
 
@@ -43,7 +43,7 @@ export interface Hit {
 export interface PageHit {
   key: string
   name: string
-  parts: [string, string, string]
+  parts: Marks
   to: RouteLocationRaw
   /** The area it's in, for a section's page. */
   area?: MessageKey
@@ -52,7 +52,7 @@ export interface PageHit {
 
 export interface SearchResults {
   pages: PageHit[]
-  types: { id: TypeId; parts: [string, string, string] }[]
+  types: { id: TypeId; parts: Marks }[]
   sections: ((typeof SECTIONS)[number] & { hits: Hit[]; more: number })[]
 }
 

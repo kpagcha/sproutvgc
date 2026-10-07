@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Marked from '@/components/Marked'
 import { computed, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import { move, type MoveId } from '@/data/dex'
 import { CATEGORIES, FLAGS, MOVES, type Category, type Flag, type Move } from '@/data/moves'
@@ -148,10 +149,7 @@ const skeleton = computed(() => [
         <div v-for="r in sorted" :key="r.id" class="row" role="row">
           <div role="cell" class="grow">
             <AppLink :to="{ name: 'move', params: { id: r.id } }" class="name">
-              <template v-if="r.parts"
-                >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
-                >{{ r.parts[2] }}</template
-              >
+              <Marked v-if="r.parts" :p="r.parts" />
               <template v-else>{{ r.name }}</template>
             </AppLink>
             <div v-if="descriptions && phone" class="muted below">

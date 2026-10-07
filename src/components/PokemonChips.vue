@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Marked from '@/components/Marked'
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { pokemon, type PokemonId } from '@/data/dex'
@@ -39,10 +40,7 @@ const mons = computed(() => {
         :aria-current="m.id === current ? 'page' : undefined"
       >
         <PokemonIcon :id="m.id" />
-        <template v-if="m.parts"
-          >{{ m.parts[0] }}<mark>{{ m.parts[1] }}</mark
-          >{{ m.parts[2] }}</template
-        >
+        <Marked v-if="m.parts" :p="m.parts" />
         <template v-else>{{ m.name }}</template>
       </component>
     </li>

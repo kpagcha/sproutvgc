@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Marked from '@/components/Marked'
 import { nextTick, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 import { X } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
@@ -117,10 +118,7 @@ const optionId = (i: number) => `${listId}-${i}`
         @click="emit('pick', r.id)"
       >
         <PokemonIcon :id="r.id" />
-        <span
-          >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
-          >{{ r.parts[2] }}</span
-        >
+        <span><Marked :p="r.parts" /></span>
       </li>
     </ul>
   </div>

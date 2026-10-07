@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Marked from '@/components/Marked'
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { availableIds, item } from '@/data/dex'
@@ -51,10 +52,7 @@ const groups = computed(() => {
               <RouterLink :to="{ name: 'item', params: { id: it.id } }" class="name">
                 <ItemIcon :id="it.id" />
                 <span>
-                  <template v-if="it.parts"
-                    >{{ it.parts[0] }}<mark>{{ it.parts[1] }}</mark
-                    >{{ it.parts[2] }}</template
-                  >
+                  <Marked v-if="it.parts" :p="it.parts" />
                   <template v-else>{{ it.name }}</template>
                 </span>
               </RouterLink>

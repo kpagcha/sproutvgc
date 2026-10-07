@@ -6,20 +6,45 @@ export const fold = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toL
 /** A character that continues a word: an apostrophe too, so "King's" is one word. */
 const IN_WORD = /[\p{L}\p{N}'’]/u
 
-/** The first place `q` occurs in `folded` at the start of a word (anything else separates words), or -1. */
-function wordMatch(folded: string, q: string): number {
-  for (let at = folded.indexOf(q); at >= 0; at = folded.indexOf(q, at + 1)) {
-    if (at === 0 || !IN_WORD.test(folded[at - 1]!)) return at
+/**
+ * A name split by the search's matches: the text between them at even indices, the matches at odd ones (so it always
+ * has an odd length, and its first element is empty when the name starts with a match).
+ */
+export type Marks = readonly string[]
+
+/** The folded query's words, longest first (so a short one doesn't take the place a longer one needs). */
+let lastQuery = ''
+let lastWords: string[] = []
+function words(q: string): string[] {
+  if (q !== lastQuery) {
+    lastQuery = q
+    lastWords = q
+      .split(/[^\p{L}\p{N}'’]+/u)
+      .filter(Boolean)
+      .sort((a, b) => b.length - a.length)
+  }
+  return lastWords
+}
+
+/** The first place `w` occurs in `folded` at the start of a word, outside the ranges `taken`, or -1. */
+function wordMatch(folded: string, w: string, taken: [number, number][]): number {
+  for (let at = folded.indexOf(w); at >= 0; at = folded.indexOf(w, at + 1)) {
+    if (at > 0 && IN_WORD.test(folded[at - 1]!)) continue
+    if (taken.some(([from, to]) => at < to && at + w.length > from)) continue
+    return at
   }
   return -1
 }
 
 /**
- * `name` split around the first match of the folded query `q` at the start of a word ("ab" finds "Volt Absorb", "now"
- * doesn't find "Abomasnow"): [before, match, after], or null. The match is found in the folded name, then mapped back
- * character by character, so it's highlighted in the name as written.
+ * `name` split around the matches of the folded query `q`, or null when it doesn't match. Each word of the query has to
+ * be found at the start of a word of the name, in any order ("ab" finds "Volt Absorb", "now" doesn't find "Abomasnow";
+ * "rotom wash" finds "Rotom (Wash)", "mega garchomp" finds "Garchomp (Mega)"). The matches are found in the folded name,
+ * then mapped back character by character, so they're highlighted in the name as written.
  */
-export function split(name: string, q: string): [string, string, string] | null {
+export function split(name: string, q: string): Marks | null {
+  const ws = words(q)
+  if (!ws.length) return null
   const chars = [...name]
   let folded = ''
   const starts: number[] = [] // Where each character of the name starts in `folded`
@@ -27,11 +52,38 @@ export function split(name: string, q: string): [string, string, string] | null 
     starts.push(folded.length)
     folded += fold(c)
   }
-  const at = wordMatch(folded, q)
-  if (at < 0) return null
-  let from = 0
-  while (from + 1 < starts.length && starts[from + 1]! <= at) from++
-  const to = starts.findIndex((i) => i >= at + q.length)
-  const end = to < 0 ? chars.length : to
-  return [chars.slice(0, from).join(''), chars.slice(from, end).join(''), chars.slice(end).join('')]
+  const taken: [number, number][] = []
+  for (const w of ws) {
+    const at = wordMatch(folded, w, taken)
+    if (at < 0) return null
+    taken.push([at, at + w.length])
+  }
+  // Back to the name's characters, in order.
+  const ranges = taken
+    .map(([at, end]): [number, number] => {
+      let from = 0
+      while (from + 1 < starts.length && starts[from + 1]! <= at) from++
+      const to = starts.findIndex((i) => i >= end)
+      return [from, to < 0 ? chars.length : to]
+    })
+    .sort((a, b) => a[0] - b[0])
+  const parts: string[] = []
+  let prev = 0
+  for (const [from, to] of ranges) {
+    parts.push(chars.slice(prev, from).join(''), chars.slice(from, to).join(''))
+    prev = to
+  }
+  parts.push(chars.slice(prev).join(''))
+  return parts
+}
+
+/** The marks of a name, cut down to its part from `at` to `at + text.length` (`text`). */
+export function sliceMarks(parts: Marks, text: string, at: number): Marks {
+  let pos = 0
+  return parts.map((p) => {
+    const from = Math.min(text.length, Math.max(0, pos - at))
+    const to = Math.min(text.length, Math.max(0, pos + p.length - at))
+    pos += p.length
+    return text.slice(from, to)
+  })
 }

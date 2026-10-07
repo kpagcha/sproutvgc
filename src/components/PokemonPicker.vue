@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Marked from '@/components/Marked'
 import { nextTick, onBeforeUnmount, ref, useId, useTemplateRef, watch } from 'vue'
 import type { PokemonId } from '@/data/dex'
 import { pokemonName as nameOf, usePokemonSearch } from '@/composables/usePokemonSearch'
@@ -283,10 +284,7 @@ const optionId = (i: number) => `${listId}-${i}`
           @mouseenter="active = i"
         >
           <PokemonIcon :id="r.id" />
-          <span
-            >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
-            >{{ r.parts[2] }}</span
-          >
+          <span><Marked :p="r.parts" /></span>
         </li>
       </ul>
     </Teleport>

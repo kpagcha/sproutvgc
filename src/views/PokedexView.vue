@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, h, onMounted, onUnmounted, ref, useTemplateRef, watchEffect, type FunctionalComponent } from 'vue'
+import { computed, onMounted, onUnmounted, ref, useTemplateRef, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   ability,
@@ -17,7 +17,7 @@ import { POKEMON, STATS, loadLearnsets, speciesOf, splitForme, statColor, total,
 import { locale, t, typeName } from '@/i18n'
 import { loadDescriptions, shortText } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
-import { fold, split } from '@/lib/search'
+import { fold, sliceMarks, split, type Marks } from '@/lib/search'
 import { percentiles } from '@/lib/statPercentiles'
 import {
   NO_FILTERS,
@@ -42,6 +42,7 @@ import SkeletonRows from '@/components/SkeletonRows.vue'
 import AppLink from '@/components/AppLink'
 import DexRef from '@/components/DexRef'
 import PokemonIcon from '@/components/PokemonIcon'
+import Marked from '@/components/Marked'
 import SearchResults from '@/components/SearchResults.vue'
 import FilterGroups from '@/components/FilterGroups.vue'
 import { confirmDialog } from '@/composables/useConfirm'
@@ -255,7 +256,6 @@ function pick(k: StatKey) {
 const statLabel = (k: StatKey) => t(k === 'total' ? 'stat.bst' : `stat.${k}`)
 const statIndex = computed(() => (column.value === 'total' ? -1 : STATS.indexOf(column.value)))
 
-type Marks = [string, string, string]
 interface Line {
   row: Row
   /** Under its parent, named by its forme alone; `last` of its parent's. */
@@ -270,12 +270,7 @@ interface Line {
 }
 
 // The search's match within part of a row's name: `text`, which starts at `at` in it.
-function marks(parts: Marks | null, text: string, at: number): Marks {
-  if (!parts) return [text, '', '']
-  const from = Math.min(text.length, Math.max(0, parts[0].length - at))
-  const to = Math.min(text.length, Math.max(from, parts[0].length + parts[1].length - at))
-  return [text.slice(0, from), text.slice(from, to), text.slice(to)]
-}
+const marks = (parts: Marks | null, text: string, at: number): Marks => (parts ? sliceMarks(parts, text, at) : [text])
 
 // The rows as shown: by name, each species' formes under it, with the species dimmed when only a forme matches; by a
 // stat, every row on its own, a forme's name its species' with the forme as a tag.
@@ -331,10 +326,6 @@ const widest = computed(() => {
     .slice(0, 3)
     .map(({ l }) => l)
 })
-
-// A name with the search's match marked.
-const Marked: FunctionalComponent<{ p: Marks }> = ({ p }) => [p[0], p[1] ? h('mark', p[1]) : null, p[2]]
-Marked.props = ['p']
 
 // The rows render once the page is in, with a skeleton until then: all of them take over 100ms.
 const { entered, restoring } = usePageEntered()

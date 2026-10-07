@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Marked from '@/components/Marked'
 import type { RouteLocationRaw } from 'vue-router'
 import { Funnel } from '@lucide/vue'
 import { t } from '@/i18n'
@@ -33,10 +34,7 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
       <li v-for="p in results.pages" :key="p.key">
         <RouterLink :to="p.to" class="chip-hit">
           <span v-if="p.area" class="muted">{{ t(p.area) }} ›</span>
-          <span
-            >{{ p.parts[0] }}<mark>{{ p.parts[1] }}</mark
-            >{{ p.parts[2] }}</span
-          >
+          <span><Marked :p="p.parts" /></span>
           <span v-if="p.soon" class="soon">{{ t('soon.tag') }}</span>
         </RouterLink>
       </li>
@@ -50,10 +48,7 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
       <li v-for="h in s.hits" :key="h.id">
         <RouterLink :to="h.to" class="chip-hit">
           <PokemonIcon :id="h.id as PokemonId" />
-          <span
-            >{{ h.parts[0] }}<mark>{{ h.parts[1] }}</mark
-            >{{ h.parts[2] }}</span
-          >
+          <span><Marked :p="h.parts" /></span>
         </RouterLink>
       </li>
     </ul>
@@ -62,10 +57,7 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
         <dt>
           <RouterLink :to="target(s.kind, h.id, h.to)" :replace="filtering(s.kind)" class="entry-name">
             <ItemIcon v-if="s.kind === 'item'" :id="h.id as ItemId" />
-            <span
-              >{{ h.parts[0] }}<mark>{{ h.parts[1] }}</mark
-              >{{ h.parts[2] }}</span
-            >
+            <span><Marked :p="h.parts" /></span>
             <span v-if="filtering(s.kind)" class="btn chip"
               ><Funnel :size="12" :stroke-width="3" />{{ t('filter.add') }}</span
             >
@@ -86,10 +78,7 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
       <li v-for="ty in results.types" :key="ty.id">
         <RouterLink :to="target('type', ty.id, `/dex/types/${ty.id}`)" :replace="filtering('type')" class="chip-hit">
           <TypeIcon :type="ty.id" />
-          <span
-            >{{ ty.parts[0] }}<mark>{{ ty.parts[1] }}</mark
-            >{{ ty.parts[2] }}</span
-          >
+          <span><Marked :p="ty.parts" /></span>
           <span v-if="filtering('type')" class="btn chip"
             ><Funnel :size="12" :stroke-width="3" />{{ t('filter.add') }}</span
           >

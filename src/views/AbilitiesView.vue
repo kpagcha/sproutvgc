@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Marked from '@/components/Marked'
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { ability, availableIds } from '@/data/dex'
@@ -43,10 +44,7 @@ const shown = computed(() => {
         <template v-for="a in shown" :key="a.id">
           <dt>
             <RouterLink :to="{ name: 'ability', params: { id: a.id } }">
-              <template v-if="a.parts"
-                >{{ a.parts[0] }}<mark>{{ a.parts[1] }}</mark
-                >{{ a.parts[2] }}</template
-              >
+              <Marked v-if="a.parts" :p="a.parts" />
               <template v-else>{{ a.name }}</template>
             </RouterLink>
           </dt>

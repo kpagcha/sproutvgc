@@ -3,7 +3,7 @@ import { availableIds, pokemon, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
 import { locale } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import { fold, split } from '@/lib/search'
+import { fold, split, type Marks } from '@/lib/search'
 
 /** A Pokémon's name, or nothing for none. */
 export const pokemonName = (id: PokemonId | null) => (id ? refName(pokemon(id)) : '')
@@ -30,7 +30,7 @@ export function usePokemonSearch(
   const results = computed(() => {
     if (!open()) return []
     const q = fold(text.value.trim())
-    if (!q || showsPicked.value) return all.value.map((m) => ({ ...m, parts: ['', '', m.name] as const }))
+    if (!q || showsPicked.value) return all.value.map((m) => ({ ...m, parts: [m.name] as Marks }))
     return all.value.flatMap((m) => {
       const parts = split(m.name, q)
       return parts ? [{ ...m, parts }] : []

@@ -6,7 +6,7 @@ import { POKEMON, splitForme } from '@/data/pokemon'
 import { has, percent, players } from '@/data/meta'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import { fold } from '@/lib/search'
+import { fold, split } from '@/lib/search'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useMeta } from '@/composables/useMeta'
 import { usePageEntered } from '@/composables/usePageEntered'
@@ -73,7 +73,7 @@ const { key, desc, toggle, sorted } = useSort<Row, Key>({
 const search = shallowRef(typeof query.value.q === 'string' ? query.value.q : '')
 const shown = computed(() => {
   const q = fold(search.value.trim())
-  return q ? sorted.value.filter((r) => fold(r.name).includes(q)) : sorted.value
+  return q ? sorted.value.filter((r) => split(r.name, q)) : sorted.value
 })
 /** The most used, the full length of the usage bars. */
 const top = computed(() => Math.max(0, ...rows.value.map((r) => r.usage ?? 0)))
