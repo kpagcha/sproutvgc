@@ -7,12 +7,14 @@ let openCount = 0
 <script setup lang="ts">
 import { onBeforeUnmount, useTemplateRef, watch } from 'vue'
 
-// A dialog taking the whole screen, for phones: what would drop down over the page (a list to pick from, a card)
-// opens on a screen of its own instead, the page under it left where it was and kept from scrolling. A native modal
-// <dialog>, so it's over everything, the rest of the page out of reach of taps, keys and screen readers; Escape and
-// phones' back gesture close it. Always in the page (closed), so what's moved into it has somewhere to go.
+// A dialog over the page, for phones: what would drop down over it (a list to pick from, a card) opens in the middle
+// of the screen instead, the page dimmed behind it, still in sight, left where it was and kept from scrolling; a tap on
+// it closes the dialog. What's in it draws its own card: the dialog only places it. A native modal <dialog>, so it's
+// over everything, the rest of the page out of reach of taps, keys and screen readers; Escape and phones' back gesture
+// close it. Always in the page (closed), so what's moved into it has somewhere to go. `fill` makes it as tall as the
+// screen leaves (a list to scroll); else it's as tall as what's in it, scrolling past that.
 const open = defineModel<boolean>('open', { required: true })
-defineProps<{ label: string }>()
+defineProps<{ label: string; fill?: boolean }>()
 
 const dialog = useTemplateRef<HTMLDialogElement>('dialog')
 
@@ -42,6 +44,10 @@ watch(
   },
   { flush: 'post' },
 )
+// A tap on the dimmed page, outside what's in it (which is all of the dialog's box), closes it.
+function onClick(e: MouseEvent) {
+  if (e.target === dialog.value) open.value = false
+}
 // Closed by Escape or the back gesture as by the model.
 function onClose() {
   lock(false)
@@ -57,7 +63,7 @@ onBeforeUnmount(() => {
 
 <template>
   <Teleport to="body">
-    <dialog ref="dialog" class="fullscreen-dialog" :aria-label="label" @close="onClose">
+    <dialog ref="dialog" class="modal-dialog" :class="{ fill }" :aria-label="label" @close="onClose" @click="onClick">
       <slot />
     </dialog>
   </Teleport>
@@ -71,23 +77,31 @@ html.dialog-open {
 </style>
 
 <style scoped>
-.fullscreen-dialog {
-  width: 100%;
-  max-width: none;
-  height: 100dvh;
-  max-height: none;
-  margin: 0;
-  padding: 0;
+/* Centered, a margin all round; no box of its own, what's in it drawing its card (with room for its shadow). */
+.modal-dialog {
+  width: calc(100% - 24px);
+  max-width: 560px;
+  max-height: calc(100dvh - 48px);
+  margin: auto;
+  padding: 0 4px 4px 0;
+  overflow: visible;
   color: var(--text);
-  background: var(--bg);
+  background: none;
   border: none;
   overscroll-behavior: contain;
 }
-.fullscreen-dialog[open] {
+.modal-dialog.fill {
+  height: calc(100dvh - 48px);
+}
+.modal-dialog[open] {
   display: flex;
   flex-direction: column;
 }
-.fullscreen-dialog::backdrop {
-  background: var(--bg);
+.modal-dialog > :slotted(*) {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.modal-dialog::backdrop {
+  background: color-mix(in srgb, var(--ink) 45%, transparent);
 }
 </style>

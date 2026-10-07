@@ -6,7 +6,7 @@ import { POKEMON } from '@/data/pokemon'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
-import FullscreenDialog from '@/components/FullscreenDialog.vue'
+import ModalDialog from '@/components/ModalDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import SearchBox from '@/components/SearchBox.vue'
 
@@ -315,48 +315,50 @@ const optionId = (i: number) => `${listId}-${i}`
         </li>
       </ul>
     </Teleport>
-    <!-- On phones: a screen of its own, the search on top, the list taking the rest. -->
-    <FullscreenDialog v-if="phone" v-model:open="sheet" :label="props.placeholder">
-      <div class="sheet-head">
-        <SearchBox
-          ref="sheetBox"
-          v-model="text"
-          :placeholder="props.placeholder"
-          :aria-label="props.placeholder"
-          role="combobox"
-          autocomplete="off"
-          aria-expanded="true"
-          :aria-controls="listId"
-          :aria-activedescendant="results.length ? optionId(active) : undefined"
-          @keydown="onKey"
-        >
-          <template v-if="props.icon" #lead>
-            <PokemonIcon :id="model ?? 'pikachu'" :class="{ unknown: !model }" />
-          </template>
-        </SearchBox>
-        <button type="button" class="btn sheet-close" :aria-label="t('picker.close')" @click="sheet = false">
-          <X :size="18" aria-hidden="true" />
-        </button>
-      </div>
-      <ul v-if="sheet" :id="listId" ref="list" class="sheet-list" role="listbox">
-        <li
-          v-for="(r, i) in results"
-          :id="optionId(i)"
-          :key="r.id"
-          role="option"
-          class="option"
-          :class="{ active: i === active }"
-          :aria-selected="i === active"
-          @click="pick(r.id)"
-        >
-          <PokemonIcon :id="r.id" />
-          <span
-            >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
-            >{{ r.parts[2] }}</span
+    <!-- On phones: a dialog over the page, the search on top, the list taking the rest. -->
+    <ModalDialog v-if="phone" v-model:open="sheet" :label="props.placeholder" fill>
+      <div class="panel sheet">
+        <div class="sheet-head">
+          <SearchBox
+            ref="sheetBox"
+            v-model="text"
+            :placeholder="props.placeholder"
+            :aria-label="props.placeholder"
+            role="combobox"
+            autocomplete="off"
+            aria-expanded="true"
+            :aria-controls="listId"
+            :aria-activedescendant="results.length ? optionId(active) : undefined"
+            @keydown="onKey"
           >
-        </li>
-      </ul>
-    </FullscreenDialog>
+            <template v-if="props.icon" #lead>
+              <PokemonIcon :id="model ?? 'pikachu'" :class="{ unknown: !model }" />
+            </template>
+          </SearchBox>
+          <button type="button" class="btn sheet-close" :aria-label="t('picker.close')" @click="sheet = false">
+            <X :size="18" aria-hidden="true" />
+          </button>
+        </div>
+        <ul v-if="sheet" :id="listId" ref="list" class="sheet-list" role="listbox">
+          <li
+            v-for="(r, i) in results"
+            :id="optionId(i)"
+            :key="r.id"
+            role="option"
+            class="option"
+            :class="{ active: i === active }"
+            :aria-selected="i === active"
+            @click="pick(r.id)"
+          >
+            <PokemonIcon :id="r.id" />
+            <span
+              >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
+              >{{ r.parts[2] }}</span
+            >
+          </li>
+        </ul>
+      </div>
+    </ModalDialog>
   </div>
 </template>
 
@@ -405,7 +407,14 @@ const optionId = (i: number) => `${listId}-${i}`
 .picker :deep(input[readonly]) {
   cursor: pointer;
 }
-/* The screen: the search box and a way out on top, the list scrolling under them, its rows roomier for fingers. */
+/* The dialog's card: the search box and a way out on top, the list scrolling under them, its rows roomier for
+   fingers. */
+.sheet {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
 .sheet-head {
   display: flex;
   align-items: center;

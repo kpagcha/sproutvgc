@@ -42,7 +42,7 @@ import { useOpenState } from '@/composables/useOpenState'
 import { usePageEntered } from '@/composables/usePageEntered'
 import AppLink from '@/components/AppLink'
 import BuildSummary from '@/components/BuildSummary.vue'
-import FullscreenDialog from '@/components/FullscreenDialog.vue'
+import ModalDialog from '@/components/ModalDialog.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import MetaPicker from '@/components/MetaPicker.vue'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -871,10 +871,10 @@ const { entered } = usePageEntered()
         class="yours-drop"
         :style="{ maxHeight: `${dropHeight}px` }"
       ></div>
-      <!-- On phones, where yours' card opens instead. -->
-      <FullscreenDialog v-model:open="yoursSheet" :label="t('speed.yours')">
+      <!-- On phones, where yours' card opens instead: a dialog over the page. -->
+      <ModalDialog v-model:open="yoursSheet" :label="t('speed.yours')">
         <div id="yours-sheet" class="yours-sheet"></div>
-      </FullscreenDialog>
+      </ModalDialog>
     </div>
     <!-- A section that folds, as yours does: its heading, with what's active in short beside it while folded (under it
          on phones), and what folds it. -->
@@ -1524,17 +1524,17 @@ const { entered } = usePageEntered()
   background: var(--panel);
   border-top: 1px solid var(--border);
 }
-/* On a screen of its own (phones): the card filling it, scrolling, its band on top saying what it is (Clear left to
+/* In a dialog over the page (phones): the card scrolling within it, its band on top saying what it is (Clear left to
    the actions at its foot, which stay in view). */
 .yours-sheet {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
   min-height: 0;
-  padding: 12px 12px 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
 }
 .yours-sheet > .yours {
   margin: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .yours-sheet .band-clear,
 .yours-sheet .yours-marker {
