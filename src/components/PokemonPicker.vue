@@ -21,6 +21,8 @@ const props = defineProps<{
   /** The element around the field (a selector, for its closest ancestor) whose width the list takes (inside its
    * padding), rather than the field's, so it keeps one width as what's beside the field comes and goes. */
   listWidthOf?: string
+  /** Shows the one picked's icon at the field's start; none picked, a silhouette, asking who. */
+  icon?: boolean
 }>()
 const model = defineModel<PokemonId | null>({ required: true })
 
@@ -199,7 +201,11 @@ const optionId = (i: number) => `${listId}-${i}`
       @click="onTap"
       @blur="onBlur"
       @keydown="onKey"
-    />
+    >
+      <template v-if="props.icon" #lead>
+        <PokemonIcon :id="model ?? 'pikachu'" :class="{ unknown: !model }" />
+      </template>
+    </SearchBox>
     <Teleport to="body">
       <ul
         v-if="results.length"
@@ -243,6 +249,9 @@ const optionId = (i: number) => `${listId}-${i}`
 }
 .picker :deep(.search-box) {
   margin: 0;
+}
+.unknown {
+  filter: brightness(0);
 }
 /* The options: a card under the field, as the site's surfaces are. */
 .options {

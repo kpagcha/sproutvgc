@@ -5,7 +5,8 @@ import { t } from '@/i18n'
 
 // A search field with a button that clears it, in every browser: phones' own clear button only shows on some, and
 // desktop browsers show it on hover at best, so the native one is hidden in favour of this. Attributes go to the field.
-// `wide` fills the width it's given (the home page's search); `icon` puts a magnifying glass at the start.
+// `wide` fills the width it's given (the home page's search); `icon` puts a magnifying glass at the start, and the
+// `lead` slot anything else there (a Pokémon's icon).
 defineOptions({ inheritAttrs: false })
 defineProps<{ wide?: boolean; icon?: boolean }>()
 const query = defineModel<string>({ default: '' })
@@ -19,8 +20,9 @@ defineExpose({ focus: (options?: FocusOptions) => input.value?.focus(options) })
 </script>
 
 <template>
-  <span class="search-box" :class="{ wide, icon }">
+  <span class="search-box" :class="{ wide, icon, led: $slots.lead }">
     <Search v-if="icon" class="glass" :size="16" :stroke-width="2.5" aria-hidden="true" />
+    <span v-if="$slots.lead" class="lead"><slot name="lead" /></span>
     <input ref="input" v-model="query" type="search" class="search" v-bind="$attrs" />
     <button v-if="query" type="button" class="clear" :aria-label="t('search.clear')" @click="clear">×</button>
   </span>
@@ -46,6 +48,17 @@ defineExpose({ focus: (options?: FocusOptions) => input.value?.focus(options) })
 }
 .icon .search {
   padding-left: 32px;
+}
+.led .search {
+  padding-left: 44px;
+}
+.lead {
+  position: absolute;
+  top: 50%;
+  left: 4px;
+  display: flex;
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 .glass {
   position: absolute;

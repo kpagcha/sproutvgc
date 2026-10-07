@@ -1129,16 +1129,20 @@ const { entered } = usePageEntered()
         <summary class="yours-title" @click.prevent="!side && toggleYours()">
           <span class="marker yours-marker" aria-hidden="true">{{ yoursOpen ? '▾' : '▸' }}</span>
           {{ t('speed.yours') }}
-          <PokemonIcon v-if="mine" :id="mine" :scale="0.75" class="yours-icon" />
+          <!-- Unpicking yours, at the band's end: its own click, not the heading's. -->
+          <button v-if="mine" type="button" class="btn on-band band-clear" @click.stop.prevent="clearMine">
+            {{ t('speed.clear') }}
+          </button>
         </summary>
         <div class="yours-pick">
           <PokemonPicker
             :model-value="mine"
             :placeholder="t('speed.yoursPick')"
             list-width-of=".yours-pick"
+            icon
+            class="yours-picker"
             @update:model-value="pickMine"
           />
-          <button v-if="mine" type="button" class="btn" @click="clearMine">{{ t('speed.clear') }}</button>
         </div>
         <p v-if="!mine" class="muted small wide-only yours-intro">{{ t('speed.yoursIntro') }}</p>
         <template v-else>
@@ -1811,10 +1815,19 @@ const { entered } = usePageEntered()
   font-weight: bold;
   cursor: pointer;
 }
-/* Yours' icon in the band, right after the heading (its cell has room of its own around the sprite), at three quarters
-   of its size to fit the band, and taking no height of its own, so the band is as tall with it as without. */
-.yours-icon {
-  margin-block: -6px;
+/* Clear, at the band's end. */
+.band-clear {
+  margin-block: -2px;
+  margin-left: auto;
+}
+/* Yours' search as a button holding it: its icon, its name and the cross, raised and bold as the buttons are. */
+.yours-picker :deep(.search) {
+  font-weight: bold;
+  box-shadow: var(--hard-sm);
+  cursor: pointer;
+}
+.yours-picker :deep(.search:focus) {
+  cursor: text;
 }
 .yours-title::-webkit-details-marker {
   display: none;

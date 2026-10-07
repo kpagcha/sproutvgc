@@ -135,6 +135,26 @@
 :root:root .btn:disabled {
   box-shadow: none;
 }
+/* A button on a panel's band: in the band's own text color, outlined in it, flat; a wash of it on hover, more pressed.
+   Small, so the band is as tall with it as without. */
+:root:root .btn.on-band {
+  min-height: 0;
+  padding: 0 8px;
+  font-size: 0.875em;
+  color: inherit;
+  background: transparent;
+  border-color: currentColor;
+  box-shadow: none;
+}
+:root:root .btn.on-band:hover:not(:disabled) {
+  transform: none;
+  background: color-mix(in srgb, currentColor 18%, transparent);
+  box-shadow: none;
+}
+:root:root .btn.on-band:active:not(:disabled) {
+  transform: none;
+  background: color-mix(in srgb, currentColor 30%, transparent);
+}
 :root:root .btn.primary,
 :root:root .btn.danger {
   border-color: var(--ink);
