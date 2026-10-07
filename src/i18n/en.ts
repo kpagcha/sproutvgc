@@ -679,7 +679,7 @@ export const messages = {
   'speed.opponentsHead': 'Opponents',
   'speed.opponentsHint': 'Tap one to compare.',
   'speed.opponentsGo': 'Find one on the ladder',
-  'speed.vs': 'Against {name} at {speed}',
+  'speed.vs': 'Against {name}',
   'speed.vsNow.first': 'Your {name} moves first',
   'speed.vsNow.tie': 'Your {name} ties',
   'speed.vsNow.after': 'Your {name} moves after',

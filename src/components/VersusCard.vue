@@ -9,10 +9,10 @@ import { pointsText } from '@/lib/speedBuild'
 import AppLink from '@/components/AppLink'
 import PokemonIcon from '@/components/PokemonIcon'
 
-// Yours against a Pokémon on the speed tiers' ladder (the chip tapped): its name (a link to its page) and Speed on
-// top; then whether yours moves first as it's built, at what Speeds, and for its nature the points that do it (what's
-// left to spare, or, when none do, what another nature would need); and the way to the comparison of the two, where
-// every nature's shown. A panel of its own under yours beside the ladder; narrower, a card floating at the foot of the
+// Yours against a Pokémon on the speed tiers' ladder (the chip tapped): its name (a link to its page) on top; then
+// whether yours moves first as it's built, at what Speeds (its own finding its chip), and for its nature the points that
+// do it (what's left to spare, or, when none do, what another nature would need); and the way to the comparison of the
+// two, where every nature's shown. A panel of its own under yours beside the ladder; narrower, a card floating at the foot of the
 // screen.
 type Result = ReturnType<typeof pointsToMoveFirst>
 const props = defineProps<{
@@ -50,8 +50,8 @@ const plan = computed(() => {
 </script>
 
 <template>
-  <!-- A band of the opponents' red: the Pokémon it's against (a link to its page) at its Speed (finding its chip on
-       the ladder), and a way to close it. -->
+  <!-- A band of the opponents' red: the Pokémon it's against (a link to its page), and a way to close it, as yours'
+       band clears it. -->
   <section class="panel banded versus-card small" role="status">
     <div class="band">
       <strong
@@ -59,19 +59,22 @@ const plan = computed(() => {
           ><template v-if="typeof part === 'string'">{{ part }}</template
           ><AppLink v-else-if="part.slot === 'name'" :to="{ name: 'pokemon', params: { id: props.id } }" class="mon"
             ><PokemonIcon :id="props.id" />{{ props.name }}</AppLink
-          ><button v-else type="button" class="speed" :aria-label="t('speed.vsLocate')" @click="emit('locate')">
-            {{ props.speed }}
-          </button></template
+          ></template
         ></strong
       >
-      <button type="button" class="close" :aria-label="t('speed.vsClose')" @click="emit('close')">
-        <X :size="18" aria-hidden="true" />
+      <button type="button" class="btn on-band inverted close" @click="emit('close')">
+        <X :size="14" aria-hidden="true" />{{ t('speed.vsClose') }}
       </button>
     </div>
-    <!-- Yours as it's built: moves first, ties or moves after, at what Speeds. -->
+    <!-- Yours as it's built: moves first, ties or moves after, at what Speeds (its, finding its chip on the ladder). -->
     <p class="verdict" :class="verdict">
       {{ t(`speed.vsNow.${verdict}`, { name: props.mineName }) }}
-      <span class="speeds">{{ props.mineSpeed }} <span class="vs">vs</span> {{ props.speed }}</span>
+      <span class="speeds"
+        >{{ props.mineSpeed }} <span class="vs">vs</span>{{ ' '
+        }}<button type="button" class="speed" :aria-label="t('speed.vsLocate')" @click="emit('locate')">
+          {{ props.speed }}
+        </button></span
+      >
     </p>
     <!-- Its nature: the points that do it; when none do, another nature's. -->
     <p class="plan">{{ plan }}</p>
@@ -128,18 +131,19 @@ const plan = computed(() => {
 .speed:hover {
   text-decoration-style: solid;
 }
-/* Close: its icon alone, in the band's text color, a faint square behind it on hover. */
-.close {
-  display: inline-flex;
+/* Close, as yours' band's Clear is: filled with the band's text color, in the opponents' red. */
+:root:root .versus-card .btn.on-band.inverted {
   flex: none;
-  padding: 2px;
-  color: inherit;
-  background: none;
-  border: none;
-  cursor: pointer;
+  margin-block: -2px;
+  color: var(--opponent);
+  background: var(--opponent-text);
+  border-color: var(--opponent-text);
 }
-.close:hover {
-  background: color-mix(in srgb, var(--opponent-text) 20%, transparent);
+:root:root .versus-card .btn.on-band.inverted:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--opponent-text) 85%, var(--opponent));
+}
+:root:root .versus-card .btn.on-band.inverted:active:not(:disabled) {
+  background: color-mix(in srgb, var(--opponent-text) 70%, var(--opponent));
 }
 /* The verdict: bold, in the color of how it goes for yours; the Speeds beside it. */
 .verdict {
@@ -149,7 +153,6 @@ const plan = computed(() => {
   justify-content: space-between;
   gap: 2px 10px;
   margin: 0;
-  font-size: 1.1em;
   font-weight: bold;
 }
 .verdict.after {

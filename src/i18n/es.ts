@@ -687,7 +687,7 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.opponentsHead': 'Rivales',
   'speed.opponentsHint': 'Toca uno para comparar.',
   'speed.opponentsGo': 'Busca uno en la escala',
-  'speed.vs': 'Contra {name} con {speed}',
+  'speed.vs': 'Contra {name}',
   'speed.vsNow.first': 'Tu {name} mueve antes',
   'speed.vsNow.tie': 'Tu {name} empata',
   'speed.vsNow.after': 'Tu {name} mueve después',
