@@ -4,13 +4,14 @@ import { useRoute, type RouteLocationNormalizedLoaded, type RouteLocationRaw } f
 import { AnimatePresence, MotionConfig, motion } from 'motion-v'
 import { FADE, PAGE } from '@/lib/motion'
 import { pageEntered, pageEntering, pageExited, pageKey, setPageWaits } from '@/lib/pageExit'
-import { t, typeName, type MessageKey } from '@/i18n'
+import { LOCALES, locale, setLocale, t, typeName, type Locale, type MessageKey } from '@/i18n'
 import { isType } from '@/data/types'
 import { generatedName, refName } from '@/i18n/refName'
 import type { GeneratedKind } from '@/i18n'
 import type { Ref } from '@/data/dex'
 import { GAME_NAME, REGULATION } from '@/data/format'
-import { Search, Settings } from '@lucide/vue'
+import { Moon, Search, Settings, Sun } from '@lucide/vue'
+import { useTheme } from '@/composables/useTheme'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import NavPill from '@/components/NavPill.vue'
 import { KeptPage, Page } from '@/components/PageFrame'
@@ -94,6 +95,13 @@ const NAV: { to: string; section: string; label: MessageKey }[] = AREAS.map((a) 
   label: a.label,
 }))
 
+// Wider screens switch the language and the theme from the bar too, beside Settings: the language to the next one, the
+// theme to the other of light and dark (from what shows, the device's when on auto).
+const { theme, setMode } = useTheme()
+const CODES = Object.keys(LOCALES) as Locale[]
+const nextLocale = () => setLocale(CODES[(CODES.indexOf(locale.value) + 1) % CODES.length]!)
+const toggleTheme = () => setMode(theme.value === 'dark' ? 'light' : 'dark')
+
 // Narrow screens fold the areas into a dropdown, and show Settings as just its icon.
 const compactQuery = window.matchMedia('(max-width: 560px)')
 const compact = ref(compactQuery.matches)
@@ -157,6 +165,32 @@ const fadeVariants = {
             <RouterLink v-for="n in NAV" :key="n.to" :to="n.to" :class="{ active: section === n.section }">
               <span class="label">{{ t(n.label) }}</span>
             </RouterLink>
+          </template>
+          <template v-if="!compact">
+            <button
+              v-tip="t('lang.label')"
+              type="button"
+              class="quick first"
+              :aria-label="`${t('lang.label')}: ${LOCALES[locale]}`"
+              @click="nextLocale"
+            >
+              <span class="label">{{ locale.toUpperCase() }}</span>
+            </button>
+            <button
+              v-tip="t('theme.label')"
+              type="button"
+              class="quick"
+              :aria-label="t('theme.label')"
+              @click="toggleTheme"
+            >
+              <component
+                :is="theme === 'dark' ? Moon : Sun"
+                class="label"
+                :size="16"
+                :stroke-width="2.5"
+                aria-hidden="true"
+              />
+            </button>
           </template>
           <RouterLink
             to="/settings"
@@ -308,6 +342,30 @@ const fadeVariants = {
 }
 .nav .end {
   margin-left: auto;
+}
+/* The language and theme switches, before Settings at the end, as its link looks. */
+.nav .quick {
+  display: flex;
+  align-items: center;
+  flex: none;
+  padding: 4px 8px;
+  font: inherit;
+  color: var(--text);
+  background: none;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .nav .quick:hover {
+    background: var(--hover);
+  }
+}
+.nav .quick.first {
+  margin-left: auto;
+}
+.nav .quick + .end {
+  margin-left: 0;
 }
 /* The dropdown's menu hangs below the bar, so nothing may clip it (and the three links never need scrolling). */
 .nav.compact {
