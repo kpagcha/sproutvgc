@@ -2,7 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
 import { AnimatePresence, motion } from 'motion-v'
 import { useRouter } from 'vue-router'
-import { ArrowRight, ChevronsDown, ChevronsUp, Columns2, Plus, RotateCcw, Trash2, X } from '@lucide/vue'
+import { ArrowLeftRight, ArrowRight, ChevronsDown, ChevronsUp, Columns2, Plus, RotateCcw, Trash2, X } from '@lucide/vue'
 import { ability, availableIds, condition, item, pokemon, type ItemId, type PokemonId, type Ref } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
@@ -255,6 +255,14 @@ function resetMine() {
 function clearMine() {
   const q = { ...query.value }
   for (const k of ['mine', 'mynat', 'mypts', 'mymods', 'mystage', 'vs']) delete q[k]
+  void router.replace({ query: q })
+}
+/** Yours and the one found swapped: the one found yours, at its build as picked (keeping your modifiers, as picking
+ * one does), and yours found. */
+function swapMine() {
+  if (mine.value === null || found.value === null) return
+  const q = { ...query.value, mine: found.value, ...buildOf(found.value), find: mine.value }
+  delete q.vs
   void router.replace({ query: q })
 }
 const setMyNature = (e: NatureEffect) => set('mynat', e)
@@ -1136,6 +1144,17 @@ const { entered } = usePageEntered()
             ><Columns2 :size="16" aria-hidden="true" />{{ t('compare.short')
             }}<ArrowRight :size="16" aria-hidden="true"
           /></AppLink>
+          <!-- Yours and the one found swapped, once there's yours; its icon alone on phones, so the row still fits. -->
+          <button
+            v-if="found"
+            type="button"
+            class="btn find-mode find-swap"
+            :disabled="!mine"
+            :aria-label="t('compare.swap')"
+            @click="swapMine"
+          >
+            <ArrowLeftRight :size="16" aria-hidden="true" /><span class="swap-text">{{ t('compare.swap') }}</span>
+          </button>
           <button v-if="found" type="button" class="btn inverted find-clear" @click="setFound(null)">
             <Trash2 :size="16" aria-hidden="true" />{{ t('speed.clear') }}
           </button>
@@ -1845,6 +1864,14 @@ const { entered } = usePageEntered()
 }
 .find-compare {
   gap: 6px;
+}
+.find-swap {
+  gap: 6px;
+}
+@media (max-width: 480px) {
+  .swap-text {
+    display: none;
+  }
 }
 .find-compare:hover {
   text-decoration: none;
