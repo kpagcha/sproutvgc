@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { RouteLocationRaw } from 'vue-router'
-import { Funnel } from '@lucide/vue'
+import { Funnel, Star } from '@lucide/vue'
 import { t } from '@/i18n'
 import type { ItemId, PokemonId } from '@/data/dex'
 import { description, isDescribed } from '@/i18n/descriptions'
@@ -11,8 +11,8 @@ import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import DexText from '@/components/DexText'
 
-// The dex searched, grouped by category (`useSearch`): the home page's results, the search page's, and the Pokémon
-// list's. On the Pokémon list (given its `filters`), types, abilities and moves filter it rather than open their pages.
+// The dex searched, grouped by category (`useSearch`), the reader's favorites first and starred: the home page's
+// results, the search page's, and the Pokémon list's. On the Pokémon list (given its `filters`), types, abilities and moves filter it rather than open their pages.
 const props = defineProps<{ query: string; results: SearchResults; filters?: Filters }>()
 
 /** Where a result leads: its page, or on the Pokémon list, the list filtered by it. */
@@ -53,7 +53,7 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
           <span
             >{{ h.parts[0] }}<mark>{{ h.parts[1] }}</mark
             >{{ h.parts[2] }}</span
-          >
+          ><Star v-if="h.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" />
         </RouterLink>
       </li>
     </ul>
@@ -65,7 +65,7 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
             <span
               >{{ h.parts[0] }}<mark>{{ h.parts[1] }}</mark
               >{{ h.parts[2] }}</span
-            >
+            ><Star v-if="h.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" />
             <span v-if="filtering(s.kind)" class="btn chip"
               ><Funnel :size="12" :stroke-width="3" />{{ t('filter.add') }}</span
             >

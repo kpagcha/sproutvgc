@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, useId, useTemplateRef, watch } from 'vue'
+import { Star } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
+import { t } from '@/i18n'
 import { pokemonName as nameOf, usePokemonSearch } from '@/composables/usePokemonSearch'
 import ModalDialog from '@/components/ModalDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -8,12 +10,12 @@ import PokemonSearchPanel from '@/components/PokemonSearchPanel.vue'
 import SearchBox from '@/components/SearchBox.vue'
 
 // Picks one of the regulation's Pokémon by name: the site's search box, with the Pokémon its text finds listed under
-// it (their icons, the match marked; every one while it's empty), in a list that scrolls, picked by clicking or with
-// the arrow keys and Enter. Shows the one picked once it's picked, and opening the list again brings it into view,
-// ready; emptying the field unpicks it. The list is drawn on the page's body, placed under the field, so no container
-// it's in (a <details>, which clips its content to animate it; a scrolling one) can cut it off. On phones, the field
-// opens a screen of its own instead: a search box on top and the list under it, filling the rest, the page under it
-// left where it was.
+// it (their icons, the match marked, a star after the reader's favorites; every one while it's empty, the favorites
+// first), in a list that scrolls, picked by clicking or with the arrow keys and Enter. Shows the one picked once
+// it's picked, and opening the list again brings it into view, ready; emptying the field unpicks it. The list is
+// drawn on the page's body, placed under the field, so no container it's in (a <details>, which clips its content to
+// animate it; a scrolling one) can cut it off. On phones, the field opens a screen of its own instead: a search box
+// on top and the list under it, filling the rest, the page under it left where it was.
 const props = defineProps<{
   placeholder: string
   /** The Pokémon to pick from, when not every one of the regulation's. */
@@ -271,23 +273,26 @@ const optionId = (i: number) => `${listId}-${i}`
           maxHeight: `${LIST_HEIGHT()}px`,
         }"
       >
-        <li
-          v-for="(r, i) in results"
-          :id="optionId(i)"
-          :key="r.id"
-          role="option"
-          class="option"
-          :class="{ active: i === active }"
-          :aria-selected="i === active"
-          @mousedown.prevent="pick(r.id)"
-          @mouseenter="active = i"
-        >
-          <PokemonIcon :id="r.id" />
-          <span
-            >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
-            >{{ r.parts[2] }}</span
+        <template v-for="(r, i) in results" :key="r.key">
+          <li v-if="r.group" role="presentation" class="group">
+            {{ t(r.group === 'favorites' ? 'favorites.title' : 'picker.all') }}
+          </li>
+          <li
+            :id="optionId(i)"
+            role="option"
+            class="option"
+            :class="{ active: i === active }"
+            :aria-selected="i === active"
+            @mousedown.prevent="pick(r.id)"
+            @mouseenter="active = i"
           >
-        </li>
+            <PokemonIcon :id="r.id" />
+            <span
+              >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
+              >{{ r.parts[2] }}</span
+            ><Star v-if="r.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" />
+          </li>
+        </template>
       </ul>
     </Teleport>
     <!-- On phones: a dialog over the page, its card the search panel (made anew each time it opens). -->
@@ -347,6 +352,15 @@ const optionId = (i: number) => `${listId}-${i}`
 }
 .option.active {
   background: var(--sel);
+}
+/* A group's heading, while browsing with favorites: small, muted, not an option. */
+.group {
+  padding: 6px 6px 2px;
+  font-size: 0.75em;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
 }
 /* On phones, the field opens the dialog: no caret, no keyboard. */
 .picker :deep(input[readonly]) {

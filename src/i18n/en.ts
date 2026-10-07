@@ -760,6 +760,7 @@ export const messages = {
   'compare.helpAgainst':
     'The Speed points each side needs to move before the other with each kind of nature, the rest of its build as it is.',
   'picker.close': 'Close',
+  'picker.all': 'All Pokémon',
   'compare.intro':
     'Your Pokémon and an opponent, each with its own build and modifiers: which moves first, and the points each needs to move before the other.',
   'compare.pick': 'Pick a Pokémon',

@@ -770,6 +770,7 @@ export const messages: Record<keyof typeof en, string> = {
   'compare.helpAgainst':
     'Los puntos de Velocidad que necesita cada lado para mover antes que el otro con cada tipo de naturaleza, con el resto de su distribución como está.',
   'picker.close': 'Cerrar',
+  'picker.all': 'Todos los Pokémon',
   'compare.intro':
     'Tu Pokémon y un rival, cada uno con su distribución y sus modificadores: cuál mueve antes, y los puntos que necesita cada uno para mover antes que el otro.',
   'compare.pick': 'Elige un Pokémon',
