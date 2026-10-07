@@ -1993,7 +1993,8 @@ const { entered } = usePageEntered()
     align-items: start;
     gap: 0 12px;
   }
-  /* Beside the ladder, yours and the comparison under it, stuck as it scrolls; scrolling when taller than the screen. */
+  /* Beside the ladder, yours and the comparison under it, stuck as it scrolls; scrolling when taller than the screen,
+     the page then scrolling on from its end (and from anywhere on it when it fits), as a wheel over it would expect. */
   .side-col {
     position: sticky;
     top: 12px;
@@ -2003,7 +2004,6 @@ const { entered } = usePageEntered()
     max-height: calc(100dvh - 24px);
     padding: 0 4px 4px 0;
     overflow-y: auto;
-    overscroll-behavior: contain;
   }
   .side-col > .yours {
     margin: 0;

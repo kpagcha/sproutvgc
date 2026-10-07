@@ -279,7 +279,11 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
         v-for="side in sides"
         :key="side.s"
         class="panel banded side"
-        :class="{ first: verdict && !verdict.tie && verdict.first === side.s, opponent: side.s === 'b' }"
+        :class="{
+          first: verdict && !verdict.tie && verdict.first === side.s,
+          tied: verdict?.tie,
+          opponent: side.s === 'b',
+        }"
       >
         <!-- Yours, and its opponent, red as on the speed tiers. On phones, where one is under the other, each stuck to
              the top while its panel is in view, with its Pokémon in short as on the speed tiers' bar. -->
@@ -459,6 +463,12 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
   grid-area: active;
   --gap: 4px;
 }
+/* Beside the heading, centered on it by its chips, not the room under them for their shadows. */
+@media (min-width: 721px) {
+  .active {
+    margin-bottom: -4px;
+  }
+}
 .active .item {
   flex: none;
   padding: 1px 6px;
@@ -602,6 +612,13 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
   margin: 0 0 12px;
   font-weight: bold;
 }
+/* Its line as tall as the icon of the one first, whether it shows or not (a tie, none picked): nothing under it moves
+   as the verdict changes. Its own width taken back from the gap after it. */
+.verdict::before {
+  content: '';
+  height: 30px;
+  margin-right: -10px;
+}
 .verdict-speeds {
   margin-left: auto;
   font-variant-numeric: tabular-nums;
@@ -661,13 +678,18 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
   gap: 8px;
   font-weight: bold;
 }
-/* The one that moves first, marked by its outline: blue for yours, the opponents' red for an opponent. */
+/* The one that moves first, marked by its outline: blue for yours, the opponents' red for an opponent; on a tie, both,
+   in a neutral color. */
 .side.first {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
 .side.first.opponent {
   outline-color: var(--opponent);
+}
+.side.tied {
+  outline: 3px solid var(--muted);
+  outline-offset: 2px;
 }
 .picker {
   width: 100%;
