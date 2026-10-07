@@ -1580,6 +1580,10 @@ const { entered } = usePageEntered()
   details[open] > .head {
     border-bottom: 1px solid var(--border);
   }
+  /* Folded, the heading's padding is the panel's at its foot too, not added to it. */
+  details:not([open]) > .head {
+    margin-bottom: calc(-1 * var(--panel-pad));
+  }
 }
 .head::-webkit-details-marker {
   display: none;
