@@ -1,13 +1,10 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, useId, useTemplateRef, watch } from 'vue'
-import { X } from '@lucide/vue'
-import { availableIds, pokemon, type PokemonId } from '@/data/dex'
-import { POKEMON } from '@/data/pokemon'
-import { locale, t } from '@/i18n'
-import { refName } from '@/i18n/refName'
-import { fold, split } from '@/lib/search'
+import { nextTick, onBeforeUnmount, ref, useId, useTemplateRef, watch } from 'vue'
+import type { PokemonId } from '@/data/dex'
+import { pokemonName as nameOf, usePokemonSearch } from '@/composables/usePokemonSearch'
 import ModalDialog from '@/components/ModalDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import PokemonSearchPanel from '@/components/PokemonSearchPanel.vue'
 import SearchBox from '@/components/SearchBox.vue'
 
 // Picks one of the regulation's Pokémon by name: the site's search box, with the Pokémon its text finds listed under
@@ -29,35 +26,20 @@ const props = defineProps<{
 }>()
 const model = defineModel<PokemonId | null>({ required: true })
 
-const ALL = computed(() =>
-  (props.ids ?? availableIds('pokemon'))
-    .filter((id) => !POKEMON[id].cosmetic)
-    .map((id) => ({ id, name: refName(pokemon(id)) }))
-    .sort((a, b) => a.name.localeCompare(b.name, locale.value)),
-)
-const nameOf = (id: PokemonId | null) => (id ? refName(pokemon(id)) : '')
-
 const text = ref(nameOf(model.value))
 watch(model, (id) => (text.value = nameOf(id)))
 watch(text, (v) => {
-  if (!v.trim() && model.value && !sheet.value) model.value = null
+  if (!v.trim() && model.value) model.value = null
 })
 const open = ref(false)
 const active = ref(0)
 
-const results = computed(() => {
-  if (!open.value) return []
-  const q = fold(text.value.trim())
-  // The field showing the one picked, or empty: every Pokémon, to browse.
-  if (!q || text.value === nameOf(model.value))
-    return ALL.value.map((m) => ({ ...m, parts: ['', '', m.name] as const }))
-  return ALL.value.flatMap((m) => {
-    const parts = split(m.name, q)
-    return parts ? [{ ...m, parts }] : []
-  })
-})
-// The field shows the one picked as it is, not a search being typed.
-const showsPicked = computed(() => !!model.value && text.value === nameOf(model.value))
+const { results, showsPicked } = usePokemonSearch(
+  () => props.ids,
+  text,
+  () => model.value,
+  () => open.value,
+)
 // Browsing every Pokémon from the one picked: it, in view; else the first.
 watch(results, (list) => {
   const i = showsPicked.value ? list.findIndex((r) => r.id === model.value) : -1
@@ -65,28 +47,14 @@ watch(results, (list) => {
   if (i > 0) void nextTick(() => showOption(i, true))
 })
 
-// Phones (as wide as 720px) pick on a screen of their own (`sheet`), its search box ready to type in, showing the one
-// picked (selected, so typing replaces it) and the list at it. Its search emptied doesn't unpick: closing it leaves
-// the pick as it was.
+// Phones (as wide as 720px) pick in a dialog over the page (`sheet`), its card the search panel.
 const phoneQuery = window.matchMedia('(max-width: 720px)')
 const phone = ref(phoneQuery.matches)
 const onPhone = (e: MediaQueryListEvent) => (phone.value = e.matches)
 phoneQuery.addEventListener('change', onPhone)
 onBeforeUnmount(() => phoneQuery.removeEventListener('change', onPhone))
 const sheet = ref(false)
-const sheetBox = useTemplateRef<InstanceType<typeof SearchBox>>('sheetBox')
-async function openSheet() {
-  sheet.value = true
-  open.value = true
-  await nextTick()
-  sheetBox.value?.focus({ preventScroll: true })
-  sheetBox.value?.select()
-}
-watch(sheet, (o) => {
-  if (o) return
-  open.value = false
-  text.value = nameOf(model.value)
-})
+const openSheet = () => (sheet.value = true)
 
 // On touch screens, picking one leaves the field, so the keyboard goes away and the page it was covering shows; with a
 // mouse or keys, the focus stays for picking another. On phones, it closes the screen it was picked on.
@@ -158,7 +126,6 @@ function onKey(e: KeyboardEvent) {
 // Leaving the field closes the list and puts back the name of the one picked (a click on an option keeps the focus,
 // so it picks first).
 function onBlur() {
-  if (sheet.value) return
   open.value = false
   text.value = nameOf(model.value)
 }
@@ -216,7 +183,7 @@ let opening = false
 const onScroll = (e: Event) => (fixed.value || e.target !== document) && measure()
 const list = useTemplateRef<HTMLElement>('list')
 watch(
-  () => results.value.length > 0 && !sheet.value,
+  () => results.value.length > 0,
   (shown) => {
     if (shown) {
       fixed.value = stuck(field.value)
@@ -265,9 +232,9 @@ const optionId = (i: number) => `${listId}-${i}`
       autocomplete="off"
       :readonly="phone"
       :aria-haspopup="phone ? 'dialog' : undefined"
-      :aria-expanded="results.length > 0 && !sheet"
+      :aria-expanded="phone ? sheet : results.length > 0"
       :aria-controls="phone ? undefined : listId"
-      :aria-activedescendant="results.length && !sheet ? optionId(active) : undefined"
+      :aria-activedescendant="results.length ? optionId(active) : undefined"
       @input="open = true"
       @focus="onFocus"
       @pointerdown="onPointerDown"
@@ -283,7 +250,7 @@ const optionId = (i: number) => `${listId}-${i}`
     </SearchBox>
     <Teleport to="body">
       <ul
-        v-if="results.length && !sheet"
+        v-if="results.length"
         :id="listId"
         ref="list"
         class="options"
@@ -315,49 +282,17 @@ const optionId = (i: number) => `${listId}-${i}`
         </li>
       </ul>
     </Teleport>
-    <!-- On phones: a dialog over the page, the search on top, the list taking the rest. -->
+    <!-- On phones: a dialog over the page, its card the search panel (made anew each time it opens). -->
     <ModalDialog v-if="phone" v-model:open="sheet" :label="props.placeholder" fill>
-      <div class="panel sheet">
-        <div class="sheet-head">
-          <SearchBox
-            ref="sheetBox"
-            v-model="text"
-            :placeholder="props.placeholder"
-            :aria-label="props.placeholder"
-            role="combobox"
-            autocomplete="off"
-            aria-expanded="true"
-            :aria-controls="listId"
-            :aria-activedescendant="results.length ? optionId(active) : undefined"
-            @keydown="onKey"
-          >
-            <template v-if="props.icon" #lead>
-              <PokemonIcon :id="model ?? 'pikachu'" :class="{ unknown: !model }" />
-            </template>
-          </SearchBox>
-          <button type="button" class="btn sheet-close" :aria-label="t('picker.close')" @click="sheet = false">
-            <X :size="18" aria-hidden="true" />
-          </button>
-        </div>
-        <ul v-if="sheet" :id="listId" ref="list" class="sheet-list" role="listbox">
-          <li
-            v-for="(r, i) in results"
-            :id="optionId(i)"
-            :key="r.id"
-            role="option"
-            class="option"
-            :class="{ active: i === active }"
-            :aria-selected="i === active"
-            @click="pick(r.id)"
-          >
-            <PokemonIcon :id="r.id" />
-            <span
-              >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
-              >{{ r.parts[2] }}</span
-            >
-          </li>
-        </ul>
-      </div>
+      <PokemonSearchPanel
+        v-if="sheet"
+        :placeholder="props.placeholder"
+        :picked="model"
+        :ids="props.ids"
+        :icon="props.icon"
+        @pick="pick"
+        @close="sheet = false"
+      />
     </ModalDialog>
   </div>
 </template>
@@ -403,47 +338,8 @@ const optionId = (i: number) => `${listId}-${i}`
 .option.active {
   background: var(--sel);
 }
-/* On phones, the field opens the screen: no caret, no keyboard. */
+/* On phones, the field opens the dialog: no caret, no keyboard. */
 .picker :deep(input[readonly]) {
   cursor: pointer;
-}
-/* The dialog's card: the search box and a way out on top, the list scrolling under them, its rows roomier for
-   fingers. */
-.sheet {
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  overflow: hidden;
-}
-.sheet-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  background: var(--panel);
-  border-bottom: 2px solid var(--ink);
-}
-.sheet-head :deep(.search-box) {
-  flex: 1;
-  max-width: none;
-  margin: 0;
-}
-.sheet-close {
-  flex: none;
-  padding: 6px;
-}
-.sheet-list {
-  position: relative;
-  flex: 1;
-  min-height: 0;
-  margin: 0;
-  padding: 4px 8px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  list-style: none;
-}
-.sheet-list .option {
-  height: 44px;
-  border-bottom: 1px solid var(--border);
 }
 </style>
