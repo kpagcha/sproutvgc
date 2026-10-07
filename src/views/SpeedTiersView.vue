@@ -536,6 +536,16 @@ function pickVersus(e: Entry) {
   const vs = query.value.vs === chipKey(e) ? undefined : chipKey(e)
   void router.replace({ query: { ...query.value, vs, ...(vs && { find: e.id }) } })
 }
+// The comparison's Speed finds the chip it's against: brought to the middle of the screen, flashing once.
+function locateVersus() {
+  const el = ladder.value?.querySelector<HTMLElement>('.chip.versus')
+  if (!el) return
+  center(el)
+  el.classList.remove('flash')
+  void el.offsetWidth
+  el.classList.add('flash')
+  el.addEventListener('animationend', () => el.classList.remove('flash'), { once: true })
+}
 function onChip(ev: MouseEvent, e: Entry) {
   if (mine.value === null || ev.ctrlKey || ev.metaKey || ev.shiftKey) return
   ev.preventDefault()
@@ -1279,7 +1289,7 @@ const { entered } = usePageEntered()
               :exit="{ opacity: 0, y: 8 }"
               :transition="FADE"
             >
-              <VersusCard v-bind="versus.card" @close="set('vs', undefined)" />
+              <VersusCard v-bind="versus.card" @close="set('vs', undefined)" @locate="locateVersus" />
             </motion.div>
             <motion.button
               v-else-if="match"
@@ -1457,7 +1467,7 @@ const { entered } = usePageEntered()
             </div>
           </details>
         </Teleport>
-        <VersusCard v-if="versus && side" v-bind="versus.card" @close="set('vs', undefined)" />
+        <VersusCard v-if="versus && side" v-bind="versus.card" @close="set('vs', undefined)" @locate="locateVersus" />
       </div>
     </div>
   </div>
@@ -2188,6 +2198,20 @@ const { entered } = usePageEntered()
 .chip.versus {
   background: var(--sel);
   border-color: var(--text);
+}
+/* The chip found from the comparison: a ring in the opponents' red pulsing twice, softly. */
+.chip.flash {
+  animation: chip-flash 0.6s ease-out 2;
+}
+@keyframes chip-flash {
+  40% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--opponent) 45%, transparent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chip.flash {
+    animation: none;
+  }
 }
 /* The row a link picked. */
 .tier.at {
