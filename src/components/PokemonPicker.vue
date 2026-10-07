@@ -23,6 +23,9 @@ const props = defineProps<{
   listWidthOf?: string
   /** Shows the one picked's icon at the field's start; none picked, a silhouette, asking who. */
   icon?: boolean
+  /** On phones, the band on top of the dialog's card saying what it's picking for, in its side's color. */
+  title?: string
+  tone?: 'yours' | 'opponent'
 }>()
 const model = defineModel<PokemonId | null>({ required: true })
 
@@ -290,6 +293,8 @@ const optionId = (i: number) => `${listId}-${i}`
         :picked="model"
         :ids="props.ids"
         :icon="props.icon"
+        :title="props.title"
+        :tone="props.tone"
         @pick="pick"
         @close="sheet = false"
       />

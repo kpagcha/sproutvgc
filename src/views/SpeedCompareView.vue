@@ -300,6 +300,8 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
         <PokemonPicker
           :model-value="side.id"
           :placeholder="t('compare.pick')"
+          :title="side.s === 'a' ? t('speed.yours') : t('compare.opponent')"
+          :tone="side.s === 'a' ? 'yours' : 'opponent'"
           icon
           class="picker"
           @update:model-value="(id: PokemonId | null) => pick(side.s, id)"

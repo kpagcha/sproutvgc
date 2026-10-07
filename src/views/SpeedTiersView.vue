@@ -442,6 +442,8 @@ const findMode = computed<FindMode>({
       : defaultFindMode,
   set: (m) => set('findmode', m === defaultFindMode ? undefined : m),
 })
+// The find's dialog on phones says what it finds in: the ladder, or yours' opponents on it.
+const findTitle = computed(() => (mine.value ? t('compare.opponent') : t('title.speedTiers')))
 const onlyFound = computed(() => found.value !== null && findMode.value === 'only')
 // The toggle's label around the found Pokémon's icon, the same width whatever its name (which the search shows).
 const onlyLabel = computed(() => tSplit('speed.findOnly', 'name'))
@@ -1041,6 +1043,8 @@ const { entered } = usePageEntered()
             :model-value="found"
             :ids="findableIds"
             :placeholder="t('speed.find')"
+            :title="findTitle"
+            :tone="mine ? 'opponent' : undefined"
             list-width-of=".find-row"
             @update:model-value="setFound"
           />
@@ -1107,6 +1111,8 @@ const { entered } = usePageEntered()
                 :model-value="found"
                 :ids="findableIds"
                 :placeholder="t('speed.findShort')"
+                :title="findTitle"
+                :tone="mine ? 'opponent' : undefined"
                 list-width-of=".pinned"
                 @update:model-value="setFound"
               />
@@ -1316,6 +1322,8 @@ const { entered } = usePageEntered()
             <PokemonPicker
               :model-value="mine"
               :placeholder="t('speed.yoursPick')"
+              :title="t('speed.yours')"
+              tone="yours"
               list-width-of=".yours-pick"
               icon
               class="yours-picker"

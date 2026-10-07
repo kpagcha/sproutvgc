@@ -19,6 +19,9 @@ const props = defineProps<{
   ids?: readonly PokemonId[]
   /** Shows the one picked's icon at the search's start; none picked, a silhouette, asking who. */
   icon?: boolean
+  /** A band on top saying what it's picking for, in its side's color: yours blue, an opponent red. */
+  title?: string
+  tone?: 'yours' | 'opponent'
 }>()
 const emit = defineEmits<{ pick: [id: PokemonId]; close: [] }>()
 
@@ -80,6 +83,7 @@ const optionId = (i: number) => `${listId}-${i}`
 
 <template>
   <div class="panel search-panel">
+    <div v-if="props.title" class="title-band" :class="props.tone">{{ props.title }}</div>
     <div class="head">
       <SearchBox
         ref="box"
@@ -130,6 +134,21 @@ const optionId = (i: number) => `${listId}-${i}`
   min-height: 0;
   padding: 0;
   overflow: hidden;
+}
+.title-band {
+  padding: 6px 12px;
+  font-weight: bold;
+  color: var(--text);
+  background: var(--panel-alt);
+  border-bottom: 2px solid var(--ink);
+}
+.title-band.yours {
+  color: var(--accent-text);
+  background: var(--accent);
+}
+.title-band.opponent {
+  color: var(--opponent-text);
+  background: var(--opponent);
 }
 .head {
   display: flex;
