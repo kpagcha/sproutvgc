@@ -95,7 +95,7 @@ const NAV: { to: string; section: string; label: MessageKey }[] = AREAS.map((a) 
   label: a.label,
 }))
 
-// Wider screens switch the language and the theme from the bar too, beside Settings: the language to the next one, the
+// The bar switches the language and the theme too, beside Settings: the language to the next one, the
 // theme to the other of light and dark (from what shows, the device's when on auto).
 const { theme, setMode } = useTheme()
 const CODES = Object.keys(LOCALES) as Locale[]
@@ -166,32 +166,33 @@ const fadeVariants = {
               <span class="label">{{ t(n.label) }}</span>
             </RouterLink>
           </template>
-          <template v-if="!compact">
-            <button
-              v-tip="t('lang.label')"
-              type="button"
-              class="quick first"
-              :aria-label="`${t('lang.label')}: ${LOCALES[locale]}`"
-              @click="nextLocale"
-            >
-              <span class="label">{{ locale.toUpperCase() }}</span>
-            </button>
-            <button
-              v-tip="t('theme.label')"
-              type="button"
-              class="quick"
-              :aria-label="t('theme.label')"
-              @click="toggleTheme"
-            >
-              <component
-                :is="theme === 'dark' ? Moon : Sun"
-                class="label"
-                :size="16"
-                :stroke-width="2.5"
-                aria-hidden="true"
-              />
-            </button>
-          </template>
+          <!-- The language on wider screens only: narrow, there's room for the theme alone. -->
+          <button
+            v-if="!compact"
+            v-tip="t('lang.label')"
+            type="button"
+            class="quick first"
+            :aria-label="`${t('lang.label')}: ${LOCALES[locale]}`"
+            @click="nextLocale"
+          >
+            <span class="label">{{ locale.toUpperCase() }}</span>
+          </button>
+          <button
+            v-tip="t('theme.label')"
+            type="button"
+            class="quick"
+            :class="{ first: compact }"
+            :aria-label="t('theme.label')"
+            @click="toggleTheme"
+          >
+            <component
+              :is="theme === 'dark' ? Moon : Sun"
+              class="label"
+              :size="16"
+              :stroke-width="2.5"
+              aria-hidden="true"
+            />
+          </button>
           <RouterLink
             to="/settings"
             class="end"
@@ -404,8 +405,7 @@ const fadeVariants = {
   text-decoration: none;
 }
 
-/* Narrow screens: one row, the logo's picture alone (its name kept for screen readers) and the links together at the
-   end. */
+/* Narrow screens: one row, the logo's picture alone (its name kept for screen readers), then the links. */
 @media (max-width: 560px) {
   .bar {
     flex-wrap: nowrap;
@@ -418,9 +418,9 @@ const fadeVariants = {
     clip-path: inset(50%);
     white-space: nowrap;
   }
+  /* Search and the page's menu right after the logo, wherever its label ends; the theme and Settings at the end. */
   .nav {
-    flex: 0 1 auto;
-    margin-left: auto;
+    flex: 1 1 auto;
   }
   .nav .end {
     margin-left: 0;
