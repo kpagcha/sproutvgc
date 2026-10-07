@@ -744,6 +744,8 @@ export const messages = {
   'speed.benchTip.min': 'No stat points, a nature that lowers Speed',
   'speed.megaNote':
     "Mega Evolutions are at their Mega's Speed. On the turn one Mega Evolves, it still moves at its base form's.",
+  'scroll.back': 'Scroll back',
+  'scroll.more': 'Scroll for more',
   'compare.intro':
     'Your Pokémon and an opponent, each with its own build and modifiers: which moves first, and the points each needs to move before the other.',
   'compare.pick': 'Pick a Pokémon',

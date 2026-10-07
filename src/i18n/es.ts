@@ -754,6 +754,8 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.benchTip.min': 'Sin puntos de estadística, una naturaleza que baja la Velocidad',
   'speed.megaNote':
     'Las megaevoluciones están en la Velocidad de la mega. El turno en que megaevoluciona, aún mueve con la de su forma base.',
+  'scroll.back': 'Desplazar atrás',
+  'scroll.more': 'Desplazar para ver más',
   'compare.intro':
     'Tu Pokémon y un rival, cada uno con su distribución y sus modificadores: cuál mueve antes, y los puntos que necesita cada uno para mover antes que el otro.',
   'compare.pick': 'Elige un Pokémon',

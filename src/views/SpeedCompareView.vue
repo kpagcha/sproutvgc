@@ -29,6 +29,7 @@ import ItemIcon from '@/components/ItemIcon.vue'
 import MetaPicker from '@/components/MetaPicker.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import PokemonPicker from '@/components/PokemonPicker.vue'
+import ScrollRow from '@/components/ScrollRow.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 
 // Yours and an opponent's Speeds side by side, each with a build of its own (its nature's effect, its stat points, its
@@ -226,7 +227,9 @@ const canHover = window.matchMedia('(hover: hover)').matches
         <!-- Yours, and its opponent, red as on the speed tiers. On phones, where one is under the other, each stuck to
              the top while its panel is in view, with its Pokémon in short as on the speed tiers' bar. -->
         <div class="band">
-          <span class="band-label">{{ side.s === 'a' ? t('speed.yours') : t('compare.opponent') }}</span>
+          <span class="band-label" :class="{ picked: side.id }">{{
+            side.s === 'a' ? t('speed.yours') : t('compare.opponent')
+          }}</span>
           <BuildSummary v-if="side.id" :id="side.id" :speed="side.speed!" :build="side.build" class="band-summary" />
           <!-- On phones, its icon alone, leaving the band's room to the summary. -->
           <button
@@ -256,7 +259,8 @@ const canHover = window.matchMedia('(hover: hover)').matches
           <!-- The meta's builds of it, to pick one in a tap. -->
           <section v-if="commonBuilds(side.id).length" class="part">
             <span class="muted small">{{ t('compare.common') }}</span>
-            <div class="builds">
+            <!-- On one line, scrolling sideways when they don't fit; on phones, wrapping. -->
+            <ScrollRow wrap-on-phones class="builds">
               <button
                 v-for="b in commonBuilds(side.id)"
                 :key="`${b.effect}:${b.points}`"
@@ -270,7 +274,7 @@ const canHover = window.matchMedia('(hover: hover)').matches
                 }}
                 <span class="muted">{{ percent(b.share) }}</span>
               </button>
-            </div>
+            </ScrollRow>
           </section>
 
           <section class="part">
@@ -455,21 +459,13 @@ const canHover = window.matchMedia('(hover: hover)').matches
   .clear-text {
     display: none;
   }
+  /* Once picked, the summary says whose it is, by the band's color: the label gives it the room. */
+  .band-label.picked {
+    display: none;
+  }
 }
-/* Wider, the common builds on one line, scrolling sideways when they don't fit (room under them for the buttons'
-   shadows). */
-@media (min-width: 721px) {
-  .part:has(> .builds) {
-    align-items: stretch;
-  }
-  .part > .builds {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 6px;
-  }
-  .part > .builds > .btn {
-    flex: none;
-  }
+.part > .builds {
+  align-self: stretch;
 }
 .band {
   display: flex;
@@ -520,7 +516,6 @@ const canHover = window.matchMedia('(hover: hover)').matches
 .stacked :deep(.segments label) {
   white-space: nowrap;
 }
-.builds,
 .mods {
   display: flex;
   flex-wrap: wrap;
