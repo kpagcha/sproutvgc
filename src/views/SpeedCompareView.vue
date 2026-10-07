@@ -30,6 +30,7 @@ import ItemIcon from '@/components/ItemIcon.vue'
 import MetaPicker from '@/components/MetaPicker.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import PokemonPicker from '@/components/PokemonPicker.vue'
+import SetupStar from '@/components/SetupStar.vue'
 import ScrollRow from '@/components/ScrollRow.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 
@@ -207,9 +208,12 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
          once. -->
     <details class="panel instant top" :open="controlsOpen" @toggle="controlsOpen = isOpen($event)">
       <summary class="head" @click.prevent="toggleControls">
+        <!-- Its star saves the two and their builds to the favorites. -->
         <h1>
-          <span class="marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
-          >{{ t('title.speedCompare') }}
+          <span
+            ><span class="marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
+            >{{ t('title.speedCompare') }}</span
+          ><SetupStar />
         </h1>
         <!-- On one line, scrolling sideways when it doesn't fit. -->
         <ScrollRow v-if="!controlsOpen && active.length" class="active" role="list" :aria-label="t('speed.active')">
@@ -457,6 +461,8 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 }
 .head h1 {
   grid-area: title;
+  display: flex;
+  align-items: center;
   margin: 0;
 }
 .active {

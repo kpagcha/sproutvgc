@@ -42,6 +42,7 @@ import PokemonPicker from '@/components/PokemonPicker.vue'
 import ScrollRow from '@/components/ScrollRow.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 import VersusCard from '@/components/VersusCard.vue'
+import SetupStar from '@/components/SetupStar.vue'
 
 // The regulation's Pokémon ordered by Speed, as a ladder of Speed values with the Pokémon at each. By default the
 // meta: the most used Pokémon at the Speeds their sets actually run (from the meta snapshot shown, when it has them);
@@ -928,12 +929,12 @@ const { entered } = usePageEntered()
     <details class="panel instant" :open="controlsOpen" @toggle="controlsOpen = isOpen($event)">
       <summary class="head" @click.prevent="toggleControls">
         <!-- With yours picked, everything the controls set is for the others: its opponents, tagged as on the ladder. -->
-        <!-- The heading folds them, its arrow saying whether they're open. -->
+        <!-- The heading folds them, its arrow saying whether they're open; its star saves the setup to the favorites. -->
         <h1>
           <span
             ><span class="marker head-marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
             >{{ t('title.speedTiers') }}</span
-          ><span v-if="mine" class="opponents-tag head-tag">{{ t('speed.opponentsHead') }}</span>
+          ><SetupStar /><span v-if="mine" class="opponents-tag head-tag">{{ t('speed.opponentsHead') }}</span>
         </h1>
         <!-- On one line, scrolling sideways when it doesn't fit. -->
         <ScrollRow v-if="!controlsOpen" class="active" role="list" :aria-label="t('speed.active')">
@@ -958,7 +959,8 @@ const { entered } = usePageEntered()
             <CircleHelp :size="16" aria-hidden="true" /><span>{{ t('speed.help') }}</span>
           </button>
         </p>
-        <!-- How to read a chip: samples, each with what its parts mean; on phones, the intro and the options too. -->
+        <!-- How to read a chip: samples, each with what its parts mean; then yours among them; on phones, the intro and
+             the options too. -->
         <div v-if="helpOpen" id="speed-help" class="help-body panel sunken">
           <div class="phone-only-block small">
             <p class="muted">{{ t('speed.intro', { reg: REGULATION }) }}</p>
@@ -999,6 +1001,15 @@ const { entered } = usePageEntered()
             </template>
           </dl>
           <p v-else class="muted small">{{ t('speed.allNote', { build: benchTip(bench) }) }}</p>
+          <!-- Yours among them: what picking it does, tapping an opponent, and the comparison side by side. -->
+          <dl class="help-options help-yours small">
+            <dt>{{ t('speed.yours') }}</dt>
+            <dd class="muted">{{ t('speed.helpYours') }}</dd>
+            <dt>{{ t('speed.opponentsHead') }}</dt>
+            <dd class="muted">{{ t('speed.helpOpponents') }}</dd>
+            <dt>{{ t('compare.open') }}</dt>
+            <dd class="muted">{{ t('speed.helpCompare') }}</dd>
+          </dl>
         </div>
         <div class="controls">
           <!-- What's shown: the data, and which Pokémon. -->
@@ -2290,6 +2301,12 @@ const { entered } = usePageEntered()
 }
 .help-options dd {
   margin: 0;
+}
+/* Yours among them, under a rule, apart from how to read the chips. */
+.help-yours {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
 }
 @media (max-width: 720px) {
   .phone-only {

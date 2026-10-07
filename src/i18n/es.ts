@@ -622,6 +622,9 @@ export const messages: Record<keyof typeof en, string> = {
   'favorites.title': 'Favoritos',
   'favorites.add': 'Añadir a favoritos',
   'favorites.remove': 'Quitar de favoritos',
+  'favorites.setups': 'Configuraciones',
+  'favorites.addSetup': 'Añadir esta configuración a favoritos',
+  'favorites.removeSetup': 'Quitar esta configuración de favoritos',
   'favorites.clear': 'Borrar',
   'favorites.clearConfirm': '¿Quitar los {n} favoritos? No se puede deshacer.',
   'favorites.clearConfirmButton': 'Quitar todos',
@@ -662,6 +665,11 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.findShort': 'Buscar…',
   'speed.trShort': 'TR',
   'speed.help': 'Cómo leer esto',
+  'speed.helpYours':
+    'Se coloca en la escala con su distribución, con qué frecuencia mueve antes, según el uso; el resto pasan a ser sus rivales.',
+  'speed.helpOpponents': 'Toca uno para ver si el tuyo mueve antes, y los puntos que necesita para ello.',
+  'speed.helpCompare':
+    'Los dos en una página propia: cada naturaleza, las distribuciones que se usan, y modificadores para cada uno.',
   'speed.count': '{n} Pokémon',
   'speed.yours': 'Tu Pokémon',
   'speed.yoursPick': 'Elige un Pokémon',
@@ -768,8 +776,7 @@ export const messages: Record<keyof typeof en, string> = {
     'Los puntos de Velocidad que necesita cada lado para mover antes que el otro con cada tipo de naturaleza, con el resto de su distribución como está.',
   'picker.close': 'Cerrar',
   'picker.all': 'Todos los Pokémon',
-  'compare.intro':
-    'Tu Pokémon y un rival, cada uno con su distribución y sus modificadores: cuál mueve antes, y los puntos que necesita cada uno para mover antes que el otro.',
+  'compare.intro': 'Tu Pokémon y un rival, cada uno con su distribución: quién mueve antes, y qué hace falta.',
   'compare.pick': 'Elige un Pokémon',
   'compare.opponent': 'Rival',
   'compare.stat': 'Característica {stat}',

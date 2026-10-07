@@ -1,5 +1,5 @@
 import { nextTick } from 'vue'
-import { createRouter, createWebHistory, type RouteLocationNormalized } from 'vue-router'
+import { createRouter, createWebHistory, type LocationQuery, type RouteLocationNormalized } from 'vue-router'
 import { afterPageExit } from '@/lib/pageExit'
 import { TYPES } from '@/data/types'
 import type { MessageKey } from '@/i18n'
@@ -26,8 +26,17 @@ declare module 'vue-router' {
     /** Recorded among the home page's recently viewed, as it's left, a page whose view is in its URL: what counts as
      * the same visit (one per page, or a comparison per pair), or nothing while there's nothing to record. */
     recent?: (to: RouteLocationNormalized) => string | null
+    /** A page whose setup can be starred: what of its query is the setup (the rest only a moment of it, as what's
+     * found), or nothing while there's none to star. */
+    setup?: (query: LocationQuery) => Record<string, string> | null
   }
 }
+
+/** A query's plain values, but those named in `omit`. */
+export const stringQuery = (query: LocationQuery, omit: readonly string[] = []) =>
+  Object.fromEntries(
+    Object.entries(query).filter((e): e is [string, string] => typeof e[1] === 'string' && !omit.includes(e[0])),
+  )
 
 // The page's one visit among the recently viewed, whatever its view.
 const once = (page: string) => () => page
@@ -224,6 +233,8 @@ export const router = createRouter({
         dexNames: true,
         keepScroll: true,
         recent: once('speedTiers'),
+        // Everything but what's found, the chip tapped, the Pokémon kept and the Speed picked.
+        setup: (query) => stringQuery(query, ['find', 'findmode', 'keep', 'vs', 'at']),
         ...inArea('competitive', 'speedTiers'),
       },
     },
@@ -239,6 +250,8 @@ export const router = createRouter({
         // One per pair, once both are picked.
         recent: ({ query: { a, b } }) =>
           typeof a === 'string' && typeof b === 'string' ? `speedCompare:${a}:${b}` : null,
+        // The two and their builds, once both are picked.
+        setup: (query) => (typeof query.a === 'string' && typeof query.b === 'string' ? stringQuery(query) : null),
         ...inArea('competitive', 'speedCompare'),
       },
     },
@@ -313,10 +326,7 @@ export const router = createRouter({
 router.afterEach((to, _from, failure) => {
   const page = !failure && to.meta.recent?.(to)
   if (!page) return
-  const query = Object.fromEntries(
-    Object.entries(to.query).filter((e): e is [string, string] => typeof e[1] === 'string'),
-  )
-  visitPage({ page, path: to.path, query })
+  visitPage({ page, path: to.path, query: stringQuery(to.query) })
 })
 
 // Pages showing dex entries render with their names (and descriptions) in place, rather than filling them in once
