@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import Marked from '@/components/Marked'
 import { nextTick, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
-import { X } from '@lucide/vue'
+import { Star, X } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
+import { POKEMON } from '@/data/pokemon'
 import { t } from '@/i18n'
+import { benchmark } from '@/lib/stats'
 import { pokemonName, usePokemonSearch } from '@/composables/usePokemonSearch'
 import PokemonIcon from '@/components/PokemonIcon'
 import SearchBox from '@/components/SearchBox.vue'
 
-// A card to pick a Pokémon in: a search box on top, with a way out, and the Pokémon it finds listed under it, filling
-// the rest, picked by a tap or with the arrow keys and Enter. It opens on the one picked (its name selected, so typing
+// A card to pick a Pokémon in: a search box on top, with a way out, and the Pokémon it finds listed under it (the
+// reader's favorites first, starred), filling the rest, picked by a tap or with the arrow keys and Enter. It opens on the one picked (its name selected, so typing
 // replaces it, and the list at it). Emptying the search doesn't unpick: picking or closing is up to the reader. In a
 // dialog, the Pokémon pickers' on phones.
 const props = defineProps<{
@@ -23,6 +25,8 @@ const props = defineProps<{
   /** A band on top saying what it's picking for, in its side's color: yours blue, an opponent red. */
   title?: string
   tone?: 'yours' | 'opponent'
+  /** Shows each one's Speed at the end of its row, with no points and a neutral nature: a quick preview of how fast. */
+  speed?: boolean
 }>()
 const emit = defineEmits<{ pick: [id: PokemonId]; close: [] }>()
 
@@ -78,6 +82,9 @@ function showOption(i: number, center = false) {
 }
 watch(active, (i) => queueMicrotask(() => showOption(i)))
 
+/** Its Speed with no points and a neutral nature. */
+const speedOf = (id: PokemonId) => benchmark(POKEMON[id].stats[5], 'none')
+
 const listId = useId()
 const optionId = (i: number) => `${listId}-${i}`
 </script>
@@ -107,19 +114,27 @@ const optionId = (i: number) => `${listId}-${i}`
       </button>
     </div>
     <ul :id="listId" ref="list" class="list" role="listbox">
-      <li
-        v-for="(r, i) in results"
-        :id="optionId(i)"
-        :key="r.id"
-        role="option"
-        class="option"
-        :class="{ active: i === active }"
-        :aria-selected="i === active"
-        @click="emit('pick', r.id)"
-      >
-        <PokemonIcon :id="r.id" />
-        <span><Marked :p="r.parts" /></span>
-      </li>
+      <template v-for="(r, i) in results" :key="r.key">
+        <li v-if="r.group" role="presentation" class="group">
+          {{ t(r.group === 'favorites' ? 'favorites.title' : 'picker.all') }}
+        </li>
+        <li
+          :id="optionId(i)"
+          role="option"
+          class="option"
+          :class="{ active: i === active }"
+          :aria-selected="i === active"
+          @click="emit('pick', r.id)"
+        >
+          <PokemonIcon :id="r.id" />
+          <span><Marked :p="r.parts" /></span
+          ><Star v-if="r.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" /><span
+            v-if="props.speed"
+            class="option-speed"
+            >{{ speedOf(r.id) }}</span
+          >
+        </li>
+      </template>
     </ul>
   </div>
 </template>
@@ -184,8 +199,24 @@ const optionId = (i: number) => `${listId}-${i}`
   border-bottom: 1px solid var(--border);
   cursor: pointer;
 }
+.option-speed {
+  margin-left: auto;
+  padding-left: 8px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
 .option.active {
   background: var(--sel);
+}
+/* A group's heading, while browsing with favorites: small, muted, not an option. */
+.group {
+  padding: 10px 6px 4px;
+  font-size: 0.75em;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
 }
 .unknown {
   filter: brightness(0);

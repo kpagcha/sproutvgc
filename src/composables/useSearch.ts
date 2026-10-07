@@ -7,6 +7,7 @@ import { TYPES, type TypeId } from '@/data/types'
 import { loadDescriptions } from '@/i18n/descriptions'
 import { loadDexNames, refName } from '@/i18n/refName'
 import { fold, split, type Marks } from '@/lib/search'
+import { useFavorites } from '@/composables/useFavorites'
 import { AREAS } from '@/lib/areas'
 
 export type SectionKind = 'pokemon' | 'move' | 'ability' | 'item' | 'condition'
@@ -37,6 +38,8 @@ export interface Hit {
   name: string
   parts: Marks
   to: RouteLocationRaw
+  /** Whether the reader has starred it. */
+  fav: boolean
 }
 
 /** A page of the site found by its name: an area's, or a section's (`src/lib/areas.ts`). */
@@ -88,6 +91,7 @@ export function useSearch(
   kinds: readonly SectionKind[] = SECTIONS.map((s) => s.kind),
   { pages = false } = {},
 ) {
+  const { isFavorite } = useFavorites()
   /** Each category's entries matching the search; categories without any left out. */
   const results = computed((): SearchResults | null => {
     const q = fold(query().trim())
@@ -96,19 +100,22 @@ export function useSearch(
       const parts = split(typeName(id), q)
       return parts ? [{ id, parts }] : []
     })
-    // Names starting with the search first, then the rest, each alphabetically. Pokémon formes that only look
-    // different are left to their species.
+    // The reader's favorites first, then names starting with the search, then the rest, each alphabetically. Pokémon
+    // formes that only look different are left to their species.
     const sections = SECTIONS.filter((s) => kinds.includes(s.kind))
       .map((section) => {
         const ids: string[] = availableIds(section.kind)
         const hits = ids
           .filter((id) => section.kind !== 'pokemon' || !POKEMON[id as PokemonId].cosmetic)
           .flatMap((id): Hit[] => {
-            const name = refName({ kind: section.kind, id } as Ref)
+            const ref = { kind: section.kind, id } as Ref
+            const name = refName(ref)
             const parts = split(name, q)
-            return parts ? [{ id, name, parts, to: { name: section.route, params: { id } } }] : []
+            return parts ? [{ id, name, parts, to: { name: section.route, params: { id } }, fav: isFavorite(ref) }] : []
           })
-          .sort((a, b) => +!!a.parts[0] - +!!b.parts[0] || a.name.localeCompare(b.name, locale.value))
+          .sort(
+            (a, b) => +b.fav - +a.fav || +!!a.parts[0] - +!!b.parts[0] || a.name.localeCompare(b.name, locale.value),
+          )
         return { ...section, hits: hits.slice(0, LIMIT), more: Math.max(0, hits.length - LIMIT) }
       })
       .filter((s) => s.hits.length)

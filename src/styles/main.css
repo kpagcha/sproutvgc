@@ -305,6 +305,11 @@ mark {
   background: var(--sel);
   border-radius: 2px;
 }
+/* After a favorite's name in a list of results (its row's gap apart): the entry pages' star, filled. */
+.fav-star {
+  color: var(--accent);
+  fill: currentColor;
+}
 
 :focus-visible {
   outline: 2px solid var(--accent);

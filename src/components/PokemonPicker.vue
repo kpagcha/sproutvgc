@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import Marked from '@/components/Marked'
 import { nextTick, onBeforeUnmount, ref, useId, useTemplateRef, watch } from 'vue'
+import { Star } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
+import { POKEMON } from '@/data/pokemon'
+import { t } from '@/i18n'
+import { benchmark } from '@/lib/stats'
 import { pokemonName as nameOf, usePokemonSearch } from '@/composables/usePokemonSearch'
 import ModalDialog from '@/components/ModalDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -9,12 +13,12 @@ import PokemonSearchPanel from '@/components/PokemonSearchPanel.vue'
 import SearchBox from '@/components/SearchBox.vue'
 
 // Picks one of the regulation's Pokémon by name: the site's search box, with the Pokémon its text finds listed under
-// it (their icons, the match marked; every one while it's empty), in a list that scrolls, picked by clicking or with
-// the arrow keys and Enter. Shows the one picked once it's picked, and opening the list again brings it into view,
-// ready; emptying the field unpicks it. The list is drawn on the page's body, placed under the field, so no container
-// it's in (a <details>, which clips its content to animate it; a scrolling one) can cut it off. On phones, the field
-// opens a screen of its own instead: a search box on top and the list under it, filling the rest, the page under it
-// left where it was.
+// it (their icons, the match marked, a star after the reader's favorites; every one while it's empty, the favorites
+// first), in a list that scrolls, picked by clicking or with the arrow keys and Enter. Shows the one picked once
+// it's picked, and opening the list again brings it into view, ready; emptying the field unpicks it. The list is
+// drawn on the page's body, placed under the field, so no container it's in (a <details>, which clips its content to
+// animate it; a scrolling one) can cut it off. On phones, the field opens a screen of its own instead: a search box
+// on top and the list under it, filling the rest, the page under it left where it was.
 const props = defineProps<{
   placeholder: string
   /** The Pokémon to pick from, when not every one of the regulation's. */
@@ -27,6 +31,8 @@ const props = defineProps<{
   /** On phones, the band on top of the dialog's card saying what it's picking for, in its side's color. */
   title?: string
   tone?: 'yours' | 'opponent'
+  /** Shows each one's Speed at the end of its row, with no points and a neutral nature: a quick preview of how fast. */
+  speed?: boolean
 }>()
 const model = defineModel<PokemonId | null>({ required: true })
 
@@ -227,6 +233,9 @@ function showOption(i: number, center = false) {
 }
 watch(active, (i) => queueMicrotask(() => showOption(i)))
 
+/** Its Speed with no points and a neutral nature. */
+const speedOf = (id: PokemonId) => benchmark(POKEMON[id].stats[5], 'none')
+
 const listId = useId()
 const optionId = (i: number) => `${listId}-${i}`
 </script>
@@ -272,20 +281,28 @@ const optionId = (i: number) => `${listId}-${i}`
           maxHeight: `${LIST_HEIGHT()}px`,
         }"
       >
-        <li
-          v-for="(r, i) in results"
-          :id="optionId(i)"
-          :key="r.id"
-          role="option"
-          class="option"
-          :class="{ active: i === active }"
-          :aria-selected="i === active"
-          @mousedown.prevent="pick(r.id)"
-          @mouseenter="active = i"
-        >
-          <PokemonIcon :id="r.id" />
-          <span><Marked :p="r.parts" /></span>
-        </li>
+        <template v-for="(r, i) in results" :key="r.key">
+          <li v-if="r.group" role="presentation" class="group">
+            {{ t(r.group === 'favorites' ? 'favorites.title' : 'picker.all') }}
+          </li>
+          <li
+            :id="optionId(i)"
+            role="option"
+            class="option"
+            :class="{ active: i === active }"
+            :aria-selected="i === active"
+            @mousedown.prevent="pick(r.id)"
+            @mouseenter="active = i"
+          >
+            <PokemonIcon :id="r.id" />
+            <span><Marked :p="r.parts" /></span
+            ><Star v-if="r.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" /><span
+              v-if="props.speed"
+              class="option-speed"
+              >{{ speedOf(r.id) }}</span
+            >
+          </li>
+        </template>
       </ul>
     </Teleport>
     <!-- On phones: a dialog over the page, its card the search panel (made anew each time it opens). -->
@@ -298,6 +315,7 @@ const optionId = (i: number) => `${listId}-${i}`
         :icon="props.icon"
         :title="props.title"
         :tone="props.tone"
+        :speed="props.speed"
         @pick="pick"
         @close="sheet = false"
       />
@@ -343,8 +361,23 @@ const optionId = (i: number) => `${listId}-${i}`
   padding: 0 6px 0 2px;
   cursor: pointer;
 }
+.option-speed {
+  margin-left: auto;
+  padding-left: 8px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
 .option.active {
   background: var(--sel);
+}
+/* A group's heading, while browsing with favorites: small, muted, not an option. */
+.group {
+  padding: 6px 6px 2px;
+  font-size: 0.75em;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
 }
 /* On phones, the field opens the dialog: no caret, no keyboard. */
 .picker :deep(input[readonly]) {

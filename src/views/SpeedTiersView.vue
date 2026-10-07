@@ -520,7 +520,6 @@ const versus = computed(() => {
       id: e.id,
       name: [e.species, e.forme].filter(Boolean).join(' '),
       speed: target,
-      mineName: refName(pokemon(mine.value)),
       mineSpeed: mySpeed.value!,
       trickRoom: trickRoom.value,
       points: myPoints.value,
@@ -931,9 +930,10 @@ const { entered } = usePageEntered()
         <!-- With yours picked, everything the controls set is for the others: its opponents, tagged as on the ladder. -->
         <!-- The heading folds them, its arrow saying whether they're open. -->
         <h1>
-          <span class="marker head-marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
-          >{{ t('title.speedTiers')
-          }}<span v-if="mine" class="opponents-tag head-tag">{{ t('speed.opponentsHead') }}</span>
+          <span
+            ><span class="marker head-marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
+            >{{ t('title.speedTiers') }}</span
+          ><span v-if="mine" class="opponents-tag head-tag">{{ t('speed.opponentsHead') }}</span>
         </h1>
         <!-- On one line, scrolling sideways when it doesn't fit. -->
         <ScrollRow v-if="!controlsOpen" class="active" role="list" :aria-label="t('speed.active')">
@@ -1085,7 +1085,7 @@ const { entered } = usePageEntered()
           <strong>{{ t('speed.opponentsHead') }}</strong>
           <span>{{ t('speed.opponentsHint') }}</span>
         </div>
-        <!-- Finding a Pokémon on the ladder: a band on top, over its header, which sits on the rows as a table's does. -->
+        <!-- Finding a Pokémon on the ladder: a band on top, sitting on the rows. -->
         <div class="band find find-row" :class="{ flash: flashFind }" @animationend="flashFind = false">
           <PokemonPicker
             :model-value="found"
@@ -1094,6 +1094,7 @@ const { entered } = usePageEntered()
             :title="findTitle"
             :tone="mine ? 'opponent' : undefined"
             list-width-of=".find-row"
+            speed
             @update:model-value="setFound"
           />
           <label v-if="found" class="btn switch find-mode" :class="{ on: onlyFound }">
@@ -1145,17 +1146,10 @@ const { entered } = usePageEntered()
             </li>
           </ul>
         </div>
-        <!-- What the ladder is: its numbers, which way it runs, and how many Pokémon it holds. -->
-        <div class="band ladder-head">
-          <!-- The stat's shorthand, as narrow as the column of Speeds it heads. -->
-          <span v-tip="canHover && t('speed.column')" :aria-label="t('speed.column')">{{ t('stat.spe') }}</span>
-          <span>{{ t(trickRoom ? 'speed.slowestFirst' : 'speed.fastestFirst') }}</span>
-          <span v-if="entered && (showAll || data)" class="muted">{{ t('speed.count', { n: monCount }) }}</span>
-        </div>
         <!-- Pinned over the ladder once the controls are scrolled away; takes no room of its own. -->
         <div ref="pinMark" aria-hidden="true"></div>
         <div class="pin">
-          <div v-if="pinned" class="pinned" data-top-bar>
+          <div v-if="pinned" class="pinned" :class="{ opponents: mine }" data-top-bar>
             <div class="find">
               <PokemonPicker
                 :model-value="found"
@@ -1164,6 +1158,7 @@ const { entered } = usePageEntered()
                 :title="findTitle"
                 :tone="mine ? 'opponent' : undefined"
                 list-width-of=".pinned"
+                speed
                 @update:model-value="setFound"
               />
               <label v-if="found" class="btn switch find-mode" :class="{ on: onlyFound }">
@@ -1191,16 +1186,6 @@ const { entered } = usePageEntered()
               <span class="long" aria-hidden="true">{{ t('speed.mod.trickroom') }}</span>
               <span class="short" aria-hidden="true">{{ t('speed.trShort') }}</span>
             </label>
-            <!-- The ladder's header, scrolled away under it: in a strip of its own, red with yours picked, saying the
-                 ladder is its opponents. -->
-            <div class="pinned-head small" :class="{ opponents: mine }" aria-hidden="true">
-              <span>{{ t('stat.spe') }}</span>
-              <span
-                ><strong v-if="mine">{{ t('speed.opponentsHead') }} · </strong
-                >{{ t(trickRoom ? 'speed.slowestFirst' : 'speed.fastestFirst') }}</span
-              >
-              <span v-if="showAll || data" class="count">{{ t('speed.count', { n: monCount }) }}</span>
-            </div>
           </div>
         </div>
 
@@ -1309,6 +1294,7 @@ const { entered } = usePageEntered()
           </AnimatePresence>
         </Teleport>
 
+        <p v-if="entered && (showAll || data)" class="muted small note">{{ t('speed.count', { n: monCount }) }}</p>
         <p v-if="showMegas" class="muted small note">{{ t('speed.megaNote') }}</p>
         <p v-if="!showAll && snapshot" class="muted small note">
           {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
@@ -1345,6 +1331,7 @@ const { entered } = usePageEntered()
                 :title="t('speed.yours')"
                 tone="yours"
                 list-width-of=".yours-pick"
+                speed
                 icon
                 class="yours-picker"
                 @update:model-value="pickMine"
@@ -1615,15 +1602,24 @@ const { entered } = usePageEntered()
 .head .head-tag {
   margin-left: 10px;
   font-size: 0.55em;
-  vertical-align: middle;
 }
+/* Its line's items centered on it, so the tag lines up with what's active beside it, centered on the heading too. */
 .head h1 {
   grid-area: title;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   margin: 0;
 }
 .active {
   grid-area: active;
   --gap: 4px;
+}
+/* Beside the heading, centered on it by its chips, not the room under them for their shadows. */
+@media (min-width: 721px) {
+  .active {
+    margin-bottom: -4px;
+  }
 }
 .active .item {
   flex: none;
@@ -1771,32 +1767,17 @@ const { entered } = usePageEntered()
   font-weight: normal;
   opacity: 0.85;
 }
-/* The panel's bands, stacked: the opponents' (with yours picked), the find's, the ladder's header on the rows. */
+/* The panel's bands, stacked: the opponents' (with yours picked), then the find's on the rows. */
 :root:root .list.banded > .band.find-row {
-  margin-bottom: 0;
+  margin-bottom: 6px;
   padding-block: 8px;
 }
-:root:root .list.banded > .opponents-head + .band.find-row,
-:root:root .list.banded > .band.ladder-head {
+:root:root .list.banded > .opponents-head + .band.find-row {
   margin-top: 0;
 }
-:root:root .list.banded > .band.ladder-head {
-  margin-bottom: 6px;
-}
-/* The find's band and the header: the panel's own color, darker, rather than the accent's tint. */
-:root:root .list.banded > .band:is(.find-row, .ladder-head) {
+/* The find's band: the panel's own color, darker, rather than the accent's tint. */
+:root:root .list.banded > .band.find-row {
   background: color-mix(in srgb, var(--ink) 25%, var(--panel));
-}
-/* The ladder's header: its columns' labels, its first, the stat's shorthand, bold, over the Speeds. */
-.ladder-head {
-  display: grid;
-  grid-template-columns: var(--speed-col) 1fr auto;
-  align-items: baseline;
-  gap: 8px;
-}
-.ladder-head > :first-child {
-  font-weight: bold;
-  text-align: right;
 }
 /* The find's band, with why the Pokémon found shows as it does, when it isn't in the top, on a line of its own. */
 .find-row {
@@ -1902,33 +1883,19 @@ const { entered } = usePageEntered()
 .pinned .short {
   display: none;
 }
-/* The header's strip, across the bar's bottom, its columns the ladder's. */
-.pinned-head {
-  display: grid;
-  flex: 1 0 100%;
-  grid-template-columns: var(--speed-col) 1fr auto;
-  gap: 8px;
-  margin: 0 calc(-1 * var(--panel-bleed)) -6px;
-  padding: 2px var(--panel-bleed);
-  background: color-mix(in srgb, var(--ink) 25%, var(--panel));
+/* With yours picked, the ladder is its opponents: the bar's edge in their red, thick. */
+.pinned.opponents {
+  border-bottom: 3px solid var(--opponent);
 }
-.pinned-head > :first-child {
-  font-weight: bold;
-  text-align: right;
-}
-.pinned-head .count {
-  color: var(--muted);
-}
-.pinned-head.opponents {
-  color: var(--opponent-text);
-  background: var(--opponent);
-}
-.pinned-head.opponents .count {
-  color: inherit;
+/* Its switches as tall as the search beside them. */
+.pinned > .switch,
+.pinned .find > .find-mode {
+  align-self: stretch;
 }
 /* The find, how it shows beside it, the search taking what the switches leave, as in its row. */
 .pinned .find {
   display: flex;
+  align-self: stretch;
   align-items: center;
   gap: 8px;
   max-width: none;
@@ -2026,7 +1993,8 @@ const { entered } = usePageEntered()
     align-items: start;
     gap: 0 12px;
   }
-  /* Beside the ladder, yours and the comparison under it, stuck as it scrolls; scrolling when taller than the screen. */
+  /* Beside the ladder, yours and the comparison under it, stuck as it scrolls; scrolling when taller than the screen,
+     the page then scrolling on from its end (and from anywhere on it when it fits), as a wheel over it would expect. */
   .side-col {
     position: sticky;
     top: 12px;
@@ -2036,7 +2004,6 @@ const { entered } = usePageEntered()
     max-height: calc(100dvh - 24px);
     padding: 0 4px 4px 0;
     overflow-y: auto;
-    overscroll-behavior: contain;
   }
   .side-col > .yours {
     margin: 0;

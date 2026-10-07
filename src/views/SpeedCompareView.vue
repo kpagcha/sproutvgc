@@ -63,7 +63,6 @@ const sides = computed(() =>
       id,
       build,
       name: id ? refName(pokemon(id)) : null,
-      base: id ? POKEMON[id].stats[5] : null,
       stat: id ? speedStat(POKEMON[id].stats[5], build.points, build.effect) : null,
       speed: id ? buildSpeed(id, build) : null,
     }
@@ -263,13 +262,13 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
       <AppLink :to="ladderLink" class="btn">{{ t('compare.toLadder') }}</AppLink>
     </div>
 
-    <!-- Who moves first, between the two; on phones, nothing until there are two, the panels saying what to do. -->
+    <!-- Who moves first, between the two, and their Speeds at the end of its line (the sentence wrapping, not them);
+         on phones, nothing until there are two, the panels saying what to do. -->
     <p class="verdict panel" :class="{ tie: verdict?.tie, empty: !verdict }" role="status">
-      <template v-if="!verdict">{{ t('compare.empty') }}</template>
-      <template v-else-if="verdict.tie">{{ t('compare.tie') }}</template>
-      <template v-else
-        ><PokemonIcon :id="sideOf(verdict.first).id!" />{{ t('compare.first', { name: verdict.name }) }}</template
-      >
+      <PokemonIcon v-if="verdict && !verdict.tie" :id="sideOf(verdict.first).id!" />
+      <span class="verdict-text">{{
+        !verdict ? t('compare.empty') : verdict.tie ? t('compare.tie') : t('compare.first', { name: verdict.name })
+      }}</span>
       <span v-if="verdict" class="verdict-speeds"
         >{{ sideOf('a').speed }} <span class="muted">vs</span> {{ sideOf('b').speed }}</span
       >
@@ -280,7 +279,11 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
         v-for="side in sides"
         :key="side.s"
         class="panel banded side"
-        :class="{ first: verdict && !verdict.tie && verdict.first === side.s, opponent: side.s === 'b' }"
+        :class="{
+          first: verdict && !verdict.tie && verdict.first === side.s,
+          tied: verdict?.tie,
+          opponent: side.s === 'b',
+        }"
       >
         <!-- Yours, and its opponent, red as on the speed tiers. On phones, where one is under the other, each stuck to
              the top while its panel is in view, with its Pokémon in short as on the speed tiers' bar. -->
@@ -306,14 +309,17 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
           :title="side.s === 'a' ? t('speed.yours') : t('compare.opponent')"
           :tone="side.s === 'a' ? 'yours' : 'opponent'"
           icon
+          speed
           class="picker"
           @update:model-value="(id: PokemonId | null) => pick(side.s, id)"
         />
         <template v-if="side.id">
-          <!-- Its Speed, large, with what it comes from. -->
+          <!-- Its Speed, large, with its stat as built when modifiers change it (its base is the dex's). -->
           <p class="speed">
             <span class="speed-number">{{ side.speed }}</span>
-            <span class="muted small">{{ t('compare.baseStat', { base: side.base!, stat: side.stat! }) }}</span>
+            <span v-if="side.stat !== side.speed" class="muted small">{{
+              t('compare.stat', { stat: side.stat! })
+            }}</span>
           </p>
 
           <!-- The meta's builds of it, to pick one in a tap. -->
@@ -457,6 +463,12 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
   grid-area: active;
   --gap: 4px;
 }
+/* Beside the heading, centered on it by its chips, not the room under them for their shadows. */
+@media (min-width: 721px) {
+  .active {
+    margin-bottom: -4px;
+  }
+}
 .active .item {
   flex: none;
   padding: 1px 6px;
@@ -594,14 +606,25 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 }
 .verdict {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 4px 10px;
+  gap: 10px;
   margin: 0 0 12px;
   font-weight: bold;
 }
+/* Its line as tall as the icon of the one first, whether it shows or not (a tie, none picked): nothing under it moves
+   as the verdict changes. Its own width taken back from the gap after it. */
+.verdict::before {
+  content: '';
+  height: 30px;
+  margin-right: -10px;
+}
+.verdict-text {
+  flex: 1;
+  min-width: 0;
+}
 .verdict-speeds {
-  margin-left: auto;
+  flex: none;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 /* Side by side from tablets up; one under the other on phones. */
@@ -659,9 +682,17 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
   gap: 8px;
   font-weight: bold;
 }
-/* The one that moves first, marked by its outline. */
+/* The one that moves first, marked by its outline: blue for yours, the opponents' red for an opponent; on a tie, both,
+   in a neutral color. */
 .side.first {
   outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.side.first.opponent {
+  outline-color: var(--opponent);
+}
+.side.tied {
+  outline: 3px solid var(--muted);
   outline-offset: 2px;
 }
 .picker {
