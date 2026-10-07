@@ -683,6 +683,8 @@ const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.speedTier
 // what's active then said in short beside the heading: what's shown, and every switch and modifier away from its default.
 const isOpen = (e: Event) => (e.target as HTMLDetailsElement).open
 const { open: controlsOpen, toggle: toggleControls } = useOpenState('sproutvgc.speedTiers.controlsOpen', true)
+// On phones they start folded on each visit, the ladder first in view, whatever was left last time.
+if (window.matchMedia('(max-width: 720px)').matches) controlsOpen.value = false
 const stageLabel = (s: string) => (Number(s) > 0 ? `+${s}` : s.replace('-', '−'))
 const active = computed(() => {
   const list: string[] = []
