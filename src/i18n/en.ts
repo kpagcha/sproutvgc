@@ -693,7 +693,7 @@ export const messages = {
   'speed.keep': 'Keep on the ladder',
   'speed.unkeepAll': 'Remove all',
   'speed.resetControls': 'Reset options',
-  'speed.resetYours': 'Reset build',
+  'speed.resetYours': 'Reset',
   'speed.kept': 'Kept:',
   'speed.unkeep': 'Take {name} off the ladder',
   'speed.findOnly': 'Only {name}',

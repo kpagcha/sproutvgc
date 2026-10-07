@@ -701,7 +701,7 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.keep': 'Dejar en la escala',
   'speed.unkeepAll': 'Quitar todos',
   'speed.resetControls': 'Restablecer opciones',
-  'speed.resetYours': 'Restablecer reparto',
+  'speed.resetYours': 'Restablecer',
   'speed.kept': 'En la escala:',
   'speed.unkeep': 'Quitar a {name} de la escala',
   'speed.findOnly': 'Solo {name}',
