@@ -1741,6 +1741,12 @@ const { entered } = usePageEntered()
   color: var(--opponent-text);
   background: var(--opponent);
 }
+/* Its hint quieter than its name: smaller, not bold, and softer (white at 85% keeps over 4.5:1 on the red). */
+.opponents-head > span {
+  font-size: 0.85em;
+  font-weight: normal;
+  opacity: 0.85;
+}
 /* The panel's bands, stacked: the opponents' (with yours picked), the find's, the ladder's header on the rows. */
 :root:root .list.banded > .band.find-row {
   margin-bottom: 0;
