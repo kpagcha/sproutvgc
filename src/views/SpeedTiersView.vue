@@ -42,6 +42,7 @@ import { useOpenState } from '@/composables/useOpenState'
 import { usePageEntered } from '@/composables/usePageEntered'
 import AppLink from '@/components/AppLink'
 import BuildSummary from '@/components/BuildSummary.vue'
+import FullscreenDialog from '@/components/FullscreenDialog.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import MetaPicker from '@/components/MetaPicker.vue'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -778,6 +779,17 @@ onBeforeUnmount(() => sideQuery.removeEventListener('change', onSide))
 // short, its card dropping from it when tapped (over the page, which a tap beside it closes). Beside the ladder, the
 // card is the sidebar, and the bar shows only while it's out of view, bringing it in.
 const yoursOpen = shallowRef(false)
+// On phones (as wide as 720px), the card opens on a screen of its own rather than dropping from the bar, whether the
+// bar is stuck to the top or not.
+const phoneQuery = window.matchMedia('(max-width: 720px)')
+const phone = shallowRef(phoneQuery.matches)
+const onPhone = (e: MediaQueryListEvent) => (phone.value = e.matches)
+phoneQuery.addEventListener('change', onPhone)
+onBeforeUnmount(() => phoneQuery.removeEventListener('change', onPhone))
+const yoursSheet = computed({
+  get: () => yoursOpen.value && phone.value,
+  set: (v: boolean) => (yoursOpen.value = v),
+})
 const toggleYours = () => (yoursOpen.value = !yoursOpen.value)
 watch(side, (s) => s && (yoursOpen.value = false))
 const yoursCard = useTemplateRef<HTMLElement>('yoursCard')
@@ -852,13 +864,17 @@ const { entered } = usePageEntered()
         </template>
         <span class="marker" aria-hidden="true">{{ yoursOpen ? '▾' : '▸' }}</span>
       </button>
-      <div v-if="yoursOpen && !side" class="yours-backdrop" @click="yoursOpen = false"></div>
+      <div v-if="yoursOpen && !side && !phone" class="yours-backdrop" @click="yoursOpen = false"></div>
       <div
-        v-show="yoursOpen && !side"
+        v-show="yoursOpen && !side && !phone"
         id="yours-drop"
         class="yours-drop"
         :style="{ maxHeight: `${dropHeight}px` }"
       ></div>
+      <!-- On phones, where yours' card opens instead. -->
+      <FullscreenDialog v-model:open="yoursSheet" :label="t('speed.yours')">
+        <div id="yours-sheet" class="yours-sheet"></div>
+      </FullscreenDialog>
     </div>
     <!-- A section that folds, as yours does: its heading, with what's active in short beside it while folded (under it
          on phones), and what folds it. -->
@@ -1279,8 +1295,8 @@ const { entered } = usePageEntered()
       </div>
       <!-- Your Pokémon: where it lands among the others, and what it takes to move before one of them. A sidebar that
            stays in view beside the ladder on wide screens, so tapping a chip anywhere shows the answer; above it, narrower. -->
-      <!-- Narrower, it's the card dropping from yours' bar. -->
-      <Teleport to="#yours-drop" :disabled="side" defer>
+      <!-- Narrower, it's the card dropping from yours' bar; on phones, on a screen of its own. -->
+      <Teleport :to="phone ? '#yours-sheet' : '#yours-drop'" :disabled="side" defer>
         <details
           ref="yoursCard"
           class="panel banded yours instant"
@@ -1507,6 +1523,26 @@ const { entered } = usePageEntered()
   padding: 10px var(--panel-pad);
   background: var(--panel);
   border-top: 1px solid var(--border);
+}
+/* On a screen of its own (phones): the card filling it, scrolling, its band on top saying what it is (Clear left to
+   the actions at its foot, which stay in view). */
+.yours-sheet {
+  flex: 1;
+  min-height: 0;
+  padding: 12px 12px 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.yours-sheet > .yours {
+  margin: 0;
+}
+.yours-sheet .band-clear,
+.yours-sheet .yours-marker {
+  display: none;
+}
+.yours-sheet .drop-actions {
+  position: sticky;
+  bottom: 0;
 }
 /* Dropped from the bar, which says what it is and closes it, the card's own band is left out. */
 .yours-drop .yours-title {

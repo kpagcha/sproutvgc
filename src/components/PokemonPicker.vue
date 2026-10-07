@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, useId, useTemplateRef, watch } from 'vue'
+import { X } from '@lucide/vue'
 import { availableIds, pokemon, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
-import { locale } from '@/i18n'
+import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
+import FullscreenDialog from '@/components/FullscreenDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import SearchBox from '@/components/SearchBox.vue'
 
@@ -12,7 +14,9 @@ import SearchBox from '@/components/SearchBox.vue'
 // it (their icons, the match marked; every one while it's empty), in a list that scrolls, picked by clicking or with
 // the arrow keys and Enter. Shows the one picked once it's picked, and opening the list again brings it into view,
 // ready; emptying the field unpicks it. The list is drawn on the page's body, placed under the field, so no container
-// it's in (a <details>, which clips its content to animate it; a scrolling one) can cut it off.
+// it's in (a <details>, which clips its content to animate it; a scrolling one) can cut it off. On phones, the field
+// opens a screen of its own instead: a search box on top and the list under it, filling the rest, the page under it
+// left where it was.
 const props = defineProps<{
   placeholder: string
   /** The Pokémon to pick from, when not every one of the regulation's. */
@@ -36,7 +40,7 @@ const nameOf = (id: PokemonId | null) => (id ? refName(pokemon(id)) : '')
 const text = ref(nameOf(model.value))
 watch(model, (id) => (text.value = nameOf(id)))
 watch(text, (v) => {
-  if (!v.trim() && model.value) model.value = null
+  if (!v.trim() && model.value && !sheet.value) model.value = null
 })
 const open = ref(false)
 const active = ref(0)
@@ -61,19 +65,60 @@ watch(results, (list) => {
   if (i > 0) void nextTick(() => showOption(i, true))
 })
 
+// Phones (as wide as 720px) pick on a screen of their own (`sheet`), its search box ready to type in, showing the one
+// picked (selected, so typing replaces it) and the list at it. Its search emptied doesn't unpick: closing it leaves
+// the pick as it was.
+const phoneQuery = window.matchMedia('(max-width: 720px)')
+const phone = ref(phoneQuery.matches)
+const onPhone = (e: MediaQueryListEvent) => (phone.value = e.matches)
+phoneQuery.addEventListener('change', onPhone)
+onBeforeUnmount(() => phoneQuery.removeEventListener('change', onPhone))
+const sheet = ref(false)
+const sheetBox = useTemplateRef<InstanceType<typeof SearchBox>>('sheetBox')
+async function openSheet() {
+  sheet.value = true
+  open.value = true
+  await nextTick()
+  sheetBox.value?.focus({ preventScroll: true })
+  sheetBox.value?.select()
+}
+watch(sheet, (o) => {
+  if (o) return
+  open.value = false
+  text.value = nameOf(model.value)
+})
+
 // On touch screens, picking one leaves the field, so the keyboard goes away and the page it was covering shows; with a
-// mouse or keys, the focus stays for picking another.
+// mouse or keys, the focus stays for picking another. On phones, it closes the screen it was picked on.
 const touch = window.matchMedia('(pointer: coarse)')
 function pick(id: PokemonId) {
+  keepTop = field.value?.getBoundingClientRect().top ?? null
   model.value = id
   text.value = nameOf(id)
   open.value = false
+  sheet.value = false
   if (touch.matches) field.value?.querySelector('input')?.blur()
 }
+// Whatever the pick changes above the field once the page has it (a panel appearing), the field stays where it was on
+// the screen.
+let keepTop: number | null = null
+watch(
+  model,
+  () => {
+    if (keepTop === null) return
+    const top = keepTop
+    keepTop = null
+    requestAnimationFrame(() => {
+      const now = field.value?.getBoundingClientRect().top
+      if (now !== undefined && Math.abs(now - top) > 1) window.scrollBy({ top: now - top, behavior: 'instant' })
+    })
+  },
+  { flush: 'post' },
+)
 // Focusing the field opens the list, leaving the page where it is (on touch screens, the browser keeps the field in
 // view of the keyboard on its own).
 function onFocus() {
-  open.value = true
+  if (!phone.value) open.value = true
 }
 // On touch screens, a tap on the field focuses it here, without the browser scrolling the page to it as it does on its
 // own (the keyboard coming up may still move it, to keep the field in view): the list opens where it is, in the
@@ -86,7 +131,7 @@ function onTouchStart(e: TouchEvent) {
 function onTouchEnd(e: TouchEvent) {
   const input = e.currentTarget as HTMLInputElement
   const p = e.changedTouches[0]
-  if (!touchAt || !p || document.activeElement === input) return
+  if (phone.value || !touchAt || !p || document.activeElement === input) return
   if (Math.hypot(p.clientX - touchAt.x, p.clientY - touchAt.y) > 10) return
   e.preventDefault()
   input.focus({ preventScroll: true })
@@ -95,7 +140,8 @@ function onTouchEnd(e: TouchEvent) {
 let wasFocused = false
 const onPointerDown = (e: PointerEvent) => (wasFocused = document.activeElement === e.currentTarget)
 function onTap(e: MouseEvent) {
-  if (touch.matches && wasFocused) (e.currentTarget as HTMLInputElement).blur()
+  if (phone.value) void openSheet()
+  else if (touch.matches && wasFocused) (e.currentTarget as HTMLInputElement).blur()
 }
 function onKey(e: KeyboardEvent) {
   const n = results.value.length
@@ -112,6 +158,7 @@ function onKey(e: KeyboardEvent) {
 // Leaving the field closes the list and puts back the name of the one picked (a click on an option keeps the focus,
 // so it picks first).
 function onBlur() {
+  if (sheet.value) return
   open.value = false
   text.value = nameOf(model.value)
 }
@@ -169,7 +216,7 @@ let opening = false
 const onScroll = (e: Event) => (fixed.value || e.target !== document) && measure()
 const list = useTemplateRef<HTMLElement>('list')
 watch(
-  () => results.value.length > 0,
+  () => results.value.length > 0 && !sheet.value,
   (shown) => {
     if (shown) {
       fixed.value = stuck(field.value)
@@ -216,9 +263,11 @@ const optionId = (i: number) => `${listId}-${i}`
       :aria-label="props.placeholder"
       role="combobox"
       autocomplete="off"
-      :aria-expanded="results.length > 0"
-      :aria-controls="listId"
-      :aria-activedescendant="results.length ? optionId(active) : undefined"
+      :readonly="phone"
+      :aria-haspopup="phone ? 'dialog' : undefined"
+      :aria-expanded="results.length > 0 && !sheet"
+      :aria-controls="phone ? undefined : listId"
+      :aria-activedescendant="results.length && !sheet ? optionId(active) : undefined"
       @input="open = true"
       @focus="onFocus"
       @pointerdown="onPointerDown"
@@ -234,7 +283,7 @@ const optionId = (i: number) => `${listId}-${i}`
     </SearchBox>
     <Teleport to="body">
       <ul
-        v-if="results.length"
+        v-if="results.length && !sheet"
         :id="listId"
         ref="list"
         class="options"
@@ -266,6 +315,48 @@ const optionId = (i: number) => `${listId}-${i}`
         </li>
       </ul>
     </Teleport>
+    <!-- On phones: a screen of its own, the search on top, the list taking the rest. -->
+    <FullscreenDialog v-if="phone" v-model:open="sheet" :label="props.placeholder">
+      <div class="sheet-head">
+        <SearchBox
+          ref="sheetBox"
+          v-model="text"
+          :placeholder="props.placeholder"
+          :aria-label="props.placeholder"
+          role="combobox"
+          autocomplete="off"
+          aria-expanded="true"
+          :aria-controls="listId"
+          :aria-activedescendant="results.length ? optionId(active) : undefined"
+          @keydown="onKey"
+        >
+          <template v-if="props.icon" #lead>
+            <PokemonIcon :id="model ?? 'pikachu'" :class="{ unknown: !model }" />
+          </template>
+        </SearchBox>
+        <button type="button" class="btn sheet-close" :aria-label="t('picker.close')" @click="sheet = false">
+          <X :size="18" aria-hidden="true" />
+        </button>
+      </div>
+      <ul v-if="sheet" :id="listId" ref="list" class="sheet-list" role="listbox">
+        <li
+          v-for="(r, i) in results"
+          :id="optionId(i)"
+          :key="r.id"
+          role="option"
+          class="option"
+          :class="{ active: i === active }"
+          :aria-selected="i === active"
+          @click="pick(r.id)"
+        >
+          <PokemonIcon :id="r.id" />
+          <span
+            >{{ r.parts[0] }}<mark>{{ r.parts[1] }}</mark
+            >{{ r.parts[2] }}</span
+          >
+        </li>
+      </ul>
+    </FullscreenDialog>
   </div>
 </template>
 
@@ -309,5 +400,41 @@ const optionId = (i: number) => `${listId}-${i}`
 }
 .option.active {
   background: var(--sel);
+}
+/* On phones, the field opens the screen: no caret, no keyboard. */
+.picker :deep(input[readonly]) {
+  cursor: pointer;
+}
+/* The screen: the search box and a way out on top, the list scrolling under them, its rows roomier for fingers. */
+.sheet-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--panel);
+  border-bottom: 2px solid var(--ink);
+}
+.sheet-head :deep(.search-box) {
+  flex: 1;
+  max-width: none;
+  margin: 0;
+}
+.sheet-close {
+  flex: none;
+  padding: 6px;
+}
+.sheet-list {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 4px 8px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+}
+.sheet-list .option {
+  height: 44px;
+  border-bottom: 1px solid var(--border);
 }
 </style>

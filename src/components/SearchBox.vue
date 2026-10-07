@@ -16,7 +16,7 @@ function clear() {
   query.value = ''
   input.value?.focus({ preventScroll: true })
 }
-defineExpose({ focus: (options?: FocusOptions) => input.value?.focus(options) })
+defineExpose({ focus: (options?: FocusOptions) => input.value?.focus(options), select: () => input.value?.select() })
 </script>
 
 <template>
