@@ -461,6 +461,8 @@ export const messages: Record<keyof typeof en, string> = {
   'pokedex.type': 'Tipo',
   'pokedex.anyType': 'Cualquier tipo',
   'pokedex.name': 'Nombre',
+  'pokedex.statColumn': 'Estadística mostrada',
+  'pokedex.sortBy': 'Ordenar por {stat}',
   'pokedex.abilities': 'Habilidades',
   'pokedex.types': 'Tipos',
   'pokedex.none': 'Ningún Pokémon coincide.',

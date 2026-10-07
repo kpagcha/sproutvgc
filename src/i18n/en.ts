@@ -454,6 +454,8 @@ export const messages = {
   'pokedex.type': 'Type',
   'pokedex.anyType': 'Any type',
   'pokedex.name': 'Name',
+  'pokedex.statColumn': 'Stat shown',
+  'pokedex.sortBy': 'Sort by {stat}',
   'pokedex.abilities': 'Abilities',
   'pokedex.types': 'Types',
   'pokedex.none': 'No Pokémon matches.',
