@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeftRight, ChevronsDown, ChevronsUp, Trash2 } from '@lucide/vue'
+import { ArrowLeftRight, ChevronsDown, ChevronsUp, CircleHelp, Trash2 } from '@lucide/vue'
 import { pokemon, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
-import { has, percent } from '@/data/meta'
+import { currentSnapshots, distinctLabel, has, percent } from '@/data/meta'
 import { natureName } from '@/data/natures'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
@@ -23,6 +23,7 @@ import {
 } from '@/lib/speedBuild'
 import { TIERS_PICKS, lastTiersQuery } from '@/lib/tiersState'
 import { useMeta } from '@/composables/useMeta'
+import { useOpenState } from '@/composables/useOpenState'
 import AppLink from '@/components/AppLink'
 import BuildSummary from '@/components/BuildSummary.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
@@ -180,37 +181,87 @@ const EFFECT_ICONS = { up: ChevronsUp, neutral: undefined, down: ChevronsDown }
 const naturesOf = (e: NatureEffect) =>
   e === 'neutral' ? t('speed.naturesNeutral') : NATURES_BY_EFFECT[e].map(natureName).join(', ')
 const canHover = window.matchMedia('(hover: hover)').matches
+
+// The top panel folds away as the speed tiers' does (open at first, then as the reader last left it; on phones folded
+// on each visit), what's set then said in short beside the heading. How to read the page in a section of its own,
+// closed unless opened (remembered).
+const isOpen = (e: Event) => (e.target as HTMLDetailsElement).open
+const { open: controlsOpen, toggle: toggleControls } = useOpenState('sproutvgc.compare.controlsOpen', true)
+if (window.matchMedia('(max-width: 720px)').matches) controlsOpen.value = false
+const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.compare.helpOpen', false)
+const active = computed(() => {
+  const list: string[] = []
+  if (snapshot.value && metaSpeeds.value && currentSnapshots().length > 1) list.push(distinctLabel(snapshot.value))
+  if (trickRoom.value) list.push(t('speed.mod.trickroom'))
+  return list
+})
+const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 </script>
 
 <template>
   <div class="compare-page">
-    <header class="page-head">
-      <h1>{{ t('title.speedCompare') }}</h1>
-      <p class="muted">{{ t('compare.intro') }}</p>
-    </header>
+    <!-- The heading, the intro and how to read the page, and what applies to both sides (the snapshot the common
+         builds come from, Trick Room): a panel folding away as the speed tiers' top one does, what's set said in short
+         beside the heading while folded. Its heading opens and closes it itself, so the arrow and what's said change at
+         once. -->
+    <details class="panel instant top" :open="controlsOpen" @toggle="controlsOpen = isOpen($event)">
+      <summary class="head" @click.prevent="toggleControls">
+        <h1>
+          <span class="marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
+          >{{ t('title.speedCompare') }}
+        </h1>
+        <ul v-if="!controlsOpen && active.length" class="active" :aria-label="t('speed.active')">
+          <li v-for="a in active" :key="a">{{ a }}</li>
+        </ul>
+      </summary>
+      <div class="fold-body">
+        <!-- The intro, and how to read the page: a link-like toggle beside it. -->
+        <p class="lede">
+          <span class="muted wide-only">{{ t('compare.intro') }}</span>
+          <button
+            type="button"
+            class="help-toggle"
+            :aria-expanded="helpOpen"
+            aria-controls="compare-help"
+            @click="toggleHelp"
+          >
+            <CircleHelp :size="16" aria-hidden="true" /><span>{{ t('speed.help') }}</span>
+          </button>
+        </p>
+        <!-- How to read it: the formula and what each part says; on phones, the intro too. -->
+        <div v-if="helpOpen" id="compare-help" class="help-body panel sunken small">
+          <p class="muted phone-only-block">{{ t('compare.intro') }}</p>
+          <p class="formula muted">{{ t('speed.formula') }}</p>
+          <dl class="help-options">
+            <dt>{{ t('compare.common') }}</dt>
+            <dd class="muted">{{ t('compare.helpCommon') }}</dd>
+            <dt>{{ t('compare.helpAgainstLabel') }}</dt>
+            <dd class="muted">{{ t('compare.helpAgainst') }}</dd>
+            <dt>{{ t('speed.mod.trickroom') }}</dt>
+            <dd class="muted">{{ t('compare.trickroomTip') }}</dd>
+          </dl>
+        </div>
+        <div class="controls">
+          <MetaPicker v-if="metaSpeeds" />
+          <label class="btn switch" :class="{ on: trickRoom }">
+            <input type="checkbox" :checked="trickRoom" @change="replace({ trickroom: trickRoom ? undefined : '1' })" />
+            {{ t('speed.mod.trickroom') }}
+          </label>
+          <span class="muted small wide-only">{{ t('compare.trickroomTip') }}</span>
+        </div>
+      </div>
+    </details>
 
-    <!-- What applies to both: the snapshot the common builds come from, and Trick Room. -->
-    <div class="panel controls">
-      <MetaPicker v-if="metaSpeeds" />
-      <label class="btn switch" :class="{ on: trickRoom }">
-        <input type="checkbox" :checked="trickRoom" @change="replace({ trickroom: trickRoom ? undefined : '1' })" />
-        {{ t('speed.mod.trickroom') }}
-      </label>
-      <span class="muted small">{{ t('compare.trickroomTip') }}</span>
-    </div>
-
-    <!-- What to do with the two: swap them, or see them on the speed tiers. -->
-    <div class="panel actions">
-      <button type="button" class="btn" :disabled="!sideOf('a').id && !sideOf('b').id" @click="swap">
+    <!-- What to do with the two, once there's one: swap them, or see them on the speed tiers. -->
+    <div v-if="anyPicked" class="panel actions">
+      <button type="button" class="btn" @click="swap">
         <ArrowLeftRight :size="16" aria-hidden="true" />{{ t('compare.swap') }}
       </button>
-      <AppLink v-if="sideOf('a').id || sideOf('b').id" :to="ladderLink" class="btn">{{
-        t('compare.toLadder')
-      }}</AppLink>
+      <AppLink :to="ladderLink" class="btn">{{ t('compare.toLadder') }}</AppLink>
     </div>
 
-    <!-- Who moves first, between the two. -->
-    <p class="verdict panel" :class="{ tie: verdict?.tie }" role="status">
+    <!-- Who moves first, between the two; on phones, nothing until there are two, the panels saying what to do. -->
+    <p class="verdict panel" :class="{ tie: verdict?.tie, empty: !verdict }" role="status">
       <template v-if="!verdict">{{ t('compare.empty') }}</template>
       <template v-else-if="verdict.tie">{{ t('compare.tie') }}</template>
       <template v-else
@@ -377,11 +428,140 @@ const canHover = window.matchMedia('(hover: hover)').matches
 </template>
 
 <style scoped>
-.page-head h1 {
+.top {
+  margin-bottom: 12px;
+}
+/* The heading: the arrow and the title, what's set beside it while folded (under it on phones). */
+.head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: 'title active';
+  align-items: center;
+  gap: 4px 12px;
+  list-style: none;
+  cursor: pointer;
+}
+.head::-webkit-details-marker {
+  display: none;
+}
+.head h1 {
+  grid-area: title;
   margin: 0;
 }
-.page-head p {
-  margin: 4px 0 12px;
+.active {
+  grid-area: active;
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  list-style: none;
+}
+.active::-webkit-scrollbar {
+  display: none;
+}
+.active li {
+  flex: none;
+  padding: 1px 6px;
+  font-size: 0.85em;
+  white-space: nowrap;
+  background: var(--panel-alt);
+  border: 1px solid var(--border-strong);
+}
+/* It opens and closes at once, without the slide and fade collapsible sections have (main.css); its heading takes
+   taps as taps. */
+.instant::details-content,
+.instant > summary {
+  transition: none;
+}
+.instant > summary {
+  touch-action: manipulation;
+  user-select: none;
+}
+.fold-body {
+  padding-top: 8px;
+}
+.marker {
+  display: inline-block;
+  width: 0.85em;
+  font-size: 1.15em;
+  line-height: 1;
+}
+/* The intro's line: the intro, then the toggle for how to read the page, a link rather than a control. */
+.lede {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0 0 12px;
+}
+.help-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  font: inherit;
+  color: var(--text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  align-self: center;
+}
+.help-toggle > span {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+.help-toggle:hover > span {
+  text-decoration-style: solid;
+}
+.help-toggle > .lucide {
+  color: var(--muted);
+}
+/* How to read the page, in a well between the intro and the controls. */
+.help-body {
+  margin: 0 0 12px;
+  padding: 8px 10px;
+}
+.help-body > p {
+  margin: 0 0 8px;
+}
+.help-options {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2px 10px;
+  margin: 0;
+}
+.help-options dt {
+  font-weight: bold;
+}
+.help-options dd {
+  margin: 0;
+}
+.phone-only-block {
+  display: none;
+}
+@media (max-width: 720px) {
+  .head {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'title' 'active';
+  }
+  .phone-only-block {
+    display: block;
+  }
+  .wide-only {
+    display: none;
+  }
+  .help-options {
+    grid-template-columns: 1fr;
+  }
+  .help-options dd {
+    margin-bottom: 4px;
+  }
+  /* Nothing to say until there are two. */
+  .verdict.empty {
+    display: none;
+  }
 }
 .controls,
 .actions {
@@ -393,6 +573,9 @@ const canHover = window.matchMedia('(hover: hover)').matches
 }
 .actions > .btn {
   gap: 6px;
+}
+.top .controls {
+  margin-bottom: 0;
 }
 .switch {
   justify-content: flex-start;

@@ -14,7 +14,7 @@ const query = defineModel<string>({ default: '' })
 const input = useTemplateRef('input')
 function clear() {
   query.value = ''
-  input.value?.focus()
+  input.value?.focus({ preventScroll: true })
 }
 defineExpose({ focus: (options?: FocusOptions) => input.value?.focus(options) })
 </script>

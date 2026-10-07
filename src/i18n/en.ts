@@ -744,6 +744,11 @@ export const messages = {
     "Mega Evolutions are at their Mega's Speed. On the turn one Mega Evolves, it still moves at its base form's.",
   'scroll.back': 'Scroll back',
   'scroll.more': 'Scroll for more',
+  'compare.helpCommon':
+    'The Speed builds its sets run most in the snapshot shown, by nature and points: a tap sets one.',
+  'compare.helpAgainstLabel': 'To move first',
+  'compare.helpAgainst':
+    'The Speed points each side needs to move before the other with each kind of nature, the rest of its build as it is.',
   'compare.intro':
     'Your Pokémon and an opponent, each with its own build and modifiers: which moves first, and the points each needs to move before the other.',
   'compare.pick': 'Pick a Pokémon',

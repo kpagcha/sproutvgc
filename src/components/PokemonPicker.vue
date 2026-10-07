@@ -75,6 +75,22 @@ function pick(id: PokemonId) {
 function onFocus() {
   open.value = true
 }
+// On touch screens, a tap on the field focuses it here, without the browser scrolling the page to it as it does on its
+// own (the keyboard coming up may still move it, to keep the field in view): the list opens where it is, in the
+// direction that has room. A swipe starting on the field scrolls the page as usual.
+let touchAt: { x: number; y: number } | null = null
+function onTouchStart(e: TouchEvent) {
+  const p = e.touches[0]
+  touchAt = p ? { x: p.clientX, y: p.clientY } : null
+}
+function onTouchEnd(e: TouchEvent) {
+  const input = e.currentTarget as HTMLInputElement
+  const p = e.changedTouches[0]
+  if (!touchAt || !p || document.activeElement === input) return
+  if (Math.hypot(p.clientX - touchAt.x, p.clientY - touchAt.y) > 10) return
+  e.preventDefault()
+  input.focus({ preventScroll: true })
+}
 // On touch screens, tapping the field again while it's in use puts it away: the list closes and the keyboard goes.
 let wasFocused = false
 const onPointerDown = (e: PointerEvent) => (wasFocused = document.activeElement === e.currentTarget)
@@ -206,6 +222,8 @@ const optionId = (i: number) => `${listId}-${i}`
       @input="open = true"
       @focus="onFocus"
       @pointerdown="onPointerDown"
+      @touchstart.passive="onTouchStart"
+      @touchend="onTouchEnd"
       @click="onTap"
       @blur="onBlur"
       @keydown="onKey"

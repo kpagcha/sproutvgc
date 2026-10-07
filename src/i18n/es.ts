@@ -754,6 +754,11 @@ export const messages: Record<keyof typeof en, string> = {
     'Las megaevoluciones están en la Velocidad de la mega. El turno en que megaevoluciona, aún mueve con la de su forma base.',
   'scroll.back': 'Desplazar atrás',
   'scroll.more': 'Desplazar para ver más',
+  'compare.helpCommon':
+    'Las distribuciones de Velocidad que más llevan sus equipos en los datos mostrados, por naturaleza y puntos: un toque aplica una.',
+  'compare.helpAgainstLabel': 'Para mover antes',
+  'compare.helpAgainst':
+    'Los puntos de Velocidad que necesita cada lado para mover antes que el otro con cada tipo de naturaleza, con el resto de su distribución como está.',
   'compare.intro':
     'Tu Pokémon y un rival, cada uno con su distribución y sus modificadores: cuál mueve antes, y los puntos que necesita cada uno para mover antes que el otro.',
   'compare.pick': 'Elige un Pokémon',
