@@ -2,7 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
 import { AnimatePresence, motion } from 'motion-v'
 import { useRouter } from 'vue-router'
-import { ChevronsDown, ChevronsUp, CircleHelp, Plus, RotateCcw, Trash2, X } from '@lucide/vue'
+import { ArrowRight, ChevronsDown, ChevronsUp, CircleHelp, Columns2, Plus, RotateCcw, Trash2, X } from '@lucide/vue'
 import { ability, availableIds, condition, item, pokemon, type ItemId, type PokemonId, type Ref } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
@@ -1070,12 +1070,14 @@ const { entered } = usePageEntered()
             <input type="checkbox" :checked="kept.includes(found)" @change="toggleKept(found)" />
             {{ t('speed.keep') }}
           </label>
+          <!-- To the comparison's own page, standing out as the card's way there does. -->
           <AppLink
             v-if="found"
             :to="compareLink({ id: found, build: topBuild(found) })"
-            class="btn find-mode find-compare"
-            >{{ t('compare.short') }}</AppLink
-          >
+            class="btn primary find-mode find-compare"
+            ><Columns2 :size="16" aria-hidden="true" />{{ t('compare.short')
+            }}<ArrowRight :size="16" aria-hidden="true"
+          /></AppLink>
           <button v-if="found" type="button" class="btn inverted find-clear" @click="setFound(null)">
             <Trash2 :size="16" aria-hidden="true" />{{ t('speed.clear') }}
           </button>
@@ -1801,6 +1803,12 @@ const { entered } = usePageEntered()
 /* The toggles and the clear button as tall as the search beside them. */
 .find-row > :is(.find-mode, .find-clear) {
   align-self: stretch;
+}
+.find-compare {
+  gap: 6px;
+}
+.find-compare:hover {
+  text-decoration: none;
 }
 /* The found Pokémon's icon over the toggle's padding, so the toggle takes the height around it: the search's in its
    row, the switches' pinned. */
