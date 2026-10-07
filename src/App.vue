@@ -4,13 +4,14 @@ import { useRoute, type RouteLocationNormalizedLoaded, type RouteLocationRaw } f
 import { AnimatePresence, MotionConfig, motion } from 'motion-v'
 import { FADE, PAGE } from '@/lib/motion'
 import { pageEntered, pageEntering, pageExited, pageKey, setPageWaits } from '@/lib/pageExit'
-import { t, typeName, type MessageKey } from '@/i18n'
+import { LOCALES, locale, setLocale, t, typeName, type Locale, type MessageKey } from '@/i18n'
 import { isType } from '@/data/types'
 import { generatedName, refName } from '@/i18n/refName'
 import type { GeneratedKind } from '@/i18n'
 import type { Ref } from '@/data/dex'
 import { GAME_NAME, REGULATION } from '@/data/format'
-import { Search, Settings } from '@lucide/vue'
+import { Moon, Search, Settings, Sun } from '@lucide/vue'
+import { useTheme } from '@/composables/useTheme'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import NavPill from '@/components/NavPill.vue'
 import { KeptPage, Page } from '@/components/PageFrame'
@@ -62,8 +63,9 @@ watchEffect(() => {
   setMeta('meta[property="og:description"]', desc)
 })
 
-/** Entry pages lead back to their category's list. */
+/** Entry pages lead back to their category's list; the speed tiers, to Competitive. */
 const LISTS: Partial<Record<string, { to: RouteLocationRaw; label: MessageKey }>> = {
+  speedTiers: { to: { name: 'competitive' }, label: 'nav.competitive' },
   ability: { to: { name: 'abilities' }, label: 'title.abilities' },
   pokemon: { to: { name: 'pokedex' }, label: 'title.pokemon' },
   move: { to: { name: 'moves' }, label: 'title.moves' },
@@ -92,6 +94,13 @@ const NAV: { to: string; section: string; label: MessageKey }[] = AREAS.map((a) 
   section: a.id,
   label: a.label,
 }))
+
+// The bar switches the language and the theme too, beside Settings: the language to the next one, the
+// theme to the other of light and dark (from what shows, the device's when on auto).
+const { theme, setMode } = useTheme()
+const CODES = Object.keys(LOCALES) as Locale[]
+const nextLocale = () => setLocale(CODES[(CODES.indexOf(locale.value) + 1) % CODES.length]!)
+const toggleTheme = () => setMode(theme.value === 'dark' ? 'light' : 'dark')
 
 // Narrow screens fold the areas into a dropdown, and show Settings as just its icon.
 const compactQuery = window.matchMedia('(max-width: 560px)')
@@ -157,6 +166,33 @@ const fadeVariants = {
               <span class="label">{{ t(n.label) }}</span>
             </RouterLink>
           </template>
+          <!-- The language on wider screens only: narrow, there's room for the theme alone. -->
+          <button
+            v-if="!compact"
+            v-tip="t('lang.label')"
+            type="button"
+            class="quick first"
+            :aria-label="`${t('lang.label')}: ${LOCALES[locale]}`"
+            @click="nextLocale"
+          >
+            <span class="label">{{ locale.toUpperCase() }}</span>
+          </button>
+          <button
+            v-tip="t('theme.label')"
+            type="button"
+            class="quick"
+            :class="{ first: compact }"
+            :aria-label="t('theme.label')"
+            @click="toggleTheme"
+          >
+            <component
+              :is="theme === 'dark' ? Moon : Sun"
+              class="label"
+              :size="16"
+              :stroke-width="2.5"
+              aria-hidden="true"
+            />
+          </button>
           <RouterLink
             to="/settings"
             class="end"
@@ -308,6 +344,30 @@ const fadeVariants = {
 .nav .end {
   margin-left: auto;
 }
+/* The language and theme switches, before Settings at the end, as its link looks. */
+.nav .quick {
+  display: flex;
+  align-items: center;
+  flex: none;
+  padding: 4px 8px;
+  font: inherit;
+  color: var(--text);
+  background: none;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .nav .quick:hover {
+    background: var(--hover);
+  }
+}
+.nav .quick.first {
+  margin-left: auto;
+}
+.nav .quick + .end {
+  margin-left: 0;
+}
 /* The dropdown's menu hangs below the bar, so nothing may clip it (and the three links never need scrolling). */
 .nav.compact {
   overflow: visible;
@@ -345,8 +405,7 @@ const fadeVariants = {
   text-decoration: none;
 }
 
-/* Narrow screens: one row, the logo's picture alone (its name kept for screen readers) and the links together at the
-   end. */
+/* Narrow screens: one row, the logo's picture alone (its name kept for screen readers), then the links. */
 @media (max-width: 560px) {
   .bar {
     flex-wrap: nowrap;
@@ -359,9 +418,9 @@ const fadeVariants = {
     clip-path: inset(50%);
     white-space: nowrap;
   }
+  /* Search and the page's menu right after the logo, wherever its label ends; the theme and Settings at the end. */
   .nav {
-    flex: 0 1 auto;
-    margin-left: auto;
+    flex: 1 1 auto;
   }
   .nav .end {
     margin-left: 0;

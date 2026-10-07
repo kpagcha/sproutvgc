@@ -21,6 +21,8 @@ const props = defineProps<{
   /** The element around the field (a selector, for its closest ancestor) whose width the list takes (inside its
    * padding), rather than the field's, so it keeps one width as what's beside the field comes and goes. */
   listWidthOf?: string
+  /** Shows the one picked's icon at the field's start; none picked, a silhouette, asking who. */
+  icon?: boolean
 }>()
 const model = defineModel<PokemonId | null>({ required: true })
 
@@ -128,22 +130,29 @@ function measure() {
     const [pl, pr] = [parseFloat(style.paddingLeft), parseFloat(style.paddingRight)]
     along = { left: box.left + pl, width: box.width - pl - pr }
   }
-  // As tall as the room left under the field, a dozen rows at most: down to what shows of the page, above the keyboard.
-  // On touch screens, from where focusing it brings the field: its panel at the top of the screen.
-  const vv = window.visualViewport
-  const [shownTop, shownBottom] = vv ? [vv.offsetTop, vv.offsetTop + vv.height] : [0, window.innerHeight]
+  // As tall as the room left under the field, a dozen rows at most: down to the bottom of the screen, whatever a
+  // keyboard covers of it (following the keyboard as it slides in makes the list jump about). On touch screens, from
+  // where focusing it brings the field: its panel at the top of the screen.
   const below = r.bottom - (anchor()?.getBoundingClientRect().top ?? r.top)
-  const fieldBottom = touch.matches && !fixed.value ? shownTop + 12 + below : r.bottom
+  const fieldBottom = touch.matches && !fixed.value ? 12 + below : r.bottom
   const [dx, dy] = fixed.value ? [0, 0] : [window.scrollX, window.scrollY]
   place.value = {
     top: r.bottom + 4 + dy,
     left: along.left + dx,
     width: along.width,
-    height: shownBottom - fieldBottom - 16,
+    height: window.innerHeight - fieldBottom - 16,
   }
 }
 // Only what's stuck to the screen follows the page's scrolling, and anything scrolling the field within the page.
 const onScroll = (e: Event) => (fixed.value || e.target !== document) && measure()
+// The reader scrolling anything but the list or the field (a swipe, a wheel; not the page scrolling itself, as it does to bring the
+// field up) puts it away: the list closes, and on touch screens the keyboard goes with it.
+const list = useTemplateRef<HTMLElement>('list')
+function onScrollAway(e: Event) {
+  if (list.value?.contains(e.target as Node) || field.value?.contains(e.target as Node)) return
+  open.value = false
+  if (touch.matches) field.value?.querySelector('input')?.blur()
+}
 watch(
   () => results.value.length > 0,
   (shown) => {
@@ -152,18 +161,21 @@ watch(
       measure()
       window.addEventListener('scroll', onScroll, { passive: true, capture: true })
       window.addEventListener('resize', measure)
-      window.visualViewport?.addEventListener('resize', measure)
+      window.addEventListener('touchmove', onScrollAway, { passive: true })
+      window.addEventListener('wheel', onScrollAway, { passive: true })
     } else {
       window.removeEventListener('scroll', onScroll, { capture: true })
       window.removeEventListener('resize', measure)
-      window.visualViewport?.removeEventListener('resize', measure)
+      window.removeEventListener('touchmove', onScrollAway)
+      window.removeEventListener('wheel', onScrollAway)
     }
   },
 )
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', onScroll, { capture: true })
   window.removeEventListener('resize', measure)
-  window.visualViewport?.removeEventListener('resize', measure)
+  window.removeEventListener('touchmove', onScrollAway)
+  window.removeEventListener('wheel', onScrollAway)
 })
 
 watch(active, (i) => queueMicrotask(() => document.getElementById(optionId(i))?.scrollIntoView({ block: 'nearest' })))
@@ -189,11 +201,16 @@ const optionId = (i: number) => `${listId}-${i}`
       @click="onTap"
       @blur="onBlur"
       @keydown="onKey"
-    />
+    >
+      <template v-if="props.icon" #lead>
+        <PokemonIcon :id="model ?? 'pikachu'" :class="{ unknown: !model }" />
+      </template>
+    </SearchBox>
     <Teleport to="body">
       <ul
         v-if="results.length"
         :id="listId"
+        ref="list"
         class="options"
         :class="{ fixed }"
         role="listbox"
@@ -233,6 +250,9 @@ const optionId = (i: number) => `${listId}-${i}`
 .picker :deep(.search-box) {
   margin: 0;
 }
+.unknown {
+  filter: brightness(0);
+}
 /* The options: a card under the field, as the site's surfaces are. */
 .options {
   position: absolute;
@@ -245,16 +265,9 @@ const optionId = (i: number) => `${listId}-${i}`
   background: var(--panel);
   border: 2px solid var(--ink);
   box-shadow: var(--hard);
-  /* Following the room left as the keyboard comes and goes, rather than jumping to it. */
-  transition: max-height 0.2s ease-out;
 }
 .options.fixed {
   position: fixed;
-}
-@media (prefers-reduced-motion: reduce) {
-  .options {
-    transition: none;
-  }
 }
 .option {
   display: flex;
