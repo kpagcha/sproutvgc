@@ -677,7 +677,7 @@ export const messages = {
   'speed.summaryMeta': "of the top {n}'s sets, by usage",
   'speed.summaryAll': 'of every Pokémon at {bench}',
   'speed.opponentsHead': 'Opponents',
-  'speed.opponentsHint': 'Tap one to see the points to outspeed it.',
+  'speed.opponentsHint': 'Tap one to compare.',
   'speed.opponentsGo': 'Find one on the ladder',
   'speed.vs': 'Against {name} at {speed}',
   'speed.vsFrom': 'moves first from {points} points',

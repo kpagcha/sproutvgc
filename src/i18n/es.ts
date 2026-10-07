@@ -685,7 +685,7 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.summaryMeta': 'de los sets de los {n} más usados, según su uso',
   'speed.summaryAll': 'de todos los Pokémon con {bench}',
   'speed.opponentsHead': 'Rivales',
-  'speed.opponentsHint': 'Toca uno para ver los puntos para adelantarlo.',
+  'speed.opponentsHint': 'Toca uno para comparar.',
   'speed.opponentsGo': 'Busca uno en la escala',
   'speed.vs': 'Contra {name} con {speed}',
   'speed.vsFrom': 'mueve antes desde {points} puntos',
