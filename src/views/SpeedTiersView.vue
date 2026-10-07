@@ -938,6 +938,7 @@ const { entered } = usePageEntered()
           <div class="view-row">
             <MetaPicker v-if="snapshot" />
             <SegmentedControl
+              class="phone-stacked"
               v-if="metaAvailable"
               :model-value="showAll ? 'all' : 'meta'"
               :label="t('speed.show')"
@@ -948,6 +949,7 @@ const { entered } = usePageEntered()
               @update:model-value="(v: string) => set('all', v === 'all' ? '1' : undefined)"
             />
             <SegmentedControl
+              class="phone-stacked"
               v-if="showAll"
               v-model="bench"
               :label="t('speed.at')"
@@ -995,6 +997,7 @@ const { entered } = usePageEntered()
                 }}
               </button>
               <SegmentedControl
+                class="phone-stacked"
                 v-model="stage"
                 :label="t('speed.stage')"
                 :options="STAGES.map((s) => ({ value: s, label: stageLabel(s) }))"
@@ -1376,6 +1379,7 @@ const { entered } = usePageEntered()
                 </button>
               </div>
               <SegmentedControl
+                class="phone-stacked"
                 v-if="myModsOpen"
                 :model-value="myStage"
                 :label="t('speed.stage')"
@@ -1458,7 +1462,8 @@ const { entered } = usePageEntered()
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
-  padding: 6px 0;
+  /* Room above it, none under: stuck, nothing but the button (and its shadow) covers what scrolls under. */
+  padding-top: 6px;
   background: var(--bg);
 }
 .bar-yours {
@@ -2157,6 +2162,14 @@ const { entered } = usePageEntered()
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
+}
+/* On phones, the choices' labels above them, so they start at the panel's edge as the buttons around them do. */
+@media (max-width: 720px) {
+  .segmented.phone-stacked {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
 }
 .stacked :deep(.segments label) {
   white-space: nowrap;
