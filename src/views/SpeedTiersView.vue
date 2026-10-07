@@ -880,8 +880,19 @@ const { entered } = usePageEntered()
         :style="{ maxHeight: `${dropHeight}px` }"
       ></div>
       <!-- On phones, where yours' card opens instead: a dialog over the page. -->
-      <ModalDialog v-model:open="yoursSheet" :label="t('speed.yours')">
-        <div id="yours-sheet" class="yours-sheet"></div>
+      <!-- As large as the screen leaves, whatever's open in the card (which scrolls), its actions at the foot. -->
+      <ModalDialog v-model:open="yoursSheet" :label="t('speed.yours')" fill>
+        <div class="yours-sheet">
+          <div id="yours-sheet" class="yours-sheet-card"></div>
+          <div class="drop-actions sheet-actions">
+            <button v-if="mine" type="button" class="btn inverted" @click="clearMine">
+              <Trash2 :size="16" aria-hidden="true" />{{ t('speed.clear') }}
+            </button>
+            <button type="button" class="btn" :class="{ primary: mine }" @click="yoursOpen = false">
+              {{ t(mine ? 'speed.confirm' : 'speed.close') }}
+            </button>
+          </div>
+        </div>
       </ModalDialog>
     </div>
     <!-- A section that folds, as yours does: its heading, with what's active in short beside it while folded (under it
@@ -1481,7 +1492,7 @@ const { entered } = usePageEntered()
           </template>
           <!-- Dropped from the bar, the card has no band: its actions at its foot instead,
                Confirm putting it away (Close, a plain button, with none picked). -->
-          <div v-if="!side" class="drop-actions">
+          <div v-if="!side && !phone" class="drop-actions">
             <button v-if="mine" type="button" class="btn inverted" @click="clearMine">
               <Trash2 :size="16" aria-hidden="true" />{{ t('speed.clear') }}
             </button>
@@ -1539,25 +1550,33 @@ const { entered } = usePageEntered()
   background: var(--panel);
   border-top: 1px solid var(--border);
 }
-/* In a dialog over the page (phones): the card scrolling within it, its band on top saying what it is (Clear left to
-   the actions at its foot, which stay in view). */
+/* In a dialog over the page (phones), one card filling it: yours' card scrolling within it, its band on top saying
+   what it is (Clear left to the actions), and the actions at its foot, always there. */
 .yours-sheet {
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  background: var(--panel);
+  border: 2px solid var(--ink);
+  box-shadow: var(--hard);
 }
-.yours-sheet > .yours {
-  margin: 0;
+.yours-sheet-card {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+:root:root .yours-sheet-card > .yours {
+  margin: 0;
+  border: none;
+  box-shadow: none;
 }
 .yours-sheet .band-clear,
 .yours-sheet .yours-marker {
   display: none;
 }
-.yours-sheet .drop-actions {
-  position: sticky;
-  bottom: 0;
+.sheet-actions {
+  flex: none;
+  margin: 0;
 }
 /* Dropped from the bar, which says what it is and closes it, the card's own band is left out. */
 .yours-drop .yours-title {
