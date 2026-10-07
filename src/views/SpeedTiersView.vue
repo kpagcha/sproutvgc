@@ -1348,6 +1348,7 @@ const { entered } = usePageEntered()
                 :placeholder="t('speed.yoursPick')"
                 :title="t('speed.yours')"
                 tone="yours"
+                :caret="!mine"
                 list-width-of=".yours-pick"
                 speed
                 icon
@@ -1524,7 +1525,7 @@ const { entered } = usePageEntered()
   border-top: 1px solid var(--border);
 }
 /* In a dialog over the page (phones), one card filling it: yours' card scrolling within it, its band on top saying
-   what it is (Clear left to the actions), and the actions at its foot, always there. */
+   what it is and closing it (Clear left to the actions), and the actions at its foot, always there. */
 .yours-sheet {
   display: flex;
   flex-direction: column;
@@ -1543,9 +1544,13 @@ const { entered } = usePageEntered()
   border: none;
   box-shadow: none;
 }
-.yours-sheet .band-clear,
-.yours-sheet .yours-marker {
+.yours-sheet .band-clear {
   display: none;
+}
+/* Its arrow at the band's end, where the bar's is: a tap on the band folds the card back into the bar. */
+.yours-sheet .yours-marker {
+  order: 1;
+  margin-left: auto;
 }
 .sheet-actions {
   flex: none;
