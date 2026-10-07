@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChevronsDown, ChevronsUp } from '@lucide/vue'
+import { ChevronsDown, ChevronsUp, X } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { t, tSlots } from '@/i18n'
 import type { NamedLocation } from '@/lib/links'
@@ -29,11 +29,14 @@ const emit = defineEmits<{ close: [] }>()
 const EFFECT_ICONS = { up: ChevronsUp, neutral: undefined, down: ChevronsDown }
 const canHover = window.matchMedia('(hover: hover)').matches
 const title = tSlots('speed.vs')
+/** Whether a row's yours moves first, only ties, or can't. */
+const kind = (r: ReturnType<typeof pointsToMoveFirst>) => (!r ? 'no' : 'ties' in r ? 'tie' : 'yes')
 </script>
 
 <template>
-  <section class="panel versus-card small" role="status">
-    <p class="head">
+  <!-- A band of the opponents' red: the Pokémon it's against (a link to its page) at its Speed, and Close. -->
+  <section class="panel banded versus-card small" role="status">
+    <div class="band">
       <strong
         ><template v-for="(part, i) in title" :key="i"
           ><template v-if="typeof part === 'string'">{{ part }}</template
@@ -42,9 +45,12 @@ const title = tSlots('speed.vs')
           ><template v-else>{{ props.speed }}</template></template
         ></strong
       >
-      <button type="button" class="link-button" @click="emit('close')">{{ t('speed.vsClose') }}</button>
-    </p>
-    <!-- Whose points they are: yours'. -->
+      <button type="button" class="btn on-band inverted close" @click="emit('close')">
+        <X :size="14" aria-hidden="true" />{{ t('speed.vsClose') }}
+      </button>
+    </div>
+    <!-- Whose points they are: yours'. Then a row per nature effect: the effect as the nature's choice shows it, and
+         the points, red when there are none that do it. -->
     <p class="needs">{{ t('speed.vsNeeds', { name: props.mineName }) }}</p>
     <dl>
       <template v-for="v in props.rows" :key="v.effect">
@@ -57,7 +63,7 @@ const title = tSlots('speed.vs')
           >
           <template v-else>{{ t(`speed.effect.${v.effect}`) }}</template>
         </dt>
-        <dd>{{ pointsText(v.result) }}</dd>
+        <dd :class="kind(v.result)">{{ pointsText(v.result) }}</dd>
       </template>
     </dl>
     <AppLink :to="props.compareTo" class="compare-link">{{ t('compare.open') }}</AppLink>
@@ -71,13 +77,22 @@ const title = tSlots('speed.vs')
 .small {
   font-size: 0.875em;
 }
-.head {
+/* Its band in the opponents' red, as the ladder's is with yours picked. */
+:root:root .versus-card.banded > .band {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 4px 10px;
-  margin: 0;
+  color: var(--opponent-text);
+  background: var(--opponent);
+}
+.band a {
+  color: inherit;
+}
+.close {
+  flex: none;
+  gap: 4px;
 }
 /* The Pokémon it's against, in its title: its name on the text's line, its icon centered on it. */
 .mon {
@@ -87,35 +102,41 @@ const title = tSlots('speed.vs')
   margin-block: -6px;
 }
 .needs {
-  margin: 6px 0 0;
+  margin: 0;
+  font-weight: bold;
 }
+/* The rows: the effect in a small outlined label, the points in bold, red when yours can't move first. */
 dl {
   display: grid;
   grid-template-columns: max-content 1fr;
-  gap: 2px 10px;
-  margin: 6px 0 0;
+  align-items: center;
+  gap: 4px 10px;
+  margin: 8px 0 0;
 }
-dd {
-  margin: 0;
-}
-/* A nature effect: its arrows and "Spe" together, the effect's name read out in their place. */
 .effect {
   display: inline-flex;
   align-items: center;
+  justify-self: start;
   gap: 2px;
+  padding: 1px 6px;
+  font-size: 0.875em;
+  background: var(--panel-alt);
+  border: 1px solid var(--border-strong);
+}
+dd {
+  margin: 0;
+  font-weight: bold;
+}
+dd.tie {
+  color: var(--muted);
+}
+dd.no {
+  color: var(--opponent);
 }
 .compare-link {
   display: inline-block;
-  margin-top: 6px;
+  margin-top: 10px;
   font-weight: bold;
-}
-.link-button {
-  padding: 0;
-  font: inherit;
-  color: var(--link);
-  background: none;
-  border: none;
-  cursor: pointer;
 }
 .visually-hidden {
   position: absolute;
