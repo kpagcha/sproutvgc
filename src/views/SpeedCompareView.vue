@@ -262,13 +262,13 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
       <AppLink :to="ladderLink" class="btn">{{ t('compare.toLadder') }}</AppLink>
     </div>
 
-    <!-- Who moves first, between the two; on phones, nothing until there are two, the panels saying what to do. -->
+    <!-- Who moves first, between the two, and their Speeds at the end of its line (the sentence wrapping, not them);
+         on phones, nothing until there are two, the panels saying what to do. -->
     <p class="verdict panel" :class="{ tie: verdict?.tie, empty: !verdict }" role="status">
-      <template v-if="!verdict">{{ t('compare.empty') }}</template>
-      <template v-else-if="verdict.tie">{{ t('compare.tie') }}</template>
-      <template v-else
-        ><PokemonIcon :id="sideOf(verdict.first).id!" />{{ t('compare.first', { name: verdict.name }) }}</template
-      >
+      <PokemonIcon v-if="verdict && !verdict.tie" :id="sideOf(verdict.first).id!" />
+      <span class="verdict-text">{{
+        !verdict ? t('compare.empty') : verdict.tie ? t('compare.tie') : t('compare.first', { name: verdict.name })
+      }}</span>
       <span v-if="verdict" class="verdict-speeds"
         >{{ sideOf('a').speed }} <span class="muted">vs</span> {{ sideOf('b').speed }}</span
       >
@@ -606,9 +606,8 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 }
 .verdict {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 4px 10px;
+  gap: 10px;
   margin: 0 0 12px;
   font-weight: bold;
 }
@@ -619,8 +618,13 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
   height: 30px;
   margin-right: -10px;
 }
+.verdict-text {
+  flex: 1;
+  min-width: 0;
+}
 .verdict-speeds {
-  margin-left: auto;
+  flex: none;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 /* Side by side from tablets up; one under the other on phones. */
