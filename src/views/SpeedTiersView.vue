@@ -749,17 +749,22 @@ const { open: controlsOpen, toggle: toggleControls } = useOpenState('sproutvgc.s
 if (window.matchMedia('(max-width: 720px)').matches) controlsOpen.value = false
 const stageLabel = (s: string) => (Number(s) > 0 ? `+${s}` : s.replace('-', '−'))
 // In two kinds: what's shown (the data, which Pokémon), and the options on (as their switches show when on).
+// The options first, as they change what's read off the ladder: the switches by name, the modifiers in short as yours'
+// bar has them (items by their icon, the name read out); then what's shown.
 const active = computed(() => {
-  const view: string[] = []
-  const options: string[] = []
-  if (snapshot.value && !showAll.value && currentSnapshots().length > 1) view.push(distinctLabel(snapshot.value))
-  view.push(showAll.value ? `${t('speed.all')} · ${benchLabel(bench.value)}` : t('speed.meta', { n: TOP }))
-  if (showBoosts.value) options.push(t('speed.boosts'))
-  if (!showMegas.value) options.push(t('speed.noMegas'))
-  if (trickRoom.value) options.push(t('speed.mod.trickroom'))
-  for (const k of TOGGLES) if (flag(k)) options.push(t(`speed.mod.${k}`))
-  if (stage.value !== '0') options.push(t('speed.stageShort', { stage: stageLabel(stage.value) }))
-  return [...view.map((label) => ({ label, kind: 'view' })), ...options.map((label) => ({ label, kind: 'option' }))]
+  const list: { label: string; kind: 'view' | 'option' | 'mod'; item?: ItemId }[] = []
+  if (trickRoom.value) list.push({ label: t('speed.mod.trickroom'), kind: 'option' })
+  if (showBoosts.value) list.push({ label: t('speed.boosts'), kind: 'option' })
+  if (!showMegas.value) list.push({ label: t('speed.noMegas'), kind: 'option' })
+  for (const k of TOGGLES) if (flag(k)) list.push({ label: t(`speed.modShort.${k}`), kind: 'mod', item: MOD_ITEMS[k] })
+  if (stage.value !== '0') list.push({ label: stageLabel(stage.value), kind: 'mod' })
+  list.push({
+    label: showAll.value ? `${t('speed.all')} · ${benchLabel(bench.value)}` : t('speed.meta', { n: TOP }),
+    kind: 'view',
+  })
+  if (snapshot.value && !showAll.value && currentSnapshots().length > 1)
+    list.push({ label: distinctLabel(snapshot.value), kind: 'view' })
+  return list
 })
 
 /** Whether the screen has hover, for tooltips: touch screens show what matters inline instead. */
@@ -906,7 +911,11 @@ const { entered } = usePageEntered()
         </h1>
         <!-- On one line, scrolling sideways when it doesn't fit. -->
         <ScrollRow v-if="!controlsOpen" class="active" role="list" :aria-label="t('speed.active')">
-          <span v-for="a in active" :key="a.label" role="listitem" class="item" :class="a.kind">{{ a.label }}</span>
+          <span v-for="a in active" :key="a.label" role="listitem" class="item" :class="[a.kind, { icon: a.item }]"
+            ><template v-if="a.item"
+              ><ItemIcon :id="a.item" :scale="0.67" /><span class="visually-hidden">{{ a.label }}</span></template
+            ><template v-else>{{ a.label }}</template></span
+          >
         </ScrollRow>
       </summary>
       <div class="fold-body">
@@ -1614,11 +1623,16 @@ const { entered } = usePageEntered()
   background: var(--panel-alt);
   border: 1px solid var(--border-strong);
 }
-/* The options on, as their switches show when on. */
-.active .item.option {
+/* The options on, as their switches show when on; the modifiers among them in short. */
+.active .item:is(.option, .mod) {
   font-weight: bold;
   background: var(--sel);
   border-color: var(--ink);
+}
+.active .item.icon {
+  display: inline-flex;
+  align-items: center;
+  padding-block: 0;
 }
 /* These sections open and close at once, without the slide and fade collapsible sections have (main.css). Their
    headings take taps as taps: quick ones neither select the text nor zoom. */

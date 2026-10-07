@@ -189,12 +189,12 @@ const isOpen = (e: Event) => (e.target as HTMLDetailsElement).open
 const { open: controlsOpen, toggle: toggleControls } = useOpenState('sproutvgc.compare.controlsOpen', true)
 if (window.matchMedia('(max-width: 720px)').matches) controlsOpen.value = false
 const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.compare.helpOpen', false)
-// In two kinds, as the speed tiers': what's shown (the data), and the options on.
+// In two kinds, as the speed tiers': the options on first, then what's shown (the data).
 const active = computed(() => {
   const list: { label: string; kind: 'view' | 'option' }[] = []
+  if (trickRoom.value) list.push({ label: t('speed.mod.trickroom'), kind: 'option' })
   if (snapshot.value && metaSpeeds.value && currentSnapshots().length > 1)
     list.push({ label: distinctLabel(snapshot.value), kind: 'view' })
-  if (trickRoom.value) list.push({ label: t('speed.mod.trickroom'), kind: 'option' })
   return list
 })
 const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
