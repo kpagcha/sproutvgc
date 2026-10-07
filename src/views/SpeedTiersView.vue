@@ -130,6 +130,22 @@ function toggleBoosts() {
   set('boosts', on ? undefined : '0')
 }
 const toggleTrickRoom = () => set('trickroom', trickRoom.value ? undefined : '1')
+// The controls back as a page comes without them: what's shown, the options and the modifiers, boosts on again here
+// too. What's found and kept, and yours, are left as they are.
+const CONTROL_KEYS = ['all', 'bench', 'trickroom', 'megas', 'boosts', 'stage', ...TOGGLES] as const
+const controlsChanged = computed(() => CONTROL_KEYS.some((k) => query.value[k] !== undefined) || !boostsOn.value)
+function resetControls() {
+  boostsPref.value = true
+  try {
+    localStorage.setItem(BOOSTS_KEY, '1')
+  } catch {
+    // Storage unavailable: boosts are on until the page reloads.
+  }
+  const q = { ...query.value }
+  for (const k of CONTROL_KEYS) delete q[k]
+  void router.replace({ query: q })
+  modsOpen.value = false
+}
 // Megas show unless the URL turns them off (`?megas=0`).
 const showMegas = computed(() => query.value.megas !== '0')
 const toggleMegas = () => set('megas', showMegas.value ? '0' : undefined)
@@ -193,16 +209,23 @@ const mySpeed = computed(() =>
  */
 function pickMine(id: PokemonId | null) {
   if (!id) return
+  void router.replace({ query: { ...query.value, mine: id, ...buildOf(id), vs: undefined } })
+}
+/** Its build as picked: the meta's most common one, else the fastest. */
+function buildOf(id: PokemonId) {
   const build = data.value?.[id]?.speeds?.[0]
-  void router.replace({
-    query: {
-      ...query.value,
-      mine: id,
-      mynat: build ? natureEffect(build.nature) : 'up',
-      mypts: String(build ? build.points : MAX_POINTS),
-      vs: undefined,
-    },
-  })
+  return { mynat: build ? natureEffect(build.nature) : 'up', mypts: String(build ? build.points : MAX_POINTS) }
+}
+// Its build and modifiers back as when it was picked.
+const myChanged = computed(() => {
+  if (mine.value === null) return false
+  const b = buildOf(mine.value)
+  return myNature.value !== b.mynat || String(myPoints.value) !== b.mypts || myModded.value
+})
+function resetMine() {
+  if (mine.value === null) return
+  void router.replace({ query: { ...query.value, ...buildOf(mine.value), mymods: undefined, mystage: undefined } })
+  myModsOpen.value = false
 }
 function clearMine() {
   const q = { ...query.value }
@@ -832,6 +855,9 @@ const { entered } = usePageEntered()
               />
             </div>
           </div>
+          <button v-if="controlsChanged" type="button" class="btn reset" @click="resetControls">
+            {{ t('speed.resetControls') }}
+          </button>
         </div>
       </div>
     </details>
@@ -884,6 +910,11 @@ const { entered } = usePageEntered()
                 @click="toggleKept(id)"
               >
                 <X :size="14" aria-hidden="true" />
+              </button>
+            </li>
+            <li>
+              <button type="button" class="link-button" @click="set('keep', undefined)">
+                {{ t('speed.unkeepAll') }}
               </button>
             </li>
           </ul>
@@ -1186,6 +1217,9 @@ const { entered } = usePageEntered()
               :options="STAGES.map((s) => ({ value: s, label: stageLabel(s) }))"
               @update:model-value="(v: string) => setMyStage(v)"
             />
+            <button v-if="myChanged" type="button" class="btn reset" @click="resetMine">
+              {{ t('speed.resetYours') }}
+            </button>
           </section>
           <section v-if="summary || (versus && side)" class="yours-section">
             <p v-if="summary" class="small">
@@ -1474,6 +1508,11 @@ const { entered } = usePageEntered()
 .find-note {
   flex-basis: 100%;
   margin: 0;
+}
+/* The resets: under what they reset, to the left. */
+.reset {
+  align-self: flex-start;
+  justify-self: start;
 }
 /* The Pokémon kept, on a line of their own: each its name, which finds it, and a cross. */
 .kept {
