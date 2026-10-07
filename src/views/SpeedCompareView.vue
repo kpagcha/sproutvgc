@@ -661,10 +661,13 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
   gap: 8px;
   font-weight: bold;
 }
-/* The one that moves first, marked by its outline. */
+/* The one that moves first, marked by its outline: blue for yours, the opponents' red for an opponent. */
 .side.first {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
+}
+.side.first.opponent {
+  outline-color: var(--opponent);
 }
 .picker {
   width: 100%;
