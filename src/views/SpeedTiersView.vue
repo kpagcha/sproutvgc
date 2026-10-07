@@ -2,7 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
 import { AnimatePresence, motion } from 'motion-v'
 import { useRouter } from 'vue-router'
-import { ArrowRight, ChevronsDown, ChevronsUp, CircleHelp, Columns2, Plus, RotateCcw, Trash2, X } from '@lucide/vue'
+import { ArrowRight, ChevronsDown, ChevronsUp, Columns2, Plus, RotateCcw, Trash2, X } from '@lucide/vue'
 import { ability, availableIds, condition, item, pokemon, type ItemId, type PokemonId, type Ref } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
@@ -43,6 +43,7 @@ import ScrollRow from '@/components/ScrollRow.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 import VersusCard from '@/components/VersusCard.vue'
 import SetupStar from '@/components/SetupStar.vue'
+import HelpToggle from '@/components/HelpToggle.vue'
 
 // The regulation's Pokémon ordered by Speed, as a ladder of Speed values with the Pokémon at each. By default the
 // meta: the most used Pokémon at the Speeds their sets actually run (from the meta snapshot shown, when it has them);
@@ -771,6 +772,13 @@ const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.speedTier
 // what's active then said in short beside the heading: what's shown, and every switch and modifier away from its default.
 const isOpen = (e: Event) => (e.target as HTMLDetailsElement).open
 const { open: controlsOpen, toggle: toggleControls } = useOpenState('sproutvgc.speedTiers.controlsOpen', true)
+// On phones, how to read the page is toggled from beside its heading, the controls folded or not: opening it opens
+// them, which hold it.
+function helpFromHead() {
+  if (controlsOpen.value && helpOpen.value) return toggleHelp()
+  controlsOpen.value = true
+  if (!helpOpen.value) toggleHelp()
+}
 // On phones they start folded on each visit, the ladder first in view, whatever was left last time.
 if (window.matchMedia('(max-width: 720px)').matches) controlsOpen.value = false
 const stageLabel = (s: string) => (Number(s) > 0 ? `+${s}` : s.replace('-', '−'))
@@ -934,7 +942,14 @@ const { entered } = usePageEntered()
           <span
             ><span class="marker head-marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
             >{{ t('title.speedTiers') }}</span
-          ><SetupStar /><span v-if="mine" class="opponents-tag head-tag">{{ t('speed.opponentsHead') }}</span>
+          ><SetupStar /><span v-if="mine" class="opponents-tag head-tag">{{ t('speed.opponentsHead') }}</span
+          ><HelpToggle
+            class="head-help"
+            :open="helpOpen && controlsOpen"
+            controls="speed-help"
+            fit
+            @toggle="helpFromHead"
+          />
         </h1>
         <!-- On one line, scrolling sideways when it doesn't fit. -->
         <ScrollRow v-if="!controlsOpen" class="active" role="list" :aria-label="t('speed.active')">
@@ -949,15 +964,7 @@ const { entered } = usePageEntered()
         <!-- The intro, and how to read the page: a link-like toggle beside it, apart from the controls. -->
         <p class="lede">
           <span class="muted wide-only">{{ t('speed.intro', { reg: REGULATION }) }}</span>
-          <button
-            type="button"
-            class="help-toggle"
-            :aria-expanded="helpOpen"
-            aria-controls="speed-help"
-            @click="toggleHelp"
-          >
-            <CircleHelp :size="16" aria-hidden="true" /><span>{{ t('speed.help') }}</span>
-          </button>
+          <HelpToggle :open="helpOpen" controls="speed-help" @toggle="toggleHelp" />
         </p>
         <!-- How to read a chip: samples, each with what its parts mean; then yours among them; on phones, the intro and
              the options too. -->
@@ -2246,35 +2253,16 @@ const { entered } = usePageEntered()
 .phone-only-block {
   display: none;
 }
-/* The intro's line: the intro, then the toggle for how to read the page, a link rather than a control. */
+/* The intro's line: the intro, then the toggle for how to read the page, a link rather than a control; on phones,
+   beside the heading instead. */
+.head .head-help {
+  display: none;
+}
 .lede {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 4px 12px;
-}
-.help-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0;
-  font: inherit;
-  color: var(--text);
-  background: none;
-  border: none;
-  cursor: pointer;
-  align-self: center;
-}
-/* Ink rather than a link's blue, which nothing else on the page has: dotted, as what explains, solid on hover. */
-.help-toggle > span {
-  text-decoration: underline dotted;
-  text-underline-offset: 3px;
-}
-.help-toggle:hover > span {
-  text-decoration-style: solid;
-}
-.help-toggle > .lucide {
-  color: var(--muted);
 }
 /* How to read the page, in a well between the intro and the controls. */
 .help-body {
@@ -2315,8 +2303,16 @@ const { entered } = usePageEntered()
   .phone-only-block {
     display: block;
   }
-  .wide-only {
+  .wide-only,
+  .lede {
     display: none;
+  }
+  .head .head-help {
+    display: inline-flex;
+  }
+  /* One line, the toggle taking what the rest leaves. */
+  .head h1 {
+    flex-wrap: nowrap;
   }
   .help-body .phone-only-block > :first-child {
     margin-top: 0;

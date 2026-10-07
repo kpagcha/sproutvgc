@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeftRight, ChevronsDown, ChevronsUp, CircleHelp, Trash2 } from '@lucide/vue'
+import { ArrowLeftRight, ChevronsDown, ChevronsUp, Trash2 } from '@lucide/vue'
 import { pokemon, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
 import { currentSnapshots, distinctLabel, has, percent } from '@/data/meta'
@@ -31,6 +31,7 @@ import MetaPicker from '@/components/MetaPicker.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import PokemonPicker from '@/components/PokemonPicker.vue'
 import SetupStar from '@/components/SetupStar.vue'
+import HelpToggle from '@/components/HelpToggle.vue'
 import ScrollRow from '@/components/ScrollRow.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 
@@ -189,6 +190,13 @@ const isOpen = (e: Event) => (e.target as HTMLDetailsElement).open
 const { open: controlsOpen, toggle: toggleControls } = useOpenState('sproutvgc.compare.controlsOpen', true)
 if (window.matchMedia('(max-width: 720px)').matches) controlsOpen.value = false
 const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.compare.helpOpen', false)
+// On phones, how to read the page is toggled from beside its heading, the controls folded or not: opening it opens
+// them, which hold it.
+function helpFromHead() {
+  if (controlsOpen.value && helpOpen.value) return toggleHelp()
+  controlsOpen.value = true
+  if (!helpOpen.value) toggleHelp()
+}
 // In two kinds, as the speed tiers': the options on first, then what's shown (the data).
 const active = computed(() => {
   const list: { label: string; kind: 'view' | 'option' }[] = []
@@ -213,7 +221,13 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
           <span
             ><span class="marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
             >{{ t('title.speedCompare') }}</span
-          ><SetupStar />
+          ><SetupStar /><HelpToggle
+            class="head-help"
+            :open="helpOpen && controlsOpen"
+            controls="compare-help"
+            fit
+            @toggle="helpFromHead"
+          />
         </h1>
         <!-- On one line, scrolling sideways when it doesn't fit. -->
         <ScrollRow v-if="!controlsOpen && active.length" class="active" role="list" :aria-label="t('speed.active')">
@@ -224,15 +238,7 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
         <!-- The intro, and how to read the page: a link-like toggle beside it. -->
         <p class="lede">
           <span class="muted wide-only">{{ t('compare.intro') }}</span>
-          <button
-            type="button"
-            class="help-toggle"
-            :aria-expanded="helpOpen"
-            aria-controls="compare-help"
-            @click="toggleHelp"
-          >
-            <CircleHelp :size="16" aria-hidden="true" /><span>{{ t('speed.help') }}</span>
-          </button>
+          <HelpToggle :open="helpOpen" controls="compare-help" @toggle="toggleHelp" />
         </p>
         <!-- How to read it: the formula and what each part says; on phones, the intro too. -->
         <div v-if="helpOpen" id="compare-help" class="help-body panel sunken small">
@@ -508,34 +514,16 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
   line-height: 1;
 }
 /* The intro's line: the intro, then the toggle for how to read the page, a link rather than a control. */
+/* How to read the page: beside the intro; on phones, beside the heading instead. */
+.head .head-help {
+  display: none;
+}
 .lede {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 4px 12px;
   margin: 0 0 12px;
-}
-.help-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0;
-  font: inherit;
-  color: var(--text);
-  background: none;
-  border: none;
-  cursor: pointer;
-  align-self: center;
-}
-.help-toggle > span {
-  text-decoration: underline dotted;
-  text-underline-offset: 3px;
-}
-.help-toggle:hover > span {
-  text-decoration-style: solid;
-}
-.help-toggle > .lucide {
-  color: var(--muted);
 }
 /* How to read the page, in a well between the intro and the controls. */
 .help-body {
@@ -568,8 +556,12 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
   .phone-only-block {
     display: block;
   }
-  .wide-only {
+  .wide-only,
+  .lede {
     display: none;
+  }
+  .head .head-help {
+    display: inline-flex;
   }
   .help-options {
     grid-template-columns: 1fr;
