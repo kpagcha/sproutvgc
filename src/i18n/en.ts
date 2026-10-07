@@ -657,6 +657,10 @@ export const messages = {
   'speed.findShort': 'Find…',
   'speed.trShort': 'TR',
   'speed.help': 'How to read this',
+  'speed.helpYours':
+    'Placed on the ladder with its own build, with how often it moves first, by usage; the rest become its opponents.',
+  'speed.helpOpponents': 'Tap one to see whether yours moves first, and the points it needs to.',
+  'speed.helpCompare': 'Both on a page of their own: every nature, the builds players run, and modifiers for each.',
   'speed.count': '{n} Pokémon',
   'speed.yours': 'Your Pokémon',
   'speed.yoursPick': 'Pick a Pokémon',
@@ -761,8 +765,7 @@ export const messages = {
     'The Speed points each side needs to move before the other with each kind of nature, the rest of its build as it is.',
   'picker.close': 'Close',
   'picker.all': 'All Pokémon',
-  'compare.intro':
-    'Your Pokémon and an opponent, each with its own build and modifiers: which moves first, and the points each needs to move before the other.',
+  'compare.intro': 'Your Pokémon and an opponent, each with its build: who moves first, and what it takes.',
   'compare.pick': 'Pick a Pokémon',
   'compare.opponent': 'Opponent',
   'compare.stat': 'Stat {stat}',

@@ -959,7 +959,8 @@ const { entered } = usePageEntered()
             <CircleHelp :size="16" aria-hidden="true" /><span>{{ t('speed.help') }}</span>
           </button>
         </p>
-        <!-- How to read a chip: samples, each with what its parts mean; on phones, the intro and the options too. -->
+        <!-- How to read a chip: samples, each with what its parts mean; then yours among them; on phones, the intro and
+             the options too. -->
         <div v-if="helpOpen" id="speed-help" class="help-body panel sunken">
           <div class="phone-only-block small">
             <p class="muted">{{ t('speed.intro', { reg: REGULATION }) }}</p>
@@ -1000,6 +1001,15 @@ const { entered } = usePageEntered()
             </template>
           </dl>
           <p v-else class="muted small">{{ t('speed.allNote', { build: benchTip(bench) }) }}</p>
+          <!-- Yours among them: what picking it does, tapping an opponent, and the comparison side by side. -->
+          <dl class="help-options help-yours small">
+            <dt>{{ t('speed.yours') }}</dt>
+            <dd class="muted">{{ t('speed.helpYours') }}</dd>
+            <dt>{{ t('speed.opponentsHead') }}</dt>
+            <dd class="muted">{{ t('speed.helpOpponents') }}</dd>
+            <dt>{{ t('compare.open') }}</dt>
+            <dd class="muted">{{ t('speed.helpCompare') }}</dd>
+          </dl>
         </div>
         <div class="controls">
           <!-- What's shown: the data, and which Pokémon. -->
@@ -2291,6 +2301,12 @@ const { entered } = usePageEntered()
 }
 .help-options dd {
   margin: 0;
+}
+/* Yours among them, under a rule, apart from how to read the chips. */
+.help-yours {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
 }
 @media (max-width: 720px) {
   .phone-only {
