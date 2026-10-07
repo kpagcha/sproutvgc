@@ -173,7 +173,6 @@ const fadeVariants = {
           <!-- The language on wider screens only: narrow, there's room for the theme alone. -->
           <button
             v-if="!compact"
-            v-tip="t('lang.label')"
             type="button"
             class="quick first"
             :aria-label="`${t('lang.label')}: ${LOCALES[locale]}`"
