@@ -13,6 +13,8 @@ import PokemonIcon from '@/components/PokemonIcon'
 // its page) and Speed on top, then for each nature effect the points that do it, and the way to the comparison of the
 // two. A panel of its own under yours beside the ladder; narrower, a card floating at the foot of the screen.
 const props = defineProps<{
+  /** Yours, by name. */
+  mineName: string
   /** The Pokémon it's against, its name as the ladder shows it, and its Speed there. */
   id: PokemonId
   name: string
@@ -42,6 +44,8 @@ const title = tSlots('speed.vs')
       >
       <button type="button" class="link-button" @click="emit('close')">{{ t('speed.vsClose') }}</button>
     </p>
+    <!-- Whose points they are: yours'. -->
+    <p class="needs">{{ t('speed.vsNeeds', { name: props.mineName }) }}</p>
     <dl>
       <template v-for="v in props.rows" :key="v.effect">
         <dt v-tip="canHover && !!EFFECT_ICONS[v.effect] && t(`speed.effect.${v.effect}`)" class="effect">
@@ -81,6 +85,9 @@ const title = tSlots('speed.vs')
 }
 .mon :deep(.sheet-icon) {
   margin-block: -6px;
+}
+.needs {
+  margin: 6px 0 0;
 }
 dl {
   display: grid;
