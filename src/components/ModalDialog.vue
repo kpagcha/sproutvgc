@@ -5,7 +5,7 @@ let openCount = 0
 </script>
 
 <script setup lang="ts">
-import { onBeforeUnmount, useTemplateRef, watch } from 'vue'
+import { onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
 
 // A dialog over the page, for phones: what would drop down over it (a list to pick from, a card) opens in the middle
 // of the screen instead, the page dimmed behind it, still in sight, left where it was and kept from scrolling; a tap on
@@ -22,6 +22,27 @@ const dialog = useTemplateRef<HTMLDialogElement>('dialog')
 // where it was once it closes: closing would put the focus back where it was, the browser scrolling to it, so the focus
 // is taken from there as it opens and given back here without scrolling.
 let before: HTMLElement | null = null
+
+// It covers what's on the screen, its card centered there: the visual viewport, which a phone's address bar hiding or
+// its keyboard coming up change, where the layout's (which a fixed box follows on its own) can be taller, its top
+// then off the screen.
+const area = shallowRef<{ top: number; height: number } | null>(null)
+function follow() {
+  const vv = window.visualViewport
+  area.value = vv ? { top: vv.offsetTop, height: vv.height } : null
+}
+function following(on: boolean) {
+  const vv = window.visualViewport
+  if (!vv) return
+  if (on) {
+    follow()
+    vv.addEventListener('resize', follow)
+    vv.addEventListener('scroll', follow)
+  } else {
+    vv.removeEventListener('resize', follow)
+    vv.removeEventListener('scroll', follow)
+  }
+}
 let locked = false
 function lock(on: boolean) {
   if (on === locked) return
@@ -36,6 +57,7 @@ watch(
     if (o && !el.open) {
       before = document.activeElement instanceof HTMLElement ? document.activeElement : null
       before?.blur()
+      following(true)
       el.showModal()
       lock(true)
     } else if (!o && el.open) {
@@ -44,12 +66,13 @@ watch(
   },
   { flush: 'post' },
 )
-// A tap on the dimmed page, outside what's in it (which is all of the dialog's box), closes it.
+// A tap on the dimmed page around its card (the dialog's own box, which only holds the card) closes it.
 function onClick(e: MouseEvent) {
   if (e.target === dialog.value) open.value = false
 }
 // Closed by Escape or the back gesture as by the model.
 function onClose() {
+  following(false)
   lock(false)
   open.value = false
   before?.focus({ preventScroll: true })
@@ -57,13 +80,22 @@ function onClose() {
 }
 onBeforeUnmount(() => {
   if (dialog.value?.open) dialog.value.close()
+  following(false)
   lock(false)
 })
 </script>
 
 <template>
   <Teleport to="body">
-    <dialog ref="dialog" class="modal-dialog" :class="{ fill }" :aria-label="label" @close="onClose" @click="onClick">
+    <dialog
+      ref="dialog"
+      class="modal-dialog"
+      :class="{ fill }"
+      :style="area && { top: `${area.top}px`, height: `${area.height}px` }"
+      :aria-label="label"
+      @close="onClose"
+      @click="onClick"
+    >
       <slot />
     </dialog>
   </Teleport>
@@ -77,29 +109,39 @@ html.dialog-open {
 </style>
 
 <style scoped>
-/* Centered, a margin all round; no box of its own, what's in it drawing its card (with room for its shadow). */
+/* Over what's on the screen (the visual viewport, set as it changes), with no look of its own: it centers its card,
+   a margin all round (room for the card's shadow too), the card no wider than reads well. */
 .modal-dialog {
-  width: calc(100% - 24px);
-  max-width: 560px;
-  max-height: calc(100dvh - 48px);
-  margin: auto;
-  padding: 0 4px 4px 0;
+  position: fixed;
+  top: 0;
+  bottom: auto;
+  left: 0;
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 24px 12px;
   overflow: visible;
   color: var(--text);
   background: none;
   border: none;
   overscroll-behavior: contain;
 }
-.modal-dialog.fill {
-  height: calc(100dvh - 48px);
-}
 .modal-dialog[open] {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 .modal-dialog > :slotted(*) {
-  flex: 1 1 auto;
+  width: 100%;
+  max-width: 560px;
+  max-height: 100%;
   min-height: 0;
+}
+.modal-dialog.fill > :slotted(*) {
+  height: 100%;
 }
 .modal-dialog::backdrop {
   background: color-mix(in srgb, var(--ink) 45%, transparent);
