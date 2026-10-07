@@ -26,6 +26,15 @@ import {
   withEffect,
 } from '@/lib/speed'
 import { BENCHMARKS, MAX_POINTS, benchmark, type Benchmark, type NatureEffect } from '@/lib/stats'
+import {
+  FASTEST,
+  benchBuild,
+  buildQuery,
+  pointsText,
+  toggled,
+  type BuildToggle,
+  type SpeedBuild,
+} from '@/lib/speedBuild'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useMeta } from '@/composables/useMeta'
 import { useOpenState } from '@/composables/useOpenState'
@@ -504,11 +513,52 @@ function onChip(ev: MouseEvent, e: Entry) {
   ev.stopPropagation()
   if (!e.mine) pickVersus(e)
 }
-function versusText(r: ReturnType<typeof pointsToMoveFirst>) {
-  if (!r) return t('speed.vsNever')
-  if ('from' in r) return r.from === 0 ? t('speed.vsAny') : t('speed.vsFrom', { points: r.from })
-  if ('upTo' in r) return r.upTo === MAX_POINTS ? t('speed.vsAny') : t('speed.vsUpTo', { points: r.upTo })
-  return t('speed.vsTies', { points: r.ties })
+
+// The comparison page, side by side: yours (when picked) against a Pokémon, each at its build, with the modifiers the
+// ladder has for everyone on the other.
+const myBuild = computed<SpeedBuild>(() => ({
+  effect: myNature.value,
+  points: myPoints.value,
+  toggles: [...myToggles.value],
+  stage: Number(myStage.value),
+}))
+/** The ladder's modifiers for everyone, with an item or ability a chip's sets run. */
+function othersBuild(b: Pick<SpeedBuild, 'effect' | 'points'>, boost?: Entry['boost']): SpeedBuild {
+  let toggles: BuildToggle[] = TOGGLES.filter(flag)
+  const k: BuildToggle | null = !boost
+    ? null
+    : boost.ref.id === 'choicescarf'
+      ? 'scarf'
+      : boost.ref.id === 'ironball'
+        ? 'ironball'
+        : boost.factor === 2
+          ? 'doubled'
+          : null
+  if (k && !toggles.includes(k)) toggles = toggled(toggles, k)
+  return { ...b, toggles, stage: Number(stage.value) }
+}
+/** A chip's build: its benchmark, or its sets' nature and points. */
+const chipBuild = (e: Entry) =>
+  othersBuild(
+    e.bench ? benchBuild(e.bench) : e.nature ? { effect: natureEffect(e.nature), points: e.points! } : FASTEST,
+    e.boost,
+  )
+/** A Pokémon's build when it's no chip in particular: the meta's most common, else the benchmark shown. */
+function topBuild(id: PokemonId) {
+  const top = data.value?.[id]?.speeds?.[0]
+  return othersBuild(
+    top ? { effect: natureEffect(top.nature), points: top.points } : showAll.value ? benchBuild(bench.value) : FASTEST,
+  )
+}
+function compareLink(other: { id: PokemonId; build: SpeedBuild } | null) {
+  return {
+    name: 'speedCompare',
+    query: {
+      ...(mine.value && { a: mine.value, ...buildQuery(myBuild.value, 'a') }),
+      ...(other && { b: other.id, ...buildQuery(other.build, 'b') }),
+      trickroom: trickRoom.value ? '1' : undefined,
+    },
+  }
 }
 function toMine() {
   if (!side.value) yoursOpen.value = false
@@ -1040,6 +1090,12 @@ const { entered } = usePageEntered()
             <input type="checkbox" :checked="kept.includes(found)" @change="toggleKept(found)" />
             {{ t('speed.keep') }}
           </label>
+          <AppLink
+            v-if="found"
+            :to="compareLink({ id: found, build: topBuild(found) })"
+            class="btn find-mode find-compare"
+            >{{ t('compare.short') }}</AppLink
+          >
           <button v-if="found" type="button" class="btn inverted find-clear" @click="setFound(null)">
             <Trash2 :size="16" aria-hidden="true" />{{ t('speed.clear') }}
           </button>
@@ -1241,9 +1297,12 @@ const { entered } = usePageEntered()
                     >
                     <template v-else>{{ t(`speed.effect.${v.effect}`) }}</template>
                   </dt>
-                  <dd>{{ versusText(v.result) }}</dd>
+                  <dd>{{ pointsText(v.result) }}</dd>
                 </template>
               </dl>
+              <AppLink :to="compareLink({ id: versus.e.id, build: chipBuild(versus.e) })" class="compare-link">{{
+                t('compare.open')
+              }}</AppLink>
             </motion.div>
             <motion.button
               v-else-if="match"
@@ -1429,9 +1488,12 @@ const { entered } = usePageEntered()
                       >
                       <template v-else>{{ t(`speed.effect.${v.effect}`) }}</template>
                     </dt>
-                    <dd>{{ versusText(v.result) }}</dd>
+                    <dd>{{ pointsText(v.result) }}</dd>
                   </template>
                 </dl>
+                <AppLink :to="compareLink({ id: versus.e.id, build: chipBuild(versus.e) })" class="compare-link">{{
+                  t('compare.open')
+                }}</AppLink>
               </div>
             </section>
           </template>
@@ -2208,6 +2270,11 @@ const { entered } = usePageEntered()
 }
 .versus dd {
   margin: 0;
+}
+.compare-link {
+  display: inline-block;
+  margin-top: 6px;
+  font-weight: bold;
 }
 .link-button {
   padding: 0;

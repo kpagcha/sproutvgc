@@ -62,6 +62,13 @@ export const AREAS: Area[] = [
         soon: true,
       },
       { key: 'speedTiers', route: 'speedTiers', label: 'nav.speedTiers', desc: 'desc.speedTiers' },
+      {
+        key: 'speedCompare',
+        route: 'speedCompare',
+        label: 'nav.speedCompare',
+        title: 'title.speedCompare',
+        desc: 'desc.speedCompare',
+      },
     ],
   },
   {

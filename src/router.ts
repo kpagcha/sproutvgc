@@ -214,6 +214,18 @@ export const router = createRouter({
         ...inArea('competitive', 'speedTiers'),
       },
     },
+    {
+      // Two Pokémon's Speeds side by side, linked to and from the speed tiers.
+      path: '/competitive/speed-tiers/compare',
+      name: 'speedCompare',
+      component: () => import('@/views/SpeedCompareView.vue'),
+      meta: {
+        titleKey: 'title.speedCompare',
+        descKey: 'desc.speedCompare',
+        dexNames: true,
+        ...inArea('competitive', 'speedCompare'),
+      },
+    },
 
     // Tools: what you interact with.
     area('tools', 'title.tools', 'desc.tools'),
