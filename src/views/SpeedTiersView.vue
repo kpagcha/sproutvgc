@@ -42,6 +42,7 @@ import PokemonPicker from '@/components/PokemonPicker.vue'
 import ScrollRow from '@/components/ScrollRow.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 import VersusCard from '@/components/VersusCard.vue'
+import SetupStar from '@/components/SetupStar.vue'
 
 // The regulation's Pokémon ordered by Speed, as a ladder of Speed values with the Pokémon at each. By default the
 // meta: the most used Pokémon at the Speeds their sets actually run (from the meta snapshot shown, when it has them);
@@ -928,12 +929,12 @@ const { entered } = usePageEntered()
     <details class="panel instant" :open="controlsOpen" @toggle="controlsOpen = isOpen($event)">
       <summary class="head" @click.prevent="toggleControls">
         <!-- With yours picked, everything the controls set is for the others: its opponents, tagged as on the ladder. -->
-        <!-- The heading folds them, its arrow saying whether they're open. -->
+        <!-- The heading folds them, its arrow saying whether they're open; its star saves the setup to the favorites. -->
         <h1>
           <span
             ><span class="marker head-marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
             >{{ t('title.speedTiers') }}</span
-          ><span v-if="mine" class="opponents-tag head-tag">{{ t('speed.opponentsHead') }}</span>
+          ><SetupStar /><span v-if="mine" class="opponents-tag head-tag">{{ t('speed.opponentsHead') }}</span>
         </h1>
         <!-- On one line, scrolling sideways when it doesn't fit. -->
         <ScrollRow v-if="!controlsOpen" class="active" role="list" :aria-label="t('speed.active')">

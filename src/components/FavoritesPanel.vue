@@ -9,12 +9,13 @@ import { useFavorites } from '@/composables/useFavorites'
 import { useOpenState } from '@/composables/useOpenState'
 import { confirmDialog } from '@/composables/useConfirm'
 import EntryChip from '@/components/EntryChip.vue'
+import PageChip, { shownVisit } from '@/components/PageChip.vue'
 
 // The home page's favorites: the entries starred on their pages, one row per category (in the search's order), each
-// alphabetically, as chips (`EntryChip`). Those the regulation doesn't have are
-// left out (and kept, for when it has them again). Nothing shows until something is starred. It folds away, and stays
+// alphabetically, as chips (`EntryChip`); then the setups starred (the speed tiers', a comparison's), in the order they
+// were starred (`PageChip`). Those the regulation doesn't have are left out (and kept, for when it has them again). Nothing shows until something is starred. It folds away, and stays
 // as the reader left it. It can be cleared, once confirmed, as starring them again would take a while.
-const { favorites, clear } = useFavorites()
+const { favorites, setups, clear, count: saved } = useFavorites()
 
 const groups = computed(() =>
   SECTIONS.flatMap((s) => {
@@ -25,13 +26,14 @@ const groups = computed(() =>
     return refs.length ? [{ kind: s.kind, title: s.title, refs }] : []
   }),
 )
-const count = computed(() => groups.value.reduce((n, g) => n + g.refs.length, 0))
+const shownSetups = computed(() => setups.value.filter(shownVisit))
+const count = computed(() => groups.value.reduce((n, g) => n + g.refs.length, 0) + shownSetups.value.length)
 
 const { open, onToggle } = useOpenState('sproutvgc.favorites.open')
 
 async function confirmClear() {
   const ok = await confirmDialog({
-    message: t('favorites.clearConfirm', { n: favorites.value.length }),
+    message: t('favorites.clearConfirm', { n: saved() }),
     confirm: t('favorites.clearConfirmButton'),
     danger: true,
   })
@@ -53,6 +55,12 @@ async function confirmClear() {
         <dt class="muted">{{ t(g.title) }}</dt>
         <dd>
           <EntryChip v-for="{ ref: r } in g.refs" :key="r.id" :to="r" />
+        </dd>
+      </template>
+      <template v-if="shownSetups.length">
+        <dt class="muted">{{ t('favorites.setups') }}</dt>
+        <dd>
+          <PageChip v-for="(v, i) in shownSetups" :key="i" :visit="v" />
         </dd>
       </template>
     </dl>
