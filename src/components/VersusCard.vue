@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChevronsDown, ChevronsUp, X } from '@lucide/vue'
+import { ArrowRight, ChevronsDown, ChevronsUp, Columns2, X } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { t, tSlots } from '@/i18n'
 import type { NamedLocation } from '@/lib/links'
@@ -66,7 +66,10 @@ const kind = (r: ReturnType<typeof pointsToMoveFirst>) => (!r ? 'no' : 'ties' in
         <dd :class="kind(v.result)">{{ pointsText(v.result) }}</dd>
       </template>
     </dl>
-    <AppLink :to="props.compareTo" class="compare-link">{{ t('compare.open') }}</AppLink>
+    <!-- To the comparison's own page: a button that stands out, its arrow saying it goes there. -->
+    <AppLink :to="props.compareTo" class="btn primary compare-link"
+      ><Columns2 :size="16" aria-hidden="true" />{{ t('compare.open') }}<ArrowRight :size="16" aria-hidden="true"
+    /></AppLink>
   </section>
 </template>
 
@@ -134,9 +137,13 @@ dd.no {
   color: var(--opponent);
 }
 .compare-link {
-  display: inline-block;
+  gap: 6px;
+  width: 100%;
   margin-top: 10px;
   font-weight: bold;
+}
+.compare-link:hover {
+  text-decoration: none;
 }
 .visually-hidden {
   position: absolute;
