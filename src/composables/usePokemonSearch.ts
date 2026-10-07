@@ -9,6 +9,9 @@ import { useFavorites } from '@/composables/useFavorites'
 /** A Pokémon's name, or nothing for none. */
 export const pokemonName = (id: PokemonId | null) => (id ? refName(pokemon(id)) : '')
 
+/** Usage ranks by Pokémon, from 1, for a picker to list by. */
+export type Ranks = Partial<Record<PokemonId, number>>
+
 /** A Pokémon in a picker's list: its name with the match marked, whether it's a favorite, and the heading it opens. */
 export interface PokemonOption {
   id: PokemonId
@@ -18,28 +21,34 @@ export interface PokemonOption {
   /** Unique in the list, as a favorite browsed is in it twice. */
   key: string
   /** On the first of each group while browsing with favorites: the group it heads. */
-  group?: 'favorites' | 'all'
+  group?: 'favorites' | 'all' | 'usage'
+  /** Its usage rank, when the list goes by usage. */
+  rank?: number
 }
 
 /**
  * The Pokémon a search's text finds, by name, each with the match marked (`parts`, as `split` marks it): every one
  * (of `ids`, else the regulation's) while the text is empty or is the name of the one `picked`, to browse, the
  * reader's favorites first and again in their place among the rest; the favorites first among those found while
- * typing; none while it's not `open`. For the Pokémon pickers: the drop-down and the dialog's panel.
+ * typing; none while it's not `open`. By name, or given `ranks` (the meta's usage ranks), by usage: the ranked first,
+ * most used first, then the rest by name. For the Pokémon pickers: the drop-down and the dialog's panel.
  */
 export function usePokemonSearch(
   ids: () => readonly PokemonId[] | undefined,
   text: Ref<string>,
   picked: () => PokemonId | null,
   open: () => boolean = () => true,
+  ranks: () => Ranks | undefined = () => undefined,
 ) {
   const { isFavorite } = useFavorites()
-  const all = computed(() =>
-    (ids() ?? availableIds('pokemon'))
+  const all = computed(() => {
+    const r = ranks()
+    return (ids() ?? availableIds('pokemon'))
       .filter((id) => !POKEMON[id].cosmetic)
-      .map((id) => ({ id, name: refName(pokemon(id)), fav: isFavorite(pokemon(id)) }))
-      .sort((a, b) => a.name.localeCompare(b.name, locale.value)),
-  )
+      .map((id) => ({ id, name: refName(pokemon(id)), fav: isFavorite(pokemon(id)), rank: r?.[id] }))
+      .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity) || a.name.localeCompare(b.name, locale.value))
+  })
+  const rest = computed(() => (ranks() ? ('usage' as const) : ('all' as const)))
   /** The text shows the one picked as it is, not a search being typed. */
   const showsPicked = computed(() => !!picked() && text.value === pokemonName(picked()))
   const results = computed((): PokemonOption[] => {
@@ -51,7 +60,7 @@ export function usePokemonSearch(
       if (!favs.length) return all.value.map((m) => ({ ...whole(m), key: m.id }))
       return [
         ...favs.map((m, i) => ({ ...whole(m), key: `fav:${m.id}`, group: i ? undefined : ('favorites' as const) })),
-        ...all.value.map((m, i) => ({ ...whole(m), key: m.id, group: i ? undefined : ('all' as const) })),
+        ...all.value.map((m, i) => ({ ...whole(m), key: m.id, group: i ? undefined : rest.value })),
       ]
     }
     const found = all.value.flatMap((m) => {

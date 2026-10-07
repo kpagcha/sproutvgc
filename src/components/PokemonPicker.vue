@@ -6,7 +6,7 @@ import type { PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { benchmark } from '@/lib/stats'
-import { pokemonName as nameOf, usePokemonSearch } from '@/composables/usePokemonSearch'
+import { pokemonName as nameOf, usePokemonSearch, type Ranks } from '@/composables/usePokemonSearch'
 import ModalDialog from '@/components/ModalDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import PokemonSearchPanel from '@/components/PokemonSearchPanel.vue'
@@ -33,6 +33,8 @@ const props = defineProps<{
   tone?: 'yours' | 'opponent'
   /** Shows each one's Speed at the end of its row, with no points and a neutral nature: a quick preview of how fast. */
   speed?: boolean
+  /** Lists them by usage, by these ranks (the meta's), each with its rank, rather than by name. */
+  ranks?: Ranks
 }>()
 const model = defineModel<PokemonId | null>({ required: true })
 
@@ -49,6 +51,7 @@ const { results, showsPicked } = usePokemonSearch(
   text,
   () => model.value,
   () => open.value,
+  () => props.ranks,
 )
 // Browsing every Pokémon from the one picked: it, in view; else the first.
 watch(results, (list) => {
@@ -236,6 +239,9 @@ watch(active, (i) => queueMicrotask(() => showOption(i)))
 /** Its Speed with no points and a neutral nature. */
 const speedOf = (id: PokemonId) => benchmark(POKEMON[id].stats[5], 'none')
 
+/** The headings of the groups browsed with favorites. */
+const GROUPS = { favorites: 'favorites.title', all: 'picker.all', usage: 'picker.byUsage' } as const
+
 const listId = useId()
 const optionId = (i: number) => `${listId}-${i}`
 </script>
@@ -283,7 +289,7 @@ const optionId = (i: number) => `${listId}-${i}`
       >
         <template v-for="(r, i) in results" :key="r.key">
           <li v-if="r.group" role="presentation" class="group">
-            {{ t(r.group === 'favorites' ? 'favorites.title' : 'picker.all') }}
+            {{ t(GROUPS[r.group]) }}
           </li>
           <li
             :id="optionId(i)"
@@ -297,10 +303,10 @@ const optionId = (i: number) => `${listId}-${i}`
             <PokemonIcon :id="r.id" />
             <span><Marked :p="r.parts" /></span
             ><Star v-if="r.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" /><span
-              v-if="props.speed"
-              class="option-speed"
-              >{{ speedOf(r.id) }}</span
-            >
+              v-if="r.rank"
+              class="option-rank"
+              >#{{ r.rank }}</span
+            ><span v-if="props.speed" class="option-speed">{{ speedOf(r.id) }}</span>
           </li>
         </template>
       </ul>
@@ -316,6 +322,7 @@ const optionId = (i: number) => `${listId}-${i}`
         :title="props.title"
         :tone="props.tone"
         :speed="props.speed"
+        :ranks="props.ranks"
         @pick="pick"
         @close="sheet = false"
       />
@@ -360,6 +367,16 @@ const optionId = (i: number) => `${listId}-${i}`
   gap: 4px;
   padding: 0 6px 0 2px;
   cursor: pointer;
+}
+.option-rank {
+  margin-left: auto;
+  padding-left: 8px;
+  color: var(--muted);
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+}
+.option-rank + .option-speed {
+  margin-left: 0;
 }
 .option-speed {
   margin-left: auto;
