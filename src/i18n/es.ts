@@ -731,8 +731,6 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.noMegas': 'Sin Megas',
   'speed.stageShort': 'Velocidad {stage}',
   'speed.active': 'Mostrado',
-  'speed.showControls': 'Opciones',
-  'speed.hideControls': 'Ocultar opciones',
   'speed.megasDesc': 'Las megaevoluciones, con la Velocidad de la mega.',
   'speed.boostsDesc':
     'Objetos y habilidades que llevan sus sets y cambian la Velocidad: Pañuelo Elegido, Liviano, Nado Rápido…',

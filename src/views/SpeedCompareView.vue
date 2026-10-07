@@ -189,7 +189,7 @@ const canHover = window.matchMedia('(hover: hover)').matches
       <p class="muted">{{ t('compare.intro') }}</p>
     </header>
 
-    <!-- What applies to both: the snapshot the common builds come from, Trick Room, and swapping the sides. -->
+    <!-- What applies to both: the snapshot the common builds come from, and Trick Room. -->
     <div class="panel controls">
       <MetaPicker v-if="metaSpeeds" />
       <label class="btn switch" :class="{ on: trickRoom }">
@@ -197,7 +197,11 @@ const canHover = window.matchMedia('(hover: hover)').matches
         {{ t('speed.mod.trickroom') }}
       </label>
       <span class="muted small">{{ t('compare.trickroomTip') }}</span>
-      <button type="button" class="btn swap" :disabled="!sideOf('a').id && !sideOf('b').id" @click="swap">
+    </div>
+
+    <!-- What to do with the two: swap them, or see them on the speed tiers. -->
+    <div class="panel actions">
+      <button type="button" class="btn" :disabled="!sideOf('a').id && !sideOf('b').id" @click="swap">
         <ArrowLeftRight :size="16" aria-hidden="true" />{{ t('compare.swap') }}
       </button>
       <AppLink v-if="sideOf('a').id || sideOf('b').id" :to="ladderLink" class="btn">{{
@@ -379,16 +383,16 @@ const canHover = window.matchMedia('(hover: hover)').matches
 .page-head p {
   margin: 4px 0 12px;
 }
-.controls {
+.controls,
+.actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 12px;
   margin-bottom: 12px;
 }
-.swap {
+.actions > .btn {
   gap: 6px;
-  margin-left: auto;
 }
 .switch {
   justify-content: flex-start;
@@ -426,9 +430,6 @@ const canHover = window.matchMedia('(hover: hover)').matches
 @media (max-width: 720px) {
   .sides {
     grid-template-columns: minmax(0, 1fr);
-  }
-  .swap {
-    margin-left: 0;
   }
 }
 :root:root .side.opponent > .band {

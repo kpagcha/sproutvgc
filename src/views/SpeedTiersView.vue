@@ -836,7 +836,7 @@ const { entered } = usePageEntered()
     </Teleport>
     <!-- Yours' bar: yours in short, opening its card (dropped under it, narrower than the sidebar; the sidebar brought
          in, beside the ladder). -->
-    <div v-show="barShown" ref="bar" class="yours-bar">
+    <div v-show="barShown" ref="bar" class="yours-bar" data-top-bar>
       <button
         type="button"
         class="btn primary bar-yours"
@@ -869,7 +869,7 @@ const { entered } = usePageEntered()
     <details class="panel instant" :open="controlsOpen" @toggle="controlsOpen = isOpen($event)">
       <summary class="head" @click.prevent="toggleControls">
         <!-- With yours picked, everything the controls set is for the others: its opponents, tagged as on the ladder. -->
-        <!-- On phones, the arrow before the heading folds them, with no words beside it. -->
+        <!-- The heading folds them, its arrow saying whether they're open. -->
         <h1>
           <span class="marker head-marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
           >{{ t('title.speedTiers')
@@ -878,10 +878,6 @@ const { entered } = usePageEntered()
         <ul v-if="!controlsOpen" class="active" :aria-label="t('speed.active')">
           <li v-for="a in active" :key="a">{{ a }}</li>
         </ul>
-        <span class="fold">
-          <span class="marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
-          >{{ t(controlsOpen ? 'speed.hideControls' : 'speed.showControls') }}
-        </span>
       </summary>
       <div class="fold-body">
         <!-- The intro, and how to read the page: a link-like toggle beside it, apart from the controls. -->
@@ -1090,7 +1086,7 @@ const { entered } = usePageEntered()
         <!-- Pinned over the ladder once the controls are scrolled away; takes no room of its own. -->
         <div ref="pinMark" aria-hidden="true"></div>
         <div class="pin">
-          <div v-if="pinned" class="pinned">
+          <div v-if="pinned" class="pinned" data-top-bar>
             <div class="find">
               <PokemonPicker
                 :model-value="found"
@@ -1549,8 +1545,8 @@ const { entered } = usePageEntered()
    doesn't fit), and the toggle at the end. On phones, what's active goes to a line of its own. */
 .head {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-areas: 'title active fold';
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: 'title active';
   align-items: center;
   gap: 4px 12px;
   list-style: none;
@@ -1605,11 +1601,6 @@ const { entered } = usePageEntered()
   background: var(--panel-alt);
   border: 1px solid var(--border-strong);
 }
-.fold {
-  grid-area: fold;
-  font-weight: bold;
-  white-space: nowrap;
-}
 /* These sections open and close at once, without the slide and fade collapsible sections have (main.css). Their
    headings take taps as taps: quick ones neither select the text nor zoom. */
 .instant::details-content,
@@ -1623,19 +1614,10 @@ const { entered } = usePageEntered()
 .fold-body {
   padding-top: 8px;
 }
-.head-marker {
-  display: none;
-}
 @media (max-width: 720px) {
   .head {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: 'title' 'active';
-  }
-  .head-marker {
-    display: inline-block;
-  }
-  .fold {
-    display: none;
   }
 }
 .controls {

@@ -4,7 +4,6 @@ import { availableIds, pokemon, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
 import { locale } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import { toTopOf } from '@/lib/scroll'
 import { fold, split } from '@/lib/search'
 import PokemonIcon from '@/components/PokemonIcon'
 import SearchBox from '@/components/SearchBox.vue'
@@ -59,7 +58,7 @@ const showsPicked = computed(() => !!model.value && text.value === nameOf(model.
 watch(results, (list) => {
   const i = showsPicked.value ? list.findIndex((r) => r.id === model.value) : -1
   active.value = Math.max(i, 0)
-  if (i > 0) void nextTick(() => document.getElementById(optionId(i))?.scrollIntoView({ block: 'center' }))
+  if (i > 0) void nextTick(() => showOption(i, true))
 })
 
 // On touch screens, picking one leaves the field, so the keyboard goes away and the page it was covering shows; with a
@@ -71,13 +70,10 @@ function pick(id: PokemonId) {
   open.value = false
   if (touch.matches) field.value?.querySelector('input')?.blur()
 }
-// On touch screens, focusing the field brings the panel it's in to the top of the screen (its heading showing where it
-// is), so the list has all the room between it and the keyboard coming up; not in something stuck to the screen, which
-// the page scrolls under.
-const anchor = () => field.value?.closest('.panel') ?? field.value
+// Focusing the field opens the list, leaving the page where it is (on touch screens, the browser keeps the field in
+// view of the keyboard on its own).
 function onFocus() {
   open.value = true
-  if (touch.matches && !stuck(field.value)) toTopOf(anchor())
 }
 // On touch screens, tapping the field again while it's in use puts it away: the list closes and the keyboard goes.
 let wasFocused = false
@@ -109,7 +105,7 @@ function onBlur() {
 // page by its scroll events lags behind it); fixed to the screen only when the field is in something stuck to it (a
 // sticky bar), following it as the page scrolls then.
 const field = useTemplateRef<HTMLElement>('field')
-const place = ref({ top: 0, left: 0, width: 0, height: 0, up: false })
+const place = ref({ top: 0, left: 0, width: 0, up: false })
 const fixed = ref(false)
 function stuck(el: Element | null): boolean {
   for (; el && el !== document.body; el = el.parentElement) {
@@ -130,67 +126,67 @@ function measure() {
     const [pl, pr] = [parseFloat(style.paddingLeft), parseFloat(style.paddingRight)]
     along = { left: box.left + pl, width: box.width - pl - pr }
   }
-  // Under the field, as tall as the room left under it (a dozen rows at most): down to the bottom of the screen,
-  // whatever a keyboard covers of it (following the keyboard as it slides in makes the list jump about). Over it
-  // instead when there's too little room under it and more over it: a field low on the page, which focusing can't
-  // bring up. On touch screens, the room from where focusing brings the field: its panel at the top of the screen, or
-  // as near as the page's end lets it.
-  let shift = 0
-  if (touch.matches && !fixed.value) {
-    const want = (anchor()?.getBoundingClientRect().top ?? r.top) - 12
-    const max = document.documentElement.scrollHeight - window.innerHeight
-    shift = Math.max(-window.scrollY, Math.min(max - window.scrollY, want))
-  }
-  const below = window.innerHeight - (r.bottom - shift) - 16
-  const above = r.top - shift - 16
-  const up = below < MIN_ROOM && above > below
+  // Under the field, unless the list's height doesn't fit under it and there's more room over it: then over it. On
+  // touch screens, under it means above the keyboard coming up, which takes about the screen's lower half. Which one is
+  // settled as it opens, so the list doesn't hop from one to the other as the keyboard comes.
   const [dx, dy] = fixed.value ? [0, 0] : [window.scrollX, window.scrollY]
+  const floor = window.innerHeight * (touch.matches ? 0.55 : 1)
+  const up = opening ? floor - r.bottom < LIST_HEIGHT() && r.top > floor - r.bottom : place.value.up
+  opening = false
   place.value = {
     top: (up ? r.top - 4 : r.bottom + 4) + dy,
     left: along.left + dx,
     width: along.width,
-    height: up ? above : below,
     up,
   }
 }
-/** The room under the field below which the list goes over it, when there's more there. */
-const MIN_ROOM = 200
+/**
+ * The list's height, whatever the screen: a few rows on touch screens, where a keyboard takes half of it, more with a
+ * mouse. Fewer results, a shorter list.
+ */
+/** An option's height, as the styles set it. */
+const ROW = 30
+const ROWS = () => (touch.matches ? 6 : 8)
+const LIST_HEIGHT = () => ROWS() * ROW + 8
+let opening = false
 // Only what's stuck to the screen follows the page's scrolling, and anything scrolling the field within the page.
 const onScroll = (e: Event) => (fixed.value || e.target !== document) && measure()
-// The reader scrolling anything but the list or the field (a swipe, a wheel; not the page scrolling itself, as it does to bring the
-// field up) puts it away: the list closes, and on touch screens the keyboard goes with it.
 const list = useTemplateRef<HTMLElement>('list')
-function onScrollAway(e: Event) {
-  if (list.value?.contains(e.target as Node) || field.value?.contains(e.target as Node)) return
-  open.value = false
-  if (touch.matches) field.value?.querySelector('input')?.blur()
-}
 watch(
   () => results.value.length > 0,
   (shown) => {
     if (shown) {
       fixed.value = stuck(field.value)
+      opening = true
       measure()
       window.addEventListener('scroll', onScroll, { passive: true, capture: true })
       window.addEventListener('resize', measure)
-      window.addEventListener('touchmove', onScrollAway, { passive: true })
-      window.addEventListener('wheel', onScrollAway, { passive: true })
     } else {
       window.removeEventListener('scroll', onScroll, { capture: true })
       window.removeEventListener('resize', measure)
-      window.removeEventListener('touchmove', onScrollAway)
-      window.removeEventListener('wheel', onScrollAway)
     }
   },
 )
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', onScroll, { capture: true })
   window.removeEventListener('resize', measure)
-  window.removeEventListener('touchmove', onScrollAway)
-  window.removeEventListener('wheel', onScrollAway)
 })
 
-watch(active, (i) => queueMicrotask(() => document.getElementById(optionId(i))?.scrollIntoView({ block: 'nearest' })))
+/**
+ * Brings an option into view within the list, centered or at the nearest edge: by the list's own scroll, as
+ * `scrollIntoView` scrolls everything around it too, the page with it.
+ */
+function showOption(i: number, center = false) {
+  const el = list.value
+  const opt = document.getElementById(optionId(i))
+  if (!el || !opt) return
+  const top = opt.offsetTop
+  const bottom = top + opt.offsetHeight
+  if (center) el.scrollTop = top - (el.clientHeight - opt.offsetHeight) / 2
+  else if (top < el.scrollTop) el.scrollTop = top
+  else if (bottom > el.scrollTop + el.clientHeight) el.scrollTop = bottom - el.clientHeight
+}
+watch(active, (i) => queueMicrotask(() => showOption(i)))
 
 const listId = useId()
 const optionId = (i: number) => `${listId}-${i}`
@@ -230,7 +226,7 @@ const optionId = (i: number) => `${listId}-${i}`
           top: `${place.top}px`,
           left: `${place.left}px`,
           width: `${place.width}px`,
-          maxHeight: `min(${Math.max(place.height, 120)}px, 24em)`,
+          maxHeight: `${LIST_HEIGHT()}px`,
         }"
       >
         <li
@@ -288,6 +284,7 @@ const optionId = (i: number) => `${listId}-${i}`
 .option {
   display: flex;
   align-items: center;
+  height: 30px;
   gap: 4px;
   padding: 0 6px 0 2px;
   cursor: pointer;

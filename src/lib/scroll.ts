@@ -6,6 +6,29 @@ const MARGIN = 12
 
 let running: { stop(): void } | null = null
 
+/**
+ * The room bars stuck to the top of the screen take (the speed tiers' bar of yours): what's brought into view goes
+ * under them, not behind. A page marks such a bar with `data-top-bar` (sticky, or in something sticky); one hidden
+ * takes none.
+ */
+function topInset(): number {
+  let inset = 0
+  for (const el of document.querySelectorAll<HTMLElement>('[data-top-bar]')) {
+    if (!el.offsetParent) continue
+    // Where it sticks: its own `top`, or that of what it's in that sticks (a bar under another).
+    let at = 0
+    for (let s: HTMLElement | null = el; s && s !== document.body; s = s.parentElement) {
+      const style = getComputedStyle(s)
+      if (style.position === 'sticky') {
+        at = parseFloat(style.top) || 0
+        break
+      }
+    }
+    inset = Math.max(inset, at + el.offsetHeight)
+  }
+  return inset
+}
+
 function stop() {
   running?.stop()
   running = null
@@ -21,24 +44,27 @@ export function reveal(from: Element | null | undefined, to: Element | null | un
   const top = from.getBoundingClientRect().top
   const bottom = to.getBoundingClientRect().bottom
   const vh = window.innerHeight
+  const edge = MARGIN + topInset()
   let delta = 0
-  if (top < MARGIN) delta = top - MARGIN
-  else if (bottom > vh - MARGIN) delta = Math.min(bottom - vh + MARGIN, top - MARGIN)
+  if (top < edge) delta = top - edge
+  else if (bottom > vh - MARGIN) delta = Math.min(bottom - vh + MARGIN, top - edge)
   scrollToY(window.scrollY + delta)
 }
 
-/** Smoothly scrolls the page to bring `el` to the middle of the screen; the user scrolling or touching it takes over. */
+/** Smoothly scrolls the page to bring `el` to the middle of the screen (under any bar stuck to its top); the user
+ * scrolling or touching it takes over. */
 export function center(el: Element | null | undefined) {
   if (!el) return
   const r = el.getBoundingClientRect()
-  scrollToY(window.scrollY + r.top + r.height / 2 - window.innerHeight / 2)
+  const inset = topInset()
+  scrollToY(window.scrollY + r.top + r.height / 2 - (inset + (window.innerHeight - inset) / 2))
 }
 
-/** Smoothly scrolls the page to bring `el`'s top to the top of the screen; the user scrolling or touching it takes
- * over. */
+/** Smoothly scrolls the page to bring `el`'s top to the top of the screen (under any bar stuck to it); the user
+ * scrolling or touching it takes over. */
 export function toTopOf(el: Element | null | undefined) {
   if (!el) return
-  const top = el.getBoundingClientRect().top
+  const top = el.getBoundingClientRect().top - topInset()
   if (Math.abs(top - MARGIN) > 8) scrollToY(window.scrollY + top - MARGIN)
 }
 

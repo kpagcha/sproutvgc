@@ -723,8 +723,6 @@ export const messages = {
   'speed.noMegas': 'No Megas',
   'speed.stageShort': 'Speed {stage}',
   'speed.active': 'Shown',
-  'speed.showControls': 'Options',
-  'speed.hideControls': 'Hide options',
   'speed.megasDesc': "Mega Evolutions, at their Mega's Speed.",
   'speed.boostsDesc': 'Items and abilities their sets run that change Speed: Choice Scarf, Unburden, Swift Swim…',
   'speed.legendChip': 'Nature, stat points in Speed and the share of its sets running them; under {pct}, left out',
