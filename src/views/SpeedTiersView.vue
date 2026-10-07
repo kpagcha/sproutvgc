@@ -2,7 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
 import { AnimatePresence, motion } from 'motion-v'
 import { useRouter } from 'vue-router'
-import { ChevronsDown, ChevronsUp, CircleHelp, X } from '@lucide/vue'
+import { ChevronsDown, ChevronsUp, CircleHelp, Plus, X } from '@lucide/vue'
 import { ability, availableIds, condition, item, pokemon, type PokemonId, type Ref } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
@@ -807,9 +807,9 @@ const { entered } = usePageEntered()
               {{ t('speed.mod.trickroom') }}
             </label>
             <span class="muted">{{ t('speed.modTip.trickroom') }}</span>
-            <button type="button" class="disclosure" :aria-expanded="modsOpen" @click="toggleMods">
-              <span class="marker" aria-hidden="true">{{ modsOpen ? '▾' : '▸' }}</span
-              >{{ t('speed.modifiers') }}
+            <button type="button" class="btn disclosure" :aria-expanded="modsOpen" @click="toggleMods">
+              <Plus :size="16" aria-hidden="true" />{{ t('speed.modifiers')
+              }}<span class="marker" aria-hidden="true">{{ modsOpen ? '▾' : '▸' }}</span>
             </button>
             <span class="muted">{{ t('speed.modifiersTip') }}</span>
             <div v-if="modsOpen" class="mods all-mods">
@@ -1161,9 +1161,9 @@ const { entered } = usePageEntered()
             </label>
           </section>
           <section class="yours-section">
-            <button type="button" class="disclosure" :aria-expanded="myModsOpen" @click="toggleMyMods">
-              <span class="marker" aria-hidden="true">{{ myModsOpen ? '▾' : '▸' }}</span
-              >{{ t('speed.modifiers') }}
+            <button type="button" class="btn disclosure" :aria-expanded="myModsOpen" @click="toggleMyMods">
+              <Plus :size="16" aria-hidden="true" />{{ t('speed.modifiers')
+              }}<span class="marker" aria-hidden="true">{{ myModsOpen ? '▾' : '▸' }}</span>
             </button>
             <div v-if="myModsOpen" class="mods">
               <button
@@ -1371,16 +1371,13 @@ const { entered } = usePageEntered()
 .switch input {
   margin: 0;
 }
+/* The modifiers' disclosure: a button, a plus, what it opens and the arrow saying whether it is. */
 .disclosure {
+  justify-self: start;
+  justify-content: flex-start;
+  gap: 6px;
   margin-top: 6px;
-  padding: 0;
-  font: inherit;
   font-weight: bold;
-  text-align: left;
-  color: inherit;
-  background: none;
-  border: none;
-  cursor: pointer;
 }
 .disclosure + .muted {
   margin-top: 6px;
