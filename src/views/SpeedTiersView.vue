@@ -2366,12 +2366,16 @@ const { entered } = usePageEntered()
   .help-options dd {
     margin-bottom: 4px;
   }
-  /* The switches and the modifiers' disclosure in a row, their descriptions in the section above. */
+  /* The switches and the modifiers' disclosure in a row, their descriptions in the section above; under a rule, apart
+     from which Pokémon are shown, as they change the Speeds instead. */
   .options {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 6px 10px;
+    margin-top: 4px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
   }
   .options > .muted {
     display: none;
