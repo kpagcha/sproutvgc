@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, h, onMounted, ref, useTemplateRef, watchEffect, type FunctionalComponent } from 'vue'
+import { computed, h, onMounted, onUnmounted, ref, useTemplateRef, watchEffect, type FunctionalComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   ability,
@@ -237,6 +237,24 @@ const { key, desc, toggle, sorted } = useSort({
   remember: 'pokemon',
 })
 
+// Phones have room for one stat column: the one sorted by, or, sorted by name, the one last picked (the total at first),
+// picked in its header.
+const phoneQuery = window.matchMedia('(max-width: 720px)')
+const phone = ref(phoneQuery.matches)
+const onPhone = (e: MediaQueryListEvent) => (phone.value = e.matches)
+phoneQuery.addEventListener('change', onPhone)
+onUnmounted(() => phoneQuery.removeEventListener('change', onPhone))
+type StatKey = Exclude<Key, 'name'>
+const STAT_KEYS: StatKey[] = [...STATS, 'total']
+const picked = ref<StatKey>(key.value === 'name' ? 'total' : key.value)
+const column = computed(() => (key.value === 'name' ? picked.value : key.value))
+function pick(k: StatKey) {
+  picked.value = k
+  if (key.value !== k) toggle(k)
+}
+const statLabel = (k: StatKey) => t(k === 'total' ? 'stat.bst' : `stat.${k}`)
+const statIndex = computed(() => (column.value === 'total' ? -1 : STATS.indexOf(column.value)))
+
 type Marks = [string, string, string]
 interface Line {
   row: Row
@@ -408,6 +426,7 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
             @sort="toggle(s)"
           />
           <SortHeader
+            v-if="!phone"
             :label="t('stat.bst')"
             :tip="t('stat.bstFull')"
             right
@@ -415,6 +434,31 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
             :desc="desc"
             @sort="toggle('total')"
           />
+          <div
+            v-else
+            role="columnheader"
+            class="r stat-pick"
+            :aria-sort="key === column ? (desc ? 'descending' : 'ascending') : undefined"
+          >
+            <button
+              type="button"
+              class="sort"
+              :class="{ active: key === column }"
+              :aria-label="t('pokedex.sortBy', { stat: statLabel(column) })"
+              @click="toggle(column)"
+            >
+              <span class="arrow" :class="{ shown: key === column, up: !desc }" aria-hidden="true">▾</span>
+            </button>
+            <select
+              class="stat-select"
+              :class="{ active: key === column }"
+              :value="column"
+              :aria-label="t('pokedex.statColumn')"
+              @change="pick(($event.target as HTMLSelectElement).value as StatKey)"
+            >
+              <option v-for="k in STAT_KEYS" :key="k" :value="k">{{ statLabel(k) }}</option>
+            </select>
+          </div>
         </div>
         <SkeletonRows v-if="!entered" :cells="SKELETON" height="2.3em" />
         <template v-else>
@@ -458,7 +502,16 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
             >
               {{ v }}
             </div>
-            <div role="cell" class="r num total">{{ total(r.data) }}</div>
+            <div v-if="!phone || statIndex < 0" role="cell" class="r num total">{{ total(r.data) }}</div>
+            <div
+              v-else
+              role="cell"
+              class="r num stat"
+              :class="statMarks?.get(r.id)?.[statIndex]?.class"
+              :style="statMarks?.get(r.id)?.[statIndex]?.style"
+            >
+              {{ r.data.stats[statIndex] }}
+            </div>
           </div>
         </template>
       </div>
@@ -469,9 +522,9 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
 </template>
 
 <style scoped>
-/* Name, types (room for two badges), abilities, the six stats and their total; on phones name, types and total. The
+/* Name, types (room for two badges), abilities, the six stats and their total; on phones name, types and one stat. The
    name column fits the widest name shown (`.sizer`), within bounds, and the abilities take the rest; on phones, the
-   total. */
+   stat. */
 .dex-table {
   --types: calc(64px * var(--icon-scale, 1) + 14px);
   --num: minmax(2.6em, auto);
@@ -680,6 +733,35 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
   height: 3px;
   background: var(--color);
 }
+/* On phones, the stat column's header picks the stat, with the arrow before it sorting by it, or reversing it. */
+.stat-pick {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.15em;
+}
+.stat-pick .arrow {
+  font-size: 0.8em;
+}
+.stat-pick .arrow.up {
+  transform: scaleY(-1);
+}
+.stat-pick .arrow:not(.shown) {
+  visibility: hidden;
+}
+.stat-select {
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.stat-select.active {
+  color: var(--text);
+  font-weight: bold;
+}
+
 /* Short of the page's full width, the stats sit closer together, so the abilities keep room for theirs on one line. */
 @media (max-width: 1000px) {
   .dex-table {
