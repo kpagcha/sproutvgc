@@ -261,9 +261,9 @@ function clearMine() {
  * one does), and yours found. */
 function swapMine() {
   if (mine.value === null || found.value === null) return
-  const q = { ...query.value, mine: found.value, ...buildOf(found.value), find: mine.value }
-  delete q.vs
-  void router.replace({ query: q })
+  void router.replace({
+    query: { ...query.value, mine: found.value, ...buildOf(found.value), find: mine.value, vs: undefined },
+  })
 }
 const setMyNature = (e: NatureEffect) => set('mynat', e)
 const setMyPoints = (v: string) => {
