@@ -1,40 +1,57 @@
 <script setup lang="ts">
-import { ArrowRight, ChevronsDown, ChevronsUp, Columns2, X } from '@lucide/vue'
+import { computed } from 'vue'
+import { ArrowRight, Columns2, X } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { t, tSlots } from '@/i18n'
 import type { NamedLocation } from '@/lib/links'
 import type { pointsToMoveFirst } from '@/lib/speed'
 import { pointsText } from '@/lib/speedBuild'
-import type { NatureEffect } from '@/lib/stats'
 import AppLink from '@/components/AppLink'
 import PokemonIcon from '@/components/PokemonIcon'
 
-// What it takes for yours to move before a Pokémon on the speed tiers' ladder (the chip tapped): its name (a link to
-// its page) and Speed on top, then for each nature effect the points that do it, and the way to the comparison of the
-// two. A panel of its own under yours beside the ladder; narrower, a card floating at the foot of the screen.
+// Yours against a Pokémon on the speed tiers' ladder (the chip tapped): its name (a link to its page) and Speed on
+// top; then whether yours moves first as it's built, at what Speeds, and for its nature the points that do it (what's
+// left to spare, or, when none do, what another nature would need); and the way to the comparison of the two, where
+// every nature's shown. A panel of its own under yours beside the ladder; narrower, a card floating at the foot of the
+// screen.
+type Result = ReturnType<typeof pointsToMoveFirst>
 const props = defineProps<{
-  /** Yours, by name. */
-  mineName: string
   /** The Pokémon it's against, its name as the ladder shows it, and its Speed there. */
   id: PokemonId
   name: string
   speed: number
-  rows: readonly { effect: NatureEffect; result: ReturnType<typeof pointsToMoveFirst> }[]
+  /** Yours: its name, Speed, and Speed points. */
+  mineName: string
+  mineSpeed: number
+  points: number
+  trickRoom: boolean
+  /** The points that move yours first with its nature, and with the one that would when it can't. */
+  result: Result
+  other: { effect: 'up' | 'down'; result: Result } | null
   /** The comparison of yours and it, side by side. */
   compareTo: NamedLocation
 }>()
-const emit = defineEmits<{ close: [] }>()
+const emit = defineEmits<{ close: []; locate: [] }>()
 
-/** The nature effects as the nature's choice shows them: arrows beside "Spe", neutral as a word. */
-const EFFECT_ICONS = { up: ChevronsUp, neutral: undefined, down: ChevronsDown }
-const canHover = window.matchMedia('(hover: hover)').matches
 const title = tSlots('speed.vs')
-/** Whether a row's yours moves first, only ties, or can't. */
-const kind = (r: ReturnType<typeof pointsToMoveFirst>) => (!r ? 'no' : 'ties' in r ? 'tie' : 'yes')
+/** Whether yours moves first as it is: the faster, or under Trick Room the slower. */
+const verdict = computed(() =>
+  props.mineSpeed === props.speed ? 'tie' : props.mineSpeed > props.speed !== props.trickRoom ? 'first' : 'after',
+)
+/** What yours' nature takes: the points, and what's to spare of yours (more than it needs, outside Trick Room). */
+const plan = computed(() => {
+  const r = props.result
+  if (!r) return t('speed.planNever')
+  if ('ties' in r) return t('speed.planTies', { points: r.ties })
+  const amount = pointsText(r)
+  const spare = 'from' in r && props.points > r.from ? t('speed.planSpare', { n: props.points - r.from }) : ''
+  return `${t('speed.planWith', { amount })}${spare ? ` ${spare}` : ''}`
+})
 </script>
 
 <template>
-  <!-- A band of the opponents' red: the Pokémon it's against (a link to its page) at its Speed, and Close. -->
+  <!-- A band of the opponents' red: the Pokémon it's against (a link to its page) at its Speed (finding its chip on
+       the ladder), and a way to close it. -->
   <section class="panel banded versus-card small" role="status">
     <div class="band">
       <strong
@@ -42,30 +59,25 @@ const kind = (r: ReturnType<typeof pointsToMoveFirst>) => (!r ? 'no' : 'ties' in
           ><template v-if="typeof part === 'string'">{{ part }}</template
           ><AppLink v-else-if="part.slot === 'name'" :to="{ name: 'pokemon', params: { id: props.id } }" class="mon"
             ><PokemonIcon :id="props.id" />{{ props.name }}</AppLink
-          ><template v-else>{{ props.speed }}</template></template
+          ><button v-else type="button" class="speed" :aria-label="t('speed.vsLocate')" @click="emit('locate')">
+            {{ props.speed }}
+          </button></template
         ></strong
       >
-      <button type="button" class="btn on-band inverted close" @click="emit('close')">
-        <X :size="14" aria-hidden="true" />{{ t('speed.vsClose') }}
+      <button type="button" class="close" :aria-label="t('speed.vsClose')" @click="emit('close')">
+        <X :size="18" aria-hidden="true" />
       </button>
     </div>
-    <!-- Whose points they are: yours'. Then a row per nature effect: the effect as the nature's choice shows it, and
-         the points, red when there are none that do it. -->
-    <p class="needs">{{ t('speed.vsNeeds', { name: props.mineName }) }}</p>
-    <dl>
-      <template v-for="v in props.rows" :key="v.effect">
-        <dt v-tip="canHover && !!EFFECT_ICONS[v.effect] && t(`speed.effect.${v.effect}`)" class="effect">
-          <template v-if="EFFECT_ICONS[v.effect]"
-            ><component :is="EFFECT_ICONS[v.effect]" :size="14" aria-hidden="true" /><span aria-hidden="true">{{
-              t('stat.spe')
-            }}</span
-            ><span class="visually-hidden">{{ t(`speed.effect.${v.effect}`) }}</span></template
-          >
-          <template v-else>{{ t(`speed.effect.${v.effect}`) }}</template>
-        </dt>
-        <dd :class="kind(v.result)">{{ pointsText(v.result) }}</dd>
-      </template>
-    </dl>
+    <!-- Yours as it's built: moves first, ties or moves after, at what Speeds. -->
+    <p class="verdict" :class="verdict">
+      {{ t(`speed.vsNow.${verdict}`, { name: props.mineName }) }}
+      <span class="speeds">{{ props.mineSpeed }} <span class="vs">vs</span> {{ props.speed }}</span>
+    </p>
+    <!-- Its nature: the points that do it; when none do, another nature's. -->
+    <p class="plan">{{ plan }}</p>
+    <p v-if="props.other" class="plan">
+      {{ t(`speed.planOther.${props.other.effect}`, { amount: pointsText(props.other.result) }) }}
+    </p>
     <!-- To the comparison's own page: a button that stands out, its arrow saying it goes there. -->
     <AppLink :to="props.compareTo" class="btn primary compare-link"
       ><Columns2 :size="16" aria-hidden="true" />{{ t('compare.open') }}<ArrowRight :size="16" aria-hidden="true"
@@ -80,22 +92,20 @@ const kind = (r: ReturnType<typeof pointsToMoveFirst>) => (!r ? 'no' : 'ties' in
 .small {
   font-size: 0.875em;
 }
-/* Its band in the opponents' red, as the ladder's is with yours picked. */
+/* Its band in the opponents' red, as the ladder's is with yours picked: on one line, Close at its end. */
 :root:root .versus-card.banded > .band {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 4px 10px;
+  gap: 8px;
   color: var(--opponent-text);
   background: var(--opponent);
 }
+.band > strong {
+  flex: 1;
+  min-width: 0;
+}
 .band a {
   color: inherit;
-}
-.close {
-  flex: none;
-  gap: 4px;
 }
 /* The Pokémon it's against, in its title: its name on the text's line, its icon centered on it. */
 .mon {
@@ -104,37 +114,60 @@ const kind = (r: ReturnType<typeof pointsToMoveFirst>) => (!r ? 'no' : 'ties' in
 .mon :deep(.sheet-icon) {
   margin-block: -6px;
 }
-.needs {
-  margin: 0;
-  font-weight: bold;
+/* Its Speed, which finds its chip on the ladder: underlined as a link is, dotted as what shows rather than goes. */
+.speed {
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: pointer;
 }
-/* The rows: the effect in a small outlined label, the points in bold, red when yours can't move first. */
-dl {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  align-items: center;
-  gap: 4px 10px;
-  margin: 8px 0 0;
+.speed:hover {
+  text-decoration-style: solid;
 }
-.effect {
+/* Close: its icon alone, in the band's text color, a faint square behind it on hover. */
+.close {
   display: inline-flex;
-  align-items: center;
-  justify-self: start;
-  gap: 2px;
-  padding: 1px 6px;
-  font-size: 0.875em;
-  background: var(--panel-alt);
-  border: 1px solid var(--border-strong);
+  flex: none;
+  padding: 2px;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
-dd {
+.close:hover {
+  background: color-mix(in srgb, var(--opponent-text) 20%, transparent);
+}
+/* The verdict: bold, in the color of how it goes for yours; the Speeds beside it. */
+.verdict {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 10px;
   margin: 0;
+  font-size: 1.1em;
   font-weight: bold;
 }
-dd.tie {
+.verdict.after {
+  color: var(--opponent);
+}
+.verdict.tie {
   color: var(--muted);
 }
-dd.no {
-  color: var(--opponent);
+.speeds {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.vs {
+  font-weight: normal;
+  color: var(--muted);
+}
+.plan {
+  margin: 6px 0 0;
 }
 .compare-link {
   gap: 6px;
@@ -144,13 +177,5 @@ dd.no {
 }
 .compare-link:hover {
   text-decoration: none;
-}
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
 }
 </style>

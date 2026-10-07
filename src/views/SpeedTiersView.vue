@@ -505,13 +505,29 @@ const versus = computed(() => {
   if (!e) return null
   const target = inBattle(e.speed, mods.value)
   const base = POKEMON[mine.value].stats[5]
+  const at = (effect: NatureEffect) => pointsToMoveFirst(base, effect, myMods.value, target, trickRoom.value)
+  // Yours' nature, and when no points do it with that one, the nature that would: raising Speed (lowering it, under
+  // Trick Room).
+  const result = at(myNature.value)
+  const works = (r: typeof result) => !!r && !('ties' in r)
+  const better = trickRoom.value ? ('down' as const) : ('up' as const)
+  const other =
+    !works(result) && myNature.value !== better && works(at(better)) ? { effect: better, result: at(better) } : null
   return {
     e,
     target,
-    byEffect: NATURE_EFFECTS.map((effect) => ({
-      effect,
-      result: pointsToMoveFirst(base, effect, myMods.value, target, trickRoom.value),
-    })),
+    card: {
+      id: e.id,
+      name: [e.species, e.forme].filter(Boolean).join(' '),
+      speed: target,
+      mineName: refName(pokemon(mine.value)),
+      mineSpeed: mySpeed.value!,
+      trickRoom: trickRoom.value,
+      points: myPoints.value,
+      result,
+      other,
+      compareTo: compareLink({ id: e.id, build: chipBuild(e) }),
+    },
   }
 })
 // Its title, the Pokémon's name (with its icon) a link to its page.
@@ -1263,15 +1279,7 @@ const { entered } = usePageEntered()
               :exit="{ opacity: 0, y: 8 }"
               :transition="FADE"
             >
-              <VersusCard
-                :id="versus.e.id"
-                :name="[versus.e.species, versus.e.forme].filter(Boolean).join(' ')"
-                :speed="versus.target"
-                :mine-name="refName(pokemon(mine!))"
-                :rows="versus.byEffect"
-                :compare-to="compareLink({ id: versus.e.id, build: chipBuild(versus.e) })"
-                @close="set('vs', undefined)"
-              />
+              <VersusCard v-bind="versus.card" @close="set('vs', undefined)" />
             </motion.div>
             <motion.button
               v-else-if="match"
@@ -1449,16 +1457,7 @@ const { entered } = usePageEntered()
             </div>
           </details>
         </Teleport>
-        <VersusCard
-          v-if="versus && side"
-          :id="versus.e.id"
-          :name="[versus.e.species, versus.e.forme].filter(Boolean).join(' ')"
-          :speed="versus.target"
-          :mine-name="refName(pokemon(mine!))"
-          :rows="versus.byEffect"
-          :compare-to="compareLink({ id: versus.e.id, build: chipBuild(versus.e) })"
-          @close="set('vs', undefined)"
-        />
+        <VersusCard v-if="versus && side" v-bind="versus.card" @close="set('vs', undefined)" />
       </div>
     </div>
   </div>
