@@ -1954,7 +1954,7 @@ const { entered } = usePageEntered()
   border-style: dashed;
   border-color: var(--muted);
 }
-/* Finding a Pokémon: its chips marked, the Speeds without it faded. */
+/* Finding a Pokémon: its chips marked, the Speeds without it faded, but for yours: at its Speed, only the others. */
 .chip.hit {
   background: var(--sel);
   border-color: var(--border-strong);
@@ -1962,7 +1962,8 @@ const { entered } = usePageEntered()
 .chip.boost.hit {
   border-color: var(--muted);
 }
-.finding .tier:not(.hit) {
+.finding .tier:not(.hit, .has-mine),
+.finding .tier.has-mine:not(.hit) li:not(:has(.yours)) {
   opacity: 0.4;
 }
 .skeleton {
