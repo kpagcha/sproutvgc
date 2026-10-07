@@ -35,6 +35,7 @@ import {
   type BuildToggle,
   type SpeedBuild,
 } from '@/lib/speedBuild'
+import { lastTiersQuery } from '@/lib/tiersState'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useMeta } from '@/composables/useMeta'
 import { useOpenState } from '@/composables/useOpenState'
@@ -143,6 +144,21 @@ function toggleBoosts() {
 const toggleTrickRoom = () => set('trickroom', trickRoom.value ? undefined : '1')
 // The controls back as a page comes without them: what's shown, the options and the modifiers, boosts on again here
 // too. What's found and kept, and yours, are left as they are.
+// Everything back as the page comes with nothing set: its whole URL cleared (what's shown, the options, yours, what's
+// found and kept), boosts on again, and the modifiers' sections folded.
+const allChanged = computed(() => Object.keys(query.value).length > 0 || !boostsPref.value)
+function resetAll() {
+  boostsPref.value = true
+  try {
+    localStorage.removeItem(BOOSTS_KEY)
+  } catch {
+    // Storage unavailable: nothing saved to clear.
+  }
+  modsOpen.value = false
+  myModsOpen.value = false
+  yoursOpen.value = false
+  void router.replace({ query: {} })
+}
 const CONTROL_KEYS = ['all', 'bench', 'trickroom', 'megas', 'boosts', 'stage', ...TOGGLES] as const
 const controlsChanged = computed(() => CONTROL_KEYS.some((k) => query.value[k] !== undefined) || !boostsOn.value)
 function resetControls() {
@@ -842,12 +858,21 @@ watch(yoursOpen, (open) => {
   if (open && bar.value) dropHeight.value = window.innerHeight - bar.value.getBoundingClientRect().bottom - 8
 })
 
+// Remembered as left, for the comparison's way back.
+watch(query, (q) => (lastTiersQuery.value = { ...q }), { immediate: true })
+
 const { entered } = usePageEntered()
 </script>
 
 <template>
   <!-- The controls and the ladder in panels of their own, under yours' bar. -->
   <div :style="{ '--bar-h': `${barHeight}px` }">
+    <!-- Reset all, on the row of the way back to Competitive (the app's frame has a place for it there). -->
+    <Teleport to="#back-actions-speedTiers" defer>
+      <button v-if="allChanged" type="button" class="btn inverted reset-all" @click="resetAll">
+        <RotateCcw :size="16" aria-hidden="true" />{{ t('speed.resetAll') }}
+      </button>
+    </Teleport>
     <!-- Yours' bar: yours in short, opening its card (dropped under it, narrower than the sidebar; the sidebar brought
          in, beside the ladder). -->
     <div v-show="barShown" ref="bar" class="yours-bar">

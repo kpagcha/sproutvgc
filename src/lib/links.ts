@@ -11,8 +11,9 @@ const hrefs = new Map<string, string>()
 /** A named route with string params: what `hrefOf` and `AppLink` take. */
 export type NamedLocation = RouteLocationNamedRaw & { name: string; params?: Record<string, string> }
 
-/** The href of a named route with string params, resolved once. */
+/** The href of a named route with string params, resolved once; one with a query, each time, as the key leaves it out. */
 export function hrefOf(to: NamedLocation): string {
+  if (to.query && Object.keys(to.query).length) return router.resolve(to).href
   const key = `${to.name}/${Object.values(to.params ?? {}).join('/')}`
   let href = hrefs.get(key)
   if (href === undefined) hrefs.set(key, (href = router.resolve(to).href))

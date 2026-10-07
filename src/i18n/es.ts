@@ -706,6 +706,7 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.unkeepAll': 'Quitar todos',
   'speed.resetControls': 'Restablecer opciones',
   'speed.resetYours': 'Restablecer',
+  'speed.resetAll': 'Restablecer todo',
   'speed.kept': 'En la escala:',
   'speed.unkeep': 'Quitar a {name} de la escala',
   'speed.findOnly': 'Solo {name}',
@@ -754,10 +755,9 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.megaNote':
     'Las megaevoluciones están en la Velocidad de la mega. El turno en que megaevoluciona, aún mueve con la de su forma base.',
   'compare.intro':
-    'Dos Pokémon, cada uno con su distribución y sus modificadores: cuál mueve antes, y los puntos que necesita cada uno para mover antes que el otro.',
+    'Tu Pokémon y un rival, cada uno con su distribución y sus modificadores: cuál mueve antes, y los puntos que necesita cada uno para mover antes que el otro.',
   'compare.pick': 'Elige un Pokémon',
-  'compare.sideA': 'Pokémon 1',
-  'compare.sideB': 'Pokémon 2',
+  'compare.opponent': 'Rival',
   'compare.baseStat': 'Base {base} · característica {stat}',
   'compare.common': 'Distribuciones habituales',
   'compare.first': '{name} mueve antes',

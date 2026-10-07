@@ -21,6 +21,7 @@ import {
   type BuildToggle,
   type SpeedBuild,
 } from '@/lib/speedBuild'
+import { TIERS_PICKS, lastTiersQuery } from '@/lib/tiersState'
 import { useMeta } from '@/composables/useMeta'
 import AppLink from '@/components/AppLink'
 import ItemIcon from '@/components/ItemIcon.vue'
@@ -29,7 +30,7 @@ import PokemonIcon from '@/components/PokemonIcon'
 import PokemonPicker from '@/components/PokemonPicker.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 
-// Two Pokémon's Speeds side by side, each with a build of its own (its nature's effect, its stat points, its
+// Yours and an opponent's Speeds side by side, each with a build of its own (its nature's effect, its stat points, its
 // modifiers): which moves first, and the points each needs to move before the other. Everything in the URL, each side
 // under its letter (`a`, `b`, and `anat`, `apts`, `amods`, `astage`…), with `trickroom`; the speed tiers link here with
 // yours and the Pokémon it's measured against, and back with either as yours.
@@ -138,25 +139,33 @@ const setPoints = (s: Side, v: string) => {
 }
 const toggle = (s: Side, k: BuildToggle) => setBuild(s, { toggles: toggled(sideOf(s).build.toggles, k) })
 
-/** The speed tiers with a side as yours, the other found on the ladder. */
-function ladderLink(s: Side) {
-  const me = sideOf(s)
-  const them = sideOf(other(s))
+/**
+ * The speed tiers as they were left, with yours as yours and the opponent found on the ladder (what was picked there
+ * before giving way to them), and Trick Room as here.
+ */
+const ladderLink = computed(() => {
+  const q = { ...lastTiersQuery.value }
+  for (const k of TIERS_PICKS) delete q[k]
+  const me = sideOf('a')
+  const them = sideOf('b')
   const b = me.build
   return {
     name: 'speedTiers',
     query: {
-      mine: me.id!,
-      mynat: b.effect,
-      mypts: String(b.points),
-      mymods: b.toggles.length ? b.toggles.join(',') : undefined,
-      // The speed tiers have fewer stages: one beyond them is left out.
-      mystage: [-1, 1, 2].includes(b.stage) ? String(b.stage) : undefined,
+      ...(q as Record<string, string>),
+      ...(me.id && {
+        mine: me.id,
+        mynat: b.effect,
+        mypts: String(b.points),
+        mymods: b.toggles.length ? b.toggles.join(',') : undefined,
+        // The speed tiers have fewer stages: one beyond them is left out.
+        mystage: [-1, 1, 2].includes(b.stage) ? String(b.stage) : undefined,
+      }),
       find: them.id ?? undefined,
       trickroom: trickRoom.value ? '1' : undefined,
     },
   }
-}
+})
 
 const STAGES = ['-2', '-1', '0', '1', '2'] as const
 const stageLabel = (s: string) => (Number(s) > 0 ? `+${s}` : s.replace('-', '−'))
@@ -189,6 +198,9 @@ const canHover = window.matchMedia('(hover: hover)').matches
       <button type="button" class="btn swap" :disabled="!sideOf('a').id && !sideOf('b').id" @click="swap">
         <ArrowLeftRight :size="16" aria-hidden="true" />{{ t('compare.swap') }}
       </button>
+      <AppLink v-if="sideOf('a').id || sideOf('b').id" :to="ladderLink" class="btn">{{
+        t('compare.toLadder')
+      }}</AppLink>
     </div>
 
     <!-- Who moves first, between the two. -->
@@ -208,10 +220,11 @@ const canHover = window.matchMedia('(hover: hover)').matches
         v-for="side in sides"
         :key="side.s"
         class="panel banded side"
-        :class="{ first: verdict && !verdict.tie && verdict.first === side.s }"
+        :class="{ first: verdict && !verdict.tie && verdict.first === side.s, opponent: side.s === 'b' }"
       >
+        <!-- Yours, and its opponent, red as on the speed tiers. -->
         <div class="band">
-          <span>{{ side.s === 'a' ? t('compare.sideA') : t('compare.sideB') }}</span>
+          <span>{{ side.s === 'a' ? t('speed.yours') : t('compare.opponent') }}</span>
           <button v-if="side.id" type="button" class="btn on-band inverted" @click="clear(side.s)">
             {{ t('speed.clear') }}
           </button>
@@ -339,10 +352,6 @@ const canHover = window.matchMedia('(hover: hover)').matches
               </template>
             </dl>
           </section>
-
-          <section class="part">
-            <AppLink :to="ladderLink(side.s)" class="btn">{{ t('compare.toLadder') }}</AppLink>
-          </section>
         </template>
       </section>
     </div>
@@ -407,6 +416,10 @@ const canHover = window.matchMedia('(hover: hover)').matches
   .swap {
     margin-left: 0;
   }
+}
+:root:root .side.opponent > .band {
+  color: var(--opponent-text);
+  background: var(--opponent);
 }
 .band {
   display: flex;

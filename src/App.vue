@@ -18,6 +18,7 @@ import { KeptPage, Page } from '@/components/PageFrame'
 import SectionMenu from '@/components/SectionMenu.vue'
 import AreaNav from '@/components/AreaNav.vue'
 import { AREAS } from '@/lib/areas'
+import { lastTiersQuery } from '@/lib/tiersState'
 import logoUrl from '@/assets/logo.png'
 import { searchFocus } from '@/composables/useSearch'
 
@@ -63,10 +64,9 @@ watchEffect(() => {
   setMeta('meta[property="og:description"]', desc)
 })
 
-/** Entry pages lead back to their category's list; the speed tiers, to Competitive, and their comparison to them. */
+/** Entry pages lead back to their category's list; the speed tiers, to Competitive. */
 const LISTS: Partial<Record<string, { to: RouteLocationRaw; label: MessageKey }>> = {
   speedTiers: { to: { name: 'competitive' }, label: 'nav.competitive' },
-  speedCompare: { to: { name: 'speedTiers' }, label: 'nav.speedTiers' },
   ability: { to: { name: 'abilities' }, label: 'title.abilities' },
   pokemon: { to: { name: 'pokedex' }, label: 'title.pokemon' },
   move: { to: { name: 'moves' }, label: 'title.moves' },
@@ -80,6 +80,9 @@ function backLink(r: RouteLocationNormalizedLoaded): { to: RouteLocationRaw; lab
     const query = { ...r.query, mode: r.params.side === 'atk' ? 'atk' : undefined }
     return { to: { name: 'matchups', query }, label: 'nav.matchups' }
   }
+  // The speed comparison leads back to the speed tiers as they were left.
+  if (r.name === 'speedCompare')
+    return { to: { name: 'speedTiers', query: lastTiersQuery.value }, label: 'nav.speedTiers' }
   return (typeof r.name === 'string' ? LISTS[r.name] : undefined) ?? null
 }
 
@@ -232,9 +235,12 @@ const fadeVariants = {
               :transition="FADE"
               :on-animation-complete="onPageAnimated"
             >
-              <RouterLink v-if="backLink(r)" :to="backLink(r)!.to" class="back font-display">
-                <span class="chevron" aria-hidden="true">‹</span> {{ t(backLink(r)!.label) }}
-              </RouterLink>
+              <div v-if="backLink(r)" class="back-row">
+                <RouterLink :to="backLink(r)!.to" class="back font-display">
+                  <span class="chevron" aria-hidden="true">‹</span> {{ t(backLink(r)!.label) }}
+                </RouterLink>
+                <div :id="`back-actions-${String(r.name)}`" class="back-actions"></div>
+              </div>
               <component :is="Component" />
             </component>
           </KeepAlive>
@@ -249,9 +255,13 @@ const fadeVariants = {
             :transition="PAGE"
             :on-animation-complete="onPageAnimated"
           >
-            <RouterLink v-if="backLink(r)" :to="backLink(r)!.to" class="back font-display">
-              <span class="chevron" aria-hidden="true">‹</span> {{ t(backLink(r)!.label) }}
-            </RouterLink>
+            <!-- Beside the way back, a place for the page's own actions on the same row (the speed tiers' Reset all). -->
+            <div v-if="backLink(r)" class="back-row">
+              <RouterLink :to="backLink(r)!.to" class="back font-display">
+                <span class="chevron" aria-hidden="true">‹</span> {{ t(backLink(r)!.label) }}
+              </RouterLink>
+              <div :id="`back-actions-${String(r.name)}`" class="back-actions"></div>
+            </div>
             <component :is="Component" />
           </motion.div>
         </AnimatePresence>
@@ -382,12 +392,22 @@ const fadeVariants = {
   border-top: 1px solid var(--border);
 }
 
+.back-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.back-actions {
+  display: flex;
+  gap: 8px;
+}
 .back {
   display: flex;
   align-items: center;
   gap: 5px;
   width: fit-content;
-  margin-bottom: 12px;
   padding: 3px 10px 3px 7px;
   border: 1px solid var(--border);
   border-radius: 6px;
