@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeftRight, ChevronsDown, ChevronsUp, Trash2 } from '@lucide/vue'
+import { ArrowLeftRight, ChevronDown, ChevronsDown, ChevronsUp, Trash2 } from '@lucide/vue'
 import { pokemon, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
 import { currentSnapshots, distinctLabel, has, percent } from '@/data/meta'
@@ -14,7 +14,6 @@ import {
   BUILD_TOGGLES,
   buildQuery,
   buildSpeed,
-  pointsText,
   readBuild,
   toggled,
   toMoveFirst,
@@ -31,6 +30,7 @@ import MetaPicker from '@/components/MetaPicker.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import PokemonPicker from '@/components/PokemonPicker.vue'
 import SetupStar from '@/components/SetupStar.vue'
+import SpeedAgainst from '@/components/SpeedAgainst.vue'
 import HelpToggle from '@/components/HelpToggle.vue'
 import ScrollRow from '@/components/ScrollRow.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
@@ -88,6 +88,18 @@ function against(s: Side) {
   if (!me.id || them.speed === null) return null
   return toMoveFirst(me.id, me.build, them.speed, trickRoom.value)
 }
+const againstTitle = (s: Side) => t('compare.against', { name: sideOf(other(s)).name!, speed: sideOf(other(s)).speed! })
+
+// On phones, the two side by side as tabs, each with its Pokémon in short: tapping one opens its panel under them,
+// tapping it again folds it, both folded leaving what each takes to move first in view, under them. At first, the
+// first one without a Pokémon is open, to pick it; with both picked, neither.
+const phoneQuery = window.matchMedia('(max-width: 720px)')
+const phone = ref(phoneQuery.matches)
+const onPhone = (e: MediaQueryListEvent) => (phone.value = e.matches)
+phoneQuery.addEventListener('change', onPhone)
+onUnmounted(() => phoneQuery.removeEventListener('change', onPhone))
+const openSide = ref<Side | null>(SIDES.find((s) => !idOf(s)) ?? null)
+const toggleSide = (s: Side) => (openSide.value = openSide.value === s ? null : s)
 
 /** A Pokémon's builds in the meta, by nature effect and points (what Speed cares about), the most common first. */
 function commonBuilds(id: PokemonId) {
@@ -284,9 +296,39 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
       >
     </p>
 
+    <!-- On phones, the two side by side as tabs, each with its Pokémon in short, stuck to the top while the page
+         scrolls: tapping one opens its panel under them, tapping it again folds it. Marked as the panels are when it
+         moves first. -->
+    <div v-if="phone" class="side-tabs">
+      <button
+        v-for="side in sides"
+        :key="side.s"
+        type="button"
+        class="tab"
+        :class="{
+          open: openSide === side.s,
+          first: verdict && !verdict.tie && verdict.first === side.s,
+          tied: verdict?.tie,
+          opponent: side.s === 'b',
+        }"
+        :aria-expanded="openSide === side.s"
+        :aria-controls="`compare-${side.s}`"
+        @click="toggleSide(side.s)"
+      >
+        <span class="tab-label"
+          >{{ side.s === 'a' ? t('speed.yours') : t('compare.opponent')
+          }}<ChevronDown :size="16" class="tab-chevron" aria-hidden="true"
+        /></span>
+        <BuildSummary v-if="side.id" :id="side.id" :speed="side.speed!" :build="side.build" class="tab-summary" />
+        <span v-else class="tab-empty">{{ t('compare.pick') }}</span>
+      </button>
+    </div>
+
     <div class="sides">
       <section
         v-for="side in sides"
+        v-show="!phone || openSide === side.s"
+        :id="`compare-${side.s}`"
         :key="side.s"
         class="panel banded side"
         :class="{
@@ -295,22 +337,11 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
           opponent: side.s === 'b',
         }"
       >
-        <!-- Yours, and its opponent, red as on the speed tiers. On phones, where one is under the other, each stuck to
-             the top while its panel is in view, with its Pokémon in short as on the speed tiers' bar. -->
-        <div class="band">
-          <span class="band-label" :class="{ picked: side.id }">{{
-            side.s === 'a' ? t('speed.yours') : t('compare.opponent')
-          }}</span>
-          <BuildSummary v-if="side.id" :id="side.id" :speed="side.speed!" :build="side.build" class="band-summary" />
-          <!-- On phones, its icon alone, leaving the band's room to the summary. -->
-          <button
-            v-if="side.id"
-            type="button"
-            class="btn on-band inverted band-clear"
-            :aria-label="t('speed.clear')"
-            @click="clear(side.s)"
-          >
-            <Trash2 :size="14" aria-hidden="true" /><span class="clear-text">{{ t('speed.clear') }}</span>
+        <!-- Yours, and its opponent, red as on the speed tiers; on phones, its tab stands for it. -->
+        <div v-if="!phone" class="band">
+          <span>{{ side.s === 'a' ? t('speed.yours') : t('compare.opponent') }}</span>
+          <button v-if="side.id" type="button" class="btn on-band inverted" @click="clear(side.s)">
+            <Trash2 :size="14" aria-hidden="true" />{{ t('speed.clear') }}
           </button>
         </div>
         <PokemonPicker
@@ -330,6 +361,10 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
             <span v-if="side.stat !== side.speed" class="muted small">{{
               t('compare.stat', { stat: side.stat! })
             }}</span>
+            <!-- On phones, with no band to hold it. -->
+            <button v-if="phone" type="button" class="btn speed-clear" @click="clear(side.s)">
+              <Trash2 :size="14" aria-hidden="true" />{{ t('speed.clear') }}
+            </button>
           </p>
 
           <!-- The meta's builds of it, to pick one in a tap. -->
@@ -422,27 +457,23 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
             />
           </section>
 
-          <!-- What it takes to move before the other, at each nature effect. -->
-          <section v-if="against(side.s)" class="part">
-            <strong class="small">{{
-              t('compare.against', { name: sideOf(other(side.s)).name!, speed: sideOf(other(side.s)).speed! })
-            }}</strong>
-            <dl class="versus small">
-              <template v-for="v in against(side.s)!" :key="v.effect">
-                <dt v-tip="canHover && !!EFFECT_ICONS[v.effect] && t(`speed.effect.${v.effect}`)" class="effect">
-                  <template v-if="EFFECT_ICONS[v.effect]"
-                    ><component :is="EFFECT_ICONS[v.effect]" :size="14" aria-hidden="true" /><span aria-hidden="true">{{
-                      t('stat.spe')
-                    }}</span
-                    ><span class="visually-hidden">{{ t(`speed.effect.${v.effect}`) }}</span></template
-                  >
-                  <template v-else>{{ t(`speed.effect.${v.effect}`) }}</template>
-                </dt>
-                <dd>{{ pointsText(v.result) }}</dd>
-              </template>
-            </dl>
+          <!-- What it takes to move before the other, at each nature effect; on phones, under the two instead. -->
+          <section v-if="!phone && against(side.s)" class="part">
+            <SpeedAgainst :title="againstTitle(side.s)" :rows="against(side.s)!" />
           </section>
         </template>
+      </section>
+    </div>
+
+    <!-- On phones, what each takes to move first, side by side under the two (and the panel open, if one is). -->
+    <div v-if="phone && verdict" class="insights">
+      <section
+        v-for="side in sides"
+        :key="side.s"
+        class="panel insight"
+        :class="{ opponent: side.s === 'b', open: openSide === side.s }"
+      >
+        <SpeedAgainst :title="againstTitle(side.s)" :rows="against(side.s)!" />
       </section>
     </div>
   </div>
@@ -641,34 +672,125 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
   color: var(--opponent-text);
   background: var(--opponent);
 }
-.band-label {
-  flex: none;
-}
-.band-summary {
-  display: none;
-}
 .band > .btn {
   flex: none;
   gap: 4px;
   margin-left: auto;
 }
-@media (max-width: 720px) {
-  :root:root .side > .band {
-    position: sticky;
-    top: 0;
-    z-index: 4;
-  }
-  .band-summary {
-    display: flex;
-    overflow: hidden;
-  }
-  .clear-text {
-    display: none;
-  }
-  /* Once picked, the summary says whose it is, by the band's color: the label gives it the room. */
-  .band-label.picked {
-    display: none;
-  }
+/* On phones, the two tabs: each a band of its side's color over its Pokémon in short, side by side, stuck to the top
+   on a strip of the page's background. The open one pressed in, its arrow turned. */
+.side-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 4px;
+  padding: 6px 0 8px;
+  background: var(--bg);
+}
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: bold;
+  text-align: left;
+  color: var(--text);
+  background: var(--panel);
+  border: 2px solid var(--ink);
+  box-shadow: var(--hard);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.tab.open {
+  box-shadow: none;
+  transform: translate(3px, 3px);
+}
+.tab-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 3px 8px;
+  font-size: 0.875em;
+  color: var(--accent-text);
+  background: var(--accent);
+  border-bottom: 2px solid var(--ink);
+}
+.tab.opponent .tab-label {
+  color: var(--opponent-text);
+  background: var(--opponent);
+}
+.tab-chevron {
+  flex: none;
+  transition: transform 0.15s;
+}
+.tab.open .tab-chevron {
+  transform: rotate(180deg);
+}
+/* Its icon standing for its name (still read out), its modifiers under the rest when they don't fit beside it. */
+.tab-summary {
+  flex: none;
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+.tab-summary :deep(.name) {
+  display: none;
+}
+.tab-summary,
+.tab-empty {
+  min-height: 40px;
+  padding: 4px 8px;
+}
+.tab-empty {
+  display: flex;
+  align-items: center;
+  font-weight: normal;
+  color: var(--muted);
+}
+.tab.first {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.tab.first.opponent {
+  outline-color: var(--opponent);
+}
+.tab.tied {
+  outline: 3px solid var(--muted);
+  outline-offset: 2px;
+}
+.speed-clear {
+  gap: 4px;
+  margin-left: auto;
+  align-self: center;
+}
+/* On phones, what each takes to move first, side by side, each topped by its side's color. */
+.insights {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+.insight {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border-top: 6px solid var(--accent) !important;
+}
+.insight.opponent {
+  border-top-color: var(--opponent) !important;
+}
+.insight :deep(.versus) {
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+.insight :deep(dd) {
+  margin-bottom: 4px;
 }
 .part > .builds {
   align-self: stretch;
@@ -767,27 +889,5 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 .points-box {
   width: 4em;
   font: inherit;
-}
-.versus {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 2px 10px;
-  margin: 0;
-}
-.versus dd {
-  margin: 0;
-}
-.effect {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-}
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
 }
 </style>
