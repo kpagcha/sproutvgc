@@ -58,6 +58,11 @@ phoneQuery.addEventListener('change', onPhone)
 onBeforeUnmount(() => phoneQuery.removeEventListener('change', onPhone))
 const sheet = ref(false)
 const openSheet = () => (sheet.value = true)
+// A page can open the picking straight away (yours' bar on phones, with none picked): on phones its dialog, wider its
+// field's list.
+defineExpose({
+  open: () => (phone.value ? openSheet() : field.value?.querySelector('input')?.focus()),
+})
 
 // On touch screens, picking one leaves the field, so the keyboard goes away and the page it was covering shows; with a
 // mouse or keys, the focus stays for picking another. On phones, it closes the screen it was picked on.

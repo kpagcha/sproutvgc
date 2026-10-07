@@ -810,7 +810,13 @@ watch(
 )
 onBeforeUnmount(() => sidebarObserver?.disconnect())
 const barShown = computed(() => !side.value || !sidebarSeen.value)
-const onBarYours = () => (side.value ? reveal(yoursCard.value) : toggleYours())
+// On phones with none picked, the bar goes straight to picking one: the card would only ask for it.
+const yoursPicker = useTemplateRef<InstanceType<typeof PokemonPicker>>('yoursPicker')
+function onBarYours() {
+  if (side.value) reveal(yoursCard.value)
+  else if (phone.value && !mine.value) yoursPicker.value?.open()
+  else toggleYours()
+}
 // The bar's height, for what sticks to the top under it (the controls' heading, the ladder's bar), and where its card
 // drops to: the screen under the bar, the card scrolling within that.
 const bar = useTemplateRef<HTMLElement>('bar')
@@ -1321,6 +1327,7 @@ const { entered } = usePageEntered()
           <div class="yours-pick">
             <PokemonPicker
               :model-value="mine"
+              ref="yoursPicker"
               :placeholder="t('speed.yoursPick')"
               :title="t('speed.yours')"
               tone="yours"
