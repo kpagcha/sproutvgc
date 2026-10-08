@@ -239,7 +239,7 @@ export const router = createRouter({
       },
     },
     {
-      // Two Pokémon's Speeds side by side, linked to and from the speed tiers.
+      // Pokémon's Speeds compared, yours against opponents or in speed order, linked to and from the speed tiers.
       path: '/competitive/speed-tiers/compare',
       name: 'speedCompare',
       component: () => import('@/views/SpeedCompareView.vue'),
@@ -247,11 +247,26 @@ export const router = createRouter({
         titleKey: 'title.speedCompare',
         descKey: 'desc.speedCompare',
         dexNames: true,
-        // One per pair, once both are picked.
-        recent: ({ query: { a, b } }) =>
-          typeof a === 'string' && typeof b === 'string' ? `speedCompare:${a}:${b}` : null,
-        // The two and their builds, once both are picked.
-        setup: (query) => (typeof query.a === 'string' && typeof query.b === 'string' ? stringQuery(query) : null),
+        // Yours against the opponents: one per matchup (the two, or the four), once each team has one. The speed order:
+        // one, whatever its list, once there's one in it.
+        recent: ({ query: { a, b, a2, b2, mode, list } }) =>
+          mode === 'order'
+            ? typeof list === 'string' && list
+              ? 'speedCompare:order'
+              : null
+            : typeof a === 'string' && typeof b === 'string'
+              ? `speedCompare:${[a, a2, b, b2].filter((x) => typeof x === 'string').join(':')}`
+              : null,
+        // The Pokémon and their builds, once each team has one (in speed order, once there's one), but for the two
+        // tapped among the matchups.
+        setup: (query) =>
+          (
+            query.mode === 'order'
+              ? typeof query.list === 'string' && query.list
+              : typeof query.a === 'string' && typeof query.b === 'string'
+          )
+            ? stringQuery(query, ['pair'])
+            : null,
         ...inArea('competitive', 'speedCompare'),
       },
     },

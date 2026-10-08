@@ -5,6 +5,7 @@ import { POKEMON } from '@/data/pokemon'
 import type { PokemonId } from '@/data/dex'
 import { isType, type TypeId } from '@/data/types'
 import { readBuild } from '@/lib/speedBuild'
+import { readList } from '@/lib/speedLineup'
 
 /** The Pokémon a query names, if the regulation has it. */
 const mon = (id: string | undefined) => (id && id in POKEMON ? (id as PokemonId) : null)
@@ -16,10 +17,20 @@ function view(visit: PageVisit) {
   const to = router.resolve({ path: visit.path, query: visit.query })
   const q = visit.query
   const name = String(to.name ?? '')
+  const compare = name === 'speedCompare'
+  const team = (keys: string[]) => keys.flatMap((k) => mon(q[k]) ?? [])
+  // Past a pair, and in speed order, their icons: each team's, or the list's.
+  const groups =
+    compare && q.mode === 'order'
+      ? [readList(q.list).map((e) => e.id)]
+      : compare && (q.a2 || q.b2)
+        ? [team(['a', 'a2']), team(['b', 'b2'])]
+        : null
   return {
     to,
     titleKey: to.meta.titleKey,
-    pair: name === 'speedCompare' ? ([mon(q.a), mon(q.b)] as const) : null,
+    groups,
+    pair: compare && !groups ? ([mon(q.a), mon(q.b)] as const) : null,
     /** Each one's build, as the page reads it. */
     builds: name === 'speedCompare' ? [readBuild(q, 'a'), readBuild(q, 'b')] : [readBuild(q, 'my')],
     mine: name === 'speedTiers' ? mon(q.mine) : null,
@@ -28,10 +39,10 @@ function view(visit: PageVisit) {
   }
 }
 
-/** Whether a page visited can still be shown: a page that still exists, a comparison of two the regulation has. */
+/** Whether a page visited can still be shown: a page that still exists, a comparison of ones the regulation has. */
 export function shownVisit(visit: PageVisit) {
   const v = view(visit)
-  return !!v.titleKey && (!v.pair || (!!v.pair[0] && !!v.pair[1]))
+  return !!v.titleKey && (!v.pair || (!!v.pair[0] && !!v.pair[1])) && (!v.groups || v.groups.every((g) => g.length > 0))
 }
 </script>
 
@@ -47,15 +58,30 @@ import TypeIcon from '@/components/TypeIcon'
 
 // A page with a view of its own (in its URL) as a chip reopening it as it was: the home page's recently viewed and
 // favorites (a setup starred), beside the dex entries' chips (`EntryChip`), in their style. A comparison is its two
-// Pokémon, each with its build; any other page its name, with the Pokémon picked on it (the speed tiers' yours, with
-// its build) or its types (the type matchups'); Trick Room, on, said in short.
+// Pokémon, each with its build (past two, and in speed order, their icons alone); any other page its name, with the
+// Pokémon picked on it (the speed tiers' yours, with its build) or its types (the type matchups'); Trick Room, on,
+// said in short.
 const props = defineProps<{ visit: PageVisit }>()
 const v = computed(() => view(props.visit))
+/** The most icons a group shows, the rest counted. */
+const GROUP_MAX = 6
 </script>
 
 <template>
   <a :href="v.to.href" class="page-chip" @click="follow">
-    <template v-if="v.pair">
+    <template v-if="v.groups">
+      <template v-for="(g, i) in v.groups" :key="i">
+        <span v-if="i" class="muted">vs</span>
+        <span class="group"
+          ><PokemonIcon v-for="(id, j) in g.slice(0, GROUP_MAX)" :key="j" :id /><span
+            v-if="g.length > GROUP_MAX"
+            class="muted more"
+            >+{{ g.length - GROUP_MAX }}</span
+          ></span
+        >
+      </template>
+    </template>
+    <template v-else-if="v.pair">
       <template v-for="(id, i) in v.pair" :key="i">
         <span v-if="i" class="muted">vs</span>
         <PokemonIcon :id="id!" />{{ refName(pokemon(id!)) }}
@@ -115,6 +141,15 @@ const v = computed(() => view(props.visit))
   margin-left: -2px;
   font-size: 0.85em;
   font-variant-numeric: tabular-nums;
+}
+/* A group's icons, close together. */
+.group {
+  display: inline-flex;
+  align-items: center;
+}
+.more {
+  margin-left: 4px;
+  font-size: 0.85em;
 }
 /* Trick Room, on: as the switch shows it on. */
 .tr {
