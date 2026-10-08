@@ -61,7 +61,7 @@ const idOf = (s: Slot) => {
   const id = route.query[s]
   return typeof id === 'string' && id in POKEMON ? (id as PokemonId) : null
 }
-/** The second slots added and not picked yet: in the page alone, until they are. */
+/** The second slots added and not picked yet: in the page alone, until they are, or until another is opened. */
 const added = ref(new Set<Slot>())
 const vsSlots = computed(() => SLOTS.filter((s) => s === 'a' || s === 'b' || !!idOf(s) || added.value.has(s)))
 
@@ -208,8 +208,10 @@ function pick(key: string, id: PokemonId) {
   if (phone.value || stacked.value) openKey.value = key
   const build = pickedBuild(id, e.build)
   if (mode.value === 'order') return setList(list.value.map((x, i) => (i === listIndex(key) ? { id, build } : x)))
-  added.value.delete(key as Slot)
-  replace({ [key]: id, ...buildQuery(build, key) })
+  // An added slot stops being one once the URL has it, not before: the list would fold to a pair in between.
+  void router
+    .replace({ query: { ...route.query, [key]: id, ...buildQuery(build, key) } })
+    .then(() => added.value.delete(key as Slot))
 }
 /** A slot's keys in the URL, each as `from`'s (none when it's empty). */
 const moveSlot = (to: Slot, from: Slot | null) =>
@@ -240,13 +242,22 @@ function swap() {
   added.value = new Set([...added.value].map((s) => (s.startsWith('a') ? `b${s.slice(1)}` : `a${s.slice(1)}`) as Slot))
   openKey.value = null
 }
-/** A team's second, added: its panel opens, picking it. */
+/** A team's second, added: its panel opens, picking it. Left for another before it's picked, it goes. */
+watch(openKey, (_, was) => {
+  if (was && added.value.has(was as Slot) && !idOf(was as Slot)) added.value.delete(was as Slot)
+})
 function addSlot(s: Slot) {
   added.value.add(s)
   openKey.value = s
   void nextTick(() => editors[s]?.openPicker())
 }
-const canAdd = (s: Side) => mode.value === 'vs' && !!idOf(s) && !vsSlots.value.includes(`${s}2` as Slot)
+// Each team offers its second from the start, once its first is picked.
+const secondOf = (s: Side) => `${s}2` as Slot
+const canAdd = (s: Side) => !!idOf(s)
+const hasSecond = (s: Side) => vsSlots.value.includes(secondOf(s))
+/** The Pokémon on a slot's team but it, which it can't be (a team has one of each species); none in speed order. */
+const takenFor = (key: string) =>
+  mode.value === 'vs' ? SLOTS.filter((s) => s !== key && teamOf(s) === teamOf(key)).flatMap((s) => idOf(s) ?? []) : []
 
 // In speed order, one added at the end of the list (at its common build), the field emptied for the next; past the
 // most it takes, a message saying so in its place, until one goes.
@@ -408,17 +419,11 @@ function resetAll() {
       </div>
     </details>
 
-    <!-- Yours against the opponents, once there's one: swap the teams, add a second to either, or see the two first
-         on the speed tiers. -->
-    <div v-if="mode === 'vs' && anyPicked" class="panel actions">
-      <button type="button" class="btn" @click="swap">
+    <!-- Yours against the opponents: swap the teams (once there's one to swap), or see the two first on the speed
+         tiers. There from the start, so nothing under it moves on the first pick. -->
+    <div v-if="mode === 'vs'" class="panel actions">
+      <button type="button" class="btn" :disabled="!anyPicked" @click="swap">
         <ArrowLeftRight :size="16" aria-hidden="true" />{{ t('compare.swap') }}
-      </button>
-      <button v-if="canAdd('a')" type="button" class="btn add yours" @click="addSlot('a2')">
-        <Plus :size="16" aria-hidden="true" />{{ t('compare.addYours') }}
-      </button>
-      <button v-if="canAdd('b')" type="button" class="btn add opponent" @click="addSlot('b2')">
-        <Plus :size="16" aria-hidden="true" />{{ t('compare.addOpponent') }}
       </button>
       <AppLink :to="ladderLink" class="btn">{{ t('compare.toLadder') }}</AppLink>
     </div>
@@ -436,11 +441,28 @@ function resetAll() {
             :common="commonBuilds(entry.id)"
             :title="entry.team === 'opponent' ? t('compare.opponent') : t('speed.yours')"
             :tone="entry.team ?? undefined"
+            :taken="takenFor(entry.key)"
             clearable
             @pick="(id: PokemonId) => pick(entry.key, id)"
             @build="(b: Partial<SpeedBuild>) => setBuild(entry.key, b)"
             @clear="clear(entry.key)"
           />
+        </template>
+        <!-- Yours against the opponents: a row adding a second to each team that has room for one, greyed out until
+             its first is picked. -->
+        <template v-if="mode === 'vs'" #after>
+          <template v-for="s in SIDES" :key="s">
+            <button
+              v-if="!hasSecond(s)"
+              type="button"
+              class="add-second row-add"
+              :class="teamOf(s)"
+              :disabled="!canAdd(s)"
+              @click="addSlot(secondOf(s))"
+            >
+              <Plus :size="16" aria-hidden="true" />{{ t(s === 'a' ? 'compare.addYours' : 'compare.addOpponent') }}
+            </button>
+          </template>
         </template>
       </SpeedLineup>
 
@@ -547,6 +569,21 @@ function resetAll() {
           <span v-else class="tab-empty">{{ t('compare.pick') }}</span>
         </button>
       </div>
+      <!-- On phones, under each tab, a second for its team, greyed out until its first is picked. -->
+      <div v-if="phone" class="side-adds">
+        <button
+          v-for="side in sides"
+          :key="side.s"
+          type="button"
+          class="add-second"
+          :class="teamOf(side.s)"
+          :disabled="!canAdd(side.s)"
+          :aria-label="t(side.s === 'a' ? 'compare.addYours' : 'compare.addOpponent')"
+          @click="addSlot(secondOf(side.s))"
+        >
+          <Plus :size="14" aria-hidden="true" />{{ t('compare.addSecondShort') }}
+        </button>
+      </div>
 
       <div class="sides">
         <section
@@ -581,6 +618,7 @@ function resetAll() {
             :common="commonBuilds(side.id)"
             :title="side.s === 'a' ? t('speed.yours') : t('compare.opponent')"
             :tone="side.s === 'a' ? 'yours' : 'opponent'"
+            :taken="takenFor(side.s)"
             :clearable="phone"
             @pick="(id: PokemonId) => pick(side.s, id)"
             @build="(b: Partial<SpeedBuild>) => setBuild(side.s, b)"
@@ -591,6 +629,18 @@ function resetAll() {
               <SpeedAgainst :title="againstTitle(side.s)" :rows="against(side.s)!" :current="side.build.effect" />
             </section>
           </SpeedEditor>
+          <!-- A second for its team, greyed out until its first is picked; on phones, under its tab instead. -->
+          <button
+            v-if="!phone"
+            type="button"
+            class="add-second panel-add"
+            :class="teamOf(side.s)"
+            :disabled="!canAdd(side.s)"
+            :aria-label="t(side.s === 'a' ? 'compare.addYours' : 'compare.addOpponent')"
+            @click="addSlot(secondOf(side.s))"
+          >
+            <Plus :size="16" aria-hidden="true" />{{ t('compare.addSecond') }}
+          </button>
         </section>
       </div>
 
@@ -950,15 +1000,59 @@ function resetAll() {
   outline-color: var(--opponent);
 }
 
-/* Adding a second to a team: in its color. */
-.add.yours {
-  border-color: var(--accent);
+/* Adding a second to a team: a dashed slot in its color, its text too; faded until its first is picked. */
+.add-second {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  font: inherit;
+  font-weight: bold;
+  text-align: left;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--panel));
+  border: 2px dashed var(--accent);
+  cursor: pointer;
+  touch-action: manipulation;
 }
-.add.opponent {
+.add-second.opponent {
+  color: var(--opponent);
+  background: color-mix(in srgb, var(--opponent) 8%, var(--panel));
   border-color: var(--opponent);
 }
-.actions > .add {
-  box-shadow: 3px 3px 0 var(--ink);
+.add-second:hover:not(:disabled) {
+  border-style: solid;
+}
+.add-second:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+/* In a side's panel, under its editor. */
+.panel-add {
+  margin-top: 14px;
+  padding: 8px 10px;
+}
+/* On phones, a slim one under each tab. */
+.side-adds {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: -2px 0 10px;
+}
+.side-adds > .add-second {
+  justify-content: center;
+  padding: 4px 6px;
+  font-size: 0.875em;
+}
+/* Under the list, as tall as its bands. */
+.row-add {
+  height: 44px;
+  margin-top: 6px;
+  padding: 0 10px;
+}
+.row-add + .row-add {
+  margin-top: 6px;
 }
 /* In speed order, the field adding one more, how many there are beside it. */
 .adder {

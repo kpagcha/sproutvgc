@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import Marked from '@/components/Marked'
-import { nextTick, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 import { Star, X } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
-import { POKEMON } from '@/data/pokemon'
+import { POKEMON, speciesOf } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { benchmark } from '@/lib/stats'
 import { pokemonName, usePokemonSearch } from '@/composables/usePokemonSearch'
@@ -29,8 +29,14 @@ const props = defineProps<{
   caret?: boolean
   /** Shows each one's Speed at the end of its row, with no points and a neutral nature: a quick preview of how fast. */
   speed?: boolean
+  /** Pokémon already on the team: they, and any of their species (its formes and Megas), are shown but can't be
+   * picked. */
+  taken?: readonly PokemonId[]
 }>()
 const emit = defineEmits<{ pick: [id: PokemonId]; close: [] }>()
+const takenSpecies = computed(() => new Set((props.taken ?? []).map(speciesOf)))
+const isTaken = (id: PokemonId) => takenSpecies.value.has(speciesOf(id))
+const pick = (id: PokemonId) => !isTaken(id) && emit('pick', id)
 
 const text = ref(pokemonName(props.picked))
 const { results, showsPicked } = usePokemonSearch(
@@ -63,7 +69,7 @@ function onKey(e: KeyboardEvent) {
   const n = results.value.length
   if (e.key === 'ArrowDown' && n) active.value = (active.value + 1) % n
   else if (e.key === 'ArrowUp' && n) active.value = (active.value - 1 + n) % n
-  else if (e.key === 'Enter' && n) emit('pick', results.value[active.value]!.id)
+  else if (e.key === 'Enter' && n) pick(results.value[active.value]!.id)
   // The search box would take Escape to empty itself: here it closes, as the dialog's would.
   else if (e.key === 'Escape') emit('close')
   else return
@@ -134,17 +140,18 @@ const optionId = (i: number) => `${listId}-${i}`
           :id="optionId(i)"
           role="option"
           class="option"
-          :class="{ active: i === active }"
+          :class="{ active: i === active, taken: isTaken(r.id) }"
           :aria-selected="i === active"
-          @click="emit('pick', r.id)"
+          :aria-disabled="isTaken(r.id) || undefined"
+          @click="pick(r.id)"
         >
           <PokemonIcon :id="r.id" />
           <span><Marked :p="r.parts" /></span
           ><Star v-if="r.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" /><span
-            v-if="props.speed"
+            v-if="isTaken(r.id)"
             class="option-speed"
-            >{{ speedOf(r.id) }}</span
-          >
+            >{{ t('picker.taken') }}</span
+          ><span v-else-if="props.speed" class="option-speed">{{ speedOf(r.id) }}</span>
         </li>
       </template>
     </ul>
@@ -240,6 +247,14 @@ const optionId = (i: number) => `${listId}-${i}`
 }
 .option.active {
   background: var(--sel);
+}
+/* Already on the team: faded, not picked. */
+.option.taken {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.option.taken.active {
+  background: var(--panel-alt);
 }
 /* A group's heading, while browsing with favorites: small, muted, not an option. */
 .group {

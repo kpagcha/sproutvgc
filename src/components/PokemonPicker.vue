@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import Marked from '@/components/Marked'
-import { nextTick, onBeforeUnmount, ref, useId, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, useId, useTemplateRef, watch } from 'vue'
 import { Star } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
-import { POKEMON } from '@/data/pokemon'
+import { POKEMON, speciesOf } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { benchmark } from '@/lib/stats'
 import { pokemonName as nameOf, usePokemonSearch } from '@/composables/usePokemonSearch'
@@ -35,6 +35,9 @@ const props = defineProps<{
   caret?: boolean
   /** Shows each one's Speed at the end of its row, with no points and a neutral nature: a quick preview of how fast. */
   speed?: boolean
+  /** Pokémon already on the team: they, and any of their species (its formes and Megas), are shown but can't be
+   * picked. */
+  taken?: readonly PokemonId[]
 }>()
 const model = defineModel<PokemonId | null>({ required: true })
 
@@ -76,7 +79,10 @@ defineExpose({
 // On touch screens, picking one leaves the field, so the keyboard goes away and the page it was covering shows; with a
 // mouse or keys, the focus stays for picking another. On phones, it closes the screen it was picked on.
 const touch = window.matchMedia('(pointer: coarse)')
+const takenSpecies = computed(() => new Set((props.taken ?? []).map(speciesOf)))
+const isTaken = (id: PokemonId) => takenSpecies.value.has(speciesOf(id))
 function pick(id: PokemonId) {
+  if (isTaken(id)) return
   keepTop = field.value?.getBoundingClientRect().top ?? null
   model.value = id
   text.value = nameOf(id)
@@ -291,18 +297,19 @@ const optionId = (i: number) => `${listId}-${i}`
             :id="optionId(i)"
             role="option"
             class="option"
-            :class="{ active: i === active }"
+            :class="{ active: i === active, taken: isTaken(r.id) }"
             :aria-selected="i === active"
+            :aria-disabled="isTaken(r.id) || undefined"
             @mousedown.prevent="pick(r.id)"
             @mouseenter="active = i"
           >
             <PokemonIcon :id="r.id" />
             <span><Marked :p="r.parts" /></span
             ><Star v-if="r.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" /><span
-              v-if="props.speed"
+              v-if="isTaken(r.id)"
               class="option-speed"
-              >{{ speedOf(r.id) }}</span
-            >
+              >{{ t('picker.taken') }}</span
+            ><span v-else-if="props.speed" class="option-speed">{{ speedOf(r.id) }}</span>
           </li>
         </template>
       </ul>
@@ -319,6 +326,7 @@ const optionId = (i: number) => `${listId}-${i}`
         :tone="props.tone"
         :caret="props.caret"
         :speed="props.speed"
+        :taken="props.taken"
         @pick="pick"
         @close="sheet = false"
       />
@@ -372,6 +380,14 @@ const optionId = (i: number) => `${listId}-${i}`
 }
 .option.active {
   background: var(--sel);
+}
+/* Already on the team: faded, not picked. */
+.option.taken {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.option.taken.active {
+  background: var(--panel-alt);
 }
 /* A group's heading, while browsing with favorites: small, muted, not an option. */
 .group {

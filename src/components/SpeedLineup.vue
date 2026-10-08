@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
 import { ChevronDown } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { t } from '@/i18n'
@@ -11,8 +11,8 @@ import BuildSummary from '@/components/BuildSummary.vue'
 // with its place in the move order, numbered (one tied with another sharing its number, marked `=`), and its Pokémon
 // in short. Tapping one opens what changes it under it (the `editor` slot), tapping it again folds it. While one is
 // open the bands keep their order, so what's being changed stays put; once none is, they move to the order they move
-// in. The bands stick to the top, piling up as the page scrolls, so every one stays in view; a list too long for that
-// keeps the open one alone in view.
+// in, sliding there. The bands stick to the top, piling up as the page scrolls, so every one stays in view; a list too
+// long for that keeps the open one alone in view. Under them, what the page adds (the `after` slot: rows adding one).
 export interface LineupEntry {
   key: string
   team: 'yours' | 'opponent' | null
@@ -51,13 +51,39 @@ const shown = computed(() => {
   return [...kept, ...props.entries.filter((e) => !keep.includes(e.key))]
 })
 
+// Moving to their new places, the bands slide there from where they were (by `transform` alone, off the main thread),
+// unless motion is reduced.
+const root = useTemplateRef<HTMLElement>('root')
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
+watch(
+  () => shown.value.map((e) => e.key).join(),
+  (now, was) => {
+    const el = root.value
+    if (!el || !was || reduced.matches) return
+    const bands = () => [...el.querySelectorAll<HTMLElement>(':scope > .row')]
+    const before = new Map(bands().map((b) => [b.id, b.getBoundingClientRect().top]))
+    void nextTick(() => {
+      for (const b of bands()) {
+        const top = before.get(b.id)
+        const dy = top === undefined ? 0 : top - b.getBoundingClientRect().top
+        if (Math.abs(dy) > 1)
+          b.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }], {
+            duration: 350,
+            easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+          })
+      }
+    })
+  },
+  { flush: 'pre' },
+)
+
 const placeLabel = (p: Place) => t(p.tie ? 'compare.placeTie' : 'compare.place', { n: p.rank })
 const teamLabel = (e: LineupEntry) =>
   e.team === 'yours' ? t('speed.yours') : e.team === 'opponent' ? t('compare.opponent') : null
 </script>
 
 <template>
-  <TransitionGroup tag="div" name="reorder" class="lineup" :class="{ pile }">
+  <div ref="root" class="lineup" :class="{ pile }">
     <template v-for="(e, i) in shown" :key="e.key">
       <button
         :id="`band-${e.key}`"
@@ -85,7 +111,8 @@ const teamLabel = (e: LineupEntry) =>
         <slot name="editor" :entry="e" />
       </div>
     </template>
-  </TransitionGroup>
+    <slot name="after" />
+  </div>
 </template>
 
 <style scoped>
@@ -194,15 +221,6 @@ const teamLabel = (e: LineupEntry) =>
 }
 .editor.opponent {
   border-left-color: var(--opponent);
-}
-/* Moving to their new places, sliding. */
-.reorder-move {
-  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-@media (prefers-reduced-motion: reduce) {
-  .reorder-move {
-    transition: none;
-  }
 }
 .visually-hidden {
   position: absolute;

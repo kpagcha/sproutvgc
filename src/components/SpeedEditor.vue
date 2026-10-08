@@ -28,6 +28,8 @@ const props = defineProps<{
   title: string
   tone?: 'yours' | 'opponent'
   clearable?: boolean
+  /** Pokémon already on its team, which it can't be (nor one of their species). */
+  taken?: readonly PokemonId[]
 }>()
 const emit = defineEmits<{ pick: [id: PokemonId]; build: [b: Partial<SpeedBuild>]; clear: [] }>()
 
@@ -63,6 +65,7 @@ const canHover = window.matchMedia('(hover: hover)').matches
         :placeholder="t('compare.pick')"
         :title="props.title"
         :tone="props.tone"
+        :taken="props.taken"
         icon
         speed
         class="picker"
