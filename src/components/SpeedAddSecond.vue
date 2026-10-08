@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { Plus } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { t } from '@/i18n'
+import type { Ranks } from '@/composables/usePokemonSearch'
 import PokemonPicker from '@/components/PokemonPicker.vue'
 
 // The comparison's slot adding a team's second Pokémon: a dashed field in its team's color that picks one straight away
@@ -15,6 +16,8 @@ const props = defineProps<{
   disabled?: boolean
   /** The team's first, which it can't be (nor one of its species). */
   taken?: readonly PokemonId[]
+  /** The meta's usage ranks, for its picker to list by. */
+  ranks?: Ranks
 }>()
 const emit = defineEmits<{ pick: [id: PokemonId] }>()
 
@@ -39,6 +42,7 @@ function pick(id: PokemonId | null) {
     :title="props.team === 'yours' ? t('speed.yours') : t('compare.opponent')"
     :tone="props.team"
     :taken="props.taken"
+    :ranks="props.ranks"
     speed
     class="add-second add-picker"
     :class="props.team"

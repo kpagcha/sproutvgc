@@ -33,7 +33,14 @@ function view(visit: PageVisit) {
     build: readBuild(q, 'my'),
     mine: name === 'speedTiers' ? mon(q.mine) : null,
     trickRoom: name.startsWith('speed') && q.trickroom === '1',
-    types: name.startsWith('matchups') ? (typesOf(q.def, 2).length ? typesOf(q.def, 2) : typesOf(q.atk, 4)) : [],
+    // The type matchups' types, or the type the speed tiers are filtered by.
+    types: name.startsWith('matchups')
+      ? typesOf(q.def, 2).length
+        ? typesOf(q.def, 2)
+        : typesOf(q.atk, 4)
+      : name === 'speedTiers'
+        ? typesOf(q.type, 1)
+        : [],
   }
 }
 
@@ -57,8 +64,8 @@ import TypeIcon from '@/components/TypeIcon'
 // A page with a view of its own (in its URL) as a chip reopening it as it was: the home page's recently viewed and
 // favorites (a setup starred), beside the dex entries' chips (`EntryChip`), in their style. A comparison is its
 // Pokémon's icons, each team's (or the speed order's list), their names read out; any other page its name, with the
-// Pokémon picked on it (the speed tiers' yours, with its build) or its types (the type matchups'); Trick Room, on,
-// said in short.
+// Pokémon picked on it (the speed tiers' yours, with its build, and the type it's filtered by) or its types (the type
+// matchups'); Trick Room, on, said in short.
 const props = defineProps<{ visit: PageVisit }>()
 const v = computed(() => view(props.visit))
 /** A comparison's Pokémon by name, for what reads the chip out: its icons alone say nothing. */

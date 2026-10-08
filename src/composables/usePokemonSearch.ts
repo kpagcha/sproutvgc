@@ -10,9 +10,15 @@ import { GROUP_CAP, usePickerGroups, type PickerGroup } from '@/composables/useP
 /** A Pokémon's name, or nothing for none. */
 export const pokemonName = (id: PokemonId | null) => (id ? refName(pokemon(id)) : '')
 
-/** A group's heading while browsing: Recent and Favorites fold away (`folded`, their rows then left out), All doesn't. */
+/** Usage ranks by Pokémon, from 1, for a picker to list by. */
+export type Ranks = Partial<Record<PokemonId, number>>
+
+/**
+ * A group's heading while browsing: Recent and Favorites fold away (`folded`, their rows then left out); the rest (All,
+ * or By usage given ranks) doesn't.
+ */
 export interface GroupHeading {
-  group: PickerGroup | 'all'
+  group: PickerGroup | 'all' | 'usage'
   /** How many it has, all of them. */
   count: number
   folded: boolean
@@ -38,6 +44,8 @@ export interface PokemonOption {
   key: string
   headings?: GroupHeading[]
   more?: GroupMore
+  /** Its usage rank, when the list goes by usage. */
+  rank?: number
 }
 
 /**
@@ -45,23 +53,27 @@ export interface PokemonOption {
  * (of `ids`, else the regulation's) while the text is empty or is the name of the one `picked`, to browse, the ones
  * picked lately first (with `withRecent`), then the reader's favorites, each group its first `GROUP_CAP` unless asked
  * for all and folding away, then every one in its place; the favorites first among those found while typing; none
- * while it's not `open`. For the Pokémon pickers: the drop-down and the dialog's panel.
+ * while it's not `open`. By name, or given `ranks` (the meta's usage ranks), by usage: the ranked first, most used
+ * first, then the rest by name. For the Pokémon pickers: the drop-down and the dialog's panel.
  */
 export function usePokemonSearch(
   ids: () => readonly PokemonId[] | undefined,
   text: Ref<string>,
   picked: () => PokemonId | null,
   open: () => boolean = () => true,
+  ranks: () => Ranks | undefined = () => undefined,
   withRecent: () => boolean = () => false,
 ) {
   const { isFavorite } = useFavorites()
   const { recent, folded, expanded } = usePickerGroups()
-  const all = computed(() =>
-    (ids() ?? availableIds('pokemon'))
+  const all = computed(() => {
+    const r = ranks()
+    return (ids() ?? availableIds('pokemon'))
       .filter((id) => !POKEMON[id].cosmetic)
-      .map((id) => ({ id, name: refName(pokemon(id)), fav: isFavorite(pokemon(id)) }))
-      .sort((a, b) => a.name.localeCompare(b.name, locale.value)),
-  )
+      .map((id) => ({ id, name: refName(pokemon(id)), fav: isFavorite(pokemon(id)), rank: r?.[id] }))
+      .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity) || a.name.localeCompare(b.name, locale.value))
+  })
+  const rest = computed(() => (ranks() ? ('usage' as const) : ('all' as const)))
   /** The text shows the one picked as it is, not a search being typed. */
   const showsPicked = computed(() => !!picked() && text.value === pokemonName(picked()))
   const results = computed((): PokemonOption[] => {
@@ -91,7 +103,7 @@ export function usePokemonSearch(
         }
         if (list.length > GROUP_CAP) out[out.length - 1]!.more = { group, total: list.length, all: showsAll }
       }
-      waiting.push({ group: 'all', count: all.value.length, folded: false })
+      waiting.push({ group: rest.value, count: all.value.length, folded: false })
       return [...out, ...all.value.map((m, i) => ({ ...whole(m), key: m.id, headings: i ? undefined : waiting }))]
     }
     const found = all.value.flatMap((m) => {

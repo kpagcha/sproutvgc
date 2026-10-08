@@ -3,6 +3,7 @@ import { useTemplateRef } from 'vue'
 import { ChevronsDown, ChevronsUp, Trash2 } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { percent } from '@/data/meta'
+import type { Ranks } from '@/composables/usePokemonSearch'
 import { natureName } from '@/data/natures'
 import { t } from '@/i18n'
 import { NATURE_EFFECTS, NATURES_BY_EFFECT } from '@/lib/speed'
@@ -34,6 +35,8 @@ const props = defineProps<{
   confirmable?: boolean
   /** Pokémon already on its team, which it can't be (nor one of their species). */
   taken?: readonly PokemonId[]
+  /** The meta's usage ranks, for its picker to list by. */
+  ranks?: Ranks
 }>()
 const emit = defineEmits<{ pick: [id: PokemonId]; build: [b: Partial<SpeedBuild>]; clear: []; confirm: [] }>()
 
@@ -71,6 +74,7 @@ const canHover = window.matchMedia('(hover: hover)').matches
         :title="props.title"
         :tone="props.tone"
         :taken="props.taken"
+        :ranks="props.ranks"
         icon
         speed
         class="picker"

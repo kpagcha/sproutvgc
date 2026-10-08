@@ -6,7 +6,7 @@ import type { PokemonId } from '@/data/dex'
 import { POKEMON, speciesOf } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { benchmark } from '@/lib/stats'
-import { pokemonName, usePokemonSearch } from '@/composables/usePokemonSearch'
+import { pokemonName, usePokemonSearch, type Ranks } from '@/composables/usePokemonSearch'
 import { usePickerGroups, type PickerGroup } from '@/composables/usePickerGroups'
 import PokemonIcon from '@/components/PokemonIcon'
 import SearchBox from '@/components/SearchBox.vue'
@@ -35,6 +35,8 @@ const props = defineProps<{
   taken?: readonly PokemonId[]
   /** Lists the Pokémon picked lately first while browsing (the picker it's in records them). */
   recent?: boolean
+  /** Lists them by usage, by these ranks (the meta's), each with its rank, rather than by name. */
+  ranks?: Ranks
 }>()
 const emit = defineEmits<{ pick: [id: PokemonId]; close: [] }>()
 const takenSpecies = computed(() => new Set((props.taken ?? []).map(speciesOf)))
@@ -47,6 +49,7 @@ const { results, showsPicked } = usePokemonSearch(
   text,
   () => props.picked,
   () => true,
+  () => props.ranks,
   () => !!props.recent,
 )
 // Folding a group or showing all of it keeps the list where it is, rather than going back to the one picked.
@@ -56,8 +59,16 @@ function regroup(change: () => void) {
   regrouping = true
   change()
 }
-const groupLabel = (g: PickerGroup | 'all') =>
-  t(g === 'recent' ? 'picker.recent' : g === 'favorites' ? 'favorites.title' : 'picker.all')
+/** The headings of the groups browsed with favorites or picks. */
+const GROUPS = {
+  recent: 'picker.recent',
+  favorites: 'favorites.title',
+  all: 'picker.all',
+  usage: 'picker.byUsage',
+} as const
+const groupLabel = (g: keyof typeof GROUPS) => t(GROUPS[g])
+/** Recent and Favorites fold away; the rest (All, By usage) is the list itself. */
+const foldable = (g: keyof typeof GROUPS) => g === 'recent' || g === 'favorites'
 
 const active = ref(0)
 // Browsing every Pokémon from the one picked: it, in view, centered; else the first.
@@ -160,11 +171,11 @@ const optionId = (i: number) => `${listId}-${i}`
           :key="h.group"
           role="presentation"
           class="group"
-          :class="{ foldable: h.group !== 'all' }"
-          @click="h.group !== 'all' && regroup(() => toggleFold(h.group as PickerGroup))"
+          :class="{ foldable: foldable(h.group) }"
+          @click="foldable(h.group) && regroup(() => toggleFold(h.group as PickerGroup))"
         >
-          <span v-if="h.group !== 'all'" class="fold" aria-hidden="true">{{ h.folded ? '▸' : '▾' }}</span
-          >{{ groupLabel(h.group) }}<span v-if="h.group !== 'all'" class="count">{{ h.count }}</span>
+          <span v-if="foldable(h.group)" class="fold" aria-hidden="true">{{ h.folded ? '▸' : '▾' }}</span
+          >{{ groupLabel(h.group) }}<span v-if="foldable(h.group)" class="count">{{ h.count }}</span>
         </li>
         <li
           :id="optionId(i)"
@@ -178,9 +189,10 @@ const optionId = (i: number) => `${listId}-${i}`
           <PokemonIcon :id="r.id" />
           <span><Marked :p="r.parts" /></span
           ><Star v-if="r.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" /><span
-            v-if="isTaken(r.id)"
-            class="option-speed"
-            >{{ t('picker.taken') }}</span
+            v-if="r.rank"
+            class="option-rank"
+            >#{{ r.rank }}</span
+          ><span v-if="isTaken(r.id)" class="option-speed">{{ t('picker.taken') }}</span
           ><span v-else-if="props.speed" class="option-speed">{{ speedOf(r.id) }}</span>
         </li>
         <!-- After a group's last shown, when it has more: all of them, or back to its first few. -->
@@ -274,6 +286,16 @@ const optionId = (i: number) => `${listId}-${i}`
   padding: 0 6px 0 2px;
   border-bottom: 1px solid var(--border);
   cursor: pointer;
+}
+.option-rank {
+  margin-left: auto;
+  padding-left: 8px;
+  color: var(--muted);
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+}
+.option-rank + .option-speed {
+  margin-left: 0;
 }
 .option-speed {
   margin-left: auto;

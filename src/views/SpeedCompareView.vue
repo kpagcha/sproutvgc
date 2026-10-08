@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeftRight, ChevronDown, Plus, RotateCcw, Trash2 } from '@lucide/vue'
 import { pokemon, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
-import { currentSnapshots, distinctLabel, has } from '@/data/meta'
+import { currentSnapshots, distinctLabel, has, usageRanks } from '@/data/meta'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { natureEffect, speedStat } from '@/lib/speed'
@@ -44,6 +44,8 @@ const replace = (q: Record<string, string | undefined>) => void router.replace({
 
 const { snapshot, data } = useMeta()
 const metaSpeeds = computed(() => !!snapshot.value && has(snapshot.value, 'speeds'))
+/** Usage ranks, for the pickers to list by, most used first. */
+const ranks = computed(() => (data.value ? usageRanks(data.value) : undefined))
 
 const MODES = ['vs', 'order'] as const
 type Mode = (typeof MODES)[number]
@@ -563,6 +565,7 @@ function resetAll() {
       <SpeedLineup :entries="lineup" :open-key="openKey" @toggle="toggleOpen">
         <template #editor="{ entry }">
           <SpeedEditor
+            :ranks
             :ref="editorRef(entry.key)"
             :id="entry.id"
             :build="entry.build"
@@ -585,6 +588,7 @@ function resetAll() {
         <template v-if="mode === 'vs'" #after>
           <template v-for="s in SIDES" :key="s">
             <SpeedAddSecond
+              :ranks
               v-if="!hasSecond(s)"
               class="row-add"
               :team="teamOf(s)"
@@ -610,6 +614,7 @@ function resetAll() {
             :title="t('compare.add')"
             icon
             speed
+            :ranks
             class="picker"
             @update:model-value="add"
           />
@@ -710,6 +715,7 @@ function resetAll() {
       <!-- On phones, under each tab, a second for its team, greyed out until its first is picked. -->
       <div v-if="phone" class="side-adds">
         <SpeedAddSecond
+          :ranks
           v-for="side in sides"
           :key="side.s"
           :team="teamOf(side.s)"
@@ -765,6 +771,7 @@ function resetAll() {
             </template>
             <!-- Confirm at its end folds it: under its tab on phones, to its short form wider. -->
             <SpeedEditor
+              :ranks
               v-else
               :ref="editorRef(side.s)"
               :id="side.id"
@@ -790,6 +797,7 @@ function resetAll() {
           <!-- Under its panel, a second for its team, greyed out until its first is picked; on phones, under its tab
              instead. -->
           <SpeedAddSecond
+            :ranks
             v-if="!phone"
             class="col-add"
             :team="teamOf(side.s)"

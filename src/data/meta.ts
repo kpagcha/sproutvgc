@@ -81,6 +81,10 @@ export interface PokemonMeta {
 
 export type MetaData = Partial<Record<PokemonId, PokemonMeta>>
 
+/** Each Pokémon's usage rank in a snapshot's data, for a picker to list them by. */
+export const usageRanks = (d: MetaData): Partial<Record<PokemonId, number>> =>
+  Object.fromEntries(Object.entries(d).map(([id, m]) => [id, m!.rank]))
+
 const INDEX = import.meta.glob<Record<string, MetaSnapshot>>('./generated/meta/index.json', {
   eager: true,
   import: 'default',
