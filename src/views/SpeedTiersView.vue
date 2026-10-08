@@ -1401,16 +1401,17 @@ const { entered } = usePageEntered()
             </button>
           </div>
           <!-- The Pokémon kept: each finds it, or leaves the ladder. -->
+          <!-- Each a chip: its name finds it (marked while found), its cross takes it off; then a way to take them all off. -->
           <ul v-if="keptShown.length" class="kept small">
-            <li class="muted">{{ t('speed.kept') }}</li>
-            <li v-for="id in keptShown" :key="id" class="kept-mon">
-              <button type="button" class="link-button" @click="setFound(id)">
+            <li class="kept-label">{{ t('speed.kept') }}</li>
+            <li v-for="id in keptShown" :key="id" class="kept-mon" :class="{ found: id === found }">
+              <button type="button" class="kept-find" :aria-pressed="id === found" @click="setFound(id)">
                 <PokemonIcon :id />{{ refName(pokemon(id)) }}
               </button>
               <button
                 v-tip="canHover && t('speed.unkeep', { name: refName(pokemon(id)) })"
                 type="button"
-                class="link-button"
+                class="kept-remove"
                 :aria-label="t('speed.unkeep', { name: refName(pokemon(id)) })"
                 @click="toggleKept(id)"
               >
@@ -1418,7 +1419,7 @@ const { entered } = usePageEntered()
               </button>
             </li>
             <li>
-              <button type="button" class="link-button" @click="set('keep', undefined)">
+              <button type="button" class="btn inverted kept-all" @click="set('keep', undefined)">
                 <Trash2 :size="14" aria-hidden="true" />{{ t('speed.unkeepAll') }}
               </button>
             </li>
@@ -2116,7 +2117,6 @@ const { entered } = usePageEntered()
 }
 .filter.on .filter-pick,
 .field-pick.on {
-  font-weight: bold;
   border-color: var(--ink);
   background: var(--sel);
 }
@@ -2138,19 +2138,67 @@ const { entered } = usePageEntered()
   flex-basis: 100%;
   flex-wrap: wrap;
   align-items: center;
-  gap: 2px 12px;
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
+/* Its label as the band's other labels: small, bold, quieter. */
+.kept-label {
+  margin-right: 2px;
+  font-size: 0.85em;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+/* Each kept one a chip, as the ladder's are: its name and its cross, a line between them; marked while it's the one
+   found. */
 .kept-mon {
   display: inline-flex;
-  align-items: center;
-  gap: 2px;
+  align-items: stretch;
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--hard-sm);
 }
-.kept .link-button {
+.kept-mon.found {
+  background: var(--sel);
+}
+.kept-mon > button {
   display: inline-flex;
   align-items: center;
+  min-height: 26px;
+  padding: 0 6px;
+  line-height: 1;
+  font: inherit;
+  color: var(--text);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.kept-find {
+  gap: 4px;
+  padding-left: 2px;
+}
+.kept-find :deep(.sheet-icon) {
+  margin-block: -8px;
+}
+.kept-remove {
+  color: var(--muted);
+  border-left: 1px solid var(--border-strong) !important;
+}
+.kept-mon > button:hover {
+  background: var(--hover);
+}
+.kept-mon > .kept-remove:hover {
+  color: var(--text);
+}
+.kept-all {
+  gap: 4px;
+  min-height: 28px;
+  padding: 0 8px;
+  font-size: 1em;
+  line-height: 1;
 }
 /* The toggles and the clear button as tall as the search beside them. */
 .find-row :is(.find-mode, .find-clear) {

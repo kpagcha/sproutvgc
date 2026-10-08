@@ -722,7 +722,7 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.resetControls': 'Restablecer opciones',
   'speed.resetYours': 'Restablecer',
   'speed.resetAll': 'Restablecer todo',
-  'speed.kept': 'En la escala:',
+  'speed.kept': 'En la escala',
   'speed.unkeep': 'Quitar a {name} de la escala',
   'speed.findOnly': 'Solo {name}',
   'speed.findBeyond': 'Fuera de los {n} más usados: se muestra con sus sets, sin contar en cuánto mueve antes el tuyo.',

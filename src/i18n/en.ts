@@ -713,7 +713,7 @@ export const messages = {
   'speed.resetControls': 'Reset options',
   'speed.resetYours': 'Reset',
   'speed.resetAll': 'Reset all',
-  'speed.kept': 'Kept:',
+  'speed.kept': 'Kept',
   'speed.unkeep': 'Take {name} off the ladder',
   'speed.findOnly': 'Only {name}',
   'speed.findBeyond': 'Outside the top {n}: shown at its sets, and left out of how often yours moves first.',
