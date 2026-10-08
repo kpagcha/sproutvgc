@@ -730,6 +730,8 @@ export const messages = {
   'speed.copied': 'Link copied',
   'speed.points': '{n} pts',
   'speed.boostAt': 'at {nature} {points} pts',
+  'speed.boostTipNoSets': '{effect}, which it can have: Speed ×{factor}{when}. Here at {build}.',
+  'speed.boostAtBench': 'at {bench}',
   'speed.boosts': 'Boosts',
   'speed.boostLabel': '{effect} ×{factor}',
   'speed.boostTip':

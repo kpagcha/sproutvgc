@@ -739,6 +739,8 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.copied': 'Enlace copiado',
   'speed.points': '{n} pts',
   'speed.boostAt': 'con {nature} {points} pts',
+  'speed.boostTipNoSets': '{effect}, que puede tener: Velocidad ×{factor}{when}. Aquí con {build}.',
+  'speed.boostAtBench': 'con {bench}',
   'speed.boosts': 'Mejoras',
   'speed.boostLabel': '{effect} ×{factor}',
   'speed.boostTip':

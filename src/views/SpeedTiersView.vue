@@ -371,8 +371,9 @@ function fallbackVs(field: Field) {
   const [id, kind, effect] = vs.split(':')
   const when = kind === 'ability' && effect ? SPEED_ABILITIES[effect]?.when : undefined
   if (!when || !needsField(when) || when === field || isTerrain(when) !== isTerrain(field)) return vs
-  const top = data.value?.[id as PokemonId]?.speeds?.[0]
-  return top ? `${id}:${top.points}:${top.nature}` : undefined
+  const m = data.value?.[id as PokemonId]
+  const top = m?.speeds?.[0]
+  return top ? `${id}:${top.points}:${top.nature}` : m ? undefined : `${id}:${boostBench.value}`
 }
 /** Yours' modifiers' buttons: its doubling abilities by name, only those it can have. */
 const myModButtons = computed(() => modButtons(mine.value))
@@ -453,6 +454,27 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
   }
   return list
 }
+/** The benchmark a Pokémon with no sets in the snapshot has its boosts at: the fastest, the slowest under Trick
+ * Room. */
+const boostBench = computed<Benchmark>(() => (trickRoom.value ? 'min' : 'max'))
+/**
+ * A Pokémon with no sets in the snapshot, found or kept: at every benchmark, and its boosts, the Speed abilities it
+ * can have, at `boostBench` (what could be, as nothing says how many run them).
+ */
+function benchChips(id: PokemonId): Entry[] {
+  const base = POKEMON[id].stats[5]
+  const at = { id, ...named(id), rank: Infinity, extra: true as const }
+  const list: Entry[] = BENCHMARKS.map((b) => ({ ...at, speed: benchmark(base, b), bench: b }))
+  if (showBoosts.value) {
+    const speed = benchmark(base, boostBench.value)
+    for (const a of POKEMON[id].abilities) {
+      const effect = SPEED_ABILITIES[a]
+      if (!effect || !inField(effect.when) || !withEffect(mods.value, effect)) continue
+      list.push({ ...at, speed, bench: boostBench.value, boost: { ref: ability(a), ...effect } })
+    }
+  }
+  return list
+}
 /** A chip's Speed in battle: with the modifiers, and its boost's effect among them, counted once if they have it. */
 const chipSpeed = (e: Entry) => inBattle(e.speed, (e.boost && withEffect(mods.value, e.boost)) || mods.value)
 const megaShown = (id: PokemonId) => showMegas.value || !POKEMON[id].mega
@@ -469,18 +491,7 @@ const pool = computed<Entry[]>(() => {
     for (const id of extras) {
       const m = data.value[id]
       if (!beyondTop(id) || !findable.value.has(id)) continue
-      list.push(
-        ...(m
-          ? metaChips(id, m, true)
-          : BENCHMARKS.map((b) => ({
-              id,
-              ...named(id),
-              speed: benchmark(POKEMON[id].stats[5], b),
-              bench: b,
-              rank: Infinity,
-              extra: true as const,
-            }))),
-      )
+      list.push(...(m ? metaChips(id, m, true) : benchChips(id)))
     }
     return list
   }
@@ -884,6 +895,8 @@ function boostTip(e: Entry) {
     b.when === 'always'
       ? ''
       : ` ${f ? t('speed.when.field', { field: f }) : t(`speed.when.${b.when as 'itemLost' | 'status'}`)}`
+  if (e.bench)
+    return t('speed.boostTipNoSets', { effect: refName(b.ref), factor: factor(b), when, build: benchTip(e.bench) })
   return t('speed.boostTip', {
     effect: refName(b.ref),
     pct: percent(e.share!),
@@ -892,11 +905,11 @@ function boostTip(e: Entry) {
     build: t('speed.build', { nature: natureName(e.nature!), points: e.points! }),
   })
 }
-const tip = (e: Entry) => (e.bench ? (e.extra ? benchTip(e.bench) : undefined) : e.boost ? boostTip(e) : investTip(e))
+const tip = (e: Entry) => (e.boost ? boostTip(e) : e.bench ? (e.extra ? benchTip(e.bench) : undefined) : investTip(e))
 const chipKey = (e: Entry) =>
   e.mine
     ? 'mine'
-    : `${e.id}:${e.bench ?? (e.boost ? `${e.boost.ref.kind}:${e.boost.ref.id}` : `${e.points}:${e.nature}`)}`
+    : `${e.id}:${e.boost ? `${e.boost.ref.kind}:${e.boost.ref.id}` : (e.bench ?? `${e.points}:${e.nature}`)}`
 
 // A Speed's row links to the page as it is with that row picked (`?at=`): clicking its number picks it (or drops it,
 // when picked already) and copies the link. A shared link brings the row into view once the ladder is in.
@@ -1583,10 +1596,13 @@ const { entered } = usePageEntered()
                       }}</span
                     >
                     <span v-if="whenTag(e.boost)" class="tag">{{ whenTag(e.boost) }}</span>
-                    <span class="tag">{{ percent(e.share!) }}</span>
-                    <!-- The build it's placed at, its most common, which the data doesn't tie to the boost: said as such. -->
+                    <span v-if="e.share !== undefined" class="tag">{{ percent(e.share) }}</span>
+                    <!-- The build it's placed at, its most common (a benchmark, with no sets in the snapshot), which the
+                         data doesn't tie to the boost: said as such. -->
                     <span class="tag boost-at">{{
-                      t('speed.boostAt', { nature: natureName(e.nature!), points: e.points! })
+                      e.bench
+                        ? t('speed.boostAtBench', { bench: benchLabel(e.bench) })
+                        : t('speed.boostAt', { nature: natureName(e.nature!), points: e.points! })
                     }}</span>
                   </span>
                   <span v-else-if="e.bench && e.extra" class="tags">
