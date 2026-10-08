@@ -707,7 +707,7 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.vsUpTo': '{points} puntos o menos',
   'speed.vsAny': 'cualquier número de puntos',
   'speed.vsTies': 'no puede; empata con {points} puntos',
-  'speed.vsNever': 'no puede, con ningún número de puntos',
+  'speed.vsNever': 'nunca',
   'speed.mod.ironball': 'Bola Férrea ×0,5',
   'speed.modShort.tailwind': 'VA',
   'speed.modShort.scarf': 'Pañuelo',

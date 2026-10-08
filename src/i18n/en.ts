@@ -698,7 +698,7 @@ export const messages = {
   'speed.vsUpTo': '{points} points or fewer',
   'speed.vsAny': 'any points',
   'speed.vsTies': "can't; ties at {points} points",
-  'speed.vsNever': "can't, whatever its points",
+  'speed.vsNever': 'never',
   'speed.mod.ironball': 'Iron Ball ×0.5',
   'speed.modShort.tailwind': 'TW',
   'speed.modShort.scarf': 'Scarf',
