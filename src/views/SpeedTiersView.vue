@@ -2,7 +2,18 @@
 import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
 import { AnimatePresence, motion } from 'motion-v'
 import { useRouter } from 'vue-router'
-import { ArrowLeftRight, ArrowRight, ChevronsDown, ChevronsUp, Columns2, Plus, RotateCcw, Trash2, X } from '@lucide/vue'
+import {
+  ArrowLeftRight,
+  ArrowRight,
+  ChevronsDown,
+  ChevronsUp,
+  Columns2,
+  Funnel,
+  Plus,
+  RotateCcw,
+  Trash2,
+  X,
+} from '@lucide/vue'
 import {
   ability,
   availableIds,
@@ -501,6 +512,8 @@ const itemOptions = computed(() =>
       )
     : [],
 )
+// On phones, the filters fold away behind a button beside the find, marked while any is on.
+const filtersOpen = shallowRef(false)
 const clearFilters = () =>
   void router.replace({ query: { ...query.value, type: undefined, ability: undefined, item: undefined } })
 /** Usage ranks, for the pickers to list by, most used first: the meta's, when there is one. */
@@ -1288,44 +1301,65 @@ const { entered } = usePageEntered()
             :ranks
             @update:model-value="setFound"
           />
-          <label v-if="found" class="btn switch find-mode" :class="{ on: onlyFound }">
-            <input
-              type="checkbox"
-              :checked="onlyFound"
-              :aria-label="t('speed.findOnly', { name: refName(pokemon(found)) })"
-              @change="findMode = onlyFound ? 'mark' : 'only'"
-            />
-            {{ onlyLabel[0] }}<PokemonIcon :id="found" />{{ onlyLabel[1] }}
-          </label>
-          <label v-if="found && beyondTop(found)" class="btn switch find-mode" :class="{ on: kept.includes(found) }">
-            <input type="checkbox" :checked="kept.includes(found)" @change="toggleKept(found)" />
-            {{ t('speed.keep') }}
-          </label>
-          <!-- To the comparison's own page, standing out as the card's way there does. -->
-          <AppLink
-            v-if="found"
-            :to="compareLink({ id: found, build: topBuild(found) })"
-            class="btn primary find-mode find-compare"
-            ><Columns2 :size="16" aria-hidden="true" />{{ t('compare.short')
-            }}<ArrowRight :size="16" aria-hidden="true"
-          /></AppLink>
-          <!-- Yours and the one found swapped, once there's yours; its icon alone on phones, so the row still fits. -->
+          <!-- On phones, the filters' fold, beside the find. -->
           <button
-            v-if="found"
             type="button"
-            class="btn find-mode find-swap"
-            :disabled="!mine"
-            :aria-label="t('compare.swap')"
-            @click="swapMine"
+            class="btn filters-toggle"
+            :class="{ on: filtering }"
+            :aria-expanded="filtersOpen"
+            aria-controls="speed-filters"
+            :aria-label="t('speed.filter')"
+            @click="filtersOpen = !filtersOpen"
           >
-            <ArrowLeftRight :size="16" aria-hidden="true" /><span class="swap-text">{{ t('compare.swap') }}</span>
+            <Funnel :size="16" aria-hidden="true" />
           </button>
-          <button v-if="found" type="button" class="btn inverted find-clear" @click="setFound(null)">
-            <Trash2 :size="16" aria-hidden="true" />{{ t('speed.clear') }}
-          </button>
+          <!-- What finding it does (only it, kept on the ladder); on phones, on a row of their own at the band's foot. -->
+          <div v-if="found" class="find-modes">
+            <label class="btn switch find-mode" :class="{ on: onlyFound }">
+              <input
+                type="checkbox"
+                :checked="onlyFound"
+                :aria-label="t('speed.findOnly', { name: refName(pokemon(found)) })"
+                @change="findMode = onlyFound ? 'mark' : 'only'"
+              />
+              {{ onlyLabel[0] }}<PokemonIcon :id="found" />{{ onlyLabel[1] }}
+            </label>
+            <label v-if="beyondTop(found)" class="btn switch find-mode" :class="{ on: kept.includes(found) }">
+              <input type="checkbox" :checked="kept.includes(found)" @change="toggleKept(found)" />
+              {{ t('speed.keep') }}
+            </label>
+          </div>
+          <!-- What to do with the one found; on phones, on a row of their own under the find. -->
+          <div v-if="found" class="find-actions">
+            <!-- To the comparison's own page, standing out as the card's way there does. -->
+            <AppLink :to="compareLink({ id: found, build: topBuild(found) })" class="btn primary find-mode find-compare"
+              ><Columns2 :size="16" aria-hidden="true" />{{ t('compare.short')
+              }}<ArrowRight :size="16" aria-hidden="true"
+            /></AppLink>
+            <!-- Yours and the one found swapped, once there's yours; its icon alone on the narrowest phones, so the row
+                 still fits. -->
+            <button
+              type="button"
+              class="btn find-mode find-swap"
+              :disabled="!mine"
+              :aria-label="t('compare.swap')"
+              @click="swapMine"
+            >
+              <ArrowLeftRight :size="16" aria-hidden="true" /><span class="swap-text">{{ t('compare.swap') }}</span>
+            </button>
+            <button type="button" class="btn inverted find-clear" @click="setFound(null)">
+              <Trash2 :size="16" aria-hidden="true" />{{ t('speed.clear') }}
+            </button>
+          </div>
           <p v-if="foundNote" class="find-note muted small">{{ foundNote }}</p>
           <!-- Filtering the ladder: by type, ability and item, each a choice of what the Pokémon shown have. -->
-          <div class="filters" role="group" :aria-label="t('speed.filter')">
+          <div
+            id="speed-filters"
+            class="filters"
+            :class="{ folded: !filtersOpen }"
+            role="group"
+            :aria-label="t('speed.filter')"
+          >
             <span class="small filters-label">{{ t('speed.filter') }}</span>
             <span class="filter" :class="{ on: filterType }">
               <TypeIcon v-if="filterType" :type="filterType" class="filter-icon" aria-hidden="true" />
@@ -2119,8 +2153,61 @@ const { entered } = usePageEntered()
   align-items: center;
 }
 /* The toggles and the clear button as tall as the search beside them. */
-.find-row > :is(.find-mode, .find-clear) {
+.find-row :is(.find-mode, .find-clear) {
   align-self: stretch;
+}
+/* What finding does and what to do with the one found: in the find's row, but on phones (below). */
+.find-modes,
+.find-actions {
+  display: contents;
+}
+.filters-toggle {
+  display: none;
+}
+/* On phones: the find with the filters' fold beside it, the filters folded under it, then what to do with the one
+   found, why it shows as it does, and what finding does, each on a row of its own. */
+@media (max-width: 720px) {
+  .filters-toggle {
+    display: inline-flex;
+    flex: none;
+    align-self: stretch;
+    order: 1;
+    padding-inline: 10px;
+  }
+  .filters-toggle.on {
+    background: var(--sel);
+  }
+  .filters {
+    order: 2;
+  }
+  .filters.folded {
+    display: none;
+  }
+  .find-modes,
+  .find-actions {
+    display: flex;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .find-actions {
+    order: 3;
+  }
+  /* The three on one line, sharing it. */
+  .find-actions > .btn {
+    flex: 1 1 auto;
+    justify-content: center;
+    padding-inline: 8px;
+  }
+  .find-note {
+    order: 4;
+  }
+  .find-modes {
+    order: 5;
+  }
+  .kept {
+    order: 6;
+  }
 }
 .find-compare {
   gap: 6px;
@@ -2128,7 +2215,7 @@ const { entered } = usePageEntered()
 .find-swap {
   gap: 6px;
 }
-@media (max-width: 480px) {
+@media (max-width: 380px) {
   .swap-text {
     display: none;
   }
