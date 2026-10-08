@@ -33,7 +33,7 @@ import { locale, t, tSplit, typeName } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { center, reveal } from '@/lib/scroll'
 import { FADE, PRESS } from '@/lib/motion'
-import { natureEffects, natureName } from '@/data/natures'
+import { natureName } from '@/data/natures'
 import {
   NATURE_EFFECTS,
   NATURES_BY_EFFECT,
@@ -42,6 +42,7 @@ import {
   SPEED_ITEMS,
   inBattle,
   natureEffect,
+  speedBuilds,
   speedStat,
   type SpeedEffect,
   type SpeedMods,
@@ -69,6 +70,7 @@ import { useOpenState } from '@/composables/useOpenState'
 import { usePageEntered } from '@/composables/usePageEntered'
 import AppLink from '@/components/AppLink'
 import BuildSummary from '@/components/BuildSummary.vue'
+import EffectTag from '@/components/EffectTag'
 import ModalDialog from '@/components/ModalDialog.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import MetaPicker from '@/components/MetaPicker.vue'
@@ -298,10 +300,12 @@ function keptMods() {
   const kept = [...myToggles.value].filter((k) => k !== 'doubled' && k !== 'doubled2')
   return kept.length ? kept.join(',') : undefined
 }
+/** A Pokémon's Speed builds in the meta, by nature effect and points (what Speed cares about), the most common first. */
+const buildsOf = (id: PokemonId) => speedBuilds(data.value?.[id]?.speeds ?? [])
 /** Its build as picked: the meta's most common one, else the fastest. */
 function buildOf(id: PokemonId) {
-  const build = data.value?.[id]?.speeds?.[0]
-  return { mynat: build ? natureEffect(build.nature) : 'up', mypts: String(build ? build.points : MAX_POINTS) }
+  const build = buildsOf(id)[0]
+  return { mynat: build ? build.effect : 'up', mypts: String(build ? build.points : MAX_POINTS) }
 }
 // Its build and modifiers back as when it was picked.
 const myChanged = computed(() => {
@@ -366,17 +370,18 @@ async function toggleMine(k: MyToggle) {
  * longer boosts, its plain one; a boost the field rules out, the Pokémon at the build it was placed at.
  */
 function remapVs(field: Field | null) {
-  const vs = query.value.vs
-  if (typeof vs !== 'string') return vs
+  const vs = vsKey.value ?? undefined
+  if (vs === undefined) return vs
   const parts = vs.split(':')
   const id = parts[0] as PokemonId
   const m = data.value?.[id]
-  const top = m?.speeds?.[0]
+  const builds = buildsOf(id)
+  const top = builds[0]
   const shareOf = (a: string) => m?.abilities?.find((x) => x.id === a)?.share ?? 0
   if (parts[1] !== 'ability') {
     // A plain build: boosted, when the field's ability leaves too little of it plain.
     const [, pts, nat] = parts
-    const sp = m?.speeds?.find((x) => String(x.points) === pts && x.nature === nat)
+    const sp = builds.find((x) => String(x.points) === pts && x.effect === nat)
     const woken = field
       ? POKEMON[id]?.abilities.find((a) => SPEED_ABILITIES[a]?.when === field && shareOf(a) > 0)
       : undefined
@@ -390,11 +395,25 @@ function remapVs(field: Field | null) {
   const when = effect ? SPEED_ABILITIES[effect]?.when : undefined
   if (!when || !needsField(when)) return vs
   if (when === field && shareOf(effect!) > 0 && top)
-    return `${id}:ability:${effect}:${pts ?? top.points}:${nat ?? top.nature}`
+    return `${id}:ability:${effect}:${pts ?? top.points}:${nat ?? top.effect}`
   if (pts) return `${id}:${pts}:${nat}`
   if (!field || isTerrain(when) !== isTerrain(field) || when === field) return vs
-  return top ? `${id}:${top.points}:${top.nature}` : m ? undefined : `${id}:${boostBench.value}`
+  return top ? `${id}:${top.points}:${top.effect}` : m ? undefined : `${id}:${boostBench.value}`
 }
+/**
+ * The chip yours is measured against, by its key (`?vs=`). Builds go by nature effect: a key from before, with an
+ * exact nature in its place (a plain build's last, a live boost's), has it turned into its effect.
+ */
+const vsKey = computed(() => {
+  const vs = query.value.vs
+  if (typeof vs !== 'string') return null
+  const parts = vs.split(':')
+  const i = parts[1] === 'ability' ? 4 : /^\d+$/.test(parts[1] ?? '') ? 2 : -1
+  const nat = parts[i]
+  if (i < 0 || nat === undefined || isEffect(nat)) return vs
+  parts[i] = natureEffect(nat)
+  return parts.join(':')
+})
 /** What brings the field in play, for where it's said: yours' ability, by name. */
 const fieldSource = computed(() => {
   const a = mine.value && inPlay.value ? doubling(mine.value, myBuild.value) : undefined
@@ -416,10 +435,10 @@ interface Entry {
   species: string
   forme?: string
   speed: number
-  /** How its sets get there, stat points and nature, and their share of its sets (the meta), or the benchmark it is
-   * (every Pokémon). */
+  /** How its sets get there, stat points and their nature's effect on Speed, and their share of its sets (the meta),
+   * or the benchmark it is (every Pokémon). */
   points?: number
-  nature?: string
+  effect?: NatureEffect
   share?: number
   bench?: Benchmark
   /** An item or ability its sets run that changes Speed (`SPEED_ITEMS`, `SPEED_ABILITIES`), at its most common
@@ -438,22 +457,23 @@ interface Entry {
 
 const named = (id: PokemonId) => splitForme(id, refName(pokemon(id)))
 /**
- * A Pokémon's chips in the meta: one per Speed investment (stat points and nature), and its boosts. With a weather or
- * terrain in play, its sets whose ability it wakes are boosted as they play: their share leaves its builds (a build
- * left under the least share leaving the ladder) for its boost's chip.
+ * A Pokémon's chips in the meta: one per Speed build (stat points and the nature's effect, `speedBuilds`), and its
+ * boosts. With a weather or terrain in play, its sets whose ability it wakes are boosted as they play: their share
+ * leaves its builds (a build left under the least share leaving the ladder) for its boost's chip.
  */
 function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
   const base = POKEMON[id].stats[5]
   const rest = 1 - fieldShare(id)
-  const list: Entry[] = (m.speeds ?? [])
-    .filter((s) => s.share * rest >= MIN_SHARE)
-    .map((s) => ({
+  const builds = speedBuilds(m.speeds ?? [])
+  const list: Entry[] = builds
+    .filter((b) => b.share * rest >= MIN_SHARE)
+    .map((b) => ({
       id,
       ...named(id),
-      speed: speedStat(base, s.points, natureEffect(s.nature)),
-      points: s.points,
-      nature: s.nature,
-      share: s.share * rest,
+      speed: speedStat(base, b.points, b.effect),
+      points: b.points,
+      effect: b.effect,
+      share: b.share * rest,
       rank: m.rank,
       extra,
     }))
@@ -462,10 +482,10 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
   // (as what could be). Those the modifiers rule out (Unburden with a Choice Scarf on everyone), or the field (another
   // weather), are left out. The field's own, always shown, are how its sets play: each build boosted, at its share of
   // them times the ability's (the two taken apart as the data counts them), those under the least share left out.
-  const build = m.speeds?.[0]
+  const build = builds[0]
   if (boostsAvailable.value && build) {
-    const speed = speedStat(base, build.points, natureEffect(build.nature))
-    const at = { id, ...named(id), points: build.points, nature: build.nature, rank: m.rank, extra }
+    const speed = speedStat(base, build.points, build.effect)
+    const at = { id, ...named(id), points: build.points, effect: build.effect, rank: m.rank, extra }
     const abilityShare = (a: string) => m.abilities?.find((x) => x.id === a)?.share ?? 0
     const effects = [
       ...(m.items ?? [])
@@ -477,15 +497,14 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
       if (!effect || !inField(effect.when) || !withEffect(mods.value, effect)) continue
       const boost = { ref, ...effect }
       if (live(boost) && share > 0) {
-        for (const sp of m.speeds ?? []) {
-          if (sp.share * share < MIN_SHARE) continue
-          const s = speedStat(base, sp.points, natureEffect(sp.nature))
+        for (const b of builds) {
+          if (b.share * share < MIN_SHARE) continue
           list.push({
             ...at,
-            speed: s,
-            points: sp.points,
-            nature: sp.nature,
-            share: sp.share * share,
+            speed: speedStat(base, b.points, b.effect),
+            points: b.points,
+            effect: b.effect,
+            share: b.share * share,
             boost,
             live: true,
           })
@@ -708,6 +727,8 @@ const findTitle = computed(() => (mine.value ? t('compare.opponent') : t('title.
 const onlyFound = computed(() => found.value !== null && findMode.value === 'only')
 // The toggle's label around the found Pokémon's icon, the same width whatever its name (which the search shows).
 const onlyLabel = computed(() => tSplit('speed.findOnly', 'name'))
+// A boost's build, around its nature's effect (an arrow, as the chips have it).
+const boostAt = computed(() => tSplit('speed.boostAt', 'effect'))
 
 /** The ladder: each Speed (with the modifiers) with the Pokémon at it, fastest first (slowest under Trick Room). */
 const tiers = computed(() => {
@@ -793,8 +814,8 @@ const summary = computed(() => {
 // The chip yours is measured against (`?vs=`, picked by tapping it while yours is set), and what it takes to move
 // before it, for each nature effect.
 const versus = computed(() => {
-  if (mine.value === null || typeof query.value.vs !== 'string') return null
-  const e = entries.value.find((x) => chipKey(x) === query.value.vs)
+  if (mine.value === null || vsKey.value === null) return null
+  const e = entries.value.find((x) => chipKey(x) === vsKey.value)
   if (!e) return null
   const target = chipSpeed(e)
   const base = POKEMON[mine.value].stats[5]
@@ -825,7 +846,7 @@ const versus = computed(() => {
 // Its title, the Pokémon's name (with its icon) a link to its page.
 // Picking one finds it too, the find showing as its "Only" switch says.
 function pickVersus(e: Entry) {
-  const vs = query.value.vs === chipKey(e) ? undefined : chipKey(e)
+  const vs = vsKey.value === chipKey(e) ? undefined : chipKey(e)
   void router.replace({ query: { ...query.value, vs, ...(vs && { find: e.id }) } })
 }
 // The comparison's Speed finds the chip it's against: brought to the middle of the screen, flashing once.
@@ -869,19 +890,19 @@ function othersBuild(id: PokemonId, b: Pick<SpeedBuild, 'effect' | 'points'>, bo
   if (k && !toggles.includes(k)) toggles = toggled(toggles, k)
   return { ...b, toggles, stage: Number(stage.value) }
 }
-/** A chip's build: its benchmark, or its sets' nature and points. */
+/** A chip's build: its benchmark, or its sets' nature effect and points. */
 const chipBuild = (e: Entry) =>
   othersBuild(
     e.id,
-    e.bench ? benchBuild(e.bench) : e.nature ? { effect: natureEffect(e.nature), points: e.points! } : FASTEST,
+    e.bench ? benchBuild(e.bench) : e.effect ? { effect: e.effect, points: e.points! } : FASTEST,
     e.boost,
   )
 /** A Pokémon's build when it's no chip in particular: the meta's most common, else the benchmark shown. */
 function topBuild(id: PokemonId) {
-  const top = data.value?.[id]?.speeds?.[0]
+  const top = buildsOf(id)[0]
   return othersBuild(
     id,
-    top ? { effect: natureEffect(top.nature), points: top.points } : showAll.value ? benchBuild(bench.value) : FASTEST,
+    top ? { effect: top.effect, points: top.points } : showAll.value ? benchBuild(bench.value) : FASTEST,
   )
 }
 function compareLink(other: { id: PokemonId; build: SpeedBuild } | null) {
@@ -912,15 +933,14 @@ async function toOpponents() {
 
 const benchLabel = (b: Benchmark) => t(`stat.bench.${b}`)
 const benchTip = (b: Benchmark) => t(`speed.benchTip.${b}`)
-function investTip(e: Entry) {
-  const effects = natureEffects(e.nature!)
-  return t('speed.invest', {
-    points: e.points!,
-    nature: natureName(e.nature!),
-    effect: effects ? ` (${effects.plus} ${effects.minus})` : '',
-    pct: percent(e.share!),
+/** A build in words: its nature's effect (with the natures that have it, but for neutral's), and its points. */
+const buildText = (effect: NatureEffect, points: number) =>
+  t('speed.build', {
+    nature: t(`speed.natureOf.${effect}`),
+    natures: effect === 'neutral' ? '' : ` (${naturesOf(effect)})`,
+    points,
   })
-}
+const investTip = (e: Entry) => t('speed.invest', { build: buildText(e.effect!, e.points!), pct: percent(e.share!) })
 type Boost = NonNullable<Entry['boost']>
 const factor = (b: Boost) => b.factor.toLocaleString(locale.value)
 const boostLabel = (b: Boost) => t('speed.boostLabel', { effect: refName(b.ref), factor: factor(b) })
@@ -936,7 +956,7 @@ function boostTip(e: Entry) {
       effect: refName(b.ref),
       factor: factor(b),
       field: field(b) ?? '',
-      build: t('speed.build', { nature: natureName(e.nature!), points: e.points! }),
+      build: buildText(e.effect!, e.points!),
       pct: percent(e.share!),
     })
   const f = field(b)
@@ -951,7 +971,7 @@ function boostTip(e: Entry) {
     pct: percent(e.share!),
     factor: factor(b),
     when,
-    build: t('speed.build', { nature: natureName(e.nature!), points: e.points! }),
+    build: buildText(e.effect!, e.points!),
   })
 }
 const tip = (e: Entry) => (e.boost ? boostTip(e) : e.bench ? (e.extra ? benchTip(e.bench) : undefined) : investTip(e))
@@ -960,8 +980,8 @@ const chipKey = (e: Entry) =>
     ? 'mine'
     : `${e.id}:${
         e.boost
-          ? `${e.boost.ref.kind}:${e.boost.ref.id}${e.live ? `:${e.points}:${e.nature}` : ''}`
-          : (e.bench ?? `${e.points}:${e.nature}`)
+          ? `${e.boost.ref.kind}:${e.boost.ref.id}${e.live ? `:${e.points}:${e.effect}` : ''}`
+          : (e.bench ?? `${e.points}:${e.effect}`)
       }`
 
 // A Speed's row links to the page as it is with that row picked (`?at=`): clicking its number picks it (or drops it,
@@ -1297,7 +1317,7 @@ const { entered } = usePageEntered()
           <dl v-if="!showAll && snapshot" class="legend small">
             <dt>
               <span class="chip sample"
-                ><span class="tag">{{ natureName('timid') }}</span
+                ><span class="tag"><EffectTag effect="up" /></span
                 ><span class="tag">{{ t('speed.points', { n: 32 }) }}</span
                 ><span class="tag">{{ percent(0.461) }}</span></span
               >
@@ -1650,8 +1670,8 @@ const { entered } = usePageEntered()
                     boost: e.boost && !e.live,
                     extra: e.extra,
                     yours: e.mine,
-                    versus: query.vs === chipKey(e),
-                    rival: !!versus && e.id === versus.e.id && query.vs !== chipKey(e),
+                    versus: vsKey === chipKey(e),
+                    rival: !!versus && e.id === versus.e.id && vsKey !== chipKey(e),
                   }"
                 >
                   <span class="who">
@@ -1661,7 +1681,7 @@ const { entered } = usePageEntered()
                   </span>
                   <span v-if="e.mine" class="tags">
                     <span class="tag">{{ t('speed.yoursTag') }}</span>
-                    <span class="tag">{{ t(`speed.effect.${myNature}`) }}</span>
+                    <span class="tag"><EffectTag :effect="myNature" /></span>
                     <span class="tag">{{ t('speed.points', { n: myPoints }) }}</span>
                   </span>
                   <span v-else-if="e.boost" class="tags">
@@ -1675,20 +1695,23 @@ const { entered } = usePageEntered()
                     <!-- The build it's placed at, its most common (a benchmark, with no sets in the snapshot), which the
                          data doesn't tie to the boost: said as such. -->
                     <template v-if="e.live">
-                      <span class="tag">{{ natureName(e.nature!) }}</span>
+                      <span class="tag"><EffectTag :effect="e.effect!" /></span>
                       <span class="tag">{{ t('speed.points', { n: e.points! }) }}</span>
                     </template>
-                    <span v-else class="tag boost-at">{{
-                      e.bench
-                        ? t('speed.boostAtBench', { bench: benchLabel(e.bench) })
-                        : t('speed.boostAt', { nature: natureName(e.nature!), points: e.points! })
+                    <span v-else-if="e.bench" class="tag boost-at">{{
+                      t('speed.boostAtBench', { bench: benchLabel(e.bench) })
                     }}</span>
+                    <span v-else class="tag boost-at"
+                      >{{ boostAt[0] }}<EffectTag :effect="e.effect!" />{{
+                        boostAt[1].replace('{points}', String(e.points))
+                      }}</span
+                    >
                   </span>
                   <span v-else-if="e.bench && e.extra" class="tags">
                     <span class="tag">{{ benchLabel(e.bench) }}</span>
                   </span>
                   <span v-else-if="!e.bench" class="tags">
-                    <span class="tag">{{ natureName(e.nature!) }}</span>
+                    <span class="tag"><EffectTag :effect="e.effect!" /></span>
                     <span class="tag">{{ t('speed.points', { n: e.points! }) }}</span>
                     <span class="tag">{{ percent(e.share!) }}</span>
                   </span>

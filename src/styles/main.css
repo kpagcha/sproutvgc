@@ -448,6 +448,14 @@ details > summary {
   vertical-align: middle;
 }
 
+/* A nature's effect on Speed in short (`EffectTag`): its arrow tight against "Spe". */
+.nature-effect {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  white-space: nowrap;
+}
+
 /* Dex tables (Pokémon, moves): a header row of sort buttons that sticks to the top of the page, and rows. They don't
    scroll sideways, which would keep the header from sticking: phones get fewer columns instead. Not a <table>, which
    sizes its columns to everything in them, so that rows coming and going (a search, a filter) never resize the

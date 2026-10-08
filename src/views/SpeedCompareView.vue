@@ -7,8 +7,8 @@ import { POKEMON } from '@/data/pokemon'
 import { currentSnapshots, distinctLabel, has, usageRanks } from '@/data/meta'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import { natureEffect, speedStat } from '@/lib/speed'
-import { MAX_POINTS, type NatureEffect } from '@/lib/stats'
+import { commonBuilds as common, speedBuilds, speedStat } from '@/lib/speed'
+import { MAX_POINTS } from '@/lib/stats'
 import { buildQuery, buildSpeed, readBuild, toMoveFirst, type SpeedBuild } from '@/lib/speedBuild'
 import { toTopOf } from '@/lib/scroll'
 import { LIST_MAX, listQuery, movePlaces, readList, type ListEntry } from '@/lib/speedLineup'
@@ -183,19 +183,7 @@ function toggleOpen(key: string) {
 
 /** A Pokémon's builds in the meta, by nature effect and points (what Speed cares about), the most common first. */
 function commonBuilds(id: PokemonId | null) {
-  if (!id) return []
-  const byBuild = new Map<string, { effect: NatureEffect; points: number; share: number }>()
-  for (const sp of data.value?.[id]?.speeds ?? []) {
-    const effect = natureEffect(sp.nature)
-    const key = `${effect}:${sp.points}`
-    const b = byBuild.get(key) ?? { effect, points: sp.points, share: 0 }
-    b.share += sp.share
-    byBuild.set(key, b)
-  }
-  return [...byBuild.values()]
-    .filter((b) => b.share >= 0.03)
-    .sort((x, y) => y.share - x.share)
-    .slice(0, 4)
+  return id ? common(speedBuilds(data.value?.[id]?.speeds ?? [])) : []
 }
 /** A Pokémon's build when picked: the meta's most common, else the fastest; the modifiers it had stay. */
 function pickedBuild(id: PokemonId, was: SpeedBuild): SpeedBuild {
