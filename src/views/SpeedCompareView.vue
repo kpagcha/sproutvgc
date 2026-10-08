@@ -292,7 +292,16 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 
     <!-- Who moves first, between the two, and their Speeds at the end of its line (the sentence wrapping, not them);
          on phones, nothing until there are two, the panels saying what to do. -->
-    <p class="verdict panel" :class="{ tie: verdict?.tie, empty: !verdict }" role="status">
+    <p
+      class="verdict panel"
+      :class="{
+        tie: verdict?.tie,
+        empty: !verdict,
+        'first-a': verdict && !verdict.tie && verdict.first === 'a',
+        'first-b': verdict && !verdict.tie && verdict.first === 'b',
+      }"
+      role="status"
+    >
       <PokemonIcon v-if="verdict && !verdict.tie" :id="sideOf(verdict.first).id!" />
       <span class="verdict-text">{{
         !verdict ? t('compare.empty') : verdict.tie ? t('compare.tie') : t('compare.first', { name: verdict.name })
@@ -303,8 +312,8 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
     </p>
 
     <!-- On phones, the two side by side as tabs, each with its Pokémon in short, stuck to the top while the page
-         scrolls: tapping one opens its panel under them, tapping it again folds it. Marked as the panels are when it
-         moves first. -->
+         scrolls: tapping one opens its panel under them, tapping it again folds it. Who moves first is
+         marked on the verdict and the open panel, not on them. -->
     <div v-if="phone" class="side-tabs">
       <button
         v-for="side in sides"
@@ -313,7 +322,6 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
         class="tab"
         :class="{
           open: openSide === side.s,
-          first: verdict && !verdict.tie && verdict.first === side.s,
           opponent: side.s === 'b',
         }"
         :aria-expanded="openSide === side.s"
@@ -337,7 +345,10 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
         :key="side.s"
         class="panel banded side"
         :class="{
-          first: !phone && verdict && !verdict.tie && verdict.first === side.s,
+          first: verdict && !verdict.tie && verdict.first === side.s,
+          // On phones, the open one is outlined whenever there are two, neutral while it doesn't move first, so a
+          // change to its build shows how it goes at once.
+          judged: phone && !!verdict,
           opponent: side.s === 'b',
         }"
       >
@@ -640,6 +651,19 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 .small {
   font-size: 0.875em;
 }
+/* Outlined in the color of the one that moves first, neutral on a tie. */
+.verdict.first-a,
+.verdict.first-b,
+.verdict.tie {
+  outline: 3px solid var(--muted);
+  outline-offset: 2px;
+}
+.verdict.first-a {
+  outline-color: var(--accent);
+}
+.verdict.first-b {
+  outline-color: var(--opponent);
+}
 .verdict {
   display: flex;
   align-items: center;
@@ -765,13 +789,6 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
   font-weight: normal;
   color: var(--muted);
 }
-.tab.first {
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
-}
-.tab.first.opponent {
-  outline-color: var(--opponent);
-}
 .pick-row {
   display: flex;
   align-items: stretch;
@@ -815,10 +832,14 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
   font-weight: bold;
 }
 /* The one that moves first, marked by its outline: blue for yours, the opponents' red for an opponent; on a tie,
-   neither. */
-.side.first {
-  outline: 3px solid var(--accent);
+   neither. On phones, the open one is outlined either way, neutral while it doesn't move first. */
+.side.first,
+.side.judged {
+  outline: 3px solid var(--muted);
   outline-offset: 2px;
+}
+.side.first {
+  outline-color: var(--accent);
 }
 .side.first.opponent {
   outline-color: var(--opponent);
