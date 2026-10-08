@@ -52,6 +52,8 @@ const MODES = ['vs', 'order'] as const
 type Mode = (typeof MODES)[number]
 const mode = computed<Mode>(() => (route.query.mode === 'order' ? 'order' : 'vs'))
 const trickRoom = computed(() => route.query.trickroom === '1')
+const canHover = window.matchMedia('(hover: hover)').matches
+const toggleTrickRoom = () => replace({ trickroom: trickRoom.value ? undefined : '1' })
 
 // Yours against the opponents: each team's first, and its second once picked.
 const SIDES = ['a', 'b'] as const
@@ -503,11 +505,6 @@ function resetAll() {
             @update:model-value="(m: Mode) => setMode(m)"
           />
           <MetaPicker v-if="metaSpeeds" />
-          <label class="btn switch" :class="{ on: trickRoom }">
-            <input type="checkbox" :checked="trickRoom" @change="replace({ trickroom: trickRoom ? undefined : '1' })" />
-            {{ t('speed.mod.trickroom') }}
-          </label>
-          <span class="muted small wide-only">{{ t('compare.trickroomTip') }}</span>
         </div>
       </div>
     </details>
@@ -562,11 +559,15 @@ function resetAll() {
     <template v-if="stacked">
       <!-- Over the list, on its right: emptying it (in speed order), or clearing the teams (on phones, where the row
            above has no room for it). -->
-      <div v-if="mode === 'order' || phone" class="clear-row">
+      <div class="clear-row">
+        <label v-tip="canHover && t('compare.trickroomTip')" class="btn switch tr-switch" :class="{ on: trickRoom }">
+          <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
+          {{ t('speed.mod.trickroom') }}
+        </label>
         <button v-if="mode === 'order'" type="button" class="btn inverted" :disabled="!list.length" @click="clearList">
           <Trash2 :size="16" aria-hidden="true" />{{ t('compare.clearList') }}
         </button>
-        <button v-else type="button" class="btn inverted" :disabled="!anyPicked" @click="clearTeams">
+        <button v-else-if="phone" type="button" class="btn inverted" :disabled="!anyPicked" @click="clearTeams">
           <Trash2 :size="16" aria-hidden="true" />{{ t('compare.clearTeams') }}
         </button>
       </div>
@@ -685,6 +686,7 @@ function resetAll() {
           !verdict ? t('compare.empty') : verdict.tie ? t('compare.tie') : t('compare.first', { name: verdict.name })
         }}</span>
         <span v-if="verdict" class="verdict-speeds"
+          ><span v-if="trickRoom" class="tr-tag" :aria-label="t('speed.mod.trickroom')">{{ t('speed.trShort') }}</span
           >{{ sideOf('a').speed }} <span class="muted">vs</span> {{ sideOf('b').speed }}</span
         >
       </p>
@@ -693,8 +695,12 @@ function resetAll() {
            scrolls: tapping one opens its panel under them, tapping it again folds it. Who moves first is
            marked on the verdict and the open panel, not on them. -->
       <!-- On phones, over the tabs, on their right: clearing the teams. -->
-      <div v-if="phone" class="clear-row">
-        <button type="button" class="btn inverted" :disabled="!anyPicked" @click="clearTeams">
+      <div class="clear-row">
+        <label v-tip="canHover && t('compare.trickroomTip')" class="btn switch tr-switch" :class="{ on: trickRoom }">
+          <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
+          {{ t('speed.mod.trickroom') }}
+        </label>
+        <button v-if="phone" type="button" class="btn inverted" :disabled="!anyPicked" @click="clearTeams">
           <Trash2 :size="16" aria-hidden="true" />{{ t('compare.clearTeams') }}
         </button>
       </div>
@@ -1173,11 +1179,22 @@ function resetAll() {
   outline-color: var(--opponent);
 }
 
-/* Over the Pokémon, on the right, on a row of its own. */
+/* Over the Pokémon, on a row of its own: Trick Room on the left, as it turns over everything under it; clearing
+   them on the right. */
 .clear-row {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   margin-bottom: 8px;
+}
+/* On the verdict, beside the Speeds it turns over. */
+.tr-tag {
+  margin-right: 8px;
+  padding: 1px 6px;
+  font-size: 0.8em;
+  color: var(--panel);
+  background: var(--text);
 }
 .clear-row > .btn {
   gap: 6px;
