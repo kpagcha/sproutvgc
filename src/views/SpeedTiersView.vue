@@ -2,12 +2,34 @@
 import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
 import { AnimatePresence, motion } from 'motion-v'
 import { useRouter } from 'vue-router'
-import { ArrowLeftRight, ArrowRight, ChevronsDown, ChevronsUp, Columns2, Plus, RotateCcw, Trash2, X } from '@lucide/vue'
-import { ability, availableIds, condition, item, pokemon, type ItemId, type PokemonId, type Ref } from '@/data/dex'
+import {
+  ArrowLeftRight,
+  ArrowRight,
+  ChevronsDown,
+  ChevronsUp,
+  Columns2,
+  Funnel,
+  Plus,
+  RotateCcw,
+  Trash2,
+  X,
+} from '@lucide/vue'
+import {
+  ability,
+  availableIds,
+  condition,
+  item,
+  pokemon,
+  type AbilityId,
+  type ItemId,
+  type PokemonId,
+  type Ref,
+} from '@/data/dex'
+import { TYPES, isType, type TypeId } from '@/data/types'
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
-import { currentSnapshots, distinctLabel, has, percent, type PokemonMeta } from '@/data/meta'
-import { locale, t, tSplit } from '@/i18n'
+import { currentSnapshots, distinctLabel, has, percent, type PokemonMeta, type Share, usageRanks } from '@/data/meta'
+import { locale, t, tSplit, typeName } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { center, reveal } from '@/lib/scroll'
 import { FADE, PRESS } from '@/lib/motion'
@@ -23,6 +45,7 @@ import {
   speedStat,
   type SpeedEffect,
   type SpeedMods,
+  type SpeedWhen,
   withEffect,
 } from '@/lib/speed'
 import { BENCHMARKS, MAX_POINTS, benchmark, type Benchmark, type NatureEffect } from '@/lib/stats'
@@ -38,6 +61,7 @@ import ModalDialog from '@/components/ModalDialog.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import MetaPicker from '@/components/MetaPicker.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import TypeIcon from '@/components/TypeIcon'
 import PokemonPicker from '@/components/PokemonPicker.vue'
 import ScrollRow from '@/components/ScrollRow.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
@@ -140,6 +164,22 @@ function toggleBoosts() {
   set('boosts', on ? undefined : '0')
 }
 const toggleTrickRoom = () => set('trickroom', trickRoom.value ? undefined : '1')
+// The weather or terrain in play (`?field=`), for the boosts that need one: with one picked, those of every other one
+// leave the ladder (as do all of them with none), and its own count as how its sets play in how often yours moves
+// first. Unpicked, every boost shows, whatever it needs.
+const FIELDS = ['none', 'sun', 'rain', 'sandstorm', 'snow', 'electricterrain'] as const
+type Field = (typeof FIELDS)[number]
+const fieldPicked = computed<Field | null>(() =>
+  (FIELDS as readonly unknown[]).includes(query.value.field) ? (query.value.field as Field) : null,
+)
+/** The field the ladder is read in: only while boosts show, as it's about them. */
+const inPlay = computed(() => (showBoosts.value ? fieldPicked.value : null))
+const setField = (v: string) => set('field', v || undefined)
+const fieldLabel = (f: Field) => (f === 'none' ? t('speed.fieldNone') : refName(condition(f)))
+/** Whether a boost's condition is a weather or terrain. */
+const needsField = (w: SpeedWhen) => (FIELDS as readonly string[]).includes(w)
+/** Whether a boost applies in the field picked: always, without one. */
+const inField = (w: SpeedWhen) => !inPlay.value || !needsField(w) || w === inPlay.value
 // The controls back as a page comes without them: what's shown, the options and the modifiers, boosts on again here
 // too. What's found and kept, and yours, are left as they are.
 // Everything back as the page comes with nothing set: its whole URL cleared (what's shown, the options, yours, what's
@@ -157,7 +197,7 @@ function resetAll() {
   yoursOpen.value = false
   void router.replace({ query: {} })
 }
-const CONTROL_KEYS = ['all', 'bench', 'trickroom', 'megas', 'boosts', 'stage', ...TOGGLES] as const
+const CONTROL_KEYS = ['all', 'bench', 'trickroom', 'megas', 'boosts', 'field', 'stage', ...TOGGLES] as const
 const controlsChanged = computed(() => CONTROL_KEYS.some((k) => query.value[k] !== undefined) || !boostsOn.value)
 function resetControls() {
   boostsPref.value = true
@@ -338,7 +378,7 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
       ...(m.abilities ?? []).map((a) => ({ ref: ability(a.id), share: a.share, effect: SPEED_ABILITIES[a.id] })),
     ]
     for (const { ref, share, effect } of effects) {
-      if (effect && (share ?? 0) >= MIN_SHARE && withEffect(mods.value, effect))
+      if (effect && (share ?? 0) >= MIN_SHARE && inField(effect.when) && withEffect(mods.value, effect))
         list.push({ ...at, speed, share, boost: { ref, ...effect } })
     }
   }
@@ -347,7 +387,8 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
 /** A chip's Speed in battle: with the modifiers, and its boost's effect among them, counted once if they have it. */
 const chipSpeed = (e: Entry) => inBattle(e.speed, (e.boost && withEffect(mods.value, e.boost)) || mods.value)
 const megaShown = (id: PokemonId) => showMegas.value || !POKEMON[id].mega
-const entries = computed<Entry[]>(() => {
+/** Every chip the view has, before the filters. */
+const pool = computed<Entry[]>(() => {
   if (!showAll.value) {
     if (!data.value) return []
     const list = Object.entries(data.value)
@@ -386,6 +427,98 @@ const entries = computed<Entry[]>(() => {
     }))
 })
 
+// Filtering the ladder (`?type=`, `?ability=`, `?item=`, together): only the Pokémon of a type, with an ability, or
+// holding an item. In the meta, an ability or item its sets run, on at least `MIN_SHARE` of them, as the chips show
+// them; otherwise (every Pokémon shown, or one with no sets) an ability it can have, and items only from sets. Yours
+// stays, and how often it moves first is then against those filtered alone.
+const queryId = <T extends string>(k: string, ids: readonly T[]): T | null => {
+  const v = query.value[k]
+  return typeof v === 'string' && (ids as readonly string[]).includes(v) ? (v as T) : null
+}
+const filterType = computed<TypeId | null>(() => {
+  const v = query.value.type
+  return typeof v === 'string' && isType(v) ? v : null
+})
+const filterAbility = computed(() => queryId<AbilityId>('ability', availableIds('ability')))
+/** Items filter only the meta, whose sets have them. */
+const itemsFilterable = computed(() => !showAll.value && !!snapshot.value && has(snapshot.value, 'items'))
+const filterItem = computed(() => (itemsFilterable.value ? queryId<ItemId>('item', availableIds('item')) : null))
+const filtering = computed(() => !!(filterType.value || filterAbility.value || filterItem.value))
+/** A Pokémon's abilities and items, as the filters go by them. */
+function traits(id: PokemonId): { abilities: AbilityId[]; items: ItemId[] } {
+  const m = showAll.value ? undefined : data.value?.[id]
+  const run = <T extends string>(list: Share<T>[] | undefined) =>
+    (list ?? []).filter((x) => (x.share ?? 1) >= MIN_SHARE).map((x) => x.id)
+  return {
+    abilities: m?.abilities ? run(m.abilities) : POKEMON[id].abilities,
+    items: m?.items ? run(m.items) : [],
+  }
+}
+type FilterKind = 'type' | 'ability' | 'item'
+/** Whether a Pokémon passes the filters, but for the one of `except`'s kind. */
+function passes(id: PokemonId, except?: FilterKind): boolean {
+  const type = except === 'type' ? null : filterType.value
+  const ab = except === 'ability' ? null : filterAbility.value
+  const it = except === 'item' ? null : filterItem.value
+  if (type && !POKEMON[id].types.includes(type)) return false
+  if (!ab && !it) return true
+  const { abilities, items } = traits(id)
+  return (!ab || abilities.includes(ab)) && (!it || items.includes(it))
+}
+/** The chips shown: the view's, filtered. */
+const entries = computed<Entry[]>(() => (filtering.value ? pool.value.filter((e) => passes(e.id)) : pool.value))
+// What each filter can pick: what the Pokémon of the view passing the other filters have, with how many of them have
+// it, by name (types in their usual order), so no pick leaves the ladder empty; the one picked always, though none
+// have it.
+const poolIds = computed(() => [...new Set(pool.value.map((e) => e.id))])
+function options<T extends string>(
+  kind: FilterKind,
+  of: (id: PokemonId) => readonly T[],
+  name: (id: T) => string,
+  picked: T | null,
+) {
+  const counts = new Map<T, number>()
+  for (const id of poolIds.value) {
+    if (passes(id, kind)) for (const x of new Set(of(id))) counts.set(x, (counts.get(x) ?? 0) + 1)
+  }
+  if (picked && !counts.has(picked)) counts.set(picked, 0)
+  return [...counts].map(([id, n]) => ({ id, n, name: name(id) }))
+}
+const byName = <T extends { name: string }>(list: T[]) =>
+  list.sort((a, b) => a.name.localeCompare(b.name, locale.value))
+const typeOptions = computed(() => {
+  const list = options('type', (id) => POKEMON[id].types, typeName, filterType.value)
+  return TYPES.flatMap((ty) => list.find((o) => o.id === ty) ?? [])
+})
+const abilityOptions = computed(() =>
+  byName(
+    options(
+      'ability',
+      (id) => traits(id).abilities,
+      (a) => refName(ability(a)),
+      filterAbility.value,
+    ),
+  ),
+)
+const itemOptions = computed(() =>
+  itemsFilterable.value
+    ? byName(
+        options(
+          'item',
+          (id) => traits(id).items,
+          (i) => refName(item(i)),
+          filterItem.value,
+        ),
+      )
+    : [],
+)
+// The filters fold away behind a button beside the find, marked while any is on.
+const filtersOpen = shallowRef(false)
+const clearFilters = () =>
+  void router.replace({ query: { ...query.value, type: undefined, ability: undefined, item: undefined } })
+/** Usage ranks, for the pickers to list by, most used first: the meta's, when there is one. */
+const ranks = computed(() => (data.value ? usageRanks(data.value) : undefined))
+
 // Finding a Pokémon: one picked from those on the ladder (`?find=`), its chips marked and the rest dimmed.
 const found = computed(() => {
   const id = query.value.find
@@ -411,6 +544,7 @@ const findableIds = computed<PokemonId[]>(() =>
     (id) =>
       !POKEMON[id].cosmetic &&
       megaShown(id) &&
+      (!filtering.value || passes(id)) &&
       (showAll.value || !!data.value?.[id] || ((!POKEMON[id].battleOnly || !!POKEMON[id].mega) && !playsAsBase(id))),
   ),
 )
@@ -492,14 +626,43 @@ const ladder = useTemplateRef<HTMLElement>('ladder')
 
 // How yours does against the others shown: the share of them it moves before, ties and moves after, weighted by usage
 // in the meta (each build by its Pokémon's usage and its share of its sets; boosts left out, as they're those same
-// sets boosted), or each Pokémon alike when showing them all.
+// sets boosted, but for those of the field picked, which are those sets as they play: the share of its sets with them
+// moved from its builds to them), or each Pokémon alike when showing them all.
+/** The share of a Pokémon's sets whose ability works in the field picked, as the chips show them. */
+function fieldShare(id: PokemonId): number {
+  if (!inPlay.value || inPlay.value === 'none') return 0
+  const sum = (data.value?.[id]?.abilities ?? [])
+    .filter((a) => SPEED_ABILITIES[a.id]?.when === inPlay.value && (a.share ?? 0) >= MIN_SHARE)
+    .reduce((n, a) => n + a.share!, 0)
+  return Math.min(1, sum)
+}
+/** What the summary is of: the view's Pokémon, those filtered, and the field picked. */
+const summaryNote = computed(() =>
+  [
+    showAll.value ? t('speed.summaryAll', { bench: benchLabel(bench.value) }) : t('speed.summaryMeta', { n: TOP }),
+    filtering.value && t('speed.summaryFiltered'),
+    inPlay.value && inPlay.value !== 'none' && t('speed.summaryField', { field: fieldLabel(inPlay.value) }),
+  ]
+    .filter(Boolean)
+    .join(' '),
+)
+function weight(e: Entry): number {
+  if (showAll.value) return e.boost ? 0 : 1
+  const usage = data.value?.[e.id]?.usage ?? 0
+  if (e.boost) {
+    const fielded = e.boost.ref.kind === 'ability' && !!inPlay.value && e.boost.when === inPlay.value
+    return fielded ? usage * (e.share ?? 0) : 0
+  }
+  return usage * (e.share ?? 0) * (1 - fieldShare(e.id))
+}
 const summary = computed(() => {
   if (mySpeed.value === null) return null
   const tally = { first: 0, ties: 0, after: 0 }
   let total = 0
   for (const e of entries.value) {
-    if (e.boost || e.extra) continue
-    const w = showAll.value ? 1 : (data.value?.[e.id]?.usage ?? 0) * (e.share ?? 0)
+    if (e.extra) continue
+    const w = weight(e)
+    if (!w) continue
     const theirs = chipSpeed(e)
     const k = theirs === mySpeed.value ? 'ties' : mySpeed.value > theirs !== trickRoom.value ? 'first' : 'after'
     tally[k] += w
@@ -797,6 +960,7 @@ const active = computed(() => {
   const list: { label: string; kind: 'view' | 'option' | 'mod'; item?: ItemId }[] = []
   if (trickRoom.value) list.push({ label: t('speed.mod.trickroom'), kind: 'option' })
   if (showBoosts.value) list.push({ label: t('speed.boosts'), kind: 'option' })
+  if (inPlay.value) list.push({ label: fieldLabel(inPlay.value), kind: 'option' })
   if (!showMegas.value) list.push({ label: t('speed.noMegas'), kind: 'option' })
   for (const k of TOGGLES) if (flag(k)) list.push({ label: t(`speed.modShort.${k}`), kind: 'mod', item: MOD_ITEMS[k] })
   if (stage.value !== '0') list.push({ label: stageLabel(stage.value), kind: 'mod' })
@@ -1058,6 +1222,19 @@ const { entered } = usePageEntered()
                 {{ t('speed.boosts') }}
               </label>
               <span class="muted">{{ t('speed.boostsDesc') }}</span>
+              <template v-if="showBoosts">
+                <select
+                  class="search field-pick"
+                  :class="{ on: inPlay }"
+                  :value="inPlay ?? ''"
+                  :aria-label="t('speed.field')"
+                  @change="setField(($event.target as HTMLSelectElement).value)"
+                >
+                  <option value="">{{ t('speed.fieldAny') }}</option>
+                  <option v-for="f in FIELDS" :key="f" :value="f">{{ fieldLabel(f) }}</option>
+                </select>
+                <span class="muted">{{ t('speed.fieldDesc') }}</span>
+              </template>
             </template>
             <label class="btn switch" :class="{ on: showMegas }">
               <input type="checkbox" :checked="showMegas" @change="toggleMegas" />
@@ -1121,55 +1298,120 @@ const { entered } = usePageEntered()
             :tone="mine ? 'opponent' : undefined"
             list-width-of=".find-row"
             speed
+            :ranks
             @update:model-value="setFound"
           />
-          <label v-if="found" class="btn switch find-mode" :class="{ on: onlyFound }">
-            <input
-              type="checkbox"
-              :checked="onlyFound"
-              :aria-label="t('speed.findOnly', { name: refName(pokemon(found)) })"
-              @change="findMode = onlyFound ? 'mark' : 'only'"
-            />
-            {{ onlyLabel[0] }}<PokemonIcon :id="found" />{{ onlyLabel[1] }}
-          </label>
-          <label v-if="found && beyondTop(found)" class="btn switch find-mode" :class="{ on: kept.includes(found) }">
-            <input type="checkbox" :checked="kept.includes(found)" @change="toggleKept(found)" />
-            {{ t('speed.keep') }}
-          </label>
-          <!-- To the comparison's own page, standing out as the card's way there does. -->
-          <AppLink
-            v-if="found"
-            :to="compareLink({ id: found, build: topBuild(found) })"
-            class="btn primary find-mode find-compare"
-            ><Columns2 :size="16" aria-hidden="true" />{{ t('compare.short')
-            }}<ArrowRight :size="16" aria-hidden="true"
-          /></AppLink>
-          <!-- Yours and the one found swapped, once there's yours; its icon alone on phones, so the row still fits. -->
+          <!-- The filters' fold, beside the find. -->
           <button
-            v-if="found"
             type="button"
-            class="btn find-mode find-swap"
-            :disabled="!mine"
-            :aria-label="t('compare.swap')"
-            @click="swapMine"
+            class="btn filters-toggle"
+            :class="{ on: filtering }"
+            :aria-expanded="filtersOpen"
+            aria-controls="speed-filters"
+            :aria-label="t('speed.filter')"
+            @click="filtersOpen = !filtersOpen"
           >
-            <ArrowLeftRight :size="16" aria-hidden="true" /><span class="swap-text">{{ t('compare.swap') }}</span>
+            <Funnel :size="16" aria-hidden="true" />
           </button>
-          <button v-if="found" type="button" class="btn inverted find-clear" @click="setFound(null)">
-            <Trash2 :size="16" aria-hidden="true" />{{ t('speed.clear') }}
-          </button>
+          <!-- What finding it does (only it, kept on the ladder), on a row of their own at the band's foot. -->
+          <div v-if="found" class="find-modes">
+            <label class="btn switch find-mode" :class="{ on: onlyFound }">
+              <input
+                type="checkbox"
+                :checked="onlyFound"
+                :aria-label="t('speed.findOnly', { name: refName(pokemon(found)) })"
+                @change="findMode = onlyFound ? 'mark' : 'only'"
+              />
+              {{ onlyLabel[0] }}<PokemonIcon :id="found" />{{ onlyLabel[1] }}
+            </label>
+            <label v-if="beyondTop(found)" class="btn switch find-mode" :class="{ on: kept.includes(found) }">
+              <input type="checkbox" :checked="kept.includes(found)" @change="toggleKept(found)" />
+              {{ t('speed.keep') }}
+            </label>
+          </div>
+          <!-- What to do with the one found, on a row of their own under the find. -->
+          <div v-if="found" class="find-actions">
+            <!-- To the comparison's own page, standing out as the card's way there does. -->
+            <AppLink :to="compareLink({ id: found, build: topBuild(found) })" class="btn primary find-mode find-compare"
+              ><Columns2 :size="16" aria-hidden="true" />{{ t('compare.short')
+              }}<ArrowRight :size="16" aria-hidden="true"
+            /></AppLink>
+            <!-- Yours and the one found swapped, once there's yours; its icon alone on the narrowest phones, so the row
+                 still fits. -->
+            <button
+              type="button"
+              class="btn find-mode find-swap"
+              :disabled="!mine"
+              :aria-label="t('compare.swap')"
+              @click="swapMine"
+            >
+              <ArrowLeftRight :size="16" aria-hidden="true" /><span class="swap-text">{{ t('compare.swap') }}</span>
+            </button>
+            <button type="button" class="btn inverted find-clear" @click="setFound(null)">
+              <Trash2 :size="16" aria-hidden="true" />{{ t('speed.clear') }}
+            </button>
+          </div>
           <p v-if="foundNote" class="find-note muted small">{{ foundNote }}</p>
+          <!-- Filtering the ladder: by type, ability and item, each a choice of what the Pokémon shown have. -->
+          <div
+            id="speed-filters"
+            class="filters"
+            :class="{ folded: !filtersOpen }"
+            role="group"
+            :aria-label="t('speed.filter')"
+          >
+            <span class="small filters-label">{{ t('speed.filter') }}</span>
+            <span class="filter" :class="{ on: filterType }">
+              <TypeIcon v-if="filterType" :type="filterType" class="filter-icon" aria-hidden="true" />
+              <select
+                class="search filter-pick"
+                :value="filterType ?? ''"
+                :aria-label="t('speed.filterType')"
+                @change="set('type', ($event.target as HTMLSelectElement).value || undefined)"
+              >
+                <option value="">{{ t('speed.anyType') }}</option>
+                <option v-for="o in typeOptions" :key="o.id" :value="o.id">{{ o.name }} ({{ o.n }})</option>
+              </select>
+            </span>
+            <span class="filter" :class="{ on: filterAbility }">
+              <select
+                class="search filter-pick"
+                :value="filterAbility ?? ''"
+                :aria-label="t('speed.filterAbility')"
+                @change="set('ability', ($event.target as HTMLSelectElement).value || undefined)"
+              >
+                <option value="">{{ t('speed.anyAbility') }}</option>
+                <option v-for="o in abilityOptions" :key="o.id" :value="o.id">{{ o.name }} ({{ o.n }})</option>
+              </select>
+            </span>
+            <span v-if="itemsFilterable" class="filter" :class="{ on: filterItem }">
+              <ItemIcon v-if="filterItem" :id="filterItem" :scale="0.67" class="filter-icon" aria-hidden="true" />
+              <select
+                class="search filter-pick"
+                :value="filterItem ?? ''"
+                :aria-label="t('speed.filterItem')"
+                @change="set('item', ($event.target as HTMLSelectElement).value || undefined)"
+              >
+                <option value="">{{ t('speed.anyItem') }}</option>
+                <option v-for="o in itemOptions" :key="o.id" :value="o.id">{{ o.name }} ({{ o.n }})</option>
+              </select>
+            </span>
+            <button v-if="filtering" type="button" class="btn inverted filters-clear" @click="clearFilters">
+              <X :size="14" aria-hidden="true" />{{ t('speed.clearFilters') }}
+            </button>
+          </div>
           <!-- The Pokémon kept: each finds it, or leaves the ladder. -->
+          <!-- Each a chip: its name finds it (marked while found), its cross takes it off; then a way to take them all off. -->
           <ul v-if="keptShown.length" class="kept small">
-            <li class="muted">{{ t('speed.kept') }}</li>
-            <li v-for="id in keptShown" :key="id" class="kept-mon">
-              <button type="button" class="link-button" @click="setFound(id)">
+            <li class="kept-label">{{ t('speed.kept') }}</li>
+            <li v-for="id in keptShown" :key="id" class="kept-mon" :class="{ found: id === found }">
+              <button type="button" class="kept-find" :aria-pressed="id === found" @click="setFound(id)">
                 <PokemonIcon :id />{{ refName(pokemon(id)) }}
               </button>
               <button
                 v-tip="canHover && t('speed.unkeep', { name: refName(pokemon(id)) })"
                 type="button"
-                class="link-button"
+                class="kept-remove"
                 :aria-label="t('speed.unkeep', { name: refName(pokemon(id)) })"
                 @click="toggleKept(id)"
               >
@@ -1177,7 +1419,7 @@ const { entered } = usePageEntered()
               </button>
             </li>
             <li>
-              <button type="button" class="link-button" @click="set('keep', undefined)">
+              <button type="button" class="btn inverted kept-all" @click="set('keep', undefined)">
                 <Trash2 :size="14" aria-hidden="true" />{{ t('speed.unkeepAll') }}
               </button>
             </li>
@@ -1196,6 +1438,7 @@ const { entered } = usePageEntered()
                 :tone="mine ? 'opponent' : undefined"
                 list-width-of=".pinned"
                 speed
+                :ranks
                 @update:model-value="setFound"
               />
               <label v-if="found" class="btn switch find-mode" :class="{ on: onlyFound }">
@@ -1332,6 +1575,9 @@ const { entered } = usePageEntered()
         </Teleport>
 
         <p v-if="entered && (showAll || data)" class="muted small note">{{ t('speed.count', { n: monCount }) }}</p>
+        <p v-if="entered && (showAll || data) && filtering && !monCount" class="muted small note">
+          {{ t('speed.filteredNone') }}
+        </p>
         <p v-if="showMegas" class="muted small note">{{ t('speed.megaNote') }}</p>
         <p v-if="!showAll && snapshot" class="muted small note">
           {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
@@ -1371,6 +1617,7 @@ const { entered } = usePageEntered()
                 list-width-of=".yours-pick"
                 speed
                 icon
+                :ranks
                 class="yours-picker"
                 @update:model-value="pickMine"
               />
@@ -1475,9 +1722,7 @@ const { entered } = usePageEntered()
                       after: percent(summary.after),
                     })
                   }}
-                  <span class="muted">{{
-                    showAll ? t('speed.summaryAll', { bench: benchLabel(bench) }) : t('speed.summaryMeta', { n: TOP })
-                  }}</span>
+                  <span class="muted">{{ summaryNote }}</span>
                 </p>
               </section>
             </template>
@@ -1833,6 +2078,55 @@ const { entered } = usePageEntered()
   flex-basis: 100%;
   margin: 0;
 }
+/* The filters, on a line of their own under the find: each a choice, its pick's icon before it once picked. */
+.filters {
+  display: flex;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+.filters-label {
+  font-weight: bold;
+}
+.filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+/* On phones, the choices share the lines, each as wide as its share. */
+@media (max-width: 720px) {
+  .filter {
+    flex: 1 1 9em;
+    min-width: 0;
+  }
+  .filter-pick {
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+  }
+}
+/* As wide as what they hold: the search fields' width limit would cut them off. */
+.filter-pick,
+.field-pick {
+  width: auto;
+  margin: 0;
+}
+.filter-pick {
+  max-width: 14em;
+}
+.filter.on .filter-pick,
+.field-pick.on {
+  border-color: var(--ink);
+  background: var(--sel);
+}
+.filters-clear {
+  gap: 4px;
+  padding-block: 4px;
+}
+.field-pick {
+  justify-self: start;
+}
 /* The resets: under what they reset, to the left. */
 .reset {
   align-self: flex-start;
@@ -1844,23 +2138,116 @@ const { entered } = usePageEntered()
   flex-basis: 100%;
   flex-wrap: wrap;
   align-items: center;
-  gap: 2px 12px;
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
+/* Its label as the band's other labels: small, bold, quieter. */
+.kept-label {
+  margin-right: 2px;
+  font-size: 0.85em;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+/* Each kept one a chip, as the ladder's are: its name and its cross, a line between them; marked while it's the one
+   found. */
 .kept-mon {
   display: inline-flex;
-  align-items: center;
-  gap: 2px;
+  align-items: stretch;
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--hard-sm);
 }
-.kept .link-button {
+.kept-mon.found {
+  background: var(--sel);
+}
+.kept-mon > button {
   display: inline-flex;
   align-items: center;
+  min-height: 26px;
+  padding: 0 6px;
+  line-height: 1;
+  font: inherit;
+  color: var(--text);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.kept-find {
+  gap: 4px;
+  padding-left: 2px;
+}
+.kept-find :deep(.sheet-icon) {
+  margin-block: -8px;
+}
+.kept-remove {
+  color: var(--muted);
+  border-left: 1px solid var(--border-strong) !important;
+}
+.kept-mon > button:hover {
+  background: var(--hover);
+}
+.kept-mon > .kept-remove:hover {
+  color: var(--text);
+}
+.kept-all {
+  gap: 4px;
+  min-height: 28px;
+  padding: 0 8px;
+  font-size: 1em;
+  line-height: 1;
 }
 /* The toggles and the clear button as tall as the search beside them. */
-.find-row > :is(.find-mode, .find-clear) {
+.find-row :is(.find-mode, .find-clear) {
   align-self: stretch;
+}
+/* The find with the filters' fold beside it, the filters folded under it, then what to do with the one found, why it
+   shows as it does, and what finding does, each on a row of its own. */
+.filters-toggle {
+  display: inline-flex;
+  flex: none;
+  align-self: stretch;
+  order: 1;
+  padding-inline: 10px;
+}
+.filters-toggle.on {
+  background: var(--sel);
+}
+.filters {
+  order: 2;
+}
+.filters.folded {
+  display: none;
+}
+.find-modes,
+.find-actions {
+  display: flex;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.find-actions {
+  order: 3;
+}
+.find-note {
+  order: 4;
+}
+.find-modes {
+  order: 5;
+}
+.kept {
+  order: 6;
+}
+/* On phones, the three on one line, sharing it. */
+@media (max-width: 720px) {
+  .find-actions > .btn {
+    flex: 1 1 auto;
+    justify-content: center;
+    padding-inline: 8px;
+  }
 }
 .find-compare {
   gap: 6px;
@@ -1868,7 +2255,7 @@ const { entered } = usePageEntered()
 .find-swap {
   gap: 6px;
 }
-@media (max-width: 480px) {
+@media (max-width: 380px) {
   .swap-text {
     display: none;
   }

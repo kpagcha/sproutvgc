@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeftRight, ChevronDown, ChevronsDown, ChevronsUp, RotateCcw, Trash2 } from '@lucide/vue'
 import { pokemon, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
-import { currentSnapshots, distinctLabel, has, percent } from '@/data/meta'
+import { currentSnapshots, distinctLabel, has, percent, usageRanks } from '@/data/meta'
 import { natureName } from '@/data/natures'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
@@ -45,6 +45,8 @@ const replace = (q: Record<string, string | undefined>) => void router.replace({
 
 const { snapshot, data } = useMeta()
 const metaSpeeds = computed(() => !!snapshot.value && has(snapshot.value, 'speeds'))
+/** Usage ranks, for the pickers to list by, most used first. */
+const ranks = computed(() => (data.value ? usageRanks(data.value) : undefined))
 
 const SIDES = ['a', 'b'] as const
 type Side = (typeof SIDES)[number]
@@ -383,6 +385,7 @@ function resetAll() {
             :tone="side.s === 'a' ? 'yours' : 'opponent'"
             icon
             speed
+            :ranks
             class="picker"
             @update:model-value="(id: PokemonId | null) => pick(side.s, id)"
           />
