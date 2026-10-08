@@ -1210,6 +1210,20 @@ function resetAll() {
   width: max-content;
   max-width: min(420px, calc(100vw - 32px));
 }
+/* On phones the button sits partway across, so the menu hangs from the panel instead, as wide as it. */
+@media (max-width: 720px) {
+  .actions {
+    position: relative;
+  }
+  .ladder-menu {
+    position: static;
+  }
+  .ladder-pop {
+    right: 0;
+    width: auto;
+    max-width: none;
+  }
+}
 .ladder-row {
   display: flex;
   flex-direction: column;
