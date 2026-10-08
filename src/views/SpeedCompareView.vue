@@ -156,15 +156,20 @@ const phone = ref(phoneQuery.matches)
 const onPhone = (e: MediaQueryListEvent) => (phone.value = e.matches)
 phoneQuery.addEventListener('change', onPhone)
 onUnmounted(() => phoneQuery.removeEventListener('change', onPhone))
-const openKey = ref<string | null>(mode.value === 'vs' ? (SIDES.find((s) => !idOf(s)) ?? null) : null)
-// One with none picked goes straight to picking it, its panel opening once it's picked (`pick`).
+// Past a pair, the first slot with none picked starts open, to pick it there; a pair's tabs start folded, an empty one
+// picking straight away when tapped.
+const openKey = ref<string | null>(
+  mode.value === 'vs' && stacked.value ? (SLOTS.find((s) => vsSlots.value.includes(s) && !idOf(s)) ?? null) : null,
+)
+// One with none picked goes straight to picking it, its panel opening once it's picked (`pick`): in a pair's tabs on
+// phones, from its tab alone (the picking screen needs no panel under it); in the list, from its editor.
 const editors: Record<string, InstanceType<typeof SpeedEditor> | undefined> = {}
 const editorRef = (key: string) => (el: unknown) => {
   editors[key] = (el as InstanceType<typeof SpeedEditor> | null) ?? undefined
 }
 function toggleOpen(key: string) {
   if (!entryOf(key)?.id) {
-    openKey.value = key
+    if (stacked.value) openKey.value = key
     return void nextTick(() => editors[key]?.openPicker())
   }
   openKey.value = openKey.value === key ? null : key
@@ -369,10 +374,10 @@ const active = computed(() => {
 })
 const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 // Everything back as the page comes with nothing set, as the speed tiers' Reset all: its whole URL cleared (the
-// Pokémon, their builds, the view, Trick Room), and on phones yours' panel open to pick it.
+// Pokémon, their builds, the view, Trick Room).
 const allChanged = computed(() => Object.keys(route.query).length > 0)
 function resetAll() {
-  openKey.value = 'a'
+  openKey.value = null
   void router.replace({ query: {} })
 }
 </script>
