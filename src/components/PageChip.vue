@@ -19,20 +19,18 @@ function view(visit: PageVisit) {
   const name = String(to.name ?? '')
   const compare = name === 'speedCompare'
   const team = (keys: string[]) => keys.flatMap((k) => mon(q[k]) ?? [])
-  // Past a pair, and in speed order, their icons: each team's, or the list's.
-  const groups =
-    compare && q.mode === 'order'
+  // A comparison's icons: each team's, or the speed order's list.
+  const groups = !compare
+    ? null
+    : q.mode === 'order'
       ? [readList(q.list).map((e) => e.id)]
-      : compare && (q.a2 || q.b2)
-        ? [team(['a', 'a2']), team(['b', 'b2'])]
-        : null
+      : [team(['a', 'a2']), team(['b', 'b2'])]
   return {
     to,
     titleKey: to.meta.titleKey,
     groups,
-    pair: compare && !groups ? ([mon(q.a), mon(q.b)] as const) : null,
-    /** Each one's build, as the page reads it. */
-    builds: name === 'speedCompare' ? [readBuild(q, 'a'), readBuild(q, 'b')] : [readBuild(q, 'my')],
+    /** Yours' build on the speed tiers, as the page reads it. */
+    build: readBuild(q, 'my'),
     mine: name === 'speedTiers' ? mon(q.mine) : null,
     trickRoom: name.startsWith('speed') && q.trickroom === '1',
     types: name.startsWith('matchups') ? (typesOf(q.def, 2).length ? typesOf(q.def, 2) : typesOf(q.atk, 4)) : [],
@@ -42,7 +40,7 @@ function view(visit: PageVisit) {
 /** Whether a page visited can still be shown: a page that still exists, a comparison of ones the regulation has. */
 export function shownVisit(visit: PageVisit) {
   const v = view(visit)
-  return !!v.titleKey && (!v.pair || (!!v.pair[0] && !!v.pair[1])) && (!v.groups || v.groups.every((g) => g.length > 0))
+  return !!v.titleKey && (!v.groups || v.groups.every((g) => g.length > 0))
 }
 </script>
 
@@ -57,18 +55,20 @@ import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
 
 // A page with a view of its own (in its URL) as a chip reopening it as it was: the home page's recently viewed and
-// favorites (a setup starred), beside the dex entries' chips (`EntryChip`), in their style. A comparison is its two
-// Pokémon, each with its build (past two, and in speed order, their icons alone); any other page its name, with the
+// favorites (a setup starred), beside the dex entries' chips (`EntryChip`), in their style. A comparison is its
+// Pokémon's icons, each team's (or the speed order's list), their names read out; any other page its name, with the
 // Pokémon picked on it (the speed tiers' yours, with its build) or its types (the type matchups'); Trick Room, on,
 // said in short.
 const props = defineProps<{ visit: PageVisit }>()
 const v = computed(() => view(props.visit))
+/** A comparison's Pokémon by name, for what reads the chip out: its icons alone say nothing. */
+const label = computed(() => v.value.groups?.map((g) => g.map((id) => refName(pokemon(id))).join(', ')).join(' vs '))
 /** The most icons a group shows, the rest counted. */
 const GROUP_MAX = 6
 </script>
 
 <template>
-  <a :href="v.to.href" class="page-chip" @click="follow">
+  <a :href="v.to.href" class="page-chip" :aria-label="label" @click="follow">
     <template v-if="v.groups">
       <template v-for="(g, i) in v.groups" :key="i">
         <span v-if="i" class="muted">vs</span>
@@ -81,29 +81,16 @@ const GROUP_MAX = 6
         >
       </template>
     </template>
-    <template v-else-if="v.pair">
-      <template v-for="(id, i) in v.pair" :key="i">
-        <span v-if="i" class="muted">vs</span>
-        <PokemonIcon :id="id!" />{{ refName(pokemon(id!)) }}
-        <span class="build muted"
-          ><ChevronsUp v-if="v.builds[i]!.effect === 'up'" :size="14" aria-hidden="true" /><ChevronsDown
-            v-else-if="v.builds[i]!.effect === 'down'"
-            :size="14"
-            aria-hidden="true"
-          />{{ v.builds[i]!.points }}</span
-        >
-      </template>
-    </template>
     <template v-else>
       {{ t(v.titleKey!) }}
       <template v-if="v.mine">
         <PokemonIcon :id="v.mine" />
         <span class="build muted"
-          ><ChevronsUp v-if="v.builds[0]!.effect === 'up'" :size="14" aria-hidden="true" /><ChevronsDown
-            v-else-if="v.builds[0]!.effect === 'down'"
+          ><ChevronsUp v-if="v.build.effect === 'up'" :size="14" aria-hidden="true" /><ChevronsDown
+            v-else-if="v.build.effect === 'down'"
             :size="14"
             aria-hidden="true"
-          />{{ v.builds[0]!.points }}</span
+          />{{ v.build.points }}</span
         >
       </template>
       <TypeIcon v-for="ty in v.types" :key="ty" :type="ty" />
