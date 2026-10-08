@@ -99,7 +99,12 @@ const onPhone = (e: MediaQueryListEvent) => (phone.value = e.matches)
 phoneQuery.addEventListener('change', onPhone)
 onUnmounted(() => phoneQuery.removeEventListener('change', onPhone))
 const openSide = ref<Side | null>(SIDES.find((s) => !idOf(s)) ?? null)
-const toggleSide = (s: Side) => (openSide.value = openSide.value === s ? null : s)
+// A side with none picked goes straight to picking it, its panel opening once it's picked (`pick`).
+const pickers: Partial<Record<Side, InstanceType<typeof PokemonPicker>>> = {}
+function toggleSide(s: Side) {
+  if (!sideOf(s).id) return pickers[s]?.open()
+  openSide.value = openSide.value === s ? null : s
+}
 
 /** A Pokémon's builds in the meta, by nature effect and points (what Speed cares about), the most common first. */
 function commonBuilds(id: PokemonId) {
@@ -123,6 +128,7 @@ function setBuild(s: Side, b: Partial<SpeedBuild>) {
 /** Picks a side's Pokémon at the meta's most common build of it, else the fastest; its modifiers stay. */
 function pick(s: Side, id: PokemonId | null) {
   if (!id) return
+  if (phone.value) openSide.value = s
   const top = commonBuilds(id)[0]
   replace({
     [s]: id,
@@ -308,7 +314,6 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
         :class="{
           open: openSide === side.s,
           first: verdict && !verdict.tie && verdict.first === side.s,
-          tied: verdict?.tie,
           opponent: side.s === 'b',
         }"
         :aria-expanded="openSide === side.s"
@@ -332,8 +337,7 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
         :key="side.s"
         class="panel banded side"
         :class="{
-          first: verdict && !verdict.tie && verdict.first === side.s,
-          tied: verdict?.tie,
+          first: !phone && verdict && !verdict.tie && verdict.first === side.s,
           opponent: side.s === 'b',
         }"
       >
@@ -344,16 +348,23 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
             <Trash2 :size="14" aria-hidden="true" />{{ t('speed.clear') }}
           </button>
         </div>
-        <PokemonPicker
-          :model-value="side.id"
-          :placeholder="t('compare.pick')"
-          :title="side.s === 'a' ? t('speed.yours') : t('compare.opponent')"
-          :tone="side.s === 'a' ? 'yours' : 'opponent'"
-          icon
-          speed
-          class="picker"
-          @update:model-value="(id: PokemonId | null) => pick(side.s, id)"
-        />
+        <!-- On phones, its Clear beside it, with no band to hold it. -->
+        <div class="pick-row">
+          <PokemonPicker
+            :ref="(el) => (pickers[side.s] = (el as InstanceType<typeof PokemonPicker> | null) ?? undefined)"
+            :model-value="side.id"
+            :placeholder="t('compare.pick')"
+            :title="side.s === 'a' ? t('speed.yours') : t('compare.opponent')"
+            :tone="side.s === 'a' ? 'yours' : 'opponent'"
+            icon
+            speed
+            class="picker"
+            @update:model-value="(id: PokemonId | null) => pick(side.s, id)"
+          />
+          <button v-if="phone && side.id" type="button" class="btn pick-clear" @click="clear(side.s)">
+            <Trash2 :size="14" aria-hidden="true" />{{ t('speed.clear') }}
+          </button>
+        </div>
         <template v-if="side.id">
           <!-- Its Speed, large, with its stat as built when modifiers change it (its base is the dex's). -->
           <p class="speed">
@@ -361,10 +372,6 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
             <span v-if="side.stat !== side.speed" class="muted small">{{
               t('compare.stat', { stat: side.stat! })
             }}</span>
-            <!-- On phones, with no band to hold it. -->
-            <button v-if="phone" type="button" class="btn speed-clear" @click="clear(side.s)">
-              <Trash2 :size="14" aria-hidden="true" />{{ t('speed.clear') }}
-            </button>
           </p>
 
           <!-- The meta's builds of it, to pick one in a tap. -->
@@ -459,7 +466,7 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 
           <!-- What it takes to move before the other, at each nature effect; on phones, under the two instead. -->
           <section v-if="!phone && against(side.s)" class="part">
-            <SpeedAgainst :title="againstTitle(side.s)" :rows="against(side.s)!" />
+            <SpeedAgainst :title="againstTitle(side.s)" :rows="against(side.s)!" :current="side.build.effect" />
           </section>
         </template>
       </section>
@@ -473,7 +480,7 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
         class="panel insight"
         :class="{ opponent: side.s === 'b', open: openSide === side.s }"
       >
-        <SpeedAgainst :title="againstTitle(side.s)" :rows="against(side.s)!" />
+        <SpeedAgainst :title="againstTitle(side.s)" :rows="against(side.s)!" :current="side.build.effect" banded />
       </section>
     </div>
   </div>
@@ -668,6 +675,13 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
     grid-template-columns: minmax(0, 1fr);
   }
 }
+/* Its side's color, for what's marked in it. */
+.side {
+  --side: var(--accent);
+}
+.side.opponent {
+  --side: var(--opponent);
+}
 :root:root .side.opponent > .band {
   color: var(--opponent-text);
   background: var(--opponent);
@@ -678,7 +692,7 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
   margin-left: auto;
 }
 /* On phones, the two tabs: each a band of its side's color over its Pokémon in short, side by side, stuck to the top
-   on a strip of the page's background. The open one pressed in, its arrow turned. */
+   on a strip of the page's background. The open one flat, lined up with its panel under it, its arrow turned. */
 .side-tabs {
   position: sticky;
   top: 0;
@@ -708,7 +722,6 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 }
 .tab.open {
   box-shadow: none;
-  transform: translate(3px, 3px);
 }
 .tab-label {
   display: flex;
@@ -759,14 +772,18 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 .tab.first.opponent {
   outline-color: var(--opponent);
 }
-.tab.tied {
-  outline: 3px solid var(--muted);
-  outline-offset: 2px;
+.pick-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
 }
-.speed-clear {
+.pick-row > .picker {
+  flex: 1;
+  min-width: 0;
+}
+.pick-clear {
+  flex: none;
   gap: 4px;
-  margin-left: auto;
-  align-self: center;
 }
 /* On phones, what each takes to move first, side by side, each topped by its side's color. */
 .insights {
@@ -776,21 +793,16 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
   margin-top: 12px;
 }
 .insight {
+  --side: var(--accent);
+  --side-text: var(--accent-text);
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 8px;
-  border-top: 6px solid var(--accent) !important;
+  padding: 0;
+  overflow: hidden;
 }
 .insight.opponent {
-  border-top-color: var(--opponent) !important;
-}
-.insight :deep(.versus) {
-  grid-template-columns: 1fr;
-  gap: 0;
-}
-.insight :deep(dd) {
-  margin-bottom: 4px;
+  --side: var(--opponent);
+  --side-text: var(--opponent-text);
 }
 .part > .builds {
   align-self: stretch;
@@ -802,8 +814,8 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
   gap: 8px;
   font-weight: bold;
 }
-/* The one that moves first, marked by its outline: blue for yours, the opponents' red for an opponent; on a tie, both,
-   in a neutral color. */
+/* The one that moves first, marked by its outline: blue for yours, the opponents' red for an opponent; on a tie,
+   neither. */
 .side.first {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
@@ -811,13 +823,7 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 .side.first.opponent {
   outline-color: var(--opponent);
 }
-.side.tied {
-  outline: 3px solid var(--muted);
-  outline-offset: 2px;
-}
-.picker {
-  width: 100%;
-}
+
 .speed {
   display: flex;
   align-items: baseline;
