@@ -780,6 +780,9 @@ export const messages: Record<keyof typeof en, string> = {
   'compare.intro':
     'Tu Pokémon y un rival, hasta dos por lado, cada uno con su distribución: quién mueve antes, y qué hace falta.',
   'compare.pick': 'Elige un Pokémon',
+  'compare.pickYours': 'Elige tu Pokémon',
+  'compare.pickOpponent': 'Elige un rival',
+  'compare.confirm': 'Confirmar',
   'compare.opponent': 'Rival',
   'compare.stat': 'Característica {stat}',
   'compare.common': 'Distribuciones habituales',
@@ -805,7 +808,6 @@ export const messages: Record<keyof typeof en, string> = {
     'Cada uno de los tuyos contra cada rival: cuál mueve antes, y por cuánta Velocidad. Toca uno para ver a los dos solos.',
   'compare.addYours': 'Añadir un segundo tuyo',
   'compare.addOpponent': 'Añadir un segundo rival',
-  'compare.addSecond': 'Añadir un segundo Pokémon',
   'compare.addSecondShort': 'Añadir otro',
   'compare.add': 'Añadir un Pokémon',
   'compare.limit': 'La lista admite hasta {n} Pokémon: quita uno para añadir otro.',

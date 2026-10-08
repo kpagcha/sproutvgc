@@ -161,18 +161,17 @@ const toBeat = computed(() =>
   gap: 4px;
   max-width: 520px;
 }
+/* Each one's icon whole inside its header. */
 .head {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  padding: 2px 6px;
+  gap: 4px;
+  min-height: 40px;
+  padding: 2px 8px;
   font-weight: bold;
   font-variant-numeric: tabular-nums;
   border: 2px solid var(--ink);
-}
-.head :deep(.sheet-icon) {
-  margin-block: -6px;
 }
 .head.yours {
   color: var(--accent-text);

@@ -769,6 +769,9 @@ export const messages = {
   'compare.intro':
     'Your Pokémon and an opponent, up to two a side, each with its build: who moves first, and what it takes.',
   'compare.pick': 'Pick a Pokémon',
+  'compare.pickYours': 'Pick your Pokémon',
+  'compare.pickOpponent': 'Pick an opponent',
+  'compare.confirm': 'Confirm',
   'compare.opponent': 'Opponent',
   'compare.stat': 'Stat {stat}',
   'compare.common': 'Common builds',
@@ -794,7 +797,6 @@ export const messages = {
     'Each of yours against each opponent: which moves first, and by how much Speed. Tap one to see the two alone.',
   'compare.addYours': 'Add a second of yours',
   'compare.addOpponent': 'Add a second opponent',
-  'compare.addSecond': 'Add a second Pokémon',
   'compare.addSecondShort': 'Add a second',
   'compare.add': 'Add a Pokémon',
   'compare.limit': 'The list takes up to {n} Pokémon: clear one to add another.',

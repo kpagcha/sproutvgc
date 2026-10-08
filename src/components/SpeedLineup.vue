@@ -78,6 +78,9 @@ watch(
 )
 
 const placeLabel = (p: Place) => t(p.tie ? 'compare.placeTie' : 'compare.place', { n: p.rank })
+/** What an empty one picks: whose it is, as nothing else in the list says. */
+const pickLabel = (e: LineupEntry) =>
+  t(e.team === 'yours' ? 'compare.pickYours' : e.team === 'opponent' ? 'compare.pickOpponent' : 'compare.pick')
 const teamLabel = (e: LineupEntry) =>
   e.team === 'yours' ? t('speed.yours') : e.team === 'opponent' ? t('compare.opponent') : null
 </script>
@@ -104,7 +107,7 @@ const teamLabel = (e: LineupEntry) =>
         >
         <span v-if="teamLabel(e)" class="visually-hidden">{{ teamLabel(e) }}</span>
         <BuildSummary v-if="e.id" :id="e.id" :speed="e.speed!" :build="e.build" class="summary" />
-        <span v-else class="empty">{{ t('compare.pick') }}</span>
+        <span v-else class="empty">{{ pickLabel(e) }}</span>
         <ChevronDown :size="16" class="chevron" :class="{ unset: !e.id }" aria-hidden="true" />
       </button>
       <div v-if="openKey === e.key" :id="`editor-${e.key}`" class="editor" :class="e.team ?? 'neutral'">
@@ -206,21 +209,21 @@ const teamLabel = (e: LineupEntry) =>
 .chevron.unset {
   visibility: hidden;
 }
-/* What changes it, under its band, in a card edged with its team's color. */
+/* What changes it, under its band, in a card lined up with it, its team's color a stripe inside its left edge (a
+   shadow, not a wider border, so its edges line up with the band's and its corners stay square). */
 .editor {
   position: relative;
   z-index: 0;
   margin-top: -2px;
-  padding: var(--panel-pad, 12px);
+  padding: var(--panel-pad, 12px) var(--panel-pad, 12px) var(--panel-pad, 12px) calc(var(--panel-pad, 12px) + 4px);
   background: var(--panel);
   border: 2px solid var(--ink);
-  border-left-width: 6px;
 }
 .editor.yours {
-  border-left-color: var(--accent);
+  box-shadow: inset 6px 0 var(--accent);
 }
 .editor.opponent {
-  border-left-color: var(--opponent);
+  box-shadow: inset 6px 0 var(--opponent);
 }
 .visually-hidden {
   position: absolute;
