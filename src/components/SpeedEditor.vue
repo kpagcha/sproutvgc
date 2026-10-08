@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useTemplateRef } from 'vue'
-import { Check, ChevronsDown, ChevronsUp, Trash2 } from '@lucide/vue'
+import { ChevronsDown, ChevronsUp, Trash2 } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { percent } from '@/data/meta'
 import { natureName } from '@/data/natures'
@@ -13,7 +13,8 @@ import PokemonPicker from '@/components/PokemonPicker.vue'
 import ScrollRow from '@/components/ScrollRow.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 
-// One of the comparison's Pokémon and its Speed build, to change: the Pokémon, with Clear beside it, its Speed, the
+// One of the comparison's Pokémon and its Speed build, to change (its buttons as the speed tiers' yours has them):
+// the Pokémon, with Clear beside it, its Speed, the
 // meta's common builds of it, its nature's effect, its points, its modifiers and its stage; where it folds away
 // (`confirmable`), Confirm at its end, folding it as it is. In a side's panel, and under its band in the comparison's
 // list.
@@ -74,7 +75,7 @@ const canHover = window.matchMedia('(hover: hover)').matches
         class="picker"
         @update:model-value="(id: PokemonId | null) => id && emit('pick', id)"
       />
-      <button v-if="props.id" type="button" class="btn pick-clear" @click="emit('clear')">
+      <button v-if="props.id" type="button" class="btn inverted pick-clear" @click="emit('clear')">
         <Trash2 :size="14" aria-hidden="true" />{{ t('speed.clear') }}
       </button>
     </div>
@@ -176,9 +177,8 @@ const canHover = window.matchMedia('(hover: hover)').matches
       </section>
       <slot />
       <div v-if="props.confirmable" class="confirm-row">
-        <button type="button" class="btn confirm" @click="emit('confirm')">
-          <Check :size="16" aria-hidden="true" />{{ t('compare.confirm') }}
-        </button>
+        <!-- As the speed tiers' Confirm, putting yours away. -->
+        <button type="button" class="btn primary" @click="emit('confirm')">{{ t('compare.confirm') }}</button>
       </div>
     </template>
   </div>
@@ -206,11 +206,6 @@ const canHover = window.matchMedia('(hover: hover)').matches
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
-}
-.confirm {
-  gap: 6px;
-  font-weight: bold;
-  background: var(--sel);
 }
 .pick-clear {
   flex: none;

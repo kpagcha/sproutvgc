@@ -243,6 +243,18 @@ function addSecond(s: Side, id: PokemonId) {
   openKey.value = key
   replace({ [key]: id, ...buildQuery(pickedBuild(id, readBuild(route.query, key)), key) })
 }
+// Wider, a side's panel folds to its Pokémon in short (Confirm, or its band), and opens again from either; a side
+// with none picked is always open. On phones, Confirm folds its tab's panel instead.
+const folded = ref(new Set<Side>())
+const isFolded = (s: Side) => !phone.value && folded.value.has(s) && !!idOf(s)
+function toggleFold(s: Side) {
+  if (folded.value.has(s)) folded.value.delete(s)
+  else folded.value.add(s)
+}
+function confirmSide(s: Side) {
+  if (phone.value) openKey.value = null
+  else folded.value.add(s)
+}
 /** What an empty one picks: in the list, whose it is, as there's no team band over it. */
 const pickLabel = (team: 'yours' | 'opponent' | null) =>
   t(team === 'yours' ? 'compare.pickYours' : team === 'opponent' ? 'compare.pickOpponent' : 'compare.pick')
@@ -590,12 +602,38 @@ function resetAll() {
               opponent: side.s === 'b',
             }"
           >
-            <!-- Yours, and its opponent, red as on the speed tiers; on phones, its tab stands for it. -->
-            <div v-if="!phone" class="band">
+            <!-- Yours, and its opponent, red as on the speed tiers; on phones, its tab stands for it. Once picked, it
+                 opens and folds the panel, an arrow at its end saying so. -->
+            <component
+              :is="side.id ? 'button' : 'div'"
+              v-if="!phone"
+              :type="side.id ? 'button' : undefined"
+              class="band"
+              :class="{ toggle: side.id }"
+              :aria-expanded="side.id ? !isFolded(side.s) : undefined"
+              @click="side.id && toggleFold(side.s)"
+            >
               <span>{{ side.s === 'a' ? t('speed.yours') : t('compare.opponent') }}</span>
-            </div>
-            <!-- On phones, it folds away: Confirm at its end. -->
+              <ChevronDown
+                v-if="side.id"
+                :size="16"
+                class="fold-chevron"
+                :class="{ open: !isFolded(side.s) }"
+                aria-hidden="true"
+              />
+            </component>
+            <!-- Folded (desktop): its Pokémon in short, opening it when tapped, and what it takes to move first. -->
+            <template v-if="isFolded(side.s)">
+              <button type="button" class="folded-summary" @click="toggleFold(side.s)">
+                <BuildSummary :id="side.id!" :speed="side.speed!" :build="side.build" />
+              </button>
+              <section v-if="against(side.s)" class="part folded-part">
+                <SpeedAgainst :title="againstTitle(side.s)" :rows="against(side.s)!" :current="side.build.effect" />
+              </section>
+            </template>
+            <!-- Confirm at its end folds it: under its tab on phones, to its short form wider. -->
             <SpeedEditor
+              v-else
               :ref="editorRef(side.s)"
               :id="side.id"
               :build="side.build"
@@ -605,8 +643,8 @@ function resetAll() {
               :title="side.s === 'a' ? t('speed.yours') : t('compare.opponent')"
               :tone="side.s === 'a' ? 'yours' : 'opponent'"
               :taken="takenFor(side.s)"
-              :confirmable="phone"
-              @confirm="openKey = null"
+              confirmable
+              @confirm="confirmSide(side.s)"
               @pick="(id: PokemonId) => pick(side.s, id)"
               @build="(b: Partial<SpeedBuild>) => setBuild(side.s, b)"
               @clear="clear(side.s)"
@@ -987,6 +1025,46 @@ function resetAll() {
   outline-color: var(--opponent);
 }
 
+/* The band, once picked, a toggle: the whole strip, its arrow at its end turning as it opens. */
+.band.toggle {
+  width: calc(100% + 2 * var(--panel-pad));
+  border-top: none;
+  border-inline: none;
+  font: inherit;
+  font-weight: bold;
+  text-align: left;
+  cursor: pointer;
+}
+.fold-chevron {
+  flex: none;
+  transition: transform 0.15s;
+}
+.fold-chevron.open {
+  transform: rotate(180deg);
+}
+/* Folded: its Pokémon in short, a row that opens it. */
+.folded-summary {
+  display: flex;
+  width: 100%;
+  min-height: 40px;
+  padding: 0;
+  font: inherit;
+  font-weight: bold;
+  text-align: left;
+  color: var(--text);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.folded-part {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
 /* A team's second, added: under its panel; on phones, under its tab; past a pair, under the list. */
 .col-add {
   margin-top: 8px;
