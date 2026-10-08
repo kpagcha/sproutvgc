@@ -623,6 +623,7 @@ export const messages: Record<keyof typeof en, string> = {
   'favorites.add': 'Añadir a favoritos',
   'favorites.remove': 'Quitar de favoritos',
   'favorites.setups': 'Configuraciones',
+  'favorites.menuEmpty': 'Aún no hay ninguno aquí: la estrella junto al título de una página lo añade.',
   'favorites.addSetup': 'Añadir esta configuración a favoritos',
   'favorites.removeSetup': 'Quitar esta configuración de favoritos',
   'favorites.clear': 'Borrar',

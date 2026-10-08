@@ -12,6 +12,7 @@ import type { Ref } from '@/data/dex'
 import { GAME_NAME, REGULATION } from '@/data/format'
 import { Moon, Search, Settings, Sun } from '@lucide/vue'
 import { useTheme } from '@/composables/useTheme'
+import FavoritesMenu from '@/components/FavoritesMenu.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import NavPill from '@/components/NavPill.vue'
 import { KeptPage, Page } from '@/components/PageFrame'
@@ -237,6 +238,7 @@ const fadeVariants = {
                 <RouterLink :to="backLink(r)!.to" class="back font-display">
                   <span class="chevron" aria-hidden="true">‹</span> {{ t(backLink(r)!.label) }}
                 </RouterLink>
+                <FavoritesMenu :page="String(r.name)" />
                 <div :id="`back-actions-${String(r.name)}`" class="back-actions"></div>
               </div>
               <component :is="Component" />
@@ -253,11 +255,13 @@ const fadeVariants = {
             :transition="PAGE"
             :on-animation-complete="onPageAnimated"
           >
-            <!-- Beside the way back, a place for the page's own actions on the same row (the speed tiers' Reset all). -->
+            <!-- Beside the way back, the page's favorites of its kind, then a place for its own actions on the same row,
+                 at its end (the speed tiers' Reset all). -->
             <div v-if="backLink(r)" class="back-row">
               <RouterLink :to="backLink(r)!.to" class="back font-display">
                 <span class="chevron" aria-hidden="true">‹</span> {{ t(backLink(r)!.label) }}
               </RouterLink>
+              <FavoritesMenu :page="String(r.name)" />
               <div :id="`back-actions-${String(r.name)}`" class="back-actions"></div>
             </div>
             <component :is="Component" />
@@ -391,15 +395,16 @@ const fadeVariants = {
 }
 
 .back-row {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
   margin-bottom: 12px;
 }
 .back-actions {
   display: flex;
   gap: 8px;
+  margin-left: auto;
 }
 .back {
   display: flex;

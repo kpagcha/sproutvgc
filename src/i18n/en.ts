@@ -616,6 +616,7 @@ export const messages = {
   'favorites.add': 'Add to favorites',
   'favorites.remove': 'Remove from favorites',
   'favorites.setups': 'Setups',
+  'favorites.menuEmpty': 'None starred here yet: the star by a page’s title adds it.',
   'favorites.addSetup': 'Add this setup to favorites',
   'favorites.removeSetup': 'Remove this setup from favorites',
   'favorites.clear': 'Clear',
