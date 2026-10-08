@@ -317,7 +317,8 @@ function helpFromHead() {
 const active = computed(() => {
   const list: { label: string; kind: 'view' | 'option' }[] = []
   if (trickRoom.value) list.push({ label: t('speed.mod.trickroom'), kind: 'option' })
-  if (mode.value === 'order') list.push({ label: t('compare.mode.order'), kind: 'view' })
+  // The view always, as the speed tiers' (yours against opponents, or the speed order).
+  list.push({ label: t(`compare.mode.${mode.value}`), kind: 'view' })
   if (snapshot.value && metaSpeeds.value && currentSnapshots().length > 1)
     list.push({ label: distinctLabel(snapshot.value), kind: 'view' })
   return list
