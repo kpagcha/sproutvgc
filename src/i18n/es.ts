@@ -804,6 +804,18 @@ export const messages: Record<keyof typeof en, string> = {
   'compare.helpPlacesLabel': 'Orden',
   'compare.helpPlaces':
     'Con más de dos, se ordenan según mueven, numerados, en cuanto no hay ninguno abierto para cambiarlo. Los igual de rápidos comparten número, marcado con =: cualquiera mueve antes, al azar.',
+  'compare.helpTeamsLabel': 'Dos por lado',
+  'compare.helpTeams':
+    'Añade un segundo a cualquier equipo bajo su panel. Un equipo tiene uno de cada especie, sus formas y megaevoluciones incluidas: uno que ya está sale atenuado en la lista de su otro hueco (el otro equipo sí puede tenerlo).',
+  'compare.helpListLabel': 'La lista',
+  'compare.helpList':
+    'Hasta 20 Pokémon, el mismo más de una vez si quieres (con distribuciones distintas, por ejemplo). Confirmar, o tocar de nuevo su franja, lo recoge.',
+  'compare.helpBoth':
+    'Contra dos rivales, qué necesita cada uno de los tuyos para mover antes que ambos: antes que el de ellos que mueve primero.',
+  'compare.helpLadder':
+    'Tu Pokémon allí como el tuyo, con su distribución, y el rival encontrado en la escala; con dos en un equipo, eliges cuál.',
+  'compare.ladderYours': 'Como el tuyo',
+  'compare.ladderFind': 'Encontrado en la escala',
   'compare.helpMatchups':
     'Cada uno de los tuyos contra cada rival: cuál mueve antes, y por cuánta Velocidad. Toca uno para ver a los dos solos.',
   'compare.addYours': 'Añadir un segundo tuyo',

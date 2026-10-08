@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeftRight, ChevronDown, Plus, RotateCcw } from '@lucide/vue'
 import { pokemon, type PokemonId } from '@/data/dex'
@@ -289,32 +289,59 @@ function setMode(m: Mode) {
 }
 
 /**
- * The speed tiers as they were left, with yours as yours and the opponent found on the ladder (what was picked there
- * before giving way to them), and Trick Room as here.
+ * The speed tiers as they were left, with one of yours as yours (`ladderMine`) and an opponent found on the ladder
+ * (`ladderFind`; what was picked there before giving way to them), and Trick Room as here.
  */
+const ladderMine = ref<Slot>('a')
+const ladderFind = ref<Slot>('b')
 const ladderLink = computed(() => {
   const q = { ...lastTiersQuery.value }
   for (const k of TIERS_PICKS) delete q[k]
-  const me = sideOf('a')
-  const them = sideOf('b')
-  const b = me.build
+  const mineId = idOf(ladderMine.value) ? ladderMine.value : 'a'
+  const findId = idOf(ladderFind.value) ? ladderFind.value : 'b'
+  const me = idOf(mineId)
+  const b = readBuild(route.query, mineId)
   return {
     name: 'speedTiers',
     query: {
       ...(q as Record<string, string>),
-      ...(me.id && {
-        mine: me.id,
+      ...(me && {
+        mine: me,
         mynat: b.effect,
         mypts: String(b.points),
         mymods: b.toggles.length ? b.toggles.join(',') : undefined,
         // The speed tiers have fewer stages: one beyond them is left out.
         mystage: [-1, 1, 2].includes(b.stage) ? String(b.stage) : undefined,
       }),
-      find: them.id ?? undefined,
+      find: idOf(findId) ?? undefined,
       trickroom: trickRoom.value ? '1' : undefined,
     },
   }
 })
+// With a second on either team, the link is a menu choosing which of each goes there first: a row per team with two
+// to choose from. Closed by a press outside it, or Escape.
+const ladderChoices = computed(() =>
+  SIDES.map((s) => ({
+    side: s,
+    slots: [s, `${s}2` as Slot].filter((x) => !!idOf(x)),
+  })).filter((c) => c.slots.length > 1),
+)
+const ladderOpen = ref(false)
+const ladderMenu = useTemplateRef<HTMLElement>('ladderMenu')
+function onLadderPointer(e: PointerEvent) {
+  if (!ladderMenu.value?.contains(e.target as Node)) ladderOpen.value = false
+}
+const onLadderKey = (e: KeyboardEvent) => e.key === 'Escape' && (ladderOpen.value = false)
+watch(ladderOpen, (on) => {
+  if (on) {
+    document.addEventListener('pointerdown', onLadderPointer)
+    document.addEventListener('keydown', onLadderKey)
+  } else {
+    document.removeEventListener('pointerdown', onLadderPointer)
+    document.removeEventListener('keydown', onLadderKey)
+  }
+})
+onUnmounted(() => (ladderOpen.value = false))
 
 // The top panel folds away as the speed tiers' does (open at first, then as the reader last left it; on phones folded
 // on each visit), what's set then said in short beside the heading. How to read the page in a section of its own,
@@ -392,17 +419,36 @@ function resetAll() {
         <div v-if="helpOpen" id="compare-help" class="help-body panel sunken small">
           <p class="muted phone-only-block">{{ t(mode === 'order' ? 'compare.introOrder' : 'compare.intro') }}</p>
           <p class="formula muted">{{ t('speed.formula') }}</p>
+          <!-- What the view shown has: yours against opponents, or the speed order. -->
           <dl class="help-options">
             <dt>{{ t('compare.mode') }}</dt>
             <dd class="muted">{{ t('compare.helpMode') }}</dd>
+            <template v-if="mode === 'vs'">
+              <dt>{{ t('compare.helpTeamsLabel') }}</dt>
+              <dd class="muted">{{ t('compare.helpTeams') }}</dd>
+            </template>
+            <template v-else>
+              <dt>{{ t('compare.helpListLabel') }}</dt>
+              <dd class="muted">{{ t('compare.helpList') }}</dd>
+            </template>
             <dt>{{ t('compare.helpPlacesLabel') }}</dt>
             <dd class="muted">{{ t('compare.helpPlaces') }}</dd>
             <dt>{{ t('compare.common') }}</dt>
             <dd class="muted">{{ t('compare.helpCommon') }}</dd>
-            <dt>{{ t('compare.helpAgainstLabel') }}</dt>
-            <dd class="muted">{{ t('compare.helpAgainst') }}</dd>
-            <dt>{{ t('compare.matchups') }}</dt>
-            <dd class="muted">{{ t('compare.helpMatchups') }}</dd>
+            <template v-if="mode === 'vs'">
+              <dt>{{ t('compare.helpAgainstLabel') }}</dt>
+              <dd class="muted">{{ t('compare.helpAgainst') }}</dd>
+              <dt>{{ t('compare.matchups') }}</dt>
+              <dd class="muted">{{ t('compare.helpMatchups') }}</dd>
+              <dt>{{ t('compare.both') }}</dt>
+              <dd class="muted">{{ t('compare.helpBoth') }}</dd>
+              <dt>{{ t('compare.toLadder') }}</dt>
+              <dd class="muted">{{ t('compare.helpLadder') }}</dd>
+            </template>
+            <template v-else>
+              <dt>{{ t('compare.ties') }}</dt>
+              <dd class="muted">{{ t('compare.tiesNote') }}</dd>
+            </template>
             <dt>{{ t('speed.mod.trickroom') }}</dt>
             <dd class="muted">{{ t('compare.trickroomTip') }}</dd>
           </dl>
@@ -430,7 +476,40 @@ function resetAll() {
       <button type="button" class="btn" :disabled="!anyPicked" @click="swap">
         <ArrowLeftRight :size="16" aria-hidden="true" />{{ t('compare.swap') }}
       </button>
-      <AppLink :to="ladderLink" class="btn">{{ t('compare.toLadder') }}</AppLink>
+      <AppLink v-if="!ladderChoices.length" :to="ladderLink" class="btn">{{ t('compare.toLadder') }}</AppLink>
+      <!-- With a second on either team: which of yours goes there as yours, which opponent it finds. -->
+      <div v-else ref="ladderMenu" class="ladder-menu">
+        <button type="button" class="btn" :aria-expanded="ladderOpen" @click="ladderOpen = !ladderOpen">
+          {{ t('compare.toLadder')
+          }}<ChevronDown :size="16" class="fold-chevron" :class="{ open: ladderOpen }" aria-hidden="true" />
+        </button>
+        <div v-if="ladderOpen" class="ladder-pop panel">
+          <div
+            v-for="c in ladderChoices"
+            :key="c.side"
+            class="ladder-row"
+            role="radiogroup"
+            :aria-label="t(c.side === 'a' ? 'compare.ladderYours' : 'compare.ladderFind')"
+          >
+            <span class="muted small">{{ t(c.side === 'a' ? 'compare.ladderYours' : 'compare.ladderFind') }}</span>
+            <span class="ladder-picks">
+              <button
+                v-for="sl in c.slots"
+                :key="sl"
+                type="button"
+                role="radio"
+                class="btn ladder-pick"
+                :class="[teamOf(sl), { on: (c.side === 'a' ? ladderMine : ladderFind) === sl }]"
+                :aria-checked="(c.side === 'a' ? ladderMine : ladderFind) === sl"
+                @click="c.side === 'a' ? (ladderMine = sl) : (ladderFind = sl)"
+              >
+                <PokemonIcon :id="idOf(sl)!" />{{ refName(pokemon(idOf(sl)!)) }}
+              </button>
+            </span>
+          </div>
+          <AppLink :to="ladderLink" class="btn primary ladder-go">{{ t('compare.toLadder') }}</AppLink>
+        </div>
+      </div>
     </div>
 
     <!-- Past a pair, and in speed order: one under the other, in the order they move. -->
@@ -1025,6 +1104,53 @@ function resetAll() {
   outline-color: var(--opponent);
 }
 
+/* The speed tiers' menu: under its button, over what follows. */
+.ladder-menu {
+  position: relative;
+}
+.ladder-menu > .btn {
+  gap: 6px;
+}
+.ladder-pop {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: max-content;
+  max-width: min(420px, calc(100vw - 32px));
+}
+.ladder-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ladder-picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ladder-pick {
+  gap: 4px;
+  min-height: 0;
+  padding: 2px 10px 2px 4px;
+}
+.ladder-pick :deep(.sheet-icon) {
+  margin-block: -4px;
+}
+.ladder-pick.on.yours {
+  color: var(--accent-text);
+  background: var(--accent);
+}
+.ladder-pick.on.opponent {
+  color: var(--opponent-text);
+  background: var(--opponent);
+}
+.ladder-go {
+  align-self: flex-start;
+}
 /* The band, once picked, a toggle: the whole strip, its arrow at its end turning as it opens. */
 .band.toggle {
   width: calc(100% + 2 * var(--panel-pad));

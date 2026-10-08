@@ -793,6 +793,18 @@ export const messages = {
   'compare.helpPlacesLabel': 'Order',
   'compare.helpPlaces':
     'With more than two, they line up in the order they move, numbered, once none is open for changing. Those as fast share a number, marked =: either moves first, at random.',
+  'compare.helpTeamsLabel': 'Two a side',
+  'compare.helpTeams':
+    "Add a second to either team under its panel. A team has one of each species, its formes and Megas included: one on it shows greyed out in its other slot's list (the other team can still have it).",
+  'compare.helpListLabel': 'The list',
+  'compare.helpList':
+    'Up to 20 Pokémon, the same one more than once if you like (at different builds, say). Confirm, or tapping its band again, puts one away.',
+  'compare.helpBoth':
+    'Against two opponents, what each of yours takes to move before both: before the one of them that moves first.',
+  'compare.helpLadder':
+    'Your Pokémon there as yours, with its build, and the opponent found on the ladder; with two on a team, you choose which.',
+  'compare.ladderYours': 'As yours',
+  'compare.ladderFind': 'Found on the ladder',
   'compare.helpMatchups':
     'Each of yours against each opponent: which moves first, and by how much Speed. Tap one to see the two alone.',
   'compare.addYours': 'Add a second of yours',
