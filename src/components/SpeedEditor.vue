@@ -193,8 +193,10 @@ const canHover = window.matchMedia('(hover: hover)').matches
   align-items: stretch;
   gap: 8px;
 }
+/* The field at its usual width (a search box's, 320px) or less where the row is narrower, Clear right after it: the
+   two one control, whatever the panel's width. */
 .pick-row > .picker {
-  flex: 1;
+  flex: 0 1 320px;
   min-width: 0;
 }
 /* At the end, on its right, under a line. */
