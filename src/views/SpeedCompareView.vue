@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeftRight, ChevronDown, Plus, RotateCcw } from '@lucide/vue'
+import { ArrowLeftRight, ChevronDown, Plus, RotateCcw, Trash2 } from '@lucide/vue'
 import { pokemon, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
 import { currentSnapshots, distinctLabel, has } from '@/data/meta'
@@ -12,6 +12,7 @@ import { MAX_POINTS, type NatureEffect } from '@/lib/stats'
 import { buildQuery, buildSpeed, readBuild, toMoveFirst, type SpeedBuild } from '@/lib/speedBuild'
 import { LIST_MAX, listQuery, movePlaces, readList, type ListEntry } from '@/lib/speedLineup'
 import { TIERS_PICKS, lastTiersQuery } from '@/lib/tiersState'
+import { confirmDialog } from '@/composables/useConfirm'
 import { useMeta } from '@/composables/useMeta'
 import { useOpenState } from '@/composables/useOpenState'
 import AppLink from '@/components/AppLink'
@@ -231,6 +232,32 @@ function clear(key: string) {
   const second = s === 'a' || s === 'b' ? (`${s}2` as Slot) : null
   const q = second && idOf(second) ? { ...moveSlot(s, second), ...moveSlot(second, null) } : moveSlot(s, null)
   replace({ ...q, pair: undefined })
+}
+/** Every one of the teams cleared, with their builds (and the two tapped among the matchups); the rest stays. */
+function clearTeams() {
+  openKey.value = null
+  folded.value = new Set()
+  replace({
+    ...moveSlot('a', null),
+    ...moveSlot('a2', null),
+    ...moveSlot('b', null),
+    ...moveSlot('b2', null),
+    pair: undefined,
+  })
+}
+/** The speed order's list emptied: asked first past a few, as it can take a while to make. */
+async function clearList() {
+  if (
+    list.value.length > 4 &&
+    !(await confirmDialog({
+      message: t('compare.clearListConfirm', { n: list.value.length }),
+      confirm: t('compare.clearList'),
+      danger: true,
+    }))
+  )
+    return
+  openKey.value = null
+  setList([])
 }
 function swap() {
   replace({
@@ -481,6 +508,10 @@ function resetAll() {
       <button type="button" class="btn" :disabled="!anyPicked" @click="swap">
         <ArrowLeftRight :size="16" aria-hidden="true" />{{ t('compare.swap') }}
       </button>
+      <!-- At the row's end, apart from the rest. -->
+      <button type="button" class="btn inverted clear-all" :disabled="!anyPicked" @click="clearTeams">
+        <Trash2 :size="16" aria-hidden="true" />{{ t('compare.clearTeams') }}
+      </button>
       <AppLink v-if="!ladderChoices.length" :to="ladderLink" class="btn">{{ t('compare.toLadder') }}</AppLink>
       <!-- With a second on either team: which of yours goes there as yours, which opponent it finds. -->
       <div v-else ref="ladderMenu" class="ladder-menu">
@@ -515,6 +546,13 @@ function resetAll() {
           <AppLink :to="ladderLink" class="btn primary ladder-go">{{ t('compare.toLadder') }}</AppLink>
         </div>
       </div>
+    </div>
+
+    <!-- The speed order: emptying its list. -->
+    <div v-if="mode === 'order'" class="panel actions">
+      <button type="button" class="btn inverted" :disabled="!list.length" @click="clearList">
+        <Trash2 :size="16" aria-hidden="true" />{{ t('compare.clearList') }}
+      </button>
     </div>
 
     <!-- Past a pair, and in speed order: one under the other, in the order they move. -->
@@ -1109,6 +1147,11 @@ function resetAll() {
   outline-color: var(--opponent);
 }
 
+/* Clearing the teams: last in the row, pushed to its end. */
+.actions > .clear-all {
+  order: 1;
+  margin-left: auto;
+}
 /* The speed tiers' menu: under its button, over what follows. */
 .ladder-menu {
   position: relative;
