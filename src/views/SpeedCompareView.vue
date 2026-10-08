@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeftRight, ChevronDown, ChevronsDown, ChevronsUp, Trash2 } from '@lucide/vue'
+import { ArrowLeftRight, ChevronDown, ChevronsDown, ChevronsUp, RotateCcw, Trash2 } from '@lucide/vue'
 import { pokemon, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
 import { currentSnapshots, distinctLabel, has, percent } from '@/data/meta'
@@ -224,10 +224,23 @@ const active = computed(() => {
   return list
 })
 const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
+// Everything back as the page comes with nothing set, as the speed tiers' Reset all: its whole URL cleared (the two,
+// their builds, Trick Room), and on phones yours' panel open to pick it.
+const allChanged = computed(() => Object.keys(route.query).length > 0)
+function resetAll() {
+  openSide.value = 'a'
+  void router.replace({ query: {} })
+}
 </script>
 
 <template>
   <div class="compare-page">
+    <!-- Reset all, on the row of the way back to the speed tiers (the app's frame has a place for it there). -->
+    <Teleport to="#back-actions-speedCompare" defer>
+      <button v-if="allChanged" type="button" class="btn inverted" @click="resetAll">
+        <RotateCcw :size="16" aria-hidden="true" />{{ t('speed.resetAll') }}
+      </button>
+    </Teleport>
     <!-- The heading, the intro and how to read the page, and what applies to both sides (the snapshot the common
          builds come from, Trick Room): a panel folding away as the speed tiers' top one does, what's set said in short
          beside the heading while folded. Its heading opens and closes it itself, so the arrow and what's said change at
