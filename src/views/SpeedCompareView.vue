@@ -337,13 +337,13 @@ function resetAll() {
           open: openSide === side.s,
           opponent: side.s === 'b',
         }"
-        :aria-expanded="openSide === side.s"
+        :aria-expanded="side.id ? openSide === side.s : undefined"
         :aria-controls="`compare-${side.s}`"
         @click="toggleSide(side.s)"
       >
         <span class="tab-label"
           >{{ side.s === 'a' ? t('speed.yours') : t('compare.opponent')
-          }}<ChevronDown :size="16" class="tab-chevron" aria-hidden="true"
+          }}<ChevronDown :size="16" class="tab-chevron" :class="{ unset: !side.id }" aria-hidden="true"
         /></span>
         <BuildSummary v-if="side.id" :id="side.id" :speed="side.speed!" :build="side.build" class="tab-summary" />
         <span v-else class="tab-empty">{{ t('compare.pick') }}</span>
@@ -783,6 +783,10 @@ function resetAll() {
 }
 .tab.open .tab-chevron {
   transform: rotate(180deg);
+}
+/* With none picked there's nothing to fold: the tab picks one. Hidden, its room kept, so both tabs stay as tall. */
+.tab-chevron.unset {
+  visibility: hidden;
 }
 /* Its icon standing for its name (still read out), its modifiers under the rest when they don't fit beside it. */
 .tab-summary {
