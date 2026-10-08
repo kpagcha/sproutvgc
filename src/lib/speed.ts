@@ -1,5 +1,5 @@
 // Speed in Pokémon Champions: the stat as `stats.ts` computes it, a nature raising or lowering it. Then in battle,
-// modifiers multiply it (Tailwind, Choice Scarf, stat stages, paralysis), each rounded down in turn. Its only import is
+// modifiers multiply it (Tailwind, Choice Scarf, stat stages, paralysis), rounded as Showdown does (`inBattle`). Its only import is
 // `stats.ts`, with its extension, so that the generator can read it.
 
 import { MAX_POINTS, statValue, type NatureEffect } from './stats.ts'
@@ -62,17 +62,26 @@ export interface SpeedMods {
   quickFeet?: boolean
 }
 
-/** A Speed stat with the modifiers applied: the stage first, then each multiplier, rounded down each time. */
+/**
+ * A Speed stat with the modifiers applied, as Showdown computes it: the stat stage first, rounded down; then every
+ * multiplier (abilities, items, Tailwind) chained into one, in 4096ths, and applied once, rounding to the nearest and
+ * halves down; then paralysis halving it, rounded down, unless Quick Feet is at work.
+ */
 export function inBattle(speed: number, mods: SpeedMods): number {
   const stage = mods.stage ?? 0
-  let s = Math.floor((speed * Math.max(2, 2 + stage)) / Math.max(2, 2 - stage))
-  if (mods.doubled) s *= 2
-  if (mods.quickFeet) s = Math.floor(s * 1.5)
-  if (mods.scarf) s = Math.floor(s * 1.5)
-  if (mods.ironBall) s = Math.floor(s / 2)
-  if (mods.tailwind) s *= 2
-  if (mods.paralysis && !mods.quickFeet) s = Math.floor(s / 2)
-  return s
+  const s = Math.floor((speed * Math.max(2, 2 + stage)) / Math.max(2, 2 - stage))
+  const factors = [
+    mods.doubled && 2,
+    mods.quickFeet && 1.5,
+    mods.scarf && 1.5,
+    mods.ironBall && 0.5,
+    mods.tailwind && 2,
+  ].filter((f): f is number => !!f)
+  // Showdown's `chainModify` and `modify`.
+  let modifier = 4096
+  for (const f of factors) modifier = (modifier * Math.trunc(f * 4096) + 2048) >> 12
+  const v = Math.trunc((Math.trunc(s * modifier) + 2047) / 4096)
+  return mods.paralysis && !mods.quickFeet ? Math.floor((v * 50) / 100) : v
 }
 
 /**
