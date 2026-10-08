@@ -25,6 +25,8 @@ const props = defineProps<{
   /** A band on top saying what it's picking for, in its side's color: yours blue, an opponent red. */
   title?: string
   tone?: 'yours' | 'opponent'
+  /** The band closes it when tapped, an arrow at its end saying so. */
+  caret?: boolean
   /** Shows each one's Speed at the end of its row, with no points and a neutral nature: a quick preview of how fast. */
   speed?: boolean
 }>()
@@ -91,7 +93,17 @@ const optionId = (i: number) => `${listId}-${i}`
 
 <template>
   <div class="panel search-panel">
-    <div v-if="props.title" class="title-band" :class="props.tone">{{ props.title }}</div>
+    <button
+      v-if="props.title && props.caret"
+      type="button"
+      class="title-band caret"
+      :class="props.tone"
+      aria-expanded="true"
+      @click="emit('close')"
+    >
+      {{ props.title }}<span class="marker" aria-hidden="true">▾</span>
+    </button>
+    <div v-else-if="props.title" class="title-band" :class="props.tone">{{ props.title }}</div>
     <div class="head">
       <SearchBox
         ref="box"
@@ -154,6 +166,27 @@ const optionId = (i: number) => `${listId}-${i}`
   color: var(--text);
   background: var(--panel-alt);
   border-bottom: 2px solid var(--ink);
+}
+/* As a button closing it: the band's row, its arrow at the end. */
+.title-band.caret {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  font: inherit;
+  font-weight: bold;
+  text-align: start;
+  border: none;
+  border-bottom: 2px solid var(--ink);
+  border-radius: 0;
+  cursor: pointer;
+}
+/* Drawn as the speed pages' disclosures' arrows. */
+.marker {
+  display: inline-block;
+  width: 0.85em;
+  margin-left: auto;
+  font-size: 1.15em;
+  line-height: 1;
 }
 .title-band.yours {
   color: var(--accent-text);
