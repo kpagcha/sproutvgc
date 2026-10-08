@@ -346,9 +346,10 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
         class="panel banded side"
         :class="{
           first: verdict && !verdict.tie && verdict.first === side.s,
-          // On phones, the open one is outlined whenever there are two, neutral while it doesn't move first, so a
-          // change to its build shows how it goes at once.
+          // On phones, the open one is outlined whenever there are two (in its color when it moves first, neutral on a
+          // tie), so a change to its build shows how it goes at once.
           judged: phone && !!verdict,
+          tied: phone && verdict?.tie,
           opponent: side.s === 'b',
         }"
       >
@@ -724,7 +725,8 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  margin-bottom: 4px;
+  /* Clear of the open panel's outline (its width and offset), which the strip would otherwise cover. */
+  margin-bottom: 6px;
   padding: 6px 0 8px;
   background: var(--bg);
 }
@@ -832,11 +834,15 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
   font-weight: bold;
 }
 /* The one that moves first, marked by its outline: blue for yours, the opponents' red for an opponent; on a tie,
-   neither. On phones, the open one is outlined either way, neutral while it doesn't move first. */
+   neither. On phones, the open one has its outline whenever there are two, neutral on a tie and see-through while it
+   moves after, so it's only its color that changes. */
 .side.first,
 .side.judged {
-  outline: 3px solid var(--muted);
+  outline: 3px solid transparent;
   outline-offset: 2px;
+}
+.side.tied {
+  outline-color: var(--muted);
 }
 .side.first {
   outline-color: var(--accent);
