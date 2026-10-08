@@ -509,7 +509,7 @@ function resetAll() {
         <ArrowLeftRight :size="16" aria-hidden="true" />{{ t('compare.swap') }}
       </button>
       <!-- At the row's end, apart from the rest. -->
-      <button type="button" class="btn inverted clear-all" :disabled="!anyPicked" @click="clearTeams">
+      <button v-if="!phone" type="button" class="btn inverted clear-all" :disabled="!anyPicked" @click="clearTeams">
         <Trash2 :size="16" aria-hidden="true" />{{ t('compare.clearTeams') }}
       </button>
       <AppLink v-if="!ladderChoices.length" :to="ladderLink" class="btn">{{ t('compare.toLadder') }}</AppLink>
@@ -548,15 +548,18 @@ function resetAll() {
       </div>
     </div>
 
-    <!-- The speed order: emptying its list. -->
-    <div v-if="mode === 'order'" class="panel actions">
-      <button type="button" class="btn inverted" :disabled="!list.length" @click="clearList">
-        <Trash2 :size="16" aria-hidden="true" />{{ t('compare.clearList') }}
-      </button>
-    </div>
-
     <!-- Past a pair, and in speed order: one under the other, in the order they move. -->
     <template v-if="stacked">
+      <!-- Over the list, on its right: emptying it (in speed order), or clearing the teams (on phones, where the row
+           above has no room for it). -->
+      <div v-if="mode === 'order' || phone" class="clear-row">
+        <button v-if="mode === 'order'" type="button" class="btn inverted" :disabled="!list.length" @click="clearList">
+          <Trash2 :size="16" aria-hidden="true" />{{ t('compare.clearList') }}
+        </button>
+        <button v-else type="button" class="btn inverted" :disabled="!anyPicked" @click="clearTeams">
+          <Trash2 :size="16" aria-hidden="true" />{{ t('compare.clearTeams') }}
+        </button>
+      </div>
       <SpeedLineup :entries="lineup" :open-key="openKey" @toggle="toggleOpen">
         <template #editor="{ entry }">
           <SpeedEditor
@@ -675,6 +678,12 @@ function resetAll() {
       <!-- On phones, the two side by side as tabs, each with its Pokémon in short, stuck to the top while the page
            scrolls: tapping one opens its panel under them, tapping it again folds it. Who moves first is
            marked on the verdict and the open panel, not on them. -->
+      <!-- On phones, over the tabs, on their right: clearing the teams. -->
+      <div v-if="phone" class="clear-row">
+        <button type="button" class="btn inverted" :disabled="!anyPicked" @click="clearTeams">
+          <Trash2 :size="16" aria-hidden="true" />{{ t('compare.clearTeams') }}
+        </button>
+      </div>
       <div v-if="phone" class="side-tabs">
         <button
           v-for="side in sides"
@@ -1147,6 +1156,15 @@ function resetAll() {
   outline-color: var(--opponent);
 }
 
+/* Over the Pokémon, on the right, on a row of its own. */
+.clear-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+.clear-row > .btn {
+  gap: 6px;
+}
 /* Clearing the teams: last in the row, pushed to its end. */
 .actions > .clear-all {
   order: 1;
