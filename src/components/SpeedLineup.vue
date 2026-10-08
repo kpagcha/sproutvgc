@@ -77,6 +77,8 @@ watch(
   { flush: 'pre' },
 )
 
+// Its place in words on hover; on touch screens a tap opens the band, and the badge is read out anyway.
+const canHover = window.matchMedia('(hover: hover)').matches
 const placeLabel = (p: Place) => t(p.tie ? 'compare.placeTie' : 'compare.place', { n: p.rank })
 /** What an empty one picks: whose it is, as nothing else in the list says. */
 const pickLabel = (e: LineupEntry) =>
@@ -99,7 +101,7 @@ const teamLabel = (e: LineupEntry) =>
         @click="emit('toggle', e.key)"
       >
         <span
-          v-tip="e.place && placeLabel(e.place)"
+          v-tip="canHover && e.place && placeLabel(e.place)"
           class="place"
           :class="{ tie: e.place?.tie, unset: !e.place }"
           :aria-label="e.place ? placeLabel(e.place) : undefined"

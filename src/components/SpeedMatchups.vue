@@ -27,6 +27,8 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ pair: [pair: [string, string] | null] }>()
 
+// Who moves first, on a cell's hover; on touch screens a tap shows the two alone instead.
+const canHover = window.matchMedia('(hover: hover)').matches
 const outcome = (y: Mon, o: Mon) => movesBefore(y.speed, o.speed, props.trickRoom)
 const KIND = { 1: 'first', 0: 'tie', [-1]: 'after' } as const
 const cellText = (y: Mon, o: Mon) => t(`compare.cell.${KIND[outcome(y, o)]}`)
@@ -78,7 +80,7 @@ const toBeat = computed(() =>
         <button
           v-for="o in opponents"
           :key="o.key"
-          v-tip="cellTip(y, o)"
+          v-tip="canHover && cellTip(y, o)"
           type="button"
           class="cell"
           :class="[KIND[outcome(y, o)], { on: isPicked(y, o) }]"

@@ -91,8 +91,9 @@ const canHover = window.matchMedia('(hover: hover)').matches
       <!-- The meta's builds of it, to pick one in a tap. -->
       <section v-if="props.common.length" class="part">
         <span class="muted small">{{ t('compare.common') }}</span>
-        <!-- On one line, scrolling sideways when they don't fit; on phones, wrapping. -->
-        <ScrollRow wrap-on-phones class="builds">
+        <!-- On one line, scrolling sideways when they don't fit; on phones, wrapping. Each Pokémon's from its start,
+             not where the last one's was left. -->
+        <ScrollRow :key="props.id" wrap-on-phones class="builds">
           <button
             v-for="b in props.common"
             :key="`${b.effect}:${b.points}`"
