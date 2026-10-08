@@ -708,6 +708,8 @@ export const messages = {
   'speed.fieldConfirm':
     '{ability} needs {field}: it will be in play for every Pokémon on the ladder. Their sets that it boosts count as boosted, and boosts that need another weather or terrain leave the ladder.',
   'speed.fieldConfirmButton': 'Set {field}',
+  'speed.fieldFrom': "From your {name}'s {ability}: {field} for every Pokémon on the ladder. The cross turns it off.",
+  'speed.fieldOff': 'Turn off {ability} ({field})',
   'speed.modShort.paralysis': 'PAR',
   'speed.modTip.ironball': 'Halves Speed.',
   'speed.vsClose': 'Close',

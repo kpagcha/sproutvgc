@@ -395,6 +395,13 @@ function remapVs(field: Field | null) {
   if (!field || isTerrain(when) !== isTerrain(field) || when === field) return vs
   return top ? `${id}:${top.points}:${top.nature}` : m ? undefined : `${id}:${boostBench.value}`
 }
+/** What brings the field in play, for where it's said: yours' ability, by name. */
+const fieldSource = computed(() => {
+  const a = mine.value && inPlay.value ? doubling(mine.value, myBuild.value) : undefined
+  return a ? refName(ability(a as AbilityId)) : null
+})
+/** The field out of play: yours' ability that brings it turned off. */
+const clearField = () => void toggleMine(myToggles.value.has('doubled2') ? 'doubled2' : 'doubled')
 /** Yours' modifiers' buttons: its doubling abilities by name, only those it can have. */
 const myModButtons = computed(() => modButtons(mine.value))
 const setMyStage = (v: string) => set('mystage', v === '0' ? undefined : v)
@@ -1363,6 +1370,26 @@ const { entered } = usePageEntered()
               {{ t('speed.mod.trickroom') }}
             </label>
             <span class="muted">{{ t('speed.modTip.trickroom') }}</span>
+            <!-- The weather or terrain in play, from yours' ability: said as a switch that's on, its cross turning the
+                 ability off; on phones, where the descriptions go, what brings it said on the button itself. -->
+            <template v-if="inPlay">
+              <button
+                type="button"
+                class="btn switch on field-status"
+                :aria-label="t('speed.fieldOff', { ability: fieldSource!, field: fieldLabel(inPlay) })"
+                @click="clearField"
+              >
+                {{ fieldLabel(inPlay) }}<span class="field-source"> · {{ fieldSource }}</span
+                ><X :size="16" aria-hidden="true" />
+              </button>
+              <span class="muted">{{
+                t('speed.fieldFrom', {
+                  name: refName(pokemon(mine!)),
+                  ability: fieldSource!,
+                  field: fieldLabel(inPlay),
+                })
+              }}</span>
+            </template>
             <button type="button" class="btn disclosure" :aria-expanded="modsOpen" @click="toggleMods">
               <Plus :size="16" aria-hidden="true" />{{ t('speed.modifiers')
               }}<span class="marker" aria-hidden="true">{{ modsOpen ? '▾' : '▸' }}</span>
@@ -1404,6 +1431,8 @@ const { entered } = usePageEntered()
         <div v-if="mine" class="band opponents-head">
           <strong>{{ t('speed.opponentsHead') }}</strong>
           <span>{{ t('speed.opponentsHint') }}</span>
+          <!-- The weather or terrain they're in, from yours' ability, at the band's end. -->
+          <span v-if="inPlay" class="field-tag">{{ fieldLabel(inPlay) }}</span>
         </div>
         <!-- Finding a Pokémon on the ladder: a band on top, sitting on the rows. -->
         <div class="band find find-row" :class="{ flash: flashFind }" @animationend="flashFind = false">
@@ -2179,6 +2208,27 @@ const { entered } = usePageEntered()
   font-weight: normal;
   opacity: 0.85;
 }
+/* The field they're in: a tag outlined in the band's text, at its end, kept to one line. */
+.opponents-head > .field-tag {
+  align-self: center;
+  margin-left: auto;
+  padding: 0 6px;
+  font-weight: bold;
+  white-space: nowrap;
+  border: 1px solid currentColor;
+  opacity: 1;
+}
+/* The field in play among the options: its cross at its end. */
+.field-status {
+  gap: 6px;
+}
+.field-status > .lucide {
+  margin-left: auto;
+}
+.field-source {
+  display: none;
+  font-weight: normal;
+}
 /* The panel's bands, stacked: the opponents' (with yours picked), then the find's on the rows. */
 :root:root .list.banded > .band.find-row {
   margin-bottom: 6px;
@@ -2882,6 +2932,10 @@ const { entered } = usePageEntered()
   }
   .options > .muted {
     display: none;
+  }
+  /* Its description gone, what brings the field said on its button. */
+  .field-source {
+    display: inline;
   }
   .disclosure {
     margin-top: 6px;

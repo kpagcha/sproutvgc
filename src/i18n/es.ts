@@ -717,6 +717,8 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.fieldConfirm':
     '{ability} necesita {field}: estará en juego para todos los Pokémon de la escala. Sus sets que mejora cuentan como mejorados, y las mejoras que necesitan otro clima o campo salen de la escala.',
   'speed.fieldConfirmButton': 'Poner {field}',
+  'speed.fieldFrom': '{ability} de tu {name}: {field} para todos los Pokémon de la escala. La cruz lo quita.',
+  'speed.fieldOff': 'Quitar {ability} ({field})',
   'speed.modShort.paralysis': 'PAR',
   'speed.modTip.ironball': 'Reduce la Velocidad a la mitad.',
   'speed.vsClose': 'Cerrar',
