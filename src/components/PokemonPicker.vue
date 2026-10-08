@@ -31,6 +31,8 @@ const props = defineProps<{
   /** On phones, the band on top of the dialog's card saying what it's picking for, in its side's color. */
   title?: string
   tone?: 'yours' | 'opponent'
+  /** The band closes the dialog when tapped, an arrow at its end saying so, as the bar it opened from has. */
+  caret?: boolean
   /** Shows each one's Speed at the end of its row, with no points and a neutral nature: a quick preview of how fast. */
   speed?: boolean
   /** Lists them by usage, by these ranks (the meta's), each with its rank, rather than by name. */
@@ -321,6 +323,7 @@ const optionId = (i: number) => `${listId}-${i}`
         :icon="props.icon"
         :title="props.title"
         :tone="props.tone"
+        :caret="props.caret"
         :speed="props.speed"
         :ranks="props.ranks"
         @pick="pick"

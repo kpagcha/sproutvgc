@@ -2,7 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
 import { AnimatePresence, motion } from 'motion-v'
 import { useRouter } from 'vue-router'
-import { ArrowRight, ChevronsDown, ChevronsUp, Columns2, Plus, RotateCcw, Trash2, X } from '@lucide/vue'
+import { ArrowLeftRight, ArrowRight, ChevronsDown, ChevronsUp, Columns2, Plus, RotateCcw, Trash2, X } from '@lucide/vue'
 import {
   ability,
   availableIds,
@@ -286,6 +286,14 @@ function clearMine() {
   for (const k of ['mine', 'mynat', 'mypts', 'mymods', 'mystage', 'vs']) delete q[k]
   void router.replace({ query: q })
 }
+/** Yours and the one found swapped: the one found yours, at its build as picked (keeping your modifiers, as picking
+ * one does), and yours found. */
+function swapMine() {
+  if (mine.value === null || found.value === null) return
+  void router.replace({
+    query: { ...query.value, mine: found.value, ...buildOf(found.value), find: mine.value, vs: undefined },
+  })
+}
 const setMyNature = (e: NatureEffect) => set('mynat', e)
 const setMyPoints = (v: string) => {
   const n = Math.round(Number(v))
@@ -321,7 +329,7 @@ interface Entry {
   share?: number
   bench?: Benchmark
   /** An item or ability its sets run that changes Speed (`SPEED_ITEMS`, `SPEED_ABILITIES`), at its most common
-   * Speed build. */
+   * Speed build: `speed` is the build's, the effect applied with the modifiers (`chipSpeed`). */
   boost?: { ref: Ref<'item' | 'ability'> } & SpeedEffect
   /** Your Pokémon, with its own modifiers rather than the others'. */
   mine?: true
@@ -349,7 +357,7 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
       extra,
     }))
   // Its boosts, at its most common build: the data counts items, abilities and spreads apart, so it doesn't say which
-  // build goes with them.
+  // build goes with them. Those the modifiers rule out (Unburden with a Choice Scarf on everyone) are left out.
   const build = m.speeds?.[0]
   if (showBoosts.value && build) {
     const speed = speedStat(base, build.points, natureEffect(build.nature))
@@ -359,12 +367,14 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
       ...(m.abilities ?? []).map((a) => ({ ref: ability(a.id), share: a.share, effect: SPEED_ABILITIES[a.id] })),
     ]
     for (const { ref, share, effect } of effects) {
-      if (effect && (share ?? 0) >= MIN_SHARE && inField(effect.when))
-        list.push({ ...at, speed: withEffect(speed, effect), share, boost: { ref, ...effect } })
+      if (effect && (share ?? 0) >= MIN_SHARE && inField(effect.when) && withEffect(mods.value, effect))
+        list.push({ ...at, speed, share, boost: { ref, ...effect } })
     }
   }
   return list
 }
+/** A chip's Speed in battle: with the modifiers, and its boost's effect among them, counted once if they have it. */
+const chipSpeed = (e: Entry) => inBattle(e.speed, (e.boost && withEffect(mods.value, e.boost)) || mods.value)
 const megaShown = (id: PokemonId) => showMegas.value || !POKEMON[id].mega
 /** Every chip the view has, before the filters. */
 const pool = computed<Entry[]>(() => {
@@ -570,7 +580,7 @@ const tiers = computed(() => {
   const bySpeed = new Map<number, Entry[]>()
   for (const e of entries.value) {
     if (onlyFound.value && e.id !== found.value) continue
-    const s = inBattle(e.speed, mods.value)
+    const s = chipSpeed(e)
     bySpeed.set(s, [...(bySpeed.get(s) ?? []), e])
   }
   // Yours, first at its Speed.
@@ -640,7 +650,7 @@ const summary = computed(() => {
     if (e.extra) continue
     const w = weight(e)
     if (!w) continue
-    const theirs = inBattle(e.speed, mods.value)
+    const theirs = chipSpeed(e)
     const k = theirs === mySpeed.value ? 'ties' : mySpeed.value > theirs !== trickRoom.value ? 'first' : 'after'
     tally[k] += w
     total += w
@@ -655,7 +665,7 @@ const versus = computed(() => {
   if (mine.value === null || typeof query.value.vs !== 'string') return null
   const e = entries.value.find((x) => chipKey(x) === query.value.vs)
   if (!e) return null
-  const target = inBattle(e.speed, mods.value)
+  const target = chipSpeed(e)
   const base = POKEMON[mine.value].stats[5]
   const at = (effect: NatureEffect) => pointsToMoveFirst(base, effect, myMods.value, target, trickRoom.value)
   // Yours' nature, and when no points do it with that one, the nature that would: raising Speed (lowering it, under
@@ -712,18 +722,16 @@ const myBuild = computed<SpeedBuild>(() => ({
   toggles: [...myToggles.value],
   stage: Number(myStage.value),
 }))
+/** A boost's toggle in a build: Quick Feet has none. */
+const BOOST_TOGGLES: Partial<Record<SpeedEffect['mod'], BuildToggle>> = {
+  scarf: 'scarf',
+  ironBall: 'ironball',
+  doubled: 'doubled',
+}
 /** The ladder's modifiers for everyone, with an item or ability a chip's sets run. */
 function othersBuild(b: Pick<SpeedBuild, 'effect' | 'points'>, boost?: Entry['boost']): SpeedBuild {
   let toggles: BuildToggle[] = TOGGLES.filter(flag)
-  const k: BuildToggle | null = !boost
-    ? null
-    : boost.ref.id === 'choicescarf'
-      ? 'scarf'
-      : boost.ref.id === 'ironball'
-        ? 'ironball'
-        : boost.factor === 2
-          ? 'doubled'
-          : null
+  const k: BuildToggle | null = !boost ? null : (BOOST_TOGGLES[boost.mod] ?? null)
   if (k && !toggles.includes(k)) toggles = toggled(toggles, k)
   return { ...b, toggles, stage: Number(stage.value) }
 }
@@ -1301,6 +1309,17 @@ const { entered } = usePageEntered()
             ><Columns2 :size="16" aria-hidden="true" />{{ t('compare.short')
             }}<ArrowRight :size="16" aria-hidden="true"
           /></AppLink>
+          <!-- Yours and the one found swapped, once there's yours; its icon alone on phones, so the row still fits. -->
+          <button
+            v-if="found"
+            type="button"
+            class="btn find-mode find-swap"
+            :disabled="!mine"
+            :aria-label="t('compare.swap')"
+            @click="swapMine"
+          >
+            <ArrowLeftRight :size="16" aria-hidden="true" /><span class="swap-text">{{ t('compare.swap') }}</span>
+          </button>
           <button v-if="found" type="button" class="btn inverted find-clear" @click="setFound(null)">
             <Trash2 :size="16" aria-hidden="true" />{{ t('speed.clear') }}
           </button>
@@ -1559,6 +1578,7 @@ const { entered } = usePageEntered()
                 :placeholder="t('speed.yoursPick')"
                 :title="t('speed.yours')"
                 tone="yours"
+                :caret="!mine"
                 list-width-of=".yours-pick"
                 speed
                 icon
@@ -1734,7 +1754,7 @@ const { entered } = usePageEntered()
   border-top: 1px solid var(--border);
 }
 /* In a dialog over the page (phones), one card filling it: yours' card scrolling within it, its band on top saying
-   what it is (Clear left to the actions), and the actions at its foot, always there. */
+   what it is and closing it (Clear left to the actions), and the actions at its foot, always there. */
 .yours-sheet {
   display: flex;
   flex-direction: column;
@@ -1753,9 +1773,13 @@ const { entered } = usePageEntered()
   border: none;
   box-shadow: none;
 }
-.yours-sheet .band-clear,
-.yours-sheet .yours-marker {
+.yours-sheet .band-clear {
   display: none;
+}
+/* Its arrow at the band's end, where the bar's is: a tap on the band folds the card back into the bar. */
+.yours-sheet .yours-marker {
+  order: 1;
+  margin-left: auto;
 }
 .sheet-actions {
   flex: none;
@@ -2100,6 +2124,14 @@ const { entered } = usePageEntered()
 }
 .find-compare {
   gap: 6px;
+}
+.find-swap {
+  gap: 6px;
+}
+@media (max-width: 480px) {
+  .swap-text {
+    display: none;
+  }
 }
 .find-compare:hover {
   text-decoration: none;

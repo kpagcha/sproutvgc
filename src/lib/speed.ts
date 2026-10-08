@@ -21,10 +21,11 @@ export const speedStat = (base: number, points: number, effect: NatureEffect) =>
  */
 export type SpeedWhen = 'always' | 'rain' | 'sun' | 'sandstorm' | 'snow' | 'electricterrain' | 'itemLost' | 'status'
 
-/** An item's or ability's effect on Speed: what it multiplies it by, and when. */
+/** An item's or ability's effect on Speed: what it multiplies it by, when, and the modifier that applies it. */
 export interface SpeedEffect {
   factor: number
   when: SpeedWhen
+  mod: 'scarf' | 'ironBall' | 'doubled' | 'quickFeet'
 }
 
 /**
@@ -33,21 +34,18 @@ export interface SpeedEffect {
  * regulation has that are missing here.
  */
 export const SPEED_ITEMS: Record<string, SpeedEffect> = {
-  choicescarf: { factor: 1.5, when: 'always' },
-  ironball: { factor: 0.5, when: 'always' },
+  choicescarf: { factor: 1.5, when: 'always', mod: 'scarf' },
+  ironball: { factor: 0.5, when: 'always', mod: 'ironBall' },
 }
 export const SPEED_ABILITIES: Record<string, SpeedEffect> = {
-  swiftswim: { factor: 2, when: 'rain' },
-  chlorophyll: { factor: 2, when: 'sun' },
-  sandrush: { factor: 2, when: 'sandstorm' },
-  slushrush: { factor: 2, when: 'snow' },
-  surgesurfer: { factor: 2, when: 'electricterrain' },
-  unburden: { factor: 2, when: 'itemLost' },
-  quickfeet: { factor: 1.5, when: 'status' },
+  swiftswim: { factor: 2, when: 'rain', mod: 'doubled' },
+  chlorophyll: { factor: 2, when: 'sun', mod: 'doubled' },
+  sandrush: { factor: 2, when: 'sandstorm', mod: 'doubled' },
+  slushrush: { factor: 2, when: 'snow', mod: 'doubled' },
+  surgesurfer: { factor: 2, when: 'electricterrain', mod: 'doubled' },
+  unburden: { factor: 2, when: 'itemLost', mod: 'doubled' },
+  quickfeet: { factor: 1.5, when: 'status', mod: 'quickFeet' },
 }
-
-/** A Speed stat with an item's or ability's effect, rounded down. */
-export const withEffect = (speed: number, e: SpeedEffect) => Math.floor(speed * e.factor)
 
 /** What changes Speed in battle. */
 export interface SpeedMods {
@@ -58,8 +56,10 @@ export interface SpeedMods {
   /** Stat stage, -6 to +6. */
   stage?: number
   paralysis?: boolean
-  /** Swift Swim, Chlorophyll, Sand Rush, Slush Rush and Unburden at work. */
+  /** Swift Swim, Chlorophyll, Sand Rush, Slush Rush, Surge Surfer and Unburden at work. */
   doubled?: boolean
+  /** Quick Feet at work: it raises Speed by half, and paralysis then doesn't halve it. */
+  quickFeet?: boolean
 }
 
 /** A Speed stat with the modifiers applied: the stage first, then each multiplier, rounded down each time. */
@@ -67,11 +67,23 @@ export function inBattle(speed: number, mods: SpeedMods): number {
   const stage = mods.stage ?? 0
   let s = Math.floor((speed * Math.max(2, 2 + stage)) / Math.max(2, 2 - stage))
   if (mods.doubled) s *= 2
+  if (mods.quickFeet) s = Math.floor(s * 1.5)
   if (mods.scarf) s = Math.floor(s * 1.5)
   if (mods.ironBall) s = Math.floor(s / 2)
   if (mods.tailwind) s *= 2
-  if (mods.paralysis) s = Math.floor(s / 2)
+  if (mods.paralysis && !mods.quickFeet) s = Math.floor(s / 2)
   return s
+}
+
+/**
+ * The modifiers with an item's or ability's effect on Speed among them, counted once if they have it already; or null
+ * when the two can't be together: a Choice Scarf and an Iron Ball both held, or Unburden at work while holding either.
+ */
+export function withEffect(mods: SpeedMods, e: SpeedEffect): SpeedMods | null {
+  const held = mods.scarf || mods.ironBall
+  if (e.when === 'itemLost' && held) return null
+  if ((e.mod === 'scarf' && mods.ironBall) || (e.mod === 'ironBall' && mods.scarf)) return null
+  return { ...mods, [e.mod]: true }
 }
 
 /** Every nature effect, fastest first. */
