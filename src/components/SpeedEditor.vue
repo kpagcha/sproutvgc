@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useTemplateRef } from 'vue'
+import { computed, useTemplateRef } from 'vue'
 import { ChevronsDown, ChevronsUp, Trash2 } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { percent } from '@/data/meta'
@@ -8,7 +8,7 @@ import { natureName } from '@/data/natures'
 import { t } from '@/i18n'
 import { NATURE_EFFECTS, NATURES_BY_EFFECT } from '@/lib/speed'
 import { MAX_POINTS, type NatureEffect } from '@/lib/stats'
-import { BUILD_TOGGLES, toggled, type BuildToggle, type SpeedBuild } from '@/lib/speedBuild'
+import { modButtons, toggled, type BuildToggle, type SpeedBuild } from '@/lib/speedBuild'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonPicker from '@/components/PokemonPicker.vue'
 import ScrollRow from '@/components/ScrollRow.vue'
@@ -52,10 +52,8 @@ const toggle = (k: BuildToggle) => emit('build', { toggles: toggled(props.build.
 
 const STAGES = ['-2', '-1', '0', '1', '2'] as const
 const stageLabel = (s: string) => (Number(s) > 0 ? `+${s}` : s.replace('-', '−'))
-const MOD_ITEMS: Partial<Record<BuildToggle, 'choicescarf' | 'ironball'>> = {
-  scarf: 'choicescarf',
-  ironball: 'ironball',
-}
+/** Its modifiers' buttons: its doubling abilities' by name, only those it can have. */
+const mods = computed(() => modButtons(props.id))
 /** The nature effects' choice shows them as arrows beside "Spe", up and down, neutral as a word. */
 const EFFECT_ICONS = { up: ChevronsUp, neutral: undefined, down: ChevronsDown }
 const naturesOf = (e: NatureEffect) =>
@@ -161,16 +159,16 @@ const canHover = window.matchMedia('(hover: hover)').matches
         <span class="muted small">{{ t('speed.modifiers') }}</span>
         <div class="mods">
           <button
-            v-for="k in BUILD_TOGGLES"
-            :key="k"
-            v-tip="canHover && t(`speed.modTip.${k}`)"
+            v-for="m in mods"
+            :key="m.key"
+            v-tip="canHover && m.tip"
             type="button"
             class="btn mod"
-            :class="{ on: props.build.toggles.includes(k) }"
-            :aria-pressed="props.build.toggles.includes(k)"
-            @click="toggle(k)"
+            :class="{ on: props.build.toggles.includes(m.key) }"
+            :aria-pressed="props.build.toggles.includes(m.key)"
+            @click="toggle(m.key)"
           >
-            <ItemIcon v-if="MOD_ITEMS[k]" :id="MOD_ITEMS[k]!" :scale="0.75" class="mod-item" />{{ t(`speed.mod.${k}`) }}
+            <ItemIcon v-if="m.item" :id="m.item" :scale="0.75" class="mod-item" />{{ m.label }}
           </button>
         </div>
         <SegmentedControl

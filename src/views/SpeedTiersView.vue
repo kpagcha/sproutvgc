@@ -49,7 +49,19 @@ import {
   withEffect,
 } from '@/lib/speed'
 import { BENCHMARKS, MAX_POINTS, benchmark, type Benchmark, type NatureEffect } from '@/lib/stats'
-import { FASTEST, benchBuild, buildQuery, toggled, type BuildToggle, type SpeedBuild } from '@/lib/speedBuild'
+import {
+  FASTEST,
+  benchBuild,
+  buildQuery,
+  doublerToggle,
+  doublers,
+  doubling,
+  modButtons,
+  toggled,
+  type BuildToggle,
+  type SpeedBuild,
+} from '@/lib/speedBuild'
+import { confirmDialog } from '@/composables/useConfirm'
 import { lastTiersQuery } from '@/lib/tiersState'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useMeta } from '@/composables/useMeta'
@@ -109,7 +121,7 @@ const stage = computed({
   get: () => ((STAGES as readonly string[]).includes(String(query.value.stage)) ? String(query.value.stage) : '0'),
   set: (v: string) => set('stage', v === '0' ? undefined : v),
 })
-const TOGGLES = ['tailwind', 'scarf', 'doubled', 'paralysis'] as const
+const TOGGLES = ['tailwind', 'scarf', 'paralysis'] as const
 type Toggle = (typeof TOGGLES)[number]
 const toggleMod = (k: Toggle) => set(k, flag(k) ? undefined : '1')
 /** The modifiers that are items, shown with their icon. */
@@ -117,7 +129,6 @@ const MOD_ITEMS: Partial<Record<string, ItemId>> = { scarf: 'choicescarf', ironb
 const mods = computed<SpeedMods>(() => ({
   tailwind: flag('tailwind'),
   scarf: flag('scarf'),
-  doubled: flag('doubled'),
   paralysis: flag('paralysis'),
   stage: Number(stage.value),
 }))
@@ -164,22 +175,27 @@ function toggleBoosts() {
   set('boosts', on ? undefined : '0')
 }
 const toggleTrickRoom = () => set('trickroom', trickRoom.value ? undefined : '1')
-// The weather or terrain in play (`?field=`), for the boosts that need one: with one picked, those of every other one
-// leave the ladder (as do all of them with none), and its own count as how its sets play in how often yours moves
-// first. Unpicked, every boost shows, whatever it needs.
-const FIELDS = ['none', 'sun', 'rain', 'sandstorm', 'snow', 'electricterrain'] as const
+// The weather or terrain in play: the one yours' doubling ability needs, its ×2 on (Swift Swim, rain), as it's then
+// the battle's for everyone on the ladder. Boosts needing another weather (or terrain) leave the ladder; those needing
+// it are how their sets play, counted as such in how often yours moves first. With none, every boost shows, whatever
+// it needs, as what could be.
+const FIELDS = ['sun', 'rain', 'sandstorm', 'snow', 'electricterrain'] as const
 type Field = (typeof FIELDS)[number]
-const fieldPicked = computed<Field | null>(() =>
-  (FIELDS as readonly unknown[]).includes(query.value.field) ? (query.value.field as Field) : null,
-)
-/** The field the ladder is read in: only while boosts show, as it's about them. */
-const inPlay = computed(() => (showBoosts.value ? fieldPicked.value : null))
-const setField = (v: string) => set('field', v || undefined)
-const fieldLabel = (f: Field) => (f === 'none' ? t('speed.fieldNone') : refName(condition(f)))
 /** Whether a boost's condition is a weather or terrain. */
-const needsField = (w: SpeedWhen) => (FIELDS as readonly string[]).includes(w)
-/** Whether a boost applies in the field picked: always, without one. */
-const inField = (w: SpeedWhen) => !inPlay.value || !needsField(w) || w === inPlay.value
+const needsField = (w: SpeedWhen): w is Field => (FIELDS as readonly string[]).includes(w)
+const isTerrain = (w: Field) => w === 'electricterrain'
+/** The weather or terrain a doubling ability needs, if that's what it needs. */
+const fieldOf = (a: string | undefined): Field | null => {
+  const w = a ? SPEED_ABILITIES[a]?.when : undefined
+  return w && needsField(w) ? w : null
+}
+const inPlay = computed<Field | null>(() => (mine.value ? fieldOf(doubling(mine.value, myBuild.value)) : null))
+const fieldLabel = (f: Field) => refName(condition(f))
+/** Whether a boost can be in the field in play: a weather can't with another weather, a terrain with another terrain. */
+const inField = (w: SpeedWhen) =>
+  !inPlay.value || !needsField(w) || w === inPlay.value || isTerrain(w) !== isTerrain(inPlay.value)
+/** Whether a boost is in play: the field's own, which its sets have, rather than what could be. */
+const live = (b: Boost) => b.ref.kind === 'ability' && !!inPlay.value && b.when === inPlay.value
 // The controls back as a page comes without them: what's shown, the options and the modifiers, boosts on again here
 // too. What's found and kept, and yours, are left as they are.
 // Everything back as the page comes with nothing set: its whole URL cleared (what's shown, the options, yours, what's
@@ -197,7 +213,8 @@ function resetAll() {
   yoursOpen.value = false
   void router.replace({ query: {} })
 }
-const CONTROL_KEYS = ['all', 'bench', 'trickroom', 'megas', 'boosts', 'field', 'stage', ...TOGGLES] as const
+// `field` and `doubled` were controls of their own, once: cleared with the rest, from an old link.
+const CONTROL_KEYS = ['all', 'bench', 'trickroom', 'megas', 'boosts', 'field', 'doubled', 'stage', ...TOGGLES] as const
 const controlsChanged = computed(() => CONTROL_KEYS.some((k) => query.value[k] !== undefined) || !boostsOn.value)
 function resetControls() {
   boostsPref.value = true
@@ -228,7 +245,7 @@ const myPoints = computed(() => {
   const n = Number(query.value.mypts)
   return Number.isInteger(n) && n >= 0 && n <= MAX_POINTS ? n : MAX_POINTS
 })
-const MY_TOGGLES = ['tailwind', 'scarf', 'ironball', 'doubled', 'paralysis'] as const
+const MY_TOGGLES = ['tailwind', 'scarf', 'ironball', 'doubled', 'doubled2', 'paralysis'] as const
 type MyToggle = (typeof MY_TOGGLES)[number]
 const myToggles = computed(
   () =>
@@ -245,7 +262,7 @@ const myMods = computed<SpeedMods>(() => ({
   tailwind: myToggles.value.has('tailwind'),
   scarf: myToggles.value.has('scarf'),
   ironBall: myToggles.value.has('ironball'),
-  doubled: myToggles.value.has('doubled'),
+  doubled: !!mine.value && !!doubling(mine.value, myBuild.value),
   paralysis: myToggles.value.has('paralysis'),
   stage: Number(myStage.value),
 }))
@@ -274,7 +291,12 @@ const mySpeed = computed(() =>
  */
 function pickMine(id: PokemonId | null) {
   if (!id) return
-  void router.replace({ query: { ...query.value, mine: id, ...buildOf(id), vs: undefined } })
+  void router.replace({ query: { ...query.value, mine: id, ...buildOf(id), mymods: keptMods(), vs: undefined } })
+}
+/** Your modifiers for another Pokémon: its abilities aren't yours' (nor the weather they'd bring). */
+function keptMods() {
+  const kept = [...myToggles.value].filter((k) => k !== 'doubled' && k !== 'doubled2')
+  return kept.length ? kept.join(',') : undefined
 }
 /** Its build as picked: the meta's most common one, else the fastest. */
 function buildOf(id: PokemonId) {
@@ -302,7 +324,14 @@ function clearMine() {
 function swapMine() {
   if (mine.value === null || found.value === null) return
   void router.replace({
-    query: { ...query.value, mine: found.value, ...buildOf(found.value), find: mine.value, vs: undefined },
+    query: {
+      ...query.value,
+      mine: found.value,
+      ...buildOf(found.value),
+      mymods: keptMods(),
+      find: mine.value,
+      vs: undefined,
+    },
   })
 }
 const setMyNature = (e: NatureEffect) => set('mynat', e)
@@ -310,17 +339,43 @@ const setMyPoints = (v: string) => {
   const n = Math.round(Number(v))
   if (Number.isFinite(n)) set('mypts', String(Math.min(MAX_POINTS, Math.max(0, n))))
 }
-/** Turns one of your modifiers on or off: a Choice Scarf and an Iron Ball can't be held together. */
-function toggleMine(k: MyToggle) {
-  const on = new Set(myToggles.value)
-  if (on.has(k)) on.delete(k)
-  else {
-    on.add(k)
-    if (k === 'scarf') on.delete('ironball')
-    if (k === 'ironball') on.delete('scarf')
+/**
+ * Turns one of your modifiers on or off: a Choice Scarf and an Iron Ball can't be held together, nor two abilities
+ * had. A doubling ability that needs a weather or terrain brings it to the whole ladder: with boosts showing, asked
+ * first, as those needing another one leave it; the chip yours is measured against, if one of them, then the same
+ * Pokémon's at its build, without the boost.
+ */
+async function toggleMine(k: MyToggle) {
+  const next = toggled([...myToggles.value], k)
+  const id = mine.value
+  const field = id && next.includes(k) ? fieldOf(doubling(id, { ...myBuild.value, toggles: next })) : null
+  let vs = query.value.vs
+  if (field && field !== inPlay.value) {
+    if (showBoosts.value) {
+      const a = refName(ability(doublers(id!)[k === 'doubled2' ? 1 : 0] as AbilityId))
+      const ok = await confirmDialog({
+        message: t('speed.fieldConfirm', { ability: a, field: fieldLabel(field) }),
+        confirm: t('speed.fieldConfirmButton', { field: fieldLabel(field) }),
+      })
+      if (!ok) return
+    }
+    vs = fallbackVs(field)
   }
-  set('mymods', on.size ? [...on].join(',') : undefined)
+  void router.replace({ query: { ...query.value, mymods: next.length ? next.join(',') : undefined, vs } })
 }
+/** The chip yours is measured against, once `field` is in play: a boost needing another one gives way to the same
+ * Pokémon at the build it was placed at. */
+function fallbackVs(field: Field) {
+  const vs = query.value.vs
+  if (typeof vs !== 'string') return vs
+  const [id, kind, effect] = vs.split(':')
+  const when = kind === 'ability' && effect ? SPEED_ABILITIES[effect]?.when : undefined
+  if (!when || !needsField(when) || when === field || isTerrain(when) !== isTerrain(field)) return vs
+  const top = data.value?.[id as PokemonId]?.speeds?.[0]
+  return top ? `${id}:${top.points}:${top.nature}` : undefined
+}
+/** Yours' modifiers' buttons: its doubling abilities by name, only those it can have. */
+const myModButtons = computed(() => modButtons(mine.value))
 const setMyStage = (v: string) => set('mystage', v === '0' ? undefined : v)
 /** The nature effects' choice shows them as arrows beside "Spe", up and down, neutral as a word. */
 const EFFECT_ICONS = { up: ChevronsUp, neutral: undefined, down: ChevronsDown }
@@ -342,6 +397,8 @@ interface Entry {
   /** An item or ability its sets run that changes Speed (`SPEED_ITEMS`, `SPEED_ABILITIES`), at its most common
    * Speed build: `speed` is the build's, the effect applied with the modifiers (`chipSpeed`). */
   boost?: { ref: Ref<'item' | 'ability'> } & SpeedEffect
+  /** Its boost is the field's own, which its sets have: how they play, rather than what could be. */
+  live?: true
   /** Your Pokémon, with its own modifiers rather than the others'. */
   mine?: true
   /** The Pokémon found, shown though the top leaves it out: not counted in how yours does against the others. */
@@ -352,34 +409,46 @@ interface Entry {
 }
 
 const named = (id: PokemonId) => splitForme(id, refName(pokemon(id)))
-/** A Pokémon's chips in the meta: one per Speed investment (stat points and nature), and its boosts. */
+/**
+ * A Pokémon's chips in the meta: one per Speed investment (stat points and nature), and its boosts. With a weather or
+ * terrain in play, its sets whose ability it wakes are boosted as they play: their share leaves its builds (a build
+ * left under the least share leaving the ladder) for its boost's chip.
+ */
 function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
   const base = POKEMON[id].stats[5]
+  const rest = 1 - fieldShare(id)
   const list: Entry[] = (m.speeds ?? [])
-    .filter((s) => s.share >= MIN_SHARE)
+    .filter((s) => s.share * rest >= MIN_SHARE)
     .map((s) => ({
       id,
       ...named(id),
       speed: speedStat(base, s.points, natureEffect(s.nature)),
       points: s.points,
       nature: s.nature,
-      share: s.share,
+      share: s.share * rest,
       rank: m.rank,
       extra,
     }))
   // Its boosts, at its most common build: the data counts items, abilities and spreads apart, so it doesn't say which
-  // build goes with them. Those the modifiers rule out (Unburden with a Choice Scarf on everyone) are left out.
+  // build goes with them. Items those its sets hold; abilities every one it can have, however few of its sets run it
+  // (as what could be), and the field's own, which are always shown. Those the modifiers rule out (Unburden with a
+  // Choice Scarf on everyone), or the field (another weather), are left out.
   const build = m.speeds?.[0]
-  if (showBoosts.value && build) {
+  if (boostsAvailable.value && build) {
     const speed = speedStat(base, build.points, natureEffect(build.nature))
     const at = { id, ...named(id), points: build.points, nature: build.nature, rank: m.rank, extra }
+    const abilityShare = (a: string) => m.abilities?.find((x) => x.id === a)?.share ?? 0
     const effects = [
-      ...(m.items ?? []).map((i) => ({ ref: item(i.id), share: i.share, effect: SPEED_ITEMS[i.id] })),
-      ...(m.abilities ?? []).map((a) => ({ ref: ability(a.id), share: a.share, effect: SPEED_ABILITIES[a.id] })),
+      ...(m.items ?? [])
+        .filter((i) => (i.share ?? 0) >= MIN_SHARE)
+        .map((i) => ({ ref: item(i.id), share: i.share ?? 0, effect: SPEED_ITEMS[i.id] })),
+      ...POKEMON[id].abilities.map((a) => ({ ref: ability(a), share: abilityShare(a), effect: SPEED_ABILITIES[a] })),
     ]
     for (const { ref, share, effect } of effects) {
-      if (effect && (share ?? 0) >= MIN_SHARE && inField(effect.when) && withEffect(mods.value, effect))
-        list.push({ ...at, speed, share, boost: { ref, ...effect } })
+      if (!effect || !inField(effect.when) || !withEffect(mods.value, effect)) continue
+      const boost = { ref, ...effect }
+      const isLive = live(boost) && share > 0
+      if (isLive || showBoosts.value) list.push({ ...at, speed, share, boost, live: isLive || undefined })
     }
   }
   return list
@@ -628,12 +697,12 @@ const ladder = useTemplateRef<HTMLElement>('ladder')
 // in the meta (each build by its Pokémon's usage and its share of its sets; boosts left out, as they're those same
 // sets boosted, but for those of the field picked, which are those sets as they play: the share of its sets with them
 // moved from its builds to them), or each Pokémon alike when showing them all.
-/** The share of a Pokémon's sets whose ability works in the field picked, as the chips show them. */
+/** The share of a Pokémon's sets whose ability works in the field in play, as the chips show them. */
 function fieldShare(id: PokemonId): number {
-  if (!inPlay.value || inPlay.value === 'none') return 0
+  if (!inPlay.value || !boostsAvailable.value) return 0
   const sum = (data.value?.[id]?.abilities ?? [])
-    .filter((a) => SPEED_ABILITIES[a.id]?.when === inPlay.value && (a.share ?? 0) >= MIN_SHARE)
-    .reduce((n, a) => n + a.share!, 0)
+    .filter((a) => SPEED_ABILITIES[a.id]?.when === inPlay.value)
+    .reduce((n, a) => n + (a.share ?? 0), 0)
   return Math.min(1, sum)
 }
 /** What the summary is of: the view's Pokémon, those filtered, and the field picked. */
@@ -641,7 +710,7 @@ const summaryNote = computed(() =>
   [
     showAll.value ? t('speed.summaryAll', { bench: benchLabel(bench.value) }) : t('speed.summaryMeta', { n: TOP }),
     filtering.value && t('speed.summaryFiltered'),
-    inPlay.value && inPlay.value !== 'none' && t('speed.summaryField', { field: fieldLabel(inPlay.value) }),
+    inPlay.value && t('speed.summaryField', { field: fieldLabel(inPlay.value) }),
   ]
     .filter(Boolean)
     .join(' '),
@@ -649,11 +718,8 @@ const summaryNote = computed(() =>
 function weight(e: Entry): number {
   if (showAll.value) return e.boost ? 0 : 1
   const usage = data.value?.[e.id]?.usage ?? 0
-  if (e.boost) {
-    const fielded = e.boost.ref.kind === 'ability' && !!inPlay.value && e.boost.when === inPlay.value
-    return fielded ? usage * (e.share ?? 0) : 0
-  }
-  return usage * (e.share ?? 0) * (1 - fieldShare(e.id))
+  if (e.boost) return e.live ? usage * (e.share ?? 0) : 0
+  return usage * (e.share ?? 0)
 }
 const summary = computed(() => {
   if (mySpeed.value === null) return null
@@ -735,22 +801,26 @@ const myBuild = computed<SpeedBuild>(() => ({
   toggles: [...myToggles.value],
   stage: Number(myStage.value),
 }))
-/** A boost's toggle in a build: Quick Feet has none. */
-const BOOST_TOGGLES: Partial<Record<SpeedEffect['mod'], BuildToggle>> = {
-  scarf: 'scarf',
-  ironBall: 'ironball',
-  doubled: 'doubled',
+/** A boost's toggle in a build, for the Pokémon `id`: its doubling ability's by its place among them; Quick Feet has
+ * none. */
+function boostToggle(id: PokemonId, boost: Boost): BuildToggle | null {
+  if (boost.mod === 'scarf') return 'scarf'
+  if (boost.mod === 'ironBall') return 'ironball'
+  if (boost.mod !== 'doubled') return null
+  const i = doublers(id).indexOf(boost.ref.id)
+  return i < 0 ? null : doublerToggle(i)
 }
 /** The ladder's modifiers for everyone, with an item or ability a chip's sets run. */
-function othersBuild(b: Pick<SpeedBuild, 'effect' | 'points'>, boost?: Entry['boost']): SpeedBuild {
+function othersBuild(id: PokemonId, b: Pick<SpeedBuild, 'effect' | 'points'>, boost?: Entry['boost']): SpeedBuild {
   let toggles: BuildToggle[] = TOGGLES.filter(flag)
-  const k: BuildToggle | null = !boost ? null : (BOOST_TOGGLES[boost.mod] ?? null)
+  const k = boost ? boostToggle(id, boost) : null
   if (k && !toggles.includes(k)) toggles = toggled(toggles, k)
   return { ...b, toggles, stage: Number(stage.value) }
 }
 /** A chip's build: its benchmark, or its sets' nature and points. */
 const chipBuild = (e: Entry) =>
   othersBuild(
+    e.id,
     e.bench ? benchBuild(e.bench) : e.nature ? { effect: natureEffect(e.nature), points: e.points! } : FASTEST,
     e.boost,
   )
@@ -758,6 +828,7 @@ const chipBuild = (e: Entry) =>
 function topBuild(id: PokemonId) {
   const top = data.value?.[id]?.speeds?.[0]
   return othersBuild(
+    id,
     top ? { effect: natureEffect(top.nature), points: top.points } : showAll.value ? benchBuild(bench.value) : FASTEST,
   )
 }
@@ -1222,19 +1293,6 @@ const { entered } = usePageEntered()
                 {{ t('speed.boosts') }}
               </label>
               <span class="muted">{{ t('speed.boostsDesc') }}</span>
-              <template v-if="showBoosts">
-                <select
-                  class="search field-pick"
-                  :class="{ on: inPlay }"
-                  :value="inPlay ?? ''"
-                  :aria-label="t('speed.field')"
-                  @change="setField(($event.target as HTMLSelectElement).value)"
-                >
-                  <option value="">{{ t('speed.fieldAny') }}</option>
-                  <option v-for="f in FIELDS" :key="f" :value="f">{{ fieldLabel(f) }}</option>
-                </select>
-                <span class="muted">{{ t('speed.fieldDesc') }}</span>
-              </template>
             </template>
             <label class="btn switch" :class="{ on: showMegas }">
               <input type="checkbox" :checked="showMegas" @change="toggleMegas" />
@@ -1501,7 +1559,7 @@ const { entered } = usePageEntered()
                   class="chip"
                   :class="{
                     hit: isHit(e) && !onlyFound,
-                    boost: e.boost,
+                    boost: e.boost && !e.live,
                     extra: e.extra,
                     yours: e.mine,
                     versus: query.vs === chipKey(e),
@@ -1693,18 +1751,16 @@ const { entered } = usePageEntered()
                 </div>
                 <div v-if="myModsOpen" class="mods">
                   <button
-                    v-for="k in MY_TOGGLES"
-                    :key="k"
-                    v-tip="canHover && t(`speed.modTip.${k}`)"
+                    v-for="m in myModButtons"
+                    :key="m.key"
+                    v-tip="canHover && m.tip"
                     type="button"
                     class="btn mod"
-                    :class="{ on: myToggles.has(k) }"
-                    :aria-pressed="myToggles.has(k)"
-                    @click="toggleMine(k)"
+                    :class="{ on: myToggles.has(m.key) }"
+                    :aria-pressed="myToggles.has(m.key)"
+                    @click="toggleMine(m.key)"
                   >
-                    <ItemIcon v-if="MOD_ITEMS[k]" :id="MOD_ITEMS[k]!" :scale="0.75" class="mod-item" />{{
-                      t(`speed.mod.${k}`)
-                    }}
+                    <ItemIcon v-if="m.item" :id="m.item" :scale="0.75" class="mod-item" />{{ m.label }}
                   </button>
                 </div>
                 <SegmentedControl
@@ -2110,25 +2166,20 @@ const { entered } = usePageEntered()
   }
 }
 /* As wide as what they hold: the search fields' width limit would cut them off. */
-.filter-pick,
-.field-pick {
+.filter-pick {
   width: auto;
   margin: 0;
 }
 .filter-pick {
   max-width: 14em;
 }
-.filter.on .filter-pick,
-.field-pick.on {
+.filter.on .filter-pick {
   border-color: var(--ink);
   background: var(--sel);
 }
 .filters-clear {
   gap: 4px;
   padding-block: 4px;
-}
-.field-pick {
-  justify-self: start;
 }
 /* The resets: under what they reset, to the left. */
 .reset {
