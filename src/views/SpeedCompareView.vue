@@ -10,6 +10,7 @@ import { refName } from '@/i18n/refName'
 import { natureEffect, speedStat } from '@/lib/speed'
 import { MAX_POINTS, type NatureEffect } from '@/lib/stats'
 import { buildQuery, buildSpeed, readBuild, toMoveFirst, type SpeedBuild } from '@/lib/speedBuild'
+import { toTopOf } from '@/lib/scroll'
 import { LIST_MAX, listQuery, movePlaces, readList, type ListEntry } from '@/lib/speedLineup'
 import { TIERS_PICKS, lastTiersQuery } from '@/lib/tiersState'
 import { confirmDialog } from '@/composables/useConfirm'
@@ -284,6 +285,13 @@ const isFolded = (s: Side) => !phone.value && folded.value.has(s) && !!idOf(s)
 function toggleFold(s: Side) {
   if (folded.value.has(s)) folded.value.delete(s)
   else folded.value.add(s)
+}
+// In the list, Confirm folds the open one, and the bands move to the order they move in: on phones, the page then goes
+// to the list's top, its first in view at the top of the screen.
+const lineupEl = useTemplateRef<InstanceType<typeof SpeedLineup>>('lineupEl')
+function confirmRow() {
+  openKey.value = null
+  if (phone.value) void nextTick(() => toTopOf(lineupEl.value?.root))
 }
 function confirmSide(s: Side) {
   if (phone.value) openKey.value = null
@@ -562,7 +570,7 @@ function resetAll() {
           <Trash2 :size="16" aria-hidden="true" />{{ t('compare.clearTeams') }}
         </button>
       </div>
-      <SpeedLineup :entries="lineup" :open-key="openKey" @toggle="toggleOpen">
+      <SpeedLineup ref="lineupEl" :entries="lineup" :open-key="openKey" @toggle="toggleOpen">
         <template #editor="{ entry }">
           <SpeedEditor
             :ranks
@@ -577,7 +585,7 @@ function resetAll() {
             :taken="takenFor(entry.key)"
             :placeholder="pickLabel(entry.team)"
             confirmable
-            @confirm="openKey = null"
+            @confirm="confirmRow"
             @pick="(id: PokemonId) => pick(entry.key, id)"
             @build="(b: Partial<SpeedBuild>) => setBuild(entry.key, b)"
             @clear="clear(entry.key)"

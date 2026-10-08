@@ -54,6 +54,8 @@ const shown = computed(() => {
 // Moving to their new places, the bands slide there from where they were (by `transform` alone, off the main thread),
 // unless motion is reduced.
 const root = useTemplateRef<HTMLElement>('root')
+// The list's top, for the page to bring into view (its bands stick, so their own place isn't where the list starts).
+defineExpose({ root })
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
 watch(
   () => shown.value.map((e) => e.key).join(),
