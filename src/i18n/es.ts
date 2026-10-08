@@ -741,6 +741,7 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.boostAt': 'con {nature} {points} pts',
   'speed.boostTipNoSets': '{effect}, que puede tener: Velocidad ×{factor}{when}. Aquí con {build}.',
   'speed.boostAtBench': 'con {bench}',
+  'speed.liveTip': '{effect} ×{factor} con {field}, en juego: {build}, el {pct} de sus sets',
   'speed.boosts': 'Mejoras',
   'speed.boostLabel': '{effect} ×{factor}',
   'speed.boostTip':

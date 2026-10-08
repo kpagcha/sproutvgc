@@ -348,31 +348,51 @@ const setMyPoints = (v: string) => {
 async function toggleMine(k: MyToggle) {
   const next = toggled([...myToggles.value], k)
   const id = mine.value
-  const field = id && next.includes(k) ? fieldOf(doubling(id, { ...myBuild.value, toggles: next })) : null
-  let vs = query.value.vs
-  if (field && field !== inPlay.value) {
-    if (showBoosts.value) {
-      const a = refName(ability(doublers(id!)[k === 'doubled2' ? 1 : 0] as AbilityId))
-      const ok = await confirmDialog({
-        message: t('speed.fieldConfirm', { ability: a, field: fieldLabel(field) }),
-        confirm: t('speed.fieldConfirmButton', { field: fieldLabel(field) }),
-      })
-      if (!ok) return
-    }
-    vs = fallbackVs(field)
+  const field = id ? fieldOf(doubling(id, { ...myBuild.value, toggles: next })) : null
+  if (field && field !== inPlay.value && showBoosts.value) {
+    const a = refName(ability(doublers(id!)[k === 'doubled2' ? 1 : 0] as AbilityId))
+    const ok = await confirmDialog({
+      message: t('speed.fieldConfirm', { ability: a, field: fieldLabel(field) }),
+      confirm: t('speed.fieldConfirmButton', { field: fieldLabel(field) }),
+    })
+    if (!ok) return
   }
+  const vs = field !== inPlay.value ? remapVs(field) : query.value.vs
   void router.replace({ query: { ...query.value, mymods: next.length ? next.join(',') : undefined, vs } })
 }
-/** The chip yours is measured against, once `field` is in play: a boost needing another one gives way to the same
- * Pokémon at the build it was placed at. */
-function fallbackVs(field: Field) {
+/**
+ * The chip yours is measured against, once `field` is in play (or none is): the same set as it then plays. A build
+ * the field's ability now boosts, if its plain chip leaves the ladder, is its boosted one; a boosted build the field no
+ * longer boosts, its plain one; a boost the field rules out, the Pokémon at the build it was placed at.
+ */
+function remapVs(field: Field | null) {
   const vs = query.value.vs
   if (typeof vs !== 'string') return vs
-  const [id, kind, effect] = vs.split(':')
-  const when = kind === 'ability' && effect ? SPEED_ABILITIES[effect]?.when : undefined
-  if (!when || !needsField(when) || when === field || isTerrain(when) !== isTerrain(field)) return vs
-  const m = data.value?.[id as PokemonId]
+  const parts = vs.split(':')
+  const id = parts[0] as PokemonId
+  const m = data.value?.[id]
   const top = m?.speeds?.[0]
+  const shareOf = (a: string) => m?.abilities?.find((x) => x.id === a)?.share ?? 0
+  if (parts[1] !== 'ability') {
+    // A plain build: boosted, when the field's ability leaves too little of it plain.
+    const [, pts, nat] = parts
+    const sp = m?.speeds?.find((x) => String(x.points) === pts && x.nature === nat)
+    const woken = field
+      ? POKEMON[id]?.abilities.find((a) => SPEED_ABILITIES[a]?.when === field && shareOf(a) > 0)
+      : undefined
+    if (!sp || !woken) return vs
+    const rest =
+      1 -
+      (m?.abilities ?? []).filter((a) => SPEED_ABILITIES[a.id]?.when === field).reduce((n, a) => n + (a.share ?? 0), 0)
+    return sp.share * rest >= MIN_SHARE ? vs : `${id}:ability:${woken}:${pts}:${nat}`
+  }
+  const [, , effect, pts, nat] = parts
+  const when = effect ? SPEED_ABILITIES[effect]?.when : undefined
+  if (!when || !needsField(when)) return vs
+  if (when === field && shareOf(effect!) > 0 && top)
+    return `${id}:ability:${effect}:${pts ?? top.points}:${nat ?? top.nature}`
+  if (pts) return `${id}:${pts}:${nat}`
+  if (!field || isTerrain(when) !== isTerrain(field) || when === field) return vs
   return top ? `${id}:${top.points}:${top.nature}` : m ? undefined : `${id}:${boostBench.value}`
 }
 /** Yours' modifiers' buttons: its doubling abilities by name, only those it can have. */
@@ -432,8 +452,9 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
     }))
   // Its boosts, at its most common build: the data counts items, abilities and spreads apart, so it doesn't say which
   // build goes with them. Items those its sets hold; abilities every one it can have, however few of its sets run it
-  // (as what could be), and the field's own, which are always shown. Those the modifiers rule out (Unburden with a
-  // Choice Scarf on everyone), or the field (another weather), are left out.
+  // (as what could be). Those the modifiers rule out (Unburden with a Choice Scarf on everyone), or the field (another
+  // weather), are left out. The field's own, always shown, are how its sets play: each build boosted, at its share of
+  // them times the ability's (the two taken apart as the data counts them), those under the least share left out.
   const build = m.speeds?.[0]
   if (boostsAvailable.value && build) {
     const speed = speedStat(base, build.points, natureEffect(build.nature))
@@ -448,8 +469,21 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
     for (const { ref, share, effect } of effects) {
       if (!effect || !inField(effect.when) || !withEffect(mods.value, effect)) continue
       const boost = { ref, ...effect }
-      const isLive = live(boost) && share > 0
-      if (isLive || showBoosts.value) list.push({ ...at, speed, share, boost, live: isLive || undefined })
+      if (live(boost) && share > 0) {
+        for (const sp of m.speeds ?? []) {
+          if (sp.share * share < MIN_SHARE) continue
+          const s = speedStat(base, sp.points, natureEffect(sp.nature))
+          list.push({
+            ...at,
+            speed: s,
+            points: sp.points,
+            nature: sp.nature,
+            share: sp.share * share,
+            boost,
+            live: true,
+          })
+        }
+      } else if (showBoosts.value) list.push({ ...at, speed, share, boost })
     }
   }
   return list
@@ -890,6 +924,14 @@ const field = (b: Boost) =>
 const whenTag = (b: Boost) => (b.when === 'itemLost' || b.when === 'status' ? t(`speed.whenShort.${b.when}`) : field(b))
 function boostTip(e: Entry) {
   const b = e.boost!
+  if (e.live)
+    return t('speed.liveTip', {
+      effect: refName(b.ref),
+      factor: factor(b),
+      field: field(b) ?? '',
+      build: t('speed.build', { nature: natureName(e.nature!), points: e.points! }),
+      pct: percent(e.share!),
+    })
   const f = field(b)
   const when =
     b.when === 'always'
@@ -909,7 +951,11 @@ const tip = (e: Entry) => (e.boost ? boostTip(e) : e.bench ? (e.extra ? benchTip
 const chipKey = (e: Entry) =>
   e.mine
     ? 'mine'
-    : `${e.id}:${e.boost ? `${e.boost.ref.kind}:${e.boost.ref.id}` : (e.bench ?? `${e.points}:${e.nature}`)}`
+    : `${e.id}:${
+        e.boost
+          ? `${e.boost.ref.kind}:${e.boost.ref.id}${e.live ? `:${e.points}:${e.nature}` : ''}`
+          : (e.bench ?? `${e.points}:${e.nature}`)
+      }`
 
 // A Speed's row links to the page as it is with that row picked (`?at=`): clicking its number picks it (or drops it,
 // when picked already) and copies the link. A shared link brings the row into view once the ladder is in.
@@ -1599,7 +1645,11 @@ const { entered } = usePageEntered()
                     <span v-if="e.share !== undefined" class="tag">{{ percent(e.share) }}</span>
                     <!-- The build it's placed at, its most common (a benchmark, with no sets in the snapshot), which the
                          data doesn't tie to the boost: said as such. -->
-                    <span class="tag boost-at">{{
+                    <template v-if="e.live">
+                      <span class="tag">{{ natureName(e.nature!) }}</span>
+                      <span class="tag">{{ t('speed.points', { n: e.points! }) }}</span>
+                    </template>
+                    <span v-else class="tag boost-at">{{
                       e.bench
                         ? t('speed.boostAtBench', { bench: benchLabel(e.bench) })
                         : t('speed.boostAt', { nature: natureName(e.nature!), points: e.points! })

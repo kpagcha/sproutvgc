@@ -732,6 +732,7 @@ export const messages = {
   'speed.boostAt': 'at {nature} {points} pts',
   'speed.boostTipNoSets': '{effect}, which it can have: Speed ×{factor}{when}. Here at {build}.',
   'speed.boostAtBench': 'at {bench}',
+  'speed.liveTip': '{effect} ×{factor} in {field}, as it is: {build}, {pct} of its sets',
   'speed.boosts': 'Boosts',
   'speed.boostLabel': '{effect} ×{factor}',
   'speed.boostTip':
