@@ -7,6 +7,7 @@ import { POKEMON, speciesOf } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { benchmark } from '@/lib/stats'
 import { pokemonName as nameOf, usePokemonSearch } from '@/composables/usePokemonSearch'
+import { usePickerGroups, type PickerGroup } from '@/composables/usePickerGroups'
 import ModalDialog from '@/components/ModalDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import PokemonSearchPanel from '@/components/PokemonSearchPanel.vue'
@@ -38,6 +39,8 @@ const props = defineProps<{
   /** Pokémon already on the team: they, and any of their species (its formes and Megas), are shown but can't be
    * picked. */
   taken?: readonly PokemonId[]
+  /** Lists the Pokémon picked lately (in any picker with it) first while browsing, and records what's picked here. */
+  recent?: boolean
 }>()
 const model = defineModel<PokemonId | null>({ required: true })
 
@@ -54,9 +57,25 @@ const { results, showsPicked } = usePokemonSearch(
   text,
   () => model.value,
   () => open.value,
+  () => !!props.recent,
 )
+// Folding a group or showing all of it keeps the list where it is, rather than going back to the one picked.
+const { recordPick, toggleFold, toggleExpanded } = usePickerGroups()
+let regrouping = false
+function regroup(change: () => void) {
+  regrouping = true
+  change()
+}
+const groupLabel = (g: PickerGroup | 'all') =>
+  t(g === 'recent' ? 'picker.recent' : g === 'favorites' ? 'favorites.title' : 'picker.all')
+
 // Browsing every Pokémon from the one picked: it, in view; else the first.
 watch(results, (list) => {
+  if (regrouping) {
+    regrouping = false
+    active.value = Math.min(active.value, Math.max(list.length - 1, 0))
+    return
+  }
   const i = showsPicked.value ? list.findIndex((r) => r.id === model.value) : -1
   active.value = Math.max(i, 0)
   if (i > 0) void nextTick(() => showOption(i, true))
@@ -83,6 +102,7 @@ const takenSpecies = computed(() => new Set((props.taken ?? []).map(speciesOf)))
 const isTaken = (id: PokemonId) => takenSpecies.value.has(speciesOf(id))
 function pick(id: PokemonId) {
   if (isTaken(id)) return
+  if (props.recent) recordPick(id)
   keepTop = field.value?.getBoundingClientRect().top ?? null
   model.value = id
   text.value = nameOf(id)
@@ -290,8 +310,18 @@ const optionId = (i: number) => `${listId}-${i}`
         }"
       >
         <template v-for="(r, i) in results" :key="r.key">
-          <li v-if="r.group" role="presentation" class="group">
-            {{ t(r.group === 'favorites' ? 'favorites.title' : 'picker.all') }}
+          <!-- Its group's heading (Recent and Favorites fold away when tapped, with how many they have), and before
+               it a folded group's. -->
+          <li
+            v-for="h in r.headings ?? []"
+            :key="h.group"
+            role="presentation"
+            class="group"
+            :class="{ foldable: h.group !== 'all' }"
+            @mousedown.prevent="h.group !== 'all' && regroup(() => toggleFold(h.group as PickerGroup))"
+          >
+            <span v-if="h.group !== 'all'" class="fold" aria-hidden="true">{{ h.folded ? '▸' : '▾' }}</span
+            >{{ groupLabel(h.group) }}<span v-if="h.group !== 'all'" class="count">{{ h.count }}</span>
           </li>
           <li
             :id="optionId(i)"
@@ -311,6 +341,12 @@ const optionId = (i: number) => `${listId}-${i}`
               >{{ t('picker.taken') }}</span
             ><span v-else-if="props.speed" class="option-speed">{{ speedOf(r.id) }}</span>
           </li>
+          <!-- After a group's last shown, when it has more: all of them, or back to its first few. -->
+          <li v-if="r.more" role="presentation" class="more">
+            <span class="more-link" @mousedown.prevent="regroup(() => toggleExpanded(r.more!.group))">{{
+              r.more.all ? t('picker.showFewer') : t('picker.showAll', { n: r.more.total })
+            }}</span>
+          </li>
         </template>
       </ul>
     </Teleport>
@@ -327,6 +363,7 @@ const optionId = (i: number) => `${listId}-${i}`
         :caret="props.caret"
         :speed="props.speed"
         :taken="props.taken"
+        :recent="props.recent"
         @pick="pick"
         @close="sheet = false"
       />
@@ -397,6 +434,32 @@ const optionId = (i: number) => `${listId}-${i}`
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--muted);
+}
+/* A group that folds: its heading a toggle, its count after its name. */
+.group.foldable {
+  cursor: pointer;
+  user-select: none;
+}
+.group.foldable:hover {
+  color: var(--text);
+}
+.fold {
+  display: inline-block;
+  width: 1em;
+}
+.count {
+  margin-left: 6px;
+  font-weight: normal;
+}
+/* The link showing a group's all, or its first few: small, after its last row. */
+.more {
+  padding: 2px 6px 6px 22px;
+  font-size: 0.8em;
+}
+.more-link {
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
 }
 /* On phones, the field opens the dialog: no caret, no keyboard. */
 .picker :deep(input[readonly]) {

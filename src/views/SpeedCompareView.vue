@@ -604,6 +604,7 @@ function resetAll() {
           <PokemonPicker
             v-if="!full"
             :key="adderKey"
+            recent
             :model-value="null"
             :placeholder="t('compare.add')"
             :title="t('compare.add')"

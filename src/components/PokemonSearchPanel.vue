@@ -7,6 +7,7 @@ import { POKEMON, speciesOf } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { benchmark } from '@/lib/stats'
 import { pokemonName, usePokemonSearch } from '@/composables/usePokemonSearch'
+import { usePickerGroups, type PickerGroup } from '@/composables/usePickerGroups'
 import PokemonIcon from '@/components/PokemonIcon'
 import SearchBox from '@/components/SearchBox.vue'
 
@@ -32,6 +33,8 @@ const props = defineProps<{
   /** Pokémon already on the team: they, and any of their species (its formes and Megas), are shown but can't be
    * picked. */
   taken?: readonly PokemonId[]
+  /** Lists the Pokémon picked lately first while browsing (the picker it's in records them). */
+  recent?: boolean
 }>()
 const emit = defineEmits<{ pick: [id: PokemonId]; close: [] }>()
 const takenSpecies = computed(() => new Set((props.taken ?? []).map(speciesOf)))
@@ -43,12 +46,29 @@ const { results, showsPicked } = usePokemonSearch(
   () => props.ids,
   text,
   () => props.picked,
+  () => true,
+  () => !!props.recent,
 )
+// Folding a group or showing all of it keeps the list where it is, rather than going back to the one picked.
+const { toggleFold, toggleExpanded } = usePickerGroups()
+let regrouping = false
+function regroup(change: () => void) {
+  regrouping = true
+  change()
+}
+const groupLabel = (g: PickerGroup | 'all') =>
+  t(g === 'recent' ? 'picker.recent' : g === 'favorites' ? 'favorites.title' : 'picker.all')
+
 const active = ref(0)
 // Browsing every Pokémon from the one picked: it, in view, centered; else the first.
 watch(
   results,
   (list) => {
+    if (regrouping) {
+      regrouping = false
+      active.value = Math.min(active.value, Math.max(list.length - 1, 0))
+      return
+    }
     const i = showsPicked.value ? list.findIndex((r) => r.id === props.picked) : -1
     active.value = Math.max(i, 0)
     if (i > 0) void nextTick(() => showOption(i, true))
@@ -133,8 +153,18 @@ const optionId = (i: number) => `${listId}-${i}`
     </div>
     <ul :id="listId" ref="list" class="list" role="listbox">
       <template v-for="(r, i) in results" :key="r.key">
-        <li v-if="r.group" role="presentation" class="group">
-          {{ t(r.group === 'favorites' ? 'favorites.title' : 'picker.all') }}
+        <!-- Its group's heading (Recent and Favorites fold away when tapped, with how many they have), and before
+             it a folded group's. -->
+        <li
+          v-for="h in r.headings ?? []"
+          :key="h.group"
+          role="presentation"
+          class="group"
+          :class="{ foldable: h.group !== 'all' }"
+          @click="h.group !== 'all' && regroup(() => toggleFold(h.group as PickerGroup))"
+        >
+          <span v-if="h.group !== 'all'" class="fold" aria-hidden="true">{{ h.folded ? '▸' : '▾' }}</span
+          >{{ groupLabel(h.group) }}<span v-if="h.group !== 'all'" class="count">{{ h.count }}</span>
         </li>
         <li
           :id="optionId(i)"
@@ -152,6 +182,12 @@ const optionId = (i: number) => `${listId}-${i}`
             class="option-speed"
             >{{ t('picker.taken') }}</span
           ><span v-else-if="props.speed" class="option-speed">{{ speedOf(r.id) }}</span>
+        </li>
+        <!-- After a group's last shown, when it has more: all of them, or back to its first few. -->
+        <li v-if="r.more" role="presentation" class="more">
+          <span class="more-link" @click="regroup(() => toggleExpanded(r.more!.group))">{{
+            r.more.all ? t('picker.showFewer') : t('picker.showAll', { n: r.more.total })
+          }}</span>
         </li>
       </template>
     </ul>
@@ -265,6 +301,32 @@ const optionId = (i: number) => `${listId}-${i}`
   letter-spacing: 0.04em;
   color: var(--muted);
   border-bottom: 1px solid var(--border);
+}
+/* A group that folds: its heading a toggle, its count after its name. */
+.group.foldable {
+  cursor: pointer;
+  user-select: none;
+}
+.group.foldable:hover {
+  color: var(--text);
+}
+.fold {
+  display: inline-block;
+  width: 1em;
+}
+.count {
+  margin-left: 6px;
+  font-weight: normal;
+}
+/* The link showing a group's all, or its first few: small, after its last row. */
+.more {
+  padding: 2px 6px 6px 22px;
+  font-size: 0.8em;
+}
+.more-link {
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
 }
 .unknown {
   filter: brightness(0);

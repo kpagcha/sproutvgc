@@ -33,6 +33,7 @@ function pick(id: PokemonId | null) {
   <PokemonPicker
     v-else
     :key="round"
+    recent
     :model-value="null"
     :placeholder="`+ ${props.label}`"
     :title="props.team === 'yours' ? t('speed.yours') : t('compare.opponent')"

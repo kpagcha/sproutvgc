@@ -1114,6 +1114,7 @@ const { entered } = usePageEntered()
         <!-- Finding a Pokémon on the ladder: a band on top, sitting on the rows. -->
         <div class="band find find-row" :class="{ flash: flashFind }" @animationend="flashFind = false">
           <PokemonPicker
+            recent
             :model-value="found"
             :ids="findableIds"
             :placeholder="t('speed.find')"
@@ -1189,6 +1190,7 @@ const { entered } = usePageEntered()
           <div v-if="pinned" class="pinned" :class="{ opponents: mine }" data-top-bar>
             <div class="find">
               <PokemonPicker
+                recent
                 :model-value="found"
                 :ids="findableIds"
                 :placeholder="t('speed.findShort')"
@@ -1362,6 +1364,7 @@ const { entered } = usePageEntered()
             </summary>
             <div class="yours-pick">
               <PokemonPicker
+                recent
                 :model-value="mine"
                 ref="yoursPicker"
                 :placeholder="t('speed.yoursPick')"

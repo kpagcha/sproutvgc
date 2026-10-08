@@ -65,6 +65,7 @@ const canHover = window.matchMedia('(hover: hover)').matches
     <div class="pick-row">
       <PokemonPicker
         ref="picker"
+        recent
         :model-value="props.id"
         :placeholder="props.placeholder ?? t('compare.pick')"
         :title="props.title"

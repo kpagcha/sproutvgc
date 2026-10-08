@@ -777,6 +777,9 @@ export const messages: Record<keyof typeof en, string> = {
   'picker.close': 'Cerrar',
   'picker.all': 'Todos los Pokémon',
   'picker.taken': 'En el equipo',
+  'picker.recent': 'Recientes',
+  'picker.showAll': 'Ver todos ({n})',
+  'picker.showFewer': 'Ver menos',
   'compare.intro':
     'Tu Pokémon y un rival, hasta dos por lado, cada uno con su distribución: quién mueve antes, y qué hace falta.',
   'compare.pick': 'Elige un Pokémon',

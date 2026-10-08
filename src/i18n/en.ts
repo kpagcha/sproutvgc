@@ -766,6 +766,9 @@ export const messages = {
   'picker.close': 'Close',
   'picker.all': 'All Pokémon',
   'picker.taken': 'On the team',
+  'picker.recent': 'Recent',
+  'picker.showAll': 'Show all ({n})',
+  'picker.showFewer': 'Show fewer',
   'compare.intro':
     'Your Pokémon and an opponent, up to two a side, each with its build: who moves first, and what it takes.',
   'compare.pick': 'Pick a Pokémon',
