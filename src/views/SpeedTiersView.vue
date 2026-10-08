@@ -512,7 +512,7 @@ const itemOptions = computed(() =>
       )
     : [],
 )
-// On phones, the filters fold away behind a button beside the find, marked while any is on.
+// The filters fold away behind a button beside the find, marked while any is on.
 const filtersOpen = shallowRef(false)
 const clearFilters = () =>
   void router.replace({ query: { ...query.value, type: undefined, ability: undefined, item: undefined } })
@@ -1301,7 +1301,7 @@ const { entered } = usePageEntered()
             :ranks
             @update:model-value="setFound"
           />
-          <!-- On phones, the filters' fold, beside the find. -->
+          <!-- The filters' fold, beside the find. -->
           <button
             type="button"
             class="btn filters-toggle"
@@ -1313,7 +1313,7 @@ const { entered } = usePageEntered()
           >
             <Funnel :size="16" aria-hidden="true" />
           </button>
-          <!-- What finding it does (only it, kept on the ladder); on phones, on a row of their own at the band's foot. -->
+          <!-- What finding it does (only it, kept on the ladder), on a row of their own at the band's foot. -->
           <div v-if="found" class="find-modes">
             <label class="btn switch find-mode" :class="{ on: onlyFound }">
               <input
@@ -1329,7 +1329,7 @@ const { entered } = usePageEntered()
               {{ t('speed.keep') }}
             </label>
           </div>
-          <!-- What to do with the one found; on phones, on a row of their own under the find. -->
+          <!-- What to do with the one found, on a row of their own under the find. -->
           <div v-if="found" class="find-actions">
             <!-- To the comparison's own page, standing out as the card's way there does. -->
             <AppLink :to="compareLink({ id: found, build: topBuild(found) })" class="btn primary find-mode find-compare"
@@ -2156,57 +2156,49 @@ const { entered } = usePageEntered()
 .find-row :is(.find-mode, .find-clear) {
   align-self: stretch;
 }
-/* What finding does and what to do with the one found: in the find's row, but on phones (below). */
-.find-modes,
-.find-actions {
-  display: contents;
-}
+/* The find with the filters' fold beside it, the filters folded under it, then what to do with the one found, why it
+   shows as it does, and what finding does, each on a row of its own. */
 .filters-toggle {
+  display: inline-flex;
+  flex: none;
+  align-self: stretch;
+  order: 1;
+  padding-inline: 10px;
+}
+.filters-toggle.on {
+  background: var(--sel);
+}
+.filters {
+  order: 2;
+}
+.filters.folded {
   display: none;
 }
-/* On phones: the find with the filters' fold beside it, the filters folded under it, then what to do with the one
-   found, why it shows as it does, and what finding does, each on a row of its own. */
+.find-modes,
+.find-actions {
+  display: flex;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.find-actions {
+  order: 3;
+}
+.find-note {
+  order: 4;
+}
+.find-modes {
+  order: 5;
+}
+.kept {
+  order: 6;
+}
+/* On phones, the three on one line, sharing it. */
 @media (max-width: 720px) {
-  .filters-toggle {
-    display: inline-flex;
-    flex: none;
-    align-self: stretch;
-    order: 1;
-    padding-inline: 10px;
-  }
-  .filters-toggle.on {
-    background: var(--sel);
-  }
-  .filters {
-    order: 2;
-  }
-  .filters.folded {
-    display: none;
-  }
-  .find-modes,
-  .find-actions {
-    display: flex;
-    flex-basis: 100%;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .find-actions {
-    order: 3;
-  }
-  /* The three on one line, sharing it. */
   .find-actions > .btn {
     flex: 1 1 auto;
     justify-content: center;
     padding-inline: 8px;
-  }
-  .find-note {
-    order: 4;
-  }
-  .find-modes {
-    order: 5;
-  }
-  .kept {
-    order: 6;
   }
 }
 .find-compare {
