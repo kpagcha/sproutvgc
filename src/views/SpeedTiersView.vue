@@ -41,6 +41,7 @@ import {
   SPEED_ABILITIES,
   SPEED_ITEMS,
   inBattle,
+  commonBuilds,
   natureEffect,
   speedBuilds,
   speedStat,
@@ -339,6 +340,10 @@ function swapMine() {
   })
 }
 const setMyNature = (e: NatureEffect) => set('mynat', e)
+/** Yours' common builds in the meta, to pick in a tap (as the comparison's are). */
+const myCommon = computed(() => (mine.value ? commonBuilds(buildsOf(mine.value)) : []))
+const setMyBuild = (e: NatureEffect, points: number) =>
+  void router.replace({ query: { ...query.value, mynat: e, mypts: String(points) } })
 const setMyPoints = (v: string) => {
   const n = Math.round(Number(v))
   if (Number.isFinite(n)) set('mypts', String(Math.min(MAX_POINTS, Math.max(0, n))))
@@ -1341,6 +1346,8 @@ const { entered } = usePageEntered()
           <dl class="help-options help-yours small">
             <dt>{{ t('speed.yours') }}</dt>
             <dd class="muted">{{ t('speed.helpYours') }}</dd>
+            <dt>{{ t('compare.common') }}</dt>
+            <dd class="muted">{{ t('compare.helpCommon') }}</dd>
             <dt>{{ t('speed.opponentsHead') }}</dt>
             <dd class="muted">{{ t('speed.helpOpponents') }}</dd>
             <dt>{{ t('compare.open') }}</dt>
@@ -1816,6 +1823,28 @@ const { entered } = usePageEntered()
                 <span>{{ t('speed.opponentsGo') }}</span>
               </button>
               <!-- Its build and modifiers, then what they come to: each a section of its own, labeled above. -->
+              <!-- The meta's builds of it, to pick one in a tap, as the comparison has them. -->
+              <section v-if="myCommon.length" class="yours-section">
+                <span class="muted small">{{ t('compare.common') }}</span>
+                <ScrollRow :key="mine" wrap-on-phones class="builds">
+                  <button
+                    v-for="b in myCommon"
+                    :key="`${b.effect}:${b.points}`"
+                    type="button"
+                    class="btn mod"
+                    :class="{ on: myNature === b.effect && myPoints === b.points }"
+                    @click="setMyBuild(b.effect, b.points)"
+                  >
+                    <component
+                      :is="EFFECT_ICONS[b.effect]"
+                      v-if="EFFECT_ICONS[b.effect]"
+                      :size="14"
+                      aria-hidden="true"
+                    />{{ t('speed.points', { n: b.points }) }}
+                    <span class="muted">{{ percent(b.share) }}</span>
+                  </button>
+                </ScrollRow>
+              </section>
               <section class="yours-section">
                 <SegmentedControl
                   class="stacked"
@@ -2719,6 +2748,10 @@ const { entered } = usePageEntered()
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
+}
+/* The common builds' row, the card's width, scrolling sideways (wrapping on phones). */
+.yours-section > .builds {
+  align-self: stretch;
 }
 .mods-head {
   display: flex;
