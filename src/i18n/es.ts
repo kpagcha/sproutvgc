@@ -660,10 +660,10 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.slice.all': 'todos los Pokémon',
   'speed.viewLabel': 'Vista',
   'speed.viewDesc':
-    'La escala, una fila por Velocidad; o rangos, una fila por Pokémon (por Velocidad base, con las referencias).',
+    'La escala, una fila por Velocidad; o gráficos, una fila por Pokémon (por Velocidad base, con las referencias).',
   'speed.showDesc': 'Los Pokémon más usados, o todos los Pokémon del reglamento.',
   'speed.view.ladder': 'Ladder',
-  'speed.view.ranges': 'Rangos',
+  'speed.view.ranges': 'Gráficos',
   'speed.speedsFrom': 'Velocidades',
   'speed.speedsFromTip':
     'Las Velocidades de los sets que se usan, según su uso, o las referencias de cada Pokémon (Min−, 0, Max, Max+).',

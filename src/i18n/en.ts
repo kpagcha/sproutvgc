@@ -652,10 +652,10 @@ export const messages = {
   'speed.slice.top': 'the top {n}',
   'speed.slice.all': 'every Pokémon',
   'speed.viewLabel': 'View',
-  'speed.viewDesc': 'The ladder, a row per Speed; or ranges, a row per Pokémon (per base Speed, at the benchmarks).',
+  'speed.viewDesc': 'The ladder, a row per Speed; or charts, a row per Pokémon (per base Speed, at the benchmarks).',
   'speed.showDesc': 'The most used Pokémon, or every Pokémon of the regulation.',
   'speed.view.ladder': 'Ladder',
-  'speed.view.ranges': 'Ranges',
+  'speed.view.ranges': 'Charts',
   'speed.speedsFrom': 'Speeds',
   'speed.speedsFromTip':
     "The Speeds players' sets run, weighted by usage, or each Pokémon's benchmarks (Min−, 0, Max, Max+).",
