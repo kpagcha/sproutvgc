@@ -1608,70 +1608,73 @@ const { entered } = usePageEntered()
                Pokémon on it. -->
           <div class="band find find-row" :class="{ flash: flashFind }" @animationend="flashFind = false">
             <div class="options-line">
-              <template v-if="view === 'ladder' && bySets && boostsAvailable">
+              <div class="options">
+                <template v-if="view === 'ladder' && bySets && boostsAvailable">
+                  <button
+                    v-tip="canHover && t('speed.boostsDesc')"
+                    type="button"
+                    class="btn switch"
+                    :class="{ on: showBoosts }"
+                    :aria-pressed="showBoosts"
+                    @click="toggleBoosts"
+                  >
+                    <Rocket :size="16" aria-hidden="true" />{{ t('speed.boosts') }}
+                  </button>
+                </template>
                 <button
-                  v-tip="canHover && t('speed.boostsDesc')"
                   type="button"
                   class="btn switch"
-                  :class="{ on: showBoosts }"
-                  :aria-pressed="showBoosts"
-                  @click="toggleBoosts"
+                  :class="{ on: trickRoom }"
+                  :aria-pressed="trickRoom"
+                  @click="toggleTrickRoom"
                 >
-                  <Rocket :size="16" aria-hidden="true" />{{ t('speed.boosts') }}
+                  <Box :size="16" aria-hidden="true" />{{ t('speed.mod.trickroom') }}
                 </button>
-              </template>
-              <button
-                type="button"
-                class="btn switch"
-                :class="{ on: trickRoom }"
-                :aria-pressed="trickRoom"
-                @click="toggleTrickRoom"
-              >
-                <Box :size="16" aria-hidden="true" />{{ t('speed.mod.trickroom') }}
-              </button>
-              <!-- The weather or terrain in play, from yours' ability: said as a switch that's on, what brings it on it, its
+                <!-- The weather or terrain in play, from yours' ability: said as a switch that's on, what brings it on it, its
                cross turning the ability off. -->
-              <template v-if="inPlay">
+                <template v-if="inPlay">
+                  <button
+                    v-tip="
+                      canHover &&
+                      t('speed.fieldFrom', {
+                        name: refName(pokemon(mine!)),
+                        ability: fieldSource!,
+                        field: fieldLabel(inPlay),
+                      })
+                    "
+                    type="button"
+                    class="btn switch on field-status"
+                    :aria-label="t('speed.fieldOff', { ability: fieldSource!, field: fieldLabel(inPlay) })"
+                    @click="clearField"
+                  >
+                    {{ fieldLabel(inPlay) }}<span class="field-source"> · {{ fieldSource }}</span
+                    ><X :size="16" aria-hidden="true" />
+                  </button>
+                </template>
                 <button
-                  v-tip="
-                    canHover &&
-                    t('speed.fieldFrom', {
-                      name: refName(pokemon(mine!)),
-                      ability: fieldSource!,
-                      field: fieldLabel(inPlay),
-                    })
-                  "
                   type="button"
-                  class="btn switch on field-status"
-                  :aria-label="t('speed.fieldOff', { ability: fieldSource!, field: fieldLabel(inPlay) })"
-                  @click="clearField"
+                  class="btn disclosure"
+                  :class="{ on: modded }"
+                  :aria-expanded="modsOpen"
+                  @click="toggleMods"
                 >
-                  {{ fieldLabel(inPlay) }}<span class="field-source"> · {{ fieldSource }}</span
-                  ><X :size="16" aria-hidden="true" />
+                  <Plus :size="16" aria-hidden="true" />{{ t('speed.modifiers')
+                  }}<span v-if="!modsOpen && modsOn.length" class="mods-on">{{ modsOn.join(' · ') }}</span
+                  ><span class="marker" aria-hidden="true">{{ modsOpen ? '▾' : '▸' }}</span>
                 </button>
-              </template>
-              <button
-                type="button"
-                class="btn disclosure"
-                :class="{ on: modded }"
-                :aria-expanded="modsOpen"
-                @click="toggleMods"
-              >
-                <Plus :size="16" aria-hidden="true" />{{ t('speed.modifiers')
-                }}<span v-if="!modsOpen && modsOn.length" class="mods-on">{{ modsOn.join(' · ') }}</span
-                ><span class="marker" aria-hidden="true">{{ modsOpen ? '▾' : '▸' }}</span>
-              </button>
-              <button
-                type="button"
-                class="btn switch"
-                :class="{ on: showMegas }"
-                :aria-pressed="showMegas"
-                @click="toggleMegas"
-              >
-                {{ t('speed.megas') }}
-              </button>
-              <!-- Resetting them: an icon at the line's end, there from the start (greyed out with nothing to reset), so
-                   the line doesn't change as options are set. -->
+                <button
+                  type="button"
+                  class="btn switch"
+                  :class="{ on: showMegas }"
+                  :aria-pressed="showMegas"
+                  @click="toggleMegas"
+                >
+                  {{ t('speed.megas') }}
+                </button>
+              </div>
+              <!-- Resetting them: an icon at the end of the options' first line (they wrap beside it, never leaving it a
+                   line of its own), there from the start (greyed out with nothing to reset), so the line doesn't change as
+                   options are set. The zero-width space gives it a line of text, so it's as tall as the buttons. -->
               <button
                 v-tip="canHover && t('speed.resetControls')"
                 type="button"
@@ -1680,7 +1683,7 @@ const { entered } = usePageEntered()
                 :aria-label="t('speed.resetControls')"
                 @click="resetControls"
               >
-                <RotateCcw :size="16" aria-hidden="true" />
+                <RotateCcw :size="16" aria-hidden="true" />&#8203;
               </button>
             </div>
             <div v-if="modsOpen" class="mods all-mods">
@@ -2424,9 +2427,16 @@ const { entered } = usePageEntered()
 }
 .options-line {
   display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.options {
+  display: flex;
+  flex: 1 1 0;
   flex-wrap: wrap;
   align-items: center;
   gap: 6px 8px;
+  min-width: 0;
 }
 /* Who's shown: its label, then its choice, as wide as its longest. */
 .choice {
@@ -2438,16 +2448,13 @@ const { entered } = usePageEntered()
   width: auto;
   margin: 0;
 }
-.options-line > .btn {
+.options-line .btn {
   min-height: 0;
   padding: 3px 10px;
   font-size: 0.9em;
 }
-.options-line > .reset {
-  margin-left: auto;
-}
 .options-line > .reset-options {
-  align-self: stretch;
+  flex: none;
   padding-inline: 8px;
 }
 /* The modifiers' disclosure while some are on, folded or not: marked as the switches on are. */
