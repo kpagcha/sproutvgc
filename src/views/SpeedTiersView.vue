@@ -731,7 +731,8 @@ const findMode = computed<FindMode>({
 })
 // The find's dialog on phones says what it finds in: the ladder, or yours' opponents on it.
 const findTitle = computed(() => (mine.value ? t('compare.opponent') : t('title.speedTiers')))
-const onlyFound = computed(() => found.value !== null && findMode.value === 'only')
+// Only it on the ladder, among its builds and boosts: with every Pokémon once, it'd be alone, so there it's only marked.
+const onlyFound = computed(() => found.value !== null && !showAll.value && findMode.value === 'only')
 // The toggle's label around the found Pokémon's icon, the same width whatever its name (which the search shows).
 const onlyLabel = computed(() => tSplit('speed.findOnly', 'name'))
 // A boost's build, around its nature's effect (an arrow, as the chips have it).
@@ -1508,8 +1509,9 @@ const { entered } = usePageEntered()
           >
             <Funnel :size="16" aria-hidden="true" />
           </button>
-          <!-- What finding it does (only it, kept on the ladder), on a row of their own at the band's foot. -->
-          <div v-if="found" class="find-modes">
+          <!-- What finding it does (only it, kept on the ladder), on a row of their own at the band's foot: neither with
+               every Pokémon once, where it shows once and is on the ladder already. -->
+          <div v-if="found && !showAll" class="find-modes">
             <label class="btn switch find-mode" :class="{ on: onlyFound }">
               <input
                 type="checkbox"
@@ -1639,7 +1641,7 @@ const { entered } = usePageEntered()
                 :ranks
                 @update:model-value="setFound"
               />
-              <label v-if="found" class="btn switch find-mode" :class="{ on: onlyFound }">
+              <label v-if="found && !showAll" class="btn switch find-mode" :class="{ on: onlyFound }">
                 <input
                   type="checkbox"
                   :checked="onlyFound"
