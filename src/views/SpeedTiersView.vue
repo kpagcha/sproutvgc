@@ -789,7 +789,13 @@ const found = computed(() => {
   const id = query.value.find
   return typeof id === 'string' && id in POKEMON ? (id as PokemonId) : null
 })
-const setFound = (id: PokemonId | null) => set('find', id ?? undefined)
+/** In the charts, where each Pokémon is a row of its own, the one found is the one yours is measured against too (its
+ * most common set), as tapping its row does: on the ladder, that's a chip of it, tapped. */
+function setFound(id: PokemonId | null) {
+  if (view.value !== 'ranges' || mine.value === null) return set('find', id ?? undefined)
+  const e = id !== null && id !== mine.value ? topEntry(id) : undefined
+  void router.replace({ query: { ...query.value, find: id ?? undefined, vs: e ? chipKey(e) : undefined } })
+}
 /** Formes found though they battle as their base species does: Squawkabilly's plumages, which go together (two of
  * them have an ability of their own). */
 const FINDABLE_ALIKE: ReadonlySet<PokemonId> = new Set<PokemonId>(['squawkabillyblue'])
@@ -972,8 +978,10 @@ const oddsRows = computed<OddsRow[]>(() => {
 })
 /** A Pokémon tapped in a row: measured against, as a chip is (its most common one, in the ranges at the sets); yours
  * isn't. */
+const topEntry = (id: PokemonId) =>
+  entries.value.filter((x) => x.id === id && !x.boost).sort((a, b) => (b.share ?? 0) - (a.share ?? 0))[0]
 function onRangeChip(ev: MouseEvent, id: PokemonId) {
-  const e = entries.value.filter((x) => x.id === id && !x.boost).sort((a, b) => (b.share ?? 0) - (a.share ?? 0))[0]
+  const e = topEntry(id)
   // Yours, tapped: nothing, as its chip on the ladder (its page still opens in a new tab).
   if (id === mine.value) {
     if (!ev.ctrlKey && !ev.metaKey && !ev.shiftKey) {
@@ -1071,10 +1079,23 @@ const versus = computed(() => {
 // tapped, the comparison's card has the way there instead.
 const compareTarget = computed(() => (mine.value === null ? null : compareLink(null)))
 // Its title, the Pokémon's name (with its icon) a link to its page.
-// Picking one finds it too, the find showing as its "Only" switch says.
+// Picking one finds it too, the find showing as its "Only" switch says; in the charts, letting it go lets the find go
+// too, the two being one there.
 function pickVersus(e: Entry) {
   const vs = vsKey.value === chipKey(e) ? undefined : chipKey(e)
+  if (!vs && view.value === 'ranges') return clearVersus()
   void router.replace({ query: { ...query.value, vs, ...(vs && { find: e.id }) } })
+}
+// In the charts, a Pokémon found with none measured against (found before yours was set, or on the ladder) is measured
+// against, as finding it there does.
+watch([view, mine, found, vsKey, entries], () => {
+  if (view.value !== 'ranges' || mine.value === null || found.value === null || found.value === mine.value) return
+  if (vsKey.value !== null) return
+  const e = topEntry(found.value)
+  if (e) set('vs', chipKey(e))
+})
+function clearVersus() {
+  void router.replace({ query: { ...query.value, vs: undefined, ...(view.value === 'ranges' && { find: undefined }) } })
 }
 // The comparison's Speed finds the chip it's against: brought to the middle of the screen, flashing once.
 function locateVersus() {
@@ -2018,7 +2039,7 @@ const { entered } = usePageEntered()
                 :exit="{ opacity: 0, y: 8 }"
                 :transition="FADE"
               >
-                <VersusCard v-bind="versus.card" @close="set('vs', undefined)" @locate="locateVersus" />
+                <VersusCard v-bind="versus.card" @close="clearVersus" @locate="locateVersus" />
               </motion.div>
               <motion.button
                 v-else-if="match"
@@ -2254,7 +2275,7 @@ const { entered } = usePageEntered()
             </div>
           </details>
         </Teleport>
-        <VersusCard v-if="versus && side" v-bind="versus.card" @close="set('vs', undefined)" @locate="locateVersus" />
+        <VersusCard v-if="versus && side" v-bind="versus.card" @close="clearVersus" @locate="locateVersus" />
       </div>
     </div>
   </div>

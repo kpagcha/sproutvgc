@@ -209,13 +209,13 @@ onBeforeUnmount(() => {
         v-for="r in rows"
         :key="r.id"
         class="row tier"
-        :class="{ hit: r.hit, 'has-mine': r.mine, extra: r.extra }"
+        :class="{ hit: r.hit, 'has-mine': r.mine, versus: r.id === versus, extra: r.extra }"
         :data-id="r.id"
       >
         <AppLink
           :to="{ name: 'pokemon', params: { id: r.id } }"
           class="who mon"
-          :class="{ hit: r.hit, mine: r.mine, versus: r.id === versus }"
+          :class="{ hit: r.hit, mine: r.mine }"
           @click.capture="emit('chip', $event, r.id)"
         >
           <PokemonIcon :id="r.id" /><span class="name">{{ r.species }}</span
@@ -360,6 +360,11 @@ onBeforeUnmount(() => {
 .row.hit {
   background: var(--sel);
 }
+/* The one yours is measured against: tinted the opponents' red, as yours is its color, rather than marked found too
+   (in the charts it's the one found). */
+.row.versus {
+  background: color-mix(in srgb, var(--opponent) 14%, transparent);
+}
 .finding .row:not(.hit, .has-mine) {
   opacity: 0.45;
 }
@@ -367,7 +372,7 @@ onBeforeUnmount(() => {
 .row.extra {
   border-bottom-style: dotted;
 }
-/* The Pokémon: its icon and name; yours outlined, the one yours is measured against in the opponents' red. */
+/* The Pokémon: its icon and name; yours outlined (the one yours is measured against is its row's tint). */
 .mon {
   display: inline-flex;
   align-items: center;
@@ -380,6 +385,13 @@ onBeforeUnmount(() => {
 .mon:hover {
   text-decoration: none;
   background: var(--hover);
+}
+/* On a tinted row, a deeper tint of its own color rather than the hover's yellow. */
+.row.versus .mon:hover {
+  background: color-mix(in srgb, var(--opponent) 28%, transparent);
+}
+.row.has-mine .mon:hover {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
 }
 .name {
   overflow: hidden;
@@ -394,13 +406,6 @@ onBeforeUnmount(() => {
 .mon.mine {
   font-weight: bold;
   box-shadow: inset 0 0 0 2px var(--accent);
-}
-.mon.versus {
-  color: var(--opponent-text);
-  background: var(--opponent);
-}
-.mon.versus .forme {
-  color: inherit;
 }
 .num {
   font-weight: bold;
