@@ -690,7 +690,7 @@ async function main() {
   await writeJson('pokemon.learnsets.json', Object.fromEntries(byId(roster).map((s) => [s.id, learnset(s.id)])))
 
   // The meta: Smogon's usage stats for the format, a snapshot per rating cutoff (`meta/<id>.json`, listed in
-  // `meta/index.json`). Which of them the app shows is `VITE_META_SETS` in `.env`.
+  // `meta/index.json`), by regulation (`smogon-mc-1760`). Which of them the app shows is `VITE_META_SETS` in `.env`.
   const smogon = new Smogon(join(CACHE, 'smogon'), (url) => getBinary(url, true), toId(format.name))
   if (!sources.smogon || process.argv.includes('--update') || process.argv.includes('--update-smogon')) {
     sources.smogon = await smogon.latestMonth()
@@ -702,9 +702,20 @@ async function main() {
     items: new Set(availableIds.items),
     abilities: new Set(availableIds.abilities),
   })
-  rmSync(join(OUT, 'meta'), { recursive: true, force: true })
+  // Past regulations' snapshots stay, as their history: only the current regulation's are replaced. They're never
+  // checked against the dex again, which may no longer have what they name.
+  const indexPath = join(OUT, 'meta/index.json')
+  const index: Record<string, { regulation: string }> = existsSync(indexPath)
+    ? JSON.parse(readFileSync(indexPath, 'utf8'))
+    : {}
+  const past = Object.entries(index).filter(([, s]) => s.regulation !== reg)
+  for (const [id, s] of Object.entries(index))
+    if (s.regulation === reg) rmSync(join(OUT, `meta/${id}.json`), { force: true })
   for (const { snapshot, data } of snapshots) await writeJson(`meta/${snapshot.id}.json`, data)
-  await writeJson('meta/index.json', Object.fromEntries(snapshots.map((s) => [s.snapshot.id, s.snapshot])))
+  await writeJson('meta/index.json', {
+    ...Object.fromEntries(snapshots.map((s) => [s.snapshot.id, s.snapshot])),
+    ...Object.fromEntries(past),
+  })
 
   // Sprites: the icon sheets cut down to the regulation's entries, in ID order, and each legal Pokémon's own sprite.
   const clientData = await get(`${CLIENT_RAW}/${sources.client}/play.pokemonshowdown.com/src/battle-dex-data.ts`)

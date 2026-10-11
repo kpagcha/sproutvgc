@@ -104,7 +104,7 @@ export class Smogon {
     return readFileSync(cached, 'utf8')
   }
 
-  /** The month's snapshots, a cutoff each, by snapshot ID. Stops on any name or ID the dex doesn't have. */
+  /** The month's snapshots, a cutoff each, by snapshot ID (`smogon-<regulation>-<cutoff>`). Stops on any name or ID the dex doesn't have. */
   async snapshots(
     month: string,
     regulation: string,
@@ -185,7 +185,7 @@ export class Smogon {
       })
       result.push({
         snapshot: {
-          id: `smogon-${cutoff}`,
+          id: `smogon-${regulation.toLowerCase().replace(/[^a-z0-9]/g, '')}-${cutoff}`,
           kind: 'showdown' as const,
           provider: PROVIDER,
           regulation,

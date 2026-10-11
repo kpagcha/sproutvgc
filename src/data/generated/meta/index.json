@@ -1,6 +1,6 @@
 {
-  "smogon-1760": {
-    "id": "smogon-1760",
+  "smogon-mc-1760": {
+    "id": "smogon-mc-1760",
     "kind": "showdown",
     "provider": { "name": "Smogon", "url": "https://www.smogon.com/" },
     "regulation": "M-C",
@@ -12,8 +12,8 @@
     "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
     "unweighted": ["brought"]
   },
-  "smogon-1630": {
-    "id": "smogon-1630",
+  "smogon-mc-1630": {
+    "id": "smogon-mc-1630",
     "kind": "showdown",
     "provider": { "name": "Smogon", "url": "https://www.smogon.com/" },
     "regulation": "M-C",
@@ -25,8 +25,8 @@
     "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
     "unweighted": ["brought"]
   },
-  "smogon-1500": {
-    "id": "smogon-1500",
+  "smogon-mc-1500": {
+    "id": "smogon-mc-1500",
     "kind": "showdown",
     "provider": { "name": "Smogon", "url": "https://www.smogon.com/" },
     "regulation": "M-C",
@@ -38,8 +38,8 @@
     "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
     "unweighted": ["brought"]
   },
-  "smogon-0": {
-    "id": "smogon-0",
+  "smogon-mc-0": {
+    "id": "smogon-mc-0",
     "kind": "showdown",
     "provider": { "name": "Smogon", "url": "https://www.smogon.com/" },
     "regulation": "M-C",

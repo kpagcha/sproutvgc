@@ -153,7 +153,9 @@ const PICK_KEY = 'sproutvgc.metaSet'
 
 function savedPick(): string | null {
   try {
-    return localStorage.getItem(PICK_KEY)
+    const id = localStorage.getItem(PICK_KEY)
+    // From before snapshot IDs named their regulation ("smogon-1630"): those were all of M-C.
+    return id?.replace(/^smogon-(\d+)$/, 'smogon-mc-$1') ?? null
   } catch {
     return null
   }
