@@ -748,7 +748,7 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.boosts': 'Mejoras',
   'speed.boostLabel': '{effect} ×{factor}',
   'speed.boostTip':
-    '{effect} en el {pct} de sus sets: Velocidad ×{factor}{when}. Aquí con su reparto de Velocidad más común: {build}.',
+    '{effect} en el {pct} de sus sets: Velocidad ×{factor}{when}. Aquí con uno de sus repartos de Velocidad: {build}.',
   'speed.when.field': 'con {field}',
   'speed.when.itemLost': 'al gastar o perder su objeto',
   'speed.when.status': 'mientras sufre un problema de estado',
@@ -762,7 +762,7 @@ export const messages: Record<keyof typeof en, string> = {
     'El efecto de la naturaleza en la Velocidad, los puntos de estadística en Velocidad y la proporción de sus sets que los llevan, sea cual sea la naturaleza; por debajo del {pct}, no se muestran',
   'speed.legendBoostLabel': 'Pañuelo Elegido ×1,5',
   'speed.legendBoost':
-    'Un objeto que llevan sus sets o una habilidad que puede tener y cambia la Velocidad, con la proporción de sus sets que la llevan, con su reparto de Velocidad más común, ya que los datos no dicen qué reparto va con él',
+    'Un objeto que llevan sus sets o una habilidad que puede tener y cambia la Velocidad, con la proporción de sus sets que la llevan, con cada uno de sus repartos de Velocidad, ya que los datos no dicen qué repartos van con él',
   'speed.whenShort.itemLost': 'Sin objeto',
   'speed.whenShort.status': 'Con estado',
   'speed.build': '{points} puntos y {nature}{natures}',

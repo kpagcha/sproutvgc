@@ -738,8 +738,7 @@ export const messages = {
   'speed.liveTip': '{effect} ×{factor} in {field}, as it is: {build}, {pct} of its sets',
   'speed.boosts': 'Boosts',
   'speed.boostLabel': '{effect} ×{factor}',
-  'speed.boostTip':
-    '{effect} on {pct} of its sets: Speed ×{factor}{when}. Here at its most common Speed build: {build}.',
+  'speed.boostTip': '{effect} on {pct} of its sets: Speed ×{factor}{when}. Here at one of its Speed builds: {build}.',
   'speed.when.field': 'in {field}',
   'speed.when.itemLost': 'once its item is used or lost',
   'speed.when.status': 'while it has a status condition',
@@ -753,7 +752,7 @@ export const messages = {
     "The nature's effect on Speed, stat points in Speed and the share of its sets running them, whatever the nature; under {pct}, left out",
   'speed.legendBoostLabel': 'Choice Scarf ×1.5',
   'speed.legendBoost':
-    "An item its sets hold or an ability it can have that changes Speed, with the share of its sets running it, shown at its most common Speed build, as the data doesn't say which build goes with it",
+    "An item its sets hold or an ability it can have that changes Speed, with the share of its sets running it, shown at each of its Speed builds, as the data doesn't say which builds go with it",
   'speed.whenShort.itemLost': 'Item gone',
   'speed.whenShort.status': 'Statused',
   'speed.build': '{points} points and {nature}{natures}',

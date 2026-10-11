@@ -402,20 +402,24 @@ function remapVs(field: Field | null) {
   const [, , effect, pts, nat] = parts
   const when = effect ? SPEED_ABILITIES[effect]?.when : undefined
   if (!when || !needsField(when)) return vs
-  if (when === field && shareOf(effect!) > 0 && top)
-    return `${id}:ability:${effect}:${pts ?? top.points}:${nat ?? top.effect}`
+  if (when === field && shareOf(effect!) > 0) return vs
+  // Still on the ladder as what could be, while boosts show and the field doesn't rule it out; else its build plain.
+  if (showBoosts.value && (!field || isTerrain(when) !== isTerrain(field) || when === field)) return vs
   if (pts) return `${id}:${pts}:${nat}`
-  if (!field || isTerrain(when) !== isTerrain(field) || when === field) return vs
   return top ? `${id}:${top.points}:${top.effect}` : m ? undefined : `${id}:${boostBench.value}`
 }
 /**
  * The chip yours is measured against, by its key (`?vs=`). Builds go by nature effect: a key from before, with an
- * exact nature in its place (a plain build's last, a live boost's), has it turned into its effect.
+ * exact nature in its place (a plain build's last, a live boost's), has it turned into its effect. A boost's from
+ * before, with no build, when boosts were each at the most common one, is at that build.
  */
 const vsKey = computed(() => {
   const vs = query.value.vs
   if (typeof vs !== 'string') return null
   const parts = vs.split(':')
+  const top = buildsOf(parts[0] as PokemonId)[0]
+  if ((parts[1] === 'ability' || parts[1] === 'item') && parts.length === 3 && top)
+    return `${vs}:${top.points}:${top.effect}`
   const i = parts[1] === 'ability' ? 4 : /^\d+$/.test(parts[1] ?? '') ? 2 : -1
   const nat = parts[i]
   if (i < 0 || nat === undefined || isEffect(nat)) return vs
@@ -449,8 +453,9 @@ interface Entry {
   effect?: NatureEffect
   share?: number
   bench?: Benchmark
-  /** An item or ability its sets run that changes Speed (`SPEED_ITEMS`, `SPEED_ABILITIES`), at its most common
-   * Speed build: `speed` is the build's, the effect applied with the modifiers (`chipSpeed`). */
+  /** An item or ability its sets run that changes Speed (`SPEED_ITEMS`, `SPEED_ABILITIES`), at one of its Speed
+   * builds (a benchmark, with no sets in the snapshot): `speed` is the build's, the effect applied with the modifiers
+   * (`chipSpeed`). */
   boost?: { ref: Ref<'item' | 'ability'> } & SpeedEffect
   /** Its boost is the field's own, which its sets have: how they play, rather than what could be. */
   live?: true
@@ -485,15 +490,14 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
       rank: m.rank,
       extra,
     }))
-  // Its boosts, at its most common build: the data counts items, abilities and spreads apart, so it doesn't say which
-  // build goes with them. Items those its sets hold; abilities every one it can have, however few of its sets run it
-  // (as what could be). Those the modifiers rule out (Unburden with a Choice Scarf on everyone), or the field (another
+  // Its boosts, at each of its builds the ladder has (the least share of its sets, whatever the field): the data counts
+  // items, abilities and spreads apart, so it doesn't say which builds go with them. Items those its sets hold;
+  // abilities every one it can have, however few of its sets run it (as what could be), with the share of its sets
+  // running it. Those the modifiers rule out (Unburden with a Choice Scarf on everyone), or the field (another
   // weather), are left out. The field's own, always shown, are how its sets play: each build boosted, at its share of
   // them times the ability's (the two taken apart as the data counts them), those under the least share left out.
-  const build = builds[0]
-  if (boostsAvailable.value && build) {
-    const speed = speedStat(base, build.points, build.effect)
-    const at = { id, ...named(id), points: build.points, effect: build.effect, rank: m.rank, extra }
+  if (boostsAvailable.value && builds.length) {
+    const at = { id, ...named(id), rank: m.rank, extra }
     const abilityShare = (a: string) => m.abilities?.find((x) => x.id === a)?.share ?? 0
     const effects = [
       ...(m.items ?? [])
@@ -517,7 +521,19 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
             live: true,
           })
         }
-      } else if (showBoosts.value) list.push({ ...at, speed, share, boost })
+      } else if (showBoosts.value) {
+        for (const b of builds) {
+          if (b.share < MIN_SHARE) continue
+          list.push({
+            ...at,
+            speed: speedStat(base, b.points, b.effect),
+            points: b.points,
+            effect: b.effect,
+            share,
+            boost,
+          })
+        }
+      }
     }
   }
   return list
@@ -984,7 +1000,7 @@ const chipKey = (e: Entry) =>
     ? 'mine'
     : `${e.id}:${
         e.boost
-          ? `${e.boost.ref.kind}:${e.boost.ref.id}${e.live ? `:${e.points}:${e.effect}` : ''}`
+          ? `${e.boost.ref.kind}:${e.boost.ref.id}${e.bench ? '' : `:${e.points}:${e.effect}`}`
           : (e.bench ?? `${e.points}:${e.effect}`)
       }`
 
