@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { t } from '@/i18n'
 import { GAME_NAME, REGULATION } from '@/data/format'
@@ -37,6 +37,18 @@ function focusBox() {
 onMounted(focusBox)
 watch(searchFocus, focusBox)
 
+// "/" focuses the box too, as on the speed tiers; not while typing elsewhere, nor with a dialog over the page.
+function onSlash(e: KeyboardEvent) {
+  if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return
+  const el = document.activeElement
+  if (el instanceof HTMLElement && (el.isContentEditable || el.closest('input, textarea, select'))) return
+  if (document.documentElement.classList.contains('dialog-open')) return
+  e.preventDefault()
+  box.value?.focus({ preventScroll: true })
+}
+window.addEventListener('keydown', onSlash)
+onBeforeUnmount(() => window.removeEventListener('keydown', onSlash))
+
 const { results, only } = useSearch(() => query.value, undefined, { pages: true })
 function openOnly() {
   if (only.value) void router.push(only.value)
@@ -61,6 +73,7 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
         v-model="query"
         wide
         icon
+        hotkey="/"
         :placeholder="t('home.search')"
         :aria-label="t('home.search')"
         @keydown.enter="openOnly"
