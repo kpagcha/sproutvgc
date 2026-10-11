@@ -217,6 +217,8 @@ const name = (m: RangeRow['mons'][number]) => [m.species, m.forme].filter(Boolea
           </template>
           <span v-if="mine !== null" class="line" :style="{ left: at(mine) }" aria-hidden="true"></span>
         </span>
+        <!-- On phones, where the bar's under the rest of the row and as wide as it: yours' line down the whole row. -->
+        <span v-if="mine !== null" class="line row-line" :style="{ left: at(mine) }" aria-hidden="true"></span>
       </li>
     </ol>
   </div>
@@ -305,8 +307,12 @@ const name = (m: RangeRow['mons'][number]) => [m.species, m.forme].filter(Boolea
   list-style: none;
 }
 .row {
+  position: relative;
   padding: 2px 0;
   border-bottom: 1px solid var(--border);
+}
+.row-line {
+  display: none;
 }
 .row.has-mine {
   background: color-mix(in srgb, var(--accent) 10%, transparent);
@@ -429,6 +435,20 @@ const name = (m: RangeRow['mons'][number]) => [m.species, m.forme].filter(Boolea
   white-space: nowrap;
 }
 @media (max-width: 720px) {
+  /* Yours' line down the whole row, the bar's own left out (it would stop at the bar). */
+  .row .track > .line {
+    display: none;
+  }
+  .row-line {
+    display: block;
+    top: -1px;
+    bottom: -1px;
+  }
+  /* Behind the Pokémon. */
+  .row .mons {
+    position: relative;
+    z-index: 1;
+  }
   .ranges {
     --cols: 2.2em minmax(0, 1fr);
   }
