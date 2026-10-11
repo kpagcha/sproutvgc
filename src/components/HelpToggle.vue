@@ -4,8 +4,8 @@ import { t } from '@/i18n'
 
 // "How to read this": a link-like toggle opening a page's help (the element `controls` names). In a heading's row
 // (`fit`), it takes what the row leaves: its icon always, its words only when they fit beside it, else on a second
-// line it hides, so the row never wraps.
-const props = defineProps<{ open: boolean; controls: string; fit?: boolean }>()
+// line it hides, so the row never wraps. `iconOnly`: its icon alone, its words its tooltip.
+const props = defineProps<{ open: boolean; controls: string; fit?: boolean; iconOnly?: boolean }>()
 const emit = defineEmits<{ toggle: [] }>()
 </script>
 
@@ -16,12 +16,13 @@ const emit = defineEmits<{ toggle: [] }>()
     :class="{ fit: props.fit }"
     :aria-expanded="props.open"
     :aria-controls="props.controls"
-    :aria-label="props.fit ? t('speed.help') : undefined"
+    :aria-label="props.fit || props.iconOnly ? t('speed.help') : undefined"
+    v-tip="props.iconOnly ? t('speed.help') : undefined"
     @click.stop.prevent="emit('toggle')"
     @keydown.enter.stop
     @keydown.space.stop
   >
-    <CircleHelp :size="16" aria-hidden="true" /><span>{{ t('speed.help') }}</span>
+    <CircleHelp :size="16" aria-hidden="true" /><span v-if="!props.iconOnly">{{ t('speed.help') }}</span>
   </button>
 </template>
 

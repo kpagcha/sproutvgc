@@ -471,7 +471,7 @@ function resetAll() {
       <div class="head">
         <h1>{{ t('title.speedCompare') }}<SetupStar /></h1>
         <MetaDialog v-if="metaSpeeds" class="head-meta" />
-        <HelpToggle class="head-help" :open="helpOpen" controls="compare-help" fit @toggle="toggleHelp" />
+        <HelpToggle class="head-help" :open="helpOpen" controls="compare-help" fit icon-only @toggle="toggleHelp" />
       </div>
       <div v-if="helpOpen" id="compare-help" class="help-body panel sunken small">
         <p class="formula muted">{{ t('speed.formula') }}</p>
