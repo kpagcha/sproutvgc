@@ -295,6 +295,8 @@ const mySpeed = computed(() =>
 function pickMine(id: PokemonId | null) {
   if (!id) return
   void router.replace({ query: { ...query.value, mine: id, ...buildOf(id), mymods: keptMods(), vs: undefined } })
+  // On phones, picked from the bar: its card opens, for its build and modifiers.
+  if (phone.value) yoursOpen.value = true
 }
 /** Your modifiers for another Pokémon: its abilities aren't yours' (nor the weather they'd bring). */
 function keptMods() {
