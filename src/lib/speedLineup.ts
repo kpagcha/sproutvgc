@@ -4,7 +4,7 @@
 
 import type { PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
-import type { NatureEffect } from './stats'
+import { MAX_POINTS, type NatureEffect } from './stats'
 import type { SpeedBuildShare } from './speed'
 import { buildSpeed, readBuild, type SpeedBuild } from './speedBuild'
 
@@ -102,6 +102,12 @@ export function setSpread(id: PokemonId, builds: readonly SpeedBuildShare[], b: 
   }
   return [...bySpeed.values()].sort((x, y) => y.speed - x.speed)
 }
+
+/** What a Pokémon could reach with a build's modifiers: its Speeds at Min− and Max+. */
+export const reachOf = (id: PokemonId, b: SpeedBuild) => ({
+  min: buildSpeed(id, { ...b, effect: 'down', points: 0 }),
+  max: buildSpeed(id, { ...b, effect: 'up', points: MAX_POINTS }),
+})
 
 /** A spread's most common Speed (the faster of two as common). */
 export const commonSpeed = (spread: readonly SpreadPoint[]) =>

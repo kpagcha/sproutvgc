@@ -908,6 +908,13 @@ export const messages: Record<keyof typeof en, string> = {
   'compare.helpSets':
     'La Velocidad de un rival no se sabe, así que va con cada set de los datos, cada uno contando según lo usan: cuántas veces mueve antes el tuyo contra ellos, un gráfico de cada Velocidad a la que llegan y qué necesita el tuyo para mover antes que la más común y que todas. Tocar una de sus distribuciones, o cambiar su naturaleza o sus puntos, lo deja con una sola.',
   'compare.spreadNote': 'La más común: {speed}, en el {pct} de sus sets.',
+  'compare.commonSpeeds': 'Velocidades habituales de {name}',
+  'compare.colSpeed': 'Velocidad',
+  'compare.ofSets': 'De sus sets',
+  'compare.build': 'Distribución',
+  'compare.bothChance': '{name} mueve antes que ambos el {pct} de las veces',
+  'compare.bothCommon':
+    'Para mover antes que las Velocidades más comunes de ambos ({speeds}) con su naturaleza: {points}',
   'compare.pairHint': 'Toca un enfrentamiento para ver a los dos solos: cuál mueve antes, y qué necesita cada uno.',
   'compare.both': 'Para mover antes que ambos rivales',
   'compare.bothOf': '{name}: antes que {other} a {speed}',

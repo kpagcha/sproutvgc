@@ -896,6 +896,12 @@ export const messages = {
   'compare.helpSets':
     "An opponent's Speed isn't known, so it's at every set the snapshot has, each counting as often as it's run: how often yours moves first against them, a chart of every Speed they reach and what yours takes to move before the most common and before them all. Tapping one of its builds, or changing its nature or points, sets it to one build.",
   'compare.spreadNote': 'Most common: {speed}, on {pct} of its sets.',
+  'compare.commonSpeeds': "{name}'s common Speeds",
+  'compare.colSpeed': 'Speed',
+  'compare.ofSets': 'Of its sets',
+  'compare.build': 'Build',
+  'compare.bothChance': '{name} moves before both {pct} of the time',
+  'compare.bothCommon': 'To move before both most common Speeds ({speeds}) at its nature: {points}',
   'compare.pairHint': 'Tap a matchup to see the two alone: which moves first, and what each takes.',
   'compare.both': 'To move before both opponents',
   'compare.bothOf': '{name}: before {other} at {speed}',

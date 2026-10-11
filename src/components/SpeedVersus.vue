@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import type { PokemonId } from '@/data/dex'
 import { t } from '@/i18n'
-import { MAX_POINTS } from '@/lib/stats'
-import { buildSpeed, toMoveFirst, type SpeedBuild } from '@/lib/speedBuild'
-import { toBeatAll, type SpreadPoint } from '@/lib/speedLineup'
+import { toMoveFirst, type SpeedBuild } from '@/lib/speedBuild'
+import { reachOf, toBeatAll, type SpreadPoint } from '@/lib/speedLineup'
 import SpeedAgainst from '@/components/SpeedAgainst.vue'
 import SpeedSpread from '@/components/SpeedSpread.vue'
 
@@ -28,11 +27,6 @@ const props = defineProps<{
 }>()
 
 const rows = (speed: number) => toMoveFirst(props.me.id, props.me.build, speed, props.trickRoom)
-/** What it could reach, with its modifiers: Min− to Max+. */
-const reach = () => ({
-  min: buildSpeed(props.me.id, { ...props.me.build, effect: 'down', points: 0 }),
-  max: buildSpeed(props.me.id, { ...props.me.build, effect: 'up', points: MAX_POINTS }),
-})
 </script>
 
 <template>
@@ -42,7 +36,7 @@ const reach = () => ({
     :spread="me.spread"
     :tone
     :other="{ name: them.name, spread: them.spread, sets: them.sets }"
-    :reach="reach()"
+    :reach="reachOf(me.id, me.build)"
     :trick-room="trickRoom"
     :banded
   />
