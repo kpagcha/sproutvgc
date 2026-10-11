@@ -474,10 +474,16 @@ function resetAll() {
          clearing them (the teams, or the list in speed order). There from the start, so nothing under it moves on the
          first pick. -->
     <div class="panel toolbar">
-      <label v-tip="canHover && t('compare.trickroomTip')" class="btn switch tr-switch" :class="{ on: trickRoom }">
-        <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
+      <button
+        v-tip="canHover && t('compare.trickroomTip')"
+        type="button"
+        class="btn switch tr-switch"
+        :class="{ on: trickRoom }"
+        :aria-pressed="trickRoom"
+        @click="toggleTrickRoom"
+      >
         <Box :size="16" aria-hidden="true" />{{ t('speed.mod.trickroom') }}
-      </label>
+      </button>
       <template v-if="mode === 'vs' && anyPicked">
         <button type="button" class="btn" @click="swap">
           <ArrowLeftRight :size="16" aria-hidden="true" />{{ t('compare.swap') }}

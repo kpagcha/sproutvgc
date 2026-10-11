@@ -1386,15 +1386,26 @@ const { entered } = usePageEntered()
                 :options="BENCHMARKS.map((b) => ({ value: b, label: benchLabel(b) }))"
               />
               <template v-if="!showAll && boostsAvailable">
-                <label v-tip="canHover && t('speed.boostsDesc')" class="btn switch" :class="{ on: showBoosts }">
-                  <input type="checkbox" :checked="showBoosts" @change="toggleBoosts" />
+                <button
+                  v-tip="canHover && t('speed.boostsDesc')"
+                  type="button"
+                  class="btn switch"
+                  :class="{ on: showBoosts }"
+                  :aria-pressed="showBoosts"
+                  @click="toggleBoosts"
+                >
                   <Rocket :size="16" aria-hidden="true" />{{ t('speed.boosts') }}
-                </label>
+                </button>
               </template>
-              <label class="btn switch" :class="{ on: trickRoom }">
-                <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
+              <button
+                type="button"
+                class="btn switch"
+                :class="{ on: trickRoom }"
+                :aria-pressed="trickRoom"
+                @click="toggleTrickRoom"
+              >
                 <Box :size="16" aria-hidden="true" />{{ t('speed.mod.trickroom') }}
-              </label>
+              </button>
               <!-- The weather or terrain in play, from yours' ability: said as a switch that's on, what brings it on it, its
                cross turning the ability off. -->
               <template v-if="inPlay">
@@ -1427,10 +1438,15 @@ const { entered } = usePageEntered()
                 }}<span v-if="!modsOpen && modsOn.length" class="mods-on">{{ modsOn.join(' · ') }}</span
                 ><span class="marker" aria-hidden="true">{{ modsOpen ? '▾' : '▸' }}</span>
               </button>
-              <label class="btn switch" :class="{ on: showMegas }">
-                <input type="checkbox" :checked="showMegas" @change="toggleMegas" />
+              <button
+                type="button"
+                class="btn switch"
+                :class="{ on: showMegas }"
+                :aria-pressed="showMegas"
+                @click="toggleMegas"
+              >
                 {{ t('speed.megas') }}
-              </label>
+              </button>
               <!-- Resetting them: an icon at the line's end, there from the start (greyed out with nothing to reset), so
                    the line doesn't change as options are set. -->
               <button
@@ -1499,20 +1515,18 @@ const { entered } = usePageEntered()
             <!-- Only it on the ladder, beside the find (not with every Pokémon once, where it shows once): its room kept
                  there while it's not shown, so the row doesn't change. -->
             <div class="find-modes">
-              <label
+              <button
+                type="button"
                 class="btn switch find-mode"
                 :class="{ on: onlyFound, unshown: !found || showAll }"
+                :disabled="!found || showAll"
                 :aria-hidden="!found || showAll || undefined"
+                :aria-pressed="onlyFound"
+                :aria-label="found ? t('speed.findOnly', { name: refName(pokemon(found)) }) : undefined"
+                @click="findMode = onlyFound ? 'mark' : 'only'"
               >
-                <input
-                  type="checkbox"
-                  :checked="onlyFound"
-                  :disabled="!found || showAll"
-                  :aria-label="found ? t('speed.findOnly', { name: refName(pokemon(found)) }) : undefined"
-                  @change="findMode = onlyFound ? 'mark' : 'only'"
-                />
                 {{ onlyLabel[0] }}<PokemonIcon :id="found ?? 'pikachu'" />{{ onlyLabel[1] }}
-              </label>
+              </button>
             </div>
             <!-- What to do with the one found, on a row under the filters (the field's own cross clears it): swap it, and
                  keep it on the ladder, joined to the ones kept. -->
@@ -1633,32 +1647,41 @@ const { entered } = usePageEntered()
                   clearable
                   @update:model-value="setFound"
                 />
-                <label v-if="found && !showAll" class="btn switch find-mode" :class="{ on: onlyFound }">
-                  <input
-                    type="checkbox"
-                    :checked="onlyFound"
-                    :aria-label="t('speed.findOnly', { name: refName(pokemon(found)) })"
-                    @change="findMode = onlyFound ? 'mark' : 'only'"
-                  />
+                <button
+                  v-if="found && !showAll"
+                  type="button"
+                  class="btn switch find-mode"
+                  :class="{ on: onlyFound }"
+                  :aria-pressed="onlyFound"
+                  :aria-label="t('speed.findOnly', { name: refName(pokemon(found)) })"
+                  @click="findMode = onlyFound ? 'mark' : 'only'"
+                >
                   {{ onlyLabel[0] }}<PokemonIcon :id="found" />{{ onlyLabel[1] }}
-                </label>
+                </button>
               </div>
-              <label v-if="!showAll && boostsAvailable" class="btn switch" :class="{ on: showBoosts }">
-                <input type="checkbox" :checked="showBoosts" @change="toggleBoosts" />
+              <button
+                v-if="!showAll && boostsAvailable"
+                type="button"
+                class="btn switch"
+                :class="{ on: showBoosts }"
+                :aria-pressed="showBoosts"
+                @click="toggleBoosts"
+              >
                 <Rocket :size="16" aria-hidden="true" />{{ t('speed.boosts') }}
-              </label>
-              <label class="btn switch" :class="{ on: trickRoom }">
-                <input
-                  type="checkbox"
-                  :checked="trickRoom"
-                  :aria-label="t('speed.mod.trickroom')"
-                  @change="toggleTrickRoom"
-                />
+              </button>
+              <button
+                type="button"
+                class="btn switch"
+                :class="{ on: trickRoom }"
+                :aria-pressed="trickRoom"
+                :aria-label="t('speed.mod.trickroom')"
+                @click="toggleTrickRoom"
+              >
                 <!-- "TR" on phones, the usual shorthand, so the bar fits on one line. -->
                 <Box :size="16" aria-hidden="true" />
                 <span class="long" aria-hidden="true">{{ t('speed.mod.trickroom') }}</span>
                 <span class="short" aria-hidden="true">{{ t('speed.trShort') }}</span>
-              </label>
+              </button>
             </div>
           </div>
 
