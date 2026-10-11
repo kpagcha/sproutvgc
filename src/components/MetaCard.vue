@@ -4,10 +4,10 @@ import { X } from '@lucide/vue'
 import {
   datasetDates,
   metaDatasets,
-  periodLabel,
   selectSnapshot,
   selectedSnapshot,
   snapshots,
+  sourceParts,
   subsetParts,
   type MetaDataset,
   type MetaSnapshot,
@@ -15,9 +15,9 @@ import {
 import { locale, t } from '@/i18n'
 
 // The meta's data, to see and pick (`MetaDialog`'s card), in steps, each shown when there's a choice: the regulation
-// (the current one first), then its datasets (what one source observed over one period: its months, the latest
-// first), what the one shown is (its battles, regulation, days, source), and its subsets (whose teams count most),
-// what they mean said once over them. Picking a subset shows it on every page and closes the card; another regulation
+// (the current one first), then its datasets, a plain list of them, the latest first (what one source observed over
+// one period, whatever the period: Smogon's are months), what the one shown is (its battles, regulation, days,
+// source), and its subsets (whose teams count most), what they mean said once over them. Picking a subset shows it on every page and closes the card; another regulation
 // or dataset shows its latest, keeping the subset when it has it, and leaves the card open for the next step.
 const emit = defineEmits<{ close: [] }>()
 const id = useId()
@@ -29,13 +29,8 @@ const current = computed<MetaDataset | undefined>(
 const regulations = computed(() => [...new Set(datasets.value.map((d) => d.regulation))])
 /** The current regulation's datasets. */
 const inRegulation = computed(() => datasets.value.filter((d) => d.regulation === current.value?.regulation))
-/** A dataset's name among its regulation's: its period, with its source when they're not all the same. */
-const sameKind = computed(() => new Set(inRegulation.value.map((d) => d.snapshots[0]!.kind)).size === 1)
-const datasetName = (d: MetaDataset) =>
-  sameKind.value
-    ? periodLabel(d.snapshots[0]!)
-    : `${t(`meta.kind.${d.snapshots[0]!.kind}`)} · ${periodLabel(d.snapshots[0]!)}`
-const monthly = computed(() => inRegulation.value.every((d) => d.snapshots[0]!.period === 'month'))
+/** A dataset's name among its regulation's: its source and period ("Showdown ladder · Sep 2026"). */
+const datasetName = (d: MetaDataset) => sourceParts(d.snapshots[0]!).join(' · ')
 
 function pickRegulation(r: string) {
   const d = datasets.value.find((x) => x.regulation === r)
@@ -89,10 +84,10 @@ const about = (d: MetaDataset) =>
         </label>
       </div>
     </section>
-    <!-- Its datasets (its months), when there's a choice of them. -->
+    <!-- Its datasets, when there's a choice of them. -->
     <section v-if="inRegulation.length > 1" class="section">
-      <h3 :id="`${id}-datasets`" class="heading">{{ t(monthly ? 'meta.month' : 'meta.dataset') }}</h3>
-      <div class="options inline" role="radiogroup" :aria-labelledby="`${id}-datasets`">
+      <h3 :id="`${id}-datasets`" class="heading">{{ t('meta.dataset') }}</h3>
+      <div class="options" role="radiogroup" :aria-labelledby="`${id}-datasets`">
         <label v-for="d in inRegulation" :key="d.key" class="option" :class="{ on: d === current }">
           <input type="radio" :name="`${id}-dataset`" :checked="d === current" @change="show(d)" />
           <span class="name">{{ datasetName(d) }}</span>
@@ -176,7 +171,7 @@ const about = (d: MetaDataset) =>
   border: 1px solid transparent;
   cursor: pointer;
 }
-/* The regulations and months, short: side by side, wrapping. */
+/* The regulations, short: side by side, wrapping. */
 .options.inline {
   flex-direction: row;
   flex-wrap: wrap;

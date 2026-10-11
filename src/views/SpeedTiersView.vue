@@ -69,7 +69,7 @@ import {
   type SpeedBuild,
 } from '@/lib/speedBuild'
 import { confirmDialog } from '@/composables/useConfirm'
-import { lastTiersQuery } from '@/lib/tiersState'
+import { lastTiersQuery, withoutMeta } from '@/lib/tiersState'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useMeta } from '@/composables/useMeta'
 import { useOpenState } from '@/composables/useOpenState'
@@ -160,7 +160,11 @@ function choose(k: 'show' | 'view', v: string) {
 // The page opened bare (from the menu, nothing in its URL) comes as it was left (`lastTiersQuery`), put in the URL, so
 // the URL always says what's shown; the charts' name from before put right.
 {
-  const q = Object.keys(query.value).length ? query.value : lastTiersQuery.value
+  // Bare but for the data shown, which a link may carry: kept.
+  const q: typeof query.value =
+    Object.keys(withoutMeta(query.value)).length || !Object.keys(lastTiersQuery.value).length
+      ? query.value
+      : { ...lastTiersQuery.value, ...(query.value.meta !== undefined && { meta: query.value.meta }) }
   const fixed = q.view === 'ranges' ? { ...q, view: 'charts' } : q
   if (fixed !== query.value) void router.replace({ query: fixed })
 }
@@ -251,7 +255,8 @@ const live = (b: Boost) => b.ref.kind === 'ability' && !!inPlay.value && b.when 
 // Pokémon are shown (the tabs), what's found and kept, and yours, are left as they are.
 // Everything back as the page comes with nothing set: its whole URL cleared (what's shown, the options, yours, what's
 // found and kept), boosts on again, and the modifiers' sections folded.
-const allChanged = computed(() => Object.keys(query.value).length > 0 || !boostsPref.value)
+// The data shown (`?meta=`) isn't the page's to reset: it's the reader's choice on every page.
+const allChanged = computed(() => Object.keys(withoutMeta(query.value)).length > 0 || !boostsPref.value)
 function resetAll() {
   boostsPref.value = true
   try {
@@ -1418,7 +1423,7 @@ watch(yoursOpen, (open) => {
 // Remembered as left, for the page opened bare and the comparison's way back: while it's the page shown, not as it
 // leaves (still there, fading out, as the next page's query comes in).
 const route = useRoute()
-watch(query, (q) => route.name === 'speedTiers' && (lastTiersQuery.value = { ...q }), { immediate: true })
+watch(query, (q) => route.name === 'speedTiers' && (lastTiersQuery.value = withoutMeta(q)), { immediate: true })
 
 const { entered } = usePageEntered()
 </script>

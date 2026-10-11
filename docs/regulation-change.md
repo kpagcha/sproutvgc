@@ -61,7 +61,7 @@ item or ability the regulation has whose Showdown code changes Speed (`onModifyS
       every month Smogon has of it (none at first: the site then shows the previous regulation's latest, labeled).
       `usage-stats.yml` adds each new month once published.
 - [ ] Past regulations stay in `sources.json` and keep being generated (every month, every cutoff), as their
-      history; the reader picks regulation → month → players. Removing one from `sources.json` drops it.
+      history; the reader picks regulation → dataset → players. Removing one from `sources.json` drops it.
 - [ ] Their stats aren't held to the dex: what the dex no longer has is left out, with a warning. A past
       regulation's roster (`meta/rosters.json`, for "every Pokémon" on the speed tiers) is its Showdown format's,
       or, once Showdown drops the format, the Pokémon its stats name.

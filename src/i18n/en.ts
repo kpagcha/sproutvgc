@@ -659,7 +659,6 @@ export const messages = {
   'meta.data': 'Data',
   'meta.regulations': 'Regulation',
   'meta.dataset': 'Dataset',
-  'meta.month': 'Month',
   'meta.subset': 'Players',
   'meta.battles': '{n} battles',
   'meta.regulation': 'Regulation {reg}',

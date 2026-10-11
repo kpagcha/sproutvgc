@@ -31,6 +31,10 @@ function remembered(key: string, legacy: (saved: string) => LocationQuery, legac
   return last
 }
 
+/** A page's query but for the meta snapshot shown (`?meta=`): the reader's choice across pages, not the page's. */
+export const withoutMeta = <Q extends Record<string, unknown>>(q: Q): Q =>
+  Object.fromEntries(Object.entries(q).filter(([k]) => k !== 'meta')) as Q
+
 /** The speed tiers as last left. Who's shown and how they were drawn, kept before as `show=…&view=…` ('all' older). */
 export const lastTiersQuery = remembered(
   'sproutvgc.speedTiers.last',

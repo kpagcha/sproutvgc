@@ -254,8 +254,9 @@ export const router = createRouter({
         dexNames: true,
         keepScroll: true,
         recent: once('speedTiers'),
-        // Everything but what's found, the chip tapped, the Pokémon kept and the Speed picked.
-        setup: (query) => stringQuery(query, ['find', 'findmode', 'keep', 'vs', 'at']),
+        // Everything but what's found, the chip tapped, the Pokémon kept and the Speed picked, and the data shown (the
+        // reader's choice on every page, not the setup's).
+        setup: (query) => stringQuery(query, ['find', 'findmode', 'keep', 'vs', 'at', 'meta']),
         ...inArea('competitive', 'speedTiers'),
       },
     },
@@ -281,14 +282,14 @@ export const router = createRouter({
               ? `speedCompare:${[a, a2, b, b2].filter((x) => typeof x === 'string').join(':')}`
               : null,
         // The Pokémon and their builds, once each team has one (in speed order, once there's one), but for the two
-        // tapped among the matchups.
+        // tapped among the matchups and the data shown.
         setup: (query) =>
           (
             query.mode === 'order'
               ? typeof query.list === 'string' && query.list
               : typeof query.a === 'string' && typeof query.b === 'string'
           )
-            ? stringQuery(query, ['pair'])
+            ? stringQuery(query, ['pair', 'meta'])
             : null,
         ...inArea('competitive', 'speedCompare'),
       },

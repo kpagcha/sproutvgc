@@ -22,7 +22,7 @@ import {
   setSpread,
   type ListEntry,
 } from '@/lib/speedLineup'
-import { TIERS_PICKS, lastCompareQuery, lastTiersQuery } from '@/lib/tiersState'
+import { TIERS_PICKS, lastCompareQuery, lastTiersQuery, withoutMeta } from '@/lib/tiersState'
 import { confirmDialog } from '@/composables/useConfirm'
 import { useMeta } from '@/composables/useMeta'
 import { useOpenState } from '@/composables/useOpenState'
@@ -65,13 +65,14 @@ type Mode = (typeof MODES)[number]
 const mode = computed<Mode>(() => (route.query.mode === 'order' ? 'order' : 'vs'))
 // The page opened bare (from the menu, nothing in its URL) comes as it was left (`lastCompareQuery`), put in the URL,
 // so the URL always says what's shown and links (the speed tiers', with yours and an opponent) open as they were made.
-if (!Object.keys(route.query).length && Object.keys(lastCompareQuery.value).length)
-  void router.replace({ query: lastCompareQuery.value })
+// Bare but for the data shown, which a link may carry: kept.
+if (!Object.keys(withoutMeta(route.query)).length && Object.keys(lastCompareQuery.value).length)
+  void router.replace({ query: { ...lastCompareQuery.value, meta: route.query.meta } })
 // Remembered as left: while it's the page shown, not as it leaves (still there, fading out, as the next page's query
 // comes in).
 watch(
   () => route.query,
-  (q) => route.name === 'speedCompare' && (lastCompareQuery.value = { ...q }),
+  (q) => route.name === 'speedCompare' && (lastCompareQuery.value = withoutMeta(q)),
   { immediate: true },
 )
 const trickRoom = computed(() => route.query.trickroom === '1')
@@ -446,7 +447,8 @@ const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.compare.h
 const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 // Everything back as the page comes with nothing set, as the speed tiers' Reset all: its whole URL cleared (the
 // Pokémon, their builds, the view, Trick Room).
-const allChanged = computed(() => Object.keys(route.query).length > 0)
+// The data shown (`?meta=`) isn't the page's to reset: it's the reader's choice on every page.
+const allChanged = computed(() => Object.keys(withoutMeta(route.query)).length > 0)
 function resetAll() {
   openKey.value = null
   void router.replace({ query: {} })

@@ -667,7 +667,6 @@ export const messages: Record<keyof typeof en, string> = {
   'meta.data': 'Datos',
   'meta.regulations': 'Reglamento',
   'meta.dataset': 'Conjunto de datos',
-  'meta.month': 'Mes',
   'meta.subset': 'Jugadores',
   'meta.battles': '{n} combates',
   'meta.regulation': 'Reglamento {reg}',

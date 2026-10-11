@@ -5,8 +5,8 @@
 // lists the snapshots, `<id>.json` holds each one's data, loaded on demand. With none generated there's no meta,
 // and pages show none. Which snapshots the app shows is `VITE_META_SETS` in `.env`: the generator writes every one
 // it can (Smogon's four cutoffs, for every month of every regulation it's given), so trying another, or another
-// source, is a matter of changing it. The reader picks among them by regulation, month and players (`MetaCard`); the
-// default is the current regulation's latest month. On the dev server, the settings page overrides which are shown
+// source, is a matter of changing it. The reader picks among them by regulation, dataset and players (`MetaCard`); the
+// default is the current regulation's latest dataset. On the dev server, the settings page overrides which are shown
 // (`setActiveSnapshots`), saved in this browser.
 // Sources and their formats: notes/usage-stats.md.
 
@@ -146,7 +146,7 @@ export function setActiveSnapshots(ids: readonly string[] | null) {
 export const snapshots = computed<MetaSnapshot[]>(() => active.value.flatMap((id) => GENERATED[id] ?? []))
 
 /**
- * The latest dataset's snapshots, what's shown by default: the current regulation's latest month (any regulation's,
+ * The latest dataset's snapshots, what's shown by default: the current regulation's latest (any regulation's,
  * when the current one has none yet), in their order.
  */
 const latestSnapshots = computed<MetaSnapshot[]>(() => {
@@ -156,8 +156,11 @@ const latestSnapshots = computed<MetaSnapshot[]>(() => {
   return latest ? pool.filter((s) => datasetKey(s) === datasetKey(latest)) : []
 })
 
+/** The snapshot shown by default: the latest dataset's first. */
+export const defaultSnapshot = computed<MetaSnapshot | undefined>(() => latestSnapshots.value[0])
+
 const PICK_KEY = 'sproutvgc.metaSet'
-/** A pick of the latest dataset, saved as its subset alone (`latest:1630`), so that it stays the latest as new months
+/** A pick of the latest dataset, saved as its subset alone (`latest:1630`), so that it stays the latest as new ones
  * come; any other is saved as its ID. */
 const LATEST = 'latest:'
 
@@ -232,9 +235,14 @@ export const metaLabel = (s: MetaSnapshot): string => metaParts(s).join(' · ')
 export const metaParts = (s: MetaSnapshot): string[] => [...datasetParts(s), ...subsetParts(s)]
 
 /** What a snapshot's dataset is, part by part: its kind, season and period ("Showdown ladder", "Sep 2026"). */
-export function datasetParts(s: MetaSnapshot): string[] {
-  const parts = severalRegulations.value ? [t('meta.regulation', { reg: s.regulation })] : []
-  parts.push(t(`meta.kind.${s.kind}`))
+export const datasetParts = (s: MetaSnapshot): string[] => [
+  ...(severalRegulations.value ? [t('meta.regulation', { reg: s.regulation })] : []),
+  ...sourceParts(s),
+]
+
+/** What a snapshot's dataset is within its regulation: its source and period ("Showdown ladder", "Sep 2026"). */
+export function sourceParts(s: MetaSnapshot): string[] {
+  const parts = [t(`meta.kind.${s.kind}`)]
   if (s.season) parts.push(t('meta.season', { season: s.season }))
   parts.push(periodLabel(s))
   return parts
@@ -244,7 +252,7 @@ export function datasetParts(s: MetaSnapshot): string[] {
 const severalRegulations = computed(() => new Set(snapshots.value.map((s) => s.regulation)).size > 1)
 
 /** The period a snapshot covers: its month ("Sep 2026"), or the day it ends. */
-export const periodLabel = (s: MetaSnapshot): string =>
+const periodLabel = (s: MetaSnapshot): string =>
   s.period === 'month'
     ? date(s.from, { month: 'short', year: 'numeric' })
     : date(s.to, { day: 'numeric', month: 'short', year: 'numeric' })
