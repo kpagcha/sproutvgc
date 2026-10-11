@@ -711,7 +711,7 @@ function resetAll() {
             }}<ChevronDown :size="16" class="tab-chevron" :class="{ unset: !side.id }" aria-hidden="true"
           /></span>
           <BuildSummary v-if="side.id" :id="side.id" :speed="side.speed!" :build="side.build" class="tab-summary" />
-          <span v-else class="tab-empty">{{ t('compare.pick') }}</span>
+          <span v-else class="tab-empty"><Plus :size="16" aria-hidden="true" />{{ t('compare.pick') }}</span>
         </button>
       </div>
       <!-- On phones, under each tab, a second for its team, greyed out until its first is picked. -->
@@ -1120,6 +1120,7 @@ function resetAll() {
 .tab-empty {
   display: flex;
   align-items: center;
+  gap: 6px;
   font-weight: normal;
   color: var(--muted);
 }
