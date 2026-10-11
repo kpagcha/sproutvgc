@@ -661,7 +661,6 @@ export const messages = {
     "The Speeds players' sets run, weighted by usage, or each Pokémon's benchmarks (Min−, 0, Max, Max+).",
   'speed.from.sets': 'Sets',
   'speed.from.bench': 'Benchmarks',
-  'speed.at': 'At',
   'speed.oddsHead': 'You first',
   'speed.oddsNote':
     "One row per Pokémon, a mark at each Speed its sets run, taller the more run it. Your Pokémon is the line; at the row's end, the share of its sets you move first against.",

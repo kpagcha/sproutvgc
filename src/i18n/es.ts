@@ -669,7 +669,6 @@ export const messages: Record<keyof typeof en, string> = {
     'Las Velocidades de los sets que se usan, según su uso, o las referencias de cada Pokémon (Min−, 0, Max, Max+).',
   'speed.from.sets': 'Sets',
   'speed.from.bench': 'Referencias',
-  'speed.at': 'Con',
   'speed.oddsHead': 'Tú primero',
   'speed.oddsNote':
     'Una fila por Pokémon, una marca en cada Velocidad de sus sets, más alta cuantos más la llevan. Tu Pokémon es la línea; al final de la fila, la proporción de sus sets contra los que mueves primero.',

@@ -89,7 +89,6 @@ import TypeIcon from '@/components/TypeIcon'
 import PokemonPicker from '@/components/PokemonPicker.vue'
 import ScrollRow from '@/components/ScrollRow.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
-import SpeedSourcePicker from '@/components/SpeedSourcePicker.vue'
 import VersusCard from '@/components/VersusCard.vue'
 import SetupStar from '@/components/SetupStar.vue'
 import HelpToggle from '@/components/HelpToggle.vue'
@@ -134,7 +133,11 @@ const pick = <T extends string>(k: 'show' | 'view' | 'speeds', list: readonly T[
 }
 const show = computed<Show>(() => (metaAvailable.value ? pick('show', SHOWS) : 'all'))
 const view = computed<View>(() => pick('view', VIEWS))
-const speedsFrom = computed<Source>(() => (metaAvailable.value ? pick('speeds', SOURCES) : 'bench'))
+// The ladder is at the sets alone: at a benchmark, every Pokémon's at the same one, so its order is the base Speeds'
+// whichever it is (the charts have each at all four). With no snapshot, it's at the benchmark below.
+const speedsFrom = computed<Source>(() =>
+  !metaAvailable.value ? 'bench' : view.value === 'ladder' ? 'sets' : pick('speeds', SOURCES),
+)
 /** Whether the Speeds are the sets players run (else the benchmarks). */
 const bySets = computed(() => speedsFrom.value === 'sets')
 /** How many of the most used the view shows (every Pokémon: no top). */
@@ -184,14 +187,9 @@ function choose(k: 'show' | 'view' | 'speeds', v: string) {
 }
 const trickRoom = computed(() => flag('trickroom'))
 
-// The benchmark every Pokémon is at, showing them all: as picked (`?bench=`), else the fastest build, or the slowest
-// under Trick Room, which is what matters then.
-const isBench = (b: unknown): b is Benchmark => (BENCHMARKS as readonly unknown[]).includes(b)
-const defaultBench = computed<Benchmark>(() => (trickRoom.value ? 'min' : 'max'))
-const bench = computed<Benchmark>({
-  get: () => (isBench(query.value.bench) ? query.value.bench : defaultBench.value),
-  set: (b) => set('bench', b === defaultBench.value ? undefined : b),
-})
+// The benchmark a Pokémon is at on the ladder, with no sets to have it at: the fastest build, or the slowest under
+// Trick Room, which is what matters then.
+const bench = computed<Benchmark>(() => (trickRoom.value ? 'min' : 'max'))
 
 // The modifiers, applied to everyone: shown when the reader opens them, or when the URL sets one; closed, they stay
 // on, their disclosure marked and saying which, so the ladder is never modified out of sight.
@@ -1177,10 +1175,8 @@ const showLabel = (s: Show) => (s === 'all' ? t('speed.all') : t('speed.meta', {
 const sliceLabel = computed(() =>
   show.value === 'all' ? t('speed.slice.all') : t('speed.slice.top', { n: topN.value }),
 )
-/** Where a Pokémon at the benchmarks sits, shown: on the ladder, at the sets for one with none, or at the benchmarks. */
-const benchPicked = computed(() => view.value === 'ladder' && (!bySets.value || show.value === 'all'))
 /** Whether there's anything to choose about the list (its band, with the tab shown in its color). */
-const choicesShown = computed(() => metaAvailable.value || benchPicked.value)
+const choicesShown = computed(() => metaAvailable.value)
 const benchTip = (b: Benchmark) => t(`speed.benchTip.${b}`)
 /** A build in words: its nature's effect (with the natures that have it, but for neutral's), and its points. */
 const buildText = (effect: NatureEffect, points: number) =>
@@ -1519,8 +1515,10 @@ const { entered } = usePageEntered()
                 <template v-if="metaAvailable">
                   <dt>{{ t('speed.show') }}</dt>
                   <dd class="muted">{{ t('speed.showDesc') }}</dd>
-                  <dt>{{ t('speed.speedsFrom') }}</dt>
-                  <dd class="muted">{{ t('speed.speedsFromTip') }}</dd>
+                  <template v-if="view === 'ranges'">
+                    <dt>{{ t('speed.speedsFrom') }}</dt>
+                    <dd class="muted">{{ t('speed.speedsFromTip') }}</dd>
+                  </template>
                 </template>
                 <template v-if="view === 'ladder' && bySets && boostsAvailable">
                   <dt>{{ t('speed.boosts') }}</dt>
@@ -1580,24 +1578,20 @@ const { entered } = usePageEntered()
           @update:model-value="(v: string) => choose('view', v)"
         />
         <div ref="listPanel" class="panel banded soft list">
-          <!-- What the list is, a band of its own between the tabs and the toolbar: who's shown and where their Speeds
-               come from (with a snapshot to have them from), and the benchmark, where the ladder has Pokémon at one. Where
-               the Speeds come from first: it changes what the list is the most; on the ladder, its benchmarks' button
-               also picks the benchmark (but with no snapshot, where there's nothing else to pick). On
-               phones, on one compact line, their labels read out but not shown (the choices say what they are). -->
+          <!-- What the list is, a band of its own between the tabs and the toolbar: where the Speeds come from, in the
+               charts (first: it changes what they are the most), and who's shown (with a snapshot to have them from).
+               On phones, on one compact line, their labels read out but not shown (the choices say what they are). -->
           <div v-if="choicesShown" class="band choices-band">
-            <SpeedSourcePicker
-              v-if="metaAvailable"
-              v-model:bench="bench"
-              class="choice-seg"
+            <SegmentedControl
+              v-if="view === 'ranges'"
+              class="choice-seg speeds-seg"
               :model-value="speedsFrom"
               :label="t('speed.speedsFrom')"
               :tip="t('speed.speedsFromTip')"
-              :bench-menu="view === 'ladder'"
-              :bench-label
+              :options="SOURCES.map((s) => ({ value: s, label: t(`speed.from.${s}`) }))"
               @update:model-value="(v: string) => choose('speeds', v)"
             />
-            <label v-if="metaAvailable" class="choice">
+            <label class="choice">
               <span class="muted choice-label">{{ t('speed.show') }}</span>
               <select
                 class="search choice-pick"
@@ -1608,13 +1602,6 @@ const { entered } = usePageEntered()
                 <option v-for="s in SHOWS" :key="s" :value="s">{{ showLabel(s) }}</option>
               </select>
             </label>
-            <SegmentedControl
-              v-if="benchPicked && !metaAvailable"
-              class="choice-seg at-seg"
-              v-model="bench"
-              :label="t('speed.at')"
-              :options="BENCHMARKS.map((b) => ({ value: b, label: benchLabel(b) }))"
-            />
           </div>
           <!-- The list's toolbar, a band under what the list is: its options on a line (what each does in a tooltip,
                the boosts', or in how to read the page; the modifiers for everyone opening under them), then finding a
@@ -2553,14 +2540,21 @@ const { entered } = usePageEntered()
   padding-block: 8px;
   background: var(--choices);
 }
+/* Where the Speeds come from: at the page's own size, as its buttons are, not a small toggle. */
+.speeds-seg {
+  font-size: 1em;
+}
+.speeds-seg :deep(.segments label) {
+  padding: 2px 10px;
+}
 @media (max-width: 720px) {
-  /* On phones, one compact line: the labels read out but not shown (but the benchmark's). */
+  /* On phones, one compact line: the labels read out but not shown. */
   :root:root .list.banded > .band.choices-band {
     gap: 6px 8px;
     padding-block: 6px;
   }
   .choice-label,
-  .choice-seg:not(.at-seg) > :deep(.muted) {
+  .choice-seg > :deep(.muted) {
     position: absolute;
     width: 1px;
     height: 1px;
