@@ -934,8 +934,8 @@ const rangeRows = computed<RangeRow[]>(() => {
 })
 /**
  * The ranges at the sets players run (`SpeedOdds`): a row per Pokémon shown, its sets' Speeds (merged by nature effect
- * and points, and by Speed once the modifiers apply) with their shares, or, with none in the snapshot, its benchmarks;
- * the rows from those moving first by their most common Speed, then by usage.
+ * and points, and by Speed once the modifiers apply, each keeping the builds reaching it) with their shares, or, with
+ * none in the snapshot, its benchmarks; the rows from those moving first by their most common Speed, then by usage.
  */
 const oddsRows = computed<OddsRow[]>(() => {
   if (view.value !== 'ranges' || !bySets.value) return []
@@ -943,12 +943,15 @@ const oddsRows = computed<OddsRow[]>(() => {
   const rows = ids.map((id) => {
     const base = POKEMON[id].stats[5]
     const m = data.value?.[id]
-    const bySpeed = new Map<number, number>()
+    const bySpeed = new Map<number, OddsRow['builds'][number]>()
     for (const b of speedBuilds(m?.speeds ?? [])) {
-      const s = inBattle(speedStat(base, b.points, b.effect), mods.value)
-      bySpeed.set(s, (bySpeed.get(s) ?? 0) + b.share)
+      const speed = inBattle(speedStat(base, b.points, b.effect), mods.value)
+      const at = bySpeed.get(speed) ?? { speed, share: 0, sets: [] }
+      at.share += b.share
+      at.sets.push(b)
+      bySpeed.set(speed, at)
     }
-    const builds = [...bySpeed].map(([speed, share]) => ({ speed, share })).sort((a, b) => b.share - a.share)
+    const builds = [...bySpeed.values()].sort((a, b) => b.share - a.share)
     const fallback = builds.length
       ? undefined
       : (Object.fromEntries(BENCHMARKS.map((b) => [b, inBattle(benchmark(base, b), mods.value)])) as Record<

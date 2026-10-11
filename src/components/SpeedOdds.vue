@@ -5,9 +5,10 @@ import { CircleHelp } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { percent } from '@/data/meta'
 import { t } from '@/i18n'
-import type { Benchmark } from '@/lib/stats'
+import type { Benchmark, NatureEffect } from '@/lib/stats'
 import { useOpenState } from '@/composables/useOpenState'
 import AppLink from '@/components/AppLink'
+import EffectTag from '@/components/EffectTag'
 import PokemonIcon from '@/components/PokemonIcon'
 
 // The speed tiers' ranges at the sets players run: a row per Pokémon, a mark at each Speed its sets run on an axis
@@ -20,8 +21,9 @@ export interface OddsRow {
   id: PokemonId
   species: string
   forme?: string
-  /** Its sets' Speeds in battle (with the modifiers), each with its share of them, the most common first. */
-  builds: { speed: number; share: number }[]
+  /** Its sets' Speeds in battle (with the modifiers), each with its share of them and the builds reaching it (nature
+   * effect and points), the most common first. */
+  builds: { speed: number; share: number; sets: { effect: NatureEffect; points: number; share: number }[] }[]
   /** With no sets: its Speed at each benchmark. */
   fallback?: Record<Benchmark, number>
   /** Shown though the view leaves it out (found or kept), or with no sets: not counted as the rest. */
@@ -94,6 +96,9 @@ const SHOW_DELAY = 80
 const REACH = { mouse: 12, touch: 24 }
 const list = useTemplateRef<HTMLElement>('list')
 const active = ref<{ id: PokemonId; speed: number } | null>(null)
+/** What the tooltip says: the Speed, its share, and the builds reaching it, as the ladder's chips tag them. */
+const pointed = ref<OddsRow['builds'][number] | null>(null)
+const tipBody = useTemplateRef<HTMLElement>('tipBody')
 let tip: Instance | undefined
 let pending: ReturnType<typeof setTimeout> | undefined
 let markEl: HTMLElement | undefined
@@ -117,7 +122,7 @@ function nearest(e: PointerEvent) {
 function point(hit: NonNullable<ReturnType<typeof nearest>>) {
   active.value = { id: hit.row.id, speed: hit.build.speed }
   markEl = hit.el
-  tip?.setContent(`${hit.build.speed} · ${percent(hit.build.share)}`)
+  pointed.value = hit.build
 }
 function show(hit: NonNullable<ReturnType<typeof nearest>>) {
   clearTimeout(pending)
@@ -156,6 +161,7 @@ onMounted(() => {
     trigger: 'manual',
     hideOnClick: false,
     placement: 'top',
+    content: tipBody.value!,
     getReferenceClientRect: () => markEl?.getBoundingClientRect() ?? list.value!.getBoundingClientRect(),
   })
   document.addEventListener('pointerdown', onOutside)
@@ -257,6 +263,16 @@ onBeforeUnmount(() => {
         </span>
       </li>
     </ol>
+    <!-- The tooltip's content, moved into it by tippy. -->
+    <div ref="tipBody" class="tip-body">
+      <template v-if="pointed">
+        <div class="tip-head num">{{ pointed.speed }} · {{ percent(pointed.share) }}</div>
+        <div v-for="b in pointed.sets" :key="`${b.effect}:${b.points}`" class="tip-build">
+          <EffectTag :effect="b.effect" /><span>{{ t('speed.points', { n: b.points }) }}</span
+          ><span v-if="pointed.sets.length > 1" class="tip-share">{{ percent(b.share) }}</span>
+        </div>
+      </template>
+    </div>
   </div>
 </template>
 
@@ -446,6 +462,21 @@ onBeforeUnmount(() => {
   translate: -50% -100%;
   background: var(--range-plain);
   box-shadow: 0 0 0 1px var(--panel);
+}
+/* The tooltip: the Speed and its share, then a line per build reaching it. */
+.tip-head {
+  font-weight: bold;
+}
+.tip-build {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.tip-share {
+  margin-left: auto;
+  padding-left: 8px;
+  opacity: 0.75;
 }
 /* The one the tooltip is on: outlined, over its neighbours (whoever moves first). */
 .track .mark.active {
