@@ -3160,7 +3160,11 @@ const { entered } = usePageEntered()
 .tags {
   flex-wrap: wrap;
 }
+/* Each centered on the line, rather than on the words' baseline: the nature's effect, an arrow and "Spe", would sit
+   its arrow on the baseline and lift its words above the other tags'. */
 .tag {
+  display: inline-flex;
+  align-items: center;
   white-space: nowrap;
 }
 /* How to read the page, in a well under the data shown. */
