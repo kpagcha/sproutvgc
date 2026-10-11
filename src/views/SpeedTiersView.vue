@@ -852,14 +852,9 @@ const versus = computed(() => {
     },
   }
 })
-// The comparison over the ladder: yours against the chip tapped, else the one found at its most common build; none
-// until there are both.
-const compareTarget = computed(() =>
-  mine.value === null
-    ? null
-    : (versus.value?.card.compareTo ??
-      (found.value !== null ? compareLink({ id: found.value, build: topBuild(found.value) }) : null)),
-)
+// The comparison from yours' card: yours alone, to add opponents to there; none until there's yours. Against the chip
+// tapped, the comparison's card has the way there instead.
+const compareTarget = computed(() => (mine.value === null ? null : compareLink(null)))
 // Its title, the Pokémon's name (with its icon) a link to its page.
 // Picking one finds it too, the find showing as its "Only" switch says.
 function pickVersus(e: Entry) {
@@ -914,14 +909,6 @@ const chipBuild = (e: Entry) =>
     e.bench ? benchBuild(e.bench) : e.effect ? { effect: e.effect, points: e.points! } : FASTEST,
     e.boost,
   )
-/** A Pokémon's build when it's no chip in particular: the meta's most common, else the benchmark shown. */
-function topBuild(id: PokemonId) {
-  const top = buildsOf(id)[0]
-  return othersBuild(
-    id,
-    top ? { effect: top.effect, points: top.points } : showAll.value ? benchBuild(bench.value) : FASTEST,
-  )
-}
 function compareLink(other: { id: PokemonId; build: SpeedBuild } | null) {
   return {
     name: 'speedCompare',
@@ -1949,25 +1936,21 @@ const { entered } = usePageEntered()
                 </p>
               </section>
             </template>
-            <!-- Yours side by side with the opponent tapped (else the one found), on the comparison's page: greyed out
-                 until there are both, saying why in a tooltip, or under it where there's no hovering. -->
-            <section class="yours-section yours-compare">
+            <!-- Yours on the comparison's page, to add opponents to there: greyed out until there's yours, saying why in
+                 a tooltip, or under it where there's no hovering. Not with a chip tapped: the comparison's card goes
+                 there with both. -->
+            <section v-if="!versus" class="yours-section yours-compare">
               <AppLink v-if="compareTarget" :to="compareTarget" class="btn primary compare-go"
                 ><Columns2 :size="16" aria-hidden="true" />{{ t('compare.open')
                 }}<ArrowRight :size="16" aria-hidden="true"
               /></AppLink>
               <template v-else>
-                <span
-                  v-tip="canHover && t(mine ? 'speed.compareNeedsOpponent' : 'speed.compareNeeds')"
-                  class="compare-off"
-                >
+                <span v-tip="canHover && t('speed.compareNeeds')" class="compare-off">
                   <button type="button" class="btn compare-go" disabled>
                     <Columns2 :size="16" aria-hidden="true" />{{ t('compare.open') }}
                   </button>
                 </span>
-                <p v-if="!canHover" class="muted small">
-                  {{ t(mine ? 'speed.compareNeedsOpponent' : 'speed.compareNeeds') }}
-                </p>
+                <p v-if="!canHover" class="muted small">{{ t('speed.compareNeeds') }}</p>
               </template>
             </section>
             <!-- Dropped from the bar, the card has no band: its actions at its foot instead,
