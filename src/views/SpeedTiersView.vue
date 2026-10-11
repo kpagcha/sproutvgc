@@ -145,8 +145,8 @@ const bench = computed<Benchmark>({
   set: (b) => set('bench', b === defaultBench.value ? undefined : b),
 })
 
-// The modifiers, applied to everyone: shown when the reader opens them, or when the URL sets one; closing them clears
-// them, so the ladder is never modified out of sight.
+// The modifiers, applied to everyone: shown when the reader opens them, or when the URL sets one; closed, they stay
+// on, their disclosure marked and saying which, so the ladder is never modified out of sight.
 const STAGES = ['-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6'] as const
 const stage = computed({
   get: () => ((STAGES as readonly string[]).includes(String(query.value.stage)) ? String(query.value.stage) : '0'),
@@ -167,15 +167,7 @@ const mods = computed<SpeedMods>(() => ({
 }))
 const modded = computed(() => TOGGLES.some(flag) || stage.value !== '0')
 const modsOpen = shallowRef(modded.value)
-function toggleMods() {
-  const open = !modsOpen.value
-  if (!open && modded.value) {
-    const q = { ...query.value }
-    for (const k of [...TOGGLES, 'stage']) delete q[k]
-    void router.replace({ query: q })
-  }
-  modsOpen.value = open
-}
+const toggleMods = () => (modsOpen.value = !modsOpen.value)
 /**
  * Whether boosts show, when the snapshot has the items and abilities they come from: as the URL says (`?boosts=0` or
  * `1`, a shared link), else as the reader last left them, remembered in this browser; on at first.
@@ -300,19 +292,11 @@ const myMods = computed<SpeedMods>(() => ({
   paralysis: myToggles.value.has('paralysis'),
   stage: Number(myStage.value),
 }))
-// Its modifiers fold away as the others' do: shown when the page comes with some on, folding them turns them off.
+// Its modifiers fold away as the others' do: shown when the page comes with some on; folded, they stay on, their
+// disclosure marked.
 const myModded = computed(() => myToggles.value.size > 0 || myStage.value !== '0')
 const myModsOpen = shallowRef(myModded.value)
-function toggleMyMods() {
-  const open = !myModsOpen.value
-  if (!open && myModded.value) {
-    const q = { ...query.value }
-    delete q.mymods
-    delete q.mystage
-    void router.replace({ query: q })
-  }
-  myModsOpen.value = open
-}
+const toggleMyMods = () => (myModsOpen.value = !myModsOpen.value)
 const mySpeed = computed(() =>
   mine.value === null
     ? null
@@ -1432,7 +1416,13 @@ const { entered } = usePageEntered()
                   ><X :size="16" aria-hidden="true" />
                 </button>
               </template>
-              <button type="button" class="btn disclosure" :aria-expanded="modsOpen" @click="toggleMods">
+              <button
+                type="button"
+                class="btn disclosure"
+                :class="{ on: modded }"
+                :aria-expanded="modsOpen"
+                @click="toggleMods"
+              >
                 <Plus :size="16" aria-hidden="true" />{{ t('speed.modifiers')
                 }}<span v-if="!modsOpen && modsOn.length" class="mods-on">{{ modsOn.join(' · ') }}</span
                 ><span class="marker" aria-hidden="true">{{ modsOpen ? '▾' : '▸' }}</span>
@@ -1441,8 +1431,17 @@ const { entered } = usePageEntered()
                 <input type="checkbox" :checked="showMegas" @change="toggleMegas" />
                 {{ t('speed.megas') }}
               </label>
-              <button v-if="controlsChanged" type="button" class="btn inverted reset" @click="resetControls">
-                <RotateCcw :size="16" aria-hidden="true" />{{ t('speed.resetControls') }}
+              <!-- Resetting them: an icon at the line's end, there from the start (greyed out with nothing to reset), so
+                   the line doesn't change as options are set. -->
+              <button
+                v-tip="canHover && t('speed.resetControls')"
+                type="button"
+                class="btn reset reset-options"
+                :disabled="!controlsChanged"
+                :aria-label="t('speed.resetControls')"
+                @click="resetControls"
+              >
+                <RotateCcw :size="16" aria-hidden="true" />
               </button>
             </div>
             <div v-if="modsOpen" class="mods all-mods">
@@ -1913,7 +1912,13 @@ const { entered } = usePageEntered()
               <section class="yours-section">
                 <!-- The modifiers' disclosure, and Reset build at the row's end. -->
                 <div class="mods-head">
-                  <button type="button" class="btn disclosure" :aria-expanded="myModsOpen" @click="toggleMyMods">
+                  <button
+                    type="button"
+                    class="btn disclosure"
+                    :class="{ on: myModded }"
+                    :aria-expanded="myModsOpen"
+                    @click="toggleMyMods"
+                  >
                     <Plus :size="16" aria-hidden="true" />{{ t('speed.modifiers')
                     }}<span class="marker" aria-hidden="true">{{ myModsOpen ? '▾' : '▸' }}</span>
                   </button>
@@ -2166,6 +2171,14 @@ const { entered } = usePageEntered()
 }
 .options-line > .reset {
   margin-left: auto;
+}
+.options-line > .reset-options {
+  align-self: stretch;
+  padding-inline: 8px;
+}
+/* The modifiers' disclosure while some are on, folded or not: marked as the switches on are. */
+.disclosure.on {
+  background: var(--sel);
 }
 .switch {
   justify-content: flex-start;
