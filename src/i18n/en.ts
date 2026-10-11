@@ -432,8 +432,7 @@ export const messages = {
   'quiz.reset': 'Reset progress',
   'quiz.resetConfirm': 'Reset all quiz progress?',
 
-  'footer.copyright': 'Pokémon © Nintendo',
-  'footer.home': 'Home',
+  'footer.copyright': 'Pokémon © Nintendo, Game Freak and Creatures',
 
   'title.credits': 'Credits',
   'desc.credits': 'Credits for sproutvgc, a competitive dex for {game}.',

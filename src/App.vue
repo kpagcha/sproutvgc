@@ -283,11 +283,9 @@ const fadeVariants = {
       </RouterView>
     </main>
     <footer class="wrap footer muted">
-      <div class="credits">
-        <span>{{ t('footer.copyright') }}</span>
-        <RouterLink to="/">{{ t('footer.home') }}</RouterLink>
-        <RouterLink to="/credits">{{ t('title.credits') }}</RouterLink>
-      </div>
+      <RouterLink to="/credits">{{ t('title.credits') }}</RouterLink>
+      <span aria-hidden="true">·</span>
+      <span>{{ t('footer.copyright') }}</span>
     </footer>
     <ConfirmDialog />
   </MotionConfig>
@@ -476,13 +474,8 @@ main {
   padding-bottom: 24px;
   font-size: calc(11px * var(--text-scale));
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.credits {
-  display: flex;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
 }
 </style>

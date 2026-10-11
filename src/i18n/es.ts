@@ -440,8 +440,7 @@ export const messages: Record<keyof typeof en, string> = {
   'quiz.reset': 'Reiniciar progreso',
   'quiz.resetConfirm': '¿Reiniciar todo el progreso del test?',
 
-  'footer.copyright': 'Pokémon © Nintendo',
-  'footer.home': 'Inicio',
+  'footer.copyright': 'Pokémon © Nintendo, Game Freak y Creatures',
 
   'title.credits': 'Créditos',
   'desc.credits': 'Créditos de sproutvgc, una Pokédex competitiva para {game}.',
