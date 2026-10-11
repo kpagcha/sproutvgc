@@ -8,7 +8,6 @@ one). Most of the dex follows the data; what's below is what doesn't, or what ne
 - [ ] `.env`: `VITE_REGULATION` to the new one; update the dates in its comment.
 - [ ] `npm run gen-data -- --update` (Showdown, PokéAPI, client, sprites, Smogon month).
 - [ ] Stops on "no VGC format for Regulation X": Showdown hasn't added it yet. Wait, or repin later.
-- [ ] Stops on "Smogon has no stats": no month published for the new format yet. See §6.
 - [ ] Stops on "Names missing": add them to `scripts/overrides.ts` (official names; Bulbapedia only to check).
 - [ ] Warns "sources agree with overrides": delete those overrides.
 - [ ] Read every other warning; each one is a task below.
@@ -58,12 +57,15 @@ item or ability the regulation has whose Showdown code changes Speed (`onModifyS
 
 ## 6. Usage stats
 
-- [ ] Smogon's format ID follows `VITE_REGULATION`; `usage-stats.yml` picks the new month on its own once published.
-- [ ] **Gap:** until Smogon publishes the new format, gen-data throws instead of shipping with no meta. Needs a
-      "no stats yet" path (the app already handles no snapshot).
-- [ ] Past regulations' snapshots are kept (`meta/index.json`, IDs `smogon-<reg>-<cutoff>`); only the current
-      regulation's are replaced. Nothing to do, just commit them.
-- [ ] `VITE_META_SETS` in `.env`: the new regulation's IDs (`smogon-<reg>-<cutoff>`).
+- [ ] Nothing to add: `gen-data` adds the new regulation to `smogon` in `scripts/sources.json` on its own, with
+      every month Smogon has of it (none at first: the site then shows the previous regulation's latest, labeled).
+      `usage-stats.yml` adds each new month once published.
+- [ ] Past regulations stay in `sources.json` and keep being generated (every month, every cutoff), as their
+      history; the reader picks regulation → month → players. Removing one from `sources.json` drops it.
+- [ ] Their stats aren't held to the dex: what the dex no longer has is left out, with a warning. A past
+      regulation's roster (`meta/rosters.json`, for "every Pokémon" on the speed tiers) is its Showdown format's,
+      or, once Showdown drops the format, the Pokémon its stats name.
+- [ ] `VITE_META_SETS` uses patterns (`smogon-*-1760`…): nothing to change.
 
 ## 7. Text and pages
 

@@ -32,7 +32,7 @@ import {
 import { TYPES, isType, type TypeId } from '@/data/types'
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
-import { has, metaLabel, percent, type PokemonMeta, type Share, usageRanks } from '@/data/meta'
+import { has, metaLabel, pastRoster, percent, type PokemonMeta, type Share, usageRanks } from '@/data/meta'
 import { locale, t, tSplit, typeName } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { center, reveal } from '@/lib/scroll'
@@ -112,6 +112,10 @@ const MIN_SHARE = 0.03
 
 // The snapshot shown is the one picked on any page (`useMeta`).
 const { snapshot, data } = useMeta()
+/** Every Pokémon of the regulation shown: a past one's, when the data is of one; else the dex's. */
+const regulationIds = computed<readonly PokemonId[]>(
+  () => (snapshot.value && pastRoster(snapshot.value.regulation)) ?? availableIds('pokemon'),
+)
 const metaAvailable = computed(() => !!snapshot.value && has(snapshot.value, 'speeds'))
 
 // Two choices, each in the URL: which Pokémon are shown (`?show=`): the most used (the top 50 or 100), or every
@@ -626,7 +630,7 @@ const chipSpeed = (e: Entry) => inBattle(e.speed, (e.boost && withEffect(mods.va
 const megaShown = (id: PokemonId) => showMegas.value || !POKEMON[id].mega
 /** The Pokémon shown, before the filters: the top by usage, or every Pokémon. */
 const sliceIds = computed<PokemonId[]>(() => {
-  if (show.value === 'all') return availableIds('pokemon').filter((id) => !POKEMON[id].cosmetic && megaShown(id))
+  if (show.value === 'all') return regulationIds.value.filter((id) => !POKEMON[id].cosmetic && megaShown(id))
   if (!data.value) return []
   return (Object.entries(data.value) as [PokemonId, PokemonMeta][])
     .filter(([id, m]) => m.rank <= topN.value && megaShown(id))
@@ -783,7 +787,7 @@ function playsAsBase(id: PokemonId): boolean {
 // none in the snapshot (at the benchmarks); but for the formes a battle changes it into, Megas aside (picked before
 // it), and those battling as their base species, which say nothing it doesn't.
 const findableIds = computed<PokemonId[]>(() =>
-  availableIds('pokemon').filter(
+  regulationIds.value.filter(
     (id) =>
       !POKEMON[id].cosmetic &&
       megaShown(id) &&
@@ -2013,7 +2017,7 @@ const { entered } = usePageEntered()
           </Teleport>
 
           <p v-if="entered && (!needsData || data)" class="muted small note">{{ t('speed.count', { n: monCount }) }}</p>
-          <p class="muted small note">{{ t('speed.intro', { reg: REGULATION }) }}</p>
+          <p class="muted small note">{{ t('speed.intro', { reg: snapshot?.regulation ?? REGULATION }) }}</p>
           <p v-if="entered && (!needsData || data) && filtering && !monCount" class="muted small note">
             {{ t('speed.filteredNone') }}
           </p>

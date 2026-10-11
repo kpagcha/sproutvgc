@@ -3,9 +3,11 @@
 // and which source it uses is decided there: the app never tells one from another, only what each snapshot has
 // (`capabilities`), so a page shows what's there and hides the rest. Generated into `generated/meta/`: `index.json`
 // lists the snapshots, `<id>.json` holds each one's data, loaded on demand. With none generated there's no meta,
-// and pages show none. Which snapshots the app shows, the first by default, is `VITE_META_SETS` in `.env`: the
-// generator writes every one it can (Smogon's four cutoffs), so trying another, or another source, is a matter of
-// changing it. On the dev server, the settings page overrides it (`setActiveSnapshots`), saved in this browser.
+// and pages show none. Which snapshots the app shows is `VITE_META_SETS` in `.env`: the generator writes every one
+// it can (Smogon's four cutoffs, for every month of every regulation it's given), so trying another, or another
+// source, is a matter of changing it. The reader picks among them by regulation, month and players (`MetaCard`); the
+// default is the current regulation's latest month. On the dev server, the settings page overrides which are shown
+// (`setActiveSnapshots`), saved in this browser.
 // Sources and their formats: notes/usage-stats.md.
 
 import type { AbilityId, ItemId, MoveId, PokemonId } from '@/data/dex'
@@ -98,13 +100,20 @@ const GENERATED = Object.values(INDEX)[0] ?? {}
 /** Every snapshot generated, in the generator's order, for the dev settings to pick from. */
 export const GENERATED_SNAPSHOTS: readonly MetaSnapshot[] = Object.values(GENERATED)
 
-/** The ones `.env` picks (`VITE_META_SETS`), what production shows. */
-export const DEFAULT_ACTIVE: readonly string[] = (import.meta.env.VITE_META_SETS ?? '')
+/** The ones `.env` picks (`VITE_META_SETS`), what production shows: by ID, or a pattern, `*` standing for anything
+ * (`smogon-*-1760`: every regulation's and month's), its matches in the generator's order. */
+export const DEFAULT_PATTERNS: readonly string[] = (import.meta.env.VITE_META_SETS ?? '')
   .split(',')
   .map((id) => id.trim())
   .filter(Boolean)
+const matching = (pattern: string): string[] => {
+  const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const re = new RegExp(`^${pattern.split('*').map(escape).join('.*')}$`)
+  return Object.keys(GENERATED).filter((id) => re.test(id))
+}
+export const DEFAULT_ACTIVE: readonly string[] = [...new Set(DEFAULT_PATTERNS.flatMap(matching))]
 if (import.meta.env.DEV) {
-  const missing = DEFAULT_ACTIVE.filter((id) => !GENERATED[id])
+  const missing = DEFAULT_PATTERNS.filter((p) => !matching(p).length)
   if (missing.length) console.warn(`VITE_META_SETS names snapshots never generated: ${missing.join(', ')}`)
 }
 
@@ -136,26 +145,27 @@ export function setActiveSnapshots(ids: readonly string[] | null) {
 /** The snapshots the app shows, in order. */
 export const snapshots = computed<MetaSnapshot[]>(() => active.value.flatMap((id) => GENERATED[id] ?? []))
 
-/** The current regulation's snapshots, the one to show by default first. */
-export const currentSnapshots = (): MetaSnapshot[] => snapshots.value.filter((s) => s.regulation === REGULATION)
-
-/** What tells a snapshot apart from the others shown ("Strong players (1760+)"), or its whole label when nothing does. */
-export function distinctLabel(s: MetaSnapshot): string {
-  const all = currentSnapshots().map(metaParts)
-  return (
-    metaParts(s)
-      .filter((p) => !all.every((ps) => ps.includes(p)))
-      .join(' · ') || metaLabel(s)
-  )
-}
+/**
+ * The latest dataset's snapshots, what's shown by default: the current regulation's latest month (any regulation's,
+ * when the current one has none yet), in their order.
+ */
+const latestSnapshots = computed<MetaSnapshot[]>(() => {
+  const list = snapshots.value
+  const pool = list.some((s) => s.regulation === REGULATION) ? list.filter((s) => s.regulation === REGULATION) : list
+  const latest = pool.reduce<MetaSnapshot | undefined>((a, s) => (!a || s.to > a.to ? s : a), undefined)
+  return latest ? pool.filter((s) => datasetKey(s) === datasetKey(latest)) : []
+})
 
 const PICK_KEY = 'sproutvgc.metaSet'
+/** A pick of the latest dataset, saved as its subset alone (`latest:1630`), so that it stays the latest as new months
+ * come; any other is saved as its ID. */
+const LATEST = 'latest:'
 
 function savedPick(): string | null {
   try {
     const id = localStorage.getItem(PICK_KEY)
-    // From before snapshot IDs named their regulation ("smogon-1630"): those were all of M-C.
-    return id?.replace(/^smogon-(\d+)$/, 'smogon-mc-$1') ?? null
+    // From before snapshot IDs named their regulation and month ("smogon-1630"): a pick of a cutoff of the latest.
+    return id?.replace(/^smogon-(\d+)$/, `${LATEST}$1`) ?? null
   } catch {
     return null
   }
@@ -163,21 +173,39 @@ function savedPick(): string | null {
 
 const picked = ref<string | null>(savedPick())
 
-/** The snapshot every page shows: the one the reader picked, while it's still shown, or else the first. */
+const subsetKey = (s: MetaSnapshot) => `${s.cutoff ?? ''}|${s.bestOf ?? ''}`
+
+/** The snapshot every page shows: the one the reader picked, while it's still shown, or else the latest's first. */
 export const selectedSnapshot = computed<MetaSnapshot | undefined>(() => {
-  const list = currentSnapshots()
-  return list.find((s) => s.id === picked.value) ?? list[0]
+  const latest = latestSnapshots.value
+  const p = picked.value
+  if (p?.startsWith(LATEST)) {
+    const subset = p.slice(LATEST.length)
+    return latest.find((s) => subsetKey(s) === subset || String(s.cutoff) === subset) ?? latest[0]
+  }
+  return snapshots.value.find((s) => s.id === p) ?? latest[0]
 })
 
 /** Shows `id`'s snapshot on every page, remembered in this browser. */
 export function selectSnapshot(id: string) {
-  picked.value = id
+  const s = snapshots.value.find((x) => x.id === id)
+  const save = s && latestSnapshots.value.includes(s) ? `${LATEST}${subsetKey(s)}` : id
+  picked.value = save
   try {
-    localStorage.setItem(PICK_KEY, id)
+    localStorage.setItem(PICK_KEY, save)
   } catch {
     // Storage unavailable: the choice lasts until the page reloads.
   }
 }
+
+const ROSTERS = import.meta.glob<Record<string, PokemonId[]>>('./generated/meta/rosters.json', {
+  eager: true,
+  import: 'default',
+})
+
+/** A past regulation's legal Pokémon, those the dex still has; null for the current one, whose are the dex's. */
+export const pastRoster = (regulation: string): readonly PokemonId[] | null =>
+  regulation === REGULATION ? null : (Object.values(ROSTERS)[0]?.[regulation] ?? null)
 
 export const has = (s: MetaSnapshot, c: MetaCapability) => s.capabilities.includes(c)
 
@@ -205,15 +233,21 @@ export const metaParts = (s: MetaSnapshot): string[] => [...datasetParts(s), ...
 
 /** What a snapshot's dataset is, part by part: its kind, season and period ("Showdown ladder", "Sep 2026"). */
 export function datasetParts(s: MetaSnapshot): string[] {
-  const parts = [t(`meta.kind.${s.kind}`)]
+  const parts = severalRegulations.value ? [t('meta.regulation', { reg: s.regulation })] : []
+  parts.push(t(`meta.kind.${s.kind}`))
   if (s.season) parts.push(t('meta.season', { season: s.season }))
-  parts.push(
-    s.period === 'month'
-      ? date(s.from, { month: 'short', year: 'numeric' })
-      : date(s.to, { day: 'numeric', month: 'short', year: 'numeric' }),
-  )
+  parts.push(periodLabel(s))
   return parts
 }
+
+/** Whether the snapshots shown are of several regulations: then each one's label names its own. */
+const severalRegulations = computed(() => new Set(snapshots.value.map((s) => s.regulation)).size > 1)
+
+/** The period a snapshot covers: its month ("Sep 2026"), or the day it ends. */
+export const periodLabel = (s: MetaSnapshot): string =>
+  s.period === 'month'
+    ? date(s.from, { month: 'short', year: 'numeric' })
+    : date(s.to, { day: 'numeric', month: 'short', year: 'numeric' })
 
 /** What tells a snapshot apart within its dataset, part by part: whose teams count most, and the format. */
 export function subsetParts(s: MetaSnapshot): string[] {
@@ -250,7 +284,7 @@ export interface MetaDataset {
 const datasetKey = (s: MetaSnapshot) =>
   [s.regulation, s.provider.url, s.kind, s.season ?? '', s.period, s.from, s.to].join('|')
 
-/** Snapshots by dataset: the current regulation's first, then the latest first, each's snapshots in their order. */
+/** Snapshots by dataset, by regulation (see below), each's snapshots in their order. */
 export function metaDatasets(list: readonly MetaSnapshot[]): MetaDataset[] {
   const byKey = new Map<string, MetaDataset>()
   for (const s of list) {
@@ -271,8 +305,17 @@ export function metaDatasets(list: readonly MetaSnapshot[]): MetaDataset[] {
     }
     d.snapshots.push(s)
   }
-  return [...byKey.values()].sort(
-    (a, b) => Number(b.regulation === REGULATION) - Number(a.regulation === REGULATION) || b.to.localeCompare(a.to),
+  // A regulation's datasets together: the current regulation's first, then the one with the latest, each one's latest
+  // first.
+  const all = [...byKey.values()]
+  const last = new Map<string, string>()
+  for (const d of all) if (d.to > (last.get(d.regulation) ?? '')) last.set(d.regulation, d.to)
+  return all.sort(
+    (a, b) =>
+      Number(b.regulation === REGULATION) - Number(a.regulation === REGULATION) ||
+      last.get(b.regulation)!.localeCompare(last.get(a.regulation)!) ||
+      b.regulation.localeCompare(a.regulation) ||
+      b.to.localeCompare(a.to),
   )
 }
 

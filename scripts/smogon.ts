@@ -1,5 +1,6 @@
-// The meta from Smogon's usage stats (notes/usage-stats.md): Pokémon Showdown's ladder for the regulation's format
-// over one month (`smogon` in `sources.json`), as a snapshot per rating cutoff, in the shape `src/data/meta.ts` reads.
+// The meta from Smogon's usage stats (notes/usage-stats.md): Pokémon Showdown's ladder for a regulation's format over
+// each month it has (`smogon` in `sources.json`), as a snapshot per month and rating cutoff, in the shape
+// `src/data/meta.ts` reads.
 // Each snapshot takes the month's `chaos` JSON (usage and sets, weighted by the cutoff) and its usage table (how often
 // each Pokémon is brought, counted over every player whatever the cutoff). A month's files never change once
 // published, so they're cached by month.
@@ -84,12 +85,18 @@ export class Smogon {
     this.format = format
   }
 
-  /** The latest month with stats for the format. */
-  async latestMonth(): Promise<string> {
+  /** Every month with stats for the format, oldest first: a regulation's run of them, as the newest found back to
+   * the first before it with none, looking no further back than the year its name gives ("vgc2026"). */
+  async months(): Promise<string[]> {
     const listing = (await this.get(`${STATS}/`))!.toString('utf8')
-    const months = [...new Set([...listing.matchAll(/href="(\d{4}-\d{2})\/"/g)].map((m) => m[1]!))].sort().reverse()
-    for (const month of months) if (await this.get(`${STATS}/${month}/${this.format}-0.txt`)) return month
-    throw new Error(`Smogon has no stats for ${this.format}`)
+    const all = [...new Set([...listing.matchAll(/href="(\d{4}-\d{2})\/"/g)].map((m) => m[1]!))].sort().reverse()
+    const since = this.format.match(/vgc(\d{4})/)?.[1] ?? ''
+    const found: string[] = []
+    for (const month of all.filter((m) => m >= since)) {
+      if (await this.get(`${STATS}/${month}/${this.format}-0.txt`)) found.push(month)
+      else if (found.length) break
+    }
+    return found.reverse()
   }
 
   /** A file of the month's stats, through the cache. */
@@ -104,11 +111,16 @@ export class Smogon {
     return readFileSync(cached, 'utf8')
   }
 
-  /** The month's snapshots, a cutoff each, by snapshot ID (`smogon-<regulation>-<cutoff>`). Stops on any name or ID the dex doesn't have. */
+  /**
+   * The month's snapshots, a cutoff each, by snapshot ID (`smogon-<regulation>-<month>-<cutoff>`). Stops on any name or
+   * ID the dex doesn't have when `strict` (the current regulation's); else leaves them out, saying so (a past
+   * regulation's, which may have what the dex no longer does).
+   */
   async snapshots(
     month: string,
     regulation: string,
     known: Known,
+    strict: boolean,
   ): Promise<{ snapshot: Snapshot; data: Record<string, PokemonMeta> }[]> {
     const unknown = new Set<string>()
     const pokemon = (name: string) => {
@@ -185,7 +197,7 @@ export class Smogon {
       })
       result.push({
         snapshot: {
-          id: `smogon-${regulation.toLowerCase().replace(/[^a-z0-9]/g, '')}-${cutoff}`,
+          id: `smogon-${regulation.toLowerCase().replace(/[^a-z0-9]/g, '')}-${month}-${cutoff}`,
           kind: 'showdown' as const,
           provider: PROVIDER,
           regulation,
@@ -200,7 +212,11 @@ export class Smogon {
         data,
       })
     }
-    if (unknown.size) throw new Error(`Smogon's ${month} stats name what the dex hasn't: ${[...unknown].join(', ')}`)
+    if (unknown.size) {
+      const msg = `Smogon's ${month} stats of Regulation ${regulation} name what the dex hasn't: ${[...unknown].join(', ')}`
+      if (strict) throw new Error(msg)
+      console.warn(`${msg} (left out)`)
+    }
     return result
   }
 }

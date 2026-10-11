@@ -2,35 +2,51 @@
 import { computed, useId } from 'vue'
 import { X } from '@lucide/vue'
 import {
-  currentSnapshots,
   datasetDates,
   metaDatasets,
+  periodLabel,
   selectSnapshot,
   selectedSnapshot,
+  snapshots,
   subsetParts,
   type MetaDataset,
   type MetaSnapshot,
 } from '@/data/meta'
 import { locale, t } from '@/i18n'
 
-// The meta's data, to see and pick (`MetaDialog`'s card): the datasets (what one source observed over one period,
-// for one regulation), when there are several, by regulation when there are several of those, the latest first; what
-// the one shown is (its battles, regulation, days, source); and its subsets (whose teams count most), what they mean
-// said once over them. Picking one shows it on every page and closes the card; another dataset keeps the subset when
-// it has it.
+// The meta's data, to see and pick (`MetaDialog`'s card), in steps, each shown when there's a choice: the regulation
+// (the current one first), then its datasets (what one source observed over one period: its months, the latest
+// first), what the one shown is (its battles, regulation, days, source), and its subsets (whose teams count most),
+// what they mean said once over them. Picking a subset shows it on every page and closes the card; another regulation
+// or dataset shows its latest, keeping the subset when it has it, and leaves the card open for the next step.
 const emit = defineEmits<{ close: [] }>()
 const id = useId()
 
-const datasets = computed(() => metaDatasets(currentSnapshots()))
+const datasets = computed(() => metaDatasets(snapshots.value))
 const current = computed<MetaDataset | undefined>(
   () => datasets.value.find((d) => d.snapshots.some((s) => s.id === selectedSnapshot.value?.id)) ?? datasets.value[0],
 )
-const byRegulation = computed(() => new Set(datasets.value.map((d) => d.regulation)).size > 1)
+const regulations = computed(() => [...new Set(datasets.value.map((d) => d.regulation))])
+/** The current regulation's datasets. */
+const inRegulation = computed(() => datasets.value.filter((d) => d.regulation === current.value?.regulation))
+/** A dataset's name among its regulation's: its period, with its source when they're not all the same. */
+const sameKind = computed(() => new Set(inRegulation.value.map((d) => d.snapshots[0]!.kind)).size === 1)
+const datasetName = (d: MetaDataset) =>
+  sameKind.value
+    ? periodLabel(d.snapshots[0]!)
+    : `${t(`meta.kind.${d.snapshots[0]!.kind}`)} · ${periodLabel(d.snapshots[0]!)}`
+const monthly = computed(() => inRegulation.value.every((d) => d.snapshots[0]!.period === 'month'))
 
-function pickDataset(d: MetaDataset) {
+function pickRegulation(r: string) {
+  const d = datasets.value.find((x) => x.regulation === r)
+  if (d) show(d)
+}
+
+/** Shows a dataset, at the subset shown when it has it; the card stays open. */
+function show(d: MetaDataset) {
   const now = selectedSnapshot.value
   const same = d.snapshots.find((s) => s.cutoff === now?.cutoff && s.bestOf === now?.bestOf) ?? d.snapshots[0]
-  if (same) pick(same.id)
+  if (same) selectSnapshot(same.id)
 }
 /** Shows it on every page, and closes the card: the choice is made. */
 function pick(snapshot: string) {
@@ -58,19 +74,29 @@ const about = (d: MetaDataset) =>
         <X :size="16" aria-hidden="true" />
       </button>
     </div>
-    <!-- The datasets, when there's a choice of them: under their regulation's name when there's one of those too. -->
-    <section v-if="datasets.length > 1" class="section">
-      <h3 :id="`${id}-datasets`" class="heading">{{ t('meta.dataset') }}</h3>
-      <div class="options" role="radiogroup" :aria-labelledby="`${id}-datasets`">
-        <template v-for="(d, i) in datasets" :key="d.key">
-          <p v-if="byRegulation && d.regulation !== datasets[i - 1]?.regulation" class="group">
-            {{ t('meta.regulation', { reg: d.regulation }) }}
-          </p>
-          <label class="option" :class="{ on: d === current }">
-            <input type="radio" :name="`${id}-dataset`" :checked="d === current" @change="pickDataset(d)" />
-            <span class="name">{{ d.label }}</span>
-          </label>
-        </template>
+    <!-- The regulations, when there's a choice of them. -->
+    <section v-if="regulations.length > 1" class="section">
+      <h3 :id="`${id}-regulations`" class="heading">{{ t('meta.regulations') }}</h3>
+      <div class="options inline" role="radiogroup" :aria-labelledby="`${id}-regulations`">
+        <label v-for="r in regulations" :key="r" class="option" :class="{ on: r === current?.regulation }">
+          <input
+            type="radio"
+            :name="`${id}-regulation`"
+            :checked="r === current?.regulation"
+            @change="pickRegulation(r)"
+          />
+          <span class="name">{{ r }}</span>
+        </label>
+      </div>
+    </section>
+    <!-- Its datasets (its months), when there's a choice of them. -->
+    <section v-if="inRegulation.length > 1" class="section">
+      <h3 :id="`${id}-datasets`" class="heading">{{ t(monthly ? 'meta.month' : 'meta.dataset') }}</h3>
+      <div class="options inline" role="radiogroup" :aria-labelledby="`${id}-datasets`">
+        <label v-for="d in inRegulation" :key="d.key" class="option" :class="{ on: d === current }">
+          <input type="radio" :name="`${id}-dataset`" :checked="d === current" @change="show(d)" />
+          <span class="name">{{ datasetName(d) }}</span>
+        </label>
       </div>
     </section>
     <!-- What the one shown is. -->
@@ -130,11 +156,6 @@ const about = (d: MetaDataset) =>
   text-transform: uppercase;
   color: var(--muted);
 }
-.group {
-  margin: 6px 0 2px;
-  font-size: 0.85em;
-  font-weight: bold;
-}
 .about p {
   margin: 0;
 }
@@ -154,6 +175,17 @@ const about = (d: MetaDataset) =>
   padding: 6px 8px;
   border: 1px solid transparent;
   cursor: pointer;
+}
+/* The regulations and months, short: side by side, wrapping. */
+.options.inline {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.options.inline .option {
+  align-items: center;
+}
+.options.inline .option input {
+  margin: 0;
 }
 .option:hover {
   background: var(--hover);

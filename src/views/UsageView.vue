@@ -17,13 +17,13 @@ import DexRef from '@/components/DexRef'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import SearchBox from '@/components/SearchBox.vue'
-import MetaPicker from '@/components/MetaPicker.vue'
+import MetaDialog from '@/components/MetaDialog.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
 
 // The regulation's Pokémon by usage, from the meta snapshot shown (`useMeta`: the one picked, on this page or another,
-// when there are several). Columns come and go with what the snapshot has. Its links are `AppLink`s and its icons
+// when there are several, of any regulation and month generated, `MetaDialog`). Columns come and go with what the snapshot has. Its links are `AppLink`s and its icons
 // functional components, as in the other dex tables.
 const query = useActiveQuery()
 const { snapshot, data } = useMeta()
@@ -138,10 +138,10 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   <div>
     <div class="panel">
       <h1>{{ t('title.usage') }}</h1>
-      <p class="muted intro">{{ t('usage.intro', { reg: REGULATION }) }}</p>
+      <p class="muted intro">{{ t('usage.intro', { reg: snapshot?.regulation ?? REGULATION }) }}</p>
       <template v-if="snapshot">
         <div class="source">
-          <MetaPicker />
+          <MetaDialog />
           <span v-if="snapshot.battles" class="muted">
             {{ t('usage.battles', { n: snapshot.battles.toLocaleString(locale) }) }}
           </span>

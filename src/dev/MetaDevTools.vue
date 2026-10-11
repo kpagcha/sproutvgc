@@ -4,13 +4,17 @@
 // when import.meta.env.DEV is true. Not translated.
 import { computed } from 'vue'
 import DevZone from '@/dev/DevZone.vue'
-import { DEFAULT_ACTIVE, GENERATED_SNAPSHOTS, metaLabel, setActiveSnapshots, snapshots } from '@/data/meta'
+import {
+  DEFAULT_ACTIVE,
+  DEFAULT_PATTERNS,
+  GENERATED_SNAPSHOTS,
+  metaLabel,
+  setActiveSnapshots,
+  snapshots,
+} from '@/data/meta'
 
 const active = computed(() => new Set(snapshots.value.map((s) => s.id)))
-const generated = new Set(GENERATED_SNAPSHOTS.map((s) => s.id))
-const isDefault = computed(
-  () => snapshots.value.map((s) => s.id).join() === DEFAULT_ACTIVE.filter((id) => generated.has(id)).join(),
-)
+const isDefault = computed(() => snapshots.value.map((s) => s.id).join() === DEFAULT_ACTIVE.join())
 
 /** Turns one on or off, keeping the generator's order: the first on is the default. */
 function toggle(id: string, on: boolean) {
@@ -23,7 +27,7 @@ function toggle(id: string, on: boolean) {
     <h2>Meta snapshots</h2>
     <p class="muted">
       Which ones the app shows, the first on by default. <code>.env</code> has
-      <code>{{ DEFAULT_ACTIVE.join(', ') || 'none' }}</code
+      <code>{{ DEFAULT_PATTERNS.join(', ') || 'none' }}</code
       >.
     </p>
     <p v-if="!GENERATED_SNAPSHOTS.length" class="muted">None generated: run <code>npm run gen-data</code>.</p>

@@ -1,14 +1,14 @@
 // Generates `src/data/generated/` from Pokémon Showdown's Champions mod, at the commit pinned in `sources.json`, and
 // names in every locale from PokéAPI's data (`languages.ts` says where) and `overrides.ts`, which fills in what
 // PokéAPI lacks or has outdated. The regulation is `VITE_REGULATION` in `.env`. Run with `npm run gen-data`; `npm run gen-data -- --update` first moves every pin to
-// the latest version, and `-- --update-smogon` only Smogon's month (what the monthly refresh workflow runs).
+// the latest version, and `-- --update-smogon` only Smogon's months (what the monthly refresh workflow runs).
 //
 // Showdown's own code loads the data (through jiti, which runs its TypeScript), so the Champions mod is merged over
 // Gen 9 and the format's rules apply exactly as on Showdown. Availability comes from the regulation's legal Pokémon:
 // an ability is available when one of them can have it, a move when one of them learns it.
 //
 // Sprites come from Showdown's server, trimmed to the regulation's entries (`sprites.ts`), and the meta from Smogon's
-// usage stats for the regulation's format, a month of them (`smogon.ts`).
+// usage stats for each regulation's format, every month of them, past regulations' too (`smogon.ts`).
 
 import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
@@ -50,8 +50,11 @@ interface Sources {
   client: string
   /** The day Showdown's sprites were fetched: they aren't versioned, so this keys their cache. */
   sprites: string
-  /** The month of Smogon's usage stats ("2026-09"). */
-  smogon: string
+  /**
+   * The months of Smogon's usage stats, by regulation (`"M-C": ["2026-09"]`): every one its format has, oldest first.
+   * Past regulations stay, as their history: each one listed is generated, current or not.
+   */
+  smogon: Record<string, string[]>
 }
 
 // The little of Showdown's API used here.
@@ -352,6 +355,16 @@ interface Category {
   compose?: (names: Map<string, string>) => Map<string, string>
 }
 
+/** A format's legal Pokémon, Mega Evolutions included. A forme battles change it into is legal when one it changes from
+ * is: the format bans Ogerpon, not its Tera formes, which no team can bring anyway. */
+function legalSpecies(dex: ModdedDex, rules: RuleTable): Species[] {
+  const allowed = dex.species.all().filter((s) => s.exists && !rules.isBannedSpecies(s))
+  const allowedIds = new Set(allowed.map((s) => s.id))
+  return allowed.filter(
+    (s) => !s.battleOnly || [s.battleOnly].flat().some((from) => allowedIds.has(dex.species.get(from).id)),
+  )
+}
+
 async function main() {
   const saved = readFileSync(SOURCES_FILE, 'utf8')
   const parsed = JSON.parse(saved) as Partial<Sources>
@@ -361,7 +374,7 @@ async function main() {
     pokeapi: parsed.pokeapi!,
     client: parsed.client ?? latestCommit(CLIENT_REPO),
     sprites: parsed.sprites ?? today,
-    smogon: parsed.smogon ?? '',
+    smogon: typeof parsed.smogon === 'object' ? parsed.smogon : {},
   }
   if (process.argv.includes('--update')) {
     sources.showdown = latestCommit(SHOWDOWN_REPO)
@@ -382,20 +395,19 @@ async function main() {
 
   // The regulation's VGC format, e.g. "[Gen 9 Champions] VGC 2026 Reg M-C". Its mod is the data that regulation
   // uses: `champions` for the current one, a frozen snapshot like `championsregmb` for past ones.
-  const pattern = new RegExp(`^\\[Gen 9 Champions\\] VGC \\d+ Reg ${reg.replace(/[^\w]/g, '\\$&')}$`)
-  const format = Dex.formats.all().find((f) => pattern.test(f.name))
+  /** A regulation's VGC format on Showdown, if it still has it. */
+  const formatOf = (r: string) => {
+    const pattern = new RegExp(`^\\[Gen 9 Champions\\] VGC \\d+ Reg ${r.replace(/[^\w]/g, '\\$&')}$`)
+    return Dex.formats.all().find((f) => pattern.test(f.name))
+  }
+  const format = formatOf(reg)
   if (!format) throw new Error(`Showdown ${sources.showdown.slice(0, 7)} has no VGC format for Regulation ${reg}`)
   const dex = Dex.forFormat(format)
   const rules = dex.formats.getRuleTable(format)
   console.log(`${format.name} (mod: ${format.mod})`)
 
-  // The regulation's legal Pokémon, Mega Evolutions included. A forme battles change it into is legal when one it
-  // changes from is: the format bans Ogerpon, not its Tera formes, which no team can bring anyway.
-  const allowed = dex.species.all().filter((s) => s.exists && !rules.isBannedSpecies(s))
-  const allowedIds = new Set(allowed.map((s) => s.id))
-  const roster = allowed.filter(
-    (s) => !s.battleOnly || [s.battleOnly].flat().some((from) => allowedIds.has(dex.species.get(from).id)),
-  )
+  // The regulation's legal Pokémon.
+  const roster = legalSpecies(dex, rules)
   console.log(`${roster.length} legal Pokémon`)
   const legal = new Set(roster.map((s) => s.id))
   const abilitiesHeld = new Set(roster.flatMap((s) => Object.values(s.abilities).map(toId)))
@@ -689,33 +701,46 @@ async function main() {
   // Each legal Pokémon's moves, for its page (and the other way round, for a move's).
   await writeJson('pokemon.learnsets.json', Object.fromEntries(byId(roster).map((s) => [s.id, learnset(s.id)])))
 
-  // The meta: Smogon's usage stats for the format, a snapshot per rating cutoff (`meta/<id>.json`, listed in
-  // `meta/index.json`), by regulation (`smogon-mc-1760`). Which of them the app shows is `VITE_META_SETS` in `.env`.
-  const smogon = new Smogon(join(CACHE, 'smogon'), (url) => getBinary(url, true), toId(format.name))
-  if (!sources.smogon || process.argv.includes('--update') || process.argv.includes('--update-smogon')) {
-    sources.smogon = await smogon.latestMonth()
-    console.log(`Pinned Smogon's stats of ${sources.smogon}`)
-  }
-  const snapshots = await smogon.snapshots(sources.smogon, reg, {
-    pokemon: (name) => (legal.has(speciesId(name)) ? speciesId(name) : undefined),
+  // The meta: Smogon's usage stats for every regulation in `sources.json` (the current one always), every month of
+  // its format, a snapshot per month and rating cutoff (`meta/<id>.json`, listed in `meta/index.json`, by regulation
+  // and month: `smogon-mc-2026-09-1760`), the current regulation's first, each regulation's latest month first. Which
+  // of them the app shows is `VITE_META_SETS` in `.env`. A past regulation's stats aren't held to the dex, which may
+  // no longer have what they name: that's left out. Each past regulation's legal Pokémon go in `meta/rosters.json`,
+  // for the pages showing "every Pokémon" of it: its format's, when Showdown still has it, else those its stats name.
+  const updateSmogon = process.argv.includes('--update') || process.argv.includes('--update-smogon')
+  /** Smogon's ID for a regulation's format: Showdown's name for it as an ID, or, when Showdown no longer has it, the
+   * current one's with the regulation swapped ("gen9championsvgc2026regma"). */
+  const smogonFormat = (r: string) => toId(formatOf(r)?.name ?? format.name.replace(/Reg \S+$/, `Reg ${r}`))
+  const known = {
+    pokemon: (name: string) => (legal.has(speciesId(name)) ? speciesId(name) : undefined),
     moves: new Set(availableIds.moves),
     items: new Set(availableIds.items),
     abilities: new Set(availableIds.abilities),
-  })
-  // Past regulations' snapshots stay, as their history: only the current regulation's are replaced. They're never
-  // checked against the dex again, which may no longer have what they name.
-  const indexPath = join(OUT, 'meta/index.json')
-  const index: Record<string, { regulation: string }> = existsSync(indexPath)
-    ? JSON.parse(readFileSync(indexPath, 'utf8'))
-    : {}
-  const past = Object.entries(index).filter(([, s]) => s.regulation !== reg)
-  for (const [id, s] of Object.entries(index))
-    if (s.regulation === reg) rmSync(join(OUT, `meta/${id}.json`), { force: true })
-  for (const { snapshot, data } of snapshots) await writeJson(`meta/${snapshot.id}.json`, data)
-  await writeJson('meta/index.json', {
-    ...Object.fromEntries(snapshots.map((s) => [s.snapshot.id, s.snapshot])),
-    ...Object.fromEntries(past),
-  })
+  }
+  rmSync(join(OUT, 'meta'), { recursive: true, force: true })
+  const index: Record<string, unknown> = {}
+  const rosters: Record<string, string[]> = {}
+  for (const r of [reg, ...Object.keys(sources.smogon).filter((r) => r !== reg)]) {
+    const smogon = new Smogon(join(CACHE, 'smogon'), (url) => getBinary(url, true), smogonFormat(r))
+    if (!sources.smogon[r] || updateSmogon) {
+      sources.smogon[r] = await smogon.months()
+      console.log(`Pinned Smogon's stats of Regulation ${r}: ${sources.smogon[r].join(', ') || 'none yet'}`)
+    }
+    const named = new Set<string>()
+    for (const month of [...sources.smogon[r]].reverse()) {
+      for (const { snapshot, data } of await smogon.snapshots(month, r, known, r === reg)) {
+        await writeJson(`meta/${snapshot.id}.json`, data)
+        index[snapshot.id] = snapshot
+        for (const id of Object.keys(data)) named.add(id)
+      }
+    }
+    if (r === reg) continue
+    const past = formatOf(r)
+    const ids = past ? legalSpecies(Dex.forFormat(past), Dex.formats.getRuleTable(past)).map((s) => s.id) : [...named]
+    rosters[r] = ids.filter((id) => legal.has(id)).sort()
+  }
+  await writeJson('meta/index.json', index)
+  await writeJson('meta/rosters.json', rosters)
 
   // Sprites: the icon sheets cut down to the regulation's entries, in ID order, and each legal Pokémon's own sprite.
   const clientData = await get(`${CLIENT_RAW}/${sources.client}/play.pokemonshowdown.com/src/battle-dex-data.ts`)
