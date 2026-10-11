@@ -80,6 +80,7 @@ import ModalDialog from '@/components/ModalDialog.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import FolderTabs from '@/components/FolderTabs.vue'
+import StageStepper from '@/components/StageStepper.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import SpeedKeptMenu from '@/components/SpeedKeptMenu.vue'
 import TypeIcon from '@/components/TypeIcon'
@@ -146,7 +147,7 @@ const bench = computed<Benchmark>({
 
 // The modifiers, applied to everyone: shown when the reader opens them, or when the URL sets one; closing them clears
 // them, so the ladder is never modified out of sight.
-const STAGES = ['-1', '0', '1', '2'] as const
+const STAGES = ['-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6'] as const
 const stage = computed({
   get: () => ((STAGES as readonly string[]).includes(String(query.value.stage)) ? String(query.value.stage) : '0'),
   set: (v: string) => set('stage', v === '0' ? undefined : v),
@@ -1462,11 +1463,11 @@ const { entered } = usePageEntered()
                   aria-hidden="true"
                 />{{ t(`speed.mod.${k}`) }}
               </button>
-              <SegmentedControl
-                class="phone-stacked"
-                v-model="stage"
-                :label="t('speed.stage')"
-                :options="STAGES.map((s) => ({ value: s, label: stageLabel(s) }))"
+              <StageStepper
+                :model-value="Number(stage)"
+                :min="Number(STAGES[0])"
+                :max="Number(STAGES.at(-1))"
+                @update:model-value="(n: number) => (stage = String(n))"
               />
             </div>
             <PokemonPicker
@@ -1938,15 +1939,13 @@ const { entered } = usePageEntered()
                       aria-hidden="true"
                     />{{ m.label }}
                   </button>
+                  <StageStepper
+                    :model-value="Number(myStage)"
+                    :min="Number(STAGES[0])"
+                    :max="Number(STAGES.at(-1))"
+                    @update:model-value="(n: number) => setMyStage(String(n))"
+                  />
                 </div>
-                <SegmentedControl
-                  class="phone-stacked"
-                  v-if="myModsOpen"
-                  :model-value="myStage"
-                  :label="t('speed.stage')"
-                  :options="STAGES.map((s) => ({ value: s, label: stageLabel(s) }))"
-                  @update:model-value="(v: string) => setMyStage(v)"
-                />
               </section>
               <section v-if="summary" class="yours-section">
                 <p class="small">

@@ -13,6 +13,7 @@ import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonPicker from '@/components/PokemonPicker.vue'
 import ScrollRow from '@/components/ScrollRow.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
+import StageStepper from '@/components/StageStepper.vue'
 
 // One of the comparison's Pokémon and its Speed build, to change (its buttons as the speed tiers' yours has them):
 // the Pokémon, with Clear beside it, its Speed, the
@@ -50,8 +51,9 @@ function setPoints(v: string) {
 }
 const toggle = (k: BuildToggle) => emit('build', { toggles: toggled(props.build.toggles, k) })
 
-const STAGES = ['-2', '-1', '0', '1', '2'] as const
-const stageLabel = (s: string) => (Number(s) > 0 ? `+${s}` : s.replace('-', '−'))
+/** The Speed stages its stepper goes through. */
+const STAGE_MIN = -6
+const STAGE_MAX = 6
 /** Its modifiers' buttons: its doubling abilities' by name, only those it can have. */
 const mods = computed(() => modButtons(props.id))
 /** The nature effects' choice shows them as arrows beside "Spe", up and down, neutral as a word. */
@@ -177,14 +179,13 @@ const canHover = window.matchMedia('(hover: hover)').matches
               aria-hidden="true"
             />{{ m.label }}
           </button>
+          <StageStepper
+            :model-value="props.build.stage"
+            :min="STAGE_MIN"
+            :max="STAGE_MAX"
+            @update:model-value="(n: number) => emit('build', { stage: n })"
+          />
         </div>
-        <SegmentedControl
-          class="stacked"
-          :model-value="String(props.build.stage)"
-          :label="t('speed.stage')"
-          :options="STAGES.map((s) => ({ value: s, label: stageLabel(s) }))"
-          @update:model-value="(v: string) => emit('build', { stage: Number(v) })"
-        />
       </section>
       <slot />
       <div v-if="props.confirmable" class="confirm-row">
