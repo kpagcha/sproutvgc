@@ -231,8 +231,10 @@ onBeforeUnmount(() => {
           :class="{ hit: r.hit, mine: r.mine }"
           @click.capture="emit('chip', $event, r.id)"
         >
-          <PokemonIcon :id="r.id" /><span class="name">{{ r.species }}</span
-          ><span v-if="r.forme" class="forme">{{ r.forme }}</span>
+          <PokemonIcon :id="r.id" /><span class="names"
+            ><span class="name">{{ r.species }}</span
+            ><span v-if="r.forme" class="forme">{{ r.forme }}</span></span
+          >
         </AppLink>
         <span class="track">
           <span class="visually-hidden">{{
@@ -419,15 +421,22 @@ onBeforeUnmount(() => {
 .row.has-mine .mon:hover {
   background: color-mix(in srgb, var(--accent) 22%, transparent);
 }
-.name {
+/* The name, and its forme on a line under it, smaller, so neither cuts the other off. */
+.names {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.15;
+}
+.name,
+.forme {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .forme {
-  font-size: 0.85em;
+  font-size: 0.8em;
   color: var(--muted);
-  white-space: nowrap;
 }
 .mon.mine {
   font-weight: bold;
