@@ -1,125 +1,122 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, useTemplateRef } from 'vue'
+import { computed } from 'vue'
 import { percent } from '@/data/meta'
 import { t } from '@/i18n'
-import type { NatureEffect } from '@/lib/stats'
 import { odds, type SpreadPoint } from '@/lib/speedLineup'
-import { toTopOf } from '@/lib/scroll'
-import EffectTag from '@/components/EffectTag'
 
-// One of the comparison's Pokémon at its sets, against another: every Speed its sets reach, in the order they move,
-// each with its share of the sets (a bar, as long as it's common), the builds reaching it and how it does against the
-// other. The other, at one build, is a row of its own among them, where it moves; at its sets too, each row says the
-// share of the other's sets it moves first against. A row tapped (`pickable`) sets the Pokémon to its most common
-// build there. In a side's panel, and on phones under the two, where its heading is a band of its side's color
-// (`banded`). Folded, as it starts, its most common Speeds alone (`FOLDED`), the most common first, and a button
-// showing them all, in the order they move with the other among them, and folding them back (the page going to the
-// top of its panel).
+// One of the comparison's Pokémon at its sets, against another, drawn as the speed tiers' charts draw a row: a mark at
+// each Speed its sets reach, rising from the axis as tall as it's common, colored by who moves first at it (its side's
+// color, the other's, plain on a tie), over a fainter stretch of what it could reach (Min− to Max+); the other, at one
+// build, a line through with its Speed over it (at its sets too, each mark is colored by who moves first against most
+// of them). Under the axis its slowest, most common and fastest Speeds. Each mark says on hover, or a tap, its Speed,
+// its share of the sets and the builds reaching it. In a side's panel, and on phones under the two, where its heading
+// is a band of its side's color (`banded`).
 const props = defineProps<{
   title: string
   spread: readonly SpreadPoint[]
   /** Its side, for its color; the other's is the other's. */
   tone: 'yours' | 'opponent'
   other: { name: string; spread: readonly SpreadPoint[]; sets: boolean } | null
+  /** Its Speeds at its slowest and fastest builds (Min− and Max+), with its modifiers. */
+  reach: { min: number; max: number }
   trickRoom: boolean
   banded?: boolean
-  pickable?: boolean
 }>()
-const emit = defineEmits<{ pick: [b: { effect: NatureEffect; points: number }] }>()
 
-const topShare = computed(() => Math.max(...props.spread.map((s) => s.share), 0.0001))
-/** How a Speed does against the other: who moves first, and the share of its sets when it's at them. */
-function vs(speed: number) {
-  if (!props.other) return null
-  const o = odds([{ speed, share: 1, builds: [] }], props.other.spread, props.trickRoom)
-  const kind = o.first > 0.5 ? 'first' : o.after > 0.5 ? 'after' : 'tie'
-  return { kind, text: props.other.sets ? percent(o.first) : t(`compare.cell.${kind}`) }
-}
-/** The other at one build: its Speed, among the rows where it moves (before the first it moves before or ties). */
+/** The other at one build: its Speed, a line through the chart. */
 const otherAt = computed(() => (props.other && !props.other.sets ? props.other.spread[0]!.speed : null))
-/** The most common Speeds shown folded. */
-const FOLDED = 3
-const all = ref(false)
-// Folded back, the page goes to the top of the panel it's in, its band in view, as what was below the fold is gone.
-const root = useTemplateRef<HTMLElement>('root')
-async function toggleAll() {
-  all.value = !all.value
-  if (all.value) return
-  await nextTick()
-  toTopOf(root.value?.closest('.panel, .card'))
-}
-const foldable = computed(() => props.spread.length > FOLDED)
-type Row = { other: true; speed: number } | ({ other?: false } & SpreadPoint)
-const rows = computed((): Row[] => {
-  if (foldable.value && !all.value)
-    return [...props.spread]
-      .sort((a, b) => b.share - a.share)
-      .slice(0, FOLDED)
-      .map((s) => ({ ...s, other: false as const }))
-  const list: Row[] = [...props.spread]
-    .sort((a, b) => (props.trickRoom ? a.speed - b.speed : b.speed - a.speed))
-    .map((s) => ({ ...s, other: false as const }))
-  const at = otherAt.value
-  if (at !== null) {
-    const i = list.findIndex((r) => (props.trickRoom ? at <= r.speed : at >= r.speed))
-    list.splice(i < 0 ? list.length : i, 0, { other: true, speed: at })
-  }
-  return list
+const axis = computed(() => {
+  const all = [props.reach.min, props.reach.max, ...props.spread.map((s) => s.speed)]
+  if (otherAt.value !== null) all.push(otherAt.value)
+  const lo = Math.min(...all)
+  const hi = Math.max(...all)
+  const pad = Math.max(2, (hi - lo) * 0.04)
+  return { lo: lo - pad, span: hi - lo + 2 * pad }
 })
-const topBuild = (s: SpreadPoint) => s.builds.reduce((a, b) => (b.share > a.share ? b : a))
+const at = (speed: number) => `${((speed - axis.value.lo) / axis.value.span) * 100}%`
+const between = (lo: number, hi: number) => ({ left: at(lo), width: `calc(${at(hi)} - ${at(lo)})` })
+
+/** Who moves first at a Speed against the other: it, the other, or neither (a tie, or at most half of its sets each). */
+function kind(speed: number) {
+  if (!props.other) return undefined
+  const o = odds([{ speed, share: 1, builds: [] }], props.other.spread, props.trickRoom)
+  return o.first > 0.5 ? 'first' : o.after > 0.5 ? 'after' : 'tie'
+}
+const topShare = computed(() => Math.max(...props.spread.map((s) => s.share), 0.0001))
+const common = computed(() => props.spread.reduce((a, b) => (b.share > a.share ? b : a)))
+const lo = computed(() => props.spread[props.spread.length - 1]!.speed)
+const hi = computed(() => props.spread[0]!.speed)
+
+const ARROWS = { up: '↑', down: '↓' }
+/** A mark's tooltip: its Speed and share, then the builds reaching it, as the speed tiers' chips tag them. */
+function tip(s: SpreadPoint) {
+  const builds = s.builds.map((b) => {
+    const effect = b.effect === 'neutral' ? t('speed.effect.neutral') : `${ARROWS[b.effect]}${t('stat.spe')}`
+    const share = s.builds.length > 1 ? ` (${percent(b.share)})` : ''
+    return `${effect} ${t('speed.points', { n: b.points })}${share}`
+  })
+  return `${s.speed} · ${percent(s.share)} · ${builds.join(', ')}`
+}
 </script>
 
 <template>
-  <div ref="root" class="spread-part" :class="tone">
+  <div class="spread-part" :class="tone">
     <strong class="small title" :class="{ band: banded }">{{ title }}</strong>
-    <div class="spread small" :class="{ padded: banded }" role="table">
-      <template v-for="r in rows" :key="r.other ? 'other' : r.speed">
-        <div v-if="r.other" class="srow other-row" role="row">
-          <span class="c-speed" role="cell">{{ r.speed }}</span>
-          <span class="c-rest" role="cell">{{ other!.name }}</span>
-        </div>
-        <component
-          :is="pickable ? 'button' : 'div'"
-          v-else
-          :type="pickable ? 'button' : undefined"
-          class="srow"
-          :class="{ pick: pickable }"
-          role="row"
-          @click="pickable && emit('pick', topBuild(r))"
+    <div class="chart" :class="{ padded: banded }">
+      <!-- Read out: every Speed and its share, and the other's Speed. -->
+      <span class="visually-hidden">{{
+        spread.map((s) => `${s.speed} ${percent(s.share)}`).join(', ') +
+        (otherAt !== null ? ` · ${other!.name} ${otherAt}` : '')
+      }}</span>
+      <div class="plot" aria-hidden="true">
+        <span v-if="otherAt !== null" class="other-label" :style="{ left: at(otherAt) }"
+          >{{ other!.name }} {{ otherAt }}</span
         >
-          <span class="c-speed" role="cell" :class="vs(r.speed)?.kind">{{ r.speed }}</span>
-          <span class="c-share" role="cell">
-            <span class="bar" aria-hidden="true"
-              ><span :class="vs(r.speed)?.kind" :style="{ width: `${(r.share / topShare) * 100}%` }"></span></span
-            ><span class="pct">{{ percent(r.share) }}</span>
-          </span>
-          <span class="c-builds muted" role="cell">
-            <span v-for="b in r.builds" :key="`${b.effect}:${b.points}`" class="build">
-              <EffectTag :effect="b.effect" /><span>{{ t('speed.points', { n: b.points }) }}</span>
-            </span>
-          </span>
-          <span v-if="vs(r.speed)" class="c-vs" role="cell" :class="vs(r.speed)!.kind">{{ vs(r.speed)!.text }}</span>
-        </component>
-      </template>
+        <span class="reach" :style="between(reach.min, reach.max)"></span>
+        <span class="span" :style="between(lo, hi)"></span>
+        <span
+          v-for="s in spread"
+          :key="s.speed"
+          v-tip:group="tip(s)"
+          class="mark"
+          :class="kind(s.speed)"
+          :style="{ left: at(s.speed), '--tall': s.share / topShare }"
+        ></span>
+        <span v-if="otherAt !== null" class="line" :style="{ left: at(otherAt) }"></span>
+      </div>
+      <div class="ticks" aria-hidden="true">
+        <span class="tick" :style="{ left: at(lo) }">{{ lo }}</span>
+        <span
+          v-if="common.speed !== lo && common.speed !== hi"
+          class="tick common"
+          :style="{ left: at(common.speed) }"
+          >{{ common.speed }}</span
+        >
+        <span v-if="hi !== lo" class="tick" :style="{ left: at(hi) }">{{ hi }}</span>
+      </div>
+      <p class="muted small note">
+        {{ t('compare.spreadNote', { speed: common.speed, pct: percent(common.share) }) }}
+      </p>
     </div>
-    <button v-if="foldable" type="button" class="btn quiet more small" :class="{ padded: banded }" @click="toggleAll">
-      {{ all ? t('compare.showFewerSets') : t('compare.showAllSets', { n: spread.length }) }}
-    </button>
   </div>
 </template>
 
 <style scoped>
 .spread-part {
-  --mine: var(--accent);
-  --theirs: var(--opponent);
+  --mine: color-mix(in srgb, var(--accent) 75%, var(--panel));
+  --theirs: color-mix(in srgb, var(--opponent) 75%, var(--panel));
+  --theirs-solid: var(--opponent);
+  --theirs-text: var(--opponent-text);
   display: flex;
   flex-direction: column;
   align-self: stretch;
   gap: 6px;
 }
 .spread-part.opponent {
-  --mine: var(--opponent);
-  --theirs: var(--accent);
+  --mine: color-mix(in srgb, var(--opponent) 75%, var(--panel));
+  --theirs: color-mix(in srgb, var(--accent) 75%, var(--panel));
+  --theirs-solid: var(--accent);
+  --theirs-text: var(--accent-text);
 }
 .small {
   font-size: 0.875em;
@@ -133,116 +130,112 @@ const topBuild = (s: SpreadPoint) => s.builds.reduce((a, b) => (b.share > a.shar
   background: var(--side);
   border-bottom: 2px solid var(--ink);
 }
-.spread.padded {
+.chart.padded {
   padding: 0 8px 6px;
 }
-.more {
-  align-self: flex-start;
+/* The marks rising from the axis (a faint groove; what it could reach a deeper stretch of it; what its sets span a
+   baseline on that), the other's line through, its label over it. */
+.plot {
+  position: relative;
+  height: 64px;
+  margin-top: 20px;
 }
-.more.padded {
-  margin: 0 8px 8px;
-}
-/* A row per Speed: the Speed, its share, how it does; the builds reaching it on a line under them. */
-.srow {
-  display: grid;
-  grid-template-columns: 3em minmax(0, 1fr) auto;
-  grid-template-areas:
-    'speed share vs'
-    '. builds builds';
-  align-items: center;
-  gap: 2px 10px;
-  width: 100%;
-  padding: 4px 0;
-  font: inherit;
-  text-align: left;
-  color: var(--text);
-  background: none;
-  border: none;
-  border-bottom: 1px solid var(--border);
-}
-.srow.pick {
-  cursor: pointer;
-}
-.srow.pick:hover {
-  background: var(--hover, var(--sel));
-}
-.c-speed {
-  grid-area: speed;
-  font-weight: bold;
-  font-variant-numeric: tabular-nums;
-}
-.c-share {
-  grid-area: share;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-}
-.c-builds {
-  grid-area: builds;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 10px;
-}
-.c-builds:empty {
-  display: none;
-}
-.c-vs {
-  grid-area: vs;
-  font-weight: bold;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-.first {
-  color: var(--mine);
-}
-.after {
-  color: var(--theirs);
-}
-.bar {
-  flex: 1;
-  height: 10px;
-  min-width: 3em;
+.plot::before {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 4px;
+  translate: 0 50%;
   background: color-mix(in srgb, var(--text) 7%, var(--panel));
 }
-.bar > span {
-  display: block;
-  height: 100%;
+.reach {
+  position: absolute;
+  bottom: 0;
+  height: 4px;
+  translate: 0 50%;
+  background: color-mix(in srgb, var(--text) 16%, var(--panel));
+}
+.span {
+  position: absolute;
+  bottom: 0;
+  height: 2px;
+  translate: 0 50%;
   background: color-mix(in srgb, var(--text) 45%, var(--panel));
 }
-.bar > .first {
+.mark {
+  position: absolute;
+  bottom: 0;
+  width: 8px;
+  height: calc(4px + var(--tall) * 56px);
+  translate: -50% 0;
+  background: color-mix(in srgb, var(--text) 45%, var(--panel));
+  box-shadow: 0 0 0 1px var(--panel);
+}
+/* Easier to point at than its own width. */
+.mark::after {
+  content: '';
+  position: absolute;
+  inset: -4px -3px;
+}
+.mark.first {
   background: var(--mine);
 }
-.bar > .after {
+.mark.after {
   background: var(--theirs);
 }
-.bar > .tie {
+.mark.tie {
   background: var(--panel);
-  box-shadow: inset 0 0 0 1px var(--ink);
+  box-shadow:
+    inset 0 0 0 1px var(--ink),
+    0 0 0 1px var(--panel);
 }
-.pct {
-  min-width: 3.4em;
-  text-align: right;
+.line {
+  position: absolute;
+  top: -2px;
+  bottom: -6px;
+  width: 2px;
+  translate: -50% 0;
+  background: var(--theirs-solid);
+}
+.other-label {
+  position: absolute;
+  top: -20px;
+  translate: -50% 0;
+  padding: 0 4px;
+  font-size: 0.75em;
+  font-weight: bold;
+  line-height: 1.4;
+  white-space: nowrap;
+  color: var(--theirs-text);
+  background: var(--theirs-solid);
+}
+/* Its slowest, most common and fastest Speeds under the axis. */
+.ticks {
+  position: relative;
+  height: 1.5em;
+  font-size: 0.8em;
   font-variant-numeric: tabular-nums;
 }
-.build {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+.tick {
+  position: absolute;
+  top: 4px;
+  translate: -50% 0;
   white-space: nowrap;
+  color: var(--muted);
 }
-/* The other, where it moves among them: a row in its color. */
-.other-row {
-  grid-template-areas: 'speed rest rest';
+.tick.common {
   font-weight: bold;
-  color: var(--theirs);
-  background: color-mix(in srgb, var(--theirs) 10%, transparent);
-  box-shadow: inset 3px 0 0 var(--theirs);
+  color: var(--text);
 }
-.other-row .c-speed {
-  padding-left: 6px;
+.note {
+  margin: 4px 0 0;
 }
-.c-rest {
-  grid-area: rest;
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 </style>
