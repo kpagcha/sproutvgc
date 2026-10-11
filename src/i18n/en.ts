@@ -676,7 +676,7 @@ export const messages = {
   'speed.viewDesc': 'The ladder, a row per Speed; or charts, a row per Pokémon (per base Speed, without usage data).',
   'speed.showDesc': 'The most used Pokémon, or every Pokémon of the regulation.',
   'speed.view.ladder': 'Ladder',
-  'speed.view.ranges': 'Charts',
+  'speed.view.charts': 'Charts',
   'speed.oddsHead': 'You first',
   'speed.oddsNote':
     "One row per Pokémon, a mark at each Speed its sets run, taller the more run it, over a fainter stretch from its slowest possible Speed to its fastest. Your Pokémon is the line; at the row's end, the share of its sets you move first against.",

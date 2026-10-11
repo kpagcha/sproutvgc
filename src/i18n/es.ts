@@ -685,7 +685,7 @@ export const messages: Record<keyof typeof en, string> = {
     'La escala, una fila por Velocidad; o gráficos, una fila por Pokémon (por Velocidad base, sin datos de uso).',
   'speed.showDesc': 'Los Pokémon más usados, o todos los Pokémon del reglamento.',
   'speed.view.ladder': 'Ladder',
-  'speed.view.ranges': 'Gráficos',
+  'speed.view.charts': 'Gráficos',
   'speed.oddsHead': 'Tú primero',
   'speed.oddsNote':
     'Una fila por Pokémon, una marca en cada Velocidad de sus sets, más alta cuantos más la llevan, sobre un tramo más tenue de su Velocidad más baja posible a la más alta. Tu Pokémon es la línea; al final de la fila, la proporción de sus sets contra los que mueves primero.',

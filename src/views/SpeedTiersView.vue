@@ -116,18 +116,20 @@ const metaAvailable = computed(() => !!snapshot.value && has(snapshot.value, 'sp
 
 // Two choices, each in the URL: which Pokémon are shown (`?show=`): the most used (the top 50 or 100), or every
 // Pokémon of the regulation; and how they're drawn (`?view=`): the ladder, a row per Speed, or the charts, a row per
-// Pokémon. Their Speeds are the sets players run; without a snapshot with Speeds, every Pokémon is at the benchmarks
+// Pokémon (`?view=charts`; `ranges`, its name before, still taken, from a link or what was saved). Their Speeds are the sets players run; without a snapshot with Speeds, every Pokémon is at the benchmarks
 // (the charts a row per base Speed). A link from before these (`?all=1`) is every Pokémon's charts; one from when the
 // charts could be at the benchmarks (`?speeds=bench`) is at the sets.
 const SHOWS = ['top50', 'top100', 'all'] as const
 type Show = (typeof SHOWS)[number]
-const VIEWS = ['ladder', 'ranges'] as const
+const VIEWS = ['ladder', 'charts'] as const
 type View = (typeof VIEWS)[number]
 const DEFAULTS = { show: 'top50', view: 'ladder' } as const
-const LEGACY = { show: 'all', view: 'ranges' } as const
+const LEGACY = { show: 'all', view: 'charts' } as const
+/** The charts' name in the URL before they were the charts. */
+const renamed = <T,>(k: string, v: T) => (k === 'view' && v === 'ranges' ? 'charts' : v)
 const legacy = computed(() => flag('all'))
 const pick = <T extends string>(k: 'show' | 'view', list: readonly T[]): T => {
-  const v = query.value[k]
+  const v = renamed(k, query.value[k])
   return (list as readonly unknown[]).includes(v) ? (v as T) : ((legacy.value ? LEGACY : DEFAULTS)[k] as T)
 }
 const show = computed<Show>(() => (metaAvailable.value ? pick('show', SHOWS) : 'all'))
@@ -149,7 +151,7 @@ function saved(): Record<string, string> {
     const v = localStorage.getItem(VIEW_KEY)
     if (!v || v === 'all') return {}
     const q = Object.fromEntries(new URLSearchParams(v))
-    return Object.fromEntries(REMEMBERED.flatMap((k) => (q[k] ? [[k, q[k]]] : [])))
+    return Object.fromEntries(REMEMBERED.flatMap((k) => (q[k] ? [[k, renamed(k, q[k])]] : [])))
   } catch {
     return {}
   }
@@ -179,6 +181,7 @@ function choose(k: 'show' | 'view', v: string) {
 {
   const s = saved()
   if (!Object.keys(query.value).length && Object.keys(s).length) void router.replace({ query: s })
+  else if (query.value.view === 'charts') void router.replace({ query: { ...query.value, view: 'charts' } })
 }
 const trickRoom = computed(() => flag('trickroom'))
 
@@ -786,7 +789,7 @@ const found = computed(() => {
 /** In the charts, where each Pokémon is a row of its own, the one found is the one yours is measured against too (its
  * most common set), as tapping its row does: on the ladder, that's a chip of it, tapped. */
 function setFound(id: PokemonId | null) {
-  if (view.value !== 'ranges' || mine.value === null) return set('find', id ?? undefined)
+  if (view.value !== 'charts' || mine.value === null) return set('find', id ?? undefined)
   const e = id !== null && id !== mine.value ? topEntry(id) : undefined
   void router.replace({ query: { ...query.value, find: id ?? undefined, vs: e ? chipKey(e) : undefined } })
 }
@@ -898,7 +901,7 @@ const finding = computed(() => found.value !== null)
  * moving first, as the ladder goes.
  */
 const rangeRows = computed<RangeRow[]>(() => {
-  if (view.value !== 'ranges' || bySets.value) return []
+  if (view.value !== 'charts' || bySets.value) return []
   const byBase = new Map<number, Entry[]>()
   for (const e of entries.value) {
     const base = POKEMON[e.id].stats[5]
@@ -934,7 +937,7 @@ const rangeRows = computed<RangeRow[]>(() => {
  * none in the snapshot, its benchmarks; the rows from those moving first by their most common Speed, then by usage.
  */
 const oddsRows = computed<OddsRow[]>(() => {
-  if (view.value !== 'ranges' || !bySets.value) return []
+  if (view.value !== 'charts' || !bySets.value) return []
   const ids = [...new Set(entries.value.map((e) => e.id))].filter((id) => !onlyFound.value || id === found.value)
   const rows = ids.map((id) => {
     const base = POKEMON[id].stats[5]
@@ -1079,19 +1082,19 @@ const compareTarget = computed(() => (mine.value === null ? null : compareLink(n
 // too, the two being one there.
 function pickVersus(e: Entry) {
   const vs = vsKey.value === chipKey(e) ? undefined : chipKey(e)
-  if (!vs && view.value === 'ranges') return clearVersus()
+  if (!vs && view.value === 'charts') return clearVersus()
   void router.replace({ query: { ...query.value, vs, ...(vs && { find: e.id }) } })
 }
 // In the charts, a Pokémon found with none measured against (found before yours was set, or on the ladder) is measured
 // against, as finding it there does.
 watch([view, mine, found, vsKey, entries], () => {
-  if (view.value !== 'ranges' || mine.value === null || found.value === null || found.value === mine.value) return
+  if (view.value !== 'charts' || mine.value === null || found.value === null || found.value === mine.value) return
   if (vsKey.value !== null) return
   const e = topEntry(found.value)
   if (e) set('vs', chipKey(e))
 })
 function clearVersus() {
-  void router.replace({ query: { ...query.value, vs: undefined, ...(view.value === 'ranges' && { find: undefined }) } })
+  void router.replace({ query: { ...query.value, vs: undefined, ...(view.value === 'charts' && { find: undefined }) } })
 }
 // The comparison's Speed finds the chip it's against: brought to the middle of the screen, flashing once.
 function locateVersus() {
@@ -1900,7 +1903,7 @@ const { entered } = usePageEntered()
           </div>
           <!-- The charts: at the sets, a row per Pokémon with its sets' Speeds; with no snapshot, at the benchmarks, a
                row per base Speed. -->
-          <div v-else-if="view === 'ranges'" ref="ladder" class="ranges-wrap">
+          <div v-else-if="view === 'charts'" ref="ladder" class="ranges-wrap">
             <SpeedOdds
               v-if="bySets"
               :rows="oddsRows"
@@ -2093,7 +2096,7 @@ const { entered } = usePageEntered()
                the ladder. -->
               <button type="button" class="btn primary big-go" @click="toMine">
                 <span class="big-go-speed">{{ mySpeed }}</span>
-                <span>{{ t(view === 'ranges' ? 'speed.showYoursRow' : 'speed.showYours') }}</span>
+                <span>{{ t(view === 'charts' ? 'speed.showYoursRow' : 'speed.showYours') }}</span>
               </button>
               <!-- Narrower, the ladder is under this card, its opponents band out of view: a way to it, said as it's
                picked. -->
