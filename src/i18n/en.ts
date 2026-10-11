@@ -635,6 +635,14 @@ export const messages = {
   'meta.season': 'Season {season}',
   'meta.bo3': 'Bo3',
   'meta.cutoff': '{players} ({cutoff}+)',
+  'meta.data': 'Data',
+  'meta.dataset': 'Dataset',
+  'meta.subset': 'Players',
+  'meta.battles': '{n} battles',
+  'meta.regulation': 'Regulation {reg}',
+  'meta.pick': 'Data shown: {label}',
+  'meta.cutoffsNote':
+    "Teams weighted by their players' rating: each counts those rated above its cutoff most; All players counts every team the same.",
   'speed.intro': 'The Pokémon of Regulation {reg} by their Speed stat.',
   'speed.formula':
     'Speed is base Speed, plus its stat points (up to 32), plus 20, times 1.1 or 0.9 for a nature that raises or lowers it, rounded down.',

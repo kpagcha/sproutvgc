@@ -198,8 +198,11 @@ const date = (iso: string, opts: Intl.DateTimeFormatOptions) =>
 /** What a snapshot is, to label every number from it with: "Showdown ladder · Sep 2026 · 1760+". */
 export const metaLabel = (s: MetaSnapshot): string => metaParts(s).join(' · ')
 
-/** What a snapshot is, part by part: its kind, season, period, players and format. */
-export function metaParts(s: MetaSnapshot): string[] {
+/** What a snapshot is, part by part: its dataset's (kind, season, period), then its subset's (players, format). */
+export const metaParts = (s: MetaSnapshot): string[] => [...datasetParts(s), ...subsetParts(s)]
+
+/** What a snapshot's dataset is, part by part: its kind, season and period ("Showdown ladder", "Sep 2026"). */
+export function datasetParts(s: MetaSnapshot): string[] {
   const parts = [t(`meta.kind.${s.kind}`)]
   if (s.season) parts.push(t('meta.season', { season: s.season }))
   parts.push(
@@ -207,10 +210,78 @@ export function metaParts(s: MetaSnapshot): string[] {
       ? date(s.from, { month: 'short', year: 'numeric' })
       : date(s.to, { day: 'numeric', month: 'short', year: 'numeric' }),
   )
+  return parts
+}
+
+/** What tells a snapshot apart within its dataset, part by part: whose teams count most, and the format. */
+export function subsetParts(s: MetaSnapshot): string[] {
+  const parts: string[] = []
   if (s.cutoff !== undefined) parts.push(players(s.cutoff))
   if (s.bestOf === 3) parts.push(t('meta.bo3'))
   return parts
 }
+
+/** A snapshot's subset in short, for where room is tight: "1760+", "All players", "Bo3". */
+export function subsetShort(s: MetaSnapshot): string {
+  const parts: string[] = []
+  if (s.cutoff !== undefined) parts.push(s.cutoff ? `${s.cutoff}+` : t('meta.players.0'))
+  if (s.bestOf === 3) parts.push(t('meta.bo3'))
+  return parts.join(' · ')
+}
+
+/**
+ * A dataset: what one source observed over one period, for one regulation ("Showdown ladder · Sep 2026"), as its
+ * snapshots, which tell apart whose teams count most (Smogon's cutoffs) or the format. Another month, another source or
+ * another regulation is another dataset.
+ */
+export interface MetaDataset {
+  key: string
+  regulation: string
+  provider: MetaSnapshot['provider']
+  from: string
+  to: string
+  battles?: number
+  label: string
+  snapshots: MetaSnapshot[]
+}
+
+const datasetKey = (s: MetaSnapshot) =>
+  [s.regulation, s.provider.url, s.kind, s.season ?? '', s.period, s.from, s.to].join('|')
+
+/** Snapshots by dataset: the current regulation's first, then the latest first, each's snapshots in their order. */
+export function metaDatasets(list: readonly MetaSnapshot[]): MetaDataset[] {
+  const byKey = new Map<string, MetaDataset>()
+  for (const s of list) {
+    const key = datasetKey(s)
+    let d = byKey.get(key)
+    if (!d) {
+      d = {
+        key,
+        regulation: s.regulation,
+        provider: s.provider,
+        from: s.from,
+        to: s.to,
+        battles: s.battles,
+        label: datasetParts(s).join(' · '),
+        snapshots: [],
+      }
+      byKey.set(key, d)
+    }
+    d.snapshots.push(s)
+  }
+  return [...byKey.values()].sort(
+    (a, b) => Number(b.regulation === REGULATION) - Number(a.regulation === REGULATION) || b.to.localeCompare(a.to),
+  )
+}
+
+/** The days a dataset covers, in the reader's language: "1–30 Sep 2026". */
+export const datasetDates = (d: Pick<MetaDataset, 'from' | 'to'>) =>
+  new Intl.DateTimeFormat(locale.value, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).formatRange(new Date(`${d.from}T00:00:00Z`), new Date(`${d.to}T00:00:00Z`))
 
 /** Whose teams a cutoff counts most: "Strong players (1760+)". */
 export const players = (c: Cutoff) =>

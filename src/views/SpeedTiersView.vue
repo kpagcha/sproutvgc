@@ -28,7 +28,7 @@ import {
 import { TYPES, isType, type TypeId } from '@/data/types'
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
-import { currentSnapshots, distinctLabel, has, percent, type PokemonMeta, type Share, usageRanks } from '@/data/meta'
+import { has, metaLabel, percent, type PokemonMeta, type Share, usageRanks } from '@/data/meta'
 import { locale, t, tSplit, typeName } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { center, reveal } from '@/lib/scroll'
@@ -74,7 +74,7 @@ import BuildSummary from '@/components/BuildSummary.vue'
 import EffectTag from '@/components/EffectTag'
 import ModalDialog from '@/components/ModalDialog.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
-import MetaPicker from '@/components/MetaPicker.vue'
+import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import SpeedKeptMenu from '@/components/SpeedKeptMenu.vue'
 import TypeIcon from '@/components/TypeIcon'
@@ -1129,28 +1129,11 @@ window.addEventListener('keydown', onSlash)
 onBeforeUnmount(() => window.removeEventListener('keydown', onSlash))
 
 // How to read the page, in a section closed unless the reader opens it (remembered), so the ladder starts close to the
-// top: the chips' legend, and on phones the intro and what each option does too (wide screens show them beside what
-// they explain). Opened from the intro's line, apart from the controls, as it changes nothing shown.
+// top: what each option does, the chips' legend, and yours among them. Opened from the heading's row.
 const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.speedTiers.helpOpen', false)
-
-// The controls fold away (open at first, then as the reader last left them) once the reader has the view they want,
-// what's active then said in short beside the heading: what's shown, and every switch and modifier away from its default.
 const isOpen = (e: Event) => (e.target as HTMLDetailsElement).open
-const { open: controlsOpen, toggle: toggleControls } = useOpenState('sproutvgc.speedTiers.controlsOpen', true)
-// On phones, how to read the page is toggled from beside its heading, the controls folded or not: opening it opens
-// them, which hold it.
-function helpFromHead() {
-  if (controlsOpen.value && helpOpen.value) return toggleHelp()
-  controlsOpen.value = true
-  if (!helpOpen.value) toggleHelp()
-}
-// On phones they start folded on each visit, the ladder first in view, whatever was left last time.
-if (window.matchMedia('(max-width: 720px)').matches) controlsOpen.value = false
+
 const stageLabel = (s: string) => (Number(s) > 0 ? `+${s}` : s.replace('-', '−'))
-// Folded, the data shown beside the heading, when there's a choice of it.
-const foldedLabel = computed(() =>
-  snapshot.value && !showAll.value && currentSnapshots().length > 1 ? distinctLabel(snapshot.value) : null,
-)
 // The modifiers on, in short, on their disclosure while it's folded.
 const modsOn = computed(() => [
   ...TOGGLES.filter((k) => flag(k)).map((k) => t(`speed.modShort.${k}`)),
@@ -1288,94 +1271,70 @@ const { entered } = usePageEntered()
 
     <div class="speed-layout">
       <div class="main-col">
-        <!-- The page's heading, over the ladder (yours beside both), in a section that folds as yours does: the intro, how to
-             read the page and the data shown; folded, the data in short beside the heading (under it on phones). -->
-        <!-- Their headings open and close them themselves, rather than leaving it to the browser, so the section and what
-             changes with it (what's active, the arrow) change at once, however fast the taps come; the browser opening one
-             itself (finding text in it) is followed. -->
-        <details class="panel instant" :open="controlsOpen" @toggle="controlsOpen = isOpen($event)">
-          <summary class="head" @click.prevent="toggleControls">
-            <!-- The heading folds them, its arrow saying whether they're open; its star saves the setup to the favorites. -->
-            <h1>
-              <span
-                ><span class="marker head-marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
-                >{{ t('title.speedTiers') }}</span
-              ><SetupStar /><HelpToggle
-                class="head-help"
-                :open="helpOpen && controlsOpen"
-                controls="speed-help"
-                fit
-                @toggle="helpFromHead"
-              />
-            </h1>
-            <span v-if="!controlsOpen && foldedLabel" class="active"
-              ><span class="item">{{ foldedLabel }}</span></span
-            >
-          </summary>
-          <div class="fold-body">
-            <!-- The intro, and how to read the page: a link-like toggle beside it, apart from the controls. -->
-            <p class="lede">
-              <span class="muted wide-only">{{ t('speed.intro', { reg: REGULATION }) }}</span>
-              <HelpToggle :open="helpOpen" controls="speed-help" @toggle="toggleHelp" />
-            </p>
-            <!-- How to read the ladder: what its options do (on phones, after the intro); samples of a chip, each with what
-                 its parts mean; then yours among them. -->
-            <div v-if="helpOpen" id="speed-help" class="help-body panel sunken">
-              <div class="help-intro small">
-                <p class="muted phone-only-block">{{ t('speed.intro', { reg: REGULATION }) }}</p>
-                <dl class="help-options">
-                  <template v-if="!showAll && boostsAvailable">
-                    <dt>{{ t('speed.boosts') }}</dt>
-                    <dd class="muted">{{ t('speed.boostsDesc') }}</dd>
-                  </template>
-                  <dt>{{ t('speed.megas') }}</dt>
-                  <dd class="muted">{{ t('speed.megasDesc') }}</dd>
-                  <dt>{{ t('speed.mod.trickroom') }}</dt>
-                  <dd class="muted">{{ t('speed.modTip.trickroom') }}</dd>
-                  <dt>{{ t('speed.modifiers') }}</dt>
-                  <dd class="muted">{{ t('speed.modifiersTip') }}</dd>
-                </dl>
-              </div>
-              <p class="formula muted small">{{ t('speed.formula') }}</p>
-              <dl v-if="!showAll && snapshot" class="legend small">
-                <dt>
-                  <span class="chip sample"
-                    ><span class="tag"><EffectTag effect="up" /></span
-                    ><span class="tag">{{ t('speed.points', { n: 32 }) }}</span
-                    ><span class="tag">{{ percent(0.461) }}</span></span
-                  >
-                </dt>
-                <dd class="muted">{{ t('speed.legendChip', { pct: percent(MIN_SHARE) }) }}</dd>
-                <template v-if="showBoosts">
-                  <dt>
-                    <span class="chip sample boost"
-                      ><span class="tag boost-label"
-                        ><ItemIcon id="choicescarf" :scale="0.67" />{{ t('speed.legendBoostLabel') }}</span
-                      ></span
-                    >
-                  </dt>
-                  <dd class="muted">
-                    {{ t('speed.legendBoost') }}
-                  </dd>
+        <!-- The page's heading, over the ladder (yours beside both): on one row, the title and its star, saving the setup
+             to the favorites, the data shown (a button opening what it is, to pick another; on phones, on a line of its own
+             under them), and how to read the page at the row's end (its icon alone on phones); under it, how to read the
+             page, opened. -->
+        <section class="panel page-head">
+          <div class="head">
+            <h1>{{ t('title.speedTiers') }}<SetupStar /></h1>
+            <MetaDialog v-if="snapshot" class="head-meta" />
+            <HelpToggle class="head-help" :open="helpOpen" controls="speed-help" fit @toggle="toggleHelp" />
+          </div>
+          <!-- How to read the ladder: what its options do; samples of a chip, each with what its parts mean; then yours
+               among them. -->
+          <div v-if="helpOpen" id="speed-help" class="help-body panel sunken">
+            <div class="help-intro small">
+              <dl class="help-options">
+                <template v-if="!showAll && boostsAvailable">
+                  <dt>{{ t('speed.boosts') }}</dt>
+                  <dd class="muted">{{ t('speed.boostsDesc') }}</dd>
                 </template>
-              </dl>
-              <p v-else class="muted small">{{ t('speed.allNote', { build: benchTip(bench) }) }}</p>
-              <!-- Yours among them: what picking it does, tapping an opponent, and the comparison side by side. -->
-              <dl class="help-options help-yours small">
-                <dt>{{ t('speed.yours') }}</dt>
-                <dd class="muted">{{ t('speed.helpYours') }}</dd>
-                <dt>{{ t('compare.common') }}</dt>
-                <dd class="muted">{{ t('compare.helpCommon') }}</dd>
-                <dt>{{ t('speed.opponentsHead') }}</dt>
-                <dd class="muted">{{ t('speed.helpOpponents') }}</dd>
-                <dt>{{ t('compare.open') }}</dt>
-                <dd class="muted">{{ t('speed.helpCompare') }}</dd>
+                <dt>{{ t('speed.megas') }}</dt>
+                <dd class="muted">{{ t('speed.megasDesc') }}</dd>
+                <dt>{{ t('speed.mod.trickroom') }}</dt>
+                <dd class="muted">{{ t('speed.modTip.trickroom') }}</dd>
+                <dt>{{ t('speed.modifiers') }}</dt>
+                <dd class="muted">{{ t('speed.modifiersTip') }}</dd>
               </dl>
             </div>
-            <!-- The data shown. -->
-            <div v-if="snapshot" class="controls"><MetaPicker /></div>
+            <p class="formula muted small">{{ t('speed.formula') }}</p>
+            <dl v-if="!showAll && snapshot" class="legend small">
+              <dt>
+                <span class="chip sample"
+                  ><span class="tag"><EffectTag effect="up" /></span
+                  ><span class="tag">{{ t('speed.points', { n: 32 }) }}</span
+                  ><span class="tag">{{ percent(0.461) }}</span></span
+                >
+              </dt>
+              <dd class="muted">{{ t('speed.legendChip', { pct: percent(MIN_SHARE) }) }}</dd>
+              <template v-if="showBoosts">
+                <dt>
+                  <span class="chip sample boost"
+                    ><span class="tag boost-label"
+                      ><ItemIcon id="choicescarf" :scale="0.67" />{{ t('speed.legendBoostLabel') }}</span
+                    ></span
+                  >
+                </dt>
+                <dd class="muted">
+                  {{ t('speed.legendBoost') }}
+                </dd>
+              </template>
+            </dl>
+            <p v-else class="muted small">{{ t('speed.allNote', { build: benchTip(bench) }) }}</p>
+            <!-- Yours among them: what picking it does, tapping an opponent, and the comparison side by side. -->
+            <dl class="help-options help-yours small">
+              <dt>{{ t('speed.yours') }}</dt>
+              <dd class="muted">{{ t('speed.helpYours') }}</dd>
+              <dt>{{ t('compare.common') }}</dt>
+              <dd class="muted">{{ t('compare.helpCommon') }}</dd>
+              <dt>{{ t('speed.opponentsHead') }}</dt>
+              <dd class="muted">{{ t('speed.helpOpponents') }}</dd>
+              <dt>{{ t('compare.open') }}</dt>
+              <dd class="muted">{{ t('speed.helpCompare') }}</dd>
+            </dl>
           </div>
-        </details>
+        </section>
         <!-- Which Pokémon the ladder shows: folder tabs standing on its panel's top edge, the one shown joined to the
              toolbar under it. -->
         <div v-if="metaAvailable" class="view-tabs" role="radiogroup" :aria-label="t('speed.show')">
@@ -1779,12 +1738,14 @@ const { entered } = usePageEntered()
           </Teleport>
 
           <p v-if="entered && (showAll || data)" class="muted small note">{{ t('speed.count', { n: monCount }) }}</p>
+          <p class="muted small note">{{ t('speed.intro', { reg: REGULATION }) }}</p>
           <p v-if="entered && (showAll || data) && filtering && !monCount" class="muted small note">
             {{ t('speed.filteredNone') }}
           </p>
           <p v-if="showMegas" class="muted small note">{{ t('speed.megaNote') }}</p>
           <p v-if="!showAll && snapshot" class="muted small note">
-            {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
+            {{ metaLabel(snapshot) }} · {{ t('usage.from') }}
+            <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
           </p>
         </div>
       </div>
@@ -2095,58 +2056,32 @@ const { entered } = usePageEntered()
   touch-action: none;
   --dim: color-mix(in srgb, var(--ink) 40%, transparent);
 }
-/* The heading's row: the heading, what's active (taking what room is left, on one line, scrolling sideways when it
-   doesn't fit), and the toggle at the end. On phones, what's active goes to a line of its own. */
+/* The heading's row: the title and its star, the data shown (its dataset cut short first when the row's tight; on
+   phones, on a line of its own under the rest), then how to read the page taking what's left, at its end (its words
+   when they fit, else its icon alone; on phones, always its icon alone). */
 .head {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  grid-template-areas: 'title active';
-  align-items: center;
-  gap: 4px 12px;
-  list-style: none;
-  cursor: pointer;
-}
-/* Where yours isn't beside the ladder, the heading sticks to the top while the options are in view, as yours' does:
-   across the panel, over what scrolls under it. */
-@media (max-width: 1099px) {
-  .head {
-    position: sticky;
-    top: var(--bar-h);
-    z-index: 3;
-    margin: calc(-1 * var(--panel-pad)) calc(-1 * var(--panel-pad)) 0;
-    padding: var(--panel-pad);
-    background: var(--panel);
-  }
-  details[open] > .head {
-    border-bottom: 1px solid var(--border);
-  }
-  /* Folded, the heading's padding is the panel's at its foot too, not added to it. */
-  details:not([open]) > .head {
-    margin-bottom: calc(-1 * var(--panel-pad));
-  }
-}
-.head::-webkit-details-marker {
-  display: none;
-}
-/* Its line's items centered on it. */
-.head h1 {
-  grid-area: title;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  gap: 8px 12px;
+}
+.head h1 {
+  display: flex;
+  flex: none;
+  align-items: center;
   margin: 0;
 }
-.active {
-  grid-area: active;
-  min-width: 0;
+@media (max-width: 720px) {
+  .head-help :deep(span) {
+    display: none;
+  }
+  .head-meta {
+    flex-basis: 100%;
+    order: 1;
+  }
 }
-.active .item {
-  flex: none;
-  padding: 1px 6px;
-  font-size: 0.85em;
-  white-space: nowrap;
-  background: var(--panel-alt);
-  border: 1px solid var(--border-strong);
+.head-meta {
+  flex: 0 1 auto;
 }
 /* These sections open and close at once, without the slide and fade collapsible sections have (main.css). Their
    headings take taps as taps: quick ones neither select the text nor zoom. */
@@ -2157,20 +2092,6 @@ const { entered } = usePageEntered()
 .instant > summary {
   touch-action: manipulation;
   user-select: none;
-}
-.fold-body {
-  padding-top: 8px;
-}
-@media (max-width: 720px) {
-  .head {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: 'title' 'active';
-  }
-}
-.controls {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 .find {
   flex: 1 1 14em;
@@ -2918,25 +2839,9 @@ const { entered } = usePageEntered()
 .tag {
   white-space: nowrap;
 }
-/* On phones only: what wider screens show in a tooltip, or beside what it explains. */
-.phone-only,
-.phone-only-block {
-  display: none;
-}
-/* The intro's line: the intro, then the toggle for how to read the page, a link rather than a control; on phones,
-   beside the heading instead. */
-.head .head-help {
-  display: none;
-}
-.lede {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 12px;
-}
-/* How to read the page, in a well between the intro and the controls. */
+/* How to read the page, in a well under the data shown. */
 .help-body {
-  margin: 0 0 12px;
+  margin: 12px 0 0;
   padding: 8px 10px;
 }
 .help-body > :is(.legend, p) {
@@ -2948,12 +2853,9 @@ const { entered } = usePageEntered()
 .help-body .legend dd:last-child {
   margin-bottom: 0;
 }
-/* What the options do, first in the well (on phones, after the intro). */
+/* What the options do, first in the well. */
 .help-intro {
   margin-bottom: 10px;
-}
-.help-intro > p {
-  margin: 0 0 8px;
 }
 .help-options {
   display: grid;
@@ -2977,24 +2879,10 @@ const { entered } = usePageEntered()
   border-top: 1px solid var(--border);
 }
 @media (max-width: 720px) {
-  .phone-only {
-    display: inline;
-  }
-  .phone-only-block {
-    display: block;
-  }
-  .wide-only,
-  .lede {
+  .wide-only {
     display: none;
   }
-  .head .head-help {
-    display: inline-flex;
-  }
-  /* One line, the toggle taking what the rest leaves. */
-  .head h1 {
-    flex-wrap: nowrap;
-  }
-  /* Under the intro and the options. */
+  /* Under the options. */
   .help-body > .legend {
     margin-top: 12px;
   }

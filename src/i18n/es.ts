@@ -642,6 +642,14 @@ export const messages: Record<keyof typeof en, string> = {
   'meta.season': 'Temporada {season}',
   'meta.bo3': 'Bo3',
   'meta.cutoff': '{players} ({cutoff}+)',
+  'meta.data': 'Datos',
+  'meta.dataset': 'Conjunto de datos',
+  'meta.subset': 'Jugadores',
+  'meta.battles': '{n} combates',
+  'meta.regulation': 'Reglamento {reg}',
+  'meta.pick': 'Datos mostrados: {label}',
+  'meta.cutoffsNote':
+    'Equipos ponderados por la puntuación de sus jugadores: cada uno cuenta más los de su corte o más; Todos los jugadores cuenta todos igual.',
   'speed.intro': 'Los Pokémon del Reglamento {reg} por su Velocidad.',
   'speed.formula':
     'La Velocidad es la Velocidad base, más sus puntos de estadística (hasta 32), más 20, por 1,1 o 0,9 si su naturaleza la sube o la baja, redondeando hacia abajo.',
