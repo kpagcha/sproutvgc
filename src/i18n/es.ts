@@ -109,9 +109,31 @@ export const messages: Record<keyof typeof en, string> = {
   'desc.usage': 'Qué Pokémon, movimientos, habilidades y objetos se usan más en {game}, Reglamento {reg}.',
   'desc.reports': 'Resultados y equipos ganadores de los torneos de {game}.',
   'desc.speedTiers':
-    'Todos los Pokémon de {game}, Reglamento {reg}, ordenados por su Velocidad con las distribuciones habituales.',
+    'Escalas de velocidad de {game}, Reglamento {reg}: lista y tabla de velocidades de todos los Pokémon con las Velocidades que se usan, con Espacio Raro, Viento Afín y Pañuelo Elección. Mira a quién superas.',
   'desc.speedCompare':
-    'Dos Pokémon de {game}, Reglamento {reg}, cara a cara: cuál mueve antes, y los puntos para cambiarlo.',
+    'Calculadora de velocidad de {game}, Reglamento {reg}: calcula y compara Velocidades, la tuya contra rivales con los sets que se usan, quién mueve antes y los puntos para superarlos.',
+  'head.speedTiers': 'Escalas de velocidad: lista y tabla de velocidades',
+  'head.speedCompare': 'Calculadora de velocidad: compara velocidades de Pokémon',
+  'head.pokedex': 'Pokédex: todos los Pokémon, sus estadísticas y movimientos',
+  'head.chart': 'Tabla de tipos: efectividad de tipos',
+  'head.matchups': 'Calculadora de tipos: debilidades y cobertura',
+  'head.usage': 'Estadísticas de uso: los Pokémon más usados',
+  'head.quiz': 'Test de tipos: aprende la tabla de tipos',
+  'keywords.home':
+    '{game} dex, VGC, Pokémon competitivo, Pokédex, escalas de velocidad, calculadora de velocidad, tabla de tipos, estadísticas de uso, Reglamento {reg}',
+  'keywords.pokedex':
+    'Pokédex, lista de Pokémon, estadísticas base, habilidades, movimientos, VGC, {game}, Reglamento {reg}',
+  'keywords.chart':
+    'tabla de tipos, efectividad de tipos, debilidades, resistencias, inmunidades, súper eficaz, VGC, {game}',
+  'keywords.matchups':
+    'calculadora de tipos, calculadora de debilidades, enfrentamientos de tipos, cobertura de tipos, tipos dobles, VGC, {game}',
+  'keywords.usage':
+    'estadísticas de uso, Pokémon más usados, uso en VGC, metagame, tier list, {game}, Reglamento {reg}',
+  'keywords.quiz': 'test de tipos, quiz de tipos, aprender la tabla de tipos, efectividad de tipos, {game}',
+  'keywords.speedTiers':
+    'escalas de velocidad, speed tiers, lista de velocidades, tabla de velocidades, calculadora de velocidad, velocidad Pokémon, Espacio Raro, Viento Afín, Pañuelo Elección, VGC, {game}, Reglamento {reg}',
+  'keywords.speedCompare':
+    'calculadora de velocidad, calcular velocidad, comparar velocidades, comparador de velocidad, speed calc, escalas de velocidad, tabla de velocidades, velocidad Pokémon, Espacio Raro, Viento Afín, VGC, {game}, Reglamento {reg}',
   'desc.calc': 'El daño que cualquier Pokémon hace a cualquier otro en {game}, combates dobles incluidos.',
   'desc.teamBuilder': 'Crea equipos de {game}, comprueba sus debilidades y compártelos.',
   'soon.title': 'Próximamente…',

@@ -14,6 +14,10 @@ declare module 'vue-router' {
     titleKey?: MessageKey
     /** The page's meta description, for search results and link previews. */
     descKey?: MessageKey
+    /** The document's title, when it's to say more than the page's own (`titleKey`), with what it's searched for. */
+    headKey?: MessageKey
+    /** The page's meta keywords, comma-separated. */
+    keywordsKey?: MessageKey
     /** The page shows dex entries (`DexRef`), or will when this says so: navigation waits for the current locale's names. */
     dexNames?: boolean | (() => boolean)
     /** The categories whose descriptions the page shows: navigation waits for the current locale's. */
@@ -68,7 +72,7 @@ export const router = createRouter({
       name: 'home',
       component: () => import('@/views/HomeView.vue'),
       // Its favorites and recently viewed show dex entries.
-      meta: { descKey: 'desc.home', dexNames: () => hasFavorites() || hasRecent() },
+      meta: { descKey: 'desc.home', keywordsKey: 'keywords.home', dexNames: () => hasFavorites() || hasRecent() },
     },
 
     // The dex: what exists in the regulation.
@@ -90,7 +94,13 @@ export const router = createRouter({
       path: '/dex/types/chart',
       name: 'chart',
       component: () => import('@/views/TypeChartView.vue'),
-      meta: { titleKey: 'title.chart', descKey: 'desc.chart', ...inArea('dex', 'chart') },
+      meta: {
+        titleKey: 'title.chart',
+        descKey: 'desc.chart',
+        headKey: 'head.chart',
+        keywordsKey: 'keywords.chart',
+        ...inArea('dex', 'chart'),
+      },
     },
     {
       path: '/dex/abilities',
@@ -121,7 +131,14 @@ export const router = createRouter({
       path: '/dex/pokemon',
       name: 'pokedex',
       component: () => import('@/views/PokedexView.vue'),
-      meta: { titleKey: 'title.pokemon', descKey: 'desc.pokedex', dexNames: true, ...inArea('dex', 'pokemon') },
+      meta: {
+        titleKey: 'title.pokemon',
+        descKey: 'desc.pokedex',
+        headKey: 'head.pokedex',
+        keywordsKey: 'keywords.pokedex',
+        dexNames: true,
+        ...inArea('dex', 'pokemon'),
+      },
     },
     {
       path: '/dex/pokemon/:id',
@@ -217,6 +234,8 @@ export const router = createRouter({
       meta: {
         titleKey: 'title.usage',
         descKey: 'desc.usage',
+        headKey: 'head.usage',
+        keywordsKey: 'keywords.usage',
         dexNames: true,
         recent: once('usage'),
         ...inArea('competitive', 'usage'),
@@ -230,6 +249,8 @@ export const router = createRouter({
       meta: {
         titleKey: 'title.speedTiers',
         descKey: 'desc.speedTiers',
+        headKey: 'head.speedTiers',
+        keywordsKey: 'keywords.speedTiers',
         dexNames: true,
         keepScroll: true,
         recent: once('speedTiers'),
@@ -246,6 +267,8 @@ export const router = createRouter({
       meta: {
         titleKey: 'title.speedCompare',
         descKey: 'desc.speedCompare',
+        headKey: 'head.speedCompare',
+        keywordsKey: 'keywords.speedCompare',
         dexNames: true,
         // Yours against the opponents: one per matchup (the two, or the four), once each team has one. The speed order:
         // one, whatever its list, once there's one in it.
@@ -282,6 +305,8 @@ export const router = createRouter({
       meta: {
         titleKey: 'title.matchups',
         descKey: 'desc.matchups',
+        headKey: 'head.matchups',
+        keywordsKey: 'keywords.matchups',
         dexNames: true,
         recent: once('matchups'),
         ...inArea('tools', 'matchups'),
@@ -295,6 +320,8 @@ export const router = createRouter({
       meta: {
         titleKey: 'title.matchups',
         descKey: 'desc.matchups',
+        headKey: 'head.matchups',
+        keywordsKey: 'keywords.matchups',
         dexNames: true,
         recent: once('matchups'),
         ...inArea('tools', 'matchups'),
@@ -304,7 +331,13 @@ export const router = createRouter({
       path: '/tools/quiz',
       name: 'quiz',
       component: () => import('@/views/TypeQuizView.vue'),
-      meta: { titleKey: 'title.quiz', descKey: 'desc.quiz', ...inArea('tools', 'quiz') },
+      meta: {
+        titleKey: 'title.quiz',
+        descKey: 'desc.quiz',
+        headKey: 'head.quiz',
+        keywordsKey: 'keywords.quiz',
+        ...inArea('tools', 'quiz'),
+      },
     },
 
     {
@@ -335,6 +368,14 @@ export const router = createRouter({
     return savedPosition ?? { top: 0 }
   },
 })
+
+// The build's pages for search engines are folders (`scripts/seoPages.ts`), which GitHub Pages opens with a trailing
+// slash: the app's own URLs have none.
+router.beforeEach((to) =>
+  to.path.length > 1 && to.path.endsWith('/')
+    ? { path: to.path.replace(/\/+$/, ''), query: to.query, hash: to.hash, replace: true }
+    : undefined,
+)
 
 // Pages whose view is in their URL go among the recently viewed as they're opened, each change to the view (a
 // `router.replace`) keeping the visit where it's left.

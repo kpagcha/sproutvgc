@@ -106,9 +106,30 @@ export const messages = {
   'title.teamBuilder': 'Team builder',
   'desc.usage': 'Which Pokémon, moves, abilities and items are used most in {game}, Regulation {reg}.',
   'desc.reports': 'Results and winning teams from {game} tournaments.',
-  'desc.speedTiers': 'Every Pokémon in {game}, Regulation {reg}, ordered by its Speed at the common spreads.',
+  'desc.speedTiers':
+    '{game} speed tiers for Regulation {reg}: a speed list and speed chart of every Pokémon at the Speeds players run, with Trick Room, Tailwind and Choice Scarf. See what yours outspeeds.',
   'desc.speedCompare':
-    'Two Pokémon of {game}, Regulation {reg}, side by side: which moves first, and the points to change it.',
+    '{game} speed calculator for Regulation {reg}: calculate and compare Speeds, yours against opponents at the sets players run, who moves first and the points to outspeed.',
+  'head.speedTiers': 'Speed tiers: speed list and speed chart',
+  'head.speedCompare': 'Speed calculator: compare Pokémon speeds',
+  'head.pokedex': 'Pokédex: every Pokémon, its stats and moves',
+  'head.chart': 'Type chart: type effectiveness',
+  'head.matchups': 'Type calculator: weaknesses and coverage',
+  'head.usage': 'Usage stats: the most used Pokémon',
+  'head.quiz': 'Type quiz: learn the type chart',
+  'keywords.home':
+    '{game} dex, VGC, competitive Pokémon, Pokédex, speed tiers, speed calculator, type chart, usage stats, Regulation {reg}',
+  'keywords.pokedex':
+    'Pokédex, Pokémon list, base stats, abilities, movesets, learnsets, VGC, {game}, Regulation {reg}',
+  'keywords.chart': 'type chart, type effectiveness, weaknesses, resistances, immunities, super effective, VGC, {game}',
+  'keywords.matchups':
+    'type calculator, weakness calculator, type matchups, type coverage, coverage calculator, dual types, VGC, {game}',
+  'keywords.usage': 'usage stats, most used Pokémon, VGC usage, metagame, tier list, {game}, Regulation {reg}',
+  'keywords.quiz': 'type quiz, type chart quiz, learn type matchups, type effectiveness quiz, {game}',
+  'keywords.speedTiers':
+    'speed tiers, speed tier list, speed list, speed chart, speed calculator, Pokémon speed, outspeed, Trick Room, Tailwind, Choice Scarf, VGC, {game}, Regulation {reg}',
+  'keywords.speedCompare':
+    'speed calculator, calculate speed, speed calc, compare speeds, speed comparison, outspeed, speed tiers, speed chart, Pokémon speed, Trick Room, Tailwind, VGC, {game}, Regulation {reg}',
   'desc.calc': 'The damage any Pokémon deals to any other in {game}, doubles included.',
   'desc.teamBuilder': 'Build {game} teams, check their weaknesses and share them.',
   'soon.title': 'Coming soon…',

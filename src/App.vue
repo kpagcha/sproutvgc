@@ -29,6 +29,18 @@ function setMeta(selector: string, content: string) {
   document.head.querySelector(selector)?.setAttribute('content', content)
 }
 
+/** The page's meta keywords: added while it has some, removed when it has none. */
+function setKeywords(content: string | null) {
+  let el = document.head.querySelector<HTMLMetaElement>('meta[name="keywords"]')
+  if (!content) return el?.remove()
+  if (!el) {
+    el = document.createElement('meta')
+    el.name = 'keywords'
+    document.head.append(el)
+  }
+  el.content = content
+}
+
 /** The entry pages of generated categories, by route name, and the meta description of each. */
 const ENTRY_PAGES: Partial<Record<string, { kind: GeneratedKind; desc: MessageKey }>> = {
   ability: { kind: 'ability', desc: 'desc.ability' },
@@ -49,7 +61,7 @@ watchEffect(() => {
     : route.name === 'condition'
       ? refName({ kind: 'condition', id } as Ref)
       : undefined
-  const key = route.meta.titleKey
+  const key = route.meta.headKey ?? route.meta.titleKey
   const name = key ? t(key) : null
   const lead = type ? typeName(type) : entry
   const title = name ? `${lead ? `${lead} · ` : ''}${name} · ${GAME_NAME} · sproutvgc` : `sproutvgc · ${GAME_NAME} dex`
@@ -61,6 +73,7 @@ watchEffect(() => {
       : t(route.meta.descKey ?? 'desc.home', params)
   document.title = title
   setMeta('meta[name="description"]', desc)
+  setKeywords(route.meta.keywordsKey ? t(route.meta.keywordsKey, params) : null)
   setMeta('meta[property="og:title"]', title)
   setMeta('meta[property="og:description"]', desc)
 })
