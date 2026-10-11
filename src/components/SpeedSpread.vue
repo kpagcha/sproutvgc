@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref, useTemplateRef } from 'vue'
 import { percent } from '@/data/meta'
 import { t } from '@/i18n'
 import type { NatureEffect } from '@/lib/stats'
 import { odds, type SpreadPoint } from '@/lib/speedLineup'
+import { toTopOf } from '@/lib/scroll'
 import EffectTag from '@/components/EffectTag'
 
 // One of the comparison's Pokémon at its sets, against another: every Speed its sets reach, in the order they move,
@@ -12,7 +13,8 @@ import EffectTag from '@/components/EffectTag'
 // share of the other's sets it moves first against. A row tapped (`pickable`) sets the Pokémon to its most common
 // build there. In a side's panel, and on phones under the two, where its heading is a band of its side's color
 // (`banded`). Folded, as it starts, its most common Speeds alone (`FOLDED`), the most common first, and a button
-// showing them all, in the order they move with the other among them, and folding them back.
+// showing them all, in the order they move with the other among them, and folding them back (the page going to the
+// top of its panel).
 const props = defineProps<{
   title: string
   spread: readonly SpreadPoint[]
@@ -38,6 +40,14 @@ const otherAt = computed(() => (props.other && !props.other.sets ? props.other.s
 /** The most common Speeds shown folded. */
 const FOLDED = 3
 const all = ref(false)
+// Folded back, the page goes to the top of the panel it's in, its band in view, as what was below the fold is gone.
+const root = useTemplateRef<HTMLElement>('root')
+async function toggleAll() {
+  all.value = !all.value
+  if (all.value) return
+  await nextTick()
+  toTopOf(root.value?.closest('.panel, .card'))
+}
 const foldable = computed(() => props.spread.length > FOLDED)
 type Row = { other: true; speed: number } | ({ other?: false } & SpreadPoint)
 const rows = computed((): Row[] => {
@@ -60,7 +70,7 @@ const topBuild = (s: SpreadPoint) => s.builds.reduce((a, b) => (b.share > a.shar
 </script>
 
 <template>
-  <div class="spread-part" :class="tone">
+  <div ref="root" class="spread-part" :class="tone">
     <strong class="small title" :class="{ band: banded }">{{ title }}</strong>
     <div class="spread small" :class="{ padded: banded }" role="table">
       <template v-for="r in rows" :key="r.other ? 'other' : r.speed">
@@ -92,7 +102,7 @@ const topBuild = (s: SpreadPoint) => s.builds.reduce((a, b) => (b.share > a.shar
         </component>
       </template>
     </div>
-    <button v-if="foldable" type="button" class="btn quiet more small" :class="{ padded: banded }" @click="all = !all">
+    <button v-if="foldable" type="button" class="btn quiet more small" :class="{ padded: banded }" @click="toggleAll">
       {{ all ? t('compare.showFewerSets') : t('compare.showAllSets', { n: spread.length }) }}
     </button>
   </div>

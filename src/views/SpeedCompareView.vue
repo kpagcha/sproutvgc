@@ -731,9 +731,9 @@ function resetAll() {
       </div>
 
       <!-- On phones, the two side by side as tabs, each with its Pokémon in short, stuck to the top while the page
-           scrolls: tapping one opens its panel under them, tapping it again folds it. Who moves first is
-           marked on the verdict and the open panel, not on them. -->
-      <div v-if="phone" class="side-tabs">
+           scrolls (what the page scrolls to going under them): tapping one opens its panel under them, tapping it
+           again folds it. Who moves first is marked on the verdict and the open panel, not on them. -->
+      <div v-if="phone" class="side-tabs" data-top-bar>
         <button
           v-for="side in sides"
           :key="side.s"

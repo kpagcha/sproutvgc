@@ -4,7 +4,7 @@ import type { PokemonId } from '@/data/dex'
 import { percent } from '@/data/meta'
 import { t } from '@/i18n'
 import { toMoveFirst } from '@/lib/speedBuild'
-import { movesBefore, odds, toBeatAll } from '@/lib/speedLineup'
+import { movesBefore, odds } from '@/lib/speedLineup'
 import PokemonIcon from '@/components/PokemonIcon'
 import SpeedAgainst from '@/components/SpeedAgainst.vue'
 import SpeedShare from '@/components/SpeedShare.vue'
@@ -14,8 +14,9 @@ import SpeedVersus, { type VersusMon } from '@/components/SpeedVersus.vue'
 // saying which moves first (and by how much Speed), with how many your side wins in all; a cell tapped, the two alone
 // (`pair`): which moves first, and what each takes to move before the other. Against two opponents, what each of yours
 // takes to move before both: before the one that moves first of them. One at its sets is at every one of them: a cell
-// says the share of their matchups yours moves first in, colored by who moves first in most, and to move before both
-// is to move before every one of its sets.
+// says the share of their matchups yours moves first in, colored by who moves first in most; and to move before both,
+// each opponent has its own, as the two alone do: before its most common Speed and before every one of its sets (or,
+// at one build, before its Speed).
 interface Mon extends VersusMon {
   key: string
   id: PokemonId
@@ -78,14 +79,14 @@ const picked = computed(() => {
 const isPicked = (y: Mon, o: Mon) => picked.value?.y === y && picked.value.o === o
 const tap = (y: Mon, o: Mon) => emit('pair', isPicked(y, o) ? null : [y.key, o.key])
 
-/** The Speed to move before to move before an opponent: at its sets, every one of them. */
-const target = (o: Mon) => (o.sets ? toBeatAll(o.spread, props.trickRoom) : o.speed)
-/** Of the opponents, the one to beat to move before both: the one that moves first, and the Speed to beat. */
-const toBeat = computed(() => {
-  if (props.opponents.length < 2) return null
-  const o = props.opponents.reduce((a, b) => (movesBefore(target(b), target(a), props.trickRoom) > 0 ? b : a))
-  return { name: o.name, speed: target(o) }
-})
+/** Against two opponents at one build each, the one to beat to move before both: the one that moves first. */
+const toBeat = computed(() =>
+  props.opponents.length < 2
+    ? null
+    : props.opponents.reduce((a, b) => (movesBefore(b.speed, a.speed, props.trickRoom) > 0 ? b : a)),
+)
+/** Either opponent at its sets: each has its own. */
+const bySets = computed(() => props.opponents.some((o) => o.sets))
 const against = (me: Mon, speed: number) => toMoveFirst(me.id, me.build, speed, props.trickRoom)
 </script>
 
@@ -160,7 +161,18 @@ const against = (me: Mon, speed: number) => toMoveFirst(me.id, me.build, speed, 
   <!-- Against two opponents, what each of yours takes to move before both. -->
   <section v-if="toBeat" class="panel both">
     <h2 class="heading">{{ t('compare.both') }}</h2>
-    <div class="cards">
+    <!-- Either at its sets: a card per one of yours, its name on its band, with what it takes against each. -->
+    <div v-if="bySets" class="cards">
+      <section v-for="y in yours" :key="y.key" class="card yours">
+        <strong class="small band">{{ y.name }}</strong>
+        <div class="per-opponent">
+          <div v-for="o in opponents" :key="o.key" class="against">
+            <SpeedVersus :me="y" :them="o" tone="yours" :trick-room="trickRoom" />
+          </div>
+        </div>
+      </section>
+    </div>
+    <div v-else class="cards">
       <section v-for="y in yours" :key="y.key" class="card yours">
         <SpeedAgainst
           :title="t('compare.bothOf', { name: y.name, other: toBeat.name, speed: toBeat.speed })"
@@ -292,6 +304,28 @@ const against = (me: Mon, speed: number) => toMoveFirst(me.id, me.build, speed, 
 .verdict.tie {
   outline: 3px solid var(--muted);
   outline-offset: 2px;
+}
+/* Against each opponent, one under the other in its card, a line between them. */
+.band {
+  display: block;
+  padding: 6px 8px;
+  line-height: 1.3;
+  color: var(--side-text);
+  background: var(--side);
+  border-bottom: 2px solid var(--ink);
+}
+.per-opponent {
+  padding: 6px 8px;
+}
+.against {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.against + .against {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 2px solid var(--border);
 }
 /* What each takes, side by side, under a band of its team's color. */
 .cards {
