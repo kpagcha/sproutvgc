@@ -815,7 +815,6 @@ export const messages = {
   'compare.common': 'Common builds',
   'compare.first': '{name} moves first',
   'compare.tie': 'Speed tie: either moves first, at random',
-  'compare.empty': 'Pick your Pokémon and an opponent, up to two a side, to see who moves first.',
   'compare.swap': 'Swap',
   'compare.clearTeams': 'Clear teams',
   'compare.clearList': 'Clear list',

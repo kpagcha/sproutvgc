@@ -75,6 +75,7 @@ import EffectTag from '@/components/EffectTag'
 import ModalDialog from '@/components/ModalDialog.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
+import FolderTabs from '@/components/FolderTabs.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import SpeedKeptMenu from '@/components/SpeedKeptMenu.vue'
 import TypeIcon from '@/components/TypeIcon'
@@ -1348,20 +1349,16 @@ const { entered } = usePageEntered()
         </section>
         <!-- Which Pokémon the ladder shows: folder tabs standing on its panel's top edge, the one shown joined to the
              toolbar under it. -->
-        <div v-if="metaAvailable" class="view-tabs" role="radiogroup" :aria-label="t('speed.show')">
-          <button
-            v-for="v in ['meta', 'all'] as const"
-            :key="v"
-            type="button"
-            role="radio"
-            class="view-tab"
-            :class="{ on: (v === 'all') === showAll }"
-            :aria-checked="(v === 'all') === showAll"
-            @click="set('all', v === 'all' ? '1' : undefined)"
-          >
-            {{ v === 'all' ? t('speed.all') : t('speed.meta', { n: TOP }) }}
-          </button>
-        </div>
+        <FolderTabs
+          v-if="metaAvailable"
+          :model-value="showAll ? 'all' : 'meta'"
+          :label="t('speed.show')"
+          :options="[
+            { value: 'meta', label: t('speed.meta', { n: TOP }) },
+            { value: 'all', label: t('speed.all') },
+          ]"
+          @update:model-value="(v: string) => set('all', v === 'all' ? '1' : undefined)"
+        />
         <div ref="listPanel" class="panel banded soft list">
           <!-- The ladder's toolbar, a band under the tabs: how it's shown on a line (what each option does in a tooltip,
                the boosts', or in how to read the page; the benchmark with every Pokémon; the modifiers for everyone
@@ -2114,42 +2111,6 @@ const { entered } = usePageEntered()
 .find :deep(.search-box) {
   max-width: none;
 }
-/* Which Pokémon are shown: folder tabs on the page, standing on the panel's top edge. The one shown is in the
-   toolbar's color, outlined as the panel is, and covers the panel's border under it, so it and the toolbar are one
-   shape; the other is plain text on the page. */
-.view-tabs {
-  display: flex;
-  gap: 4px;
-  padding-inline: 8px;
-}
-.view-tab {
-  position: relative;
-  z-index: 1;
-  margin-bottom: -2px;
-  padding: 6px 14px 8px;
-  font: inherit;
-  font-weight: bold;
-  color: var(--muted);
-  background: none;
-  border: 2px solid transparent;
-  border-bottom: none;
-  cursor: pointer;
-}
-.view-tab:hover {
-  color: var(--text);
-}
-.view-tab.on {
-  color: var(--text);
-  background: var(--toolbar);
-  border-color: var(--ink);
-}
-/* On phones, the tabs share the width. */
-@media (max-width: 720px) {
-  .view-tab {
-    flex: 1;
-    padding-inline: 8px;
-  }
-}
 /* The toolbar's first line: the switches (buttons holding their checkbox) and the modifiers' disclosure, compact,
    wrapping where they don't fit, the reset at the line's end; the modifiers, opened, under it. Over the find. */
 .find-row > :is(.options-line, .all-mods) {
@@ -2238,6 +2199,7 @@ const { entered } = usePageEntered()
 /* The toolbar's color (the find's band and the tab shown): the panel's own, darker, rather than the accent's tint. */
 .main-col {
   --toolbar: color-mix(in srgb, var(--ink) 25%, var(--panel));
+  --tab-bg: var(--toolbar);
 }
 /* The opponents band: red, on top of the panel. Beats retro.css's bands. */
 :root:root .list.banded > .band.opponents-head {

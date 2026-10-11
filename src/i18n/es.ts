@@ -826,7 +826,6 @@ export const messages: Record<keyof typeof en, string> = {
   'compare.common': 'Distribuciones habituales',
   'compare.first': '{name} mueve antes',
   'compare.tie': 'Empate de velocidad: cualquiera mueve antes, al azar',
-  'compare.empty': 'Elige tu Pokémon y un rival, hasta dos por lado, para ver quién mueve antes.',
   'compare.swap': 'Intercambiar',
   'compare.clearTeams': 'Vaciar equipos',
   'compare.clearList': 'Vaciar lista',

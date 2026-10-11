@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeftRight, ChevronDown, Plus, RotateCcw, Trash2 } from '@lucide/vue'
 import { pokemon, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
-import { currentSnapshots, distinctLabel, has, usageRanks } from '@/data/meta'
+import { has, usageRanks } from '@/data/meta'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { commonBuilds as common, speedBuilds, speedStat } from '@/lib/speed'
@@ -18,7 +18,8 @@ import { useMeta } from '@/composables/useMeta'
 import { useOpenState } from '@/composables/useOpenState'
 import AppLink from '@/components/AppLink'
 import BuildSummary from '@/components/BuildSummary.vue'
-import MetaPicker from '@/components/MetaPicker.vue'
+import MetaDialog from '@/components/MetaDialog.vue'
+import FolderTabs from '@/components/FolderTabs.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import PokemonPicker from '@/components/PokemonPicker.vue'
 import SetupStar from '@/components/SetupStar.vue'
@@ -28,8 +29,6 @@ import SpeedEditor from '@/components/SpeedEditor.vue'
 import SpeedLineup, { type LineupEntry } from '@/components/SpeedLineup.vue'
 import SpeedMatchups from '@/components/SpeedMatchups.vue'
 import HelpToggle from '@/components/HelpToggle.vue'
-import ScrollRow from '@/components/ScrollRow.vue'
-import SegmentedControl from '@/components/SegmentedControl.vue'
 
 // Pokémon's Speeds compared, each with a build of its own (its nature's effect, its stat points, its modifiers), in
 // one of two views (`mode`). Yours against opponents (the default): up to two a side, yours `a` and `a2`, the
@@ -375,30 +374,8 @@ watch(ladderOpen, (on) => {
 })
 onUnmounted(() => (ladderOpen.value = false))
 
-// The top panel folds away as the speed tiers' does (open at first, then as the reader last left it; on phones folded
-// on each visit), what's set then said in short beside the heading. How to read the page in a section of its own,
-// closed unless opened (remembered).
-const isOpen = (e: Event) => (e.target as HTMLDetailsElement).open
-const { open: controlsOpen, toggle: toggleControls } = useOpenState('sproutvgc.compare.controlsOpen', true)
-if (window.matchMedia('(max-width: 720px)').matches) controlsOpen.value = false
+// How to read the page, in a section closed unless opened (remembered), toggled from the heading's row.
 const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.compare.helpOpen', false)
-// On phones, how to read the page is toggled from beside its heading, the controls folded or not: opening it opens
-// them, which hold it.
-function helpFromHead() {
-  if (controlsOpen.value && helpOpen.value) return toggleHelp()
-  controlsOpen.value = true
-  if (!helpOpen.value) toggleHelp()
-}
-// In two kinds, as the speed tiers': the options on first, then what's shown (the view, the data).
-const active = computed(() => {
-  const list: { label: string; kind: 'view' | 'option' }[] = []
-  if (trickRoom.value) list.push({ label: t('speed.mod.trickroom'), kind: 'option' })
-  // The view always, as the speed tiers' (yours against opponents, or the speed order).
-  list.push({ label: t(`compare.mode.${mode.value}`), kind: 'view' })
-  if (snapshot.value && metaSpeeds.value && currentSnapshots().length > 1)
-    list.push({ label: distinctLabel(snapshot.value), kind: 'view' })
-  return list
-})
 const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 // Everything back as the page comes with nothing set, as the speed tiers' Reset all: its whole URL cleared (the
 // Pokémon, their builds, the view, Trick Room).
@@ -417,148 +394,125 @@ function resetAll() {
         <RotateCcw :size="16" aria-hidden="true" />{{ t('speed.resetAll') }}
       </button>
     </Teleport>
-    <!-- The heading, the intro and how to read the page, and what applies to every one (the view, the snapshot the
-         common builds come from, Trick Room): a panel folding away as the speed tiers' top one does, what's set said
-         in short beside the heading while folded. Its heading opens and closes it itself, so the arrow and what's said
-         change at once. -->
-    <details class="panel instant top" :open="controlsOpen" @toggle="controlsOpen = isOpen($event)">
-      <summary class="head" @click.prevent="toggleControls">
-        <!-- Its star saves the Pokémon and their builds to the favorites. -->
-        <h1>
-          <span
-            ><span class="marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
-            >{{ t('title.speedCompare') }}</span
-          ><SetupStar /><HelpToggle
-            class="head-help"
-            :open="helpOpen && controlsOpen"
-            controls="compare-help"
-            fit
-            @toggle="helpFromHead"
-          />
-        </h1>
-        <!-- On one line, scrolling sideways when it doesn't fit. -->
-        <ScrollRow v-if="!controlsOpen && active.length" class="active" role="list" :aria-label="t('speed.active')">
-          <span v-for="a in active" :key="a.label" role="listitem" class="item" :class="a.kind">{{ a.label }}</span>
-        </ScrollRow>
-      </summary>
-      <div class="fold-body">
-        <!-- The intro, and how to read the page: a link-like toggle beside it. -->
-        <p class="lede">
-          <span class="muted wide-only">{{ t(mode === 'order' ? 'compare.introOrder' : 'compare.intro') }}</span>
-          <HelpToggle :open="helpOpen" controls="compare-help" @toggle="toggleHelp" />
-        </p>
-        <!-- How to read it: the formula and what each part says; on phones, the intro too. -->
-        <div v-if="helpOpen" id="compare-help" class="help-body panel sunken small">
-          <p class="muted phone-only-block">{{ t(mode === 'order' ? 'compare.introOrder' : 'compare.intro') }}</p>
-          <p class="formula muted">{{ t('speed.formula') }}</p>
-          <!-- What the view shown has: yours against opponents, or the speed order. -->
-          <dl class="help-options">
-            <dt>{{ t('compare.mode') }}</dt>
-            <dd class="muted">{{ t('compare.helpMode') }}</dd>
-            <template v-if="mode === 'vs'">
-              <dt>{{ t('compare.helpTeamsLabel') }}</dt>
-              <dd class="muted">{{ t('compare.helpTeams') }}</dd>
-            </template>
-            <template v-else>
-              <dt>{{ t('compare.helpListLabel') }}</dt>
-              <dd class="muted">{{ t('compare.helpList') }}</dd>
-            </template>
-            <dt>{{ t('compare.helpPlacesLabel') }}</dt>
-            <dd class="muted">{{ t('compare.helpPlaces') }}</dd>
-            <dt>{{ t('compare.common') }}</dt>
-            <dd class="muted">{{ t('compare.helpCommon') }}</dd>
-            <template v-if="mode === 'vs'">
-              <dt>{{ t('compare.helpAgainstLabel') }}</dt>
-              <dd class="muted">{{ t('compare.helpAgainst') }}</dd>
-              <dt>{{ t('compare.matchups') }}</dt>
-              <dd class="muted">{{ t('compare.helpMatchups') }}</dd>
-              <dt>{{ t('compare.both') }}</dt>
-              <dd class="muted">{{ t('compare.helpBoth') }}</dd>
-              <dt>{{ t('compare.toLadder') }}</dt>
-              <dd class="muted">{{ t('compare.helpLadder') }}</dd>
-            </template>
-            <template v-else>
-              <dt>{{ t('compare.ties') }}</dt>
-              <dd class="muted">{{ t('compare.tiesNote') }}</dd>
-            </template>
-            <dt>{{ t('speed.mod.trickroom') }}</dt>
-            <dd class="muted">{{ t('compare.trickroomTip') }}</dd>
-          </dl>
-        </div>
-        <div class="controls">
-          <SegmentedControl
-            :model-value="mode"
-            :label="t('compare.mode')"
-            :options="MODES.map((m) => ({ value: m, label: t(`compare.mode.${m}`) }))"
-            @update:model-value="(m: Mode) => setMode(m)"
-          />
-          <MetaPicker v-if="metaSpeeds" />
-        </div>
+    <!-- The heading: the title and its star (saving the Pokémon and their builds to the favorites), the data the
+         common builds come from (a button opening what it is, to pick another; on phones, on a line of its own under
+         them), and how to read the page at the row's end (its icon alone on phones); under it, how to read the page,
+         opened: the formula and what each part says. -->
+    <section class="panel page-head">
+      <div class="head">
+        <h1>{{ t('title.speedCompare') }}<SetupStar /></h1>
+        <MetaDialog v-if="metaSpeeds" class="head-meta" />
+        <HelpToggle class="head-help" :open="helpOpen" controls="compare-help" fit @toggle="toggleHelp" />
       </div>
-    </details>
+      <div v-if="helpOpen" id="compare-help" class="help-body panel sunken small">
+        <p class="formula muted">{{ t('speed.formula') }}</p>
+        <!-- What the view shown has: yours against opponents, or the speed order. -->
+        <dl class="help-options">
+          <dt>{{ t('compare.mode') }}</dt>
+          <dd class="muted">{{ t('compare.helpMode') }}</dd>
+          <template v-if="mode === 'vs'">
+            <dt>{{ t('compare.helpTeamsLabel') }}</dt>
+            <dd class="muted">{{ t('compare.helpTeams') }}</dd>
+          </template>
+          <template v-else>
+            <dt>{{ t('compare.helpListLabel') }}</dt>
+            <dd class="muted">{{ t('compare.helpList') }}</dd>
+          </template>
+          <dt>{{ t('compare.helpPlacesLabel') }}</dt>
+          <dd class="muted">{{ t('compare.helpPlaces') }}</dd>
+          <dt>{{ t('compare.common') }}</dt>
+          <dd class="muted">{{ t('compare.helpCommon') }}</dd>
+          <template v-if="mode === 'vs'">
+            <dt>{{ t('compare.helpAgainstLabel') }}</dt>
+            <dd class="muted">{{ t('compare.helpAgainst') }}</dd>
+            <dt>{{ t('compare.matchups') }}</dt>
+            <dd class="muted">{{ t('compare.helpMatchups') }}</dd>
+            <dt>{{ t('compare.both') }}</dt>
+            <dd class="muted">{{ t('compare.helpBoth') }}</dd>
+            <dt>{{ t('compare.toLadder') }}</dt>
+            <dd class="muted">{{ t('compare.helpLadder') }}</dd>
+          </template>
+          <template v-else>
+            <dt>{{ t('compare.ties') }}</dt>
+            <dd class="muted">{{ t('compare.tiesNote') }}</dd>
+          </template>
+          <dt>{{ t('speed.mod.trickroom') }}</dt>
+          <dd class="muted">{{ t('compare.trickroomTip') }}</dd>
+        </dl>
+      </div>
+    </section>
 
-    <!-- Yours against the opponents: swap the teams (once there's one to swap), or see the two first on the speed
-         tiers. There from the start, so nothing under it moves on the first pick. -->
-    <div v-if="mode === 'vs'" class="panel actions">
-      <button type="button" class="btn" :disabled="!anyPicked" @click="swap">
-        <ArrowLeftRight :size="16" aria-hidden="true" />{{ t('compare.swap') }}
+    <!-- The view: folder tabs on the toolbar under them, the one shown joined to it. -->
+    <FolderTabs
+      :model-value="mode"
+      :label="t('compare.mode')"
+      :options="MODES.map((m) => ({ value: m, label: t(`compare.mode.${m}`) }))"
+      @update:model-value="(m: Mode) => setMode(m)"
+    />
+    <!-- What applies to every one shown: Trick Room, turning over everything under it; yours against the opponents,
+         once there's one picked, swapping the teams and seeing the two first on the speed tiers; and at the row's end,
+         clearing them (the teams, or the list in speed order). There from the start, so nothing under it moves on the
+         first pick. -->
+    <div class="panel toolbar">
+      <label v-tip="canHover && t('compare.trickroomTip')" class="btn switch tr-switch" :class="{ on: trickRoom }">
+        <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
+        {{ t('speed.mod.trickroom') }}
+      </label>
+      <template v-if="mode === 'vs' && anyPicked">
+        <button type="button" class="btn" @click="swap">
+          <ArrowLeftRight :size="16" aria-hidden="true" />{{ t('compare.swap') }}
+        </button>
+        <AppLink v-if="!ladderChoices.length" :to="ladderLink" class="btn">{{ t('compare.toLadder') }}</AppLink>
+        <!-- With a second on either team: which of yours goes there as yours, which opponent it finds. -->
+        <div v-else ref="ladderMenu" class="ladder-menu">
+          <button type="button" class="btn" :aria-expanded="ladderOpen" @click="ladderOpen = !ladderOpen">
+            {{ t('compare.toLadder')
+            }}<ChevronDown :size="16" class="fold-chevron" :class="{ open: ladderOpen }" aria-hidden="true" />
+          </button>
+          <div v-if="ladderOpen" class="ladder-pop panel">
+            <div
+              v-for="c in ladderChoices"
+              :key="c.side"
+              class="ladder-row"
+              role="radiogroup"
+              :aria-label="t(c.side === 'a' ? 'compare.ladderYours' : 'compare.ladderFind')"
+            >
+              <span class="muted small">{{ t(c.side === 'a' ? 'compare.ladderYours' : 'compare.ladderFind') }}</span>
+              <span class="ladder-picks">
+                <button
+                  v-for="sl in c.slots"
+                  :key="sl"
+                  type="button"
+                  role="radio"
+                  class="btn ladder-pick"
+                  :class="[teamOf(sl), { on: (c.side === 'a' ? ladderMine : ladderFind) === sl }]"
+                  :aria-checked="(c.side === 'a' ? ladderMine : ladderFind) === sl"
+                  @click="c.side === 'a' ? (ladderMine = sl) : (ladderFind = sl)"
+                >
+                  <PokemonIcon :id="idOf(sl)!" />{{ refName(pokemon(idOf(sl)!)) }}
+                </button>
+              </span>
+            </div>
+            <AppLink :to="ladderLink" class="btn primary ladder-go">{{ t('compare.toLadder') }}</AppLink>
+          </div>
+        </div>
+      </template>
+      <button
+        v-if="mode === 'order'"
+        type="button"
+        class="btn inverted clear-all"
+        :disabled="!list.length"
+        @click="clearList"
+      >
+        <Trash2 :size="16" aria-hidden="true" />{{ t('compare.clearList') }}
       </button>
-      <!-- At the row's end, apart from the rest. -->
-      <button v-if="!phone" type="button" class="btn inverted clear-all" :disabled="!anyPicked" @click="clearTeams">
+      <button v-else type="button" class="btn inverted clear-all" :disabled="!anyPicked" @click="clearTeams">
         <Trash2 :size="16" aria-hidden="true" />{{ t('compare.clearTeams') }}
       </button>
-      <AppLink v-if="!ladderChoices.length" :to="ladderLink" class="btn">{{ t('compare.toLadder') }}</AppLink>
-      <!-- With a second on either team: which of yours goes there as yours, which opponent it finds. -->
-      <div v-else ref="ladderMenu" class="ladder-menu">
-        <button type="button" class="btn" :aria-expanded="ladderOpen" @click="ladderOpen = !ladderOpen">
-          {{ t('compare.toLadder')
-          }}<ChevronDown :size="16" class="fold-chevron" :class="{ open: ladderOpen }" aria-hidden="true" />
-        </button>
-        <div v-if="ladderOpen" class="ladder-pop panel">
-          <div
-            v-for="c in ladderChoices"
-            :key="c.side"
-            class="ladder-row"
-            role="radiogroup"
-            :aria-label="t(c.side === 'a' ? 'compare.ladderYours' : 'compare.ladderFind')"
-          >
-            <span class="muted small">{{ t(c.side === 'a' ? 'compare.ladderYours' : 'compare.ladderFind') }}</span>
-            <span class="ladder-picks">
-              <button
-                v-for="sl in c.slots"
-                :key="sl"
-                type="button"
-                role="radio"
-                class="btn ladder-pick"
-                :class="[teamOf(sl), { on: (c.side === 'a' ? ladderMine : ladderFind) === sl }]"
-                :aria-checked="(c.side === 'a' ? ladderMine : ladderFind) === sl"
-                @click="c.side === 'a' ? (ladderMine = sl) : (ladderFind = sl)"
-              >
-                <PokemonIcon :id="idOf(sl)!" />{{ refName(pokemon(idOf(sl)!)) }}
-              </button>
-            </span>
-          </div>
-          <AppLink :to="ladderLink" class="btn primary ladder-go">{{ t('compare.toLadder') }}</AppLink>
-        </div>
-      </div>
     </div>
 
     <!-- Past a pair, and in speed order: one under the other, in the order they move. -->
     <template v-if="stacked">
-      <!-- Over the list, on its right: emptying it (in speed order), or clearing the teams (on phones, where the row
-           above has no room for it). -->
-      <div class="clear-row">
-        <label v-tip="canHover && t('compare.trickroomTip')" class="btn switch tr-switch" :class="{ on: trickRoom }">
-          <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
-          {{ t('speed.mod.trickroom') }}
-        </label>
-        <button v-if="mode === 'order'" type="button" class="btn inverted" :disabled="!list.length" @click="clearList">
-          <Trash2 :size="16" aria-hidden="true" />{{ t('compare.clearList') }}
-        </button>
-        <button v-else-if="phone" type="button" class="btn inverted" :disabled="!anyPicked" @click="clearTeams">
-          <Trash2 :size="16" aria-hidden="true" />{{ t('compare.clearTeams') }}
-        </button>
-      </div>
       <SpeedLineup ref="lineupEl" :entries="lineup" :open-key="openKey" @toggle="toggleOpen">
         <template #editor="{ entry }">
           <SpeedEditor
@@ -657,23 +611,23 @@ function resetAll() {
     </template>
 
     <template v-else>
-      <!-- Who moves first, between the two, and their Speeds at the end of its line (the sentence wrapping, not them);
-           on phones, nothing until there are two, the panels saying what to do. -->
+      <!-- Who moves first, between the two, and their Speeds at the end of its line (the sentence wrapping, not them):
+           nothing until there are two, the panels saying what to do. -->
       <p
+        v-if="verdict"
         class="verdict panel"
         :class="{
-          tie: verdict?.tie,
-          empty: !verdict,
-          'first-a': verdict && !verdict.tie && verdict.first === 'a',
-          'first-b': verdict && !verdict.tie && verdict.first === 'b',
+          tie: verdict.tie,
+          'first-a': !verdict.tie && verdict.first === 'a',
+          'first-b': !verdict.tie && verdict.first === 'b',
         }"
         role="status"
       >
-        <PokemonIcon v-if="verdict && !verdict.tie" :id="sideOf(verdict.first).id!" />
+        <PokemonIcon v-if="!verdict.tie" :id="sideOf(verdict.first).id!" />
         <span class="verdict-text">{{
-          !verdict ? t('compare.empty') : verdict.tie ? t('compare.tie') : t('compare.first', { name: verdict.name })
+          verdict.tie ? t('compare.tie') : t('compare.first', { name: verdict.name })
         }}</span>
-        <span v-if="verdict" class="verdict-speeds"
+        <span class="verdict-speeds"
           ><span v-if="trickRoom" class="tr-tag" :aria-label="t('speed.mod.trickroom')">{{ t('speed.trShort') }}</span
           >{{ sideOf('a').speed }} <span class="muted">vs</span> {{ sideOf('b').speed }}</span
         >
@@ -682,16 +636,6 @@ function resetAll() {
       <!-- On phones, the two side by side as tabs, each with its Pokémon in short, stuck to the top while the page
            scrolls: tapping one opens its panel under them, tapping it again folds it. Who moves first is
            marked on the verdict and the open panel, not on them. -->
-      <!-- On phones, over the tabs, on their right: clearing the teams. -->
-      <div class="clear-row">
-        <label v-tip="canHover && t('compare.trickroomTip')" class="btn switch tr-switch" :class="{ on: trickRoom }">
-          <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
-          {{ t('speed.mod.trickroom') }}
-        </label>
-        <button v-if="phone" type="button" class="btn inverted" :disabled="!anyPicked" @click="clearTeams">
-          <Trash2 :size="16" aria-hidden="true" />{{ t('compare.clearTeams') }}
-        </button>
-      </div>
       <div v-if="phone" class="side-tabs">
         <button
           v-for="side in sides"
@@ -823,89 +767,41 @@ function resetAll() {
         </section>
       </div>
     </template>
+    <p class="muted small page-note">{{ t(mode === 'order' ? 'compare.introOrder' : 'compare.intro') }}</p>
   </div>
 </template>
 
 <style scoped>
-.top {
-  margin-bottom: 12px;
-}
-/* The heading: the arrow and the title, what's set beside it while folded (under it on phones). */
+/* The heading's row: the title and its star, the data shown (its dataset cut short first when the row's tight; on
+   phones, on a line of its own under the rest), then how to read the page taking what's left, at its end (its words
+   when they fit, else its icon alone; on phones, always its icon alone). */
 .head {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  grid-template-areas: 'title active';
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 4px 12px;
-  list-style: none;
-  cursor: pointer;
-}
-.head::-webkit-details-marker {
-  display: none;
+  gap: 8px 12px;
 }
 .head h1 {
-  grid-area: title;
   display: flex;
+  flex: none;
   align-items: center;
   margin: 0;
 }
-.active {
-  grid-area: active;
-  --gap: 4px;
+.head-meta {
+  flex: 0 1 auto;
 }
-/* Beside the heading, centered on it by its chips, not the room under them for their shadows. */
-@media (min-width: 721px) {
-  .active {
-    margin-bottom: -4px;
+@media (max-width: 720px) {
+  .head-help :deep(span) {
+    display: none;
+  }
+  .head-meta {
+    flex-basis: 100%;
+    order: 1;
   }
 }
-.active .item {
-  flex: none;
-  padding: 1px 6px;
-  font-size: 0.85em;
-  white-space: nowrap;
-  background: var(--panel-alt);
-  border: 1px solid var(--border-strong);
-}
-.active .item.option {
-  font-weight: bold;
-  background: var(--sel);
-  border-color: var(--ink);
-}
-/* It opens and closes at once, without the slide and fade collapsible sections have (main.css); its heading takes
-   taps as taps. */
-.instant::details-content,
-.instant > summary {
-  transition: none;
-}
-.instant > summary {
-  touch-action: manipulation;
-  user-select: none;
-}
-.fold-body {
-  padding-top: 8px;
-}
-.marker {
-  display: inline-block;
-  width: 0.85em;
-  font-size: 1.15em;
-  line-height: 1;
-}
-/* The intro's line: the intro, then the toggle for how to read the page, a link rather than a control. */
-/* How to read the page: beside the intro; on phones, beside the heading instead. */
-.head .head-help {
-  display: none;
-}
-.lede {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 12px;
-  margin: 0 0 12px;
-}
-/* How to read the page, in a well between the intro and the controls. */
+/* How to read the page, in a well under the heading. */
 .help-body {
-  margin: 0 0 12px;
+  margin: 12px 0 0;
   padding: 8px 10px;
 }
 .help-body > p {
@@ -923,48 +819,28 @@ function resetAll() {
 .help-options dd {
   margin: 0;
 }
-.phone-only-block {
-  display: none;
-}
 @media (max-width: 720px) {
-  .head {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: 'title' 'active';
-  }
-  .phone-only-block {
-    display: block;
-  }
-  .wide-only,
-  .lede {
-    display: none;
-  }
-  .head .head-help {
-    display: inline-flex;
-  }
   .help-options {
     grid-template-columns: 1fr;
   }
   .help-options dd {
     margin-bottom: 4px;
   }
-  /* Nothing to say until there are two. */
-  .verdict.empty {
-    display: none;
-  }
 }
-.controls,
-.actions {
+/* The toolbar under the view's tabs: Trick Room, the teams' actions, and the clear at the row's end. */
+.toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 12px;
+  gap: 8px;
   margin-bottom: 12px;
 }
-.actions > .btn {
+.toolbar > .btn {
   gap: 6px;
 }
-.top .controls {
-  margin-bottom: 0;
+/* The intro, at the page's end. */
+.page-note {
+  margin: 12px 0 0;
 }
 .switch {
   justify-content: flex-start;
@@ -1168,15 +1044,6 @@ function resetAll() {
   outline-color: var(--opponent);
 }
 
-/* Over the Pokémon, on a row of its own: Trick Room on the left, as it turns over everything under it; clearing
-   them on the right. */
-.clear-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 8px;
-}
 /* On the verdict, beside the Speeds it turns over. */
 .tr-tag {
   margin-right: 8px;
@@ -1185,11 +1052,8 @@ function resetAll() {
   color: var(--panel);
   background: var(--text);
 }
-.clear-row > .btn {
-  gap: 6px;
-}
-/* Clearing the teams: last in the row, pushed to its end. */
-.actions > .clear-all {
+/* Clearing them: last in the row, pushed to its end. */
+.toolbar > .clear-all {
   order: 1;
   margin-left: auto;
 }
@@ -1213,7 +1077,7 @@ function resetAll() {
 }
 /* On phones the button sits partway across, so the menu hangs from the panel instead, as wide as it. */
 @media (max-width: 720px) {
-  .actions {
+  .toolbar {
     position: relative;
   }
   .ladder-menu {
