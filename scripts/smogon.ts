@@ -13,8 +13,9 @@ const PROVIDER = { name: 'Smogon', url: 'https://www.smogon.com/' }
 /** The rating cutoffs Smogon publishes, a snapshot each. */
 const CUTOFFS = [1760, 1630, 1500, 0] as const
 
-/** How much of each list to keep: Smogon's own moveset files show about as much. Less than 1% is noise. */
-const KEEP = { list: 10, spreads: 6, speeds: 20, min: 0.01 }
+/** How much of each list to keep: Smogon's own moveset files show about as much. Less than 1% is noise. Speeds are
+ * kept whole (`speeds`), as the app adds them up: what's left out would be left out of its totals too. */
+const KEEP = { list: 10, spreads: 6, min: 0.01 }
 
 // What `src/data/meta.ts` reads (`MetaSnapshot`, `PokemonMeta`), with IDs as plain strings.
 interface Snapshot {
@@ -136,7 +137,8 @@ export class Smogon {
           .slice(0, n)
           .map(([id, w]) => ({ id, share: round(w / total) }))
       /** What its sets put into Speed, from every spread (the long tail of them is most of the sets): stat points and
-       * nature, as shares. */
+       * nature, as shares, every one of them (but those too rare to show at the shares' precision), so they add up to
+       * all of its sets. Lists in the app leave out the rare ones themselves. */
       const speeds = (spreads: Record<string, number>, total: number) => {
         const weights = new Map<string, number>()
         for (const [spread, w] of Object.entries(spreads)) {
@@ -146,12 +148,11 @@ export class Smogon {
         }
         return [...weights]
           .sort((a, b) => b[1] - a[1])
-          .filter(([, w]) => w / total >= KEEP.min)
-          .slice(0, KEEP.speeds)
           .map(([key, w]) => {
             const [points, nature] = key.split(':') as [string, string]
             return { points: Number(points), nature, share: round(w / total) }
           })
+          .filter((s) => s.share > 0)
       }
       const check = (set: ReadonlySet<string>, what: string) => (id: string) => {
         if (!set.has(id)) unknown.add(`${what} "${id}"`)

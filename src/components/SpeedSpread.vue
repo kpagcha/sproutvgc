@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { percent } from '@/data/meta'
-import { t } from '@/i18n'
+import { locale, t } from '@/i18n'
+import { MARK_SHARE } from '@/lib/speed'
 import { odds, type SpreadPoint } from '@/lib/speedLineup'
 
 // One of the comparison's Pokémon at its sets, against another, drawn as the speed tiers' charts draw a row: a mark at
 // each Speed its sets reach, rising from the axis as tall as it's common, colored by who moves first at it (its side's
 // color, the other's, plain on a tie), over a fainter stretch of what it could reach (Min− to Max+); the other, at one
 // build, a line through with its Speed over it (at its sets too, each mark is colored by who moves first against most
-// of them). Under the axis its slowest, most common and fastest Speeds. Each mark says on hover, or a tap, its Speed,
+// of them). Only the Speeds on at least `MARK_SHARE` of its sets are drawn, though every one counts. Under the axis
+// its slowest drawn, most common and fastest Speeds. Each mark says on hover, or a tap, its Speed,
 // its share of the sets and the builds reaching it. In a side's panel, and on phones under the two, where its heading
 // is a band of its side's color (`banded`).
 const props = defineProps<{
@@ -26,7 +28,7 @@ const props = defineProps<{
 /** The other at one build: its Speed, a line through the chart. */
 const otherAt = computed(() => (props.other && !props.other.sets ? props.other.spread[0]!.speed : null))
 const axis = computed(() => {
-  const all = [props.reach.min, props.reach.max, ...props.spread.map((s) => s.speed)]
+  const all = [props.reach.min, props.reach.max, ...drawn.value.map((s) => s.speed)]
   if (otherAt.value !== null) all.push(otherAt.value)
   const lo = Math.min(...all)
   const hi = Math.max(...all)
@@ -43,9 +45,17 @@ function kind(speed: number) {
   return o.first > 0.5 ? 'first' : o.after > 0.5 ? 'after' : 'tie'
 }
 const topShare = computed(() => Math.max(...props.spread.map((s) => s.share), 0.0001))
+/** The Speeds drawn: those on at least `MARK_SHARE` of its sets (the rarer ones count in the odds, undrawn). */
+const drawn = computed(() => {
+  const list = props.spread.filter((s) => s.share >= MARK_SHARE)
+  return list.length ? list : [common.value]
+})
 const common = computed(() => props.spread.reduce((a, b) => (b.share > a.share ? b : a)))
-const lo = computed(() => props.spread[props.spread.length - 1]!.speed)
-const hi = computed(() => props.spread[0]!.speed)
+/** Whether any of its Speeds is too rare to be drawn, and that least share in words ("1%"). */
+const hidden = computed(() => drawn.value.length < props.spread.length)
+const markShare = computed(() => MARK_SHARE.toLocaleString(locale.value, { style: 'percent' }))
+const lo = computed(() => drawn.value[drawn.value.length - 1]!.speed)
+const hi = computed(() => drawn.value[0]!.speed)
 
 const ARROWS = { up: '↑', down: '↓' }
 /** A mark's tooltip: its Speed and share, then the builds reaching it, as the speed tiers' chips tag them. */
@@ -65,7 +75,7 @@ function tip(s: SpreadPoint) {
     <div class="chart" :class="{ padded: banded }">
       <!-- Read out: every Speed and its share, and the other's Speed. -->
       <span class="visually-hidden">{{
-        spread.map((s) => `${s.speed} ${percent(s.share)}`).join(', ') +
+        drawn.map((s) => `${s.speed} ${percent(s.share)}`).join(', ') +
         (otherAt !== null ? ` · ${other!.name} ${otherAt}` : '')
       }}</span>
       <div class="plot" aria-hidden="true">
@@ -75,7 +85,7 @@ function tip(s: SpreadPoint) {
         <span class="reach" :style="between(reach.min, reach.max)"></span>
         <span class="span" :style="between(lo, hi)"></span>
         <span
-          v-for="s in spread"
+          v-for="s in drawn"
           :key="s.speed"
           v-tip:group="tip(s)"
           class="mark"
@@ -96,6 +106,7 @@ function tip(s: SpreadPoint) {
       </div>
       <p class="muted small note">
         {{ t('compare.spreadNote', { speed: common.speed, pct: percent(common.share) }) }}
+        <template v-if="hidden">{{ t('compare.hiddenNote', { pct: markShare }) }}</template>
       </p>
     </div>
   </div>

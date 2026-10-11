@@ -915,6 +915,7 @@ export const messages: Record<keyof typeof en, string> = {
   'compare.bothChance': '{name} mueve antes que ambos el {pct} de las veces',
   'compare.bothCommon':
     'Para mover antes que las Velocidades más comunes de ambos ({speeds}) con su naturaleza: {points}',
+  'compare.hiddenNote': 'Los sets de menos del {pct} cuentan, pero no se muestran.',
   'compare.pairHint': 'Toca un enfrentamiento para ver a los dos solos: cuál mueve antes, y qué necesita cada uno.',
   'compare.both': 'Para mover antes que ambos rivales',
   'compare.bothOf': '{name}: antes que {other} a {speed}',

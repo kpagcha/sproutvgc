@@ -46,6 +46,7 @@ import {
   SPEED_ITEMS,
   inBattle,
   commonBuilds,
+  MARK_SHARE,
   natureEffect,
   speedBuilds,
   speedStat,
@@ -550,9 +551,10 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
   const rest = 1 - fieldShare(id)
   const builds = speedBuilds(m.speeds ?? [])
   // What its sets run under the least share is left out, but for the Pokémon looked for (found, or kept on the
-  // ladder): every build its sets run, and every boost, the Speed abilities it can have too, however few run them.
+  // ladder): every build its sets run on a chart's least share (`MARK_SHARE`; the data has every one, down to single
+  // sets), and every boost, the Speed abilities it can have too, however few run them.
   const all = id === found.value || kept.value.includes(id)
-  const shown = (share: number) => (all ? share > 0 : share >= MIN_SHARE)
+  const shown = (share: number) => share >= (all ? MARK_SHARE : MIN_SHARE)
   // Those under it, shown only as it's looked for, are as a Pokémon beyond the top is: marked, and not counted in how
   // yours does against the others, so looking for one doesn't change it.
   const rare = (share: number) => extra ?? (share < MIN_SHARE ? (true as const) : undefined)

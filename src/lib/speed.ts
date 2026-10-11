@@ -35,6 +35,12 @@ export function speedBuilds(speeds: readonly { points: number; nature: string; s
   return [...byBuild.values()].sort((x, y) => y.share - x.share)
 }
 
+/**
+ * The least share of a Pokémon's sets a Speed needs to be drawn on a chart: the rarer ones still count in its shares
+ * and odds, but a mark for each would bury the chart in hairlines (the data has every Speed its sets run).
+ */
+export const MARK_SHARE = 0.01
+
 /** The builds to offer in a tap: those on at least 3% of the sets, the 4 most common. */
 export const commonBuilds = (builds: readonly SpeedBuildShare[]) => builds.filter((b) => b.share >= 0.03).slice(0, 4)
 

@@ -902,6 +902,7 @@ export const messages = {
   'compare.build': 'Build',
   'compare.bothChance': '{name} moves before both {pct} of the time',
   'compare.bothCommon': 'To move before both most common Speeds ({speeds}) at its nature: {points}',
+  'compare.hiddenNote': "Sets under {pct} count but aren't shown.",
   'compare.pairHint': 'Tap a matchup to see the two alone: which moves first, and what each takes.',
   'compare.both': 'To move before both opponents',
   'compare.bothOf': '{name}: before {other} at {speed}',

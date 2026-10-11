@@ -6,6 +6,7 @@ import type { PokemonId } from '@/data/dex'
 import { percent } from '@/data/meta'
 import { t } from '@/i18n'
 import type { NatureEffect } from '@/lib/stats'
+import { MARK_SHARE } from '@/lib/speed'
 import { useOpenState } from '@/composables/useOpenState'
 import AppLink from '@/components/AppLink'
 import EffectTag from '@/components/EffectTag'
@@ -60,16 +61,18 @@ function verdict(speed: number): 'yours' | 'theirs' | 'tie' | undefined {
   return speed < props.mine !== props.trickRoom ? 'yours' : 'theirs'
 }
 /** A row's marks: each Speed's height by its share, against the row's most common (the height itself is the CSS's). */
+/** The Speeds drawn: those on at least `MARK_SHARE` of its sets (the rest count in its odds, undrawn). */
+const drawn = (r: RangeLike) => r.builds.filter((b) => b.share >= MARK_SHARE)
 function marks(r: RangeLike) {
   const top = Math.max(...r.builds.map((b) => b.share), 0.0001)
-  return r.builds.map((b) => ({ ...b, tall: b.share / top, kind: verdict(b.speed) }))
+  return drawn(r).map((b) => ({ ...b, tall: b.share / top, kind: verdict(b.speed) }))
 }
 type RangeLike = Pick<OddsRow, 'builds'>
 const between = (lo: number, hi: number) => ({ left: at(lo), width: `calc(${at(hi)} - ${at(lo)})` })
 /** The range its sets span, or, with none, what it could reach. */
 function span(r: OddsRow) {
   if (r.noSets) return between(r.reach.min, r.reach.max)
-  const s = r.builds.map((b) => b.speed)
+  const s = drawn(r).map((b) => b.speed)
   return between(Math.min(...s), Math.max(...s))
 }
 /** Against how many of its sets yours moves first, and ties with. */
@@ -115,12 +118,13 @@ function nearest(e: PointerEvent) {
   const x = (speed: number) => box.left + ((speed - axis.value.lo) / axis.value.span) * box.width
   let best = -1
   let gap = e.pointerType === 'mouse' ? REACH.mouse : REACH.touch
-  row.builds.forEach((b, i) => {
+  const shown = drawn(row)
+  shown.forEach((b, i) => {
     const d = Math.abs(x(b.speed) - e.clientX)
     if (d <= gap) [best, gap] = [i, d]
   })
   if (best < 0) return null
-  return { row, build: row.builds[best]!, el: track.querySelectorAll<HTMLElement>('.mark')[best]! }
+  return { row, build: shown[best]!, el: track.querySelectorAll<HTMLElement>('.mark')[best]! }
 }
 function point(hit: NonNullable<ReturnType<typeof nearest>>) {
   active.value = { id: hit.row.id, speed: hit.build.speed }
@@ -234,7 +238,9 @@ onBeforeUnmount(() => {
           <span class="visually-hidden">{{
             r.noSets
               ? t('speed.oddsNoSets', { name: name(r) })
-              : r.builds.map((b) => `${b.speed} ${percent(b.share)}`).join(', ')
+              : drawn(r)
+                  .map((b) => `${b.speed} ${percent(b.share)}`)
+                  .join(', ')
           }}</span>
           <span v-if="!r.noSets" class="reach" :style="between(r.reach.min, r.reach.max)" aria-hidden="true"></span>
           <span class="span" :class="{ fallback: r.noSets }" :style="span(r)" aria-hidden="true"></span>
