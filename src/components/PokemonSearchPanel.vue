@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Marked from '@/components/Marked'
 import { computed, nextTick, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
-import { Star, X } from '@lucide/vue'
+import { Star, Trash2, X } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { POKEMON, speciesOf } from '@/data/pokemon'
 import { t } from '@/i18n'
@@ -37,8 +37,10 @@ const props = defineProps<{
   recent?: boolean
   /** Lists them by usage, by these ranks (the meta's), each with its rank, rather than by name. */
   ranks?: Ranks
+  /** With one picked, a button beside the way out unpicks it. */
+  clearable?: boolean
 }>()
-const emit = defineEmits<{ pick: [id: PokemonId]; close: [] }>()
+const emit = defineEmits<{ pick: [id: PokemonId]; close: []; clear: [] }>()
 const takenSpecies = computed(() => new Set((props.taken ?? []).map(speciesOf)))
 const isTaken = (id: PokemonId) => takenSpecies.value.has(speciesOf(id))
 const pick = (id: PokemonId) => !isTaken(id) && emit('pick', id)
@@ -152,12 +154,25 @@ const optionId = (i: number) => `${listId}-${i}`
         aria-expanded="true"
         :aria-controls="listId"
         :aria-activedescendant="results.length ? optionId(active) : undefined"
+        no-clear
         @keydown="onKey"
       >
         <template v-if="props.icon" #lead>
           <PokemonIcon :id="props.picked ?? 'pikachu'" :class="{ unknown: !props.picked }" />
         </template>
       </SearchBox>
+      <!-- The search's own clear button left out: emptying the search is a tap away, and the way out is beside it.
+           Unpicking the one picked instead, when it can be. -->
+      <button
+        v-if="props.clearable && props.picked"
+        v-tip="t('picker.clear')"
+        type="button"
+        class="btn inverted close"
+        :aria-label="t('picker.clear')"
+        @click="emit('clear')"
+      >
+        <Trash2 :size="18" aria-hidden="true" />
+      </button>
       <button type="button" class="btn close" :aria-label="t('picker.close')" @click="emit('close')">
         <X :size="18" aria-hidden="true" />
       </button>

@@ -7,9 +7,10 @@ import { t } from '@/i18n'
 // desktop browsers show it on hover at best, so the native one is hidden in favour of this. Attributes go to the field.
 // `wide` fills the width it's given (the home page's search); `icon` puts a magnifying glass at the start, and the
 // `lead` slot anything else there (a Pokémon's icon). `hotkey` is the key the page focuses it with, shown where the
-// clear button goes while there's nothing to clear (where there's a keyboard to press it on).
+// clear button goes while there's nothing to clear (where there's a keyboard to press it on). `noClear` leaves the
+// clear button out, for where something else around the field does it.
 defineOptions({ inheritAttrs: false })
-defineProps<{ wide?: boolean; icon?: boolean; hotkey?: string }>()
+defineProps<{ wide?: boolean; icon?: boolean; hotkey?: string; noClear?: boolean }>()
 const query = defineModel<string>({ default: '' })
 
 const input = useTemplateRef('input')
@@ -25,7 +26,9 @@ defineExpose({ focus: (options?: FocusOptions) => input.value?.focus(options), s
     <Search v-if="icon" class="glass" :size="16" :stroke-width="2.5" aria-hidden="true" />
     <span v-if="$slots.lead" class="lead"><slot name="lead" /></span>
     <input ref="input" v-model="query" type="search" class="search" :aria-keyshortcuts="hotkey" v-bind="$attrs" />
-    <button v-if="query" type="button" class="clear" :aria-label="t('search.clear')" @click="clear">×</button>
+    <button v-if="query && !noClear" type="button" class="clear" :aria-label="t('search.clear')" @click="clear">
+      ×
+    </button>
     <kbd v-else-if="hotkey" class="hotkey" aria-hidden="true">{{ hotkey }}</kbd>
   </span>
 </template>

@@ -76,6 +76,7 @@ import ModalDialog from '@/components/ModalDialog.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import MetaPicker from '@/components/MetaPicker.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import SpeedKeptMenu from '@/components/SpeedKeptMenu.vue'
 import TypeIcon from '@/components/TypeIcon'
 import PokemonPicker from '@/components/PokemonPicker.vue'
 import ScrollRow from '@/components/ScrollRow.vue'
@@ -851,6 +852,14 @@ const versus = computed(() => {
     },
   }
 })
+// The comparison over the ladder: yours against the chip tapped, else the one found at its most common build; none
+// until there are both.
+const compareTarget = computed(() =>
+  mine.value === null
+    ? null
+    : (versus.value?.card.compareTo ??
+      (found.value !== null ? compareLink({ id: found.value, build: topBuild(found.value) }) : null)),
+)
 // Its title, the Pokémon's name (with its icon) a link to its page.
 // Picking one finds it too, the find showing as its "Only" switch says.
 function pickVersus(e: Entry) {
@@ -1135,25 +1144,15 @@ function helpFromHead() {
 // On phones they start folded on each visit, the ladder first in view, whatever was left last time.
 if (window.matchMedia('(max-width: 720px)').matches) controlsOpen.value = false
 const stageLabel = (s: string) => (Number(s) > 0 ? `+${s}` : s.replace('-', '−'))
-// In two kinds: what's shown (the data, which Pokémon), and the options on (as their switches show when on).
-// The options first, as they change what's read off the ladder: the switches by name, the modifiers in short as yours'
-// bar has them (items by their icon, the name read out); then what's shown.
-const active = computed(() => {
-  const list: { label: string; kind: 'view' | 'option' | 'mod'; item?: ItemId }[] = []
-  if (trickRoom.value) list.push({ label: t('speed.mod.trickroom'), kind: 'option' })
-  if (showBoosts.value) list.push({ label: t('speed.boosts'), kind: 'option' })
-  if (inPlay.value) list.push({ label: fieldLabel(inPlay.value), kind: 'option' })
-  if (!showMegas.value) list.push({ label: t('speed.noMegas'), kind: 'option' })
-  for (const k of TOGGLES) if (flag(k)) list.push({ label: t(`speed.modShort.${k}`), kind: 'mod', item: MOD_ITEMS[k] })
-  if (stage.value !== '0') list.push({ label: stageLabel(stage.value), kind: 'mod' })
-  list.push({
-    label: showAll.value ? `${t('speed.all')} · ${benchLabel(bench.value)}` : t('speed.meta', { n: TOP }),
-    kind: 'view',
-  })
-  if (snapshot.value && !showAll.value && currentSnapshots().length > 1)
-    list.push({ label: distinctLabel(snapshot.value), kind: 'view' })
-  return list
-})
+// Folded, the data shown beside the heading, when there's a choice of it.
+const foldedLabel = computed(() =>
+  snapshot.value && !showAll.value && currentSnapshots().length > 1 ? distinctLabel(snapshot.value) : null,
+)
+// The modifiers on, in short, on their disclosure while it's folded.
+const modsOn = computed(() => [
+  ...TOGGLES.filter((k) => flag(k)).map((k) => t(`speed.modShort.${k}`)),
+  ...(stage.value !== '0' ? [stageLabel(stage.value)] : []),
+])
 
 /** Whether the screen has hover, for tooltips: touch screens show what matters inline instead. */
 const canHover = window.matchMedia('(hover: hover)').matches
@@ -1283,165 +1282,170 @@ const { entered } = usePageEntered()
         </div>
       </ModalDialog>
     </div>
-    <!-- A section that folds, as yours does: its heading, with what's active in short beside it while folded (under it
-         on phones), and what folds it. -->
-    <!-- Their headings open and close them themselves, rather than leaving it to the browser, so the section and what
-         changes with it (what's active, the arrow) change at once, however fast the taps come; the browser opening one
-         itself (finding text in it) is followed. -->
-    <details class="panel instant" :open="controlsOpen" @toggle="controlsOpen = isOpen($event)">
-      <summary class="head" @click.prevent="toggleControls">
-        <!-- With yours picked, everything the controls set is for the others: its opponents, tagged as on the ladder. -->
-        <!-- The heading folds them, its arrow saying whether they're open; its star saves the setup to the favorites. -->
-        <h1>
-          <span
-            ><span class="marker head-marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
-            >{{ t('title.speedTiers') }}</span
-          ><SetupStar /><span v-if="mine" class="opponents-tag head-tag">{{ t('speed.opponentsHead') }}</span
-          ><HelpToggle
-            class="head-help"
-            :open="helpOpen && controlsOpen"
-            controls="speed-help"
-            fit
-            @toggle="helpFromHead"
-          />
-        </h1>
-        <!-- On one line, scrolling sideways when it doesn't fit. -->
-        <ScrollRow v-if="!controlsOpen" class="active" role="list" :aria-label="t('speed.active')">
-          <span v-for="a in active" :key="a.label" role="listitem" class="item" :class="[a.kind, { icon: a.item }]"
-            ><template v-if="a.item"
-              ><ItemIcon :id="a.item" :scale="0.67" /><span class="visually-hidden">{{ a.label }}</span></template
-            ><template v-else>{{ a.label }}</template></span
-          >
-        </ScrollRow>
-      </summary>
-      <div class="fold-body">
-        <!-- The intro, and how to read the page: a link-like toggle beside it, apart from the controls. -->
-        <p class="lede">
-          <span class="muted wide-only">{{ t('speed.intro', { reg: REGULATION }) }}</span>
-          <HelpToggle :open="helpOpen" controls="speed-help" @toggle="toggleHelp" />
-        </p>
-        <!-- How to read a chip: samples, each with what its parts mean; then yours among them; on phones, the intro and
-             the options too. -->
-        <div v-if="helpOpen" id="speed-help" class="help-body panel sunken">
-          <div class="phone-only-block small">
-            <p class="muted">{{ t('speed.intro', { reg: REGULATION }) }}</p>
-            <dl class="help-options">
-              <template v-if="!showAll && boostsAvailable">
-                <dt>{{ t('speed.boosts') }}</dt>
-                <dd class="muted">{{ t('speed.boostsDesc') }}</dd>
-              </template>
-              <dt>{{ t('speed.megas') }}</dt>
-              <dd class="muted">{{ t('speed.megasDesc') }}</dd>
-              <dt>{{ t('speed.mod.trickroom') }}</dt>
-              <dd class="muted">{{ t('speed.modTip.trickroom') }}</dd>
-              <dt>{{ t('speed.modifiers') }}</dt>
-              <dd class="muted">{{ t('speed.modifiersTip') }}</dd>
-            </dl>
-          </div>
-          <p class="formula muted small">{{ t('speed.formula') }}</p>
-          <dl v-if="!showAll && snapshot" class="legend small">
-            <dt>
-              <span class="chip sample"
-                ><span class="tag"><EffectTag effect="up" /></span
-                ><span class="tag">{{ t('speed.points', { n: 32 }) }}</span
-                ><span class="tag">{{ percent(0.461) }}</span></span
-              >
-            </dt>
-            <dd class="muted">{{ t('speed.legendChip', { pct: percent(MIN_SHARE) }) }}</dd>
-            <template v-if="showBoosts">
-              <dt>
-                <span class="chip sample boost"
-                  ><span class="tag boost-label"
-                    ><ItemIcon id="choicescarf" :scale="0.67" />{{ t('speed.legendBoostLabel') }}</span
-                  ></span
-                >
-              </dt>
-              <dd class="muted">
-                {{ t('speed.legendBoost') }}
-              </dd>
-            </template>
-          </dl>
-          <p v-else class="muted small">{{ t('speed.allNote', { build: benchTip(bench) }) }}</p>
-          <!-- Yours among them: what picking it does, tapping an opponent, and the comparison side by side. -->
-          <dl class="help-options help-yours small">
-            <dt>{{ t('speed.yours') }}</dt>
-            <dd class="muted">{{ t('speed.helpYours') }}</dd>
-            <dt>{{ t('compare.common') }}</dt>
-            <dd class="muted">{{ t('compare.helpCommon') }}</dd>
-            <dt>{{ t('speed.opponentsHead') }}</dt>
-            <dd class="muted">{{ t('speed.helpOpponents') }}</dd>
-            <dt>{{ t('compare.open') }}</dt>
-            <dd class="muted">{{ t('speed.helpCompare') }}</dd>
-          </dl>
-        </div>
-        <div class="controls">
-          <!-- What's shown: the data, and which Pokémon. -->
-          <div class="view-row">
-            <MetaPicker v-if="snapshot" />
-            <SegmentedControl
-              class="phone-stacked"
-              v-if="metaAvailable"
-              :model-value="showAll ? 'all' : 'meta'"
-              :label="t('speed.show')"
-              :options="[
-                { value: 'meta', label: t('speed.meta', { n: TOP }) },
-                { value: 'all', label: t('speed.all') },
-              ]"
-              @update:model-value="(v: string) => set('all', v === 'all' ? '1' : undefined)"
-            />
-            <SegmentedControl
-              class="phone-stacked"
-              v-if="showAll"
-              v-model="bench"
-              :label="t('speed.at')"
-              :options="BENCHMARKS.map((b) => ({ value: b, label: benchLabel(b) }))"
-            />
-          </div>
 
-          <!-- How it's shown: each option with what it does beside it, as tooltips get missed. -->
-          <div class="options">
-            <template v-if="!showAll && boostsAvailable">
-              <label class="btn switch" :class="{ on: showBoosts }">
-                <input type="checkbox" :checked="showBoosts" @change="toggleBoosts" />
-                {{ t('speed.boosts') }}
+    <div class="speed-layout">
+      <div class="main-col">
+        <!-- The page's heading, over the ladder (yours beside both), in a section that folds as yours does: the intro, how to
+             read the page and the data shown; folded, the data in short beside the heading (under it on phones). -->
+        <!-- Their headings open and close them themselves, rather than leaving it to the browser, so the section and what
+             changes with it (what's active, the arrow) change at once, however fast the taps come; the browser opening one
+             itself (finding text in it) is followed. -->
+        <details class="panel instant" :open="controlsOpen" @toggle="controlsOpen = isOpen($event)">
+          <summary class="head" @click.prevent="toggleControls">
+            <!-- The heading folds them, its arrow saying whether they're open; its star saves the setup to the favorites. -->
+            <h1>
+              <span
+                ><span class="marker head-marker" aria-hidden="true">{{ controlsOpen ? '▾' : '▸' }}</span
+                >{{ t('title.speedTiers') }}</span
+              ><SetupStar /><HelpToggle
+                class="head-help"
+                :open="helpOpen && controlsOpen"
+                controls="speed-help"
+                fit
+                @toggle="helpFromHead"
+              />
+            </h1>
+            <span v-if="!controlsOpen && foldedLabel" class="active"
+              ><span class="item">{{ foldedLabel }}</span></span
+            >
+          </summary>
+          <div class="fold-body">
+            <!-- The intro, and how to read the page: a link-like toggle beside it, apart from the controls. -->
+            <p class="lede">
+              <span class="muted wide-only">{{ t('speed.intro', { reg: REGULATION }) }}</span>
+              <HelpToggle :open="helpOpen" controls="speed-help" @toggle="toggleHelp" />
+            </p>
+            <!-- How to read the ladder: what its options do (on phones, after the intro); samples of a chip, each with what
+                 its parts mean; then yours among them. -->
+            <div v-if="helpOpen" id="speed-help" class="help-body panel sunken">
+              <div class="help-intro small">
+                <p class="muted phone-only-block">{{ t('speed.intro', { reg: REGULATION }) }}</p>
+                <dl class="help-options">
+                  <template v-if="!showAll && boostsAvailable">
+                    <dt>{{ t('speed.boosts') }}</dt>
+                    <dd class="muted">{{ t('speed.boostsDesc') }}</dd>
+                  </template>
+                  <dt>{{ t('speed.megas') }}</dt>
+                  <dd class="muted">{{ t('speed.megasDesc') }}</dd>
+                  <dt>{{ t('speed.mod.trickroom') }}</dt>
+                  <dd class="muted">{{ t('speed.modTip.trickroom') }}</dd>
+                  <dt>{{ t('speed.modifiers') }}</dt>
+                  <dd class="muted">{{ t('speed.modifiersTip') }}</dd>
+                </dl>
+              </div>
+              <p class="formula muted small">{{ t('speed.formula') }}</p>
+              <dl v-if="!showAll && snapshot" class="legend small">
+                <dt>
+                  <span class="chip sample"
+                    ><span class="tag"><EffectTag effect="up" /></span
+                    ><span class="tag">{{ t('speed.points', { n: 32 }) }}</span
+                    ><span class="tag">{{ percent(0.461) }}</span></span
+                  >
+                </dt>
+                <dd class="muted">{{ t('speed.legendChip', { pct: percent(MIN_SHARE) }) }}</dd>
+                <template v-if="showBoosts">
+                  <dt>
+                    <span class="chip sample boost"
+                      ><span class="tag boost-label"
+                        ><ItemIcon id="choicescarf" :scale="0.67" />{{ t('speed.legendBoostLabel') }}</span
+                      ></span
+                    >
+                  </dt>
+                  <dd class="muted">
+                    {{ t('speed.legendBoost') }}
+                  </dd>
+                </template>
+              </dl>
+              <p v-else class="muted small">{{ t('speed.allNote', { build: benchTip(bench) }) }}</p>
+              <!-- Yours among them: what picking it does, tapping an opponent, and the comparison side by side. -->
+              <dl class="help-options help-yours small">
+                <dt>{{ t('speed.yours') }}</dt>
+                <dd class="muted">{{ t('speed.helpYours') }}</dd>
+                <dt>{{ t('compare.common') }}</dt>
+                <dd class="muted">{{ t('compare.helpCommon') }}</dd>
+                <dt>{{ t('speed.opponentsHead') }}</dt>
+                <dd class="muted">{{ t('speed.helpOpponents') }}</dd>
+                <dt>{{ t('compare.open') }}</dt>
+                <dd class="muted">{{ t('speed.helpCompare') }}</dd>
+              </dl>
+            </div>
+            <!-- The data shown. -->
+            <div v-if="snapshot" class="controls"><MetaPicker /></div>
+          </div>
+        </details>
+        <!-- Which Pokémon the ladder shows: folder tabs standing on its panel's top edge, the one shown joined to the
+             toolbar under it. -->
+        <div v-if="metaAvailable" class="view-tabs" role="radiogroup" :aria-label="t('speed.show')">
+          <button
+            v-for="v in ['meta', 'all'] as const"
+            :key="v"
+            type="button"
+            role="radio"
+            class="view-tab"
+            :class="{ on: (v === 'all') === showAll }"
+            :aria-checked="(v === 'all') === showAll"
+            @click="set('all', v === 'all' ? '1' : undefined)"
+          >
+            {{ v === 'all' ? t('speed.all') : t('speed.meta', { n: TOP }) }}
+          </button>
+        </div>
+        <div ref="listPanel" class="panel banded soft list">
+          <!-- The ladder's toolbar, a band under the tabs: how it's shown on a line (what each option does in a tooltip,
+               the boosts', or in how to read the page; the benchmark with every Pokémon; the modifiers for everyone
+               opening under them), then finding a Pokémon on it. -->
+          <div class="band find find-row" :class="{ flash: flashFind }" @animationend="flashFind = false">
+            <div class="options-line">
+              <SegmentedControl
+                class="phone-stacked"
+                v-if="showAll"
+                v-model="bench"
+                :label="t('speed.at')"
+                :options="BENCHMARKS.map((b) => ({ value: b, label: benchLabel(b) }))"
+              />
+              <template v-if="!showAll && boostsAvailable">
+                <label v-tip="canHover && t('speed.boostsDesc')" class="btn switch" :class="{ on: showBoosts }">
+                  <input type="checkbox" :checked="showBoosts" @change="toggleBoosts" />
+                  {{ t('speed.boosts') }}
+                </label>
+              </template>
+              <label class="btn switch" :class="{ on: showMegas }">
+                <input type="checkbox" :checked="showMegas" @change="toggleMegas" />
+                {{ t('speed.megas') }}
               </label>
-              <span class="muted">{{ t('speed.boostsDesc') }}</span>
-            </template>
-            <label class="btn switch" :class="{ on: showMegas }">
-              <input type="checkbox" :checked="showMegas" @change="toggleMegas" />
-              {{ t('speed.megas') }}
-            </label>
-            <span class="muted">{{ t('speed.megasDesc') }}</span>
-            <label class="btn switch" :class="{ on: trickRoom }">
-              <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
-              {{ t('speed.mod.trickroom') }}
-            </label>
-            <span class="muted">{{ t('speed.modTip.trickroom') }}</span>
-            <!-- The weather or terrain in play, from yours' ability: said as a switch that's on, its cross turning the
-                 ability off; on phones, where the descriptions go, what brings it said on the button itself. -->
-            <template v-if="inPlay">
-              <button
-                type="button"
-                class="btn switch on field-status"
-                :aria-label="t('speed.fieldOff', { ability: fieldSource!, field: fieldLabel(inPlay) })"
-                @click="clearField"
-              >
-                {{ fieldLabel(inPlay) }}<span class="field-source"> · {{ fieldSource }}</span
-                ><X :size="16" aria-hidden="true" />
+              <label class="btn switch" :class="{ on: trickRoom }">
+                <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
+                {{ t('speed.mod.trickroom') }}
+              </label>
+              <!-- The weather or terrain in play, from yours' ability: said as a switch that's on, what brings it on it, its
+               cross turning the ability off. -->
+              <template v-if="inPlay">
+                <button
+                  v-tip="
+                    canHover &&
+                    t('speed.fieldFrom', {
+                      name: refName(pokemon(mine!)),
+                      ability: fieldSource!,
+                      field: fieldLabel(inPlay),
+                    })
+                  "
+                  type="button"
+                  class="btn switch on field-status"
+                  :aria-label="t('speed.fieldOff', { ability: fieldSource!, field: fieldLabel(inPlay) })"
+                  @click="clearField"
+                >
+                  {{ fieldLabel(inPlay) }}<span class="field-source"> · {{ fieldSource }}</span
+                  ><X :size="16" aria-hidden="true" />
+                </button>
+              </template>
+              <button type="button" class="btn disclosure" :aria-expanded="modsOpen" @click="toggleMods">
+                <Plus :size="16" aria-hidden="true" />{{ t('speed.modifiers')
+                }}<span v-if="!modsOpen && modsOn.length" class="mods-on">{{ modsOn.join(' · ') }}</span
+                ><span class="marker" aria-hidden="true">{{ modsOpen ? '▾' : '▸' }}</span>
               </button>
-              <span class="muted">{{
-                t('speed.fieldFrom', {
-                  name: refName(pokemon(mine!)),
-                  ability: fieldSource!,
-                  field: fieldLabel(inPlay),
-                })
-              }}</span>
-            </template>
-            <button type="button" class="btn disclosure" :aria-expanded="modsOpen" @click="toggleMods">
-              <Plus :size="16" aria-hidden="true" />{{ t('speed.modifiers')
-              }}<span class="marker" aria-hidden="true">{{ modsOpen ? '▾' : '▸' }}</span>
-            </button>
-            <span class="muted">{{ t('speed.modifiersTip') }}</span>
+              <button v-if="controlsChanged" type="button" class="btn inverted reset" @click="resetControls">
+                <RotateCcw :size="16" aria-hidden="true" />{{ t('speed.resetControls') }}
+              </button>
+            </div>
             <div v-if="modsOpen" class="mods all-mods">
               <button
                 v-for="k in TOGGLES"
@@ -1464,334 +1468,322 @@ const { entered } = usePageEntered()
                 :options="STAGES.map((s) => ({ value: s, label: stageLabel(s) }))"
               />
             </div>
-          </div>
-          <button v-if="controlsChanged" type="button" class="btn inverted reset" @click="resetControls">
-            <RotateCcw :size="16" aria-hidden="true" />{{ t('speed.resetControls') }}
-          </button>
-        </div>
-      </div>
-    </details>
-
-    <div class="speed-layout">
-      <div ref="listPanel" class="panel banded soft list">
-        <!-- With yours picked, the ladder is its opponents: said over it, with what tapping one does. -->
-        <div v-if="mine" class="band opponents-head">
-          <strong>{{ t('speed.opponentsHead') }}</strong>
-          <span>{{ t('speed.opponentsHint') }}</span>
-          <!-- The weather or terrain they're in, from yours' ability, at the band's end. -->
-          <span v-if="inPlay" class="field-tag">{{ fieldLabel(inPlay) }}</span>
-        </div>
-        <!-- Finding a Pokémon on the ladder: a band on top, sitting on the rows. -->
-        <div class="band find find-row" :class="{ flash: flashFind }" @animationend="flashFind = false">
-          <PokemonPicker
-            ref="findPicker"
-            recent
-            :model-value="found"
-            :ids="findableIds"
-            :placeholder="t('speed.find')"
-            hotkey="/"
-            :title="findTitle"
-            :tone="mine ? 'opponent' : undefined"
-            list-width-of=".find-row"
-            speed
-            :ranks
-            @update:model-value="setFound"
-          />
-          <!-- The filters' fold, beside the find. -->
-          <button
-            type="button"
-            class="btn filters-toggle"
-            :class="{ on: filtering }"
-            :aria-expanded="filtersOpen"
-            aria-controls="speed-filters"
-            :aria-label="t('speed.filter')"
-            @click="filtersOpen = !filtersOpen"
-          >
-            <Funnel :size="16" aria-hidden="true" />
-          </button>
-          <!-- What finding it does (only it, kept on the ladder), on a row of their own at the band's foot: neither with
-               every Pokémon once, where it shows once and is on the ladder already. -->
-          <div v-if="found && !showAll" class="find-modes">
-            <label class="btn switch find-mode" :class="{ on: onlyFound }">
-              <input
-                type="checkbox"
-                :checked="onlyFound"
-                :aria-label="t('speed.findOnly', { name: refName(pokemon(found)) })"
-                @change="findMode = onlyFound ? 'mark' : 'only'"
-              />
-              {{ onlyLabel[0] }}<PokemonIcon :id="found" />{{ onlyLabel[1] }}
-            </label>
-            <label v-if="beyondTop(found)" class="btn switch find-mode" :class="{ on: kept.includes(found) }">
-              <input type="checkbox" :checked="kept.includes(found)" @change="toggleKept(found)" />
-              {{ t('speed.keep') }}
-            </label>
-          </div>
-          <!-- What to do with the one found, on a row of their own under the find. -->
-          <div v-if="found" class="find-actions">
-            <!-- To the comparison's own page, standing out as the card's way there does. -->
-            <AppLink :to="compareLink({ id: found, build: topBuild(found) })" class="btn primary find-mode find-compare"
-              ><Columns2 :size="16" aria-hidden="true" />{{ t('compare.short')
-              }}<ArrowRight :size="16" aria-hidden="true"
-            /></AppLink>
-            <!-- Yours and the one found swapped, once there's yours; its icon alone on the narrowest phones, so the row
-                 still fits. -->
+            <PokemonPicker
+              ref="findPicker"
+              recent
+              :model-value="found"
+              :ids="findableIds"
+              :placeholder="t('speed.find')"
+              hotkey="/"
+              :title="findTitle"
+              :tone="mine ? 'opponent' : undefined"
+              list-width-of=".find-row"
+              speed
+              :ranks
+              clearable
+              @update:model-value="setFound"
+            />
+            <!-- The filters' fold, beside the find. -->
             <button
               type="button"
-              class="btn find-mode find-swap"
-              :disabled="!mine"
-              :aria-label="t('compare.swap')"
-              @click="swapMine"
+              class="btn filters-toggle"
+              :class="{ on: filtering }"
+              :aria-expanded="filtersOpen"
+              aria-controls="speed-filters"
+              :aria-label="t('speed.filter')"
+              @click="filtersOpen = !filtersOpen"
             >
-              <ArrowLeftRight :size="16" aria-hidden="true" /><span class="swap-text">{{ t('compare.swap') }}</span>
+              <Funnel :size="16" aria-hidden="true" />
             </button>
-            <button type="button" class="btn inverted find-clear" @click="setFound(null)">
-              <Trash2 :size="16" aria-hidden="true" />{{ t('speed.clear') }}
-            </button>
-          </div>
-          <p v-if="foundNote" class="find-note muted small">{{ foundNote }}</p>
-          <!-- Filtering the ladder: by type, ability and item, each a choice of what the Pokémon shown have. -->
-          <div
-            id="speed-filters"
-            class="filters"
-            :class="{ folded: !filtersOpen }"
-            role="group"
-            :aria-label="t('speed.filter')"
-          >
-            <span class="small filters-label">{{ t('speed.filter') }}</span>
-            <span class="filter" :class="{ on: filterType }">
-              <TypeIcon v-if="filterType" :type="filterType" class="filter-icon" aria-hidden="true" />
-              <select
-                class="search filter-pick"
-                :value="filterType ?? ''"
-                :aria-label="t('speed.filterType')"
-                @change="set('type', ($event.target as HTMLSelectElement).value || undefined)"
+            <!-- Only it on the ladder, beside the find (not with every Pokémon once, where it shows once): its room kept
+                 there while it's not shown, so the row doesn't change. -->
+            <div class="find-modes">
+              <label
+                class="btn switch find-mode"
+                :class="{ on: onlyFound, unshown: !found || showAll }"
+                :aria-hidden="!found || showAll || undefined"
               >
-                <option value="">{{ t('speed.anyType') }}</option>
-                <option v-for="o in typeOptions" :key="o.id" :value="o.id">{{ o.name }} ({{ o.n }})</option>
-              </select>
-            </span>
-            <span class="filter" :class="{ on: filterAbility }">
-              <select
-                class="search filter-pick"
-                :value="filterAbility ?? ''"
-                :aria-label="t('speed.filterAbility')"
-                @change="set('ability', ($event.target as HTMLSelectElement).value || undefined)"
-              >
-                <option value="">{{ t('speed.anyAbility') }}</option>
-                <option v-for="o in abilityOptions" :key="o.id" :value="o.id">{{ o.name }} ({{ o.n }})</option>
-              </select>
-            </span>
-            <span v-if="itemsFilterable" class="filter" :class="{ on: filterItem }">
-              <ItemIcon v-if="filterItem" :id="filterItem" :scale="0.67" class="filter-icon" aria-hidden="true" />
-              <select
-                class="search filter-pick"
-                :value="filterItem ?? ''"
-                :aria-label="t('speed.filterItem')"
-                @change="set('item', ($event.target as HTMLSelectElement).value || undefined)"
-              >
-                <option value="">{{ t('speed.anyItem') }}</option>
-                <option v-for="o in itemOptions" :key="o.id" :value="o.id">{{ o.name }} ({{ o.n }})</option>
-              </select>
-            </span>
-            <button v-if="filtering" type="button" class="btn inverted filters-clear" @click="clearFilters">
-              <X :size="14" aria-hidden="true" />{{ t('speed.clearFilters') }}
-            </button>
-          </div>
-          <!-- The Pokémon kept: each finds it, or leaves the ladder. -->
-          <!-- Each a chip: its name finds it (marked while found), its cross takes it off; then a way to take them all off. -->
-          <ul v-if="keptShown.length" class="kept small">
-            <li class="kept-label">{{ t('speed.kept') }}</li>
-            <li v-for="id in keptShown" :key="id" class="kept-mon" :class="{ found: id === found }">
-              <button type="button" class="kept-find" :aria-pressed="id === found" @click="setFound(id)">
-                <PokemonIcon :id />{{ refName(pokemon(id)) }}
-              </button>
-              <button
-                v-tip="canHover && t('speed.unkeep', { name: refName(pokemon(id)) })"
-                type="button"
-                class="kept-remove"
-                :aria-label="t('speed.unkeep', { name: refName(pokemon(id)) })"
-                @click="toggleKept(id)"
-              >
-                <X :size="14" aria-hidden="true" />
-              </button>
-            </li>
-            <li>
-              <button type="button" class="btn inverted kept-all" @click="set('keep', undefined)">
-                <Trash2 :size="14" aria-hidden="true" />{{ t('speed.unkeepAll') }}
-              </button>
-            </li>
-          </ul>
-        </div>
-        <!-- Pinned over the ladder once the controls are scrolled away; takes no room of its own. -->
-        <div ref="pinMark" aria-hidden="true"></div>
-        <div class="pin">
-          <div v-if="pinned" class="pinned" :class="{ opponents: mine }" data-top-bar>
-            <div class="find">
-              <PokemonPicker
-                ref="pinnedFindPicker"
-                recent
-                :model-value="found"
-                :ids="findableIds"
-                :placeholder="t('speed.findShort')"
-                hotkey="/"
-                :title="findTitle"
-                :tone="mine ? 'opponent' : undefined"
-                list-width-of=".pinned"
-                speed
-                :ranks
-                @update:model-value="setFound"
-              />
-              <label v-if="found && !showAll" class="btn switch find-mode" :class="{ on: onlyFound }">
                 <input
                   type="checkbox"
                   :checked="onlyFound"
-                  :aria-label="t('speed.findOnly', { name: refName(pokemon(found)) })"
+                  :disabled="!found || showAll"
+                  :aria-label="found ? t('speed.findOnly', { name: refName(pokemon(found)) }) : undefined"
                   @change="findMode = onlyFound ? 'mark' : 'only'"
                 />
-                {{ onlyLabel[0] }}<PokemonIcon :id="found" />{{ onlyLabel[1] }}
+                {{ onlyLabel[0] }}<PokemonIcon :id="found ?? 'pikachu'" />{{ onlyLabel[1] }}
               </label>
             </div>
-            <label v-if="!showAll && boostsAvailable" class="btn switch" :class="{ on: showBoosts }">
-              <input type="checkbox" :checked="showBoosts" @change="toggleBoosts" />
-              {{ t('speed.boosts') }}
-            </label>
-            <label class="btn switch" :class="{ on: trickRoom }">
-              <input
-                type="checkbox"
-                :checked="trickRoom"
-                :aria-label="t('speed.mod.trickroom')"
-                @change="toggleTrickRoom"
-              />
-              <!-- "TR" on phones, the usual shorthand, so the bar fits on one line. -->
-              <span class="long" aria-hidden="true">{{ t('speed.mod.trickroom') }}</span>
-              <span class="short" aria-hidden="true">{{ t('speed.trShort') }}</span>
-            </label>
-          </div>
-        </div>
-
-        <div v-if="!entered || (!showAll && !data)" class="ladder" aria-hidden="true">
-          <div v-for="i in 12" :key="i" class="tier skeleton"><span class="bone"></span></div>
-        </div>
-        <ol v-else ref="ladder" class="ladder" :class="{ finding: finding && !onlyFound }">
-          <li
-            v-for="tier in tiers"
-            :key="tier.speed"
-            class="tier"
-            :class="{ hit: tier.hit, at: tier.speed === at, 'has-mine': tier.list.some((e) => e.mine) }"
-            :data-speed="tier.speed"
-          >
-            <a
-              v-tip="canHover && t('speed.rowLink')"
-              :href="rowHref(tier.speed)"
-              class="speed num"
-              :aria-current="tier.speed === at ? 'true' : undefined"
-              @click.prevent="share(tier.speed)"
-              >{{ tier.speed
-              }}<span v-if="copied === tier.speed" class="copied" role="status">{{ t('speed.copied') }}</span></a
-            >
-            <ul class="mons">
-              <!-- With yours set, a tap on a chip measures yours against it (caught before the link follows); the link
-                 still opens in a new tab. -->
-              <li v-for="e in tier.list" :key="chipKey(e)" @click.capture="onChip($event, e)">
-                <AppLink
-                  v-tip="canHover && !e.mine && tip(e)"
-                  :to="{ name: 'pokemon', params: { id: e.id } }"
-                  class="chip"
-                  :class="{
-                    hit: isHit(e) && !onlyFound,
-                    boost: e.boost && !e.live,
-                    extra: e.extra,
-                    yours: e.mine,
-                    versus: vsKey === chipKey(e),
-                    rival: !!versus && e.id === versus.e.id && vsKey !== chipKey(e),
-                  }"
+            <!-- What to do with the one found, on a row under the filters (the field's own cross clears it): swap it, and
+                 keep it on the ladder, joined to the ones kept. -->
+            <div v-if="found || keptShown.length" class="find-actions">
+              <!-- Yours and the one found swapped, once there's yours; its icon alone on the narrowest phones, so the row
+                 still fits. -->
+              <button
+                v-if="found"
+                type="button"
+                class="btn find-mode find-swap"
+                :disabled="!mine"
+                :aria-label="t('compare.swap')"
+                @click="swapMine"
+              >
+                <ArrowLeftRight :size="16" aria-hidden="true" /><span class="swap-text">{{ t('compare.swap') }}</span>
+              </button>
+              <!-- Keeping the one found on the ladder (when it's not on it already: beyond the top), joined to the drop-down
+                   of the ones kept, saying how many. -->
+              <span v-if="(found && !showAll && beyondTop(found)) || keptShown.length" class="keep-group">
+                <label
+                  v-if="found && !showAll && beyondTop(found)"
+                  v-tip="canHover && t('speed.keep')"
+                  class="btn switch find-mode"
+                  :class="{ on: kept.includes(found) }"
                 >
-                  <span class="who">
-                    <PokemonIcon :id="e.id" />
-                    <span>{{ e.species }}</span>
-                    <span v-if="e.forme" class="forme">{{ e.forme }}</span>
-                  </span>
-                  <span v-if="e.mine" class="tags">
-                    <span class="tag">{{ t('speed.yoursTag') }}</span>
-                    <span class="tag"><EffectTag :effect="myNature" /></span>
-                    <span class="tag">{{ t('speed.points', { n: myPoints }) }}</span>
-                  </span>
-                  <span v-else-if="e.boost" class="tags">
-                    <span class="tag boost-label"
-                      ><ItemIcon v-if="e.boost.ref.kind === 'item'" :id="e.boost.ref.id" :scale="0.67" />{{
-                        boostLabel(e.boost)
-                      }}</span
-                    >
-                    <span v-if="whenTag(e.boost)" class="tag">{{ whenTag(e.boost) }}</span>
-                    <span v-if="e.share !== undefined" class="tag">{{ percent(e.share) }}</span>
-                    <!-- The build it's placed at, its most common (a benchmark, with no sets in the snapshot), which the
+                  <input
+                    type="checkbox"
+                    :checked="kept.includes(found)"
+                    :aria-label="t('speed.keep')"
+                    @change="toggleKept(found)"
+                  />
+                  {{ t('speed.keepShort') }}
+                </label>
+                <SpeedKeptMenu
+                  v-if="keptShown.length"
+                  :ids="keptShown"
+                  :found
+                  @find="setFound"
+                  @remove="toggleKept"
+                  @clear="set('keep', undefined)"
+                />
+              </span>
+            </div>
+            <p v-if="foundNote" class="find-note muted small">{{ foundNote }}</p>
+            <!-- Filtering the ladder: by type, ability and item, each a choice of what the Pokémon shown have. -->
+            <div
+              id="speed-filters"
+              class="filters"
+              :class="{ folded: !filtersOpen }"
+              role="group"
+              :aria-label="t('speed.filter')"
+            >
+              <span class="small filters-label">{{ t('speed.filter') }}</span>
+              <span class="filter" :class="{ on: filterType }">
+                <TypeIcon v-if="filterType" :type="filterType" class="filter-icon" aria-hidden="true" />
+                <select
+                  class="search filter-pick"
+                  :value="filterType ?? ''"
+                  :aria-label="t('speed.filterType')"
+                  @change="set('type', ($event.target as HTMLSelectElement).value || undefined)"
+                >
+                  <option value="">{{ t('speed.anyType') }}</option>
+                  <option v-for="o in typeOptions" :key="o.id" :value="o.id">{{ o.name }} ({{ o.n }})</option>
+                </select>
+              </span>
+              <span class="filter" :class="{ on: filterAbility }">
+                <select
+                  class="search filter-pick"
+                  :value="filterAbility ?? ''"
+                  :aria-label="t('speed.filterAbility')"
+                  @change="set('ability', ($event.target as HTMLSelectElement).value || undefined)"
+                >
+                  <option value="">{{ t('speed.anyAbility') }}</option>
+                  <option v-for="o in abilityOptions" :key="o.id" :value="o.id">{{ o.name }} ({{ o.n }})</option>
+                </select>
+              </span>
+              <span v-if="itemsFilterable" class="filter" :class="{ on: filterItem }">
+                <ItemIcon v-if="filterItem" :id="filterItem" :scale="0.67" class="filter-icon" aria-hidden="true" />
+                <select
+                  class="search filter-pick"
+                  :value="filterItem ?? ''"
+                  :aria-label="t('speed.filterItem')"
+                  @change="set('item', ($event.target as HTMLSelectElement).value || undefined)"
+                >
+                  <option value="">{{ t('speed.anyItem') }}</option>
+                  <option v-for="o in itemOptions" :key="o.id" :value="o.id">{{ o.name }} ({{ o.n }})</option>
+                </select>
+              </span>
+              <button v-if="filtering" type="button" class="btn inverted filters-clear" @click="clearFilters">
+                <X :size="14" aria-hidden="true" />{{ t('speed.clearFilters') }}
+              </button>
+            </div>
+          </div>
+          <!-- With yours picked, the ladder is its opponents: said over it, with what tapping one does. -->
+          <div v-if="mine" class="band opponents-head">
+            <strong>{{ t('speed.opponentsHead') }}</strong>
+            <span>{{ t('speed.opponentsHint') }}</span>
+            <!-- The weather or terrain they're in, from yours' ability, at the band's end. -->
+            <span v-if="inPlay" class="field-tag">{{ fieldLabel(inPlay) }}</span>
+          </div>
+          <!-- Pinned over the ladder once the controls are scrolled away; takes no room of its own. -->
+          <div ref="pinMark" aria-hidden="true"></div>
+          <div class="pin">
+            <div v-if="pinned" class="pinned" :class="{ opponents: mine }" data-top-bar>
+              <div class="find">
+                <PokemonPicker
+                  ref="pinnedFindPicker"
+                  recent
+                  :model-value="found"
+                  :ids="findableIds"
+                  :placeholder="t('speed.findShort')"
+                  hotkey="/"
+                  :title="findTitle"
+                  :tone="mine ? 'opponent' : undefined"
+                  list-width-of=".pinned"
+                  speed
+                  :ranks
+                  clearable
+                  @update:model-value="setFound"
+                />
+                <label v-if="found && !showAll" class="btn switch find-mode" :class="{ on: onlyFound }">
+                  <input
+                    type="checkbox"
+                    :checked="onlyFound"
+                    :aria-label="t('speed.findOnly', { name: refName(pokemon(found)) })"
+                    @change="findMode = onlyFound ? 'mark' : 'only'"
+                  />
+                  {{ onlyLabel[0] }}<PokemonIcon :id="found" />{{ onlyLabel[1] }}
+                </label>
+              </div>
+              <label v-if="!showAll && boostsAvailable" class="btn switch" :class="{ on: showBoosts }">
+                <input type="checkbox" :checked="showBoosts" @change="toggleBoosts" />
+                {{ t('speed.boosts') }}
+              </label>
+              <label class="btn switch" :class="{ on: trickRoom }">
+                <input
+                  type="checkbox"
+                  :checked="trickRoom"
+                  :aria-label="t('speed.mod.trickroom')"
+                  @change="toggleTrickRoom"
+                />
+                <!-- "TR" on phones, the usual shorthand, so the bar fits on one line. -->
+                <span class="long" aria-hidden="true">{{ t('speed.mod.trickroom') }}</span>
+                <span class="short" aria-hidden="true">{{ t('speed.trShort') }}</span>
+              </label>
+            </div>
+          </div>
+
+          <div v-if="!entered || (!showAll && !data)" class="ladder" aria-hidden="true">
+            <div v-for="i in 12" :key="i" class="tier skeleton"><span class="bone"></span></div>
+          </div>
+          <ol v-else ref="ladder" class="ladder" :class="{ finding: finding && !onlyFound }">
+            <li
+              v-for="tier in tiers"
+              :key="tier.speed"
+              class="tier"
+              :class="{ hit: tier.hit, at: tier.speed === at, 'has-mine': tier.list.some((e) => e.mine) }"
+              :data-speed="tier.speed"
+            >
+              <a
+                v-tip="canHover && t('speed.rowLink')"
+                :href="rowHref(tier.speed)"
+                class="speed num"
+                :aria-current="tier.speed === at ? 'true' : undefined"
+                @click.prevent="share(tier.speed)"
+                >{{ tier.speed
+                }}<span v-if="copied === tier.speed" class="copied" role="status">{{ t('speed.copied') }}</span></a
+              >
+              <ul class="mons">
+                <!-- With yours set, a tap on a chip measures yours against it (caught before the link follows); the link
+                 still opens in a new tab. -->
+                <li v-for="e in tier.list" :key="chipKey(e)" @click.capture="onChip($event, e)">
+                  <AppLink
+                    v-tip="canHover && !e.mine && tip(e)"
+                    :to="{ name: 'pokemon', params: { id: e.id } }"
+                    class="chip"
+                    :class="{
+                      hit: isHit(e) && !onlyFound,
+                      boost: e.boost && !e.live,
+                      extra: e.extra,
+                      yours: e.mine,
+                      versus: vsKey === chipKey(e),
+                      rival: !!versus && e.id === versus.e.id && vsKey !== chipKey(e),
+                    }"
+                  >
+                    <span class="who">
+                      <PokemonIcon :id="e.id" />
+                      <span>{{ e.species }}</span>
+                      <span v-if="e.forme" class="forme">{{ e.forme }}</span>
+                    </span>
+                    <span v-if="e.mine" class="tags">
+                      <span class="tag">{{ t('speed.yoursTag') }}</span>
+                      <span class="tag"><EffectTag :effect="myNature" /></span>
+                      <span class="tag">{{ t('speed.points', { n: myPoints }) }}</span>
+                    </span>
+                    <span v-else-if="e.boost" class="tags">
+                      <span class="tag boost-label"
+                        ><ItemIcon v-if="e.boost.ref.kind === 'item'" :id="e.boost.ref.id" :scale="0.67" />{{
+                          boostLabel(e.boost)
+                        }}</span
+                      >
+                      <span v-if="whenTag(e.boost)" class="tag">{{ whenTag(e.boost) }}</span>
+                      <span v-if="e.share !== undefined" class="tag">{{ percent(e.share) }}</span>
+                      <!-- The build it's placed at, its most common (a benchmark, with no sets in the snapshot), which the
                          data doesn't tie to the boost: said as such. -->
-                    <template v-if="e.live">
+                      <template v-if="e.live">
+                        <span class="tag"><EffectTag :effect="e.effect!" /></span>
+                        <span class="tag">{{ t('speed.points', { n: e.points! }) }}</span>
+                      </template>
+                      <span v-else-if="e.bench" class="tag boost-at">{{
+                        t('speed.boostAtBench', { bench: benchLabel(e.bench) })
+                      }}</span>
+                      <span v-else class="tag boost-at"
+                        >{{ boostAt[0] }}<EffectTag :effect="e.effect!" />{{
+                          boostAt[1].replace('{points}', String(e.points))
+                        }}</span
+                      >
+                    </span>
+                    <span v-else-if="e.bench && e.extra" class="tags">
+                      <span class="tag">{{ benchLabel(e.bench) }}</span>
+                    </span>
+                    <span v-else-if="!e.bench" class="tags">
                       <span class="tag"><EffectTag :effect="e.effect!" /></span>
                       <span class="tag">{{ t('speed.points', { n: e.points! }) }}</span>
-                    </template>
-                    <span v-else-if="e.bench" class="tag boost-at">{{
-                      t('speed.boostAtBench', { bench: benchLabel(e.bench) })
-                    }}</span>
-                    <span v-else class="tag boost-at"
-                      >{{ boostAt[0] }}<EffectTag :effect="e.effect!" />{{
-                        boostAt[1].replace('{points}', String(e.points))
-                      }}</span
-                    >
-                  </span>
-                  <span v-else-if="e.bench && e.extra" class="tags">
-                    <span class="tag">{{ benchLabel(e.bench) }}</span>
-                  </span>
-                  <span v-else-if="!e.bench" class="tags">
-                    <span class="tag"><EffectTag :effect="e.effect!" /></span>
-                    <span class="tag">{{ t('speed.points', { n: e.points! }) }}</span>
-                    <span class="tag">{{ percent(e.share!) }}</span>
-                  </span>
-                </AppLink>
-              </li>
-            </ul>
-          </li>
-        </ol>
+                      <span class="tag">{{ percent(e.share!) }}</span>
+                    </span>
+                  </AppLink>
+                </li>
+              </ul>
+            </li>
+          </ol>
 
-        <!-- Outside the page so the page transition's transform can't move it. -->
-        <Teleport to="body">
-          <AnimatePresence>
-            <motion.div
-              v-if="versus && !side"
-              key="versus"
-              class="versus-float"
-              :initial="{ opacity: 0, y: 8 }"
-              :animate="{ opacity: 1, y: 0 }"
-              :exit="{ opacity: 0, y: 8 }"
-              :transition="FADE"
-            >
-              <VersusCard v-bind="versus.card" @close="set('vs', undefined)" @locate="locateVersus" />
-            </motion.div>
-            <motion.button
-              v-else-if="match"
-              key="match"
-              type="button"
-              class="btn primary to-match"
-              :initial="{ opacity: 0, y: 8 }"
-              :animate="{ opacity: 1, y: 0 }"
-              :exit="{ opacity: 0, y: 8 }"
-              :transition="FADE"
-              :while-press="PRESS"
-              @click="toMatch"
-            >
-              {{ match.name }} {{ match.up ? '↑' : '↓' }}
-            </motion.button>
-          </AnimatePresence>
-        </Teleport>
+          <!-- Outside the page so the page transition's transform can't move it. -->
+          <Teleport to="body">
+            <AnimatePresence>
+              <motion.div
+                v-if="versus && !side"
+                key="versus"
+                class="versus-float"
+                :initial="{ opacity: 0, y: 8 }"
+                :animate="{ opacity: 1, y: 0 }"
+                :exit="{ opacity: 0, y: 8 }"
+                :transition="FADE"
+              >
+                <VersusCard v-bind="versus.card" @close="set('vs', undefined)" @locate="locateVersus" />
+              </motion.div>
+              <motion.button
+                v-else-if="match"
+                key="match"
+                type="button"
+                class="btn primary to-match"
+                :initial="{ opacity: 0, y: 8 }"
+                :animate="{ opacity: 1, y: 0 }"
+                :exit="{ opacity: 0, y: 8 }"
+                :transition="FADE"
+                :while-press="PRESS"
+                @click="toMatch"
+              >
+                {{ match.name }} {{ match.up ? '↑' : '↓' }}
+              </motion.button>
+            </AnimatePresence>
+          </Teleport>
 
-        <p v-if="entered && (showAll || data)" class="muted small note">{{ t('speed.count', { n: monCount }) }}</p>
-        <p v-if="entered && (showAll || data) && filtering && !monCount" class="muted small note">
-          {{ t('speed.filteredNone') }}
-        </p>
-        <p v-if="showMegas" class="muted small note">{{ t('speed.megaNote') }}</p>
-        <p v-if="!showAll && snapshot" class="muted small note">
-          {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
-        </p>
+          <p v-if="entered && (showAll || data)" class="muted small note">{{ t('speed.count', { n: monCount }) }}</p>
+          <p v-if="entered && (showAll || data) && filtering && !monCount" class="muted small note">
+            {{ t('speed.filteredNone') }}
+          </p>
+          <p v-if="showMegas" class="muted small note">{{ t('speed.megaNote') }}</p>
+          <p v-if="!showAll && snapshot" class="muted small note">
+            {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
+          </p>
+        </div>
       </div>
       <!-- Your Pokémon: where it lands among the others, and what it takes to move before one of them. A sidebar that
            stays in view beside the ladder on wide screens, so tapping a chip anywhere shows the answer; above it, narrower. -->
@@ -1957,6 +1949,27 @@ const { entered } = usePageEntered()
                 </p>
               </section>
             </template>
+            <!-- Yours side by side with the opponent tapped (else the one found), on the comparison's page: greyed out
+                 until there are both, saying why in a tooltip, or under it where there's no hovering. -->
+            <section class="yours-section yours-compare">
+              <AppLink v-if="compareTarget" :to="compareTarget" class="btn primary compare-go"
+                ><Columns2 :size="16" aria-hidden="true" />{{ t('compare.open')
+                }}<ArrowRight :size="16" aria-hidden="true"
+              /></AppLink>
+              <template v-else>
+                <span
+                  v-tip="canHover && t(mine ? 'speed.compareNeedsOpponent' : 'speed.compareNeeds')"
+                  class="compare-off"
+                >
+                  <button type="button" class="btn compare-go" disabled>
+                    <Columns2 :size="16" aria-hidden="true" />{{ t('compare.open') }}
+                  </button>
+                </span>
+                <p v-if="!canHover" class="muted small">
+                  {{ t(mine ? 'speed.compareNeedsOpponent' : 'speed.compareNeeds') }}
+                </p>
+              </template>
+            </section>
             <!-- Dropped from the bar, the card has no band: its actions at its foot instead,
                Confirm putting it away (Close, a plain button, with none picked). -->
             <div v-if="!side && !phone" class="drop-actions">
@@ -2116,12 +2129,7 @@ const { entered } = usePageEntered()
 .head::-webkit-details-marker {
   display: none;
 }
-/* Beside the heading, with yours picked: the opponents tag, as small as the text under it. */
-.head .head-tag {
-  margin-left: 10px;
-  font-size: 0.55em;
-}
-/* Its line's items centered on it, so the tag lines up with what's active beside it, centered on the heading too. */
+/* Its line's items centered on it. */
 .head h1 {
   grid-area: title;
   display: flex;
@@ -2131,13 +2139,7 @@ const { entered } = usePageEntered()
 }
 .active {
   grid-area: active;
-  --gap: 4px;
-}
-/* Beside the heading, centered on it by its chips, not the room under them for their shadows. */
-@media (min-width: 721px) {
-  .active {
-    margin-bottom: -4px;
-  }
+  min-width: 0;
 }
 .active .item {
   flex: none;
@@ -2146,17 +2148,6 @@ const { entered } = usePageEntered()
   white-space: nowrap;
   background: var(--panel-alt);
   border: 1px solid var(--border-strong);
-}
-/* The options on, as their switches show when on; the modifiers among them in short. */
-.active .item:is(.option, .mod) {
-  font-weight: bold;
-  background: var(--sel);
-  border-color: var(--ink);
-}
-.active .item.icon {
-  display: inline-flex;
-  align-items: center;
-  padding-block: 0;
 }
 /* These sections open and close at once, without the slide and fade collapsible sections have (main.css). Their
    headings take taps as taps: quick ones neither select the text nor zoom. */
@@ -2182,12 +2173,6 @@ const { entered } = usePageEntered()
   flex-direction: column;
   gap: 8px;
 }
-.view-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 16px;
-}
 .find {
   flex: 1 1 14em;
   max-width: 30em;
@@ -2195,13 +2180,61 @@ const { entered } = usePageEntered()
 .find :deep(.search-box) {
   max-width: none;
 }
-/* The options: a grid of switches (buttons holding their checkbox) and the modifiers' disclosure, as wide as the
-   widest of them, each with what it does beside it; on phones, under it. */
-.options {
-  display: grid;
-  grid-template-columns: max-content 1fr;
+/* Which Pokémon are shown: folder tabs on the page, standing on the panel's top edge. The one shown is in the
+   toolbar's color, outlined as the panel is, and covers the panel's border under it, so it and the toolbar are one
+   shape; the other is plain text on the page. */
+.view-tabs {
+  display: flex;
+  gap: 4px;
+  padding-inline: 8px;
+}
+.view-tab {
+  position: relative;
+  z-index: 1;
+  margin-bottom: -2px;
+  padding: 6px 14px 8px;
+  font: inherit;
+  font-weight: bold;
+  color: var(--muted);
+  background: none;
+  border: 2px solid transparent;
+  border-bottom: none;
+  cursor: pointer;
+}
+.view-tab:hover {
+  color: var(--text);
+}
+.view-tab.on {
+  color: var(--text);
+  background: var(--toolbar);
+  border-color: var(--ink);
+}
+/* On phones, the tabs share the width. */
+@media (max-width: 720px) {
+  .view-tab {
+    flex: 1;
+    padding-inline: 8px;
+  }
+}
+/* The toolbar's first line: the switches (buttons holding their checkbox) and the modifiers' disclosure, compact,
+   wrapping where they don't fit, the reset at the line's end; the modifiers, opened, under it. Over the find. */
+.find-row > :is(.options-line, .all-mods) {
+  flex-basis: 100%;
+  order: -1;
+}
+.options-line {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 4px 10px;
+  gap: 6px 8px;
+}
+.options-line > .btn {
+  min-height: 0;
+  padding: 3px 10px;
+  font-size: 0.9em;
+}
+.options-line > .reset {
+  margin-left: auto;
 }
 .switch {
   justify-content: flex-start;
@@ -2214,16 +2247,16 @@ const { entered } = usePageEntered()
 .switch input {
   margin: 0;
 }
-/* The modifiers' disclosure: a button, a plus, what it opens and the arrow saying whether it is. */
+/* The modifiers' disclosure: a button, a plus, what it opens (folded, the ones on in short) and the arrow saying
+   whether it is. */
 .disclosure {
   justify-self: start;
   justify-content: flex-start;
   gap: 6px;
-  margin-top: 6px;
   font-weight: bold;
 }
-.disclosure + .muted {
-  margin-top: 6px;
+.mods-on {
+  font-weight: normal;
 }
 /* The disclosures' arrows: as large as the text, close to it, in a column as wide as either so the text doesn't shift
    when one turns. */
@@ -2247,9 +2280,8 @@ const { entered } = usePageEntered()
 .mod.on {
   background: var(--sel);
 }
-/* The modifiers that apply to everyone, under the options, across both columns. */
+/* The modifiers that apply to everyone, under the options. */
 .all-mods {
-  grid-column: 1 / -1;
   padding: 8px;
   background: var(--panel-alt);
   border: 1px dashed var(--border-strong);
@@ -2269,13 +2301,17 @@ const { entered } = usePageEntered()
 .list {
   --speed-col: 2.2em;
 }
+/* The toolbar's color (the find's band and the tab shown): the panel's own, darker, rather than the accent's tint. */
+.main-col {
+  --toolbar: color-mix(in srgb, var(--ink) 25%, var(--panel));
+}
 /* The opponents band: red, on top of the panel. Beats retro.css's bands. */
 :root:root .list.banded > .band.opponents-head {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 2px 10px;
-  margin-bottom: 0;
+  margin-bottom: 6px;
   color: var(--opponent-text);
   background: var(--opponent);
 }
@@ -2303,20 +2339,21 @@ const { entered } = usePageEntered()
   margin-left: auto;
 }
 .field-source {
-  display: none;
   font-weight: normal;
 }
-/* The panel's bands, stacked: the opponents' (with yours picked), then the find's on the rows. */
+/* The panel's bands, stacked: the tabs, the toolbar, then the opponents' (with yours picked), on the rows. */
 :root:root .list.banded > .band.find-row {
   margin-bottom: 6px;
-  padding-block: 8px;
+  padding-block: 10px;
 }
-:root:root .list.banded > .opponents-head + .band.find-row {
+:root:root .list.banded > .band.find-row:has(+ .opponents-head) {
+  margin-bottom: 0;
+}
+:root:root .list.banded > .band + .band {
   margin-top: 0;
 }
-/* The find's band: the panel's own color, darker, rather than the accent's tint. */
 :root:root .list.banded > .band.find-row {
-  background: color-mix(in srgb, var(--ink) 25%, var(--panel));
+  background: var(--toolbar);
 }
 /* The find's band, with why the Pokémon found shows as it does, when it isn't in the top, on a line of its own. */
 .find-row {
@@ -2379,86 +2416,24 @@ const { entered } = usePageEntered()
   align-self: flex-start;
   justify-self: start;
 }
-/* The Pokémon kept, on a line of their own: each its name, which finds it, and a cross. */
-.kept {
-  display: flex;
-  flex-basis: 100%;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-/* Its label as the band's other labels: small, bold, quieter. */
-.kept-label {
-  margin-right: 2px;
-  font-size: 0.85em;
-  font-weight: bold;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-/* Each kept one a chip, as the ladder's are: its name and its cross, a line between them; marked while it's the one
-   found. */
-.kept-mon {
-  display: inline-flex;
-  align-items: stretch;
-  background: var(--panel);
-  border: 1px solid var(--border-strong);
-  box-shadow: var(--hard-sm);
-}
-.kept-mon.found {
-  background: var(--sel);
-}
-.kept-mon > button {
-  display: inline-flex;
-  align-items: center;
-  min-height: 26px;
-  padding: 0 6px;
-  line-height: 1;
-  font: inherit;
-  color: var(--text);
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-.kept-find {
-  gap: 4px;
-  padding-left: 2px;
-}
-.kept-find :deep(.sheet-icon) {
-  margin-block: -8px;
-}
-.kept-remove {
-  color: var(--muted);
-  border-left: 1px solid var(--border-strong) !important;
-}
-.kept-mon > button:hover {
-  background: var(--hover);
-}
-.kept-mon > .kept-remove:hover {
-  color: var(--text);
-}
-.kept-all {
-  gap: 4px;
-  min-height: 28px;
-  padding: 0 8px;
-  font-size: 1em;
-  line-height: 1;
-}
-/* The toggles and the clear button as tall as the search beside them. */
-.find-row :is(.find-mode, .find-clear) {
+/* The toggles as tall as the search beside them. */
+.find-row .find-mode {
   align-self: stretch;
 }
 /* The find with the filters' fold beside it, the filters folded under it, then what to do with the one found, why it
    shows as it does, and what finding does, each on a row of its own. */
+/* The filters' fold joined to the find's field, at its end: one outline, a line between them (over the row's gap and
+   the field's border), still where it is when hovered. */
 .filters-toggle {
   display: inline-flex;
   flex: none;
   align-self: stretch;
   order: 1;
+  margin-left: -10px;
   padding-inline: 10px;
+}
+:root:root .filters-toggle:hover:not(:disabled) {
+  transform: none;
 }
 .filters-toggle.on {
   background: var(--sel);
@@ -2469,31 +2444,43 @@ const { entered } = usePageEntered()
 .filters.folded {
   display: none;
 }
-.find-modes,
+/* Only it beside the find, as tall as the row; under them the filters, opened, then what to do with the one found and
+   the ones kept, and why the one found shows as it does. */
+.find-modes {
+  display: flex;
+  align-self: stretch;
+  order: 1;
+}
 .find-actions {
+  position: relative;
   display: flex;
   flex-basis: 100%;
   flex-wrap: wrap;
   gap: 8px;
-}
-.find-actions {
   order: 3;
 }
 .find-note {
   order: 4;
 }
-.find-modes {
-  order: 5;
+/* Only it, while there's none found: its room kept, nothing shown. */
+.find-mode.unshown {
+  visibility: hidden;
 }
-.kept {
-  order: 6;
+/* The keep and the ones kept, one pill: a single outline, a line between them. */
+.keep-group {
+  display: flex;
 }
-/* On phones, the three on one line, sharing it. */
-@media (max-width: 720px) {
-  .find-actions > .btn {
-    flex: 1 1 auto;
-    justify-content: center;
-    padding-inline: 8px;
+.keep-group > :not(:first-child) :deep(.btn),
+.keep-group > .btn:not(:first-child) {
+  margin-left: -2px;
+}
+:root:root .keep-group > .btn:not(:last-child) {
+  box-shadow: none;
+}
+/* Wider, the find no wider than a name needs. */
+@media (min-width: 721px) {
+  .find.find-row > .picker {
+    flex: 0 1 18em;
   }
 }
 .find-compare {
@@ -2778,6 +2765,20 @@ const { entered } = usePageEntered()
 .yours-section > .builds {
   align-self: stretch;
 }
+/* The comparison, across the card's foot; greyed out, its tooltip on what's around it (a disabled button gets no
+   pointer events). */
+.yours-compare > :is(.compare-go, .compare-off) {
+  align-self: stretch;
+}
+.compare-go {
+  gap: 6px;
+}
+.compare-off {
+  display: flex;
+}
+.compare-off > .compare-go {
+  flex: 1;
+}
 .mods-head {
   display: flex;
   flex-wrap: wrap;
@@ -2948,11 +2949,21 @@ const { entered } = usePageEntered()
 .help-body .legend dd:last-child {
   margin-bottom: 0;
 }
+/* What the options do, first in the well (on phones, after the intro). */
+.help-intro {
+  margin-bottom: 10px;
+}
+.help-intro > p {
+  margin: 0 0 8px;
+}
 .help-options {
   display: grid;
   grid-template-columns: max-content 1fr;
   gap: 2px 10px;
   margin: 8px 0 0;
+}
+.help-intro > .help-options {
+  margin-top: 0;
 }
 .help-options dt {
   font-weight: bold;
@@ -2984,9 +2995,6 @@ const { entered } = usePageEntered()
   .head h1 {
     flex-wrap: nowrap;
   }
-  .help-body .phone-only-block > :first-child {
-    margin-top: 0;
-  }
   /* Under the intro and the options. */
   .help-body > .legend {
     margin-top: 12px;
@@ -2999,30 +3007,6 @@ const { entered } = usePageEntered()
   }
   .help-options dd {
     margin-bottom: 4px;
-  }
-  /* The switches and the modifiers' disclosure in a row, their descriptions in the section above; under a rule, apart
-     from which Pokémon are shown, as they change the Speeds instead. */
-  .options {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px 10px;
-    margin-top: 4px;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
-  }
-  .options > .muted {
-    display: none;
-  }
-  /* Its description gone, what brings the field said on its button. */
-  .field-source {
-    display: inline;
-  }
-  .disclosure {
-    margin-top: 6px;
-  }
-  .all-mods {
-    flex-basis: 100%;
   }
   /* Each legend sample's description under it rather than squeezed beside it. */
   .help-body .legend {

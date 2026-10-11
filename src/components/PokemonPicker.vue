@@ -41,6 +41,8 @@ const props = defineProps<{
   taken?: readonly PokemonId[]
   /** Lists the Pokémon picked lately (in any picker with it) first while browsing, and records what's picked here. */
   recent?: boolean
+  /** On phones, its dialog has a button unpicking the one picked (wider, the field's clear button does). */
+  clearable?: boolean
   /** The key the page focuses the field with, hinted at in it (`SearchBox`'s). */
   hotkey?: string
   /** Lists them by usage, by these ranks (the meta's), each with its rank, rather than by name. */
@@ -122,6 +124,12 @@ function pick(id: PokemonId) {
   open.value = false
   sheet.value = false
   if (touch.matches) field.value?.querySelector('input')?.blur()
+}
+/** Unpicks the one picked, from the dialog on phones, and closes it. */
+function unpick() {
+  model.value = null
+  text.value = ''
+  sheet.value = false
 }
 // Whatever the pick changes above the field once the page has it (a panel appearing), the field stays where it was on
 // the screen.
@@ -380,8 +388,10 @@ const optionId = (i: number) => `${listId}-${i}`
         :taken="props.taken"
         :recent="props.recent"
         :ranks="props.ranks"
+        :clearable="props.clearable"
         @pick="pick"
         @close="sheet = false"
+        @clear="unpick"
       />
     </ModalDialog>
   </div>
