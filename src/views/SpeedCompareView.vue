@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeftRight, ChevronDown, Plus, RotateCcw, Trash2 } from '@lucide/vue'
+import { ArrowLeftRight, Box, ChevronDown, Plus, RotateCcw, Trash2 } from '@lucide/vue'
 import { pokemon, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
 import { has, usageRanks } from '@/data/meta'
@@ -476,7 +476,7 @@ function resetAll() {
     <div class="panel toolbar">
       <label v-tip="canHover && t('compare.trickroomTip')" class="btn switch tr-switch" :class="{ on: trickRoom }">
         <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
-        {{ t('speed.mod.trickroom') }}
+        <Box :size="16" aria-hidden="true" />{{ t('speed.mod.trickroom') }}
       </label>
       <template v-if="mode === 'vs' && anyPicked">
         <button type="button" class="btn" @click="swap">

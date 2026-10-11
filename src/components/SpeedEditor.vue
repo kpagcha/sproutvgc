@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, useTemplateRef } from 'vue'
-import { ChevronsDown, ChevronsUp, Trash2 } from '@lucide/vue'
+import { computed, useTemplateRef, type Component } from 'vue'
+import { ChevronsDown, ChevronsUp, Trash2, Wind, Zap } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { percent } from '@/data/meta'
 import type { Ranks } from '@/composables/usePokemonSearch'
@@ -56,6 +56,8 @@ const stageLabel = (s: string) => (Number(s) > 0 ? `+${s}` : s.replace('-', '−
 const mods = computed(() => modButtons(props.id))
 /** The nature effects' choice shows them as arrows beside "Spe", up and down, neutral as a word. */
 const EFFECT_ICONS = { up: ChevronsUp, neutral: undefined, down: ChevronsDown }
+/** The modifiers with no item to show, by an icon: Tailwind's wind, paralysis' bolt. */
+const MOD_ICONS: Partial<Record<string, Component>> = { tailwind: Wind, paralysis: Zap }
 const naturesOf = (e: NatureEffect) =>
   e === 'neutral' ? t('speed.naturesNeutral') : NATURES_BY_EFFECT[e].map(natureName).join(', ')
 const canHover = window.matchMedia('(hover: hover)').matches
@@ -168,7 +170,12 @@ const canHover = window.matchMedia('(hover: hover)').matches
             :aria-pressed="props.build.toggles.includes(m.key)"
             @click="toggle(m.key)"
           >
-            <ItemIcon v-if="m.item" :id="m.item" :scale="0.75" class="mod-item" />{{ m.label }}
+            <ItemIcon v-if="m.item" :id="m.item" :scale="0.75" class="mod-item" /><component
+              :is="MOD_ICONS[m.key]"
+              v-else-if="MOD_ICONS[m.key]"
+              :size="16"
+              aria-hidden="true"
+            />{{ m.label }}
           </button>
         </div>
         <SegmentedControl

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch, type Component } from 'vue'
 import { AnimatePresence, motion } from 'motion-v'
 import { useRouter } from 'vue-router'
 import {
@@ -9,10 +9,14 @@ import {
   ChevronsUp,
   Columns2,
   Funnel,
+  Box,
   Plus,
+  Rocket,
   RotateCcw,
   Trash2,
+  Wind,
   X,
+  Zap,
 } from '@lucide/vue'
 import {
   ability,
@@ -152,6 +156,8 @@ type Toggle = (typeof TOGGLES)[number]
 const toggleMod = (k: Toggle) => set(k, flag(k) ? undefined : '1')
 /** The modifiers that are items, shown with their icon. */
 const MOD_ITEMS: Partial<Record<string, ItemId>> = { scarf: 'choicescarf', ironball: 'ironball' }
+/** The modifiers with no item to show, by an icon: Tailwind's wind, paralysis' bolt. */
+const MOD_ICONS: Partial<Record<string, Component>> = { tailwind: Wind, paralysis: Zap }
 const mods = computed<SpeedMods>(() => ({
   tailwind: flag('tailwind'),
   scarf: flag('scarf'),
@@ -1397,16 +1403,12 @@ const { entered } = usePageEntered()
               <template v-if="!showAll && boostsAvailable">
                 <label v-tip="canHover && t('speed.boostsDesc')" class="btn switch" :class="{ on: showBoosts }">
                   <input type="checkbox" :checked="showBoosts" @change="toggleBoosts" />
-                  {{ t('speed.boosts') }}
+                  <Rocket :size="16" aria-hidden="true" />{{ t('speed.boosts') }}
                 </label>
               </template>
-              <label class="btn switch" :class="{ on: showMegas }">
-                <input type="checkbox" :checked="showMegas" @change="toggleMegas" />
-                {{ t('speed.megas') }}
-              </label>
               <label class="btn switch" :class="{ on: trickRoom }">
                 <input type="checkbox" :checked="trickRoom" @change="toggleTrickRoom" />
-                {{ t('speed.mod.trickroom') }}
+                <Box :size="16" aria-hidden="true" />{{ t('speed.mod.trickroom') }}
               </label>
               <!-- The weather or terrain in play, from yours' ability: said as a switch that's on, what brings it on it, its
                cross turning the ability off. -->
@@ -1434,6 +1436,10 @@ const { entered } = usePageEntered()
                 }}<span v-if="!modsOpen && modsOn.length" class="mods-on">{{ modsOn.join(' · ') }}</span
                 ><span class="marker" aria-hidden="true">{{ modsOpen ? '▾' : '▸' }}</span>
               </button>
+              <label class="btn switch" :class="{ on: showMegas }">
+                <input type="checkbox" :checked="showMegas" @change="toggleMegas" />
+                {{ t('speed.megas') }}
+              </label>
               <button v-if="controlsChanged" type="button" class="btn inverted reset" @click="resetControls">
                 <RotateCcw :size="16" aria-hidden="true" />{{ t('speed.resetControls') }}
               </button>
@@ -1449,9 +1455,12 @@ const { entered } = usePageEntered()
                 :aria-pressed="flag(k)"
                 @click="toggleMod(k)"
               >
-                <ItemIcon v-if="MOD_ITEMS[k]" :id="MOD_ITEMS[k]!" :scale="0.75" class="mod-item" />{{
-                  t(`speed.mod.${k}`)
-                }}
+                <ItemIcon v-if="MOD_ITEMS[k]" :id="MOD_ITEMS[k]!" :scale="0.75" class="mod-item" /><component
+                  :is="MOD_ICONS[k]"
+                  v-else-if="MOD_ICONS[k]"
+                  :size="16"
+                  aria-hidden="true"
+                />{{ t(`speed.mod.${k}`) }}
               </button>
               <SegmentedControl
                 class="phone-stacked"
@@ -1636,7 +1645,7 @@ const { entered } = usePageEntered()
               </div>
               <label v-if="!showAll && boostsAvailable" class="btn switch" :class="{ on: showBoosts }">
                 <input type="checkbox" :checked="showBoosts" @change="toggleBoosts" />
-                {{ t('speed.boosts') }}
+                <Rocket :size="16" aria-hidden="true" />{{ t('speed.boosts') }}
               </label>
               <label class="btn switch" :class="{ on: trickRoom }">
                 <input
@@ -1646,6 +1655,7 @@ const { entered } = usePageEntered()
                   @change="toggleTrickRoom"
                 />
                 <!-- "TR" on phones, the usual shorthand, so the bar fits on one line. -->
+                <Box :size="16" aria-hidden="true" />
                 <span class="long" aria-hidden="true">{{ t('speed.mod.trickroom') }}</span>
                 <span class="short" aria-hidden="true">{{ t('speed.trShort') }}</span>
               </label>
@@ -1921,7 +1931,12 @@ const { entered } = usePageEntered()
                     :aria-pressed="myToggles.has(m.key)"
                     @click="toggleMine(m.key)"
                   >
-                    <ItemIcon v-if="m.item" :id="m.item" :scale="0.75" class="mod-item" />{{ m.label }}
+                    <ItemIcon v-if="m.item" :id="m.item" :scale="0.75" class="mod-item" /><component
+                      :is="MOD_ICONS[m.key]"
+                      v-else-if="MOD_ICONS[m.key]"
+                      :size="16"
+                      aria-hidden="true"
+                    />{{ m.label }}
                   </button>
                 </div>
                 <SegmentedControl
