@@ -22,7 +22,7 @@ import {
   setSpread,
   type ListEntry,
 } from '@/lib/speedLineup'
-import { TIERS_PICKS, lastTiersQuery } from '@/lib/tiersState'
+import { TIERS_PICKS, lastCompareQuery, lastTiersQuery } from '@/lib/tiersState'
 import { confirmDialog } from '@/composables/useConfirm'
 import { useMeta } from '@/composables/useMeta'
 import { useOpenState } from '@/composables/useOpenState'
@@ -63,24 +63,17 @@ const ranks = computed(() => (data.value ? usageRanks(data.value) : undefined))
 const MODES = ['vs', 'order'] as const
 type Mode = (typeof MODES)[number]
 const mode = computed<Mode>(() => (route.query.mode === 'order' ? 'order' : 'vs'))
-// The view as last picked (`sproutvgc.compare.view`): the page opened bare (from the menu, nothing in its URL) comes
-// with it, put in the URL, so the URL always says what's shown and links (the speed tiers', with yours and an
-// opponent) open as they were made.
-const VIEW_KEY = 'sproutvgc.compare.view'
-function saveView(m: Mode) {
-  try {
-    if (m === 'order') localStorage.setItem(VIEW_KEY, 'order')
-    else localStorage.removeItem(VIEW_KEY)
-  } catch {
-    // Storage unavailable: the page opens on yours against opponents until it's picked again.
-  }
-}
-try {
-  if (!Object.keys(route.query).length && localStorage.getItem(VIEW_KEY) === 'order')
-    void router.replace({ query: { mode: 'order' } })
-} catch {
-  // Storage unavailable: the page opens on yours against opponents.
-}
+// The page opened bare (from the menu, nothing in its URL) comes as it was left (`lastCompareQuery`), put in the URL,
+// so the URL always says what's shown and links (the speed tiers', with yours and an opponent) open as they were made.
+if (!Object.keys(route.query).length && Object.keys(lastCompareQuery.value).length)
+  void router.replace({ query: lastCompareQuery.value })
+// Remembered as left: while it's the page shown, not as it leaves (still there, fading out, as the next page's query
+// comes in).
+watch(
+  () => route.query,
+  (q) => route.name === 'speedCompare' && (lastCompareQuery.value = { ...q }),
+  { immediate: true },
+)
 const trickRoom = computed(() => route.query.trickroom === '1')
 const canHover = window.matchMedia('(hover: hover)').matches
 const toggleTrickRoom = () => replace({ trickroom: trickRoom.value ? undefined : '1' })
@@ -385,7 +378,6 @@ function add(id: PokemonId | null) {
 
 // Switching to the speed order with its list empty brings the Pokémon compared over, to go on from them.
 function setMode(m: Mode) {
-  saveView(m)
   openKey.value = null
   const carried =
     m === 'order' && !list.value.length
@@ -456,7 +448,6 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 // Pokémon, their builds, the view, Trick Room).
 const allChanged = computed(() => Object.keys(route.query).length > 0)
 function resetAll() {
-  saveView('vs')
   openKey.value = null
   void router.replace({ query: {} })
 }

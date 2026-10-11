@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch, type Component } from 'vue'
 import { AnimatePresence, motion } from 'motion-v'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import {
   ArrowLeftRight,
   ArrowRight,
@@ -141,30 +141,6 @@ const bySets = computed(() => metaAvailable.value)
 const topN = computed(() => (show.value === 'top50' ? 50 : show.value === 'top100' ? 100 : Infinity))
 /** Whether the view needs the snapshot's data: for the sets, or to know who's most used. */
 const needsData = computed(() => bySets.value || show.value !== 'all')
-// Who's shown and how they're drawn as last picked (`sproutvgc.speedTiers.view`, those away from their defaults): the
-// page opened bare (from the menu, nothing in its URL) comes with them, put in the URL, so the URL always says what's
-// shown and links open as they were left. What was saved before these choices ('all') is left behind.
-const VIEW_KEY = 'sproutvgc.speedTiers.view'
-const REMEMBERED = ['show', 'view'] as const
-function saved(): Record<string, string> {
-  try {
-    const v = localStorage.getItem(VIEW_KEY)
-    if (!v || v === 'all') return {}
-    const q = Object.fromEntries(new URLSearchParams(v))
-    return Object.fromEntries(REMEMBERED.flatMap((k) => (q[k] ? [[k, renamed(k, q[k])]] : [])))
-  } catch {
-    return {}
-  }
-}
-function saveChoices(q: Record<string, unknown>) {
-  const kept = Object.fromEntries(REMEMBERED.flatMap((k) => (typeof q[k] === 'string' ? [[k, q[k] as string]] : [])))
-  try {
-    if (Object.keys(kept).length) localStorage.setItem(VIEW_KEY, new URLSearchParams(kept).toString())
-    else localStorage.removeItem(VIEW_KEY)
-  } catch {
-    // Storage unavailable: the page opens on the defaults until they're picked again.
-  }
-}
 /** One of the two set (the URL saying so only away from its default), a link from before them made explicit. */
 function choose(k: 'show' | 'view', v: string) {
   const q: Record<string, unknown> = { ...query.value }
@@ -175,13 +151,14 @@ function choose(k: 'show' | 'view', v: string) {
     for (const key of ['show', 'view'] as const) q[key] ??= LEGACY[key]
   }
   q[k] = v === DEFAULTS[k] ? undefined : v
-  saveChoices(q)
   void router.replace({ query: q as typeof query.value })
 }
+// The page opened bare (from the menu, nothing in its URL) comes as it was left (`lastTiersQuery`), put in the URL, so
+// the URL always says what's shown; the charts' name from before put right.
 {
-  const s = saved()
-  if (!Object.keys(query.value).length && Object.keys(s).length) void router.replace({ query: s })
-  else if (query.value.view === 'charts') void router.replace({ query: { ...query.value, view: 'charts' } })
+  const q = Object.keys(query.value).length ? query.value : lastTiersQuery.value
+  const fixed = q.view === 'ranges' ? { ...q, view: 'charts' } : q
+  if (fixed !== query.value) void router.replace({ query: fixed })
 }
 const trickRoom = computed(() => flag('trickroom'))
 
@@ -272,7 +249,6 @@ const live = (b: Boost) => b.ref.kind === 'ability' && !!inPlay.value && b.when 
 // found and kept), boosts on again, and the modifiers' sections folded.
 const allChanged = computed(() => Object.keys(query.value).length > 0 || !boostsPref.value)
 function resetAll() {
-  saveChoices({})
   boostsPref.value = true
   try {
     localStorage.removeItem(BOOSTS_KEY)
@@ -311,7 +287,6 @@ function resetControls() {
   for (const k of CONTROL_KEYS) delete q[k]
   // From an old link, its view kept.
   if (legacy.value) q.view = LEGACY.view
-  saveChoices(q)
   void router.replace({ query: q as typeof query.value })
   modsOpen.value = false
 }
@@ -1436,8 +1411,10 @@ watch(yoursOpen, (open) => {
   if (open && bar.value) dropHeight.value = window.innerHeight - bar.value.getBoundingClientRect().bottom - 8
 })
 
-// Remembered as left, for the comparison's way back.
-watch(query, (q) => (lastTiersQuery.value = { ...q }), { immediate: true })
+// Remembered as left, for the page opened bare and the comparison's way back: while it's the page shown, not as it
+// leaves (still there, fading out, as the next page's query comes in).
+const route = useRoute()
+watch(query, (q) => route.name === 'speedTiers' && (lastTiersQuery.value = { ...q }), { immediate: true })
 
 const { entered } = usePageEntered()
 </script>

@@ -4,23 +4,45 @@
 import { shallowRef, watch } from 'vue'
 import type { LocationQuery } from 'vue-router'
 
-// The speed tiers as the reader last left them (their URL's query), so coming back from the comparison finds them so.
-// Kept for the tab's session, so a reload of the comparison keeps it too.
-const TIERS_KEY = 'sproutvgc.speedTiers.last'
-function savedTiers(): LocationQuery {
-  try {
-    return JSON.parse(sessionStorage.getItem(TIERS_KEY) ?? '{}') as LocationQuery
-  } catch {
-    return {}
+// A speed page as the reader last left it (its URL's query), saved in the browser: the page opened bare (from the menu,
+// nothing in its URL) comes back so, and the comparison's way back finds the speed tiers so. Reset all clears it, the
+// URL emptied. `legacy`, from before the whole page was kept: the choices kept then, taken once and cleared.
+function remembered(key: string, legacy: (saved: string) => LocationQuery, legacyKey: string) {
+  function read(): LocationQuery {
+    try {
+      const v = localStorage.getItem(key)
+      if (v) return JSON.parse(v) as LocationQuery
+      const old = localStorage.getItem(legacyKey)
+      localStorage.removeItem(legacyKey)
+      return old ? legacy(old) : {}
+    } catch {
+      return {}
+    }
   }
+  const last = shallowRef<LocationQuery>(read())
+  watch(last, (q) => {
+    try {
+      if (Object.keys(q).length) localStorage.setItem(key, JSON.stringify(q))
+      else localStorage.removeItem(key)
+    } catch {
+      // Storage unavailable: remembered until the page reloads.
+    }
+  })
+  return last
 }
-export const lastTiersQuery = shallowRef<LocationQuery>(savedTiers())
-watch(lastTiersQuery, (q) => {
-  try {
-    sessionStorage.setItem(TIERS_KEY, JSON.stringify(q))
-  } catch {
-    // Storage unavailable: remembered until the page reloads.
-  }
-})
+
+/** The speed tiers as last left. Who's shown and how they were drawn, kept before as `show=…&view=…` ('all' older). */
+export const lastTiersQuery = remembered(
+  'sproutvgc.speedTiers.last',
+  (v) => (v === 'all' ? {} : Object.fromEntries(new URLSearchParams(v))),
+  'sproutvgc.speedTiers.view',
+)
+/** The speed comparison as last left. Its view, kept before: 'order', or nothing for yours against opponents. */
+export const lastCompareQuery = remembered(
+  'sproutvgc.compare.last',
+  (v): LocationQuery => (v === 'order' ? { mode: 'order' } : {}),
+  'sproutvgc.compare.view',
+)
+
 /** The speed tiers' query keys for yours, the Pokémon found and what's picked on the ladder. */
 export const TIERS_PICKS = ['mine', 'mynat', 'mypts', 'mymods', 'mystage', 'vs', 'find', 'at'] as const
