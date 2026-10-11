@@ -746,8 +746,10 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.findBeyond': 'Fuera de los {n} más usados: se muestra con sus sets, sin contar en cuánto mueve antes el tuyo.',
   'speed.findNoData':
     'Sin sets en estas estadísticas: se muestra con los repartos de referencia, sin contar en cuánto mueve antes el tuyo.',
-  'speed.allNote': 'Todos los Pokémon una vez, con el mismo reparto: {build}.',
-  'speed.at': 'Con',
+  'speed.rangesNote':
+    'Una fila por Velocidad base, su barra de Min− a Max+, sus Velocidades debajo (Min−, 0, Max, Max+). Tu Pokémon es la línea: color de acento, mueves tú primero; rojo, ellos.',
+  'speed.base': 'Base',
+  'speed.yoursAt': 'Tuyo {speed}',
   'speed.invest': '{build}: el {pct} de sus sets',
   'speed.rowLink': 'Enlace a esta Velocidad: lo copia',
   'speed.copied': 'Enlace copiado',

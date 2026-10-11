@@ -81,6 +81,7 @@ import ItemIcon from '@/components/ItemIcon.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import FolderTabs from '@/components/FolderTabs.vue'
 import StageStepper from '@/components/StageStepper.vue'
+import SpeedRanges, { type RangeRow } from '@/components/SpeedRanges.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import SpeedKeptMenu from '@/components/SpeedKeptMenu.vue'
 import TypeIcon from '@/components/TypeIcon'
@@ -810,6 +811,53 @@ const tiers = computed(() => {
     })
 })
 const finding = computed(() => found.value !== null)
+/**
+ * Every Pokémon shown, by base Speed (`SpeedRanges`): those sharing one have the same Speeds whatever their build, so
+ * a row each, with its Speeds at every benchmark (with the modifiers) and its Pokémon by name; the rows from those
+ * moving first, as the ladder goes.
+ */
+const rangeRows = computed<RangeRow[]>(() => {
+  if (!showAll.value) return []
+  const byBase = new Map<number, Entry[]>()
+  for (const e of entries.value) {
+    const base = POKEMON[e.id].stats[5]
+    byBase.set(base, [...(byBase.get(base) ?? []), e])
+  }
+  const dir = trickRoom.value ? 1 : -1
+  return [...byBase]
+    .sort((a, b) => (a[0] - b[0]) * dir)
+    .map(([base, list]) => ({
+      base,
+      speeds: Object.fromEntries(BENCHMARKS.map((b) => [b, inBattle(benchmark(base, b), mods.value)])) as Record<
+        Benchmark,
+        number
+      >,
+      mons: list
+        .sort(
+          (a, b) =>
+            a.species.localeCompare(b.species, locale.value) ||
+            (a.forme ?? '').localeCompare(b.forme ?? '', locale.value),
+        )
+        .map((e) => ({
+          id: e.id,
+          species: e.species,
+          forme: e.forme,
+          hit: e.id === found.value,
+          mine: e.id === mine.value,
+        })),
+    }))
+})
+/** A Pokémon tapped in a row: measured against, as a chip is, at the view's benchmark; yours isn't. */
+function onRangeChip(ev: MouseEvent, id: PokemonId) {
+  const e = entries.value.find((x) => x.id === id)
+  // Yours, tapped: nothing, as its chip on the ladder (its page still opens in a new tab).
+  if (id === mine.value) {
+    if (!ev.ctrlKey && !ev.metaKey && !ev.shiftKey) {
+      ev.preventDefault()
+      ev.stopPropagation()
+    }
+  } else if (e) onChip(ev, e)
+}
 /** How many Pokémon the ladder holds, each once however many Speeds it's at. */
 const monCount = computed(
   () => new Set(tiers.value.flatMap((t) => t.list.filter((e) => !e.mine).map((e) => e.id))).size,
@@ -1099,13 +1147,12 @@ function checkMatch() {
     const d = up ? -r.bottom : r.top - vh
     if (!nearest || d < nearest.d) nearest = { el: hit, up, d }
   }
-  // Named after the Pokémon found there.
-  const tier = nearest && tiers.value.find((t) => t.speed === Number((nearest.el as HTMLElement).dataset.speed))
-  const e = tier?.list.find(isHit)
+  // Named after the Pokémon found, whatever the view.
+  const who = found.value ? named(found.value) : null
   match.value = nearest && {
     el: nearest.el,
     up: nearest.up,
-    name: e ? [e.species, e.forme].filter(Boolean).join(' ') : '',
+    name: who ? [who.species, who.forme].filter(Boolean).join(' ') : '',
   }
 }
 watch([tiers, found, ladder], () => void nextTick(checkMatch), { flush: 'post' })
@@ -1346,7 +1393,6 @@ const { entered } = usePageEntered()
                 </dd>
               </template>
             </dl>
-            <p v-else class="muted small">{{ t('speed.allNote', { build: benchTip(bench) }) }}</p>
             <!-- Yours among them: what picking it does, tapping an opponent, and the comparison side by side. -->
             <dl class="help-options help-yours small">
               <dt>{{ t('speed.yours') }}</dt>
@@ -1378,13 +1424,6 @@ const { entered } = usePageEntered()
                opening under them), then finding a Pokémon on it. -->
           <div class="band find find-row" :class="{ flash: flashFind }" @animationend="flashFind = false">
             <div class="options-line">
-              <SegmentedControl
-                class="phone-stacked"
-                v-if="showAll"
-                v-model="bench"
-                :label="t('speed.at')"
-                :options="BENCHMARKS.map((b) => ({ value: b, label: benchLabel(b) }))"
-              />
               <template v-if="!showAll && boostsAvailable">
                 <button
                   v-tip="canHover && t('speed.boostsDesc')"
@@ -1687,6 +1726,17 @@ const { entered } = usePageEntered()
 
           <div v-if="!entered || (!showAll && !data)" class="ladder" aria-hidden="true">
             <div v-for="i in 12" :key="i" class="tier skeleton"><span class="bone"></span></div>
+          </div>
+          <!-- Every Pokémon: a row per base Speed, its range and its Speeds at each benchmark, yours a line down them. -->
+          <div v-else-if="showAll" ref="ladder" class="ranges-wrap">
+            <SpeedRanges
+              :rows="rangeRows"
+              :mine="mySpeed"
+              :trick-room="trickRoom"
+              :finding
+              :versus="versus?.e.id ?? null"
+              @chip="onRangeChip"
+            />
           </div>
           <ol v-else ref="ladder" class="ladder" :class="{ finding: finding && !onlyFound }">
             <li

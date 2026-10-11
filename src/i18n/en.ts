@@ -737,8 +737,10 @@ export const messages = {
   'speed.findBeyond': 'Outside the top {n}: shown at its sets, and left out of how often yours moves first.',
   'speed.findNoData':
     'No sets of it in these stats: shown at the standard builds, and left out of how often yours moves first.',
-  'speed.allNote': 'Every Pokémon once, at the same build: {build}.',
-  'speed.at': 'At',
+  'speed.rangesNote':
+    'One row per base Speed, its bar from Min− to Max+, its Speeds under it (Min−, 0, Max, Max+). Your Pokémon is the line: accent, you move first; red, they do.',
+  'speed.base': 'Base',
+  'speed.yoursAt': 'Yours {speed}',
   'speed.invest': '{build}: {pct} of its sets',
   'speed.rowLink': 'Link to this Speed: copies it',
   'speed.copied': 'Link copied',
