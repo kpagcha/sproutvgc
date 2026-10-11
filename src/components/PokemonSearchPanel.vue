@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Marked from '@/components/Marked'
 import { computed, nextTick, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
-import { Star, Trash2, X } from '@lucide/vue'
+import { ChevronDown, ChevronUp, Star, Trash2, X } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { POKEMON, speciesOf } from '@/data/pokemon'
 import { t } from '@/i18n'
@@ -212,9 +212,11 @@ const optionId = (i: number) => `${listId}-${i}`
         </li>
         <!-- After a group's last shown, when it has more: all of them, or back to its first few. -->
         <li v-if="r.more" role="presentation" class="more">
-          <span class="more-link" @click="regroup(() => toggleExpanded(r.more!.group))">{{
-            r.more.all ? t('picker.showFewer') : t('picker.showAll', { n: r.more.total })
-          }}</span>
+          <span class="more-link" @click="regroup(() => toggleExpanded(r.more!.group))"
+            ><component :is="r.more.all ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />{{
+              r.more.all ? t('picker.showFewer') : t('picker.showAll', { n: r.more.total })
+            }}</span
+          >
         </li>
       </template>
     </ul>
@@ -355,15 +357,25 @@ const optionId = (i: number) => `${listId}-${i}`
   margin-left: 6px;
   font-weight: normal;
 }
-/* The link showing a group's all, or its first few: small, after its last row. */
+/* Showing a group's all, or its first few: a row after its last, quiet as the group headings are (muted, small,
+   bold, brighter when hovered), its arrow saying which way it goes. */
 .more {
-  padding: 2px 6px 6px 22px;
-  font-size: 0.8em;
+  padding: 0;
 }
 .more-link {
-  color: var(--accent);
-  text-decoration: underline;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px 6px;
+  font-size: 0.8em;
+  font-weight: bold;
+  color: var(--muted);
   cursor: pointer;
+  user-select: none;
+}
+.more-link:hover {
+  color: var(--text);
+  background: var(--hover);
 }
 .unknown {
   filter: brightness(0);
