@@ -411,13 +411,16 @@ onBeforeUnmount(() => {
   font-weight: bold;
   font-variant-numeric: tabular-nums;
 }
-/* The axis's rule, the range its sets span as a baseline on it, a mark rising from it at each Speed (as tall as it's
-   common, a hairline of the panel between marks side by side), yours a line through. */
+/* The axis as a faint groove (a track, not a rule that would read as a second divider), the range its sets span as a
+   baseline on it, a mark rising from it at each Speed (as tall as it's common, a hairline of the panel between marks
+   side by side), yours a line through. */
 .track::before {
   content: '';
   position: absolute;
   inset: var(--bar-y) 0 auto;
-  border-top: 1px dashed var(--border);
+  height: 4px;
+  translate: 0 -50%;
+  background: color-mix(in srgb, var(--text) 7%, var(--panel));
 }
 .head .track::before {
   display: none;
