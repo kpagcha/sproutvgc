@@ -19,7 +19,8 @@ import StageStepper from '@/components/StageStepper.vue'
 // the Pokémon, with Clear beside it, its Speed, the
 // meta's common builds of it, its nature's effect, its points, its modifiers and its stage; where it folds away
 // (`confirmable`), Confirm at its end, folding it as it is. In a side's panel, and under its band in the comparison's
-// list.
+// list. Where it can be at its sets (`atSets` given), the first of the common builds is "Every set": on, its Speed is
+// its sets' range, and its nature and points are theirs, their controls giving way to a note.
 const props = defineProps<{
   id: PokemonId | null
   build: SpeedBuild
@@ -38,8 +39,18 @@ const props = defineProps<{
   taken?: readonly PokemonId[]
   /** The meta's usage ranks, for its picker to list by. */
   ranks?: Ranks
+  /** Whether it's at its sets, where it can be; and then, its Speeds from the slowest to the fastest. */
+  atSets?: boolean
+  range?: readonly [number, number] | null
 }>()
-const emit = defineEmits<{ pick: [id: PokemonId]; build: [b: Partial<SpeedBuild>]; clear: []; confirm: [] }>()
+const emit = defineEmits<{
+  pick: [id: PokemonId]
+  build: [b: Partial<SpeedBuild>]
+  sets: [on: boolean]
+  clear: []
+  confirm: []
+}>()
+const sets = computed(() => !!props.atSets && !!props.range)
 
 const picker = useTemplateRef<InstanceType<typeof PokemonPicker>>('picker')
 // A page can open the picking straight away (a slot just added, or tapped with none picked).
@@ -88,7 +99,13 @@ const canHover = window.matchMedia('(hover: hover)').matches
     </div>
     <template v-if="props.id">
       <!-- Its Speed, large, with its stat as built when modifiers change it (its base is the dex's). -->
-      <p class="speed">
+      <p v-if="sets" class="speed">
+        <span class="speed-number">{{
+          props.range![0] === props.range![1] ? props.range![0] : `${props.range![0]}–${props.range![1]}`
+        }}</span>
+        <span class="muted small">{{ t('compare.setsRange', { speed: props.speed! }) }}</span>
+      </p>
+      <p v-else class="speed">
         <span class="speed-number">{{ props.speed }}</span>
         <span v-if="props.stat !== props.speed" class="muted small">{{
           t('compare.stat', { stat: props.stat! })
@@ -102,11 +119,22 @@ const canHover = window.matchMedia('(hover: hover)').matches
              not where the last one's was left. -->
         <ScrollRow :key="props.id" wrap-on-phones class="builds">
           <button
+            v-if="props.atSets !== undefined"
+            v-tip="canHover && t('compare.atSetsTip')"
+            type="button"
+            class="btn mod"
+            :class="{ on: sets }"
+            :aria-pressed="sets"
+            @click="emit('sets', !sets)"
+          >
+            {{ t('compare.atSets') }}
+          </button>
+          <button
             v-for="b in props.common"
             :key="`${b.effect}:${b.points}`"
             type="button"
             class="btn mod"
-            :class="{ on: props.build.effect === b.effect && props.build.points === b.points }"
+            :class="{ on: !sets && props.build.effect === b.effect && props.build.points === b.points }"
             @click="emit('build', { effect: b.effect, points: b.points })"
           >
             <component :is="EFFECT_ICONS[b.effect]" v-if="EFFECT_ICONS[b.effect]" :size="14" aria-hidden="true" />{{
@@ -117,7 +145,10 @@ const canHover = window.matchMedia('(hover: hover)').matches
         </ScrollRow>
       </section>
 
-      <section class="part">
+      <section v-if="sets" class="part">
+        <p class="muted small">{{ t('compare.atSetsNote') }}</p>
+      </section>
+      <section v-if="!sets" class="part">
         <SegmentedControl
           class="stacked"
           :model-value="props.build.effect"
@@ -136,7 +167,7 @@ const canHover = window.matchMedia('(hover: hover)').matches
         <p class="muted small">{{ naturesOf(props.build.effect) }}</p>
       </section>
 
-      <section class="part">
+      <section v-if="!sets" class="part">
         <label class="field">
           <span class="muted small">{{ t('speed.pointsLabel') }}</span>
           <span class="points">

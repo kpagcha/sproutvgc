@@ -1,22 +1,26 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { PokemonId } from '@/data/dex'
+import { percent } from '@/data/meta'
 import { t } from '@/i18n'
-import { toMoveFirst, type SpeedBuild } from '@/lib/speedBuild'
-import { movesBefore } from '@/lib/speedLineup'
+import { toMoveFirst } from '@/lib/speedBuild'
+import { movesBefore, odds, toBeatAll } from '@/lib/speedLineup'
 import PokemonIcon from '@/components/PokemonIcon'
 import SpeedAgainst from '@/components/SpeedAgainst.vue'
+import SpeedShare from '@/components/SpeedShare.vue'
+import SpeedVersus, { type VersusMon } from '@/components/SpeedVersus.vue'
 
 // Past a pair, how yours do against the opponents: a grid of every one of yours against every opponent, each cell
 // saying which moves first (and by how much Speed), with how many your side wins in all; a cell tapped, the two alone
 // (`pair`): which moves first, and what each takes to move before the other. Against two opponents, what each of yours
-// takes to move before both: before the one that moves first of them.
-interface Mon {
+// takes to move before both: before the one that moves first of them. One at its sets is at every one of them: a cell
+// says the share of their matchups yours moves first in, colored by who moves first in most, and to move before both
+// is to move before every one of its sets.
+interface Mon extends VersusMon {
   key: string
   id: PokemonId
-  name: string
-  speed: number
-  build: SpeedBuild
+  /** At its sets, its Speeds from the slowest to the fastest. */
+  range: readonly [number, number] | null
 }
 const props = defineProps<{
   yours: readonly Mon[]
@@ -29,35 +33,60 @@ const emit = defineEmits<{ pair: [pair: [string, string] | null] }>()
 
 // Who moves first, on a cell's hover; on touch screens a tap shows the two alone instead.
 const canHover = window.matchMedia('(hover: hover)').matches
-const outcome = (y: Mon, o: Mon) => movesBefore(y.speed, o.speed, props.trickRoom)
+/** Either at its sets: the shares of their matchups, else none. */
+const shares = (y: Mon, o: Mon) => (y.sets || o.sets ? odds(y.spread, o.spread, props.trickRoom) : null)
+/** Who moves first: at one build each, by their Speeds; else who does in most of their matchups. */
+function outcome(y: Mon, o: Mon): 1 | 0 | -1 {
+  const s = shares(y, o)
+  if (!s) return movesBefore(y.speed, o.speed, props.trickRoom)
+  return s.first > 0.5 ? 1 : s.after > 0.5 ? -1 : 0
+}
 const KIND = { 1: 'first', 0: 'tie', [-1]: 'after' } as const
-const cellText = (y: Mon, o: Mon) => t(`compare.cell.${KIND[outcome(y, o)]}`)
+const cellText = (y: Mon, o: Mon) => {
+  const s = shares(y, o)
+  return s ? percent(s.first) : t(`compare.cell.${KIND[outcome(y, o)]}`)
+}
+/** The one at one build moving first against the other's sets, or both at theirs, in words. */
+function setsText(y: Mon, o: Mon) {
+  const s = shares(y, o)!
+  if (y.sets && o.sets) return t('compare.setsVsSets', { name: y.name, pct: percent(s.first), other: o.name })
+  return y.sets
+    ? t('compare.vsSets', { name: o.name, pct: percent(s.after), other: y.name })
+    : t('compare.vsSets', { name: y.name, pct: percent(s.first), other: o.name })
+}
 const cellTip = (y: Mon, o: Mon) => {
+  if (shares(y, o)) return setsText(y, o)
   const r = outcome(y, o)
   return r === 0 ? t('compare.tie') : t('compare.first', { name: r > 0 ? y.name : o.name })
 }
 const diff = (y: Mon, o: Mon) => {
+  if (y.sets || o.sets) return t(`compare.cell.${KIND[outcome(y, o)]}`)
   const d = y.speed - o.speed
   return d > 0 ? `+${d}` : d < 0 ? `−${-d}` : '±0'
 }
+/** Its Speed in a header: at its sets, their range. */
+const speedLabel = (m: Mon) =>
+  !m.range ? m.speed : m.range[0] === m.range[1] ? m.range[0] : `${m.range[0]}–${m.range[1]}`
 const won = computed(() => props.yours.flatMap((y) => props.opponents.filter((o) => outcome(y, o) > 0)).length)
 
 const picked = computed(() => {
   if (!props.pair) return null
   const y = props.yours.find((m) => m.key === props.pair![0])
   const o = props.opponents.find((m) => m.key === props.pair![1])
-  return y && o ? { y, o, r: outcome(y, o) } : null
+  return y && o ? { y, o, r: outcome(y, o), shares: shares(y, o) } : null
 })
 const isPicked = (y: Mon, o: Mon) => picked.value?.y === y && picked.value.o === o
 const tap = (y: Mon, o: Mon) => emit('pair', isPicked(y, o) ? null : [y.key, o.key])
 
-const against = (me: Mon, them: Mon) => toMoveFirst(me.id, me.build, them.speed, props.trickRoom)
-/** Of the opponents, the one to beat to move before both: the one that moves first. */
-const toBeat = computed(() =>
-  props.opponents.length < 2
-    ? null
-    : props.opponents.reduce((a, b) => (movesBefore(b.speed, a.speed, props.trickRoom) > 0 ? b : a)),
-)
+/** The Speed to move before to move before an opponent: at its sets, every one of them. */
+const target = (o: Mon) => (o.sets ? toBeatAll(o.spread, props.trickRoom) : o.speed)
+/** Of the opponents, the one to beat to move before both: the one that moves first, and the Speed to beat. */
+const toBeat = computed(() => {
+  if (props.opponents.length < 2) return null
+  const o = props.opponents.reduce((a, b) => (movesBefore(target(b), target(a), props.trickRoom) > 0 ? b : a))
+  return { name: o.name, speed: target(o) }
+})
+const against = (me: Mon, speed: number) => toMoveFirst(me.id, me.build, speed, props.trickRoom)
 </script>
 
 <template>
@@ -70,12 +99,12 @@ const toBeat = computed(() =>
       <span class="corner" aria-hidden="true" />
       <span v-for="o in opponents" :key="o.key" class="head opponent" role="columnheader"
         ><PokemonIcon :id="o.id" /><span class="visually-hidden">{{ o.name }}</span
-        >{{ o.speed }}</span
+        >{{ speedLabel(o) }}</span
       >
       <template v-for="y in yours" :key="y.key">
         <span class="head yours" role="rowheader"
           ><PokemonIcon :id="y.id" /><span class="visually-hidden">{{ y.name }}</span
-          >{{ y.speed }}</span
+          >{{ speedLabel(y) }}</span
         >
         <button
           v-for="o in opponents"
@@ -95,29 +124,33 @@ const toBeat = computed(() =>
 
     <!-- The two tapped, alone. -->
     <div v-if="picked" class="pair">
-      <p class="verdict" :class="KIND[picked.r]">
+      <div class="verdict" :class="KIND[picked.r]">
         <PokemonIcon v-if="picked.r" :id="picked.r > 0 ? picked.y.id : picked.o.id" />
         <span class="verdict-text">{{
-          picked.r === 0 ? t('compare.tie') : t('compare.first', { name: picked.r > 0 ? picked.y.name : picked.o.name })
+          picked.shares
+            ? setsText(picked.y, picked.o)
+            : picked.r === 0
+              ? t('compare.tie')
+              : t('compare.first', { name: picked.r > 0 ? picked.y.name : picked.o.name })
         }}</span>
-        <span class="verdict-speeds">{{ picked.y.speed }} <span class="muted">vs</span> {{ picked.o.speed }}</span>
-      </p>
+        <span class="verdict-speeds"
+          >{{ speedLabel(picked.y) }} <span class="muted">vs</span> {{ speedLabel(picked.o) }}</span
+        >
+        <SpeedShare
+          v-if="picked.shares"
+          class="verdict-share"
+          :odds="picked.shares"
+          :name="picked.y.name"
+          :other="picked.o.name"
+          tone="yours"
+        />
+      </div>
       <div class="cards">
         <section class="card yours">
-          <SpeedAgainst
-            :title="t('compare.against', { name: picked.o.name, speed: picked.o.speed })"
-            :rows="against(picked.y, picked.o)"
-            :current="picked.y.build.effect"
-            banded
-          />
+          <SpeedVersus :me="picked.y" :them="picked.o" tone="yours" :trick-room="trickRoom" banded />
         </section>
         <section class="card opponent">
-          <SpeedAgainst
-            :title="t('compare.against', { name: picked.y.name, speed: picked.y.speed })"
-            :rows="against(picked.o, picked.y)"
-            :current="picked.o.build.effect"
-            banded
-          />
+          <SpeedVersus :me="picked.o" :them="picked.y" tone="opponent" :trick-room="trickRoom" banded />
         </section>
       </div>
     </div>
@@ -131,7 +164,7 @@ const toBeat = computed(() =>
       <section v-for="y in yours" :key="y.key" class="card yours">
         <SpeedAgainst
           :title="t('compare.bothOf', { name: y.name, other: toBeat.name, speed: toBeat.speed })"
-          :rows="against(y, toBeat)"
+          :rows="against(y, toBeat.speed)"
           :current="y.build.effect"
           banded
         />
@@ -231,6 +264,13 @@ const toBeat = computed(() =>
   padding: 6px 10px;
   font-weight: bold;
   border: 2px solid var(--ink);
+}
+.verdict {
+  flex-wrap: wrap;
+}
+.verdict-share {
+  flex: 1 0 100%;
+  font-weight: normal;
 }
 .verdict-text {
   flex: 1;

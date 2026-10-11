@@ -4,7 +4,9 @@
 
 import type { PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
-import { readBuild, type SpeedBuild } from './speedBuild'
+import type { NatureEffect } from './stats'
+import type { SpeedBuildShare } from './speed'
+import { buildSpeed, readBuild, type SpeedBuild } from './speedBuild'
 
 /** The most Pokémon the speed order takes. */
 export const LIST_MAX = 20
@@ -69,3 +71,54 @@ export function movePlaces(entries: readonly { key: string; speed: number }[], t
 /** Whether `a` moves before `b`: 1 when it does, −1 when it moves after, 0 on a tie. */
 export const movesBefore = (a: number, b: number, trickRoom: boolean): 1 | 0 | -1 =>
   a === b ? 0 : a > b !== trickRoom ? 1 : -1
+
+/** A Speed one of the comparison's Pokémon can be at: its share of its sets, and the builds reaching it. */
+export interface SpreadPoint {
+  speed: number
+  share: number
+  builds: { effect: NatureEffect; points: number; share: number }[]
+}
+
+/** One build alone, as a spread: its Speed, at every one of its sets. */
+export const exactSpread = (id: PokemonId, b: SpeedBuild): SpreadPoint[] => [
+  { speed: buildSpeed(id, b), share: 1, builds: [{ effect: b.effect, points: b.points, share: 1 }] },
+]
+
+/**
+ * A Pokémon at its sets: the Speeds its builds in the meta reach with the modifiers of `b` (its own, which every set
+ * has here), the builds reaching the same one together, their shares out of every set the data has a Speed for; the
+ * fastest first. None with no builds.
+ */
+export function setSpread(id: PokemonId, builds: readonly SpeedBuildShare[], b: SpeedBuild): SpreadPoint[] {
+  const total = builds.reduce((n, x) => n + x.share, 0)
+  if (!total) return []
+  const bySpeed = new Map<number, SpreadPoint>()
+  for (const x of builds) {
+    const speed = buildSpeed(id, { ...b, effect: x.effect, points: x.points })
+    const p = bySpeed.get(speed) ?? { speed, share: 0, builds: [] }
+    p.share += x.share / total
+    p.builds.push({ effect: x.effect, points: x.points, share: x.share / total })
+    bySpeed.set(speed, p)
+  }
+  return [...bySpeed.values()].sort((x, y) => y.speed - x.speed)
+}
+
+/** A spread's most common Speed (the faster of two as common). */
+export const commonSpeed = (spread: readonly SpreadPoint[]) =>
+  spread.reduce((a, b) => (b.share > a.share ? b : a)).speed
+
+/** What it takes to move before every Speed of a spread: its fastest, or under Trick Room its slowest. */
+export const toBeatAll = (spread: readonly SpreadPoint[], trickRoom: boolean) =>
+  trickRoom ? spread[spread.length - 1]!.speed : spread[0]!.speed
+
+/** How `a` does against `b`, each at its spread: the share of their matchups it moves first in, ties, moves after. */
+export function odds(a: readonly SpreadPoint[], b: readonly SpreadPoint[], trickRoom: boolean) {
+  const tally = { first: 0, tie: 0, after: 0 }
+  for (const x of a)
+    for (const y of b) {
+      const r = movesBefore(x.speed, y.speed, trickRoom)
+      tally[r > 0 ? 'first' : r < 0 ? 'after' : 'tie'] += x.share * y.share
+    }
+  return tally
+}
+export type Odds = ReturnType<typeof odds>

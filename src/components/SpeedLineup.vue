@@ -19,6 +19,8 @@ export interface LineupEntry {
   id: PokemonId | null
   build: SpeedBuild
   speed: number | null
+  /** At its sets, its Speeds from the slowest to the fastest. */
+  range?: readonly [number, number] | null
   /** Its place in the move order, once picked. */
   place: Place | null
 }
@@ -110,7 +112,7 @@ const teamLabel = (e: LineupEntry) =>
           >{{ e.place ? `${e.place.tie ? '=' : ''}${e.place.rank}` : '' }}</span
         >
         <span v-if="teamLabel(e)" class="visually-hidden">{{ teamLabel(e) }}</span>
-        <BuildSummary v-if="e.id" :id="e.id" :speed="e.speed!" :build="e.build" class="summary" />
+        <BuildSummary v-if="e.id" :id="e.id" :speed="e.speed!" :build="e.build" :range="e.range" class="summary" />
         <span v-else class="empty">{{ pickLabel(e) }}</span>
         <ChevronDown :size="16" class="chevron" :class="{ unset: !e.id }" aria-hidden="true" />
       </button>

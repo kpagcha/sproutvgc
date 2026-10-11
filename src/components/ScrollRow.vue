@@ -137,7 +137,8 @@ function onWheel(e: WheelEvent) {
   z-index: 1;
   min-height: 0;
   padding: 2px;
-  transform: translateY(-50%);
+  /* Centered by `translate`, not `transform`, which buttons' hover and press take over. */
+  translate: 0 -50%;
 }
 .arrow.left {
   left: 0;

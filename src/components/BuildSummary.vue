@@ -12,7 +12,13 @@ import PokemonIcon from '@/components/PokemonIcon'
 // and no points, which go without saying) and its modifiers, items by their icon. Its name only where it fits whole
 // beside the rest: cut, it goes, its icon standing for it (the name still read out); gone, it comes back once the room
 // left at the line's end takes it, as measured when it was there. On the speed tiers' bar and, on phones, the comparison's tabs.
-const props = defineProps<{ id: PokemonId; speed: number; build: SpeedBuild }>()
+// At its sets (`range`), its Speeds from the slowest to the fastest, and "Sets" for its build.
+const props = defineProps<{
+  id: PokemonId
+  speed: number
+  build: SpeedBuild
+  range?: readonly [number, number] | null
+}>()
 
 const EFFECT_ICONS = { up: ChevronsUp, neutral: undefined, down: ChevronsDown }
 const MOD_ITEMS: Partial<Record<BuildToggle, 'choicescarf' | 'ironball'>> = {
@@ -42,7 +48,7 @@ function fit() {
   const room = el.getBoundingClientRect().right - last.getBoundingClientRect().right - GAP
   if (room >= nameWidth + GAP) nameFits.value = true
 }
-watch([() => props.id, () => props.build, locale], () => {
+watch([() => props.id, () => props.build, () => props.range, locale], () => {
   nameFits.value = true
   void nextTick(fit)
 })
@@ -67,8 +73,14 @@ onBeforeUnmount(() => observer?.disconnect())
     <span ref="name" class="name" :class="{ gone: !nameFits }" aria-hidden="true">{{
       refName(pokemon(props.id))
     }}</span>
-    <span class="speed">{{ props.speed }}</span>
-    <span v-if="props.build.effect !== 'neutral' || props.build.points > 0" class="build"
+    <template v-if="props.range"
+      ><span class="speed">{{
+        props.range[0] === props.range[1] ? props.range[0] : `${props.range[0]}–${props.range[1]}`
+      }}</span
+      ><span class="mod sets">{{ t('compare.setsTag') }}</span></template
+    >
+    <span v-else class="speed">{{ props.speed }}</span>
+    <span v-if="!props.range && (props.build.effect !== 'neutral' || props.build.points > 0)" class="build"
       ><template v-if="props.build.effect !== 'neutral'"
         ><component :is="EFFECT_ICONS[props.build.effect]" :size="14" aria-hidden="true" /><span
           class="visually-hidden"
@@ -147,6 +159,10 @@ onBeforeUnmount(() => observer?.disconnect())
   font-weight: normal;
   vertical-align: middle;
   border: 1px solid currentColor;
+}
+.mod.sets {
+  flex: none;
+  margin-right: 0;
 }
 .mod.item {
   padding: 0 2px;
