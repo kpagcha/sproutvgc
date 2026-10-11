@@ -754,13 +754,14 @@ export const messages = {
   'speed.stageShort': 'Speed {stage}',
   'speed.active': 'Shown',
   'speed.megasDesc': "Mega Evolutions, at their Mega's Speed.",
-  'speed.boostsDesc':
-    'Items their sets hold and abilities they can have that change Speed, as what could be: Choice Scarf, Unburden, Swift Swim…',
+  'speed.boostsDesc': 'Items and abilities their sets run that change Speed: Choice Scarf, Unburden, Swift Swim…',
+  'speed.leftOutNote':
+    "Builds, items and abilities under {pct} of a Pokémon's sets are left out, but for the Pokémon you find or keep on the ladder: it shows all of them, and every Speed ability it can have, however few run them.",
   'speed.legendChip':
     "The nature's effect on Speed, stat points in Speed and the share of its sets running them, whatever the nature; under {pct}, left out",
   'speed.legendBoostLabel': 'Choice Scarf ×1.5',
   'speed.legendBoost':
-    "An item its sets hold or an ability it can have that changes Speed, with the share of its sets running it, shown at each of its Speed builds, as the data doesn't say which builds go with it",
+    "An item or ability its sets run that changes Speed, with the share of its sets running it, shown at each of its Speed builds, as the data doesn't say which builds go with it",
   'speed.whenShort.itemLost': 'Item gone',
   'speed.whenShort.status': 'Statused',
   'speed.build': '{points} points and {nature}{natures}',

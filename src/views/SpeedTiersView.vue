@@ -478,8 +478,15 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
   const base = POKEMON[id].stats[5]
   const rest = 1 - fieldShare(id)
   const builds = speedBuilds(m.speeds ?? [])
+  // What its sets run under the least share is left out, but for the Pokémon looked for (found, or kept on the
+  // ladder): every build its sets run, and every boost, the Speed abilities it can have too, however few run them.
+  const all = id === found.value || kept.value.includes(id)
+  const shown = (share: number) => (all ? share > 0 : share >= MIN_SHARE)
+  // Those under it, shown only as it's looked for, are as a Pokémon beyond the top is: marked, and not counted in how
+  // yours does against the others, so looking for one doesn't change it.
+  const rare = (share: number) => extra ?? (share < MIN_SHARE ? (true as const) : undefined)
   const list: Entry[] = builds
-    .filter((b) => b.share * rest >= MIN_SHARE)
+    .filter((b) => shown(b.share * rest))
     .map((b) => ({
       id,
       ...named(id),
@@ -488,12 +495,12 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
       effect: b.effect,
       share: b.share * rest,
       rank: m.rank,
-      extra,
+      extra: rare(b.share * rest),
     }))
-  // Its boosts, at each of its builds the ladder has (the least share of its sets, whatever the field): the data counts
-  // items, abilities and spreads apart, so it doesn't say which builds go with them. Items those its sets hold;
-  // abilities every one it can have, however few of its sets run it (as what could be), with the share of its sets
-  // running it. Those the modifiers rule out (Unburden with a Choice Scarf on everyone), or the field (another
+  // Its boosts, at each of its builds the ladder has (whatever the field): the data counts items, abilities and spreads
+  // apart, so it doesn't say which builds go with them. Items and abilities its sets run (the least share of them, but
+  // for the Pokémon looked for, which has every ability it can have, as what could be), with the share of its sets
+  // running each. Those the modifiers rule out (Unburden with a Choice Scarf on everyone), or the field (another
   // weather), are left out. The field's own, always shown, are how its sets play: each build boosted, at its share of
   // them times the ability's (the two taken apart as the data counts them), those under the least share left out.
   if (boostsAvailable.value && builds.length) {
@@ -501,16 +508,18 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
     const abilityShare = (a: string) => m.abilities?.find((x) => x.id === a)?.share ?? 0
     const effects = [
       ...(m.items ?? [])
-        .filter((i) => (i.share ?? 0) >= MIN_SHARE)
+        .filter((i) => shown(i.share ?? 0))
         .map((i) => ({ ref: item(i.id), share: i.share ?? 0, effect: SPEED_ITEMS[i.id] })),
-      ...POKEMON[id].abilities.map((a) => ({ ref: ability(a), share: abilityShare(a), effect: SPEED_ABILITIES[a] })),
+      ...POKEMON[id].abilities
+        .filter((a) => all || abilityShare(a) >= MIN_SHARE)
+        .map((a) => ({ ref: ability(a), share: abilityShare(a), effect: SPEED_ABILITIES[a] })),
     ]
     for (const { ref, share, effect } of effects) {
       if (!effect || !inField(effect.when) || !withEffect(mods.value, effect)) continue
       const boost = { ref, ...effect }
       if (live(boost) && share > 0) {
         for (const b of builds) {
-          if (b.share * share < MIN_SHARE) continue
+          if (!shown(b.share * share)) continue
           list.push({
             ...at,
             speed: speedStat(base, b.points, b.effect),
@@ -519,11 +528,12 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
             share: b.share * share,
             boost,
             live: true,
+            extra: rare(b.share * share),
           })
         }
       } else if (showBoosts.value) {
         for (const b of builds) {
-          if (b.share < MIN_SHARE) continue
+          if (!shown(b.share)) continue
           list.push({
             ...at,
             speed: speedStat(base, b.points, b.effect),
@@ -531,6 +541,7 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
             effect: b.effect,
             share,
             boost,
+            extra: rare(Math.min(b.share, share)),
           })
         }
       }
@@ -1744,6 +1755,9 @@ const { entered } = usePageEntered()
           </p>
           <p v-if="showMegas" class="muted small note">{{ t('speed.megaNote') }}</p>
           <p v-if="!showAll && snapshot" class="muted small note">
+            {{ t('speed.leftOutNote', { pct: percent(MIN_SHARE) }) }}
+          </p>
+          <p v-if="!showAll && snapshot" class="muted small note">
             {{ metaLabel(snapshot) }} · {{ t('usage.from') }}
             <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
           </p>
@@ -2939,7 +2953,8 @@ const { entered } = usePageEntered()
   border-style: dashed;
   border-color: var(--muted);
 }
-/* A Pokémon beyond the top, found or kept: on the panel's own color, a dotted line around it. */
+/* A Pokémon beyond the top, found or kept, or what one's sets run under the least share, shown as it's looked for: on
+   the panel's own color, a dotted line around it. */
 .chip.extra {
   background: var(--panel);
   border-style: dotted;

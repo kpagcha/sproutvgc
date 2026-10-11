@@ -765,12 +765,14 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.active': 'Mostrado',
   'speed.megasDesc': 'Las megaevoluciones, con la Velocidad de la mega.',
   'speed.boostsDesc':
-    'Objetos que llevan sus sets y habilidades que pueden tener que cambian la Velocidad, como lo que podría pasar: Pañuelo Elegido, Liviano, Nado Rápido…',
+    'Objetos y habilidades que llevan sus sets y cambian la Velocidad: Pañuelo Elegido, Liviano, Nado Rápido…',
+  'speed.leftOutNote':
+    'No se muestran los repartos, objetos y habilidades de menos del {pct} de los sets de un Pokémon, salvo para el Pokémon que buscas o dejas en la escala: muestra todos, y cada habilidad de Velocidad que puede tener, por pocos que la lleven.',
   'speed.legendChip':
     'El efecto de la naturaleza en la Velocidad, los puntos de estadística en Velocidad y la proporción de sus sets que los llevan, sea cual sea la naturaleza; por debajo del {pct}, no se muestran',
   'speed.legendBoostLabel': 'Pañuelo Elegido ×1,5',
   'speed.legendBoost':
-    'Un objeto que llevan sus sets o una habilidad que puede tener y cambia la Velocidad, con la proporción de sus sets que la llevan, con cada uno de sus repartos de Velocidad, ya que los datos no dicen qué repartos van con él',
+    'Un objeto o habilidad que llevan sus sets y cambia la Velocidad, con la proporción de sus sets que lo llevan, con cada uno de sus repartos de Velocidad, ya que los datos no dicen qué repartos van con él',
   'speed.whenShort.itemLost': 'Sin objeto',
   'speed.whenShort.status': 'Con estado',
   'speed.build': '{points} puntos y {nature}{natures}',
