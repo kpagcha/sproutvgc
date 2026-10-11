@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
+import tippy, { type Instance } from 'tippy.js'
 import { CircleHelp } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { percent } from '@/data/meta'
@@ -54,10 +55,10 @@ function verdict(speed: number): 'yours' | 'theirs' | 'tie' | undefined {
   if (speed === props.mine) return 'tie'
   return speed < props.mine !== props.trickRoom ? 'yours' : 'theirs'
 }
-/** A row's marks: each Speed's height by its share (against the row's most common), and the range they span. */
+/** A row's marks: each Speed's height by its share, against the row's most common (the height itself is the CSS's). */
 function marks(r: RangeLike) {
   const top = Math.max(...r.builds.map((b) => b.share), 0.0001)
-  return r.builds.map((b) => ({ ...b, height: `${6 + 14 * (b.share / top)}px`, kind: verdict(b.speed) }))
+  return r.builds.map((b) => ({ ...b, tall: b.share / top, kind: verdict(b.speed) }))
 }
 type RangeLike = Pick<OddsRow, 'builds'>
 function span(r: OddsRow) {
@@ -83,6 +84,89 @@ function odds(r: OddsRow) {
 const name = (r: OddsRow) => [r.species, r.forme].filter(Boolean).join(' ')
 const canHover = window.matchMedia('(hover: hover)').matches
 const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.speedTiers.rangesHelp', false)
+
+// The marks' tooltip: one for the whole chart, rather than one per mark (there can be thousands), moved to the mark
+// nearest the pointer on a row's bar, so a 5px mark needn't be hit exactly. With a mouse, it shows after a moment over
+// a bar (so sweeping across the list doesn't fire it), or at once on a click, then follows the pointer from mark to
+// mark; leaving the bars hides it. With a finger, a tap shows it, and dragging along the bar moves it (the bars leave
+// the browser only vertical pans, so scrolling the page still works); a tap elsewhere or a scroll hides it.
+const SHOW_DELAY = 80
+const REACH = { mouse: 12, touch: 24 }
+const list = useTemplateRef<HTMLElement>('list')
+const active = ref<{ id: PokemonId; speed: number } | null>(null)
+let tip: Instance | undefined
+let pending: ReturnType<typeof setTimeout> | undefined
+let markEl: HTMLElement | undefined
+
+/** The mark nearest `x` on the bar under the event, within reach. */
+function nearest(e: PointerEvent) {
+  const track = (e.target as Element).closest<HTMLElement>('.row .track')
+  const row = track && props.rows.find((r) => r.id === track.parentElement!.dataset.id)
+  if (!track || !row || row.fallback) return null
+  const box = track.getBoundingClientRect()
+  const x = (speed: number) => box.left + ((speed - axis.value.lo) / axis.value.span) * box.width
+  let best = -1
+  let gap = e.pointerType === 'mouse' ? REACH.mouse : REACH.touch
+  row.builds.forEach((b, i) => {
+    const d = Math.abs(x(b.speed) - e.clientX)
+    if (d <= gap) [best, gap] = [i, d]
+  })
+  if (best < 0) return null
+  return { row, build: row.builds[best]!, el: track.querySelectorAll<HTMLElement>('.mark')[best]! }
+}
+function point(hit: NonNullable<ReturnType<typeof nearest>>) {
+  active.value = { id: hit.row.id, speed: hit.build.speed }
+  markEl = hit.el
+  tip?.setContent(`${hit.build.speed} · ${percent(hit.build.share)}`)
+}
+function show(hit: NonNullable<ReturnType<typeof nearest>>) {
+  clearTimeout(pending)
+  point(hit)
+  if (tip?.state.isVisible) tip.popperInstance?.update()
+  else tip?.show()
+}
+function hide() {
+  clearTimeout(pending)
+  pending = undefined
+  active.value = null
+  tip?.hide()
+}
+function onMove(e: PointerEvent) {
+  const hit = nearest(e)
+  if (!hit) {
+    if (e.pointerType === 'mouse') hide()
+    return
+  }
+  if (tip?.state.isVisible) show(hit)
+  else if (e.pointerType === 'mouse') {
+    point(hit)
+    if (pending === undefined) pending = setTimeout(() => show(nearest(e) ?? hit), SHOW_DELAY)
+  } else if (e.buttons) show(hit)
+}
+function onDown(e: PointerEvent) {
+  const hit = nearest(e)
+  if (hit) show(hit)
+  else hide()
+}
+function onOutside(e: PointerEvent) {
+  if (!list.value?.contains(e.target as Node)) hide()
+}
+onMounted(() => {
+  tip = tippy(list.value!, {
+    trigger: 'manual',
+    hideOnClick: false,
+    placement: 'top',
+    getReferenceClientRect: () => markEl?.getBoundingClientRect() ?? list.value!.getBoundingClientRect(),
+  })
+  document.addEventListener('pointerdown', onOutside)
+  window.addEventListener('scroll', hide, { passive: true, capture: true })
+})
+onBeforeUnmount(() => {
+  clearTimeout(pending)
+  tip?.destroy()
+  document.removeEventListener('pointerdown', onOutside)
+  window.removeEventListener('scroll', hide, { capture: true })
+})
 </script>
 
 <template>
@@ -113,7 +197,14 @@ const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.speedTier
       <span v-if="mine !== null" class="odds-cell">{{ t('speed.oddsHead') }}</span>
     </div>
     <p v-if="helpOpen" id="odds-help" class="odds-help panel sunken muted small">{{ t('speed.oddsNote') }}</p>
-    <ol class="rows">
+    <ol
+      ref="list"
+      class="rows"
+      @pointermove="onMove"
+      @pointerdown="onDown"
+      @pointerleave="(e: PointerEvent) => e.pointerType === 'mouse' && hide()"
+      @pointercancel="hide"
+    >
       <li
         v-for="r in rows"
         :key="r.id"
@@ -141,10 +232,9 @@ const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.speedTier
             <span
               v-for="(b, i) in marks(r)"
               :key="i"
-              v-tip="canHover && `${b.speed} · ${percent(b.share)}`"
               class="mark"
-              :class="b.kind"
-              :style="{ left: at(b.speed), height: b.height }"
+              :class="[b.kind, { active: active?.id === r.id && active.speed === b.speed }]"
+              :style="{ left: at(b.speed), '--tall': b.tall }"
               aria-hidden="true"
             ></span>
             <span class="value num" :class="verdict(r.builds[0]!.speed)" :style="{ left: at(r.builds[0]!.speed) }">{{
@@ -208,11 +298,16 @@ const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.speedTier
 .track {
   grid-area: track;
   position: relative;
-  min-height: 34px;
-  --bar-y: calc(50% - 4px);
+  min-height: 40px;
+  /* The baseline: low in the row, the marks rising from it and the most common Speed under it. */
+  --bar-y: calc(100% - 15px);
+  --mark-w: 5px;
+  --mark-max: 19px;
 }
 .row .track {
   align-self: stretch;
+  /* Dragging along it moves the tooltip; up and down still scroll the page. */
+  touch-action: pan-y pinch-zoom;
 }
 .odds-cell {
   grid-area: odds;
@@ -311,7 +406,8 @@ const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.speedTier
   font-weight: bold;
   font-variant-numeric: tabular-nums;
 }
-/* The axis's rule, the range its sets span, a mark at each Speed (as tall as it's common), yours a line through. */
+/* The axis's rule, the range its sets span as a baseline on it, a mark rising from it at each Speed (as tall as it's
+   common, a hairline of the panel between marks side by side), yours a line through. */
 .track::before {
   content: '';
   position: absolute;
@@ -330,16 +426,25 @@ const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.speedTier
 }
 .span.fallback {
   height: 8px;
+  translate: 0 -100%;
   background: none;
   border: 1px dotted var(--border-strong);
 }
 .mark {
   position: absolute;
   top: var(--bar-y);
-  width: 4px;
-  translate: -50% -50%;
+  width: var(--mark-w);
+  height: calc(3px + var(--tall) * var(--mark-max));
+  translate: -50% -100%;
   background: var(--range-plain);
-  border: 1px solid var(--ink);
+  box-shadow: 0 0 0 1px var(--panel);
+}
+/* The one the tooltip is on: outlined, over its neighbours (whoever moves first). */
+.track .mark.active {
+  z-index: 2;
+  box-shadow:
+    0 0 0 1px var(--panel),
+    0 0 0 2px var(--ink);
 }
 .mark.yours {
   background: var(--range-yours);
@@ -349,31 +454,29 @@ const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.speedTier
 }
 .mark.tie {
   background: var(--panel);
+  box-shadow:
+    inset 0 0 0 1px var(--ink),
+    0 0 0 1px var(--panel);
 }
+/* Its most common Speed under the baseline, in its mark's color. */
 .value {
   position: absolute;
   z-index: 1;
-  top: calc(var(--bar-y) + 11px);
+  top: calc(var(--bar-y) + 2px);
   translate: -50% 0;
   padding: 0 2px;
-  font-size: 0.72em;
+  font-size: 0.75em;
   line-height: 1.3;
   white-space: nowrap;
 }
 .value.yours {
-  color: var(--accent-text);
-  background: var(--range-yours);
+  color: var(--accent);
 }
 .value.theirs {
-  color: var(--opponent-text);
-  background: var(--range-theirs);
-}
-.value.tie {
-  background: var(--panel);
-  box-shadow: inset 0 0 0 1px var(--ink);
+  color: var(--opponent);
 }
 .value.no-sets {
-  top: calc(var(--bar-y) + 6px);
+  top: calc(var(--bar-y) + 2px);
   font-weight: normal;
   color: var(--muted);
 }
@@ -410,6 +513,11 @@ const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.speedTier
     display: block;
     top: -1px;
     bottom: -1px;
+  }
+  /* The marks taller, as the bar has the row's whole width. */
+  .row .track {
+    min-height: 44px;
+    --mark-max: 24px;
   }
   /* Behind the Pokémon. */
   .row .who {
