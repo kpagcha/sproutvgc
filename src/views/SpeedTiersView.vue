@@ -3039,8 +3039,12 @@ const { entered } = usePageEntered()
   align-items: center;
   gap: 2px;
 }
-/* The build a boost is placed at: assumed, so quieter than the rest. */
+/* The build a boost is placed at: assumed, so quieter than the rest. Its words and the nature's effect centered on one
+   line (the effect's arrow would otherwise lift it off the words' baseline), spaced as the words were. */
 .boost-at {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
   font-style: italic;
 }
 /* An item or ability its sets run that changes Speed, told apart from its builds. */
