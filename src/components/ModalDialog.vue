@@ -5,14 +5,16 @@ let openCount = 0
 </script>
 
 <script setup lang="ts">
-import { onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
+import { onBeforeUnmount, useTemplateRef, watch } from 'vue'
 
 // A dialog over the page, for phones: what would drop down over it (a list to pick from, a card) opens in the middle
 // of the screen instead, the page dimmed behind it, still in sight, left where it was and kept from scrolling; a tap on
 // it closes the dialog. What's in it draws its own card: the dialog only places it. A native modal <dialog>, so it's
 // over everything, the rest of the page out of reach of taps, keys and screen readers; Escape and phones' back gesture
 // close it. Always in the page (closed), so what's moved into it has somewhere to go. `fill` makes it as tall as the
-// screen leaves (a list to scroll); else it's as tall as what's in it, scrolling past that.
+// screen leaves (a list to scroll); else it's as tall as what's in it, scrolling past that. It fits the window, the
+// keyboard coming up over it as over the page, rather than following it (which had it chase the keyboard as it slid
+// in). Its card fades in rising a little, and out sinking back (`@starting-style`, where the browser has it).
 const open = defineModel<boolean>('open', { required: true })
 defineProps<{ label: string; fill?: boolean }>()
 
@@ -23,28 +25,6 @@ const dialog = useTemplateRef<HTMLDialogElement>('dialog')
 // is taken from there as it opens and given back here without scrolling.
 let before: HTMLElement | null = null
 
-// It covers what's on the screen, its card centered there. Pinned to the window's edges, it follows the address bar
-// showing and hiding on its own, and (with `interactive-widget=resizes-content`, index.html) Chrome's keyboard. Where
-// what's on the screen is less than the window all the same (an iPhone's keyboard, which only shrinks the visual
-// viewport; a pinch zoom), it's placed over that instead.
-const area = shallowRef<{ top: number; height: number } | null>(null)
-function follow() {
-  const vv = window.visualViewport
-  area.value =
-    vv && (vv.offsetTop > 0.5 || window.innerHeight - vv.height > 0.5) ? { top: vv.offsetTop, height: vv.height } : null
-}
-function following(on: boolean) {
-  const vv = window.visualViewport
-  if (!vv) return
-  if (on) {
-    follow()
-    vv.addEventListener('resize', follow)
-    vv.addEventListener('scroll', follow)
-  } else {
-    vv.removeEventListener('resize', follow)
-    vv.removeEventListener('scroll', follow)
-  }
-}
 let locked = false
 function lock(on: boolean) {
   if (on === locked) return
@@ -59,7 +39,6 @@ watch(
     if (o && !el.open) {
       before = document.activeElement instanceof HTMLElement ? document.activeElement : null
       before?.blur()
-      following(true)
       el.showModal()
       lock(true)
     } else if (!o && el.open) {
@@ -74,7 +53,6 @@ function onClick(e: MouseEvent) {
 }
 // Closed by Escape or the back gesture as by the model.
 function onClose() {
-  following(false)
   lock(false)
   open.value = false
   before?.focus({ preventScroll: true })
@@ -82,22 +60,13 @@ function onClose() {
 }
 onBeforeUnmount(() => {
   if (dialog.value?.open) dialog.value.close()
-  following(false)
   lock(false)
 })
 </script>
 
 <template>
   <Teleport to="body">
-    <dialog
-      ref="dialog"
-      class="modal-dialog"
-      :class="{ fill }"
-      :style="area ? { top: `${area.top}px`, bottom: 'auto', height: `${area.height}px` } : undefined"
-      :aria-label="label"
-      @close="onClose"
-      @click="onClick"
-    >
+    <dialog ref="dialog" class="modal-dialog" :class="{ fill }" :aria-label="label" @close="onClose" @click="onClick">
       <slot />
     </dialog>
   </Teleport>
@@ -111,9 +80,8 @@ html.dialog-open {
 </style>
 
 <style scoped>
-/* Over what's on the screen, pinned to the window's edges (or placed over the visual viewport, above), with no look of
-   its own: it centers its card, an even gap all round (and the screen's safe area, by a notch or round corners), the
-   card no wider than reads well. */
+/* Over the window, pinned to its edges, with no look of its own: it centers its card, an even gap all round (and the
+   screen's safe area, by a notch or round corners), the card no wider than reads well. */
 .modal-dialog {
   position: fixed;
   inset: 0;
@@ -149,5 +117,45 @@ html.dialog-open {
 }
 .modal-dialog::backdrop {
   background: color-mix(in srgb, var(--ink) 45%, transparent);
+}
+/* Opening, the page dims and the card fades in rising a little; closing, the other way, a touch quicker. The dialog
+   stays shown (`display`) and over everything (`overlay`) until its card is out. */
+.modal-dialog,
+.modal-dialog::backdrop,
+.modal-dialog > :slotted(*) {
+  transition:
+    opacity 0.16s ease-in,
+    transform 0.16s ease-in,
+    display 0.16s allow-discrete,
+    overlay 0.16s allow-discrete;
+}
+.modal-dialog[open],
+.modal-dialog[open]::backdrop,
+.modal-dialog[open] > :slotted(*) {
+  transition-duration: 0.2s;
+  transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.modal-dialog:not([open])::backdrop {
+  opacity: 0;
+}
+.modal-dialog:not([open]) > :slotted(*) {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+}
+@starting-style {
+  .modal-dialog[open]::backdrop {
+    opacity: 0;
+  }
+  .modal-dialog[open] > :slotted(*) {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .modal-dialog,
+  .modal-dialog::backdrop,
+  .modal-dialog > :slotted(*) {
+    transition: none;
+  }
 }
 </style>

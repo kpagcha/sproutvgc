@@ -104,6 +104,19 @@ phoneQuery.addEventListener('change', onPhone)
 onBeforeUnmount(() => phoneQuery.removeEventListener('change', onPhone))
 const sheet = ref(false)
 const openSheet = () => (sheet.value = true)
+// Its card is made anew each time it opens (`opens`), and kept while it closes, so it fades out with the dialog
+// (`ModalDialog`'s closing, 0.16s) rather than vanishing first.
+const opens = ref(0)
+const panelShown = ref(false)
+let unmountTimer: ReturnType<typeof setTimeout> | undefined
+watch(sheet, (on) => {
+  clearTimeout(unmountTimer)
+  if (on) {
+    opens.value++
+    panelShown.value = true
+  } else unmountTimer = setTimeout(() => (panelShown.value = false), 200)
+})
+onBeforeUnmount(() => clearTimeout(unmountTimer))
 // A page can open the picking straight away (yours' bar on phones, with none picked): on phones its dialog, wider its
 // field's list.
 defineExpose({
@@ -375,10 +388,12 @@ const optionId = (i: number) => `${listId}-${i}`
         </template>
       </ul>
     </Teleport>
-    <!-- On phones: a dialog over the page, its card the search panel (made anew each time it opens). -->
+    <!-- On phones: a dialog over the page, its card the search panel (made anew each time it opens, kept while it
+         closes). -->
     <ModalDialog v-if="phone" v-model:open="sheet" :label="props.placeholder" fill>
       <PokemonSearchPanel
-        v-if="sheet"
+        v-if="panelShown"
+        :key="opens"
         :placeholder="props.placeholder"
         :picked="model"
         :ids="props.ids"
