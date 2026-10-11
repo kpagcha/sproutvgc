@@ -660,18 +660,13 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.slice.all': 'todos los Pokémon',
   'speed.viewLabel': 'Vista',
   'speed.viewDesc':
-    'La escala, una fila por Velocidad; o gráficos, una fila por Pokémon (por Velocidad base, con las referencias).',
+    'La escala, una fila por Velocidad; o gráficos, una fila por Pokémon (por Velocidad base, sin datos de uso).',
   'speed.showDesc': 'Los Pokémon más usados, o todos los Pokémon del reglamento.',
   'speed.view.ladder': 'Ladder',
   'speed.view.ranges': 'Gráficos',
-  'speed.speedsFrom': 'Velocidades',
-  'speed.speedsFromTip':
-    'Las Velocidades de los sets que se usan, según su uso, o las referencias de cada Pokémon (Min−, 0, Max, Max+).',
-  'speed.from.sets': 'Sets',
-  'speed.from.bench': 'Referencias',
   'speed.oddsHead': 'Tú primero',
   'speed.oddsNote':
-    'Una fila por Pokémon, una marca en cada Velocidad de sus sets, más alta cuantos más la llevan. Tu Pokémon es la línea; al final de la fila, la proporción de sus sets contra los que mueves primero.',
+    'Una fila por Pokémon, una marca en cada Velocidad de sus sets, más alta cuantos más la llevan, sobre un tramo más tenue de su Velocidad más baja posible a la más alta. Tu Pokémon es la línea; al final de la fila, la proporción de sus sets contra los que mueves primero.',
   'speed.oddsNoSets': '{name}: sin sets en los datos, se muestran sus referencias',
   'speed.noSets': 'Sin sets',
   'speed.oddsTies': '+{pct} empate',

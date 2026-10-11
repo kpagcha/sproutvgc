@@ -5,7 +5,7 @@ import { CircleHelp } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { percent } from '@/data/meta'
 import { t } from '@/i18n'
-import type { Benchmark, NatureEffect } from '@/lib/stats'
+import type { NatureEffect } from '@/lib/stats'
 import { useOpenState } from '@/composables/useOpenState'
 import AppLink from '@/components/AppLink'
 import EffectTag from '@/components/EffectTag'
@@ -15,8 +15,9 @@ import PokemonIcon from '@/components/PokemonIcon'
 // shared by every row (taller the more of its sets run it), a thin line from its slowest to its fastest, and its most
 // common Speed under its mark. With yours, its Speed is a line down the rows, each mark colored by who moves first at
 // it (yours the accent, them the opponents' red; under Trick Room the other way round), and at the row's end the share
-// of its sets yours moves first against (and ties with). A Pokémon with no sets in the snapshot (every Pokémon shown)
-// has its benchmarks' range instead, marked as such. The rows from those moving first, by their most common Speed.
+// of its sets yours moves first against (and ties with). Behind them, faint on the axis, the range it could reach
+// (Min− to Max+), whatever its sets run. A Pokémon with no sets in the snapshot (every Pokémon shown) has that range
+// alone, marked as such. The rows from those moving first, by their most common Speed.
 export interface OddsRow {
   id: PokemonId
   species: string
@@ -24,8 +25,10 @@ export interface OddsRow {
   /** Its sets' Speeds in battle (with the modifiers), each with its share of them and the builds reaching it (nature
    * effect and points), the most common first. */
   builds: { speed: number; share: number; sets: { effect: NatureEffect; points: number; share: number }[] }[]
-  /** With no sets: its Speed at each benchmark. */
-  fallback?: Record<Benchmark, number>
+  /** Its Speeds at its slowest and fastest builds (Min− and Max+) in battle: what it could reach. */
+  reach: { min: number; max: number }
+  /** No sets in the snapshot: its reach alone. */
+  noSets: boolean
   /** Shown though the view leaves it out (found or kept), or with no sets: not counted as the rest. */
   extra: boolean
   hit: boolean
@@ -40,9 +43,8 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ chip: [event: MouseEvent, id: PokemonId] }>()
 
-const speedsOf = (r: OddsRow) => (r.fallback ? [r.fallback.min, r.fallback.max] : r.builds.map((b) => b.speed))
 const axis = computed(() => {
-  const all = props.rows.flatMap(speedsOf)
+  const all = props.rows.flatMap((r) => [r.reach.min, r.reach.max])
   if (props.mine !== null) all.push(props.mine)
   if (!all.length) return { lo: 0, span: 1 }
   const lo = Math.min(...all)
@@ -63,15 +65,16 @@ function marks(r: RangeLike) {
   return r.builds.map((b) => ({ ...b, tall: b.share / top, kind: verdict(b.speed) }))
 }
 type RangeLike = Pick<OddsRow, 'builds'>
+const between = (lo: number, hi: number) => ({ left: at(lo), width: `calc(${at(hi)} - ${at(lo)})` })
+/** The range its sets span, or, with none, what it could reach. */
 function span(r: OddsRow) {
-  const s = speedsOf(r)
-  const lo = Math.min(...s)
-  const hi = Math.max(...s)
-  return { left: at(lo), width: `calc(${at(hi)} - ${at(lo)})` }
+  if (r.noSets) return between(r.reach.min, r.reach.max)
+  const s = r.builds.map((b) => b.speed)
+  return between(Math.min(...s), Math.max(...s))
 }
 /** Against how many of its sets yours moves first, and ties with. */
 function odds(r: OddsRow) {
-  if (props.mine === null || r.fallback || !r.builds.length) return null
+  if (props.mine === null || r.noSets || !r.builds.length) return null
   const total = r.builds.reduce((n, b) => n + b.share, 0)
   if (!total) return null
   let first = 0
@@ -107,7 +110,7 @@ let markEl: HTMLElement | undefined
 function nearest(e: PointerEvent) {
   const track = (e.target as Element).closest<HTMLElement>('.row .track')
   const row = track && props.rows.find((r) => r.id === track.parentElement!.dataset.id)
-  if (!track || !row || row.fallback) return null
+  if (!track || !row || row.noSets) return null
   const box = track.getBoundingClientRect()
   const x = (speed: number) => box.left + ((speed - axis.value.lo) / axis.value.span) * box.width
   let best = -1
@@ -229,12 +232,13 @@ onBeforeUnmount(() => {
         </AppLink>
         <span class="track">
           <span class="visually-hidden">{{
-            r.fallback
+            r.noSets
               ? t('speed.oddsNoSets', { name: name(r) })
               : r.builds.map((b) => `${b.speed} ${percent(b.share)}`).join(', ')
           }}</span>
-          <span class="span" :class="{ fallback: !!r.fallback }" :style="span(r)" aria-hidden="true"></span>
-          <template v-if="!r.fallback">
+          <span v-if="!r.noSets" class="reach" :style="between(r.reach.min, r.reach.max)" aria-hidden="true"></span>
+          <span class="span" :class="{ fallback: r.noSets }" :style="span(r)" aria-hidden="true"></span>
+          <template v-if="!r.noSets">
             <span
               v-for="(b, i) in marks(r)"
               :key="i"
@@ -247,7 +251,7 @@ onBeforeUnmount(() => {
               r.builds[0]!.speed
             }}</span>
           </template>
-          <span v-else class="value num no-sets" :style="{ left: at((r.fallback.min + r.fallback.max) / 2) }">{{
+          <span v-else class="value num no-sets" :style="{ left: at((r.reach.min + r.reach.max) / 2) }">{{
             t('speed.noSets')
           }}</span>
           <span v-if="mine !== null" class="line" :style="{ left: at(mine) }" aria-hidden="true"></span>
@@ -427,8 +431,8 @@ onBeforeUnmount(() => {
   font-weight: bold;
   font-variant-numeric: tabular-nums;
 }
-/* The axis as a faint groove (a track, not a rule that would read as a second divider), the range its sets span as a
-   baseline on it, a mark rising from it at each Speed (as tall as it's common, a hairline of the panel between marks
+/* The axis as a faint groove (a track, not a rule that would read as a second divider), the range it could reach a
+   deeper stretch of it, the range its sets span as a baseline on it, a mark rising from it at each Speed (as tall as it's common, a hairline of the panel between marks
    side by side), yours a line through. */
 .track::before {
   content: '';
@@ -440,6 +444,13 @@ onBeforeUnmount(() => {
 }
 .head .track::before {
   display: none;
+}
+.reach {
+  position: absolute;
+  top: var(--bar-y);
+  height: 4px;
+  translate: 0 -50%;
+  background: color-mix(in srgb, var(--text) 16%, var(--panel));
 }
 .span {
   position: absolute;

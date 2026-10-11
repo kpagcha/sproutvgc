@@ -113,41 +113,34 @@ const MIN_SHARE = 0.03
 const { snapshot, data } = useMeta()
 const metaAvailable = computed(() => !!snapshot.value && has(snapshot.value, 'speeds'))
 
-// Three choices, each in the URL: which Pokémon are shown (`?show=`): the most used (the top 50 or 100), or every
-// Pokémon of the regulation; how they're drawn (`?view=`): the ladder, a row per Speed, or
-// ranges, a row per base Speed (at the benchmarks) or per Pokémon (at its sets); and where their Speeds come from
-// (`?speeds=`): the sets players run, or the benchmarks. Without a snapshot with Speeds, every Pokémon at the
-// benchmarks. A link from before them (`?all=1`) is every Pokémon's ranges at the benchmarks.
+// Two choices, each in the URL: which Pokémon are shown (`?show=`): the most used (the top 50 or 100), or every
+// Pokémon of the regulation; and how they're drawn (`?view=`): the ladder, a row per Speed, or the charts, a row per
+// Pokémon. Their Speeds are the sets players run; without a snapshot with Speeds, every Pokémon is at the benchmarks
+// (the charts a row per base Speed). A link from before these (`?all=1`) is every Pokémon's charts; one from when the
+// charts could be at the benchmarks (`?speeds=bench`) is at the sets.
 const SHOWS = ['top50', 'top100', 'all'] as const
 type Show = (typeof SHOWS)[number]
 const VIEWS = ['ladder', 'ranges'] as const
 type View = (typeof VIEWS)[number]
-const SOURCES = ['sets', 'bench'] as const
-type Source = (typeof SOURCES)[number]
-const DEFAULTS = { show: 'top50', view: 'ladder', speeds: 'sets' } as const
-const LEGACY = { show: 'all', view: 'ranges', speeds: 'bench' } as const
+const DEFAULTS = { show: 'top50', view: 'ladder' } as const
+const LEGACY = { show: 'all', view: 'ranges' } as const
 const legacy = computed(() => flag('all'))
-const pick = <T extends string>(k: 'show' | 'view' | 'speeds', list: readonly T[]): T => {
+const pick = <T extends string>(k: 'show' | 'view', list: readonly T[]): T => {
   const v = query.value[k]
   return (list as readonly unknown[]).includes(v) ? (v as T) : ((legacy.value ? LEGACY : DEFAULTS)[k] as T)
 }
 const show = computed<Show>(() => (metaAvailable.value ? pick('show', SHOWS) : 'all'))
 const view = computed<View>(() => pick('view', VIEWS))
-// The ladder is at the sets alone: at a benchmark, every Pokémon's at the same one, so its order is the base Speeds'
-// whichever it is (the charts have each at all four). With no snapshot, it's at the benchmark below.
-const speedsFrom = computed<Source>(() =>
-  !metaAvailable.value ? 'bench' : view.value === 'ladder' ? 'sets' : pick('speeds', SOURCES),
-)
-/** Whether the Speeds are the sets players run (else the benchmarks). */
-const bySets = computed(() => speedsFrom.value === 'sets')
+/** Whether the Speeds are the sets players run: with a snapshot that has them (else the benchmarks: the ladder at the
+ * one below, the charts a row per base Speed). */
+const bySets = computed(() => metaAvailable.value)
 /** How many of the most used the view shows (every Pokémon: no top). */
 const topN = computed(() => (show.value === 'top50' ? 50 : show.value === 'top100' ? 100 : Infinity))
 /** Whether the view needs the snapshot's data: for the sets, or to know who's most used. */
 const needsData = computed(() => bySets.value || show.value !== 'all')
 // Who's shown and how they're drawn as last picked (`sproutvgc.speedTiers.view`, those away from their defaults): the
 // page opened bare (from the menu, nothing in its URL) comes with them, put in the URL, so the URL always says what's
-// shown and links open as they were left. Where the Speeds come from isn't kept: the sets, unless a link says
-// otherwise. What was saved before these choices ('all') is left behind.
+// shown and links open as they were left. What was saved before these choices ('all') is left behind.
 const VIEW_KEY = 'sproutvgc.speedTiers.view'
 const REMEMBERED = ['show', 'view'] as const
 function saved(): Record<string, string> {
@@ -169,13 +162,14 @@ function saveChoices(q: Record<string, unknown>) {
     // Storage unavailable: the page opens on the defaults until they're picked again.
   }
 }
-/** One of the three set (the URL saying so only away from its default), a link from before them made explicit. */
-function choose(k: 'show' | 'view' | 'speeds', v: string) {
+/** One of the two set (the URL saying so only away from its default), a link from before them made explicit. */
+function choose(k: 'show' | 'view', v: string) {
   const q: Record<string, unknown> = { ...query.value }
+  delete q.speeds
   if (legacy.value) {
     delete q.all
-    // Every one of them away from its default.
-    for (const key of ['show', 'view', 'speeds'] as const) q[key] ??= LEGACY[key]
+    // Both of them away from their defaults.
+    for (const key of ['show', 'view'] as const) q[key] ??= LEGACY[key]
   }
   q[k] = v === DEFAULTS[k] ? undefined : v
   saveChoices(q)
@@ -286,8 +280,8 @@ function resetAll() {
   yoursOpen.value = false
   void router.replace({ query: {} })
 }
-// `field` and `doubled` were controls of their own, once: cleared with the rest, from an old link. Who's shown and where
-// the Speeds come from are the toolbar's too (how they're drawn, the tabs, isn't).
+// `field` and `doubled` were controls of their own, once, as was where the Speeds come from (`speeds`): cleared with the
+// rest, from an old link. Who's shown is the toolbar's too (how they're drawn, the tabs, isn't).
 const CONTROL_KEYS = [
   'show',
   'speeds',
@@ -952,12 +946,10 @@ const oddsRows = computed<OddsRow[]>(() => {
       bySpeed.set(speed, at)
     }
     const builds = [...bySpeed.values()].sort((a, b) => b.share - a.share)
-    const fallback = builds.length
-      ? undefined
-      : (Object.fromEntries(BENCHMARKS.map((b) => [b, inBattle(benchmark(base, b), mods.value)])) as Record<
-          Benchmark,
-          number
-        >)
+    const reach = {
+      min: inBattle(benchmark(base, 'min'), mods.value),
+      max: inBattle(benchmark(base, 'max'), mods.value),
+    }
     const who = named(id)
     return {
       row: {
@@ -965,12 +957,13 @@ const oddsRows = computed<OddsRow[]>(() => {
         species: who.species,
         forme: who.forme,
         builds,
-        fallback,
+        reach,
+        noSets: !builds.length,
         extra: beyondTop(id) || !builds.length,
         hit: id === found.value,
         mine: id === mine.value,
       },
-      speed: builds[0]?.speed ?? fallback!.max,
+      speed: builds[0]?.speed ?? reach.max,
       rank: m?.rank ?? Infinity,
     }
   })
@@ -1518,10 +1511,6 @@ const { entered } = usePageEntered()
                 <template v-if="metaAvailable">
                   <dt>{{ t('speed.show') }}</dt>
                   <dd class="muted">{{ t('speed.showDesc') }}</dd>
-                  <template v-if="view === 'ranges'">
-                    <dt>{{ t('speed.speedsFrom') }}</dt>
-                    <dd class="muted">{{ t('speed.speedsFromTip') }}</dd>
-                  </template>
                 </template>
                 <template v-if="view === 'ladder' && bySets && boostsAvailable">
                   <dt>{{ t('speed.boosts') }}</dt>
@@ -1581,19 +1570,9 @@ const { entered } = usePageEntered()
           @update:model-value="(v: string) => choose('view', v)"
         />
         <div ref="listPanel" class="panel banded soft list">
-          <!-- What the list is, a band of its own between the tabs and the toolbar: where the Speeds come from, in the
-               charts (first: it changes what they are the most), and who's shown (with a snapshot to have them from).
-               On phones, on one compact line, their labels read out but not shown (the choices say what they are). -->
+          <!-- What the list is, a band of its own between the tabs and the toolbar: who's shown (with a snapshot to
+               have them from). On phones, its label read out but not shown (the choice says what it is). -->
           <div v-if="choicesShown" class="band choices-band">
-            <SegmentedControl
-              v-if="view === 'ranges'"
-              class="choice-seg speeds-seg"
-              :model-value="speedsFrom"
-              :label="t('speed.speedsFrom')"
-              :tip="t('speed.speedsFromTip')"
-              :options="SOURCES.map((s) => ({ value: s, label: t(`speed.from.${s}`) }))"
-              @update:model-value="(v: string) => choose('speeds', v)"
-            />
             <label class="choice">
               <span class="muted choice-label">{{ t('speed.show') }}</span>
               <select
@@ -1917,8 +1896,8 @@ const { entered } = usePageEntered()
           <div v-if="!entered || (needsData && !data)" class="ladder" aria-hidden="true">
             <div v-for="i in 12" :key="i" class="tier skeleton"><span class="bone"></span></div>
           </div>
-          <!-- Every Pokémon: a row per base Speed, its range and its Speeds at each benchmark, yours a line down them. -->
-          <!-- The ranges: at the sets, a row per Pokémon with its sets' Speeds; at the benchmarks, a row per base Speed. -->
+          <!-- The charts: at the sets, a row per Pokémon with its sets' Speeds; with no snapshot, at the benchmarks, a
+               row per base Speed. -->
           <div v-else-if="view === 'ranges'" ref="ladder" class="ranges-wrap">
             <SpeedOdds
               v-if="bySets"
@@ -2550,21 +2529,13 @@ const { entered } = usePageEntered()
   padding-block: 8px;
   background: var(--choices);
 }
-/* Where the Speeds come from: at the page's own size, as its buttons are, not a small toggle. */
-.speeds-seg {
-  font-size: 1em;
-}
-.speeds-seg :deep(.segments label) {
-  padding: 2px 10px;
-}
 @media (max-width: 720px) {
   /* On phones, one compact line: the labels read out but not shown. */
   :root:root .list.banded > .band.choices-band {
     gap: 6px 8px;
     padding-block: 6px;
   }
-  .choice-label,
-  .choice-seg > :deep(.muted) {
+  .choice-label {
     position: absolute;
     width: 1px;
     height: 1px;
