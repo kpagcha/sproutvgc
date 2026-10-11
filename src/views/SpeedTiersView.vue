@@ -1098,6 +1098,23 @@ watch(
 )
 onBeforeUnmount(() => observer?.disconnect())
 
+// "/" focuses the find (the pinned bar's, while it shows), as on sites with a search; not while typing elsewhere, nor
+// with a dialog over the page.
+const findPicker = useTemplateRef<InstanceType<typeof PokemonPicker>>('findPicker')
+const pinnedFindPicker = useTemplateRef<InstanceType<typeof PokemonPicker>>('pinnedFindPicker')
+function onSlash(e: KeyboardEvent) {
+  if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return
+  const el = document.activeElement
+  if (el instanceof HTMLElement && (el.isContentEditable || el.closest('input, textarea, select'))) return
+  if (document.documentElement.classList.contains('dialog-open')) return
+  const picker = (pinned.value && pinnedFindPicker.value) || findPicker.value
+  if (!picker) return
+  e.preventDefault()
+  picker.open()
+}
+window.addEventListener('keydown', onSlash)
+onBeforeUnmount(() => window.removeEventListener('keydown', onSlash))
+
 // How to read the page, in a section closed unless the reader opens it (remembered), so the ladder starts close to the
 // top: the chips' legend, and on phones the intro and what each option does too (wide screens show them beside what
 // they explain). Opened from the intro's line, apart from the controls, as it changes nothing shown.
@@ -1466,10 +1483,12 @@ const { entered } = usePageEntered()
         <!-- Finding a Pokémon on the ladder: a band on top, sitting on the rows. -->
         <div class="band find find-row" :class="{ flash: flashFind }" @animationend="flashFind = false">
           <PokemonPicker
+            ref="findPicker"
             recent
             :model-value="found"
             :ids="findableIds"
             :placeholder="t('speed.find')"
+            hotkey="/"
             :title="findTitle"
             :tone="mine ? 'opponent' : undefined"
             list-width-of=".find-row"
@@ -1607,10 +1626,12 @@ const { entered } = usePageEntered()
           <div v-if="pinned" class="pinned" :class="{ opponents: mine }" data-top-bar>
             <div class="find">
               <PokemonPicker
+                ref="pinnedFindPicker"
                 recent
                 :model-value="found"
                 :ids="findableIds"
                 :placeholder="t('speed.findShort')"
+                hotkey="/"
                 :title="findTitle"
                 :tone="mine ? 'opponent' : undefined"
                 list-width-of=".pinned"

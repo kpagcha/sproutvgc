@@ -41,6 +41,8 @@ const props = defineProps<{
   taken?: readonly PokemonId[]
   /** Lists the Pokémon picked lately (in any picker with it) first while browsing, and records what's picked here. */
   recent?: boolean
+  /** The key the page focuses the field with, hinted at in it (`SearchBox`'s). */
+  hotkey?: string
   /** Lists them by usage, by these ranks (the meta's), each with its rank, rather than by name. */
   ranks?: Ranks
 }>()
@@ -285,6 +287,7 @@ const optionId = (i: number) => `${listId}-${i}`
       v-model="text"
       :placeholder="props.placeholder"
       :aria-label="props.placeholder"
+      :hotkey="props.hotkey"
       role="combobox"
       autocomplete="off"
       :readonly="phone"
