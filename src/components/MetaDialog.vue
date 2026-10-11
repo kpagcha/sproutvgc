@@ -8,7 +8,8 @@ import ModalDialog from '@/components/ModalDialog.vue'
 
 // The meta's data shown, as a button saying it (its dataset, "Showdown ladder · Sep 2026", and its subset in short,
 // "1760+") that opens its card (`MetaCard`) to see what it is and pick another: dropping from the button, closed by a
-// press outside it or Escape; on phones, in a dialog over the page.
+// press outside it or Escape. On phones, the button is its icon alone (what it shows read out, and in the card), as
+// the favorites' is, and the card opens in a dialog over the page.
 const open = ref(false)
 const root = useTemplateRef<HTMLElement>('root')
 
@@ -52,8 +53,10 @@ const subset = computed(() => (selectedSnapshot.value ? subsetShort(selectedSnap
       @click="open = !open"
     >
       <Database :size="16" class="icon" aria-hidden="true" />
-      <span class="dataset">{{ dataset }}</span>
-      <span v-if="subset" class="subset">{{ subset }}</span>
+      <template v-if="!phone">
+        <span class="dataset">{{ dataset }}</span>
+        <span v-if="subset" class="subset">{{ subset }}</span>
+      </template>
       <ChevronDown :size="14" class="chevron" :class="{ open }" aria-hidden="true" />
     </button>
     <ModalDialog v-if="phone" v-model:open="open" :label="t('meta.data')">
@@ -97,6 +100,14 @@ const subset = computed(() => (selectedSnapshot.value ? subsetShort(selectedSnap
 }
 .chevron.open {
   transform: rotate(180deg);
+}
+/* On phones, its icon alone: as compact as the favorites' star. */
+@media (max-width: 720px) {
+  .toggle {
+    gap: 4px;
+    min-height: 0;
+    padding: 3px 8px;
+  }
 }
 /* Under the button, over the page. */
 .pop {

@@ -415,9 +415,9 @@ function resetAll() {
       </button>
     </Teleport>
     <!-- The heading: the title and its star (saving the Pokémon and their builds to the favorites), the data the
-         common builds come from (a button opening what it is, to pick another; on phones, on a line of its own under
-         them), and how to read the page at the row's end (its icon alone on phones); under it, how to read the page,
-         opened: the formula and what each part says. -->
+         common builds come from (a button opening what it is, to pick another; on phones, its icon alone), and how to
+         read the page at the row's end (its icon alone on phones); under it, how to read the page, opened: the formula
+         and what each part says. -->
     <section class="panel page-head">
       <div class="head">
         <h1>{{ t('title.speedCompare') }}<SetupStar /></h1>
@@ -799,8 +799,8 @@ function resetAll() {
 
 <style scoped>
 /* The heading's row: the title and its star, the data shown (its dataset cut short first when the row's tight; on
-   phones, on a line of its own under the rest), then how to read the page taking what's left, at its end (its words
-   when they fit, else its icon alone; on phones, always its icon alone). */
+   phones, its icon alone), then how to read the page taking what's left, at its end (its words when they fit, else its
+   icon alone; on phones, always its icon alone). */
 .head {
   display: flex;
   flex-wrap: wrap;
@@ -819,10 +819,6 @@ function resetAll() {
 @media (max-width: 720px) {
   .head-help :deep(span) {
     display: none;
-  }
-  .head-meta {
-    flex-basis: 100%;
-    order: 1;
   }
 }
 /* How to read the page, in a well under the heading. */

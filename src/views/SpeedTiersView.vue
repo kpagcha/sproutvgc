@@ -1344,9 +1344,9 @@ const { entered } = usePageEntered()
     <div class="speed-layout">
       <div class="main-col">
         <!-- The page's heading, over the ladder (yours beside both): on one row, the title and its star, saving the setup
-             to the favorites, the data shown (a button opening what it is, to pick another; on phones, on a line of its own
-             under them), and how to read the page at the row's end (its icon alone on phones); under it, how to read the
-             page, opened. -->
+             to the favorites, the data shown (a button opening what it is, to pick another; on phones, its icon alone),
+             and how to read the page at the row's end (its icon alone on phones); under it, how to read the page,
+             opened. -->
         <section class="panel page-head">
           <div class="head">
             <h1>{{ t('title.speedTiers') }}<SetupStar /></h1>
@@ -2182,8 +2182,8 @@ const { entered } = usePageEntered()
   --dim: color-mix(in srgb, var(--ink) 40%, transparent);
 }
 /* The heading's row: the title and its star, the data shown (its dataset cut short first when the row's tight; on
-   phones, on a line of its own under the rest), then how to read the page taking what's left, at its end (its words
-   when they fit, else its icon alone; on phones, always its icon alone). */
+   phones, its icon alone), then how to read the page taking what's left, at its end (its words when they fit, else its
+   icon alone; on phones, always its icon alone). */
 .head {
   display: flex;
   flex-wrap: wrap;
@@ -2199,10 +2199,6 @@ const { entered } = usePageEntered()
 @media (max-width: 720px) {
   .head-help :deep(span) {
     display: none;
-  }
-  .head-meta {
-    flex-basis: 100%;
-    order: 1;
   }
 }
 .head-meta {
