@@ -108,6 +108,27 @@ const { snapshot, data } = useMeta()
 const metaAvailable = computed(() => !!snapshot.value && has(snapshot.value, 'speeds'))
 
 const showAll = computed(() => !metaAvailable.value || flag('all'))
+// Which Pokémon are shown, as last picked (`sproutvgc.speedTiers.view`): the page opened bare (from the menu, nothing in
+// its URL) comes with it, put in the URL, so the URL always says what's shown and links open as they were left.
+const VIEW_KEY = 'sproutvgc.speedTiers.view'
+function saveView(all: boolean) {
+  try {
+    if (all) localStorage.setItem(VIEW_KEY, 'all')
+    else localStorage.removeItem(VIEW_KEY)
+  } catch {
+    // Storage unavailable: the page opens on the top until it's picked again.
+  }
+}
+function setView(all: boolean) {
+  saveView(all)
+  set('all', all ? '1' : undefined)
+}
+try {
+  if (!Object.keys(query.value).length && localStorage.getItem(VIEW_KEY) === 'all')
+    void router.replace({ query: { all: '1' } })
+} catch {
+  // Storage unavailable: the page opens on the top.
+}
 const trickRoom = computed(() => flag('trickroom'))
 
 // The benchmark every Pokémon is at, showing them all: as picked (`?bench=`), else the fastest build, or the slowest
@@ -201,12 +222,13 @@ const inField = (w: SpeedWhen) =>
   !inPlay.value || !needsField(w) || w === inPlay.value || isTerrain(w) !== isTerrain(inPlay.value)
 /** Whether a boost is in play: the field's own, which its sets have, rather than what could be. */
 const live = (b: Boost) => b.ref.kind === 'ability' && !!inPlay.value && b.when === inPlay.value
-// The controls back as a page comes without them: what's shown, the options and the modifiers, boosts on again here
-// too. What's found and kept, and yours, are left as they are.
+// The controls back as a page comes without them: the options and the modifiers, boosts on again here too. Which
+// Pokémon are shown (the tabs), what's found and kept, and yours, are left as they are.
 // Everything back as the page comes with nothing set: its whole URL cleared (what's shown, the options, yours, what's
 // found and kept), boosts on again, and the modifiers' sections folded.
 const allChanged = computed(() => Object.keys(query.value).length > 0 || !boostsPref.value)
 function resetAll() {
+  saveView(false)
   boostsPref.value = true
   try {
     localStorage.removeItem(BOOSTS_KEY)
@@ -219,7 +241,7 @@ function resetAll() {
   void router.replace({ query: {} })
 }
 // `field` and `doubled` were controls of their own, once: cleared with the rest, from an old link.
-const CONTROL_KEYS = ['all', 'bench', 'trickroom', 'megas', 'boosts', 'field', 'doubled', 'stage', ...TOGGLES] as const
+const CONTROL_KEYS = ['bench', 'trickroom', 'megas', 'boosts', 'field', 'doubled', 'stage', ...TOGGLES] as const
 const controlsChanged = computed(() => CONTROL_KEYS.some((k) => query.value[k] !== undefined) || !boostsOn.value)
 function resetControls() {
   boostsPref.value = true
@@ -1357,7 +1379,7 @@ const { entered } = usePageEntered()
             { value: 'meta', label: t('speed.meta', { n: TOP }) },
             { value: 'all', label: t('speed.all') },
           ]"
-          @update:model-value="(v: string) => set('all', v === 'all' ? '1' : undefined)"
+          @update:model-value="(v: string) => setView(v === 'all')"
         />
         <div ref="listPanel" class="panel banded soft list">
           <!-- The ladder's toolbar, a band under the tabs: how it's shown on a line (what each option does in a tooltip,
