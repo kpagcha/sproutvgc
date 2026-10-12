@@ -552,13 +552,14 @@ function resetAll() {
     <FolderTabs
       :model-value="mode"
       :label="t('compare.mode')"
-      :options="MODES.map((m) => ({ value: m, label: t(`compare.mode.${m}`) }))"
+      :options="
+        MODES.map((m) => ({ value: m, label: t(phone && m === 'vs' ? 'compare.mode.vsShort' : `compare.mode.${m}`) }))
+      "
       @update:model-value="(m: Mode) => setMode(m)"
     />
     <!-- What applies to every one shown: Trick Room, turning over everything under it; yours against the opponents,
-         once there's one picked, swapping the teams and seeing the two first on the speed tiers; and at the row's end,
-         clearing them (the teams, or the list in speed order). There from the start, so nothing under it moves on the
-         first pick. -->
+         once there's one picked, swapping the teams; and at the row's end, clearing them (the teams, or the list in
+         speed order; on phones, its icon alone). There from the start, so nothing under it moves on the first pick. -->
     <div class="panel toolbar">
       <button
         v-tip="canHover && t('compare.trickroomTip')"
@@ -574,52 +575,26 @@ function resetAll() {
         <button type="button" class="btn" @click="swap">
           <ArrowLeftRight :size="16" aria-hidden="true" />{{ t('compare.swap') }}
         </button>
-        <AppLink v-if="!ladderChoices.length" :to="ladderLink" class="btn">{{ t('compare.toLadder') }}</AppLink>
-        <!-- With a second on either team: which of yours goes there as yours, which opponent it finds. -->
-        <div v-else ref="ladderMenu" class="ladder-menu">
-          <button type="button" class="btn" :aria-expanded="ladderOpen" @click="ladderOpen = !ladderOpen">
-            {{ t('compare.toLadder')
-            }}<ChevronDown :size="16" class="fold-chevron" :class="{ open: ladderOpen }" aria-hidden="true" />
-          </button>
-          <div v-if="ladderOpen" class="ladder-pop panel">
-            <div
-              v-for="c in ladderChoices"
-              :key="c.side"
-              class="ladder-row"
-              role="radiogroup"
-              :aria-label="t(c.side === 'a' ? 'compare.ladderYours' : 'compare.ladderFind')"
-            >
-              <span class="muted small">{{ t(c.side === 'a' ? 'compare.ladderYours' : 'compare.ladderFind') }}</span>
-              <span class="ladder-picks">
-                <button
-                  v-for="sl in c.slots"
-                  :key="sl"
-                  type="button"
-                  role="radio"
-                  class="btn ladder-pick"
-                  :class="[teamOf(sl), { on: (c.side === 'a' ? ladderMine : ladderFind) === sl }]"
-                  :aria-checked="(c.side === 'a' ? ladderMine : ladderFind) === sl"
-                  @click="c.side === 'a' ? (ladderMine = sl) : (ladderFind = sl)"
-                >
-                  <PokemonIcon :id="idOf(sl)!" />{{ refName(pokemon(idOf(sl)!)) }}
-                </button>
-              </span>
-            </div>
-            <AppLink :to="ladderLink" class="btn primary ladder-go">{{ t('compare.toLadder') }}</AppLink>
-          </div>
-        </div>
       </template>
       <button
         v-if="mode === 'order'"
         type="button"
         class="btn inverted clear-all"
+        :aria-label="t('compare.clearList')"
         :disabled="!list.length"
         @click="clearList"
       >
-        <Trash2 :size="16" aria-hidden="true" />{{ t('compare.clearList') }}
+        <Trash2 :size="16" aria-hidden="true" /><span class="clear-label">{{ t('compare.clearList') }}</span>
       </button>
-      <button v-else type="button" class="btn inverted clear-all" :disabled="!anyPicked" @click="clearTeams">
-        <Trash2 :size="16" aria-hidden="true" />{{ t('compare.clearTeams') }}
+      <button
+        v-else
+        type="button"
+        class="btn inverted clear-all"
+        :aria-label="t('compare.clearTeams')"
+        :disabled="!anyPicked"
+        @click="clearTeams"
+      >
+        <Trash2 :size="16" aria-hidden="true" /><span class="clear-label">{{ t('compare.clearTeams') }}</span>
       </button>
     </div>
 
@@ -888,6 +863,44 @@ function resetAll() {
         </section>
       </div>
     </template>
+    <!-- Yours against the opponents, once there's one picked: seeing the two on the speed tiers, at the page's end, as
+         the speed tiers' card ends with the way here. -->
+    <div v-if="mode === 'vs' && anyPicked" class="to-ladder">
+      <AppLink v-if="!ladderChoices.length" :to="ladderLink" class="btn">{{ t('compare.toLadder') }}</AppLink>
+      <!-- With a second on either team: which of yours goes there as yours, which opponent it finds. -->
+      <div v-else ref="ladderMenu" class="ladder-menu">
+        <button type="button" class="btn" :aria-expanded="ladderOpen" @click="ladderOpen = !ladderOpen">
+          {{ t('compare.toLadder')
+          }}<ChevronDown :size="16" class="fold-chevron" :class="{ open: ladderOpen }" aria-hidden="true" />
+        </button>
+        <div v-if="ladderOpen" class="ladder-pop panel">
+          <div
+            v-for="c in ladderChoices"
+            :key="c.side"
+            class="ladder-row"
+            role="radiogroup"
+            :aria-label="t(c.side === 'a' ? 'compare.ladderYours' : 'compare.ladderFind')"
+          >
+            <span class="muted small">{{ t(c.side === 'a' ? 'compare.ladderYours' : 'compare.ladderFind') }}</span>
+            <span class="ladder-picks">
+              <button
+                v-for="sl in c.slots"
+                :key="sl"
+                type="button"
+                role="radio"
+                class="btn ladder-pick"
+                :class="[teamOf(sl), { on: (c.side === 'a' ? ladderMine : ladderFind) === sl }]"
+                :aria-checked="(c.side === 'a' ? ladderMine : ladderFind) === sl"
+                @click="c.side === 'a' ? (ladderMine = sl) : (ladderFind = sl)"
+              >
+                <PokemonIcon :id="idOf(sl)!" />{{ refName(pokemon(idOf(sl)!)) }}
+              </button>
+            </span>
+          </div>
+          <AppLink :to="ladderLink" class="btn primary ladder-go">{{ t('compare.toLadder') }}</AppLink>
+        </div>
+      </div>
+    </div>
     <p class="muted small page-note">{{ t(mode === 'order' ? 'compare.introOrder' : 'compare.intro') }}</p>
   </div>
 </template>
@@ -1207,6 +1220,21 @@ function resetAll() {
   order: 1;
   margin-left: auto;
 }
+/* On phones, clearing them is its icon alone (its words read out still). */
+@media (max-width: 720px) {
+  .clear-label {
+    display: none;
+  }
+}
+/* The way to the speed tiers, at the page's end. */
+.to-ladder {
+  position: relative;
+  display: flex;
+  margin-top: 12px;
+}
+.to-ladder > .btn {
+  gap: 6px;
+}
 /* The speed tiers' menu: under its button, over what follows. */
 .ladder-menu {
   position: relative;
@@ -1225,11 +1253,8 @@ function resetAll() {
   width: max-content;
   max-width: min(420px, calc(100vw - 32px));
 }
-/* On phones the button sits partway across, so the menu hangs from the panel instead, as wide as it. */
+/* On phones, the menu as wide as the page's column. */
 @media (max-width: 720px) {
-  .toolbar {
-    position: relative;
-  }
   .ladder-menu {
     position: static;
   }

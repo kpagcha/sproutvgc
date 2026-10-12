@@ -883,6 +883,7 @@ export const messages = {
   'compare.introOrder': 'Any Pokémon, each with its build, in the order they move.',
   'compare.mode': 'View',
   'compare.mode.vs': 'Yours vs opponents',
+  'compare.mode.vsShort': 'Versus',
   'compare.mode.order': 'Speed order',
   'compare.helpMode':
     'Yours against opponents, up to two a side, or any Pokémon at all (up to 20) in the order they move.',

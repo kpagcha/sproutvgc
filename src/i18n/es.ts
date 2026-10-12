@@ -896,6 +896,7 @@ export const messages: Record<keyof typeof en, string> = {
   'compare.introOrder': 'Cualquier Pokémon, cada uno con su distribución, en el orden en que mueven.',
   'compare.mode': 'Vista',
   'compare.mode.vs': 'Tuyos contra rivales',
+  'compare.mode.vsShort': 'Versus',
   'compare.mode.order': 'Orden de velocidad',
   'compare.helpMode':
     'Los tuyos contra rivales, hasta dos por lado, o cualquier Pokémon (hasta 20) en el orden en que mueven.',
