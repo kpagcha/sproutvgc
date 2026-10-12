@@ -682,8 +682,11 @@ export const messages = {
   'speed.view.charts': 'Charts',
   'speed.oddsHead': 'You first',
   'speed.oddsNote':
-    "One row per Pokémon, a mark at each Speed its sets run, taller the more run it, over a fainter stretch from its slowest possible Speed to its fastest. Your Pokémon is the line; at the row's end, the share of its sets you move first against.",
-  'speed.oddsNoSets': '{name}: no sets in the data, its benchmarks shown',
+    "One row per Pokémon, a mark at each Speed its sets run, taller the more run it, over a fainter stretch from its slowest possible Speed to its fastest. Your Pokémon is the line; at the row's end, the share of its sets you move first against. A Pokémon with no sets in the data has hollow marks at its benchmarks instead, and whether you move first against all of its range, none of it or part of it.",
+  'speed.oddsNoSets': '{name}: no sets in the data. At its benchmarks: {list}',
+  'speed.oddsReach.always': 'Always',
+  'speed.oddsReach.never': 'Never',
+  'speed.oddsReach.depends': 'Depends',
   'speed.noSets': 'No sets',
   'speed.oddsTies': '+{pct} tie',
   'speed.mod.trickroom': 'Trick Room',

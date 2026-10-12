@@ -691,8 +691,11 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.view.charts': 'Gráficos',
   'speed.oddsHead': 'Tú primero',
   'speed.oddsNote':
-    'Una fila por Pokémon, una marca en cada Velocidad de sus sets, más alta cuantos más la llevan, sobre un tramo más tenue de su Velocidad más baja posible a la más alta. Tu Pokémon es la línea; al final de la fila, la proporción de sus sets contra los que mueves primero.',
-  'speed.oddsNoSets': '{name}: sin sets en los datos, se muestran sus referencias',
+    'Una fila por Pokémon, una marca en cada Velocidad de sus sets, más alta cuantos más la llevan, sobre un tramo más tenue de su Velocidad más baja posible a la más alta. Tu Pokémon es la línea; al final de la fila, la proporción de sus sets contra los que mueves primero. Un Pokémon sin sets en los datos tiene en su lugar marcas huecas en sus referencias, y si mueves primero contra todo su tramo, contra nada de él o contra parte.',
+  'speed.oddsNoSets': '{name}: sin sets en los datos. En sus referencias: {list}',
+  'speed.oddsReach.always': 'Siempre',
+  'speed.oddsReach.never': 'Nunca',
+  'speed.oddsReach.depends': 'Depende',
   'speed.noSets': 'Sin sets',
   'speed.oddsTies': '+{pct} empate',
   'speed.mod.trickroom': 'Espacio Raro',

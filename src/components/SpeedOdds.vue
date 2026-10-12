@@ -5,7 +5,7 @@ import { CircleHelp } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { percent } from '@/data/meta'
 import { t } from '@/i18n'
-import type { NatureEffect } from '@/lib/stats'
+import type { Benchmark, NatureEffect } from '@/lib/stats'
 import { MARK_SHARE } from '@/lib/speed'
 import { useOpenState } from '@/composables/useOpenState'
 import AppLink from '@/components/AppLink'
@@ -18,7 +18,9 @@ import PokemonIcon from '@/components/PokemonIcon'
 // it (yours the accent, them the opponents' red; under Trick Room the other way round), and at the row's end the share
 // of its sets yours moves first against (and ties with). Behind them, faint on the axis, the range it could reach
 // (Min− to Max+), whatever its sets run. A Pokémon with no sets in the snapshot (every Pokémon shown) has that range
-// alone, marked as such. The rows from those moving first, by their most common Speed.
+// with its four benchmarks on it, hollow and alike (how common each is unknown), and, rather than a share, whether
+// yours moves first against all of that range, none of it or part of it. The rows from those moving first, by their
+// most common Speed.
 export interface OddsRow {
   id: PokemonId
   species: string
@@ -28,6 +30,8 @@ export interface OddsRow {
   builds: { speed: number; share: number; sets: { effect: NatureEffect; points: number; share: number }[] }[]
   /** Its Speeds at its slowest and fastest builds (Min− and Max+) in battle: what it could reach. */
   reach: { min: number; max: number }
+  /** Its Speed at each benchmark in battle: what a row with no sets shows. */
+  bench: Record<Benchmark, number>
   /** No sets in the snapshot: its reach alone. */
   noSets: boolean
   /** Shown though the view leaves it out (found or kept), or with no sets: not counted as the rest. */
@@ -69,11 +73,22 @@ function marks(r: RangeLike) {
 }
 type RangeLike = Pick<OddsRow, 'builds'>
 const between = (lo: number, hi: number) => ({ left: at(lo), width: `calc(${at(hi)} - ${at(lo)})` })
-/** The range its sets span, or, with none, what it could reach. */
+/** The range its sets span. */
 function span(r: OddsRow) {
-  if (r.noSets) return between(r.reach.min, r.reach.max)
   const s = drawn(r).map((b) => b.speed)
   return between(Math.min(...s), Math.max(...s))
+}
+/** The benchmarks as the bar runs, slowest first: a row with no sets' marks. */
+const ALONG: readonly Benchmark[] = ['min', 'none', 'maxNeutral', 'max']
+const benchMarks = (r: OddsRow) => ALONG.map((b) => ({ bench: b, speed: r.bench[b], kind: verdict(r.bench[b]) }))
+const benchLabel = (b: Benchmark) => t(`stat.bench.${b}`)
+/** With no sets: whether yours moves first against the whole of what it could reach, none of it, or part of it. */
+function reachVerdict(r: OddsRow): 'always' | 'never' | 'depends' | null {
+  if (props.mine === null) return null
+  const ends = [verdict(r.reach.min), verdict(r.reach.max)]
+  if (ends.every((v) => v === 'yours')) return 'always'
+  if (ends.every((v) => v === 'theirs')) return 'never'
+  return 'depends'
 }
 /** Against how many of its sets yours moves first, and ties with. */
 function odds(r: OddsRow) {
@@ -102,8 +117,9 @@ const SHOW_DELAY = 80
 const REACH = { mouse: 12, touch: 24 }
 const list = useTemplateRef<HTMLElement>('list')
 const active = ref<{ id: PokemonId; speed: number } | null>(null)
-/** What the tooltip says: the Speed, its share, and the builds reaching it, as the ladder's chips tag them. */
-const pointed = ref<OddsRow['builds'][number] | null>(null)
+/** What the tooltip says: the Speed, its share, and the builds reaching it, as the ladder's chips tag them; or, on a row
+ * with no sets, the benchmark it is. */
+const pointed = ref<OddsRow['builds'][number] | { speed: number; bench: Benchmark } | null>(null)
 const tipBody = useTemplateRef<HTMLElement>('tipBody')
 let tip: Instance | undefined
 let pending: ReturnType<typeof setTimeout> | undefined
@@ -113,12 +129,12 @@ let markEl: HTMLElement | undefined
 function nearest(e: PointerEvent) {
   const track = (e.target as Element).closest<HTMLElement>('.row .track')
   const row = track && props.rows.find((r) => r.id === track.parentElement!.dataset.id)
-  if (!track || !row || row.noSets) return null
+  if (!track || !row) return null
   const box = track.getBoundingClientRect()
   const x = (speed: number) => box.left + ((speed - axis.value.lo) / axis.value.span) * box.width
   let best = -1
   let gap = e.pointerType === 'mouse' ? REACH.mouse : REACH.touch
-  const shown = drawn(row)
+  const shown = row.noSets ? benchMarks(row) : drawn(row)
   shown.forEach((b, i) => {
     const d = Math.abs(x(b.speed) - e.clientX)
     if (d <= gap) [best, gap] = [i, d]
@@ -239,14 +255,17 @@ onBeforeUnmount(() => {
         <span class="track">
           <span class="visually-hidden">{{
             r.noSets
-              ? t('speed.oddsNoSets', { name: name(r) })
+              ? t('speed.oddsNoSets', {
+                  name: name(r),
+                  list: ALONG.map((b) => `${benchLabel(b)} ${r.bench[b]}`).join(', '),
+                })
               : drawn(r)
                   .map((b) => `${b.speed} ${percent(b.share)}`)
                   .join(', ')
           }}</span>
-          <span v-if="!r.noSets" class="reach" :style="between(r.reach.min, r.reach.max)" aria-hidden="true"></span>
-          <span class="span" :class="{ fallback: r.noSets }" :style="span(r)" aria-hidden="true"></span>
+          <span class="reach" :style="between(r.reach.min, r.reach.max)" aria-hidden="true"></span>
           <template v-if="!r.noSets">
+            <span class="span" :style="span(r)" aria-hidden="true"></span>
             <span
               v-for="(b, i) in marks(r)"
               :key="i"
@@ -259,15 +278,28 @@ onBeforeUnmount(() => {
               r.builds[0]!.speed
             }}</span>
           </template>
-          <span v-else class="value num no-sets" :style="{ left: at((r.reach.min + r.reach.max) / 2) }">{{
-            t('speed.noSets')
-          }}</span>
+          <template v-else>
+            <span
+              v-for="b in benchMarks(r)"
+              :key="b.bench"
+              class="mark bench"
+              :class="[b.kind, { active: active?.id === r.id && active.speed === b.speed }]"
+              :style="{ left: at(b.speed) }"
+              aria-hidden="true"
+            ></span>
+            <span class="value num no-sets" :style="{ left: at((r.reach.min + r.reach.max) / 2) }">{{
+              t('speed.noSets')
+            }}</span>
+          </template>
           <span v-if="mine !== null" class="line" :style="{ left: at(mine) }" aria-hidden="true"></span>
         </span>
         <!-- On phones, where the bar's under the rest of the row and as wide as it: yours' line down the whole row. -->
         <span v-if="mine !== null" class="line row-line" :style="{ left: at(mine) }" aria-hidden="true"></span>
         <span v-if="mine !== null" class="odds-cell num">
-          <template v-if="odds(r)">
+          <span v-if="r.noSets && reachVerdict(r)" class="reach-verdict" :class="reachVerdict(r)">{{
+            t(`speed.oddsReach.${reachVerdict(r)!}`)
+          }}</span>
+          <template v-else-if="odds(r)">
             <span class="first">{{ percent(odds(r)!.first) }}</span>
             <span v-if="odds(r)!.ties" class="ties">{{ t('speed.oddsTies', { pct: percent(odds(r)!.ties) }) }}</span>
           </template>
@@ -277,7 +309,11 @@ onBeforeUnmount(() => {
     </ol>
     <!-- The tooltip's content, moved into it by tippy. -->
     <div ref="tipBody" class="tip-body">
-      <template v-if="pointed">
+      <template v-if="pointed && 'bench' in pointed">
+        <div class="tip-head num">{{ pointed.speed }} · {{ benchLabel(pointed.bench) }}</div>
+        <div>{{ t(`speed.benchTip.${pointed.bench}`) }}</div>
+      </template>
+      <template v-else-if="pointed">
         <div class="tip-head num">{{ pointed.speed }} · {{ percent(pointed.share) }}</div>
         <div v-for="b in pointed.sets" :key="`${b.effect}:${b.points}`" class="tip-build">
           <EffectTag :effect="b.effect" /><span>{{ t('speed.points', { n: b.points }) }}</span
@@ -474,11 +510,35 @@ onBeforeUnmount(() => {
   translate: 0 -50%;
   background: var(--range-plain);
 }
-.span.fallback {
-  height: 8px;
-  translate: 0 -100%;
-  background: none;
-  border: 1px dotted var(--border-strong);
+/* A row with no sets' benchmarks: hollow and all alike, as how common each is isn't known, outlined in the color of
+   who moves first at it. */
+.mark.bench {
+  height: 11px;
+  background: var(--panel);
+  box-shadow:
+    inset 0 0 0 1px var(--range-plain),
+    0 0 0 1px var(--panel);
+}
+.mark.bench.yours {
+  box-shadow:
+    inset 0 0 0 1px var(--range-yours),
+    0 0 0 1px var(--panel);
+}
+.mark.bench.theirs {
+  box-shadow:
+    inset 0 0 0 1px var(--range-theirs),
+    0 0 0 1px var(--panel);
+}
+.mark.bench.tie {
+  box-shadow:
+    inset 0 0 0 1px var(--ink),
+    0 0 0 1px var(--panel);
+}
+.track .mark.bench.active {
+  box-shadow:
+    inset 0 0 0 1px var(--ink),
+    0 0 0 1px var(--panel),
+    0 0 0 2px var(--ink);
 }
 .mark {
   position: absolute;
@@ -555,6 +615,16 @@ onBeforeUnmount(() => {
 }
 .first {
   color: var(--accent);
+}
+/* With no sets, a word rather than a share, in the color of who moves first. */
+.reach-verdict.always {
+  color: var(--accent);
+}
+.reach-verdict.never {
+  color: var(--opponent);
+}
+.reach-verdict.depends {
+  color: var(--muted);
 }
 .ties {
   font-size: 0.75em;

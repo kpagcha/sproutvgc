@@ -935,10 +935,11 @@ const oddsRows = computed<OddsRow[]>(() => {
       bySpeed.set(speed, at)
     }
     const builds = [...bySpeed.values()].sort((a, b) => b.share - a.share)
-    const reach = {
-      min: inBattle(benchmark(base, 'min'), mods.value),
-      max: inBattle(benchmark(base, 'max'), mods.value),
-    }
+    const bench = Object.fromEntries(BENCHMARKS.map((b) => [b, inBattle(benchmark(base, b), mods.value)])) as Record<
+      Benchmark,
+      number
+    >
+    const reach = { min: bench.min, max: bench.max }
     const who = named(id)
     return {
       row: {
@@ -947,6 +948,7 @@ const oddsRows = computed<OddsRow[]>(() => {
         forme: who.forme,
         builds,
         reach,
+        bench,
         noSets: !builds.length,
         extra: beyondTop(id) || !builds.length,
         hit: id === found.value,
