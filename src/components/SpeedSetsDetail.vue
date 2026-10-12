@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { t } from '@/i18n'
 import { reachOf } from '@/lib/speedLineup'
 import SpeedCommonSpeeds from '@/components/SpeedCommonSpeeds.vue'
@@ -8,8 +8,19 @@ import type { VersusMon } from '@/components/SpeedVersus.vue'
 
 // One of yours against an opponent, either at its sets, in the matchups: the chart of the one at its sets (the
 // opponent's when both are), the other on it; then, the opponent at its sets, its common Speeds and how yours does
-// against each (`SpeedCommonSpeeds`).
+// against each (`SpeedCommonSpeeds`), folded until opened or a mark on the chart is tapped, unfolding them at it.
 const props = defineProps<{ yours: VersusMon; opponent: VersusMon; trickRoom: boolean }>()
+
+const open = ref(false)
+const focus = ref<number | null>(null)
+watch(
+  () => props.opponent.id,
+  () => (focus.value = null),
+)
+function pick(speed: number) {
+  focus.value = speed
+  open.value = true
+}
 
 const charted = computed(() =>
   props.opponent.sets
@@ -27,8 +38,18 @@ const charted = computed(() =>
       :other="{ name: charted.them.name, spread: charted.them.spread, sets: charted.them.sets }"
       :reach="reachOf(charted.me.id, charted.me.build)"
       :trick-room="trickRoom"
+      :pickable="opponent.sets"
+      @pick="pick"
     />
-    <SpeedCommonSpeeds v-if="opponent.sets" :yours :opponent :trick-room="trickRoom" />
+    <SpeedCommonSpeeds
+      v-if="opponent.sets"
+      v-model:open="open"
+      :yours
+      :opponent
+      :trick-room="trickRoom"
+      :focus
+      foldable
+    />
   </div>
 </template>
 

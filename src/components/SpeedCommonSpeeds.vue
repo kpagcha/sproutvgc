@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, useTemplateRef, watch } from 'vue'
 import { ChevronDown } from '@lucide/vue'
 import { percent } from '@/data/meta'
 import { t } from '@/i18n'
@@ -14,9 +14,19 @@ import type { VersusMon } from '@/components/SpeedVersus.vue'
 // under Trick Room), when it isn't among them), each with its share and build, and how yours does against it: who
 // moves first, and what yours takes to (`moveFirstPlan`): at its nature the points that do it (with what's to spare)
 // or how far off it is, the nature that would when its can't, and, when none can, the modifiers that would, unfolded
-// from the row. Yours at its sets, the share of them that move first. In the matchups, and in yours' panel against
-// it, where its heading is a band of its side's color (`banded`).
-const props = defineProps<{ yours: VersusMon; opponent: VersusMon; trickRoom: boolean; banded?: boolean }>()
+// from the row. Yours at its sets, the share of them that move first. Folded under the opponent's chart (`foldable`),
+// in the matchups and in the pair, where its heading is a band of its side's color (`banded`): a mark tapped there
+// unfolds it at that Speed (`focus`), its rows marked, and added when it isn't among them.
+const props = defineProps<{
+  yours: VersusMon
+  opponent: VersusMon
+  trickRoom: boolean
+  banded?: boolean
+  foldable?: boolean
+  /** The Speed tapped on the chart. */
+  focus?: number | null
+}>()
+const open = defineModel<boolean>('open', { default: true })
 
 const MIN_SHARE = 0.03
 const MAX_ROWS = 4
@@ -34,6 +44,9 @@ const rows = computed(() => {
     const top = [...(spread.find((p) => p.speed === edge)?.builds ?? [])].sort((a, b) => b.share - a.share)[0]
     if (top) list.push({ ...top, speed: edge })
   }
+  const at =
+    props.focus != null && !list.some((b) => b.speed === props.focus) && spread.find((p) => p.speed === props.focus)
+  if (at) list.push(...[...at.builds].sort((a, b) => b.share - a.share).map((b) => ({ ...b, speed: at.speed })))
   return list.map((b) => ({ ...b, key: `${b.speed}:${b.effect}:${b.points}`, versus: versus(b.speed) }))
 })
 
@@ -55,19 +68,36 @@ function versus(speed: number) {
   return { kind, text: `${t(`compare.cell.${kind}`)} · ${how}`, plan }
 }
 
+// The Speed tapped, once its rows are drawn, brought into view.
+const root = useTemplateRef<HTMLElement>('root')
+watch(
+  [() => props.focus, open],
+  () => {
+    if (open.value && props.focus != null)
+      root.value?.querySelector('.trow.focus')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  },
+  { flush: 'post' },
+)
+
 /** The rows whose modifiers are unfolded. */
-const open = ref(new Set<string>())
+const unfolded = ref(new Set<string>())
 function toggle(key: string) {
-  const next = new Set(open.value)
+  const next = new Set(unfolded.value)
   if (!next.delete(key)) next.add(key)
-  open.value = next
+  unfolded.value = next
 }
 </script>
 
 <template>
-  <section class="common">
-    <h3 class="small title" :class="{ band: banded }">{{ t('compare.commonSpeeds', { name: opponent.name }) }}</h3>
-    <div class="table small" :class="{ padded: banded }" role="table">
+  <section ref="root" class="common">
+    <h3 class="small title" :class="{ band: banded, folded: foldable && !open }">
+      <button v-if="foldable" type="button" class="fold" :aria-expanded="open" @click="open = !open">
+        {{ t('compare.commonSpeeds', { name: opponent.name })
+        }}<ChevronDown :size="16" class="chevron" :class="{ open }" aria-hidden="true" />
+      </button>
+      <template v-else>{{ t('compare.commonSpeeds', { name: opponent.name }) }}</template>
+    </h3>
+    <div v-if="open" class="table small" :class="{ padded: banded }" role="table">
       <div class="trow thead muted" role="row">
         <span role="columnheader">{{ t('compare.colSpeed') }}</span>
         <span role="columnheader">{{ t('compare.ofSets') }}</span>
@@ -83,7 +113,7 @@ function toggle(key: string) {
         >
       </div>
       <template v-for="r in rows" :key="r.key">
-        <div class="trow" role="row">
+        <div class="trow" :class="{ focus: r.speed === focus }" role="row">
           <span role="cell" class="num">{{ r.speed }}</span>
           <span role="cell" class="num muted">{{ percent(r.share) }}</span>
           <span role="cell" class="build"
@@ -102,17 +132,17 @@ function toggle(key: string) {
               v-if="r.versus.plan?.mods"
               type="button"
               class="would"
-              :aria-expanded="open.has(r.key)"
+              :aria-expanded="unfolded.has(r.key)"
               :aria-controls="`would-${r.key}`"
               @click="toggle(r.key)"
             >
               {{ t('speed.wouldDo')
               }}<template v-if="r.versus.plan.mods.length"> ({{ r.versus.plan.mods.length }})</template
-              ><ChevronDown :size="14" class="chevron" :class="{ open: open.has(r.key) }" aria-hidden="true" />
+              ><ChevronDown :size="14" class="chevron" :class="{ open: unfolded.has(r.key) }" aria-hidden="true" />
             </button>
           </span>
         </div>
-        <div v-if="r.versus.plan?.mods && open.has(r.key)" :id="`would-${r.key}`" class="trow mods-row" role="row">
+        <div v-if="r.versus.plan?.mods && unfolded.has(r.key)" :id="`would-${r.key}`" class="trow mods-row" role="row">
           <span role="cell" class="mods-cell"
             ><SpeedModChips :mods="r.versus.plan.mods" :effect="yours.build.effect"
           /></span>
@@ -145,6 +175,26 @@ function toggle(key: string) {
   background: var(--side);
   border-bottom: 2px solid var(--ink);
 }
+/* Folded, its heading alone. */
+.title.folded,
+.title.band.folded {
+  margin: 0;
+  border-bottom: none;
+}
+.fold {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
 .table.padded {
   padding: 2px 8px 6px;
 }
@@ -163,6 +213,10 @@ function toggle(key: string) {
   row-gap: 2px;
   padding: 4px 0;
   border-bottom: 1px solid var(--border);
+}
+/* The Speed tapped on the chart. */
+.trow.focus {
+  background: var(--sel);
 }
 .thead {
   font-weight: bold;

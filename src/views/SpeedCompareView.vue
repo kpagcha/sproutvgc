@@ -826,15 +826,15 @@ function resetAll() {
               @clear="clear(side.s)"
             />
           </section>
-          <!-- What it takes to move before the other, a panel of its own under its side's, open or folded; on phones,
-               under the two instead. -->
-          <section
+          <!-- What it takes to move before the other, in panels of their own under its side's, open or folded; on
+               phones, under the two instead. -->
+          <SpeedVersus
             v-if="!phone && vsPair(side.s)"
-            class="panel insight col-insight"
-            :class="{ opponent: side.s === 'b' }"
-          >
-            <SpeedVersus v-bind="vsPair(side.s)!" :tone="teamOf(side.s)" :trick-room="trickRoom" banded />
-          </section>
+            v-bind="vsPair(side.s)!"
+            class="col-insight"
+            :tone="teamOf(side.s)"
+            :trick-room="trickRoom"
+          />
           <!-- Under its panel, a second for its team, greyed out until its first is picked; on phones, under its tab
              instead. -->
           <SpeedAddSecond
@@ -853,14 +853,13 @@ function resetAll() {
       <!-- On phones, what each takes to move first, side by side under the two (and the panel open, if one is). -->
       <!-- With either at its sets, one under the other, full width: its Speeds need the room. -->
       <div v-if="phone && verdict" class="insights" :class="{ wide: verdict.shares }">
-        <section
+        <SpeedVersus
           v-for="side in sides"
           :key="side.s"
-          class="panel insight"
-          :class="{ opponent: side.s === 'b', open: openKey === side.s }"
-        >
-          <SpeedVersus v-bind="vsPair(side.s)!" :tone="teamOf(side.s)" :trick-room="trickRoom" banded />
-        </section>
+          v-bind="vsPair(side.s)!"
+          :tone="teamOf(side.s)"
+          :trick-room="trickRoom"
+        />
       </div>
     </template>
     <!-- Yours against the opponents, once there's one picked: seeing the two on the speed tiers, at the page's end, as
@@ -1187,18 +1186,6 @@ function resetAll() {
 }
 .insights.wide {
   grid-template-columns: minmax(0, 1fr);
-}
-.insight {
-  --side: var(--accent);
-  --side-text: var(--accent-text);
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  overflow: hidden;
-}
-.insight.opponent {
-  --side: var(--opponent);
-  --side-text: var(--opponent-text);
 }
 .band {
   display: flex;

@@ -15,7 +15,8 @@ import EffectTag from '@/components/EffectTag'
 // its slowest drawn, most common and fastest Speeds. Each mark says on hover, or a tap, its Speed,
 // its share of the sets and the builds reaching it (the nearest one's, following the pointer, or a finger, along the
 // chart). In a side's panel, and on phones under the two, where its heading
-// is a band of its side's color (`banded`).
+// is a band of its side's color (`banded`). With its common Speeds folded under it (`pickable`), a mark clicked or
+// tapped says so (`pick`), unfolding them at it.
 const props = defineProps<{
   title: string
   spread: readonly SpreadPoint[]
@@ -26,7 +27,9 @@ const props = defineProps<{
   reach: { min: number; max: number }
   trickRoom: boolean
   banded?: boolean
+  pickable?: boolean
 }>()
+const emit = defineEmits<{ pick: [speed: number] }>()
 
 /** The other at one build: its Speed, a line through the chart. */
 const otherAt = computed(() => (props.other && !props.other.sets ? props.other.spread[0]!.speed : null))
@@ -74,7 +77,8 @@ let markTip: Instance | undefined
 /** The mark the tooltip is at. */
 let pointed: HTMLElement | undefined
 let dragging = false
-function point(e: PointerEvent) {
+/** The mark nearest the pointer along the chart, and its place among those drawn. */
+function nearest(e: MouseEvent) {
   const marks = [...plot.value!.querySelectorAll<HTMLElement>('.mark')]
   let best = -1
   let gap = Infinity
@@ -83,8 +87,16 @@ function point(e: PointerEvent) {
     const d = Math.abs(r.left + r.width / 2 - e.clientX)
     if (d < gap) [best, gap] = [i, d]
   })
-  const mark = marks[best]
-  if (!mark) return
+  return marks[best] ? { mark: marks[best], i: best } : null
+}
+function onClick(e: MouseEvent) {
+  const hit = props.pickable && nearest(e)
+  if (hit) emit('pick', drawn.value[hit.i]!.speed)
+}
+function point(e: PointerEvent) {
+  const hit = nearest(e)
+  if (!hit) return
+  const { mark, i: best } = hit
   markTip ??= tippy(plot.value!, {
     trigger: 'manual',
     content: tipBody.value!,
@@ -136,13 +148,14 @@ onBeforeUnmount(() => markTip?.destroy())
       <div
         ref="plot"
         class="plot"
-        :class="{ touch: !canHover }"
+        :class="{ touch: !canHover, pickable }"
         aria-hidden="true"
         @pointerdown="onDown"
         @pointermove="onMove"
         @pointerup="onUp"
         @pointerleave="onLeave"
         @pointercancel="onCancel"
+        @click="onClick"
       >
         <span v-if="otherAt !== null" class="other-label" :style="{ left: at(otherAt) }"
           >{{ other!.name }} {{ otherAt }}</span
@@ -232,6 +245,9 @@ onBeforeUnmount(() => markTip?.destroy())
   touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
+}
+.plot.pickable {
+  cursor: pointer;
 }
 .plot::before {
   content: '';
