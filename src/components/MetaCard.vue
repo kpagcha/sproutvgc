@@ -69,50 +69,57 @@ const about = (d: MetaDataset) =>
         <X :size="16" aria-hidden="true" />
       </button>
     </div>
-    <!-- The regulations, when there's a choice of them. -->
-    <section v-if="regulations.length > 1" class="section">
-      <h3 :id="`${id}-regulations`" class="heading">{{ t('meta.regulations') }}</h3>
-      <div class="options inline" role="radiogroup" :aria-labelledby="`${id}-regulations`">
-        <label v-for="r in regulations" :key="r" class="option" :class="{ on: r === current?.regulation }">
-          <input
-            type="radio"
-            :name="`${id}-regulation`"
-            :checked="r === current?.regulation"
-            @change="pickRegulation(r)"
-          />
-          <span class="name">{{ r }}</span>
-        </label>
-      </div>
-    </section>
-    <!-- Its datasets, when there's a choice of them. -->
-    <section v-if="inRegulation.length > 1" class="section">
-      <h3 :id="`${id}-datasets`" class="heading">{{ t('meta.dataset') }}</h3>
-      <div class="options" role="radiogroup" :aria-labelledby="`${id}-datasets`">
-        <label v-for="d in inRegulation" :key="d.key" class="option" :class="{ on: d === current }">
-          <input type="radio" :name="`${id}-dataset`" :checked="d === current" @change="show(d)" />
-          <span class="name">{{ datasetName(d) }}</span>
-        </label>
-      </div>
-    </section>
-    <!-- What the one shown is. -->
-    <section v-if="current" class="section about">
-      <p class="name">{{ current.label }}</p>
-      <p class="muted small">
-        {{ about(current) }} · {{ t('usage.from') }}
-        <a :href="current.provider.url" target="_blank" rel="noopener">{{ current.provider.name }}</a>
-      </p>
-    </section>
-    <!-- Its subsets, what they mean said once over them. -->
-    <section v-if="current && current.snapshots.length > 1" class="section">
-      <h3 :id="`${id}-subsets`" class="heading">{{ t('meta.subset') }}</h3>
-      <p v-if="cutoffs" class="muted small note">{{ t('meta.cutoffsNote') }}</p>
-      <div class="options" role="radiogroup" :aria-labelledby="`${id}-subsets`">
-        <label v-for="s in current.snapshots" :key="s.id" class="option" :class="{ on: s.id === selectedSnapshot?.id }">
-          <input type="radio" :name="`${id}-subset`" :checked="s.id === selectedSnapshot?.id" @change="pick(s.id)" />
-          <span class="name">{{ subsetLabel(s) }}</span>
-        </label>
-      </div>
-    </section>
+    <div class="body">
+      <!-- The regulations, when there's a choice of them. -->
+      <section v-if="regulations.length > 1" class="section">
+        <h3 :id="`${id}-regulations`" class="heading">{{ t('meta.regulations') }}</h3>
+        <div class="options inline" role="radiogroup" :aria-labelledby="`${id}-regulations`">
+          <label v-for="r in regulations" :key="r" class="option" :class="{ on: r === current?.regulation }">
+            <input
+              type="radio"
+              :name="`${id}-regulation`"
+              :checked="r === current?.regulation"
+              @change="pickRegulation(r)"
+            />
+            <span class="name">{{ r }}</span>
+          </label>
+        </div>
+      </section>
+      <!-- Its datasets, when there's a choice of them. -->
+      <section v-if="inRegulation.length > 1" class="section">
+        <h3 :id="`${id}-datasets`" class="heading">{{ t('meta.dataset') }}</h3>
+        <div class="options" role="radiogroup" :aria-labelledby="`${id}-datasets`">
+          <label v-for="d in inRegulation" :key="d.key" class="option" :class="{ on: d === current }">
+            <input type="radio" :name="`${id}-dataset`" :checked="d === current" @change="show(d)" />
+            <span class="name">{{ datasetName(d) }}</span>
+          </label>
+        </div>
+      </section>
+      <!-- What the one shown is. -->
+      <section v-if="current" class="section about">
+        <p class="name">{{ current.label }}</p>
+        <p class="muted small">
+          {{ about(current) }} · {{ t('usage.from') }}
+          <a :href="current.provider.url" target="_blank" rel="noopener">{{ current.provider.name }}</a>
+        </p>
+      </section>
+      <!-- Its subsets, what they mean said once over them. -->
+      <section v-if="current && current.snapshots.length > 1" class="section">
+        <h3 :id="`${id}-subsets`" class="heading">{{ t('meta.subset') }}</h3>
+        <p v-if="cutoffs" class="muted small note">{{ t('meta.cutoffsNote') }}</p>
+        <div class="options" role="radiogroup" :aria-labelledby="`${id}-subsets`">
+          <label
+            v-for="s in current.snapshots"
+            :key="s.id"
+            class="option"
+            :class="{ on: s.id === selectedSnapshot?.id }"
+          >
+            <input type="radio" :name="`${id}-subset`" :checked="s.id === selectedSnapshot?.id" @change="pick(s.id)" />
+            <span class="name">{{ subsetLabel(s) }}</span>
+          </label>
+        </div>
+      </section>
+    </div>
   </div>
 </template>
 
@@ -120,6 +127,7 @@ const about = (d: MetaDataset) =>
 .meta-card {
   display: flex;
   flex-direction: column;
+  min-height: 0;
   margin: 0;
 }
 /* Its band: what it is, its close at the end. */
@@ -130,6 +138,15 @@ const about = (d: MetaDataset) =>
   gap: 8px;
   margin-bottom: 0;
   font-weight: bold;
+}
+/* Under the band, what scrolls when the card's too tall for the screen (in the phones' dialog), the band staying put;
+   it reaches the card's right and bottom edges, so its scrollbar runs along them. */
+.body {
+  min-height: 0;
+  margin: 0 calc(-1 * var(--panel-pad)) calc(-1 * var(--panel-pad)) 0;
+  padding: 0 var(--panel-pad) var(--panel-pad) 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .close {
   min-height: 0;
