@@ -213,3 +213,10 @@ export function moveFirstPlan(id: PokemonId, b: SpeedBuild, target: number, tric
   tryWith(trickRoom ? t('speed.without', { mod: t('speed.mod.trickroom') }) : t('speed.mod.trickroom'), b, !trickRoom)
   return { current, other: null, mods: list }
 }
+
+/** How an answer of `pointsToMoveFirst` goes: whatever the points, with some, only to a tie, or not at all. */
+export function moveFirstKind(r: MoveFirst): 'any' | 'some' | 'tie' | 'never' {
+  if (!r) return 'never'
+  if ('ties' in r) return 'tie'
+  return ('from' in r && r.from === 0) || ('upTo' in r && r.upTo === MAX_POINTS) ? 'any' : 'some'
+}

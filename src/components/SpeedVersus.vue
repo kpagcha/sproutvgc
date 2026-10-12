@@ -2,13 +2,14 @@
 import type { PokemonId } from '@/data/dex'
 import { t } from '@/i18n'
 import type { SpeedBuild } from '@/lib/speedBuild'
-import { reachOf, toBeatAll, type SpreadPoint } from '@/lib/speedLineup'
+import { reachOf, type SpreadPoint } from '@/lib/speedLineup'
 import SpeedAgainst from '@/components/SpeedAgainst.vue'
+import SpeedCommonSpeeds from '@/components/SpeedCommonSpeeds.vue'
 import SpeedSpread from '@/components/SpeedSpread.vue'
 
 // How one of the comparison's Pokémon does against another, in its panel: at its sets, every Speed they reach against
-// the other, as a chart (`SpeedSpread`); at one build, what it takes to move before the other, at each nature effect: before its
-// Speed, or, the other at its sets, before its most common Speed and before every one of them.
+// the other, as a chart (`SpeedSpread`); at one build, what it takes to move before the other (`SpeedAgainst`), or, the
+// other at its sets, before each of its common Speeds (`SpeedCommonSpeeds`).
 export interface VersusMon {
   id: PokemonId
   name: string
@@ -38,25 +39,7 @@ defineProps<{
     :trick-room="trickRoom"
     :banded
   />
-  <template v-else-if="them.sets">
-    <SpeedAgainst
-      :title="t('compare.againstCommon', { name: them.name, speed: them.speed })"
-      :id="me.id"
-      :build="me.build"
-      :target="them.speed"
-      :trick-room="trickRoom"
-      :banded
-    />
-    <SpeedAgainst
-      v-if="toBeatAll(them.spread, trickRoom) !== them.speed"
-      :title="t('compare.againstAll', { name: them.name, speed: toBeatAll(them.spread, trickRoom) })"
-      :id="me.id"
-      :build="me.build"
-      :target="toBeatAll(them.spread, trickRoom)"
-      :trick-room="trickRoom"
-      :banded
-    />
-  </template>
+  <SpeedCommonSpeeds v-else-if="them.sets" :yours="me" :opponent="them" :trick-room="trickRoom" :banded />
   <SpeedAgainst
     v-else
     :title="t('compare.against', { name: them.name, speed: them.speed })"

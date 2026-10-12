@@ -750,6 +750,8 @@ export const messages = {
   'speed.reachShort': 'at most {speed}, {n} short',
   'speed.reachOver': 'at least {speed}, {n} too fast',
   'speed.spare': '{n} to spare',
+  'speed.short': '{n} short',
+  'speed.over': '{n} too fast',
   'speed.without': 'Without {mod}',
   'speed.wouldDo': 'What would do it',
   'speed.nothingDoes': 'No single modifier would do it.',

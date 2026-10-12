@@ -760,6 +760,8 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.reachShort': 'como mucho {speed}, le faltan {n}',
   'speed.reachOver': 'como poco {speed}, le sobran {n}',
   'speed.spare': 'le sobran {n}',
+  'speed.short': 'le faltan {n}',
+  'speed.over': 'le sobran {n}',
   'speed.without': 'Sin {mod}',
   'speed.wouldDo': 'Lo que lo lograría',
   'speed.nothingDoes': 'Ningún modificador por sí solo lo lograría.',

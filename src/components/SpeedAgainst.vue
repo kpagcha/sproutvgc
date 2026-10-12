@@ -2,9 +2,9 @@
 import { computed } from 'vue'
 import type { PokemonId } from '@/data/dex'
 import { t } from '@/i18n'
-import { MAX_POINTS } from '@/lib/stats'
-import { moveFirstPlan, pointsText, type SpeedBuild } from '@/lib/speedBuild'
+import { moveFirstKind, moveFirstPlan, pointsText, type SpeedBuild } from '@/lib/speedBuild'
 import EffectTag from '@/components/EffectTag'
+import SpeedModChips from '@/components/SpeedModChips.vue'
 
 // What it takes a Pokémon to move before another at Speed `target`, under its heading, in short (`moveFirstPlan`): with
 // its nature, the points that do it, its answer in a pill colored by how it goes (any points, some, only a tie, none),
@@ -22,13 +22,7 @@ const props = defineProps<{
 
 const plan = computed(() => moveFirstPlan(props.id, props.build, props.target, props.trickRoom))
 
-type Result = ReturnType<typeof moveFirstPlan>['current']['result']
-/** How an answer goes: whatever the points, with some, only to a tie, or not at all. */
-function kind(r: Result): 'any' | 'some' | 'tie' | 'never' {
-  if (!r) return 'never'
-  if ('ties' in r) return 'tie'
-  return ('from' in r && r.from === 0) || ('upTo' in r && r.upTo === MAX_POINTS) ? 'any' : 'some'
-}
+const kind = moveFirstKind
 /** Beside its nature's answer: what's to spare, or, when nothing does it, how close it gets. */
 const note = computed(() => {
   const c = plan.value.current
@@ -55,14 +49,7 @@ const note = computed(() => {
       <summary class="muted">
         {{ t('speed.wouldDo') }}<template v-if="plan.mods.length"> ({{ plan.mods.length }})</template>
       </summary>
-      <ul v-if="plan.mods.length" class="mods">
-        <li v-for="m in plan.mods" :key="m.label" class="mod">
-          <span class="mod-name">{{ m.label }}</span>
-          <EffectTag v-if="m.effect !== build.effect" :effect="m.effect" class="effect" />
-          <span class="answer" :class="kind(m.result)">{{ pointsText(m.result) }}</span>
-        </li>
-      </ul>
-      <p v-else class="muted">{{ t('speed.nothingDoes') }}</p>
+      <SpeedModChips :mods="plan.mods" :effect="build.effect" />
     </details>
   </div>
 </template>
@@ -114,25 +101,6 @@ const note = computed(() => {
 }
 .would[open] summary {
   margin-bottom: 6px;
-}
-/* The modifiers that would do it, each a chip of its own: its name, the nature it'd take when not its own, and what. */
-.mods {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.mod {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 2px 2px 2px 6px;
-  border: 1px solid var(--border);
-}
-.mod-name {
-  font-weight: bold;
 }
 .answer {
   display: inline-block;
