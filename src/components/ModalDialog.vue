@@ -98,12 +98,14 @@ html.dialog-open {
   background: none;
   border: none;
   overscroll-behavior: contain;
-}
-.modal-dialog[open] {
-  display: flex;
+  /* Its layout holds closed too: closing keeps it shown (`display`, below) while its card fades out, and the card
+     would meanwhile be stretched to the whole screen if it went back to a row's. */
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+.modal-dialog[open] {
+  display: flex;
 }
 .modal-dialog > :slotted(*) {
   width: 100%;
