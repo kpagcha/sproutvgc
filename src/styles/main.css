@@ -21,6 +21,8 @@
   --logo-vgc: #9c7320;
   --hover: #fff1b8;
   --sel: #ffdf6e;
+  /* A row picked out among faded ones (the speed tiers' Pokémon found): a neutral gray, darker than the panel. */
+  --found: color-mix(in srgb, var(--ink) 9%, var(--panel));
   --good: #2c7a2c;
   --bad: #b3261e;
   /* What stands against yours: the speed tiers' opponents band. */
@@ -58,6 +60,7 @@
     --logo-vgc: #ffee73;
     --hover: #3a3526;
     --sel: #5e4c10;
+    --found: color-mix(in srgb, var(--ink) 35%, var(--panel));
     --good: #7fd07f;
     --bad: #ff8a80;
     --opponent: #a1302a;
@@ -93,6 +96,7 @@
   --logo-vgc: #ffee73;
   --hover: #3a3526;
   --sel: #5e4c10;
+  --found: color-mix(in srgb, var(--ink) 35%, var(--panel));
   --good: #7fd07f;
   --bad: #ff8a80;
   --opponent: #a1302a;
