@@ -1727,21 +1727,9 @@ const { entered } = usePageEntered()
                 {{ onlyLabel[0] }}<PokemonIcon :id="found ?? 'pikachu'" />{{ onlyLabel[1] }}
               </button>
             </div>
-            <!-- What to do with the one found, on a row under the filters (the field's own cross clears it): swap it, and
-                 keep it on the ladder, joined to the ones kept. -->
-            <div v-if="found || keptShown.length" class="find-actions">
-              <!-- Yours and the one found swapped, once there's yours; its icon alone on the narrowest phones, so the row
-                 still fits. -->
-              <button
-                v-if="found"
-                type="button"
-                class="btn find-mode find-swap"
-                :disabled="!mine"
-                :aria-label="t('compare.swap')"
-                @click="swapMine"
-              >
-                <ArrowLeftRight :size="16" aria-hidden="true" /><span class="swap-text">{{ t('compare.swap') }}</span>
-              </button>
+            <!-- What to do with the one found, on a row under the filters (the field's own cross clears it): keep it on
+                 the ladder, joined to the ones kept. -->
+            <div v-if="(found && beyondTop(found)) || keptShown.length" class="find-actions">
               <!-- Keeping the one found on the ladder (when it's not on it already: beyond the top), joined to the drop-down
                    of the ones kept, saying how many. -->
               <span v-if="(found && beyondTop(found)) || keptShown.length" class="keep-group">
@@ -1822,9 +1810,22 @@ const { entered } = usePageEntered()
           <!-- With yours picked, the ladder is its opponents: said over it, with what tapping one does. -->
           <div v-if="mine" class="band opponents-head">
             <strong>{{ t('speed.opponentsHead') }}</strong>
-            <span>{{ t('speed.opponentsHint') }}</span>
+            <!-- What tapping one does, left out when it doesn't fit on the band's line. -->
+            <span class="opponents-hint"
+              ><span>{{ t('speed.opponentsHint') }}</span></span
+            >
             <!-- The weather or terrain they're in, from yours' ability, at the band's end. -->
             <span v-if="inPlay" class="field-tag">{{ fieldLabel(inPlay) }}</span>
+            <!-- Yours and the one found swapped, at the band's very end. -->
+            <button
+              v-if="found"
+              type="button"
+              class="btn on-band inverted find-swap"
+              :aria-label="t('compare.swap')"
+              @click="swapMine"
+            >
+              <ArrowLeftRight :size="14" aria-hidden="true" />{{ t('compare.swap') }}
+            </button>
           </div>
           <!-- Pinned over the ladder once the controls are scrolled away; takes no room of its own. -->
           <div ref="pinMark" aria-hidden="true"></div>
@@ -2550,9 +2551,8 @@ const { entered } = usePageEntered()
 /* The opponents band: red, on top of the panel. Beats retro.css's bands. */
 :root:root .list.banded > .band.opponents-head {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px 10px;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 6px;
   color: var(--opponent-text);
   background: var(--opponent);
@@ -2562,6 +2562,29 @@ const { entered } = usePageEntered()
   font-size: 0.85em;
   font-weight: normal;
   opacity: 0.85;
+}
+/* The hint takes what's left of the line, and is left out when it doesn't fit there: one line high, clipped, with an
+   empty first item as tall as a line, so a hint too wide wraps to the line under it, out of view. */
+.opponents-head > .opponents-hint {
+  display: flex;
+  flex: 1 1 0;
+  flex-wrap: wrap;
+  min-width: 0;
+  height: 1lh;
+  overflow: hidden;
+}
+.opponents-hint::before {
+  height: 1lh;
+  content: '';
+}
+.opponents-hint > span {
+  white-space: nowrap;
+}
+.opponents-head > strong,
+.opponents-head > .field-tag,
+.opponents-head > .find-swap {
+  flex: none;
+  white-space: nowrap;
 }
 /* The field they're in: a tag outlined in the band's text, at its end, kept to one line. */
 .opponents-head > .field-tag {
@@ -2728,13 +2751,15 @@ const { entered } = usePageEntered()
 .find-compare {
   gap: 6px;
 }
-.find-swap {
+/* The swap on the opponents band, at its end (beside the field's tag, when there's one). */
+.opponents-head > .find-swap {
+  align-self: center;
   gap: 6px;
+  margin-block: -2px;
+  margin-left: auto;
 }
-@media (max-width: 380px) {
-  .swap-text {
-    display: none;
-  }
+.opponents-head > .field-tag + .find-swap {
+  margin-left: 0;
 }
 .find-compare:hover {
   text-decoration: none;
