@@ -257,14 +257,14 @@ const inField = (w: SpeedWhen) =>
   !inPlay.value || !needsField(w) || w === inPlay.value || isTerrain(w) !== isTerrain(inPlay.value)
 /** Whether a boost is in play: the field's own, which its sets have, rather than what could be. */
 const live = (b: Boost) => b.ref.kind === 'ability' && !!inPlay.value && b.when === inPlay.value
-// The controls back as a page comes without them: the options and the modifiers, boosts on again here too. Which
+// The controls back as a page comes without them: the options and the modifiers, boosts off again here too. Which
 // Pokémon are shown (the tabs), what's found and kept, and yours, are left as they are.
 // Everything back as the page comes with nothing set: its whole URL cleared (what's shown, the options, yours, what's
-// found and kept), boosts on again, and the modifiers' sections folded.
+// found and kept), boosts off again, and the modifiers' sections folded.
 // The data shown (`?meta=`) isn't the page's to reset: it's the reader's choice on every page.
-const allChanged = computed(() => Object.keys(withoutMeta(query.value)).length > 0 || !boostsPref.value)
+const allChanged = computed(() => Object.keys(withoutMeta(query.value)).length > 0 || boostsPref.value)
 function resetAll() {
-  boostsPref.value = true
+  boostsPref.value = false
   try {
     localStorage.removeItem(BOOSTS_KEY)
   } catch {
