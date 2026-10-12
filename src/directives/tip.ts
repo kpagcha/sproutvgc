@@ -37,6 +37,17 @@ const tapToggle: Plugin = {
   },
 }
 
+// A tap on a tooltip hides it (tippy, as the finger lifts), and is then over: the mouse events and click a touch screen
+// fires after lifting, and the focus they bring, would otherwise land on what's under it, the tooltip gone or going.
+// None of ours has anything to tap in it.
+document.addEventListener(
+  'touchend',
+  (e) => {
+    if ((e.target as Element | null)?.closest?.('[data-tippy-root]')) e.preventDefault()
+  },
+  { capture: true, passive: false },
+)
+
 tippy.setDefaultProps({ theme: 'sproutvgc', delay: [200, 0], duration: [120, 80], plugins: [tapToggle] })
 
 type TipEl = HTMLElement & { _tip?: Instance; _tipContent?: string; _tipGroup?: string }
