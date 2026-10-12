@@ -2,11 +2,19 @@
 // it has of its own (toggles and a stat stage). The speed tiers keep yours under `my…`; the comparison keeps each side
 // under its letter (`a…`, `b…`), so a link from one page to the other carries the builds across.
 
-import { POKEMON } from '@/data/pokemon'
+import { POKEMON, itemBound } from '@/data/pokemon'
 import { ability, condition, type AbilityId, type PokemonId } from '@/data/dex'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import { NATURE_EFFECTS, SPEED_ABILITIES, inBattle, pointsToMoveFirst, speedStat, type SpeedMods } from './speed'
+import {
+  NATURE_EFFECTS,
+  SPEED_ABILITIES,
+  inBattle,
+  pointsToMoveFirst,
+  speedStat,
+  withoutItems,
+  type SpeedMods,
+} from './speed'
 import { MAX_POINTS, type Benchmark, type NatureEffect } from './stats'
 
 /**
@@ -28,9 +36,12 @@ export const FASTEST: SpeedBuild = { effect: 'up', points: MAX_POINTS, toggles: 
 
 export const isEffect = (e: unknown): e is NatureEffect => (NATURE_EFFECTS as readonly unknown[]).includes(e)
 
-/** The abilities a Pokémon can have that double its Speed, in slot order: `doubled` and `doubled2` turn them on. */
+/** The abilities a Pokémon can have that double its Speed, in slot order: `doubled` and `doubled2` turn them on. Not
+ * Unburden for one whose item is fixed (`itemBound`), which it can't lose. */
 export const doublers = (id: PokemonId): string[] =>
-  (POKEMON[id].abilities as readonly string[]).filter((a) => SPEED_ABILITIES[a]?.factor === 2)
+  (POKEMON[id].abilities as readonly string[]).filter(
+    (a) => SPEED_ABILITIES[a]?.factor === 2 && !(SPEED_ABILITIES[a]!.when === 'itemLost' && itemBound(id)),
+  )
 /** The toggle for a Pokémon's doubling ability, by its place among them. */
 export const doublerToggle = (i: number): BuildToggle => (i ? 'doubled2' : 'doubled')
 /** The doubling ability at work in a build, if any: one the Pokémon can have. */
@@ -56,7 +67,7 @@ export function doublerLabel(a: string) {
 }
 
 /** The buttons for a Pokémon's modifiers, in order: its doubling abilities by name, only those it can have (none
- * without a Pokémon). */
+ * without a Pokémon); no items for one whose item is fixed (`itemBound`). */
 export function modButtons(id: PokemonId | null) {
   const MOD_ITEMS: Partial<Record<BuildToggle, 'choicescarf' | 'ironball'>> = {
     scarf: 'choicescarf',
@@ -67,20 +78,25 @@ export function modButtons(id: PokemonId | null) {
     if (k === 'doubled' || k === 'doubled2') {
       const a = id ? doublers(id)[k === 'doubled' ? 0 : 1] : undefined
       if (a) list.push({ key: k, ...doublerLabel(a) })
-    } else list.push({ key: k, label: t(`speed.mod.${k}`), tip: t(`speed.modTip.${k}`), item: MOD_ITEMS[k] })
+    } else if (!(MOD_ITEMS[k] && id && itemBound(id)))
+      list.push({ key: k, label: t(`speed.mod.${k}`), tip: t(`speed.modTip.${k}`), item: MOD_ITEMS[k] })
   }
   return list
 }
 
-/** Its toggles as `inBattle` takes them: a doubling ability only one the Pokémon `id` can have, when given. */
-export const modsOf = (b: SpeedBuild, id?: PokemonId): SpeedMods => ({
-  tailwind: b.toggles.includes('tailwind'),
-  scarf: b.toggles.includes('scarf'),
-  ironBall: b.toggles.includes('ironball'),
-  doubled: id ? !!doubling(id, b) : b.toggles.includes('doubled') || b.toggles.includes('doubled2'),
-  paralysis: b.toggles.includes('paralysis'),
-  stage: b.stage,
-})
+/** Its toggles as `inBattle` takes them: a doubling ability only one the Pokémon `id` can have, and no items for one
+ * whose item is fixed (`itemBound`), when given. */
+export function modsOf(b: SpeedBuild, id?: PokemonId): SpeedMods {
+  const mods = {
+    tailwind: b.toggles.includes('tailwind'),
+    scarf: b.toggles.includes('scarf'),
+    ironBall: b.toggles.includes('ironball'),
+    doubled: id ? !!doubling(id, b) : b.toggles.includes('doubled') || b.toggles.includes('doubled2'),
+    paralysis: b.toggles.includes('paralysis'),
+    stage: b.stage,
+  }
+  return id && itemBound(id) ? withoutItems(mods) : mods
+}
 
 /** Turns a toggle on or off: a Choice Scarf and an Iron Ball can't be held together, nor two abilities had. */
 const CLASHES: Partial<Record<BuildToggle, BuildToggle>> = {
@@ -105,17 +121,25 @@ export const benchBuild = (bench: Benchmark): Pick<SpeedBuild, 'effect' | 'point
   points: bench === 'max' || bench === 'maxNeutral' ? MAX_POINTS : 0,
 })
 
-/** A build read from the URL under `prefix`: its letter, or `my` on the speed tiers. */
-export function readBuild(query: Record<string, unknown>, prefix: string): SpeedBuild {
+/** A Pokémon's toggles, those it can't have left out: no items for one whose item is fixed (`itemBound`). */
+export const togglesFor = <T extends string>(id: PokemonId | null | undefined, list: readonly T[]): T[] =>
+  id && itemBound(id) ? list.filter((k) => k !== 'scarf' && k !== 'ironball') : [...list]
+
+/** A build read from the URL under `prefix` (its letter, or `my` on the speed tiers), for the Pokémon `id` when given:
+ * the toggles it can't have left out (`togglesFor`). */
+export function readBuild(query: Record<string, unknown>, prefix: string, id?: PokemonId | null): SpeedBuild {
   const pts = Number(query[`${prefix}pts`])
   const stage = Number(query[`${prefix}stage`])
   const nat = query[`${prefix}nat`]
   return {
     effect: isEffect(nat) ? nat : 'up',
     points: Number.isInteger(pts) && pts >= 0 && pts <= MAX_POINTS ? pts : MAX_POINTS,
-    toggles: String(query[`${prefix}mods`] ?? '')
-      .split(',')
-      .filter((m): m is BuildToggle => (BUILD_TOGGLES as readonly string[]).includes(m)),
+    toggles: togglesFor(
+      id,
+      String(query[`${prefix}mods`] ?? '')
+        .split(',')
+        .filter((m): m is BuildToggle => (BUILD_TOGGLES as readonly string[]).includes(m)),
+    ),
     stage: Number.isInteger(stage) && stage >= -6 && stage <= 6 ? stage : 0,
   }
 }

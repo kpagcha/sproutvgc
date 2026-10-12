@@ -46,6 +46,10 @@ export const spriteUrl = (id: PokemonId) => `${import.meta.env.BASE_URL}sprites/
 /** Base stat total. */
 export const total = (p: Pokemon) => p.stats.reduce((a, b) => a + b, 0)
 
+/** Whether a Pokémon's held item is fixed, as it needs it (a Mega its Mega Stone, Ogerpon its mask): it holds no other
+ * (a Choice Scarf, an Iron Ball), and can't lose it (Unburden). */
+export const itemBound = (id: PokemonId) => !!POKEMON[id].item
+
 /** The species a Pokémon belongs to: itself, or its base species for a forme. */
 export const speciesOf = (id: PokemonId): PokemonId => POKEMON[id].base ?? id
 

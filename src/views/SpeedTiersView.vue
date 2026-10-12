@@ -31,7 +31,7 @@ import {
 } from '@/data/dex'
 import { TYPES, isType, type TypeId } from '@/data/types'
 import { REGULATION } from '@/data/format'
-import { POKEMON, splitForme } from '@/data/pokemon'
+import { POKEMON, itemBound, splitForme } from '@/data/pokemon'
 import { has, metaLabel, pastRoster, percent, type PokemonMeta, type Share, usageRanks } from '@/data/meta'
 import { locale, t, tSplit, typeName } from '@/i18n'
 import { refName } from '@/i18n/refName'
@@ -54,6 +54,7 @@ import {
   type SpeedMods,
   type SpeedWhen,
   withEffect,
+  withoutItems,
 } from '@/lib/speed'
 import { BENCHMARKS, MAX_POINTS, benchmark, type Benchmark, type NatureEffect } from '@/lib/stats'
 import {
@@ -64,6 +65,7 @@ import {
   doublers,
   doubling,
   modButtons,
+  togglesFor,
   toggled,
   type BuildToggle,
   type SpeedBuild,
@@ -200,6 +202,9 @@ const mods = computed<SpeedMods>(() => ({
   paralysis: flag('paralysis'),
   stage: Number(stage.value),
 }))
+/** The modifiers for everyone, as they apply to one Pokémon: no Choice Scarf for one whose item is fixed (a Mega's
+ * Mega Stone, Ogerpon's mask: `itemBound`). */
+const modsFor = (id: PokemonId) => (itemBound(id) ? withoutItems(mods.value) : mods.value)
 const modded = computed(() => TOGGLES.some(flag) || stage.value !== '0')
 const modsOpen = shallowRef(modded.value)
 const toggleMods = () => (modsOpen.value = !modsOpen.value)
@@ -323,12 +328,16 @@ const myPoints = computed(() => {
 })
 const MY_TOGGLES = ['tailwind', 'scarf', 'ironball', 'doubled', 'doubled2', 'paralysis'] as const
 type MyToggle = (typeof MY_TOGGLES)[number]
+// Those it can't have left out (`togglesFor`: no items for one whose item is fixed).
 const myToggles = computed(
   () =>
     new Set(
-      String(query.value.mymods ?? '')
-        .split(',')
-        .filter((m): m is MyToggle => (MY_TOGGLES as readonly string[]).includes(m)),
+      togglesFor(
+        mine.value,
+        String(query.value.mymods ?? '')
+          .split(',')
+          .filter((m): m is MyToggle => (MY_TOGGLES as readonly string[]).includes(m)),
+      ),
     ),
 )
 const myStage = computed(() =>
@@ -571,8 +580,10 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
   if (boostsAvailable.value && builds.length) {
     const at = { id, ...named(id), rank: m.rank, extra }
     const abilityShare = (a: string) => m.abilities?.find((x) => x.id === a)?.share ?? 0
+    // One whose item is fixed (a Mega, Ogerpon in a mask) has no other, nor Unburden at work, whatever the data says.
+    const bound = itemBound(id)
     const effects = [
-      ...(m.items ?? [])
+      ...(bound ? [] : (m.items ?? []))
         .filter((i) => shown(i.share ?? 0))
         .map((i) => ({ ref: item(i.id), share: i.share ?? 0, effect: SPEED_ITEMS[i.id] })),
       ...POKEMON[id].abilities
@@ -580,7 +591,8 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
         .map((a) => ({ ref: ability(a), share: abilityShare(a), effect: SPEED_ABILITIES[a] })),
     ]
     for (const { ref, share, effect } of effects) {
-      if (!effect || !inField(effect.when) || !withEffect(mods.value, effect)) continue
+      if (!effect || !inField(effect.when) || (bound && effect.when === 'itemLost')) continue
+      if (!withEffect(modsFor(id), effect)) continue
       const boost = { ref, ...effect }
       if (live(boost) && share > 0) {
         for (const b of builds) {
@@ -625,7 +637,8 @@ function benchBoosts(id: PokemonId, rank: number): Entry[] {
   const at = { id, ...named(id), rank, extra: true as const }
   return POKEMON[id].abilities.flatMap((a) => {
     const effect = SPEED_ABILITIES[a]
-    if (!effect || !inField(effect.when) || !withEffect(mods.value, effect)) return []
+    if (!effect || !inField(effect.when) || (effect.when === 'itemLost' && itemBound(id))) return []
+    if (!withEffect(modsFor(id), effect)) return []
     return [{ ...at, speed, bench: boostBench.value, boost: { ref: ability(a), ...effect } }]
   })
 }
@@ -635,8 +648,14 @@ function benchChips(id: PokemonId): Entry[] {
   const at = { id, ...named(id), rank: Infinity, extra: true as const }
   return [...BENCHMARKS.map((b) => ({ ...at, speed: benchmark(base, b), bench: b })), ...benchBoosts(id, Infinity)]
 }
+/** The modifiers for everyone as they apply to a Pokémon (`modsFor`), with a boost's effect among them, counted once if
+ * they have it. */
+function modsWith(id: PokemonId, boost?: Boost): SpeedMods {
+  const m = modsFor(id)
+  return (boost && withEffect(m, boost)) || m
+}
 /** A chip's Speed in battle: with the modifiers, and its boost's effect among them, counted once if they have it. */
-const chipSpeed = (e: Entry) => inBattle(e.speed, (e.boost && withEffect(mods.value, e.boost)) || mods.value)
+const chipSpeed = (e: Entry) => inBattle(e.speed, modsWith(e.id, e.boost))
 const megaShown = (id: PokemonId) => showMegas.value || !POKEMON[id].mega
 /** The Pokémon shown, before the filters: the top by usage, or every Pokémon. */
 const sliceIds = computed<PokemonId[]>(() => {
@@ -861,13 +880,11 @@ const onlyLabel = computed(() => tSplit('speed.findOnly', 'name'))
 const boostAt = computed(() => tSplit('speed.boostAt', 'effect'))
 const finding = computed(() => found.value !== null)
 
-/** The modifiers for everyone, with a boost's effect among them, counted once if they have it. */
-const modsWith = (boost?: Boost) => (boost && withEffect(mods.value, boost)) || mods.value
 /** A Pokémon's sets' Speeds in battle, with a boost's effect if any: merged by nature effect and points, and by Speed
  * once the modifiers apply (each keeping the builds reaching it), the most common first. */
 function setSpeeds(id: PokemonId, boost?: Boost): OddsRow['builds'] {
   const base = POKEMON[id].stats[5]
-  const m = modsWith(boost)
+  const m = modsWith(id, boost)
   const bySpeed = new Map<number, OddsRow['builds'][number]>()
   for (const b of buildsOf(id)) {
     const speed = inBattle(speedStat(base, b.points, b.effect), m)
@@ -910,7 +927,7 @@ const ladderRows = computed(() => {
     let b = cache.get(k)
     if (!b) {
       const builds = setSpeeds(e.id, e.boost)
-      const bench = benchSpeeds(e.id, modsWith(e.boost))
+      const bench = benchSpeeds(e.id, modsWith(e.id, e.boost))
       b = {
         id: e.id,
         species: e.species,
@@ -1036,20 +1053,27 @@ const rowChip = (r: OddsRow) => tagChips.get(r.key)
  */
 const rangeRows = computed<RangeRow[]>(() => {
   if (bySets.value) return []
-  const byBase = new Map<number, Entry[]>()
+  // By base Speed, and, with an item on everyone, apart for those whose item is fixed (`itemBound`), which hold none.
+  const groups = new Map<string, { base: number; m: SpeedMods; list: Entry[] }>()
   for (const e of entries.value) {
     const base = POKEMON[e.id].stats[5]
-    byBase.set(base, [...(byBase.get(base) ?? []), e])
+    const m = modsFor(e.id)
+    const key = m === mods.value ? String(base) : `${base}:bound`
+    const g = groups.get(key) ?? { base, m, list: [] }
+    g.list.push(e)
+    groups.set(key, g)
   }
+  const speedsOf = (base: number, m: SpeedMods) =>
+    Object.fromEntries(BENCHMARKS.map((b) => [b, inBattle(benchmark(base, b), m)])) as Record<Benchmark, number>
   const dir = trickRoom.value ? 1 : -1
-  return [...byBase]
-    .sort((a, b) => (a[0] - b[0]) * dir)
-    .map(([base, list]) => ({
+  const at = bench.value
+  return [...groups]
+    .map(([key, g]) => ({ key, ...g, speeds: speedsOf(g.base, g.m) }))
+    .sort((a, b) => (a.speeds[at] - b.speeds[at]) * dir || (a.base - b.base) * dir)
+    .map(({ key, base, speeds, list }) => ({
+      key,
       base,
-      speeds: Object.fromEntries(BENCHMARKS.map((b) => [b, inBattle(benchmark(base, b), mods.value)])) as Record<
-        Benchmark,
-        number
-      >,
+      speeds,
       mons: list
         .sort(
           (a, b) =>

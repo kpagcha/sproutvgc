@@ -14,6 +14,8 @@ import PokemonIcon from '@/components/PokemonIcon'
 // first: yours (the accent) or them (the opponents' red); under Trick Room, the other way round. In the heads, a "?"
 // with how to read them in its tooltip. The rows go from those moving first.
 export interface RangeRow {
+  /** Its base Speed, and whether it's of those whose item is fixed while an item is on everyone (`itemBound`). */
+  key: string
   base: number
   /** Its Speed at each benchmark, with the modifiers. */
   speeds: Record<Benchmark, number>
@@ -140,7 +142,7 @@ function placed(r: RangeRow): Partial<Record<Benchmark, number>> {
   }
   return out
 }
-const spots = computed(() => Object.fromEntries(props.rows.map((r) => [r.base, placed(r)])))
+const spots = computed(() => Object.fromEntries(props.rows.map((r) => [r.key, placed(r)])))
 const valueLeft = (r: RangeRow, b: Benchmark, spots: Partial<Record<Benchmark, number>>) =>
   spots[b] !== undefined ? `${spots[b]}px` : at(r.speeds[b])
 const name = (m: RangeRow['mons'][number]) => [m.species, m.forme].filter(Boolean).join(' ')
@@ -170,7 +172,7 @@ const name = (m: RangeRow['mons'][number]) => [m.species, m.forme].filter(Boolea
     <ol class="rows">
       <li
         v-for="r in rows"
-        :key="r.base"
+        :key="r.key"
         class="row tier"
         :class="{ hit: r.mons.some((m) => m.hit), 'has-mine': r.mons.some((m) => m.mine) }"
         :data-base="r.base"
@@ -198,7 +200,7 @@ const name = (m: RangeRow['mons'][number]) => [m.species, m.forme].filter(Boolea
             <span
               class="value num"
               :class="verdict(r.speeds[b])"
-              :style="{ left: valueLeft(r, b, spots[r.base]!) }"
+              :style="{ left: valueLeft(r, b, spots[r.key]!) }"
               aria-hidden="true"
               >{{ r.speeds[b] }}</span
             >

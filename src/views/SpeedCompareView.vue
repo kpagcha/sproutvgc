@@ -125,14 +125,16 @@ const list = computed(() => readList(route.query.list))
 const entries = computed<Mon[]>(() =>
   mode.value === 'order'
     ? list.value.map((e, i) => mon(`p${i}`, e.id, e.build))
-    : vsSlots.value.map((s) => mon(s, idOf(s), readBuild(route.query, s), atSets(s))),
+    : vsSlots.value.map((s) => mon(s, idOf(s), readBuild(route.query, s, idOf(s)), atSets(s))),
 )
 const entryOf = (key: string) => entries.value.find((e) => e.key === key)
 
 /** A pair side by side, as the page always had; past a pair, and in speed order, one under the other. */
 const stacked = computed(() => mode.value === 'order' || vsSlots.value.length > 2)
 
-const sides = computed(() => SIDES.map((s) => ({ s, ...mon(s, idOf(s), readBuild(route.query, s), atSets(s)) })))
+const sides = computed(() =>
+  SIDES.map((s) => ({ s, ...mon(s, idOf(s), readBuild(route.query, s, idOf(s)), atSets(s)) })),
+)
 const sideOf = (s: Side) => sides.value[SIDES.indexOf(s)]!
 
 /**
@@ -339,7 +341,7 @@ function addSecond(s: Side, id: PokemonId) {
   void toListTop(
     replace({
       [key]: id,
-      ...buildQuery(pickedBuild(id, readBuild(route.query, key)), key),
+      ...buildQuery(pickedBuild(id, readBuild(route.query, key, id)), key),
       [`${key}sets`]: startsAtSets(key, id),
     }),
   )
@@ -434,7 +436,7 @@ const ladderLink = computed(() => {
   const mineId = idOf(ladderMine.value) ? ladderMine.value : 'a'
   const findId = idOf(ladderFind.value) ? ladderFind.value : 'b'
   const me = idOf(mineId)
-  const b = readBuild(route.query, mineId)
+  const b = readBuild(route.query, mineId, me)
   return {
     name: 'speedTiers',
     query: {

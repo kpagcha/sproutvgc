@@ -29,7 +29,11 @@ export function readList(v: unknown): ListEntry[] {
     if (!id || !(id in POKEMON)) continue
     list.push({
       id: id as PokemonId,
-      build: readBuild({ xnat: nat, xpts: pts, xmods: mods?.replaceAll('_', ','), xstage: stage }, 'x'),
+      build: readBuild(
+        { xnat: nat, xpts: pts, xmods: mods?.replaceAll('_', ','), xstage: stage },
+        'x',
+        id as PokemonId,
+      ),
     })
   }
   return list.slice(0, LIST_MAX)

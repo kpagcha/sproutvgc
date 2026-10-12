@@ -116,6 +116,10 @@ export function inBattle(speed: number, mods: SpeedMods): number {
   return mods.paralysis && !mods.quickFeet ? Math.floor((v * 50) / 100) : v
 }
 
+/** The modifiers with the held items' taken off: for a Pokémon that can hold none of them (`itemBound`). */
+export const withoutItems = (mods: SpeedMods): SpeedMods =>
+  mods.scarf || mods.ironBall ? { ...mods, scarf: false, ironBall: false } : mods
+
 /**
  * The modifiers with an item's or ability's effect on Speed among them, counted once if they have it already; or null
  * when the two can't be together: a Choice Scarf and an Iron Ball both held, or Unburden at work while holding either.
