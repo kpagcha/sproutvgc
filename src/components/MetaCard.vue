@@ -13,6 +13,7 @@ import {
   type MetaSnapshot,
 } from '@/data/meta'
 import { locale, t } from '@/i18n'
+import { metaLoading } from '@/composables/useMeta'
 
 // The meta's data, to see and pick (`MetaDialog`'s card), in steps, each shown when there's a choice: the regulation
 // (the current one first), then its datasets, a plain list of them, the latest first (what one source observed over
@@ -62,7 +63,7 @@ const about = (d: MetaDataset) =>
 </script>
 
 <template>
-  <div class="panel banded meta-card">
+  <div class="panel banded meta-card" :class="{ loading: metaLoading }" :aria-busy="metaLoading">
     <div class="band">
       <span>{{ t('meta.data') }}</span>
       <button type="button" class="btn on-band close" :aria-label="t('picker.close')" @click="emit('close')">
@@ -214,6 +215,15 @@ const about = (d: MetaDataset) =>
 }
 .option .name {
   font-weight: bold;
+}
+/* The one picked, while its data loads (it stays open on another regulation or dataset, over the page on phones). */
+.loading .option.on .name {
+  animation: meta-pulse 0.7s ease-in-out infinite alternate;
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading .option.on .name {
+    animation: none;
+  }
 }
 .small {
   font-size: 0.875em;

@@ -26,7 +26,7 @@ import TypeIcon from '@/components/TypeIcon'
 // when there are several, of any regulation and month generated, `MetaDialog`). Columns come and go with what the snapshot has. Its links are `AppLink`s and its icons
 // functional components, as in the other dex tables.
 const query = useActiveQuery()
-const { snapshot, data } = useMeta()
+const { snapshot, data, loading } = useMeta()
 
 const can = (c: Parameters<typeof has>[1]) => computed(() => !!snapshot.value && has(snapshot.value, c))
 const showUsage = can('usage')
@@ -162,7 +162,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
       </template>
       <p v-else class="muted">{{ t('usage.none', { reg: REGULATION }) }}</p>
     </div>
-    <div v-if="snapshot" class="panel">
+    <div v-if="snapshot" class="panel" :class="{ 'meta-stale': loading }" :aria-busy="loading">
       <div
         v-if="!data || shown.length"
         class="dex-table"

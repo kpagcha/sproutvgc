@@ -3,13 +3,14 @@ import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } fro
 import { ChevronDown, Database } from '@lucide/vue'
 import { datasetParts, metaLabel, selectedSnapshot, subsetShort } from '@/data/meta'
 import { t } from '@/i18n'
+import { metaLoading } from '@/composables/useMeta'
 import MetaCard from '@/components/MetaCard.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
 
 // The meta's data shown, as a button saying it (its dataset, "Showdown ladder · Sep 2026", and its subset in short,
 // "1760+") that opens its card (`MetaCard`) to see what it is and pick another: dropping from the button, closed by a
 // press outside it or Escape. On phones, the button is its icon alone (what it shows read out, and in the card), as
-// the favorites' is, and the card opens in a dialog over the page.
+// the favorites' is, and the card opens in a dialog over the page. Its icon pulses while the data picked loads.
 const open = ref(false)
 const root = useTemplateRef<HTMLElement>('root')
 
@@ -50,9 +51,10 @@ const subset = computed(() => (selectedSnapshot.value ? subsetShort(selectedSnap
       :aria-expanded="open"
       :aria-haspopup="phone ? 'dialog' : undefined"
       :aria-label="t('meta.pick', { label: metaLabel(selectedSnapshot) })"
+      :aria-busy="metaLoading"
       @click="open = !open"
     >
-      <Database :size="16" class="icon" aria-hidden="true" />
+      <Database :size="16" class="icon" :class="{ 'meta-pulse': metaLoading }" aria-hidden="true" />
       <template v-if="!phone">
         <span class="dataset">{{ dataset }}</span>
         <span v-if="subset" class="subset">{{ subset }}</span>

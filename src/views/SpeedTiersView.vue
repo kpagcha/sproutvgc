@@ -111,7 +111,7 @@ function set(k: string, v: string | undefined) {
 const MIN_SHARE = 0.03
 
 // The snapshot shown is the one picked on any page (`useMeta`).
-const { snapshot, data } = useMeta()
+const { snapshot, data, loading } = useMeta()
 /** Every Pokémon of the regulation shown: a past one's, when the data is of one; else the dex's. */
 const regulationIds = computed<readonly PokemonId[]>(
   () => (snapshot.value && pastRoster(snapshot.value.regulation)) ?? availableIds('pokemon'),
@@ -1889,7 +1889,13 @@ const { entered } = usePageEntered()
           </div>
           <!-- The charts: at the sets, a row per Pokémon with its sets' Speeds; with no snapshot, at the benchmarks, a
                row per base Speed. -->
-          <div v-else-if="view === 'charts'" ref="ladder" class="ranges-wrap">
+          <div
+            v-else-if="view === 'charts'"
+            ref="ladder"
+            class="ranges-wrap"
+            :class="{ 'meta-stale': loading }"
+            :aria-busy="loading"
+          >
             <SpeedOdds
               v-if="bySets"
               :rows="oddsRows"
@@ -1909,7 +1915,13 @@ const { entered } = usePageEntered()
               @chip="onRangeChip"
             />
           </div>
-          <ol v-else ref="ladder" class="ladder" :class="{ finding: finding && !onlyFound }">
+          <ol
+            v-else
+            ref="ladder"
+            class="ladder"
+            :class="{ finding: finding && !onlyFound, 'meta-stale': loading }"
+            :aria-busy="loading"
+          >
             <li
               v-for="tier in tiers"
               :key="tier.speed"

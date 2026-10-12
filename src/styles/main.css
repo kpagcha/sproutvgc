@@ -540,3 +540,25 @@ details > summary {
 .panel > .dex-table:last-child {
   margin-bottom: calc(-1 * var(--panel-bleed));
 }
+
+/* What shows another meta snapshot's data than the one just picked, while that one's on its way (`useMeta`'s
+   `loading`): faded, after a moment, so a pick already loaded doesn't flicker. */
+.meta-stale {
+  opacity: 0.45;
+  pointer-events: none;
+  transition: opacity 0.2s ease-out 0.12s;
+}
+/* What says the data's loading (`MetaDialog`'s icon): pulsing. */
+.meta-pulse {
+  animation: meta-pulse 0.7s ease-in-out infinite alternate;
+}
+@keyframes meta-pulse {
+  to {
+    opacity: 0.25;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .meta-pulse {
+    animation: none;
+  }
+}
