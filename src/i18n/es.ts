@@ -876,6 +876,12 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.anyItem': 'Cualquier objeto',
   'speed.clearFilters': 'Quitar filtros',
   'speed.summaryFiltered': '(solo los filtrados)',
+  'speed.filterThreat': 'Golpean al tuyo con ataques supereficaces',
+  'speed.filterThreatNeedsYours': 'Elige antes el tuyo',
+  'speed.summaryThreat':
+    'que golpean al tuyo con ataques supereficaces, según cuántos de sus sets llevan uno (como mínimo)',
+  'speed.summaryPriority': '({n} con prioridad, antes sea cual sea la Velocidad)',
+  'speed.threatPriority': 'Prioridad',
   'speed.summaryField': 'con {field}, con sus sets mejorados por él',
   'speed.filteredNone': 'Ninguno pasa los filtros.',
   'picker.all': 'Todos los Pokémon',

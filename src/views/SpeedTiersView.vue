@@ -23,6 +23,7 @@ import {
   availableIds,
   condition,
   item,
+  move,
   pokemon,
   type AbilityId,
   type ItemId,
@@ -68,6 +69,8 @@ import {
   type BuildToggle,
   type SpeedBuild,
 } from '@/lib/speedBuild'
+import { immunities, threatOf, type Threat } from '@/lib/threats'
+import { formatMult } from '@/lib/typecalc'
 import { confirmDialog } from '@/composables/useConfirm'
 import { lastTiersQuery, withoutMeta } from '@/lib/tiersState'
 import { useActiveQuery } from '@/composables/useActiveQuery'
@@ -697,7 +700,34 @@ const filterAbility = computed(() => queryId<AbilityId>('ability', availableIds(
 /** Items filter only the meta, whose sets have them. */
 const itemsFilterable = computed(() => bySets.value && !!snapshot.value && has(snapshot.value, 'items'))
 const filterItem = computed(() => (itemsFilterable.value ? queryId<ItemId>('item', availableIds('item')) : null))
-const filtering = computed(() => !!(filterType.value || filterAbility.value || filterItem.value))
+const filteringTraits = computed(() => !!(filterType.value || filterAbility.value || filterItem.value))
+// Filtering by threat (`?threat=se`): with yours picked and moves in the snapshot, only those whose sets hit it super
+// effectively (`threatOf`), on at least `MIN_SHARE` of them; how often yours moves first is then weighted by how many
+// of their sets do, those hitting with priority moving first whatever the Speeds.
+const threatsAvailable = computed(() => bySets.value && !!snapshot.value && has(snapshot.value, 'moves'))
+const filterThreat = computed(() => threatsAvailable.value && mine.value !== null && query.value.threat === 'se')
+const threats = computed(() => {
+  const map = new Map<PokemonId, Threat>()
+  const id = mine.value
+  if (!threatsAvailable.value || id === null || !data.value) return map
+  const immune = immunities(id, data.value[id])
+  for (const [k, m] of Object.entries(data.value)) {
+    const th = threatOf(k as PokemonId, m, POKEMON[id].types, immune)
+    if (th) map.set(k as PokemonId, th)
+  }
+  return map
+})
+const threatens = (id: PokemonId) => (threats.value.get(id)?.share ?? 0) >= MIN_SHARE
+/** A threat's moves on its row: the two most common, and its most common with priority, if neither is. */
+function threatMoves(id: PokemonId) {
+  const th = threats.value.get(id)
+  if (!th) return []
+  const list = th.moves.slice(0, 2)
+  const prio = th.moves.find((m) => m.priority)
+  if (prio && !list.includes(prio)) list.push(prio)
+  return list
+}
+const filtering = computed(() => filteringTraits.value || filterThreat.value)
 /** A Pokémon's abilities and items, as the filters go by them. */
 function traits(id: PokemonId): { abilities: AbilityId[]; items: ItemId[] } {
   const m = bySets.value ? data.value?.[id] : undefined
@@ -708,9 +738,10 @@ function traits(id: PokemonId): { abilities: AbilityId[]; items: ItemId[] } {
     items: m?.items ? run(m.items) : [],
   }
 }
-type FilterKind = 'type' | 'ability' | 'item'
+type FilterKind = 'type' | 'ability' | 'item' | 'threat'
 /** Whether a Pokémon passes the filters, but for the one of `except`'s kind. */
 function passes(id: PokemonId, except?: FilterKind): boolean {
+  if (except !== 'threat' && filterThreat.value && !threatens(id)) return false
   const type = except === 'type' ? null : filterType.value
   const ab = except === 'ability' ? null : filterAbility.value
   const it = except === 'item' ? null : filterItem.value
@@ -744,6 +775,8 @@ const typeOptions = computed(() => {
   const list = options('type', (id) => POKEMON[id].types, typeName, filterType.value)
   return TYPES.flatMap((ty) => list.find((o) => o.id === ty) ?? [])
 })
+/** How many of the Pokémon shown, passing the other filters, threaten yours. */
+const threatCount = computed(() => poolIds.value.filter((id) => passes(id, 'threat') && threatens(id)).length)
 const abilityOptions = computed(() =>
   byName(
     options(
@@ -769,7 +802,9 @@ const itemOptions = computed(() =>
 // The filters fold away behind a button beside the find, marked while any is on.
 const filtersOpen = shallowRef(false)
 const clearFilters = () =>
-  void router.replace({ query: { ...query.value, type: undefined, ability: undefined, item: undefined } })
+  void router.replace({
+    query: { ...query.value, type: undefined, ability: undefined, item: undefined, threat: undefined },
+  })
 /** Usage ranks, for the pickers to list by, most used first: the meta's, when there is one. */
 const ranks = computed(() => (data.value ? usageRanks(data.value) : undefined))
 
@@ -1109,7 +1144,8 @@ const summaryNote = computed(() =>
     bySets.value
       ? t('speed.summarySets', { slice: sliceLabel.value })
       : t('speed.summaryBench', { slice: sliceLabel.value, bench: benchLabel(bench.value) }),
-    filtering.value && t('speed.summaryFiltered'),
+    filteringTraits.value && t('speed.summaryFiltered'),
+    filterThreat.value && t('speed.summaryThreat'),
     inPlay.value && t('speed.summaryField', { field: fieldLabel(inPlay.value) }),
   ]
     .filter(Boolean)
@@ -1125,17 +1161,29 @@ const summary = computed(() => {
   if (mySpeed.value === null) return null
   const tally = { first: 0, ties: 0, after: 0 }
   let total = 0
+  let priority = 0
   for (const e of entries.value) {
     if (e.extra) continue
-    const w = weight(e)
-    if (!w) continue
+    const base = weight(e)
+    if (!base) continue
+    // Filtering by threat, only its sets hitting yours super effectively, those with priority moving first.
+    const th = filterThreat.value ? threats.value.get(e.id) : undefined
+    const w = th ? base * th.share : base
+    const pw = th ? base * th.priority : 0
     const theirs = chipSpeed(e)
     const k = theirs === mySpeed.value ? 'ties' : mySpeed.value > theirs !== trickRoom.value ? 'first' : 'after'
-    tally[k] += w
+    tally[k] += w - pw
+    tally.after += pw
+    priority += pw
     total += w
   }
   if (!total) return null
-  return { first: tally.first / total, ties: tally.ties / total, after: tally.after / total }
+  return {
+    first: tally.first / total,
+    ties: tally.ties / total,
+    after: tally.after / total,
+    priority: priority / total,
+  }
 })
 
 // The chip yours is measured against (`?vs=`, picked by tapping it while yours is set), and what it takes to move
@@ -1962,6 +2010,21 @@ const { entered } = usePageEntered()
                   <option v-for="o in itemOptions" :key="o.id" :value="o.id">{{ o.name }} ({{ o.n }})</option>
                 </select>
               </span>
+              <!-- Those hitting yours super effectively: greyed out until there's yours. -->
+              <label
+                v-if="threatsAvailable"
+                v-tip="!mine && canHover && t('speed.filterThreatNeedsYours')"
+                class="btn switch threat-filter"
+                :class="{ on: filterThreat, disabled: !mine }"
+              >
+                <input
+                  type="checkbox"
+                  :checked="filterThreat"
+                  :disabled="!mine"
+                  @change="set('threat', filterThreat ? undefined : 'se')"
+                />
+                {{ t('speed.filterThreat') }}<template v-if="mine"> ({{ threatCount }})</template>
+              </label>
               <button v-if="filtering" type="button" class="btn inverted filters-clear" @click="clearFilters">
                 <X :size="14" aria-hidden="true" />{{ t('speed.clearFilters') }}
               </button>
@@ -2114,6 +2177,13 @@ const { entered } = usePageEntered()
                     </span>
                   </template>
                 </template>
+                <!-- Filtering by threat, what of its sets hits yours super effectively, on a line of its own. -->
+                <span v-if="filterThreat && !row.mine && threats.has(row.id)" class="tags threat-tags">
+                  <template v-for="m in threatMoves(row.id)" :key="m.id">
+                    <span class="tag">{{ refName(move(m.id)) }} {{ formatMult(m.mult) }} {{ percent(m.share) }}</span>
+                    <span v-if="m.priority" class="tag threat-priority">{{ t('speed.threatPriority') }}</span>
+                  </template>
+                </span>
               </template>
             </SpeedOdds>
             <SpeedRanges
@@ -2343,6 +2413,9 @@ const { entered } = usePageEntered()
                     })
                   }}
                   <span class="muted">{{ summaryNote }}</span>
+                  <template v-if="filterThreat && summary.priority">
+                    {{ t('speed.summaryPriority', { n: percent(summary.priority) }) }}</template
+                  >
                 </p>
               </section>
             </template>
@@ -2788,6 +2861,20 @@ const { entered } = usePageEntered()
 .filter.on .filter-pick {
   border-color: var(--ink);
   background: var(--sel);
+}
+.threat-filter {
+  min-height: 0;
+  padding: 4px 8px;
+}
+.threat-filter.disabled {
+  opacity: 0.5;
+}
+/* What threatens yours, on a line of its own under the row's other tags. */
+.threat-tags {
+  flex-basis: 100%;
+}
+.threat-priority {
+  font-weight: bold;
 }
 .filters-clear {
   gap: 4px;

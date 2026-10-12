@@ -864,6 +864,12 @@ export const messages = {
   'speed.anyItem': 'Any item',
   'speed.clearFilters': 'Clear filters',
   'speed.summaryFiltered': '(those filtered only)',
+  'speed.filterThreat': 'Hits yours super effectively',
+  'speed.filterThreatNeedsYours': 'Pick yours first',
+  'speed.summaryThreat':
+    'hitting yours super effectively, weighted by how many of their sets run such a move (at least)',
+  'speed.summaryPriority': '({n} with priority, first whatever the Speeds)',
+  'speed.threatPriority': 'Priority',
   'speed.summaryField': 'in {field}, with their sets boosted in it',
   'speed.filteredNone': 'None of them pass the filters.',
   'picker.all': 'All Pokémon',
