@@ -757,7 +757,7 @@ function resetAll() {
       </div>
 
       <!-- On phones, the two side by side as tabs, each with its Pokémon in short, stuck to the top while the page
-           scrolls: tapping one opens its panel under them, tapping it again folds it. Who moves first is marked on the verdict and the open panel, not on them. -->
+           scrolls: tapping one opens its panel under them, tapping it again folds it. Who moves first is marked on the verdict alone. -->
       <div v-if="phone" class="side-tabs" data-top-bar>
         <button
           v-for="side in sides"
@@ -803,18 +803,7 @@ function resetAll() {
 
       <div class="sides">
         <div v-for="side in sides" v-show="!phone || openKey === side.s" :key="side.s" class="side-col">
-          <section
-            :id="`compare-${side.s}`"
-            class="panel banded side"
-            :class="{
-              first: verdict && !verdict.tie && verdict.first === side.s,
-              // On phones, the open one is outlined whenever there are two (in its color when it moves first, neutral on
-              // a tie), so a change to its build shows how it goes at once.
-              judged: phone && !!verdict,
-              tied: phone && verdict?.tie,
-              opponent: side.s === 'b',
-            }"
-          >
+          <section :id="`compare-${side.s}`" class="panel banded side" :class="{ opponent: side.s === 'b' }">
             <!-- Yours, and its opponent, red as on the speed tiers; on phones, its tab stands for it. Once picked, it
                  opens and folds the panel, an arrow at its end saying so. -->
             <component
@@ -1199,24 +1188,6 @@ function resetAll() {
   gap: 8px;
   font-weight: bold;
 }
-/* The one that moves first, marked by its outline: blue for yours, the opponents' red for an opponent; on a tie,
-   neither. On phones, the open one has its outline whenever there are two, neutral on a tie and see-through while it
-   moves after, so it's only its color that changes. */
-.side.first,
-.side.judged {
-  outline: 3px solid transparent;
-  outline-offset: 2px;
-}
-.side.tied {
-  outline-color: var(--muted);
-}
-.side.first {
-  outline-color: var(--accent);
-}
-.side.first.opponent {
-  outline-color: var(--opponent);
-}
-
 /* On the verdict, beside the Speeds it turns over. */
 .tr-tag {
   margin-right: 8px;
