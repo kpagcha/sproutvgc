@@ -31,7 +31,7 @@ function view(visit: PageVisit) {
     groups,
     /** Yours' build on the speed tiers, as the page reads it. */
     build: readBuild(q, 'my'),
-    mine: name === 'speedTiers' ? mon(q.mine) : null,
+    mine: name === 'speedTiers' || name === 'speedThreats' ? mon(q.mine) : null,
     trickRoom: name.startsWith('speed') && q.trickroom === '1',
     // The type matchups' types, or the type the speed tiers are filtered by.
     types: name.startsWith('matchups')

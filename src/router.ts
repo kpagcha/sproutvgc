@@ -294,6 +294,24 @@ export const router = createRouter({
         ...inArea('competitive', 'speedCompare'),
       },
     },
+    {
+      // What hits yours super effectively, and how it does on Speed against each, linked to and from the speed tiers;
+      // in their section, with no link of its own in the header.
+      path: '/competitive/speed-tiers/threats',
+      name: 'speedThreats',
+      component: () => import('@/views/SpeedThreatsView.vue'),
+      meta: {
+        titleKey: 'title.speedThreats',
+        descKey: 'desc.speedThreats',
+        headKey: 'head.speedThreats',
+        keywordsKey: 'keywords.speedThreats',
+        dexNames: true,
+        // One per Pokémon of yours, once there's one; its setup, yours and its build, but for the data shown.
+        recent: ({ query: { mine } }) => (typeof mine === 'string' ? `speedThreats:${mine}` : null),
+        setup: (query) => (typeof query.mine === 'string' ? stringQuery(query, ['meta']) : null),
+        ...inArea('competitive', 'speedTiers'),
+      },
+    },
 
     // Tools: what you interact with.
     area('tools', 'title.tools', 'desc.tools'),

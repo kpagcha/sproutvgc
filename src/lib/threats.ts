@@ -61,6 +61,8 @@ export function immunities(id: PokemonId, m: PokemonMeta | undefined): Set<TypeI
 
 export interface ThreatMove {
   id: MoveId
+  /** Its type as it hits: a Normal move's, by an -ate ability, that ability's. */
+  type: TypeId
   /** The share of the Pokémon's sets running it. */
   share: number
   mult: Multiplier
@@ -102,7 +104,7 @@ export function threatOf(
     if (mult <= 1) continue
     const needs = PRIORITY_WITH[mid]
     const priority = mv.priority > 0 || (!!needs && hasAbility(id, m, needs))
-    moves.push({ id: mid, share, mult: Math.min(mult, 4) as Multiplier, priority })
+    moves.push({ id: mid, type, share, mult: Math.min(mult, 4) as Multiplier, priority })
   }
   if (!moves.length) return null
   moves.sort((a, b) => b.share - a.share)

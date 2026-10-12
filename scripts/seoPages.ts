@@ -136,6 +136,7 @@ export function seoPages(): Plugin {
         searched('competitive/usage', 'usage', 'WebPage'),
         searched('competitive/speed-tiers', 'speedTiers'),
         searched('competitive/speed-tiers/compare', 'speedCompare'),
+        searched('competitive/speed-tiers/threats', 'speedThreats'),
         { path: 'tools', title: 'title.tools', desc: 'desc.tools', schema: 'CollectionPage' },
         searched('tools/matchups', 'matchups'),
         searched('tools/quiz', 'quiz'),

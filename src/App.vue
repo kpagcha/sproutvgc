@@ -94,9 +94,17 @@ function backLink(r: RouteLocationNormalizedLoaded): { to: RouteLocationRaw; lab
     const query = { ...r.query, mode: r.params.side === 'atk' ? 'atk' : undefined }
     return { to: { name: 'matchups', query }, label: 'nav.matchups' }
   }
-  // The speed comparison leads back to the speed tiers as they were left.
+  // The speed comparison leads back to the speed tiers as they were left; the speed threats, with yours as it is there.
   if (r.name === 'speedCompare')
     return { to: { name: 'speedTiers', query: lastTiersQuery.value }, label: 'nav.speedTiers' }
+  if (r.name === 'speedThreats') {
+    const keys = ['mine', 'mynat', 'mypts', 'mymods', 'mystage', 'trickroom']
+    const yours = Object.fromEntries(keys.map((k) => [k, r.query[k] ?? undefined]))
+    return {
+      to: { name: 'speedTiers', query: { ...lastTiersQuery.value, ...yours, vs: undefined } },
+      label: 'nav.speedTiers',
+    }
+  }
   return (typeof r.name === 'string' ? LISTS[r.name] : undefined) ?? null
 }
 
