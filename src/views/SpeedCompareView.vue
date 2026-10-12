@@ -1017,6 +1017,12 @@ function resetAll() {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
+/* On phones, not the Speeds: the tabs right under it have them. */
+@media (max-width: 720px) {
+  .verdict-speeds {
+    display: none;
+  }
+}
 /* Side by side from tablets up; one under the other on phones. */
 .sides {
   display: grid;
