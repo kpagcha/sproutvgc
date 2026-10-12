@@ -1040,6 +1040,40 @@ function resetAll() {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+/* Side by side, each column's parts on rows they share (its panel, what it takes to move first, the second to add),
+   so the two panels are as tall as the taller one. */
+@media (min-width: 721px) {
+  .sides {
+    row-gap: 0;
+  }
+  .side-col {
+    display: grid;
+    grid-row: span 3;
+    grid-template-rows: subgrid;
+    /* Its share of the width, whatever its widest row (the builds, scrolling sideways) would take. */
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+  }
+  .side-col > .col-add {
+    align-self: start;
+  }
+  /* The shorter one's Confirm at its foot, level with the other's: its editor taking the panel's room. */
+  .side {
+    display: flex;
+    flex-direction: column;
+  }
+  .side > .speed-editor {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+  }
+  .side :deep(.confirm-row) {
+    margin-top: auto;
+  }
+  .side :deep(.speed-editor > :nth-last-child(2)) {
+    margin-bottom: 12px;
+  }
+}
 /* Its side's color, for what's marked in it. */
 .side {
   --side: var(--accent);
