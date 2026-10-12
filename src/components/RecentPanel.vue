@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { Trash2 } from '@lucide/vue'
 import { available } from '@/data/dex'
 import { t } from '@/i18n'
 import { useRecent } from '@/composables/useRecent'
@@ -21,7 +22,9 @@ const { open, onToggle } = useOpenState('sproutvgc.recent.open')
   <details v-if="items.length" class="panel banded recent" :open @toggle="onToggle">
     <summary>
       <h2 class="title">{{ t('recent.title') }}</h2>
-      <button type="button" class="clear" @click.prevent="clear">{{ t('recent.clear') }}</button>
+      <button type="button" class="btn on-band inverted clear" @click.prevent="clear">
+        <Trash2 :size="14" aria-hidden="true" />{{ t('recent.clear') }}
+      </button>
     </summary>
     <div class="chips">
       <template v-for="r in items" :key="keyOf(r)">
@@ -42,24 +45,12 @@ const { open, onToggle } = useOpenState('sproutvgc.recent.open')
   display: inline;
   margin: 0 0 0 2px;
 }
-/* Clearing sits at the band's end, quiet until hovered. */
+/* Clearing sits at the band's end, a band button as the speed tiers' clear is. */
 .clear {
   position: absolute;
   top: 50%;
   right: 12px;
   transform: translateY(-50%);
-  padding: 0 4px;
-  font: inherit;
-  font-size: 0.8em;
-  color: inherit;
-  background: none;
-  border: none;
-  opacity: 0.75;
-  cursor: pointer;
-}
-.clear:hover {
-  opacity: 1;
-  text-decoration: underline;
 }
 .chips {
   display: flex;

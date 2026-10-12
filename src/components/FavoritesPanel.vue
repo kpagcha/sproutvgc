@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Star } from '@lucide/vue'
+import { Star, Trash2 } from '@lucide/vue'
 import { available } from '@/data/dex'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
@@ -48,7 +48,9 @@ async function confirmClear() {
         <Star :size="16" :stroke-width="2.5" aria-hidden="true" />{{ t('favorites.title') }}
         <span class="count muted">{{ count }}</span>
       </h2>
-      <button type="button" class="clear" @click.prevent="confirmClear">{{ t('favorites.clear') }}</button>
+      <button type="button" class="btn on-band inverted clear" @click.prevent="confirmClear">
+        <Trash2 :size="14" aria-hidden="true" />{{ t('favorites.clear') }}
+      </button>
     </summary>
     <dl>
       <template v-for="g in groups" :key="g.kind">
@@ -74,24 +76,12 @@ async function confirmClear() {
   position: relative;
   cursor: pointer;
 }
-/* Clearing sits at the band's end, quiet until hovered, as on the recently viewed. */
+/* Clearing sits at the band's end, a band button as the speed tiers' clear is, as on the recently viewed. */
 .clear {
   position: absolute;
   top: 50%;
   right: 12px;
   transform: translateY(-50%);
-  padding: 0 4px;
-  font: inherit;
-  font-size: 0.8em;
-  color: inherit;
-  background: none;
-  border: none;
-  opacity: 0.75;
-  cursor: pointer;
-}
-.clear:hover {
-  opacity: 1;
-  text-decoration: underline;
 }
 .favorites:not(.banded) > summary {
   width: fit-content;
