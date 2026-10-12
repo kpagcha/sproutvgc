@@ -584,8 +584,9 @@ onBeforeUnmount(() => {
 .row.has-mine {
   background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
+/* The one found: a light wash of the selection's color, as the rest fade around it. */
 .row.hit {
-  background: var(--sel);
+  background: color-mix(in srgb, var(--sel) 35%, transparent);
 }
 /* The Speed picked by its link. */
 .row.at {
