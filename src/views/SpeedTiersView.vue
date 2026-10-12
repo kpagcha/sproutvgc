@@ -199,7 +199,7 @@ const modsOpen = shallowRef(modded.value)
 const toggleMods = () => (modsOpen.value = !modsOpen.value)
 /**
  * Whether boosts show, when the snapshot has the items and abilities they come from: as the URL says (`?boosts=0` or
- * `1`, a shared link), else as the reader last left them, remembered in this browser; on at first.
+ * `1`, a shared link), else as the reader last left them, remembered in this browser; off at first.
  */
 const boostsAvailable = computed(
   () => !!snapshot.value && has(snapshot.value, 'items') && has(snapshot.value, 'abilities'),
@@ -207,9 +207,9 @@ const boostsAvailable = computed(
 const BOOSTS_KEY = 'sproutvgc.speedTiers.boosts'
 function savedBoosts(): boolean {
   try {
-    return localStorage.getItem(BOOSTS_KEY) !== '0'
+    return localStorage.getItem(BOOSTS_KEY) === '1'
   } catch {
-    return true
+    return false
   }
 }
 const boostsPref = shallowRef(savedBoosts())
@@ -227,7 +227,7 @@ function toggleBoosts() {
     // Storage unavailable: the choice lasts until the page reloads.
   }
   // The URL says so only when it differs from the default, so links stay short.
-  set('boosts', on ? undefined : '0')
+  set('boosts', on ? '1' : undefined)
 }
 const toggleTrickRoom = () => set('trickroom', trickRoom.value ? undefined : '1')
 // The weather or terrain in play: the one yours' doubling ability needs, its ×2 on (Swift Swim, rain), as it's then
@@ -284,13 +284,13 @@ const CONTROL_KEYS = [
   'stage',
   ...TOGGLES,
 ] as const
-const controlsChanged = computed(() => CONTROL_KEYS.some((k) => query.value[k] !== undefined) || !boostsOn.value)
+const controlsChanged = computed(() => CONTROL_KEYS.some((k) => query.value[k] !== undefined) || boostsOn.value)
 function resetControls() {
-  boostsPref.value = true
+  boostsPref.value = false
   try {
-    localStorage.setItem(BOOSTS_KEY, '1')
+    localStorage.setItem(BOOSTS_KEY, '0')
   } catch {
-    // Storage unavailable: boosts are on until the page reloads.
+    // Storage unavailable: boosts are off until the page reloads.
   }
   const q: Record<string, unknown> = { ...query.value }
   for (const k of CONTROL_KEYS) delete q[k]
