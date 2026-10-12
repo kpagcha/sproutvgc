@@ -7,7 +7,7 @@ import { MARK_SHARE } from '@/lib/speed'
 import { odds, type SpreadPoint } from '@/lib/speedLineup'
 import EffectTag from '@/components/EffectTag'
 
-// One of the comparison's Pokémon at its sets, against another, drawn as the speed tiers' charts draw a row: a mark at
+// One of the comparison's Pokémon at its sets, against another, drawn as the speed tiers' ladder draws a row: a mark at
 // each Speed its sets reach, rising from the axis as tall as it's common, colored by who moves first at it (its side's
 // color, the other's, plain on a tie), over a fainter stretch of what it could reach (Min− to Max+); the other, at one
 // build, a line through with its Speed over it (at its sets too, each mark is colored by who moves first against most

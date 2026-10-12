@@ -76,11 +76,11 @@ import { useOpenState } from '@/composables/useOpenState'
 import { usePageEntered } from '@/composables/usePageEntered'
 import AppLink from '@/components/AppLink'
 import BuildSummary from '@/components/BuildSummary.vue'
+import ChoiceDialog from '@/components/ChoiceDialog.vue'
 import EffectTag from '@/components/EffectTag'
 import ModalDialog from '@/components/ModalDialog.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
-import FolderTabs from '@/components/FolderTabs.vue'
 import StageStepper from '@/components/StageStepper.vue'
 import SpeedRanges, { type RangeRow } from '@/components/SpeedRanges.vue'
 import SpeedOdds, { type OddsRow } from '@/components/SpeedOdds.vue'
@@ -119,13 +119,15 @@ const regulationIds = computed<readonly PokemonId[]>(
 const metaAvailable = computed(() => !!snapshot.value && has(snapshot.value, 'speeds'))
 
 // Two choices, each in the URL: which Pokémon are shown (`?show=`): the most used (the top 50 or 100), or every
-// Pokémon of the regulation; and how they're drawn (`?view=`): the ladder, a row per Speed, or the charts, a row per
-// Pokémon (`?view=charts`; `ranges`, its name before, still taken, from a link or what was saved). Their Speeds are the sets players run; without a snapshot with Speeds, every Pokémon is at the benchmarks
-// (the charts a row per base Speed). A link from before these (`?all=1`) is every Pokémon's charts; one from when the
-// charts could be at the benchmarks (`?speeds=bench`) is at the sets.
+// Pokémon of the regulation; and what the ladder's rows are (`?view=`): a row per build its sets run, at its Speed
+// (`ladder`); a row per Pokémon at its most common Speed, its builds marked on it (`charts`; `ranges`, their name
+// before, still taken); or a row per Pokémon at the fastest it could be (`max`: Max+, Min− under Trick Room), with every
+// Speed ability it can have among the boosts. Their Speeds are the sets players run; without a snapshot with Speeds,
+// every Pokémon is at the benchmarks, a row per base Speed. A link from before these (`?all=1`) is every Pokémon's
+// charts; one from when the charts could be at the benchmarks (`?speeds=bench`) is at the sets.
 const SHOWS = ['top50', 'top100', 'all'] as const
 type Show = (typeof SHOWS)[number]
-const VIEWS = ['ladder', 'charts'] as const
+const VIEWS = ['ladder', 'charts', 'max'] as const
 type View = (typeof VIEWS)[number]
 const DEFAULTS = { show: 'top50', view: 'ladder' } as const
 const LEGACY = { show: 'all', view: 'charts' } as const
@@ -138,8 +140,10 @@ const pick = <T extends string>(k: 'show' | 'view', list: readonly T[]): T => {
 }
 const show = computed<Show>(() => (metaAvailable.value ? pick('show', SHOWS) : 'all'))
 const view = computed<View>(() => pick('view', VIEWS))
-/** Whether the Speeds are the sets players run: with a snapshot that has them (else the benchmarks: the ladder at the
- * one below, the charts a row per base Speed). */
+/** Whether the ladder is a row per Pokémon (and per boost), rather than per build. */
+const perMon = computed(() => view.value !== 'ladder')
+/** Whether the Speeds are the sets players run: with a snapshot that has them (else the benchmarks: a row per base
+ * Speed). */
 const bySets = computed(() => metaAvailable.value)
 /** How many of the most used the view shows (every Pokémon: no top). */
 const topN = computed(() => (show.value === 'top50' ? 50 : show.value === 'top100' ? 100 : Infinity))
@@ -216,8 +220,8 @@ const boostsPref = shallowRef(savedBoosts())
 const boostsOn = computed(() =>
   query.value.boosts === '0' ? false : query.value.boosts === '1' ? true : boostsPref.value,
 )
-// Boosts are chips of the ladder at the sets' Speeds.
-const showBoosts = computed(() => view.value === 'ladder' && bySets.value && boostsAvailable.value && boostsOn.value)
+// Boosts are rows of the ladder at the sets' Speeds.
+const showBoosts = computed(() => bySets.value && boostsAvailable.value && boostsOn.value)
 function toggleBoosts() {
   const on = !boostsOn.value
   boostsPref.value = on
@@ -270,9 +274,10 @@ function resetAll() {
   void router.replace({ query: {} })
 }
 // `field` and `doubled` were controls of their own, once, as was where the Speeds come from (`speeds`): cleared with the
-// rest, from an old link. Who's shown is the toolbar's too (how they're drawn, the tabs, isn't).
+// rest, from an old link. Who's shown and how they're sorted are the toolbar's too (as how they were drawn was).
 const CONTROL_KEYS = [
   'show',
+  'view',
   'speeds',
   'all',
   'bench',
@@ -294,8 +299,6 @@ function resetControls() {
   }
   const q: Record<string, unknown> = { ...query.value }
   for (const k of CONTROL_KEYS) delete q[k]
-  // From an old link, its view kept.
-  if (legacy.value) q.view = LEGACY.view
   void router.replace({ query: q as typeof query.value })
   modsOpen.value = false
 }
@@ -559,8 +562,8 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
     }))
   // Its boosts, at each of its builds the ladder has (whatever the field): the data counts items, abilities and spreads
   // apart, so it doesn't say which builds go with them. Items and abilities its sets run (the least share of them, but
-  // for the Pokémon looked for, which has every ability it can have, as what could be), with the share of its sets
-  // running each. Those the modifiers rule out (Unburden with a Choice Scarf on everyone), or the field (another
+  // for the Pokémon looked for, and sorting by what they could reach, which have every ability they can have, as what
+  // could be), with the share of its sets running each. Those the modifiers rule out (Unburden with a Choice Scarf on everyone), or the field (another
   // weather), are left out. The field's own, always shown, are how its sets play: each build boosted, at its share of
   // them times the ability's (the two taken apart as the data counts them), those under the least share left out.
   if (boostsAvailable.value && builds.length) {
@@ -571,7 +574,7 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
         .filter((i) => shown(i.share ?? 0))
         .map((i) => ({ ref: item(i.id), share: i.share ?? 0, effect: SPEED_ITEMS[i.id] })),
       ...POKEMON[id].abilities
-        .filter((a) => all || abilityShare(a) >= MIN_SHARE)
+        .filter((a) => all || view.value === 'max' || abilityShare(a) >= MIN_SHARE)
         .map((a) => ({ ref: ability(a), share: abilityShare(a), effect: SPEED_ABILITIES[a] })),
     ]
     for (const { ref, share, effect } of effects) {
@@ -612,23 +615,23 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
 /** The benchmark a Pokémon with no sets in the snapshot has its boosts at: the fastest, the slowest under Trick
  * Room. */
 const boostBench = computed<Benchmark>(() => (trickRoom.value ? 'min' : 'max'))
-/**
- * A Pokémon with no sets in the snapshot, found or kept: at every benchmark, and its boosts, the Speed abilities it
- * can have, at `boostBench` (what could be, as nothing says how many run them).
- */
+/** A Pokémon with no sets in the snapshot's boosts: the Speed abilities it can have, at `boostBench` (what could be, as
+ * nothing says how many run them). */
+function benchBoosts(id: PokemonId, rank: number): Entry[] {
+  if (!showBoosts.value) return []
+  const speed = benchmark(POKEMON[id].stats[5], boostBench.value)
+  const at = { id, ...named(id), rank, extra: true as const }
+  return POKEMON[id].abilities.flatMap((a) => {
+    const effect = SPEED_ABILITIES[a]
+    if (!effect || !inField(effect.when) || !withEffect(mods.value, effect)) return []
+    return [{ ...at, speed, bench: boostBench.value, boost: { ref: ability(a), ...effect } }]
+  })
+}
+/** A Pokémon with no sets in the snapshot, found or kept: at every benchmark, and its boosts. */
 function benchChips(id: PokemonId): Entry[] {
   const base = POKEMON[id].stats[5]
   const at = { id, ...named(id), rank: Infinity, extra: true as const }
-  const list: Entry[] = BENCHMARKS.map((b) => ({ ...at, speed: benchmark(base, b), bench: b }))
-  if (showBoosts.value) {
-    const speed = benchmark(base, boostBench.value)
-    for (const a of POKEMON[id].abilities) {
-      const effect = SPEED_ABILITIES[a]
-      if (!effect || !inField(effect.when) || !withEffect(mods.value, effect)) continue
-      list.push({ ...at, speed, bench: boostBench.value, boost: { ref: ability(a), ...effect } })
-    }
-  }
-  return list
+  return [...BENCHMARKS.map((b) => ({ ...at, speed: benchmark(base, b), bench: b })), ...benchBoosts(id, Infinity)]
 }
 /** A chip's Speed in battle: with the modifiers, and its boost's effect among them, counted once if they have it. */
 const chipSpeed = (e: Entry) => inBattle(e.speed, (e.boost && withEffect(mods.value, e.boost)) || mods.value)
@@ -659,7 +662,12 @@ const pool = computed<Entry[]>(() => {
   for (const id of sliceIds.value) {
     const m = bySets.value ? data.value?.[id] : undefined
     if (m?.speeds?.length) list.push(...metaChips(id, m))
-    else list.push(benchEntry(id, bySets.value || undefined))
+    else {
+      const e = benchEntry(id, bySets.value || undefined)
+      list.push(e)
+      // At the fastest they could be, its boosts too, as for one with sets.
+      if (bySets.value && view.value === 'max') list.push(...benchBoosts(id, e.rank))
+    }
   }
   // The Pokémon kept and the one found, when the view leaves them out: at their sets (with none in the snapshot, at
   // every benchmark), or at the benchmark picked.
@@ -770,10 +778,10 @@ const found = computed(() => {
   const id = query.value.find
   return typeof id === 'string' && id in POKEMON ? (id as PokemonId) : null
 })
-/** In the charts, where each Pokémon is a row of its own, the one found is the one yours is measured against too (its
- * most common set), as tapping its row does: on the ladder, that's a chip of it, tapped. */
+/** A row per Pokémon, the one found is the one yours is measured against too (its most common set), as tapping its
+ * row does; a row per build, that's one of its rows, tapped. */
 function setFound(id: PokemonId | null) {
-  if (view.value !== 'charts' || mine.value === null) return set('find', id ?? undefined)
+  if (!perMon.value || mine.value === null) return set('find', id ?? undefined)
   const e = id !== null && id !== mine.value ? topEntry(id) : undefined
   void router.replace({ query: { ...query.value, find: id ?? undefined, vs: e ? chipKey(e) : undefined } })
 }
@@ -840,52 +848,169 @@ const findMode = computed<FindMode>({
 })
 // The find's dialog on phones says what it finds in: the ladder, or yours' opponents on it.
 const findTitle = computed(() => (mine.value ? t('compare.opponent') : t('title.speedTiers')))
-// Only it on the ladder, among its builds and boosts: with every Pokémon once, it'd be alone, so there it's only marked.
+/// Only it on the ladder, among its builds and boosts; with every Pokémon at the benchmarks, a row per base Speed, it'd be
+// alone in its row, so there it's only marked.
 /** Whether the view can show only the Pokémon found: not the ranges at the benchmarks, a row per base Speed. */
-const onlyAllowed = computed(() => view.value === 'ladder' || bySets.value)
+const onlyAllowed = computed(() => bySets.value)
 const onlyFound = computed(() => found.value !== null && onlyAllowed.value && findMode.value === 'only')
 // The toggle's label around the found Pokémon's icon, the same width whatever its name (which the search shows).
 const onlyLabel = computed(() => tSplit('speed.findOnly', 'name'))
 // A boost's build, around its nature's effect (an arrow, as the chips have it).
 const boostAt = computed(() => tSplit('speed.boostAt', 'effect'))
-
-/** The ladder: each Speed (with the modifiers) with the Pokémon at it, fastest first (slowest under Trick Room). */
-const tiers = computed(() => {
-  const bySpeed = new Map<number, Entry[]>()
-  for (const e of entries.value) {
-    if (onlyFound.value && e.id !== found.value) continue
-    const s = chipSpeed(e)
-    bySpeed.set(s, [...(bySpeed.get(s) ?? []), e])
-  }
-  // Yours, first at its Speed.
-  if (mine.value !== null && mySpeed.value !== null) {
-    const yours: Entry = { id: mine.value, ...named(mine.value), speed: mySpeed.value, mine: true, rank: -1 }
-    bySpeed.set(mySpeed.value, [...(bySpeed.get(mySpeed.value) ?? []), yours])
-  }
-  const dir = trickRoom.value ? 1 : -1
-  return [...bySpeed]
-    .sort((a, b) => (a[0] - b[0]) * dir)
-    .map(([speed, list]) => {
-      // Yours first, then by usage and by how many of its sets are at that Speed, then by name: species, then forme,
-      // the species' own first.
-      const sorted = list.sort(
-        (a, b) =>
-          a.rank - b.rank ||
-          (b.share ?? 0) - (a.share ?? 0) ||
-          a.species.localeCompare(b.species, locale.value) ||
-          (a.forme ?? '').localeCompare(b.forme ?? '', locale.value),
-      )
-      return { speed, list: sorted, hit: sorted.some(isHit) }
-    })
-})
 const finding = computed(() => found.value !== null)
+
+/** The modifiers for everyone, with a boost's effect among them, counted once if they have it. */
+const modsWith = (boost?: Boost) => (boost && withEffect(mods.value, boost)) || mods.value
+/** A Pokémon's sets' Speeds in battle, with a boost's effect if any: merged by nature effect and points, and by Speed
+ * once the modifiers apply (each keeping the builds reaching it), the most common first. */
+function setSpeeds(id: PokemonId, boost?: Boost): OddsRow['builds'] {
+  const base = POKEMON[id].stats[5]
+  const m = modsWith(boost)
+  const bySpeed = new Map<number, OddsRow['builds'][number]>()
+  for (const b of buildsOf(id)) {
+    const speed = inBattle(speedStat(base, b.points, b.effect), m)
+    const at = bySpeed.get(speed) ?? { speed, share: 0, sets: [] }
+    at.share += b.share
+    at.sets.push(b)
+    bySpeed.set(speed, at)
+  }
+  return [...bySpeed.values()].sort((a, b) => b.share - a.share)
+}
+/** A Pokémon's Speed at each benchmark in battle, with `m`. */
+const benchSpeeds = (id: PokemonId, m: SpeedMods) =>
+  Object.fromEntries(BENCHMARKS.map((b) => [b, inBattle(benchmark(POKEMON[id].stats[5], b), m)])) as Record<
+    Benchmark,
+    number
+  >
+/** A row of the ladder, but for where it's placed and how it stands to the one yours is measured against. */
+type RowBase = Omit<OddsRow, 'speed' | 'own' | 'versus' | 'rival'>
+/** What the rows of a Pokémon and one of its boosts (or none) have alike, by the two: its sets' Speeds and reach. */
+const groupKey = (e: Entry) => (e.boost ? `${e.id}:${e.boost.ref.kind}:${e.boost.ref.id}` : e.id)
+/** Where a row of a Pokémon goes: at its most common Speed, or the fastest it could be (Max+; Min− under Trick Room);
+ * with no sets in the snapshot, at that benchmark either way. */
+function placeOf(r: RowBase): number {
+  if (r.noSets || view.value === 'max') return trickRoom.value ? r.bench.min : r.bench.max
+  return r.builds[0]!.speed
+}
 /**
- * Every Pokémon shown, by base Speed (`SpeedRanges`): those sharing one have the same Speeds whatever their build, so
- * a row each, with its Speeds at every benchmark (with the modifiers) and its Pokémon by name; the rows from those
- * moving first, as the ladder goes.
+ * The ladder at the sets players run (`SpeedOdds`), each row with the chip it stands for (what tapping it measures
+ * yours against, and its tags): by build, a row per chip (a Speed build its sets run, or a boost at one), at its
+ * Speed; else a row per Pokémon (its most common build's chip) and per boost (at its most common build), placed by the
+ * view (`placeOf`). Each row has its Pokémon's sets' Speeds (with its boost), or, with none in the snapshot, its
+ * benchmarks. Yours is a row of its own, first at its Speed; the rest from those moving first, then by usage.
+ */
+const ladderRows = computed(() => {
+  const chips = new Map<string, Entry>()
+  if (!bySets.value) return { rows: [] as OddsRow[], chips }
+  const cache = new Map<string, Omit<RowBase, 'key' | 'extra' | 'hit'>>()
+  function rowBase(key: string, e: Entry, extra: boolean): RowBase {
+    const k = groupKey(e)
+    let b = cache.get(k)
+    if (!b) {
+      const builds = setSpeeds(e.id, e.boost)
+      const bench = benchSpeeds(e.id, modsWith(e.boost))
+      b = {
+        id: e.id,
+        species: e.species,
+        forme: e.forme,
+        builds,
+        reach: { min: bench.min, max: bench.max },
+        bench,
+        noSets: !builds.length,
+        boost: !!e.boost && !e.live,
+        mine: false,
+      }
+      cache.set(k, b)
+    }
+    return { ...b, key, extra, hit: isHit(e) }
+  }
+  const vs = versus.value?.e
+  const vsGroup = vs ? groupKey(vs) : null
+  const shown = onlyFound.value ? entries.value.filter((e) => e.id === found.value) : entries.value
+  const placed: { row: OddsRow; rank: number; share: number }[] = []
+  if (perMon.value) {
+    const groups = new Map<string, Entry[]>()
+    for (const e of shown) {
+      const k = groupKey(e)
+      groups.set(k, [...(groups.get(k) ?? []), e])
+    }
+    for (const [k, list] of groups) {
+      // Its most common build (the chips come so), or with no sets, the benchmark it's placed at.
+      const e = list.find((x) => x.bench === bench.value) ?? list[0]!
+      const b = rowBase(
+        k,
+        e,
+        list.every((x) => x.extra),
+      )
+      chips.set(k, e)
+      const isVs = k === vsGroup
+      placed.push({
+        row: { ...b, speed: placeOf(b), versus: isVs, rival: !isVs && vs?.id === e.id },
+        rank: e.rank,
+        share: e.boost ? 0 : 1,
+      })
+    }
+  } else {
+    for (const e of shown) {
+      const k = chipKey(e)
+      const speed = chipSpeed(e)
+      chips.set(k, e)
+      const isVs = vsKey.value === k
+      placed.push({
+        row: { ...rowBase(k, e, !!e.extra), speed, own: speed, versus: isVs, rival: !isVs && vs?.id === e.id },
+        rank: e.rank,
+        share: e.share ?? 0,
+      })
+    }
+  }
+  // Yours, at its Speed with its own modifiers.
+  if (mine.value !== null && mySpeed.value !== null) {
+    const myBench = benchSpeeds(mine.value, myMods.value)
+    placed.push({
+      row: {
+        key: 'mine',
+        id: mine.value,
+        ...named(mine.value),
+        speed: mySpeed.value,
+        builds: [
+          { speed: mySpeed.value, share: 1, sets: [{ effect: myNature.value, points: myPoints.value, share: 1 }] },
+        ],
+        reach: { min: myBench.min, max: myBench.max },
+        bench: myBench,
+        own: mySpeed.value,
+        noSets: false,
+        extra: false,
+        hit: false,
+        mine: true,
+        versus: false,
+        rival: false,
+      },
+      rank: -Infinity,
+      share: 1,
+    })
+  }
+  // Yours first at its Speed, then by usage and by how many of its sets are at it, then by name: species, then forme,
+  // the species' own first.
+  const dir = trickRoom.value ? 1 : -1
+  placed.sort(
+    (a, b) =>
+      (a.row.speed - b.row.speed) * dir ||
+      a.rank - b.rank ||
+      b.share - a.share ||
+      a.row.species.localeCompare(b.row.species, locale.value) ||
+      (a.row.forme ?? '').localeCompare(b.row.forme ?? '', locale.value),
+  )
+  return { rows: placed.map((p) => p.row), chips }
+})
+/** The chip a row stands for. */
+const rowChip = (r: OddsRow) => ladderRows.value.chips.get(r.key)
+/**
+ * Every Pokémon shown, by base Speed (`SpeedRanges`), with no snapshot to have their sets from: those sharing one have
+ * the same Speeds whatever their build, so a row each, with its Speeds at every benchmark (with the modifiers) and its
+ * Pokémon by name; the rows from those moving first.
  */
 const rangeRows = computed<RangeRow[]>(() => {
-  if (view.value !== 'charts' || bySets.value) return []
+  if (bySets.value) return []
   const byBase = new Map<number, Entry[]>()
   for (const e of entries.value) {
     const base = POKEMON[e.id].stats[5]
@@ -915,69 +1040,54 @@ const rangeRows = computed<RangeRow[]>(() => {
         })),
     }))
 })
-/**
- * The ranges at the sets players run (`SpeedOdds`): a row per Pokémon shown, its sets' Speeds (merged by nature effect
- * and points, and by Speed once the modifiers apply, each keeping the builds reaching it) with their shares, or, with
- * none in the snapshot, its benchmarks; the rows from those moving first by their most common Speed, then by usage.
- */
-const oddsRows = computed<OddsRow[]>(() => {
-  if (view.value !== 'charts' || !bySets.value) return []
-  const ids = [...new Set(entries.value.map((e) => e.id))].filter((id) => !onlyFound.value || id === found.value)
-  const rows = ids.map((id) => {
-    const base = POKEMON[id].stats[5]
-    const m = data.value?.[id]
-    const bySpeed = new Map<number, OddsRow['builds'][number]>()
-    for (const b of speedBuilds(m?.speeds ?? [])) {
-      const speed = inBattle(speedStat(base, b.points, b.effect), mods.value)
-      const at = bySpeed.get(speed) ?? { speed, share: 0, sets: [] }
-      at.share += b.share
-      at.sets.push(b)
-      bySpeed.set(speed, at)
-    }
-    const builds = [...bySpeed.values()].sort((a, b) => b.share - a.share)
-    const bench = Object.fromEntries(BENCHMARKS.map((b) => [b, inBattle(benchmark(base, b), mods.value)])) as Record<
-      Benchmark,
-      number
-    >
-    const reach = { min: bench.min, max: bench.max }
-    const who = named(id)
-    return {
-      row: {
-        id,
-        species: who.species,
-        forme: who.forme,
-        builds,
-        reach,
-        bench,
-        noSets: !builds.length,
-        extra: beyondTop(id) || !builds.length,
-        hit: id === found.value,
-        mine: id === mine.value,
-      },
-      speed: builds[0]?.speed ?? reach.max,
-      rank: m?.rank ?? Infinity,
-    }
-  })
-  const dir = trickRoom.value ? 1 : -1
-  return rows.sort((a, b) => (a.speed - b.speed) * dir || a.rank - b.rank).map((r) => r.row)
-})
-/** A Pokémon tapped in a row: measured against, as a chip is (its most common one, in the ranges at the sets); yours
+/** A Pokémon tapped, or found, a row per Pokémon: measured against at its most common chip, as its row is; yours
  * isn't. */
 const topEntry = (id: PokemonId) =>
   entries.value.filter((x) => x.id === id && !x.boost).sort((a, b) => (b.share ?? 0) - (a.share ?? 0))[0]
+/** Yours, tapped: nothing, as on its row (its page still opens in a new tab). */
+function holdMine(ev: MouseEvent) {
+  if (ev.ctrlKey || ev.metaKey || ev.shiftKey) return
+  ev.preventDefault()
+  ev.stopPropagation()
+}
 function onRangeChip(ev: MouseEvent, id: PokemonId) {
   const e = topEntry(id)
-  // Yours, tapped: nothing, as its chip on the ladder (its page still opens in a new tab).
-  if (id === mine.value) {
-    if (!ev.ctrlKey && !ev.metaKey && !ev.shiftKey) {
-      ev.preventDefault()
-      ev.stopPropagation()
-    }
-  } else if (e) onChip(ev, e)
+  if (id === mine.value) holdMine(ev)
+  else if (e) onChip(ev, e)
 }
-/** How many Pokémon the ladder holds, each once however many Speeds it's at. */
-const monCount = computed(
-  () => new Set(tiers.value.flatMap((t) => t.list.filter((e) => !e.mine).map((e) => e.id))).size,
+/** A row's Pokémon tapped: measured against the chip it stands for. */
+function onRow(ev: MouseEvent, key: string) {
+  const e = ladderRows.value.chips.get(key)
+  if (key === 'mine') holdMine(ev)
+  else if (e) onChip(ev, e)
+}
+/** A mark tapped, with yours: measured against that Speed of its row, at the most common build reaching it (with its
+ * boost); on a row with no sets, at that benchmark. */
+function onMark(key: string, speed: number) {
+  const e = ladderRows.value.chips.get(key)
+  const row = ladderRows.value.rows.find((r) => r.key === key)
+  if (mine.value === null || !e || !row) return
+  if (row.noSets) {
+    const b = BENCHMARKS.find((x) => row.bench[x] === speed)
+    // A boost with no sets is only at the benchmark it's placed at.
+    if (!b || (e.boost && b !== e.bench)) return
+    return pickVersus({ ...e, speed: benchmark(POKEMON[e.id].stats[5], b), bench: b })
+  }
+  const set = row.builds.find((b) => b.speed === speed)?.sets[0]
+  if (!set) return
+  pickVersus({
+    ...e,
+    speed: speedStat(POKEMON[e.id].stats[5], set.points, set.effect),
+    points: set.points,
+    effect: set.effect,
+    ...(!e.boost && { share: set.share }),
+  })
+}
+/** How many Pokémon the ladder holds, each once however many rows it has. */
+const monCount = computed(() =>
+  bySets.value
+    ? new Set(ladderRows.value.rows.filter((r) => !r.mine).map((r) => r.id)).size
+    : rangeRows.value.reduce((n, r) => n + r.mons.length, 0),
 )
 const ladder = useTemplateRef<HTMLElement>('ladder')
 
@@ -1032,7 +1142,7 @@ const summary = computed(() => {
 // before it, for each nature effect.
 const versus = computed(() => {
   if (mine.value === null || vsKey.value === null) return null
-  const e = entries.value.find((x) => chipKey(x) === vsKey.value)
+  const e = chipOf(vsKey.value)
   if (!e) return null
   const target = chipSpeed(e)
   const base = POKEMON[mine.value].stats[5]
@@ -1056,10 +1166,37 @@ const versus = computed(() => {
       points: myPoints.value,
       result,
       other,
-      compareTo: compareLink({ id: e.id, build: chipBuild(e), sets: view.value === 'charts' }),
+      compareTo: compareLink({ id: e.id, build: chipBuild(e), sets: perMon.value }),
     },
   }
 })
+/**
+ * The chip a key stands for: one the ladder has, or, a mark tapped, a build its sets run that it leaves out (under the
+ * least share), of a Pokémon and boost it has rows of.
+ */
+function chipOf(key: string): Entry | undefined {
+  const on = entries.value.find((x) => chipKey(x) === key)
+  if (on) return on
+  const parts = key.split(':')
+  const id = parts[0] as PokemonId
+  const boosted = parts[1] === 'item' || parts[1] === 'ability'
+  const of = entries.value.find((x) => x.id === id && (boosted ? x.boost?.ref.id === parts[2] : !x.boost))
+  if (!of) return undefined
+  const bench = parts[boosted ? 3 : 1]
+  if (!boosted && parts.length === 2 && (BENCHMARKS as readonly string[]).includes(bench!)) {
+    const b = bench as Benchmark
+    return { ...of, speed: benchmark(POKEMON[id].stats[5], b), bench: b, points: undefined, effect: undefined }
+  }
+  const [pts, nat] = parts.slice(boosted ? 3 : 1)
+  if (!isEffect(nat) || !/^\d+$/.test(pts ?? '') || of.bench) return undefined
+  return {
+    ...of,
+    speed: speedStat(POKEMON[id].stats[5], Number(pts), nat),
+    points: Number(pts),
+    effect: nat,
+    ...(!boosted && { share: buildsOf(id).find((b) => b.effect === nat && String(b.points) === pts)?.share }),
+  }
+}
 // The comparison from yours' card: yours alone, to add opponents to there; none until there's yours. Against the chip
 // tapped, the comparison's card has the way there instead. The one found, none of its chips tapped, is its opponent:
 // at its sets, no Speed of them picked.
@@ -1071,27 +1208,27 @@ const compareTarget = computed(() => {
   return compareLink({ id, build: e ? chipBuild(e) : othersBuild(id, buildsOf(id)[0] ?? FASTEST), sets: true })
 })
 // Its title, the Pokémon's name (with its icon) a link to its page.
-// Picking one finds it too, the find showing as its "Only" switch says; in the charts, letting it go lets the find go
-// too, the two being one there.
+// Picking one finds it too, the find showing as its "Only" switch says; a row per Pokémon, letting it go lets the find
+// go too, the two being one there.
 function pickVersus(e: Entry) {
   const vs = vsKey.value === chipKey(e) ? undefined : chipKey(e)
-  if (!vs && view.value === 'charts') return clearVersus()
+  if (!vs && perMon.value) return clearVersus()
   void router.replace({ query: { ...query.value, vs, ...(vs && { find: e.id }) } })
 }
-// In the charts, a Pokémon found with none measured against (found before yours was set, or on the ladder) is measured
-// against, as finding it there does.
-watch([view, mine, found, vsKey, entries], () => {
-  if (view.value !== 'charts' || mine.value === null || found.value === null || found.value === mine.value) return
+// A row per Pokémon, one found with none measured against (found before yours was set, or a row per build) is
+// measured against, as finding it there does.
+watch([perMon, mine, found, vsKey, entries], () => {
+  if (!perMon.value || mine.value === null || found.value === null || found.value === mine.value) return
   if (vsKey.value !== null) return
   const e = topEntry(found.value)
   if (e) set('vs', chipKey(e))
 })
 function clearVersus() {
-  void router.replace({ query: { ...query.value, vs: undefined, ...(view.value === 'charts' && { find: undefined }) } })
+  void router.replace({ query: { ...query.value, vs: undefined, ...(perMon.value && { find: undefined }) } })
 }
-// The comparison's Speed finds the chip it's against: brought to the middle of the screen, flashing once.
+// The comparison's Speed finds the row it's against: brought to the middle of the screen, flashing once.
 function locateVersus() {
-  const el = ladder.value?.querySelector<HTMLElement>('.chip.versus')
+  const el = ladder.value?.querySelector<HTMLElement>('.row.versus')
   if (!el) return
   center(el)
   el.classList.remove('flash')
@@ -1168,6 +1305,19 @@ async function toOpponents() {
 const benchLabel = (b: Benchmark) => t(`stat.bench.${b}`)
 /** The choice of who's shown, by name; and who's shown, as the summary says it. */
 const showLabel = (s: Show) => (s === 'all' ? t('speed.all') : t('speed.meta', { n: s === 'top50' ? 50 : 100 }))
+/** The views to pick, each with what it is in a line: the fastest possible the slowest under Trick Room, which turns
+ * the ladder over. */
+const viewOptions = computed(() => {
+  const max = trickRoom.value ? 'min' : 'max'
+  return VIEWS.map((v) => ({
+    value: v,
+    label: t(`speed.view.${v === 'max' ? max : v}`),
+    desc: t(`speed.viewTip.${v === 'max' ? max : v}`, {
+      pct: percent(v === 'ladder' ? MIN_SHARE : MARK_SHARE),
+      bench: benchLabel(bench.value),
+    }),
+  }))
+})
 const sliceLabel = computed(() =>
   show.value === 'all' ? t('speed.slice.all') : t('speed.slice.top', { n: topN.value }),
 )
@@ -1270,7 +1420,7 @@ async function copy(text: string): Promise<boolean> {
 // button, below, goes to it.
 let scrolled = false
 watch(
-  () => [ladder.value, tiers.value.length] as const,
+  () => [ladder.value, bySets.value ? ladderRows.value.rows.length : rangeRows.value.length] as const,
   async ([el, n]) => {
     if (scrolled || !el || !n) return
     scrolled = true
@@ -1303,7 +1453,7 @@ function checkMatch() {
     name: who ? [who.species, who.forme].filter(Boolean).join(' ') : '',
   }
 }
-watch([tiers, found, ladder], () => void nextTick(checkMatch), { flush: 'post' })
+watch([ladderRows, rangeRows, found, ladder], () => void nextTick(checkMatch), { flush: 'post' })
 window.addEventListener('scroll', checkMatch, { passive: true })
 window.addEventListener('resize', checkMatch)
 onBeforeUnmount(() => {
@@ -1508,13 +1658,13 @@ const { entered } = usePageEntered()
           <div v-if="helpOpen" id="speed-help" class="help-body panel sunken">
             <div class="help-intro small">
               <dl class="help-options">
-                <dt>{{ t('speed.viewLabel') }}</dt>
-                <dd class="muted">{{ t('speed.viewDesc') }}</dd>
                 <template v-if="metaAvailable">
                   <dt>{{ t('speed.show') }}</dt>
                   <dd class="muted">{{ t('speed.showDesc') }}</dd>
+                  <dt>{{ t('speed.viewLabel') }}</dt>
+                  <dd class="muted">{{ t('speed.viewDesc') }}</dd>
                 </template>
-                <template v-if="view === 'ladder' && bySets && boostsAvailable">
+                <template v-if="bySets && boostsAvailable">
                   <dt>{{ t('speed.boosts') }}</dt>
                   <dd class="muted">{{ t('speed.boostsDesc') }}</dd>
                 </template>
@@ -1527,7 +1677,7 @@ const { entered } = usePageEntered()
               </dl>
             </div>
             <p class="formula muted small">{{ t('speed.formula') }}</p>
-            <dl v-if="view === 'ladder' && bySets && snapshot" class="legend small">
+            <dl v-if="bySets && snapshot" class="legend small">
               <dt>
                 <span class="chip sample"
                   ><span class="tag"><EffectTag effect="up" /></span
@@ -1562,30 +1712,29 @@ const { entered } = usePageEntered()
             </dl>
           </div>
         </section>
-        <!-- How they're drawn: folder tabs standing on its panel's top edge, the one shown joined to the toolbar under
-             it. -->
-        <FolderTabs
-          :model-value="view"
-          :class="{ 'on-choices': choicesShown }"
-          :label="t('speed.viewLabel')"
-          :options="VIEWS.map((v) => ({ value: v, label: t(`speed.view.${v}`) }))"
-          @update:model-value="(v: string) => choose('view', v)"
-        />
         <div ref="listPanel" class="panel banded soft list">
-          <!-- What the list is, a band of its own between the tabs and the toolbar: who's shown (with a snapshot to
-               have them from). On phones, its label read out but not shown (the choice says what it is). -->
+          <!-- What the list is, a band of its own over the toolbar: who's shown and what places them (with a snapshot
+               to have them from). On phones, their labels read out but not shown (the choices say what they are). -->
           <div v-if="choicesShown" class="band choices-band">
-            <label class="choice">
-              <span class="muted choice-label">{{ t('speed.show') }}</span>
-              <select
-                class="search choice-pick"
-                :aria-label="t('speed.show')"
-                :value="show"
-                @change="choose('show', ($event.target as HTMLSelectElement).value)"
-              >
-                <option v-for="s in SHOWS" :key="s" :value="s">{{ showLabel(s) }}</option>
-              </select>
-            </label>
+            <!-- Each in a dialog: who's shown, a plain list; the view, each with what it is in a line. -->
+            <div class="choice">
+              <span class="muted choice-label" aria-hidden="true">{{ t('speed.show') }}</span>
+              <ChoiceDialog
+                :model-value="show"
+                :label="t('speed.show')"
+                :options="SHOWS.map((s) => ({ value: s, label: showLabel(s) }))"
+                @update:model-value="(v: string) => choose('show', v)"
+              />
+            </div>
+            <div class="choice">
+              <span class="muted choice-label" aria-hidden="true">{{ t('speed.viewLabel') }}</span>
+              <ChoiceDialog
+                :model-value="view"
+                :label="t('speed.viewLabel')"
+                :options="viewOptions"
+                @update:model-value="(v: string) => choose('view', v)"
+              />
+            </div>
           </div>
           <!-- The list's toolbar, a band under what the list is: its options on a line (what each does in a tooltip,
                the boosts', or in how to read the page; the modifiers for everyone opening under them), then finding a
@@ -1593,7 +1742,7 @@ const { entered } = usePageEntered()
           <div class="band find find-row" :class="{ flash: flashFind }" @animationend="flashFind = false">
             <div class="options-line">
               <div class="options">
-                <template v-if="view === 'ladder' && bySets && boostsAvailable">
+                <template v-if="bySets && boostsAvailable">
                   <button
                     v-tip="canHover && t('speed.boostsDesc')"
                     type="button"
@@ -1871,7 +2020,7 @@ const { entered } = usePageEntered()
                 </button>
               </div>
               <button
-                v-if="view === 'ladder' && bySets && boostsAvailable"
+                v-if="bySets && boostsAvailable"
                 type="button"
                 class="btn switch"
                 :class="{ on: showBoosts }"
@@ -1899,24 +2048,74 @@ const { entered } = usePageEntered()
           <div v-if="!entered || (needsData && !data)" class="ladder" aria-hidden="true">
             <div v-for="i in 12" :key="i" class="tier skeleton"><span class="bone"></span></div>
           </div>
-          <!-- The charts: at the sets, a row per Pokémon with its sets' Speeds; with no snapshot, at the benchmarks, a
-               row per base Speed. -->
-          <div
-            v-else-if="view === 'charts'"
-            ref="ladder"
-            class="ranges-wrap"
-            :class="{ 'meta-stale': loading }"
-            :aria-busy="loading"
-          >
+          <!-- The ladder: at the sets, a row per build or per Pokémon with its sets' Speeds, by the view; with no
+               snapshot, at the benchmarks, a row per base Speed. With yours, a tap on a row's Pokémon or on a mark
+               measures yours against it (caught before the link follows; the link still opens in a new tab). -->
+          <div v-else ref="ladder" class="ranges-wrap" :class="{ 'meta-stale': loading }" :aria-busy="loading">
             <SpeedOdds
               v-if="bySets"
-              :rows="oddsRows"
+              :rows="ladderRows.rows"
               :mine="mySpeed"
               :trick-room="trickRoom"
               :finding="finding && !onlyFound"
-              :versus="versus?.e.id ?? null"
-              @chip="onRangeChip"
-            />
+              :versus-speed="versus?.target ?? null"
+              :picked-speed="at"
+              :copied
+              :row-href="rowHref"
+              :axis-reach="view === 'max'"
+              @chip="onRow"
+              @mark="onMark"
+              @share="share"
+            >
+              <template #tags="{ row }">
+                <span v-if="row.mine" class="tags">
+                  <span class="tag">{{ t('speed.yoursTag') }}</span>
+                  <span class="tag"><EffectTag :effect="myNature" /></span>
+                  <span class="tag">{{ t('speed.points', { n: myPoints }) }}</span>
+                </span>
+                <template v-else-if="rowChip(row)">
+                  <span v-if="rowChip(row)!.boost" v-tip="canHover && tip(rowChip(row)!)" class="tags">
+                    <span class="tag boost-label"
+                      ><ItemIcon
+                        v-if="rowChip(row)!.boost!.ref.kind === 'item'"
+                        :id="rowChip(row)!.boost!.ref.id as ItemId"
+                        :scale="0.67"
+                      />{{ boostLabel(rowChip(row)!.boost!) }}</span
+                    >
+                    <span v-if="whenTag(rowChip(row)!.boost!)" class="tag">{{ whenTag(rowChip(row)!.boost!) }}</span>
+                    <span v-if="rowChip(row)!.share !== undefined && !(perMon && rowChip(row)!.live)" class="tag">{{
+                      percent(rowChip(row)!.share!)
+                    }}</span>
+                    <!-- A row per build: the build it's placed at, which the data doesn't tie to the boost (but for the
+                         field's own, as they play), said as such. -->
+                    <template v-if="!perMon">
+                      <template v-if="rowChip(row)!.live">
+                        <span class="tag"><EffectTag :effect="rowChip(row)!.effect!" /></span>
+                        <span class="tag">{{ t('speed.points', { n: rowChip(row)!.points! }) }}</span>
+                      </template>
+                      <span v-else-if="rowChip(row)!.bench" class="tag boost-at">{{
+                        t('speed.boostAtBench', { bench: benchLabel(rowChip(row)!.bench!) })
+                      }}</span>
+                      <span v-else class="tag boost-at"
+                        >{{ boostAt[0] }}<EffectTag :effect="rowChip(row)!.effect!" />{{
+                          boostAt[1].replace('{points}', String(rowChip(row)!.points))
+                        }}</span
+                      >
+                    </template>
+                  </span>
+                  <template v-else-if="!perMon">
+                    <span v-if="rowChip(row)!.bench && rowChip(row)!.extra" class="tags">
+                      <span class="tag">{{ benchLabel(rowChip(row)!.bench!) }}</span>
+                    </span>
+                    <span v-else-if="!rowChip(row)!.bench" v-tip="canHover && tip(rowChip(row)!)" class="tags">
+                      <span class="tag"><EffectTag :effect="rowChip(row)!.effect!" /></span>
+                      <span class="tag">{{ t('speed.points', { n: rowChip(row)!.points! }) }}</span>
+                      <span class="tag">{{ percent(rowChip(row)!.share!) }}</span>
+                    </span>
+                  </template>
+                </template>
+              </template>
+            </SpeedOdds>
             <SpeedRanges
               v-else
               :rows="rangeRows"
@@ -1927,92 +2126,6 @@ const { entered } = usePageEntered()
               @chip="onRangeChip"
             />
           </div>
-          <ol
-            v-else
-            ref="ladder"
-            class="ladder"
-            :class="{ finding: finding && !onlyFound, 'meta-stale': loading }"
-            :aria-busy="loading"
-          >
-            <li
-              v-for="tier in tiers"
-              :key="tier.speed"
-              class="tier"
-              :class="{ hit: tier.hit, at: tier.speed === at, 'has-mine': tier.list.some((e) => e.mine) }"
-              :data-speed="tier.speed"
-            >
-              <a
-                v-tip="canHover && t('speed.rowLink')"
-                :href="rowHref(tier.speed)"
-                class="speed num"
-                :aria-current="tier.speed === at ? 'true' : undefined"
-                @click.prevent="share(tier.speed)"
-                >{{ tier.speed
-                }}<span v-if="copied === tier.speed" class="copied" role="status">{{ t('speed.copied') }}</span></a
-              >
-              <ul class="mons">
-                <!-- With yours set, a tap on a chip measures yours against it (caught before the link follows); the link
-                 still opens in a new tab. -->
-                <li v-for="e in tier.list" :key="chipKey(e)" @click.capture="onChip($event, e)">
-                  <AppLink
-                    v-tip="canHover && !e.mine && tip(e)"
-                    :to="{ name: 'pokemon', params: { id: e.id } }"
-                    class="chip"
-                    :class="{
-                      hit: isHit(e) && !onlyFound,
-                      boost: e.boost && !e.live,
-                      extra: e.extra,
-                      yours: e.mine,
-                      versus: vsKey === chipKey(e),
-                      rival: !!versus && e.id === versus.e.id && vsKey !== chipKey(e),
-                    }"
-                  >
-                    <span class="who">
-                      <PokemonIcon :id="e.id" />
-                      <span>{{ e.species }}</span>
-                      <span v-if="e.forme" class="forme">{{ e.forme }}</span>
-                    </span>
-                    <span v-if="e.mine" class="tags">
-                      <span class="tag">{{ t('speed.yoursTag') }}</span>
-                      <span class="tag"><EffectTag :effect="myNature" /></span>
-                      <span class="tag">{{ t('speed.points', { n: myPoints }) }}</span>
-                    </span>
-                    <span v-else-if="e.boost" class="tags">
-                      <span class="tag boost-label"
-                        ><ItemIcon v-if="e.boost.ref.kind === 'item'" :id="e.boost.ref.id" :scale="0.67" />{{
-                          boostLabel(e.boost)
-                        }}</span
-                      >
-                      <span v-if="whenTag(e.boost)" class="tag">{{ whenTag(e.boost) }}</span>
-                      <span v-if="e.share !== undefined" class="tag">{{ percent(e.share) }}</span>
-                      <!-- The build it's placed at, its most common (a benchmark, with no sets in the snapshot), which the
-                         data doesn't tie to the boost: said as such. -->
-                      <template v-if="e.live">
-                        <span class="tag"><EffectTag :effect="e.effect!" /></span>
-                        <span class="tag">{{ t('speed.points', { n: e.points! }) }}</span>
-                      </template>
-                      <span v-else-if="e.bench" class="tag boost-at">{{
-                        t('speed.boostAtBench', { bench: benchLabel(e.bench) })
-                      }}</span>
-                      <span v-else class="tag boost-at"
-                        >{{ boostAt[0] }}<EffectTag :effect="e.effect!" />{{
-                          boostAt[1].replace('{points}', String(e.points))
-                        }}</span
-                      >
-                    </span>
-                    <span v-else-if="e.bench && e.extra" class="tags">
-                      <span class="tag">{{ benchLabel(e.bench) }}</span>
-                    </span>
-                    <span v-else-if="!e.bench" class="tags">
-                      <span class="tag"><EffectTag :effect="e.effect!" /></span>
-                      <span class="tag">{{ t('speed.points', { n: e.points! }) }}</span>
-                      <span class="tag">{{ percent(e.share!) }}</span>
-                    </span>
-                  </AppLink>
-                </li>
-              </ul>
-            </li>
-          </ol>
 
           <!-- Outside the page so the page transition's transform can't move it. -->
           <Teleport to="body">
@@ -2051,7 +2164,7 @@ const { entered } = usePageEntered()
             {{ t('speed.filteredNone') }}
           </p>
           <p v-if="showMegas" class="muted small note">{{ t('speed.megaNote') }}</p>
-          <p v-if="bySets && view === 'ladder' && snapshot" class="muted small note">
+          <p v-if="bySets && snapshot" class="muted small note">
             {{ t('speed.leftOutNote', { pct: percent(MIN_SHARE) }) }}
           </p>
           <p v-if="needsData && snapshot" class="muted small note">
@@ -2106,7 +2219,7 @@ const { entered } = usePageEntered()
                the ladder. -->
               <button type="button" class="btn primary big-go" @click="toMine">
                 <span class="big-go-speed">{{ mySpeed }}</span>
-                <span>{{ t(view === 'charts' ? 'speed.showYoursRow' : 'speed.showYours') }}</span>
+                <span>{{ t('speed.showYours') }}</span>
               </button>
               <!-- Narrower, the ladder is under this card, its opponents band out of view: a way to it, said as it's
                picked. -->
@@ -2435,23 +2548,21 @@ const { entered } = usePageEntered()
   gap: 6px 8px;
   min-width: 0;
 }
-/* Who's shown: its label, then its choice, as wide as its longest. */
+/* Who's shown and the view: each its label, then its choice. */
 .choice {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-}
-.choice-pick {
-  width: auto;
-  margin: 0;
 }
 .options-line .btn {
   min-height: 0;
   padding: 3px 10px;
   font-size: 0.9em;
 }
+/* Its icon centered: no gap before the zero-width space that gives it a line's height. */
 .options-line > .reset-options {
   flex: none;
+  gap: 0;
   padding-inline: 8px;
 }
 /* The modifiers' disclosure while some are on, folded or not: marked as the switches on are. */
@@ -2523,15 +2634,10 @@ const { entered } = usePageEntered()
 .list {
   --speed-col: 2.2em;
 }
-/* The toolbar's color (the find's band and the tab shown): the panel's own, darker, rather than the accent's tint. */
+/* The toolbar's color (the find's band): the panel's own, darker, rather than the accent's tint. */
 .main-col {
   --toolbar: color-mix(in srgb, var(--ink) 25%, var(--panel));
   --choices: var(--panel-alt);
-  --tab-bg: var(--toolbar);
-}
-/* The tab shown joins the band under it: the choices', when there are any. */
-.on-choices {
-  --tab-bg: var(--choices);
 }
 /* What the list is: a band of its own over the toolbar, lighter than it, a rule between them; its choices on a line,
    wrapping where they don't fit. */
@@ -2786,10 +2892,7 @@ const { entered } = usePageEntered()
   flex: 1 1 9em;
   min-width: 9em;
 }
-/* The band's line stands in for the first Speed's. */
-.tier:first-child {
-  border-top: none;
-}
+/* The skeleton's rows, while the ladder comes in. */
 .tier {
   display: grid;
   grid-template-columns: var(--speed-col) 1fr;
@@ -2797,17 +2900,6 @@ const { entered } = usePageEntered()
   gap: 8px;
   padding: 4px var(--panel-bleed);
   border-top: 1px solid var(--border);
-}
-.speed {
-  position: relative;
-  padding-top: 4px;
-  font-weight: bold;
-  text-align: right;
-  color: inherit;
-  text-decoration: none;
-}
-.speed:hover {
-  text-decoration: underline;
 }
 /* The bar pinned over the ladder: sticks to the top with no height, the bar itself drawn over the rows. */
 .pin {
@@ -3125,52 +3217,7 @@ const { entered } = usePageEntered()
   border: none;
   cursor: pointer;
 }
-/* Yours on the ladder: solid and strong. */
-.chip.yours {
-  border: 2px solid var(--text);
-  font-weight: bold;
-}
-/* The chip found from the comparison: a ring in the opponents' red pulsing twice, softly. */
-.chip.flash {
-  animation: chip-flash 0.6s ease-out 2;
-}
-@keyframes chip-flash {
-  40% {
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--opponent) 45%, transparent);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .chip.flash {
-    animation: none;
-  }
-}
-/* The row a link picked. */
-.tier.at {
-  background: var(--sel);
-  box-shadow: inset 3px 0 var(--accent);
-}
-.copied {
-  position: absolute;
-  left: 0;
-  top: 100%;
-  z-index: 1;
-  padding: 1px 6px;
-  font-size: 0.75em;
-  font-weight: normal;
-  white-space: nowrap;
-  color: var(--text);
-  background: var(--panel);
-  border: 1px solid var(--border-strong);
-}
-.mons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-/* A chip: who (icon, name, forme), then its tags, which go under it when the two don't fit on a line. */
+/* A chip, in the legend: its tags, as a row's are. */
 .chip {
   display: inline-flex;
   flex-wrap: wrap;
@@ -3182,17 +3229,12 @@ const { entered } = usePageEntered()
   border: 1px solid var(--border);
   border-radius: 3px;
 }
-.who,
+/* A row's tags, under its name, and the legend's. */
 .tags {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 4px;
-}
-.who {
-  white-space: nowrap;
-}
-.tags {
-  flex-wrap: wrap;
 }
 /* Each centered on the line, rather than on the words' baseline: the nature's effect, an arrow and "Spe", would sit
    its arrow on the baseline and lift its words above the other tags'. */
@@ -3265,18 +3307,19 @@ const { entered } = usePageEntered()
   .help-body .legend dd {
     margin-bottom: 8px;
   }
-  /* The tags under the name, with room beside the icon. */
-  .chip {
-    padding-bottom: 2px;
-  }
-  .tags {
-    padding-left: 4px;
+}
+/* Quieter than the name: in a row, its line under the name is so already. On phones, a long one (an item's name)
+   wraps rather than running under how yours does beside it. */
+.tag {
+  color: var(--muted);
+}
+@media (max-width: 720px) {
+  .tags .tag {
+    white-space: normal;
   }
 }
-.forme,
-.tag {
+.chip .tag {
   font-size: 0.85em;
-  color: var(--muted);
 }
 .tag + .tag::before {
   content: '·';
@@ -3296,44 +3339,17 @@ const { entered } = usePageEntered()
   gap: 0.3em;
   font-style: italic;
 }
+/* In a row, on a line of its own under the boost, with no dot before it. */
+.tags .boost-at {
+  flex-basis: 100%;
+}
+.tags .boost-at::before {
+  content: none;
+}
 /* An item or ability its sets run that changes Speed, told apart from its builds. */
 .chip.boost {
   border-style: dashed;
   border-color: var(--muted);
-}
-/* A Pokémon beyond the top, found or kept, or what one's sets run under the least share, shown as it's looked for: on
-   the panel's own color, a dotted line around it. */
-.chip.extra {
-  background: var(--panel);
-  border-style: dotted;
-  border-color: var(--border-strong);
-}
-/* Finding a Pokémon: its chips marked, the Speeds without it faded, but for yours: at its Speed, only the others. */
-.chip.hit {
-  background: var(--sel);
-  border-color: var(--border-strong);
-}
-.chip.boost.hit {
-  border-color: var(--muted);
-}
-/* The opponent yours is measured against: its chip in the opponents' red, all its text the band's; the same Pokémon's
-   other chips in a faint wash of it. */
-.chip.versus {
-  color: var(--opponent-text);
-  background: var(--opponent);
-  border-color: var(--ink);
-}
-.chip.versus :is(.forme, .tag) {
-  color: inherit;
-  opacity: 0.85;
-}
-.chip.rival {
-  background: color-mix(in srgb, var(--opponent) 14%, var(--panel-alt));
-  border-color: color-mix(in srgb, var(--opponent) 55%, var(--panel-alt));
-}
-.finding .tier:not(.hit, .has-mine),
-.finding .tier.has-mine:not(.hit) li:not(:has(.yours)) {
-  opacity: 0.4;
 }
 .skeleton {
   height: 2.2em;

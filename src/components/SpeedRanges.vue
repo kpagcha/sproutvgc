@@ -265,10 +265,13 @@ const name = (m: RangeRow['mons'][number]) => [m.species, m.forme].filter(Boolea
 }
 .head {
   padding: 2px 0 4px;
-  font-size: 0.8em;
   font-weight: bold;
   color: var(--muted);
   border-bottom: 1px solid var(--border);
+}
+/* Smaller, its cells rather than the row: the columns' widths are in ems, and must be the rows' own. */
+.head > * {
+  font-size: 0.8em;
 }
 .head .track {
   display: flex;
