@@ -521,3 +521,75 @@
 :root:root .category-badge[data-category='status'] {
   --tc: #ada594;
 }
+
+/* ---------- Tours ---------- */
+/* A page's tour (`useTour`, driver.js): its popover a card like the panels, its buttons the app's. */
+:root:root .driver-popover.tour {
+  max-width: min(340px, calc(100vw - 32px));
+  padding: 14px 16px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--panel);
+  border: 2px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+:root:root .driver-popover.tour .driver-popover-title {
+  padding-right: 24px;
+  font-family: var(--font-display, inherit);
+  font-size: 1.0625rem;
+}
+:root:root .driver-popover.tour .driver-popover-description {
+  font-size: 0.9375rem;
+}
+:root:root .driver-popover.tour .driver-popover-close-btn {
+  color: var(--muted);
+}
+:root:root .driver-popover.tour .driver-popover-close-btn:is(:hover, :focus-visible) {
+  color: var(--text);
+}
+:root:root .driver-popover.tour .driver-popover-progress-text {
+  color: var(--muted);
+}
+:root:root .driver-popover.tour .driver-popover-footer-btn {
+  padding: 2px 10px;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: bold;
+  color: var(--text);
+  text-shadow: none;
+  background: var(--panel-alt);
+  border: 2px solid var(--ink);
+  box-shadow: var(--hard-sm);
+}
+:root:root .driver-popover.tour .driver-popover-next-btn {
+  color: var(--accent-text);
+  background: var(--accent);
+}
+:root:root .driver-popover.tour .driver-popover-footer-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: var(--hard);
+}
+/* The arrow in the card's color, its outline left to the card's. */
+:root:root .driver-popover.tour .driver-popover-arrow {
+  border-color: var(--ink);
+}
+:root:root .driver-popover.tour .driver-popover-arrow-side-left {
+  border-top-color: transparent;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+}
+:root:root .driver-popover.tour .driver-popover-arrow-side-right {
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+}
+:root:root .driver-popover.tour .driver-popover-arrow-side-top {
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+}
+:root:root .driver-popover.tour .driver-popover-arrow-side-bottom {
+  border-top-color: transparent;
+  border-right-color: transparent;
+  border-left-color: transparent;
+}

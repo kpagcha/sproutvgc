@@ -74,6 +74,7 @@ import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useMeta } from '@/composables/useMeta'
 import { useOpenState } from '@/composables/useOpenState'
 import { usePageEntered } from '@/composables/usePageEntered'
+import { useTour } from '@/composables/useTour'
 import AppLink from '@/components/AppLink'
 import BuildSummary from '@/components/BuildSummary.vue'
 import ChoiceDialog from '@/components/ChoiceDialog.vue'
@@ -1587,6 +1588,28 @@ const route = useRoute()
 watch(query, (q) => route.name === 'speedTiers' && (lastTiersQuery.value = withoutMeta(q)), { immediate: true })
 
 const { entered } = usePageEntered()
+
+// The first visit's tour of the page: what it shows, its choices and options, finding one, a row of the ladder, yours,
+// and where to read more (and take it again).
+const { start: startTour } = useTour(
+  'speedTiers',
+  () => [
+    { title: 'tour.tiers.introTitle', text: 'tour.tiers.intro' },
+    { el: '.choices-band', title: 'tour.tiers.choicesTitle', text: 'tour.tiers.choices', side: 'bottom' },
+    { el: '.options-line', title: 'tour.tiers.optionsTitle', text: 'tour.tiers.options', side: 'bottom' },
+    { el: '.find-row > .picker', title: 'tour.tiers.findTitle', text: 'tour.tiers.find', side: 'bottom' },
+    { el: '.filters-toggle', title: 'tour.tiers.filtersTitle', text: 'tour.tiers.filters', side: 'bottom' },
+    {
+      el: ['.ranges-wrap .row', '.ranges-wrap'],
+      title: 'tour.tiers.rowTitle',
+      text: bySets.value ? 'tour.tiers.row' : 'tour.tiers.rowRanges',
+      side: 'bottom',
+    },
+    { el: ['details.yours', '.bar-yours'], title: 'tour.tiers.yoursTitle', text: 'tour.tiers.yours', side: 'left' },
+    { el: '.head-help', title: 'tour.helpTitle', text: 'tour.help', side: 'bottom' },
+  ],
+  () => entered.value && (!needsData.value || !!data.value),
+)
 </script>
 
 <template>
@@ -1656,6 +1679,7 @@ const { entered } = usePageEntered()
           <!-- How to read the ladder: what its options do; samples of a chip, each with what its parts mean; then yours
                among them. -->
           <div v-if="helpOpen" id="speed-help" class="help-body panel sunken">
+            <button type="button" class="btn tour-start" @click="startTour">{{ t('tour.start') }}</button>
             <div class="help-intro small">
               <dl class="help-options">
                 <template v-if="metaAvailable">
@@ -3248,6 +3272,10 @@ const { entered } = usePageEntered()
 .help-body {
   margin: 12px 0 0;
   padding: 8px 10px;
+}
+/* Taking the page's tour again, first in the well. */
+.help-body > .tour-start {
+  margin-bottom: 8px;
 }
 .help-body > :is(.legend, p) {
   margin-top: 0;

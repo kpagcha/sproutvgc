@@ -718,6 +718,51 @@ export const messages = {
   'speed.stageUp': 'Raise the Speed stage',
   'speed.findShort': 'Find…',
   'speed.trShort': 'TR',
+  'tour.start': 'Take the tour',
+  'tour.next': 'Next',
+  'tour.prev': 'Back',
+  'tour.done': 'Done',
+  'tour.progress': '{current} of {total}',
+  'tour.helpTitle': 'How to read this',
+  'tour.help': 'Every option and part of the page, explained. You can take this tour again from there.',
+  'tour.tiers.introTitle': 'Speed tiers',
+  'tour.tiers.intro':
+    "Who moves first: the regulation's Pokémon in Speed order, at the Speeds players run. A quick look around; close it at any time.",
+  'tour.tiers.choicesTitle': 'Who and how',
+  'tour.tiers.choices':
+    "Who's shown (the most used, or every Pokémon) and the view: a row per build, a row per Pokémon, or each at the fastest it can be.",
+  'tour.tiers.optionsTitle': 'Options',
+  'tour.tiers.options':
+    'Speed items and abilities as rows of their own, Trick Room turning the order over, and modifiers for everyone shown: Tailwind, a Choice Scarf, paralysis, stat stages.',
+  'tour.tiers.findTitle': 'Find a Pokémon',
+  'tour.tiers.find':
+    'Finds one on the ladder and shows every build and boost it has, however rare. Press / to jump here.',
+  'tour.tiers.filtersTitle': 'Filters',
+  'tour.tiers.filters': 'Only the Pokémon of a type, or running an ability or item.',
+  'tour.tiers.rowTitle': 'A row',
+  'tour.tiers.row':
+    'Its Speed at the left (tap it to pick it, and copy it), a mark at each Speed its sets run, taller the more common, over the stretch it could reach.',
+  'tour.tiers.rowRanges': 'A row per base Speed: its Pokémon, and a bar from the slowest they can be to the fastest.',
+  'tour.tiers.yoursTitle': 'Your Pokémon',
+  'tour.tiers.yours':
+    'Pick yours to place it on the ladder with its own build and see how often it moves first. Then tap any row for the points it needs to move before it.',
+  'tour.compare.introTitle': 'Compare speeds',
+  'tour.compare.intro':
+    'Yours against opponents, or any Pokémon in the order they move. A quick look around; close it at any time.',
+  'tour.compare.viewsTitle': 'Two views',
+  'tour.compare.views': 'Yours against opponents, up to two a side, or a list of up to 20 Pokémon in speed order.',
+  'tour.compare.toolbarTitle': 'For every one',
+  'tour.compare.toolbar': 'Trick Room turns the order over; swap the teams, or clear them.',
+  'tour.compare.yoursTitle': 'Yours',
+  'tour.compare.yours':
+    'Pick yours and set its nature and points, or in a tap one of the builds players run, plus modifiers of its own.',
+  'tour.compare.opponentTitle': 'The opponent',
+  'tour.compare.opponent':
+    "Its Speed isn't known, so it's at every set players run: how often yours moves first, and the points it needs to move before them.",
+  'tour.compare.secondTitle': 'Two a side',
+  'tour.compare.second': 'Add a second to either team, and see how each fares against each, in the order they move.',
+  'tour.compare.orderTitle': 'The list',
+  'tour.compare.order': 'Add Pokémon, up to 20, each at a build of its own: they line up in the order they move.',
   'speed.help': 'How to read this',
   'speed.helpYours':
     'Placed on the ladder with its own build, with how often it moves first, by usage; the rest become its opponents.',

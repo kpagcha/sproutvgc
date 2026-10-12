@@ -727,6 +727,54 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.stageUp': 'Subir el nivel de Velocidad',
   'speed.findShort': 'Buscar…',
   'speed.trShort': 'TR',
+  'tour.start': 'Hacer el recorrido',
+  'tour.next': 'Siguiente',
+  'tour.prev': 'Atrás',
+  'tour.done': 'Hecho',
+  'tour.progress': '{current} de {total}',
+  'tour.helpTitle': 'Cómo leer esto',
+  'tour.help': 'Cada opción y parte de la página, explicada. Desde ahí puedes volver a hacer este recorrido.',
+  'tour.tiers.introTitle': 'Escalas de velocidad',
+  'tour.tiers.intro':
+    'Quién se mueve primero: los Pokémon de la regulación por orden de Velocidad, en las Velocidades que usan los jugadores. Un vistazo rápido; ciérralo cuando quieras.',
+  'tour.tiers.choicesTitle': 'Quiénes y cómo',
+  'tour.tiers.choices':
+    'Quiénes se muestran (los más usados, o todos los Pokémon) y la vista: una fila por reparto, una por Pokémon, o cada uno en lo más rápido que puede ser.',
+  'tour.tiers.optionsTitle': 'Opciones',
+  'tour.tiers.options':
+    'Los objetos y habilidades de Velocidad como filas propias, Espacio Raro invirtiendo el orden, y modificadores para todos los mostrados: Viento Afín, Pañuelo Elegido, parálisis, cambios de característica.',
+  'tour.tiers.findTitle': 'Buscar un Pokémon',
+  'tour.tiers.find':
+    'Lo encuentra en la escala y muestra todos sus repartos y mejoras, por raros que sean. Pulsa / para venir aquí.',
+  'tour.tiers.filtersTitle': 'Filtros',
+  'tour.tiers.filters': 'Solo los Pokémon de un tipo, o que llevan una habilidad u objeto.',
+  'tour.tiers.rowTitle': 'Una fila',
+  'tour.tiers.row':
+    'Su Velocidad a la izquierda (tócala para elegirla y copiarla), una marca en cada Velocidad de sus sets, más alta cuanto más común, sobre el tramo que podría alcanzar.',
+  'tour.tiers.rowRanges':
+    'Una fila por Velocidad base: sus Pokémon, y una barra de lo más lentos que pueden ser a lo más rápidos.',
+  'tour.tiers.yoursTitle': 'Tu Pokémon',
+  'tour.tiers.yours':
+    'Elige el tuyo para colocarlo en la escala con su propio reparto y ver cuántas veces se mueve primero. Luego toca cualquier fila para ver los puntos que necesita para adelantarla.',
+  'tour.compare.introTitle': 'Comparar velocidades',
+  'tour.compare.intro':
+    'El tuyo contra rivales, o cualquier Pokémon en el orden en que se mueven. Un vistazo rápido; ciérralo cuando quieras.',
+  'tour.compare.viewsTitle': 'Dos vistas',
+  'tour.compare.views':
+    'El tuyo contra rivales, hasta dos por bando, o una lista de hasta 20 Pokémon por orden de velocidad.',
+  'tour.compare.toolbarTitle': 'Para todos',
+  'tour.compare.toolbar': 'Espacio Raro invierte el orden; intercambia los equipos, o vacíalos.',
+  'tour.compare.yoursTitle': 'El tuyo',
+  'tour.compare.yours':
+    'Elige el tuyo y ajusta su naturaleza y puntos, o de un toque uno de los repartos que usan los jugadores, más modificadores propios.',
+  'tour.compare.opponentTitle': 'El rival',
+  'tour.compare.opponent':
+    'Su Velocidad no se conoce, así que está en cada set que usan los jugadores: cuántas veces se mueve primero el tuyo, y los puntos que necesita para adelantarlos.',
+  'tour.compare.secondTitle': 'Dos por bando',
+  'tour.compare.second':
+    'Añade un segundo a cualquier equipo y mira cómo le va a cada uno contra cada otro, en el orden en que se mueven.',
+  'tour.compare.orderTitle': 'La lista',
+  'tour.compare.order': 'Añade Pokémon, hasta 20, cada uno con su propio reparto: se ordenan según se mueven.',
   'speed.help': 'Cómo leer esto',
   'speed.helpYours':
     'Se coloca en la escala con su distribución, con qué frecuencia mueve antes, según el uso; el resto pasan a ser sus rivales.',

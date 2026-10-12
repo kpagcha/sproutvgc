@@ -26,6 +26,7 @@ import { TIERS_PICKS, lastCompareQuery, lastTiersQuery, withoutMeta } from '@/li
 import { confirmDialog } from '@/composables/useConfirm'
 import { useMeta } from '@/composables/useMeta'
 import { useOpenState } from '@/composables/useOpenState'
+import { useTour } from '@/composables/useTour'
 import AppLink from '@/components/AppLink'
 import BuildSummary from '@/components/BuildSummary.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
@@ -489,6 +490,19 @@ onUnmounted(() => (ladderOpen.value = false))
 // How to read the page, in a section closed unless opened (remembered), toggled from the heading's row.
 const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.compare.helpOpen', false)
 const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
+
+// The first visit's tour of the page: its two views, what applies to every one, yours and the opponent (or the list in
+// speed order), a second a side, and where to read more (and take it again).
+const { start: startTour } = useTour('compare', () => [
+  { title: 'tour.compare.introTitle', text: 'tour.compare.intro' },
+  { el: '.folder-tabs', title: 'tour.compare.viewsTitle', text: 'tour.compare.views', side: 'bottom' },
+  { el: '.toolbar', title: 'tour.compare.toolbarTitle', text: 'tour.compare.toolbar', side: 'bottom' },
+  { el: ['#compare-a', '.side-tabs'], title: 'tour.compare.yoursTitle', text: 'tour.compare.yours', side: 'bottom' },
+  { el: '#compare-b', title: 'tour.compare.opponentTitle', text: 'tour.compare.opponent', side: 'bottom' },
+  { el: ['.col-add', '.side-adds'], title: 'tour.compare.secondTitle', text: 'tour.compare.second', side: 'top' },
+  { el: '.adder', title: 'tour.compare.orderTitle', text: 'tour.compare.order', side: 'bottom' },
+  { el: '.head-help', title: 'tour.helpTitle', text: 'tour.help', side: 'bottom' },
+])
 // Everything back as the page comes with nothing set, as the speed tiers' Reset all: its whole URL cleared (the
 // Pokémon, their builds, the view, Trick Room).
 // The data shown (`?meta=`) isn't the page's to reset: it's the reader's choice on every page.
@@ -518,6 +532,7 @@ function resetAll() {
         <HelpToggle class="head-help" :open="helpOpen" controls="compare-help" fit icon-only @toggle="toggleHelp" />
       </div>
       <div v-if="helpOpen" id="compare-help" class="help-body panel sunken small">
+        <button type="button" class="btn tour-start" @click="startTour">{{ t('tour.start') }}</button>
         <p class="formula muted">{{ t('speed.formula') }}</p>
         <!-- What the view shown has: yours against opponents, or the speed order. -->
         <dl class="help-options">
@@ -953,6 +968,10 @@ function resetAll() {
 .help-body {
   margin: 12px 0 0;
   padding: 8px 10px;
+}
+/* Taking the page's tour again, first in the well. */
+.help-body > .tour-start {
+  margin-bottom: 8px;
 }
 .help-body > p {
   margin: 0 0 8px;
