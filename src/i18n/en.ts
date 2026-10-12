@@ -686,11 +686,16 @@ export const messages = {
   'speed.viewTip.ladder': 'A row per build run on at least {pct} of its sets, at its Speed.',
   'speed.viewTip.charts':
     'A row per Pokémon at its most common Speed, every build run on at least {pct} of its sets marked on it.',
-  'speed.viewTip.max': 'A row per Pokémon at {bench}; with Boosts, every Speed ability it can have.',
-  'speed.viewTip.min': 'A row per Pokémon at {bench}; with Boosts, every Speed ability it can have.',
+  'speed.viewTip.max':
+    'A row per Pokémon at {bench}, its four benchmarks ticked on its bar; with Boosts, every Speed ability it can have.',
+  'speed.viewTip.min':
+    'A row per Pokémon at {bench}, its four benchmarks ticked on its bar; with Boosts, every Speed ability it can have.',
   'speed.oddsHead': 'You first',
+  'speed.oddsInfo':
+    "The share of the opponent's sets your Pokémon moves first against, weighted by how many of its sets run each Speed (rare builds included), not counting ties.{boost} How much the opponent is used isn't counted here: your Pokémon's summary counts that.",
+  'speed.oddsInfoBoost': " On a boost's row, it's those same sets with the boost.",
   'speed.oddsNote':
-    "A row per Pokémon (per build, in By build) and per boost, placed by the Speed at its left, the rows at one Speed under one number: hover it, or pick it, to see what else is at it. A mark at each Speed its sets run, taller the more run it, over a fainter stretch from its slowest possible Speed to its fastest; a row of one build has its own mark solid. Your Pokémon is a row and a line; at the row's end, the share of its sets you move first against, and a mark tapped measures yours against it. A Pokémon with no sets in the data has hollow marks at its benchmarks instead, and whether you move first against all of its range, none of it or part of it.",
+    'Spe: the Speed the row is placed at. Hover or pick it to see what else is at that Speed.\nMarks: the Speeds its sets run, taller the more common.\nFaint bar: from its slowest possible Speed to its fastest.\nTicks (Fastest possible): its benchmarks, Min− to Max+.\nHollow marks: no sets in the data, its benchmarks instead.\nDashed name: an item or ability that changes its Speed, on a row of its own.\nWith your Pokémon: its Speed is the line; marks are blue where you move first and red where they do; tap a mark to compare against it.',
   'speed.oddsNoSets': '{name}: no sets in the data. At its benchmarks: {list}',
   'speed.oddsReach.always': 'Always',
   'speed.oddsReach.never': 'Never',

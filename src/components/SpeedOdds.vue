@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef } from 'vue'
 import tippy, { type Instance } from 'tippy.js'
-import { CircleHelp } from '@lucide/vue'
+import { CircleHelp, Info } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { percent } from '@/data/meta'
 import { t } from '@/i18n'
 import type { Benchmark, NatureEffect } from '@/lib/stats'
 import { MARK_SHARE } from '@/lib/speed'
-import { useOpenState } from '@/composables/useOpenState'
 import AppLink from '@/components/AppLink'
 import EffectTag from '@/components/EffectTag'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -64,9 +63,11 @@ const props = defineProps<{
   pickedSpeed: number | null
   copied: number | null
   rowHref: (speed: number) => string
-  /** Whether the axis takes in the boosts' rows (sorting by what they could reach), rather than leaving them past its
-   * ends. */
-  axisReach: boolean
+  /** Whether the view is at what they could reach: the axis takes in the boosts' rows, rather than leaving them past
+   * its ends, and every row has its benchmarks ticked on its bar. */
+  possible: boolean
+  /** Whether there are boosts' rows (boosts shown, or the field's own): what "You first" is of says what it is on them. */
+  boosts: boolean
 }>()
 const emit = defineEmits<{
   chip: [event: MouseEvent, key: string]
@@ -82,7 +83,7 @@ type RangeLike = Pick<OddsRow, 'builds'>
  * what they could reach), so a boost doubling a few doesn't squeeze the rest: their Speeds past its ends are said at
  * them rather than drawn. */
 const axis = computed(() => {
-  const plain = props.axisReach ? props.rows : props.rows.filter((r) => !r.boost)
+  const plain = props.possible ? props.rows : props.rows.filter((r) => !r.boost)
   const all = (plain.length ? plain : props.rows).flatMap((r) => [
     r.reach.min,
     r.reach.max,
@@ -144,6 +145,8 @@ const ALONG: readonly Benchmark[] = ['min', 'none', 'maxNeutral', 'max']
 const benchMarks = (r: OddsRow) =>
   ALONG.filter((b) => inside(r.bench[b])).map((b) => ({ bench: b, speed: r.bench[b], kind: verdict(r.bench[b]) }))
 const benchLabel = (b: Benchmark) => t(`stat.bench.${b}`)
+/** At what they could reach, a row with sets' benchmarks too: ticks across its baseline, under its marks. */
+const ticks = (r: OddsRow) => (props.possible && !r.noSets ? benchMarks(r) : [])
 /** With no sets: whether yours moves first against the whole of what it could reach, none of it, or part of it. */
 function reachVerdict(r: OddsRow): 'always' | 'never' | 'depends' | null {
   if (props.mine === null) return null
@@ -170,7 +173,8 @@ function odds(r: OddsRow) {
 const firsts = computed(() => props.rows.map((r, i) => i === 0 || props.rows[i - 1]!.speed !== r.speed))
 const name = (r: OddsRow) => [r.species, r.forme].filter(Boolean).join(' ')
 const canHover = window.matchMedia('(hover: hover)').matches
-const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.speedTiers.rangesHelp', false)
+/** What "You first" is of, in its icon's tooltip: on a boost's row too, when there are any. */
+const oddsInfo = computed(() => t('speed.oddsInfo', { boost: props.boosts ? t('speed.oddsInfoBoost') : '' }))
 
 // A Speed of the column, hovered (or focused), or picked: a line down the rows at it, the marks on it outlined, to see
 // what's at it beyond the rows placed there.
@@ -192,6 +196,19 @@ const active = ref<{ key: string; speed: number } | null>(null)
 const pointed = ref<OddsRow['builds'][number] | { speed: number; bench: Benchmark } | null>(null)
 const tipBody = useTemplateRef<HTMLElement>('tipBody')
 let tip: Instance | undefined
+// How to read the rows, in the "?"'s tooltip: a line per part of them, its name in bold before what it is (the text a
+// line each, "Marks: the Speeds…", split at its first colon). Hovered, or tapped (it takes the focus).
+const noteLines = computed(() =>
+  t('speed.oddsNote')
+    .split('\n')
+    .map((line) => {
+      const i = line.indexOf(': ')
+      return i < 0 ? { term: '', text: line } : { term: line.slice(0, i + 1), text: line.slice(i + 2) }
+    }),
+)
+const noteHelp = useTemplateRef<HTMLElement>('noteHelp')
+const noteBody = useTemplateRef<HTMLElement>('noteBody')
+let noteTip: Instance | undefined
 let pending: ReturnType<typeof setTimeout> | undefined
 let markEl: HTMLElement | undefined
 
@@ -204,13 +221,14 @@ function nearest(e: PointerEvent) {
   const x = (speed: number) => box.left + (pct(speed) / 100) * box.width
   let best = -1
   let gap = e.pointerType === 'mouse' ? REACH.mouse : REACH.touch
-  const shown = row.noSets ? benchMarks(row) : marks(row)
+  // Its marks, then its benchmarks' ticks, numbered as drawn (`data-i`).
+  const shown = row.noSets ? benchMarks(row) : [...marks(row), ...ticks(row)]
   shown.forEach((b, i) => {
     const d = Math.abs(x(b.speed) - e.clientX)
     if (d <= gap) [best, gap] = [i, d]
   })
   if (best < 0) return null
-  return { row, build: shown[best]!, el: track.querySelectorAll<HTMLElement>('.mark')[best]! }
+  return { row, build: shown[best]!, el: track.querySelector<HTMLElement>(`[data-i="${best}"]`)! }
 }
 function point(hit: NonNullable<ReturnType<typeof nearest>>) {
   active.value = { key: hit.row.key, speed: hit.build.speed }
@@ -261,12 +279,14 @@ onMounted(() => {
     content: tipBody.value!,
     getReferenceClientRect: () => markEl?.getBoundingClientRect() ?? list.value!.getBoundingClientRect(),
   })
+  noteTip = tippy(noteHelp.value!, { content: noteBody.value!, placement: 'bottom-start', maxWidth: 380 })
   document.addEventListener('pointerdown', onOutside)
   window.addEventListener('scroll', hide, { passive: true, capture: true })
 })
 onBeforeUnmount(() => {
   clearTimeout(pending)
   tip?.destroy()
+  noteTip?.destroy()
   document.removeEventListener('pointerdown', onOutside)
   window.removeEventListener('scroll', hide, { capture: true })
 })
@@ -274,23 +294,15 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="odds" :class="{ finding, mined: mine !== null }">
-    <!-- The heads: the Speed's column, how to read the rows (a "?", opening it under them), the axis's ends with yours
+    <!-- The heads: the Speed's column, how to read the rows (a "?", its tooltip), the axis's ends with yours
          on it, and, with yours, what the rows' ends say. -->
     <div class="head">
-      <span class="speed" aria-hidden="true">{{ t('stat.spe') }}</span>
-      <span class="who">
-        <button
-          v-tip="canHover && t('speed.help')"
-          type="button"
-          class="help"
-          :aria-expanded="helpOpen"
-          aria-controls="odds-help"
-          :aria-label="t('speed.help')"
-          @click="toggleHelp"
-        >
-          <CircleHelp :size="16" aria-hidden="true" />
-        </button>
-      </span>
+      <span class="speed"
+        ><span aria-hidden="true">{{ t('stat.spe') }}</span
+        ><span ref="noteHelp" class="help" tabindex="0" role="img" :aria-label="t('speed.help')">
+          <CircleHelp :size="14" aria-hidden="true" /></span
+      ></span>
+      <span class="who"></span>
       <span class="track" aria-hidden="true">
         <span class="end">{{ Math.round(axis.lo) }}</span>
         <span v-if="mine !== null" class="mine-label" :style="{ left: at(mine) }">{{
@@ -298,9 +310,12 @@ onBeforeUnmount(() => {
         }}</span>
         <span class="end">{{ Math.round(axis.lo + axis.span) }}</span>
       </span>
-      <span v-if="mine !== null" class="odds-cell">{{ t('speed.oddsHead') }}</span>
+      <span v-if="mine !== null" class="odds-cell odds-head"
+        >{{ t('speed.oddsHead')
+        }}<span v-tip="oddsInfo" class="help" tabindex="0" role="img" :aria-label="oddsInfo">
+          <Info :size="14" aria-hidden="true" /></span
+      ></span>
     </div>
-    <p v-if="helpOpen" id="odds-help" class="odds-help panel sunken muted small">{{ t('speed.oddsNote') }}</p>
     <ol
       ref="list"
       class="rows"
@@ -370,8 +385,9 @@ onBeforeUnmount(() => {
           <template v-if="!r.noSets">
             <span class="span" :style="span(r)" aria-hidden="true"></span>
             <span
-              v-for="b in marks(r)"
+              v-for="(b, i) in marks(r)"
               :key="b.speed"
+              :data-i="i"
               class="mark"
               :class="[
                 r.mine ? 'own-mine' : b.kind,
@@ -396,8 +412,9 @@ onBeforeUnmount(() => {
           </template>
           <template v-else>
             <span
-              v-for="b in benchMarks(r)"
+              v-for="(b, i) in benchMarks(r)"
               :key="b.bench"
+              :data-i="i"
               class="mark bench"
               :class="[
                 b.kind,
@@ -415,6 +432,15 @@ onBeforeUnmount(() => {
               t('speed.noSets')
             }}</span>
           </template>
+          <span
+            v-for="(b, j) in ticks(r)"
+            :key="b.bench"
+            :data-i="marks(r).length + j"
+            class="tick"
+            :class="{ active: active?.key === r.key && active.speed === b.speed }"
+            :style="{ left: at(b.speed) }"
+            aria-hidden="true"
+          ></span>
           <span v-if="past(r).lo" class="past lo num" :class="past(r).lo!.kind" aria-hidden="true"
             >◂ {{ past(r).lo!.text }}</span
           >
@@ -441,6 +467,12 @@ onBeforeUnmount(() => {
         </span>
       </li>
     </ol>
+    <!-- How to read the rows, the "?"'s tooltip's content, moved into it by tippy. -->
+    <div ref="noteBody" class="note-body">
+      <p v-for="(l, i) in noteLines" :key="i" class="note-line">
+        <strong v-if="l.term">{{ l.term }}</strong> {{ l.text }}
+      </p>
+    </div>
     <!-- The tooltip's content, moved into it by tippy. -->
     <div ref="tipBody" class="tip-body">
       <template v-if="pointed && 'bench' in pointed">
@@ -500,9 +532,17 @@ onBeforeUnmount(() => {
   padding-top: 6px;
   text-align: right;
 }
+/* "Spe", how to read the rows after it as "You first" has what it is: 4px after it, centered on the line, in the gap
+   past the column (as the numbers under it are right-aligned to its edge). */
 .head .speed {
   align-self: center;
   padding: 0;
+}
+.head .speed > .help {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 4px);
+  translate: 0 -50%;
 }
 /* In the text's color, as a number rather than a link (retro.css colors links). */
 :root:root a.speed {
@@ -536,6 +576,13 @@ onBeforeUnmount(() => {
   align-items: flex-end;
   text-align: right;
 }
+/* "You first", its info icon after it: what it is of in a tooltip, hovered or tapped. */
+.odds-head {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
 .help {
   display: inline-flex;
   padding: 0;
@@ -545,12 +592,8 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 .help:hover,
-.help[aria-expanded='true'] {
+.help:focus-visible {
   color: var(--text);
-}
-.odds-help {
-  margin: 8px 0;
-  padding: 8px 10px;
 }
 .mine-label {
   position: absolute;
@@ -771,11 +814,31 @@ onBeforeUnmount(() => {
   background: var(--range-plain);
   box-shadow: 0 0 0 1px var(--panel);
 }
+/* At what they could reach, a row with sets' benchmarks: thin ticks across its baseline, under its marks; the one the
+   tooltip is on in ink. */
+.tick {
+  position: absolute;
+  top: var(--bar-y);
+  width: 2px;
+  height: 8px;
+  translate: -50% -3px;
+  background: color-mix(in srgb, var(--text) 55%, var(--panel));
+}
+.tick.active {
+  background: var(--text);
+}
 /* A row of one build: the others faint. */
 .mark.faint {
   opacity: 0.35;
 }
 /* The tooltip: the Speed and its share, then a line per build reaching it. */
+/* How to read the rows: a line per part, its name in bold, a little apart. */
+.note-line {
+  margin: 0;
+}
+.note-line + .note-line {
+  margin-top: 3px;
+}
 .tip-head {
   font-weight: bold;
 }
@@ -945,9 +1008,6 @@ onBeforeUnmount(() => {
     grid-template-areas:
       'speed who odds'
       'speed track track';
-  }
-  .head .speed {
-    display: none;
   }
   /* How yours does, its ties under it, so the Pokémon and what its row is of have the line's room; over yours' line. */
   .odds-cell {

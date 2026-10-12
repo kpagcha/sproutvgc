@@ -2019,16 +2019,15 @@ const { entered } = usePageEntered()
                   {{ onlyLabel[0] }}<PokemonIcon :id="found" />{{ onlyLabel[1] }}
                 </button>
               </div>
-              <button
-                v-if="bySets && boostsAvailable"
-                type="button"
-                class="btn switch"
-                :class="{ on: showBoosts }"
-                :aria-pressed="showBoosts"
-                @click="toggleBoosts"
-              >
-                <Rocket :size="16" aria-hidden="true" />{{ t('speed.boosts') }}
-              </button>
+              <!-- The view, as in the band over the toolbar. -->
+              <ChoiceDialog
+                v-if="choicesShown"
+                class="pinned-view"
+                :model-value="view"
+                :label="t('speed.viewLabel')"
+                :options="viewOptions"
+                @update:model-value="(v: string) => choose('view', v)"
+              />
               <button
                 type="button"
                 class="btn switch"
@@ -2062,7 +2061,8 @@ const { entered } = usePageEntered()
               :picked-speed="at"
               :copied
               :row-href="rowHref"
-              :axis-reach="view === 'max'"
+              :possible="view === 'max'"
+              :boosts="showBoosts || !!inPlay"
               @chip="onRow"
               @mark="onMark"
               @share="share"
@@ -2928,7 +2928,8 @@ const { entered } = usePageEntered()
 .pinned.opponents {
   border-bottom: 3px solid var(--opponent);
 }
-/* Its switches as tall as the search beside them. */
+/* Its switches and the view as tall as the search beside them. */
+.pinned > .pinned-view,
 .pinned > .switch,
 .pinned .find > .find-mode {
   align-self: stretch;

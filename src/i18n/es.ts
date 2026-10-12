@@ -694,11 +694,16 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.viewTip.ladder': 'Una fila por reparto que llevan al menos el {pct} de sus sets, en su Velocidad.',
   'speed.viewTip.charts':
     'Una fila por Pokémon en su Velocidad más común, con cada reparto que llevan al menos el {pct} de sus sets marcado en ella.',
-  'speed.viewTip.max': 'Una fila por Pokémon en {bench}; con Mejoras, cada habilidad de Velocidad que puede tener.',
-  'speed.viewTip.min': 'Una fila por Pokémon en {bench}; con Mejoras, cada habilidad de Velocidad que puede tener.',
+  'speed.viewTip.max':
+    'Una fila por Pokémon en {bench}, con sus cuatro referencias marcadas en su barra; con Mejoras, cada habilidad de Velocidad que puede tener.',
+  'speed.viewTip.min':
+    'Una fila por Pokémon en {bench}, con sus cuatro referencias marcadas en su barra; con Mejoras, cada habilidad de Velocidad que puede tener.',
   'speed.oddsHead': 'Tú primero',
+  'speed.oddsInfo':
+    'La proporción de los sets del rival contra los que tu Pokémon mueve primero, según cuántos de sus sets llevan cada Velocidad (incluidos los repartos raros), sin contar los empates.{boost} Aquí no cuenta cuánto se usa el rival: eso lo cuenta el resumen de tu Pokémon.',
+  'speed.oddsInfoBoost': ' En la fila de una mejora, son esos mismos sets con la mejora.',
   'speed.oddsNote':
-    'Una fila por Pokémon (por reparto, en Por reparto) y por mejora, colocada por la Velocidad a su izquierda, las filas de una misma Velocidad bajo un solo número: pasa por encima o elígelo para ver qué más hay en ella. Una marca en cada Velocidad de sus sets, más alta cuantos más la llevan, sobre un tramo más tenue de su Velocidad más baja posible a la más alta; una fila de un reparto tiene su marca rellena. Tu Pokémon es una fila y una línea; al final de la fila, la proporción de sus sets contra los que mueves primero, y tocar una marca compara el tuyo con ella. Un Pokémon sin sets en los datos tiene en su lugar marcas huecas en sus referencias, y si mueves primero contra todo su tramo, contra nada de él o contra parte.',
+    'Vel: la Velocidad en la que se coloca la fila. Pasa por encima o elígela para ver qué más hay en esa Velocidad.\nMarcas: las Velocidades de sus sets, más altas cuanto más comunes.\nBarra tenue: de su Velocidad más baja posible a la más alta.\nRayitas (Más rápido posible): sus referencias, de Mín− a Máx+.\nMarcas huecas: sin sets en los datos, sus referencias en su lugar.\nNombre con borde discontinuo: un objeto o habilidad que cambia su Velocidad, en una fila propia.\nCon tu Pokémon: su Velocidad es la línea; las marcas son azules donde mueves primero y rojas donde mueve el rival; toca una marca para compararte con ella.',
   'speed.oddsNoSets': '{name}: sin sets en los datos. En sus referencias: {list}',
   'speed.oddsReach.always': 'Siempre',
   'speed.oddsReach.never': 'Nunca',

@@ -3,7 +3,6 @@ import { computed, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vu
 import { CircleHelp } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { t } from '@/i18n'
-import { useOpenState } from '@/composables/useOpenState'
 import { BENCHMARKS, type Benchmark } from '@/lib/stats'
 import AppLink from '@/components/AppLink'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -13,7 +12,7 @@ import PokemonIcon from '@/components/PokemonIcon'
 // axis shared by every row from its slowest (Min−) to its fastest (Max+), a tick at each benchmark with its Speed under
 // it. With yours, its Speed is a line down the bars, and each part of a bar and each Speed is colored by who moves
 // first: yours (the accent) or them (the opponents' red); under Trick Room, the other way round. In the heads, a "?"
-// opening how to read them. The rows go from those moving first.
+// with how to read them in its tooltip. The rows go from those moving first.
 export interface RangeRow {
   base: number
   /** Its Speed at each benchmark, with the modifiers. */
@@ -144,28 +143,18 @@ function placed(r: RangeRow): Partial<Record<Benchmark, number>> {
 const spots = computed(() => Object.fromEntries(props.rows.map((r) => [r.base, placed(r)])))
 const valueLeft = (r: RangeRow, b: Benchmark, spots: Partial<Record<Benchmark, number>>) =>
   spots[b] !== undefined ? `${spots[b]}px` : at(r.speeds[b])
-// How to read the bars: a "?" at the legend's end opening it under the legend (remembered).
-const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.speedTiers.rangesHelp', false)
 const name = (m: RangeRow['mons'][number]) => [m.species, m.forme].filter(Boolean).join(' ')
 </script>
 
 <template>
   <div class="ranges" :class="{ finding }">
-    <!-- The heads: the base, how to read the bars (a "?", opening it under them), and the axis's ends, yours on it. -->
+    <!-- The heads: the base, how to read the bars (a "?", its tooltip), and the axis's ends, yours on it. -->
     <div class="head">
       <span class="base" aria-hidden="true">{{ t('speed.base') }}</span>
       <span class="head-help">
-        <button
-          v-tip="canHover && t('speed.help')"
-          type="button"
-          class="help"
-          :aria-expanded="helpOpen"
-          aria-controls="ranges-help"
-          :aria-label="t('speed.help')"
-          @click="toggleHelp"
-        >
-          <CircleHelp :size="16" aria-hidden="true" />
-        </button>
+        <span v-tip="t('speed.rangesNote')" class="help" tabindex="0" role="img" :aria-label="t('speed.help')">
+          <CircleHelp :size="14" aria-hidden="true" />
+        </span>
       </span>
       <span ref="headTrack" class="track" aria-hidden="true">
         <!-- Samples of the numbers under the bars, for their widths. -->
@@ -178,7 +167,6 @@ const name = (m: RangeRow['mons'][number]) => [m.species, m.forme].filter(Boolea
         <span class="end">{{ Math.round(axis.lo + axis.span) }}</span>
       </span>
     </div>
-    <p v-if="helpOpen" id="ranges-help" class="ranges-help panel sunken muted small">{{ t('speed.rangesNote') }}</p>
     <ol class="rows">
       <li
         v-for="r in rows"
@@ -247,13 +235,8 @@ const name = (m: RangeRow['mons'][number]) => [m.species, m.forme].filter(Boolea
   cursor: pointer;
 }
 .help:hover,
-.help[aria-expanded='true'] {
+.help:focus-visible {
   color: var(--text);
-}
-/* In a well, as the page's own how to read it is. */
-.ranges-help {
-  margin: 8px 0;
-  padding: 8px 10px;
 }
 .head,
 .row {
