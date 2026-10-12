@@ -1054,13 +1054,20 @@ const versus = computed(() => {
       points: myPoints.value,
       result,
       other,
-      compareTo: compareLink({ id: e.id, build: chipBuild(e) }),
+      compareTo: compareLink({ id: e.id, build: chipBuild(e), sets: view.value === 'charts' }),
     },
   }
 })
 // The comparison from yours' card: yours alone, to add opponents to there; none until there's yours. Against the chip
-// tapped, the comparison's card has the way there instead.
-const compareTarget = computed(() => (mine.value === null ? null : compareLink(null)))
+// tapped, the comparison's card has the way there instead. The one found, none of its chips tapped, is its opponent:
+// at its sets, no Speed of them picked.
+const compareTarget = computed(() => {
+  if (mine.value === null) return null
+  const id = found.value !== mine.value ? found.value : null
+  if (id === null) return compareLink(null)
+  const e = topEntry(id)
+  return compareLink({ id, build: e ? chipBuild(e) : othersBuild(id, buildsOf(id)[0] ?? FASTEST), sets: true })
+})
 // Its title, the Pokémon's name (with its icon) a link to its page.
 // Picking one finds it too, the find showing as its "Only" switch says; in the charts, letting it go lets the find go
 // too, the two being one there.
@@ -1128,12 +1135,14 @@ const chipBuild = (e: Entry) =>
     e.bench ? benchBuild(e.bench) : e.effect ? { effect: e.effect, points: e.points! } : FASTEST,
     e.boost,
   )
-function compareLink(other: { id: PokemonId; build: SpeedBuild } | null) {
+/** The comparison of yours and `other`, at its build, or at its sets (`sets`, when the meta has them). */
+function compareLink(other: { id: PokemonId; build: SpeedBuild; sets: boolean } | null) {
   return {
     name: 'speedCompare',
     query: {
       ...(mine.value && { a: mine.value, ...buildQuery(myBuild.value, 'a') }),
       ...(other && { b: other.id, ...buildQuery(other.build, 'b') }),
+      bsets: other?.sets && buildsOf(other.id).length ? '1' : undefined,
       trickroom: trickRoom.value ? '1' : undefined,
     },
   }
