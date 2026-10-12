@@ -464,8 +464,19 @@ function onLadderPointer(e: PointerEvent) {
   if (!ladderMenu.value?.contains(e.target as Node)) ladderOpen.value = false
 }
 const onLadderKey = (e: KeyboardEvent) => e.key === 'Escape' && (ladderOpen.value = false)
+/** The menu over its button rather than under it: too little room under it, and more over it. */
+const ladderUp = ref(false)
+function placeLadder() {
+  const pop = ladderMenu.value?.querySelector<HTMLElement>('.ladder-pop')
+  const anchor = pop?.offsetParent?.getBoundingClientRect()
+  if (!pop || !anchor) return
+  const below = window.innerHeight - anchor.bottom
+  ladderUp.value = below < pop.offsetHeight + 6 && anchor.top > below
+}
 watch(ladderOpen, (on) => {
   if (on) {
+    ladderUp.value = false
+    void nextTick(placeLadder)
     document.addEventListener('pointerdown', onLadderPointer)
     document.addEventListener('keydown', onLadderKey)
   } else {
@@ -882,7 +893,7 @@ function resetAll() {
           {{ t('compare.toLadder')
           }}<ChevronDown :size="16" class="fold-chevron" :class="{ open: ladderOpen }" aria-hidden="true" />
         </button>
-        <div v-if="ladderOpen" class="ladder-pop panel">
+        <div v-if="ladderOpen" class="ladder-pop panel" :class="{ up: ladderUp }">
           <div
             v-for="c in ladderChoices"
             :key="c.side"
@@ -1250,7 +1261,7 @@ function resetAll() {
 .to-ladder > .btn {
   gap: 6px;
 }
-/* The speed tiers' menu: under its button, over what follows. */
+/* The speed tiers' menu: under its button, over what follows; over it instead when there's no room under it. */
 .ladder-menu {
   position: relative;
 }
@@ -1267,6 +1278,10 @@ function resetAll() {
   gap: 10px;
   width: max-content;
   max-width: min(420px, calc(100vw - 32px));
+}
+.ladder-pop.up {
+  top: auto;
+  bottom: calc(100% + 6px);
 }
 /* On phones, the menu as wide as the page's column. */
 @media (max-width: 720px) {
