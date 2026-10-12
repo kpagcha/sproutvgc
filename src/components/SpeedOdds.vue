@@ -307,6 +307,9 @@ onMounted(() => {
     trigger: 'manual',
     hideOnClick: false,
     placement: 'top',
+    // Fixed, so that, its text grown wider for a moment before it's placed again (sliding from mark to mark), it can't
+    // widen the page past the screen, flashing its scrollbar on phones.
+    popperOptions: { strategy: 'fixed' },
     content: tipBody.value!.$el as HTMLElement,
     getReferenceClientRect: () => markEl?.getBoundingClientRect() ?? list.value!.getBoundingClientRect(),
   })
