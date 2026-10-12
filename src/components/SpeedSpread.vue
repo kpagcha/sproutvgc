@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
+import tippy, { type Instance } from 'tippy.js'
 import { percent } from '@/data/meta'
 import { locale, t } from '@/i18n'
 import { MARK_SHARE } from '@/lib/speed'
@@ -11,7 +12,8 @@ import { odds, type SpreadPoint } from '@/lib/speedLineup'
 // build, a line through with its Speed over it (at its sets too, each mark is colored by who moves first against most
 // of them). Only the Speeds on at least `MARK_SHARE` of its sets are drawn, though every one counts. Under the axis
 // its slowest drawn, most common and fastest Speeds. Each mark says on hover, or a tap, its Speed,
-// its share of the sets and the builds reaching it. In a side's panel, and on phones under the two, where its heading
+// its share of the sets and the builds reaching it; where there's no hovering, a finger on the chart shows the nearest
+// one's, which follows it as it slides along. In a side's panel, and on phones under the two, where its heading
 // is a band of its side's color (`banded`).
 const props = defineProps<{
   title: string
@@ -67,6 +69,57 @@ function tip(s: SpreadPoint) {
   })
   return `${s.speed} · ${percent(s.share)} · ${builds.join(', ')}`
 }
+
+// Where there's no hovering, the marks' tooltips are one of the chart's own: a finger on it shows the nearest mark's,
+// following it as it slides along, and it stays once lifted, until a tap elsewhere.
+const canHover = window.matchMedia('(hover: hover)').matches
+const plot = useTemplateRef<HTMLElement>('plot')
+/** The mark whose tooltip is shown, by its place among those drawn. */
+const active = shallowRef<number | null>(null)
+let dragTip: Instance | undefined
+let dragging = false
+function point(e: PointerEvent) {
+  const marks = [...plot.value!.querySelectorAll<HTMLElement>('.mark')]
+  let best = -1
+  let gap = Infinity
+  marks.forEach((m, i) => {
+    const r = m.getBoundingClientRect()
+    const d = Math.abs(r.left + r.width / 2 - e.clientX)
+    if (d < gap) [best, gap] = [i, d]
+  })
+  const mark = marks[best]
+  const s = drawn.value[best]
+  if (!mark || !s) return
+  dragTip ??= tippy(plot.value!, {
+    trigger: 'manual',
+    onHidden: () => {
+      active.value = null
+    },
+  })
+  dragTip.setProps({ getReferenceClientRect: () => mark.getBoundingClientRect() })
+  dragTip.setContent(tip(s))
+  active.value = best
+  if (dragTip.state.isVisible) dragTip.popperInstance?.update()
+  else dragTip.show()
+}
+function onDown(e: PointerEvent) {
+  if (e.pointerType === 'mouse') return
+  dragging = true
+  plot.value!.setPointerCapture(e.pointerId)
+  point(e)
+}
+function onMove(e: PointerEvent) {
+  if (dragging) point(e)
+}
+function onUp() {
+  dragging = false
+}
+function onCancel() {
+  dragging = false
+  dragTip?.hide()
+}
+watch(drawn, () => dragTip?.hide())
+onBeforeUnmount(() => dragTip?.destroy())
 </script>
 
 <template>
@@ -78,18 +131,27 @@ function tip(s: SpreadPoint) {
         drawn.map((s) => `${s.speed} ${percent(s.share)}`).join(', ') +
         (otherAt !== null ? ` · ${other!.name} ${otherAt}` : '')
       }}</span>
-      <div class="plot" aria-hidden="true">
+      <div
+        ref="plot"
+        class="plot"
+        :class="{ touch: !canHover }"
+        aria-hidden="true"
+        @pointerdown="onDown"
+        @pointermove="onMove"
+        @pointerup="onUp"
+        @pointercancel="onCancel"
+      >
         <span v-if="otherAt !== null" class="other-label" :style="{ left: at(otherAt) }"
           >{{ other!.name }} {{ otherAt }}</span
         >
         <span class="reach" :style="between(reach.min, reach.max)"></span>
         <span class="span" :style="between(lo, hi)"></span>
         <span
-          v-for="s in drawn"
+          v-for="(s, i) in drawn"
           :key="s.speed"
-          v-tip:group="tip(s)"
+          v-tip:group="canHover && tip(s)"
           class="mark"
-          :class="kind(s.speed)"
+          :class="[kind(s.speed), { active: active === i }]"
           :style="{ left: at(s.speed), '--tall': s.share / topShare }"
         ></span>
         <span v-if="otherAt !== null" class="line" :style="{ left: at(otherAt) }"></span>
@@ -151,6 +213,12 @@ function tip(s: SpreadPoint) {
   height: 64px;
   margin-top: 20px;
 }
+/* Sliding a finger along it moves the tooltip; up and down still scroll the page. */
+.plot.touch {
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
 .plot::before {
   content: '';
   position: absolute;
@@ -187,6 +255,13 @@ function tip(s: SpreadPoint) {
   content: '';
   position: absolute;
   inset: -4px -3px;
+}
+/* The one whose tooltip a finger shows, outlined. */
+.mark.mark.active {
+  box-shadow:
+    0 0 0 1px var(--panel),
+    0 0 0 3px var(--ink);
+  z-index: 1;
 }
 .mark.first {
   background: var(--mine);
