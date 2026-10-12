@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
 import tippy, { type Instance } from 'tippy.js'
 import { percent } from '@/data/meta'
 import { locale, t } from '@/i18n'
 import { MARK_SHARE } from '@/lib/speed'
 import { odds, type SpreadPoint } from '@/lib/speedLineup'
+import EffectTag from '@/components/EffectTag'
 
 // One of the comparison's Pokémon at its sets, against another, drawn as the speed tiers' charts draw a row: a mark at
 // each Speed its sets reach, rising from the axis as tall as it's common, colored by who moves first at it (its side's
@@ -12,8 +13,8 @@ import { odds, type SpreadPoint } from '@/lib/speedLineup'
 // build, a line through with its Speed over it (at its sets too, each mark is colored by who moves first against most
 // of them). Only the Speeds on at least `MARK_SHARE` of its sets are drawn, though every one counts. Under the axis
 // its slowest drawn, most common and fastest Speeds. Each mark says on hover, or a tap, its Speed,
-// its share of the sets and the builds reaching it; where there's no hovering, a finger on the chart shows the nearest
-// one's, which follows it as it slides along. In a side's panel, and on phones under the two, where its heading
+// its share of the sets and the builds reaching it (the nearest one's, following the pointer, or a finger, along the
+// chart). In a side's panel, and on phones under the two, where its heading
 // is a band of its side's color (`banded`).
 const props = defineProps<{
   title: string
@@ -59,24 +60,17 @@ const markShare = computed(() => MARK_SHARE.toLocaleString(locale.value, { style
 const lo = computed(() => drawn.value[drawn.value.length - 1]!.speed)
 const hi = computed(() => drawn.value[0]!.speed)
 
-const ARROWS = { up: '↑', down: '↓' }
-/** A mark's tooltip: its Speed and share, then the builds reaching it, as the speed tiers' chips tag them. */
-function tip(s: SpreadPoint) {
-  const builds = s.builds.map((b) => {
-    const effect = b.effect === 'neutral' ? t('speed.effect.neutral') : `${ARROWS[b.effect]}${t('stat.spe')}`
-    const share = s.builds.length > 1 ? ` (${percent(b.share)})` : ''
-    return `${effect} ${t('speed.points', { n: b.points })}${share}`
-  })
-  return `${s.speed} · ${percent(s.share)} · ${builds.join(', ')}`
-}
-
-// Where there's no hovering, the marks' tooltips are one of the chart's own: a finger on it shows the nearest mark's,
-// following it as it slides along, and it stays once lifted, until a tap elsewhere.
+// The marks' tooltip, one of the chart's own: the nearest mark's, shown hovering over the chart or with a finger on it,
+// following it along (where there's no hovering, it stays once lifted, until a tap elsewhere). Its content is drawn
+// here, hidden, and handed to it: the mark's Speed and share, then the builds reaching it, as the speed tiers' chips
+// tag them.
 const canHover = window.matchMedia('(hover: hover)').matches
 const plot = useTemplateRef<HTMLElement>('plot')
+const tipBody = useTemplateRef<HTMLElement>('tipBody')
 /** The mark whose tooltip is shown, by its place among those drawn. */
 const active = shallowRef<number | null>(null)
-let dragTip: Instance | undefined
+const activePoint = computed(() => (active.value === null ? null : (drawn.value[active.value] ?? null)))
+let markTip: Instance | undefined
 let dragging = false
 function point(e: PointerEvent) {
   const marks = [...plot.value!.querySelectorAll<HTMLElement>('.mark')]
@@ -88,19 +82,19 @@ function point(e: PointerEvent) {
     if (d < gap) [best, gap] = [i, d]
   })
   const mark = marks[best]
-  const s = drawn.value[best]
-  if (!mark || !s) return
-  dragTip ??= tippy(plot.value!, {
+  if (!mark) return
+  markTip ??= tippy(plot.value!, {
     trigger: 'manual',
+    content: tipBody.value!,
+    moveTransition: 'transform 0.12s ease-out',
     onHidden: () => {
       active.value = null
     },
   })
-  dragTip.setProps({ getReferenceClientRect: () => mark.getBoundingClientRect() })
-  dragTip.setContent(tip(s))
+  markTip.setProps({ getReferenceClientRect: () => mark.getBoundingClientRect() })
   active.value = best
-  if (dragTip.state.isVisible) dragTip.popperInstance?.update()
-  else dragTip.show()
+  if (markTip.state.isVisible) void nextTick(() => markTip?.popperInstance?.update())
+  else markTip.show()
 }
 function onDown(e: PointerEvent) {
   if (e.pointerType === 'mouse') return
@@ -109,17 +103,20 @@ function onDown(e: PointerEvent) {
   point(e)
 }
 function onMove(e: PointerEvent) {
-  if (dragging) point(e)
+  if (dragging || e.pointerType === 'mouse') point(e)
 }
 function onUp() {
   dragging = false
 }
+function onLeave(e: PointerEvent) {
+  if (e.pointerType === 'mouse') markTip?.hide()
+}
 function onCancel() {
   dragging = false
-  dragTip?.hide()
+  markTip?.hide()
 }
-watch(drawn, () => dragTip?.hide())
-onBeforeUnmount(() => dragTip?.destroy())
+watch(drawn, () => markTip?.hide())
+onBeforeUnmount(() => markTip?.destroy())
 </script>
 
 <template>
@@ -139,6 +136,7 @@ onBeforeUnmount(() => dragTip?.destroy())
         @pointerdown="onDown"
         @pointermove="onMove"
         @pointerup="onUp"
+        @pointerleave="onLeave"
         @pointercancel="onCancel"
       >
         <span v-if="otherAt !== null" class="other-label" :style="{ left: at(otherAt) }"
@@ -149,7 +147,6 @@ onBeforeUnmount(() => dragTip?.destroy())
         <span
           v-for="(s, i) in drawn"
           :key="s.speed"
-          v-tip:group="canHover && tip(s)"
           class="mark"
           :class="[kind(s.speed), { active: active === i }]"
           :style="{ left: at(s.speed), '--tall': s.share / topShare }"
@@ -165,6 +162,18 @@ onBeforeUnmount(() => dragTip?.destroy())
           >{{ common.speed }}</span
         >
         <span v-if="hi !== lo" class="tick" :style="{ left: at(hi) }">{{ hi }}</span>
+      </div>
+      <!-- The marks' tooltip's content, handed to it. -->
+      <div hidden>
+        <div ref="tipBody" class="mark-tip">
+          <template v-if="activePoint"
+            >{{ activePoint.speed }} · {{ percent(activePoint.share) }} ·
+            <template v-for="(b, j) in activePoint.builds" :key="j"
+              >{{ j ? ', ' : '' }}<EffectTag :effect="b.effect" /> {{ t('speed.points', { n: b.points })
+              }}<template v-if="activePoint.builds.length > 1"> ({{ percent(b.share) }})</template></template
+            ></template
+          >
+        </div>
       </div>
       <p class="muted small note">
         {{ t('compare.spreadNote', { speed: common.speed, pct: percent(common.share) }) }}
