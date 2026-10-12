@@ -781,7 +781,13 @@ function resetAll() {
       </div>
 
       <div class="sides">
-        <div v-for="side in sides" v-show="!phone || openKey === side.s" :key="side.s" class="side-col">
+        <div
+          v-for="side in sides"
+          v-show="!phone || openKey === side.s"
+          :key="side.s"
+          class="side-col"
+          :class="{ folded: isFolded(side.s) }"
+        >
           <section :id="`compare-${side.s}`" class="panel banded side" :class="{ opponent: side.s === 'b' }">
             <!-- Yours, and its opponent, red as on the speed tiers; on phones, its tab stands for it. Once picked, it
                  opens and folds the panel, an arrow at its end saying so. -->
@@ -1066,6 +1072,11 @@ function resetAll() {
     min-width: 0;
   }
   .side-col > .col-add {
+    align-self: start;
+  }
+  /* Folded, its column off the shared rows: its panel as short as its Pokémon in short, what's under it right after. */
+  .side-col.folded {
+    display: block;
     align-self: start;
   }
   /* The shorter one's Confirm at its foot, level with the other's: its editor taking the panel's room. */
