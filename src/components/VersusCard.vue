@@ -76,10 +76,14 @@ const plan = computed(() => {
     <p v-if="props.other" class="plan">
       {{ t(`speed.planOther.${props.other.effect}`, { amount: pointsText(props.other.result) }) }}
     </p>
-    <!-- To the comparison's own page: a button that stands out, its arrow saying it goes there. -->
-    <AppLink :to="props.compareTo" class="btn primary compare-link"
-      ><Columns2 :size="16" aria-hidden="true" />{{ t('compare.open') }}<ArrowRight :size="16" aria-hidden="true"
-    /></AppLink>
+    <!-- Its chip on the ladder, found; and to the comparison's own page: a button that stands out, its arrow saying it
+         goes there. -->
+    <div class="actions">
+      <button type="button" class="btn show-link" @click="emit('locate')">{{ t('speed.vsShow') }}</button>
+      <AppLink :to="props.compareTo" class="btn primary compare-link"
+        ><Columns2 :size="16" aria-hidden="true" />{{ t('compare.open') }}<ArrowRight :size="16" aria-hidden="true"
+      /></AppLink>
+    </div>
   </section>
 </template>
 
@@ -178,10 +182,19 @@ const plan = computed(() => {
 .plan {
   margin: 6px 0 0;
 }
-.compare-link {
-  gap: 6px;
-  width: 100%;
+/* The two on a line, the comparison taking what's left; one under the other when they don't fit. */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: 10px;
+}
+.show-link {
+  flex: 1 0 auto;
+}
+.compare-link {
+  flex: 999 0 auto;
+  gap: 6px;
   font-weight: bold;
 }
 .compare-link:hover {

@@ -735,6 +735,7 @@ export const messages = {
   'speed.vsNow.tie': 'Your Pokémon ties',
   'speed.vsNow.after': 'Your Pokémon moves after',
   'speed.vsLocate': 'Find it on the ladder',
+  'speed.vsShow': 'Show on ladder',
   'speed.planWith': 'With its nature: {amount}.',
   'speed.planSpare': '{n} to spare.',
   'speed.planTies': 'With its nature it can only tie, at {points} points.',

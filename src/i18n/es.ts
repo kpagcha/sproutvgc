@@ -746,6 +746,7 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.vsNow.tie': 'Tu Pokémon empata',
   'speed.vsNow.after': 'Tu Pokémon mueve después',
   'speed.vsLocate': 'Encontrarlo en la escala',
+  'speed.vsShow': 'Ver en la escala',
   'speed.planWith': 'Con su naturaleza: {amount}.',
   'speed.planSpare': 'Le sobran {n}.',
   'speed.planTies': 'Con su naturaleza solo puede empatar, con {points} puntos.',
