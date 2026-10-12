@@ -71,6 +71,8 @@ const tipBody = useTemplateRef<HTMLElement>('tipBody')
 const active = shallowRef<number | null>(null)
 const activePoint = computed(() => (active.value === null ? null : (drawn.value[active.value] ?? null)))
 let markTip: Instance | undefined
+/** The mark the tooltip is at. */
+let pointed: HTMLElement | undefined
 let dragging = false
 function point(e: PointerEvent) {
   const marks = [...plot.value!.querySelectorAll<HTMLElement>('.mark')]
@@ -87,11 +89,14 @@ function point(e: PointerEvent) {
     trigger: 'manual',
     content: tipBody.value!,
     moveTransition: 'transform 0.12s ease-out',
+    // Pointing at the mark shown, read each time: setting it anew would remake its placing, the tooltip then gliding in
+    // from the screen's top left corner.
+    getReferenceClientRect: () => (pointed ?? plot.value!).getBoundingClientRect(),
     onHidden: () => {
       active.value = null
     },
   })
-  markTip.setProps({ getReferenceClientRect: () => mark.getBoundingClientRect() })
+  pointed = mark
   active.value = best
   if (markTip.state.isVisible) void nextTick(() => markTip?.popperInstance?.update())
   else markTip.show()
