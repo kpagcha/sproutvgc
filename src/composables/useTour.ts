@@ -67,7 +67,8 @@ export function useTour(page: string, steps: () => TourStep[], ready: WatchSourc
     tour = driver({
       steps: list,
       animate: !reduced,
-      smoothScroll: !reduced,
+      // Scrolled to at once: scrolled smoothly, the popover is placed mid-scroll and then chases its part as it moves.
+      smoothScroll: false,
       showProgress: true,
       allowClose: true,
       overlayOpacity: 0.55,
