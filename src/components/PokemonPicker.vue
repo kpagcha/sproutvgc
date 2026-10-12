@@ -251,7 +251,7 @@ function measure() {
  * The list's height, whatever the screen: a few rows on touch screens, where a keyboard takes half of it, more with a
  * mouse. Fewer results, a shorter list.
  */
-/** An option's height, as the styles set it. */
+/** An option's height, as the styles set it (at least: a long name on two lines makes it taller). */
 const ROW = 30
 const ROWS = () => (touch.matches ? 6 : 8)
 const LIST_HEIGHT = () => ROWS() * ROW + 8
@@ -369,7 +369,7 @@ const optionId = (i: number) => `${listId}-${i}`
             @mouseenter="active = i"
           >
             <PokemonIcon :id="r.id" />
-            <span><Marked :p="r.parts" /></span
+            <span class="option-name"><Marked :p="r.parts" /></span
             ><Star v-if="r.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" /><span
               v-if="r.rank"
               class="option-rank"
@@ -447,10 +447,20 @@ const optionId = (i: number) => `${listId}-${i}`
 .option {
   display: flex;
   align-items: center;
-  height: 30px;
+  min-height: 30px;
   gap: 4px;
   padding: 0 6px 0 2px;
   cursor: pointer;
+}
+/* Its name whole: where the list is narrow (yours' card), a long one (a forme's) on a second line, the row taller; the
+   icon, rank and Speed keep their room. */
+.option > :not(.option-name) {
+  flex: none;
+}
+.option-name {
+  min-width: 0;
+  padding-block: 2px;
+  line-height: 1.15;
 }
 .option-rank {
   margin-left: auto;
