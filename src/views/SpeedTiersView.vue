@@ -94,6 +94,7 @@ import SegmentedControl from '@/components/SegmentedControl.vue'
 import VersusCard from '@/components/VersusCard.vue'
 import SetupStar from '@/components/SetupStar.vue'
 import HelpToggle from '@/components/HelpToggle.vue'
+import TourToggle from '@/components/TourToggle.vue'
 
 // The regulation's Pokémon ordered by Speed, as a ladder of Speed values with the Pokémon at each. By default the
 // meta: the most used Pokémon at the Speeds their sets actually run (from the meta snapshot shown, when it has them);
@@ -1606,7 +1607,7 @@ const { start: startTour } = useTour(
       side: 'bottom',
     },
     { el: ['details.yours', '.bar-yours'], title: 'tour.tiers.yoursTitle', text: 'tour.tiers.yours', side: 'left' },
-    { el: '.head-help', title: 'tour.helpTitle', text: 'tour.help', side: 'bottom' },
+    { el: '.head-tour', title: 'tour.againTitle', text: 'tour.again', side: 'bottom' },
   ],
   () => entered.value && (!needsData.value || !!data.value),
 )
@@ -1675,6 +1676,7 @@ const { start: startTour } = useTour(
             <h1>{{ t('title.speedTiers') }}<SetupStar /></h1>
             <MetaDialog v-if="snapshot" class="head-meta" />
             <HelpToggle class="head-help" :open="helpOpen" controls="speed-help" fit @toggle="toggleHelp" />
+            <TourToggle class="head-tour" @start="startTour" />
           </div>
           <!-- How to read the ladder: what its options do; samples of a chip, each with what its parts mean; then yours
                among them. -->

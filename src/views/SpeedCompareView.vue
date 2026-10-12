@@ -41,6 +41,7 @@ import SpeedMatchups from '@/components/SpeedMatchups.vue'
 import SpeedShare from '@/components/SpeedShare.vue'
 import SpeedVersus from '@/components/SpeedVersus.vue'
 import HelpToggle from '@/components/HelpToggle.vue'
+import TourToggle from '@/components/TourToggle.vue'
 
 // Pokémon's Speeds compared, each with a build of its own (its nature's effect, its stat points, its modifiers), in
 // one of two views (`mode`). Yours against opponents (the default): up to two a side, yours `a` and `a2`, the
@@ -501,7 +502,7 @@ const { start: startTour } = useTour('compare', () => [
   { el: '#compare-b', title: 'tour.compare.opponentTitle', text: 'tour.compare.opponent', side: 'bottom' },
   { el: ['.col-add', '.side-adds'], title: 'tour.compare.secondTitle', text: 'tour.compare.second', side: 'top' },
   { el: '.adder', title: 'tour.compare.orderTitle', text: 'tour.compare.order', side: 'bottom' },
-  { el: '.head-help', title: 'tour.helpTitle', text: 'tour.help', side: 'bottom' },
+  { el: '.head-tour', title: 'tour.againTitle', text: 'tour.again', side: 'bottom' },
 ])
 // Everything back as the page comes with nothing set, as the speed tiers' Reset all: its whole URL cleared (the
 // Pokémon, their builds, the view, Trick Room).
@@ -530,6 +531,7 @@ function resetAll() {
         <h1>{{ t('title.speedCompare') }}<SetupStar /></h1>
         <MetaDialog v-if="metaSpeeds" class="head-meta" />
         <HelpToggle class="head-help" :open="helpOpen" controls="compare-help" fit icon-only @toggle="toggleHelp" />
+        <TourToggle class="head-tour" @start="startTour" />
       </div>
       <div v-if="helpOpen" id="compare-help" class="help-body panel sunken small">
         <button type="button" class="btn tour-start" @click="startTour">{{ t('tour.start') }}</button>

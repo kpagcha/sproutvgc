@@ -732,8 +732,8 @@ export const messages: Record<keyof typeof en, string> = {
   'tour.prev': 'Atrás',
   'tour.done': 'Hecho',
   'tour.progress': '{current} de {total}',
-  'tour.helpTitle': 'Cómo leer esto',
-  'tour.help': 'Cada opción y parte de la página, explicada. Desde ahí puedes volver a hacer este recorrido.',
+  'tour.againTitle': 'Repetirlo',
+  'tour.again': 'Este botón repite el recorrido. Cómo leer esto, a su lado, explica cada opción y parte de la página.',
   'tour.tiers.introTitle': 'Escalas de velocidad',
   'tour.tiers.intro':
     'Quién se mueve primero: los Pokémon de la regulación por orden de Velocidad, en las Velocidades que usan los jugadores. Un vistazo rápido; ciérralo cuando quieras.',

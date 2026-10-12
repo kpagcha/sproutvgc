@@ -723,8 +723,9 @@ export const messages = {
   'tour.prev': 'Back',
   'tour.done': 'Done',
   'tour.progress': '{current} of {total}',
-  'tour.helpTitle': 'How to read this',
-  'tour.help': 'Every option and part of the page, explained. You can take this tour again from there.',
+  'tour.againTitle': 'Take it again',
+  'tour.again':
+    'This button takes the tour again. How to read this, beside it, explains every option and part of the page.',
   'tour.tiers.introTitle': 'Speed tiers',
   'tour.tiers.intro':
     "Who moves first: the regulation's Pokémon in Speed order, at the Speeds players run. A quick look around; close it at any time.",
