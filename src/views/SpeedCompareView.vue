@@ -732,7 +732,8 @@ function resetAll() {
       </div>
 
       <!-- On phones, the two side by side as tabs, each with its Pokémon in short, stuck to the top while the page
-           scrolls: tapping one opens its panel under them, tapping it again folds it. Who moves first is marked on the verdict alone. -->
+           scrolls: tapping one opens its panel under them, tapping it again folds it. Who moves first is marked on the verdict alone.
+           One at its sets says so in its label, rather than beside its Speeds, where it would wrap. -->
       <div v-if="phone" class="side-tabs" data-top-bar>
         <button
           v-for="side in sides"
@@ -748,8 +749,10 @@ function resetAll() {
           @click="toggleOpen(side.s)"
         >
           <span class="tab-label"
-            >{{ side.s === 'a' ? t('speed.yours') : t('compare.opponent')
-            }}<ChevronDown :size="16" class="tab-chevron" :class="{ unset: !side.id }" aria-hidden="true"
+            ><span
+              >{{ side.s === 'a' ? t('speed.yours') : t('compare.opponent')
+              }}<span v-if="side.id && side.range" class="tab-sets">{{ t('compare.setsTag') }}</span></span
+            ><ChevronDown :size="16" class="tab-chevron" :class="{ unset: !side.id }" aria-hidden="true"
           /></span>
           <BuildSummary
             v-if="side.id"
@@ -757,6 +760,7 @@ function resetAll() {
             :speed="side.speed!"
             :build="side.build"
             :range="side.range"
+            sets-said
             class="tab-summary"
           />
           <span v-else class="tab-empty"><Plus :size="16" aria-hidden="true" />{{ t('compare.pick') }}</span>
@@ -1140,6 +1144,19 @@ function resetAll() {
   color: var(--accent-text);
   background: var(--accent);
   border-bottom: 2px solid var(--ink);
+}
+/* At its sets: "Sets" in a badge outlined in the label's color, as beside the Speeds elsewhere, within the label's
+   height. */
+.tab-sets {
+  display: inline-flex;
+  align-items: center;
+  height: 16px;
+  margin: -2px 0 -2px 6px;
+  padding: 0 4px;
+  font-size: 0.875em;
+  font-weight: normal;
+  vertical-align: middle;
+  border: 1px solid currentColor;
 }
 .tab.opponent .tab-label {
   color: var(--opponent-text);

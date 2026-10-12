@@ -12,12 +12,14 @@ import PokemonIcon from '@/components/PokemonIcon'
 // and no points, which go without saying) and its modifiers, items by their icon. Its name only where it fits whole
 // beside the rest: cut, it goes, its icon standing for it (the name still read out); gone, it comes back once the room
 // left at the line's end takes it, as measured when it was there. On the speed tiers' bar and, on phones, the comparison's tabs.
-// At its sets (`range`), its Speeds from the slowest to the fastest, and "Sets" for its build.
+// At its sets (`range`), its Speeds from the slowest to the fastest, and "Sets" for its build (but where what's around
+// says so, `setsSaid`: the comparison's tabs on phones, their label).
 const props = defineProps<{
   id: PokemonId
   speed: number
   build: SpeedBuild
   range?: readonly [number, number] | null
+  setsSaid?: boolean
 }>()
 
 const EFFECT_ICONS = { up: ChevronsUp, neutral: undefined, down: ChevronsDown }
@@ -77,7 +79,7 @@ onBeforeUnmount(() => observer?.disconnect())
       ><span class="speed">{{
         props.range[0] === props.range[1] ? props.range[0] : `${props.range[0]}–${props.range[1]}`
       }}</span
-      ><span class="mod sets">{{ t('compare.setsTag') }}</span></template
+      ><span v-if="!props.setsSaid" class="mod sets">{{ t('compare.setsTag') }}</span></template
     >
     <span v-else class="speed">{{ props.speed }}</span>
     <span v-if="!props.range && (props.build.effect !== 'neutral' || props.build.points > 0)" class="build"
