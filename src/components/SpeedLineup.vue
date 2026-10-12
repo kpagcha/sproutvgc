@@ -5,6 +5,7 @@ import type { PokemonId } from '@/data/dex'
 import { t } from '@/i18n'
 import type { SpeedBuild } from '@/lib/speedBuild'
 import type { Place } from '@/lib/speedLineup'
+import { revealBelow } from '@/lib/scroll'
 import BuildSummary from '@/components/BuildSummary.vue'
 
 // The comparison's Pokémon one under the other, past a pair: each a band of its team's color (none in speed order)
@@ -56,8 +57,20 @@ const shown = computed(() => {
 // Moving to their new places, the bands slide there from where they were (by `transform` alone, off the main thread),
 // unless motion is reduced.
 const root = useTemplateRef<HTMLElement>('root')
-// The list's top, for the page to bring into view (its bands stick, so their own place isn't where the list starts).
-defineExpose({ root })
+/**
+ * The open one's card brought into view right under its band where that sticks (the ones piled over it too): opened
+ * from a band stuck at the top, its card would otherwise be above the screen, or behind them.
+ */
+function revealOpen() {
+  const key = props.openKey
+  const band = key && root.value?.querySelector<HTMLElement>(`#band-${key}`)
+  if (!band) return
+  const edge = parseFloat(getComputedStyle(band).top) + band.offsetHeight - 2
+  revealBelow(root.value!.querySelector(`#editor-${key}`), edge)
+}
+// The list's top, for the page to bring into view (its bands stick, so their own place isn't where the list starts),
+// and the open one's card.
+defineExpose({ root, revealOpen })
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
 watch(
   () => shown.value.map((e) => e.key).join(),

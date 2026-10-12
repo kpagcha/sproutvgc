@@ -51,6 +51,21 @@ export function reveal(from: Element | null | undefined, to: Element | null | un
   scrollToY(window.scrollY + delta)
 }
 
+/**
+ * Smoothly scrolls the page by the least amount that brings `el` into view under `edge` (how far down the screen what's
+ * stuck over it reaches); when it's taller than the room, its top wins. The user scrolling or touching the screen
+ * takes over.
+ */
+export function revealBelow(el: Element | null | undefined, edge: number) {
+  if (!el) return
+  const r = el.getBoundingClientRect()
+  let delta = 0
+  if (r.top < edge) delta = r.top - edge
+  else if (r.bottom > window.innerHeight - MARGIN)
+    delta = Math.min(r.bottom - window.innerHeight + MARGIN, r.top - edge)
+  scrollToY(window.scrollY + delta)
+}
+
 /** Smoothly scrolls the page to bring `el` to the middle of the screen (under any bar stuck to its top); the user
  * scrolling or touching it takes over. */
 export function center(el: Element | null | undefined) {

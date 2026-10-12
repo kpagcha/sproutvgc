@@ -10,7 +10,7 @@ import { refName } from '@/i18n/refName'
 import { commonBuilds as common, speedBuilds, speedStat } from '@/lib/speed'
 import { MAX_POINTS } from '@/lib/stats'
 import { buildQuery, buildSpeed, readBuild, type SpeedBuild } from '@/lib/speedBuild'
-import { toTopOf } from '@/lib/scroll'
+import { reveal, toTopOf } from '@/lib/scroll'
 import {
   LIST_MAX,
   commonSpeed,
@@ -53,7 +53,7 @@ import HelpToggle from '@/components/HelpToggle.vue'
 // an opponent picked here starts so, when the meta has its sets.
 const route = useRoute()
 const router = useRouter()
-const replace = (q: Record<string, string | undefined>) => void router.replace({ query: { ...route.query, ...q } })
+const replace = (q: Record<string, string | undefined>) => router.replace({ query: { ...route.query, ...q } })
 
 const { snapshot, data } = useMeta()
 const metaSpeeds = computed(() => !!snapshot.value && has(snapshot.value, 'speeds'))
@@ -232,6 +232,7 @@ function toggleOpen(key: string) {
     return void nextTick(() => editors[key]?.openPicker())
   }
   openKey.value = openKey.value === key ? null : key
+  if (openKey.value) void nextTick(revealOpen)
 }
 
 /** A Pokémon's builds in the meta, by nature effect and points (what Speed cares about), the most common first. */
@@ -269,8 +270,12 @@ function pick(key: string, id: PokemonId) {
   if (!e) return
   if (phone.value || stacked.value) openKey.value = key
   const build = pickedBuild(id, e.build)
-  if (mode.value === 'order') return setList(list.value.map((x, i) => (i === listIndex(key) ? { id, build } : x)))
-  replace({ [key]: id, ...buildQuery(build, key), [`${key}sets`]: startsAtSets(key, id) })
+  const done =
+    mode.value === 'order'
+      ? setList(list.value.map((x, i) => (i === listIndex(key) ? { id, build } : x)))
+      : replace({ [key]: id, ...buildQuery(build, key), [`${key}sets`]: startsAtSets(key, id) })
+  if (stacked.value) void toListTop(done)
+  else void afterPick(done, revealOpen)
 }
 /** A slot's keys in the URL, each as `from`'s (none when it's empty). */
 const moveSlot = (to: Slot, from: Slot | null) =>
@@ -329,11 +334,13 @@ function swap() {
 function addSecond(s: Side, id: PokemonId) {
   const key = `${s}2` as Slot
   openKey.value = key
-  replace({
-    [key]: id,
-    ...buildQuery(pickedBuild(id, readBuild(route.query, key)), key),
-    [`${key}sets`]: startsAtSets(key, id),
-  })
+  void toListTop(
+    replace({
+      [key]: id,
+      ...buildQuery(pickedBuild(id, readBuild(route.query, key)), key),
+      [`${key}sets`]: startsAtSets(key, id),
+    }),
+  )
 }
 // Wider, a side's panel folds to its Pokémon in short (Confirm, or its band), and opens again from either; a side
 // with none picked is always open. On phones, Confirm folds its tab's panel instead.
@@ -346,6 +353,27 @@ function toggleFold(s: Side) {
 // In the list, Confirm folds the open one, and the bands move to the order they move in: on phones, the page then goes
 // to the list's top, its first in view at the top of the screen.
 const lineupEl = useTemplateRef<InstanceType<typeof SpeedLineup>>('lineupEl')
+/**
+ * On phones, once one's picked in the list, the page at the list's top, its first at the top of the screen: after the
+ * URL has it and the list is drawn, and the picking dialog has closed (the page under it kept from scrolling until then).
+ */
+const toListTop = (picked: Promise<unknown>) => afterPick(picked, () => phone.value && toTopOf(lineupEl.value?.root))
+/** `then`, once what was picked is on the page: the URL has it, it's drawn, and the picking dialog has closed. */
+async function afterPick(picked: Promise<unknown>, then: () => void) {
+  await picked
+  await nextTick()
+  setTimeout(then)
+}
+/**
+ * The open one's panel brought into view under what's stuck over it: in the list, right under its band (and the ones
+ * piled over it); on phones' pair of tabs, under them, from the row adding a second over it.
+ */
+const sideAdds = useTemplateRef<HTMLElement>('sideAdds')
+function revealOpen() {
+  if (stacked.value) return lineupEl.value?.revealOpen()
+  const panel = phone.value && openKey.value ? document.getElementById(`compare-${openKey.value}`) : null
+  if (panel) reveal(sideAdds.value ?? panel, panel)
+}
 function confirmRow() {
   openKey.value = null
   if (phone.value) void nextTick(() => toTopOf(lineupEl.value?.root))
@@ -374,7 +402,12 @@ function add(id: PokemonId | null) {
   adderKey.value++
   if (!id) return
   if (full.value) return void (limitShown.value = true)
-  setList([...list.value, { id, build: pickedBuild(id, { effect: 'up', points: MAX_POINTS, toggles: [], stage: 0 }) }])
+  void toListTop(
+    setList([
+      ...list.value,
+      { id, build: pickedBuild(id, { effect: 'up', points: MAX_POINTS, toggles: [], stage: 0 }) },
+    ]),
+  )
 }
 
 // Switching to the speed order with its list empty brings the Pokémon compared over, to go on from them.
@@ -725,7 +758,7 @@ function resetAll() {
 
       <!-- On phones, the two side by side as tabs, each with its Pokémon in short, stuck to the top while the page
            scrolls: tapping one opens its panel under them, tapping it again folds it. Who moves first is marked on the verdict and the open panel, not on them. -->
-      <div v-if="phone" class="side-tabs">
+      <div v-if="phone" class="side-tabs" data-top-bar>
         <button
           v-for="side in sides"
           :key="side.s"
@@ -755,7 +788,7 @@ function resetAll() {
         </button>
       </div>
       <!-- On phones, under each tab, a second for its team, greyed out until its first is picked. -->
-      <div v-if="phone" class="side-adds">
+      <div v-if="phone" ref="sideAdds" class="side-adds">
         <SpeedAddSecond
           :ranks
           v-for="side in sides"
