@@ -1002,10 +1002,33 @@ const ladderRows = computed(() => {
       a.row.species.localeCompare(b.row.species, locale.value) ||
       (a.row.forme ?? '').localeCompare(b.row.forme ?? '', locale.value),
   )
-  return { rows: placed.map((p) => p.row), chips }
+  // Each row as it was, when nothing it shows has changed (nor its chip, what its tags show): those not changed by
+  // a change (a Pokémon found, another measured against) aren't drawn again.
+  const rows = placed.map(({ row }) => {
+    const was = lastRows.get(row.key)
+    return was && same(was.row, row) && same(was.chip, chips.get(row.key)) ? was.row : row
+  })
+  lastRows = new Map(rows.map((row) => [row.key, { row, chip: chips.get(row.key) }]))
+  tagChips = chips
+  return { rows, chips }
 })
+/** The ladder's rows as last drawn, with their chips, for `ladderRows` to keep those unchanged. */
+let lastRows = new Map<string, { row: OddsRow; chip: Entry | undefined }>()
+/** Whether two plain values (numbers, strings, arrays, objects of them) are the same. */
+function same(a: unknown, b: unknown): boolean {
+  if (a === b) return true
+  if (typeof a !== 'object' || typeof b !== 'object' || !a || !b || Array.isArray(a) !== Array.isArray(b)) return false
+  const [ka, kb] = [Object.keys(a), Object.keys(b)]
+  return (
+    ka.length === kb.length &&
+    ka.every((k) => same((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k]))
+  )
+}
+/** The chips of the rows, for their tags: read untracked, so that a row's tags are drawn again with the row alone
+ * (which changes with its chip), not every row whenever the ladder is worked out again. */
+let tagChips = new Map<string, Entry>()
 /** The chip a row stands for. */
-const rowChip = (r: OddsRow) => ladderRows.value.chips.get(r.key)
+const rowChip = (r: OddsRow) => tagChips.get(r.key)
 /**
  * Every Pokémon shown, by base Speed (`SpeedRanges`), with no snapshot to have their sets from: those sharing one have
  * the same Speeds whatever their build, so a row each, with its Speeds at every benchmark (with the modifiers) and its
