@@ -670,6 +670,9 @@ export const messages: Record<keyof typeof en, string> = {
   'meta.battles': '{n} combates',
   'meta.regulation': 'Reglamento {reg}',
   'meta.pick': 'Datos mostrados: {label}',
+  'meta.notLatest': 'No son los datos más recientes',
+  'meta.latest': 'Recientes',
+  'meta.toLatest': 'Volver a los datos más recientes',
   'meta.cutoffsNote':
     'Equipos ponderados por la puntuación de sus jugadores: cada uno cuenta más los de su corte o más; Todos los jugadores cuenta todos igual.',
   'speed.intro': 'Los Pokémon del Reglamento {reg} por su Velocidad.',

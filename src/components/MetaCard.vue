@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed, useId } from 'vue'
-import { X } from '@lucide/vue'
+import { RotateCcw, X } from '@lucide/vue'
 import {
   datasetDates,
   metaDatasets,
+  offLatest,
   selectSnapshot,
   selectedSnapshot,
+  showLatest,
   snapshots,
   sourceParts,
   subsetParts,
@@ -19,7 +21,8 @@ import { metaLoading } from '@/composables/useMeta'
 // (the current one first), then its datasets, a plain list of them, the latest first (what one source observed over
 // one period, whatever the period: Smogon's are months), what the one shown is (its battles, regulation, days,
 // source), and its subsets (whose teams count most), what they mean said once over them. Picking a subset shows it on every page and closes the card; another regulation
-// or dataset shows its latest, keeping the subset when it has it, and leaves the card open for the next step.
+// or dataset shows its latest, keeping the subset when it has it, and leaves the card open for the next step. While
+// it isn't the latest dataset, its band has the way back to it (Latest), at the same players, which closes it.
 const emit = defineEmits<{ close: [] }>()
 const id = useId()
 
@@ -49,6 +52,10 @@ function pick(snapshot: string) {
   selectSnapshot(snapshot)
   emit('close')
 }
+function latest() {
+  showLatest()
+  emit('close')
+}
 const subsetLabel = (s: MetaSnapshot) => subsetParts(s).join(' · ')
 /** What its subsets mean, said once over them: Smogon's cutoffs, when they're what tells them apart. */
 const cutoffs = computed(() => !!current.value?.snapshots.some((s) => s.cutoff !== undefined))
@@ -66,9 +73,21 @@ const about = (d: MetaDataset) =>
   <div class="panel banded meta-card" :class="{ loading: metaLoading }" :aria-busy="metaLoading">
     <div class="band">
       <span>{{ t('meta.data') }}</span>
-      <button type="button" class="btn on-band close" :aria-label="t('picker.close')" @click="emit('close')">
-        <X :size="16" aria-hidden="true" />
-      </button>
+      <div class="band-end">
+        <button
+          v-if="offLatest"
+          v-tip="t('meta.toLatest')"
+          type="button"
+          class="btn on-band latest"
+          :aria-label="t('meta.toLatest')"
+          @click="latest"
+        >
+          <RotateCcw :size="14" aria-hidden="true" />{{ t('meta.latest') }}
+        </button>
+        <button type="button" class="btn on-band close" :aria-label="t('picker.close')" @click="emit('close')">
+          <X :size="16" aria-hidden="true" />
+        </button>
+      </div>
     </div>
     <div class="body">
       <!-- The regulations, when there's a choice of them. -->
@@ -139,6 +158,12 @@ const about = (d: MetaDataset) =>
   gap: 8px;
   margin-bottom: 0;
   font-weight: bold;
+}
+/* Its end: the way back to the latest, when it's not, then the close. */
+.band-end {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 /* Under the band, what scrolls when the card's too tall for the screen (in the phones' dialog), the band staying put;
    it reaches the card's right and bottom edges, so its scrollbar runs along them. */

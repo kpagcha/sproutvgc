@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { ChevronDown, Database } from '@lucide/vue'
-import { datasetParts, metaLabel, selectedSnapshot, subsetShort } from '@/data/meta'
+import { datasetParts, metaLabel, offLatest, selectedSnapshot, subsetShort } from '@/data/meta'
 import { t } from '@/i18n'
 import { metaLoading } from '@/composables/useMeta'
 import MetaCard from '@/components/MetaCard.vue'
@@ -10,7 +10,9 @@ import ModalDialog from '@/components/ModalDialog.vue'
 // The meta's data shown, as a button saying it (its dataset, "Showdown ladder · Sep 2026", and its subset in short,
 // "1760+") that opens its card (`MetaCard`) to see what it is and pick another: dropping from the button, closed by a
 // press outside it or Escape. On phones, the button is its icon alone (what it shows read out, and in the card), as
-// the favorites' is, and the card opens in a dialog over the page. Its icon pulses while the data picked loads.
+// the favorites' is, and the card opens in a dialog over the page. Its icon pulses while the data picked loads, and
+// it's tinted in the accent while the data isn't the latest (another regulation or period than the default's), the
+// card then having the way back to it.
 const open = ref(false)
 const root = useTemplateRef<HTMLElement>('root')
 
@@ -48,9 +50,12 @@ const subset = computed(() => (selectedSnapshot.value ? subsetShort(selectedSnap
     <button
       type="button"
       class="btn toggle"
+      :class="{ off: offLatest }"
       :aria-expanded="open"
       :aria-haspopup="phone ? 'dialog' : undefined"
-      :aria-label="t('meta.pick', { label: metaLabel(selectedSnapshot) })"
+      :aria-label="
+        t('meta.pick', { label: metaLabel(selectedSnapshot) }) + (offLatest ? ` (${t('meta.notLatest')})` : '')
+      "
       :aria-busy="metaLoading"
       @click="open = !open"
     >
@@ -102,6 +107,17 @@ const subset = computed(() => (selectedSnapshot.value ? subsetShort(selectedSnap
 }
 .chevron.open {
   transform: rotate(180deg);
+}
+/* The data isn't the latest: outlined in the accent, over a wash of it, its icon in it. */
+:root:root .toggle.off {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--panel));
+}
+:root:root .toggle.off:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 24%, var(--panel));
+}
+.toggle.off .icon {
+  color: var(--accent);
 }
 /* On phones, its icon alone: as compact as the favorites' star. */
 @media (max-width: 720px) {

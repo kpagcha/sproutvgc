@@ -189,6 +189,20 @@ export const selectedSnapshot = computed<MetaSnapshot | undefined>(() => {
   return snapshots.value.find((s) => s.id === p) ?? latest[0]
 })
 
+/** Whether the snapshot shown is of another dataset than the latest (another regulation or period), whatever its
+ * players: what the data button marks, tinted. */
+export const offLatest = computed(() => {
+  const s = selectedSnapshot.value
+  return !!s && !latestSnapshots.value.includes(s)
+})
+
+/** Back to the latest dataset, at the players shown when it has them (its card's Latest). */
+export function showLatest() {
+  const now = selectedSnapshot.value
+  const s = latestSnapshots.value.find((x) => now && subsetKey(x) === subsetKey(now)) ?? latestSnapshots.value[0]
+  if (s) selectSnapshot(s.id)
+}
+
 /** Shows `id`'s snapshot on every page, remembered in this browser. */
 export function selectSnapshot(id: string) {
   const s = snapshots.value.find((x) => x.id === id)
