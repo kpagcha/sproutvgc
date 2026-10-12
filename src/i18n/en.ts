@@ -678,7 +678,7 @@ export const messages = {
   'speed.showDesc': 'The most used Pokémon, or every Pokémon of the regulation.',
   'speed.viewLabel': 'View',
   'speed.viewDesc':
-    'By build: a row per build its sets run, at its Speed, as a ladder. By Pokémon: a row per Pokémon at its most common Speed, its builds marked on it. Fastest possible: at Max+ (Slowest possible, at Min−, under Trick Room), with every Speed ability it can have among the boosts.',
+    'By Pokémon: a row per Pokémon at its most common Speed, its builds marked on it. By build: a row per build its sets run, at its Speed, as a ladder. Fastest possible: at Max+ (Slowest possible, at Min−, under Trick Room), with every Speed ability it can have among the boosts.',
   'speed.view.ladder': 'By build',
   'speed.view.charts': 'By Pokémon',
   'speed.view.max': 'Fastest possible',
@@ -695,13 +695,14 @@ export const messages = {
     "The share of the opponent's sets your Pokémon moves first against, weighted by how many of its sets run each Speed (rare builds included), not counting ties.{boost} How much the opponent is used isn't counted here: your Pokémon's summary counts that.",
   'speed.oddsInfoBoost': " On a boost's row, it's those same sets with the boost.",
   'speed.oddsNote':
-    'Spe: the Speed the row is placed at. Hover or pick it to see what else is at that Speed.\nMarks: the Speeds its sets run, taller the more common.\nFaint bar: from its slowest possible Speed to its fastest.\nTicks (Fastest possible): its benchmarks, Min− to Max+.\nHollow marks: no sets in the data, its benchmarks instead.\nDashed name: an item or ability that changes its Speed, on a row of its own.\nWith your Pokémon: its Speed is the line; marks are blue where you move first and red where they do; tap a mark to compare against it.',
+    'Spe: the Speed the row is placed at. Hover or pick it to see what else is at that Speed.\nMarks: the Speeds its sets run, taller the more common.\nFaint bar: from its slowest possible Speed to its fastest.\nTicks (Fastest possible): its benchmarks, Min− to Max+.\nHollow marks: no sets in the data, its benchmarks instead.\nDashed name: an item or ability that changes its Speed, on a row of its own.\nWith your Pokémon: its Speed is the line; marks are blue where you move first and red where they do; tap a mark, or slide along the row, to compare against it.',
   'speed.oddsNoSets': '{name}: no sets in the data. At its benchmarks: {list}',
   'speed.oddsReach.always': 'Always',
   'speed.oddsReach.never': 'Never',
   'speed.oddsReach.depends': 'Depends',
   'speed.noSets': 'No sets',
   'speed.oddsTies': '+{pct} tie',
+  'speed.slideHint': 'Slide along the row to pick another build.',
   'speed.mod.trickroom': 'Trick Room',
   'speed.modTip.trickroom': 'The slowest move first: the ladder turns over.',
   'speed.modifiers': 'Modifiers',
@@ -731,7 +732,7 @@ export const messages = {
     "Who moves first: the regulation's Pokémon in Speed order, at the Speeds players run. A quick look around; close it at any time.",
   'tour.tiers.choicesTitle': 'Who and how',
   'tour.tiers.choices':
-    "Who's shown (the most used, or every Pokémon) and the view: a row per build, a row per Pokémon, or each at the fastest it can be.",
+    "Who's shown (the most used, or every Pokémon) and the view: a row per Pokémon, a row per build, or each at the fastest it can be.",
   'tour.tiers.optionsTitle': 'Options',
   'tour.tiers.options':
     'Speed items and abilities as rows of their own, Trick Room turning the order over, and modifiers for everyone shown: Tailwind, a Choice Scarf, paralysis, stat stages.',

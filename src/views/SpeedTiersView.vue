@@ -121,17 +121,17 @@ const regulationIds = computed<readonly PokemonId[]>(
 const metaAvailable = computed(() => !!snapshot.value && has(snapshot.value, 'speeds'))
 
 // Two choices, each in the URL: which Pokémon are shown (`?show=`): the most used (the top 50 or 100), or every
-// Pokémon of the regulation; and what the ladder's rows are (`?view=`): a row per build its sets run, at its Speed
-// (`ladder`); a row per Pokémon at its most common Speed, its builds marked on it (`charts`; `ranges`, their name
-// before, still taken); or a row per Pokémon at the fastest it could be (`max`: Max+, Min− under Trick Room), with every
+// Pokémon of the regulation; and what the ladder's rows are (`?view=`): a row per Pokémon at its most common Speed, its
+// builds marked on it (`charts`, the default; `ranges`, their name before, still taken); a row per build its sets run,
+// at its Speed (`ladder`); or a row per Pokémon at the fastest it could be (`max`: Max+, Min− under Trick Room), with every
 // Speed ability it can have among the boosts. Their Speeds are the sets players run; without a snapshot with Speeds,
 // every Pokémon is at the benchmarks, a row per base Speed. A link from before these (`?all=1`) is every Pokémon's
 // charts; one from when the charts could be at the benchmarks (`?speeds=bench`) is at the sets.
 const SHOWS = ['top50', 'top100', 'all'] as const
 type Show = (typeof SHOWS)[number]
-const VIEWS = ['ladder', 'charts', 'max'] as const
+const VIEWS = ['charts', 'ladder', 'max'] as const
 type View = (typeof VIEWS)[number]
-const DEFAULTS = { show: 'top50', view: 'ladder' } as const
+const DEFAULTS = { show: 'top50', view: 'charts' } as const
 const LEGACY = { show: 'all', view: 'charts' } as const
 /** The charts' name in the URL before they were the charts. */
 const renamed = <T,>(k: string, v: T) => (k === 'view' && v === 'ranges' ? 'charts' : v)
@@ -1087,8 +1087,8 @@ function onRow(ev: MouseEvent, key: string) {
   else if (e) onChip(ev, e)
 }
 /** A mark tapped, with yours: measured against that Speed of its row, at the most common build reaching it (with its
- * boost); on a row with no sets, at that benchmark. */
-function onMark(key: string, speed: number) {
+ * boost); on a row with no sets, at that benchmark. Slid to, rather than tapped, it's picked even if it already was. */
+function onMark(key: string, speed: number, slid: boolean) {
   const e = ladderRows.value.chips.get(key)
   const row = ladderRows.value.rows.find((r) => r.key === key)
   if (mine.value === null || !e || !row) return
@@ -1096,17 +1096,20 @@ function onMark(key: string, speed: number) {
     const b = BENCHMARKS.find((x) => row.bench[x] === speed)
     // A boost with no sets is only at the benchmark it's placed at.
     if (!b || (e.boost && b !== e.bench)) return
-    return pickVersus({ ...e, speed: benchmark(POKEMON[e.id].stats[5], b), bench: b })
+    return pickVersus({ ...e, speed: benchmark(POKEMON[e.id].stats[5], b), bench: b }, slid)
   }
   const set = row.builds.find((b) => b.speed === speed)?.sets[0]
   if (!set) return
-  pickVersus({
-    ...e,
-    speed: speedStat(POKEMON[e.id].stats[5], set.points, set.effect),
-    points: set.points,
-    effect: set.effect,
-    ...(!e.boost && { share: set.share }),
-  })
+  pickVersus(
+    {
+      ...e,
+      speed: speedStat(POKEMON[e.id].stats[5], set.points, set.effect),
+      points: set.points,
+      effect: set.effect,
+      ...(!e.boost && { share: set.share }),
+    },
+    slid,
+  )
 }
 /** How many Pokémon the ladder holds, each once however many rows it has. */
 const monCount = computed(() =>
@@ -1235,7 +1238,9 @@ const compareTarget = computed(() => {
 // Its title, the Pokémon's name (with its icon) a link to its page.
 // Picking one finds it too, the find showing as its "Only" switch says; a row per Pokémon, letting it go lets the find
 // go too, the two being one there.
-function pickVersus(e: Entry) {
+/** Measured against, or no longer if it already was (unless `keep`). */
+function pickVersus(e: Entry, keep = false) {
+  if (keep && vsKey.value === chipKey(e)) return
   const vs = vsKey.value === chipKey(e) ? undefined : chipKey(e)
   if (!vs && perMon.value) return clearVersus()
   void router.replace({ query: { ...query.value, vs, ...(vs && { find: e.id }) } })

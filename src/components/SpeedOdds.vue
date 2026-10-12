@@ -77,7 +77,7 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{
   chip: [event: MouseEvent, key: string]
-  mark: [key: string, speed: number]
+  mark: [key: string, speed: number, slid: boolean]
   share: [speed: number]
 }>()
 defineSlots<{ tags?: (props: { row: OddsRow }) => unknown }>()
@@ -160,12 +160,23 @@ function onOut(e: PointerEvent | FocusEvent) {
 // nearest the pointer on a row's bar, so a 5px mark needn't be hit exactly. With a mouse, it shows after a moment over
 // a bar (so sweeping across the list doesn't fire it), or at once on a click, then follows the pointer from mark to
 // mark; leaving the bars hides it. With a finger, a tap shows it, and dragging along the bar moves it (the bars leave
-// the browser only vertical pans, so scrolling the page still works); a tap elsewhere or a scroll hides it. A mark
-// clicked or tapped is measured against, with yours. The mark it's on is marked `active`, and what it says is drawn
-// by `SpeedOddsTip` alone.
+// the browser only vertical pans, so scrolling the page still works), a slider: the mark it's let go on is picked; a
+// tap elsewhere or a scroll hides it. A mark clicked, tapped or slid to is measured against, with yours (until yours
+// is first slid along a row, the tooltip says it can be, on a finger). The mark it's on is marked `active`, and what it
+// says is drawn by `SpeedOddsTip` alone.
 const SHOW_DELAY = 80
 const REACH = { mouse: 12, touch: 24 }
-const tipState = shallowReactive<{ pointed: Pointed | null }>({ pointed: null })
+const SLID_KEY = 'sproutvgc.speedTiers.slid'
+function savedSlid() {
+  try {
+    return localStorage.getItem(SLID_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+/** Whether the reader has slid to a mark already: the tooltip no longer says they can. */
+let slidOnce = savedSlid()
+const tipState = shallowReactive<{ pointed: Pointed | null; hint: boolean }>({ pointed: null, hint: false })
 const tipBody = useTemplateRef<ComponentPublicInstance>('tipBody')
 let tip: Instance | undefined
 // How to read the rows, in the "?"'s tooltip: a line per part of them, its name in bold before what it is (the text a
@@ -185,6 +196,12 @@ let pending: ReturnType<typeof setTimeout> | undefined
 /** The mark the tooltip is placed at, and the one marked as pointed at (none once it hides). */
 let markEl: HTMLElement | undefined
 let activeEl: HTMLElement | undefined
+/** A finger's drag along a bar: the mark it started on, the one it's on, and whether it has left the first; and the
+ * click that may follow letting go, already taken as the pick. */
+let startEl: HTMLElement | undefined
+let slideHit: Hit | undefined
+let slid = false
+let skipClick = false
 
 /** The mark (or benchmark's tick) nearest the pointer on the bar under the event, within reach, and what it is. */
 function nearest(e: PointerEvent) {
@@ -220,6 +237,8 @@ function show(hit: Hit) {
   else tip?.show()
 }
 function hide() {
+  slideHit = startEl = undefined
+  tipState.hint = false
   clearTimeout(pending)
   pending = undefined
   activeEl?.classList.remove('active')
@@ -232,6 +251,11 @@ function onMove(e: PointerEvent) {
     if (e.pointerType === 'mouse') hide()
     return
   }
+  // A finger's drag from a mark: the slider.
+  if (startEl && e.buttons) {
+    slideHit = hit
+    if (hit.el !== startEl) slid = true
+  }
   if (tip?.state.isVisible) show(hit)
   else if (e.pointerType === 'mouse') {
     point(hit)
@@ -240,12 +264,36 @@ function onMove(e: PointerEvent) {
 }
 function onDown(e: PointerEvent) {
   const hit = nearest(e)
+  const finger = e.pointerType !== 'mouse'
+  skipClick = false
+  slid = false
+  startEl = finger ? hit?.el : undefined
+  slideHit = finger ? (hit ?? undefined) : undefined
+  tipState.hint = finger && !slidOnce && props.mine !== null && !!hit && !hit.row.mine
   if (hit) show(hit)
   else hide()
 }
+/** A finger let go after sliding to another mark: that one picked. */
+function onUp(e: PointerEvent) {
+  const hit = slideHit
+  slideHit = startEl = undefined
+  if (e.pointerType === 'mouse' || !slid || !hit || hit.row.mine) return
+  slid = false
+  skipClick = true
+  emit('mark', hit.row.key, hit.speed, true)
+  if (props.mine === null || slidOnce) return
+  slidOnce = true
+  tipState.hint = false
+  try {
+    localStorage.setItem(SLID_KEY, '1')
+  } catch {
+    // Not remembered: the hint shows again next time.
+  }
+}
 function onClick(e: MouseEvent) {
+  if (skipClick) return void (skipClick = false)
   const hit = e instanceof PointerEvent ? nearest(e) : null
-  if (hit && !hit.row.mine) emit('mark', hit.row.key, hit.speed)
+  if (hit && !hit.row.mine) emit('mark', hit.row.key, hit.speed, false)
 }
 function onOutside(e: PointerEvent) {
   if (!list.value?.contains(e.target as Node)) hide()
@@ -304,6 +352,7 @@ onBeforeUnmount(() => {
       class="rows"
       @pointermove="onMove"
       @pointerdown="onDown"
+      @pointerup="onUp"
       @click="onClick"
       @pointerleave="onLeave"
       @pointercancel="hide"

@@ -686,7 +686,7 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.showDesc': 'Los Pokémon más usados, o todos los Pokémon del reglamento.',
   'speed.viewLabel': 'Vista',
   'speed.viewDesc':
-    'Por reparto: una fila por reparto de sus sets, en su Velocidad, como una escala. Por Pokémon: una fila por Pokémon en su Velocidad más común, con sus repartos marcados en ella. Más rápido posible: en Máx+ (Más lento posible, en Mín−, con Espacio Raro), con cada habilidad de Velocidad que puede tener entre las mejoras.',
+    'Por Pokémon: una fila por Pokémon en su Velocidad más común, con sus repartos marcados en ella. Por reparto: una fila por reparto de sus sets, en su Velocidad, como una escala. Más rápido posible: en Máx+ (Más lento posible, en Mín−, con Espacio Raro), con cada habilidad de Velocidad que puede tener entre las mejoras.',
   'speed.view.ladder': 'Por reparto',
   'speed.view.charts': 'Por Pokémon',
   'speed.view.max': 'Más rápido posible',
@@ -703,12 +703,13 @@ export const messages: Record<keyof typeof en, string> = {
     'La proporción de los sets del rival contra los que tu Pokémon mueve primero, según cuántos de sus sets llevan cada Velocidad (incluidos los repartos raros), sin contar los empates.{boost} Aquí no cuenta cuánto se usa el rival: eso lo cuenta el resumen de tu Pokémon.',
   'speed.oddsInfoBoost': ' En la fila de una mejora, son esos mismos sets con la mejora.',
   'speed.oddsNote':
-    'Vel: la Velocidad en la que se coloca la fila. Pasa por encima o elígela para ver qué más hay en esa Velocidad.\nMarcas: las Velocidades de sus sets, más altas cuanto más comunes.\nBarra tenue: de su Velocidad más baja posible a la más alta.\nRayitas (Más rápido posible): sus referencias, de Mín− a Máx+.\nMarcas huecas: sin sets en los datos, sus referencias en su lugar.\nNombre con borde discontinuo: un objeto o habilidad que cambia su Velocidad, en una fila propia.\nCon tu Pokémon: su Velocidad es la línea; las marcas son azules donde mueves primero y rojas donde mueve el rival; toca una marca para compararte con ella.',
+    'Vel: la Velocidad en la que se coloca la fila. Pasa por encima o elígela para ver qué más hay en esa Velocidad.\nMarcas: las Velocidades de sus sets, más altas cuanto más comunes.\nBarra tenue: de su Velocidad más baja posible a la más alta.\nRayitas (Más rápido posible): sus referencias, de Mín− a Máx+.\nMarcas huecas: sin sets en los datos, sus referencias en su lugar.\nNombre con borde discontinuo: un objeto o habilidad que cambia su Velocidad, en una fila propia.\nCon tu Pokémon: su Velocidad es la línea; las marcas son azules donde mueves primero y rojas donde mueve el rival; toca una marca, o desliza por la fila, para compararte con ella.',
   'speed.oddsNoSets': '{name}: sin sets en los datos. En sus referencias: {list}',
   'speed.oddsReach.always': 'Siempre',
   'speed.oddsReach.never': 'Nunca',
   'speed.oddsReach.depends': 'Depende',
   'speed.noSets': 'Sin sets',
+  'speed.slideHint': 'Desliza por la fila para elegir otro reparto.',
   'speed.oddsTies': '+{pct} empate',
   'speed.mod.trickroom': 'Espacio Raro',
   'speed.modTip.trickroom': 'El más lento mueve primero: la escala se da la vuelta.',
@@ -739,7 +740,7 @@ export const messages: Record<keyof typeof en, string> = {
     'Quién se mueve primero: los Pokémon de la regulación por orden de Velocidad, en las Velocidades que usan los jugadores. Un vistazo rápido; ciérralo cuando quieras.',
   'tour.tiers.choicesTitle': 'Quiénes y cómo',
   'tour.tiers.choices':
-    'Quiénes se muestran (los más usados, o todos los Pokémon) y la vista: una fila por reparto, una por Pokémon, o cada uno en lo más rápido que puede ser.',
+    'Quiénes se muestran (los más usados, o todos los Pokémon) y la vista: una fila por Pokémon, una por reparto, o cada uno en lo más rápido que puede ser.',
   'tour.tiers.optionsTitle': 'Opciones',
   'tour.tiers.options':
     'Los objetos y habilidades de Velocidad como filas propias, Espacio Raro invirtiendo el orden, y modificadores para todos los mostrados: Viento Afín, Pañuelo Elegido, parálisis, cambios de característica.',
