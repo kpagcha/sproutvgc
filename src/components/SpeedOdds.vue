@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef } from 'vue'
 import tippy, { type Instance } from 'tippy.js'
-import { CircleHelp, Info } from '@lucide/vue'
+import { Info } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { percent } from '@/data/meta'
 import { t } from '@/i18n'
@@ -294,14 +294,14 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="odds" :class="{ finding, mined: mine !== null }">
-    <!-- The heads: the Speed's column, how to read the rows (a "?", its tooltip), the axis's ends with yours
+    <!-- The heads: the Speed's column, how to read the rows (its tooltip), the axis's ends with yours
          on it, and, with yours, what the rows' ends say. -->
     <div class="head">
       <span class="speed"
-        ><span aria-hidden="true">{{ t('stat.spe') }}</span
-        ><span ref="noteHelp" class="help" tabindex="0" role="img" :aria-label="t('speed.help')">
-          <CircleHelp :size="14" aria-hidden="true" /></span
-      ></span>
+        ><span ref="noteHelp" class="note" tabindex="0" role="img" :aria-label="t('speed.help')">{{
+          t('stat.spe')
+        }}</span></span
+      >
       <span class="who"></span>
       <span class="track" aria-hidden="true">
         <span class="end">{{ Math.round(axis.lo) }}</span>
@@ -532,17 +532,19 @@ onBeforeUnmount(() => {
   padding-top: 6px;
   text-align: right;
 }
-/* "Spe", how to read the rows after it as "You first" has what it is: 4px after it, centered on the line, in the gap
-   past the column (as the numbers under it are right-aligned to its edge). */
 .head .speed {
   align-self: center;
   padding: 0;
 }
-.head .speed > .help {
-  position: absolute;
-  top: 50%;
-  left: calc(100% + 4px);
-  translate: 0 -50%;
+/* "Spe", how to read the rows in its tooltip, hovered or tapped: underlined dotted, as text with more to it. */
+.head .note {
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: help;
+}
+.head .note:hover,
+.head .note:focus-visible {
+  color: var(--text);
 }
 /* In the text's color, as a number rather than a link (retro.css colors links). */
 :root:root a.speed {
