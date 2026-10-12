@@ -379,6 +379,11 @@ mark {
 }
 
 /* ---------- Tooltips (tippy.js) ---------- */
+/* A tooltip shown takes the taps and clicks on it, rather than what's under it getting them (tippy lets them through
+   one that isn't interactive): a tap on it hides it. */
+[data-tippy-root]:has(> .tippy-box[data-state='visible']) {
+  pointer-events: auto !important;
+}
 .tippy-box[data-theme~='sproutvgc'] {
   background: var(--panel);
   color: var(--text);

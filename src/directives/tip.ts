@@ -1,9 +1,43 @@
-import tippy, { createSingleton, type CreateSingletonInstance, type Instance } from 'tippy.js'
+import tippy, { createSingleton, type CreateSingletonInstance, type Instance, type Plugin } from 'tippy.js'
 import type { Directive } from 'vue'
 import 'tippy.js/dist/tippy.css'
 import 'tippy.js/dist/border.css'
 
-tippy.setDefaultProps({ theme: 'sproutvgc', delay: [200, 0], duration: [120, 80] })
+// On a touch screen, tapping what a tooltip is of toggles it: tippy shows it on the first tap but leaves it shown on the
+// next (a tap on it counts neither as outside nor as toggling it), and once hidden that way, a tap there shows it no
+// more (the emulated mouse never left, the focus is still there). Not those placed by hand (`manual`), which say for
+// themselves.
+const tapToggle: Plugin = {
+  fn(instance) {
+    let touch = false
+    let shown = false
+    const onDown = (e: PointerEvent) => {
+      touch = e.pointerType !== 'mouse'
+      shown = touch && instance.state.isVisible
+    }
+    const onClick = () => {
+      if (!touch) return
+      if (shown) instance.hide()
+      else if (!instance.state.isVisible) instance.show()
+      touch = shown = false
+    }
+    const manual = () => instance.props.trigger.includes('manual')
+    const el = instance.reference as HTMLElement
+    return {
+      onCreate() {
+        if (manual()) return
+        el.addEventListener('pointerdown', onDown)
+        el.addEventListener('click', onClick)
+      },
+      onDestroy() {
+        el.removeEventListener('pointerdown', onDown)
+        el.removeEventListener('click', onClick)
+      },
+    }
+  },
+}
+
+tippy.setDefaultProps({ theme: 'sproutvgc', delay: [200, 0], duration: [120, 80], plugins: [tapToggle] })
 
 type TipEl = HTMLElement & { _tip?: Instance; _tipContent?: string; _tipGroup?: string }
 type TipValue = string | false | null | undefined

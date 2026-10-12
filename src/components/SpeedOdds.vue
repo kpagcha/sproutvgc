@@ -8,7 +8,6 @@ import {
   type ComponentPublicInstance,
 } from 'vue'
 import tippy, { type Instance } from 'tippy.js'
-import { Info } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { t } from '@/i18n'
 import type { Benchmark, NatureEffect } from '@/lib/stats'
@@ -344,11 +343,11 @@ onBeforeUnmount(() => {
         }}</span>
         <span class="end">{{ Math.round(axis.lo + axis.span) }}</span>
       </span>
-      <span v-if="mine !== null" class="odds-cell odds-head"
-        >{{ t('speed.oddsHead')
-        }}<span v-tip="oddsInfo" class="help" tabindex="0" role="img" :aria-label="oddsInfo">
-          <Info :size="14" aria-hidden="true" /></span
-      ></span>
+      <span v-if="mine !== null" class="odds-cell"
+        ><span v-tip="oddsInfo" class="note" tabindex="0" :aria-label="`${t('speed.oddsHead')}: ${oddsInfo}`">{{
+          t('speed.oddsHead')
+        }}</span></span
+      >
     </div>
     <ol
       ref="list"
@@ -438,7 +437,8 @@ onBeforeUnmount(() => {
 .head .who {
   grid-area: who;
 }
-/* "Spe", how to read the rows in its tooltip, hovered or tapped: underlined dotted, as text with more to it. */
+/* "Spe" and "You first", what they are in their tooltips, hovered or tapped: underlined dotted, as text with more to
+   it. */
 .head .note {
   text-decoration: underline dotted;
   text-underline-offset: 2px;
@@ -454,25 +454,6 @@ onBeforeUnmount(() => {
   flex-direction: column;
   align-items: flex-end;
   text-align: right;
-}
-/* "You first", its info icon after it: what it is of in a tooltip, hovered or tapped. */
-.odds-head {
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 4px;
-}
-.help {
-  display: inline-flex;
-  padding: 0;
-  color: var(--muted);
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-.help:hover,
-.help:focus-visible {
-  color: var(--text);
 }
 .mine-label {
   position: absolute;
@@ -518,6 +499,10 @@ onBeforeUnmount(() => {
     grid-template-areas:
       'speed who odds'
       'speed track track';
+  }
+  /* At the top, as a row's Speed is: level with "You first" (or, without yours, the axis's ends). */
+  .head .speed {
+    align-self: start;
   }
 }
 </style>
