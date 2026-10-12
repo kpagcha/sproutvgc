@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { PokemonId } from '@/data/dex'
 import { t } from '@/i18n'
-import { toMoveFirst, type SpeedBuild } from '@/lib/speedBuild'
+import type { SpeedBuild } from '@/lib/speedBuild'
 import { reachOf, toBeatAll, type SpreadPoint } from '@/lib/speedLineup'
 import SpeedAgainst from '@/components/SpeedAgainst.vue'
 import SpeedSpread from '@/components/SpeedSpread.vue'
@@ -18,15 +18,13 @@ export interface VersusMon {
   spread: readonly SpreadPoint[]
   sets: boolean
 }
-const props = defineProps<{
+defineProps<{
   me: VersusMon
   them: VersusMon
   tone: 'yours' | 'opponent'
   trickRoom: boolean
   banded?: boolean
 }>()
-
-const rows = (speed: number) => toMoveFirst(props.me.id, props.me.build, speed, props.trickRoom)
 </script>
 
 <template>
@@ -43,23 +41,29 @@ const rows = (speed: number) => toMoveFirst(props.me.id, props.me.build, speed, 
   <template v-else-if="them.sets">
     <SpeedAgainst
       :title="t('compare.againstCommon', { name: them.name, speed: them.speed })"
-      :rows="rows(them.speed)"
-      :current="me.build.effect"
+      :id="me.id"
+      :build="me.build"
+      :target="them.speed"
+      :trick-room="trickRoom"
       :banded
     />
     <SpeedAgainst
       v-if="toBeatAll(them.spread, trickRoom) !== them.speed"
       :title="t('compare.againstAll', { name: them.name, speed: toBeatAll(them.spread, trickRoom) })"
-      :rows="rows(toBeatAll(them.spread, trickRoom))"
-      :current="me.build.effect"
+      :id="me.id"
+      :build="me.build"
+      :target="toBeatAll(them.spread, trickRoom)"
+      :trick-room="trickRoom"
       :banded
     />
   </template>
   <SpeedAgainst
     v-else
     :title="t('compare.against', { name: them.name, speed: them.speed })"
-    :rows="rows(them.speed)"
-    :current="me.build.effect"
+    :id="me.id"
+    :build="me.build"
+    :target="them.speed"
+    :trick-room="trickRoom"
     :banded
   />
 </template>

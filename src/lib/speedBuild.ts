@@ -142,3 +142,74 @@ export function pointsText(r: ReturnType<typeof pointsToMoveFirst>) {
   if ('upTo' in r) return r.upTo === MAX_POINTS ? t('speed.vsAny') : t('speed.vsUpTo', { points: r.upTo })
   return t('speed.vsTies', { points: r.ties })
 }
+
+type MoveFirst = ReturnType<typeof pointsToMoveFirst>
+/** Whether points do it: moving first, not only tying. */
+export const works = (r: MoveFirst): r is { from: number } | { upTo: number } => !!r && !('ties' in r)
+
+/**
+ * What it takes a Pokémon at build `b` to move before one at Speed `target`, in short. With its nature: the points that
+ * do it (with what's left of its own to spare), or how close it gets, its fastest (under Trick Room, its slowest) Speed
+ * and how far off it is. When its nature can't, the nature that would (raising Speed; lowering it under Trick Room).
+ * When neither can, the modifiers that would, each on its own, with what they'd take: one added (Tailwind, a Choice
+ * Scarf, its doubling abilities, the least Speed stage that does it, Trick Room), or one it has taken off; under Trick
+ * Room, the ones slowing it, and Trick Room gone.
+ */
+export function moveFirstPlan(id: PokemonId, b: SpeedBuild, target: number, trickRoom: boolean) {
+  const base = POKEMON[id].stats[5]
+  const better: NatureEffect = trickRoom ? 'down' : 'up'
+  const at = (effect: NatureEffect, mods: SpeedMods, tr = trickRoom) =>
+    pointsToMoveFirst(base, effect, mods, target, tr)
+  const mods = modsOf(b, id)
+  const result = at(b.effect, mods)
+  const reach = inBattle(speedStat(base, trickRoom ? 0 : MAX_POINTS, b.effect), mods)
+  const current = {
+    effect: b.effect,
+    result,
+    reach,
+    /** How far its reach is from moving first: by how much it's too slow (too fast, under Trick Room). */
+    off: trickRoom ? reach - target + 1 : target + 1 - reach,
+    spare: !trickRoom && result && 'from' in result && b.points > result.from ? b.points - result.from : 0,
+  }
+  const otherResult = b.effect === better ? null : at(better, mods)
+  const other = otherResult && works(otherResult) ? { effect: better, result: otherResult } : null
+  if (works(result) || other) return { current, other, mods: null }
+
+  // Each modifier on its own: what it takes with its nature, else with the better one.
+  const list: { label: string; effect: NatureEffect; result: NonNullable<MoveFirst> }[] = []
+  const tryWith = (label: string, next: SpeedBuild, tr = trickRoom) => {
+    const m = modsOf(next, id)
+    const fast: NatureEffect = tr ? 'down' : 'up'
+    for (const effect of b.effect === fast ? [fast] : [b.effect, fast]) {
+      const r = at(effect, m, tr)
+      if (works(r)) return void list.push({ label, effect, result: r })
+    }
+  }
+  const adding = (k: BuildToggle) => ({ ...b, toggles: toggled(b.toggles, k) })
+  const without = (k: BuildToggle, label: string) =>
+    b.toggles.includes(k) && tryWith(t('speed.without', { mod: label }), adding(k))
+  if (!trickRoom) {
+    for (const k of ['tailwind', 'scarf'] as const) if (!b.toggles.includes(k)) tryWith(t(`speed.mod.${k}`), adding(k))
+    doublers(id).forEach((a, i) => {
+      const k = doublerToggle(i)
+      if (!modsOf(b, id).doubled) tryWith(doublerLabel(a).label, adding(k))
+    })
+    without('ironball', t('speed.mod.ironball'))
+    without('paralysis', t('speed.mod.paralysis'))
+  } else {
+    for (const k of ['paralysis', 'ironball'] as const)
+      if (!b.toggles.includes(k)) tryWith(t(`speed.mod.${k}`), adding(k))
+    for (const k of ['tailwind', 'scarf'] as const) without(k, t(`speed.mod.${k}`))
+    const doubled = doubling(id, b)
+    if (doubled) without(b.toggles.includes('doubled2') ? 'doubled2' : 'doubled', doublerLabel(doubled).label)
+  }
+  // The least stage that does it, from its own.
+  const step = trickRoom ? -1 : 1
+  for (let s = b.stage + step; Math.abs(s) <= 6; s += step) {
+    const before = list.length
+    tryWith(t('speed.stageShort', { stage: s > 0 ? `+${s}` : String(s) }), { ...b, stage: s })
+    if (list.length > before) break
+  }
+  tryWith(trickRoom ? t('speed.without', { mod: t('speed.mod.trickroom') }) : t('speed.mod.trickroom'), b, !trickRoom)
+  return { current, other: null, mods: list }
+}

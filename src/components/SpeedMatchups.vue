@@ -189,8 +189,10 @@ const against = (me: Mon, speed: number) => toMoveFirst(me.id, me.build, speed, 
       <section v-for="y in yours" :key="y.key" class="card yours">
         <SpeedAgainst
           :title="t('compare.bothOf', { name: y.name, other: toBeat.name, speed: toBeat.speed })"
-          :rows="against(y, toBeat.speed)"
-          :current="y.build.effect"
+          :id="y.id"
+          :build="y.build"
+          :target="toBeat.speed"
+          :trick-room="trickRoom"
           banded
         />
       </section>
