@@ -534,7 +534,6 @@ function resetAll() {
         <TourToggle class="head-tour" @start="startTour" />
       </div>
       <div v-if="helpOpen" id="compare-help" class="help-body panel sunken small">
-        <button type="button" class="btn tour-start" @click="startTour">{{ t('tour.start') }}</button>
         <p class="formula muted">{{ t('speed.formula') }}</p>
         <!-- What the view shown has: yours against opponents, or the speed order. -->
         <dl class="help-options">
@@ -970,10 +969,6 @@ function resetAll() {
 .help-body {
   margin: 12px 0 0;
   padding: 8px 10px;
-}
-/* Taking the page's tour again, first in the well. */
-.help-body > .tour-start {
-  margin-bottom: 8px;
 }
 .help-body > p {
   margin: 0 0 8px;

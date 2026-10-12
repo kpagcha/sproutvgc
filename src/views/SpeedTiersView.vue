@@ -1681,7 +1681,6 @@ const { start: startTour } = useTour(
           <!-- How to read the ladder: what its options do; samples of a chip, each with what its parts mean; then yours
                among them. -->
           <div v-if="helpOpen" id="speed-help" class="help-body panel sunken">
-            <button type="button" class="btn tour-start" @click="startTour">{{ t('tour.start') }}</button>
             <div class="help-intro small">
               <dl class="help-options">
                 <template v-if="metaAvailable">
@@ -3274,10 +3273,6 @@ const { start: startTour } = useTour(
 .help-body {
   margin: 12px 0 0;
   padding: 8px 10px;
-}
-/* Taking the page's tour again, first in the well. */
-.help-body > .tour-start {
-  margin-bottom: 8px;
 }
 .help-body > :is(.legend, p) {
   margin-top: 0;
