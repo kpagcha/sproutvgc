@@ -5,6 +5,7 @@ import {
   onMounted,
   shallowReactive,
   useTemplateRef,
+  watch,
   type ComponentPublicInstance,
 } from 'vue'
 import tippy, { type Instance } from 'tippy.js'
@@ -82,10 +83,11 @@ const emit = defineEmits<{
 defineSlots<{ tags?: (props: { row: OddsRow }) => unknown }>()
 
 /** The axis: what the rows could reach and every Speed drawn, and yours; but for the boosts' rows (unless sorting by
- * what they could reach), so a boost doubling a few doesn't squeeze the rest: their Speeds past its ends are said at
- * them rather than drawn. */
+ * what they could reach, or the ladder is the Pokémon found alone, with yours: there are no others to squeeze), so a
+ * boost doubling a few doesn't squeeze the rest: their Speeds past its ends are said at them rather than drawn. */
 const axis = computed(() => {
-  const plain = props.possible ? props.rows : props.rows.filter((r) => !r.boost)
+  const alone = props.rows.every((r) => r.hit || r.mine)
+  const plain = props.possible || alone ? props.rows : props.rows.filter((r) => !r.boost)
   const all = (plain.length ? plain : props.rows).flatMap((r) => [
     r.reach.min,
     r.reach.max,
@@ -221,8 +223,12 @@ function nearest(e: PointerEvent) {
   return pointed ? { row, speed, pointed, el: best } : null
 }
 type Hit = NonNullable<ReturnType<typeof nearest>>
+/** The mark pointed at, by its row and Speed (and benchmark): the ladder drawn again (a mark tapped picking it, finding
+ * its Pokémon, rows coming and going around it) can put another element in its place, or move it. */
+let pointedAt: { key: string; s: string; bench?: string } | undefined
 function point(hit: Hit) {
   markEl = hit.el
+  pointedAt = { key: hit.row.key, s: hit.el.dataset.s!, bench: hit.el.dataset.bench }
   if (activeEl === hit.el) return
   activeEl?.classList.remove('active')
   activeEl = hit.el
@@ -236,6 +242,7 @@ function show(hit: Hit) {
   else tip?.show()
 }
 function hide() {
+  pointedAt = undefined
   slideHit = startEl = undefined
   tipState.hint = false
   clearTimeout(pending)
@@ -301,6 +308,28 @@ function onLeave(e: PointerEvent) {
   if (e.pointerType === 'mouse') hide()
   setHovered(null)
 }
+// The ladder drawn again with the tooltip shown: on the mark it points at as it is now, marked again, or hidden when
+// that mark's gone.
+watch(
+  () => [props.rows, props.versusSpeed, props.pickedSpeed],
+  () => {
+    if (!tip?.state.isVisible || !pointedAt) return
+    const { key, s, bench } = pointedAt
+    const row = [...(list.value?.querySelectorAll<HTMLElement>('.row') ?? [])].find((r) => r.dataset.key === key)
+    const el = [...(row?.querySelectorAll<HTMLElement>('.track [data-s]') ?? [])].find(
+      (m) => m.dataset.s === s && m.dataset.bench === bench,
+    )
+    if (!el) return hide()
+    markEl = el
+    if (activeEl !== el) {
+      activeEl?.classList.remove('active')
+      activeEl = el
+      el.classList.add('active')
+    }
+    void tip.popperInstance?.update()
+  },
+  { flush: 'post' },
+)
 onMounted(() => {
   tip = tippy(list.value!, {
     trigger: 'manual',

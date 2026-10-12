@@ -21,7 +21,7 @@ const tapToggle: Plugin = {
       else if (!instance.state.isVisible) instance.show()
       touch = shown = false
     }
-    const manual = () => instance.props.trigger.includes('manual')
+    const manual = () => /manual|click/.test(instance.props.trigger)
     const el = instance.reference as HTMLElement
     return {
       onCreate() {
@@ -48,7 +48,17 @@ document.addEventListener(
   { capture: true, passive: false },
 )
 
-tippy.setDefaultProps({ theme: 'sproutvgc', delay: [200, 0], duration: [120, 80], plugins: [tapToggle] })
+// On a screen with no hover (phones), a tap shows a tooltip and the next hides it (tippy's own toggling): not the mouse
+// events a touch screen makes up, which come on their own when the page moves under where the finger last was (the
+// speed tiers' ladder narrowing to the Pokémon found, a tooltip then opening over whatever came under it).
+const noHover = window.matchMedia('(hover: none)').matches
+tippy.setDefaultProps({
+  theme: 'sproutvgc',
+  delay: [200, 0],
+  duration: [120, 80],
+  plugins: [tapToggle],
+  ...(noHover && { trigger: 'click', delay: 0 }),
+})
 
 type TipEl = HTMLElement & { _tip?: Instance; _tipContent?: string; _tipGroup?: string }
 type TipValue = string | false | null | undefined
