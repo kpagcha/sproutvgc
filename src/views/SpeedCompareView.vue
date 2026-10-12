@@ -835,15 +835,10 @@ function resetAll() {
                 aria-hidden="true"
               />
             </component>
-            <!-- Folded (desktop): its Pokémon in short, opening it when tapped, and what it takes to move first. -->
-            <template v-if="isFolded(side.s)">
-              <button type="button" class="folded-summary" @click="toggleFold(side.s)">
-                <BuildSummary :id="side.id!" :speed="side.speed!" :build="side.build" :range="side.range" />
-              </button>
-              <section v-if="vsPair(side.s)" class="part folded-part">
-                <SpeedVersus v-bind="vsPair(side.s)!" :tone="teamOf(side.s)" :trick-room="trickRoom" />
-              </section>
-            </template>
+            <!-- Folded (desktop): its Pokémon in short, opening it when tapped. -->
+            <button v-if="isFolded(side.s)" type="button" class="folded-summary" @click="toggleFold(side.s)">
+              <BuildSummary :id="side.id!" :speed="side.speed!" :build="side.build" :range="side.range" />
+            </button>
             <!-- Confirm at its end folds it: under its tab on phones, to its short form wider. -->
             <SpeedEditor
               :ranks
@@ -865,12 +860,16 @@ function resetAll() {
               @pick="(id: PokemonId) => pick(side.s, id)"
               @build="(b: Partial<SpeedBuild>) => setBuild(side.s, b)"
               @clear="clear(side.s)"
-            >
-              <!-- What it takes to move before the other, at each nature effect; on phones, under the two instead. -->
-              <section v-if="!phone && vsPair(side.s)" class="part">
-                <SpeedVersus v-bind="vsPair(side.s)!" :tone="teamOf(side.s)" :trick-room="trickRoom" />
-              </section>
-            </SpeedEditor>
+            />
+          </section>
+          <!-- What it takes to move before the other, a panel of its own under its side's, open or folded; on phones,
+               under the two instead. -->
+          <section
+            v-if="!phone && vsPair(side.s)"
+            class="panel insight col-insight"
+            :class="{ opponent: side.s === 'b' }"
+          >
+            <SpeedVersus v-bind="vsPair(side.s)!" :tone="teamOf(side.s)" :trick-room="trickRoom" banded />
           </section>
           <!-- Under its panel, a second for its team, greyed out until its first is picked; on phones, under its tab
              instead. -->
@@ -1289,14 +1288,8 @@ function resetAll() {
   border: none;
   cursor: pointer;
 }
-.folded-part {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
+.col-insight {
   margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
 }
 /* A team's second, added: under its panel; on phones, under its tab; past a pair, under the list. */
 .col-add {
