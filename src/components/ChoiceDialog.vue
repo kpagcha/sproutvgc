@@ -8,7 +8,8 @@ import ModalDialog from '@/components/ModalDialog.vue'
 // (`ChoiceCard`), each with what it means in a line under its name when it says: dropping from the button, closed by a press outside
 // it or Escape; on phones, in a dialog over the page. Picking one closes it. As `MetaDialog` is to the data shown.
 // The card opens where it fits: under the button, or over it when there's more room there; from the button's edge on
-// its side of the screen (its right edge on the right half), unless it would run off the screen.
+// its side of the screen (its right edge on the right half), unless it would run off the screen. It's drawn over the
+// page (in the body, fixed where the button is), so that nothing the button is in clips it: a folded section, a panel.
 const props = defineProps<{
   label: string
   options: readonly { value: T; label: string; desc?: string }[]
@@ -20,26 +21,33 @@ const root = useTemplateRef<HTMLElement>('root')
 const pop = useTemplateRef<HTMLElement>('pop')
 
 /** Where the card opens: over the button rather than under it, from its right edge rather than its left, and as tall as
- * the room it has. */
-const place = ref({ up: false, end: false, room: Infinity, scroll: false })
+ * the room it has; and where that is on the screen. */
+const place = ref({ up: false, end: false, room: Infinity, scroll: false, x: 0, y: 0 })
 const GAP = 6
 const MARGIN = 8
 function measure() {
   const button = root.value?.getBoundingClientRect()
   const card = pop.value
   if (!button || !card) return
-  const below = window.innerHeight - button.bottom - GAP - MARGIN
+  const vw = document.documentElement.clientWidth
+  const vh = document.documentElement.clientHeight
+  const below = vh - button.bottom - GAP - MARGIN
   const above = button.top - GAP - MARGIN
   const up = card.scrollHeight > below && above > below
   const width = card.offsetWidth
   // From the edge on the button's side of the screen, so it stays over the page; the other one if that runs off it.
   const fitsEnd = button.right - width >= MARGIN
-  const end =
-    fitsEnd &&
-    (button.left + button.width / 2 > window.innerWidth / 2 || button.left + width > window.innerWidth - MARGIN)
+  const end = fitsEnd && (button.left + button.width / 2 > vw / 2 || button.left + width > vw - MARGIN)
   const room = Math.max(0, up ? above : below)
   // Scrolling only when it must, as that clips the card's shadow.
-  place.value = { up, end, room, scroll: card.scrollHeight > room }
+  place.value = {
+    up,
+    end,
+    room,
+    scroll: card.scrollHeight > room,
+    x: end ? vw - button.right : button.left,
+    y: up ? vh - button.top + GAP : button.bottom + GAP,
+  }
 }
 watch(open, (on) => on && measure(), { flush: 'post' })
 
@@ -49,7 +57,8 @@ const onPhone = (e: MediaQueryListEvent) => (phone.value = e.matches)
 phoneQuery.addEventListener('change', onPhone)
 
 function onPointerDown(e: PointerEvent) {
-  if (!root.value?.contains(e.target as Node)) open.value = false
+  const t = e.target as Node
+  if (!root.value?.contains(t) && !pop.value?.contains(t)) open.value = false
 }
 const onKey = (e: KeyboardEvent) => e.key === 'Escape' && (open.value = false)
 watch([open, phone], ([on, p]) => {
@@ -57,10 +66,12 @@ watch([open, phone], ([on, p]) => {
     document.addEventListener('pointerdown', onPointerDown)
     document.addEventListener('keydown', onKey)
     window.addEventListener('resize', measure)
+    window.addEventListener('scroll', measure, { capture: true, passive: true })
   } else {
     document.removeEventListener('pointerdown', onPointerDown)
     document.removeEventListener('keydown', onKey)
     window.removeEventListener('resize', measure)
+    window.removeEventListener('scroll', measure, { capture: true })
   }
 })
 onBeforeUnmount(() => {
@@ -69,6 +80,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('pointerdown', onPointerDown)
   document.removeEventListener('keydown', onKey)
   window.removeEventListener('resize', measure)
+  window.removeEventListener('scroll', measure, { capture: true })
 })
 
 const picked = computed(() => props.options.find((o) => o.value === model.value))
@@ -95,15 +107,20 @@ function pick(v: T) {
     <ModalDialog v-if="phone" v-model:open="open" :label>
       <ChoiceCard :label :options :picked="model" @pick="pick" @close="open = false" />
     </ModalDialog>
-    <div
-      v-else-if="open"
-      ref="pop"
-      class="pop"
-      :class="{ up: place.up, end: place.end, scroll: place.scroll }"
-      :style="place.scroll ? { maxHeight: `${place.room}px` } : undefined"
-    >
-      <ChoiceCard :label :options :picked="model" @pick="pick" @close="open = false" />
-    </div>
+    <Teleport v-else-if="open" to="body">
+      <div
+        ref="pop"
+        class="pop"
+        :class="{ scroll: place.scroll }"
+        :style="{
+          [place.up ? 'bottom' : 'top']: `${place.y}px`,
+          [place.end ? 'right' : 'left']: `${place.x}px`,
+          maxHeight: place.scroll ? `${place.room}px` : undefined,
+        }"
+      >
+        <ChoiceCard :label :options :picked="model" @pick="pick" @close="open = false" />
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -137,24 +154,14 @@ function pick(v: T) {
 .chevron.open {
   transform: rotate(180deg);
 }
-/* Under the button, over the page. */
+/* Under the button (or over it), over the page: where `measure` puts it. */
 .pop {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
+  position: fixed;
   z-index: 60;
   width: min(360px, calc(100vw - 32px));
 }
 .pop.scroll {
   overflow-y: auto;
-}
-.pop.up {
-  top: auto;
-  bottom: calc(100% + 6px);
-}
-.pop.end {
-  left: auto;
-  right: 0;
 }
 .toggle:disabled {
   opacity: 0.5;
