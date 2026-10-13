@@ -75,8 +75,7 @@ export const messages: Record<keyof typeof en, string> = {
   'theme.autoDesc': 'Sigue a tu dispositivo.',
   'lang.label': 'Idioma',
   'settings.clearTitle': 'Borrar todos los datos',
-  'settings.clearWarning':
-    'Borra todo lo que este sitio ha guardado en este navegador: tus favoritos, las páginas vistas recientemente, tu progreso en el test de tipos y todos los ajustes y preferencias (tema, idioma, filtros, paneles abiertos y cerrados).',
+  'settings.clearWarning': 'Borra todo lo que este sitio ha guardado en este navegador.',
   'settings.clearUndo': 'No se puede deshacer.',
   'settings.clearConfirm':
     '¿Borrar todos tus datos de sproutvgc en este navegador? Tus favoritos y tu progreso en el test de tipos se perderán para siempre.',
