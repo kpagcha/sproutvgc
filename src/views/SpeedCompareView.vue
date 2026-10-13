@@ -593,21 +593,24 @@ function resetAll() {
          once there's one picked, swapping the teams; and at the row's end, clearing them (the teams, or the list in
          speed order; on phones, its icon alone). There from the start, so nothing under it moves on the first pick. -->
     <div class="panel toolbar">
-      <button
-        v-tip="canHover && t('compare.trickroomTip')"
-        type="button"
-        class="btn switch tr-switch"
-        :class="{ on: trickRoom }"
-        :aria-pressed="trickRoom"
-        @click="toggleTrickRoom"
-      >
-        <Box :size="16" aria-hidden="true" />{{ t('speed.mod.trickroom') }}
-      </button>
-      <template v-if="mode === 'vs' && anyPicked">
-        <button type="button" class="btn" @click="swap">
-          <ArrowLeftRight :size="16" aria-hidden="true" />{{ t('compare.swap') }}
+      <!-- Trick Room and the swap, one outlined block of cells, as the speed tiers' options. -->
+      <div class="options">
+        <button
+          v-tip="canHover && t('compare.trickroomTip')"
+          type="button"
+          class="btn switch tr-switch"
+          :class="{ on: trickRoom }"
+          :aria-pressed="trickRoom"
+          @click="toggleTrickRoom"
+        >
+          <Box :size="16" aria-hidden="true" />{{ t('speed.mod.trickroom') }}
         </button>
-      </template>
+        <template v-if="mode === 'vs' && anyPicked">
+          <button type="button" class="btn" @click="swap">
+            <ArrowLeftRight :size="16" aria-hidden="true" />{{ t('compare.swap') }}
+          </button>
+        </template>
+      </div>
       <button
         v-if="mode === 'order'"
         type="button"
@@ -1006,8 +1009,29 @@ function resetAll() {
   gap: 8px;
   margin-bottom: 12px;
 }
-.toolbar > .btn {
+.toolbar .btn {
   gap: 6px;
+}
+/* Trick Room and the swap: one outlined block of cells, ink between them (the block's gaps over its ink). */
+.options {
+  display: inline-flex;
+  gap: 2px;
+  background: var(--ink);
+  border: 2px solid var(--ink);
+  box-shadow: var(--hard-sm);
+}
+:root:root .options > .btn {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  transform: none;
+}
+:root:root .options > .btn:is(:hover, :active):not(:disabled) {
+  box-shadow: none;
+  transform: none;
+}
+.options > .btn:focus-visible {
+  outline-offset: -4px;
 }
 /* The intro, at the page's end. */
 .page-note {

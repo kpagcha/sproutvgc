@@ -1650,7 +1650,7 @@ const { start: startTour } = useTour(
   () => [
     { title: 'tour.tiers.introTitle', text: 'tour.tiers.intro' },
     { el: '.choices-band', title: 'tour.tiers.choicesTitle', text: 'tour.tiers.choices', side: 'bottom' },
-    { el: '.options-line', title: 'tour.tiers.optionsTitle', text: 'tour.tiers.options', side: 'bottom' },
+    { el: '.options-line > .options', title: 'tour.tiers.optionsTitle', text: 'tour.tiers.options', side: 'bottom' },
     { el: '.find-row > .picker', title: 'tour.tiers.findTitle', text: 'tour.tiers.find', side: 'bottom' },
     { el: '.filters-toggle', title: 'tour.tiers.filtersTitle', text: 'tour.tiers.filters', side: 'bottom' },
     {
@@ -1816,10 +1816,12 @@ const { start: startTour } = useTour(
               />
             </div>
           </div>
-          <!-- The list's toolbar, a band under what the list is: its options on a line (what each does in a tooltip,
+          <!-- The list's toolbar, a band under what the list is: its options in a block (what each does in a tooltip,
                the boosts', or in how to read the page; the modifiers for everyone opening under them), then finding a
                Pokémon on it. -->
           <div class="band find find-row" :class="{ flash: flashFind }" @animationend="flashFind = false">
+            <!-- The options, one outlined block of cells: on phones two to a row (what's on the ladder, then the
+                 battle), wider on one line. -->
             <div class="options-line">
               <div class="options">
                 <template v-if="bySets && boostsAvailable">
@@ -1837,11 +1839,11 @@ const { start: startTour } = useTour(
                 <button
                   type="button"
                   class="btn switch"
-                  :class="{ on: trickRoom }"
-                  :aria-pressed="trickRoom"
-                  @click="toggleTrickRoom"
+                  :class="{ on: showMegas, wide: !(bySets && boostsAvailable) }"
+                  :aria-pressed="showMegas"
+                  @click="toggleMegas"
                 >
-                  <Box :size="16" aria-hidden="true" />{{ t('speed.mod.trickroom') }}
+                  {{ t('speed.megas') }}
                 </button>
                 <!-- The weather or terrain in play, from yours' ability: said as a switch that's on, what brings it on it, its
                cross turning the ability off. -->
@@ -1856,7 +1858,7 @@ const { start: startTour } = useTour(
                       })
                     "
                     type="button"
-                    class="btn switch on field-status"
+                    class="btn switch on field-status wide"
                     :aria-label="t('speed.fieldOff', { ability: fieldSource!, field: fieldLabel(inPlay) })"
                     @click="clearField"
                   >
@@ -1866,8 +1868,17 @@ const { start: startTour } = useTour(
                 </template>
                 <button
                   type="button"
+                  class="btn switch"
+                  :class="{ on: trickRoom }"
+                  :aria-pressed="trickRoom"
+                  @click="toggleTrickRoom"
+                >
+                  <Box :size="16" aria-hidden="true" />{{ t('speed.mod.trickroom') }}
+                </button>
+                <button
+                  type="button"
                   class="btn disclosure"
-                  :class="{ on: modded }"
+                  :class="{ on: modded, open: modsOpen }"
                   :aria-expanded="modsOpen"
                   @click="toggleMods"
                 >
@@ -1875,31 +1886,21 @@ const { start: startTour } = useTour(
                   }}<span v-if="!modsOpen && modsOn.length" class="mods-on">{{ modsOn.join(' · ') }}</span
                   ><span class="marker" aria-hidden="true">{{ modsOpen ? '▾' : '▸' }}</span>
                 </button>
+                <!-- Resetting them: the block's last cell (on phones, down its right edge), there from the start (greyed
+                     out with nothing to reset), so the block doesn't change as options are set. -->
                 <button
+                  v-tip="canHover && t('speed.resetControls')"
                   type="button"
-                  class="btn switch"
-                  :class="{ on: showMegas }"
-                  :aria-pressed="showMegas"
-                  @click="toggleMegas"
+                  class="btn reset-options"
+                  :disabled="!controlsChanged"
+                  :aria-label="t('speed.resetControls')"
+                  @click="resetControls"
                 >
-                  {{ t('speed.megas') }}
+                  <RotateCcw :size="16" aria-hidden="true" />
                 </button>
               </div>
-              <!-- Resetting them: an icon at the end of the options' first line (they wrap beside it, never leaving it a
-                   line of its own), there from the start (greyed out with nothing to reset), so the line doesn't change as
-                   options are set. The zero-width space gives it a line of text, so it's as tall as the buttons. -->
-              <button
-                v-tip="canHover && t('speed.resetControls')"
-                type="button"
-                class="btn reset reset-options"
-                :disabled="!controlsChanged"
-                :aria-label="t('speed.resetControls')"
-                @click="resetControls"
-              >
-                <RotateCcw :size="16" aria-hidden="true" />&#8203;
-              </button>
             </div>
-            <div v-if="modsOpen" class="mods all-mods">
+            <div v-if="modsOpen" class="mods all-mods tray">
               <button
                 v-for="k in TOGGLES"
                 :key="k"
@@ -2371,12 +2372,13 @@ const { start: startTour } = useTour(
                 </label>
               </section>
               <section class="yours-section">
-                <!-- The modifiers' disclosure, and Reset build at the row's end. -->
+                <!-- The modifiers' disclosure, and Reset build at the row's end; the modifiers, opened, in a tray under
+                     it. -->
                 <div class="mods-head">
                   <button
                     type="button"
                     class="btn disclosure"
-                    :class="{ on: myModded }"
+                    :class="{ on: myModded, open: myModsOpen }"
                     :aria-expanded="myModsOpen"
                     @click="toggleMyMods"
                   >
@@ -2387,7 +2389,7 @@ const { start: startTour } = useTour(
                     <RotateCcw :size="16" aria-hidden="true" />{{ t('speed.resetYours') }}
                   </button>
                 </div>
-                <div v-if="myModsOpen" class="mods">
+                <div v-if="myModsOpen" class="mods tray">
                   <button
                     v-for="m in myModButtons"
                     :key="m.key"
@@ -2609,24 +2611,62 @@ const { start: startTour } = useTour(
 .find :deep(.search-box) {
   max-width: none;
 }
-/* The toolbar's first line: the switches (buttons holding their checkbox) and the modifiers' disclosure, compact,
-   wrapping where they don't fit, the reset at the line's end; the modifiers, opened, under it. Over the find. */
+/* The toolbar's first line: the options, one outlined block of cells (ink between them, the block's gaps over its
+   ink), on one line; the modifiers, opened, under it. Over the find. */
 .find-row > :is(.options-line, .all-mods) {
   flex-basis: 100%;
   order: -1;
 }
-.options-line {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
 .options {
-  display: flex;
-  flex: 1 1 0;
+  display: inline-flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 8px;
-  min-width: 0;
+  gap: 2px;
+  max-width: 100%;
+  background: var(--ink);
+  border: 2px solid var(--ink);
+  box-shadow: var(--hard-sm);
+}
+:root:root .options > .btn {
+  min-height: 0;
+  padding: 4px 12px;
+  font-size: 0.9em;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  transform: none;
+}
+:root:root .options > .btn:is(:hover, :active):not(:disabled) {
+  box-shadow: none;
+  transform: none;
+}
+.options > .btn:focus-visible {
+  outline-offset: -4px;
+}
+/* On phones, two to a row, as wide as each other: what's on the ladder, then the battle; one alone (Megas without
+   the boosts, the field in play) the row's whole width; the reset down the block's right edge. */
+@media (max-width: 720px) {
+  .options {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    width: 100%;
+  }
+  .options > .reset-options {
+    grid-row: 1 / span 2;
+    grid-column: 3;
+  }
+  :root:root .options > .btn {
+    justify-content: center;
+    justify-self: stretch;
+    min-width: 0;
+    padding-block: 7px;
+    white-space: normal;
+  }
+  .options > :is(.wide, .field-status) {
+    grid-column: 1 / 3;
+  }
+  .options:has(> .field-status) > .reset-options {
+    grid-row: 1 / span 3;
+  }
 }
 /* Who's shown and the view: each its label, then its choice. */
 .choice {
@@ -2634,20 +2674,80 @@ const { start: startTour } = useTour(
   align-items: center;
   gap: 6px;
 }
-.options-line .btn {
-  min-height: 0;
-  padding: 3px 10px;
-  font-size: 0.9em;
+/* Resetting them, its icon alone; greyed out in its icon alone, so the block stays whole. */
+:root:root .options > .reset-options {
+  padding-inline: 10px;
 }
-/* Its icon centered: no gap before the zero-width space that gives it a line's height. */
-.options-line > .reset-options {
-  flex: none;
-  gap: 0;
-  padding-inline: 8px;
+.reset-options:disabled {
+  color: var(--muted);
+  opacity: 1;
 }
 /* The modifiers' disclosure while some are on, folded or not: marked as the switches on are. */
 .disclosure.on {
   background: var(--sel);
+}
+/* The modifiers, opened: a tray under their disclosure, set into the page (a shade darker, a shadow along its top
+   edge), the disclosure the tray's tab, in its color, nothing between them. Their chips flat and smaller, a level under
+   what's around. */
+.tray,
+.disclosure.open {
+  --tray: color-mix(in srgb, var(--ink) 12%, var(--panel-alt));
+}
+:root:root .tray {
+  padding: 8px;
+  font-size: 0.85em;
+  background: var(--tray);
+  border: 2px solid var(--ink);
+  box-shadow:
+    inset 0 2px 0 color-mix(in srgb, var(--ink) 15%, transparent),
+    var(--hard-sm);
+}
+:root:root .tray > .mod,
+:root:root .tray > :deep(.stepper) {
+  min-height: 0;
+  padding-block: 3px;
+  font-weight: normal;
+  box-shadow: none;
+}
+:root:root .tray > :deep(.stepper) {
+  padding-block: 0;
+}
+:root:root .tray > .mod:is(:hover, :active):not(:disabled) {
+  box-shadow: none;
+  transform: none;
+}
+:root:root .disclosure.open {
+  position: relative;
+  background: var(--tray);
+  box-shadow: none;
+  transform: none;
+}
+:root:root .disclosure.open:is(:hover, :active):not(:disabled) {
+  box-shadow: none;
+  transform: none;
+}
+/* Over the line under it and the tray's shadow, in the tray's color. */
+.disclosure.open::after {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  z-index: 1;
+  height: 4px;
+  background: var(--tray);
+  content: '';
+}
+/* Everyone's tray on the options' block's edge (over the row's gap), the block's shadow gone; yours' on its
+   disclosure's (over the section's gap), the disclosure at the foot of its row. */
+.find-row > .all-mods {
+  margin-top: -10px;
+}
+.find-row > .options-line:has(+ .all-mods) .options {
+  box-shadow: none;
+}
+.yours-section > .tray {
+  align-self: stretch;
+  margin-top: -8px;
 }
 .switch {
   justify-content: flex-start;
@@ -2693,12 +2793,6 @@ const { start: startTour } = useTour(
 .mod.on {
   background: var(--sel);
 }
-/* The modifiers that apply to everyone, under the options. */
-.all-mods {
-  padding: 8px;
-  background: var(--panel-alt);
-  border: 1px dashed var(--border-strong);
-}
 .small {
   font-size: calc(13px * var(--text-scale));
 }
@@ -2731,10 +2825,34 @@ const { start: startTour } = useTour(
   background: var(--choices);
 }
 @media (max-width: 720px) {
-  /* On phones, one compact line: the labels read out but not shown. */
+  /* On phones, one compact line, the two joined halves of it (one outline, a line between them): the labels read
+     out but not shown. */
   :root:root .list.banded > .band.choices-band {
-    gap: 6px 8px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
     padding-block: 6px;
+  }
+  .choice {
+    min-width: 0;
+  }
+  .choice > :deep(.choice-dialog),
+  .choice > :deep(.choice-dialog > .toggle) {
+    flex: 1;
+    width: 100%;
+    max-width: none;
+  }
+  .choice > :deep(.choice-dialog > .toggle) {
+    justify-content: space-between;
+  }
+  .choice + .choice {
+    margin-left: -1px;
+  }
+  .choice:first-child > :deep(.choice-dialog > .toggle) {
+    border-radius: 3px 0 0 3px;
+  }
+  .choice + .choice > :deep(.choice-dialog > .toggle) {
+    border-radius: 0 3px 3px 0;
   }
   .choice-label {
     position: absolute;
@@ -3233,7 +3351,7 @@ const { start: startTour } = useTour(
 .mods-head {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 6px;
   align-self: stretch;
