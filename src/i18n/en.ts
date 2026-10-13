@@ -990,6 +990,8 @@ export const messages = {
   'speed.anyAbility': 'Any ability',
   'speed.anyItem': 'Any item',
   'speed.clearFilters': 'Clear filters',
+  'speed.clearAll': 'Clear all',
+  'speed.turnOff': 'Turn off {name}',
   'speed.summaryFiltered': '(those filtered only)',
   'speed.summaryField': 'in {field}, with their sets boosted in it',
   'speed.filteredNone': 'None of them pass the filters.',

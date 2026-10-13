@@ -788,10 +788,52 @@ const itemOptions = computed(() =>
       )
     : [],
 )
-// The filters fold away behind a button beside the find, marked while any is on.
+/** The filters, each a choice of what the Pokémon shown have: in the toolbar, and in the pinned bar's dialog. */
+const filterPicks = computed(() => [
+  {
+    key: 'type' as const,
+    value: filterType.value,
+    label: t('speed.filterType'),
+    any: t('speed.anyType'),
+    options: typeOptions.value,
+  },
+  {
+    key: 'ability' as const,
+    value: filterAbility.value,
+    label: t('speed.filterAbility'),
+    any: t('speed.anyAbility'),
+    options: abilityOptions.value,
+  },
+  ...(itemsFilterable.value
+    ? [
+        {
+          key: 'item' as const,
+          value: filterItem.value,
+          label: t('speed.filterItem'),
+          any: t('speed.anyItem'),
+          options: itemOptions.value,
+        },
+      ]
+    : []),
+])
+// The filters fold away behind a button beside the find, marked while any is on: folded out under it in the toolbar on
+// wide screens; in a dialog over the page on phones, and from the pinned bar (`filtersSheet`).
 const filtersOpen = shallowRef(false)
+const filtersSheet = shallowRef(false)
+function toggleFilters(fromBar: boolean) {
+  if (fromBar || phone.value) filtersSheet.value = true
+  else filtersOpen.value = !filtersOpen.value
+}
 const clearFilters = () =>
   void router.replace({ query: { ...query.value, type: undefined, ability: undefined, item: undefined } })
+// The pinned bar's modifiers, in a dialog over the page from its strip.
+const modsSheet = shallowRef(false)
+/** How many modifiers are on, said on the strip's chip. */
+const modsCount = computed(() => TOGGLES.filter(flag).length + (stage.value !== '0' ? 1 : 0))
+const clearMods = () =>
+  void router.replace({
+    query: { ...query.value, stage: undefined, ...Object.fromEntries(TOGGLES.map((k) => [k, undefined])) },
+  })
 /** Usage ranks, for the pickers to list by, most used first: the meta's, when there is one. */
 const ranks = computed(() => (data.value ? usageRanks(data.value) : undefined))
 
@@ -1945,10 +1987,10 @@ const { start: startTour } = useTour(
               type="button"
               class="btn filters-toggle"
               :class="{ on: filtering }"
-              :aria-expanded="filtersOpen"
-              aria-controls="speed-filters"
+              :aria-expanded="phone ? filtersSheet : filtersOpen"
+              :aria-controls="phone ? undefined : 'speed-filters'"
               :aria-label="t('speed.filter')"
-              @click="filtersOpen = !filtersOpen"
+              @click="toggleFilters(false)"
             >
               <Funnel :size="16" aria-hidden="true" />
             </button>
@@ -2003,44 +2045,33 @@ const { start: startTour } = useTour(
             <div
               id="speed-filters"
               class="filters"
-              :class="{ folded: !filtersOpen }"
+              :class="{ folded: !filtersOpen || phone }"
               role="group"
               :aria-label="t('speed.filter')"
             >
               <span class="small filters-label">{{ t('speed.filter') }}</span>
-              <span class="filter" :class="{ on: filterType }">
-                <TypeIcon v-if="filterType" :type="filterType" class="filter-icon" aria-hidden="true" />
+              <span v-for="f in filterPicks" :key="f.key" class="filter" :class="{ on: f.value }">
+                <TypeIcon
+                  v-if="f.key === 'type' && filterType"
+                  :type="filterType"
+                  class="filter-icon"
+                  aria-hidden="true"
+                />
+                <ItemIcon
+                  v-else-if="f.key === 'item' && filterItem"
+                  :id="filterItem"
+                  :scale="0.67"
+                  class="filter-icon"
+                  aria-hidden="true"
+                />
                 <select
                   class="search filter-pick"
-                  :value="filterType ?? ''"
-                  :aria-label="t('speed.filterType')"
-                  @change="set('type', ($event.target as HTMLSelectElement).value || undefined)"
+                  :value="f.value ?? ''"
+                  :aria-label="f.label"
+                  @change="set(f.key, ($event.target as HTMLSelectElement).value || undefined)"
                 >
-                  <option value="">{{ t('speed.anyType') }}</option>
-                  <option v-for="o in typeOptions" :key="o.id" :value="o.id">{{ o.name }} ({{ o.n }})</option>
-                </select>
-              </span>
-              <span class="filter" :class="{ on: filterAbility }">
-                <select
-                  class="search filter-pick"
-                  :value="filterAbility ?? ''"
-                  :aria-label="t('speed.filterAbility')"
-                  @change="set('ability', ($event.target as HTMLSelectElement).value || undefined)"
-                >
-                  <option value="">{{ t('speed.anyAbility') }}</option>
-                  <option v-for="o in abilityOptions" :key="o.id" :value="o.id">{{ o.name }} ({{ o.n }})</option>
-                </select>
-              </span>
-              <span v-if="itemsFilterable" class="filter" :class="{ on: filterItem }">
-                <ItemIcon v-if="filterItem" :id="filterItem" :scale="0.67" class="filter-icon" aria-hidden="true" />
-                <select
-                  class="search filter-pick"
-                  :value="filterItem ?? ''"
-                  :aria-label="t('speed.filterItem')"
-                  @change="set('item', ($event.target as HTMLSelectElement).value || undefined)"
-                >
-                  <option value="">{{ t('speed.anyItem') }}</option>
-                  <option v-for="o in itemOptions" :key="o.id" :value="o.id">{{ o.name }} ({{ o.n }})</option>
+                  <option value="">{{ f.any }}</option>
+                  <option v-for="o in f.options" :key="o.id" :value="o.id">{{ o.name }} ({{ o.n }})</option>
                 </select>
               </span>
               <button v-if="filtering" type="button" class="btn inverted filters-clear" @click="clearFilters">
@@ -2088,6 +2119,17 @@ const { start: startTour } = useTour(
                   clearable
                   @update:model-value="setFound"
                 />
+                <!-- The filters, as beside the toolbar's find: joined to its end, opening them in a dialog. -->
+                <button
+                  type="button"
+                  class="btn filters-toggle"
+                  :class="{ on: filtering }"
+                  aria-haspopup="dialog"
+                  :aria-label="t('speed.filter')"
+                  @click="toggleFilters(true)"
+                >
+                  <Funnel :size="16" aria-hidden="true" />
+                </button>
                 <button
                   v-if="found && onlyAllowed"
                   type="button"
@@ -2100,30 +2142,220 @@ const { start: startTour } = useTour(
                   {{ onlyLabel[0] }}<PokemonIcon :id="found" />{{ onlyLabel[1] }}
                 </button>
               </div>
-              <!-- The view, as in the band over the toolbar. -->
-              <ChoiceDialog
-                v-if="choicesShown"
-                class="pinned-view"
-                :model-value="view"
-                :label="t('speed.viewLabel')"
-                :options="viewOptions"
-                @update:model-value="(v: string) => choose('view', v)"
-              />
-              <button
-                type="button"
-                class="btn switch"
-                :class="{ on: trickRoom }"
-                :aria-pressed="trickRoom"
-                :aria-label="t('speed.mod.trickroom')"
-                @click="toggleTrickRoom"
-              >
-                <!-- "TR" on phones, the usual shorthand, so the bar fits on one line. -->
-                <Box :size="16" aria-hidden="true" />
-                <span class="long" aria-hidden="true">{{ t('speed.mod.trickroom') }}</span>
-                <span class="short" aria-hidden="true">{{ t('speed.trShort') }}</span>
-              </button>
+              <!-- The rest, a strip on one line, scrolling sideways when it doesn't fit (from its start each time the bar
+                   pins): yours and the one found swapped, the switches, what's on (each a chip turning it off), the
+                   view and who's shown, then the modifiers in a dialog. -->
+              <ScrollRow class="pinned-chips">
+                <button v-if="mine && found" type="button" class="btn inverted" @click="swapMine">
+                  <ArrowLeftRight :size="14" aria-hidden="true" />{{ t('compare.swap') }}
+                </button>
+                <button
+                  type="button"
+                  class="btn switch"
+                  :class="{ on: trickRoom }"
+                  :aria-pressed="trickRoom"
+                  :aria-label="t('speed.mod.trickroom')"
+                  @click="toggleTrickRoom"
+                >
+                  <!-- "TR" on phones, the usual shorthand. -->
+                  <Box :size="16" aria-hidden="true" />
+                  <span class="long" aria-hidden="true">{{ t('speed.mod.trickroom') }}</span>
+                  <span class="short" aria-hidden="true">{{ t('speed.trShort') }}</span>
+                </button>
+                <button
+                  v-if="bySets && boostsAvailable"
+                  type="button"
+                  class="btn switch"
+                  :class="{ on: showBoosts }"
+                  :aria-pressed="showBoosts"
+                  @click="toggleBoosts"
+                >
+                  <Rocket :size="16" aria-hidden="true" />{{ t('speed.boosts') }}
+                </button>
+                <button
+                  type="button"
+                  class="btn switch"
+                  :class="{ on: showMegas }"
+                  :aria-pressed="showMegas"
+                  @click="toggleMegas"
+                >
+                  {{ t('speed.megas') }}
+                </button>
+                <button
+                  v-if="inPlay"
+                  type="button"
+                  class="btn switch on off-chip"
+                  :aria-label="t('speed.fieldOff', { ability: fieldSource!, field: fieldLabel(inPlay) })"
+                  @click="clearField"
+                >
+                  {{ fieldLabel(inPlay) }}<X :size="14" aria-hidden="true" />
+                </button>
+                <button
+                  v-for="k in TOGGLES.filter(flag)"
+                  :key="k"
+                  type="button"
+                  class="btn switch on off-chip"
+                  :aria-label="t('speed.turnOff', { name: t(`speed.mod.${k}`) })"
+                  @click="toggleMod(k)"
+                >
+                  <ItemIcon v-if="MOD_ITEMS[k]" :id="MOD_ITEMS[k]!" :scale="0.75" class="mod-item" /><component
+                    :is="MOD_ICONS[k]"
+                    v-else-if="MOD_ICONS[k]"
+                    :size="16"
+                    aria-hidden="true"
+                  />{{ t(`speed.mod.${k}`) }}<X :size="14" aria-hidden="true" />
+                </button>
+                <button
+                  v-if="stage !== '0'"
+                  type="button"
+                  class="btn switch on off-chip"
+                  :aria-label="t('speed.turnOff', { name: t('speed.stageShort', { stage: stageLabel(stage) }) })"
+                  @click="stage = '0'"
+                >
+                  {{ t('speed.stageShort', { stage: stageLabel(stage) }) }}<X :size="14" aria-hidden="true" />
+                </button>
+                <template v-for="f in filterPicks" :key="f.key">
+                  <button
+                    v-if="f.value"
+                    type="button"
+                    class="btn switch on off-chip"
+                    :aria-label="t('speed.turnOff', { name: f.options.find((o) => o.id === f.value)?.name ?? '' })"
+                    @click="set(f.key, undefined)"
+                  >
+                    <TypeIcon v-if="f.key === 'type' && filterType" :type="filterType" aria-hidden="true" />
+                    <ItemIcon v-else-if="f.key === 'item' && filterItem" :id="filterItem" :scale="0.67" />
+                    {{ f.options.find((o) => o.id === f.value)?.name }}<X :size="14" aria-hidden="true" />
+                  </button>
+                </template>
+                <!-- The view and who's shown, as in the band over the toolbar. -->
+                <template v-if="choicesShown">
+                  <ChoiceDialog
+                    :model-value="view"
+                    :label="t('speed.viewLabel')"
+                    :options="viewOptions"
+                    @update:model-value="(v: string) => choose('view', v)"
+                  />
+                  <ChoiceDialog
+                    :model-value="show"
+                    :label="t('speed.show')"
+                    :options="SHOWS.map((s) => ({ value: s, label: showLabel(s) }))"
+                    @update:model-value="(v: string) => choose('show', v)"
+                  />
+                </template>
+                <button
+                  type="button"
+                  class="btn"
+                  :class="{ on: modsCount }"
+                  aria-haspopup="dialog"
+                  @click="modsSheet = true"
+                >
+                  <Plus :size="16" aria-hidden="true" />{{ t('speed.modifiers')
+                  }}<span v-if="modsCount" class="count">{{ modsCount }}</span>
+                </button>
+              </ScrollRow>
             </div>
           </div>
+          <!-- The filters (on phones, and from the pinned bar) and the pinned bar's modifiers, each in a dialog over the
+               page: kept out of the bar, so they stay open as what's picked moves the ladder and the bar comes and
+               goes. -->
+          <ModalDialog v-model:open="filtersSheet" :label="t('speed.filter')">
+            <div class="panel banded filters-sheet">
+              <div class="band">
+                <span>{{ t('speed.filter') }}</span>
+                <button
+                  type="button"
+                  class="btn on-band sheet-close"
+                  :aria-label="t('speed.close')"
+                  @click="filtersSheet = false"
+                >
+                  <X :size="16" aria-hidden="true" />
+                </button>
+              </div>
+              <div class="sheet-section" role="group" :aria-label="t('speed.filter')">
+                <span v-for="f in filterPicks" :key="f.key" class="filter" :class="{ on: f.value }">
+                  <TypeIcon
+                    v-if="f.key === 'type' && filterType"
+                    :type="filterType"
+                    class="filter-icon"
+                    aria-hidden="true"
+                  />
+                  <ItemIcon
+                    v-else-if="f.key === 'item' && filterItem"
+                    :id="filterItem"
+                    :scale="0.67"
+                    class="filter-icon"
+                    aria-hidden="true"
+                  />
+                  <select
+                    class="search filter-pick"
+                    :value="f.value ?? ''"
+                    :aria-label="f.label"
+                    @change="set(f.key, ($event.target as HTMLSelectElement).value || undefined)"
+                  >
+                    <option value="">{{ f.any }}</option>
+                    <option v-for="o in f.options" :key="o.id" :value="o.id">{{ o.name }} ({{ o.n }})</option>
+                  </select>
+                </span>
+              </div>
+              <div class="drop-actions">
+                <button type="button" class="btn inverted" :disabled="!filtering" @click="clearFilters">
+                  <X :size="16" aria-hidden="true" />{{ t('speed.clearAll') }}
+                </button>
+                <button type="button" class="btn primary" @click="filtersSheet = false">
+                  {{ t('speed.close') }}
+                </button>
+              </div>
+            </div>
+          </ModalDialog>
+          <ModalDialog v-model:open="modsSheet" :label="t('speed.modifiers')">
+            <div class="panel banded filters-sheet">
+              <div class="band">
+                <span>{{ t('speed.modifiers') }}</span>
+                <button
+                  type="button"
+                  class="btn on-band sheet-close"
+                  :aria-label="t('speed.close')"
+                  @click="modsSheet = false"
+                >
+                  <X :size="16" aria-hidden="true" />
+                </button>
+              </div>
+              <div class="sheet-section" role="group" :aria-label="t('speed.modifiers')">
+                <div class="mods tray">
+                  <button
+                    v-for="k in TOGGLES"
+                    :key="k"
+                    type="button"
+                    class="btn mod"
+                    :class="{ on: flag(k) }"
+                    :aria-pressed="flag(k)"
+                    @click="toggleMod(k)"
+                  >
+                    <ItemIcon v-if="MOD_ITEMS[k]" :id="MOD_ITEMS[k]!" :scale="0.75" class="mod-item" /><component
+                      :is="MOD_ICONS[k]"
+                      v-else-if="MOD_ICONS[k]"
+                      :size="16"
+                      aria-hidden="true"
+                    />{{ t(`speed.mod.${k}`) }}
+                  </button>
+                  <StageStepper
+                    :model-value="Number(stage)"
+                    :min="Number(STAGES[0])"
+                    :max="Number(STAGES.at(-1))"
+                    @update:model-value="(n: number) => (stage = String(n))"
+                  />
+                </div>
+              </div>
+              <div class="drop-actions">
+                <button type="button" class="btn inverted" :disabled="!modsCount" @click="clearMods">
+                  <X :size="16" aria-hidden="true" />{{ t('speed.clearAll') }}
+                </button>
+                <button type="button" class="btn primary" @click="modsSheet = false">
+                  {{ t('speed.close') }}
+                </button>
+              </div>
+            </div>
+          </ModalDialog>
 
           <div v-if="!entered || (needsData && !data)" class="ladder" aria-hidden="true">
             <div v-for="i in 12" :key="i" class="tier skeleton"><span class="bone"></span></div>
@@ -3126,17 +3358,10 @@ const { start: startTour } = useTour(
 .pinned.opponents {
   border-bottom: 3px solid var(--opponent);
 }
-/* Its switches and the view as tall as the search beside them. */
-.pinned > .pinned-view,
-.pinned > .switch,
-.pinned .find > .find-mode {
-  align-self: stretch;
-}
-/* The find, how it shows beside it, the search taking what the switches leave, as in its row. */
+/* The find, the "only" switch beside it, the search taking what the switch leaves. */
 .pinned .find {
   display: flex;
-  align-self: stretch;
-  align-items: center;
+  align-items: stretch;
   gap: 8px;
   max-width: none;
 }
@@ -3144,23 +3369,64 @@ const { start: startTour } = useTour(
   flex: 1 1 0;
   min-width: 0;
 }
-/* On phones, one line: the search takes what the compact switches leave. */
-@media (max-width: 720px) {
+/* The filters' fold right after the search, before the "only" switch. */
+.pinned .filters-toggle {
+  order: 0;
+}
+/* The strip: its chips as tall as each other, a smaller weight than the toolbar's. */
+.pinned-chips {
+  --gap: 6px;
+}
+.pinned-chips :deep(.track) {
+  align-items: stretch;
+  padding-block: 0 4px;
+}
+.pinned-chips .btn {
+  gap: 6px;
+  white-space: nowrap;
+}
+.pinned-chips :deep(.track) > .btn,
+.pinned-chips :deep(.choice-dialog .toggle) {
+  min-height: 0;
+  padding-block: 4px;
+}
+/* What's on, a tap turning it off: marked as the switches on are, its cross at the end. */
+.off-chip {
+  font-weight: normal;
+}
+.pinned-chips .count {
+  padding: 0 5px;
+  font-size: 0.85em;
+  font-weight: bold;
+  color: var(--panel);
+  background: var(--ink);
+}
+.pinned-chips .btn.on {
+  background: var(--sel);
+}
+/* Wide: one line, the find a set share of it, the strip the rest. */
+@media (min-width: 721px) {
   .pinned {
-    gap: 6px;
+    flex-wrap: nowrap;
   }
   .pinned .find {
+    flex: 0 1 22em;
+    min-width: 12em;
+  }
+  .pinned-chips {
     flex: 1 1 0;
-    min-width: 0;
-    max-width: none;
   }
-  /* No room for how a find shows beside it, the switches too: the find's row has it. */
-  .pinned .find-mode {
-    display: none;
+}
+/* Phones: the find on a line of its own, the strip under it. */
+@media (max-width: 720px) {
+  .pinned {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
   }
-  .pinned .switch {
+  /* As tall as the search: the find's width share would be its height in a column. */
+  .pinned .find {
     flex: none;
-    padding-inline: 6px;
   }
   .pinned .long {
     display: none;
@@ -3168,6 +3434,44 @@ const { start: startTour } = useTour(
   .pinned .short {
     display: inline;
   }
+}
+/* The pinned bar's dialog: the filters, then the modifiers, then its actions. */
+.filters-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+}
+:root:root .filters-sheet.banded > .band {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 0;
+  font-weight: bold;
+}
+.sheet-close {
+  min-height: 0;
+  padding: 2px 4px;
+}
+.sheet-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+/* As tall as their choice: the phones' width share would be their height in a column. */
+.sheet-section > .filter {
+  display: flex;
+  flex: none;
+}
+.sheet-section .filter-pick {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+}
+.filters-sheet > .drop-actions {
+  justify-content: space-between;
+  margin-top: 0;
 }
 /* Your Pokémon's Speed: one big primary button, its number large. */
 .big-go {
