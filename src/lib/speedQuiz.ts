@@ -11,9 +11,8 @@ import { POKEMON, speciesOf } from '@/data/pokemon'
 import { speedBuilds, speedStat } from '@/lib/speed'
 import type { NatureEffect } from '@/lib/stats'
 
-/** What each Pokémon is at: uninvested (no stat points, a neutral nature: its Speed as the game has it, not its base,
- * though the stage keeps its first ID, `base`, as saved progress and cards have it), its most used set, or any of its top
- * sets. */
+/** What each Pokémon is at: base (no stat points, a neutral nature: its Speed as the game has it, not its base stat),
+ * its most used set, or any of its top sets. */
 export const STAGES = ['base', 'common', 'top'] as const
 export type Stage = (typeof STAGES)[number]
 

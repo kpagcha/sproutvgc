@@ -108,18 +108,14 @@ const canHover = window.matchMedia('(hover: hover)').matches
           props.range![0] === props.range![1] ? props.range![0] : `${props.range![0]}–${props.range![1]}`
         }}</span>
         <span class="muted small">{{ t('compare.setsRange', { speed: props.speed! }) }}</span>
-        <span v-tip="t('speed.benchTip.none')" class="muted small">{{
-          t('compare.uninvested', { n: uninvested })
-        }}</span>
+        <span v-tip="t('speed.benchTip.none')" class="muted small">{{ t('compare.base', { n: uninvested }) }}</span>
       </p>
       <p v-else class="speed">
         <span class="speed-number">{{ props.speed }}</span>
         <span v-if="props.stat !== props.speed" class="muted small">{{
           t('compare.stat', { stat: props.stat! })
         }}</span>
-        <span v-tip="t('speed.benchTip.none')" class="muted small">{{
-          t('compare.uninvested', { n: uninvested })
-        }}</span>
+        <span v-tip="t('speed.benchTip.none')" class="muted small">{{ t('compare.base', { n: uninvested }) }}</span>
       </p>
 
       <!-- The meta's builds of it, to pick one in a tap. -->
