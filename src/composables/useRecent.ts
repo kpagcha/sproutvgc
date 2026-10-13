@@ -22,7 +22,8 @@ export type RecentItem = { kind: 'entry'; ref: Ref } | ({ kind: 'page' } & PageV
 
 type Stored = string | PageVisit
 
-const isVisit = (v: unknown): v is PageVisit =>
+/** Whether something read back is a `PageVisit`. */
+export const isVisit = (v: unknown): v is PageVisit =>
   !!v &&
   typeof v === 'object' &&
   typeof (v as PageVisit).page === 'string' &&
@@ -30,6 +31,13 @@ const isVisit = (v: unknown): v is PageVisit =>
   !!(v as PageVisit).query &&
   typeof (v as PageVisit).query === 'object' &&
   Object.values((v as PageVisit).query).every((q) => typeof q === 'string')
+
+/** A page's setup's identity: its page and its query, whatever their order. */
+export const setupKey = (v: PageVisit) =>
+  `${v.page}?${Object.entries(v.query)
+    .sort(([a], [b]) => (a < b ? -1 : 1))
+    .map(([k, q]) => `${k}=${q}`)
+    .join('&')}`
 
 /** What makes two of them one visit. */
 const identity = (s: Stored) => (typeof s === 'string' ? s : `page:${s.page}`)

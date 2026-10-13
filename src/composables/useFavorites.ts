@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
 import type { Kind, Ref } from '@/data/dex'
-import type { PageVisit } from '@/composables/useRecent'
+import { isVisit as isSetup, setupKey, type PageVisit } from '@/composables/useRecent'
 
 // The entries the reader has starred, saved in this browser, and the setups of pages whose view is in their URL (the
 // speed tiers, a comparison): what the page's `meta.setup` keeps of it, reopening as it was saved. Entries are kept as
@@ -16,21 +16,6 @@ const KINDS: readonly Kind[] = ['pokemon', 'move', 'ability', 'item', 'condition
 
 type Stored = string | PageVisit
 
-const isSetup = (v: unknown): v is PageVisit =>
-  !!v &&
-  typeof v === 'object' &&
-  typeof (v as PageVisit).page === 'string' &&
-  typeof (v as PageVisit).path === 'string' &&
-  !!(v as PageVisit).query &&
-  typeof (v as PageVisit).query === 'object' &&
-  Object.values((v as PageVisit).query).every((q) => typeof q === 'string')
-
-/** A setup's identity: its page and its query, whatever their order. */
-const setupKey = (v: PageVisit) =>
-  `${v.page}?${Object.entries(v.query)
-    .sort(([a], [b]) => (a < b ? -1 : 1))
-    .map(([k, q]) => `${k}=${q}`)
-    .join('&')}`
 const identity = (s: Stored) => (typeof s === 'string' ? s : setupKey(s))
 
 function parse(raw: string | null): Stored[] {
@@ -100,5 +85,24 @@ export function useFavorites() {
     keys.value = []
     save()
   }
-  return { favorites, setups, isFavorite, toggle, isSetupFavorite, toggleSetup, clear, count: () => keys.value.length }
+  /** Unstars a category's entries (those the regulation doesn't have included), or the setups. */
+  const clearKind = (kind: Kind | 'setups') => {
+    keys.value = keys.value.filter((k) => (typeof k === 'string' ? toRef(k)!.kind !== kind : kind !== 'setups'))
+    save()
+  }
+  /** How many a category has starred (those the regulation doesn't have included), or the setups. */
+  const countKind = (kind: Kind | 'setups') =>
+    keys.value.filter((k) => (typeof k === 'string' ? toRef(k)!.kind === kind : kind === 'setups')).length
+  return {
+    favorites,
+    setups,
+    isFavorite,
+    toggle,
+    isSetupFavorite,
+    toggleSetup,
+    clear,
+    clearKind,
+    countKind,
+    count: () => keys.value.length,
+  }
 }

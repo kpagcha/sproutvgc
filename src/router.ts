@@ -7,6 +7,7 @@ import type { AreaId } from '@/lib/areas'
 import { loadDexNames } from '@/i18n/refName'
 import { hasFavorites } from '@/composables/useFavorites'
 import { hasRecent, visitPage } from '@/composables/useRecent'
+import { endVisit, recordSetup, startVisit } from '@/composables/usePageHistory'
 import { loadDescriptions, type DescribedKind } from '@/i18n/descriptions'
 
 declare module 'vue-router' {
@@ -33,6 +34,9 @@ declare module 'vue-router' {
     /** A page whose setup can be starred: what of its query is the setup (the rest only a moment of it, as what's
      * found), or nothing while there's none to star. */
     setup?: (query: LocationQuery) => Record<string, string> | null
+    /** What of its query the page's own recently viewed keep (`usePageHistory`), or nothing while there's none worth
+     * keeping: its setup unless this says otherwise. */
+    history?: (query: LocationQuery) => Record<string, string> | null
   }
 }
 
@@ -257,6 +261,8 @@ export const router = createRouter({
         // Everything but what's found, the chip tapped, the Pokémon kept and the Speed picked, and the data shown (the
         // reader's choice on every page, not the setup's).
         setup: (query) => stringQuery(query, ['find', 'findmode', 'keep', 'vs', 'at', 'meta']),
+        // Its own recently viewed: with yours or a Pokémon found, what's found too.
+        history: (query) => (query.mine || query.find ? stringQuery(query, ['vs', 'at', 'meta']) : null),
         ...inArea('competitive', 'speedTiers'),
       },
     },
@@ -384,6 +390,20 @@ router.afterEach((to, _from, failure) => {
   const page = !failure && to.meta.recent?.(to)
   if (!page) return
   visitPage({ page, path: to.path, query: stringQuery(to.query) })
+})
+
+// Pages whose setup can be starred keep the setups they're at lately (`usePageHistory`), where a visit starts and where
+// it ends: one starts as the page is arrived at, or as another of its visits among the recently viewed starts (another
+// matchup); it ends as the page is left.
+router.afterEach((to, from, failure) => {
+  if (failure) return
+  const kept = to.meta.history ?? to.meta.setup
+  const next = from.name !== to.name || (to.meta.recent?.(to) ?? null) !== (from.meta.recent?.(from) ?? null)
+  if (next && from.meta.setup) endVisit(String(from.name))
+  if (!kept) return
+  const name = String(to.name)
+  if (next) startVisit(name)
+  recordSetup({ page: name, path: to.path, query: kept(to.query) ?? {} })
 })
 
 // Pages showing dex entries render with their names (and descriptions) in place, rather than filling them in once

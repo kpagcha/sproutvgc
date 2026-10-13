@@ -650,6 +650,8 @@ export const messages: Record<keyof typeof en, string> = {
   'favorites.clear': 'Borrar',
   'favorites.clearConfirm': '¿Quitar los {n} favoritos? No se puede deshacer.',
   'favorites.clearConfirmButton': 'Quitar todos',
+  'favorites.clearKind': 'Borrar los favoritos de {category}',
+  'favorites.clearKindConfirm': '¿Quitar los {n} favoritos de {category}? No se puede deshacer.',
   'credits.spritesTitle': 'Sprites',
   'credits.spritesBody': 'Los sprites e iconos de Pokémon y objetos son de {source}.',
   'credits.dataTitle': 'Datos',

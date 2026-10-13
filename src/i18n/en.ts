@@ -642,6 +642,8 @@ export const messages = {
   'favorites.clear': 'Clear',
   'favorites.clearConfirm': 'Remove all {n} favorites? This can’t be undone.',
   'favorites.clearConfirmButton': 'Remove all',
+  'favorites.clearKind': 'Clear the favorites in {category}',
+  'favorites.clearKindConfirm': 'Remove the {n} favorites in {category}? This can’t be undone.',
   'credits.spritesTitle': 'Sprites',
   'credits.spritesBody': 'The Pokémon and item sprites and icons come from {source}.',
   'credits.dataTitle': 'Data',

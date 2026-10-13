@@ -405,10 +405,11 @@ const fadeVariants = {
   border-top: 1px solid var(--border);
 }
 
+/* Its parts as tall as each other, the tallest's height: the way back, the favorites and the page's own actions. */
 .back-row {
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 8px;
   margin-bottom: 12px;
 }

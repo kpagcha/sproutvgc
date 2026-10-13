@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Star, Trash2 } from '@lucide/vue'
-import { available } from '@/data/dex'
+import { available, type Kind } from '@/data/dex'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { SECTIONS } from '@/composables/useSearch'
@@ -13,9 +13,10 @@ import PageChip, { shownVisit } from '@/components/PageChip.vue'
 
 // The home page's favorites: the entries starred on their pages, one row per category (in the search's order), each
 // alphabetically, as chips (`EntryChip`); then the setups starred (the speed tiers', a comparison's), in the order they
-// were starred (`PageChip`). Those the regulation doesn't have are left out (and kept, for when it has them again). Nothing shows until something is starred. It folds away, and stays
-// as the reader left it. It can be cleared, once confirmed, as starring them again would take a while.
-const { favorites, setups, clear, count: saved } = useFavorites()
+// // were starred (`PageChip`). Those the regulation doesn't have are left out (and kept, for when it has them again).
+// Nothing shows until something is starred. It folds away, and stays as the reader left it. It can be cleared, whole or
+// a row at a time, once confirmed, as starring them again would take a while.
+const { favorites, setups, clear, clearKind, countKind, count: saved } = useFavorites()
 
 const groups = computed(() =>
   SECTIONS.flatMap((s) => {
@@ -39,6 +40,16 @@ async function confirmClear() {
   })
   if (ok) clear()
 }
+
+/** Clears a row: a category's favorites, or the setups. */
+async function confirmClearKind(kind: Kind | 'setups', title: string) {
+  const ok = await confirmDialog({
+    message: t('favorites.clearKindConfirm', { n: countKind(kind), category: title }),
+    confirm: t('favorites.clearConfirmButton'),
+    danger: true,
+  })
+  if (ok) clearKind(kind)
+}
 </script>
 
 <template>
@@ -54,13 +65,35 @@ async function confirmClear() {
     </summary>
     <dl>
       <template v-for="g in groups" :key="g.kind">
-        <dt class="muted">{{ t(g.title) }}</dt>
+        <dt class="muted">
+          {{ t(g.title)
+          }}<button
+            v-tip="t('favorites.clearKind', { category: t(g.title) })"
+            type="button"
+            class="clear-kind"
+            :aria-label="t('favorites.clearKind', { category: t(g.title) })"
+            @click="confirmClearKind(g.kind, t(g.title))"
+          >
+            <Trash2 :size="13" aria-hidden="true" />
+          </button>
+        </dt>
         <dd>
           <EntryChip v-for="{ ref: r } in g.refs" :key="r.id" :to="r" />
         </dd>
       </template>
       <template v-if="shownSetups.length">
-        <dt class="muted">{{ t('favorites.setups') }}</dt>
+        <dt class="muted">
+          {{ t('favorites.setups')
+          }}<button
+            v-tip="t('favorites.clearKind', { category: t('favorites.setups') })"
+            type="button"
+            class="clear-kind"
+            :aria-label="t('favorites.clearKind', { category: t('favorites.setups') })"
+            @click="confirmClearKind('setups', t('favorites.setups'))"
+          >
+            <Trash2 :size="13" aria-hidden="true" />
+          </button>
+        </dt>
         <dd>
           <PageChip v-for="(v, i) in shownSetups" :key="i" :visit="v" />
         </dd>
@@ -125,6 +158,24 @@ dt {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+/* A row's own clear, small, after its name. */
+dt {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.clear-kind {
+  display: inline-flex;
+  padding: 2px;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.clear-kind:hover,
+.clear-kind:focus-visible {
+  color: var(--text);
 }
 dd {
   display: flex;

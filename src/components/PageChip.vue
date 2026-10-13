@@ -32,6 +32,8 @@ function view(visit: PageVisit) {
     /** Yours' build on the speed tiers, as the page reads it. */
     build: readBuild(q, 'my', name === 'speedTiers' ? mon(q.mine) : null),
     mine: name === 'speedTiers' ? mon(q.mine) : null,
+    /** The Pokémon found on the speed tiers. */
+    found: name === 'speedTiers' && q.find !== q.mine ? mon(q.find) : null,
     trickRoom: name.startsWith('speed') && q.trickroom === '1',
     // The type matchups' types, or the type the speed tiers are filtered by.
     types: name.startsWith('matchups')
@@ -64,9 +66,10 @@ import TypeIcon from '@/components/TypeIcon'
 // A page with a view of its own (in its URL) as a chip reopening it as it was: the home page's recently viewed and
 // favorites (a setup starred), beside the dex entries' chips (`EntryChip`), in their style. A comparison is its
 // Pokémon's icons, each team's (or the speed order's list), their names read out; any other page its name, with the
-// Pokémon picked on it (the speed tiers' yours, with its build, and the type it's filtered by) or its types (the type
-// matchups'); Trick Room, on, said in short.
-const props = defineProps<{ visit: PageVisit }>()
+// Pokémon picked on it (the speed tiers' yours, with its build, the Pokémon found and the type it's filtered by) or its
+// types (the type matchups'); Trick Room, on, said in short.
+// `untitled` (on the page itself, which needs no naming): its name left out but when there's nothing else to show.
+const props = defineProps<{ visit: PageVisit; untitled?: boolean }>()
 const v = computed(() => view(props.visit))
 /** A comparison's Pokémon by name, for what reads the chip out: its icons alone say nothing. */
 const label = computed(() => v.value.groups?.map((g) => g.map((id) => refName(pokemon(id))).join(', ')).join(' vs '))
@@ -89,7 +92,7 @@ const GROUP_MAX = 6
       </template>
     </template>
     <template v-else>
-      {{ t(v.titleKey!) }}
+      <template v-if="!untitled || (!v.mine && !v.found && !v.types.length)">{{ t(v.titleKey!) }}</template>
       <template v-if="v.mine">
         <PokemonIcon :id="v.mine" />
         <span class="build muted"
@@ -100,6 +103,7 @@ const GROUP_MAX = 6
           />{{ v.build.points }}</span
         >
       </template>
+      <template v-if="v.found"><span v-if="v.mine" class="muted">vs</span><PokemonIcon :id="v.found" /></template>
       <TypeIcon v-for="ty in v.types" :key="ty" :type="ty" />
     </template>
     <span v-if="v.trickRoom" class="tr">{{ t('speed.trShort') }}</span>

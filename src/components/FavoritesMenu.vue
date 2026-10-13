@@ -90,8 +90,10 @@ onBeforeUnmount(() => (open.value = false))
 </template>
 
 <style scoped>
+/* A flex box, so its button fills the row's height as the rest of the back row does. */
 .favorites-menu {
   position: relative;
+  display: flex;
 }
 .toggle {
   gap: 4px;
