@@ -9,7 +9,7 @@ import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { commonBuilds as common, speedBuilds, speedStat } from '@/lib/speed'
 import { MAX_POINTS } from '@/lib/stats'
-import { buildQuery, buildSpeed, readBuild, type SpeedBuild } from '@/lib/speedBuild'
+import { buildQuery, buildSpeed, readBuild, toggled, type BuildToggle, type SpeedBuild } from '@/lib/speedBuild'
 import { reveal, toTopOf } from '@/lib/scroll'
 import {
   LIST_MAX,
@@ -95,6 +95,17 @@ const idOf = (s: Slot) => {
   const id = route.query[s]
   return typeof id === 'string' && id in POKEMON ? (id as PokemonId) : null
 }
+/** A team's slots: its first and its second. */
+const teamSlots = (s: string): Slot[] => (teamOf(s) === 'yours' ? ['a', 'a2'] : ['b', 'b2'])
+/**
+ * A slot's build as the URL keeps it, with Tailwind when its team has it: Tailwind is its whole side's, so one of a team
+ * having it is both having it (as setting it does, `setBuild`; a link may have it on one alone).
+ */
+function slotBuild(s: Slot): SpeedBuild {
+  const b = readBuild(route.query, s, idOf(s))
+  const tailwind = teamSlots(s).some((x) => readBuild(route.query, x).toggles.includes('tailwind'))
+  return tailwind && !b.toggles.includes('tailwind') ? { ...b, toggles: [...b.toggles, 'tailwind'] } : b
+}
 /** Each team's first, and its second once picked. */
 const vsSlots = computed(() => SLOTS.filter((s) => s === 'a' || s === 'b' || !!idOf(s)))
 
@@ -126,16 +137,14 @@ const list = computed(() => readList(route.query.list))
 const entries = computed<Mon[]>(() =>
   mode.value === 'order'
     ? list.value.map((e, i) => mon(`p${i}`, e.id, e.build))
-    : vsSlots.value.map((s) => mon(s, idOf(s), readBuild(route.query, s, idOf(s)), atSets(s))),
+    : vsSlots.value.map((s) => mon(s, idOf(s), slotBuild(s), atSets(s))),
 )
 const entryOf = (key: string) => entries.value.find((e) => e.key === key)
 
 /** A pair side by side, as the page always had; past a pair, and in speed order, one under the other. */
 const stacked = computed(() => mode.value === 'order' || vsSlots.value.length > 2)
 
-const sides = computed(() =>
-  SIDES.map((s) => ({ s, ...mon(s, idOf(s), readBuild(route.query, s, idOf(s)), atSets(s)) })),
-)
+const sides = computed(() => SIDES.map((s) => ({ s, ...mon(s, idOf(s), slotBuild(s), atSets(s)) })))
 const sideOf = (s: Side) => sides.value[SIDES.indexOf(s)]!
 
 /**
@@ -261,9 +270,20 @@ function setBuild(key: string, b: Partial<SpeedBuild>) {
     setList(list.value.map((x, i) => (i === listIndex(key) ? { ...x, build: { ...x.build, ...b } } : x)))
   else
     replace({
+      ...(b.toggles && sharedToggles(key as Slot, b.toggles)),
       ...buildQuery({ ...e.build, ...b }, key),
       ...(('effect' in b || 'points' in b) && { [`${key}sets`]: undefined }),
     })
+}
+/**
+ * Against the opponents, what a slot's modifiers set does to its teammate's (its build as the URL then keeps it):
+ * Tailwind is its whole side's, set or cleared for both. In speed order, each one's modifiers are its own.
+ */
+function sharedToggles(key: Slot, next: readonly BuildToggle[]) {
+  const mate = teamSlots(key).find((s) => s !== key)!
+  const b = slotBuild(mate)
+  if (!idOf(mate) || b.toggles.includes('tailwind') === next.includes('tailwind')) return {}
+  return buildQuery({ ...b, toggles: toggled(b.toggles, 'tailwind') }, mate)
 }
 /** One at its sets, or at one build (the one it had: its sets' most common, from when it was picked). */
 const setSets = (key: string, on: boolean) => replace({ [`${key}sets`]: on ? '1' : undefined })
@@ -342,7 +362,7 @@ function addSecond(s: Side, id: PokemonId) {
   void toListTop(
     replace({
       [key]: id,
-      ...buildQuery(pickedBuild(id, readBuild(route.query, key, id)), key),
+      ...buildQuery(pickedBuild(id, slotBuild(key)), key),
       [`${key}sets`]: startsAtSets(key, id),
     }),
   )
@@ -437,7 +457,7 @@ const ladderLink = computed(() => {
   const mineId = idOf(ladderMine.value) ? ladderMine.value : 'a'
   const findId = idOf(ladderFind.value) ? ladderFind.value : 'b'
   const me = idOf(mineId)
-  const b = readBuild(route.query, mineId, me)
+  const b = slotBuild(mineId)
   return {
     name: 'speedTiers',
     query: {
