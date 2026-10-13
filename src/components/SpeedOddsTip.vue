@@ -11,7 +11,7 @@ export type Pointed = OddsRow['builds'][number] | { speed: number; bench: Benchm
 // it, as the ladder's tags have them; or, on a row with no sets (or a benchmark's tick), the benchmark it is. A
 // component of its own, given a holder rather than what it points at, so that pointing from mark to mark draws it
 // alone again, not the ladder.
-defineProps<{ state: { pointed: Pointed | null; hint: boolean } }>()
+defineProps<{ state: { pointed: Pointed | null } }>()
 </script>
 
 <template>
@@ -27,8 +27,6 @@ defineProps<{ state: { pointed: Pointed | null; hint: boolean } }>()
         ><span v-if="state.pointed.sets.length > 1" class="tip-share">{{ percent(b.share) }}</span>
       </div>
     </template>
-    <!-- With a finger, until it's done once: the bar slides from mark to mark. -->
-    <div v-if="state.pointed && state.hint" class="tip-hint">{{ t('speed.slideHint') }}</div>
   </div>
 </template>
 
@@ -43,13 +41,6 @@ defineProps<{ state: { pointed: Pointed | null; hint: boolean } }>()
   align-items: center;
   gap: 6px;
   white-space: nowrap;
-}
-.tip-hint {
-  margin-top: 4px;
-  padding-top: 4px;
-  font-size: 0.85em;
-  opacity: 0.8;
-  border-top: 1px solid currentColor;
 }
 .tip-share {
   margin-left: auto;

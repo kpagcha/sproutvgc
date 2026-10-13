@@ -709,7 +709,6 @@ export const messages: Record<keyof typeof en, string> = {
   'speed.oddsReach.never': 'Nunca',
   'speed.oddsReach.depends': 'Depende',
   'speed.noSets': 'Sin sets',
-  'speed.slideHint': 'Desliza por la fila para elegir otro reparto.',
   'speed.oddsTies': '+{pct} empate',
   'speed.mod.trickroom': 'Espacio Raro',
   'speed.modTip.trickroom': 'El más lento mueve primero: la escala se da la vuelta.',

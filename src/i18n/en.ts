@@ -702,7 +702,6 @@ export const messages = {
   'speed.oddsReach.depends': 'Depends',
   'speed.noSets': 'No sets',
   'speed.oddsTies': '+{pct} tie',
-  'speed.slideHint': 'Slide along the row to pick another build.',
   'speed.mod.trickroom': 'Trick Room',
   'speed.modTip.trickroom': 'The slowest move first: the ladder turns over.',
   'speed.modifiers': 'Modifiers',

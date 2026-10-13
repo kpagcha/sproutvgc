@@ -162,22 +162,12 @@ function onOut(e: PointerEvent | FocusEvent) {
 // a bar (so sweeping across the list doesn't fire it), or at once on a click, then follows the pointer from mark to
 // mark; leaving the bars hides it. With a finger, a tap shows it, and dragging along the bar moves it (the bars leave
 // the browser only vertical pans, so scrolling the page still works), a slider: the mark it's let go on is picked; a
-// tap elsewhere or a scroll hides it. A mark clicked, tapped or slid to is measured against, with yours (until yours
-// is first slid along a row, the tooltip says it can be, on a finger). The mark it's on is marked `active`, and what it
-// says is drawn by `SpeedOddsTip` alone.
+// tap elsewhere or a scroll hides it. A mark clicked, tapped or slid to is measured against, with yours. The mark it's
+// on is marked `active`, and what it says is drawn by `SpeedOddsTip` alone, the tooltip placed again whenever that
+// changes its size (drawn after it's placed, it would otherwise grow off its mark).
 const SHOW_DELAY = 80
 const REACH = { mouse: 12, touch: 24 }
-const SLID_KEY = 'sproutvgc.speedTiers.slid'
-function savedSlid() {
-  try {
-    return localStorage.getItem(SLID_KEY) === '1'
-  } catch {
-    return false
-  }
-}
-/** Whether the reader has slid to a mark already: the tooltip no longer says they can. */
-let slidOnce = savedSlid()
-const tipState = shallowReactive<{ pointed: Pointed | null; hint: boolean }>({ pointed: null, hint: false })
+const tipState = shallowReactive<{ pointed: Pointed | null }>({ pointed: null })
 const tipBody = useTemplateRef<ComponentPublicInstance>('tipBody')
 let tip: Instance | undefined
 // How to read the rows, in the "?"'s tooltip: a line per part of them, its name in bold before what it is (the text a
@@ -193,6 +183,7 @@ const noteLines = computed(() =>
 const noteHelp = useTemplateRef<HTMLElement>('noteHelp')
 const noteBody = useTemplateRef<HTMLElement>('noteBody')
 let noteTip: Instance | undefined
+let tipResize: ResizeObserver | undefined
 let pending: ReturnType<typeof setTimeout> | undefined
 /** The mark the tooltip is placed at, and the one marked as pointed at (none once it hides). */
 let markEl: HTMLElement | undefined
@@ -244,7 +235,6 @@ function show(hit: Hit) {
 function hide() {
   pointedAt = undefined
   slideHit = startEl = undefined
-  tipState.hint = false
   clearTimeout(pending)
   pending = undefined
   activeEl?.classList.remove('active')
@@ -275,7 +265,6 @@ function onDown(e: PointerEvent) {
   slid = false
   startEl = finger ? hit?.el : undefined
   slideHit = finger ? (hit ?? undefined) : undefined
-  tipState.hint = finger && !slidOnce && props.mine !== null && !!hit && !hit.row.mine
   if (hit) show(hit)
   else hide()
 }
@@ -287,14 +276,6 @@ function onUp(e: PointerEvent) {
   slid = false
   skipClick = true
   emit('mark', hit.row.key, hit.speed, true)
-  if (props.mine === null || slidOnce) return
-  slidOnce = true
-  tipState.hint = false
-  try {
-    localStorage.setItem(SLID_KEY, '1')
-  } catch {
-    // Not remembered: the hint shows again next time.
-  }
 }
 function onClick(e: MouseEvent) {
   if (skipClick) return void (skipClick = false)
@@ -335,18 +316,22 @@ onMounted(() => {
     trigger: 'manual',
     hideOnClick: false,
     placement: 'top',
-    // Fixed, so that, its text grown wider for a moment before it's placed again (sliding from mark to mark), it can't
-    // widen the page past the screen, flashing its scrollbar on phones.
-    popperOptions: { strategy: 'fixed' },
     content: tipBody.value!.$el as HTMLElement,
     getReferenceClientRect: () => markEl?.getBoundingClientRect() ?? list.value!.getBoundingClientRect(),
   })
+  // Placed with the page (not fixed to the screen, which iOS Safari misplaces with its toolbar collapsed, by about its
+  // height), and again whenever its text changes size, so it's never drawn off its mark.
+  tipResize = new ResizeObserver(() => {
+    if (tip?.state.isVisible) void tip.popperInstance?.update()
+  })
+  tipResize.observe(tipBody.value!.$el as HTMLElement)
   noteTip = tippy(noteHelp.value!, { content: noteBody.value!, placement: 'bottom-start', maxWidth: 380 })
   document.addEventListener('pointerdown', onOutside)
   window.addEventListener('scroll', hide, { passive: true, capture: true })
 })
 onBeforeUnmount(() => {
   clearTimeout(pending)
+  tipResize?.disconnect()
   tip?.destroy()
   noteTip?.destroy()
   document.removeEventListener('pointerdown', onOutside)

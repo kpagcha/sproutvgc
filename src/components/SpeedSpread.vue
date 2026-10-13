@@ -101,15 +101,10 @@ function point(e: PointerEvent) {
     trigger: 'manual',
     content: tipBody.value!,
     moveTransition: 'transform 0.12s ease-out',
-    // Fixed, so that, its text grown wider for a moment before it's placed again, it can't widen the page past the
-    // screen, flashing its scrollbar on phones; placed again as the page scrolls, which it no longer moves with.
-    popperOptions: { strategy: 'fixed' },
-    onShow: () => window.addEventListener('scroll', follow, { passive: true, capture: true }),
     // Pointing at the mark shown, read each time: setting it anew would remake its placing, the tooltip then gliding in
     // from the screen's top left corner.
     getReferenceClientRect: () => (pointed ?? plot.value!).getBoundingClientRect(),
     onHidden: () => {
-      window.removeEventListener('scroll', follow, { capture: true })
       active.value = null
     },
   })
@@ -138,13 +133,7 @@ function onCancel() {
   markTip?.hide()
 }
 watch(drawn, () => markTip?.hide())
-function follow() {
-  void markTip?.popperInstance?.update()
-}
-onBeforeUnmount(() => {
-  window.removeEventListener('scroll', follow, { capture: true })
-  markTip?.destroy()
-})
+onBeforeUnmount(() => markTip?.destroy())
 </script>
 
 <template>
