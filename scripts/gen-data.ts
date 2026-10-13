@@ -589,11 +589,11 @@ async function main() {
 
     // Each locale's names: English is Showdown's; the others come from PokéAPI, then the overrides.
     const english = new Map(entries.map((e) => [e.id, e.name]))
-    const names = { en: c.compose ? c.compose(english) : english } as Record<Locale, Map<string, string>>
+    const names: Record<string, Map<string, string>> = { en: c.compose ? c.compose(english) : english }
     for (const [locale, language] of languages) {
       names[locale] = await pokeapiNames(sources.pokeapi, language.pokeapi, ...c.pokeapi)
       if (c.compose) names[locale] = c.compose(names[locale])
-      const overrides = NAMES[locale]?.[c.key] ?? {}
+      const overrides: Record<string, string> = NAMES[locale]?.[c.key] ?? {}
       const redundant = Object.keys(overrides).filter((id) => overrides[id] === names[locale].get(id))
       if (redundant.length)
         console.warn(`The sources agree with the ${locale} ${c.key} overrides for ${redundant.join(', ')}`)

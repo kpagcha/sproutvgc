@@ -5,6 +5,8 @@ import { LOCALES, locale, setLocale, t, type Locale } from '@/i18n'
 import { confirmDialog } from '@/composables/useConfirm'
 
 const { mode, setMode } = useTheme()
+// The language is a choice only while there's more than one (English only for now).
+const multilingual = Object.keys(LOCALES).length > 1
 const MetaDevTools = import.meta.env.DEV ? defineAsyncComponent(() => import('@/dev/MetaDevTools.vue')) : null
 
 // Erases everything the site has saved in this browser (every `sproutvgc.` key: favorites, recently viewed, the quiz's
@@ -34,7 +36,7 @@ async function clearAll() {
     <p class="muted">{{ t('settings.intro') }}</p>
   </div>
 
-  <div class="panel">
+  <div v-if="multilingual" class="panel">
     <h2>{{ t('lang.label') }}</h2>
     <div class="opts">
       <label v-for="(label, code) in LOCALES" :key="code" class="opt" :class="{ on: locale === code }">

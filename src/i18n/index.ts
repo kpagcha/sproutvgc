@@ -3,7 +3,6 @@ import type { TypeId } from '@/data/types'
 import type { Ids, NamedKind, Ref } from '@/data/dex'
 import type { ConditionId, MoveNamedCondition } from '@/data/conditions'
 import * as en from './en'
-import * as es from './es'
 import { LOCALES, type Locale } from './locales'
 
 export { LOCALES, type Locale }
@@ -22,7 +21,6 @@ export type Names = {
 
 const BUNDLES: Record<Locale, { messages: Record<MessageKey, string>; types: Record<TypeId, string>; names: Names }> = {
   en,
-  es,
 }
 
 const KEY = 'sproutvgc.lang'

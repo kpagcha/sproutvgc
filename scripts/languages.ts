@@ -8,7 +8,5 @@ export interface Language {
   pokeapi: string
 }
 
-export const LANGUAGES: Record<Exclude<Locale, 'en'>, Language> = {
-  // Spain's Spanish.
-  es: { pokeapi: 'es' },
-}
+// English only for now: Spain's Spanish would be `es: { pokeapi: 'es' }`.
+export const LANGUAGES: Record<Exclude<Locale, 'en'>, Language> = {}

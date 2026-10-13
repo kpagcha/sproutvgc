@@ -10,7 +10,7 @@ Currently implemented:
 - **Type quiz** (`/quizzes/types`): a matchup quiz that schedules questions with SM-2 spaced repetition, so the matchups you miss come back more often.
 - **Speed quiz** (`/quizzes/speed`): who moves first, or a tie, between two Pokémon, from base Speeds to the sets players run; it gets harder as you get better, and the pairs you miss come back with spaced repetition.
 
-Available in English and Spanish, with the official type names in each language. Add a language
+English only for now; translations will come once the rest is done. The i18n stays in place: add a language
 by creating `src/i18n/<code>.ts` (the compiler flags missing keys) and listing it in `src/i18n/index.ts`.
 
 ## Scripts

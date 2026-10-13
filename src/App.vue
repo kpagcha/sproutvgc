@@ -113,10 +113,11 @@ const NAV: { to: string; section: string; label: MessageKey }[] = AREAS.map((a) 
   label: a.label,
 }))
 
-// The bar switches the language and the theme too, beside Settings: the language to the next one, the
-// theme to the other of light and dark (from what shows, the device's when on auto).
+// The bar switches the language and the theme too, beside Settings: the language to the next one (while there's more
+// than one: English only for now), the theme to the other of light and dark (from what shows, the device's when on auto).
 const { theme, setMode } = useTheme()
 const CODES = Object.keys(LOCALES) as Locale[]
+const multilingual = CODES.length > 1
 const nextLocale = () => setLocale(CODES[(CODES.indexOf(locale.value) + 1) % CODES.length]!)
 const toggleTheme = () => setMode(theme.value === 'dark' ? 'light' : 'dark')
 
@@ -186,7 +187,7 @@ const fadeVariants = {
           </template>
           <!-- The language on wider screens only: narrow, there's room for the theme alone. -->
           <button
-            v-if="!compact"
+            v-if="multilingual && !compact"
             type="button"
             class="quick first"
             :aria-label="`${t('lang.label')}: ${LOCALES[locale]}`"
@@ -197,7 +198,7 @@ const fadeVariants = {
           <button
             type="button"
             class="quick"
-            :class="{ first: compact }"
+            :class="{ first: compact || !multilingual }"
             :aria-label="t('theme.label')"
             @click="toggleTheme"
           >

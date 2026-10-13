@@ -23,7 +23,7 @@ item or ability the regulation has whose Showdown code changes Speed (`onModifyS
 - [ ] Order of operations still Showdown's? Check `inBattle()` against Showdown's `getActionSpeed`/`modifySpe`.
 - [ ] Can't stack with something? `withEffect()` and `CLASHES` (`speedBuild.ts`).
 - [ ] Should the reader toggle it? `BUILD_TOGGLES`, `MY_TOGGLES`, `TOGGLES`, `modButtons`, `modsOf`, `MOD_ITEMS`.
-- [ ] Labels: `speed.mod.*`, `speed.modTip.*`, `speed.when.*` in `en.ts` and `es.ts`.
+- [ ] Labels: `speed.mod.*`, `speed.modTip.*`, `speed.when.*` in `en.ts` (and any other locale's).
 - [ ] A Pokémon with 3+ doubling abilities? `doubled`/`doubled2` assume at most two.
 
 **Blind spots** (gen-data does not warn; check the regulation's new entries by hand):
@@ -42,7 +42,7 @@ item or ability the regulation has whose Showdown code changes Speed (`onModifyS
 ## 4. Hand-curated dex content
 
 - [ ] Descriptions: gen-data lists new, changed (source hash) and gone entries per category. Write/revise in
-      `src/i18n/en/<category>.ts`, then translations in `src/i18n/es/…`.
+      `src/i18n/en/<category>.ts`, then translations in `src/i18n/<locale>/…`, if any.
 - [ ] Conditions: a new weather/terrain/side/field effect? Add to `CONDITIONS` (`src/data/conditions.ts`), its
       `names` in every locale, a description; `scripts/conditions.ts` patterns if Showdown sets it a new way.
 - [ ] Type interactions: new abilities/items/moves that touch types, weather, immunities → `src/data/typeinfo.ts`
@@ -69,7 +69,7 @@ item or ability the regulation has whose Showdown code changes Speed (`onModifyS
 
 ## 7. Text and pages
 
-- [ ] Regulation-specific copy is `{reg}`-parametrized; grep `en.ts`/`es.ts` for anything hard-coded ("M-C").
+- [ ] Regulation-specific copy is `{reg}`-parametrized; grep the locales' messages (`en.ts`...) for anything hard-coded ("M-C").
 - [ ] SEO pages, sitemap, availability, learnsets, pickers: automatic from the data.
 
 ## 8. Verify
