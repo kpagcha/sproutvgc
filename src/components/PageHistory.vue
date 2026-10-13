@@ -12,8 +12,8 @@ import PageChip, { shownVisit } from '@/components/PageChip.vue'
 // (`usePageHistory`), most recent first, as the home page's recently viewed shows pages (`PageChip`), each reopening it
 // so, the one shown now marked (rather than left out, so the row keeps still as the page changes). Picking one starts a
 // visit of its own, the one before saved as it was left. Those the regulation can't show are left out. Nothing shows
-// until there's one besides the one shown now; it folds away (folded at first), and can be cleared. On wide screens,
-// all on one row.
+// until there's one besides the one shown now; it folds away (folded at first), and can be cleared, a band as the home
+// page's recently viewed (`RecentPanel`), in grey, the chips under it.
 const route = useRoute()
 const page = computed(() => String(route.name))
 const current = computed((): PageVisit | null => {
@@ -27,17 +27,20 @@ const items = computed(() => all.value.filter((i) => shownVisit(i.visit)).slice(
 const shown = computed(() => items.value.some((i) => !i.current))
 /** A setup picked starts a visit, but for the one shown now. */
 const onPick = (e: MouseEvent) => (e.target as Element).closest('.current') || startVisit(page.value)
-const { open, toggle } = useOpenState(`sproutvgc.pageHistory.${page.value}.open`, false)
+const { open, onToggle } = useOpenState(`sproutvgc.pageHistory.${page.value}.open`, false)
 </script>
 
 <template>
-  <!-- On one row: the toggle, the chips (on narrow screens, on a row of their own under it) and clearing. -->
-  <div v-if="shown" class="panel page-history" :class="{ open }">
-    <button type="button" class="toggle" :aria-expanded="open" aria-controls="page-history-chips" @click="toggle">
-      <span class="marker" aria-hidden="true">{{ open ? '▾' : '▸' }}</span
-      ><span class="title">{{ t('recent.title') }}</span> <span class="count muted">{{ items.length }}</span>
-    </button>
-    <div v-show="open" id="page-history-chips" class="chips" @click.capture="onPick">
+  <details v-if="shown" class="panel banded page-history" :open @toggle="onToggle">
+    <summary>
+      <h2 class="title">
+        {{ t('recent.title') }} <span class="count">{{ items.length }}</span>
+      </h2>
+      <button type="button" class="btn on-band clear" @click.prevent="clear">
+        <Trash2 :size="14" aria-hidden="true" />{{ t('recent.clear') }}
+      </button>
+    </summary>
+    <div class="chips" @click.capture="onPick">
       <PageChip
         v-for="i in items"
         :key="JSON.stringify(i.visit.query)"
@@ -47,70 +50,44 @@ const { open, toggle } = useOpenState(`sproutvgc.pageHistory.${page.value}.open`
         :aria-current="i.current ? 'page' : undefined"
       />
     </div>
-    <button
-      v-tip="t('recent.clear')"
-      type="button"
-      class="btn inverted clear"
-      :aria-label="t('recent.clear')"
-      @click="clear"
-    >
-      <Trash2 :size="14" aria-hidden="true" />
-    </button>
-  </div>
+  </details>
 </template>
 
 <style scoped>
-.page-history {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 12px;
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-.toggle {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  padding: 0;
-  color: var(--text);
-  font: inherit;
-  background: none;
-  border: 0;
+.page-history > summary {
+  position: relative;
   cursor: pointer;
 }
-.marker {
-  font-size: 0.8em;
+/* A band in the panel's own grey, not the accent: it needn't stand out over the page. */
+:root:root .page-history.banded > summary {
+  color: var(--text);
+  background: color-mix(in srgb, var(--ink) 12%, var(--panel));
 }
+/* Inline, so the marker sits on the heading's line. */
 .title {
-  font-weight: 700;
+  display: inline;
+  margin: 0 0 0 2px;
 }
 .count {
-  font-size: 0.85em;
+  font-size: 0.75em;
+  font-weight: normal;
+  opacity: 0.8;
+}
+/* Clearing sits at the band's end, as the home page's does. */
+.clear {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
 }
 .chips {
   display: flex;
-  flex: 1;
   flex-wrap: wrap;
   gap: 6px;
-  min-width: 0;
 }
 /* The one shown now: outlined, as what's picked is elsewhere. */
 .chips > .current {
   border-color: var(--accent);
   box-shadow: inset 0 0 0 1px var(--accent);
-}
-/* Clearing, its icon alone (its name in its tooltip), no taller than the heading's line. */
-.clear {
-  min-height: 0;
-  margin-left: auto;
-  padding: 3px 6px;
-}
-/* Narrow screens: the chips on a row of their own, under the toggle and clearing. */
-@media (max-width: 720px) {
-  .chips {
-    flex-basis: 100%;
-    order: 1;
-  }
 }
 </style>
