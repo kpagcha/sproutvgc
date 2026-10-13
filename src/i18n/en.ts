@@ -998,6 +998,7 @@ export const messages = {
   'picker.all': 'All Pokémon',
   'picker.taken': 'On the team',
   'picker.recent': 'Recent',
+  'picker.ability': 'With {name}',
   'picker.showAll': 'Show all ({n})',
   'picker.showFewer': 'Show fewer',
   'compare.intro':

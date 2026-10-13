@@ -1,14 +1,18 @@
 import { computed, type Ref } from 'vue'
-import { availableIds, pokemon, type PokemonId } from '@/data/dex'
+import { ability, available, availableIds, pokemon, type AbilityId, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
 import { locale } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { fold, split, type Marks } from '@/lib/search'
+import { SPEED_ABILITIES } from '@/lib/speed'
 import { useFavorites } from '@/composables/useFavorites'
 import { GROUP_CAP, usePickerGroups, type PickerGroup } from '@/composables/usePickerGroups'
 
 /** A Pokémon's name, or nothing for none. */
 export const pokemonName = (id: PokemonId | null) => (id ? refName(pokemon(id)) : '')
+
+/** The abilities that change Speed the regulation has, for the speed pages' pickers to find Pokémon by. */
+const SPEED_ABILITY_IDS = (Object.keys(SPEED_ABILITIES) as AbilityId[]).filter((id) => available(ability(id)))
 
 /** Usage ranks by Pokémon, from 1, for a picker to list by. */
 export type Ranks = Partial<Record<PokemonId, number>>
@@ -18,7 +22,9 @@ export type Ranks = Partial<Record<PokemonId, number>>
  * or By usage given ranks) doesn't.
  */
 export interface GroupHeading {
-  group: PickerGroup | 'all' | 'usage'
+  group: PickerGroup | 'all' | 'usage' | 'ability'
+  /** An ability's group's: the ability's name. */
+  label?: string
   /** How many it has, all of them. */
   count: number
   folded: boolean
@@ -54,7 +60,9 @@ export interface PokemonOption {
  * picked lately first (with `withRecent`), then the reader's favorites, each group its first `GROUP_CAP` unless asked
  * for all and folding away, then every one in its place; the favorites first among those found while typing; none
  * while it's not `open`. By name, or given `ranks` (the meta's usage ranks), by usage: the ranked first, most used
- * first, then the rest by name. For the Pokémon pickers: the drop-down and the dialog's panel.
+ * first, then the rest by name. With `bySpeedAbility` (the speed pages'), typing the name of an ability that changes
+ * Speed (Unburden, Chlorophyll) also finds, after those found by name, the Pokémon that can have it, under its name.
+ * For the Pokémon pickers: the drop-down and the dialog's panel.
  */
 export function usePokemonSearch(
   ids: () => readonly PokemonId[] | undefined,
@@ -63,6 +71,7 @@ export function usePokemonSearch(
   open: () => boolean = () => true,
   ranks: () => Ranks | undefined = () => undefined,
   withRecent: () => boolean = () => false,
+  bySpeedAbility: () => boolean = () => false,
 ) {
   const { isFavorite } = useFavorites()
   const { recent, folded, expanded } = usePickerGroups()
@@ -110,7 +119,20 @@ export function usePokemonSearch(
       const parts = split(m.name, q)
       return parts ? [{ ...m, parts, key: m.id }] : []
     })
-    return [...found.filter((m) => m.fav), ...found.filter((m) => !m.fav)]
+    const out: PokemonOption[] = [...found.filter((m) => m.fav), ...found.filter((m) => !m.fav)]
+    if (!bySpeedAbility() || q.length < 3) return out
+    // Each Speed ability the text finds: the Pokémon that can have it, under its name (a heading).
+    for (const id of SPEED_ABILITY_IDS) {
+      const name = refName(ability(id))
+      if (!split(name, q)) continue
+      const holders = all.value.filter((m) => POKEMON[m.id].abilities.includes(id))
+      if (!holders.length) continue
+      const heading: GroupHeading = { group: 'ability', label: name, count: holders.length, folded: false }
+      holders.forEach((m, i) =>
+        out.push({ ...m, parts: [m.name], key: `ability:${id}:${m.id}`, headings: i ? undefined : [heading] }),
+      )
+    }
+    return out
   })
   return { results, showsPicked }
 }

@@ -6,7 +6,7 @@ import type { PokemonId } from '@/data/dex'
 import { POKEMON, speciesOf } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { benchmark } from '@/lib/stats'
-import { pokemonName, usePokemonSearch, type Ranks } from '@/composables/usePokemonSearch'
+import { pokemonName, usePokemonSearch, type GroupHeading, type Ranks } from '@/composables/usePokemonSearch'
 import { usePickerGroups, type PickerGroup } from '@/composables/usePickerGroups'
 import PokemonIcon from '@/components/PokemonIcon'
 import SearchBox from '@/components/SearchBox.vue'
@@ -53,6 +53,7 @@ const { results, showsPicked } = usePokemonSearch(
   () => true,
   () => props.ranks,
   () => !!props.recent,
+  () => !!props.speed,
 )
 // Folding a group or showing all of it keeps the list where it is, rather than going back to the one picked.
 const { toggleFold, toggleExpanded } = usePickerGroups()
@@ -68,9 +69,10 @@ const GROUPS = {
   all: 'picker.all',
   usage: 'picker.byUsage',
 } as const
-const groupLabel = (g: keyof typeof GROUPS) => t(GROUPS[g])
+const groupLabel = (h: GroupHeading) =>
+  h.group === 'ability' ? t('picker.ability', { name: h.label ?? '' }) : t(GROUPS[h.group])
 /** Recent and Favorites fold away; the rest (All, By usage) is the list itself. */
-const foldable = (g: keyof typeof GROUPS) => g === 'recent' || g === 'favorites'
+const foldable = (g: GroupHeading['group']) => g === 'recent' || g === 'favorites'
 
 const active = ref(0)
 // Browsing every Pokémon from the one picked: it, in view, centered; else the first.
@@ -183,14 +185,14 @@ const optionId = (i: number) => `${listId}-${i}`
              it a folded group's. -->
         <li
           v-for="h in r.headings ?? []"
-          :key="h.group"
+          :key="h.label ?? h.group"
           role="presentation"
           class="group"
           :class="{ foldable: foldable(h.group) }"
           @click="foldable(h.group) && regroup(() => toggleFold(h.group as PickerGroup))"
         >
           <span v-if="foldable(h.group)" class="fold" aria-hidden="true">{{ h.folded ? '▸' : '▾' }}</span
-          >{{ groupLabel(h.group) }}<span v-if="foldable(h.group)" class="count">{{ h.count }}</span>
+          >{{ groupLabel(h) }}<span v-if="foldable(h.group)" class="count">{{ h.count }}</span>
         </li>
         <li
           :id="optionId(i)"
