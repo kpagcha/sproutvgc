@@ -433,12 +433,11 @@ export function generate(
 
 // ---- The answer, on the ladder ----
 
-/** A Speed on the ladder around a question's pair: the Pokémon at it, those asked first, and how many more there are. */
+/** A Speed on the ladder around a question's pair: the Pokémon at it, those asked first. */
 export interface LadderGroup {
   kind: 'speed'
   speed: number
   sides: Side[]
-  more: number
 }
 /** Speeds left out between the two asked, folded. */
 export interface LadderGap {
@@ -449,10 +448,10 @@ export type LadderRow = LadderGroup | LadderGap
 
 /**
  * The ladder around a question's pair, fastest first: the Speed over the faster and under the slower, their own, and
- * those between them, up to `between` of them (more, the nearest to each kept and the rest folded); at each, up to
- * `per` Pokémon, those asked first.
+ * those between them, up to `between` of them (more, the nearest to each kept and the rest folded); at each, its
+ * Pokémon, those asked first (as many as fit on a line are shown: `SpeedQuizCard`).
  */
-export function ladderAround(q: Question, sides: readonly Side[], between = 3, per = 4): LadderRow[] {
+export function ladderAround(q: Question, sides: readonly Side[], between = 3): LadderRow[] {
   const asked = [q.a, q.b]
   const bySpeed = new Map<number, Side[]>()
   for (const s of [...asked, ...sides]) {
@@ -463,11 +462,7 @@ export function ladderAround(q: Question, sides: readonly Side[], between = 3, p
   const speeds = [...bySpeed.keys()].sort((x, y) => y - x)
   const hi = speeds.indexOf(Math.max(q.a.speed, q.b.speed))
   const lo = speeds.indexOf(Math.min(q.a.speed, q.b.speed))
-  const group = (speed: number): LadderGroup => {
-    const all = bySpeed.get(speed)!
-    const shown = all.slice(0, Math.max(per, all.filter((s) => asked.some((a) => a.id === s.id)).length))
-    return { kind: 'speed', speed, sides: shown, more: all.length - shown.length }
-  }
+  const group = (speed: number): LadderGroup => ({ kind: 'speed', speed, sides: bySpeed.get(speed)! })
   const rows: LadderRow[] = []
   for (let i = Math.max(0, hi - 1); i <= Math.min(speeds.length - 1, lo + 1); i++) {
     const inner = lo - hi - 1

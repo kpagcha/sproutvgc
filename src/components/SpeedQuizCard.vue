@@ -78,6 +78,49 @@ function choose(a: Answer) {
 const name = (s: Side) => refName(pokemon(s.id))
 const asked = (s: Side) => s.id === props.question.a.id || s.id === props.question.b.id
 
+// Each Speed's Pokémon on one line: as many as fit, those asked always, the rest a "+n" (naming them on hover or a
+// tap). Measured with them all shown, whenever the ladder changes or its width does.
+const ladderEl = useTemplateRef<HTMLElement>('ladderEl')
+/** How many of each row's Pokémon show, by the row's index; none measured yet, all of them. */
+const fits = ref<number[]>([])
+const fitOf = (i: number) => fits.value[i] ?? Infinity
+const rest = (sides: Side[], i: number) => sides.slice(fitOf(i)).map(name).join(', ')
+
+async function fit() {
+  fits.value = []
+  await nextTick()
+  const items = ladderEl.value?.children
+  if (!items) return
+  fits.value = props.ladder.map((row, i) => {
+    const mons = items[i]?.querySelector<HTMLElement>('.mons')
+    if (row.kind !== 'speed' || !mons) return Infinity
+    const gap = parseFloat(getComputedStyle(mons).columnGap) || 0
+    const widths = [...mons.querySelectorAll<HTMLElement>('.mon-chip')].map((c) => c.offsetWidth)
+    const more = mons.querySelector<HTMLElement>('.more')?.offsetWidth ?? 0
+    const room = mons.clientWidth
+    const width = (k: number) => widths.slice(0, k).reduce((sum, w) => sum + w + gap, 0)
+    if (width(widths.length) - gap <= room) return widths.length
+    const least = Math.max(1, row.sides.filter(asked).length)
+    let k = widths.length - 1
+    while (k > least && width(k) + more > room) k--
+    return k
+  })
+}
+watch([() => props.ladder, picked], () => picked.value && fit(), { flush: 'post' })
+let observer: ResizeObserver | undefined
+let lastWidth = 0
+watch(ladderEl, (el) => {
+  observer?.disconnect()
+  if (!el) return
+  lastWidth = el.clientWidth
+  observer = new ResizeObserver(() => {
+    if (el.clientWidth === lastWidth) return
+    lastWidth = el.clientWidth
+    fit()
+  })
+  observer.observe(el)
+})
+
 function mark(a: Answer) {
   if (!picked.value) return undefined
   if (a === answer.value) return 'right'
@@ -124,6 +167,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKey)
   document.removeEventListener('visibilitychange', onVisibility)
+  observer?.disconnect()
 })
 </script>
 
@@ -195,12 +239,18 @@ onBeforeUnmount(() => {
       </div>
       <p v-if="eventText" class="event" :class="event?.kind">{{ eventText }}</p>
       <!-- The two among their neighbors, fastest first. -->
-      <ol class="ladder">
+      <ol ref="ladderEl" class="ladder">
         <li v-for="(row, i) in ladder" :key="i" :class="{ gap: row.kind === 'gap' }">
           <template v-if="row.kind === 'speed'">
             <span class="num at">{{ row.speed }}</span>
             <span class="mons">
-              <span v-for="s in row.sides" :key="s.id" class="mon-chip" :class="{ asked: asked(s) }">
+              <span
+                v-for="(s, j) in row.sides"
+                v-show="j < fitOf(i)"
+                :key="s.id"
+                class="mon-chip"
+                :class="{ asked: asked(s) }"
+              >
                 <PokemonIcon :id="s.id" />
                 <span>{{ name(s) }}</span>
                 <span v-if="asked(s) && s.build" class="build">
@@ -208,10 +258,20 @@ onBeforeUnmount(() => {
                   <span>{{ t('speed.points', { n: s.build.points }) }}</span>
                 </span>
               </span>
-              <span v-if="row.more" class="muted">{{ t('speedQuiz.more', { n: row.more }) }}</span>
+              <!-- Shown while measuring, at the most it could say, so whatever it says then fits. -->
+              <span
+                v-if="row.sides.length > 1"
+                v-show="!fits.length || fitOf(i) < row.sides.length"
+                v-tip="rest(row.sides, i)"
+                class="muted more"
+                >{{ t('speedQuiz.more', { n: row.sides.length - (fits.length ? fitOf(i) : 0) }) }}</span
+              >
             </span>
           </template>
-          <span v-else class="muted between">⋮ {{ t('speedQuiz.between', { n: row.speeds }) }}</span>
+          <template v-else>
+            <span class="num at dots" aria-hidden="true">⋮</span>
+            <span class="muted between">{{ t('speedQuiz.between', { n: row.speeds }) }}</span>
+          </template>
         </li>
       </ol>
     </motion.div>
@@ -420,15 +480,23 @@ kbd {
   display: grid;
   grid-template-columns: 3em minmax(0, 1fr);
   gap: 8px;
-  align-items: center;
+  /* The Speed on its row's first line, when its Pokémon wrap onto more: as tall as a line of them (their icon's). */
+  align-items: start;
 }
 .ladder .at {
+  line-height: 30px;
   text-align: right;
   font-weight: bold;
 }
-.ladder .gap {
-  display: block;
-  padding-left: calc(3em + 8px);
+/* The Speeds left out: a vertical ellipsis down the Speeds' column, how many beside it, quieter than the rows. */
+.ladder .dots {
+  line-height: inherit;
+  padding-right: 0.5ch;
+  font-weight: normal;
+  color: var(--muted);
+}
+.ladder .between {
+  font-size: 0.85em;
 }
 .mons {
   display: flex;

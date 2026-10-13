@@ -449,7 +449,7 @@ export const messages = {
   'speedQuiz.levelUp': 'Level up: {n}',
   'speedQuiz.levelDown': 'Level down: {n}',
   'speedQuiz.unlocked': 'New builds: {stage}, from level {n}',
-  'speedQuiz.between': '{n} more Speeds between',
+  'speedQuiz.between': '{n} Speeds in between',
   'speedQuiz.more': '+{n}',
   'speedQuiz.level': 'Level {n}',
   'speedQuiz.levelOf': 'Level {n} of {of}',
