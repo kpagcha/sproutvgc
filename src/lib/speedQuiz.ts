@@ -1,9 +1,9 @@
 // The speed quiz: two Pokémon, and who moves first, or a tie. Questions are generated, not a deck: each one's level is
 // how close the two Speeds are (`LEVEL_GAPS`), and the reader's level, per build stage, follows how they answer
-// (`record`). The build stages are base Speed alone, then each Pokémon at its most used set, then at any of its top sets
-// (from a share of them up); progressive, each adds the next once the closest pairs of the one before are steady.
-// What the reader shows they don't know (a miss, a close pair) is saved as an SM-2 card (`srs.ts`) and asked again on
-// schedule. The plan: notes/speed-quiz.md.
+// (`record`). The build stages are each Pokémon uninvested (no points, a neutral nature), then at its most used set,
+// then at any of its top sets (from a share of them up); progressive, each adds the next once the closest pairs of the
+// one before are steady. What the reader shows they don't know (a miss, a close pair) is saved as an SM-2 card
+// (`srs.ts`) and asked again on schedule. The plan: notes/speed-quiz.md.
 
 import type { PokemonId } from '@/data/dex'
 import type { MetaData } from '@/data/meta'
@@ -11,7 +11,9 @@ import { POKEMON, speciesOf } from '@/data/pokemon'
 import { speedBuilds, speedStat } from '@/lib/speed'
 import type { NatureEffect } from '@/lib/stats'
 
-/** What each Pokémon is at: base Speed alone, its most used set, or any of its top sets. */
+/** What each Pokémon is at: uninvested (no stat points, a neutral nature: its Speed as the game has it, not its base,
+ * though the stage keeps its first ID, `base`, as saved progress and cards have it), its most used set, or any of its top
+ * sets. */
 export const STAGES = ['base', 'common', 'top'] as const
 export type Stage = (typeof STAGES)[number]
 
@@ -37,8 +39,8 @@ export const EASIER_EVERY = 5
 export const EARLIER_EVERY = 3
 /** A Pokémon missed comes up at most this many times as often. */
 export const MISS_MAX = 4
-/** At the last level, one question in this many is a tie (if there's one to ask): left alone, base Speeds tie so often
- * that most would be. */
+/** At the last level, one question in this many is a tie (if there's one to ask): left alone, uninvested Speeds tie so
+ * often that most would be. */
 export const TIE_EVERY = 3
 /** The top sets' least share to choose from. */
 export const TOP_SHARES = [0.03, 0.05, 0.1, 0.2] as const
@@ -58,7 +60,7 @@ export function levelOf(g: number): number {
 // ---- Settings ----
 
 export interface SpeedQuizSettings {
-  /** A build stage alone, or progressive: from base Speed up to `upTo`. */
+  /** A build stage alone, or progressive: from uninvested up to `upTo`. */
   builds: 'progressive' | Stage
   upTo: Exclude<Stage, 'base'>
   /** The top sets' least share. */
@@ -112,7 +114,7 @@ export function saveSettings(s: SpeedQuizSettings) {
 }
 
 /** The build stages asked: the one picked, or progressive, those unlocked up to the last allowed. With no sets in the
- * data, base Speed alone. */
+ * data, uninvested alone. */
 export function activeStages(s: SpeedQuizSettings, unlocked: Stage, hasSets: boolean): Stage[] {
   if (!hasSets) return ['base']
   if (s.builds !== 'progressive') return [s.builds]
@@ -149,7 +151,7 @@ export const DECK_KEY = 'sproutvgc.speedQuiz.deck.v1'
 
 const freshStage = (level = 1): StageProgress => ({ level, at: level, window: [], streak: 0, quick: 0 })
 
-/** Back to the start, level 1 and base Speed, keeping which Pokémon are missed. */
+/** Back to the start, level 1 and uninvested, keeping which Pokémon are missed. */
 export const emptyProgress = (misses: Progress['misses'] = {}): Progress => ({
   v: 1,
   unlocked: 'base',
@@ -244,7 +246,7 @@ export function record(
 
 // ---- The Pokémon asked about ----
 
-/** A Pokémon as a question has it: at base Speed (no build), or at a build of its sets and the Speed it gives. */
+/** A Pokémon as a question has it: uninvested (no build), or at a build of its sets and the Speed it gives. */
 export interface Side {
   id: PokemonId
   speed: number
@@ -302,7 +304,7 @@ export function sidesAt(
     const weight = Math.sqrt(Math.max(data?.[id]?.usage ?? 0, 0.001)) * (1 + (misses[id] ?? 0))
     const base = POKEMON[id].stats[5]
     if (stage === 'base') {
-      out.push({ side: { id, speed: base }, weight })
+      out.push({ side: { id, speed: speedStat(base, 0, 'neutral') }, weight })
       continue
     }
     const builds = buildsAt(id, stage, data, topShare)
@@ -338,7 +340,7 @@ export const answerOf = (q: Pick<Question, 'a' | 'b'>): Answer =>
 const EFFECT_KEY = { up: 'u', neutral: 'n', down: 'd' } as const
 const sideKey = (s: Side) => (s.build ? `${s.id}@${EFFECT_KEY[s.build.effect]}${s.build.points}` : s.id)
 
-/** A pair's card ID: `b:` at base Speed, `s:` at sets (each side's build after an `@`), its sides in order. */
+/** A pair's card ID: `b:` uninvested, `s:` at sets (each side's build after an `@`), its sides in order. */
 export function cardId(a: Side, b: Side): string {
   const [x, y] = [sideKey(a), sideKey(b)].sort()
   return `${a.build ? 's' : 'b'}:${x}|${y}`
@@ -382,7 +384,8 @@ export function fromCard(
   if (!stage) return null
   const [a, b] = sides.map((s) => {
     const base = POKEMON[s!.id].stats[5]
-    return { ...s!, speed: s!.build ? speedStat(base, s!.build.points, s!.build.effect) : base }
+    const { points, effect } = s!.build ?? { points: 0, effect: 'neutral' as const }
+    return { ...s!, speed: speedStat(base, points, effect) }
   }) as [Side, Side]
   return {
     id,

@@ -64,7 +64,7 @@ const { open: settingsOpen, onToggle: onSettingsToggle } = useOpenState('sproutv
 const progress = reactive(loadProgress())
 const deck = shallowRef(loadDeck(DECK_KEY))
 
-/** Whether the data shown has its Pokémon's sets: without, base Speed alone. */
+/** Whether the data shown has its Pokémon's sets: without, uninvested alone. */
 const hasSets = computed(() => !!snapshot.value && has(snapshot.value, 'speeds') && !!data.value)
 /** Waiting for the data shown, which says who the most used are. */
 const waiting = computed(() => !!snapshot.value && !data.value)
