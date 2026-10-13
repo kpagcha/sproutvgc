@@ -50,7 +50,7 @@ const { open, onToggle } = useOpenState('sproutvgc.recent.open')
   position: absolute;
   top: 50%;
   right: 12px;
-  transform: translateY(-50%);
+  translate: 0 -50%;
 }
 .chips {
   display: flex;

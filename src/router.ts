@@ -7,7 +7,7 @@ import type { AreaId } from '@/lib/areas'
 import { loadDexNames } from '@/i18n/refName'
 import { hasFavorites } from '@/composables/useFavorites'
 import { hasRecent, visitPage } from '@/composables/useRecent'
-import { endVisit, recordSetup, startVisit } from '@/composables/usePageHistory'
+import { endVisit, recordSetup } from '@/composables/usePageHistory'
 import { loadDescriptions, type DescribedKind } from '@/i18n/descriptions'
 
 declare module 'vue-router' {
@@ -34,9 +34,9 @@ declare module 'vue-router' {
     /** A page whose setup can be starred: what of its query is the setup (the rest only a moment of it, as what's
      * found), or nothing while there's none to star. */
     setup?: (query: LocationQuery) => Record<string, string> | null
-    /** What of its query the page's own recently viewed keep (`usePageHistory`), or nothing while there's none worth
-     * keeping: its setup unless this says otherwise. */
-    history?: (query: LocationQuery) => Record<string, string> | null
+    /** A page whose setup can be starred, in its own recently viewed (`usePageHistory`): what counts as one visit (the
+     * Pokémon it's of) and what of its query is kept, or nothing while there's none worth keeping. */
+    history?: (query: LocationQuery) => { visit: string; query: Record<string, string> } | null
   }
 }
 
@@ -48,6 +48,15 @@ export const stringQuery = (query: LocationQuery, omit: readonly string[] = []) 
 
 // The page's one visit among the recently viewed, whatever its view.
 const once = (page: string) => () => page
+
+// The comparison's visit: yours against the opponents, one per matchup (the two, or the four), once each team has one;
+// the speed order, one whatever its list, once there's one in it.
+function compareVisit({ a, b, a2, b2, mode, list }: LocationQuery) {
+  if (mode === 'order') return typeof list === 'string' && list ? 'speedCompare:order' : null
+  return typeof a === 'string' && typeof b === 'string'
+    ? `speedCompare:${[a, a2, b, b2].filter((x) => typeof x === 'string').join(':')}`
+    : null
+}
 
 // The meta of a page in an area's section.
 const inArea = (area: AreaId, section?: string) => ({ area, section })
@@ -261,8 +270,13 @@ export const router = createRouter({
         // Everything but what's found, the chip tapped, the Pokémon kept and the Speed picked, and the data shown (the
         // reader's choice on every page, not the setup's).
         setup: (query) => stringQuery(query, ['find', 'findmode', 'keep', 'vs', 'at', 'meta']),
-        // Its own recently viewed: with yours or a Pokémon found, what's found too.
-        history: (query) => (query.mine || query.find ? stringQuery(query, ['vs', 'at', 'meta']) : null),
+        // Its own recently viewed: a visit per Pokémon of yours (or, without one, per Pokémon found), what's found kept
+        // too.
+        history: (query) => {
+          const of =
+            typeof query.mine === 'string' && query.mine ? `mine:${query.mine}` : query.find && `find:${query.find}`
+          return typeof of === 'string' ? { visit: of, query: stringQuery(query, ['vs', 'at', 'meta']) } : null
+        },
         ...inArea('competitive', 'speedTiers'),
       },
     },
@@ -279,24 +293,15 @@ export const router = createRouter({
         dexNames: true,
         // Yours against the opponents: one per matchup (the two, or the four), once each team has one. The speed order:
         // one, whatever its list, once there's one in it.
-        recent: ({ query: { a, b, a2, b2, mode, list } }) =>
-          mode === 'order'
-            ? typeof list === 'string' && list
-              ? 'speedCompare:order'
-              : null
-            : typeof a === 'string' && typeof b === 'string'
-              ? `speedCompare:${[a, a2, b, b2].filter((x) => typeof x === 'string').join(':')}`
-              : null,
+        recent: ({ query }) => compareVisit(query),
         // The Pokémon and their builds, once each team has one (in speed order, once there's one), but for the two
         // tapped among the matchups and the data shown.
-        setup: (query) =>
-          (
-            query.mode === 'order'
-              ? typeof query.list === 'string' && query.list
-              : typeof query.a === 'string' && typeof query.b === 'string'
-          )
-            ? stringQuery(query, ['pair', 'meta'])
-            : null,
+        setup: (query) => (compareVisit(query) ? stringQuery(query, ['pair', 'meta']) : null),
+        // Its own recently viewed: a visit per matchup, as the home page's.
+        history: (query) => {
+          const visit = compareVisit(query)
+          return visit ? { visit, query: stringQuery(query, ['pair', 'meta']) } : null
+        },
         ...inArea('competitive', 'speedCompare'),
       },
     },
@@ -406,18 +411,16 @@ router.afterEach((to, _from, failure) => {
   visitPage({ page, path: to.path, query: stringQuery(to.query) })
 })
 
-// Pages whose setup can be starred keep the setups they're at lately (`usePageHistory`), where a visit starts and where
-// it ends: one starts as the page is arrived at, or as another of its visits among the recently viewed starts (another
-// matchup); it ends as the page is left.
+// Pages whose setup can be starred keep the setups they're at lately (`usePageHistory`), a visit at a time: arriving at
+// the page starts one, leaving it ends it.
 router.afterEach((to, from, failure) => {
   if (failure) return
-  const kept = to.meta.history ?? to.meta.setup
-  const next = from.name !== to.name || (to.meta.recent?.(to) ?? null) !== (from.meta.recent?.(from) ?? null)
-  if (next && from.meta.setup) endVisit(String(from.name))
-  if (!kept) return
-  const name = String(to.name)
-  if (next) startVisit(name)
-  recordSetup({ page: name, path: to.path, query: kept(to.query) ?? {} })
+  if (from.name !== to.name && from.meta.history) endVisit(String(from.name))
+  const kept = to.meta.history?.(to.query)
+  if (!to.meta.history) return
+  const page = String(to.name)
+  if (from.name !== to.name) endVisit(page)
+  recordSetup({ page, path: to.path, query: kept?.query ?? {} }, kept?.visit ?? null)
 })
 
 // Pages showing dex entries render with their names (and descriptions) in place, rather than filling them in once

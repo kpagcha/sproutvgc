@@ -114,7 +114,7 @@ async function confirmClearKind(kind: Kind | 'setups', title: string) {
   position: absolute;
   top: 50%;
   right: 12px;
-  transform: translateY(-50%);
+  translate: 0 -50%;
 }
 .favorites:not(.banded) > summary {
   width: fit-content;

@@ -4,34 +4,34 @@ import { useRoute } from 'vue-router'
 import { Trash2 } from '@lucide/vue'
 import { t } from '@/i18n'
 import type { PageVisit } from '@/composables/useRecent'
-import { startVisit, usePageHistory } from '@/composables/usePageHistory'
-import { useOpenState } from '@/composables/useOpenState'
+import { pickVisit, usePageHistory } from '@/composables/usePageHistory'
 import PageChip, { shownVisit } from '@/components/PageChip.vue'
 
 // At the top of a page whose setup can be starred (the speed tiers, the comparison), the setups it was at lately
 // (`usePageHistory`), most recent first, as the home page's recently viewed shows pages (`PageChip`), each reopening it
-// so, the one shown now marked (rather than left out, so the row keeps still as the page changes). Picking one starts a
-// visit of its own, the one before saved as it was left. Those the regulation can't show are left out. Nothing shows
-// until there's one besides the one shown now; it folds away (folded at first), and can be cleared, a band as the home
-// page's recently viewed (`RecentPanel`), in grey, the chips under it.
+// so, the one shown now marked (rather than left out, so the row keeps still as the page changes). Picking one visits
+// it where it is, rather than moving it to the front. Those the regulation can't show are left out. It shows once
+// there's one, folded each time the page is opened, and can be cleared, a band as the home page's recently viewed
+// (`RecentPanel`), in grey, the chips under it.
 const route = useRoute()
 const page = computed(() => String(route.name))
 const current = computed((): PageVisit | null => {
-  const query = (route.meta.history ?? route.meta.setup)?.(route.query)
+  const query = route.meta.history?.(route.query)?.query
   return query ? { page: page.value, path: route.path, query } : null
 })
 const { items: all, clear } = usePageHistory(page, current)
 /** The most shown. */
 const MAX = 8
 const items = computed(() => all.value.filter((i) => shownVisit(i.visit)).slice(0, MAX))
-const shown = computed(() => items.value.some((i) => !i.current))
-/** A setup picked starts a visit, but for the one shown now. */
-const onPick = (e: MouseEvent) => (e.target as Element).closest('.current') || startVisit(page.value)
-const { open, onToggle } = useOpenState(`sproutvgc.pageHistory.${page.value}.open`, false)
+/** A setup picked is visited in its place, but for the one shown now. */
+function onPick(e: MouseEvent) {
+  const chip = (e.target as Element).closest('a')
+  if (chip && !chip.matches('.current') && !(e.ctrlKey || e.metaKey || e.shiftKey)) pickVisit(page.value)
+}
 </script>
 
 <template>
-  <details v-if="shown" class="panel banded page-history" :open @toggle="onToggle">
+  <details v-if="items.length" class="panel banded page-history">
     <summary>
       <h2 class="title">
         {{ t('recent.title') }} <span class="count">{{ items.length }}</span>
@@ -78,7 +78,7 @@ const { open, onToggle } = useOpenState(`sproutvgc.pageHistory.${page.value}.ope
   position: absolute;
   top: 50%;
   right: 12px;
-  transform: translateY(-50%);
+  translate: 0 -50%;
 }
 .chips {
   display: flex;
