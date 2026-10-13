@@ -209,9 +209,10 @@ export function deckStats(deck: Deck, now = Date.now(), skip?: (id: string) => b
 
 const STORAGE_KEY = 'sproutvgc.quiz.v1'
 
-export function loadDeck(): Deck {
+/** A deck saved under `key`: the type quiz's by default, or another quiz's own. */
+export function loadDeck(key = STORAGE_KEY): Deck {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(key)
     if (raw) {
       const d = JSON.parse(raw) as Deck
       if (d && d.v === 1 && d.cards) {
@@ -226,9 +227,9 @@ export function loadDeck(): Deck {
   return emptyDeck()
 }
 
-export function saveDeck(deck: Deck): void {
+export function saveDeck(deck: Deck, key = STORAGE_KEY): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(deck))
+    localStorage.setItem(key, JSON.stringify(deck))
   } catch {
     // Storage unavailable: progress stays in memory for this session.
   }

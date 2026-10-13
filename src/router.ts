@@ -334,8 +334,9 @@ export const router = createRouter({
         ...inArea('tools', 'matchups'),
       },
     },
+    area('quizzes', 'title.quizzes', 'desc.quizzes'),
     {
-      path: '/tools/quiz',
+      path: '/quizzes/types',
       name: 'quiz',
       component: () => import('@/views/TypeQuizView.vue'),
       meta: {
@@ -343,7 +344,20 @@ export const router = createRouter({
         descKey: 'desc.quiz',
         headKey: 'head.quiz',
         keywordsKey: 'keywords.quiz',
-        ...inArea('tools', 'quiz'),
+        ...inArea('quizzes', 'typeQuiz'),
+      },
+    },
+    {
+      path: '/quizzes/speed',
+      name: 'speedQuiz',
+      component: () => import('@/views/SpeedQuizView.vue'),
+      meta: {
+        titleKey: 'title.speedQuiz',
+        descKey: 'desc.speedQuiz',
+        headKey: 'head.speedQuiz',
+        keywordsKey: 'keywords.speedQuiz',
+        dexNames: true,
+        ...inArea('quizzes', 'speedQuiz'),
       },
     },
 

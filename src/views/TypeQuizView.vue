@@ -299,7 +299,7 @@ async function reset() {
         :done="devDone"
       />
 
-      <div v-if="practicing" class="panel practice small">
+      <div v-if="practicing" class="panel practice">
         <h2>{{ t('practice.title') }}</h2>
         <dl class="stats">
           <dt>{{ t('practice.answered') }}</dt>
@@ -344,11 +344,14 @@ async function reset() {
           <dt>{{ t('quiz.mature') }}</dt>
           <dd class="num">{{ stats.mature }}</dd>
         </dl>
-        <button type="button" class="btn" @click="startPractice">{{ t('practice.start') }}</button>
-        <p class="muted small side-note">{{ t('practice.note') }}</p>
+        <div class="side-buttons">
+          <button type="button" class="btn" @click="startPractice">{{ t('practice.start') }}</button>
+          <button type="button" class="btn" @click="reset">{{ t('quiz.reset') }}</button>
+        </div>
+        <p class="muted side-note">{{ t('practice.note') }}</p>
       </div>
 
-      <details class="panel settings small">
+      <details class="panel settings">
         <summary>{{ t('settings.title') }}</summary>
         <label class="row">
           <span>{{ t('settings.newPerDay') }}</span>
@@ -439,7 +442,7 @@ async function reset() {
 
       <div class="panel">
         <h2>{{ t('quiz.weakSpots') }}</h2>
-        <p v-if="!weakSpots.length" class="muted small">{{ t('quiz.weakEmpty') }}</p>
+        <p v-if="!weakSpots.length" class="muted">{{ t('quiz.weakEmpty') }}</p>
         <ol class="weak">
           <li v-for="w in weakSpots" :key="w.id">
             <span>{{ cardLabel(w.card!) }}</span>
@@ -448,11 +451,11 @@ async function reset() {
         </ol>
       </div>
 
-      <div class="panel about small muted">
-        <p>{{ t('quiz.about1') }}</p>
-        <p>{{ t('quiz.about2', { n: TYPES.length }) }}</p>
-        <button type="button" class="btn" @click="reset">{{ t('quiz.reset') }}</button>
-      </div>
+      <details class="panel about">
+        <summary>{{ t('quiz.howItWorks') }}</summary>
+        <p class="muted">{{ t('quiz.about1') }}</p>
+        <p class="muted">{{ t('quiz.about2', { n: TYPES.length }) }}</p>
+      </details>
     </aside>
   </div>
 </template>
@@ -460,7 +463,7 @@ async function reset() {
 <style scoped>
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 260px;
+  grid-template-columns: minmax(0, 1fr) 300px;
   gap: 12px;
   align-items: start;
 }
@@ -526,6 +529,11 @@ async function reset() {
 .practice .note {
   margin: 6px 0 0;
 }
+.side-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
 .side-note {
   margin: 6px 0 0;
 }
@@ -545,12 +553,14 @@ async function reset() {
   font-weight: bold;
 }
 
-.settings summary {
+.settings summary,
+.about summary {
   cursor: pointer;
   font-family: var(--font-display, inherit);
   font-weight: bold;
 }
-.settings[open] summary {
+.settings[open] summary,
+.about[open] summary {
   margin-bottom: 10px;
 }
 .settings .row {

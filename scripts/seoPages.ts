@@ -138,7 +138,9 @@ export function seoPages(): Plugin {
         searched('competitive/speed-tiers/compare', 'speedCompare'),
         { path: 'tools', title: 'title.tools', desc: 'desc.tools', schema: 'CollectionPage' },
         searched('tools/matchups', 'matchups'),
-        searched('tools/quiz', 'quiz'),
+        { path: 'quizzes', title: 'title.quizzes', desc: 'desc.quizzes', schema: 'CollectionPage' },
+        searched('quizzes/types', 'quiz'),
+        searched('quizzes/speed', 'speedQuiz'),
         { path: 'credits', title: 'title.credits', desc: 'desc.credits', schema: 'WebPage' },
       ]
 
