@@ -60,11 +60,14 @@ const onVisibility = () => {
 }
 
 // Keep what comes next on screen: the result and Next button after answering, and the new question after moving on.
+// On phones (where Next comes before the result, under the question), neither scrolls down: with the question brought
+// back up for the next one, every question would scroll the page down and up again.
+const phoneQuery = window.matchMedia('(max-width: 760px)')
 const questionEl = useTemplateRef<HTMLElement>('questionEl')
 const afterEl = useTemplateRef<HTMLElement>('after')
 watch(
   () => props.round,
-  () => reveal(questionEl.value, afterEl.value),
+  () => reveal(questionEl.value, phoneQuery.matches ? questionEl.value : afterEl.value),
   { flush: 'post' },
 )
 
@@ -72,7 +75,7 @@ function choose(a: Answer) {
   if (picked.value) return
   picked.value = a
   emit('answered', a === answer.value, !hidden && performance.now() - shownAt < QUICK_MS)
-  nextTick(() => reveal(afterEl.value))
+  if (!phoneQuery.matches) nextTick(() => reveal(afterEl.value))
 }
 
 const name = (s: Side) => refName(pokemon(s.id))
@@ -224,7 +227,7 @@ onBeforeUnmount(() => {
     </AnimatePresence>
   </div>
 
-  <div ref="after">
+  <div ref="after" class="after">
     <motion.div
       v-if="picked"
       class="feedback"
@@ -422,7 +425,15 @@ kbd {
 .actions .placeholder {
   visibility: hidden;
 }
+/* On phones, Next before the result, right under the answers: in reach without scrolling down to it. */
+.after {
+  display: flex;
+  flex-direction: column;
+}
 @media (max-width: 760px) {
+  .actions {
+    order: -1;
+  }
   .actions .btn.primary {
     flex: 1;
     min-height: 44px;
