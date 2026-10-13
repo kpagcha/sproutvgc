@@ -2604,8 +2604,7 @@ const { start: startTour } = useTour(
                 </label>
               </section>
               <section class="yours-section">
-                <!-- The modifiers' disclosure, and Reset build at the row's end; the modifiers, opened, in a tray under
-                     it. -->
+                <!-- The modifiers' disclosure; the modifiers, opened, in a tray under it. -->
                 <div class="mods-head">
                   <button
                     type="button"
@@ -2616,9 +2615,6 @@ const { start: startTour } = useTour(
                   >
                     <Plus :size="16" aria-hidden="true" />{{ t('speed.modifiers')
                     }}<span class="marker" aria-hidden="true">{{ myModsOpen ? '▾' : '▸' }}</span>
-                  </button>
-                  <button v-if="myChanged" type="button" class="btn inverted" @click="resetMine">
-                    <RotateCcw :size="16" aria-hidden="true" />{{ t('speed.resetYours') }}
                   </button>
                 </div>
                 <div v-if="myModsOpen" class="mods tray">
@@ -2658,6 +2654,13 @@ const { start: startTour } = useTour(
                   }}
                   <span class="muted">{{ summaryNote }}</span>
                 </p>
+              </section>
+              <!-- Reset build, putting back the most common with no modifiers, once it's changed: the card's last word on
+                   it, after what the build comes to. -->
+              <section v-if="myChanged" class="yours-section">
+                <button type="button" class="btn inverted" @click="resetMine">
+                  <RotateCcw :size="16" aria-hidden="true" />{{ t('speed.resetYours') }}
+                </button>
               </section>
             </template>
             <!-- Yours on the comparison's page, to add opponents to there: greyed out until there's yours, saying why in
@@ -3702,10 +3705,9 @@ const { start: startTour } = useTour(
 .stacked :deep(.segments label) {
   white-space: nowrap;
 }
-/* Its modifiers smaller than the ones for everyone, as the panel is narrow. */
+/* Its modifiers tighter than the ones for everyone, as the panel is narrow (the tray already makes them smaller). */
 .yours .mod {
   padding: 3px 8px;
-  font-size: 0.875em;
 }
 .points-box {
   width: 4em;
