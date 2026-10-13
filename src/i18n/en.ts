@@ -1006,6 +1006,7 @@ export const messages = {
   'compare.confirm': 'Confirm',
   'compare.opponent': 'Opponent',
   'compare.stat': 'Stat {stat}',
+  'compare.uninvested': 'Uninvested {n}',
   'compare.common': 'Common builds',
   'compare.first': '{name} moves first',
   'compare.tie': 'Speed tie: either moves first, at random',

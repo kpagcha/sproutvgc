@@ -3,11 +3,12 @@ import { computed, useTemplateRef, type Component } from 'vue'
 import { ChevronsDown, ChevronsUp, Trash2, Wind, Zap } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { percent } from '@/data/meta'
+import { POKEMON } from '@/data/pokemon'
 import type { Ranks } from '@/composables/usePokemonSearch'
 import { natureName } from '@/data/natures'
 import { t } from '@/i18n'
 import { NATURE_EFFECTS, NATURES_BY_EFFECT } from '@/lib/speed'
-import { MAX_POINTS, type NatureEffect } from '@/lib/stats'
+import { benchmark, MAX_POINTS, type NatureEffect } from '@/lib/stats'
 import { modButtons, toggled, type BuildToggle, type SpeedBuild } from '@/lib/speedBuild'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonPicker from '@/components/PokemonPicker.vue'
@@ -51,6 +52,8 @@ const emit = defineEmits<{
   confirm: []
 }>()
 const sets = computed(() => !!props.atSets && !!props.range)
+/** Its Speed with no stat points and a neutral nature: a stat, as the game has it, rather than its base. */
+const uninvested = computed(() => (props.id ? benchmark(POKEMON[props.id].stats[5], 'none') : 0))
 
 const picker = useTemplateRef<InstanceType<typeof PokemonPicker>>('picker')
 // A page can open the picking straight away (a slot just added, or tapped with none picked).
@@ -98,17 +101,24 @@ const canHover = window.matchMedia('(hover: hover)').matches
       </button>
     </div>
     <template v-if="props.id">
-      <!-- Its Speed, large, with its stat as built when modifiers change it (its base is the dex's). -->
+      <!-- Its Speed, large, with its stat as built when modifiers change it, and its Speed uninvested (no points, a
+           neutral nature: a stat, rather than its base). -->
       <p v-if="sets" class="speed">
         <span class="speed-number">{{
           props.range![0] === props.range![1] ? props.range![0] : `${props.range![0]}–${props.range![1]}`
         }}</span>
         <span class="muted small">{{ t('compare.setsRange', { speed: props.speed! }) }}</span>
+        <span v-tip="t('speed.benchTip.none')" class="muted small">{{
+          t('compare.uninvested', { n: uninvested })
+        }}</span>
       </p>
       <p v-else class="speed">
         <span class="speed-number">{{ props.speed }}</span>
         <span v-if="props.stat !== props.speed" class="muted small">{{
           t('compare.stat', { stat: props.stat! })
+        }}</span>
+        <span v-tip="t('speed.benchTip.none')" class="muted small">{{
+          t('compare.uninvested', { n: uninvested })
         }}</span>
       </p>
 
