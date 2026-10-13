@@ -65,11 +65,21 @@ const onVisibility = () => {
 const phoneQuery = window.matchMedia('(max-width: 760px)')
 const questionEl = useTemplateRef<HTMLElement>('questionEl')
 const afterEl = useTemplateRef<HTMLElement>('after')
+// Only a question moved on to with Next: one the page swaps in (its settings changed, a level reset) leaves the page
+// where the reader has it.
+let movedOn = false
 watch(
   () => props.round,
-  () => reveal(questionEl.value, phoneQuery.matches ? questionEl.value : afterEl.value),
+  () => {
+    if (movedOn) reveal(questionEl.value, phoneQuery.matches ? questionEl.value : afterEl.value)
+    movedOn = false
+  },
   { flush: 'post' },
 )
+function next() {
+  movedOn = true
+  emit('next')
+}
 
 function choose(a: Answer) {
   if (picked.value) return
@@ -152,7 +162,7 @@ function onKey(e: KeyboardEvent) {
   if (picked.value) {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
-      emit('next')
+      next()
     }
     return
   }
@@ -279,7 +289,7 @@ onBeforeUnmount(() => {
       </ol>
     </motion.div>
     <div class="actions">
-      <button type="button" class="btn primary" :class="{ placeholder: !picked }" @click="emit('next')">
+      <button type="button" class="btn primary" :class="{ placeholder: !picked }" @click="next">
         {{ t('quiz.next') }} <kbd>Enter</kbd>
       </button>
     </div>
