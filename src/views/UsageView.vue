@@ -52,10 +52,10 @@ const rows = computed(() =>
       rank: m!.rank,
       usage: m!.usage,
       brought: m!.brought,
-      // Its most common set, at a glance: item, ability and moves.
-      item: m!.items?.[0] && item(m!.items[0].id),
-      ability: m!.abilities?.[0] && ability(m!.abilities[0].id),
-      moves: (m!.moves ?? []).slice(0, 3).map((x) => move(x.id)),
+      // Its most common set, at a glance: item, ability and moves, each with the share of its sets that run it.
+      item: m!.items?.[0] && { ...item(m!.items[0].id), share: m!.items[0].share },
+      ability: m!.abilities?.[0] && { ...ability(m!.abilities[0].id), share: m!.abilities[0].share },
+      moves: (m!.moves ?? []).slice(0, 3).map((x) => ({ ...move(x.id), share: x.share })),
     }
   }),
 )
@@ -76,6 +76,9 @@ const shown = computed(() => {
   const q = fold(search.value.trim())
   return q ? sorted.value.filter((r) => split(r.name, q)) : sorted.value
 })
+/** A share of a Pokémon's sets, in whole percents ("62%", "<1%"): beside each part of its most common set. */
+const pct = (share?: number) =>
+  share === undefined ? '' : share > 0 && share < 0.005 ? '<1%' : `${Math.round(share * 100)}%`
 /** The most used, the full length of the usage bars. */
 const top = computed(() => Math.max(0, ...rows.value.map((r) => r.usage ?? 0)))
 
@@ -236,14 +239,18 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
               >
                 <ItemIcon :id="r.item.id" />
               </AppLink>
+              <span v-if="r.item" class="pct">{{ pct(r.item.share) }}</span>
             </div>
             <div v-if="showAbility" role="cell" class="xl-only grow">
-              <DexRef v-if="r.ability" :to="r.ability" />
+              <template v-if="r.ability"
+                ><DexRef :to="r.ability" /> <span class="pct">{{ pct(r.ability.share) }}</span></template
+              >
             </div>
             <div v-if="showMoves" role="cell" class="xl-only grow">
               <template v-for="(m, i) in r.moves" :key="m.id"
-                ><span v-if="i" class="sep" aria-hidden="true"> · </span><DexRef :to="m"
-              /></template>
+                ><span v-if="i" class="sep" aria-hidden="true"> · </span><DexRef :to="m" />
+                <span class="pct">{{ pct(m.share) }}</span></template
+              >
             </div>
             <div
               v-if="showUsage"
@@ -267,13 +274,18 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
             <div v-if="showSets && hasSets" role="cell" class="set-line">
               <AppLink v-if="r.item" :to="{ name: 'item', params: { id: r.item.id } }" class="part">
                 <ItemIcon :id="r.item.id" :scale="0.67" />{{ refName(r.item) }}
+                <span class="pct">{{ pct(r.item.share) }}</span>
               </AppLink>
-              <span v-if="r.ability" class="part"><DexRef :to="r.ability" /></span>
+              <span v-if="r.ability" class="part"
+                ><DexRef :to="r.ability" /> <span class="pct">{{ pct(r.ability.share) }}</span></span
+              >
               <span v-if="showBrought && r.brought !== undefined" class="brought-sm"
                 >{{ percent(r.brought) }} {{ t('usage.broughtShort') }}</span
               >
               <span v-if="r.moves.length" class="moves">
-                <span v-for="m in r.moves" :key="m.id" class="part"><DexRef :to="m" /></span>
+                <span v-for="m in r.moves" :key="m.id" class="part"
+                  ><DexRef :to="m" /> <span class="pct">{{ pct(m.share) }}</span></span
+                >
               </span>
             </div>
           </div>
@@ -425,6 +437,18 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 }
 .sep {
   color: var(--muted);
+}
+/* The share of its sets each part of the most common set has, smaller and muted after it. */
+.pct {
+  font-size: 0.8em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.item + .pct {
+  margin-left: 2px;
+}
+.set-line .part .pct {
+  margin-left: 3px;
 }
 .item {
   display: inline-flex;
