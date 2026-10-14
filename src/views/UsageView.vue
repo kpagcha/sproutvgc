@@ -406,29 +406,29 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
             </div>
             <div v-if="showAbility" role="cell" class="xl-only grow">
               <ul v-if="r.ability" class="chips">
-                <li
-                  class="shared"
-                  :style="{ '--share': r.ability.share ?? 0 }"
-                  :data-share="r.ability.share ?? 0"
-                  :data-kind="r.ability.kind"
-                  :data-id="r.ability.id"
-                >
-                  <DexRef :to="r.ability" />
+                <li>
+                  <span
+                    class="shared"
+                    :style="{ '--share': r.ability.share ?? 0 }"
+                    :data-share="r.ability.share ?? 0"
+                    :data-kind="r.ability.kind"
+                    :data-id="r.ability.id"
+                    ><DexRef :to="r.ability"
+                  /></span>
                 </li>
               </ul>
             </div>
             <div v-if="showMoves" role="cell" class="xl-only grow">
               <ul class="chips">
-                <li
-                  v-for="m in r.moves"
-                  :key="m.id"
-                  class="shared"
-                  :style="{ '--share': m.share ?? 0 }"
-                  :data-share="m.share ?? 0"
-                  :data-kind="m.kind"
-                  :data-id="m.id"
-                >
-                  <DexRef :to="m" />
+                <li v-for="m in r.moves" :key="m.id">
+                  <span
+                    class="shared"
+                    :style="{ '--share': m.share ?? 0 }"
+                    :data-share="m.share ?? 0"
+                    :data-kind="m.kind"
+                    :data-id="m.id"
+                    ><DexRef :to="m"
+                  /></span>
                 </li>
               </ul>
             </div>
@@ -664,37 +664,27 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   display: inline-flex;
   vertical-align: middle;
 }
-/* The ability and the top moves as chips, as the dex's list has its abilities, each its share's bar along its inside
-   foot, clear of its border. */
+/* The ability and the top moves as plain names divided by a dot, each with its share's bar along its foot, as the
+   item has: no box around each, so the columns read as text rather than a wall of chips. */
 .chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px 4px;
+  gap: 2px 0;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 .chips li {
-  padding: 0 5px 3px;
-  font-size: 0.9em;
   white-space: nowrap;
-  background: var(--panel-alt);
-  border: 1px solid var(--border);
-  border-radius: 3px;
 }
+.chips li + li::before {
+  content: '·';
+  padding: 0 6px;
+  color: var(--muted);
+}
+/* A quarter of the way to muted: a step back from the names in the Pokémon column. */
 .chips a {
-  color: inherit;
-}
-.chips li.shared::before,
-.chips li.shared::after {
-  left: 2px;
-  bottom: 1px;
-}
-.chips li.shared::before {
-  right: 2px;
-}
-.chips li.shared::after {
-  width: calc((100% - 4px) * var(--share, 0));
+  color: color-mix(in srgb, var(--text) 85%, var(--muted));
 }
 /* A header with a tooltip: underlined dotted, as `SortHeader`'s are. */
 .tipped {
