@@ -88,15 +88,15 @@ export const messages = {
 
   // The site's areas (src/lib/areas.ts) and the pages not built yet.
   'nav.dex': 'Dex',
-  'nav.competitive': 'Competitive',
+  'nav.meta': 'Meta',
   'nav.tools': 'Tools',
   'nav.areas': 'Areas',
   'nav.sections': 'Sections',
   'title.dex': 'Dex',
-  'title.competitive': 'Competitive',
+  'title.meta': 'Meta',
   'title.tools': 'Tools',
   'desc.dex': 'Everything in {game}, Regulation {reg}: Pokémon, moves, abilities, items, conditions and types.',
-  'desc.competitive': "The {game} metagame: what's used, what wins, and how fast everything is.",
+  'desc.meta': "The {game} metagame: what's used, what wins, and how fast everything is.",
   'desc.tools': 'Tools for {game} players: a damage calculator, a team builder and type matchups.',
   'nav.usage': 'Usage',
   'nav.reports': 'Tournaments',
@@ -154,7 +154,7 @@ export const messages = {
 
   'home.intro': 'A competitive companion for {game}, up to date with Regulation {reg}.',
   'home.dexPitch': "What's in Regulation {reg}, and what it does.",
-  'home.competitivePitch': 'What players use, and how it does.',
+  'home.metaPitch': 'What players use, and how it does.',
   'home.toolsPitch': 'Calculate and build.',
   'home.quizzesPitch': 'Learn the type chart and the speed tiers.',
   'search.pages': 'Pages',

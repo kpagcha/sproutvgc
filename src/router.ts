@@ -238,10 +238,10 @@ export const router = createRouter({
       },
     },
 
-    // Competitive: what players use, and how it does.
-    area('competitive', 'title.competitive', 'desc.competitive'),
+    // Meta: what players use, and how it does.
+    area('meta', 'title.meta', 'desc.meta'),
     {
-      path: '/competitive/usage',
+      path: '/meta/usage',
       name: 'usage',
       component: () => import('@/views/UsageView.vue'),
       meta: {
@@ -251,12 +251,12 @@ export const router = createRouter({
         keywordsKey: 'keywords.usage',
         dexNames: true,
         recent: once('usage'),
-        ...inArea('competitive', 'usage'),
+        ...inArea('meta', 'usage'),
       },
     },
-    soon('competitive', 'reports', '/competitive/reports', 'title.reports', 'desc.reports'),
+    soon('meta', 'reports', '/meta/reports', 'title.reports', 'desc.reports'),
     {
-      path: '/competitive/speed-tiers',
+      path: '/meta/speed-tiers',
       name: 'speedTiers',
       component: () => import('@/views/SpeedTiersView.vue'),
       meta: {
@@ -277,12 +277,12 @@ export const router = createRouter({
             typeof query.mine === 'string' && query.mine ? `mine:${query.mine}` : query.find && `find:${query.find}`
           return typeof of === 'string' ? { visit: of, query: stringQuery(query, ['vs', 'at', 'meta']) } : null
         },
-        ...inArea('competitive', 'speedTiers'),
+        ...inArea('meta', 'speedTiers'),
       },
     },
     {
       // Pokémon's Speeds compared, yours against opponents or in speed order, linked to and from the speed tiers.
-      path: '/competitive/speed-tiers/compare',
+      path: '/meta/speed-tiers/compare',
       name: 'speedCompare',
       component: () => import('@/views/SpeedCompareView.vue'),
       meta: {
@@ -302,7 +302,7 @@ export const router = createRouter({
           const visit = compareVisit(query)
           return visit ? { visit, query: stringQuery(query, ['pair', 'meta']) } : null
         },
-        ...inArea('competitive', 'speedCompare'),
+        ...inArea('meta', 'speedCompare'),
       },
     },
 

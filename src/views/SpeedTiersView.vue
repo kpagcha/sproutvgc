@@ -1617,7 +1617,7 @@ const onSide = (e: MediaQueryListEvent) => (side.value = e.matches)
 sideQuery.addEventListener('change', onSide)
 onBeforeUnmount(() => sideQuery.removeEventListener('change', onSide))
 
-// Yours, narrower than the sidebar: a bar stuck to the top of the page, the way back to Competitive and yours in
+// Yours, narrower than the sidebar: a bar stuck to the top of the page, the way back to Meta and yours in
 // short, its card dropping from it when tapped (over the page, which a tap beside it closes). Beside the ladder, the
 // card is the sidebar, and the bar shows only while it's out of view, bringing it in.
 const yoursOpen = shallowRef(false)
@@ -1711,7 +1711,7 @@ const { start: startTour } = useTour(
 <template>
   <!-- The controls and the ladder in panels of their own, under yours' bar. -->
   <div :style="{ '--bar-h': `${barHeight}px` }">
-    <!-- Reset all, on the row of the way back to Competitive (the app's frame has a place for it there). -->
+    <!-- Reset all, on the row of the way back to Meta (the app's frame has a place for it there). -->
     <Teleport to="#back-actions-speedTiers" defer>
       <button v-if="allChanged" type="button" class="btn inverted reset-all" @click="resetAll">
         <RotateCcw :size="16" aria-hidden="true" />{{ t('speed.resetAll') }}
@@ -2699,7 +2699,7 @@ const { start: startTour } = useTour(
 </template>
 
 <style scoped>
-/* Yours' bar: stuck to the top of the page over what scrolls under it, on the page's own color; back to Competitive,
+/* Yours' bar: stuck to the top of the page over what scrolls under it, on the page's own color; back to Meta,
    then yours in short taking the rest, its name giving way first. */
 .yours-bar {
   position: sticky;
