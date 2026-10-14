@@ -247,13 +247,21 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
       <h1>{{ t('title.usage') }}</h1>
       <p class="muted intro">{{ t('usage.intro', { reg: snapshot?.regulation ?? REGULATION }) }}</p>
       <template v-if="snapshot">
+        <!-- The data shown, and on its line, where the set columns don't fit, the switch that shows sets (at its end on
+             phones, the search having the line under it to itself). -->
         <div class="source">
           <MetaDialog />
           <span v-if="snapshot.battles" class="muted">
             {{ t('usage.battles', { n: snapshot.battles.toLocaleString(locale) }) }}
           </span>
+          <template v-if="hasSets">
+            <label class="btn switch sets-switch" :class="{ on: showSets }">
+              <input type="checkbox" :checked="showSets" @change="toggleSets" />
+              {{ t('usage.sets') }}
+            </label>
+            <span class="muted sets-desc">{{ t('usage.setsDesc') }}</span>
+          </template>
         </div>
-        <!-- The search, and beside it, where the set columns don't fit, the switch that shows sets. -->
         <div class="find-row">
           <div class="find">
             <TermSearch
@@ -266,13 +274,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
               :count="termCount"
             />
           </div>
-          <template v-if="hasSets">
-            <label class="btn switch sets-switch" :class="{ on: showSets }">
-              <input type="checkbox" :checked="showSets" @change="toggleSets" />
-              {{ t('usage.sets') }}
-            </label>
-            <span class="muted sets-desc">{{ t('usage.setsDesc') }}</span>
-          </template>
         </div>
       </template>
       <p v-else class="muted">{{ t('usage.none', { reg: REGULATION }) }}</p>
@@ -803,7 +804,8 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 .change.down {
   color: var(--bad);
 }
-/* The search and the Sets switch in a row; the switch and what it does only where the set columns don't fit. */
+/* The search, on a line of its own; the Sets switch and what it does (on the data's line) only where the set columns
+   don't fit. */
 .find-row {
   display: flex;
   flex-wrap: wrap;
@@ -821,8 +823,11 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
     display: none;
   }
 }
-/* Phones: the switch beside the search, its description with the notes under the table; no intro. */
+/* Phones: the switch at the end of the data's line, its description with the notes under the table; no intro. */
 @media (max-width: 720px) {
+  .sets-switch {
+    margin-left: auto;
+  }
   .find {
     flex: 1 1 0;
   }
