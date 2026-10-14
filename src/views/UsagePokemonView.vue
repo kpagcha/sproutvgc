@@ -355,59 +355,42 @@ const teammates = computed(() =>
         </p>
       </section>
 
-      <!-- Its most common exact spreads, a column each: its share, its nature, a bar per stat of the points put there. -->
+      <!-- Its most common exact spreads, a card each, side by side: its rank and share of its sets on top, then its
+           nature, then a bar per stat of the points put there; the stats named down the left, staying there as the
+           cards scroll sideways on phones. -->
       <section v-if="spreads.length" class="panel" :class="{ 'meta-stale': loading }">
         <h2>{{ t('usageMon.spreads') }}</h2>
-        <!-- A column per spread, the stats its rows: its share and nature on top, then a bar per stat. On phones, the
-             table scrolls sideways when the spreads don't fit. -->
+        <p class="muted small spreads-intro">{{ t('usageMon.spreadsIntro') }}</p>
         <div class="spreads-scroll">
-          <div class="spreads" role="table" :style="{ '--n': spreads.length }">
-            <div class="spread-row" role="row">
-              <span role="rowheader" class="row-head">{{ t('usageMon.share') }}</span>
-              <span
-                v-for="(s, i) in spreads"
-                :key="i"
-                role="cell"
-                class="spread-share num meter"
-                :style="{ '--share': s.share ?? 0 }"
-                >{{ percent(s.share ?? 0) }}</span
-              >
+          <div class="spreads" role="table">
+            <div class="spread-labels" aria-hidden="true">
+              <span></span>
+              <span>{{ t('usageMon.nature') }}</span>
+              <span v-for="stat in STATS" :key="stat">{{ t(`stat.${stat}`) }}</span>
             </div>
-            <div class="spread-row" role="row">
-              <span role="rowheader" class="row-head">{{ t('usageMon.nature') }}</span>
-              <span
-                v-for="(s, i) in spreads"
-                :key="i"
-                v-tip:group="canHover && natureTip(s.nature)"
-                role="cell"
-                class="spread-nature"
-                >{{ natureName(s.nature) }}</span
+            <div v-for="(s, i) in spreads" :key="i" class="spread-card" :class="{ main: i === 0 }" role="row">
+              <span role="cell" class="spread-head meter" :style="{ '--share': s.share ?? 0 }"
+                ><strong>#{{ i + 1 }}</strong> · {{ percent(s.share ?? 0) }}</span
               >
-            </div>
-            <div v-for="(stat, j) in STATS" :key="stat" class="spread-row" role="row">
-              <span role="rowheader" class="row-head">{{ t(`stat.${stat}`) }}</span>
+              <span v-tip:group="canHover && natureTip(s.nature)" role="cell" class="spread-nature">{{
+                natureName(s.nature)
+              }}</span>
               <span
-                v-for="(s, i) in spreads"
-                :key="i"
+                v-for="x in s.stats"
+                :key="x.stat"
                 role="cell"
                 class="invest"
-                :class="s.stats[j]!.effect"
-                :aria-label="
-                  t('usageMon.spreadStat', {
-                    stat: t(`stat.${stat}`),
-                    points: s.stats[j]!.points,
-                    value: s.stats[j]!.value,
-                  })
-                "
+                :class="x.effect"
+                :aria-label="t('usageMon.spreadStat', { stat: t(`stat.${x.stat}`), points: x.points, value: x.value })"
               >
-                <span class="invest-bar" :style="{ '--share': s.stats[j]!.points / MAX_POINTS }"></span>
+                <span class="invest-bar" :style="{ '--share': x.points / MAX_POINTS }"></span>
                 <span class="invest-text" aria-hidden="true"
-                  ><span class="invest-pts">{{ s.stats[j]!.points }}</span
+                  ><span class="invest-pts">{{ x.points }}</span
                   ><span class="invest-val"
-                    >{{ s.stats[j]!.value
+                    >{{ x.value
                     }}<component
-                      :is="s.stats[j]!.effect === 'up' ? ChevronsUp : ChevronsDown"
-                      v-if="s.stats[j]!.effect !== 'neutral'"
+                      :is="x.effect === 'up' ? ChevronsUp : ChevronsDown"
+                      v-if="x.effect !== 'neutral'"
                       :size="12"
                       :stroke-width="3" /></span
                 ></span>
@@ -415,7 +398,6 @@ const teammates = computed(() =>
             </div>
           </div>
         </div>
-        <p class="muted small note">{{ t('usageMon.spreadsNote') }}</p>
       </section>
 
       <!-- Its usage over the months of the dataset's series. -->
@@ -815,42 +797,58 @@ h2 {
 .small {
   font-size: 0.85em;
 }
-/* The spreads, a row each: share, nature, and a bar per stat of the points in it (out of the most there can be), the
-   stat its nature raises in the good color, the one it lowers in the bad. */
-/* The spreads, a column each, the stats their rows, each row's label at its start. */
+/* The spreads: the stats' names down the left, then a card per spread, side by side, each the same rows (its head,
+   its nature, a stat each) at the same heights as the names, so they line up across. The most used outlined. */
+.spreads-intro {
+  margin: -4px 0 10px;
+}
 .spreads-scroll {
   overflow-x: auto;
 }
 .spreads {
+  --spread-rows: 36px 24px repeat(6, 26px);
+  display: flex;
+  gap: 8px;
+}
+.spread-labels,
+.spread-card {
   display: grid;
-  grid-template-columns: 3.5em repeat(var(--n), minmax(84px, 1fr));
-  gap: 8px 8px;
+  grid-template-rows: var(--spread-rows);
+  row-gap: 6px;
   align-items: center;
 }
-.spread-row {
-  display: contents;
-}
-.row-head {
-  font-size: 0.85em;
-  color: var(--muted);
-}
-/* Scrolling sideways (phones), the rows' labels stay at the left, on the panel's color, the spreads passing under them. */
-.spreads .row-head {
+/* The stats' names: past the cards' border and padding at their top, so they're level with their rows; scrolling
+   sideways (phones), they stay at the left, on the panel's color, the cards passing under them. */
+.spread-labels {
   position: sticky;
   left: 0;
   z-index: 1;
+  flex: none;
+  width: 3em;
+  padding: 9px 0;
+  font-size: 0.85em;
+  color: var(--muted);
+  background: var(--panel);
+  box-shadow: 8px 0 0 var(--panel);
+}
+.spread-card {
+  flex: 1 0 110px;
+  min-width: 110px;
+  padding: 8px;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+}
+.spread-card.main {
+  border-color: var(--accent);
+}
+/* Its rank and share of its sets, its bar under them, out of all of them. */
+.spread-head {
   align-self: stretch;
   display: flex;
   align-items: center;
-  background: var(--panel);
-  /* Its color over the gap after it too, so nothing shows between it and the spread at its side. */
-  box-shadow: 8px 0 0 var(--panel);
-}
-/* Its share, as the moves': its number, its bar under it. */
-.spread-share {
-  justify-self: start;
-  min-width: 3.6em;
-  text-align: left;
+  gap: 4px;
+  font-size: 0.85em;
+  white-space: nowrap;
 }
 .spread-nature {
   font-weight: bold;
