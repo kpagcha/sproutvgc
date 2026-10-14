@@ -2,7 +2,7 @@
 import { computed, shallowRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ChevronsDown, ChevronsUp } from '@lucide/vue'
-import { ability, available, item, move, pokemon, type ItemId, type PokemonId } from '@/data/dex'
+import { ability, available, move, pokemon, type PokemonId } from '@/data/dex'
 import { MOVES } from '@/data/moves'
 import { POKEMON, STATS, barAt, gameStats, gameTotal, spriteUrl, statColor } from '@/data/pokemon'
 import { datasetDates, GENERATED_SNAPSHOTS, loadHistory, percent, type MetaHistory } from '@/data/meta'
@@ -17,10 +17,10 @@ import { MAX_POINTS, statValue } from '@/lib/stats'
 import { percentiles } from '@/lib/statPercentiles'
 import { useMeta } from '@/composables/useMeta'
 import AppLink from '@/components/AppLink'
+import ItemList from '@/components/ItemList.vue'
 import MoveTable from '@/components/MoveTable.vue'
 import DexRef from '@/components/DexRef'
 import DexText from '@/components/DexText'
-import ItemIcon from '@/components/ItemIcon.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import ShareSplit from '@/components/ShareSplit.vue'
@@ -123,17 +123,8 @@ const abilities = computed(() =>
     .map((a) => ({ key: a, ref: ability(a), share: m.value?.abilities?.find((x) => x.id === a)?.share }))
     .sort((a, b) => (b.share ?? 0) - (a.share ?? 0)),
 )
-const lists = computed(() => {
-  const x = m.value
-  if (!x) return []
-  return [
-    {
-      key: 'items',
-      title: t('usageMon.items'),
-      rows: (x.items ?? []).map((s) => ({ ref: item(s.id), share: s.share })),
-    },
-  ].filter((l) => l.rows.length)
-})
+const items = computed(() => (m.value?.items ?? []).map((x) => ({ id: x.id })))
+const itemShares = computed(() => Object.fromEntries((m.value?.items ?? []).map((x) => [x.id, x.share])))
 
 // Its most common exact spreads, a row each: its share, its nature, and a bar per stat of the points put there (out of
 // `MAX_POINTS`), the one its nature raises in the good color, the one it lowers outlined in the bad; on hover, the stat
@@ -330,21 +321,11 @@ const teammates = computed(() => (m.value?.teammates ?? []).filter((x) => availa
       <div class="cards" :class="{ 'meta-stale': loading }">
         <section v-if="moves.length" class="panel card moves-card">
           <h2>{{ t('usageMon.moves') }}</h2>
-          <MoveTable :ids="moves.map((x) => x.ref.id)" :shares="moveShares" descriptions no-pp no-filters />
+          <MoveTable :ids="moves.map((x) => x.ref.id)" :shares="moveShares" descriptions no-pp no-filters stacked />
         </section>
-        <section v-for="l in lists" :key="l.key" class="panel card" :class="`${l.key}-card`">
-          <h2>{{ l.title }}</h2>
-          <ul class="shares described">
-            <li v-for="r in l.rows" :key="r.ref.id">
-              <span class="what">
-                <ItemIcon v-if="r.ref.kind === 'item'" :id="r.ref.id as ItemId" :scale="0.67" />
-                <DexRef :to="r.ref" />
-              </span>
-              <span class="bar" :style="{ '--share': r.share ?? 0 }"></span>
-              <span class="num">{{ r.share === undefined ? '—' : percent(r.share) }}</span>
-              <span class="muted desc"><DexText :text="description(r.ref.kind, r.ref.id)?.short ?? ''" /></span>
-            </li>
-          </ul>
+        <section v-if="items.length" class="panel card items-card">
+          <h2>{{ t('usageMon.items') }}</h2>
+          <ItemList :items="items" :shares="itemShares" />
         </section>
       </div>
 
@@ -662,12 +643,12 @@ const teammates = computed(() => (m.value?.teammates ?? []).filter((x) => availa
   padding-top: 6px;
   font-weight: bold;
 }
-/* The moves at the left, the items at the right, each as tall as it is; one under the other where they don't fit side
-   by side. */
+/* The moves at the left, the items at the right (their descriptions under them), each as tall as it is; one under the
+   other where they don't fit side by side. */
 .cards {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: 'moves' 'items';
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  grid-template-areas: 'moves items';
   gap: 0 16px;
   align-items: start;
 }
@@ -723,21 +704,6 @@ h2 {
 }
 .mates {
   max-width: 640px;
-}
-/* A list with what each one does: after its share, the rest of the row; on phones, under it. */
-.shares.described {
-  grid-template-columns: minmax(0, max-content) minmax(60px, 160px) auto minmax(0, 1fr);
-  gap: 6px 12px;
-}
-@media (max-width: 720px) {
-  .shares.described {
-    grid-template-columns: minmax(0, max-content) minmax(40px, 1fr) auto;
-  }
-  .shares.described .desc {
-    grid-column: 1 / -1;
-    margin: -4px 0 4px;
-    font-size: 0.9em;
-  }
 }
 .what {
   display: inline-flex;

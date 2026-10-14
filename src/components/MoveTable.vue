@@ -26,7 +26,8 @@ import SkeletonRows from '@/components/SkeletonRows.vue'
 // filters are models, for a page that keeps them in its URL; unbound, the table keeps them itself. With `panels`, the
 // filters (after what's given in the slot: the page's heading) and the table go in panels of their own (for `.panels`);
 // without, both go in the caller's. A Pokémon's usage page gives each move's share of its sets (`shares`: a column of
-// its own, the table sorted by it at first), and leaves out PP (`noPp`) and the filters (`noFilters`).
+// its own, the table sorted by it at first), and leaves out PP (`noPp`) and the filters (`noFilters`), the descriptions
+// under the names (`stacked`), as phones have them.
 const props = defineProps<{
   ids: readonly MoveId[]
   descriptions?: boolean
@@ -34,6 +35,8 @@ const props = defineProps<{
   shares?: Partial<Record<MoveId, number>>
   noPp?: boolean
   noFilters?: boolean
+  /** The descriptions under the names, as on phones, where the table is narrow. */
+  stacked?: boolean
   query?: string
   /** Keep the sort under this name when the table is mounted again (`useSort`'s `remember`). */
   remember?: string
@@ -102,9 +105,9 @@ const COLUMNS = computed(() => {
 // The table's columns, as wide as they need: the name, the badges, a number each, and the description's room.
 const cols = computed(() => {
   const nums = COLUMNS.value.length - 2
-  const wide = `${props.descriptions ? 'minmax(9em, 1fr)' : 'minmax(0, 1fr)'} auto auto repeat(${nums}, var(--num))`
+  const wide = `${props.descriptions && !props.stacked ? 'minmax(9em, 1fr)' : 'minmax(0, 1fr)'} auto auto repeat(${nums}, var(--num))`
   return {
-    '--cols-wide': props.descriptions ? `${wide} minmax(0, 2fr)` : wide,
+    '--cols-wide': props.descriptions && !props.stacked ? `${wide} minmax(0, 2fr)` : wide,
     '--cols-phone': `minmax(0, 1fr) auto auto repeat(${nums - COLUMNS.value.filter((c) => c.wideOnly).length}, var(--num))`,
   }
 })
@@ -113,6 +116,14 @@ const phone = ref(phoneQuery.matches)
 const onPhone = (e: MediaQueryListEvent) => (phone.value = e.matches)
 phoneQuery.addEventListener('change', onPhone)
 onUnmounted(() => phoneQuery.removeEventListener('change', onPhone))
+/** A move's short description; on a usage page (`shares`), none for a move with no effect beyond its damage, which says
+ * nothing there. */
+function shortOf(id: MoveId) {
+  const text = description('move', id)?.short ?? ''
+  return props.shares && text === t('move.noEffect') ? '' : text
+}
+/** The descriptions go under the names rather than in a column of their own. */
+const below = computed(() => phone.value || props.stacked)
 
 // The rows render once the page is in, with a skeleton until then: all of them can take over 100ms.
 const { entered, restoring } = usePageEntered()
@@ -120,7 +131,7 @@ useRowColumns(useTemplateRef('head'))
 const skeleton = computed(() => [
   'grow',
   ...COLUMNS.value.map((c) => (c.right ? 'r' : '') + (c.wideOnly ? ' wide-only' : '')),
-  ...(props.descriptions && !phone.value ? ['grow'] : []),
+  ...(props.descriptions && !below.value ? ['grow'] : []),
 ])
 </script>
 
@@ -144,7 +155,7 @@ const skeleton = computed(() => [
     </div>
   </div>
   <div :class="{ panel: panels }">
-    <div v-if="sorted.length" class="dex-table" :class="{ restoring }" :style="cols" role="table">
+    <div v-if="sorted.length" class="dex-table" :class="{ restoring, tight: stacked }" :style="cols" role="table">
       <div ref="head" class="row head" role="row">
         <SortHeader :label="t('move.name')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
         <SortHeader
@@ -157,7 +168,7 @@ const skeleton = computed(() => [
           :desc="desc"
           @sort="toggle(c.k)"
         />
-        <div v-if="descriptions && !phone" role="columnheader"></div>
+        <div v-if="descriptions && !below" role="columnheader"></div>
       </div>
       <SkeletonRows v-if="!entered" :cells="skeleton" height="2.05em" />
       <template v-else>
@@ -167,8 +178,8 @@ const skeleton = computed(() => [
               <Marked v-if="r.parts" :p="r.parts" />
               <template v-else>{{ r.name }}</template>
             </AppLink>
-            <div v-if="descriptions && phone" class="muted below">
-              <DexText :text="description('move', r.id)?.short ?? ''" />
+            <div v-if="descriptions && below" class="muted below">
+              <DexText :text="shortOf(r.id)" />
             </div>
           </div>
           <div role="cell">
@@ -185,8 +196,8 @@ const skeleton = computed(() => [
           <div v-if="shares" role="cell" class="r num meter" :style="{ '--share': shares[r.id] ?? 0 }">
             {{ shares[r.id] === undefined ? '—' : percent(shares[r.id]!) }}
           </div>
-          <div v-if="descriptions && !phone" role="cell" class="grow muted">
-            <DexText :text="description('move', r.id)?.short ?? ''" />
+          <div v-if="descriptions && !below" role="cell" class="grow muted">
+            <DexText :text="shortOf(r.id)" />
           </div>
         </div>
       </template>
@@ -209,6 +220,18 @@ const skeleton = computed(() => [
     --icon-scale: 1.25;
     --cols: var(--cols-phone);
   }
+}
+/* Narrow (`stacked`), the badges' and numbers' columns as tight as they go, leaving the room to the name and its
+   description. */
+.dex-table.tight {
+  --num: minmax(2em, auto);
+}
+.dex-table.tight .row > :not(:first-child) {
+  padding-inline: 3px;
+}
+/* The numbers keep room at their left for the sort arrow, which hangs there. */
+.dex-table.tight .row > .r {
+  padding-left: 10px;
 }
 /* A move's share of a Pokémon's sets: its number, its bar under it, out of all of them. */
 .meter {

@@ -604,6 +604,7 @@ export const messages = {
   'move.type': 'Type',
   'move.categoryShort': 'Cat.',
   'move.power': 'Power',
+  'move.noEffect': 'No additional effect.',
   'move.accuracy': 'Acc.',
   'move.pp': 'PP',
   'move.category.physical': 'Physical',
