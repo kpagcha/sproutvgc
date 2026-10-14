@@ -109,6 +109,8 @@ const cols = computed(() => {
   return {
     '--cols-wide': props.descriptions && !props.stacked ? `${wide} minmax(0, 2fr)` : wide,
     '--cols-phone': `minmax(0, 1fr) auto auto repeat(${nums - COLUMNS.value.filter((c) => c.wideOnly).length}, var(--num))`,
+    // Very narrow (`stacked`), without the category's.
+    '--cols-narrow': `minmax(0, 1fr) auto repeat(${nums - COLUMNS.value.filter((c) => c.wideOnly).length}, var(--num))`,
   }
 })
 const phoneQuery = window.matchMedia('(max-width: 720px)')
@@ -154,14 +156,18 @@ const skeleton = computed(() => [
       </select>
     </div>
   </div>
-  <div :class="{ panel: panels }">
+  <div :class="{ panel: panels, 'table-box': stacked }">
     <div v-if="sorted.length" class="dex-table" :class="{ restoring, tight: stacked }" :style="cols" role="table">
       <div ref="head" class="row head" role="row">
         <SortHeader :label="t('move.name')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
         <SortHeader
           v-for="c in COLUMNS"
           :key="c.k"
-          :class="{ 'wide-only': c.wideOnly, badge: c.k === 'type' || c.k === 'category' }"
+          :class="{
+            'wide-only': c.wideOnly,
+            badge: c.k === 'type' || c.k === 'category',
+            category: c.k === 'category',
+          }"
           :label="t(stacked && phone && c.k === 'power' ? 'move.powerShort' : c.label)"
           :right="c.right"
           :active="key === c.k"
@@ -185,7 +191,7 @@ const skeleton = computed(() => [
           <div role="cell">
             <AppLink :to="{ name: 'types', params: { type: r.data.type } }"><TypeIcon :type="r.data.type" /></AppLink>
           </div>
-          <div role="cell">
+          <div role="cell" class="category">
             <AppLink :to="{ name: 'moves', query: { category: r.data.category } }"
               ><CategoryIcon :category="r.data.category"
             /></AppLink>
@@ -282,6 +288,19 @@ const skeleton = computed(() => [
 }
 .dex-table.tight .row > .span-desc {
   padding-inline: 6px;
+}
+/* Very narrow (`stacked`, its box under 320px), no category: the name has its room. The type's badge and the power
+   still say most of it. */
+.table-box {
+  container-type: inline-size;
+}
+@container (max-width: 320px) {
+  .dex-table.tight {
+    --cols: var(--cols-narrow);
+  }
+  .dex-table.tight .category {
+    display: none;
+  }
 }
 /* A name longer than its room breaks across lines rather than running into the badges after it. */
 .dex-table.tight .name {
