@@ -145,12 +145,13 @@ async function confirmClearKind(kind: Kind | 'setups', title: string) {
   color: inherit;
   opacity: 0.75;
 }
-/* A row per category: its name, then its favorites. */
+/* A row per category: its name, then its favorites, the name centered on their first line (as tall as a chip): not on
+   their baseline, which a chip starting with an icon has at the icon's foot. */
 dl {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 8px 16px;
-  align-items: baseline;
+  align-items: start;
   margin: 0;
 }
 dt {
@@ -164,6 +165,7 @@ dt {
   display: flex;
   align-items: center;
   gap: 4px;
+  min-height: 30px;
 }
 .clear-kind {
   display: inline-flex;
@@ -188,6 +190,9 @@ dd {
   dl {
     grid-template-columns: 1fr;
     gap: 4px;
+  }
+  dt {
+    min-height: 0;
   }
   dd + dt {
     margin-top: 6px;
