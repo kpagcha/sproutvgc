@@ -1,14 +1,14 @@
 import { shallowRef, watch } from 'vue'
 
 // How the meta's lists show (a Pokémon's usage page's abilities, moves and items), the same in all of them and
-// remembered: for now, whether each entry's short description shows.
+// remembered: for now, whether each entry's short description shows (not unless the reader asks).
 const KEY = 'sproutvgc.metaLists.descriptions'
 
 function saved(): boolean {
   try {
-    return localStorage.getItem(KEY) !== '0'
+    return localStorage.getItem(KEY) === '1'
   } catch {
-    return true
+    return false
   }
 }
 const descriptions = shallowRef(saved())
