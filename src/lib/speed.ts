@@ -41,8 +41,12 @@ export function speedBuilds(speeds: readonly { points: number; nature: string; s
  */
 export const MARK_SHARE = 0.01
 
-/** The builds to offer in a tap: those on at least 3% of the sets, the 4 most common. */
-export const commonBuilds = (builds: readonly SpeedBuildShare[]) => builds.filter((b) => b.share >= 0.03).slice(0, 4)
+/** The least share of a Pokémon's sets a Speed build needs for the speed tiers to show it. */
+export const MIN_SHARE = 0.03
+
+/** The builds to offer in a tap: those on at least `MIN_SHARE` of the sets, the 4 most common. */
+export const commonBuilds = (builds: readonly SpeedBuildShare[]) =>
+  builds.filter((b) => b.share >= MIN_SHARE).slice(0, 4)
 
 /** The Speed stat of a Pokémon with base Speed `base`, `points` stat points in it and a nature of `effect`. */
 export const speedStat = (base: number, points: number, effect: NatureEffect) => statValue(base, points, effect)

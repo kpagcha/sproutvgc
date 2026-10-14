@@ -10,13 +10,14 @@ import { natureEffectOn, natureEffects, natureName } from '@/data/natures'
 import { locale, t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
-import { speedBuilds } from '@/lib/speed'
+import { MIN_SHARE, speedBuilds } from '@/lib/speed'
 import { FASTEST, type SpeedBuild } from '@/lib/speedBuild'
-import { odds, reachOf, setSpread, type SpreadPoint } from '@/lib/speedLineup'
+import { commonSpeed, odds, reachOf, setSpread, type SpreadPoint } from '@/lib/speedLineup'
 import { MAX_POINTS, statValue } from '@/lib/stats'
 import { percentiles } from '@/lib/statPercentiles'
 import { useListOptions } from '@/composables/useListOptions'
 import { useMeta } from '@/composables/useMeta'
+import { useSpeedOptions } from '@/composables/useSpeedOptions'
 import AppLink from '@/components/AppLink'
 import ItemList from '@/components/ItemList.vue'
 import MoveTable from '@/components/MoveTable.vue'
@@ -25,6 +26,7 @@ import DexText from '@/components/DexText'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import ListOptions from '@/components/ListOptions.vue'
+import OptionsMenu from '@/components/OptionsMenu.vue'
 import SectionNav from '@/components/SectionNav.vue'
 import ShareSplit from '@/components/ShareSplit.vue'
 import SpeedShare from '@/components/SpeedShare.vue'
@@ -149,20 +151,27 @@ const spreads = computed(() =>
 const BARE: SpeedBuild = { ...FASTEST, effect: 'neutral', points: 0 }
 const spread = computed(() => (m.value?.speeds ? setSpread(id.value, speedBuilds(m.value.speeds), BARE) : []))
 // Against the Pokémon it'll face, as the comparison sets one against another at its sets: every Pokémon of the dataset
-// at its sets, as one spread, each counting as much as it's used. Its marks take the color of who moves first against
+// (or its top 50 or 100, as the options at the panel's top right say, `useSpeedOptions`) at its sets, as one spread,
+// each counting as much as it's used; with its rare builds left out, as much as what's left of it. Its marks take the color of who moves first against
 // most of them, and a bar says how often it moves first, ties or moves after (`odds`, `SpeedShare`); the speed pages
 // have the rest.
+const speedOptions = useSpeedOptions()
 const metaSpeeds = computed((): SpreadPoint[] => {
   const d = data.value
   if (!d) return []
+  const top = speedOptions.field.value === 'all' ? Infinity : Number(speedOptions.field.value)
   const bySpeed = new Map<number, number>()
   let total = 0
   for (const [pid, x] of Object.entries(d)) {
-    if (!x?.usage || !x.speeds || !POKEMON[pid as PokemonId]) continue
-    for (const p of setSpread(pid as PokemonId, speedBuilds(x.speeds), BARE)) {
-      bySpeed.set(p.speed, (bySpeed.get(p.speed) ?? 0) + p.share * x.usage)
+    if (!x?.usage || !x.speeds || !POKEMON[pid as PokemonId] || x.rank > top) continue
+    const builds = speedBuilds(x.speeds)
+    const kept = speedOptions.rare.value ? builds.filter((b) => b.share >= MIN_SHARE) : builds
+    const w = (x.usage * kept.reduce((n, b) => n + b.share, 0)) / builds.reduce((n, b) => n + b.share, 0)
+    if (!w) continue
+    for (const p of setSpread(pid as PokemonId, kept, BARE)) {
+      bySpeed.set(p.speed, (bySpeed.get(p.speed) ?? 0) + p.share * w)
     }
-    total += x.usage
+    total += w
   }
   return [...bySpeed].map(([speed, w]) => ({ speed, share: w / total, builds: [] })).sort((a, b) => b.speed - a.speed)
 })
@@ -171,9 +180,36 @@ const tiersQuery = computed(() => {
   const b = m.value?.speeds && speedBuilds(m.value.speeds)[0]
   return { mine: id.value, ...(b && { mynat: b.effect, mypts: String(b.points) }) }
 })
-const fieldOdds = computed(() =>
-  spread.value.length && metaSpeeds.value.length ? odds(spread.value, metaSpeeds.value, false) : null,
+// Its side: its sets, or its most common Speed alone.
+const mostCommon = computed(() => (spread.value.length ? commonSpeed(spread.value) : null))
+const mySpeeds = computed((): SpreadPoint[] =>
+  speedOptions.mine.value === 'common' && mostCommon.value !== null
+    ? [{ speed: mostCommon.value, share: 1, builds: [] }]
+    : spread.value,
 )
+const fieldOdds = computed(() =>
+  mySpeeds.value.length && metaSpeeds.value.length ? odds(mySpeeds.value, metaSpeeds.value, false) : null,
+)
+// What the share is of, as the options say: over the bar, and in more words in its tooltip.
+const fieldVs = computed(() => {
+  const { mine, field } = speedOptions
+  const against = field.value === 'all' ? t('usageMon.vsAll') : t('usageMon.vsTop', { n: field.value })
+  return mine.value === 'common'
+    ? t('usageMon.fieldVsCommon', { speed: mostCommon.value ?? '', field: against })
+    : t('usageMon.fieldVsSets', { field: against })
+})
+const fieldTip = computed(() => {
+  const { mine, field, rare } = speedOptions
+  return [
+    mine.value === 'common'
+      ? t('usageMon.fieldTipCommon', { speed: mostCommon.value ?? '' })
+      : t('usageMon.fieldTipSets'),
+    field.value === 'all' ? t('usageMon.fieldTipAll') : t('usageMon.fieldTipTop', { n: field.value }),
+    rare.value && t('usageMon.fieldTipRare', { pct: percent(MIN_SHARE) }),
+  ]
+    .filter(Boolean)
+    .join(' ')
+})
 
 // Its usage over the dataset's series, a month each, when the series has more than one.
 const history = shallowRef<MetaHistory | null>(null)
@@ -379,7 +415,38 @@ const sections = computed(() =>
 
       <!-- Its Speeds, as the speed tiers draw a row, and the ways to them. -->
       <section v-if="spread.length" id="sec-speed" class="panel" :class="{ 'meta-stale': loading }">
-        <h2>{{ t('usageMon.speed') }}</h2>
+        <div class="panel-head">
+          <h2>{{ t('usageMon.speed') }}</h2>
+          <OptionsMenu :title="t('usageMon.speedOptions')">
+            <fieldset>
+              <legend>{{ t('usageMon.optMine') }}</legend>
+              <label
+                ><input v-model="speedOptions.mine.value" type="radio" value="sets" />{{ t('usageMon.optSets') }}</label
+              >
+              <label
+                ><input v-model="speedOptions.mine.value" type="radio" value="common" />{{
+                  t('usageMon.optCommon')
+                }}</label
+              >
+            </fieldset>
+            <fieldset>
+              <legend>{{ t('usageMon.optField') }}</legend>
+              <label
+                ><input v-model="speedOptions.field.value" type="radio" value="all" />{{ t('usageMon.optAll') }}</label
+              >
+              <label v-for="n in ['50', '100']" :key="n"
+                ><input v-model="speedOptions.field.value" type="radio" :value="n" />{{
+                  t('usageMon.optTop', { n })
+                }}</label
+              >
+            </fieldset>
+            <label
+              ><input v-model="speedOptions.rare.value" type="checkbox" />{{
+                t('usageMon.optRare', { pct: percent(MIN_SHARE) })
+              }}</label
+            >
+          </OptionsMenu>
+        </div>
         <SpeedSpread
           :title="t('usageMon.speedChart', { name: refName(ref_) })"
           :spread="spread"
@@ -390,7 +457,7 @@ const sections = computed(() =>
         />
         <template v-if="fieldOdds">
           <p class="muted small field-note">
-            <span v-tip="t('usageMon.fieldTip')" class="tipped">{{ t('usageMon.fieldVs') }}</span>
+            <span v-tip="fieldTip" class="tipped">{{ fieldVs }}</span>
           </p>
           <SpeedShare :odds="fieldOdds" :name="refName(ref_)" :other="t('usageMon.field')" tone="yours" />
         </template>

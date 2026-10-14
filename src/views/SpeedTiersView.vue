@@ -47,6 +47,7 @@ import {
   inBattle,
   commonBuilds,
   MARK_SHARE,
+  MIN_SHARE,
   natureEffect,
   speedBuilds,
   speedStat,
@@ -112,9 +113,6 @@ const flag = (k: string) => query.value[k] === '1'
 function set(k: string, v: string | undefined) {
   void router.replace({ query: { ...query.value, [k]: v } })
 }
-
-/** The least share of a Pokémon's sets a Speed needs. */
-const MIN_SHARE = 0.03
 
 // The snapshot shown is the one picked on any page (`useMeta`).
 const { snapshot, data, loading } = useMeta()
