@@ -366,7 +366,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
               >
             </div>
             <div role="cell" class="grow">
-              <AppLink :to="{ name: 'pokemon', params: { id: r.id } }" class="mon">
+              <AppLink :to="{ name: 'usagePokemon', params: { id: r.id } }" class="mon">
                 <PokemonIcon :id="r.id" />
                 <span class="label">
                   <span class="name">{{ r.species }}</span>

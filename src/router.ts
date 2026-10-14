@@ -265,6 +265,18 @@ export const router = createRouter({
       },
     },
     { path: '/meta/usage/pokemon', redirect: { name: 'usage' } },
+    {
+      path: '/meta/usage/pokemon/:id',
+      name: 'usagePokemon',
+      component: () => import('@/views/UsagePokemonView.vue'),
+      meta: {
+        titleKey: 'title.usagePokemon',
+        descKey: 'desc.usagePokemon',
+        dexNames: true,
+        descriptions: ['ability', 'move', 'item'],
+        ...inArea('meta', 'usage'),
+      },
+    },
     usageSoon('moves', 'moveUsage', 'title.moveUsage', 'desc.moveUsage'),
     usageSoon('items', 'itemUsage', 'title.itemUsage', 'desc.itemUsage'),
     usageSoon('abilities', 'abilityUsage', 'title.abilityUsage', 'desc.abilityUsage'),
