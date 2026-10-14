@@ -12,7 +12,7 @@ import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { speedBuilds } from '@/lib/speed'
 import { FASTEST, type SpeedBuild } from '@/lib/speedBuild'
-import { reachOf, setSpread } from '@/lib/speedLineup'
+import { odds, reachOf, setSpread, type SpreadPoint } from '@/lib/speedLineup'
 import { MAX_POINTS, statValue } from '@/lib/stats'
 import { percentiles } from '@/lib/statPercentiles'
 import { useMeta } from '@/composables/useMeta'
@@ -24,6 +24,7 @@ import ItemIcon from '@/components/ItemIcon.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import ShareSplit from '@/components/ShareSplit.vue'
+import SpeedShare from '@/components/SpeedShare.vue'
 import SpeedSpread from '@/components/SpeedSpread.vue'
 import TypeIcon from '@/components/TypeIcon'
 
@@ -151,6 +152,27 @@ const spreads = computed(() =>
 // Its Speeds at its sets, as the speed tiers draw a row, with nothing on: the Speeds its builds reach.
 const BARE: SpeedBuild = { ...FASTEST, effect: 'neutral', points: 0 }
 const spread = computed(() => (m.value?.speeds ? setSpread(id.value, speedBuilds(m.value.speeds), BARE) : []))
+// Against the Pokémon it'll face, as the comparison sets one against another at its sets: every Pokémon of the dataset
+// at its sets, as one spread, each counting as much as it's used. Its marks take the color of who moves first against
+// most of them, and a bar says how often it moves first, ties or moves after (`odds`, `SpeedShare`); the speed pages
+// have the rest.
+const metaSpeeds = computed((): SpreadPoint[] => {
+  const d = data.value
+  if (!d) return []
+  const bySpeed = new Map<number, number>()
+  let total = 0
+  for (const [pid, x] of Object.entries(d)) {
+    if (!x?.usage || !x.speeds || !POKEMON[pid as PokemonId]) continue
+    for (const p of setSpread(pid as PokemonId, speedBuilds(x.speeds), BARE)) {
+      bySpeed.set(p.speed, (bySpeed.get(p.speed) ?? 0) + p.share * x.usage)
+    }
+    total += x.usage
+  }
+  return [...bySpeed].map(([speed, w]) => ({ speed, share: w / total, builds: [] })).sort((a, b) => b.speed - a.speed)
+})
+const fieldOdds = computed(() =>
+  spread.value.length && metaSpeeds.value.length ? odds(spread.value, metaSpeeds.value, false) : null,
+)
 
 // Its usage over the dataset's series, a month each, when the series has more than one.
 const history = shallowRef<MetaHistory | null>(null)
@@ -374,10 +396,16 @@ const teammates = computed(() => (m.value?.teammates ?? []).filter((x) => availa
           :title="t('usageMon.speedChart', { name: refName(ref_) })"
           :spread="spread"
           tone="yours"
-          :other="null"
+          :other="metaSpeeds.length ? { name: t('usageMon.field'), spread: metaSpeeds, sets: true } : null"
           :reach="reachOf(id, BARE)"
           :trick-room="false"
         />
+        <template v-if="fieldOdds">
+          <p class="muted small field-note">
+            <span v-tip="t('usageMon.fieldTip')" class="tipped">{{ t('usageMon.fieldVs') }}</span>
+          </p>
+          <SpeedShare :odds="fieldOdds" :name="refName(ref_)" :other="t('usageMon.field')" tone="yours" />
+        </template>
         <p class="links">
           <AppLink :to="{ name: 'speedTiers', query: { find: id } }">{{ t('usageMon.toTiers') }} ›</AppLink>
           <AppLink :to="{ name: 'speedCompare', query: { a: id } }">{{ t('usageMon.toCompare') }} ›</AppLink>
@@ -813,6 +841,9 @@ h2 {
 }
 .note {
   margin: 10px 0 0;
+}
+.field-note {
+  margin: 12px 0 6px;
 }
 .links {
   display: flex;

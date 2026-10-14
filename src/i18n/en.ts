@@ -1113,6 +1113,10 @@ export const messages = {
     "Each stat's stat points (its bar, out of 32) and the stat they give: in green the stat its nature raises, in red the one it lowers.",
   'usageMon.speed': 'Speed',
   'usageMon.speedChart': "{name}'s Speeds at its sets",
+  'usageMon.field': 'The meta',
+  'usageMon.fieldVs': "Against the Pokémon you'll face",
+  'usageMon.fieldTip':
+    'How often it moves first against the Pokémon in this dataset, with every one at the Speeds its sets run and the most used counting the most.',
   'usageMon.toTiers': 'On the speed tiers',
   'usageMon.toCompare': 'Compare its Speed',
   'usageMon.history': 'Usage by month',
