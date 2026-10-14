@@ -196,12 +196,12 @@ const toggleMod = (k: Toggle) => set(k, flag(k) ? undefined : '1')
 const MOD_ITEMS: Partial<Record<string, ItemId>> = { scarf: 'choicescarf', ironball: 'ironball' }
 /** The modifiers with no item to show, by an icon: Tailwind's wind, paralysis' bolt. */
 const MOD_ICONS: Partial<Record<string, Component>> = { tailwind: Wind, paralysis: Zap }
-const mods = computed<SpeedMods>(() => ({
-  tailwind: flag('tailwind'),
-  scarf: flag('scarf'),
-  paralysis: flag('paralysis'),
-  stage: Number(stage.value),
-}))
+const mods = computed<SpeedMods>((was) =>
+  keptValue(
+    { tailwind: flag('tailwind'), scarf: flag('scarf'), paralysis: flag('paralysis'), stage: Number(stage.value) },
+    was,
+  ),
+)
 /** The modifiers for everyone, as they apply to one Pokémon: no Choice Scarf for one whose item is fixed (a Mega's
  * Mega Stone, Ogerpon's mask: `itemBound`). */
 const modsFor = (id: PokemonId) => (itemBound(id) ? withoutItems(mods.value) : mods.value)
@@ -322,10 +322,18 @@ const mine = computed(() => {
 })
 const isEffect = (e: unknown): e is NatureEffect => (NATURE_EFFECTS as readonly unknown[]).includes(e)
 const myNature = computed<NatureEffect>(() => (isEffect(query.value.mynat) ? query.value.mynat : 'up'))
-const myPoints = computed(() => {
+const urlPoints = computed(() => {
   const n = Number(query.value.mypts)
   return Number.isInteger(n) && n >= 0 && n <= MAX_POINTS ? n : MAX_POINTS
 })
+/** Its points while the slider is dragged: the ladder follows them a frame at a time, and the URL takes them once it's
+ * let go (`commitMyPoints`), rather than every Pokémon's chips being worked out again at each step. */
+const draftPoints = shallowRef<number | null>(null)
+const myPoints = computed(() => draftPoints.value ?? urlPoints.value)
+watch(
+  () => query.value.mypts,
+  () => (draftPoints.value = null),
+)
 const MY_TOGGLES = ['tailwind', 'scarf', 'ironball', 'doubled', 'doubled2', 'paralysis'] as const
 type MyToggle = (typeof MY_TOGGLES)[number]
 // Those it can't have left out (`togglesFor`: no items for one whose item is fixed).
@@ -343,14 +351,19 @@ const myToggles = computed(
 const myStage = computed(() =>
   (STAGES as readonly string[]).includes(String(query.value.mystage)) ? String(query.value.mystage) : '0',
 )
-const myMods = computed<SpeedMods>(() => ({
-  tailwind: myToggles.value.has('tailwind'),
-  scarf: myToggles.value.has('scarf'),
-  ironBall: myToggles.value.has('ironball'),
-  doubled: !!mine.value && !!doubling(mine.value, myBuild.value),
-  paralysis: myToggles.value.has('paralysis'),
-  stage: Number(myStage.value),
-}))
+const myMods = computed<SpeedMods>((was) =>
+  keptValue(
+    {
+      tailwind: myToggles.value.has('tailwind'),
+      scarf: myToggles.value.has('scarf'),
+      ironBall: myToggles.value.has('ironball'),
+      doubled: !!mine.value && !!doubling(mine.value, myBuild.value),
+      paralysis: myToggles.value.has('paralysis'),
+      stage: Number(myStage.value),
+    },
+    was,
+  ),
+)
 // Its modifiers fold away as the others' do: shown when the page comes with some on; folded, they stay on, their
 // disclosure marked.
 const myModded = computed(() => myToggles.value.size > 0 || myStage.value !== '0')
@@ -420,9 +433,29 @@ const setMyNature = (e: NatureEffect) => set('mynat', e)
 const myCommon = computed(() => (mine.value ? commonBuilds(buildsOf(mine.value)) : []))
 const setMyBuild = (e: NatureEffect, points: number) =>
   void router.replace({ query: { ...query.value, mynat: e, mypts: String(points) } })
-const setMyPoints = (v: string) => {
+const pointsOf = (v: string) => {
   const n = Math.round(Number(v))
-  if (Number.isFinite(n)) set('mypts', String(Math.min(MAX_POINTS, Math.max(0, n))))
+  return Number.isFinite(n) ? Math.min(MAX_POINTS, Math.max(0, n)) : null
+}
+let pendingPoints: number | null = null
+let pointsFrame = 0
+/** The slider dragged: its points drafted, at most once a frame. */
+function dragMyPoints(v: string) {
+  pendingPoints = pointsOf(v)
+  if (pendingPoints === null || pointsFrame) return
+  pointsFrame = requestAnimationFrame(() => {
+    pointsFrame = 0
+    draftPoints.value = pendingPoints
+  })
+}
+onBeforeUnmount(() => cancelAnimationFrame(pointsFrame))
+/** Its points set (the slider let go, the box changed): in the URL, the draft dropped as it takes them. */
+function setMyPoints(v: string) {
+  cancelAnimationFrame(pointsFrame)
+  pointsFrame = 0
+  const n = pointsOf(v)
+  if (n === null || n === urlPoints.value) draftPoints.value = null
+  else set('mypts', String(n))
 }
 /**
  * Turns one of your modifiers on or off: a Choice Scarf and an Iron Ball can't be held together, nor two abilities
@@ -879,9 +912,9 @@ const beyondTop = (id: PokemonId) =>
   show.value !== 'all' && !!data.value && (data.value[id]?.rank ?? Infinity) > topN.value
 // Pokémon beyond the top kept on the ladder once found (`?keep=`, comma-separated), to compare several of them; in the
 // order kept.
-const kept = computed<PokemonId[]>(() => {
+const kept = computed<PokemonId[]>((was) => {
   const v = query.value.keep
-  return typeof v === 'string' ? (v.split(',').filter((id) => id in POKEMON) as PokemonId[]) : []
+  return keptValue(typeof v === 'string' ? (v.split(',').filter((id) => id in POKEMON) as PokemonId[]) : [], was)
 })
 const keptShown = computed(() => kept.value.filter((id) => beyondTop(id) && findable.value.has(id)))
 function toggleKept(id: PokemonId) {
@@ -958,9 +991,10 @@ function placeOf(r: RowBase): number {
  * yours against, and its tags): by build, a row per chip (a Speed build its sets run, or a boost at one), at its
  * Speed; else a row per Pokémon (its most common build's chip) and per boost (at its most common build), placed by the
  * view (`placeOf`). Each row has its Pokémon's sets' Speeds (with its boost), or, with none in the snapshot, its
- * benchmarks. Yours is a row of its own, first at its Speed; the rest from those moving first, then by usage.
+ * benchmarks. Yours is a row of its own, first at its Speed (`ladderRows`); the rest from those moving first, then by
+ * usage.
  */
-const ladderRows = computed(() => {
+const othersRows = computed(() => {
   const chips = new Map<string, Entry>()
   if (!bySets.value) return { rows: [] as OddsRow[], chips }
   const cache = new Map<string, Omit<RowBase, 'key' | 'extra' | 'hit'>>()
@@ -985,7 +1019,7 @@ const ladderRows = computed(() => {
     }
     return { ...b, key, extra, hit: isHit(e) }
   }
-  const vs = versus.value?.e
+  const vs = vsChip.value
   const vsGroup = vs ? groupKey(vs) : null
   const shown = onlyFound.value ? entries.value.filter((e) => e.id === found.value) : entries.value
   const placed: { row: OddsRow; rank: number; share: number }[] = []
@@ -1024,34 +1058,8 @@ const ladderRows = computed(() => {
       })
     }
   }
-  // Yours, at its Speed with its own modifiers.
-  if (mine.value !== null && mySpeed.value !== null) {
-    const myBench = benchSpeeds(mine.value, myMods.value)
-    placed.push({
-      row: {
-        key: 'mine',
-        id: mine.value,
-        ...named(mine.value),
-        speed: mySpeed.value,
-        builds: [
-          { speed: mySpeed.value, share: 1, sets: [{ effect: myNature.value, points: myPoints.value, share: 1 }] },
-        ],
-        reach: { min: myBench.min, max: myBench.max },
-        bench: myBench,
-        own: mySpeed.value,
-        noSets: false,
-        extra: false,
-        hit: false,
-        mine: true,
-        versus: false,
-        rival: false,
-      },
-      rank: -Infinity,
-      share: 1,
-    })
-  }
-  // Yours first at its Speed, then by usage and by how many of its sets are at it, then by name: species, then forme,
-  // the species' own first.
+  // By Speed, then by usage and by how many of its sets are at it, then by name: species, then forme, the species' own
+  // first.
   const dir = trickRoom.value ? 1 : -1
   placed.sort(
     (a, b) =>
@@ -1071,8 +1079,38 @@ const ladderRows = computed(() => {
   tagChips = chips
   return { rows, chips }
 })
+/** The ladder's rows: the others', and yours, at its Speed with its own modifiers, first among those at it. Apart, so
+ * that changing yours places it again rather than working out every row. */
+const ladderRows = computed(() => {
+  const { rows, chips } = othersRows.value
+  if (!bySets.value || mine.value === null || mySpeed.value === null) return { rows, chips }
+  const myBench = benchSpeeds(mine.value, myMods.value)
+  const row: OddsRow = {
+    key: 'mine',
+    id: mine.value,
+    ...named(mine.value),
+    speed: mySpeed.value,
+    builds: [{ speed: mySpeed.value, share: 1, sets: [{ effect: myNature.value, points: myPoints.value, share: 1 }] }],
+    reach: { min: myBench.min, max: myBench.max },
+    bench: myBench,
+    own: mySpeed.value,
+    noSets: false,
+    extra: false,
+    hit: false,
+    mine: true,
+    versus: false,
+    rival: false,
+  }
+  const dir = trickRoom.value ? 1 : -1
+  const i = rows.findIndex((r) => (r.speed - row.speed) * dir >= 0)
+  return { rows: i < 0 ? [...rows, row] : [...rows.slice(0, i), row, ...rows.slice(i)], chips }
+})
 /** The ladder's rows as last drawn, with their chips, for `ladderRows` to keep those unchanged. */
 let lastRows = new Map<string, { row: OddsRow; chip: Entry | undefined }>()
+/** `v`, or what a computed was before when that's the same (`same`), so what depends on it isn't worked out again. */
+function keptValue<T>(v: T, was: T | undefined): T {
+  return was !== undefined && same(was, v) ? was : v
+}
 /** Whether two plain values (numbers, strings, arrays, objects of them) are the same. */
 function same(a: unknown, b: unknown): boolean {
   if (a === b) return true
@@ -1234,10 +1272,14 @@ const summary = computed(() => {
 
 // The chip yours is measured against (`?vs=`, picked by tapping it while yours is set), and what it takes to move
 // before it, for each nature effect.
+/** The chip yours is measured against: the same one as long as it is, so the ladder's rows aren't worked out again as
+ * yours changes. */
+const vsChip = computed<Entry | null>((was) =>
+  mine.value === null || vsKey.value === null ? null : (keptValue(chipOf(vsKey.value), was ?? undefined) ?? null),
+)
 const versus = computed(() => {
-  if (mine.value === null || vsKey.value === null) return null
-  const e = chipOf(vsKey.value)
-  if (!e) return null
+  const e = vsChip.value
+  if (mine.value === null || !e) return null
   const target = chipSpeed(e)
   const base = POKEMON[mine.value].stats[5]
   const at = (effect: NatureEffect) => pointsToMoveFirst(base, effect, myMods.value, target, trickRoom.value)
@@ -2581,7 +2623,8 @@ const { start: startTour } = useTour(
                       min="0"
                       :max="MAX_POINTS"
                       :value="myPoints"
-                      @input="setMyPoints(($event.target as HTMLInputElement).value)"
+                      @input="dragMyPoints(($event.target as HTMLInputElement).value)"
+                      @change="setMyPoints(($event.target as HTMLInputElement).value)"
                     />
                     <input
                       type="number"

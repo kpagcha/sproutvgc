@@ -399,9 +399,18 @@ export const metaProviders = (): MetaSnapshot['provider'][] => [
   ...new Map(snapshots.value.map((s) => [s.provider.url, s.provider])).values(),
 ]
 
+/** The percentages' format, one per language: making one is slow, and long lists show hundreds of them. */
+const percentFormats = new Map<string, Intl.NumberFormat>()
+function percentFormat(lang: string): Intl.NumberFormat {
+  let f = percentFormats.get(lang)
+  if (!f) {
+    f = new Intl.NumberFormat(lang, { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 })
+    percentFormats.set(lang, f)
+  }
+  return f
+}
 /** A share as a percentage in the reader's language, to one decimal: "46.6%", "<0.1%" below that. */
 export function percent(share: number): string {
-  const f = (x: number) =>
-    x.toLocaleString(locale.value, { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 })
+  const f = (x: number) => percentFormat(locale.value).format(x)
   return share > 0 && share < 0.0005 ? `<${f(0.001)}` : f(share)
 }
