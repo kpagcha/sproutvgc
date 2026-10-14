@@ -1122,9 +1122,9 @@ export const messages = {
   'usageMon.speed': 'Speed',
   'usageMon.speedChart': "{name}'s Speeds at its sets",
   'usageMon.field': 'The meta',
-  'usageMon.fieldVs': "Against the Pokémon you'll face",
+  'usageMon.fieldVs': "Across its sets, against the Pokémon you'll face",
   'usageMon.fieldTip':
-    'How often it moves first against the Pokémon in this dataset, with every one at the Speeds its sets run and the most used counting the most.',
+    'How often one of its sets moves first against the Pokémon in this dataset: each of its Speeds counting as much as its sets run it (not its most common alone), against every Pokémon at the Speeds its sets run, the most used counting the most. The speed tiers measure one build of yours instead.',
   'usageMon.toTiers': 'On the speed tiers',
   'usageMon.toCompare': 'Compare its Speed',
   'usageMon.history': 'Usage by month',
