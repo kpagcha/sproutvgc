@@ -425,6 +425,11 @@ const teammates = computed(() => (m.value?.teammates ?? []).filter((x) => availa
             <AppLink :to="{ name: 'usagePokemon', params: { id: x.id } }" class="what">
               <PokemonIcon :id="x.id" />{{ refName(pokemon(x.id)) }}
             </AppLink>
+            <span class="types">
+              <AppLink v-for="ty in POKEMON[x.id].types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
+                <TypeIcon :type="ty" />
+              </AppLink>
+            </span>
             <span class="bar" :style="{ '--share': x.share ?? 0 }"></span>
             <span class="num">{{ x.share === undefined ? '—' : percent(x.share) }}</span>
           </li>
@@ -704,6 +709,10 @@ h2 {
 }
 .mates {
   max-width: 640px;
+}
+/* A teammate's types after its name. */
+.shares.mates {
+  grid-template-columns: minmax(0, max-content) auto minmax(40px, 1fr) auto;
 }
 .what {
   display: inline-flex;
