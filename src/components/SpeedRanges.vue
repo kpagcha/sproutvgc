@@ -183,7 +183,7 @@ const name = (m: RangeRow['mons'][number]) => [m.species, m.forme].filter(Boolea
             v-for="m in r.mons"
             :key="m.id"
             v-tip="canHover && name(m)"
-            :to="{ name: 'pokemon', params: { id: m.id } }"
+            :to="{ name: 'usagePokemon', params: { id: m.id } }"
             class="mon"
             :class="{ hit: m.hit, mine: m.mine, versus: m.id === versus }"
             :aria-label="name(m)"

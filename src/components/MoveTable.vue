@@ -9,6 +9,7 @@ import { locale, t, typeName } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
+import { percent } from '@/data/meta'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { useRowColumns } from '@/composables/useRowColumns'
 import { useSort } from '@/composables/useSort'
@@ -24,11 +25,18 @@ import SkeletonRows from '@/components/SkeletonRows.vue'
 // filtered by type, category and flag; with `descriptions`, each move's short description too. The category and flag
 // filters are models, for a page that keeps them in its URL; unbound, the table keeps them itself. With `panels`, the
 // filters (after what's given in the slot: the page's heading) and the table go in panels of their own (for `.panels`);
-// without, both go in the caller's.
+// without, both go in the caller's. A Pokémon's usage page gives each move's share of its sets (`shares`: a column of
+// its own, the table sorted by it at first), and leaves out PP (`noPp`) and the filters (`noFilters`), the descriptions
+// under the names, each a line of its own the whole width of its row (`stacked`).
 const props = defineProps<{
   ids: readonly MoveId[]
   descriptions?: boolean
-  placeholder: string
+  placeholder?: string
+  shares?: Partial<Record<MoveId, number>>
+  noPp?: boolean
+  noFilters?: boolean
+  /** The descriptions under the names, as on phones, where the table is narrow. */
+  stacked?: boolean
   query?: string
   /** Keep the sort under this name when the table is mounted again (`useSort`'s `remember`). */
   remember?: string
@@ -63,9 +71,10 @@ const shown = computed(() => {
   })
 })
 
-type Key = 'name' | 'type' | 'category' | 'power' | 'accuracy' | 'pp'
-const value = (r: { name: string; data: Move }, k: Key): number | string => {
+type Key = 'name' | 'type' | 'category' | 'power' | 'accuracy' | 'pp' | 'share'
+const value = (r: { id: MoveId; name: string; data: Move }, k: Key): number | string => {
   if (k === 'name') return r.name
+  if (k === 'share') return props.shares?.[r.id] ?? -1
   if (k === 'type') return TYPES.indexOf(r.data.type)
   if (k === 'category') return CATEGORIES.indexOf(r.data.category)
   if (k === 'accuracy') return r.data.accuracy === true ? 101 : r.data.accuracy
@@ -74,46 +83,63 @@ const value = (r: { name: string; data: Move }, k: Key): number | string => {
 const { key, desc, toggle, sorted } = useSort({
   rows: shown,
   value,
-  initial: 'name' as Key,
-  startsDesc: (k) => k === 'power' || k === 'accuracy' || k === 'pp',
+  initial: (props.shares ? 'share' : 'name') as Key,
+  startsDesc: (k) => k === 'power' || k === 'accuracy' || k === 'pp' || k === 'share',
   locale,
   remember: props.remember,
 })
 
 // Phones leave out accuracy and PP, and show the descriptions under the moves' names rather than in a column of
 // their own.
-const COLUMNS: { k: Key; label: MessageKey; right?: boolean; wideOnly?: boolean }[] = [
-  { k: 'type', label: 'move.type' },
-  { k: 'category', label: 'move.categoryShort' },
-  { k: 'power', label: 'move.power', right: true },
-  { k: 'accuracy', label: 'move.accuracy', right: true, wideOnly: true },
-  { k: 'pp', label: 'move.pp', right: true, wideOnly: true },
-]
+const COLUMNS = computed(() => {
+  const list: { k: Key; label: MessageKey; right?: boolean; wideOnly?: boolean }[] = [
+    { k: 'type', label: 'move.type' },
+    { k: 'category', label: 'move.categoryShort' },
+    { k: 'power', label: 'move.power', right: true },
+    { k: 'accuracy', label: 'move.accuracy', right: true, wideOnly: true },
+  ]
+  if (!props.noPp) list.push({ k: 'pp', label: 'move.pp', right: true, wideOnly: true })
+  if (props.shares) list.push({ k: 'share', label: 'usageMon.share', right: true })
+  return list
+})
+// The table's columns, as wide as they need: the name, the badges, a number each, and the description's room.
+const cols = computed(() => {
+  const nums = COLUMNS.value.length - 2
+  const wide = `${props.descriptions && !props.stacked ? 'minmax(9em, 1fr)' : 'minmax(0, 1fr)'} auto auto repeat(${nums}, var(--num))`
+  return {
+    '--cols-wide': props.descriptions && !props.stacked ? `${wide} minmax(0, 2fr)` : wide,
+    '--cols-phone': `minmax(0, 1fr) auto auto repeat(${nums - COLUMNS.value.filter((c) => c.wideOnly).length}, var(--num))`,
+  }
+})
 const phoneQuery = window.matchMedia('(max-width: 720px)')
 const phone = ref(phoneQuery.matches)
 const onPhone = (e: MediaQueryListEvent) => (phone.value = e.matches)
 phoneQuery.addEventListener('change', onPhone)
 onUnmounted(() => phoneQuery.removeEventListener('change', onPhone))
+/** A move's short description; on a usage page (`shares`), none for a move with no effect beyond its damage, which says
+ * nothing there. */
+function shortOf(id: MoveId) {
+  const text = description('move', id)?.short ?? ''
+  return props.shares && text === t('move.noEffect') ? '' : text
+}
+/** The descriptions go under the names rather than in a column of their own. */
+const below = computed(() => phone.value || props.stacked)
 
 // The rows render once the page is in, with a skeleton until then: all of them can take over 100ms.
 const { entered, restoring } = usePageEntered()
 useRowColumns(useTemplateRef('head'))
 const skeleton = computed(() => [
   'grow',
-  '',
-  '',
-  'r',
-  'wide-only r',
-  'wide-only r',
-  ...(props.descriptions && !phone.value ? ['grow'] : []),
+  ...COLUMNS.value.map((c) => (c.right ? 'r' : '') + (c.wideOnly ? ' wide-only' : '')),
+  ...(props.descriptions && !below.value ? ['grow'] : []),
 ])
 </script>
 
 <template>
-  <div :class="{ panel: panels }">
+  <div v-if="!noFilters" :class="{ panel: panels }">
     <slot />
     <div class="filters">
-      <SearchBox v-model="query" :placeholder="placeholder" :aria-label="placeholder" />
+      <SearchBox v-model="query" :placeholder="placeholder ?? ''" :aria-label="placeholder" />
       <select v-model="type" class="search select" :aria-label="t('move.type')">
         <option value="">{{ t('pokedex.anyType') }}</option>
         <option v-for="ty in TYPES" :key="ty" :value="ty">{{ typeName(ty) }}</option>
@@ -129,20 +155,20 @@ const skeleton = computed(() => [
     </div>
   </div>
   <div :class="{ panel: panels }">
-    <div v-if="sorted.length" class="dex-table" :class="{ described: descriptions, restoring }" role="table">
+    <div v-if="sorted.length" class="dex-table" :class="{ restoring, tight: stacked }" :style="cols" role="table">
       <div ref="head" class="row head" role="row">
         <SortHeader :label="t('move.name')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
         <SortHeader
           v-for="c in COLUMNS"
           :key="c.k"
-          :class="{ 'wide-only': c.wideOnly }"
-          :label="t(c.label)"
+          :class="{ 'wide-only': c.wideOnly, badge: c.k === 'type' || c.k === 'category' }"
+          :label="t(stacked && phone && c.k === 'power' ? 'move.powerShort' : c.label)"
           :right="c.right"
           :active="key === c.k"
           :desc="desc"
           @sort="toggle(c.k)"
         />
-        <div v-if="descriptions && !phone" role="columnheader"></div>
+        <div v-if="descriptions && !below" role="columnheader"></div>
       </div>
       <SkeletonRows v-if="!entered" :cells="skeleton" height="2.05em" />
       <template v-else>
@@ -152,8 +178,8 @@ const skeleton = computed(() => [
               <Marked v-if="r.parts" :p="r.parts" />
               <template v-else>{{ r.name }}</template>
             </AppLink>
-            <div v-if="descriptions && phone" class="muted below">
-              <DexText :text="description('move', r.id)?.short ?? ''" />
+            <div v-if="descriptions && below && !stacked" class="muted below">
+              <DexText :text="shortOf(r.id)" />
             </div>
           </div>
           <div role="cell">
@@ -166,9 +192,15 @@ const skeleton = computed(() => [
           </div>
           <div role="cell" class="r num">{{ r.data.power || '—' }}</div>
           <div role="cell" class="wide-only r num">{{ r.data.accuracy === true ? '—' : r.data.accuracy }}</div>
-          <div role="cell" class="wide-only r num">{{ r.data.pp }}</div>
-          <div v-if="descriptions && !phone" role="cell" class="grow muted">
-            <DexText :text="description('move', r.id)?.short ?? ''" />
+          <div v-if="!noPp" role="cell" class="wide-only r num">{{ r.data.pp }}</div>
+          <div v-if="shares" role="cell" class="r num meter" :style="{ '--share': shares[r.id] ?? 0 }">
+            {{ shares[r.id] === undefined ? '—' : percent(shares[r.id]!) }}
+          </div>
+          <div v-if="descriptions && stacked && shortOf(r.id)" role="cell" class="muted span-desc">
+            <DexText :text="shortOf(r.id)" />
+          </div>
+          <div v-if="descriptions && !below" role="cell" class="grow muted">
+            <DexText :text="shortOf(r.id)" />
           </div>
         </div>
       </template>
@@ -178,22 +210,99 @@ const skeleton = computed(() => [
 </template>
 
 <style scoped>
-/* Name, type, category, power, accuracy, PP and, with descriptions, the description; phones leave out accuracy and PP,
-   show the descriptions under the names, and take the type and category badges down from the phone size. */
+/* Name, type, category, power, accuracy, PP (unless left out), the share (when given) and, with descriptions, the
+   description (`cols`); phones leave out accuracy and PP, show the descriptions under the names, and take the type and
+   category badges down from the phone size. */
 .dex-table {
   --num: minmax(2.6em, auto);
   --row-height: 2.05em;
-  --cols: minmax(0, 1fr) auto auto repeat(3, var(--num));
-}
-.dex-table.described {
-  --cols: minmax(9em, 1fr) auto auto repeat(3, var(--num)) minmax(0, 2fr);
+  --cols: var(--cols-wide);
 }
 @media (max-width: 720px) {
-  .dex-table,
-  .dex-table.described {
+  .dex-table {
     --icon-scale: 1.25;
-    --cols: minmax(0, 1fr) auto auto var(--num);
+    --cols: var(--cols-phone);
   }
+}
+/* Narrow (`stacked`), the badges' and numbers' columns as tight as they go, leaving the room to the name and its
+   description. */
+.dex-table.tight {
+  --icon-scale: 1;
+  --num: minmax(2em, auto);
+}
+/* On phones, the header's labels smaller: they size the badges' and numbers' columns, which then leave the name more
+   room. */
+@media (max-width: 720px) {
+  .dex-table.tight .head {
+    font-size: 0.8em;
+  }
+  /* The share's column as wide as its numbers ("98.7%"), wider than its header, which sizes it, at this size. */
+  .dex-table.tight .head > :last-child {
+    min-width: calc(12px + 3.3rem + 6px);
+  }
+  /* The badges' columns as narrow as the badges (and their padding): their labels left unshown, the badges saying what
+     they are. */
+  .dex-table.tight .head > .badge {
+    min-width: calc(26px + 6px);
+    font-size: 0;
+  }
+}
+/* Each description a line of its own under its row, the whole width, rather than under the name alone. */
+.dex-table .row > .span-desc {
+  grid-column: 1 / -1;
+  padding-top: 0;
+  font-size: 0.9em;
+  white-space: normal;
+}
+.dex-table.tight .row > :not(:first-child) {
+  padding-inline: 3px;
+}
+/* The numbers keep room at their left for the sort arrow, which hangs there; the share, more, apart from the power
+   before it. */
+.dex-table.tight .row > .r {
+  padding-left: 10px;
+}
+.dex-table.tight .row > .meter,
+.dex-table.tight .head > :last-child {
+  padding-left: 12px;
+}
+/* Its bar under its number alone, from where the number's room starts. */
+.dex-table.tight .meter::before,
+.dex-table.tight .meter::after {
+  left: 12px;
+}
+.dex-table.tight .meter::after {
+  width: calc((100% - 18px) * var(--share, 0));
+}
+/* The outer edge keeps the cells' own 6px: on phones the table runs to the panel's border (`--panel-bleed`), and that
+   is its margin there. So does each description, in line with its name. */
+.dex-table.tight .row > .meter,
+.dex-table.tight .head > :last-child {
+  padding-right: 6px;
+}
+.dex-table.tight .row > .span-desc {
+  padding-inline: 6px;
+}
+/* A move's share of a Pokémon's sets: its number, its bar under it, out of all of them. */
+.meter {
+  position: relative;
+}
+.meter::before,
+.meter::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  bottom: 3px;
+}
+.meter::before {
+  right: 6px;
+  height: 1px;
+  background: var(--border);
+}
+.meter::after {
+  width: calc((100% - 12px) * var(--share, 0));
+  height: 3px;
+  background: var(--accent);
 }
 .filters {
   display: flex;

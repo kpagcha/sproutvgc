@@ -9,7 +9,7 @@ import { pointsText } from '@/lib/speedBuild'
 import AppLink from '@/components/AppLink'
 import PokemonIcon from '@/components/PokemonIcon'
 
-// Yours against a Pokémon on the speed tiers' ladder (the chip tapped): its name (a link to its page) on top; then
+// Yours against a Pokémon on the speed tiers' ladder (the chip tapped): its name (a link to its usage page) on top; then
 // whether yours moves first as it's built, at what Speeds (its own finding its chip), and for its nature the points that
 // do it (what's left to spare, or, when none do, what another nature would need); and the way to the comparison of the
 // two, where every nature's shown. A panel of its own under yours beside the ladder; narrower, a card floating at the
@@ -48,12 +48,12 @@ const plan = computed(() => {
 </script>
 
 <template>
-  <!-- A band of the opponents' red: the Pokémon it's against (a link to its page), under a small "Against" so a long
+  <!-- A band of the opponents' red: the Pokémon it's against (a link to its usage page), under a small "Against" so a long
        name has the band's width to wrap in, and a way to close it, as yours' band clears it. -->
   <section class="panel banded versus-card small" role="status">
     <div class="band">
       <div class="title">
-        <AppLink :to="{ name: 'pokemon', params: { id: props.id } }" class="mon"
+        <AppLink :to="{ name: 'usagePokemon', params: { id: props.id } }" class="mon"
           ><PokemonIcon :id="props.id" /><strong>{{ props.name }}</strong></AppLink
         >
       </div>

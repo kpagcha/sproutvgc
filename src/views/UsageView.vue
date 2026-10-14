@@ -1,26 +1,31 @@
 <script setup lang="ts">
-import { computed, shallowRef, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, onDeactivated, shallowRef, useTemplateRef } from 'vue'
+import tippy, { type Instance } from 'tippy.js'
+import { useRouter } from 'vue-router'
 import { ability, item, move, pokemon, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
-import { has, percent, players } from '@/data/meta'
+import { datasetDates, GENERATED_SNAPSHOTS, has, percent, players } from '@/data/meta'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
+import { formatTerms, parseTerms, type Term } from '@/lib/searchTerms'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useMeta } from '@/composables/useMeta'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { useRowColumns } from '@/composables/useRowColumns'
 import { useSort } from '@/composables/useSort'
+import { useSlashFocus } from '@/composables/useSlashFocus'
 import AppLink from '@/components/AppLink'
 import DexRef from '@/components/DexRef'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
-import SearchBox from '@/components/SearchBox.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
+import TermSearch from '@/components/TermSearch.vue'
+import UsageTabs from '@/components/UsageTabs.vue'
 
 // The regulation's Pokémon by usage, from the meta snapshot shown (`useMeta`: the one picked, on this page or another,
 // when there are several, of any regulation and month generated, `MetaDialog`). Columns come and go with what the snapshot has. Its links are `AppLink`s and its icons
@@ -39,6 +44,19 @@ const broughtAll = computed(
   () => showBrought.value && snapshot.value?.unweighted?.includes('brought') && !!snapshot.value.cutoff,
 )
 
+// Trends: against the dataset before the one shown in its series (`previous`, the month before), each Pokémon's rank
+// then (a mark by its rank: up or down so many places, or new to it) and the usage it gained or lost since, in points,
+// a column of its own. Changes under `STEADY` read as noise: shown, but not colored. None for a series' first dataset.
+const previous = computed(() => GENERATED_SNAPSHOTS.find((s) => s.id === snapshot.value?.previous))
+const STEADY = 0.005
+/** A change in usage, in percentage points: "+3.2", "−1.8". */
+const points = (x: number) =>
+  (x * 100).toLocaleString(locale.value, {
+    signDisplay: 'exceptZero',
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  })
+
 const rows = computed(() =>
   Object.entries(data.value ?? {}).map(([key, m]) => {
     const id = key as PokemonId
@@ -50,31 +68,117 @@ const rows = computed(() =>
       name: refName(pokemon(id)),
       rank: m!.rank,
       usage: m!.usage,
+      // Places gained (up) or lost since the previous dataset, or whether it's new to it.
+      climb: m!.prev ? m!.prev.rank - m!.rank : undefined,
+      fresh: !!previous.value && !m!.prev,
+      change: m!.usage !== undefined && m!.prev?.usage !== undefined ? m!.usage - m!.prev.usage : undefined,
       brought: m!.brought,
-      // Its most common set, at a glance: item, ability and moves.
-      item: m!.items?.[0] && item(m!.items[0].id),
-      ability: m!.abilities?.[0] && ability(m!.abilities[0].id),
-      moves: (m!.moves ?? []).slice(0, 3).map((x) => move(x.id)),
+      // Its most common set, at a glance: item, ability and moves, each with the share of its sets that run it (a bar
+      // under it, `shared`).
+      item: m!.items?.[0] && { ...item(m!.items[0].id), share: m!.items[0].share },
+      ability: m!.abilities?.[0] && { ...ability(m!.abilities[0].id), share: m!.abilities[0].share },
+      moves: (m!.moves ?? []).slice(0, 3).map((x) => ({ ...move(x.id), share: x.share })),
     }
   }),
 )
 type Row = (typeof rows.value)[number]
-type Key = 'rank' | 'name' | 'usage' | 'brought'
+type Key = 'rank' | 'name' | 'usage' | 'change' | 'brought'
 
 const { key, desc, toggle, sorted } = useSort<Row, Key>({
   rows,
-  value: (r, k) => (k === 'name' ? r.name : k === 'rank' ? r.rank : (r[k] ?? -1)),
+  value: (r, k) => (k === 'name' ? r.name : k === 'rank' ? r.rank : (r[k] ?? -Infinity)),
   initial: 'rank',
-  startsDesc: (k) => k === 'usage' || k === 'brought',
+  startsDesc: (k) => k === 'usage' || k === 'change' || k === 'brought',
   locale,
   remember: 'usage',
 })
 
+// The search: its text finds the list's Pokémon by name, and its terms (`?f=`, picked from what the text finds,
+// `TermSearch`) narrow it to those of a type, that can have an ability, or whose sets run a move or item, on at least
+// `MIN_SHARE` of them (what a few sets run doesn't make it one that runs it). With a term of what sets run (an ability,
+// a move, an item), each Pokémon's share of its sets running it is a column of its own. The list stays by usage.
+const router = useRouter()
+const MIN_SHARE = 0.05
+const TERM_KINDS = ['type', 'ability', 'move', 'item'] as const
+const LIST = { item: 'items', ability: 'abilities', move: 'moves' } as const
+/** The kinds the snapshot can search by: types and abilities always; moves and items with its sets. */
+const termKinds = computed(() =>
+  TERM_KINDS.filter((k) => k === 'type' || k === 'ability' || (snapshot.value && has(snapshot.value, LIST[k]))),
+)
+const terms = computed({
+  get: () => parseTerms(query.value.f, termKinds.value),
+  set: (list: Term[]) => void router.replace({ query: { ...query.value, f: formatTerms(list) } }),
+})
+/** The share of a Pokémon's sets running a term's ability, move or item, when the snapshot has it. */
+function shareOf(id: PokemonId, term: Term): number | undefined {
+  if (term.kind === 'type') return undefined
+  return data.value?.[id]?.[LIST[term.kind]]?.find((x) => x.id === term.id)?.share
+}
+function matches(id: PokemonId, term: Term): boolean {
+  if (term.kind === 'type') return POKEMON[id].types.includes(term.id)
+  if (term.kind === 'ability') return POKEMON[id].abilities.includes(term.id)
+  return (shareOf(id, term) ?? 0) >= MIN_SHARE
+}
+const passes = (id: PokemonId, list: readonly Term[] = terms.value) => list.every((x) => matches(id, x))
+/** How many of the list a term would leave, added to the others: offered with it. */
+const termCount = (term: Term) => rows.value.filter((r) => passes(r.id, [...terms.value, term])).length
+/** The terms whose share of each Pokémon's sets shows, a column each. */
+const shareTerms = computed(() =>
+  terms.value.filter(
+    (x): x is Exclude<Term, { kind: 'type' }> =>
+      x.kind !== 'type' && !!snapshot.value && has(snapshot.value, LIST[x.kind]),
+  ),
+)
+
+// "/" focuses the search, as on the home page.
+const termSearch = useTemplateRef('termSearch')
+useSlashFocus(() => {
+  if (!termSearch.value) return false
+  termSearch.value.focus({ preventScroll: true })
+})
 const search = shallowRef(typeof query.value.q === 'string' ? query.value.q : '')
 const shown = computed(() => {
   const q = fold(search.value.trim())
-  return q ? sorted.value.filter((r) => split(r.name, q)) : sorted.value
+  return sorted.value.filter((r) => (!q || split(r.name, q)) && passes(r.id))
 })
+// Pointing at a part of the most common set (its name or icon, or its bar) names it with its share, "Miracle Seed ·
+// 62.5%", where there's a pointer to point with. One tooltip for the whole table, placed by hand on the part pointed
+// at, its pointer followed by one listener on the table, rather than one per part: a list holds hundreds.
+const canHover = window.matchMedia('(hover: hover)').matches
+let shareTip: Instance | undefined
+let pointed: HTMLElement | null = null
+function onBarMove(e: PointerEvent) {
+  if (!canHover || e.pointerType !== 'mouse') return
+  const at = (e.target as Element).closest<HTMLElement>('.shared')
+  if (at === pointed) return
+  pointed = at
+  if (!at) return void shareTip?.hide()
+  const table = e.currentTarget as HTMLElement
+  if (shareTip?.reference !== table) {
+    shareTip?.destroy()
+    shareTip = tippy(table, {
+      trigger: 'manual',
+      appendTo: () => document.body,
+      getReferenceClientRect: () => (pointed ?? table).getBoundingClientRect(),
+    })
+  }
+  const { kind, id, share } = at.dataset
+  shareTip.setContent(`${refName({ kind, id } as never)} · ${percent(Number(share))}`)
+  shareTip.show()
+  void shareTip.popperInstance?.update()
+}
+function hideBarTip() {
+  pointed = null
+  shareTip?.hide()
+}
+onDeactivated(hideBarTip)
+onBeforeUnmount(() => shareTip?.destroy())
+
+/** Under this usage a Pokémon is on few teams, and its sets come from a handful of them: its row faded, said under the
+ * table. */
+const RARE = 0.01
+const rare = (r: Row) => r.usage !== undefined && r.usage < RARE
+const anyRare = computed(() => shown.value.some(rare))
 /** The most used, the full length of the usage bars. */
 const top = computed(() => Math.max(0, ...rows.value.map((r) => r.usage ?? 0)))
 
@@ -121,6 +225,8 @@ const columns = computed(() => {
       md: 'var(--usage)',
       sm: 'var(--usage)',
     })
+  list.push(...shareTerms.value.map(() => ({ cell: 'r', xl: 'var(--usage)', md: 'var(--usage)', sm: 'var(--usage)' })))
+  if (previous.value) list.push({ cell: 'r', xl: 'var(--change)', md: 'var(--change)', sm: 'var(--change)' })
   if (showBrought.value) list.push({ cell: 'wide-only r', xl: 'var(--num)', md: 'var(--num)', sm: null })
   return list
 })
@@ -134,23 +240,20 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 </script>
 
 <template>
-  <!-- The controls and the table in panels of their own. -->
+  <!-- The controls, under the band of tabs to the other usage lists, and the table in panels of their own. -->
   <div>
-    <div class="panel">
+    <div class="panel banded">
+      <UsageTabs current="pokemon" />
       <h1>{{ t('title.usage') }}</h1>
       <p class="muted intro">{{ t('usage.intro', { reg: snapshot?.regulation ?? REGULATION }) }}</p>
       <template v-if="snapshot">
+        <!-- The data shown, and on its line, where the set columns don't fit, the switch that shows sets (at its end on
+             phones, the search having the line under it to itself). -->
         <div class="source">
           <MetaDialog />
           <span v-if="snapshot.battles" class="muted">
             {{ t('usage.battles', { n: snapshot.battles.toLocaleString(locale) }) }}
           </span>
-        </div>
-        <!-- The search, and beside it, where the set columns don't fit, the switch that shows sets. -->
-        <div class="find-row">
-          <div class="find">
-            <SearchBox v-model="search" :placeholder="t('usage.search')" :aria-label="t('usage.search')" />
-          </div>
           <template v-if="hasSets">
             <label class="btn switch sets-switch" :class="{ on: showSets }">
               <input type="checkbox" :checked="showSets" @change="toggleSets" />
@@ -158,6 +261,19 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
             </label>
             <span class="muted sets-desc">{{ t('usage.setsDesc') }}</span>
           </template>
+        </div>
+        <div class="find-row">
+          <div class="find">
+            <TermSearch
+              ref="termSearch"
+              v-model:text="search"
+              hotkey="/"
+              v-model:terms="terms"
+              :placeholder="t('usage.search')"
+              :kinds="termKinds"
+              :count="termCount"
+            />
+          </div>
         </div>
       </template>
       <p v-else class="muted">{{ t('usage.none', { reg: REGULATION }) }}</p>
@@ -169,11 +285,14 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         :class="{ restoring, 'with-sets': showSets && hasSets }"
         :style="colVars"
         role="table"
+        @pointermove="onBarMove"
+        @pointerleave="hideBarTip"
       >
         <div ref="head" class="row head" role="row">
           <SortHeader
             :label="t('usage.rank')"
             :tip="t('usage.rankFull')"
+            :class="{ 'with-climb': previous }"
             right
             :active="key === 'rank'"
             :desc="desc"
@@ -181,9 +300,15 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
           />
           <SortHeader :label="t('usage.pokemon')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
           <div role="columnheader">{{ t('pokedex.types') }}</div>
-          <div v-if="showItem" role="columnheader" class="xl-only">{{ t('usage.item') }}</div>
-          <div v-if="showAbility" role="columnheader" class="xl-only">{{ t('usage.ability') }}</div>
-          <div v-if="showMoves" role="columnheader" class="xl-only">{{ t('usage.moves') }}</div>
+          <div v-if="showItem" role="columnheader" class="xl-only">
+            <span v-tip="t('usage.itemTip')" class="tipped">{{ t('usage.item') }}</span>
+          </div>
+          <div v-if="showAbility" role="columnheader" class="xl-only">
+            <span v-tip="t('usage.abilityTip')" class="tipped">{{ t('usage.ability') }}</span>
+          </div>
+          <div v-if="showMoves" role="columnheader" class="xl-only">
+            <span v-tip="t('usage.movesTip')" class="tipped">{{ t('usage.moves') }}</span>
+          </div>
           <SortHeader
             v-if="showUsage"
             :label="t('usage.usage')"
@@ -192,6 +317,26 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
             :active="key === 'usage'"
             :desc="desc"
             @sort="toggle('usage')"
+          />
+          <div
+            v-for="x in shareTerms"
+            :key="`${x.kind}:${x.id}`"
+            v-tip="t('usage.termShareTip', { name: refName(x) })"
+            role="columnheader"
+            class="r term-head"
+          >
+            <ItemIcon v-if="x.kind === 'item'" :id="x.id" :scale="0.67" /><span v-else class="term-name">{{
+              refName(x)
+            }}</span>
+          </div>
+          <SortHeader
+            v-if="previous"
+            :label="t('usage.change')"
+            :tip="t('usage.changeTip', { dates: datasetDates(previous) })"
+            right
+            :active="key === 'change'"
+            :desc="desc"
+            @sort="toggle('change')"
           />
           <SortHeader
             v-if="showBrought"
@@ -206,10 +351,22 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         </div>
         <SkeletonRows v-if="!entered || !data" :cells="skeleton" height="2.3em" />
         <template v-else>
-          <div v-for="r in shown" :key="r.id" class="row" role="row">
-            <div role="cell" class="r num muted">{{ r.rank }}</div>
+          <div v-for="r in shown" :key="r.id" class="row" :class="{ rare: rare(r) }" role="row">
+            <div role="cell" class="r num muted rank">
+              {{ r.rank
+              }}<span
+                v-if="previous"
+                class="climb"
+                :class="r.climb ? (r.climb > 0 ? 'up' : 'down') : r.fresh && 'fresh'"
+                ><template v-if="r.climb"
+                  ><span aria-hidden="true">{{ r.climb > 0 ? '▲' : '▼' }}</span
+                  ><span class="visually-hidden">{{ t(r.climb > 0 ? 'usage.up' : 'usage.down') }}</span
+                  >{{ Math.abs(r.climb) }}</template
+                ><template v-else-if="r.fresh">{{ t('usage.new') }}</template></span
+              >
+            </div>
             <div role="cell" class="grow">
-              <AppLink :to="{ name: 'pokemon', params: { id: r.id } }" class="mon">
+              <AppLink :to="{ name: 'usagePokemon', params: { id: r.id } }" class="mon">
                 <PokemonIcon :id="r.id" />
                 <span class="label">
                   <span class="name">{{ r.species }}</span>
@@ -227,21 +384,45 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
             <div v-if="showItem" role="cell" class="xl-only">
               <AppLink
                 v-if="r.item"
-                v-tip:group="refName(r.item)"
+                v-tip:group="!canHover && refName(r.item)"
                 :to="{ name: 'item', params: { id: r.item.id } }"
-                class="item"
+                class="item shared"
+                :style="{ '--share': r.item.share ?? 0 }"
+                :data-share="r.item.share ?? 0"
+                :data-kind="r.item.kind"
+                :data-id="r.item.id"
                 :aria-label="refName(r.item)"
               >
                 <ItemIcon :id="r.item.id" />
               </AppLink>
             </div>
             <div v-if="showAbility" role="cell" class="xl-only grow">
-              <DexRef v-if="r.ability" :to="r.ability" />
+              <ul v-if="r.ability" class="chips">
+                <li
+                  class="shared"
+                  :style="{ '--share': r.ability.share ?? 0 }"
+                  :data-share="r.ability.share ?? 0"
+                  :data-kind="r.ability.kind"
+                  :data-id="r.ability.id"
+                >
+                  <DexRef :to="r.ability" />
+                </li>
+              </ul>
             </div>
             <div v-if="showMoves" role="cell" class="xl-only grow">
-              <template v-for="(m, i) in r.moves" :key="m.id"
-                ><span v-if="i" class="sep" aria-hidden="true"> · </span><DexRef :to="m"
-              /></template>
+              <ul class="chips">
+                <li
+                  v-for="m in r.moves"
+                  :key="m.id"
+                  class="shared"
+                  :style="{ '--share': m.share ?? 0 }"
+                  :data-share="m.share ?? 0"
+                  :data-kind="m.kind"
+                  :data-id="m.id"
+                >
+                  <DexRef :to="m" />
+                </li>
+              </ul>
             </div>
             <div
               v-if="showUsage"
@@ -250,6 +431,23 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
               :style="{ '--share': (r.usage ?? 0) / (top || 1) }"
             >
               {{ r.usage === undefined ? '—' : percent(r.usage) }}
+            </div>
+            <div
+              v-for="x in shareTerms"
+              :key="`${x.kind}:${x.id}`"
+              role="cell"
+              class="r num meter term-share"
+              :style="{ '--share': shareOf(r.id, x) ?? 0 }"
+            >
+              {{ shareOf(r.id, x) === undefined ? '—' : percent(shareOf(r.id, x)!) }}
+            </div>
+            <div
+              v-if="previous"
+              role="cell"
+              class="r num change"
+              :class="r.change !== undefined && Math.abs(r.change) >= STEADY && (r.change > 0 ? 'up' : 'down')"
+            >
+              {{ r.change === undefined ? '' : points(r.change) }}
             </div>
             <div
               v-if="showBrought"
@@ -263,15 +461,40 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
                  item (told by its icon) and the ability, then the moves. On phones, the moves on a line of their own,
                  and how often it's brought at the end of the first, under its usage: the column doesn't fit. -->
             <div v-if="showSets && hasSets" role="cell" class="set-line">
-              <AppLink v-if="r.item" :to="{ name: 'item', params: { id: r.item.id } }" class="part">
+              <AppLink
+                v-if="r.item"
+                :to="{ name: 'item', params: { id: r.item.id } }"
+                class="part shared"
+                :style="{ '--share': r.item.share ?? 0 }"
+                :data-share="r.item.share ?? 0"
+                :data-kind="r.item.kind"
+                :data-id="r.item.id"
+              >
                 <ItemIcon :id="r.item.id" :scale="0.67" />{{ refName(r.item) }}
               </AppLink>
-              <span v-if="r.ability" class="part"><DexRef :to="r.ability" /></span>
+              <span
+                v-if="r.ability"
+                class="part shared"
+                :style="{ '--share': r.ability.share ?? 0 }"
+                :data-share="r.ability.share ?? 0"
+                :data-kind="r.ability.kind"
+                :data-id="r.ability.id"
+                ><DexRef :to="r.ability"
+              /></span>
               <span v-if="showBrought && r.brought !== undefined" class="brought-sm"
                 >{{ percent(r.brought) }} {{ t('usage.broughtShort') }}</span
               >
               <span v-if="r.moves.length" class="moves">
-                <span v-for="m in r.moves" :key="m.id" class="part"><DexRef :to="m" /></span>
+                <span
+                  v-for="m in r.moves"
+                  :key="m.id"
+                  class="part shared"
+                  :style="{ '--share': m.share ?? 0 }"
+                  :data-share="m.share ?? 0"
+                  :data-kind="m.kind"
+                  :data-id="m.id"
+                  ><DexRef :to="m"
+                /></span>
               </span>
             </div>
           </div>
@@ -280,8 +503,15 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
       <p v-else class="muted">{{ t('usage.noMatch') }}</p>
       <p class="muted note phone-only-block">
         {{ t('usage.usage') }}: {{ t('usage.usageTip') }}.
+        <template v-if="previous"
+          >{{ t('usage.change') }}: {{ t('usage.changeTip', { dates: datasetDates(previous) }) }}.</template
+        >
         <template v-if="showSets && showBrought">{{ t('usage.brought') }}: {{ t('usage.broughtTip') }}.</template>
         <template v-if="hasSets">{{ t('usage.sets') }}: {{ t('usage.setsDesc') }}.</template>
+      </p>
+      <p v-if="anyRare" class="muted note">{{ t('usage.rare', { share: percent(RARE) }) }}</p>
+      <p v-if="terms.some((x) => x.kind === 'move' || x.kind === 'item')" class="muted note">
+        {{ t('usage.termSets', { share: percent(MIN_SHARE) }) }}
       </p>
       <p v-if="broughtAll && snapshot.cutoff" class="muted note">
         {{ t('usage.broughtAll', { players: players(snapshot.cutoff) }) }}
@@ -303,6 +533,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   --name: 13em;
   --ability: 9em;
   --usage: 4.5em;
+  --change: minmax(3.5em, auto);
   --row-height: 2.3em;
   --cols: var(--cols-md);
 }
@@ -323,6 +554,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
     --cols: var(--cols-sm);
     --num: minmax(1.8em, auto);
     --usage: 4em;
+    --change: minmax(3em, auto);
   }
   /* The rank in line with the panel's text: left-aligned, so a short one leaves no gap before it. */
   .dex-table .row > :first-child {
@@ -421,12 +653,87 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
     padding-block: 6px 4px;
   }
 }
-.sep {
-  color: var(--muted);
+/* A Pokémon on few teams: faded, so its numbers and set don't read as firmly as the rest's. */
+.row.rare > [role='cell'] {
+  opacity: 0.55;
+}
+/* The share of its sets each part of the most common set has (`--share`, 0 to 1): a thin bar along its foot, on a
+   faint track its width, as the usage columns' bars, in the muted color so it doesn't vie with usage's; pointed at,
+   the part's name and share in a tooltip. */
+.shared {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 3px;
+}
+.shared::before,
+.shared::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+.shared::before {
+  right: 0;
+  height: 1px;
+  background: var(--border);
+}
+.shared::after {
+  width: calc(100% * var(--share, 0));
+  height: 2px;
+  background: var(--muted);
+}
+/* A chip's along its inside foot, clear of its border. */
+.set-line .part.shared::before,
+.set-line .part.shared::after {
+  left: 2px;
+  bottom: 1px;
+}
+.set-line .part.shared::before {
+  right: 2px;
+}
+.set-line .part.shared::after {
+  width: calc((100% - 4px) * var(--share, 0));
 }
 .item {
   display: inline-flex;
   vertical-align: middle;
+}
+/* The ability and the top moves as chips, as the dex's list has its abilities, each its share's bar along its inside
+   foot, clear of its border. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chips li {
+  padding: 0 5px 3px;
+  font-size: 0.9em;
+  white-space: nowrap;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+.chips a {
+  color: inherit;
+}
+.chips li.shared::before,
+.chips li.shared::after {
+  left: 2px;
+  bottom: 1px;
+}
+.chips li.shared::before {
+  right: 2px;
+}
+.chips li.shared::after {
+  width: calc((100% - 4px) * var(--share, 0));
+}
+/* A header with a tooltip: underlined dotted, as `SortHeader`'s are. */
+.tipped {
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
 }
 .source {
   display: flex;
@@ -464,7 +771,54 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 .usage {
   font-weight: bold;
 }
-/* The search and the Sets switch in a row; the switch and what it does only where the set columns don't fit. */
+/* The rank's mark: places gained or lost since the previous dataset, or new to it, small after the rank, in a slot as
+   wide for every rank. */
+.climb {
+  display: inline-block;
+  width: 2.4em;
+  margin-left: 3px;
+  font-size: 0.75em;
+  text-align: left;
+  white-space: nowrap;
+}
+/* Every rank its mark's room after it, empty or not, so the ranks line up, and "#" over them rather than the marks. */
+.with-climb :deep(.sort) {
+  margin-right: calc(3px + 1.8em);
+}
+.up {
+  color: var(--good);
+}
+.down {
+  color: var(--bad);
+}
+.fresh {
+  color: var(--accent);
+  font-weight: bold;
+}
+.rank {
+  white-space: nowrap;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+/* The change in usage: muted while it's steady, in the color of its direction once it isn't. */
+.change {
+  font-size: 0.9em;
+  color: var(--muted);
+}
+.change.up {
+  color: var(--good);
+}
+.change.down {
+  color: var(--bad);
+}
+/* The search, on a line of its own; the Sets switch and what it does (on the data's line) only where the set columns
+   don't fit. */
 .find-row {
   display: flex;
   flex-wrap: wrap;
@@ -473,11 +827,8 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   margin-bottom: 12px;
 }
 .find {
-  flex: 0 1 320px;
+  flex: 0 1 480px;
   min-width: 0;
-}
-.find :deep(.search-box) {
-  margin: 0;
 }
 @media (min-width: 1100px) {
   .sets-switch,
@@ -485,8 +836,11 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
     display: none;
   }
 }
-/* Phones: the switch beside the search, its description with the notes under the table; no intro. */
+/* Phones: the switch at the end of the data's line, its description with the notes under the table; no intro. */
 @media (max-width: 720px) {
+  .sets-switch {
+    margin-left: auto;
+  }
   .find {
     flex: 1 1 0;
   }
@@ -500,6 +854,19 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   .find-row {
     margin-bottom: 8px;
   }
+}
+/* A term's column: its name (an item's icon) over each Pokémon's share of its sets running it, its bar as brought's. */
+.term-head {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.term-name {
+  font-size: 0.85em;
+}
+.term-share::after {
+  bottom: 4px;
+  height: 2px;
+  background: var(--muted);
 }
 .switch {
   flex: none;

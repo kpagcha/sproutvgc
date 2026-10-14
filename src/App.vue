@@ -47,6 +47,7 @@ const ENTRY_PAGES: Partial<Record<string, { kind: GeneratedKind; desc: MessageKe
   pokemon: { kind: 'pokemon', desc: 'desc.pokemon' },
   move: { kind: 'move', desc: 'desc.move' },
   item: { kind: 'item', desc: 'desc.item' },
+  usagePokemon: { kind: 'pokemon', desc: 'desc.usagePokemon' },
 }
 
 watchEffect(() => {
@@ -78,9 +79,10 @@ watchEffect(() => {
   setMeta('meta[property="og:description"]', desc)
 })
 
-/** Entry pages lead back to their category's list; the speed tiers, to Competitive. */
+/** Entry pages lead back to their category's list (a Pokémon's usage, to the usage list); the speed tiers, to Meta. */
 const LISTS: Partial<Record<string, { to: RouteLocationRaw; label: MessageKey }>> = {
-  speedTiers: { to: { name: 'competitive' }, label: 'nav.competitive' },
+  speedTiers: { to: { name: 'meta' }, label: 'nav.meta' },
+  usagePokemon: { to: { name: 'usage' }, label: 'title.usage' },
   ability: { to: { name: 'abilities' }, label: 'title.abilities' },
   pokemon: { to: { name: 'pokedex' }, label: 'title.pokemon' },
   move: { to: { name: 'moves' }, label: 'title.moves' },

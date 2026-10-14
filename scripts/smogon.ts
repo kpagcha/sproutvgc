@@ -19,7 +19,7 @@ const CUTOFFS = [1760, 1630, 1500, 0] as const
 const KEEP = { list: 10, spreads: 6, min: 0.01 }
 
 // What `src/data/meta.ts` reads (`MetaSnapshot`, `PokemonMeta`), with IDs as plain strings.
-interface Snapshot {
+export interface Snapshot {
   id: string
   kind: 'showdown'
   provider: { name: string; url: string }
@@ -31,12 +31,14 @@ interface Snapshot {
   battles: number
   capabilities: string[]
   unweighted: string[]
+  previous?: string
+  history?: string
 }
 interface Share {
   id: string
   share: number
 }
-interface PokemonMeta {
+export interface MetaEntry {
   rank: number
   usage: number
   brought?: number
@@ -46,6 +48,8 @@ interface PokemonMeta {
   teammates: Share[]
   spreads: { nature: string; points: number[]; share: number }[]
   speeds: { points: number; nature: string; share: number }[]
+  natures: Share[]
+  prev?: { rank: number; usage?: number }
 }
 
 /** What the dex has, to check Smogon's names and IDs against: a Pokémon's ID by its name, or whether an ID exists. */
@@ -121,7 +125,7 @@ export class Smogon {
     regulation: string,
     known: Known,
     strict: boolean,
-  ): Promise<{ snapshot: Snapshot; data: Record<string, PokemonMeta> }[]> {
+  ): Promise<{ snapshot: Snapshot; data: Record<string, MetaEntry> }[]> {
     const unknown = new Set<string>()
     const pokemon = (name: string) => {
       const id = known.pokemon(name)
@@ -166,12 +170,25 @@ export class Smogon {
           })
           .filter((s) => s.share > 0)
       }
+      /** Its natures, from every spread, as shares, the rare ones left out. */
+      const natures = (spreads: Record<string, number>, total: number) => {
+        const weights = new Map<string, number>()
+        for (const [spread, w] of Object.entries(spreads)) {
+          const nature = spread.split(':')[0]!.toLowerCase()
+          weights.set(nature, (weights.get(nature) ?? 0) + w)
+        }
+        return [...weights]
+          .sort((a, b) => b[1] - a[1])
+          .map(([id, w]) => ({ id, share: round(w / total) }))
+          .filter((x) => x.share >= KEEP.min)
+          .slice(0, KEEP.list)
+      }
       const check = (set: ReadonlySet<string>, what: string) => (id: string) => {
         if (!set.has(id)) unknown.add(`${what} "${id}"`)
         return set.has(id)
       }
 
-      const data: Record<string, PokemonMeta> = {}
+      const data: Record<string, MetaEntry> = {}
       const ranked = Object.entries(chaos.data).sort((a, b) => b[1].usage - a[1].usage)
       ranked.forEach(([name, d], i) => {
         const id = pokemon(name)
@@ -193,6 +210,9 @@ export class Smogon {
             return { nature: nature.toLowerCase(), points: points.split('/').map(Number), share }
           }),
           speeds: speeds(d.Spreads, total),
+          // Its natures from every spread: the long tail of spreads is most of the sets, so its top spreads, a few
+          // percent each, don't say what its natures are.
+          natures: natures(d.Spreads, total),
         }
       })
       result.push({
@@ -206,7 +226,17 @@ export class Smogon {
           period: 'month' as const,
           cutoff,
           battles: chaos.info['number of battles'],
-          capabilities: ['usage', 'brought', 'moves', 'items', 'abilities', 'teammates', 'spreads', 'speeds'],
+          capabilities: [
+            'usage',
+            'brought',
+            'moves',
+            'items',
+            'abilities',
+            'teammates',
+            'spreads',
+            'speeds',
+            'natures',
+          ],
           unweighted: ['brought'],
         },
         data,
@@ -219,6 +249,67 @@ export class Smogon {
     }
     return result
   }
+}
+
+/**
+ * Each snapshot's previous one in its series (`previous`): the same source, regulation, players and kind of period, the
+ * latest that ended before it began. Each Pokémon then gets its rank and usage there (`prev`); one it doesn't have is
+ * new to the series. A first snapshot has neither. Works on any adapter's snapshots, by what they say of themselves.
+ */
+export function withPrevious(index: Record<string, Snapshot>, data: Record<string, Record<string, MetaEntry>>) {
+  for (const list of seriesOf(index).values()) {
+    list.forEach((s, i) => {
+      const before = list[i - 1]
+      if (!before) return
+      s.previous = before.id
+      const then = data[before.id]!
+      for (const [id, m] of Object.entries(data[s.id]!)) {
+        const p = then[id]
+        if (p) m.prev = { rank: p.rank, usage: p.usage }
+      }
+    })
+  }
+}
+
+/**
+ * The snapshots by series (the same source, regulation, players and kind of period), each series' in order, by a key
+ * naming it ("smogon-mb-1760-month").
+ */
+function seriesOf(index: Record<string, Snapshot>): Map<string, Snapshot[]> {
+  const series = new Map<string, Snapshot[]>()
+  for (const s of Object.values(index)) {
+    const key = [s.provider.name, s.regulation, s.cutoff, s.period]
+      .join('-')
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, '')
+    series.set(key, [...(series.get(key) ?? []), s])
+  }
+  for (const list of series.values()) list.sort((a, b) => a.from.localeCompare(b.from))
+  return series
+}
+
+/**
+ * Each series' history (`meta/history/<key>.json`): every Pokémon's rank and usage in each of its snapshots, in order,
+ * null where it wasn't, for a Pokémon's page to draw. Each snapshot is given its series' key (`history`); one alone in
+ * its series has none to draw, and no history.
+ */
+export function histories(index: Record<string, Snapshot>, data: Record<string, Record<string, MetaEntry>>) {
+  const files: Record<string, Record<string, ([number, number] | null)[]>> = {}
+  for (const [key, list] of seriesOf(index)) {
+    if (list.length < 2) continue
+    const ids = new Set(list.flatMap((s) => Object.keys(data[s.id]!)))
+    files[key] = Object.fromEntries(
+      [...ids].sort().map((id) => [
+        id,
+        list.map((s) => {
+          const m = data[s.id]![id]
+          return m ? [m.rank, m.usage] : null
+        }),
+      ]),
+    )
+    for (const s of list) s.history = key
+  }
+  return files
 }
 
 /** Shares to 4 decimals (0.01%): finer is noise, and it keeps the files small. */

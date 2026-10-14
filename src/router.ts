@@ -4,6 +4,7 @@ import { afterPageExit } from '@/lib/pageExit'
 import { TYPES } from '@/data/types'
 import type { MessageKey } from '@/i18n'
 import type { AreaId } from '@/lib/areas'
+import type { UsageList } from '@/components/UsageTabs.vue'
 import { loadDexNames } from '@/i18n/refName'
 import { hasFavorites } from '@/composables/useFavorites'
 import { hasRecent, visitPage } from '@/composables/useRecent'
@@ -67,6 +68,15 @@ const soon = (area: AreaId, section: string, path: string, titleKey: MessageKey,
   name: section,
   component: () => import('@/views/ComingSoonView.vue'),
   meta: { titleKey, descKey, ...inArea(area, section) },
+})
+
+// A usage list not built yet (the Pokémon's is `/meta/usage`): the tabs to the others, and that it's coming.
+const usageSoon = (list: UsageList, name: string, titleKey: MessageKey, descKey: MessageKey) => ({
+  path: `/meta/usage/${list}`,
+  name,
+  component: () => import('@/views/UsageSoonView.vue'),
+  props: { list },
+  meta: { titleKey, descKey, ...inArea('meta', 'usage') },
 })
 
 // An area's own page, listing its sections.
@@ -238,10 +248,10 @@ export const router = createRouter({
       },
     },
 
-    // Competitive: what players use, and how it does.
-    area('competitive', 'title.competitive', 'desc.competitive'),
+    // Meta: what players use, and how it does.
+    area('meta', 'title.meta', 'desc.meta'),
     {
-      path: '/competitive/usage',
+      path: '/meta/usage',
       name: 'usage',
       component: () => import('@/views/UsageView.vue'),
       meta: {
@@ -251,12 +261,28 @@ export const router = createRouter({
         keywordsKey: 'keywords.usage',
         dexNames: true,
         recent: once('usage'),
-        ...inArea('competitive', 'usage'),
+        ...inArea('meta', 'usage'),
       },
     },
-    soon('competitive', 'reports', '/competitive/reports', 'title.reports', 'desc.reports'),
+    { path: '/meta/usage/pokemon', redirect: { name: 'usage' } },
     {
-      path: '/competitive/speed-tiers',
+      path: '/meta/usage/pokemon/:id',
+      name: 'usagePokemon',
+      component: () => import('@/views/UsagePokemonView.vue'),
+      meta: {
+        titleKey: 'title.usagePokemon',
+        descKey: 'desc.usagePokemon',
+        dexNames: true,
+        descriptions: ['ability', 'move', 'item'],
+        ...inArea('meta', 'usage'),
+      },
+    },
+    usageSoon('moves', 'moveUsage', 'title.moveUsage', 'desc.moveUsage'),
+    usageSoon('items', 'itemUsage', 'title.itemUsage', 'desc.itemUsage'),
+    usageSoon('abilities', 'abilityUsage', 'title.abilityUsage', 'desc.abilityUsage'),
+    soon('meta', 'reports', '/meta/reports', 'title.reports', 'desc.reports'),
+    {
+      path: '/meta/speed-tiers',
       name: 'speedTiers',
       component: () => import('@/views/SpeedTiersView.vue'),
       meta: {
@@ -277,12 +303,12 @@ export const router = createRouter({
             typeof query.mine === 'string' && query.mine ? `mine:${query.mine}` : query.find && `find:${query.find}`
           return typeof of === 'string' ? { visit: of, query: stringQuery(query, ['vs', 'at', 'meta']) } : null
         },
-        ...inArea('competitive', 'speedTiers'),
+        ...inArea('meta', 'speedTiers'),
       },
     },
     {
       // Pokémon's Speeds compared, yours against opponents or in speed order, linked to and from the speed tiers.
-      path: '/competitive/speed-tiers/compare',
+      path: '/meta/speed-tiers/compare',
       name: 'speedCompare',
       component: () => import('@/views/SpeedCompareView.vue'),
       meta: {
@@ -302,7 +328,7 @@ export const router = createRouter({
           const visit = compareVisit(query)
           return visit ? { visit, query: stringQuery(query, ['pair', 'meta']) } : null
         },
-        ...inArea('competitive', 'speedCompare'),
+        ...inArea('meta', 'speedCompare'),
       },
     },
 

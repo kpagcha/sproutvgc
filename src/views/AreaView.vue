@@ -9,7 +9,7 @@ import SearchBox from '@/components/SearchBox.vue'
 import SearchResults from '@/components/SearchResults.vue'
 import SectionDecor from '@/components/SectionDecor.vue'
 
-// An area's own page (`/dex`, `/competitive`, `/tools`): a card per section, what it is, and whether it's coming. The
+// An area's own page (`/dex`, `/meta`, `/tools`): a card per section, what it is, and whether it's coming. The
 // dex's has the home page's search too (kept in `?q=`), its results in place of the cards.
 const route = useRoute()
 const router = useRouter()

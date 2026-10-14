@@ -13,7 +13,7 @@ import {
 } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { TYPES, type TypeId } from '@/data/types'
-import { POKEMON, STATS, loadLearnsets, speciesOf, splitForme, statColor, total, type StatId } from '@/data/pokemon'
+import { POKEMON, STATS, gameStats, gameTotal, loadLearnsets, speciesOf, splitForme, type StatId } from '@/data/pokemon'
 import { locale, t, typeName } from '@/i18n'
 import { loadDescriptions, shortText } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
@@ -33,7 +33,6 @@ import { usePageEntered } from '@/composables/usePageEntered'
 import { useRowColumns } from '@/composables/useRowColumns'
 import { useSearch } from '@/composables/useSearch'
 import { useSort } from '@/composables/useSort'
-import { setPercentiles } from '@/composables/useStatReference'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
 import SearchBox from '@/components/SearchBox.vue'
@@ -186,29 +185,8 @@ const shown = computed(() => {
   })
 })
 
-// Each stat is marked by where it stands among every Pokémon of the dex, as a bar from the middle of its cell, the
-// median, towards the right above it and the left below, colored by `statColor`.
-const percentile = setPercentiles('all')
-interface Mark {
-  class: 'hi' | 'lo'
-  style: string
-}
-const statMarks = computed(() => {
-  return new Map(
-    rows.value.map((r): [PokemonId, (Mark | null)[]] => [
-      r.id,
-      r.data.stats.map((v, i) => {
-        let x = percentile.rank(i, v)
-        if (x === null) return null
-        x = Math.round(x * 1000) / 1000
-        const color = `--color: ${statColor(v)}`
-        return x >= 0.5
-          ? { class: 'hi', style: `--from: 0.5; --to: ${x}; ${color}` }
-          : { class: 'lo', style: `--from: ${x}; --to: 0.5; ${color}` }
-      }),
-    ]),
-  )
-})
+// Its stats as the game shows them (`gameStats`), worked out once a row.
+const statsOf = computed(() => new Map(rows.value.map((r) => [r.id, gameStats(r.data)])))
 
 type Key = 'name' | StatId | 'total'
 // By name, a forme sorts as its parent, and the tie keeps it after it (IDs are in alphabetical order, a species' first).
@@ -220,8 +198,8 @@ const { key, desc, toggle, sorted } = useSort({
         ? byId.value.get(r.parent)!.name
         : r.name
       : k === 'total'
-        ? total(r.data)
-        : r.data.stats[STATS.indexOf(k)]!,
+        ? gameTotal(r.data)
+        : statsOf.value.get(r.id)![STATS.indexOf(k)]!,
   initial: 'name' as Key,
   startsDesc: (k) => k !== 'name',
   locale,
@@ -467,25 +445,12 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
                 </li>
               </ul>
             </div>
-            <div
-              v-for="(v, i) in r.data.stats"
-              :key="i"
-              role="cell"
-              class="wide-only r num stat"
-              :class="statMarks.get(r.id)?.[i]?.class"
-              :style="statMarks.get(r.id)?.[i]?.style"
-            >
+            <div v-for="(v, i) in statsOf.get(r.id)" :key="i" role="cell" class="wide-only r num stat">
               {{ v }}
             </div>
-            <div v-if="!phone || statIndex < 0" role="cell" class="r num total">{{ total(r.data) }}</div>
-            <div
-              v-else
-              role="cell"
-              class="r num stat"
-              :class="statMarks.get(r.id)?.[statIndex]?.class"
-              :style="statMarks.get(r.id)?.[statIndex]?.style"
-            >
-              {{ r.data.stats[statIndex] }}
+            <div v-if="!phone || statIndex < 0" role="cell" class="r num total">{{ gameTotal(r.data) }}</div>
+            <div v-else role="cell" class="r num stat">
+              {{ statsOf.get(r.id)![statIndex] }}
             </div>
           </div>
         </template>
@@ -661,35 +626,6 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
 .total {
   font-weight: bold;
 }
-/* A stat's mark: a bar along the bottom of its cell, between the median (the middle) and where the stat stands (the
-   left edge the lowest, the right edge the highest), on a faint track the cell's width. */
-.stat {
-  --inset: 6px;
-  position: relative;
-}
-.stat.hi::before,
-.stat.lo::before,
-.stat.hi::after,
-.stat.lo::after {
-  content: '';
-  position: absolute;
-  left: calc(var(--inset) + (100% - 2 * var(--inset)) * var(--from));
-  width: calc((100% - 2 * var(--inset)) * (var(--to) - var(--from)));
-  bottom: 3px;
-}
-.stat.hi::before,
-.stat.lo::before {
-  --from: 0;
-  --to: 1;
-  height: 1px;
-  bottom: 4px;
-  background: var(--border);
-}
-.stat.hi::after,
-.stat.lo::after {
-  height: 3px;
-  background: var(--color);
-}
 /* On phones, the stat column's header picks the stat, with the arrow before it sorting by it, or reversing it. */
 .stat-pick {
   display: flex;
@@ -727,9 +663,6 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
   .row > .r {
     padding-left: 3px;
     padding-right: 3px;
-  }
-  .stat {
-    --inset: 3px;
   }
 }
 

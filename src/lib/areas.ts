@@ -1,10 +1,10 @@
 // The site's areas, each a top-level link in the header with its sections as a sub-navigation: the dex (what exists
-// in the regulation), Competitive (what players use and how it does: observations, labeled with their period and
+// in the regulation), Meta (what players use and how it does: observations, labeled with their period and
 // source), Tools (what you interact with) and Quizzes (what you learn with). Each route says in its meta which area and section it belongs to.
 
 import type { MessageKey } from '@/i18n'
 
-export type AreaId = 'dex' | 'competitive' | 'tools' | 'quizzes'
+export type AreaId = 'dex' | 'meta' | 'tools' | 'quizzes'
 
 export interface Section {
   /** Matched against a route's `meta.section`. */
@@ -47,10 +47,10 @@ export const AREAS: Area[] = [
     ],
   },
   {
-    id: 'competitive',
-    route: 'competitive',
-    label: 'nav.competitive',
-    title: 'title.competitive',
+    id: 'meta',
+    route: 'meta',
+    label: 'nav.meta',
+    title: 'title.meta',
     sections: [
       { key: 'usage', route: 'usage', label: 'nav.usage', title: 'title.usage', desc: 'desc.usage' },
       {
@@ -99,7 +99,7 @@ export const areaOf = (id: unknown) => AREAS.find((a) => a.id === id)
 /** The areas' one-line pitch, on the home page. */
 export const PITCH: Record<AreaId, MessageKey> = {
   dex: 'home.dexPitch',
-  competitive: 'home.competitivePitch',
+  meta: 'home.metaPitch',
   tools: 'home.toolsPitch',
   quizzes: 'home.quizzesPitch',
 }

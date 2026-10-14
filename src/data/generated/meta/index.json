@@ -9,7 +9,7 @@
     "period": "month",
     "cutoff": 1760,
     "battles": 1631943,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
     "unweighted": ["brought"]
   },
   "smogon-mc-2026-09-1630": {
@@ -22,7 +22,7 @@
     "period": "month",
     "cutoff": 1630,
     "battles": 1631943,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
     "unweighted": ["brought"]
   },
   "smogon-mc-2026-09-1500": {
@@ -35,7 +35,7 @@
     "period": "month",
     "cutoff": 1500,
     "battles": 1631943,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
     "unweighted": ["brought"]
   },
   "smogon-mc-2026-09-0": {
@@ -48,7 +48,7 @@
     "period": "month",
     "cutoff": 0,
     "battles": 1631943,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
     "unweighted": ["brought"]
   },
   "smogon-mb-2026-09-1760": {
@@ -61,8 +61,10 @@
     "period": "month",
     "cutoff": 1760,
     "battles": 326464,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "previous": "smogon-mb-2026-08-1760",
+    "history": "smogon-m-b-1760-month"
   },
   "smogon-mb-2026-09-1630": {
     "id": "smogon-mb-2026-09-1630",
@@ -74,8 +76,10 @@
     "period": "month",
     "cutoff": 1630,
     "battles": 326464,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "previous": "smogon-mb-2026-08-1630",
+    "history": "smogon-m-b-1630-month"
   },
   "smogon-mb-2026-09-1500": {
     "id": "smogon-mb-2026-09-1500",
@@ -87,8 +91,10 @@
     "period": "month",
     "cutoff": 1500,
     "battles": 326464,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "previous": "smogon-mb-2026-08-1500",
+    "history": "smogon-m-b-1500-month"
   },
   "smogon-mb-2026-09-0": {
     "id": "smogon-mb-2026-09-0",
@@ -100,8 +106,10 @@
     "period": "month",
     "cutoff": 0,
     "battles": 326464,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "previous": "smogon-mb-2026-08-0",
+    "history": "smogon-m-b-0-month"
   },
   "smogon-mb-2026-08-1760": {
     "id": "smogon-mb-2026-08-1760",
@@ -113,8 +121,10 @@
     "period": "month",
     "cutoff": 1760,
     "battles": 1269250,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "previous": "smogon-mb-2026-07-1760",
+    "history": "smogon-m-b-1760-month"
   },
   "smogon-mb-2026-08-1630": {
     "id": "smogon-mb-2026-08-1630",
@@ -126,8 +136,10 @@
     "period": "month",
     "cutoff": 1630,
     "battles": 1269250,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "previous": "smogon-mb-2026-07-1630",
+    "history": "smogon-m-b-1630-month"
   },
   "smogon-mb-2026-08-1500": {
     "id": "smogon-mb-2026-08-1500",
@@ -139,8 +151,10 @@
     "period": "month",
     "cutoff": 1500,
     "battles": 1269250,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "previous": "smogon-mb-2026-07-1500",
+    "history": "smogon-m-b-1500-month"
   },
   "smogon-mb-2026-08-0": {
     "id": "smogon-mb-2026-08-0",
@@ -152,8 +166,10 @@
     "period": "month",
     "cutoff": 0,
     "battles": 1269250,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "previous": "smogon-mb-2026-07-0",
+    "history": "smogon-m-b-0-month"
   },
   "smogon-mb-2026-07-1760": {
     "id": "smogon-mb-2026-07-1760",
@@ -165,8 +181,10 @@
     "period": "month",
     "cutoff": 1760,
     "battles": 1764686,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "previous": "smogon-mb-2026-06-1760",
+    "history": "smogon-m-b-1760-month"
   },
   "smogon-mb-2026-07-1630": {
     "id": "smogon-mb-2026-07-1630",
@@ -178,8 +196,10 @@
     "period": "month",
     "cutoff": 1630,
     "battles": 1764686,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "previous": "smogon-mb-2026-06-1630",
+    "history": "smogon-m-b-1630-month"
   },
   "smogon-mb-2026-07-1500": {
     "id": "smogon-mb-2026-07-1500",
@@ -191,8 +211,10 @@
     "period": "month",
     "cutoff": 1500,
     "battles": 1764686,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "previous": "smogon-mb-2026-06-1500",
+    "history": "smogon-m-b-1500-month"
   },
   "smogon-mb-2026-07-0": {
     "id": "smogon-mb-2026-07-0",
@@ -204,8 +226,10 @@
     "period": "month",
     "cutoff": 0,
     "battles": 1764686,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "previous": "smogon-mb-2026-06-0",
+    "history": "smogon-m-b-0-month"
   },
   "smogon-mb-2026-06-1760": {
     "id": "smogon-mb-2026-06-1760",
@@ -217,8 +241,9 @@
     "period": "month",
     "cutoff": 1760,
     "battles": 1163315,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "history": "smogon-m-b-1760-month"
   },
   "smogon-mb-2026-06-1630": {
     "id": "smogon-mb-2026-06-1630",
@@ -230,8 +255,9 @@
     "period": "month",
     "cutoff": 1630,
     "battles": 1163315,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "history": "smogon-m-b-1630-month"
   },
   "smogon-mb-2026-06-1500": {
     "id": "smogon-mb-2026-06-1500",
@@ -243,8 +269,9 @@
     "period": "month",
     "cutoff": 1500,
     "battles": 1163315,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "history": "smogon-m-b-1500-month"
   },
   "smogon-mb-2026-06-0": {
     "id": "smogon-mb-2026-06-0",
@@ -256,8 +283,9 @@
     "period": "month",
     "cutoff": 0,
     "battles": 1163315,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "history": "smogon-m-b-0-month"
   },
   "smogon-ma-2026-06-1760": {
     "id": "smogon-ma-2026-06-1760",
@@ -269,8 +297,10 @@
     "period": "month",
     "cutoff": 1760,
     "battles": 1479658,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "previous": "smogon-ma-2026-05-1760",
+    "history": "smogon-m-a-1760-month"
   },
   "smogon-ma-2026-06-1630": {
     "id": "smogon-ma-2026-06-1630",
@@ -282,8 +312,10 @@
     "period": "month",
     "cutoff": 1630,
     "battles": 1479658,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "previous": "smogon-ma-2026-05-1630",
+    "history": "smogon-m-a-1630-month"
   },
   "smogon-ma-2026-06-1500": {
     "id": "smogon-ma-2026-06-1500",
@@ -295,8 +327,10 @@
     "period": "month",
     "cutoff": 1500,
     "battles": 1479658,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "previous": "smogon-ma-2026-05-1500",
+    "history": "smogon-m-a-1500-month"
   },
   "smogon-ma-2026-06-0": {
     "id": "smogon-ma-2026-06-0",
@@ -308,8 +342,10 @@
     "period": "month",
     "cutoff": 0,
     "battles": 1479658,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "previous": "smogon-ma-2026-05-0",
+    "history": "smogon-m-a-0-month"
   },
   "smogon-ma-2026-05-1760": {
     "id": "smogon-ma-2026-05-1760",
@@ -321,8 +357,10 @@
     "period": "month",
     "cutoff": 1760,
     "battles": 3355619,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "previous": "smogon-ma-2026-04-1760",
+    "history": "smogon-m-a-1760-month"
   },
   "smogon-ma-2026-05-1630": {
     "id": "smogon-ma-2026-05-1630",
@@ -334,8 +372,10 @@
     "period": "month",
     "cutoff": 1630,
     "battles": 3355619,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "previous": "smogon-ma-2026-04-1630",
+    "history": "smogon-m-a-1630-month"
   },
   "smogon-ma-2026-05-1500": {
     "id": "smogon-ma-2026-05-1500",
@@ -347,8 +387,10 @@
     "period": "month",
     "cutoff": 1500,
     "battles": 3355619,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "previous": "smogon-ma-2026-04-1500",
+    "history": "smogon-m-a-1500-month"
   },
   "smogon-ma-2026-05-0": {
     "id": "smogon-ma-2026-05-0",
@@ -360,8 +402,10 @@
     "period": "month",
     "cutoff": 0,
     "battles": 3355619,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "previous": "smogon-ma-2026-04-0",
+    "history": "smogon-m-a-0-month"
   },
   "smogon-ma-2026-04-1760": {
     "id": "smogon-ma-2026-04-1760",
@@ -373,8 +417,9 @@
     "period": "month",
     "cutoff": 1760,
     "battles": 3122222,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "history": "smogon-m-a-1760-month"
   },
   "smogon-ma-2026-04-1630": {
     "id": "smogon-ma-2026-04-1630",
@@ -386,8 +431,9 @@
     "period": "month",
     "cutoff": 1630,
     "battles": 3122222,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "history": "smogon-m-a-1630-month"
   },
   "smogon-ma-2026-04-1500": {
     "id": "smogon-ma-2026-04-1500",
@@ -399,8 +445,9 @@
     "period": "month",
     "cutoff": 1500,
     "battles": 3122222,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "history": "smogon-m-a-1500-month"
   },
   "smogon-ma-2026-04-0": {
     "id": "smogon-ma-2026-04-0",
@@ -412,7 +459,8 @@
     "period": "month",
     "cutoff": 0,
     "battles": 3122222,
-    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds"],
-    "unweighted": ["brought"]
+    "capabilities": ["usage", "brought", "moves", "items", "abilities", "teammates", "spreads", "speeds", "natures"],
+    "unweighted": ["brought"],
+    "history": "smogon-m-a-0-month"
   }
 }

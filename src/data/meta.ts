@@ -20,7 +20,17 @@ export type MetaKind = 'showdown' | 'ingame' | 'tournament'
 
 /** What a snapshot has besides each Pokémon's rank, which they all have. */
 export type MetaCapability =
-  'usage' | 'brought' | 'winRate' | 'leads' | 'moves' | 'items' | 'abilities' | 'teammates' | 'spreads' | 'speeds'
+  | 'usage'
+  | 'brought'
+  | 'winRate'
+  | 'leads'
+  | 'moves'
+  | 'items'
+  | 'abilities'
+  | 'teammates'
+  | 'spreads'
+  | 'speeds'
+  | 'natures'
 
 /** Smogon's rating cutoffs: the players whose teams count most. */
 export type Cutoff = 0 | 1500 | 1630 | 1760
@@ -46,6 +56,11 @@ export interface MetaSnapshot {
   capabilities: MetaCapability[]
   /** What it has that covers every player, whatever its cutoff (Smogon's brought counts): labeled as such. */
   unweighted?: MetaCapability[]
+  /** The snapshot before it in its series (same source, regulation, players and kind of period), for the trends: its
+   * Pokémon's `prev` are from there, and one without is new to it. None for a series' first. */
+  previous?: string
+  /** Its series' history (`loadHistory`), when the series has more than it. */
+  history?: string
 }
 
 /** An entry of a list, most used first. Its share (0 to 1) when the source gives one: some only rank them. */
@@ -79,6 +94,10 @@ export interface PokemonMeta {
   /** What its sets put into Speed, from all of them: stat points and nature (by Showdown ID), most common first.
    * Its Speed stat follows from its base Speed (`speedStat`, with `natureEffect`). */
   speeds?: { points: number; nature: string; share: number }[]
+  /** Its sets' natures (by Showdown ID), from all of them, most common first. */
+  natures?: Share<string>[]
+  /** Its rank and usage in the snapshot's `previous`, when it was there. */
+  prev?: { rank: number; usage?: number }
 }
 
 export type MetaData = Partial<Record<PokemonId, PokemonMeta>>
@@ -229,6 +248,27 @@ export const has = (s: MetaSnapshot, c: MetaCapability) => s.capabilities.includ
 const loaded = new Map<string, Promise<MetaData>>()
 
 /** A snapshot's data, loaded once. */
+const HISTORIES = import.meta.glob<Partial<Record<PokemonId, ([number, number] | null)[]>>>(
+  './generated/meta/history/*.json',
+  { import: 'default' },
+)
+
+/** A series' history: its snapshots, in order, and each Pokémon's rank and usage in each, null where it wasn't. */
+export interface MetaHistory {
+  snapshots: MetaSnapshot[]
+  pokemon: Partial<Record<PokemonId, ([number, number] | null)[]>>
+}
+
+/** The history of the series `s` is in, loaded on demand; null when it's alone in its series. */
+export async function loadHistory(s: MetaSnapshot): Promise<MetaHistory | null> {
+  const file = s.history && HISTORIES[`./generated/meta/history/${s.history}.json`]
+  if (!file) return null
+  const snapshots = GENERATED_SNAPSHOTS.filter((x) => x.history === s.history).sort((a, b) =>
+    a.from.localeCompare(b.from),
+  )
+  return { snapshots, pokemon: await file() }
+}
+
 export function loadMeta(s: MetaSnapshot): Promise<MetaData> {
   let p = loaded.get(s.id)
   if (!p) {

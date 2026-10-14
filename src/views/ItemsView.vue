@@ -1,22 +1,19 @@
 <script setup lang="ts">
-import Marked from '@/components/Marked'
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { availableIds, item } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { ITEM_KINDS, ITEMS } from '@/data/items'
 import { locale, t } from '@/i18n'
-import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
-import DexText from '@/components/DexText'
-import ItemIcon from '@/components/ItemIcon.vue'
+import ItemList from '@/components/ItemList.vue'
 import SearchBox from '@/components/SearchBox.vue'
 
-// Every item the regulation has, by kind (held items, berries, Mega Stones), with its short description.
+// Every item the regulation has, by kind (held items, berries, Mega Stones), with its short description (`ItemList`).
 const items = computed(() =>
   availableIds('item')
-    .map((id) => ({ id, name: refName(item(id)), kind: ITEMS[id].kind, text: description('item', id)?.short ?? '' }))
+    .map((id) => ({ id, name: refName(item(id)), kind: ITEMS[id].kind }))
     .sort((a, b) => a.name.localeCompare(b.name, locale.value)),
 )
 
@@ -46,20 +43,7 @@ const groups = computed(() => {
     <div class="panel">
       <section v-for="g in groups" :key="g.kind">
         <h2>{{ t(`items.kind.${g.kind}`) }}</h2>
-        <dl class="entries">
-          <template v-for="it in g.items" :key="it.id">
-            <dt>
-              <RouterLink :to="{ name: 'item', params: { id: it.id } }" class="name">
-                <ItemIcon :id="it.id" />
-                <span>
-                  <Marked v-if="it.parts" :p="it.parts" />
-                  <template v-else>{{ it.name }}</template>
-                </span>
-              </RouterLink>
-            </dt>
-            <dd class="muted"><DexText :text="it.text" /></dd>
-          </template>
-        </dl>
+        <ItemList :items="g.items" />
       </section>
       <p v-if="!groups.length" class="muted">{{ t('items.none') }}</p>
     </div>
@@ -69,32 +53,5 @@ const groups = computed(() => {
 <style scoped>
 section + section {
   margin-top: 16px;
-}
-.entries {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 4px 16px;
-  align-items: center;
-  margin: 0;
-}
-.entries dt {
-  font-weight: bold;
-}
-.entries dd {
-  margin: 0;
-}
-.name {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-@media (max-width: 560px) {
-  .entries {
-    grid-template-columns: 1fr;
-    gap: 2px;
-  }
-  .entries dd {
-    margin-bottom: 8px;
-  }
 }
 </style>

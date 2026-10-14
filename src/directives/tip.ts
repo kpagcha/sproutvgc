@@ -50,8 +50,10 @@ document.addEventListener(
 
 // On a screen with no hover (phones), a tap shows a tooltip and the next hides it (tippy's own toggling): not the mouse
 // events a touch screen makes up, which come on their own when the page moves under where the finger last was (the
-// speed tiers' ladder narrowing to the Pokémon found, a tooltip then opening over whatever came under it).
-const noHover = window.matchMedia('(hover: none)').matches
+// speed tiers' ladder narrowing to the Pokémon found, a tooltip then opening over whatever came under it). Only where
+// nothing can hover (`any-hover`): a laptop with a touch screen and a mouse keeps hovering with its mouse, its taps
+// still toggling (`tapToggle`).
+const noHover = window.matchMedia('(any-hover: none)').matches
 tippy.setDefaultProps({
   theme: 'sproutvgc',
   delay: [200, 0],
