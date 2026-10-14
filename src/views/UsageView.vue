@@ -292,6 +292,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
           <SortHeader
             :label="t('usage.rank')"
             :tip="t('usage.rankFull')"
+            :class="{ 'with-climb': previous }"
             right
             :active="key === 'rank'"
             :desc="desc"
@@ -352,13 +353,17 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         <template v-else>
           <div v-for="r in shown" :key="r.id" class="row" :class="{ rare: rare(r) }" role="row">
             <div role="cell" class="r num muted rank">
-              {{ r.rank }}
-              <span v-if="r.climb" class="climb" :class="r.climb > 0 ? 'up' : 'down'"
-                ><span aria-hidden="true">{{ r.climb > 0 ? '▲' : '▼' }}</span
-                ><span class="visually-hidden">{{ t(r.climb > 0 ? 'usage.up' : 'usage.down') }}</span
-                >{{ Math.abs(r.climb) }}</span
+              {{ r.rank
+              }}<span
+                v-if="previous"
+                class="climb"
+                :class="r.climb ? (r.climb > 0 ? 'up' : 'down') : r.fresh && 'fresh'"
+                ><template v-if="r.climb"
+                  ><span aria-hidden="true">{{ r.climb > 0 ? '▲' : '▼' }}</span
+                  ><span class="visually-hidden">{{ t(r.climb > 0 ? 'usage.up' : 'usage.down') }}</span
+                  >{{ Math.abs(r.climb) }}</template
+                ><template v-else-if="r.fresh">{{ t('usage.new') }}</template></span
               >
-              <span v-else-if="r.fresh" class="climb fresh">{{ t('usage.new') }}</span>
             </div>
             <div role="cell" class="grow">
               <AppLink :to="{ name: 'pokemon', params: { id: r.id } }" class="mon">
@@ -766,11 +771,19 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 .usage {
   font-weight: bold;
 }
-/* The rank's mark: places gained or lost since the previous dataset, or new to it, small after the rank. */
+/* The rank's mark: places gained or lost since the previous dataset, or new to it, small after the rank, in a slot as
+   wide for every rank. */
 .climb {
+  display: inline-block;
+  width: 2.4em;
   margin-left: 3px;
   font-size: 0.75em;
+  text-align: left;
   white-space: nowrap;
+}
+/* Every rank its mark's room after it, empty or not, so the ranks line up, and "#" over them rather than the marks. */
+.with-climb :deep(.sort) {
+  margin-right: calc(3px + 1.8em);
 }
 .up {
   color: var(--good);
