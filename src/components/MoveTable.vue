@@ -27,7 +27,7 @@ import SkeletonRows from '@/components/SkeletonRows.vue'
 // filters (after what's given in the slot: the page's heading) and the table go in panels of their own (for `.panels`);
 // without, both go in the caller's. A Pokémon's usage page gives each move's share of its sets (`shares`: a column of
 // its own, the table sorted by it at first), and leaves out PP (`noPp`) and the filters (`noFilters`), the descriptions
-// under the names (`stacked`), as phones have them.
+// under the names, each a line of its own the whole width of its row (`stacked`).
 const props = defineProps<{
   ids: readonly MoveId[]
   descriptions?: boolean
@@ -161,8 +161,8 @@ const skeleton = computed(() => [
         <SortHeader
           v-for="c in COLUMNS"
           :key="c.k"
-          :class="{ 'wide-only': c.wideOnly }"
-          :label="t(c.label)"
+          :class="{ 'wide-only': c.wideOnly, badge: c.k === 'type' || c.k === 'category' }"
+          :label="t(stacked && phone && c.k === 'power' ? 'move.powerShort' : c.label)"
           :right="c.right"
           :active="key === c.k"
           :desc="desc"
@@ -178,7 +178,7 @@ const skeleton = computed(() => [
               <Marked v-if="r.parts" :p="r.parts" />
               <template v-else>{{ r.name }}</template>
             </AppLink>
-            <div v-if="descriptions && below" class="muted below">
+            <div v-if="descriptions && below && !stacked" class="muted below">
               <DexText :text="shortOf(r.id)" />
             </div>
           </div>
@@ -195,6 +195,9 @@ const skeleton = computed(() => [
           <div v-if="!noPp" role="cell" class="wide-only r num">{{ r.data.pp }}</div>
           <div v-if="shares" role="cell" class="r num meter" :style="{ '--share': shares[r.id] ?? 0 }">
             {{ shares[r.id] === undefined ? '—' : percent(shares[r.id]!) }}
+          </div>
+          <div v-if="descriptions && stacked && shortOf(r.id)" role="cell" class="muted span-desc">
+            <DexText :text="shortOf(r.id)" />
           </div>
           <div v-if="descriptions && !below" role="cell" class="grow muted">
             <DexText :text="shortOf(r.id)" />
@@ -224,14 +227,61 @@ const skeleton = computed(() => [
 /* Narrow (`stacked`), the badges' and numbers' columns as tight as they go, leaving the room to the name and its
    description. */
 .dex-table.tight {
+  --icon-scale: 1;
   --num: minmax(2em, auto);
+}
+/* On phones, the header's labels smaller: they size the badges' and numbers' columns, which then leave the name more
+   room. */
+@media (max-width: 720px) {
+  .dex-table.tight .head {
+    font-size: 0.8em;
+  }
+  /* The share's column as wide as its numbers ("98.7%"), wider than its header, which sizes it, at this size. */
+  .dex-table.tight .head > :last-child {
+    min-width: calc(12px + 3.3rem + 6px);
+  }
+  /* The badges' columns as narrow as the badges (and their padding): their labels left unshown, the badges saying what
+     they are. */
+  .dex-table.tight .head > .badge {
+    min-width: calc(26px + 6px);
+    font-size: 0;
+  }
+}
+/* Each description a line of its own under its row, the whole width, rather than under the name alone. */
+.dex-table .row > .span-desc {
+  grid-column: 1 / -1;
+  padding-top: 0;
+  font-size: 0.9em;
+  white-space: normal;
 }
 .dex-table.tight .row > :not(:first-child) {
   padding-inline: 3px;
 }
-/* The numbers keep room at their left for the sort arrow, which hangs there. */
+/* The numbers keep room at their left for the sort arrow, which hangs there; the share, more, apart from the power
+   before it. */
 .dex-table.tight .row > .r {
   padding-left: 10px;
+}
+.dex-table.tight .row > .meter,
+.dex-table.tight .head > :last-child {
+  padding-left: 12px;
+}
+/* Its bar under its number alone, from where the number's room starts. */
+.dex-table.tight .meter::before,
+.dex-table.tight .meter::after {
+  left: 12px;
+}
+.dex-table.tight .meter::after {
+  width: calc((100% - 18px) * var(--share, 0));
+}
+/* The outer edge keeps the cells' own 6px: on phones the table runs to the panel's border (`--panel-bleed`), and that
+   is its margin there. So does each description, in line with its name. */
+.dex-table.tight .row > .meter,
+.dex-table.tight .head > :last-child {
+  padding-right: 6px;
+}
+.dex-table.tight .row > .span-desc {
+  padding-inline: 6px;
 }
 /* A move's share of a Pokémon's sets: its number, its bar under it, out of all of them. */
 .meter {
