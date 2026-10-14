@@ -31,7 +31,6 @@ export type MetaCapability =
   | 'spreads'
   | 'speeds'
   | 'natures'
-  | 'points'
 
 /** Smogon's rating cutoffs: the players whose teams count most. */
 export type Cutoff = 0 | 1500 | 1630 | 1760
@@ -97,9 +96,6 @@ export interface PokemonMeta {
   speeds?: { points: number; nature: string; share: number }[]
   /** Its sets' natures (by Showdown ID), from all of them, most common first. */
   natures?: Share<string>[]
-  /** Each stat's points (in `STATS` order) across its sets, from all of them: its commonest values, as [points, share],
-   * most common first. */
-  points?: [number, number][][]
   /** Its rank and usage in the snapshot's `previous`, when it was there. */
   prev?: { rank: number; usage?: number }
 }

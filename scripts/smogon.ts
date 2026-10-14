@@ -16,7 +16,7 @@ const CUTOFFS = [1760, 1630, 1500, 0] as const
 
 /** How much of each list to keep: Smogon's own moveset files show about as much. Less than 1% is noise. Speeds are
  * kept whole (`speeds`), as the app adds them up: what's left out would be left out of its totals too. */
-const KEEP = { list: 10, spreads: 6, points: 4, min: 0.01 }
+const KEEP = { list: 10, spreads: 6, min: 0.01 }
 
 // What `src/data/meta.ts` reads (`MetaSnapshot`, `PokemonMeta`), with IDs as plain strings.
 export interface Snapshot {
@@ -49,7 +49,6 @@ export interface MetaEntry {
   spreads: { nature: string; points: number[]; share: number }[]
   speeds: { points: number; nature: string; share: number }[]
   natures: Share[]
-  points: [number, number][][]
   prev?: { rank: number; usage?: number }
 }
 
@@ -171,22 +170,18 @@ export class Smogon {
           })
           .filter((s) => s.share > 0)
       }
-      /** From every spread, each `of` its sets have (a nature, a stat's points), as shares, the rare ones left out. */
-      const across = <K extends string | number>(
-        spreads: Record<string, number>,
-        total: number,
-        of: (nature: string, points: number[]) => K,
-      ) => {
-        const weights = new Map<K, number>()
+      /** Its natures, from every spread, as shares, the rare ones left out. */
+      const natures = (spreads: Record<string, number>, total: number) => {
+        const weights = new Map<string, number>()
         for (const [spread, w] of Object.entries(spreads)) {
-          const [nature, points] = spread.split(':') as [string, string]
-          const key = of(nature.toLowerCase(), points.split('/').map(Number))
-          weights.set(key, (weights.get(key) ?? 0) + w)
+          const nature = spread.split(':')[0]!.toLowerCase()
+          weights.set(nature, (weights.get(nature) ?? 0) + w)
         }
         return [...weights]
           .sort((a, b) => b[1] - a[1])
-          .map(([key, w]) => ({ key, share: round(w / total) }))
+          .map(([id, w]) => ({ id, share: round(w / total) }))
           .filter((x) => x.share >= KEEP.min)
+          .slice(0, KEEP.list)
       }
       const check = (set: ReadonlySet<string>, what: string) => (id: string) => {
         if (!set.has(id)) unknown.add(`${what} "${id}"`)
@@ -215,19 +210,9 @@ export class Smogon {
             return { nature: nature.toLowerCase(), points: points.split('/').map(Number), share }
           }),
           speeds: speeds(d.Spreads, total),
-          // Its natures and each stat's points, from every spread: the long tail of spreads is most of the sets, so
-          // these say what its sets do where its top spreads, a few percent each, don't.
-          // Each stat's few commonest point values (from 2% of its sets), as [points, share] pairs to 0.1%: what its sets
-          // put there at a glance, at a fraction of the files' size the whole of it would take.
-          natures: across(d.Spreads, total, (nature) => nature)
-            .slice(0, KEEP.list)
-            .map(({ key, share }) => ({ id: key, share })),
-          points: [0, 1, 2, 3, 4, 5].map((i) =>
-            across(d.Spreads, total, (_, points) => points[i]!)
-              .filter((x) => x.share >= 2 * KEEP.min)
-              .slice(0, KEEP.points)
-              .map(({ key, share }): [number, number] => [key, Math.round(share * 1e3) / 1e3]),
-          ),
+          // Its natures from every spread: the long tail of spreads is most of the sets, so its top spreads, a few
+          // percent each, don't say what its natures are.
+          natures: natures(d.Spreads, total),
         }
       })
       result.push({
@@ -251,7 +236,6 @@ export class Smogon {
             'spreads',
             'speeds',
             'natures',
-            'points',
           ],
           unweighted: ['brought'],
         },
