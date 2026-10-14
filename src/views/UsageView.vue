@@ -289,9 +289,15 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
           />
           <SortHeader :label="t('usage.pokemon')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
           <div role="columnheader">{{ t('pokedex.types') }}</div>
-          <div v-if="showItem" role="columnheader" class="xl-only">{{ t('usage.item') }}</div>
-          <div v-if="showAbility" role="columnheader" class="xl-only">{{ t('usage.ability') }}</div>
-          <div v-if="showMoves" role="columnheader" class="xl-only">{{ t('usage.moves') }}</div>
+          <div v-if="showItem" role="columnheader" class="xl-only">
+            <span v-tip="t('usage.itemTip')" class="tipped">{{ t('usage.item') }}</span>
+          </div>
+          <div v-if="showAbility" role="columnheader" class="xl-only">
+            <span v-tip="t('usage.abilityTip')" class="tipped">{{ t('usage.ability') }}</span>
+          </div>
+          <div v-if="showMoves" role="columnheader" class="xl-only">
+            <span v-tip="t('usage.movesTip')" class="tipped">{{ t('usage.moves') }}</span>
+          </div>
           <SortHeader
             v-if="showUsage"
             :label="t('usage.usage')"
@@ -376,27 +382,32 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
               </AppLink>
             </div>
             <div v-if="showAbility" role="cell" class="xl-only grow">
-              <span
-                v-if="r.ability"
-                class="shared"
-                :style="{ '--share': r.ability.share ?? 0 }"
-                :data-share="r.ability.share ?? 0"
-                :data-kind="r.ability.kind"
-                :data-id="r.ability.id"
-                ><DexRef :to="r.ability"
-              /></span>
+              <ul v-if="r.ability" class="chips">
+                <li
+                  class="shared"
+                  :style="{ '--share': r.ability.share ?? 0 }"
+                  :data-share="r.ability.share ?? 0"
+                  :data-kind="r.ability.kind"
+                  :data-id="r.ability.id"
+                >
+                  <DexRef :to="r.ability" />
+                </li>
+              </ul>
             </div>
             <div v-if="showMoves" role="cell" class="xl-only grow">
-              <template v-for="(m, i) in r.moves" :key="m.id"
-                ><span v-if="i" class="sep" aria-hidden="true"> · </span
-                ><span
+              <ul class="chips">
+                <li
+                  v-for="m in r.moves"
+                  :key="m.id"
                   class="shared"
                   :style="{ '--share': m.share ?? 0 }"
                   :data-share="m.share ?? 0"
                   :data-kind="m.kind"
                   :data-id="m.id"
-                  ><DexRef :to="m" /></span
-              ></template>
+                >
+                  <DexRef :to="m" />
+                </li>
+              </ul>
             </div>
             <div
               v-if="showUsage"
@@ -627,9 +638,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
     padding-block: 6px 4px;
   }
 }
-.sep {
-  color: var(--muted);
-}
 /* A Pokémon on few teams: faded, so its numbers and set don't read as firmly as the rest's. */
 .row.rare > [role='cell'] {
   opacity: 0.55;
@@ -674,6 +682,43 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 .item {
   display: inline-flex;
   vertical-align: middle;
+}
+/* The ability and the top moves as chips, as the dex's list has its abilities, each its share's bar along its inside
+   foot, clear of its border. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chips li {
+  padding: 0 5px 3px;
+  font-size: 0.9em;
+  white-space: nowrap;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+.chips a {
+  color: inherit;
+}
+.chips li.shared::before,
+.chips li.shared::after {
+  left: 2px;
+  bottom: 1px;
+}
+.chips li.shared::before {
+  right: 2px;
+}
+.chips li.shared::after {
+  width: calc((100% - 4px) * var(--share, 0));
+}
+/* A header with a tooltip: underlined dotted, as `SortHeader`'s are. */
+.tipped {
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
 }
 .source {
   display: flex;
