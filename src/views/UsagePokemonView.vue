@@ -422,16 +422,17 @@ const teammates = computed(() => (m.value?.teammates ?? []).filter((x) => availa
         </h2>
         <ul class="shares mates">
           <li v-for="x in teammates" :key="x.id">
-            <AppLink :to="{ name: 'usagePokemon', params: { id: x.id } }" class="what">
-              <PokemonIcon :id="x.id" />{{ refName(pokemon(x.id)) }}
+            <AppLink :to="{ name: 'usagePokemon', params: { id: x.id } }" class="what mate">
+              <PokemonIcon :id="x.id" /><span class="mate-name">{{ refName(pokemon(x.id)) }}</span>
             </AppLink>
             <span class="types">
               <AppLink v-for="ty in POKEMON[x.id].types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
                 <TypeIcon :type="ty" />
               </AppLink>
             </span>
-            <span class="bar" :style="{ '--share': x.share ?? 0 }"></span>
-            <span class="num">{{ x.share === undefined ? '—' : percent(x.share) }}</span>
+            <span class="num meter mate-share" :style="{ '--share': x.share ?? 0 }">{{
+              x.share === undefined ? '—' : percent(x.share)
+            }}</span>
           </li>
         </ul>
       </section>
@@ -710,9 +711,26 @@ h2 {
 .mates {
   max-width: 640px;
 }
-/* A teammate's types after its name. */
+/* A teammate: its name (cut short when it doesn't fit), its types, its share with its bar under it; its icons at their
+   desktop size, phones' bigger ones leaving its name no room. */
 .shares.mates {
-  grid-template-columns: minmax(0, max-content) auto minmax(40px, 1fr) auto;
+  --icon-scale: 1;
+  grid-template-columns: minmax(0, max-content) auto 4.5em;
+  justify-content: start;
+  gap: 6px 16px;
+}
+/* On phones, the whole width: the name taking what the types and share leave. */
+@media (max-width: 720px) {
+  .shares.mates {
+    grid-template-columns: minmax(0, 1fr) auto 4.5em;
+    justify-content: stretch;
+    gap: 6px 12px;
+  }
+}
+.mate-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .what {
   display: inline-flex;

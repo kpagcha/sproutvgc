@@ -111,6 +111,10 @@ watchEffect(async () => {
           <RouterLink v-for="ty in mon.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
             <TypeIcon :type="ty" :scale="2" />
           </RouterLink>
+          <!-- Its usage page, as that page links here. -->
+          <RouterLink :to="{ name: 'usagePokemon', params: { id } }" class="usage-link"
+            >{{ t('pokemon.usage') }} ›</RouterLink
+          >
         </div>
         <dl class="abilities">
           <template v-for="a in abilities" :key="a.id">
@@ -227,7 +231,13 @@ watchEffect(async () => {
 }
 .types {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 4px;
+}
+.usage-link {
+  margin-left: 8px;
+  font-weight: bold;
 }
 .origin {
   margin: 0;

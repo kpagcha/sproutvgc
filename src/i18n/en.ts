@@ -1104,6 +1104,7 @@ export const messages = {
   'usageMon.statRank': "Higher than {pct}% of the Pokémon you'll face, weighted by usage",
   'usageMon.spreadStat': '{stat}: {points} points, {value}',
   'usageMon.dex': 'Dex entry',
+  'pokemon.usage': 'Usage stats',
   'usageMon.moves': 'Moves',
   'usageMon.items': 'Items',
   'usageMon.abilities': 'Abilities',
