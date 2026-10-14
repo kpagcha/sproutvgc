@@ -167,7 +167,7 @@ onBeforeUnmount(() => shareTip?.destroy())
 
 /** Under this usage a Pokémon is on few teams, and its sets come from a handful of them: its row faded, said under the
  * table. */
-const RARE = 0.005
+const RARE = 0.01
 const rare = (r: Row) => r.usage !== undefined && r.usage < RARE
 const anyRare = computed(() => shown.value.some(rare))
 /** The most used, the full length of the usage bars. */
