@@ -862,13 +862,14 @@ h2 {
   columns: 360px;
   column-gap: 32px;
 }
-/* A row: its place, its name (as wide as the longest fits, so the types line up after it down the column), its types,
-   and its share at the end. */
+/* A row: its place, its name (as wide as the longest fits, so the types line up after it down the column), its types
+   (as wide as two badges, so the shares line up too) and its share right after them: each column's rows held together,
+   what's left of it empty at its right, rather than its shares out at its edge, nearer the next column's names. */
 .shares.mates li {
   display: grid;
   break-inside: avoid;
   margin-bottom: 8px;
-  grid-template-columns: 1.4em minmax(0, 14em) auto 1fr 4.5em;
+  grid-template-columns: 1.4em minmax(0, 14em) 58px 4.5em;
   align-items: center;
   gap: 10px;
   min-width: 0;
