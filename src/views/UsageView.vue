@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { computed, shallowRef, useTemplateRef } from 'vue'
-import { ability, item, move, pokemon, type PokemonId } from '@/data/dex'
+import { useRouter } from 'vue-router'
+import { X } from '@lucide/vue'
+import { ability, availableIds, item, move, pokemon, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
+import { isType, TYPES, type TypeId } from '@/data/types'
 import { has, percent, players } from '@/data/meta'
-import { locale, t } from '@/i18n'
+import { locale, t, typeName } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
 import { useActiveQuery } from '@/composables/useActiveQuery'
@@ -71,10 +74,61 @@ const { key, desc, toggle, sorted } = useSort<Row, Key>({
   remember: 'usage',
 })
 
+// Filtering the list (`?type=`, `?item=`, `?ability=`, `?move=`, together): only the Pokémon of a type, or whose sets
+// run an item, ability or move, on at least `MIN_SHARE` of them (what a few sets run doesn't make it one that runs it).
+// Each filter's choices are what the Pokémon passing the others have, with how many of them have it, by name (types in
+// their usual order), so no choice leaves the list empty; the one picked always, though none have it.
+const router = useRouter()
+const MIN_SHARE = 0.03
+type FilterKind = 'type' | 'item' | 'ability' | 'move'
+const KINDS = ['type', 'item', 'ability', 'move'] as const
+const REFS = { item, ability, move }
+const LIST = { item: 'items', ability: 'abilities', move: 'moves' } as const
+const picked = computed<Record<FilterKind, string | null>>(() => {
+  const at = (k: FilterKind) => {
+    const v = query.value[k]
+    return typeof v === 'string' ? v : null
+  }
+  const ref = (k: 'item' | 'ability' | 'move') => {
+    const v = at(k)
+    return v && (availableIds(k) as string[]).includes(v) ? v : null
+  }
+  const type = at('type')
+  return { type: type && isType(type) ? type : null, item: ref('item'), ability: ref('ability'), move: ref('move') }
+})
+const filtering = computed(() => Object.values(picked.value).some(Boolean))
+/** What a Pokémon has, as the filters go by it: its types, and what its sets run. */
+function traits(id: PokemonId, kind: FilterKind): readonly string[] {
+  if (kind === 'type') return POKEMON[id].types
+  return (data.value?.[id]?.[LIST[kind]] ?? []).filter((x) => (x.share ?? 1) >= MIN_SHARE).map((x) => x.id)
+}
+/** Whether a Pokémon passes the filters, but for the one of `except`'s kind. */
+const passes = (id: PokemonId, except?: FilterKind) =>
+  KINDS.every((k) => k === except || !picked.value[k] || traits(id, k).includes(picked.value[k]))
+const filterName = (kind: FilterKind, x: string) =>
+  kind === 'type' ? typeName(x as TypeId) : refName(REFS[kind](x as never))
+const filters = computed(() =>
+  KINDS.flatMap((kind) => {
+    if (kind !== 'type' && !(snapshot.value && has(snapshot.value, LIST[kind]))) return []
+    const counts = new Map<string, number>()
+    for (const r of rows.value)
+      if (passes(r.id, kind)) for (const x of traits(r.id, kind)) counts.set(x, (counts.get(x) ?? 0) + 1)
+    const value = picked.value[kind]
+    if (value && !counts.has(value)) counts.set(value, 0)
+    const options = [...counts].map(([id, n]) => ({ id, n, name: filterName(kind, id) }))
+    if (kind === 'type') options.sort((a, b) => TYPES.indexOf(a.id as TypeId) - TYPES.indexOf(b.id as TypeId))
+    else options.sort((a, b) => a.name.localeCompare(b.name, locale.value))
+    return [{ kind, value, options, label: t(`usage.filter.${kind}`), any: t(`usage.any.${kind}`) }]
+  }),
+)
+const setFilter = (k: FilterKind, v: string | undefined) => void router.replace({ query: { ...query.value, [k]: v } })
+const clearFilters = () =>
+  void router.replace({ query: { ...query.value, ...Object.fromEntries(KINDS.map((k) => [k, undefined])) } })
+
 const search = shallowRef(typeof query.value.q === 'string' ? query.value.q : '')
 const shown = computed(() => {
   const q = fold(search.value.trim())
-  return q ? sorted.value.filter((r) => split(r.name, q)) : sorted.value
+  return sorted.value.filter((r) => (!q || split(r.name, q)) && (!filtering.value || passes(r.id)))
 })
 /** A share of a Pokémon's sets, in whole percents ("62%", "<1%"): beside each part of its most common set. */
 const pct = (share?: number) =>
@@ -163,6 +217,37 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
             </label>
             <span class="muted sets-desc">{{ t('usage.setsDesc') }}</span>
           </template>
+        </div>
+        <!-- Filtering the list: by type, item, ability and move, each a choice of what the Pokémon have. -->
+        <div class="filters" role="group" :aria-label="t('usage.filter')">
+          <span class="filters-label">{{ t('usage.filter') }}</span>
+          <span v-for="f in filters" :key="f.kind" class="filter" :class="{ on: f.value }">
+            <TypeIcon
+              v-if="f.kind === 'type' && f.value"
+              :type="f.value as TypeId"
+              class="filter-icon"
+              aria-hidden="true"
+            />
+            <ItemIcon
+              v-else-if="f.kind === 'item' && f.value"
+              :id="f.value as never"
+              :scale="0.67"
+              class="filter-icon"
+              aria-hidden="true"
+            />
+            <select
+              class="search filter-pick"
+              :value="f.value ?? ''"
+              :aria-label="f.label"
+              @change="setFilter(f.kind, ($event.target as HTMLSelectElement).value || undefined)"
+            >
+              <option value="">{{ f.any }}</option>
+              <option v-for="o in f.options" :key="o.id" :value="o.id">{{ o.name }} ({{ o.n }})</option>
+            </select>
+          </span>
+          <button v-if="filtering" type="button" class="btn inverted filters-clear" @click="clearFilters">
+            <X :size="14" aria-hidden="true" />{{ t('usage.clearFilters') }}
+          </button>
         </div>
       </template>
       <p v-else class="muted">{{ t('usage.none', { reg: REGULATION }) }}</p>
@@ -296,6 +381,9 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         {{ t('usage.usage') }}: {{ t('usage.usageTip') }}.
         <template v-if="showSets && showBrought">{{ t('usage.brought') }}: {{ t('usage.broughtTip') }}.</template>
         <template v-if="hasSets">{{ t('usage.sets') }}: {{ t('usage.setsDesc') }}.</template>
+      </p>
+      <p v-if="picked.item || picked.ability || picked.move" class="muted note">
+        {{ t('usage.filteredSets', { share: pct(MIN_SHARE) }) }}
       </p>
       <p v-if="broughtAll && snapshot.cutoff" class="muted note">
         {{ t('usage.broughtAll', { players: players(snapshot.cutoff) }) }}
@@ -525,6 +613,49 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   }
   .find-row {
     margin-bottom: 8px;
+  }
+}
+/* The filters, on a line of their own under the search: each one picked marked. */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+.filters-label {
+  font-weight: bold;
+}
+.filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.filter-pick {
+  width: auto;
+  max-width: 14em;
+  margin: 0;
+}
+.filter.on .filter-pick {
+  border-color: var(--ink);
+  background: var(--sel);
+}
+.filters-clear {
+  gap: 4px;
+  padding-block: 4px;
+}
+/* On phones, the choices share the lines, each as wide as its share. */
+@media (max-width: 720px) {
+  .filters-label {
+    flex-basis: 100%;
+  }
+  .filter {
+    flex: 1 1 9em;
+    min-width: 0;
+  }
+  .filter-pick {
+    flex: 1;
+    min-width: 0;
+    max-width: none;
   }
 }
 .switch {
