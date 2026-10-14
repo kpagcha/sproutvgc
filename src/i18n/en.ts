@@ -1144,7 +1144,6 @@ export const messages = {
   'usage.itemTip': 'The item its sets hold most',
   'usage.abilityTip': 'The ability its sets run most',
   'usage.movesTip': 'The three moves its sets run most',
-  'usage.broughtShort': 'brought',
   'usage.usage': 'Usage',
   'usage.usageTip': 'The share of teams with it',
   'usage.change': 'Change',

@@ -183,7 +183,8 @@ const anyRare = computed(() => shown.value.some(rare))
 const top = computed(() => Math.max(0, ...rows.value.map((r) => r.usage ?? 0)))
 
 // Each Pokémon's most common set, where its columns don't fit (under 1100px), shows on a line of its own under the
-// row only when the reader asks for it (`Sets`, remembered), so the list stays easy to scan down.
+// row only when the reader asks for it (`Sets`, remembered), so the list stays easy to scan down; never on phones,
+// where it's the Pokémon's usage page's to show.
 const hasSets = computed(() => showItem.value || showAbility.value || showMoves.value)
 const SETS_KEY = 'sproutvgc.usage.sets'
 function savedSets(): boolean {
@@ -194,6 +195,13 @@ function savedSets(): boolean {
   }
 }
 const showSets = shallowRef(savedSets())
+const phoneQuery = window.matchMedia('(max-width: 720px)')
+const phone = shallowRef(phoneQuery.matches)
+const onPhone = (e: MediaQueryListEvent) => (phone.value = e.matches)
+phoneQuery.addEventListener('change', onPhone)
+onBeforeUnmount(() => phoneQuery.removeEventListener('change', onPhone))
+/** The sets' lines are shown. */
+const setsShown = computed(() => hasSets.value && showSets.value && !phone.value)
 function toggleSets() {
   showSets.value = !showSets.value
   try {
@@ -247,14 +255,14 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
       <h1>{{ t('title.usage') }}</h1>
       <p class="muted intro">{{ t('usage.intro', { reg: snapshot?.regulation ?? REGULATION }) }}</p>
       <template v-if="snapshot">
-        <!-- The data shown, and on its line, where the set columns don't fit, the switch that shows sets (at its end on
-             phones, the search having the line under it to itself). -->
+        <!-- The data shown, and on its line, where the set columns don't fit (but on phones), the switch that shows
+             sets. -->
         <div class="source">
           <MetaDialog />
           <span v-if="snapshot.battles" class="muted">
             {{ t('usage.battles', { n: snapshot.battles.toLocaleString(locale) }) }}
           </span>
-          <template v-if="hasSets">
+          <template v-if="hasSets && !phone">
             <label class="btn switch sets-switch" :class="{ on: showSets }">
               <input type="checkbox" :checked="showSets" @change="toggleSets" />
               {{ t('usage.sets') }}
@@ -282,7 +290,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
       <div
         v-if="!data || shown.length"
         class="dex-table"
-        :class="{ restoring, 'with-sets': showSets && hasSets }"
+        :class="{ restoring, 'with-sets': setsShown }"
         :style="colVars"
         role="table"
         @pointermove="onBarMove"
@@ -458,9 +466,8 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
               {{ r.brought === undefined ? '—' : percent(r.brought) }}
             </div>
             <!-- Under xl, what the set columns hold, on a line of its own, as chips, when the reader shows sets: the
-                 item (told by its icon) and the ability, then the moves. On phones, the moves on a line of their own,
-                 and how often it's brought at the end of the first, under its usage: the column doesn't fit. -->
-            <div v-if="showSets && hasSets" role="cell" class="set-line">
+                 item (told by its icon) and the ability, then the moves. -->
+            <div v-if="setsShown" role="cell" class="set-line">
               <AppLink
                 v-if="r.item"
                 :to="{ name: 'item', params: { id: r.item.id } }"
@@ -481,9 +488,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
                 :data-id="r.ability.id"
                 ><DexRef :to="r.ability"
               /></span>
-              <span v-if="showBrought && r.brought !== undefined" class="brought-sm"
-                >{{ percent(r.brought) }} {{ t('usage.broughtShort') }}</span
-              >
               <span v-if="r.moves.length" class="moves">
                 <span
                   v-for="m in r.moves"
@@ -506,8 +510,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         <template v-if="previous"
           >{{ t('usage.change') }}: {{ t('usage.changeTip', { dates: datasetDates(previous) }) }}.</template
         >
-        <template v-if="showSets && showBrought">{{ t('usage.brought') }}: {{ t('usage.broughtTip') }}.</template>
-        <template v-if="hasSets">{{ t('usage.sets') }}: {{ t('usage.setsDesc') }}.</template>
       </p>
       <p v-if="anyRare" class="muted note">{{ t('usage.rare', { share: percent(RARE) }) }}</p>
       <p v-if="terms.some((x) => x.kind === 'move' || x.kind === 'item')" class="muted note">
@@ -564,11 +566,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   .dex-table .row > :nth-child(2) {
     padding-left: 4px;
   }
-  /* The set's line across the whole row. */
-  .dex-table .set-line {
-    grid-column: 1 / -1;
-    padding-left: 6px;
-  }
 }
 /* The set's line: under the row, from the name's column on, when the set columns don't fit. */
 .dex-table .set-line {
@@ -590,10 +587,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   align-items: center;
   gap: 4px;
   margin-left: 8px;
-}
-/* Brought, on phones only. */
-.set-line .brought-sm {
-  display: none;
 }
 /* Each part of the set a chip: the item (its icon before its name), the ability, each move. */
 .set-line .part {
@@ -624,33 +617,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 @media (max-width: 720px) {
   .phone-only-block {
     display: block;
-  }
-  /* The set's lines across the whole row: the item, the ability and, at the end, how often it's brought (under its
-     usage); then the moves, on a line of their own. More room between the lines than wider screens give, so the chips
-     don't run together. */
-  .dex-table .set-line {
-    grid-column: 1 / -1;
-    row-gap: 6px;
-    padding: 6px 6px 8px;
-  }
-  .set-line .brought-sm {
-    display: inline;
-    margin-left: auto;
-    color: var(--muted);
-    white-space: nowrap;
-  }
-  .set-line .moves {
-    flex-basis: 100%;
-    row-gap: 6px;
-    margin-left: 0;
-  }
-  /* Three lines a row (here, after the rule for narrower screens, to win over it), each Pokémon a little apart from
-     the next. */
-  .dex-table.with-sets {
-    --row-height: 6.6em;
-  }
-  .dex-table.with-sets .row:not(.head) {
-    padding-block: 6px 4px;
   }
 }
 /* A Pokémon on few teams: faded, so its numbers and set don't read as firmly as the rest's. */
@@ -836,15 +802,11 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
     display: none;
   }
 }
-/* Phones: the switch at the end of the data's line, its description with the notes under the table; no intro. */
+/* Phones: no intro. */
 @media (max-width: 720px) {
-  .sets-switch {
-    margin-left: auto;
-  }
   .find {
     flex: 1 1 0;
   }
-  .sets-desc,
   .intro {
     display: none;
   }
