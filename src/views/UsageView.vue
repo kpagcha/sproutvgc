@@ -2,15 +2,14 @@
 import { computed, onBeforeUnmount, onDeactivated, shallowRef, useTemplateRef } from 'vue'
 import tippy, { type Instance } from 'tippy.js'
 import { useRouter } from 'vue-router'
-import { X } from '@lucide/vue'
-import { ability, availableIds, item, move, pokemon, type PokemonId } from '@/data/dex'
+import { ability, item, move, pokemon, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
-import { isType, TYPES, type TypeId } from '@/data/types'
 import { datasetDates, GENERATED_SNAPSHOTS, has, percent, players } from '@/data/meta'
-import { locale, t, typeName } from '@/i18n'
+import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
+import { formatTerms, parseTerms, type Term } from '@/lib/searchTerms'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useMeta } from '@/composables/useMeta'
 import { usePageEntered } from '@/composables/usePageEntered'
@@ -20,11 +19,11 @@ import AppLink from '@/components/AppLink'
 import DexRef from '@/components/DexRef'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
-import SearchBox from '@/components/SearchBox.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
+import TermSearch from '@/components/TermSearch.vue'
 import UsageTabs from '@/components/UsageTabs.vue'
 
 // The regulation's Pokémon by usage, from the meta snapshot shown (`useMeta`: the one picked, on this page or another,
@@ -93,61 +92,47 @@ const { key, desc, toggle, sorted } = useSort<Row, Key>({
   remember: 'usage',
 })
 
-// Filtering the list (`?type=`, `?item=`, `?ability=`, `?move=`, together): only the Pokémon of a type, or whose sets
-// run an item, ability or move, on at least `MIN_SHARE` of them (what a few sets run doesn't make it one that runs it).
-// Each filter's choices are what the Pokémon passing the others have, with how many of them have it, by name (types in
-// their usual order), so no choice leaves the list empty; the one picked always, though none have it.
+// The search: its text finds the list's Pokémon by name, and its terms (`?f=`, picked from what the text finds,
+// `TermSearch`) narrow it to those of a type, that can have an ability, or whose sets run a move or item, on at least
+// `MIN_SHARE` of them (what a few sets run doesn't make it one that runs it). With a term of what sets run (an ability,
+// a move, an item), each Pokémon's share of its sets running it is a column of its own. The list stays by usage.
 const router = useRouter()
-const MIN_SHARE = 0.03
-type FilterKind = 'type' | 'item' | 'ability' | 'move'
-const KINDS = ['type', 'item', 'ability', 'move'] as const
-const REFS = { item, ability, move }
+const MIN_SHARE = 0.05
+const TERM_KINDS = ['type', 'ability', 'move', 'item'] as const
 const LIST = { item: 'items', ability: 'abilities', move: 'moves' } as const
-const picked = computed<Record<FilterKind, string | null>>(() => {
-  const at = (k: FilterKind) => {
-    const v = query.value[k]
-    return typeof v === 'string' ? v : null
-  }
-  const ref = (k: 'item' | 'ability' | 'move') => {
-    const v = at(k)
-    return v && (availableIds(k) as string[]).includes(v) ? v : null
-  }
-  const type = at('type')
-  return { type: type && isType(type) ? type : null, item: ref('item'), ability: ref('ability'), move: ref('move') }
-})
-const filtering = computed(() => Object.values(picked.value).some(Boolean))
-/** What a Pokémon has, as the filters go by it: its types, and what its sets run. */
-function traits(id: PokemonId, kind: FilterKind): readonly string[] {
-  if (kind === 'type') return POKEMON[id].types
-  return (data.value?.[id]?.[LIST[kind]] ?? []).filter((x) => (x.share ?? 1) >= MIN_SHARE).map((x) => x.id)
-}
-/** Whether a Pokémon passes the filters, but for the one of `except`'s kind. */
-const passes = (id: PokemonId, except?: FilterKind) =>
-  KINDS.every((k) => k === except || !picked.value[k] || traits(id, k).includes(picked.value[k]))
-const filterName = (kind: FilterKind, x: string) =>
-  kind === 'type' ? typeName(x as TypeId) : refName(REFS[kind](x as never))
-const filters = computed(() =>
-  KINDS.flatMap((kind) => {
-    if (kind !== 'type' && !(snapshot.value && has(snapshot.value, LIST[kind]))) return []
-    const counts = new Map<string, number>()
-    for (const r of rows.value)
-      if (passes(r.id, kind)) for (const x of traits(r.id, kind)) counts.set(x, (counts.get(x) ?? 0) + 1)
-    const value = picked.value[kind]
-    if (value && !counts.has(value)) counts.set(value, 0)
-    const options = [...counts].map(([id, n]) => ({ id, n, name: filterName(kind, id) }))
-    if (kind === 'type') options.sort((a, b) => TYPES.indexOf(a.id as TypeId) - TYPES.indexOf(b.id as TypeId))
-    else options.sort((a, b) => a.name.localeCompare(b.name, locale.value))
-    return [{ kind, value, options, label: t(`usage.filter.${kind}`), any: t(`usage.any.${kind}`) }]
-  }),
+/** The kinds the snapshot can search by: types and abilities always; moves and items with its sets. */
+const termKinds = computed(() =>
+  TERM_KINDS.filter((k) => k === 'type' || k === 'ability' || (snapshot.value && has(snapshot.value, LIST[k]))),
 )
-const setFilter = (k: FilterKind, v: string | undefined) => void router.replace({ query: { ...query.value, [k]: v } })
-const clearFilters = () =>
-  void router.replace({ query: { ...query.value, ...Object.fromEntries(KINDS.map((k) => [k, undefined])) } })
+const terms = computed({
+  get: () => parseTerms(query.value.f, termKinds.value),
+  set: (list: Term[]) => void router.replace({ query: { ...query.value, f: formatTerms(list) } }),
+})
+/** The share of a Pokémon's sets running a term's ability, move or item, when the snapshot has it. */
+function shareOf(id: PokemonId, term: Term): number | undefined {
+  if (term.kind === 'type') return undefined
+  return data.value?.[id]?.[LIST[term.kind]]?.find((x) => x.id === term.id)?.share
+}
+function matches(id: PokemonId, term: Term): boolean {
+  if (term.kind === 'type') return POKEMON[id].types.includes(term.id)
+  if (term.kind === 'ability') return POKEMON[id].abilities.includes(term.id)
+  return (shareOf(id, term) ?? 0) >= MIN_SHARE
+}
+const passes = (id: PokemonId, list: readonly Term[] = terms.value) => list.every((x) => matches(id, x))
+/** How many of the list a term would leave, added to the others: offered with it. */
+const termCount = (term: Term) => rows.value.filter((r) => passes(r.id, [...terms.value, term])).length
+/** The terms whose share of each Pokémon's sets shows, a column each. */
+const shareTerms = computed(() =>
+  terms.value.filter(
+    (x): x is Exclude<Term, { kind: 'type' }> =>
+      x.kind !== 'type' && !!snapshot.value && has(snapshot.value, LIST[x.kind]),
+  ),
+)
 
 const search = shallowRef(typeof query.value.q === 'string' ? query.value.q : '')
 const shown = computed(() => {
   const q = fold(search.value.trim())
-  return sorted.value.filter((r) => (!q || split(r.name, q)) && (!filtering.value || passes(r.id)))
+  return sorted.value.filter((r) => (!q || split(r.name, q)) && passes(r.id))
 })
 // Pointing at a part of the most common set (its name or icon, or its bar) names it with its share, "Miracle Seed ·
 // 62.5%", where there's a pointer to point with. One tooltip for the whole table, placed by hand on the part pointed
@@ -233,6 +218,7 @@ const columns = computed(() => {
       md: 'var(--usage)',
       sm: 'var(--usage)',
     })
+  list.push(...shareTerms.value.map(() => ({ cell: 'r', xl: 'var(--usage)', md: 'var(--usage)', sm: 'var(--usage)' })))
   if (previous.value) list.push({ cell: 'r', xl: 'var(--change)', md: 'var(--change)', sm: 'var(--change)' })
   if (showBrought.value) list.push({ cell: 'wide-only r', xl: 'var(--num)', md: 'var(--num)', sm: null })
   return list
@@ -263,7 +249,13 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         <!-- The search, and beside it, where the set columns don't fit, the switch that shows sets. -->
         <div class="find-row">
           <div class="find">
-            <SearchBox v-model="search" :placeholder="t('usage.search')" :aria-label="t('usage.search')" />
+            <TermSearch
+              v-model:text="search"
+              v-model:terms="terms"
+              :placeholder="t('usage.search')"
+              :kinds="termKinds"
+              :count="termCount"
+            />
           </div>
           <template v-if="hasSets">
             <label class="btn switch sets-switch" :class="{ on: showSets }">
@@ -272,37 +264,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
             </label>
             <span class="muted sets-desc">{{ t('usage.setsDesc') }}</span>
           </template>
-        </div>
-        <!-- Filtering the list: by type, item, ability and move, each a choice of what the Pokémon have. -->
-        <div class="filters" role="group" :aria-label="t('usage.filter')">
-          <span class="filters-label">{{ t('usage.filter') }}</span>
-          <span v-for="f in filters" :key="f.kind" class="filter" :class="{ on: f.value }">
-            <TypeIcon
-              v-if="f.kind === 'type' && f.value"
-              :type="f.value as TypeId"
-              class="filter-icon"
-              aria-hidden="true"
-            />
-            <ItemIcon
-              v-else-if="f.kind === 'item' && f.value"
-              :id="f.value as never"
-              :scale="0.67"
-              class="filter-icon"
-              aria-hidden="true"
-            />
-            <select
-              class="search filter-pick"
-              :value="f.value ?? ''"
-              :aria-label="f.label"
-              @change="setFilter(f.kind, ($event.target as HTMLSelectElement).value || undefined)"
-            >
-              <option value="">{{ f.any }}</option>
-              <option v-for="o in f.options" :key="o.id" :value="o.id">{{ o.name }} ({{ o.n }})</option>
-            </select>
-          </span>
-          <button v-if="filtering" type="button" class="btn inverted filters-clear" @click="clearFilters">
-            <X :size="14" aria-hidden="true" />{{ t('usage.clearFilters') }}
-          </button>
         </div>
       </template>
       <p v-else class="muted">{{ t('usage.none', { reg: REGULATION }) }}</p>
@@ -340,6 +301,17 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
             :desc="desc"
             @sort="toggle('usage')"
           />
+          <div
+            v-for="x in shareTerms"
+            :key="`${x.kind}:${x.id}`"
+            v-tip="t('usage.termShareTip', { name: refName(x) })"
+            role="columnheader"
+            class="r term-head"
+          >
+            <ItemIcon v-if="x.kind === 'item'" :id="x.id" :scale="0.67" /><span v-else class="term-name">{{
+              refName(x)
+            }}</span>
+          </div>
           <SortHeader
             v-if="previous"
             :label="t('usage.change')"
@@ -435,6 +407,15 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
               {{ r.usage === undefined ? '—' : percent(r.usage) }}
             </div>
             <div
+              v-for="x in shareTerms"
+              :key="`${x.kind}:${x.id}`"
+              role="cell"
+              class="r num meter term-share"
+              :style="{ '--share': shareOf(r.id, x) ?? 0 }"
+            >
+              {{ shareOf(r.id, x) === undefined ? '—' : percent(shareOf(r.id, x)!) }}
+            </div>
+            <div
               v-if="previous"
               role="cell"
               class="r num change"
@@ -503,8 +484,8 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         <template v-if="hasSets">{{ t('usage.sets') }}: {{ t('usage.setsDesc') }}.</template>
       </p>
       <p v-if="anyRare" class="muted note">{{ t('usage.rare', { share: percent(RARE) }) }}</p>
-      <p v-if="picked.item || picked.ability || picked.move" class="muted note">
-        {{ t('usage.filteredSets', { share: percent(MIN_SHARE) }) }}
+      <p v-if="terms.some((x) => x.kind === 'move' || x.kind === 'item')" class="muted note">
+        {{ t('usage.termSets', { share: percent(MIN_SHARE) }) }}
       </p>
       <p v-if="broughtAll && snapshot.cutoff" class="muted note">
         {{ t('usage.broughtAll', { players: players(snapshot.cutoff) }) }}
@@ -777,11 +758,8 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   margin-bottom: 12px;
 }
 .find {
-  flex: 0 1 320px;
+  flex: 0 1 480px;
   min-width: 0;
-}
-.find :deep(.search-box) {
-  margin: 0;
 }
 @media (min-width: 1100px) {
   .sets-switch,
@@ -805,48 +783,18 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
     margin-bottom: 8px;
   }
 }
-/* The filters, on a line of their own under the search: each one picked marked. */
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 8px;
+/* A term's column: its name (an item's icon) over each Pokémon's share of its sets running it, its bar as brought's. */
+.term-head {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.filters-label {
-  font-weight: bold;
+.term-name {
+  font-size: 0.85em;
 }
-.filter {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.filter-pick {
-  width: auto;
-  max-width: 14em;
-  margin: 0;
-}
-.filter.on .filter-pick {
-  border-color: var(--ink);
-  background: var(--sel);
-}
-.filters-clear {
-  gap: 4px;
-  padding-block: 4px;
-}
-/* On phones, the choices share the lines, each as wide as its share. */
-@media (max-width: 720px) {
-  .filters-label {
-    flex-basis: 100%;
-  }
-  .filter {
-    flex: 1 1 9em;
-    min-width: 0;
-  }
-  .filter-pick {
-    flex: 1;
-    min-width: 0;
-    max-width: none;
-  }
+.term-share::after {
+  bottom: 4px;
+  height: 2px;
+  background: var(--muted);
 }
 .switch {
   flex: none;
