@@ -4,16 +4,10 @@ import { POKEMON } from '@/data/pokemon'
 import { percentiles, type Percentiles, type Sample } from '@/lib/statPercentiles'
 
 // The sets of Pokémon base stats can be compared against, each with its percentiles (below), named by `stats.vs.<set>`
-// and described by `stats.about.<set>` (and in the Pokémon list's choice by `pokedex.compare.<set>`). For now every
-// Pokémon equally; sets weighted by usage (a regulation's meta, a championship) join this list, before it, which the
-// list's choice keeps last.
+// and described by `stats.about.<set>`. For now every Pokémon equally; sets weighted by usage (a regulation's meta, a
+// championship) join this list, before it. The Pokémon list always marks its stats against every Pokémon.
 export const STAT_SETS = ['all'] as const
 export type StatSet = (typeof STAT_SETS)[number]
-
-// How the Pokémon list shows stats: on their own (`plain`), or marked against the Pokémon it shows at the moment
-// (`shown`), or against a set.
-export const LIST_STAT_MARKS = ['plain', 'shown', ...STAT_SETS] as const
-export type ListStatMarks = (typeof LIST_STAT_MARKS)[number]
 
 // How a Pokémon's page draws its stats: on their own (`plain`), or set against one of the sets.
 export const PAGE_STAT_BARS = ['plain', ...STAT_SETS] as const
@@ -38,14 +32,12 @@ function stored<T extends string>(key: string, values: readonly T[]) {
   return choice
 }
 
-const listMarks = stored('sproutvgc.statReference', LIST_STAT_MARKS)
 const pageBars = stored('sproutvgc.pokemon.statBars', PAGE_STAT_BARS)
 
-export const useListStatMarks = () => listMarks
 export const usePageStatBars = () => pageBars
 
 /** The reference's samples: Megas are left out, as one for nearly every species would lift every median. */
-export const samples = (ids: readonly PokemonId[]): Sample[] =>
+const samples = (ids: readonly PokemonId[]): Sample[] =>
   ids.flatMap((id) => (POKEMON[id].mega ? [] : [{ stats: POKEMON[id].stats, weight: 1 }]))
 
 const cache = new Map<StatSet, Percentiles>()

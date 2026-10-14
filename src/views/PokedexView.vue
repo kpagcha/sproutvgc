@@ -18,7 +18,6 @@ import { locale, t, typeName } from '@/i18n'
 import { loadDescriptions, shortText } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, sliceMarks, split, type Marks } from '@/lib/search'
-import { percentiles } from '@/lib/statPercentiles'
 import {
   NO_FILTERS,
   allTerms,
@@ -34,7 +33,7 @@ import { usePageEntered } from '@/composables/usePageEntered'
 import { useRowColumns } from '@/composables/useRowColumns'
 import { useSearch } from '@/composables/useSearch'
 import { useSort } from '@/composables/useSort'
-import { LIST_STAT_MARKS, samples, setPercentiles, useListStatMarks } from '@/composables/useStatReference'
+import { setPercentiles } from '@/composables/useStatReference'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
 import SearchBox from '@/components/SearchBox.vue'
@@ -187,28 +186,19 @@ const shown = computed(() => {
   })
 })
 
-// Each stat is marked by where it stands among the Pokémon it's compared with (`useListStatMarks`), as a bar from the
-// middle of its cell, the median, towards the right above it and the left below, colored by `statColor`.
-const reference = useListStatMarks()
-const percentile = computed(() =>
-  reference.value === 'plain'
-    ? null
-    : reference.value === 'shown'
-      ? percentiles(samples(shown.value.map((r) => r.id)))
-      : setPercentiles(reference.value),
-)
+// Each stat is marked by where it stands among every Pokémon of the dex, as a bar from the middle of its cell, the
+// median, towards the right above it and the left below, colored by `statColor`.
+const percentile = setPercentiles('all')
 interface Mark {
   class: 'hi' | 'lo'
   style: string
 }
 const statMarks = computed(() => {
-  const p = percentile.value
-  if (!p) return null
   return new Map(
     rows.value.map((r): [PokemonId, (Mark | null)[]] => [
       r.id,
       r.data.stats.map((v, i) => {
-        let x = p.rank(i, v)
+        let x = percentile.rank(i, v)
         if (x === null) return null
         x = Math.round(x * 1000) / 1000
         const color = `--color: ${statColor(v)}`
@@ -359,12 +349,6 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
         >
           {{ t('filter.advanced') }}
         </button>
-        <label class="view-opts">
-          <span v-tip="t('pokedex.compareTip')" class="muted">{{ t('pokedex.compare') }}</span>
-          <select v-model="reference" class="search">
-            <option v-for="m in LIST_STAT_MARKS" :key="m" :value="m">{{ t(`pokedex.compare.${m}`) }}</option>
-          </select>
-        </label>
       </div>
       <FilterGroups v-if="advanced" v-model="filters" />
       <ul v-else-if="plainFilters.length" class="active-filters">
@@ -488,8 +472,8 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
               :key="i"
               role="cell"
               class="wide-only r num stat"
-              :class="statMarks?.get(r.id)?.[i]?.class"
-              :style="statMarks?.get(r.id)?.[i]?.style"
+              :class="statMarks.get(r.id)?.[i]?.class"
+              :style="statMarks.get(r.id)?.[i]?.style"
             >
               {{ v }}
             </div>
@@ -498,8 +482,8 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
               v-else
               role="cell"
               class="r num stat"
-              :class="statMarks?.get(r.id)?.[statIndex]?.class"
-              :style="statMarks?.get(r.id)?.[statIndex]?.style"
+              :class="statMarks.get(r.id)?.[statIndex]?.class"
+              :style="statMarks.get(r.id)?.[statIndex]?.style"
             >
               {{ r.data.stats[statIndex] }}
             </div>
@@ -676,24 +660,6 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
 }
 .total {
   font-weight: bold;
-}
-/* What the stats are marked against: how the table shows them, not which rows it shows, so it sits apart from the
-   filters, at the far end of their row (or of its own, when it wraps), as one segmented control. As tall as the
-   search box, less its margin. Left out on phones along with the stats. */
-.view-opts {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 12px auto;
-}
-.view-opts .search {
-  width: auto;
-  margin: 0;
-}
-@media (max-width: 720px) {
-  .view-opts {
-    display: none;
-  }
 }
 /* A stat's mark: a bar along the bottom of its cell, between the median (the middle) and where the stat stands (the
    left edge the lowest, the right edge the highest), on a faint track the cell's width. */
