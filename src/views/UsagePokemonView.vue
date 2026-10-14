@@ -595,7 +595,8 @@ const sections = computed(() =>
    the one its sets run most outlined. */
 .abilities {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  /* No wider than the panel, when that's narrower than a card. */
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
   gap: 10px 16px;
   margin: 0;
   padding: 0;

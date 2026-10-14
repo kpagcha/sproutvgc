@@ -85,6 +85,8 @@ useRowColumns(useTemplateRef('head'))
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  /* A name longer than its room breaks across lines rather than running into the share after it. */
+  overflow-wrap: anywhere;
 }
 .below {
   font-size: 0.9em;

@@ -283,6 +283,10 @@ const skeleton = computed(() => [
 .dex-table.tight .row > .span-desc {
   padding-inline: 6px;
 }
+/* A name longer than its room breaks across lines rather than running into the badges after it. */
+.dex-table.tight .name {
+  overflow-wrap: anywhere;
+}
 /* A move's share of a Pokémon's sets: its number, its bar under it, out of all of them. */
 .meter {
   position: relative;
