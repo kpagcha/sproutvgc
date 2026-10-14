@@ -4,6 +4,7 @@ import { afterPageExit } from '@/lib/pageExit'
 import { TYPES } from '@/data/types'
 import type { MessageKey } from '@/i18n'
 import type { AreaId } from '@/lib/areas'
+import type { UsageList } from '@/components/UsageTabs.vue'
 import { loadDexNames } from '@/i18n/refName'
 import { hasFavorites } from '@/composables/useFavorites'
 import { hasRecent, visitPage } from '@/composables/useRecent'
@@ -67,6 +68,15 @@ const soon = (area: AreaId, section: string, path: string, titleKey: MessageKey,
   name: section,
   component: () => import('@/views/ComingSoonView.vue'),
   meta: { titleKey, descKey, ...inArea(area, section) },
+})
+
+// A usage list not built yet (the Pokémon's is `/meta/usage`): the tabs to the others, and that it's coming.
+const usageSoon = (list: UsageList, name: string, titleKey: MessageKey, descKey: MessageKey) => ({
+  path: `/meta/usage/${list}`,
+  name,
+  component: () => import('@/views/UsageSoonView.vue'),
+  props: { list },
+  meta: { titleKey, descKey, ...inArea('meta', 'usage') },
 })
 
 // An area's own page, listing its sections.
@@ -254,6 +264,10 @@ export const router = createRouter({
         ...inArea('meta', 'usage'),
       },
     },
+    { path: '/meta/usage/pokemon', redirect: { name: 'usage' } },
+    usageSoon('moves', 'moveUsage', 'title.moveUsage', 'desc.moveUsage'),
+    usageSoon('items', 'itemUsage', 'title.itemUsage', 'desc.itemUsage'),
+    usageSoon('abilities', 'abilityUsage', 'title.abilityUsage', 'desc.abilityUsage'),
     soon('meta', 'reports', '/meta/reports', 'title.reports', 'desc.reports'),
     {
       path: '/meta/speed-tiers',

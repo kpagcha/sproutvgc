@@ -21,6 +21,7 @@ import MetaDialog from '@/components/MetaDialog.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
+import UsageTabs from '@/components/UsageTabs.vue'
 
 // The regulation's Pokémon by usage, from the meta snapshot shown (`useMeta`: the one picked, on this page or another,
 // when there are several, of any regulation and month generated, `MetaDialog`). Columns come and go with what the snapshot has. Its links are `AppLink`s and its icons
@@ -134,9 +135,10 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 </script>
 
 <template>
-  <!-- The controls and the table in panels of their own. -->
+  <!-- The controls, under the band of tabs to the other usage lists, and the table in panels of their own. -->
   <div>
-    <div class="panel">
+    <div class="panel banded">
+      <UsageTabs current="pokemon" />
       <h1>{{ t('title.usage') }}</h1>
       <p class="muted intro">{{ t('usage.intro', { reg: snapshot?.regulation ?? REGULATION }) }}</p>
       <template v-if="snapshot">
