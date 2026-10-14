@@ -4,6 +4,7 @@
 import DATA from '@/data/generated/pokemon.data.json'
 import type { AbilityId, ItemId, MoveId, PokemonId } from '@/data/dex'
 import type { TypeId } from '@/data/types'
+import { statValue } from '@/lib/stats'
 
 export const STATS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as const
 export type StatId = (typeof STATS)[number]
@@ -44,7 +45,17 @@ export const POKEMON = DATA as unknown as Record<PokemonId, Pokemon>
 export const spriteUrl = (id: PokemonId) => `${import.meta.env.BASE_URL}sprites/pokemon/${id}.png`
 
 /** Base stat total. */
-export const total = (p: Pokemon) => p.stats.reduce((a, b) => a + b, 0)
+/**
+ * Its stats as the game shows them, which every page does, with no stat points and a neutral nature (`statValue`): each
+ * base stat plus 20, HP plus 75. The data keeps the base stats, which the game's own pages don't show.
+ */
+export const gameStats = (p: Pokemon) => p.stats.map((base, i) => statValue(base, 0, 'neutral', i === 0))
+/** The total of its stats as the game shows them. */
+export const gameTotal = (p: Pokemon) => gameStats(p).reduce((a, b) => a + b, 0)
+/** Where a stat as the game shows it falls along a stat bar, in percent, out of `BAR_MAX` (the few above it fill it). */
+const BAR_MAX = 250
+export const barAt = (v: number) => Math.min(100, (v / BAR_MAX) * 100)
+export const barWidth = (v: number) => `${barAt(v)}%`
 
 /** Whether a Pokémon's held item is fixed, as it needs it (a Mega its Mega Stone, Ogerpon its mask): it holds no other
  * (a Choice Scarf, an Iron Ball), and can't lose it (Unburden). */

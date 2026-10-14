@@ -3,10 +3,20 @@ import { computed, ref, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { ability, availableIds, available, item, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
-import { POKEMON, STATS, loadLearnsets, movesOf, speciesOf, spriteUrl, statColor, total } from '@/data/pokemon'
+import {
+  POKEMON,
+  STATS,
+  barWidth,
+  gameStats,
+  gameTotal,
+  loadLearnsets,
+  movesOf,
+  speciesOf,
+  spriteUrl,
+  statColor,
+} from '@/data/pokemon'
 import { t, tSlots, type MessageKey } from '@/i18n'
 import { description } from '@/i18n/descriptions'
-import { PAGE_STAT_BARS, setPercentiles, usePageStatBars } from '@/composables/useStatReference'
 import { refName } from '@/i18n/refName'
 import DefenseResults from '@/components/DefenseResults.vue'
 import DexRef from '@/components/DexRef'
@@ -16,7 +26,6 @@ import ItemIcon from '@/components/ItemIcon.vue'
 import MoveTable from '@/components/MoveTable.vue'
 import PokemonChips from '@/components/PokemonChips.vue'
 import PokemonIcon from '@/components/PokemonIcon'
-import SegmentedControl from '@/components/SegmentedControl.vue'
 import TypeIcon from '@/components/TypeIcon'
 
 // One Pokémon: its sprite, types, abilities and base stats, how it changes (Mega Evolution, other formes) and evolves,
@@ -48,28 +57,13 @@ function onMatchupsToggle(e: Event) {
   }
 }
 
-// Each stat's bar, out of 200 (the few above it fill it), colored by `statColor`. Plain (`usePageStatBars`), on its
-// own; set against a set of Pokémon, also a tick at its median, a band over its middle half, and on hover how many it
-// beats.
-const bars = usePageStatBars()
-const at = (v: number) => Math.min(100, v / 2)
-const along = (v: number) => `${at(v)}%`
+// Its stats as the game shows them (`gameStats`), each a bar colored by its base stat (`statColor`), which it says on
+// hover.
 const stats = computed(() => {
-  const p = bars.value === 'plain' ? null : setPercentiles(bars.value)
+  const values = gameStats(mon.value)
   return STATS.map((s, i) => {
-    const v = mon.value.stats[i]!
-    const rank = p?.rank(i, v) ?? null
-    const median = p?.quantile(i, 0.5) ?? null
-    const low = p?.quantile(i, 0.25) ?? null
-    const high = p?.quantile(i, 0.75) ?? null
-    return {
-      s,
-      v,
-      color: statColor(v),
-      tip: rank === null ? undefined : t('pokemon.statRank', { pct: Math.round(rank * 100) }),
-      median: median === null ? null : along(median),
-      band: low === null || high === null ? null : { left: along(low), width: `${at(high) - at(low)}%` },
-    }
+    const base = mon.value.stats[i]!
+    return { s, v: values[i]!, base, width: barWidth(values[i]!), color: statColor(base) }
   })
 })
 
@@ -141,35 +135,25 @@ watchEffect(async () => {
         </p>
       </div>
       <div class="stats-col">
-        <SegmentedControl
-          v-model="bars"
-          class="bars-mode"
-          :label="t('pokemon.statBars')"
-          :options="
-            PAGE_STAT_BARS.map((b) => ({ value: b, label: b === 'plain' ? t('stats.plain') : t(`stats.vs.${b}`) }))
-          "
-        />
+        <p class="stats-head">
+          <span v-tip="t('stats.gameTip')" class="tipped muted">{{ t('stats.game') }}</span>
+        </p>
         <table class="stats">
           <tbody>
-            <tr v-for="st in stats" :key="st.s" v-tip="st.tip">
+            <tr v-for="st in stats" :key="st.s">
               <th class="muted">{{ t(`stat.${st.s}`) }}</th>
-              <td class="r num">{{ st.v }}</td>
+              <td v-tip="t('stats.base', { base: st.base })" class="r num">{{ st.v }}</td>
               <td class="bar-cell">
-                <span class="track" :class="{ plain: bars === 'plain' }">
-                  <span v-if="st.band" class="band" :style="st.band"></span>
-                  <span class="bar" :style="{ width: along(st.v), background: st.color }"></span>
-                  <span v-if="st.median" class="median" :style="{ left: st.median }"></span>
-                </span>
+                <span class="track"><span class="bar" :style="{ width: st.width, background: st.color }"></span></span>
               </td>
             </tr>
             <tr class="total">
               <th v-tip="t('stat.bstFull')" class="muted">{{ t('stat.bst') }}</th>
-              <td class="r num">{{ total(mon) }}</td>
+              <td class="r num">{{ gameTotal(mon) }}</td>
               <td></td>
             </tr>
           </tbody>
         </table>
-        <p v-if="bars !== 'plain'" class="legend muted">{{ t(`stats.about.${bars}`) }} {{ t('pokemon.statLegend') }}</p>
         <p class="weight muted">
           {{ t('pokemon.weight') }} <span class="num">{{ mon.weight }} kg</span>
         </p>
@@ -303,53 +287,28 @@ watchEffect(async () => {
 .bar-cell {
   width: 100%;
 }
-/* A bullet chart: on a faint track, the middle half of every Pokémon's values as a band, the stat's bar over it,
-   thinner, and the median as a tick through both. */
-.bars-mode {
-  justify-content: flex-end;
-  margin-bottom: 8px;
+/* Its stats' heading, saying they're as the game shows them. */
+.stats-head {
+  margin: 0 0 6px;
+  font-size: 0.85em;
+  text-align: right;
 }
+.tipped {
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+}
+/* A stat's bar, on a faint track. */
 .track {
   position: relative;
   display: block;
-  height: 12px;
-  background: color-mix(in srgb, var(--border) 40%, transparent);
-}
-.band,
-.bar,
-.median {
-  position: absolute;
-  left: 0;
-}
-.band {
-  top: 0;
-  bottom: 0;
-  background: var(--border);
-}
-.bar {
-  top: 3px;
-  bottom: 3px;
-}
-/* Plain, the bar as it was before the comparison: on its own, its full height. */
-.track.plain {
   height: 10px;
-  background: none;
-}
-.plain .bar {
-  top: 0;
-  bottom: 0;
+  background: color-mix(in srgb, var(--border) 35%, transparent);
   border-radius: 2px;
 }
-.median {
-  top: -3px;
-  bottom: -3px;
-  width: 2px;
-  margin-left: -1px;
-  background: var(--text);
-}
-.legend {
-  margin: 6px 0 0;
-  font-size: 0.8em;
+.bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 2px;
 }
 .stats .total td,
 .stats .total th {
@@ -419,8 +378,8 @@ details.matchups {
     grid-column: 1 / -1;
     margin: 8px 0 0;
   }
-  .bars-mode {
-    justify-content: flex-start;
+  .stats-head {
+    text-align: left;
   }
   .sprite {
     grid-area: sprite;
