@@ -7,7 +7,7 @@ import { ability, availableIds, item, move, pokemon, type PokemonId } from '@/da
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
 import { isType, TYPES, type TypeId } from '@/data/types'
-import { has, percent, players } from '@/data/meta'
+import { datasetDates, GENERATED_SNAPSHOTS, has, percent, players } from '@/data/meta'
 import { locale, t, typeName } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
@@ -44,6 +44,19 @@ const broughtAll = computed(
   () => showBrought.value && snapshot.value?.unweighted?.includes('brought') && !!snapshot.value.cutoff,
 )
 
+// Trends: against the dataset before the one shown in its series (`previous`, the month before), each Pokémon's rank
+// then (a mark by its rank: up or down so many places, or new to it) and the usage it gained or lost since, in points,
+// a column of its own. Changes under `STEADY` read as noise: shown, but not colored. None for a series' first dataset.
+const previous = computed(() => GENERATED_SNAPSHOTS.find((s) => s.id === snapshot.value?.previous))
+const STEADY = 0.005
+/** A change in usage, in percentage points: "+3.2", "−1.8". */
+const points = (x: number) =>
+  (x * 100).toLocaleString(locale.value, {
+    signDisplay: 'exceptZero',
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  })
+
 const rows = computed(() =>
   Object.entries(data.value ?? {}).map(([key, m]) => {
     const id = key as PokemonId
@@ -55,6 +68,10 @@ const rows = computed(() =>
       name: refName(pokemon(id)),
       rank: m!.rank,
       usage: m!.usage,
+      // Places gained (up) or lost since the previous dataset, or whether it's new to it.
+      climb: m!.prev ? m!.prev.rank - m!.rank : undefined,
+      fresh: !!previous.value && !m!.prev,
+      change: m!.usage !== undefined && m!.prev?.usage !== undefined ? m!.usage - m!.prev.usage : undefined,
       brought: m!.brought,
       // Its most common set, at a glance: item, ability and moves, each with the share of its sets that run it (a bar
       // under it, `shared`).
@@ -65,13 +82,13 @@ const rows = computed(() =>
   }),
 )
 type Row = (typeof rows.value)[number]
-type Key = 'rank' | 'name' | 'usage' | 'brought'
+type Key = 'rank' | 'name' | 'usage' | 'change' | 'brought'
 
 const { key, desc, toggle, sorted } = useSort<Row, Key>({
   rows,
-  value: (r, k) => (k === 'name' ? r.name : k === 'rank' ? r.rank : (r[k] ?? -1)),
+  value: (r, k) => (k === 'name' ? r.name : k === 'rank' ? r.rank : (r[k] ?? -Infinity)),
   initial: 'rank',
-  startsDesc: (k) => k === 'usage' || k === 'brought',
+  startsDesc: (k) => k === 'usage' || k === 'change' || k === 'brought',
   locale,
   remember: 'usage',
 })
@@ -216,6 +233,7 @@ const columns = computed(() => {
       md: 'var(--usage)',
       sm: 'var(--usage)',
     })
+  if (previous.value) list.push({ cell: 'r', xl: 'var(--change)', md: 'var(--change)', sm: 'var(--change)' })
   if (showBrought.value) list.push({ cell: 'wide-only r', xl: 'var(--num)', md: 'var(--num)', sm: null })
   return list
 })
@@ -296,6 +314,8 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         :class="{ restoring, 'with-sets': showSets && hasSets }"
         :style="colVars"
         role="table"
+        @pointermove="onBarMove"
+        @pointerleave="hideBarTip"
       >
         <div ref="head" class="row head" role="row">
           <SortHeader
@@ -314,13 +334,20 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
           <SortHeader
             v-if="showUsage"
             :label="t('usage.usage')"
-            @pointermove="onBarMove"
-            @pointerleave="hideBarTip"
             :tip="t('usage.usageTip')"
             right
             :active="key === 'usage'"
             :desc="desc"
             @sort="toggle('usage')"
+          />
+          <SortHeader
+            v-if="previous"
+            :label="t('usage.change')"
+            :tip="t('usage.changeTip', { dates: datasetDates(previous) })"
+            right
+            :active="key === 'change'"
+            :desc="desc"
+            @sort="toggle('change')"
           />
           <SortHeader
             v-if="showBrought"
@@ -336,7 +363,15 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         <SkeletonRows v-if="!entered || !data" :cells="skeleton" height="2.3em" />
         <template v-else>
           <div v-for="r in shown" :key="r.id" class="row" :class="{ rare: rare(r) }" role="row">
-            <div role="cell" class="r num muted">{{ r.rank }}</div>
+            <div role="cell" class="r num muted rank">
+              {{ r.rank }}
+              <span v-if="r.climb" class="climb" :class="r.climb > 0 ? 'up' : 'down'"
+                ><span aria-hidden="true">{{ r.climb > 0 ? '▲' : '▼' }}</span
+                ><span class="visually-hidden">{{ t(r.climb > 0 ? 'usage.up' : 'usage.down') }}</span
+                >{{ Math.abs(r.climb) }}</span
+              >
+              <span v-else-if="r.fresh" class="climb fresh">{{ t('usage.new') }}</span>
+            </div>
             <div role="cell" class="grow">
               <AppLink :to="{ name: 'pokemon', params: { id: r.id } }" class="mon">
                 <PokemonIcon :id="r.id" />
@@ -400,6 +435,14 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
               {{ r.usage === undefined ? '—' : percent(r.usage) }}
             </div>
             <div
+              v-if="previous"
+              role="cell"
+              class="r num change"
+              :class="r.change !== undefined && Math.abs(r.change) >= STEADY && (r.change > 0 ? 'up' : 'down')"
+            >
+              {{ r.change === undefined ? '' : points(r.change) }}
+            </div>
+            <div
               v-if="showBrought"
               role="cell"
               class="wide-only r num meter brought"
@@ -453,6 +496,9 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
       <p v-else class="muted">{{ t('usage.noMatch') }}</p>
       <p class="muted note phone-only-block">
         {{ t('usage.usage') }}: {{ t('usage.usageTip') }}.
+        <template v-if="previous"
+          >{{ t('usage.change') }}: {{ t('usage.changeTip', { dates: datasetDates(previous) }) }}.</template
+        >
         <template v-if="showSets && showBrought">{{ t('usage.brought') }}: {{ t('usage.broughtTip') }}.</template>
         <template v-if="hasSets">{{ t('usage.sets') }}: {{ t('usage.setsDesc') }}.</template>
       </p>
@@ -480,6 +526,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   --name: 13em;
   --ability: 9em;
   --usage: 4.5em;
+  --change: minmax(3.5em, auto);
   --row-height: 2.3em;
   --cols: var(--cols-md);
 }
@@ -500,6 +547,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
     --cols: var(--cols-sm);
     --num: minmax(1.8em, auto);
     --usage: 4em;
+    --change: minmax(3em, auto);
   }
   /* The rank in line with the panel's text: left-aligned, so a short one leaves no gap before it. */
   .dex-table .row > :first-child {
@@ -681,6 +729,44 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 }
 .usage {
   font-weight: bold;
+}
+/* The rank's mark: places gained or lost since the previous dataset, or new to it, small after the rank. */
+.climb {
+  margin-left: 3px;
+  font-size: 0.75em;
+  white-space: nowrap;
+}
+.up {
+  color: var(--good);
+}
+.down {
+  color: var(--bad);
+}
+.fresh {
+  color: var(--accent);
+  font-weight: bold;
+}
+.rank {
+  white-space: nowrap;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+/* The change in usage: muted while it's steady, in the color of its direction once it isn't. */
+.change {
+  font-size: 0.9em;
+  color: var(--muted);
+}
+.change.up {
+  color: var(--good);
+}
+.change.down {
+  color: var(--bad);
 }
 /* The search and the Sets switch in a row; the switch and what it does only where the set columns don't fit. */
 .find-row {
