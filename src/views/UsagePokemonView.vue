@@ -405,13 +405,14 @@ const sections = computed(() =>
                 <span class="invest-text" aria-hidden="true"
                   ><span class="invest-pts">{{ x.points }}</span
                   ><span class="invest-val"
-                    >{{ x.value
-                    }}<component
+                    ><component
                       :is="x.effect === 'up' ? ChevronsUp : ChevronsDown"
                       v-if="x.effect !== 'neutral'"
                       :size="12"
-                      :stroke-width="3" /></span
-                ></span>
+                      :stroke-width="3"
+                    />{{ x.value }}</span
+                  ></span
+                >
               </span>
             </div>
           </div>
