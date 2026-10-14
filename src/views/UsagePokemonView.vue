@@ -23,6 +23,7 @@ import DexRef from '@/components/DexRef'
 import DexText from '@/components/DexText'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import SectionNav from '@/components/SectionNav.vue'
 import ShareSplit from '@/components/ShareSplit.vue'
 import SpeedShare from '@/components/SpeedShare.vue'
 import SpeedSpread from '@/components/SpeedSpread.vue'
@@ -198,6 +199,20 @@ const teammates = computed(() =>
     .filter((x) => available(pokemon(x.id)))
     .map((x) => ({ ...x, ...splitForme(x.id, refName(pokemon(x.id))) })),
 )
+
+// Its sections, as the row of links at its top lists them: those it shows.
+const sections = computed(() =>
+  [
+    { id: 'sec-stats', label: t('usageMon.secStats'), shown: true },
+    { id: 'sec-abilities', label: t('usageMon.abilities'), shown: true },
+    { id: 'sec-moves', label: t('usageMon.moves'), shown: moves.value.length > 0 },
+    { id: 'sec-items', label: t('usageMon.items'), shown: items.value.length > 0 },
+    { id: 'sec-speed', label: t('usageMon.speed'), shown: spread.value.length > 0 },
+    { id: 'sec-spreads', label: t('usageMon.secSpreads'), shown: spreads.value.length > 0 },
+    { id: 'sec-history', label: t('usageMon.secHistory'), shown: months.value.length > 1 },
+    { id: 'sec-teammates', label: t('usageMon.teammates'), shown: teammates.value.length > 0 },
+  ].filter((x) => x.shown),
+)
 </script>
 
 <template>
@@ -211,7 +226,10 @@ const teammates = computed(() =>
     </Teleport>
 
     <!-- The heading: who, its stats and what its sets do to them, and how much it's used. -->
-    <div class="panel head" :class="{ 'meta-stale': loading }">
+    <!-- Its sections, a row of links stuck to the top, the one being read marked. -->
+    <SectionNav v-if="m" :sections="sections" />
+
+    <div id="sec-stats" class="panel head" :class="{ 'meta-stale': loading }">
       <img
         v-if="!mon.noSprite"
         class="pixel sprite"
@@ -307,7 +325,7 @@ const teammates = computed(() =>
 
     <template v-else-if="m">
       <!-- Its abilities, a panel of their own: each with the share of its sets running it and what it does. -->
-      <section class="panel abilities-panel" :class="{ 'meta-stale': loading }">
+      <section id="sec-abilities" class="panel abilities-panel" :class="{ 'meta-stale': loading }">
         <h2>{{ t('usageMon.abilities') }}</h2>
         <ul class="abilities">
           <li v-for="(a, i) in abilities" :key="a.key" :class="{ main: i === 0 && a.share }">
@@ -322,18 +340,18 @@ const teammates = computed(() =>
       </section>
       <!-- What its sets run: moves, items, abilities. -->
       <div class="cards" :class="{ 'meta-stale': loading }">
-        <section v-if="moves.length" class="panel card moves-card">
+        <section v-if="moves.length" id="sec-moves" class="panel card moves-card">
           <h2>{{ t('usageMon.moves') }}</h2>
           <MoveTable :ids="moves.map((x) => x.ref.id)" :shares="moveShares" descriptions no-pp no-filters stacked />
         </section>
-        <section v-if="items.length" class="panel card items-card">
+        <section v-if="items.length" id="sec-items" class="panel card items-card">
           <h2>{{ t('usageMon.items') }}</h2>
           <ItemList :items="items" :shares="itemShares" />
         </section>
       </div>
 
       <!-- Its Speeds, as the speed tiers draw a row, and the ways to them. -->
-      <section v-if="spread.length" class="panel" :class="{ 'meta-stale': loading }">
+      <section v-if="spread.length" id="sec-speed" class="panel" :class="{ 'meta-stale': loading }">
         <h2>{{ t('usageMon.speed') }}</h2>
         <SpeedSpread
           :title="t('usageMon.speedChart', { name: refName(ref_) })"
@@ -358,7 +376,7 @@ const teammates = computed(() =>
       <!-- Its most common exact spreads, a card each, side by side: its rank and share of its sets on top, then its
            nature, then a bar per stat of the points put there; the stats named down the left, staying there as the
            cards scroll sideways on phones. -->
-      <section v-if="spreads.length" class="panel" :class="{ 'meta-stale': loading }">
+      <section v-if="spreads.length" id="sec-spreads" class="panel" :class="{ 'meta-stale': loading }">
         <h2>{{ t('usageMon.spreads') }}</h2>
         <p class="muted small spreads-intro">{{ t('usageMon.spreadsIntro') }}</p>
         <div class="spreads-scroll">
@@ -401,7 +419,7 @@ const teammates = computed(() =>
       </section>
 
       <!-- Its usage over the months of the dataset's series. -->
-      <section v-if="months.length > 1" class="panel">
+      <section v-if="months.length > 1" id="sec-history" class="panel">
         <h2>{{ t('usageMon.history') }}</h2>
         <ol class="months" :aria-label="t('usageMon.history')">
           <li
@@ -423,7 +441,7 @@ const teammates = computed(() =>
       </section>
 
       <!-- Its teammates, each a link to its own page here: the least of it, last. -->
-      <section v-if="teammates.length" class="panel" :class="{ 'meta-stale': loading }">
+      <section v-if="teammates.length" id="sec-teammates" class="panel" :class="{ 'meta-stale': loading }">
         <h2 v-tip="t('usageMon.teammatesTip', { share: percent(TEAMMATE_MIN) })" class="tipped-head">
           {{ t('usageMon.teammates') }}
         </h2>
@@ -455,6 +473,14 @@ const teammates = computed(() =>
 </template>
 
 <style scoped>
+/* Room above each section for the row of links stuck to the top, when scrolled to it; the moves' and items' table
+   headers stick under that row rather than behind it. */
+.panel {
+  scroll-margin-top: 48px;
+}
+:deep(.dex-table .head) {
+  top: 37px;
+}
 .battles {
   align-self: center;
   font-size: 0.9em;
