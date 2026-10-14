@@ -166,6 +166,11 @@ const metaSpeeds = computed((): SpreadPoint[] => {
   }
   return [...bySpeed].map(([speed, w]) => ({ speed, share: w / total, builds: [] })).sort((a, b) => b.speed - a.speed)
 })
+// The speed tiers with it as yours, at its most common build (as picking it there puts it).
+const tiersQuery = computed(() => {
+  const b = m.value?.speeds && speedBuilds(m.value.speeds)[0]
+  return { mine: id.value, ...(b && { mynat: b.effect, mypts: String(b.points) }) }
+})
 const fieldOdds = computed(() =>
   spread.value.length && metaSpeeds.value.length ? odds(spread.value, metaSpeeds.value, false) : null,
 )
@@ -390,7 +395,7 @@ const sections = computed(() =>
           <SpeedShare :odds="fieldOdds" :name="refName(ref_)" :other="t('usageMon.field')" tone="yours" />
         </template>
         <p class="links">
-          <AppLink :to="{ name: 'speedTiers', query: { find: id } }">{{ t('usageMon.toTiers') }} ›</AppLink>
+          <AppLink :to="{ name: 'speedTiers', query: tiersQuery }">{{ t('usageMon.toTiers') }} ›</AppLink>
           <AppLink :to="{ name: 'speedCompare', query: { a: id } }">{{ t('usageMon.toCompare') }} ›</AppLink>
         </p>
       </section>
