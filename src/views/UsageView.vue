@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, shallowRef, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, onDeactivated, shallowRef, useTemplateRef } from 'vue'
+import tippy, { type Instance } from 'tippy.js'
 import { useRouter } from 'vue-router'
 import { X } from '@lucide/vue'
 import { ability, availableIds, item, move, pokemon, type PokemonId } from '@/data/dex'
@@ -55,7 +56,8 @@ const rows = computed(() =>
       rank: m!.rank,
       usage: m!.usage,
       brought: m!.brought,
-      // Its most common set, at a glance: item, ability and moves, each with the share of its sets that run it.
+      // Its most common set, at a glance: item, ability and moves, each with the share of its sets that run it (a bar
+      // under it, `shared`).
       item: m!.items?.[0] && { ...item(m!.items[0].id), share: m!.items[0].share },
       ability: m!.abilities?.[0] && { ...ability(m!.abilities[0].id), share: m!.abilities[0].share },
       moves: (m!.moves ?? []).slice(0, 3).map((x) => ({ ...move(x.id), share: x.share })),
@@ -130,9 +132,39 @@ const shown = computed(() => {
   const q = fold(search.value.trim())
   return sorted.value.filter((r) => (!q || split(r.name, q)) && (!filtering.value || passes(r.id)))
 })
-/** A share of a Pokémon's sets, in whole percents ("62%", "<1%"): beside each part of its most common set. */
-const pct = (share?: number) =>
-  share === undefined ? '' : share > 0 && share < 0.005 ? '<1%' : `${Math.round(share * 100)}%`
+// Pointing at a part of the most common set (its name or icon, or its bar) names it with its share, "Miracle Seed ·
+// 62.5%", where there's a pointer to point with. One tooltip for the whole table, placed by hand on the part pointed
+// at, its pointer followed by one listener on the table, rather than one per part: a list holds hundreds.
+const canHover = window.matchMedia('(hover: hover)').matches
+let shareTip: Instance | undefined
+let pointed: HTMLElement | null = null
+function onBarMove(e: PointerEvent) {
+  if (!canHover || e.pointerType !== 'mouse') return
+  const at = (e.target as Element).closest<HTMLElement>('.shared')
+  if (at === pointed) return
+  pointed = at
+  if (!at) return void shareTip?.hide()
+  const table = e.currentTarget as HTMLElement
+  if (shareTip?.reference !== table) {
+    shareTip?.destroy()
+    shareTip = tippy(table, {
+      trigger: 'manual',
+      appendTo: () => document.body,
+      getReferenceClientRect: () => (pointed ?? table).getBoundingClientRect(),
+    })
+  }
+  const { kind, id, share } = at.dataset
+  shareTip.setContent(`${refName({ kind, id } as never)} · ${percent(Number(share))}`)
+  shareTip.show()
+  void shareTip.popperInstance?.update()
+}
+function hideBarTip() {
+  pointed = null
+  shareTip?.hide()
+}
+onDeactivated(hideBarTip)
+onBeforeUnmount(() => shareTip?.destroy())
+
 /** Under this usage a Pokémon is on few teams, and its sets come from a handful of them: its row faded, said under the
  * table. */
 const RARE = 0.005
@@ -282,6 +314,8 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
           <SortHeader
             v-if="showUsage"
             :label="t('usage.usage')"
+            @pointermove="onBarMove"
+            @pointerleave="hideBarTip"
             :tip="t('usage.usageTip')"
             right
             :active="key === 'usage'"
@@ -322,25 +356,40 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
             <div v-if="showItem" role="cell" class="xl-only">
               <AppLink
                 v-if="r.item"
-                v-tip:group="refName(r.item)"
+                v-tip:group="!canHover && refName(r.item)"
                 :to="{ name: 'item', params: { id: r.item.id } }"
-                class="item"
+                class="item shared"
+                :style="{ '--share': r.item.share ?? 0 }"
+                :data-share="r.item.share ?? 0"
+                :data-kind="r.item.kind"
+                :data-id="r.item.id"
                 :aria-label="refName(r.item)"
               >
                 <ItemIcon :id="r.item.id" />
               </AppLink>
-              <span v-if="r.item" class="pct">{{ pct(r.item.share) }}</span>
             </div>
             <div v-if="showAbility" role="cell" class="xl-only grow">
-              <template v-if="r.ability"
-                ><DexRef :to="r.ability" /> <span class="pct">{{ pct(r.ability.share) }}</span></template
-              >
+              <span
+                v-if="r.ability"
+                class="shared"
+                :style="{ '--share': r.ability.share ?? 0 }"
+                :data-share="r.ability.share ?? 0"
+                :data-kind="r.ability.kind"
+                :data-id="r.ability.id"
+                ><DexRef :to="r.ability"
+              /></span>
             </div>
             <div v-if="showMoves" role="cell" class="xl-only grow">
               <template v-for="(m, i) in r.moves" :key="m.id"
-                ><span v-if="i" class="sep" aria-hidden="true"> · </span><DexRef :to="m" />
-                <span class="pct">{{ pct(m.share) }}</span></template
-              >
+                ><span v-if="i" class="sep" aria-hidden="true"> · </span
+                ><span
+                  class="shared"
+                  :style="{ '--share': m.share ?? 0 }"
+                  :data-share="m.share ?? 0"
+                  :data-kind="m.kind"
+                  :data-id="m.id"
+                  ><DexRef :to="m" /></span
+              ></template>
             </div>
             <div
               v-if="showUsage"
@@ -362,20 +411,40 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
                  item (told by its icon) and the ability, then the moves. On phones, the moves on a line of their own,
                  and how often it's brought at the end of the first, under its usage: the column doesn't fit. -->
             <div v-if="showSets && hasSets" role="cell" class="set-line">
-              <AppLink v-if="r.item" :to="{ name: 'item', params: { id: r.item.id } }" class="part">
-                <ItemIcon :id="r.item.id" :scale="0.67" />{{ refName(r.item) }}
-                <span class="pct">{{ pct(r.item.share) }}</span>
-              </AppLink>
-              <span v-if="r.ability" class="part"
-                ><DexRef :to="r.ability" /> <span class="pct">{{ pct(r.ability.share) }}</span></span
+              <AppLink
+                v-if="r.item"
+                :to="{ name: 'item', params: { id: r.item.id } }"
+                class="part shared"
+                :style="{ '--share': r.item.share ?? 0 }"
+                :data-share="r.item.share ?? 0"
+                :data-kind="r.item.kind"
+                :data-id="r.item.id"
               >
+                <ItemIcon :id="r.item.id" :scale="0.67" />{{ refName(r.item) }}
+              </AppLink>
+              <span
+                v-if="r.ability"
+                class="part shared"
+                :style="{ '--share': r.ability.share ?? 0 }"
+                :data-share="r.ability.share ?? 0"
+                :data-kind="r.ability.kind"
+                :data-id="r.ability.id"
+                ><DexRef :to="r.ability"
+              /></span>
               <span v-if="showBrought && r.brought !== undefined" class="brought-sm"
                 >{{ percent(r.brought) }} {{ t('usage.broughtShort') }}</span
               >
               <span v-if="r.moves.length" class="moves">
-                <span v-for="m in r.moves" :key="m.id" class="part"
-                  ><DexRef :to="m" /> <span class="pct">{{ pct(m.share) }}</span></span
-                >
+                <span
+                  v-for="m in r.moves"
+                  :key="m.id"
+                  class="part shared"
+                  :style="{ '--share': m.share ?? 0 }"
+                  :data-share="m.share ?? 0"
+                  :data-kind="m.kind"
+                  :data-id="m.id"
+                  ><DexRef :to="m"
+                /></span>
               </span>
             </div>
           </div>
@@ -389,7 +458,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
       </p>
       <p v-if="anyRare" class="muted note">{{ t('usage.rare', { share: percent(RARE) }) }}</p>
       <p v-if="picked.item || picked.ability || picked.move" class="muted note">
-        {{ t('usage.filteredSets', { share: pct(MIN_SHARE) }) }}
+        {{ t('usage.filteredSets', { share: percent(MIN_SHARE) }) }}
       </p>
       <p v-if="broughtAll && snapshot.cutoff" class="muted note">
         {{ t('usage.broughtAll', { players: players(snapshot.cutoff) }) }}
@@ -536,17 +605,42 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 .row.rare > [role='cell'] {
   opacity: 0.55;
 }
-/* The share of its sets each part of the most common set has, smaller and muted after it. */
-.pct {
-  font-size: 0.8em;
-  color: var(--muted);
-  white-space: nowrap;
+/* The share of its sets each part of the most common set has (`--share`, 0 to 1): a thin bar along its foot, on a
+   faint track its width, as the usage columns' bars, in the muted color so it doesn't vie with usage's; pointed at,
+   the part's name and share in a tooltip. */
+.shared {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 3px;
 }
-.item + .pct {
-  margin-left: 2px;
+.shared::before,
+.shared::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
 }
-.set-line .part .pct {
-  margin-left: 3px;
+.shared::before {
+  right: 0;
+  height: 1px;
+  background: var(--border);
+}
+.shared::after {
+  width: calc(100% * var(--share, 0));
+  height: 2px;
+  background: var(--muted);
+}
+/* A chip's along its inside foot, clear of its border. */
+.set-line .part.shared::before,
+.set-line .part.shared::after {
+  left: 2px;
+  bottom: 1px;
+}
+.set-line .part.shared::before {
+  right: 2px;
+}
+.set-line .part.shared::after {
+  width: calc((100% - 4px) * var(--share, 0));
 }
 .item {
   display: inline-flex;
