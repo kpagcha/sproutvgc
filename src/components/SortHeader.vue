@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // A table column's header that sorts by it (`useSort`): an arrow marks the column sorted by, and its direction. `tip`,
-// if given, spells out an abbreviated label on hover. It takes the same room sorted by or not, so sorting doesn't
+// if given, spells out the label on hover, the label underlined dotted to say there's more to it. It takes the same room sorted by or not, so sorting doesn't
 // resize its column: the label as wide as in bold, and room for the arrow. In right-aligned columns (numbers) the
 // arrow hangs before the label, in the cells' padding, taking no room: the label stays lined up with the numbers under
 // it, and the column is no wider than they need.
@@ -11,7 +11,7 @@ defineEmits<{ sort: [] }>()
 <template>
   <div role="columnheader" :class="{ r: right }" :aria-sort="active ? (desc ? 'descending' : 'ascending') : undefined">
     <button v-tip="tip" type="button" class="sort" :class="{ active, right }" @click="$emit('sort')">
-      <span class="label" :data-label="label">{{ label }}</span>
+      <span class="label" :class="{ tipped: tip }" :data-label="label">{{ label }}</span>
       <span class="arrow" :class="{ shown: active, up: !desc }" aria-hidden="true">▾</span>
     </button>
   </div>
@@ -49,6 +49,11 @@ defineEmits<{ sort: [] }>()
   overflow: hidden;
   visibility: hidden;
   font-weight: bold;
+}
+/* With a tooltip: underlined dotted, as text with more to it is. */
+.label.tipped {
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
 }
 /* One glyph, flipped, as ▴ and ▾ aren't quite as wide. */
 .arrow.up {
