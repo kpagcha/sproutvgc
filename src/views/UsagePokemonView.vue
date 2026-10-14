@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router'
 import { ChevronsDown, ChevronsUp } from '@lucide/vue'
 import { ability, available, move, pokemon, type PokemonId } from '@/data/dex'
 import { MOVES } from '@/data/moves'
-import { POKEMON, STATS, barAt, gameStats, gameTotal, spriteUrl, statColor } from '@/data/pokemon'
+import { POKEMON, STATS, barAt, gameStats, gameTotal, splitForme, spriteUrl, statColor } from '@/data/pokemon'
 import { datasetDates, GENERATED_SNAPSHOTS, loadHistory, percent, type MetaHistory } from '@/data/meta'
 import { natureEffectOn, natureEffects, natureName } from '@/data/natures'
 import { locale, t } from '@/i18n'
@@ -193,7 +193,11 @@ const topMonth = computed(() => Math.max(...months.value.map((x) => x.usage ?? 0
 
 // Its teammates, the least of it, last: the data keeps the ten most common, those on at least this share of its teams.
 const TEAMMATE_MIN = LIST_MIN
-const teammates = computed(() => (m.value?.teammates ?? []).filter((x) => available(pokemon(x.id))))
+const teammates = computed(() =>
+  (m.value?.teammates ?? [])
+    .filter((x) => available(pokemon(x.id)))
+    .map((x) => ({ ...x, ...splitForme(x.id, refName(pokemon(x.id))) })),
+)
 </script>
 
 <template>
@@ -420,9 +424,13 @@ const teammates = computed(() => (m.value?.teammates ?? []).filter((x) => availa
           {{ t('usageMon.teammates') }}
         </h2>
         <ul class="shares mates">
-          <li v-for="x in teammates" :key="x.id">
+          <li v-for="(x, i) in teammates" :key="x.id">
+            <span class="mate-rank muted">{{ i + 1 }}</span>
             <AppLink :to="{ name: 'usagePokemon', params: { id: x.id } }" class="what mate">
-              <PokemonIcon :id="x.id" /><span class="mate-name">{{ refName(pokemon(x.id)) }}</span>
+              <PokemonIcon :id="x.id" /><span class="mate-name"
+                ><span>{{ x.species }}</span
+                ><span v-if="x.forme" class="forme">{{ x.forme }}</span></span
+              >
             </AppLink>
             <span class="types">
               <AppLink v-for="ty in POKEMON[x.id].types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
@@ -707,29 +715,57 @@ h2 {
 .shares li {
   display: contents;
 }
-.mates {
-  max-width: 640px;
-}
-/* A teammate: its name (cut short when it doesn't fit), its types, its share with its bar under it; its icons at their
-   desktop size, phones' bigger ones leaving its name no room. */
+/* The teammates in columns filling the panel, as many as fit (one on phones), the most common first, down each; each a
+   row of its own: its name (its forme a tag, under it when it doesn't fit), its types, its share with its bar under it, its icons at
+   their desktop size, phones' bigger ones leaving its name no room. */
 .shares.mates {
   --icon-scale: 1;
-  grid-template-columns: minmax(0, max-content) auto 4.5em;
-  justify-content: start;
-  gap: 6px 16px;
+  display: block;
+  columns: 360px;
+  column-gap: 32px;
 }
-/* On phones, the whole width: the name taking what the types and share leave. */
+/* A row: its place, its name (as wide as the longest fits, so the types line up after it down the column), its types,
+   and its share at the end. */
+.shares.mates li {
+  display: grid;
+  break-inside: avoid;
+  margin-bottom: 8px;
+  grid-template-columns: 1.4em minmax(0, 14em) auto 1fr 4.5em;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.shares.mates .num {
+  grid-column: -2;
+}
+/* Its place among them, first, so they read in order down the columns. */
+.mate-rank {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+/* On phones, one column: the name taking what's left, the types and the share after it. */
 @media (max-width: 720px) {
-  .shares.mates {
-    grid-template-columns: minmax(0, 1fr) auto 4.5em;
-    justify-content: stretch;
-    gap: 6px 12px;
+  .shares.mates li {
+    grid-template-columns: 1.4em minmax(0, 1fr) auto 4.5em;
   }
 }
 .mate-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 4px;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+}
+/* Its forme as the usage list and the speed tiers show it: a small tag after its species' name, under it when it
+   doesn't fit. */
+.forme {
+  padding: 0 5px;
+  font-size: 0.85em;
+  color: var(--muted);
+  white-space: nowrap;
+  border: 1px solid var(--border);
+  border-radius: 3px;
 }
 .what {
   display: inline-flex;
