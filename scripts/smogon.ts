@@ -19,7 +19,7 @@ const CUTOFFS = [1760, 1630, 1500, 0] as const
 const KEEP = { list: 10, spreads: 6, min: 0.01 }
 
 // What `src/data/meta.ts` reads (`MetaSnapshot`, `PokemonMeta`), with IDs as plain strings.
-interface Snapshot {
+export interface Snapshot {
   id: string
   kind: 'showdown'
   provider: { name: string; url: string }
@@ -31,12 +31,13 @@ interface Snapshot {
   battles: number
   capabilities: string[]
   unweighted: string[]
+  previous?: string
 }
 interface Share {
   id: string
   share: number
 }
-interface PokemonMeta {
+export interface MetaEntry {
   rank: number
   usage: number
   brought?: number
@@ -46,6 +47,7 @@ interface PokemonMeta {
   teammates: Share[]
   spreads: { nature: string; points: number[]; share: number }[]
   speeds: { points: number; nature: string; share: number }[]
+  prev?: { rank: number; usage?: number }
 }
 
 /** What the dex has, to check Smogon's names and IDs against: a Pokémon's ID by its name, or whether an ID exists. */
@@ -121,7 +123,7 @@ export class Smogon {
     regulation: string,
     known: Known,
     strict: boolean,
-  ): Promise<{ snapshot: Snapshot; data: Record<string, PokemonMeta> }[]> {
+  ): Promise<{ snapshot: Snapshot; data: Record<string, MetaEntry> }[]> {
     const unknown = new Set<string>()
     const pokemon = (name: string) => {
       const id = known.pokemon(name)
@@ -171,7 +173,7 @@ export class Smogon {
         return set.has(id)
       }
 
-      const data: Record<string, PokemonMeta> = {}
+      const data: Record<string, MetaEntry> = {}
       const ranked = Object.entries(chaos.data).sort((a, b) => b[1].usage - a[1].usage)
       ranked.forEach(([name, d], i) => {
         const id = pokemon(name)
@@ -218,6 +220,32 @@ export class Smogon {
       console.warn(`${msg} (left out)`)
     }
     return result
+  }
+}
+
+/**
+ * Each snapshot's previous one in its series (`previous`): the same source, regulation, players and kind of period, the
+ * latest that ended before it began. Each Pokémon then gets its rank and usage there (`prev`); one it doesn't have is
+ * new to the series. A first snapshot has neither. Works on any adapter's snapshots, by what they say of themselves.
+ */
+export function withPrevious(index: Record<string, Snapshot>, data: Record<string, Record<string, MetaEntry>>) {
+  const series = new Map<string, Snapshot[]>()
+  for (const s of Object.values(index)) {
+    const key = [s.kind, s.provider.url, s.regulation, s.cutoff, s.period].join('|')
+    series.set(key, [...(series.get(key) ?? []), s])
+  }
+  for (const list of series.values()) {
+    list.sort((a, b) => a.from.localeCompare(b.from))
+    list.forEach((s, i) => {
+      const before = list[i - 1]
+      if (!before) return
+      s.previous = before.id
+      const then = data[before.id]!
+      for (const [id, m] of Object.entries(data[s.id]!)) {
+        const p = then[id]
+        if (p) m.prev = { rank: p.rank, usage: p.usage }
+      }
+    })
   }
 }
 

@@ -25,7 +25,7 @@ import { LANGUAGES, type Language } from './languages.ts'
 import { MOVES_EVERYONE_USES, NAMES, type CategoryKey } from './overrides.ts'
 import { ConditionScan } from './conditions.ts'
 import { SPEED_ABILITIES, SPEED_ITEMS } from '../src/lib/speed.ts'
-import { Smogon } from './smogon.ts'
+import { Smogon, withPrevious, type MetaEntry, type Snapshot } from './smogon.ts'
 import { ITEM_ICONS, POKEMON_ICONS, SpriteSource, iconIndexes, sheetLayout, trimSheet } from './sprites.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -707,6 +707,8 @@ async function main() {
   // of them the app shows is `VITE_META_SETS` in `.env`. A past regulation's stats aren't held to the dex, which may
   // no longer have what they name: that's left out. Each past regulation's legal Pokémon go in `meta/rosters.json`,
   // for the pages showing "every Pokémon" of it: its format's, when Showdown still has it, else those its stats name.
+  // Once all are in, each snapshot is given the one before it in its series (`previous`) and each Pokémon its rank and
+  // usage there (`prev`), for the trends (`withPrevious`).
   const updateSmogon = process.argv.includes('--update') || process.argv.includes('--update-smogon')
   /** Smogon's ID for a regulation's format: Showdown's name for it as an ID, or, when Showdown no longer has it, the
    * current one's with the regulation swapped ("gen9championsvgc2026regma"). */
@@ -718,7 +720,8 @@ async function main() {
     abilities: new Set(availableIds.abilities),
   }
   rmSync(join(OUT, 'meta'), { recursive: true, force: true })
-  const index: Record<string, unknown> = {}
+  const index: Record<string, Snapshot> = {}
+  const metaData: Record<string, Record<string, MetaEntry>> = {}
   const rosters: Record<string, string[]> = {}
   for (const r of [reg, ...Object.keys(sources.smogon).filter((r) => r !== reg)]) {
     const smogon = new Smogon(join(CACHE, 'smogon'), (url) => getBinary(url, true), smogonFormat(r))
@@ -729,7 +732,7 @@ async function main() {
     const named = new Set<string>()
     for (const month of [...sources.smogon[r]].reverse()) {
       for (const { snapshot, data } of await smogon.snapshots(month, r, known, r === reg)) {
-        await writeJson(`meta/${snapshot.id}.json`, data)
+        metaData[snapshot.id] = data
         index[snapshot.id] = snapshot
         for (const id of Object.keys(data)) named.add(id)
       }
@@ -739,6 +742,8 @@ async function main() {
     const ids = past ? legalSpecies(Dex.forFormat(past), Dex.formats.getRuleTable(past)).map((s) => s.id) : [...named]
     rosters[r] = ids.filter((id) => legal.has(id)).sort()
   }
+  withPrevious(index, metaData)
+  for (const [id, data] of Object.entries(metaData)) await writeJson(`meta/${id}.json`, data)
   await writeJson('meta/index.json', index)
   await writeJson('meta/rosters.json', rosters)
 

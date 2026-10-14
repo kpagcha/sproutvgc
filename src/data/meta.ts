@@ -46,6 +46,9 @@ export interface MetaSnapshot {
   capabilities: MetaCapability[]
   /** What it has that covers every player, whatever its cutoff (Smogon's brought counts): labeled as such. */
   unweighted?: MetaCapability[]
+  /** The snapshot before it in its series (same source, regulation, players and kind of period), for the trends: its
+   * Pokémon's `prev` are from there, and one without is new to it. None for a series' first. */
+  previous?: string
 }
 
 /** An entry of a list, most used first. Its share (0 to 1) when the source gives one: some only rank them. */
@@ -79,6 +82,8 @@ export interface PokemonMeta {
   /** What its sets put into Speed, from all of them: stat points and nature (by Showdown ID), most common first.
    * Its Speed stat follows from its base Speed (`speedStat`, with `natureEffect`). */
   speeds?: { points: number; nature: string; share: number }[]
+  /** Its rank and usage in the snapshot's `previous`, when it was there. */
+  prev?: { rank: number; usage?: number }
 }
 
 export type MetaData = Partial<Record<PokemonId, PokemonMeta>>

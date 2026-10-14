@@ -88,7 +88,8 @@
       { "points": 25, "nature": "hardy", "share": 0.0001 },
       { "points": 0, "nature": "naughty", "share": 0.0001 },
       { "points": 32, "nature": "careful", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 1, "usage": 0.3679 }
   },
   "incineroar": {
     "rank": 2,
@@ -251,7 +252,8 @@
       { "points": 26, "nature": "adamant", "share": 0.0001 },
       { "points": 15, "nature": "hardy", "share": 0.0001 },
       { "points": 3, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 2, "usage": 0.3395 }
   },
   "garchomp": {
     "rank": 3,
@@ -379,7 +381,8 @@
       { "points": 5, "nature": "impish", "share": 0.0001 },
       { "points": 31, "nature": "timid", "share": 0.0001 },
       { "points": 0, "nature": "careful", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 3, "usage": 0.3319 }
   },
   "basculegion": {
     "rank": 4,
@@ -490,7 +493,8 @@
       { "points": 22, "nature": "hardy", "share": 0.0001 },
       { "points": 32, "nature": "naughty", "share": 0.0001 },
       { "points": 32, "nature": "careful", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 5, "usage": 0.3022 }
   },
   "sneasler": {
     "rank": 5,
@@ -594,7 +598,8 @@
       { "points": 9, "nature": "adamant", "share": 0.0001 },
       { "points": 9, "nature": "jolly", "share": 0.0001 },
       { "points": 4, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 8, "usage": 0.209 }
   },
   "charizardmegay": {
     "rank": 6,
@@ -708,7 +713,8 @@
       { "points": 5, "nature": "timid", "share": 0.0001 },
       { "points": 13, "nature": "mild", "share": 0.0001 },
       { "points": 0, "nature": "calm", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 4, "usage": 0.3058 }
   },
   "sinistcha": {
     "rank": 7,
@@ -808,7 +814,8 @@
       { "points": 23, "nature": "bold", "share": 0.0001 },
       { "points": 0, "nature": "mild", "share": 0.0001 },
       { "points": 32, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 6, "usage": 0.2611 }
   },
   "whimsicott": {
     "rank": 8,
@@ -929,7 +936,8 @@
       { "points": 5, "nature": "bold", "share": 0.0001 },
       { "points": 11, "nature": "timid", "share": 0.0001 },
       { "points": 14, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 7, "usage": 0.2249 }
   },
   "farigiraf": {
     "rank": 9,
@@ -1040,7 +1048,8 @@
       { "points": 23, "nature": "modest", "share": 0.0001 },
       { "points": 1, "nature": "sassy", "share": 0.0001 },
       { "points": 12, "nature": "bold", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 9, "usage": 0.202 }
   },
   "sylveon": {
     "rank": 10,
@@ -1147,7 +1156,8 @@
       { "points": 8, "nature": "timid", "share": 0.0001 },
       { "points": 27, "nature": "hardy", "share": 0.0001 },
       { "points": 2, "nature": "calm", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 10, "usage": 0.1747 }
   },
   "floettemega": {
     "rank": 11,
@@ -1254,7 +1264,8 @@
       { "points": 28, "nature": "timid", "share": 0.0001 },
       { "points": 32, "nature": "jolly", "share": 0.0001 },
       { "points": 30, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 11, "usage": 0.1502 }
   },
   "staraptormega": {
     "rank": 12,
@@ -1352,7 +1363,8 @@
       { "points": 15, "nature": "careful", "share": 0.0001 },
       { "points": 32, "nature": "naive", "share": 0.0001 },
       { "points": 32, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 14, "usage": 0.1134 }
   },
   "delphoxmega": {
     "rank": 13,
@@ -1443,7 +1455,8 @@
       { "points": 16, "nature": "timid", "share": 0.0001 },
       { "points": 0, "nature": "hardy", "share": 0.0001 },
       { "points": 28, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 18, "usage": 0.0865 }
   },
   "raichumegay": {
     "rank": 14,
@@ -1544,7 +1557,8 @@
       { "points": 24, "nature": "hasty", "share": 0.0001 },
       { "points": 31, "nature": "timid", "share": 0.0001 },
       { "points": 30, "nature": "mild", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 24, "usage": 0.0697 }
   },
   "blastoisemega": {
     "rank": 15,
@@ -1635,7 +1649,8 @@
       { "points": 0, "nature": "rash", "share": 0.0001 },
       { "points": 26, "nature": "timid", "share": 0.0001 },
       { "points": 14, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 19, "usage": 0.0851 }
   },
   "archaludon": {
     "rank": 16,
@@ -1787,7 +1802,8 @@
       { "points": 19, "nature": "calm", "share": 0.0001 },
       { "points": 5, "nature": "sassy", "share": 0.0001 },
       { "points": 25, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 12, "usage": 0.1427 }
   },
   "venusaur": {
     "rank": 17,
@@ -1888,7 +1904,8 @@
       { "points": 17, "nature": "modest", "share": 0.0001 },
       { "points": 3, "nature": "timid", "share": 0.0001 },
       { "points": 5, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 21, "usage": 0.0737 }
   },
   "pelipper": {
     "rank": 18,
@@ -2047,7 +2064,8 @@
       { "points": 7, "nature": "bold", "share": 0.0001 },
       { "points": 27, "nature": "quiet", "share": 0.0001 },
       { "points": 6, "nature": "calm", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 13, "usage": 0.1288 }
   },
   "froslassmega": {
     "rank": 19,
@@ -2137,7 +2155,8 @@
       { "points": 0, "nature": "quiet", "share": 0.0001 },
       { "points": 11, "nature": "modest", "share": 0.0001 },
       { "points": 32, "nature": "calm", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 39, "usage": 0.037 }
   },
   "aerodactylmega": {
     "rank": 20,
@@ -2206,7 +2225,8 @@
       { "points": 25, "nature": "jolly", "share": 0.0001 },
       { "points": 30, "nature": "jolly", "share": 0.0001 },
       { "points": 10, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 16, "usage": 0.099 }
   },
   "gholdengo": {
     "rank": 21,
@@ -2322,7 +2342,8 @@
       { "points": 10, "nature": "hardy", "share": 0.0001 },
       { "points": 20, "nature": "timid", "share": 0.0001 },
       { "points": 23, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 17, "usage": 0.0922 }
   },
   "swampertmega": {
     "rank": 22,
@@ -2430,7 +2451,8 @@
       { "points": 2, "nature": "brave", "share": 0.0001 },
       { "points": 14, "nature": "mild", "share": 0.0001 },
       { "points": 23, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 20, "usage": 0.0845 }
   },
   "grimmsnarl": {
     "rank": 23,
@@ -2542,7 +2564,8 @@
       { "points": 2, "nature": "jolly", "share": 0.0001 },
       { "points": 0, "nature": "naughty", "share": 0.0001 },
       { "points": 1, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 15, "usage": 0.1036 }
   },
   "ninetalesalola": {
     "rank": 24,
@@ -2638,7 +2661,8 @@
       { "points": 32, "nature": "calm", "share": 0.0001 },
       { "points": 26, "nature": "bold", "share": 0.0001 },
       { "points": 16, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 25, "usage": 0.0653 }
   },
   "gengarmega": {
     "rank": 25,
@@ -2757,7 +2781,8 @@
       { "points": 0, "nature": "timid", "share": 0.0001 },
       { "points": 4, "nature": "bold", "share": 0.0001 },
       { "points": 2, "nature": "gentle", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 30, "usage": 0.0494 }
   },
   "milotic": {
     "rank": 26,
@@ -2884,7 +2909,8 @@
       { "points": 26, "nature": "bold", "share": 0.0001 },
       { "points": 16, "nature": "modest", "share": 0.0001 },
       { "points": 10, "nature": "calm", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 22, "usage": 0.0712 }
   },
   "arcaninehisui": {
     "rank": 27,
@@ -2976,7 +3002,8 @@
       { "points": 26, "nature": "jolly", "share": 0.0001 },
       { "points": 16, "nature": "impish", "share": 0.0001 },
       { "points": 20, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 69, "usage": 0.012 }
   },
   "maushold": {
     "rank": 28,
@@ -3116,7 +3143,8 @@
       { "points": 21, "nature": "jolly", "share": 0.0001 },
       { "points": 17, "nature": "jolly", "share": 0.0001 },
       { "points": 0, "nature": "relaxed", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 26, "usage": 0.0625 }
   },
   "dragonitemega": {
     "rank": 29,
@@ -3226,7 +3254,8 @@
       { "points": 6, "nature": "adamant", "share": 0.0001 },
       { "points": 20, "nature": "careful", "share": 0.0001 },
       { "points": 13, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 54, "usage": 0.0236 }
   },
   "scovillainmega": {
     "rank": 30,
@@ -3307,7 +3336,8 @@
       { "points": 32, "nature": "bold", "share": 0.0001 },
       { "points": 12, "nature": "modest", "share": 0.0001 },
       { "points": 6, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 45, "usage": 0.0314 }
   },
   "torkoal": {
     "rank": 31,
@@ -3376,7 +3406,8 @@
       { "points": 6, "nature": "hardy", "share": 0.0001 },
       { "points": 2, "nature": "bold", "share": 0.0001 },
       { "points": 0, "nature": "careful", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 27, "usage": 0.0607 }
   },
   "excadrill": {
     "rank": 32,
@@ -3454,7 +3485,8 @@
       { "points": 32, "nature": "naughty", "share": 0.0001 },
       { "points": 0, "nature": "hardy", "share": 0.0001 },
       { "points": 30, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 36, "usage": 0.0406 }
   },
   "kommoo": {
     "rank": 33,
@@ -3584,7 +3616,8 @@
       { "points": 3, "nature": "impish", "share": 0.0001 },
       { "points": 11, "nature": "adamant", "share": 0.0001 },
       { "points": 14, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 42, "usage": 0.0343 }
   },
   "tyranitarmega": {
     "rank": 34,
@@ -3708,7 +3741,8 @@
       { "points": 0, "nature": "timid", "share": 0.0001 },
       { "points": 22, "nature": "jolly", "share": 0.0001 },
       { "points": 15, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 31, "usage": 0.0489 }
   },
   "toxapex": {
     "rank": 35,
@@ -3763,7 +3797,8 @@
       { "points": 29, "nature": "hardy", "share": 0.0001 },
       { "points": 7, "nature": "relaxed", "share": 0.0001 },
       { "points": 32, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 29, "usage": 0.0507 }
   },
   "glimmora": {
     "rank": 36,
@@ -3835,7 +3870,8 @@
       { "points": 10, "nature": "modest", "share": 0.0001 },
       { "points": 31, "nature": "modest", "share": 0.0001 },
       { "points": 2, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 40, "usage": 0.0369 }
   },
   "metagrossmega": {
     "rank": 37,
@@ -3951,7 +3987,8 @@
       { "points": 15, "nature": "jolly", "share": 0.0001 },
       { "points": 28, "nature": "impish", "share": 0.0001 },
       { "points": 23, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 23, "usage": 0.0701 }
   },
   "politoed": {
     "rank": 38,
@@ -4069,7 +4106,8 @@
       { "points": 0, "nature": "gentle", "share": 0.0001 },
       { "points": 20, "nature": "bold", "share": 0.0001 },
       { "points": 0, "nature": "careful", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 37, "usage": 0.0386 }
   },
   "rotomwash": {
     "rank": 39,
@@ -4223,7 +4261,8 @@
       { "points": 21, "nature": "modest", "share": 0.0001 },
       { "points": 5, "nature": "calm", "share": 0.0001 },
       { "points": 4, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 38, "usage": 0.0378 }
   },
   "dragonite": {
     "rank": 40,
@@ -4342,7 +4381,8 @@
       { "points": 16, "nature": "modest", "share": 0.0001 },
       { "points": 29, "nature": "adamant", "share": 0.0001 },
       { "points": 10, "nature": "careful", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 51, "usage": 0.0254 }
   },
   "vivillon": {
     "rank": 41,
@@ -4408,7 +4448,8 @@
       { "points": 27, "nature": "timid", "share": 0.0001 },
       { "points": 32, "nature": "jolly", "share": 0.0001 },
       { "points": 28, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 46, "usage": 0.0311 }
   },
   "tyranitar": {
     "rank": 42,
@@ -4520,7 +4561,8 @@
       { "points": 30, "nature": "adamant", "share": 0.0001 },
       { "points": 26, "nature": "naughty", "share": 0.0001 },
       { "points": 7, "nature": "brave", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 52, "usage": 0.0243 }
   },
   "mawilemega": {
     "rank": 43,
@@ -4596,7 +4638,8 @@
       { "points": 3, "nature": "impish", "share": 0.0001 },
       { "points": 8, "nature": "brave", "share": 0.0001 },
       { "points": 15, "nature": "brave", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 28, "usage": 0.0521 }
   },
   "primarina": {
     "rank": 44,
@@ -4700,7 +4743,8 @@
       { "points": 0, "nature": "mild", "share": 0.0001 },
       { "points": 29, "nature": "hardy", "share": 0.0001 },
       { "points": 20, "nature": "calm", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 62, "usage": 0.017 }
   },
   "venusaurmega": {
     "rank": 45,
@@ -4804,7 +4848,8 @@
       { "points": 0, "nature": "timid", "share": 0.0001 },
       { "points": 0, "nature": "mild", "share": 0.0001 },
       { "points": 14, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 33, "usage": 0.0477 }
   },
   "gardevoirmega": {
     "rank": 46,
@@ -4899,7 +4944,8 @@
       { "points": 0, "nature": "calm", "share": 0.0001 },
       { "points": 2, "nature": "bold", "share": 0.0001 },
       { "points": 23, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 55, "usage": 0.0234 }
   },
   "lycanrocdusk": {
     "rank": 47,
@@ -4944,7 +4990,8 @@
       { "points": 30, "nature": "jolly", "share": 0.0002 },
       { "points": 28, "nature": "adamant", "share": 0.0001 },
       { "points": 21, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 50, "usage": 0.0269 }
   },
   "aerodactyl": {
     "rank": 48,
@@ -5012,7 +5059,8 @@
       { "points": 17, "nature": "jolly", "share": 0.0001 },
       { "points": 2, "nature": "adamant", "share": 0.0001 },
       { "points": 24, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 44, "usage": 0.0316 }
   },
   "annihilape": {
     "rank": 49,
@@ -5126,7 +5174,8 @@
       { "points": 15, "nature": "hardy", "share": 0.0001 },
       { "points": 0, "nature": "calm", "share": 0.0001 },
       { "points": 16, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 32, "usage": 0.0481 }
   },
   "ceruledge": {
     "rank": 50,
@@ -5227,7 +5276,8 @@
       { "points": 5, "nature": "hardy", "share": 0.0001 },
       { "points": 29, "nature": "adamant", "share": 0.0001 },
       { "points": 0, "nature": "relaxed", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 34, "usage": 0.0452 }
   },
   "corviknight": {
     "rank": 51,
@@ -5366,7 +5416,8 @@
       { "points": 13, "nature": "hardy", "share": 0.0001 },
       { "points": 24, "nature": "impish", "share": 0.0001 },
       { "points": 1, "nature": "impish", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 57, "usage": 0.0204 }
   },
   "sableye": {
     "rank": 52,
@@ -5455,7 +5506,8 @@
       { "points": 13, "nature": "careful", "share": 0.0001 },
       { "points": 21, "nature": "timid", "share": 0.0001 },
       { "points": 32, "nature": "calm", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 43, "usage": 0.0336 }
   },
   "meowscarada": {
     "rank": 53,
@@ -5549,7 +5601,8 @@
       { "points": 21, "nature": "timid", "share": 0.0001 },
       { "points": 27, "nature": "jolly", "share": 0.0001 },
       { "points": 16, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 49, "usage": 0.0279 }
   },
   "talonflame": {
     "rank": 54,
@@ -5664,7 +5717,8 @@
       { "points": 22, "nature": "naive", "share": 0.0001 },
       { "points": 20, "nature": "adamant", "share": 0.0001 },
       { "points": 22, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 41, "usage": 0.0348 }
   },
   "hydreigon": {
     "rank": 55,
@@ -5771,7 +5825,8 @@
       { "points": 14, "nature": "timid", "share": 0.0001 },
       { "points": 32, "nature": "hasty", "share": 0.0001 },
       { "points": 26, "nature": "bold", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 35, "usage": 0.0449 }
   },
   "garchompmega": {
     "rank": 56,
@@ -5903,7 +5958,8 @@
       { "points": 23, "nature": "adamant", "share": 0.0001 },
       { "points": 0, "nature": "jolly", "share": 0.0001 },
       { "points": 29, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 71, "usage": 0.0109 }
   },
   "blazikenmega": {
     "rank": 57,
@@ -5999,7 +6055,8 @@
       { "points": 20, "nature": "hardy", "share": 0.0001 },
       { "points": 5, "nature": "jolly", "share": 0.0001 },
       { "points": 30, "nature": "lonely", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 47, "usage": 0.0308 }
   },
   "cameruptmega": {
     "rank": 58,
@@ -6052,7 +6109,8 @@
       { "points": 0, "nature": "relaxed", "share": 0.0001 },
       { "points": 0, "nature": "adamant", "share": 0.0001 },
       { "points": 5, "nature": "quiet", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 56, "usage": 0.0206 }
   },
   "staraptor": {
     "rank": 59,
@@ -6128,7 +6186,8 @@
       { "points": 17, "nature": "adamant", "share": 0.0001 },
       { "points": 31, "nature": "adamant", "share": 0.0001 },
       { "points": 19, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 63, "usage": 0.016 }
   },
   "glimmoramega": {
     "rank": 60,
@@ -6210,7 +6269,8 @@
       { "points": 16, "nature": "modest", "share": 0.0001 },
       { "points": 12, "nature": "modest", "share": 0.0001 },
       { "points": 26, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 61, "usage": 0.0183 }
   },
   "tsareena": {
     "rank": 61,
@@ -6329,7 +6389,8 @@
       { "points": 20, "nature": "jolly", "share": 0.0001 },
       { "points": 21, "nature": "jolly", "share": 0.0001 },
       { "points": 27, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 58, "usage": 0.0199 }
   },
   "pyroarmega": {
     "rank": 62,
@@ -6389,7 +6450,8 @@
       { "points": 15, "nature": "modest", "share": 0.0002 },
       { "points": 28, "nature": "modest", "share": 0.0001 },
       { "points": 14, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 64, "usage": 0.0159 }
   },
   "swampert": {
     "rank": 63,
@@ -6472,7 +6534,8 @@
       { "points": 9, "nature": "adamant", "share": 0.0001 },
       { "points": 26, "nature": "hardy", "share": 0.0001 },
       { "points": 10, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 211, "usage": 0.0006 }
   },
   "dragapult": {
     "rank": 64,
@@ -6582,7 +6645,8 @@
       { "points": 25, "nature": "hasty", "share": 0.0001 },
       { "points": 19, "nature": "adamant", "share": 0.0001 },
       { "points": 30, "nature": "lonely", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 84, "usage": 0.0073 }
   },
   "mamoswine": {
     "rank": 65,
@@ -6677,7 +6741,8 @@
       { "points": 23, "nature": "jolly", "share": 0.0001 },
       { "points": 10, "nature": "naughty", "share": 0.0001 },
       { "points": 16, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 48, "usage": 0.0291 }
   },
   "kangaskhanmega": {
     "rank": 66,
@@ -6759,7 +6824,8 @@
       { "points": 26, "nature": "jolly", "share": 0.0001 },
       { "points": 22, "nature": "jolly", "share": 0.0001 },
       { "points": 32, "nature": "hasty", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 59, "usage": 0.0199 }
   },
   "clefable": {
     "rank": 67,
@@ -6843,7 +6909,8 @@
       { "points": 11, "nature": "timid", "share": 0.0001 },
       { "points": 32, "nature": "calm", "share": 0.0001 },
       { "points": 20, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 96, "usage": 0.0056 }
   },
   "volcarona": {
     "rank": 68,
@@ -6970,7 +7037,8 @@
       { "points": 6, "nature": "timid", "share": 0.0001 },
       { "points": 30, "nature": "modest", "share": 0.0001 },
       { "points": 14, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 70, "usage": 0.0119 }
   },
   "scraftymega": {
     "rank": 69,
@@ -7058,7 +7126,8 @@
       { "points": 6, "nature": "impish", "share": 0.0001 },
       { "points": 7, "nature": "careful", "share": 0.0001 },
       { "points": 25, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 60, "usage": 0.0197 }
   },
   "scizor": {
     "rank": 70,
@@ -7141,7 +7210,8 @@
       { "points": 10, "nature": "naughty", "share": 0.0002 },
       { "points": 22, "nature": "adamant", "share": 0.0001 },
       { "points": 2, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 105, "usage": 0.0045 }
   },
   "aegislash": {
     "rank": 71,
@@ -7239,7 +7309,8 @@
       { "points": 2, "nature": "quiet", "share": 0.0001 },
       { "points": 32, "nature": "impish", "share": 0.0001 },
       { "points": 32, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 76, "usage": 0.0082 }
   },
   "kangaskhan": {
     "rank": 72,
@@ -7325,7 +7396,8 @@
       { "points": 0, "nature": "jolly", "share": 0.0001 },
       { "points": 4, "nature": "hardy", "share": 0.0001 },
       { "points": 19, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 65, "usage": 0.0153 }
   },
   "scizormega": {
     "rank": 73,
@@ -7398,7 +7470,8 @@
       { "points": 0, "nature": "careful", "share": 0.0001 },
       { "points": 20, "nature": "jolly", "share": 0.0001 },
       { "points": 18, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 83, "usage": 0.0074 }
   },
   "bellibolt": {
     "rank": 74,
@@ -7456,7 +7529,8 @@
       { "points": 0, "nature": "hardy", "share": 0.0002 },
       { "points": 8, "nature": "relaxed", "share": 0.0001 },
       { "points": 17, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 125, "usage": 0.0029 }
   },
   "chandelure": {
     "rank": 75,
@@ -7531,7 +7605,8 @@
       { "points": 31, "nature": "timid", "share": 0.0002 },
       { "points": 27, "nature": "modest", "share": 0.0001 },
       { "points": 32, "nature": "hasty", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 68, "usage": 0.012 }
   },
   "mimikyu": {
     "rank": 76,
@@ -7612,7 +7687,8 @@
       { "points": 17, "nature": "adamant", "share": 0.0001 },
       { "points": 4, "nature": "brave", "share": 0.0001 },
       { "points": 16, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 95, "usage": 0.0057 }
   },
   "armarouge": {
     "rank": 77,
@@ -7695,7 +7771,8 @@
       { "points": 21, "nature": "modest", "share": 0.0001 },
       { "points": 20, "nature": "modest", "share": 0.0001 },
       { "points": 30, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 86, "usage": 0.007 }
   },
   "weavile": {
     "rank": 78,
@@ -7763,7 +7840,8 @@
       { "points": 0, "nature": "jolly", "share": 0.0001 },
       { "points": 14, "nature": "jolly", "share": 0.0001 },
       { "points": 27, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 94, "usage": 0.006 }
   },
   "zoroarkhisui": {
     "rank": 79,
@@ -7837,7 +7915,8 @@
       { "points": 19, "nature": "bold", "share": 0.0001 },
       { "points": 2, "nature": "modest", "share": 0.0001 },
       { "points": 0, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 87, "usage": 0.0068 }
   },
   "azumarill": {
     "rank": 80,
@@ -7906,7 +7985,8 @@
       { "points": 15, "nature": "careful", "share": 0.0001 },
       { "points": 0, "nature": "bold", "share": 0.0001 },
       { "points": 6, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 115, "usage": 0.0035 }
   },
   "vanilluxe": {
     "rank": 81,
@@ -7993,7 +8073,8 @@
       { "points": 28, "nature": "timid", "share": 0.0001 },
       { "points": 6, "nature": "modest", "share": 0.0001 },
       { "points": 0, "nature": "relaxed", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 75, "usage": 0.0084 }
   },
   "raichumegax": {
     "rank": 82,
@@ -8083,7 +8164,8 @@
       { "points": 24, "nature": "careful", "share": 0.0001 },
       { "points": 25, "nature": "hasty", "share": 0.0001 },
       { "points": 2, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 80, "usage": 0.0078 }
   },
   "meganiummega": {
     "rank": 83,
@@ -8184,7 +8266,8 @@
       { "points": 0, "nature": "sassy", "share": 0.0001 },
       { "points": 9, "nature": "quiet", "share": 0.0001 },
       { "points": 12, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 72, "usage": 0.0091 }
   },
   "rotomheat": {
     "rank": 84,
@@ -8291,7 +8374,8 @@
       { "points": 4, "nature": "bold", "share": 0.0001 },
       { "points": 9, "nature": "hardy", "share": 0.0001 },
       { "points": 17, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 77, "usage": 0.008 }
   },
   "gallade": {
     "rank": 85,
@@ -8378,7 +8462,8 @@
       { "points": 32, "nature": "impish", "share": 0.0001 },
       { "points": 18, "nature": "adamant", "share": 0.0001 },
       { "points": 9, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 53, "usage": 0.0242 }
   },
   "samurotthisui": {
     "rank": 86,
@@ -8475,7 +8560,8 @@
       { "points": 13, "nature": "adamant", "share": 0.0001 },
       { "points": 0, "nature": "hardy", "share": 0.0001 },
       { "points": 1, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 99, "usage": 0.0048 }
   },
   "typhlosionhisui": {
     "rank": 87,
@@ -8550,7 +8636,8 @@
       { "points": 2, "nature": "adamant", "share": 0.0001 },
       { "points": 20, "nature": "modest", "share": 0.0001 },
       { "points": 12, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 85, "usage": 0.0073 }
   },
   "ninetales": {
     "rank": 88,
@@ -8626,7 +8713,8 @@
       { "points": 20, "nature": "timid", "share": 0.0001 },
       { "points": 26, "nature": "timid", "share": 0.0001 },
       { "points": 14, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 118, "usage": 0.0032 }
   },
   "tinkaton": {
     "rank": 89,
@@ -8741,7 +8829,8 @@
       { "points": 4, "nature": "adamant", "share": 0.0001 },
       { "points": 11, "nature": "impish", "share": 0.0001 },
       { "points": 17, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 79, "usage": 0.0079 }
   },
   "gyaradosmega": {
     "rank": 90,
@@ -8839,7 +8928,8 @@
       { "points": 26, "nature": "jolly", "share": 0.0001 },
       { "points": 11, "nature": "impish", "share": 0.0001 },
       { "points": 27, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 101, "usage": 0.0048 }
   },
   "snorlax": {
     "rank": 91,
@@ -8910,7 +9000,8 @@
       { "points": 2, "nature": "impish", "share": 0.0002 },
       { "points": 2, "nature": "brave", "share": 0.0002 },
       { "points": 8, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 98, "usage": 0.005 }
   },
   "umbreon": {
     "rank": 92,
@@ -8981,7 +9072,8 @@
       { "points": 1, "nature": "bold", "share": 0.0001 },
       { "points": 0, "nature": "modest", "share": 0.0001 },
       { "points": 18, "nature": "calm", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 131, "usage": 0.0026 }
   },
   "charizardmegax": {
     "rank": 93,
@@ -9090,7 +9182,8 @@
       { "points": 12, "nature": "adamant", "share": 0.0001 },
       { "points": 22, "nature": "adamant", "share": 0.0001 },
       { "points": 9, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 78, "usage": 0.0079 }
   },
   "lopunnymega": {
     "rank": 94,
@@ -9147,7 +9240,8 @@
       { "points": 27, "nature": "jolly", "share": 0.0002 },
       { "points": 30, "nature": "jolly", "share": 0.0001 },
       { "points": 25, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 73, "usage": 0.0086 }
   },
   "starmiemega": {
     "rank": 95,
@@ -9241,7 +9335,8 @@
       { "points": 0, "nature": "bold", "share": 0.0001 },
       { "points": 20, "nature": "timid", "share": 0.0001 },
       { "points": 28, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 103, "usage": 0.0046 }
   },
   "hatterene": {
     "rank": 96,
@@ -9311,7 +9406,8 @@
       { "points": 17, "nature": "timid", "share": 0.0002 },
       { "points": 32, "nature": "modest", "share": 0.0001 },
       { "points": 6, "nature": "quiet", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 88, "usage": 0.0067 }
   },
   "palafin": {
     "rank": 97,
@@ -9415,7 +9511,8 @@
       { "points": 25, "nature": "adamant", "share": 0.0001 },
       { "points": 6, "nature": "adamant", "share": 0.0001 },
       { "points": 32, "nature": "mild", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 100, "usage": 0.0048 }
   },
   "hippowdon": {
     "rank": 98,
@@ -9474,7 +9571,8 @@
       { "points": 0, "nature": "quiet", "share": 0.0002 },
       { "points": 1, "nature": "brave", "share": 0.0002 },
       { "points": 2, "nature": "impish", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 183, "usage": 0.0011 }
   },
   "slowkinggalar": {
     "rank": 99,
@@ -9540,7 +9638,8 @@
       { "points": 32, "nature": "timid", "share": 0.0003 },
       { "points": 2, "nature": "modest", "share": 0.0001 },
       { "points": 32, "nature": "bold", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 120, "usage": 0.0032 }
   },
   "oranguru": {
     "rank": 100,
@@ -9628,7 +9727,8 @@
       { "points": 3, "nature": "hardy", "share": 0.0001 },
       { "points": 0, "nature": "brave", "share": 0.0001 },
       { "points": 8, "nature": "bold", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 107, "usage": 0.0043 }
   },
   "gliscor": {
     "rank": 101,
@@ -9721,7 +9821,8 @@
       { "points": 0, "nature": "calm", "share": 0.0001 },
       { "points": 8, "nature": "careful", "share": 0.0001 },
       { "points": 24, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 194, "usage": 0.001 }
   },
   "altaria": {
     "rank": 102,
@@ -9818,7 +9919,8 @@
       { "points": 25, "nature": "modest", "share": 0.0001 },
       { "points": 20, "nature": "modest", "share": 0.0001 },
       { "points": 13, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 89, "usage": 0.0065 }
   },
   "mudsdale": {
     "rank": 103,
@@ -9882,7 +9984,8 @@
       { "points": 32, "nature": "adamant", "share": 0.0002 },
       { "points": 1, "nature": "adamant", "share": 0.0002 },
       { "points": 14, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 92, "usage": 0.0063 }
   },
   "araquanid": {
     "rank": 104,
@@ -9954,7 +10057,8 @@
       { "points": 1, "nature": "impish", "share": 0.0005 },
       { "points": 32, "nature": "adamant", "share": 0.0002 },
       { "points": 32, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 91, "usage": 0.0063 }
   },
   "altariamega": {
     "rank": 105,
@@ -10055,7 +10159,8 @@
       { "points": 21, "nature": "modest", "share": 0.0001 },
       { "points": 16, "nature": "hardy", "share": 0.0001 },
       { "points": 0, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 170, "usage": 0.0013 }
   },
   "eelektrossmega": {
     "rank": 106,
@@ -10174,7 +10279,8 @@
       { "points": 0, "nature": "lonely", "share": 0.0001 },
       { "points": 29, "nature": "modest", "share": 0.0001 },
       { "points": 3, "nature": "sassy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 82, "usage": 0.0077 }
   },
   "sceptilemega": {
     "rank": 107,
@@ -10257,7 +10363,8 @@
       { "points": 0, "nature": "bold", "share": 0.0001 },
       { "points": 15, "nature": "timid", "share": 0.0001 },
       { "points": 17, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 74, "usage": 0.0085 }
   },
   "vileplume": {
     "rank": 108,
@@ -10332,7 +10439,8 @@
       { "points": 20, "nature": "timid", "share": 0.0001 },
       { "points": 22, "nature": "timid", "share": 0.0001 },
       { "points": 0, "nature": "naughty", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 66, "usage": 0.014 }
   },
   "drampa": {
     "rank": 109,
@@ -10394,7 +10502,8 @@
       { "points": 26, "nature": "modest", "share": 0.0002 },
       { "points": 0, "nature": "calm", "share": 0.0001 },
       { "points": 0, "nature": "sassy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 102, "usage": 0.0048 }
   },
   "greninjamega": {
     "rank": 110,
@@ -10470,7 +10579,8 @@
       { "points": 31, "nature": "jolly", "share": 0.0001 },
       { "points": 0, "nature": "timid", "share": 0.0001 },
       { "points": 11, "nature": "hasty", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 161, "usage": 0.0016 }
   },
   "kleavor": {
     "rank": 111,
@@ -10547,7 +10657,8 @@
       { "points": 31, "nature": "adamant", "share": 0.0001 },
       { "points": 15, "nature": "adamant", "share": 0.0001 },
       { "points": 32, "nature": "naughty", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 97, "usage": 0.0051 }
   },
   "heliolisk": {
     "rank": 112,
@@ -10642,7 +10753,8 @@
       { "points": 2, "nature": "bold", "share": 0.0001 },
       { "points": 16, "nature": "modest", "share": 0.0001 },
       { "points": 2, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 127, "usage": 0.0028 }
   },
   "dragalgemega": {
     "rank": 113,
@@ -10705,7 +10817,8 @@
       { "points": 2, "nature": "timid", "share": 0.0001 },
       { "points": 2, "nature": "modest", "share": 0.0001 },
       { "points": 3, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 110, "usage": 0.0042 }
   },
   "espathra": {
     "rank": 114,
@@ -10814,7 +10927,8 @@
       { "points": 1, "nature": "timid", "share": 0.0001 },
       { "points": 28, "nature": "timid", "share": 0.0001 },
       { "points": 9, "nature": "calm", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 113, "usage": 0.0038 }
   },
   "banettemega": {
     "rank": 115,
@@ -10882,7 +10996,8 @@
       { "points": 16, "nature": "adamant", "share": 0.0002 },
       { "points": 5, "nature": "adamant", "share": 0.0001 },
       { "points": 17, "nature": "lonely", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 149, "usage": 0.002 }
   },
   "chandeluremega": {
     "rank": 116,
@@ -10965,7 +11080,8 @@
       { "points": 14, "nature": "modest", "share": 0.0003 },
       { "points": 12, "nature": "modest", "share": 0.0002 },
       { "points": 14, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 112, "usage": 0.0041 }
   },
   "houndstone": {
     "rank": 117,
@@ -11066,7 +11182,8 @@
       { "points": 12, "nature": "careful", "share": 0.0001 },
       { "points": 6, "nature": "adamant", "share": 0.0001 },
       { "points": 20, "nature": "careful", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 67, "usage": 0.0138 }
   },
   "audino": {
     "rank": 118,
@@ -11133,7 +11250,8 @@
       { "points": 10, "nature": "calm", "share": 0.0001 },
       { "points": 13, "nature": "timid", "share": 0.0001 },
       { "points": 30, "nature": "calm", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 156, "usage": 0.0018 }
   },
   "gengar": {
     "rank": 119,
@@ -11195,7 +11313,8 @@
       { "points": 20, "nature": "modest", "share": 0.0002 },
       { "points": 0, "nature": "timid", "share": 0.0001 },
       { "points": 32, "nature": "bold", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 166, "usage": 0.0015 }
   },
   "lucariomega": {
     "rank": 120,
@@ -11301,7 +11420,8 @@
       { "points": 17, "nature": "hardy", "share": 0.0001 },
       { "points": 19, "nature": "hasty", "share": 0.0001 },
       { "points": 0, "nature": "calm", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 121, "usage": 0.0031 }
   },
   "glaceon": {
     "rank": 121,
@@ -11381,7 +11501,8 @@
       { "points": 0, "nature": "sassy", "share": 0.0001 },
       { "points": 5, "nature": "modest", "share": 0.0001 },
       { "points": 0, "nature": "rash", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 160, "usage": 0.0016 }
   },
   "blastoise": {
     "rank": 122,
@@ -11468,7 +11589,8 @@
       { "points": 4, "nature": "bold", "share": 0.0001 },
       { "points": 2, "nature": "adamant", "share": 0.0001 },
       { "points": 21, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 167, "usage": 0.0015 }
   },
   "ditto": {
     "rank": 123,
@@ -11536,7 +11658,8 @@
       { "points": 11, "nature": "naive", "share": 0.0002 },
       { "points": 0, "nature": "naughty", "share": 0.0001 },
       { "points": 32, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 128, "usage": 0.0028 }
   },
   "drampamega": {
     "rank": 124,
@@ -11593,7 +11716,8 @@
       { "points": 22, "nature": "timid", "share": 0.0003 },
       { "points": 22, "nature": "modest", "share": 0.0001 },
       { "points": 4, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 108, "usage": 0.0042 }
   },
   "steelixmega": {
     "rank": 125,
@@ -11647,7 +11771,8 @@
       { "points": 2, "nature": "adamant", "share": 0.0001 },
       { "points": 0, "nature": "lax", "share": 0.0001 },
       { "points": 2, "nature": "brave", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 180, "usage": 0.0012 }
   },
   "metagross": {
     "rank": 126,
@@ -11731,7 +11856,8 @@
       { "points": 26, "nature": "jolly", "share": 0.0001 },
       { "points": 6, "nature": "adamant", "share": 0.0001 },
       { "points": 0, "nature": "bold", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 119, "usage": 0.0032 }
   },
   "decidueyehisui": {
     "rank": 127,
@@ -11818,7 +11944,8 @@
       { "points": 4, "nature": "adamant", "share": 0.0001 },
       { "points": 18, "nature": "jolly", "share": 0.0001 },
       { "points": 0, "nature": "sassy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 117, "usage": 0.0032 }
   },
   "meowstic": {
     "rank": 128,
@@ -11914,7 +12041,8 @@
       { "points": 9, "nature": "bold", "share": 0.0001 },
       { "points": 32, "nature": "calm", "share": 0.0001 },
       { "points": 18, "nature": "bold", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 81, "usage": 0.0077 }
   },
   "abomasnowmega": {
     "rank": 129,
@@ -11972,7 +12100,8 @@
       { "points": 0, "nature": "careful", "share": 0.0001 },
       { "points": 5, "nature": "modest", "share": 0.0001 },
       { "points": 23, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 90, "usage": 0.0064 }
   },
   "falinksmega": {
     "rank": 130,
@@ -12048,7 +12177,8 @@
       { "points": 15, "nature": "careful", "share": 0.0001 },
       { "points": 24, "nature": "jolly", "share": 0.0001 },
       { "points": 2, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 181, "usage": 0.0012 }
   },
   "aggronmega": {
     "rank": 131,
@@ -12112,7 +12242,8 @@
       { "points": 2, "nature": "calm", "share": 0.0001 },
       { "points": 1, "nature": "adamant", "share": 0.0001 },
       { "points": 32, "nature": "impish", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 144, "usage": 0.0021 }
   },
   "vaporeon": {
     "rank": 132,
@@ -12185,7 +12316,8 @@
       { "points": 1, "nature": "quiet", "share": 0.0001 },
       { "points": 5, "nature": "bold", "share": 0.0001 },
       { "points": 32, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 172, "usage": 0.0013 }
   },
   "chesnaughtmega": {
     "rank": 133,
@@ -12253,7 +12385,8 @@
       { "points": 6, "nature": "adamant", "share": 0.0001 },
       { "points": 0, "nature": "hardy", "share": 0.0001 },
       { "points": 12, "nature": "impish", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 129, "usage": 0.0027 }
   },
   "feraligatrmega": {
     "rank": 134,
@@ -12339,7 +12472,8 @@
       { "points": 32, "nature": "careful", "share": 0.0001 },
       { "points": 2, "nature": "brave", "share": 0.0001 },
       { "points": 9, "nature": "impish", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 146, "usage": 0.0021 }
   },
   "cofagrigus": {
     "rank": 135,
@@ -12395,7 +12529,8 @@
       { "points": 21, "nature": "calm", "share": 0.0008 },
       { "points": 6, "nature": "relaxed", "share": 0.0002 },
       { "points": 0, "nature": "naughty", "share": 0.0002 }
-    ]
+    ],
+    "prev": { "rank": 147, "usage": 0.0021 }
   },
   "conkeldurr": {
     "rank": 136,
@@ -12461,7 +12596,8 @@
       { "points": 10, "nature": "adamant", "share": 0.0001 },
       { "points": 0, "nature": "relaxed", "share": 0.0001 },
       { "points": 0, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 134, "usage": 0.0025 }
   },
   "ampharosmega": {
     "rank": 137,
@@ -12518,7 +12654,8 @@
       { "points": 1, "nature": "modest", "share": 0.0002 },
       { "points": 16, "nature": "modest", "share": 0.0001 },
       { "points": 0, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 148, "usage": 0.002 }
   },
   "blaziken": {
     "rank": 138,
@@ -12615,7 +12752,8 @@
       { "points": 16, "nature": "jolly", "share": 0.0001 },
       { "points": 10, "nature": "adamant", "share": 0.0001 },
       { "points": 12, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 111, "usage": 0.0041 }
   },
   "goodrahisui": {
     "rank": 139,
@@ -12696,7 +12834,8 @@
       { "points": 2, "nature": "calm", "share": 0.0001 },
       { "points": 1, "nature": "impish", "share": 0.0001 },
       { "points": 3, "nature": "calm", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 137, "usage": 0.0023 }
   },
   "arcanine": {
     "rank": 140,
@@ -12807,7 +12946,8 @@
       { "points": 1, "nature": "calm", "share": 0.0001 },
       { "points": 2, "nature": "modest", "share": 0.0001 },
       { "points": 0, "nature": "bold", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 130, "usage": 0.0027 }
   },
   "overqwil": {
     "rank": 141,
@@ -12912,7 +13052,8 @@
       { "points": 23, "nature": "naive", "share": 0.0001 },
       { "points": 9, "nature": "hardy", "share": 0.0001 },
       { "points": 32, "nature": "naive", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 93, "usage": 0.0062 }
   },
   "golurkmega": {
     "rank": 142,
@@ -12971,7 +13112,8 @@
       { "points": 13, "nature": "adamant", "share": 0.0001 },
       { "points": 20, "nature": "impish", "share": 0.0001 },
       { "points": 6, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 123, "usage": 0.003 }
   },
   "malamarmega": {
     "rank": 143,
@@ -13045,7 +13187,8 @@
       { "points": 32, "nature": "hasty", "share": 0.0001 },
       { "points": 11, "nature": "hardy", "share": 0.0001 },
       { "points": 4, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 109, "usage": 0.0042 }
   },
   "klefki": {
     "rank": 144,
@@ -13115,7 +13258,8 @@
       { "points": 10, "nature": "calm", "share": 0.0001 },
       { "points": 2, "nature": "relaxed", "share": 0.0001 },
       { "points": 1, "nature": "bold", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 106, "usage": 0.0043 }
   },
   "lycanroc": {
     "rank": 145,
@@ -13167,7 +13311,8 @@
       { "points": 15, "nature": "adamant", "share": 0.0011 },
       { "points": 0, "nature": "adamant", "share": 0.0005 },
       { "points": 5, "nature": "impish", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 236, "usage": 0.0004 }
   },
   "malamar": {
     "rank": 146,
@@ -13243,7 +13388,8 @@
       { "points": 19, "nature": "adamant", "share": 0.0001 },
       { "points": 7, "nature": "bold", "share": 0.0001 },
       { "points": 1, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 141, "usage": 0.0022 }
   },
   "taurospaldeaaqua": {
     "rank": 147,
@@ -13330,7 +13476,8 @@
       { "points": 15, "nature": "jolly", "share": 0.0001 },
       { "points": 30, "nature": "jolly", "share": 0.0001 },
       { "points": 19, "nature": "rash", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 132, "usage": 0.0026 }
   },
   "raichu": {
     "rank": 148,
@@ -13426,7 +13573,8 @@
       { "points": 1, "nature": "calm", "share": 0.0001 },
       { "points": 24, "nature": "hasty", "share": 0.0001 },
       { "points": 0, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 116, "usage": 0.0033 }
   },
   "toxicroak": {
     "rank": 149,
@@ -13497,7 +13645,8 @@
       { "points": 0, "nature": "bold", "share": 0.0002 },
       { "points": 0, "nature": "sassy", "share": 0.0001 },
       { "points": 30, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 218, "usage": 0.0006 }
   },
   "basculegionf": {
     "rank": 150,
@@ -13587,7 +13736,8 @@
       { "points": 2, "nature": "mild", "share": 0.0001 },
       { "points": 32, "nature": "hardy", "share": 0.0001 },
       { "points": 0, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 114, "usage": 0.0036 }
   },
   "liepard": {
     "rank": 151,
@@ -13664,7 +13814,8 @@
       { "points": 0, "nature": "sassy", "share": 0.0001 },
       { "points": 0, "nature": "relaxed", "share": 0.0001 },
       { "points": 32, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 168, "usage": 0.0015 }
   },
   "krookodile": {
     "rank": 152,
@@ -13755,7 +13906,8 @@
       { "points": 16, "nature": "adamant", "share": 0.0001 },
       { "points": 31, "nature": "jolly", "share": 0.0001 },
       { "points": 0, "nature": "sassy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 136, "usage": 0.0024 }
   },
   "victreebelmega": {
     "rank": 153,
@@ -13829,7 +13981,8 @@
       { "points": 32, "nature": "hasty", "share": 0.0002 },
       { "points": 6, "nature": "modest", "share": 0.0001 },
       { "points": 0, "nature": "brave", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 173, "usage": 0.0013 }
   },
   "alakazam": {
     "rank": 154,
@@ -13892,7 +14045,8 @@
       { "points": 32, "nature": "hardy", "share": 0.0008 },
       { "points": 0, "nature": "quiet", "share": 0.0001 },
       { "points": 0, "nature": "sassy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 203, "usage": 0.0008 }
   },
   "audinomega": {
     "rank": 155,
@@ -13947,7 +14101,8 @@
       { "points": 0, "nature": "careful", "share": 0.0002 },
       { "points": 0, "nature": "brave", "share": 0.0001 },
       { "points": 19, "nature": "bold", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 197, "usage": 0.0009 }
   },
   "chimechomega": {
     "rank": 156,
@@ -14006,7 +14161,8 @@
       { "points": 0, "nature": "hardy", "share": 0.0003 },
       { "points": 8, "nature": "calm", "share": 0.0001 },
       { "points": 25, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 199, "usage": 0.0008 }
   },
   "crabominablemega": {
     "rank": 157,
@@ -14062,7 +14218,8 @@
       { "points": 18, "nature": "adamant", "share": 0.0001 },
       { "points": 7, "nature": "brave", "share": 0.0001 },
       { "points": 0, "nature": "calm", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 143, "usage": 0.0022 }
   },
   "wyrdeer": {
     "rank": 158,
@@ -14145,7 +14302,8 @@
       { "points": 2, "nature": "adamant", "share": 0.0001 },
       { "points": 22, "nature": "modest", "share": 0.0001 },
       { "points": 32, "nature": "quiet", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 152, "usage": 0.0018 }
   },
   "scrafty": {
     "rank": 159,
@@ -14234,7 +14392,8 @@
       { "points": 27, "nature": "jolly", "share": 0.0002 },
       { "points": 7, "nature": "hardy", "share": 0.0001 },
       { "points": 3, "nature": "careful", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 104, "usage": 0.0046 }
   },
   "orthworm": {
     "rank": 160,
@@ -14303,7 +14462,8 @@
       { "points": 1, "nature": "careful", "share": 0.0001 },
       { "points": 0, "nature": "jolly", "share": 0.0001 },
       { "points": 29, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 188, "usage": 0.0011 }
   },
   "gallademega": {
     "rank": 161,
@@ -14372,7 +14532,8 @@
       { "points": 23, "nature": "jolly", "share": 0.0001 },
       { "points": 8, "nature": "hardy", "share": 0.0001 },
       { "points": 22, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 182, "usage": 0.0011 }
   },
   "mrrime": {
     "rank": 162,
@@ -14459,7 +14620,8 @@
       { "points": 14, "nature": "timid", "share": 0.0001 },
       { "points": 14, "nature": "bold", "share": 0.0001 },
       { "points": 0, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 138, "usage": 0.0023 }
   },
   "slowbromega": {
     "rank": 163,
@@ -14517,7 +14679,8 @@
       { "points": 14, "nature": "calm", "share": 0.0003 },
       { "points": 14, "nature": "bold", "share": 0.0002 },
       { "points": 0, "nature": "brave", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 189, "usage": 0.0011 }
   },
   "empoleon": {
     "rank": 164,
@@ -14607,7 +14770,8 @@
       { "points": 1, "nature": "calm", "share": 0.0003 },
       { "points": 24, "nature": "timid", "share": 0.0002 },
       { "points": 2, "nature": "quiet", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 154, "usage": 0.0018 }
   },
   "aurorus": {
     "rank": 165,
@@ -14679,7 +14843,8 @@
       { "points": 23, "nature": "modest", "share": 0.001 },
       { "points": 27, "nature": "timid", "share": 0.0002 },
       { "points": 2, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 214, "usage": 0.0006 }
   },
   "tyrantrum": {
     "rank": 166,
@@ -14747,7 +14912,8 @@
       { "points": 0, "nature": "hardy", "share": 0.0001 },
       { "points": 31, "nature": "adamant", "share": 0.0001 },
       { "points": 21, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 231, "usage": 0.0005 }
   },
   "hydrapple": {
     "rank": 167,
@@ -14815,7 +14981,8 @@
       { "points": 0, "nature": "lonely", "share": 0.0002 },
       { "points": 2, "nature": "calm", "share": 0.0001 },
       { "points": 16, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 157, "usage": 0.0017 }
   },
   "skarmory": {
     "rank": 168,
@@ -14881,7 +15048,8 @@
       { "points": 0, "nature": "hardy", "share": 0.0001 },
       { "points": 11, "nature": "careful", "share": 0.0001 },
       { "points": 4, "nature": "careful", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 269, "usage": 0.0002 }
   },
   "barbaraclemega": {
     "rank": 169,
@@ -14952,7 +15120,8 @@
       { "points": 0, "nature": "careful", "share": 0.0002 },
       { "points": 32, "nature": "hardy", "share": 0.0001 },
       { "points": 3, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 145, "usage": 0.0021 }
   },
   "rotommow": {
     "rank": 170,
@@ -15044,7 +15213,8 @@
       { "points": 8, "nature": "bold", "share": 0.0001 },
       { "points": 25, "nature": "bold", "share": 0.0001 },
       { "points": 1, "nature": "bold", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 151, "usage": 0.0019 }
   },
   "clefablemega": {
     "rank": 171,
@@ -15115,7 +15285,8 @@
       { "points": 6, "nature": "modest", "share": 0.0002 },
       { "points": 0, "nature": "sassy", "share": 0.0001 },
       { "points": 2, "nature": "bold", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 185, "usage": 0.0011 }
   },
   "alcremie": {
     "rank": 172,
@@ -15198,7 +15369,8 @@
       { "points": 26, "nature": "timid", "share": 0.0002 },
       { "points": 18, "nature": "timid", "share": 0.0001 },
       { "points": 32, "nature": "bold", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 165, "usage": 0.0015 }
   },
   "serperior": {
     "rank": 173,
@@ -15288,7 +15460,8 @@
       { "points": 32, "nature": "naive", "share": 0.0001 },
       { "points": 2, "nature": "calm", "share": 0.0001 },
       { "points": 0, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 159, "usage": 0.0017 }
   },
   "houndoommega": {
     "rank": 174,
@@ -15353,7 +15526,8 @@
       { "points": 27, "nature": "hardy", "share": 0.0002 },
       { "points": 2, "nature": "modest", "share": 0.0001 },
       { "points": 0, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 179, "usage": 0.0012 }
   },
   "diggersby": {
     "rank": 175,
@@ -15413,7 +15587,8 @@
       { "points": 15, "nature": "adamant", "share": 0.0002 },
       { "points": 28, "nature": "jolly", "share": 0.0001 },
       { "points": 20, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 222, "usage": 0.0005 }
   },
   "aromatisse": {
     "rank": 176,
@@ -15472,7 +15647,8 @@
       { "points": 0, "nature": "modest", "share": 0.0181 },
       { "points": 0, "nature": "hardy", "share": 0.0084 },
       { "points": 1, "nature": "bold", "share": 0.0075 }
-    ]
+    ],
+    "prev": { "rank": 169, "usage": 0.0014 }
   },
   "gyarados": {
     "rank": 177,
@@ -15597,7 +15773,8 @@
       { "points": 24, "nature": "adamant", "share": 0.0001 },
       { "points": 2, "nature": "jolly", "share": 0.0001 },
       { "points": 13, "nature": "impish", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 122, "usage": 0.003 }
   },
   "gardevoir": {
     "rank": 178,
@@ -15677,7 +15854,8 @@
       { "points": 20, "nature": "modest", "share": 0.0007 },
       { "points": 1, "nature": "bold", "share": 0.0005 },
       { "points": 22, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 126, "usage": 0.0028 }
   },
   "rhyperior": {
     "rank": 179,
@@ -15747,7 +15925,8 @@
       { "points": 2, "nature": "adamant", "share": 0.0002 },
       { "points": 0, "nature": "naughty", "share": 0.0002 },
       { "points": 0, "nature": "hardy", "share": 0.0002 }
-    ]
+    ],
+    "prev": { "rank": 176, "usage": 0.0012 }
   },
   "skarmorymega": {
     "rank": 180,
@@ -15817,7 +15996,8 @@
       { "points": 22, "nature": "adamant", "share": 0.0001 },
       { "points": 4, "nature": "adamant", "share": 0.0001 },
       { "points": 7, "nature": "impish", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 133, "usage": 0.0026 }
   },
   "excadrillmega": {
     "rank": 181,
@@ -15888,7 +16068,8 @@
       { "points": 18, "nature": "adamant", "share": 0.0001 },
       { "points": 19, "nature": "adamant", "share": 0.0001 },
       { "points": 0, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 163, "usage": 0.0016 }
   },
   "taurospaldeablaze": {
     "rank": 182,
@@ -15962,7 +16143,8 @@
       { "points": 20, "nature": "adamant", "share": 0.0002 },
       { "points": 14, "nature": "impish", "share": 0.0001 },
       { "points": 31, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 234, "usage": 0.0004 }
   },
   "heracrossmega": {
     "rank": 183,
@@ -16034,7 +16216,8 @@
       { "points": 26, "nature": "jolly", "share": 0.0003 },
       { "points": 15, "nature": "adamant", "share": 0.0001 },
       { "points": 31, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 150, "usage": 0.0019 }
   },
   "jolteon": {
     "rank": 184,
@@ -16108,7 +16291,8 @@
       { "points": 23, "nature": "modest", "share": 0.0002 },
       { "points": 28, "nature": "timid", "share": 0.0002 },
       { "points": 6, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 139, "usage": 0.0023 }
   },
   "quaquaval": {
     "rank": 185,
@@ -16183,7 +16367,8 @@
       { "points": 0, "nature": "careful", "share": 0.0001 },
       { "points": 28, "nature": "adamant", "share": 0.0001 },
       { "points": 0, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 210, "usage": 0.0006 }
   },
   "rotomfrost": {
     "rank": 186,
@@ -16260,7 +16445,8 @@
       { "points": 21, "nature": "timid", "share": 0.0001 },
       { "points": 31, "nature": "timid", "share": 0.0001 },
       { "points": 24, "nature": "bold", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 174, "usage": 0.0013 }
   },
   "noivern": {
     "rank": 187,
@@ -16331,7 +16517,8 @@
       { "points": 10, "nature": "bold", "share": 0.0002 },
       { "points": 21, "nature": "hasty", "share": 0.0001 },
       { "points": 32, "nature": "careful", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 135, "usage": 0.0025 }
   },
   "hawluchamega": {
     "rank": 188,
@@ -16396,7 +16583,8 @@
       { "points": 32, "nature": "naive", "share": 0.0001 },
       { "points": 2, "nature": "jolly", "share": 0.0001 },
       { "points": 0, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 158, "usage": 0.0017 }
   },
   "pidgeotmega": {
     "rank": 189,
@@ -16449,7 +16637,8 @@
       { "points": 32, "nature": "jolly", "share": 0.0005 },
       { "points": 29, "nature": "timid", "share": 0.0001 },
       { "points": 29, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 177, "usage": 0.0012 }
   },
   "beedrillmega": {
     "rank": 190,
@@ -16509,7 +16698,8 @@
       { "points": 32, "nature": "impish", "share": 0.0001 },
       { "points": 0, "nature": "adamant", "share": 0.0001 },
       { "points": 0, "nature": "impish", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 164, "usage": 0.0016 }
   },
   "rampardos": {
     "rank": 191,
@@ -16577,7 +16767,8 @@
       { "points": 7, "nature": "adamant", "share": 0.0002 },
       { "points": 16, "nature": "adamant", "share": 0.0001 },
       { "points": 32, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 195, "usage": 0.001 }
   },
   "clawitzer": {
     "rank": 192,
@@ -16637,7 +16828,8 @@
       { "points": 0, "nature": "sassy", "share": 0.0002 },
       { "points": 0, "nature": "bold", "share": 0.0001 },
       { "points": 7, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 202, "usage": 0.0008 }
   },
   "manectricmega": {
     "rank": 193,
@@ -16692,7 +16884,8 @@
       { "points": 15, "nature": "modest", "share": 0.0003 },
       { "points": 0, "nature": "quiet", "share": 0.0002 },
       { "points": 21, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 155, "usage": 0.0018 }
   },
   "greninja": {
     "rank": 194,
@@ -16764,7 +16957,8 @@
       { "points": 21, "nature": "timid", "share": 0.0004 },
       { "points": 20, "nature": "jolly", "share": 0.0001 },
       { "points": 32, "nature": "careful", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 153, "usage": 0.0018 }
   },
   "pinsirmega": {
     "rank": 195,
@@ -16825,7 +17019,8 @@
       { "points": 29, "nature": "adamant", "share": 0.0002 },
       { "points": 14, "nature": "adamant", "share": 0.0001 },
       { "points": 15, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 186, "usage": 0.0011 }
   },
   "medichammega": {
     "rank": 196,
@@ -16883,7 +17078,8 @@
       { "points": 25, "nature": "adamant", "share": 0.0001 },
       { "points": 23, "nature": "jolly", "share": 0.0001 },
       { "points": 0, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 208, "usage": 0.0007 }
   },
   "spiritomb": {
     "rank": 197,
@@ -16947,7 +17143,8 @@
       { "points": 0, "nature": "hardy", "share": 0.0005 },
       { "points": 24, "nature": "jolly", "share": 0.0001 },
       { "points": 0, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 212, "usage": 0.0006 }
   },
   "garganacl": {
     "rank": 198,
@@ -17011,7 +17208,8 @@
       { "points": 32, "nature": "adamant", "share": 0.0027 },
       { "points": 0, "nature": "brave", "share": 0.0019 },
       { "points": 0, "nature": "calm", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 204, "usage": 0.0007 }
   },
   "scolipedemega": {
     "rank": 199,
@@ -17095,7 +17293,8 @@
       { "points": 0, "nature": "hardy", "share": 0.0001 },
       { "points": 24, "nature": "adamant", "share": 0.0001 },
       { "points": 0, "nature": "sassy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 140, "usage": 0.0023 }
   },
   "ariados": {
     "rank": 200,
@@ -17164,7 +17363,8 @@
       { "points": 22, "nature": "careful", "share": 0.0022 },
       { "points": 32, "nature": "jolly", "share": 0.0013 },
       { "points": 32, "nature": "adamant", "share": 0.0002 }
-    ]
+    ],
+    "prev": { "rank": 227, "usage": 0.0005 }
   },
   "runerigus": {
     "rank": 201,
@@ -17228,7 +17428,8 @@
       { "points": 4, "nature": "relaxed", "share": 0.0002 },
       { "points": 0, "nature": "modest", "share": 0.0001 },
       { "points": 6, "nature": "relaxed", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 207, "usage": 0.0007 }
   },
   "gourgeistsuper": {
     "rank": 202,
@@ -17292,7 +17493,8 @@
       { "points": 0, "nature": "adamant", "share": 0.0105 },
       { "points": 32, "nature": "jolly", "share": 0.0013 },
       { "points": 0, "nature": "impish", "share": 0.0011 }
-    ]
+    ],
+    "prev": { "rank": 258, "usage": 0.0002 }
   },
   "pikachu": {
     "rank": 203,
@@ -17364,7 +17566,8 @@
       { "points": 28, "nature": "adamant", "share": 0.0001 },
       { "points": 18, "nature": "hardy", "share": 0.0001 },
       { "points": 32, "nature": "naughty", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 240, "usage": 0.0004 }
   },
   "reuniclus": {
     "rank": 204,
@@ -17429,7 +17632,8 @@
       { "points": 6, "nature": "sassy", "share": 0.0044 },
       { "points": 10, "nature": "modest", "share": 0.001 },
       { "points": 4, "nature": "modest", "share": 0.0002 }
-    ]
+    ],
+    "prev": { "rank": 142, "usage": 0.0022 }
   },
   "simipour": {
     "rank": 205,
@@ -17491,7 +17695,8 @@
       { "points": 19, "nature": "hasty", "share": 0.0002 },
       { "points": 0, "nature": "hardy", "share": 0.0002 },
       { "points": 0, "nature": "brave", "share": 0.0002 }
-    ]
+    ],
+    "prev": { "rank": 267, "usage": 0.0002 }
   },
   "alakazammega": {
     "rank": 206,
@@ -17562,7 +17767,8 @@
       { "points": 21, "nature": "modest", "share": 0.0001 },
       { "points": 27, "nature": "timid", "share": 0.0001 },
       { "points": 32, "nature": "rash", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 162, "usage": 0.0016 }
   },
   "lucario": {
     "rank": 207,
@@ -17639,7 +17845,8 @@
       { "points": 14, "nature": "modest", "share": 0.0001 },
       { "points": 0, "nature": "bold", "share": 0.0001 },
       { "points": 28, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 178, "usage": 0.0012 }
   },
   "torterra": {
     "rank": 208,
@@ -17725,7 +17932,8 @@
       { "points": 14, "nature": "jolly", "share": 0.0001 },
       { "points": 32, "nature": "naive", "share": 0.0001 },
       { "points": 22, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 228, "usage": 0.0005 }
   },
   "medicham": {
     "rank": 209,
@@ -17802,7 +18010,8 @@
       { "points": 20, "nature": "timid", "share": 0.0002 },
       { "points": 0, "nature": "calm", "share": 0.0001 },
       { "points": 9, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 192, "usage": 0.001 }
   },
   "hawlucha": {
     "rank": 210,
@@ -17873,7 +18082,8 @@
       { "points": 14, "nature": "careful", "share": 0.0001 },
       { "points": 0, "nature": "jolly", "share": 0.0001 },
       { "points": 12, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 264, "usage": 0.0002 }
   },
   "glaliemega": {
     "rank": 211,
@@ -17937,7 +18147,8 @@
       { "points": 2, "nature": "adamant", "share": 0.0001 },
       { "points": 3, "nature": "adamant", "share": 0.0001 },
       { "points": 2, "nature": "lax", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 248, "usage": 0.0003 }
   },
   "machamp": {
     "rank": 212,
@@ -18015,7 +18226,8 @@
       { "points": 9, "nature": "adamant", "share": 0.0001 },
       { "points": 0, "nature": "hardy", "share": 0.0001 },
       { "points": 31, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 232, "usage": 0.0004 }
   },
   "slowbro": {
     "rank": 213,
@@ -18075,7 +18287,8 @@
       { "points": 2, "nature": "bold", "share": 0.0002 },
       { "points": 0, "nature": "brave", "share": 0.0001 },
       { "points": 0, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 230, "usage": 0.0005 }
   },
   "ampharos": {
     "rank": 214,
@@ -18210,7 +18423,8 @@
       { "points": 20, "nature": "timid", "share": 0.0001 },
       { "points": 0, "nature": "timid", "share": 0.0001 },
       { "points": 0, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 187, "usage": 0.0011 }
   },
   "espeon": {
     "rank": 216,
@@ -18287,7 +18501,8 @@
       { "points": 5, "nature": "bold", "share": 0.0001 },
       { "points": 32, "nature": "adamant", "share": 0.0001 },
       { "points": 7, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 193, "usage": 0.001 }
   },
   "luxray": {
     "rank": 217,
@@ -18359,7 +18574,8 @@
       { "points": 32, "nature": "timid", "share": 0.0009 },
       { "points": 5, "nature": "careful", "share": 0.0003 },
       { "points": 32, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 242, "usage": 0.0004 }
   },
   "goodra": {
     "rank": 218,
@@ -18433,7 +18649,8 @@
       { "points": 2, "nature": "sassy", "share": 0.0001 },
       { "points": 0, "nature": "brave", "share": 0.0001 },
       { "points": 0, "nature": "sassy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 237, "usage": 0.0004 }
   },
   "beartic": {
     "rank": 219,
@@ -18506,7 +18723,8 @@
       { "points": 17, "nature": "jolly", "share": 0.0001 },
       { "points": 14, "nature": "adamant", "share": 0.0001 },
       { "points": 30, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 245, "usage": 0.0003 }
   },
   "roserade": {
     "rank": 220,
@@ -18563,7 +18781,8 @@
       { "points": 26, "nature": "naughty", "share": 0.0005 },
       { "points": 0, "nature": "timid", "share": 0.0002 },
       { "points": 0, "nature": "bold", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 241, "usage": 0.0004 }
   },
   "salazzle": {
     "rank": 221,
@@ -18631,7 +18850,8 @@
       { "points": 2, "nature": "modest", "share": 0.0001 },
       { "points": 28, "nature": "modest", "share": 0.0001 },
       { "points": 0, "nature": "mild", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 175, "usage": 0.0012 }
   },
   "houndoom": {
     "rank": 222,
@@ -18687,7 +18907,8 @@
       { "points": 17, "nature": "timid", "share": 0.0001 },
       { "points": 0, "nature": "timid", "share": 0.0001 },
       { "points": 21, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 190, "usage": 0.0011 }
   },
   "abomasnow": {
     "rank": 223,
@@ -18757,7 +18978,8 @@
       { "points": 32, "nature": "timid", "share": 0.0001 },
       { "points": 0, "nature": "bold", "share": 0.0001 },
       { "points": 32, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 251, "usage": 0.0003 }
   },
   "decidueye": {
     "rank": 224,
@@ -18896,7 +19118,8 @@
       { "points": 0, "nature": "sassy", "share": 0.0018 },
       { "points": 0, "nature": "hardy", "share": 0.0015 },
       { "points": 0, "nature": "naughty", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 171, "usage": 0.0013 }
   },
   "sableyemega": {
     "rank": 226,
@@ -18952,7 +19175,8 @@
       { "points": 32, "nature": "adamant", "share": 0.0009 },
       { "points": 0, "nature": "mild", "share": 0.0004 },
       { "points": 5, "nature": "calm", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 124, "usage": 0.0029 }
   },
   "emboarmega": {
     "rank": 227,
@@ -19010,7 +19234,8 @@
       { "points": 0, "nature": "careful", "share": 0.0004 },
       { "points": 0, "nature": "impish", "share": 0.0002 },
       { "points": 0, "nature": "lonely", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 224, "usage": 0.0005 }
   },
   "infernape": {
     "rank": 228,
@@ -19093,7 +19318,8 @@
       { "points": 0, "nature": "adamant", "share": 0.0002 },
       { "points": 27, "nature": "naive", "share": 0.0001 },
       { "points": 30, "nature": "gentle", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 205, "usage": 0.0007 }
   },
   "slowking": {
     "rank": 229,
@@ -19157,7 +19383,8 @@
       { "points": 0, "nature": "hardy", "share": 0.0005 },
       { "points": 0, "nature": "mild", "share": 0.0004 },
       { "points": 2, "nature": "quiet", "share": 0.0002 }
-    ]
+    ],
+    "prev": { "rank": 191, "usage": 0.0011 }
   },
   "simisage": {
     "rank": 230,
@@ -19286,7 +19513,8 @@
       { "points": 28, "nature": "adamant", "share": 0.0007 },
       { "points": 1, "nature": "brave", "share": 0.0002 },
       { "points": 0, "nature": "relaxed", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 257, "usage": 0.0002 }
   },
   "sharpedomega": {
     "rank": 232,
@@ -19348,7 +19576,8 @@
       { "points": 28, "nature": "jolly", "share": 0.0002 },
       { "points": 30, "nature": "adamant", "share": 0.0001 },
       { "points": 16, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 252, "usage": 0.0003 }
   },
   "meowsticfmega": {
     "rank": 233,
@@ -19404,7 +19633,8 @@
       { "points": 0, "nature": "sassy", "share": 0.0003 },
       { "points": 0, "nature": "gentle", "share": 0.0002 },
       { "points": 20, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 221, "usage": 0.0005 }
   },
   "toucannon": {
     "rank": 234,
@@ -19475,7 +19705,8 @@
       { "points": 0, "nature": "impish", "share": 0.0003 },
       { "points": 20, "nature": "careful", "share": 0.0002 },
       { "points": 21, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 259, "usage": 0.0002 }
   },
   "slurpuff": {
     "rank": 235,
@@ -19589,7 +19820,8 @@
       { "points": 14, "nature": "timid", "share": 0.0003 },
       { "points": 32, "nature": "hardy", "share": 0.0002 },
       { "points": 25, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 255, "usage": 0.0003 }
   },
   "crabominable": {
     "rank": 237,
@@ -19645,7 +19877,8 @@
       { "points": 0, "nature": "hardy", "share": 0.0083 },
       { "points": 0, "nature": "sassy", "share": 0.0048 },
       { "points": 0, "nature": "relaxed", "share": 0.0003 }
-    ]
+    ],
+    "prev": { "rank": 276, "usage": 0.0001 }
   },
   "starmie": {
     "rank": 238,
@@ -19715,7 +19948,8 @@
       { "points": 26, "nature": "timid", "share": 0.0002 },
       { "points": 0, "nature": "quiet", "share": 0.0002 },
       { "points": 27, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 235, "usage": 0.0004 }
   },
   "typhlosion": {
     "rank": 239,
@@ -19774,7 +20008,8 @@
       { "points": 17, "nature": "modest", "share": 0.0002 },
       { "points": 0, "nature": "hardy", "share": 0.0002 },
       { "points": 4, "nature": "modest", "share": 0.0002 }
-    ]
+    ],
+    "prev": { "rank": 196, "usage": 0.0009 }
   },
   "leafeon": {
     "rank": 240,
@@ -19849,7 +20084,8 @@
       { "points": 0, "nature": "relaxed", "share": 0.0002 },
       { "points": 25, "nature": "adamant", "share": 0.0001 },
       { "points": 0, "nature": "brave", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 215, "usage": 0.0006 }
   },
   "castform": {
     "rank": 241,
@@ -19909,7 +20145,8 @@
       { "points": 0, "nature": "rash", "share": 0.0005 },
       { "points": 0, "nature": "bold", "share": 0.0003 },
       { "points": 0, "nature": "quiet", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 274, "usage": 0.0001 }
   },
   "sandaconda": {
     "rank": 242,
@@ -19973,7 +20210,8 @@
       { "points": 0, "nature": "brave", "share": 0.0002 },
       { "points": 8, "nature": "adamant", "share": 0.0001 },
       { "points": 2, "nature": "impish", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 246, "usage": 0.0003 }
   },
   "slowbrogalar": {
     "rank": 243,
@@ -20035,7 +20273,8 @@
       { "points": 0, "nature": "sassy", "share": 0.0032 },
       { "points": 6, "nature": "quiet", "share": 0.0003 },
       { "points": 0, "nature": "careful", "share": 0.0003 }
-    ]
+    ],
+    "prev": { "rank": 225, "usage": 0.0005 }
   },
   "charizard": {
     "rank": 244,
@@ -20103,7 +20342,8 @@
       { "points": 21, "nature": "timid", "share": 0.0001 },
       { "points": 12, "nature": "modest", "share": 0.0001 },
       { "points": 17, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 200, "usage": 0.0008 }
   },
   "lopunny": {
     "rank": 245,
@@ -20159,7 +20399,8 @@
       { "points": 32, "nature": "timid", "share": 0.0002 },
       { "points": 23, "nature": "impish", "share": 0.0001 },
       { "points": 0, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 254, "usage": 0.0003 }
   },
   "flapple": {
     "rank": 246,
@@ -20226,7 +20467,8 @@
       { "points": 7, "nature": "adamant", "share": 0.0001 },
       { "points": 26, "nature": "adamant", "share": 0.0001 },
       { "points": 0, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 262, "usage": 0.0002 }
   },
   "morpeko": {
     "rank": 247,
@@ -20284,7 +20526,8 @@
       { "points": 32, "nature": "hasty", "share": 0.0005 },
       { "points": 2, "nature": "jolly", "share": 0.0002 },
       { "points": 17, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 253, "usage": 0.0003 }
   },
   "floetteeternal": {
     "rank": 248,
@@ -20358,7 +20601,8 @@
       { "points": 4, "nature": "modest", "share": 0.0002 },
       { "points": 6, "nature": "hardy", "share": 0.0002 },
       { "points": 32, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 201, "usage": 0.0008 }
   },
   "sceptile": {
     "rank": 249,
@@ -20437,7 +20681,8 @@
       { "points": 0, "nature": "timid", "share": 0.0001 },
       { "points": 7, "nature": "modest", "share": 0.0001 },
       { "points": 23, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 198, "usage": 0.0008 }
   },
   "dragalge": {
     "rank": 250,
@@ -20499,7 +20744,8 @@
       { "points": 0, "nature": "calm", "share": 0.0004 },
       { "points": 0, "nature": "hardy", "share": 0.0003 },
       { "points": 0, "nature": "relaxed", "share": 0.0003 }
-    ]
+    ],
+    "prev": { "rank": 219, "usage": 0.0006 }
   },
   "feraligatr": {
     "rank": 251,
@@ -20570,7 +20816,8 @@
       { "points": 32, "nature": "hardy", "share": 0.0005 },
       { "points": 12, "nature": "adamant", "share": 0.0003 },
       { "points": 0, "nature": "impish", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 184, "usage": 0.0011 }
   },
   "steelix": {
     "rank": 252,
@@ -20633,7 +20880,8 @@
       { "points": 0, "nature": "impish", "share": 0.0071 },
       { "points": 6, "nature": "brave", "share": 0.0027 },
       { "points": 2, "nature": "hardy", "share": 0.0017 }
-    ]
+    ],
+    "prev": { "rank": 278, "usage": 0.0001 }
   },
   "chesnaught": {
     "rank": 253,
@@ -20702,7 +20950,8 @@
       { "points": 32, "nature": "adamant", "share": 0.0003 },
       { "points": 0, "nature": "hardy", "share": 0.0003 },
       { "points": 22, "nature": "adamant", "share": 0.0002 }
-    ]
+    ],
+    "prev": { "rank": 238, "usage": 0.0004 }
   },
   "flareon": {
     "rank": 254,
@@ -20770,7 +21019,8 @@
       { "points": 32, "nature": "hasty", "share": 0.0003 },
       { "points": 0, "nature": "careful", "share": 0.0001 },
       { "points": 32, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 265, "usage": 0.0002 }
   },
   "meowsticmmega": {
     "rank": 255,
@@ -20833,7 +21083,8 @@
       { "points": 30, "nature": "timid", "share": 0.0008 },
       { "points": 1, "nature": "calm", "share": 0.0004 },
       { "points": 2, "nature": "modest", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 223, "usage": 0.0005 }
   },
   "absolmega": {
     "rank": 256,
@@ -20896,7 +21147,8 @@
       { "points": 32, "nature": "lonely", "share": 0.0002 },
       { "points": 0, "nature": "adamant", "share": 0.0002 },
       { "points": 25, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 260, "usage": 0.0002 }
   },
   "trevenant": {
     "rank": 257,
@@ -20962,7 +21214,8 @@
       { "points": 0, "nature": "quiet", "share": 0.0004 },
       { "points": 14, "nature": "adamant", "share": 0.0003 },
       { "points": 0, "nature": "bold", "share": 0.0002 }
-    ]
+    ],
+    "prev": { "rank": 226, "usage": 0.0005 }
   },
   "florges": {
     "rank": 258,
@@ -21037,7 +21290,8 @@
       { "points": 6, "nature": "timid", "share": 0.0002 },
       { "points": 32, "nature": "calm", "share": 0.0002 },
       { "points": 27, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 256, "usage": 0.0002 }
   },
   "musharna": {
     "rank": 259,
@@ -21098,7 +21352,8 @@
       { "points": 0, "nature": "calm", "share": 0.0097 },
       { "points": 0, "nature": "modest", "share": 0.0091 },
       { "points": 2, "nature": "modest", "share": 0.0004 }
-    ]
+    ],
+    "prev": { "rank": 217, "usage": 0.0006 }
   },
   "zoroark": {
     "rank": 260,
@@ -21160,7 +21415,8 @@
       { "points": 0, "nature": "quiet", "share": 0.0011 },
       { "points": 32, "nature": "rash", "share": 0.0001 },
       { "points": 0, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 249, "usage": 0.0003 }
   },
   "scovillain": {
     "rank": 261,
@@ -21242,7 +21498,8 @@
       { "points": 32, "nature": "rash", "share": 0.0001 },
       { "points": 13, "nature": "hardy", "share": 0.0001 },
       { "points": 1, "nature": "hasty", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 213, "usage": 0.0006 }
   },
   "bastiodon": {
     "rank": 262,
@@ -21305,7 +21562,8 @@
       { "points": 0, "nature": "brave", "share": 0.0167 },
       { "points": 0, "nature": "adamant", "share": 0.0004 },
       { "points": 0, "nature": "hardy", "share": 0.0003 }
-    ]
+    ],
+    "prev": { "rank": 266, "usage": 0.0002 }
   },
   "golurk": {
     "rank": 263,
@@ -21371,7 +21629,8 @@
       { "points": 32, "nature": "adamant", "share": 0.0005 },
       { "points": 32, "nature": "hardy", "share": 0.0005 },
       { "points": 10, "nature": "adamant", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 239, "usage": 0.0004 }
   },
   "avalugg": {
     "rank": 264,
@@ -21483,7 +21742,8 @@
       { "points": 19, "nature": "timid", "share": 0.0001 },
       { "points": 32, "nature": "lax", "share": 0.0001 },
       { "points": 10, "nature": "impish", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 209, "usage": 0.0006 }
   },
   "rotomfan": {
     "rank": 266,
@@ -21604,7 +21864,8 @@
       { "points": 0, "nature": "adamant", "share": 0.0005 },
       { "points": 32, "nature": "hasty", "share": 0.0004 },
       { "points": 32, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 263, "usage": 0.0002 }
   },
   "polteageist": {
     "rank": 268,
@@ -21677,7 +21938,8 @@
       { "points": 19, "nature": "modest", "share": 0.0003 },
       { "points": 2, "nature": "modest", "share": 0.0003 },
       { "points": 17, "nature": "bold", "share": 0.0002 }
-    ]
+    ],
+    "prev": { "rank": 244, "usage": 0.0003 }
   },
   "passimian": {
     "rank": 269,
@@ -21751,7 +22013,8 @@
       { "points": 11, "nature": "adamant", "share": 0.0003 },
       { "points": 4, "nature": "adamant", "share": 0.0003 },
       { "points": 0, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 243, "usage": 0.0003 }
   },
   "barbaracle": {
     "rank": 270,
@@ -21928,7 +22191,8 @@
       { "points": 24, "nature": "hardy", "share": 0.0004 },
       { "points": 12, "nature": "modest", "share": 0.0003 },
       { "points": 21, "nature": "timid", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 273, "usage": 0.0001 }
   },
   "rotom": {
     "rank": 273,
@@ -22108,7 +22372,8 @@
       { "points": 27, "nature": "timid", "share": 0.0003 },
       { "points": 25, "nature": "naive", "share": 0.0001 },
       { "points": 11, "nature": "jolly", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 268, "usage": 0.0002 }
   },
   "appletun": {
     "rank": 276,
@@ -22165,7 +22430,8 @@
       { "points": 0, "nature": "bold", "share": 0.0014 },
       { "points": 0, "nature": "naughty", "share": 0.0006 },
       { "points": 0, "nature": "hardy", "share": 0.0003 }
-    ]
+    ],
+    "prev": { "rank": 282, "usage": 0.0001 }
   },
   "tauros": {
     "rank": 277,
@@ -22230,6 +22496,7 @@
       { "points": 26, "nature": "adamant", "share": 0.001 },
       { "points": 32, "nature": "modest", "share": 0.0001 },
       { "points": 32, "nature": "hardy", "share": 0.0001 }
-    ]
+    ],
+    "prev": { "rank": 281, "usage": 0.0001 }
   }
 }
