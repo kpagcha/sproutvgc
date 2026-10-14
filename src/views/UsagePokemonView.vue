@@ -283,7 +283,6 @@ const teammates = computed(() => (m.value?.teammates ?? []).filter((x) => availa
             </tr>
           </tbody>
         </table>
-        <!-- Its natures, each with what it does and the share of its sets running it. -->
         <!-- Its natures, each with the share of its sets running it, what it does on hover. -->
         <ShareSplit
           v-if="natures.length"
@@ -329,6 +328,29 @@ const teammates = computed(() => (m.value?.teammates ?? []).filter((x) => availa
         </section>
       </div>
 
+      <!-- Its Speeds, as the speed tiers draw a row, and the ways to them. -->
+      <section v-if="spread.length" class="panel" :class="{ 'meta-stale': loading }">
+        <h2>{{ t('usageMon.speed') }}</h2>
+        <SpeedSpread
+          :title="t('usageMon.speedChart', { name: refName(ref_) })"
+          :spread="spread"
+          tone="yours"
+          :other="metaSpeeds.length ? { name: t('usageMon.field'), spread: metaSpeeds, sets: true } : null"
+          :reach="reachOf(id, BARE)"
+          :trick-room="false"
+        />
+        <template v-if="fieldOdds">
+          <p class="muted small field-note">
+            <span v-tip="t('usageMon.fieldTip')" class="tipped">{{ t('usageMon.fieldVs') }}</span>
+          </p>
+          <SpeedShare :odds="fieldOdds" :name="refName(ref_)" :other="t('usageMon.field')" tone="yours" />
+        </template>
+        <p class="links">
+          <AppLink :to="{ name: 'speedTiers', query: { find: id } }">{{ t('usageMon.toTiers') }} ›</AppLink>
+          <AppLink :to="{ name: 'speedCompare', query: { a: id } }">{{ t('usageMon.toCompare') }} ›</AppLink>
+        </p>
+      </section>
+
       <!-- Its most common exact spreads: its share, its nature, a bar per stat of the points put there. -->
       <section v-if="spreads.length" class="panel" :class="{ 'meta-stale': loading }">
         <h2>{{ t('usageMon.spreads') }}</h2>
@@ -368,29 +390,6 @@ const teammates = computed(() => (m.value?.teammates ?? []).filter((x) => availa
           </div>
         </div>
         <p class="muted small note">{{ t('usageMon.spreadsNote') }}</p>
-      </section>
-
-      <!-- Its Speeds, as the speed tiers draw a row, and the ways to them. -->
-      <section v-if="spread.length" class="panel" :class="{ 'meta-stale': loading }">
-        <h2>{{ t('usageMon.speed') }}</h2>
-        <SpeedSpread
-          :title="t('usageMon.speedChart', { name: refName(ref_) })"
-          :spread="spread"
-          tone="yours"
-          :other="metaSpeeds.length ? { name: t('usageMon.field'), spread: metaSpeeds, sets: true } : null"
-          :reach="reachOf(id, BARE)"
-          :trick-room="false"
-        />
-        <template v-if="fieldOdds">
-          <p class="muted small field-note">
-            <span v-tip="t('usageMon.fieldTip')" class="tipped">{{ t('usageMon.fieldVs') }}</span>
-          </p>
-          <SpeedShare :odds="fieldOdds" :name="refName(ref_)" :other="t('usageMon.field')" tone="yours" />
-        </template>
-        <p class="links">
-          <AppLink :to="{ name: 'speedTiers', query: { find: id } }">{{ t('usageMon.toTiers') }} ›</AppLink>
-          <AppLink :to="{ name: 'speedCompare', query: { a: id } }">{{ t('usageMon.toCompare') }} ›</AppLink>
-        </p>
       </section>
 
       <!-- Its usage over the months of the dataset's series. -->
