@@ -17,10 +17,12 @@ import SortHeader from '@/components/SortHeader.vue'
 // Items as the dex lists them: each its icon and name, a link to its page (the search's matches marked, when it gives
 // them), and its short description beside it (under it on phones). Given each one's share of a Pokémon's sets
 // (`shares`, its usage page), a table as the moves' (`MoveTable`): a header, a row each, sortable by name or share
-// (by share at first), its description under its name, its share a number with its bar under it.
+// (by share at first), its description under its name (unless `noDescriptions`), its share a number with its bar under
+// it.
 const props = defineProps<{
   items: readonly { id: ItemId; parts?: Marks | null }[]
   shares?: Partial<Record<ItemId, number>>
+  noDescriptions?: boolean
 }>()
 
 const rows = computed(() =>
@@ -49,7 +51,7 @@ useRowColumns(useTemplateRef('head'))
         <AppLink :to="{ name: 'item', params: { id: it.id } }" class="name item-name">
           <ItemIcon :id="it.id" />{{ it.name }}
         </AppLink>
-        <div class="muted below"><DexText :text="it.text" /></div>
+        <div v-if="!noDescriptions" class="muted below"><DexText :text="it.text" /></div>
       </div>
       <div role="cell" class="r num meter" :style="{ '--share': shares[it.id] ?? 0 }">
         {{ shares[it.id] === undefined ? '—' : percent(shares[it.id]!) }}

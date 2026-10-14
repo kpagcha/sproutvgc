@@ -15,6 +15,7 @@ import { FASTEST, type SpeedBuild } from '@/lib/speedBuild'
 import { odds, reachOf, setSpread, type SpreadPoint } from '@/lib/speedLineup'
 import { MAX_POINTS, statValue } from '@/lib/stats'
 import { percentiles } from '@/lib/statPercentiles'
+import { useListOptions } from '@/composables/useListOptions'
 import { useMeta } from '@/composables/useMeta'
 import AppLink from '@/components/AppLink'
 import ItemList from '@/components/ItemList.vue'
@@ -23,6 +24,7 @@ import DexRef from '@/components/DexRef'
 import DexText from '@/components/DexText'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import ListOptions from '@/components/ListOptions.vue'
 import SectionNav from '@/components/SectionNav.vue'
 import ShareSplit from '@/components/ShareSplit.vue'
 import SpeedShare from '@/components/SpeedShare.vue'
@@ -42,6 +44,8 @@ const exists = computed(() => available(ref_.value))
 const mon = computed(() => POKEMON[id.value])
 const { snapshot, data, loading } = useMeta()
 const m = computed(() => data.value?.[id.value])
+// Whether its lists show what each entry does (`ListOptions`, at the top right of each).
+const { descriptions: showDescriptions } = useListOptions()
 
 // Its rank's change since the dataset before (as the list marks it), and its usage's.
 const previous = computed(() => GENERATED_SNAPSHOTS.find((s) => s.id === snapshot.value?.previous))
@@ -326,7 +330,10 @@ const sections = computed(() =>
     <template v-else-if="m">
       <!-- Its abilities, a panel of their own: each with the share of its sets running it and what it does. -->
       <section id="sec-abilities" class="panel abilities-panel" :class="{ 'meta-stale': loading }">
-        <h2>{{ t('usageMon.abilities') }}</h2>
+        <div class="panel-head">
+          <h2>{{ t('usageMon.abilities') }}</h2>
+          <ListOptions />
+        </div>
         <ul class="abilities">
           <li v-for="(a, i) in abilities" :key="a.key" :class="{ main: i === 0 && a.share }">
             <span class="ability-head">
@@ -334,19 +341,34 @@ const sections = computed(() =>
               <span class="num">{{ a.share === undefined ? `<${percent(LIST_MIN)}` : percent(a.share) }}</span>
             </span>
             <span class="bar" :style="{ '--share': a.share ?? 0 }"></span>
-            <p class="muted small ability-desc"><DexText :text="description('ability', a.key)?.short ?? ''" /></p>
+            <p v-if="showDescriptions" class="muted small ability-desc">
+              <DexText :text="description('ability', a.key)?.short ?? ''" />
+            </p>
           </li>
         </ul>
       </section>
       <!-- What its sets run: moves, items, abilities. -->
       <div class="cards" :class="{ 'meta-stale': loading }">
         <section v-if="moves.length" id="sec-moves" class="panel card moves-card">
-          <h2>{{ t('usageMon.moves') }}</h2>
-          <MoveTable :ids="moves.map((x) => x.ref.id)" :shares="moveShares" descriptions no-pp no-filters stacked />
+          <div class="panel-head">
+            <h2>{{ t('usageMon.moves') }}</h2>
+            <ListOptions />
+          </div>
+          <MoveTable
+            :ids="moves.map((x) => x.ref.id)"
+            :shares="moveShares"
+            :descriptions="showDescriptions"
+            no-pp
+            no-filters
+            stacked
+          />
         </section>
         <section v-if="items.length" id="sec-items" class="panel card items-card">
-          <h2>{{ t('usageMon.items') }}</h2>
-          <ItemList :items="items" :shares="itemShares" />
+          <div class="panel-head">
+            <h2>{{ t('usageMon.items') }}</h2>
+            <ListOptions />
+          </div>
+          <ItemList :items="items" :shares="itemShares" :no-descriptions="!showDescriptions" />
         </section>
       </div>
 
@@ -729,6 +751,17 @@ const sections = computed(() =>
   width: calc(100% * var(--share, 0));
   height: 3px;
   background: var(--accent);
+}
+/* A list's heading, its options at the right (`ListOptions`): whether the short descriptions show. */
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.panel-head h2 {
+  margin-bottom: 0;
 }
 h2 {
   margin-top: 0;

@@ -1111,6 +1111,8 @@ export const messages = {
   'usageMon.moves': 'Moves',
   'usageMon.items': 'Items',
   'usageMon.abilities': 'Abilities',
+  'listOptions.title': 'List options',
+  'listOptions.descriptions': 'Show descriptions',
   'usageMon.teammates': 'Teammates',
   'usageMon.teammatesTip': 'How often each is on its teams: the ten most common, on at least {share} of them',
   'usageMon.natures': 'Natures',
