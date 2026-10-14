@@ -784,6 +784,7 @@ h2 {
    their desktop size, phones' bigger ones leaving its name no room. */
 .shares.mates {
   --icon-scale: 1;
+  container-type: inline-size;
   display: block;
   columns: 360px;
   column-gap: 32px;
@@ -813,6 +814,16 @@ h2 {
     grid-template-columns: 1.4em minmax(0, 1fr) auto 4.5em;
   }
 }
+/* Very narrow, no types: the name has their room, rather than running under them. */
+@container (max-width: 320px) {
+  .shares.mates li {
+    grid-template-columns: 1.4em minmax(0, 1fr) 4.5em;
+  }
+  .shares.mates .types {
+    display: none;
+  }
+}
+/* A name longer than its room breaks across lines rather than running into the share after it. */
 .mate-name {
   display: flex;
   flex-wrap: wrap;
@@ -820,6 +831,10 @@ h2 {
   gap: 0 4px;
   min-width: 0;
   white-space: normal;
+  overflow-wrap: anywhere;
+}
+.mate-name > :first-child {
+  min-width: 0;
 }
 /* Its forme as the usage list and the speed tiers show it: a small tag after its species' name, under it when it
    doesn't fit. */
