@@ -16,7 +16,7 @@ const CUTOFFS = [1760, 1630, 1500, 0] as const
 
 /** How much of each list to keep: Smogon's own moveset files show about as much. Less than 1% is noise. Speeds are
  * kept whole (`speeds`), as the app adds them up: what's left out would be left out of its totals too. */
-const KEEP = { list: 10, spreads: 6, min: 0.01 }
+const KEEP = { list: 10, spreads: 6, points: 4, min: 0.01 }
 
 // What `src/data/meta.ts` reads (`MetaSnapshot`, `PokemonMeta`), with IDs as plain strings.
 export interface Snapshot {
@@ -32,6 +32,7 @@ export interface Snapshot {
   capabilities: string[]
   unweighted: string[]
   previous?: string
+  history?: string
 }
 interface Share {
   id: string
@@ -47,6 +48,8 @@ export interface MetaEntry {
   teammates: Share[]
   spreads: { nature: string; points: number[]; share: number }[]
   speeds: { points: number; nature: string; share: number }[]
+  natures: Share[]
+  points: [number, number][][]
   prev?: { rank: number; usage?: number }
 }
 
@@ -168,6 +171,23 @@ export class Smogon {
           })
           .filter((s) => s.share > 0)
       }
+      /** From every spread, each `of` its sets have (a nature, a stat's points), as shares, the rare ones left out. */
+      const across = <K extends string | number>(
+        spreads: Record<string, number>,
+        total: number,
+        of: (nature: string, points: number[]) => K,
+      ) => {
+        const weights = new Map<K, number>()
+        for (const [spread, w] of Object.entries(spreads)) {
+          const [nature, points] = spread.split(':') as [string, string]
+          const key = of(nature.toLowerCase(), points.split('/').map(Number))
+          weights.set(key, (weights.get(key) ?? 0) + w)
+        }
+        return [...weights]
+          .sort((a, b) => b[1] - a[1])
+          .map(([key, w]) => ({ key, share: round(w / total) }))
+          .filter((x) => x.share >= KEEP.min)
+      }
       const check = (set: ReadonlySet<string>, what: string) => (id: string) => {
         if (!set.has(id)) unknown.add(`${what} "${id}"`)
         return set.has(id)
@@ -195,6 +215,19 @@ export class Smogon {
             return { nature: nature.toLowerCase(), points: points.split('/').map(Number), share }
           }),
           speeds: speeds(d.Spreads, total),
+          // Its natures and each stat's points, from every spread: the long tail of spreads is most of the sets, so
+          // these say what its sets do where its top spreads, a few percent each, don't.
+          // Each stat's few commonest point values (from 2% of its sets), as [points, share] pairs to 0.1%: what its sets
+          // put there at a glance, at a fraction of the files' size the whole of it would take.
+          natures: across(d.Spreads, total, (nature) => nature)
+            .slice(0, KEEP.list)
+            .map(({ key, share }) => ({ id: key, share })),
+          points: [0, 1, 2, 3, 4, 5].map((i) =>
+            across(d.Spreads, total, (_, points) => points[i]!)
+              .filter((x) => x.share >= 2 * KEEP.min)
+              .slice(0, KEEP.points)
+              .map(({ key, share }): [number, number] => [key, Math.round(share * 1e3) / 1e3]),
+          ),
         }
       })
       result.push({
@@ -208,7 +241,18 @@ export class Smogon {
           period: 'month' as const,
           cutoff,
           battles: chaos.info['number of battles'],
-          capabilities: ['usage', 'brought', 'moves', 'items', 'abilities', 'teammates', 'spreads', 'speeds'],
+          capabilities: [
+            'usage',
+            'brought',
+            'moves',
+            'items',
+            'abilities',
+            'teammates',
+            'spreads',
+            'speeds',
+            'natures',
+            'points',
+          ],
           unweighted: ['brought'],
         },
         data,
@@ -229,13 +273,7 @@ export class Smogon {
  * new to the series. A first snapshot has neither. Works on any adapter's snapshots, by what they say of themselves.
  */
 export function withPrevious(index: Record<string, Snapshot>, data: Record<string, Record<string, MetaEntry>>) {
-  const series = new Map<string, Snapshot[]>()
-  for (const s of Object.values(index)) {
-    const key = [s.kind, s.provider.url, s.regulation, s.cutoff, s.period].join('|')
-    series.set(key, [...(series.get(key) ?? []), s])
-  }
-  for (const list of series.values()) {
-    list.sort((a, b) => a.from.localeCompare(b.from))
+  for (const list of seriesOf(index).values()) {
     list.forEach((s, i) => {
       const before = list[i - 1]
       if (!before) return
@@ -247,6 +285,47 @@ export function withPrevious(index: Record<string, Snapshot>, data: Record<strin
       }
     })
   }
+}
+
+/**
+ * The snapshots by series (the same source, regulation, players and kind of period), each series' in order, by a key
+ * naming it ("smogon-mb-1760-month").
+ */
+function seriesOf(index: Record<string, Snapshot>): Map<string, Snapshot[]> {
+  const series = new Map<string, Snapshot[]>()
+  for (const s of Object.values(index)) {
+    const key = [s.provider.name, s.regulation, s.cutoff, s.period]
+      .join('-')
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, '')
+    series.set(key, [...(series.get(key) ?? []), s])
+  }
+  for (const list of series.values()) list.sort((a, b) => a.from.localeCompare(b.from))
+  return series
+}
+
+/**
+ * Each series' history (`meta/history/<key>.json`): every Pokémon's rank and usage in each of its snapshots, in order,
+ * null where it wasn't, for a Pokémon's page to draw. Each snapshot is given its series' key (`history`); one alone in
+ * its series has none to draw, and no history.
+ */
+export function histories(index: Record<string, Snapshot>, data: Record<string, Record<string, MetaEntry>>) {
+  const files: Record<string, Record<string, ([number, number] | null)[]>> = {}
+  for (const [key, list] of seriesOf(index)) {
+    if (list.length < 2) continue
+    const ids = new Set(list.flatMap((s) => Object.keys(data[s.id]!)))
+    files[key] = Object.fromEntries(
+      [...ids].sort().map((id) => [
+        id,
+        list.map((s) => {
+          const m = data[s.id]![id]
+          return m ? [m.rank, m.usage] : null
+        }),
+      ]),
+    )
+    for (const s of list) s.history = key
+  }
+  return files
 }
 
 /** Shares to 4 decimals (0.01%): finer is noise, and it keeps the files small. */

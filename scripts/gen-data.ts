@@ -25,7 +25,7 @@ import { LANGUAGES, type Language } from './languages.ts'
 import { MOVES_EVERYONE_USES, NAMES, type CategoryKey } from './overrides.ts'
 import { ConditionScan } from './conditions.ts'
 import { SPEED_ABILITIES, SPEED_ITEMS } from '../src/lib/speed.ts'
-import { Smogon, withPrevious, type MetaEntry, type Snapshot } from './smogon.ts'
+import { histories, Smogon, withPrevious, type MetaEntry, type Snapshot } from './smogon.ts'
 import { ITEM_ICONS, POKEMON_ICONS, SpriteSource, iconIndexes, sheetLayout, trimSheet } from './sprites.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -708,7 +708,8 @@ async function main() {
   // no longer have what they name: that's left out. Each past regulation's legal Pokémon go in `meta/rosters.json`,
   // for the pages showing "every Pokémon" of it: its format's, when Showdown still has it, else those its stats name.
   // Once all are in, each snapshot is given the one before it in its series (`previous`) and each Pokémon its rank and
-  // usage there (`prev`), for the trends (`withPrevious`).
+  // usage there (`prev`), for the trends (`withPrevious`), and each series of more than one its history, every
+  // Pokémon's rank and usage in each (`meta/history/<key>.json`, `histories`), for its page.
   const updateSmogon = process.argv.includes('--update') || process.argv.includes('--update-smogon')
   /** Smogon's ID for a regulation's format: Showdown's name for it as an ID, or, when Showdown no longer has it, the
    * current one's with the regulation swapped ("gen9championsvgc2026regma"). */
@@ -743,6 +744,8 @@ async function main() {
     rosters[r] = ids.filter((id) => legal.has(id)).sort()
   }
   withPrevious(index, metaData)
+  for (const [key, history] of Object.entries(histories(index, metaData)))
+    await writeJson(`meta/history/${key}.json`, history)
   for (const [id, data] of Object.entries(metaData)) await writeJson(`meta/${id}.json`, data)
   await writeJson('meta/index.json', index)
   await writeJson('meta/rosters.json', rosters)
