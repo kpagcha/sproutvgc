@@ -1125,6 +1125,8 @@ export const messages = {
   'usage.any.ability': 'Any ability',
   'usage.any.move': 'Any move',
   'usage.clearFilters': 'Clear filters',
+  'usage.rare':
+    "Faded: under {share} usage. They're on few teams, so their numbers and sets rest on a handful of them.",
   'usage.filteredSets': 'Filtering by item, ability or move counts what at least {share} of its sets run.',
   'usage.none': 'There are no usage stats for Regulation {reg} yet.',
   'meta.players.0': 'All players',

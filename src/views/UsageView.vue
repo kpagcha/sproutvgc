@@ -133,6 +133,11 @@ const shown = computed(() => {
 /** A share of a Pokémon's sets, in whole percents ("62%", "<1%"): beside each part of its most common set. */
 const pct = (share?: number) =>
   share === undefined ? '' : share > 0 && share < 0.005 ? '<1%' : `${Math.round(share * 100)}%`
+/** Under this usage a Pokémon is on few teams, and its sets come from a handful of them: its row faded, said under the
+ * table. */
+const RARE = 0.005
+const rare = (r: Row) => r.usage !== undefined && r.usage < RARE
+const anyRare = computed(() => shown.value.some(rare))
 /** The most used, the full length of the usage bars. */
 const top = computed(() => Math.max(0, ...rows.value.map((r) => r.usage ?? 0)))
 
@@ -296,7 +301,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         </div>
         <SkeletonRows v-if="!entered || !data" :cells="skeleton" height="2.3em" />
         <template v-else>
-          <div v-for="r in shown" :key="r.id" class="row" role="row">
+          <div v-for="r in shown" :key="r.id" class="row" :class="{ rare: rare(r) }" role="row">
             <div role="cell" class="r num muted">{{ r.rank }}</div>
             <div role="cell" class="grow">
               <AppLink :to="{ name: 'pokemon', params: { id: r.id } }" class="mon">
@@ -382,6 +387,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         <template v-if="showSets && showBrought">{{ t('usage.brought') }}: {{ t('usage.broughtTip') }}.</template>
         <template v-if="hasSets">{{ t('usage.sets') }}: {{ t('usage.setsDesc') }}.</template>
       </p>
+      <p v-if="anyRare" class="muted note">{{ t('usage.rare', { share: percent(RARE) }) }}</p>
       <p v-if="picked.item || picked.ability || picked.move" class="muted note">
         {{ t('usage.filteredSets', { share: pct(MIN_SHARE) }) }}
       </p>
@@ -525,6 +531,10 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 }
 .sep {
   color: var(--muted);
+}
+/* A Pokémon on few teams: faded, so its numbers and set don't read as firmly as the rest's. */
+.row.rare > [role='cell'] {
+  opacity: 0.55;
 }
 /* The share of its sets each part of the most common set has, smaller and muted after it. */
 .pct {
