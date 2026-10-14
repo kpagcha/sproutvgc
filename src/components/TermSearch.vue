@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Marked from '@/components/Marked'
 import { computed, ref, useId, useTemplateRef, watch } from 'vue'
+import { Search } from '@lucide/vue'
 import { sameRef, type ItemId } from '@/data/dex'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
@@ -14,12 +15,15 @@ import TypeIcon from '@/components/TypeIcon'
 // moves and items of `kinds` too, listed under it with how many of the list each would leave (`count`; those leaving
 // none left out). Picking one, by clicking it or with the arrow keys and Enter, makes it a term of the search, a chip
 // in the box before the text, and clears the text; a chip's cross takes it off again, as Backspace in an empty box
-// takes off the last. The list is the dex's search (`useSearch`), a few of each kind.
+// takes off the last. The list is the dex's search (`useSearch`), a few of each kind. A magnifying glass leads the box,
+// and the key the page focuses it with (`hotkey`) ends it, as the site's search boxes have them.
 const props = defineProps<{
   placeholder: string
   kinds: readonly TermKind[]
   /** How many the list would have with `term` added to the terms: those that would have none aren't offered. */
   count: (term: Term) => number
+  /** The key the page focuses it with, hinted at in it while there's nothing to clear (`SearchBox`'s). */
+  hotkey?: string
 }>()
 const text = defineModel<string>('text', { required: true })
 const terms = defineModel<Term[]>('terms', { required: true })
@@ -63,6 +67,7 @@ watch(options, () => (active.value = 0))
 watch(text, () => (dismissed.value = false))
 
 const input = useTemplateRef('input')
+defineExpose({ focus: (options?: FocusOptions) => input.value?.focus(options) })
 function pick(o: Option) {
   terms.value = [...terms.value, o.term]
   text.value = ''
@@ -104,6 +109,7 @@ const indexOf = (o: Option) => options.value.indexOf(o)
   <div class="term-search">
     <!-- The box: the terms as chips, then the text. Clicking anywhere in it is typing in it. -->
     <div class="box" @click="input?.focus()">
+      <Search class="glass" :size="16" :stroke-width="2.5" aria-hidden="true" />
       <span v-for="term in terms" :key="`${term.kind}:${term.id}`" class="chip">
         <TypeIcon v-if="term.kind === 'type'" :type="term.id" />
         <ItemIcon v-else-if="term.kind === 'item'" :id="term.id as ItemId" :scale="0.67" />
@@ -124,6 +130,7 @@ const indexOf = (o: Option) => options.value.indexOf(o)
         class="text"
         :placeholder="terms.length ? '' : placeholder"
         :aria-label="placeholder"
+        :aria-keyshortcuts="hotkey"
         role="combobox"
         autocomplete="off"
         :aria-expanded="open"
@@ -142,6 +149,7 @@ const indexOf = (o: Option) => options.value.indexOf(o)
       >
         ×
       </button>
+      <kbd v-else-if="hotkey" class="hotkey" aria-hidden="true">{{ hotkey }}</kbd>
     </div>
     <!-- What the text finds, by kind, under the box. -->
     <ul v-show="open" :id="listId" class="options" role="listbox">
@@ -202,6 +210,35 @@ const indexOf = (o: Option) => options.value.indexOf(o)
   border: none;
   box-shadow: none;
   outline: none;
+}
+/* The magnifying glass leading the box, as `SearchBox`'s. */
+.glass {
+  flex: none;
+  margin: 0 2px 0 6px;
+  color: var(--muted);
+}
+/* The key that focuses it, where the clear button goes, as `SearchBox`'s. */
+.hotkey {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  min-width: 18px;
+  padding: 2px 4px;
+  font:
+    11px/1 Verdana,
+    sans-serif;
+  text-align: center;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  pointer-events: none;
+}
+/* Touch-first devices (phones, tablets) usually have no keyboard to press it on. */
+@media (hover: none) and (pointer: coarse) {
+  .hotkey {
+    display: none;
+  }
 }
 .chip {
   display: inline-flex;

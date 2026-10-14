@@ -77,6 +77,7 @@ import { useMeta } from '@/composables/useMeta'
 import { useOpenState } from '@/composables/useOpenState'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { useTour } from '@/composables/useTour'
+import { useSlashFocus } from '@/composables/useSlashFocus'
 import AppLink from '@/components/AppLink'
 import BuildSummary from '@/components/BuildSummary.vue'
 import ChoiceDialog from '@/components/ChoiceDialog.vue'
@@ -1578,22 +1579,14 @@ watch(
 )
 onBeforeUnmount(() => observer?.disconnect())
 
-// "/" focuses the find (the pinned bar's, while it shows), as on sites with a search; not while typing elsewhere, nor
-// with a dialog over the page.
+// "/" focuses the find (the pinned bar's, while it shows), as on sites with a search.
 const findPicker = useTemplateRef<InstanceType<typeof PokemonPicker>>('findPicker')
 const pinnedFindPicker = useTemplateRef<InstanceType<typeof PokemonPicker>>('pinnedFindPicker')
-function onSlash(e: KeyboardEvent) {
-  if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return
-  const el = document.activeElement
-  if (el instanceof HTMLElement && (el.isContentEditable || el.closest('input, textarea, select'))) return
-  if (document.documentElement.classList.contains('dialog-open')) return
+useSlashFocus(() => {
   const picker = (pinned.value && pinnedFindPicker.value) || findPicker.value
-  if (!picker) return
-  e.preventDefault()
+  if (!picker) return false
   picker.open()
-}
-window.addEventListener('keydown', onSlash)
-onBeforeUnmount(() => window.removeEventListener('keydown', onSlash))
+})
 
 // How to read the page, in a section closed unless the reader opens it (remembered), so the ladder starts close to the
 // top: what each option does, the chips' legend, and yours among them. Opened from the heading's row.

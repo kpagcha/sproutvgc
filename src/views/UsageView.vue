@@ -15,6 +15,7 @@ import { useMeta } from '@/composables/useMeta'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { useRowColumns } from '@/composables/useRowColumns'
 import { useSort } from '@/composables/useSort'
+import { useSlashFocus } from '@/composables/useSlashFocus'
 import AppLink from '@/components/AppLink'
 import DexRef from '@/components/DexRef'
 import ItemIcon from '@/components/ItemIcon.vue'
@@ -129,6 +130,12 @@ const shareTerms = computed(() =>
   ),
 )
 
+// "/" focuses the search, as on the home page.
+const termSearch = useTemplateRef('termSearch')
+useSlashFocus(() => {
+  if (!termSearch.value) return false
+  termSearch.value.focus({ preventScroll: true })
+})
 const search = shallowRef(typeof query.value.q === 'string' ? query.value.q : '')
 const shown = computed(() => {
   const q = fold(search.value.trim())
@@ -250,7 +257,9 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         <div class="find-row">
           <div class="find">
             <TermSearch
+              ref="termSearch"
               v-model:text="search"
+              hotkey="/"
               v-model:terms="terms"
               :placeholder="t('usage.search')"
               :kinds="termKinds"

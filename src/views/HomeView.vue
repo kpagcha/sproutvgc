@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, useTemplateRef, watch } from 'vue'
+import { computed, onMounted, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { t } from '@/i18n'
 import { GAME_NAME, REGULATION } from '@/data/format'
 import { AREAS, PITCH } from '@/lib/areas'
 import { preloadSearch, searchFocus, useSearch } from '@/composables/useSearch'
+import { useSlashFocus } from '@/composables/useSlashFocus'
 import FavoritesPanel from '@/components/FavoritesPanel.vue'
 import RecentPanel from '@/components/RecentPanel.vue'
 import SearchResults from '@/components/SearchResults.vue'
@@ -37,17 +38,8 @@ function focusBox() {
 onMounted(focusBox)
 watch(searchFocus, focusBox)
 
-// "/" focuses the box too, as on the speed tiers; not while typing elsewhere, nor with a dialog over the page.
-function onSlash(e: KeyboardEvent) {
-  if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return
-  const el = document.activeElement
-  if (el instanceof HTMLElement && (el.isContentEditable || el.closest('input, textarea, select'))) return
-  if (document.documentElement.classList.contains('dialog-open')) return
-  e.preventDefault()
-  box.value?.focus({ preventScroll: true })
-}
-window.addEventListener('keydown', onSlash)
-onBeforeUnmount(() => window.removeEventListener('keydown', onSlash))
+// "/" focuses the box too, as on the speed tiers.
+useSlashFocus(() => box.value?.focus({ preventScroll: true }))
 
 const { results, only } = useSearch(() => query.value, undefined, { pages: true })
 function openOnly() {
