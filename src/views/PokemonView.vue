@@ -27,7 +27,6 @@ import MoveTable from '@/components/MoveTable.vue'
 import PokemonChips from '@/components/PokemonChips.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
-import DexMetaSwitch from '@/components/DexMetaSwitch.vue'
 
 // One Pokémon: its sprite, types, abilities and base stats, how it changes (Mega Evolution, other formes) and evolves,
 // how types hit it, and its moves.
@@ -112,8 +111,10 @@ watchEffect(async () => {
           <RouterLink v-for="ty in mon.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
             <TypeIcon :type="ty" :scale="2" />
           </RouterLink>
-          <!-- Its meta page, as that page has this one. -->
-          <DexMetaSwitch :id current="dex" />
+          <!-- Its meta page, as that page links here. -->
+          <RouterLink :to="{ name: 'metaPokemon', params: { id } }" class="other-page"
+            >{{ t('pokemon.meta') }} ›</RouterLink
+          >
         </div>
         <dl class="abilities">
           <template v-for="a in abilities" :key="a.id">
@@ -230,6 +231,10 @@ watchEffect(async () => {
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
+}
+.other-page {
+  margin-left: 8px;
+  font-weight: bold;
 }
 .origin {
   margin: 0;
