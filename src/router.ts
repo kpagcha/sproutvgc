@@ -275,6 +275,7 @@ export const router = createRouter({
         keywordsKey: 'keywords.usagePokemon',
         dexNames: true,
         descriptions: ['ability', 'move', 'item'],
+        recent: ({ params }) => `usagePokemon:${String(params.id)}`,
         ...inArea('meta', 'usage'),
       },
     },

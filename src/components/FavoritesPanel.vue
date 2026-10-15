@@ -6,7 +6,6 @@ import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { SECTIONS } from '@/composables/useSearch'
 import { useFavorites } from '@/composables/useFavorites'
-import { useOpenState } from '@/composables/useOpenState'
 import { confirmDialog } from '@/composables/useConfirm'
 import EntryChip from '@/components/EntryChip.vue'
 import PageChip, { shownVisit } from '@/components/PageChip.vue'
@@ -14,8 +13,8 @@ import PageChip, { shownVisit } from '@/components/PageChip.vue'
 // The home page's favorites: the entries starred on their pages, one row per category (in the search's order), each
 // alphabetically, as chips (`EntryChip`); then the setups starred (the speed tiers', a comparison's), in the order they
 // // were starred (`PageChip`). Those the regulation doesn't have are left out (and kept, for when it has them again).
-// Nothing shows until something is starred. It folds away, and stays as the reader left it. It can be cleared, whole or
-// a row at a time, once confirmed, as starring them again would take a while.
+// Nothing shows until something is starred. It starts folded on every visit. It can be cleared, whole or a row at a
+// time, once confirmed, as starring them again would take a while.
 const { favorites, setups, clear, clearKind, countKind, count: saved } = useFavorites()
 
 const groups = computed(() =>
@@ -29,8 +28,6 @@ const groups = computed(() =>
 )
 const shownSetups = computed(() => setups.value.filter(shownVisit))
 const count = computed(() => groups.value.reduce((n, g) => n + g.refs.length, 0) + shownSetups.value.length)
-
-const { open, onToggle } = useOpenState('sproutvgc.favorites.open')
 
 async function confirmClear() {
   const ok = await confirmDialog({
@@ -53,7 +50,7 @@ async function confirmClearKind(kind: Kind | 'setups', title: string) {
 </script>
 
 <template>
-  <details v-if="count" class="panel banded favorites" :open @toggle="onToggle">
+  <details v-if="count" class="panel banded favorites">
     <summary>
       <h2 class="title">
         <Star :size="16" :stroke-width="2.5" aria-hidden="true" />{{ t('favorites.title') }}

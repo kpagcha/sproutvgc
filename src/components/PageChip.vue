@@ -34,6 +34,8 @@ function view(visit: PageVisit) {
     mine: name === 'speedTiers' ? mon(q.mine) : null,
     /** The Pokémon found on the speed tiers. */
     found: name === 'speedTiers' && q.find !== q.mine ? mon(q.find) : null,
+    /** The Pokémon whose usage page it is. */
+    usage: name === 'usagePokemon' ? mon(String(to.params.id)) : null,
     trickRoom: name.startsWith('speed') && q.trickroom === '1',
     // The type matchups' types, or the type the speed tiers are filtered by.
     types: name.startsWith('matchups')
@@ -46,10 +48,15 @@ function view(visit: PageVisit) {
   }
 }
 
-/** Whether a page visited can still be shown: a page that still exists, a comparison of ones the regulation has. */
+/**
+ * Whether a page visited can still be shown: a page that still exists, a comparison or a usage page of ones the
+ * regulation has.
+ */
 export function shownVisit(visit: PageVisit) {
   const v = view(visit)
-  return !!v.titleKey && (!v.groups || v.groups.every((g) => g.length > 0))
+  return (
+    !!v.titleKey && (!v.groups || v.groups.every((g) => g.length > 0)) && (v.to.name !== 'usagePokemon' || !!v.usage)
+  )
 }
 </script>
 
@@ -66,8 +73,8 @@ import TypeIcon from '@/components/TypeIcon'
 // A page with a view of its own (in its URL) as a chip reopening it as it was: the home page's recently viewed and
 // favorites (a setup starred), beside the dex entries' chips (`EntryChip`), in their style. A comparison is its
 // Pokémon's icons, each team's (or the speed order's list), their names read out; any other page its name, with the
-// Pokémon picked on it (the speed tiers' yours, with its build, the Pokémon found and the type it's filtered by) or its
-// types (the type matchups'); Trick Room, on, said in short.
+// Pokémon picked on it (a usage page's; the speed tiers' yours, with its build, the Pokémon found and the type it's
+// filtered by) or its types (the type matchups'); Trick Room, on, said in short.
 // `untitled` (on the page itself, which needs no naming): its name left out but when there's nothing else to show.
 const props = defineProps<{ visit: PageVisit; untitled?: boolean }>()
 const v = computed(() => view(props.visit))
@@ -92,7 +99,8 @@ const GROUP_MAX = 6
       </template>
     </template>
     <template v-else>
-      <template v-if="!untitled || (!v.mine && !v.found && !v.types.length)">{{ t(v.titleKey!) }}</template>
+      <template v-if="!untitled || (!v.usage && !v.mine && !v.found && !v.types.length)">{{ t(v.titleKey!) }}</template>
+      <PokemonIcon v-if="v.usage" :id="v.usage" />
       <template v-if="v.mine">
         <PokemonIcon :id="v.mine" />
         <span class="build muted"
