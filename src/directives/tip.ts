@@ -62,8 +62,9 @@ tippy.setDefaultProps({
   ...(noHover && { trigger: 'click', delay: 0 }),
 })
 
-type TipEl = HTMLElement & { _tip?: Instance; _tipContent?: string; _tipGroup?: string }
-type TipValue = string | false | null | undefined
+type TipContent = string | Element
+type TipEl = HTMLElement & { _tip?: Instance; _tipContent?: TipContent; _tipGroup?: string }
+type TipValue = TipContent | false | null | undefined
 
 // Grouped tips share one singleton tooltip that glides between its targets.
 // Membership changes are batched per tick so several joining at once don't rebuild it each time, except for a tip just
@@ -97,7 +98,7 @@ function sync(name: string, group: Group) {
   })
 }
 
-function create(el: TipEl, content: string, groupName?: string, now = false) {
+function create(el: TipEl, content: TipContent, groupName?: string, now = false) {
   el._tip = tippy(el, { content })
   if (!groupName) return
   let group = groups.get(groupName)
@@ -122,7 +123,7 @@ function destroy(el: TipEl, groupName?: string) {
 // group, if it has one): long lists (the Pokémon's abilities, the references in descriptions, the type chart's cells)
 // would otherwise create hundreds on mounting.
 const TRIGGERS = ['mouseenter', 'focus'] as const
-function arm(el: TipEl, content: string, groupName?: string) {
+function arm(el: TipEl, content: TipContent, groupName?: string) {
   el._tipContent = content
   el._tipGroup = groupName
   for (const type of TRIGGERS) el.addEventListener(type, wake)
@@ -140,7 +141,8 @@ function wake(this: TipEl, e: Event) {
   this.dispatchEvent(new (e.constructor as typeof Event)(e.type, e))
 }
 
-// v-tip="text": a tooltip in place of the native title. A falsy value shows none.
+// v-tip="text": a tooltip in place of the native title (or an element, for one that isn't text alone: kept the same
+// across renders, as a new one each time would set it again). A falsy value shows none.
 // v-tip:group="text": joins a named group sharing one moving tooltip.
 export const vTip: Directive<TipEl, TipValue> = {
   mounted(el, { value, arg }) {

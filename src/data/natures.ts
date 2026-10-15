@@ -4,7 +4,7 @@
 import DATA from '@/data/generated/natures.json'
 import type { StatId } from '@/data/pokemon'
 import type { NatureEffect } from '@/lib/stats'
-import { locale, t } from '@/i18n'
+import { locale } from '@/i18n'
 
 type Nature = { plus?: StatId; minus?: StatId } & Record<string, string>
 const NATURES = DATA as unknown as Record<string, Nature>
@@ -12,10 +12,10 @@ const NATURES = DATA as unknown as Record<string, Nature>
 /** A nature's official name in the reader's language. */
 export const natureName = (id: string): string => NATURES[id]?.[locale.value] ?? id
 
-/** What a nature raises and lowers, as short stat names ("+SpA", "−Atk"); nothing for a neutral one. */
-export function natureEffects(id: string): { plus: string; minus: string } | null {
+/** The stats a nature raises and lowers; nothing for a neutral one. */
+export function natureEffects(id: string): { plus: StatId; minus: StatId } | null {
   const n = NATURES[id]
-  return n?.plus && n.minus ? { plus: `+${t(`stat.${n.plus}`)}`, minus: `−${t(`stat.${n.minus}`)}` } : null
+  return n?.plus && n.minus && n.plus !== n.minus ? { plus: n.plus, minus: n.minus } : null
 }
 
 /** A nature's effect on one stat: raised, lowered, or neither (HP never). */

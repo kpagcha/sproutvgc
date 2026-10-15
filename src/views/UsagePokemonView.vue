@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, shallowRef, watch } from 'vue'
+import { computed, h, render, shallowRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ChevronsDown, ChevronsUp } from '@lucide/vue'
 import { ability, available, move, pokemon, type PokemonId } from '@/data/dex'
@@ -23,6 +23,7 @@ import ItemList from '@/components/ItemList.vue'
 import MoveTable from '@/components/MoveTable.vue'
 import DexRef from '@/components/DexRef'
 import DexText from '@/components/DexText'
+import EffectTag from '@/components/EffectTag'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import ListOptions from '@/components/ListOptions.vue'
@@ -75,10 +76,23 @@ const natures = computed(() =>
     .map((n) => ({ key: n.id, share: n.share })),
 )
 const topNature = computed(() => natures.value[0]?.key)
-// A nature says what it does on hover, or tapped, as an item's, ability's or move's name gives its short description.
+// A nature says what it does on hover, or tapped, as an item's, ability's or move's name gives its short description:
+// the stat it raises and the one it lowers, each with its chevron, as the speed pages show a nature's effect on Speed.
+// Drawn once per nature, the tooltips sharing it.
+const natureTips = new Map<string, Element>()
 function natureTip(id: string) {
   const e = natureEffects(id)
-  return e ? `${e.plus} ${e.minus}` : t('usageMon.natureNeutral')
+  if (!e) return t('usageMon.natureNeutral')
+  let el = natureTips.get(id)
+  if (!el) {
+    el = document.createElement('span')
+    render(
+      h('span', [h(EffectTag, { effect: 'up', stat: e.plus }), ' ', h(EffectTag, { effect: 'down', stat: e.minus })]),
+      el,
+    )
+    natureTips.set(id, el)
+  }
+  return el
 }
 const field = computed(() =>
   data.value

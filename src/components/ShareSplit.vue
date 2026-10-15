@@ -6,7 +6,12 @@ import { percent } from '@/data/meta'
 // under `min` when it has none: the data leaves out what's rarer), over one thin bar split by their shares, each segment
 // in the swatch's shade (a muted gray, fainter for each next one), the rest a fainter track. What each part says is the
 // page's (`#part`), and so is what's said on hovering it (`tip`).
-const props = defineProps<{ label: string; parts: readonly T[]; min: number; tip?: (part: T) => string | false }>()
+const props = defineProps<{
+  label: string
+  parts: readonly T[]
+  min: number
+  tip?: (part: T) => string | Element | false
+}>()
 defineSlots<{ part(props: { part: T }): unknown }>()
 
 const rest = computed(() => Math.max(0, 1 - props.parts.reduce((a, p) => a + (p.share ?? 0), 0)))
