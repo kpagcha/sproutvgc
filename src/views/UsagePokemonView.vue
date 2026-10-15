@@ -75,8 +75,7 @@ const natures = computed(() =>
     .map((n) => ({ key: n.id, share: n.share })),
 )
 const topNature = computed(() => natures.value[0]?.key)
-// Where there's hover, a nature says what it does, as an item's, ability's or move's name gives its short description.
-const canHover = window.matchMedia('(hover: hover)').matches
+// A nature says what it does on hover, or tapped, as an item's, ability's or move's name gives its short description.
 function natureTip(id: string) {
   const e = natureEffects(id)
   return e ? `${e.plus} ${e.minus}` : t('usageMon.natureNeutral')
@@ -350,14 +349,14 @@ const sections = computed(() =>
             </tr>
           </tbody>
         </table>
-        <!-- Its natures, each with the share of its sets running it, what it does on hover. -->
+        <!-- Its natures, each with the share of its sets running it, what it does on hover or tapped. -->
         <ShareSplit
           v-if="natures.length"
           class="natures"
           :label="t('usageMon.natures')"
           :parts="natures"
           :min="LIST_MIN"
-          :tip="(n) => canHover && natureTip(n.key)"
+          :tip="(n) => natureTip(n.key)"
         >
           <template #part="{ part }">{{ natureName(part.key) }}</template>
         </ShareSplit>
@@ -484,7 +483,7 @@ const sections = computed(() =>
               <span role="cell" class="spread-head meter" :style="{ '--share': s.share ?? 0 }"
                 ><strong>#{{ i + 1 }}</strong> · {{ percent(s.share ?? 0) }}</span
               >
-              <span v-tip:group="canHover && natureTip(s.nature)" role="cell" class="spread-nature">{{
+              <span v-tip:group="natureTip(s.nature)" role="cell" class="spread-nature">{{
                 natureName(s.nature)
               }}</span>
               <span
