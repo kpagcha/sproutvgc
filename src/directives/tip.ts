@@ -1,4 +1,10 @@
-import tippy, { createSingleton, type CreateSingletonInstance, type Instance, type Plugin } from 'tippy.js'
+import tippy, {
+  createSingleton,
+  type CreateSingletonInstance,
+  type Instance,
+  type Placement,
+  type Plugin,
+} from 'tippy.js'
 import type { Directive } from 'vue'
 import 'tippy.js/dist/tippy.css'
 import 'tippy.js/dist/border.css'
@@ -63,7 +69,12 @@ tippy.setDefaultProps({
 })
 
 type TipContent = string | Element
-type TipEl = HTMLElement & { _tip?: Instance; _tipContent?: TipContent; _tipGroup?: string }
+type TipEl = HTMLElement & {
+  _tip?: Instance
+  _tipContent?: TipContent
+  _tipGroup?: string
+  _tipPlacement?: Placement
+}
 type TipValue = TipContent | false | null | undefined
 
 // Grouped tips share one singleton tooltip that glides between its targets.
@@ -84,8 +95,12 @@ function update(name: string, group: Group) {
   } else if (group.singleton) {
     group.singleton.setInstances(members)
   } else {
-    // A short hide delay keeps it visible while the pointer crosses to a neighbour.
-    group.singleton = createSingleton(members, { delay: [200, 60], moveTransition: 'transform 0.12s ease-out' })
+    // A short hide delay keeps it visible while the pointer crosses to a neighbour. Each member keeps its placement.
+    group.singleton = createSingleton(members, {
+      delay: [200, 60],
+      moveTransition: 'transform 0.12s ease-out',
+      overrides: ['placement'],
+    })
   }
 }
 
@@ -99,7 +114,7 @@ function sync(name: string, group: Group) {
 }
 
 function create(el: TipEl, content: TipContent, groupName?: string, now = false) {
-  el._tip = tippy(el, { content })
+  el._tip = tippy(el, { content, ...(el._tipPlacement && { placement: el._tipPlacement }) })
   if (!groupName) return
   let group = groups.get(groupName)
   if (!group) groups.set(groupName, (group = { members: new Set(), queued: false }))
@@ -144,8 +159,11 @@ function wake(this: TipEl, e: Event) {
 // v-tip="text": a tooltip in place of the native title (or an element, for one that isn't text alone: kept the same
 // across renders, as a new one each time would set it again). A falsy value shows none.
 // v-tip:group="text": joins a named group sharing one moving tooltip.
+// v-tip.right="text" (or .left, .bottom): placed there rather than above.
+const PLACEMENTS = ['right', 'left', 'bottom'] as const
 export const vTip: Directive<TipEl, TipValue> = {
-  mounted(el, { value, arg }) {
+  mounted(el, { value, arg, modifiers }) {
+    el._tipPlacement = PLACEMENTS.find((p) => modifiers[p])
     if (value) arm(el, value, arg)
   },
   updated(el, { value, oldValue, arg }) {

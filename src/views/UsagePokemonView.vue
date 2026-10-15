@@ -497,9 +497,10 @@ const sections = computed(() =>
               <span role="cell" class="spread-head meter" :style="{ '--share': s.share ?? 0 }"
                 ><strong>#{{ i + 1 }}</strong> · {{ percent(s.share ?? 0) }}</span
               >
-              <span v-tip:group="natureTip(s.nature)" role="cell" class="spread-nature">{{
-                natureName(s.nature)
-              }}</span>
+              <!-- The tooltip on its name alone, the cell being as wide as its column. -->
+              <span role="cell" class="spread-nature"
+                ><span v-tip:group.right="natureTip(s.nature)">{{ natureName(s.nature) }}</span></span
+              >
               <span
                 v-for="x in s.stats"
                 :key="x.stat"
