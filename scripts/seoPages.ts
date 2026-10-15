@@ -171,6 +171,7 @@ export function seoPages(): Plugin {
         ...usageIds.map((id): Page => ({
           path: `meta/pokemon/${id}`,
           title: 'title.metaPokemon',
+          head: 'head.metaPokemon',
           desc: 'desc.metaPokemon',
           keywords: 'keywords.metaPokemon',
           lead: names.pokemon[id]!,

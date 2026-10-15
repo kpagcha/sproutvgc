@@ -133,10 +133,11 @@ export const messages = {
   'head.pokedex': 'Pokédex: every Pokémon, its stats and moves',
   'head.chart': 'Type chart: type effectiveness',
   'head.matchups': 'Type calculator: weaknesses and coverage',
+  'head.metaPokemon': 'Usage, sets and spreads',
   'head.pokemonRankings': 'Pokémon usage rankings: the most used Pokémon',
   'head.quiz': 'Type quiz: learn the type chart',
   'keywords.home':
-    '{game} dex, VGC, competitive Pokémon, Pokédex, speed tiers, speed calculator, type chart, usage stats, Regulation {reg}',
+    '{game} dex, VGC, competitive Pokémon, Pokédex, speed tiers, speed calculator, type chart, usage stats, usage rankings, Regulation {reg}',
   'keywords.pokedex':
     'Pokédex, Pokémon list, base stats, abilities, movesets, learnsets, VGC, {game}, Regulation {reg}',
   'keywords.chart': 'type chart, type effectiveness, weaknesses, resistances, immunities, super effective, VGC, {game}',
@@ -145,7 +146,7 @@ export const messages = {
   'keywords.pokemonRankings':
     'usage stats, usage rankings, most used Pokémon, VGC usage, metagame, tier list, {game}, Regulation {reg}',
   'keywords.metaPokemon':
-    '{name} usage, {name} sets, {name} moveset, {name} spreads, {name} natures, {name} items, {name} abilities, {name} teammates, VGC, {game}, Regulation {reg}',
+    '{name} usage, {name} sets, {name} build, {name} VGC, {name} moveset, {name} spreads, {name} natures, {name} items, {name} abilities, {name} teammates, VGC, {game}, Regulation {reg}',
   'keywords.quiz': 'type quiz, type chart quiz, learn type matchups, type effectiveness quiz, {game}',
   'keywords.speedTiers':
     'speed tiers, speed tier list, speed list, speed chart, speed calculator, Pokémon speed, outspeed, Trick Room, Tailwind, Choice Scarf, VGC, {game}, Regulation {reg}',

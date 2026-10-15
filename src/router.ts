@@ -271,6 +271,7 @@ export const router = createRouter({
       meta: {
         titleKey: 'title.metaPokemon',
         descKey: 'desc.metaPokemon',
+        headKey: 'head.metaPokemon',
         keywordsKey: 'keywords.metaPokemon',
         dexNames: true,
         descriptions: ['ability', 'move', 'item'],
