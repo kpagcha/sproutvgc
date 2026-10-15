@@ -22,7 +22,8 @@ import { metaLoading } from '@/composables/useMeta'
 // one period, whatever the period: Smogon's are months), what the one shown is (its battles, regulation, days,
 // source), and its subsets (whose teams count most), what they mean said once over them. Picking a subset shows it on every page and closes the card; another regulation
 // or dataset shows its latest, keeping the subset when it has it, and leaves the card open for the next step. While
-// it isn't the latest dataset, its band has the way back to it (Latest), at the same players, which closes it.
+// it isn't the latest dataset, its band has the way back to it (Latest), at the same players, which closes it. Under
+// the steps, Confirm closes it too, as the speed editor's does: what's picked is shown already.
 const emit = defineEmits<{ close: [] }>()
 const id = useId()
 
@@ -140,6 +141,9 @@ const about = (d: MetaDataset) =>
         </div>
       </section>
     </div>
+    <div class="confirm-row">
+      <button type="button" class="btn primary" @click="emit('close')">{{ t('meta.confirm') }}</button>
+    </div>
   </div>
 </template>
 
@@ -165,14 +169,22 @@ const about = (d: MetaDataset) =>
   align-items: center;
   gap: 6px;
 }
-/* Under the band, what scrolls when the card's too tall for the screen (in the phones' dialog), the band staying put;
-   it reaches the card's right and bottom edges, so its scrollbar runs along them. */
+/* Under the band, what scrolls when the card's too tall for the screen (in the phones' dialog), the band and Confirm
+   staying put; it reaches the card's right edge, so its scrollbar runs along it. */
 .body {
   min-height: 0;
-  margin: 0 calc(-1 * var(--panel-pad)) calc(-1 * var(--panel-pad)) 0;
-  padding: 0 var(--panel-pad) var(--panel-pad) 0;
+  margin: 0 calc(-1 * var(--panel-pad)) 0 0;
+  padding: 0 var(--panel-pad) 0 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+.confirm-row {
+  display: flex;
+  flex: none;
+  justify-content: flex-end;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
 }
 .close {
   min-height: 0;
