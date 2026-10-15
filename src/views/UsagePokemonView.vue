@@ -484,8 +484,7 @@ const sections = computed(() =>
            nature, then a bar per stat of the points put there; the stats named down the left, staying there as the
            cards scroll sideways on phones. -->
       <section v-if="spreads.length" id="sec-spreads" class="panel" :class="{ 'meta-stale': loading }">
-        <h2>{{ t('usageMon.spreads') }}</h2>
-        <p class="muted small spreads-intro">{{ t('usageMon.spreadsIntro') }}</p>
+        <h2 v-tip="t('usageMon.spreadsTip')" class="tipped-head">{{ t('usageMon.spreads') }}</h2>
         <div class="spreads-scroll">
           <div class="spreads" role="table">
             <div class="spread-labels" aria-hidden="true">
@@ -962,9 +961,6 @@ h2 {
 }
 /* The spreads: the stats' names down the left, then a card per spread, side by side, each the same rows (its head,
    its nature, a stat each) at the same heights as the names, so they line up across. The most used outlined. */
-.spreads-intro {
-  margin: -4px 0 10px;
-}
 .spreads-scroll {
   overflow-x: auto;
 }

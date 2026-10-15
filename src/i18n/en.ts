@@ -1121,7 +1121,7 @@ export const messages = {
   'usageMon.teammatesTip': 'How often each is on its teams: the ten most common, on at least {share} of them',
   'usageMon.natures': 'Natures',
   'usageMon.spreads': 'Most common spreads',
-  'usageMon.spreadsIntro':
+  'usageMon.spreadsTip':
     "The exact spreads its sets run, a card each: how many of its sets run it, its nature, and each stat's points (the bar, out of 32) with the stat they give, in green the one its nature raises and in red the one it lowers.",
   'usageMon.speed': 'Speed',
   'usageMon.speedChart': "{name}'s Speeds at its sets",
