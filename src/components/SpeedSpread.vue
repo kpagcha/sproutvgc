@@ -157,7 +157,10 @@ onBeforeUnmount(() => markTip?.destroy())
         @pointercancel="onCancel"
         @click="onClick"
       >
-        <span v-if="otherAt !== null" class="other-label" :style="{ left: at(otherAt) }"
+        <span
+          v-if="otherAt !== null"
+          class="other-label"
+          :style="{ left: at(otherAt), '--along': (otherAt - axis.lo) / axis.span }"
           >{{ other!.name }} {{ otherAt }}</span
         >
         <span class="reach" :style="between(reach.min, reach.max)"></span>
@@ -313,10 +316,12 @@ onBeforeUnmount(() => markTip?.destroy())
   translate: -50% 0;
   background: var(--theirs-solid);
 }
+/* Shifted along its own width as the line is along the chart (centered at the middle, its edge at the line at either
+   end), so a line near an end keeps it in. */
 .other-label {
   position: absolute;
   top: -20px;
-  translate: -50% 0;
+  translate: calc(var(--along) * -100%) 0;
   padding: 0 4px;
   font-size: 0.75em;
   font-weight: bold;
