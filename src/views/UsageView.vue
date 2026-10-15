@@ -221,7 +221,7 @@ const columns = computed(() => {
   const list: { cell: string; xl: string | null; md: string | null; sm: string | null }[] = [
     { cell: 'r', xl: 'var(--num)', md: 'var(--num)', sm: 'var(--num)' },
     { cell: 'grow', xl: 'var(--name)', md: 'minmax(var(--name), 1fr)', sm: 'minmax(0, 1fr)' },
-    { cell: '', xl: 'var(--types)', md: 'var(--types)', sm: 'var(--types)' },
+    { cell: 'wide-only', xl: 'var(--types)', md: 'var(--types)', sm: null },
   ]
   if (showItem.value) list.push({ cell: 'xl-only', xl: 'auto', md: null, sm: null })
   if (showAbility.value) list.push({ cell: 'xl-only', xl: 'var(--ability)', md: null, sm: null })
@@ -307,7 +307,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
             @sort="toggle('rank')"
           />
           <SortHeader :label="t('usage.pokemon')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
-          <div role="columnheader">{{ t('pokedex.types') }}</div>
+          <div role="columnheader" class="wide-only">{{ t('pokedex.types') }}</div>
           <div v-if="showItem" role="columnheader" class="xl-only">
             <span v-tip="t('usage.itemTip')" class="tipped">{{ t('usage.item') }}</span>
           </div>
@@ -382,7 +382,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
                 </span>
               </AppLink>
             </div>
-            <div role="cell">
+            <div role="cell" class="wide-only">
               <span class="types">
                 <AppLink v-for="ty in POKEMON[r.id].types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
                   <TypeIcon :type="ty" />
@@ -549,7 +549,8 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
     display: none;
   }
 }
-/* Phones: the rank and usage columns as narrow as their numbers. */
+/* Phones: the rank and usage columns as narrow as their numbers, and no types column, which leaves the names no room
+   (a Pokémon's types are on its page). */
 @media (max-width: 720px) {
   .dex-table {
     --icon-scale: 1.25;
