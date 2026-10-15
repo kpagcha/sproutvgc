@@ -249,7 +249,8 @@ export const router = createRouter({
     },
 
     // Meta: what players use, and how it does.
-    area('meta', 'title.meta', 'desc.meta'),
+    // Its rankings are what most come for, so the area opens on them: the sections are in the bar under the header.
+    { path: '/meta', name: 'meta', redirect: { name: 'rankings' } },
     {
       path: '/meta/pokemon',
       name: 'rankings',

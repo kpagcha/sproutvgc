@@ -31,7 +31,7 @@ function onPick(e: MouseEvent) {
 </script>
 
 <template>
-  <details v-if="items.length" class="panel banded page-history">
+  <details v-if="items.length" class="panel banded grey page-history">
     <summary>
       <h2 class="title">
         {{ t('recent.title') }} <span class="count">{{ items.length }}</span>
@@ -57,11 +57,6 @@ function onPick(e: MouseEvent) {
 .page-history > summary {
   position: relative;
   cursor: pointer;
-}
-/* A band in the panel's own grey, not the accent: it needn't stand out over the page. */
-:root:root .page-history.banded > summary {
-  color: var(--text);
-  background: color-mix(in srgb, var(--ink) 12%, var(--panel));
 }
 /* Inline, so the marker sits on the heading's line. */
 .title {

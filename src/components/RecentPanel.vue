@@ -17,11 +17,17 @@ const keyOf = (r: (typeof items.value)[number]) => (r.kind === 'entry' ? `${r.re
 </script>
 
 <template>
-  <details v-if="items.length" class="panel banded recent">
+  <details v-if="items.length" class="panel banded grey recent">
     <summary>
       <h2 class="title">{{ t('recent.title') }}</h2>
-      <button type="button" class="btn on-band inverted clear" @click.prevent="clear">
-        <Trash2 :size="14" aria-hidden="true" />{{ t('recent.clear') }}
+      <button
+        v-tip="t('recent.clear')"
+        type="button"
+        class="btn on-band clear"
+        :aria-label="t('recent.clear')"
+        @click.prevent="clear"
+      >
+        <Trash2 :size="14" aria-hidden="true" />
       </button>
     </summary>
     <div class="chips">
@@ -54,5 +60,10 @@ const keyOf = (r: (typeof items.value)[number]) => (r.kind === 'entry' ? `${r.re
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+/* The icon alone, unoutlined until pointed at: clearing needn't stand out. */
+:root:root .clear.btn.on-band {
+  padding: 2px 4px;
+  border-color: transparent;
 }
 </style>

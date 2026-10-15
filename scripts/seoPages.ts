@@ -166,7 +166,6 @@ export function seoPages(): Plugin {
             })),
           ]
         }),
-        { path: 'meta', title: 'title.meta', desc: 'desc.meta', schema: 'CollectionPage' },
         searched('meta/pokemon', 'pokemonRankings', 'WebPage'),
         ...usageIds.map((id): Page => ({
           path: `meta/pokemon/${id}`,

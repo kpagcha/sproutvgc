@@ -3,17 +3,19 @@ import { computed, onMounted, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { t } from '@/i18n'
 import { GAME_NAME, REGULATION } from '@/data/format'
-import { AREAS, PITCH } from '@/lib/areas'
+import { AREAS, PITCH, type AreaId } from '@/lib/areas'
 import { preloadSearch, searchFocus, useSearch } from '@/composables/useSearch'
 import { useSlashFocus } from '@/composables/useSlashFocus'
 import FavoritesPanel from '@/components/FavoritesPanel.vue'
+import MetaHighlights from '@/components/MetaHighlights.vue'
 import RecentPanel from '@/components/RecentPanel.vue'
 import SearchResults from '@/components/SearchResults.vue'
 import SearchBox from '@/components/SearchBox.vue'
 import logoUrl from '@/assets/logo.png'
 
-// The front door to the whole site: the search (of the dex and the site's pages), the reader's favorites and recently
-// viewed, and a card per area with its sections. While searching, the results take the place of all but the search.
+// The front door to the whole site: the search (of the dex and the site's pages), and under it, side by side, the
+// areas (where to go: Meta's and Tools' with their sections) and the meta at a glance (what the site is most about,
+// `MetaHighlights`); then the reader's favorites and recently viewed. While searching, the results take the place of all but the search.
 
 // The search is kept in the URL (`?q=`), so coming back from a result brings the results back.
 const route = useRoute()
@@ -46,6 +48,9 @@ function openOnly() {
   if (only.value) void router.push(only.value)
 }
 
+/** The areas whose sections show under their name: the dex's and the quizzes' are on their own pages. */
+const WITH_SECTIONS = new Set<AreaId>(['meta', 'tools'])
+
 // The regulation's hyphens don't break ("M-C" stays on one line): U+2011, the non-breaking hyphen.
 const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharCode(0x2011)) }
 </script>
@@ -66,34 +71,41 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
         wide
         icon
         hotkey="/"
-        :placeholder="t('home.search')"
-        :aria-label="t('home.search')"
+        :placeholder="t('home.searchAll')"
+        :aria-label="t('home.searchAll')"
         @keydown.enter="openOnly"
       />
     </div>
     <SearchResults v-if="results" :query :results />
     <template v-else>
+      <!-- Under them, side by side: the site's areas (where to go) at the left, the meta at a glance (what it's about)
+           at the right; stacked on narrow screens, the areas first. -->
+      <div class="board">
+        <nav class="panel banded explore" :aria-label="t('home.explore')">
+          <div class="band">
+            <h2 class="band-title">{{ t('home.explore') }}</h2>
+          </div>
+          <div v-for="a in AREAS" :key="a.id" class="area">
+            <RouterLink :to="{ name: a.route }" class="area-head">
+              <span class="area-title font-display">{{ t(a.label) }} <span class="arrow">›</span></span>
+              <span class="muted pitch">{{ t(PITCH[a.id], params) }}</span>
+            </RouterLink>
+            <ul v-if="WITH_SECTIONS.has(a.id)" class="area-sections">
+              <li v-for="s in a.sections" :key="s.key">
+                <RouterLink
+                  v-tip="s.soon ? t('soon.title') : undefined"
+                  :to="{ name: s.route }"
+                  :class="{ soon: s.soon }"
+                  >{{ t(s.label) }}</RouterLink
+                >
+              </li>
+            </ul>
+          </div>
+        </nav>
+        <MetaHighlights />
+      </div>
       <FavoritesPanel />
       <RecentPanel />
-      <div class="areas">
-        <section v-for="a in AREAS" :key="a.id" class="panel area">
-          <RouterLink :to="{ name: a.route }" class="area-head">
-            <span class="area-title font-display">{{ t(a.label) }} <span class="arrow">›</span></span>
-            <span class="muted">{{ t(PITCH[a.id], params) }}</span>
-          </RouterLink>
-          <ul class="area-sections">
-            <li v-for="s in a.sections" :key="s.key">
-              <RouterLink
-                v-tip="s.soon ? t('soon.title') : undefined"
-                :to="{ name: s.route }"
-                :class="{ soon: s.soon }"
-              >
-                {{ t(s.label) }}
-              </RouterLink>
-            </li>
-          </ul>
-        </section>
-      </div>
     </template>
   </div>
 </template>
@@ -132,23 +144,42 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
   margin: 16px 0 0;
 }
 
-/* The areas: a card each, side by side, stacked on narrow screens. */
-.areas {
+/* The areas and the meta side by side, the meta a little wider, both as tall as the taller: its ten against the four
+   areas. */
+.board {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  align-items: stretch;
+  gap: 16px;
+  margin-bottom: 16px;
 }
-.area {
+.board > :deep(.panel) {
+  margin: 0;
+}
+.band-title {
+  margin: 0;
+}
+/* An area a block each, ink rules between them: its name and what it is (a link), then, for Meta and Tools, its
+   sections as chips. */
+.explore {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin: 0;
-  padding: 16px;
+  padding-bottom: 4px;
+}
+/* Spread down the panel's height (the meta's beside it), each taking an equal share of what's left. */
+.area {
+  flex: 1 1 auto;
+  padding: 10px 0;
+}
+.area + .area {
+  border-top: 1px solid var(--border);
+}
+.area:first-of-type {
+  padding-top: 0;
 }
 .area-head {
   display: flex;
   flex-direction: column;
-  gap: 2px;
   color: var(--text);
 }
 .area-head:hover {
@@ -156,7 +187,7 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
 }
 .area-title {
   font-weight: bold;
-  font-size: calc(20px * var(--display-scale, 1) * var(--text-scale));
+  font-size: calc(18px * var(--display-scale, 1) * var(--text-scale));
 }
 .area-head:hover .area-title {
   text-decoration: underline;
@@ -164,19 +195,21 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
 .arrow {
   color: var(--accent);
 }
-/* Its sections as small flat chips, which wrap cleanly. */
+.pitch {
+  font-size: 0.875em;
+}
 .area-sections {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin: 0;
+  margin: 8px 0 0;
   padding: 0;
   list-style: none;
 }
 .area-sections a {
   display: block;
-  padding: 2px 8px;
-  font-size: 0.9em;
+  padding: 1px 8px;
+  font-size: 0.875em;
   color: var(--text);
   background: var(--panel-alt);
   border: 1px solid var(--border);
@@ -193,9 +226,9 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
   border-style: dashed;
 }
 
-@media (max-width: 720px) {
-  .areas {
-    grid-template-columns: 1fr;
+@media (max-width: 860px) {
+  .board {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 @media (max-width: 560px) {

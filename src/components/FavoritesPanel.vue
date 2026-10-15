@@ -50,14 +50,20 @@ async function confirmClearKind(kind: Kind | 'setups', title: string) {
 </script>
 
 <template>
-  <details v-if="count" class="panel banded favorites">
+  <details v-if="count" class="panel banded grey favorites">
     <summary>
       <h2 class="title">
         <Star :size="16" :stroke-width="2.5" aria-hidden="true" />{{ t('favorites.title') }}
         <span class="count muted">{{ count }}</span>
       </h2>
-      <button type="button" class="btn on-band inverted clear" @click.prevent="confirmClear">
-        <Trash2 :size="14" aria-hidden="true" />{{ t('favorites.clear') }}
+      <button
+        v-tip="t('favorites.clear')"
+        type="button"
+        class="btn on-band clear"
+        :aria-label="t('favorites.clear')"
+        @click.prevent="confirmClear"
+      >
+        <Trash2 :size="14" aria-hidden="true" />
       </button>
     </summary>
     <dl>
@@ -194,5 +200,10 @@ dd {
   dd + dt {
     margin-top: 6px;
   }
+}
+/* The icon alone, unoutlined until pointed at: clearing needn't stand out. */
+:root:root .clear.btn.on-band {
+  padding: 2px 4px;
+  border-color: transparent;
 }
 </style>

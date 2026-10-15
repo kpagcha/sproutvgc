@@ -24,7 +24,9 @@
      shadow.
    - `sunken`: a tray rather than a card: no shadow, a darker background, an inset shadow along its top and left.
    - `soft`, with `banded`: the strip a faint wash of the accent with ink text, for a heading that labels what's under
-     it (a list's columns) rather than naming a section. */
+     it (a list's columns) rather than naming a section.
+   - `grey`, with `banded`: the strip in the panel's own grey with ink text, for a section that needn't stand out over
+     the page (the reader's own: favorites, what they viewed lately). */
 :root:root .panel.banded > :is(summary, .band) {
   margin: calc(-1 * var(--panel-pad)) calc(-1 * var(--panel-pad)) var(--panel-pad);
   padding: 6px var(--panel-pad);
@@ -35,6 +37,10 @@
 :root:root .panel.banded.soft > :is(summary, .band) {
   color: var(--text);
   background: color-mix(in srgb, var(--accent) 14%, var(--panel));
+}
+:root:root .panel.banded.grey > :is(summary, .band) {
+  color: var(--text);
+  background: color-mix(in srgb, var(--ink) 12%, var(--panel));
 }
 :root:root .panel.banded:not([open]) > summary {
   margin-bottom: calc(-1 * var(--panel-pad));
