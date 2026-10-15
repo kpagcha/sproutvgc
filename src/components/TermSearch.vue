@@ -17,6 +17,10 @@ import TypeIcon from '@/components/TypeIcon'
 // in the box before the text, and clears the text; a chip's cross takes it off again, as Backspace in an empty box
 // takes off the last. The list is the dex's search (`useSearch`), a few of each kind. A magnifying glass leads the box,
 // and the key the page focuses it with (`hotkey`) ends it, as the site's search boxes have them.
+// The list behind shows what Enter would do: while the options are open, the one highlighted is the `preview`, for the
+// page to show the list with it added. When the text finds some of the list by name too, the options lead with that
+// (`nameCount` of them), highlighted at first, which keeps the text as a search by name, as Escape or leaving the box
+// does; with none, the first term is highlighted, so the list behind shows what it finds rather than nothing.
 const props = defineProps<{
   placeholder: string
   kinds: readonly TermKind[]
@@ -24,9 +28,13 @@ const props = defineProps<{
   count: (term: Term) => number
   /** The key the page focuses it with, hinted at in it while there's nothing to clear (`SearchBox`'s). */
   hotkey?: string
+  /** How many of the list the text finds by name. */
+  nameCount: number
 }>()
 const text = defineModel<string>('text', { required: true })
 const terms = defineModel<Term[]>('terms', { required: true })
+/** The term highlighted while the options are open, which the list behind shows added; null otherwise. */
+const preview = defineModel<Term | null>('preview', { default: null })
 
 /** A kind lists this many at most. */
 const PER_KIND = 5
@@ -62,9 +70,16 @@ const options = computed(() => groups.value.flatMap((g) => g.options))
 const focused = ref(false)
 const dismissed = ref(false)
 const open = computed(() => focused.value && !dismissed.value && options.value.length > 0)
+/** The search by name leads the options, when the text finds some of the list by name. */
+const byName = computed(() => (text.value.trim() && props.nameCount > 0 ? 1 : 0))
 const active = ref(0)
 watch(options, () => (active.value = 0))
 watch(text, () => (dismissed.value = false))
+watch(
+  () => (open.value && active.value >= byName.value ? options.value[active.value - byName.value]?.term : undefined),
+  (term) => (preview.value = term ?? null),
+  { immediate: true },
+)
 
 const input = useTemplateRef('input')
 defineExpose({ focus: (options?: FocusOptions) => input.value?.focus(options) })
@@ -85,11 +100,12 @@ function onKey(e: KeyboardEvent) {
   if (!open.value) return
   if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
     e.preventDefault()
-    const n = options.value.length
+    const n = options.value.length + byName.value
     active.value = (active.value + (e.key === 'ArrowDown' ? 1 : n - 1)) % n
   } else if (e.key === 'Enter') {
     e.preventDefault()
-    pick(options.value[active.value]!)
+    if (active.value < byName.value) dismissed.value = true
+    else pick(options.value[active.value - byName.value]!)
   } else if (e.key === 'Escape') dismissed.value = true
 }
 
@@ -102,7 +118,7 @@ const KIND_LABEL = {
 const listId = useId()
 const optionId = (i: number) => `${listId}-${i}`
 /** Each option's place in the flat list, for the arrow keys. */
-const indexOf = (o: Option) => options.value.indexOf(o)
+const indexOf = (o: Option) => options.value.indexOf(o) + byName.value
 </script>
 
 <template>
@@ -153,6 +169,19 @@ const indexOf = (o: Option) => options.value.indexOf(o)
     </div>
     <!-- What the text finds, by kind, under the box. -->
     <ul v-show="open" :id="listId" class="options" role="listbox">
+      <li
+        v-if="byName"
+        :id="optionId(0)"
+        role="option"
+        class="option"
+        :class="{ active: active === 0 }"
+        :aria-selected="active === 0"
+        @mousedown.prevent="dismissed = true"
+        @mouseenter="active = 0"
+      >
+        <span class="option-name">{{ t('filter.named', { text: text.trim() }) }}</span>
+        <span class="option-count">{{ nameCount }}</span>
+      </li>
       <template v-for="g in groups" :key="g.kind">
         <li role="presentation" class="group">{{ t(KIND_LABEL[g.kind]) }}</li>
         <li

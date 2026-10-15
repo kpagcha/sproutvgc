@@ -593,6 +593,7 @@ export const messages = {
   'filter.kind.ability': 'Ability',
   'filter.kind.move': 'Move',
   'filter.kind.item': 'Item',
+  'filter.named': 'Pokémon named “{text}”',
   'stat.hp': 'HP',
   'stat.bst': 'Total',
   'stat.bstFull': 'The total of its stats, as the game shows them',

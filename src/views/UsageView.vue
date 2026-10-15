@@ -97,6 +97,8 @@ const { key, desc, toggle, sorted } = useSort<Row, Key>({
 // `TermSearch`) narrow it to those of a type, that can have an ability, or whose sets run a move or item, on at least
 // `MIN_SHARE` of them (what a few sets run doesn't make it one that runs it). With a term of what sets run (an ability,
 // a move, an item), each Pokémon's share of its sets running it is a column of its own. The list stays by usage.
+// While a term is highlighted in the search's options (`preview`), the list shows it added, rather than the text's
+// search by name, faded a little: what picking it would do.
 const router = useRouter()
 const MIN_SHARE = 0.05
 const TERM_KINDS = ['type', 'ability', 'move', 'item'] as const
@@ -109,6 +111,9 @@ const terms = computed({
   get: () => parseTerms(query.value.f, termKinds.value),
   set: (list: Term[]) => void router.replace({ query: { ...query.value, f: formatTerms(list) } }),
 })
+const preview = shallowRef<Term | null>(null)
+/** The terms the list shows: the search's, and the one highlighted in its options. */
+const shownTerms = computed(() => (preview.value ? [...terms.value, preview.value] : terms.value))
 /** The share of a Pokémon's sets running a term's ability, move or item, when the snapshot has it. */
 function shareOf(id: PokemonId, term: Term): number | undefined {
   if (term.kind === 'type') return undefined
@@ -124,7 +129,7 @@ const passes = (id: PokemonId, list: readonly Term[] = terms.value) => list.ever
 const termCount = (term: Term) => rows.value.filter((r) => passes(r.id, [...terms.value, term])).length
 /** The terms whose share of each Pokémon's sets shows, a column each. */
 const shareTerms = computed(() =>
-  terms.value.filter(
+  shownTerms.value.filter(
     (x): x is Exclude<Term, { kind: 'type' }> =>
       x.kind !== 'type' && !!snapshot.value && has(snapshot.value, LIST[x.kind]),
   ),
@@ -137,7 +142,13 @@ useSlashFocus(() => {
   termSearch.value.focus({ preventScroll: true })
 })
 const search = shallowRef(typeof query.value.q === 'string' ? query.value.q : '')
+/** How many the text finds by name, with the terms. */
+const named = computed(() => {
+  const q = fold(search.value.trim())
+  return q ? sorted.value.filter((r) => split(r.name, q) && passes(r.id)).length : 0
+})
 const shown = computed(() => {
+  if (preview.value) return sorted.value.filter((r) => passes(r.id, shownTerms.value))
   const q = fold(search.value.trim())
   return sorted.value.filter((r) => (!q || split(r.name, q)) && passes(r.id))
 })
@@ -277,6 +288,8 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
               v-model:text="search"
               hotkey="/"
               v-model:terms="terms"
+              v-model:preview="preview"
+              :name-count="named"
               :placeholder="t('usage.search')"
               :kinds="termKinds"
               :count="termCount"
@@ -286,7 +299,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
       </template>
       <p v-else class="muted">{{ t('usage.none', { reg: REGULATION }) }}</p>
     </div>
-    <div v-if="snapshot" class="panel" :class="{ 'meta-stale': loading }" :aria-busy="loading">
+    <div v-if="snapshot" class="panel" :class="{ 'meta-stale': loading, previewing: preview }" :aria-busy="loading">
       <div
         v-if="!data || shown.length"
         class="dex-table"
@@ -619,6 +632,10 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   .phone-only-block {
     display: block;
   }
+}
+/* The list with a term highlighted in the search's options: a preview, faded a little. */
+.previewing .dex-table {
+  opacity: 0.75;
 }
 /* A Pokémon on few teams: faded, so its numbers and set don't read as firmly as the rest's. */
 .row.rare > [role='cell'] {
