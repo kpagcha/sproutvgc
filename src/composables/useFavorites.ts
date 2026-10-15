@@ -2,9 +2,10 @@ import { computed, ref } from 'vue'
 import type { Kind, Ref } from '@/data/dex'
 import { isVisit as isSetup, setupKey, type PageVisit } from '@/composables/useRecent'
 
-// The entries the reader has starred, saved in this browser, and the setups of pages whose view is in their URL (the
-// speed tiers, a comparison): what the page's `meta.setup` keeps of it, reopening as it was saved. Entries are kept as
-// `refKey`s (`move:protect`), setups as a `PageVisit`, its `page` the route's name; in the order they were starred. A
+// The entries the reader has starred, saved in this browser, the Pokémon whose meta entry they've starred, and the
+// setups of pages whose view is in their URL (the speed tiers, a comparison): what the page's `meta.setup` keeps of it,
+// reopening as it was saved. Entries are kept as `refKey`s (`move:protect`), meta entries as `meta:<Pokémon>`, setups as
+// a `PageVisit`, its `page` the route's name; in the order they were starred. A
 // setup is one favorite per page and query, so a page can have several. Entries the regulation no longer has stay
 // saved, and show again if it brings them back. Imports nothing from the dex's data, so the router can check for
 // favorites without loading it.
@@ -22,7 +23,9 @@ function parse(raw: string | null): Stored[] {
   try {
     const keys: unknown = raw ? JSON.parse(raw) : []
     return Array.isArray(keys)
-      ? keys.filter((k): k is Stored => (typeof k === 'string' && toRef(k) !== null) || isSetup(k))
+      ? keys.filter(
+          (k): k is Stored => (typeof k === 'string' && (toRef(k) !== null || k.startsWith(META))) || isSetup(k),
+        )
       : []
   } catch {
     return []
@@ -54,6 +57,11 @@ function save() {
 }
 
 const keyOf = (ref: Ref) => `${ref.kind}:${ref.id}`
+/** A meta entry's key's prefix, before its Pokémon's ID. */
+const META = 'meta:'
+/** What a favorite is cleared and counted with: its category, the meta entries, or the setups. */
+type Group = Kind | 'meta' | 'setups'
+const groupOf = (s: Stored): Group => (typeof s !== 'string' ? 'setups' : s.startsWith(META) ? 'meta' : toRef(s)!.kind)
 
 function toRef(key: string): Ref | null {
   const i = key.indexOf(':')
@@ -67,7 +75,11 @@ export const hasFavorites = () => keys.value.length > 0
 export function useFavorites() {
   const set = computed(() => new Set(keys.value.map(identity)))
   /** The starred entries, in the order they were starred. */
-  const favorites = computed(() => keys.value.flatMap((k) => (typeof k === 'string' ? [toRef(k)!] : [])))
+  const favorites = computed(() => keys.value.flatMap((k) => (typeof k === 'string' ? (toRef(k) ?? []) : [])))
+  /** The Pokémon whose meta entry is starred, in the order they were starred. */
+  const metaEntries = computed(() =>
+    keys.value.flatMap((k) => (typeof k === 'string' && k.startsWith(META) ? [k.slice(META.length)] : [])),
+  )
   /** The starred setups, in the order they were starred. */
   const setups = computed(() => keys.value.filter((k): k is PageVisit => typeof k !== 'string'))
   /** Stars or unstars something, by its identity. */
@@ -78,6 +90,8 @@ export function useFavorites() {
   }
   const isFavorite = (ref: Ref) => set.value.has(keyOf(ref))
   const toggle = (ref: Ref) => flip(keyOf(ref))
+  const isMetaFavorite = (id: string) => set.value.has(META + id)
+  const toggleMeta = (id: string) => flip(META + id)
   const isSetupFavorite = (v: PageVisit) => set.value.has(setupKey(v))
   const toggleSetup = (v: PageVisit) => flip(v)
   /** Unstars everything, the entries the regulation doesn't have included. */
@@ -85,19 +99,21 @@ export function useFavorites() {
     keys.value = []
     save()
   }
-  /** Unstars a category's entries (those the regulation doesn't have included), or the setups. */
-  const clearKind = (kind: Kind | 'setups') => {
-    keys.value = keys.value.filter((k) => (typeof k === 'string' ? toRef(k)!.kind !== kind : kind !== 'setups'))
+  /** Unstars a category's entries (those the regulation doesn't have included), the meta entries, or the setups. */
+  const clearKind = (group: Group) => {
+    keys.value = keys.value.filter((k) => groupOf(k) !== group)
     save()
   }
-  /** How many a category has starred (those the regulation doesn't have included), or the setups. */
-  const countKind = (kind: Kind | 'setups') =>
-    keys.value.filter((k) => (typeof k === 'string' ? toRef(k)!.kind === kind : kind === 'setups')).length
+  /** How many a category has starred (those the regulation doesn't have included), the meta entries, or the setups. */
+  const countKind = (group: Group) => keys.value.filter((k) => groupOf(k) === group).length
   return {
     favorites,
+    metaEntries,
     setups,
     isFavorite,
     toggle,
+    isMetaFavorite,
+    toggleMeta,
     isSetupFavorite,
     toggleSetup,
     clear,

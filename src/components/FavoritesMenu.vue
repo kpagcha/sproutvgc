@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ChevronDown, Star } from '@lucide/vue'
-import { available, type Kind } from '@/data/dex'
+import { available, pokemon, type Kind, type PokemonId } from '@/data/dex'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { useFavorites } from '@/composables/useFavorites'
@@ -10,7 +10,8 @@ import EntryChip from '@/components/EntryChip.vue'
 import PageChip, { shownVisit } from '@/components/PageChip.vue'
 
 // Beside a page's way back, the reader's favorites of its kind, in a drop-down: an entry page's, the entries of its
-// category starred (alphabetically, those the regulation has), as the home page's chips; the speed pages', their
+// category starred (alphabetically, those the regulation has), as the home page's chips (a meta entry's, the meta
+// entries starred); the speed pages', their
 // setups starred (in the order they were starred). On pages with nothing to star, nothing. On phones, the star alone.
 // Closed by a press outside it, Escape, or going anywhere.
 const props = defineProps<{ page: string }>()
@@ -26,9 +27,20 @@ const KINDS: Partial<Record<string, Kind>> = {
 /** The pages whose setups can be starred. */
 const SETUP_PAGES = ['speedTiers', 'speedCompare']
 
-const { favorites, setups } = useFavorites()
+const { favorites, metaEntries, setups } = useFavorites()
 const kind = computed(() => KINDS[props.page])
-const shown = computed(() => !!kind.value || SETUP_PAGES.includes(props.page))
+/** A Pokémon's meta entry: the meta entries starred. */
+const meta = computed(() => props.page === 'metaPokemon')
+const shown = computed(() => !!kind.value || meta.value || SETUP_PAGES.includes(props.page))
+const metaRefs = computed(() =>
+  !meta.value
+    ? []
+    : metaEntries.value
+        .map((id) => pokemon(id as PokemonId))
+        .filter((r) => available(r))
+        .map((r) => ({ ref: r, name: refName(r) }))
+        .sort((a, b) => a.name.localeCompare(b.name, locale.value)),
+)
 const refs = computed(() =>
   kind.value
     ? favorites.value
@@ -38,7 +50,7 @@ const refs = computed(() =>
     : [],
 )
 const pageSetups = computed(() => setups.value.filter((v) => v.page === props.page && shownVisit(v)))
-const count = computed(() => refs.value.length + pageSetups.value.length)
+const count = computed(() => refs.value.length + metaRefs.value.length + pageSetups.value.length)
 
 const open = ref(false)
 const root = useTemplateRef<HTMLElement>('root')
@@ -82,6 +94,7 @@ onBeforeUnmount(() => (open.value = false))
     <div v-if="open" class="pop panel">
       <div v-if="count" class="chips">
         <EntryChip v-for="{ ref: r } in refs" :key="r.id" :to="r" />
+        <EntryChip v-for="{ ref: r } in metaRefs" :key="r.id" :to="r" meta />
         <PageChip v-for="(v, i) in pageSetups" :key="i" :visit="v" />
       </div>
       <p v-else class="muted empty">{{ t('favorites.menuEmpty') }}</p>

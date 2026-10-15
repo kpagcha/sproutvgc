@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Star, Trash2 } from '@lucide/vue'
-import { available, type Kind } from '@/data/dex'
+import { available, pokemon, type Kind, type PokemonId } from '@/data/dex'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { SECTIONS } from '@/composables/useSearch'
@@ -10,12 +10,21 @@ import { confirmDialog } from '@/composables/useConfirm'
 import EntryChip from '@/components/EntryChip.vue'
 import PageChip, { shownVisit } from '@/components/PageChip.vue'
 
-// The home page's favorites: the entries starred on their pages, one row per category (in the search's order), each
-// alphabetically, as chips (`EntryChip`); then the setups starred (the speed tiers', a comparison's), in the order they
+// The home page's favorites: the meta entries starred, then the entries starred on their pages, one row per category
+// (in the search's order), each alphabetically, as chips (`EntryChip`); then the setups starred (the speed tiers', a comparison's), in the order they
 // // were starred (`PageChip`). Those the regulation doesn't have are left out (and kept, for when it has them again).
 // Nothing shows until something is starred. It starts folded on every visit. It can be cleared, whole or a row at a
 // time, once confirmed, as starring them again would take a while.
-const { favorites, setups, clear, clearKind, countKind, count: saved } = useFavorites()
+const { favorites, metaEntries, setups, clear, clearKind, countKind, count: saved } = useFavorites()
+
+/** The meta entries starred, of the Pokémon the regulation has, alphabetically: a row before the dex's. */
+const metaRefs = computed(() =>
+  metaEntries.value
+    .map((id) => pokemon(id as PokemonId))
+    .filter((r) => available(r))
+    .map((r) => ({ ref: r, name: refName(r) }))
+    .sort((a, b) => a.name.localeCompare(b.name, locale.value)),
+)
 
 const groups = computed(() =>
   SECTIONS.flatMap((s) => {
@@ -27,7 +36,9 @@ const groups = computed(() =>
   }),
 )
 const shownSetups = computed(() => setups.value.filter(shownVisit))
-const count = computed(() => groups.value.reduce((n, g) => n + g.refs.length, 0) + shownSetups.value.length)
+const count = computed(
+  () => metaRefs.value.length + groups.value.reduce((n, g) => n + g.refs.length, 0) + shownSetups.value.length,
+)
 
 async function confirmClear() {
   const ok = await confirmDialog({
@@ -38,8 +49,8 @@ async function confirmClear() {
   if (ok) clear()
 }
 
-/** Clears a row: a category's favorites, or the setups. */
-async function confirmClearKind(kind: Kind | 'setups', title: string) {
+/** Clears a row: a category's favorites, the meta entries, or the setups. */
+async function confirmClearKind(kind: Kind | 'meta' | 'setups', title: string) {
   const ok = await confirmDialog({
     message: t('favorites.clearKindConfirm', { n: countKind(kind), category: title }),
     confirm: t('favorites.clearConfirmButton'),
@@ -67,6 +78,23 @@ async function confirmClearKind(kind: Kind | 'setups', title: string) {
       </button>
     </summary>
     <dl>
+      <template v-if="metaRefs.length">
+        <dt class="muted">
+          {{ t('favorites.meta')
+          }}<button
+            v-tip="t('favorites.clearKind', { category: t('favorites.meta') })"
+            type="button"
+            class="clear-kind"
+            :aria-label="t('favorites.clearKind', { category: t('favorites.meta') })"
+            @click="confirmClearKind('meta', t('favorites.meta'))"
+          >
+            <Trash2 :size="13" aria-hidden="true" />
+          </button>
+        </dt>
+        <dd>
+          <EntryChip v-for="{ ref: r } in metaRefs" :key="r.id" :to="r" meta />
+        </dd>
+      </template>
       <template v-for="g in groups" :key="g.kind">
         <dt class="muted">
           {{ t(g.title)

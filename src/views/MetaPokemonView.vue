@@ -23,6 +23,7 @@ import ItemList from '@/components/ItemList.vue'
 import MoveTable from '@/components/MoveTable.vue'
 import DexRef from '@/components/DexRef'
 import DexText from '@/components/DexText'
+import EntryTitle from '@/components/EntryTitle.vue'
 import EffectTag from '@/components/EffectTag'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -299,7 +300,7 @@ const sections = computed(() =>
       />
       <span v-else class="sprite icon-sprite"><PokemonIcon :id="id" :scale="2" /></span>
       <div class="facts">
-        <h1>{{ refName(ref_) }}</h1>
+        <EntryTitle :to="ref_" meta />
         <div class="types">
           <AppLink v-for="ty in mon.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
             <TypeIcon :type="ty" />
@@ -617,7 +618,7 @@ const sections = computed(() =>
   gap: 8px;
   min-width: 0;
 }
-.facts h1 {
+.facts .entry-title {
   margin: 0;
 }
 .types {
