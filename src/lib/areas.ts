@@ -1,6 +1,6 @@
-// The site's areas, each a top-level link in the header with its sections as a sub-navigation: the dex (what exists
-// in the regulation), Meta (what players use and how it does: observations, labeled with their period and
-// source), Tools (what you interact with) and Quizzes (what you learn with). Each route says in its meta which area and section it belongs to.
+// The site's areas, each a top-level link in the header with its sections as a sub-navigation, Meta first (what sets
+// the site apart): Meta (what players use and how it does: observations, labeled with their period and source), the
+// dex (what exists in the regulation), Tools (what you interact with) and Quizzes (what you learn with). Each route says in its meta which area and section it belongs to.
 
 import type { MessageKey } from '@/i18n'
 
@@ -32,27 +32,12 @@ export interface Area {
 
 export const AREAS: Area[] = [
   {
-    id: 'dex',
-    route: 'dex',
-    label: 'nav.dex',
-    title: 'title.dex',
-    sections: [
-      { key: 'pokemon', route: 'pokedex', label: 'nav.pokemon', desc: 'home.pokemonDesc' },
-      { key: 'moves', route: 'moves', label: 'nav.moves', desc: 'home.movesDesc' },
-      { key: 'abilities', route: 'abilities', label: 'nav.abilities', desc: 'home.abilitiesDesc' },
-      { key: 'items', route: 'items', label: 'nav.items', desc: 'home.itemsDesc' },
-      { key: 'conditions', route: 'conditions', label: 'nav.conditions', desc: 'home.conditionsDesc' },
-      { key: 'types', route: 'types', label: 'nav.types', desc: 'home.typesDesc' },
-      { key: 'chart', route: 'chart', label: 'title.chart', desc: 'desc.chart' },
-    ],
-  },
-  {
     id: 'meta',
     route: 'meta',
     label: 'nav.meta',
     title: 'title.meta',
     sections: [
-      { key: 'usage', route: 'usage', label: 'nav.usage', title: 'title.usage', desc: 'desc.usage' },
+      { key: 'rankings', route: 'rankings', label: 'nav.rankings', title: 'title.rankings', desc: 'desc.rankings' },
       {
         key: 'reports',
         route: 'reports',
@@ -69,6 +54,21 @@ export const AREAS: Area[] = [
         title: 'title.speedCompare',
         desc: 'desc.speedCompare',
       },
+    ],
+  },
+  {
+    id: 'dex',
+    route: 'dex',
+    label: 'nav.dex',
+    title: 'title.dex',
+    sections: [
+      { key: 'pokemon', route: 'pokedex', label: 'nav.pokemon', desc: 'home.pokemonDesc' },
+      { key: 'moves', route: 'moves', label: 'nav.moves', desc: 'home.movesDesc' },
+      { key: 'abilities', route: 'abilities', label: 'nav.abilities', desc: 'home.abilitiesDesc' },
+      { key: 'items', route: 'items', label: 'nav.items', desc: 'home.itemsDesc' },
+      { key: 'conditions', route: 'conditions', label: 'nav.conditions', desc: 'home.conditionsDesc' },
+      { key: 'types', route: 'types', label: 'nav.types', desc: 'home.typesDesc' },
+      { key: 'chart', route: 'chart', label: 'title.chart', desc: 'desc.chart' },
     ],
   },
   {

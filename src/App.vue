@@ -47,7 +47,7 @@ const ENTRY_PAGES: Partial<Record<string, { kind: GeneratedKind; desc: MessageKe
   pokemon: { kind: 'pokemon', desc: 'desc.pokemon' },
   move: { kind: 'move', desc: 'desc.move' },
   item: { kind: 'item', desc: 'desc.item' },
-  usagePokemon: { kind: 'pokemon', desc: 'desc.usagePokemon' },
+  metaPokemon: { kind: 'pokemon', desc: 'desc.metaPokemon' },
 }
 
 watchEffect(() => {
@@ -79,10 +79,10 @@ watchEffect(() => {
   setMeta('meta[property="og:description"]', desc)
 })
 
-/** Entry pages lead back to their category's list (a Pokémon's usage, to the usage list); the speed tiers, to Meta. */
+/** Entry pages lead back to their category's list (a Pokémon's meta page, to the Pokémon rankings); the speed tiers, to Meta. */
 const LISTS: Partial<Record<string, { to: RouteLocationRaw; label: MessageKey }>> = {
   speedTiers: { to: { name: 'meta' }, label: 'nav.meta' },
-  usagePokemon: { to: { name: 'usage' }, label: 'title.usage' },
+  metaPokemon: { to: { name: 'rankings' }, label: 'title.pokemonRankings' },
   ability: { to: { name: 'abilities' }, label: 'title.abilities' },
   pokemon: { to: { name: 'pokedex' }, label: 'title.pokemon' },
   move: { to: { name: 'moves' }, label: 'title.moves' },
@@ -147,7 +147,7 @@ watch(
 // `center` completes.
 watch(() => pageKey(route), pageEntering)
 // The pages kept when left, by route name (see the template).
-const KEPT = new Set<unknown>(['pokedex', 'moves', 'usage'])
+const KEPT = new Set<unknown>(['pokedex', 'moves', 'rankings'])
 const onPageAnimated = (definition: unknown) => definition === 'center' && pageEntered()
 // Both animate `transform` (and `opacity`) rather than motion's `x` and `y`, which it animates on the main thread: the
 // browser animates these on its own, so the next page rendering can't stall them.

@@ -33,6 +33,7 @@ import ShareSplit from '@/components/ShareSplit.vue'
 import SpeedShare from '@/components/SpeedShare.vue'
 import SpeedSpread from '@/components/SpeedSpread.vue'
 import TypeIcon from '@/components/TypeIcon'
+import DexMetaSwitch from '@/components/DexMetaSwitch.vue'
 
 // One Pokémon in the meta shown (`useMeta`, picked on the back row). Its heading has what matters most to a player: its
 // stats as the game shows them, set against the Pokémon it'll face, each marked when its most common nature raises or
@@ -276,7 +277,7 @@ const sections = computed(() =>
 <template>
   <template v-if="exists">
     <!-- The data shown, on the row of the way back: what the whole page is of. -->
-    <Teleport to="#back-actions-usagePokemon" defer>
+    <Teleport to="#back-actions-metaPokemon" defer>
       <span v-if="snapshot?.battles" class="muted battles">
         {{ t('usage.battles', { n: snapshot.battles.toLocaleString(locale) }) }}
       </span>
@@ -304,7 +305,7 @@ const sections = computed(() =>
           <AppLink v-for="ty in mon.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
             <TypeIcon :type="ty" />
           </AppLink>
-          <AppLink :to="{ name: 'pokemon', params: { id } }" class="dex-link">{{ t('usageMon.dex') }} ›</AppLink>
+          <DexMetaSwitch :id current="meta" />
         </div>
         <!-- How much it's used, smaller: its rank, usage and how often it's brought, with their changes. -->
         <p v-if="m" class="used">
@@ -556,7 +557,7 @@ const sections = computed(() =>
         <ul class="shares mates">
           <li v-for="(x, i) in teammates" :key="x.id">
             <span class="mate-rank muted">{{ i + 1 }}</span>
-            <AppLink :to="{ name: 'usagePokemon', params: { id: x.id } }" class="what mate">
+            <AppLink :to="{ name: 'metaPokemon', params: { id: x.id } }" class="what mate">
               <PokemonIcon :id="x.id" /><span class="mate-name"
                 ><span>{{ x.species }}</span
                 ><span v-if="x.forme" class="forme">{{ x.forme }}</span></span
@@ -625,10 +626,6 @@ const sections = computed(() =>
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
-}
-.dex-link {
-  margin-left: 8px;
-  font-weight: bold;
 }
 /* How much it's used: a line of its own, smaller than the stats. */
 .used {

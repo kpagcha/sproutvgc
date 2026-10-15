@@ -167,12 +167,12 @@ export function seoPages(): Plugin {
           ]
         }),
         { path: 'meta', title: 'title.meta', desc: 'desc.meta', schema: 'CollectionPage' },
-        searched('meta/usage', 'usage', 'WebPage'),
+        searched('meta/pokemon', 'pokemonRankings', 'WebPage'),
         ...usageIds.map((id): Page => ({
-          path: `meta/usage/pokemon/${id}`,
-          title: 'title.usagePokemon',
-          desc: 'desc.usagePokemon',
-          keywords: 'keywords.usagePokemon',
+          path: `meta/pokemon/${id}`,
+          title: 'title.metaPokemon',
+          desc: 'desc.metaPokemon',
+          keywords: 'keywords.metaPokemon',
           lead: names.pokemon[id]!,
           schema: 'WebPage',
         })),

@@ -53,7 +53,7 @@ const plan = computed(() => {
   <section class="panel banded versus-card small" role="status">
     <div class="band">
       <div class="title">
-        <AppLink :to="{ name: 'usagePokemon', params: { id: props.id } }" class="mon"
+        <AppLink :to="{ name: 'metaPokemon', params: { id: props.id } }" class="mon"
           ><PokemonIcon :id="props.id" /><strong>{{ props.name }}</strong></AppLink
         >
       </div>

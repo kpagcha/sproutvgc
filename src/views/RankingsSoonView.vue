@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import UsageTabs, { type UsageList } from '@/components/UsageTabs.vue'
+import RankingsTabs, { type RankingList } from '@/components/RankingsTabs.vue'
 import ComingSoonView from '@/views/ComingSoonView.vue'
 
 // A usage list not built yet: the tabs to the others, as the band over what it will be.
-defineProps<{ list: UsageList }>()
+defineProps<{ list: RankingList }>()
 </script>
 
 <template>
   <ComingSoonView>
-    <UsageTabs :current="list" />
+    <RankingsTabs :current="list" />
   </ComingSoonView>
 </template>

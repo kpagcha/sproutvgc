@@ -35,7 +35,7 @@ function view(visit: PageVisit) {
     /** The Pokémon found on the speed tiers. */
     found: name === 'speedTiers' && q.find !== q.mine ? mon(q.find) : null,
     /** The Pokémon whose usage page it is. */
-    usage: name === 'usagePokemon' ? mon(String(to.params.id)) : null,
+    usage: name === 'metaPokemon' ? mon(String(to.params.id)) : null,
     trickRoom: name.startsWith('speed') && q.trickroom === '1',
     // The type matchups' types, or the type the speed tiers are filtered by.
     types: name.startsWith('matchups')
@@ -55,7 +55,7 @@ function view(visit: PageVisit) {
 export function shownVisit(visit: PageVisit) {
   const v = view(visit)
   return (
-    !!v.titleKey && (!v.groups || v.groups.every((g) => g.length > 0)) && (v.to.name !== 'usagePokemon' || !!v.usage)
+    !!v.titleKey && (!v.groups || v.groups.every((g) => g.length > 0)) && (v.to.name !== 'metaPokemon' || !!v.usage)
   )
 }
 </script>

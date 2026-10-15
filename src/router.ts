@@ -4,7 +4,7 @@ import { afterPageExit } from '@/lib/pageExit'
 import { TYPES } from '@/data/types'
 import type { MessageKey } from '@/i18n'
 import type { AreaId } from '@/lib/areas'
-import type { UsageList } from '@/components/UsageTabs.vue'
+import type { RankingList } from '@/components/RankingsTabs.vue'
 import { loadDexNames } from '@/i18n/refName'
 import { hasFavorites } from '@/composables/useFavorites'
 import { hasRecent, visitPage } from '@/composables/useRecent'
@@ -70,13 +70,13 @@ const soon = (area: AreaId, section: string, path: string, titleKey: MessageKey,
   meta: { titleKey, descKey, ...inArea(area, section) },
 })
 
-// A usage list not built yet (the Pokémon's is `/meta/usage`): the tabs to the others, and that it's coming.
-const usageSoon = (list: UsageList, name: string, titleKey: MessageKey, descKey: MessageKey) => ({
-  path: `/meta/usage/${list}`,
+// A ranking not built yet (the Pokémon's is `/meta/pokemon`): the tabs to the others, and that it's coming.
+const rankingsSoon = (list: RankingList, name: string, titleKey: MessageKey, descKey: MessageKey) => ({
+  path: `/meta/${list}`,
   name,
-  component: () => import('@/views/UsageSoonView.vue'),
+  component: () => import('@/views/RankingsSoonView.vue'),
   props: { list },
-  meta: { titleKey, descKey, ...inArea('meta', 'usage') },
+  meta: { titleKey, descKey, ...inArea('meta', 'rankings') },
 })
 
 // An area's own page, listing its sections.
@@ -251,37 +251,36 @@ export const router = createRouter({
     // Meta: what players use, and how it does.
     area('meta', 'title.meta', 'desc.meta'),
     {
-      path: '/meta/usage',
-      name: 'usage',
-      component: () => import('@/views/UsageView.vue'),
+      path: '/meta/pokemon',
+      name: 'rankings',
+      component: () => import('@/views/RankingsView.vue'),
       meta: {
-        titleKey: 'title.usage',
-        descKey: 'desc.usage',
-        headKey: 'head.usage',
-        keywordsKey: 'keywords.usage',
+        titleKey: 'title.pokemonRankings',
+        descKey: 'desc.pokemonRankings',
+        headKey: 'head.pokemonRankings',
+        keywordsKey: 'keywords.pokemonRankings',
         dexNames: true,
-        recent: once('usage'),
-        ...inArea('meta', 'usage'),
+        recent: once('rankings'),
+        ...inArea('meta', 'rankings'),
       },
     },
-    { path: '/meta/usage/pokemon', redirect: { name: 'usage' } },
     {
-      path: '/meta/usage/pokemon/:id',
-      name: 'usagePokemon',
-      component: () => import('@/views/UsagePokemonView.vue'),
+      path: '/meta/pokemon/:id',
+      name: 'metaPokemon',
+      component: () => import('@/views/MetaPokemonView.vue'),
       meta: {
-        titleKey: 'title.usagePokemon',
-        descKey: 'desc.usagePokemon',
-        keywordsKey: 'keywords.usagePokemon',
+        titleKey: 'title.metaPokemon',
+        descKey: 'desc.metaPokemon',
+        keywordsKey: 'keywords.metaPokemon',
         dexNames: true,
         descriptions: ['ability', 'move', 'item'],
-        recent: ({ params }) => `usagePokemon:${String(params.id)}`,
-        ...inArea('meta', 'usage'),
+        recent: ({ params }) => `metaPokemon:${String(params.id)}`,
+        ...inArea('meta', 'rankings'),
       },
     },
-    usageSoon('moves', 'moveUsage', 'title.moveUsage', 'desc.moveUsage'),
-    usageSoon('items', 'itemUsage', 'title.itemUsage', 'desc.itemUsage'),
-    usageSoon('abilities', 'abilityUsage', 'title.abilityUsage', 'desc.abilityUsage'),
+    rankingsSoon('moves', 'moveRankings', 'title.moveRankings', 'desc.moveRankings'),
+    rankingsSoon('items', 'itemRankings', 'title.itemRankings', 'desc.itemRankings'),
+    rankingsSoon('abilities', 'abilityRankings', 'title.abilityRankings', 'desc.abilityRankings'),
     soon('meta', 'reports', '/meta/reports', 'title.reports', 'desc.reports'),
     {
       path: '/meta/speed-tiers',

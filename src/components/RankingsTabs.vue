@@ -3,18 +3,18 @@ import { computed, onMounted, useTemplateRef } from 'vue'
 import { t } from '@/i18n'
 import AppLink from '@/components/AppLink'
 
-// The usage lists, a page each (Pokémon at the bare `/meta/usage`, the one most come for), as the band of the page's
+// The rankings, a page each (`/meta/pokemon`, the one most come for, `/meta/moves`, `/meta/items`, `/meta/abilities`), as the band of the page's
 // first panel (`panel banded`, this its first child): a strip of segments, the others in the band's text, the one shown
 // in the panel's own color, opening into the panel. On phones, they share the width by their names' lengths.
-export type UsageList = 'pokemon' | 'moves' | 'items' | 'abilities'
+export type RankingList = 'pokemon' | 'moves' | 'items' | 'abilities'
 
-defineProps<{ current: UsageList }>()
+defineProps<{ current: RankingList }>()
 
 const lists = computed(() => [
-  { value: 'pokemon' as const, label: t('nav.pokemon'), to: { name: 'usage' } },
-  { value: 'moves' as const, label: t('nav.moves'), to: { name: 'moveUsage' } },
-  { value: 'items' as const, label: t('nav.items'), to: { name: 'itemUsage' } },
-  { value: 'abilities' as const, label: t('nav.abilities'), to: { name: 'abilityUsage' } },
+  { value: 'pokemon' as const, label: t('nav.pokemon'), to: { name: 'rankings' } },
+  { value: 'moves' as const, label: t('nav.moves'), to: { name: 'moveRankings' } },
+  { value: 'items' as const, label: t('nav.items'), to: { name: 'itemRankings' } },
+  { value: 'abilities' as const, label: t('nav.abilities'), to: { name: 'abilityRankings' } },
 ])
 
 // Where they don't fit (a narrow phone, a long language), the band scrolls sideways: the one shown scrolled into view,

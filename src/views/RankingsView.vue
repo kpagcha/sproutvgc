@@ -25,7 +25,7 @@ import SkeletonRows from '@/components/SkeletonRows.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
 import TermSearch from '@/components/TermSearch.vue'
-import UsageTabs from '@/components/UsageTabs.vue'
+import RankingsTabs from '@/components/RankingsTabs.vue'
 
 // The regulation's Pokémon by usage, from the meta snapshot shown (`useMeta`: the one picked, on this page or another,
 // when there are several, of any regulation and month generated, `MetaDialog`). Columns come and go with what the snapshot has. Its links are `AppLink`s and its icons
@@ -262,8 +262,8 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   <!-- The controls, under the band of tabs to the other usage lists, and the table in panels of their own. -->
   <div>
     <div class="panel banded">
-      <UsageTabs current="pokemon" />
-      <h1>{{ t('title.usage') }}</h1>
+      <RankingsTabs current="pokemon" />
+      <h1>{{ t('title.pokemonRankings') }}</h1>
       <p class="muted intro">{{ t('usage.intro', { reg: snapshot?.regulation ?? REGULATION }) }}</p>
       <template v-if="snapshot">
         <!-- The data shown, and on its line, where the set columns don't fit (but on phones), the switch that shows
@@ -387,7 +387,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
               >
             </div>
             <div role="cell" class="grow">
-              <AppLink :to="{ name: 'usagePokemon', params: { id: r.id } }" class="mon">
+              <AppLink :to="{ name: 'metaPokemon', params: { id: r.id } }" class="mon">
                 <PokemonIcon :id="r.id" />
                 <span class="label">
                   <span class="name">{{ r.species }}</span>

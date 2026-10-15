@@ -182,7 +182,7 @@ const v = computed(() => {
     >
     <span v-else class="speed" aria-hidden="true"></span>
     <AppLink
-      :to="{ name: 'usagePokemon', params: { id: row.id } }"
+      :to="{ name: 'metaPokemon', params: { id: row.id } }"
       class="who mon"
       :class="{ hit: row.hit, mine: row.mine }"
       @click.capture="emit('chip', $event)"
