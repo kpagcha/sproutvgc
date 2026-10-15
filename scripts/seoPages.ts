@@ -4,8 +4,8 @@
 // but a 404 to crawlers), and crawlers and link previews read its head without running the app, which then retitles it
 // in the reader's language. Also `sitemap.xml`, listing them, and 404.html, the app's index.html as it was.
 //
-// The pages are the areas, the dex's lists and every entry the regulation has, the types, and the working tools; not
-// the settings, nor what's still coming soon. The app's own data and text load through jiti, as the generator's do.
+// The pages are the areas, the dex's lists and every entry the regulation has, the types, the usage stats and the usage
+// page of every Pokémon the default dataset has, and the working tools; not the settings, nor what's still coming soon. The app's own data and text load through jiti, as the generator's do.
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createJiti } from 'jiti'
@@ -50,6 +50,19 @@ const CATEGORIES = [
 
 const NAME_FILES = { pokemon: 'pokemon', move: 'moves', ability: 'abilities', item: 'items' } as const
 
+/** A meta snapshot, as `src/data/generated/meta/index.json` lists it (`MetaSnapshot`, `src/data/meta.ts`). */
+interface Snapshot {
+  id: string
+  regulation: string
+  provider: { url: string }
+  kind: string
+  season?: string
+  period: string
+  from: string
+  to: string
+}
+
+const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 const attr = (text: string) => text.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;')
 
 export function seoPages(): Plugin {
@@ -83,6 +96,27 @@ export function seoPages(): Plugin {
           ]),
         ),
       ) as Record<Exclude<Kind, 'condition'>, Record<string, string>>
+
+      // The Pokémon with a usage page: those in the dataset shown by default, the current regulation's latest of those
+      // `VITE_META_SETS` picks (any regulation's, while the current one has none), as `latestSnapshots` picks it.
+      const metaDir = join(root, 'src/data/generated/meta')
+      const index = JSON.parse(await readFile(join(metaDir, 'index.json'), 'utf8')) as Record<string, Snapshot>
+      const patterns = String(config.env.VITE_META_SETS ?? '')
+        .split(',')
+        .map((id) => id.trim())
+        .filter(Boolean)
+        .map((p) => new RegExp(`^${p.split('*').map(escape).join('.*')}$`))
+      const shown = Object.values(index).filter((s) => patterns.some((re) => re.test(s.id)))
+      const pool = shown.some((s) => s.regulation === reg) ? shown.filter((s) => s.regulation === reg) : shown
+      const latest = pool.reduce<Snapshot | undefined>((a, s) => (!a || s.to > a.to ? s : a), undefined)
+      const datasetKey = (s: Snapshot) =>
+        [s.regulation, s.provider.url, s.kind, s.season ?? '', s.period, s.from, s.to].join('|')
+      const inMeta = new Set<string>()
+      for (const s of latest ? pool.filter((s) => datasetKey(s) === datasetKey(latest)) : []) {
+        const data = JSON.parse(await readFile(join(metaDir, `${s.id}.json`), 'utf8')) as Record<string, unknown>
+        for (const id of Object.keys(data)) inMeta.add(id)
+      }
+      const usageIds = dex.availableIds('pokemon').filter((id) => inMeta.has(id))
 
       const msg = (key: string, name = '') =>
         en.messages[key]!.replaceAll('{game}', GAME)
@@ -134,6 +168,14 @@ export function seoPages(): Plugin {
         }),
         { path: 'meta', title: 'title.meta', desc: 'desc.meta', schema: 'CollectionPage' },
         searched('meta/usage', 'usage', 'WebPage'),
+        ...usageIds.map((id): Page => ({
+          path: `meta/usage/pokemon/${id}`,
+          title: 'title.usagePokemon',
+          desc: 'desc.usagePokemon',
+          keywords: 'keywords.usagePokemon',
+          lead: names.pokemon[id]!,
+          schema: 'WebPage',
+        })),
         searched('meta/speed-tiers', 'speedTiers'),
         searched('meta/speed-tiers/compare', 'speedCompare'),
         { path: 'tools', title: 'title.tools', desc: 'desc.tools', schema: 'CollectionPage' },
@@ -196,7 +238,7 @@ export function seoPages(): Plugin {
             : []),
         ]
         const head = [
-          ...(page.keywords ? [`<meta name="keywords" content="${attr(msg(page.keywords))}" />`] : []),
+          ...(page.keywords ? [`<meta name="keywords" content="${attr(msg(page.keywords, page.lead))}" />`] : []),
           `<link rel="canonical" href="${url(page.path)}" />`,
           `<meta property="og:url" content="${url(page.path)}" />`,
           `<script type="application/ld+json">${JSON.stringify(data).replaceAll('<', '\\u003c')}</script>`,

@@ -74,7 +74,7 @@ watchEffect(() => {
       : t(route.meta.descKey ?? 'desc.home', params)
   document.title = title
   setMeta('meta[name="description"]', desc)
-  setKeywords(route.meta.keywordsKey ? t(route.meta.keywordsKey, params) : null)
+  setKeywords(route.meta.keywordsKey ? t(route.meta.keywordsKey, { ...params, ...(entry && { name: entry }) }) : null)
   setMeta('meta[property="og:title"]', title)
   setMeta('meta[property="og:description"]', desc)
 })

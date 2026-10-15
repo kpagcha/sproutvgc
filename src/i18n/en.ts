@@ -140,6 +140,8 @@ export const messages = {
   'keywords.matchups':
     'type calculator, weakness calculator, type matchups, type coverage, coverage calculator, dual types, VGC, {game}',
   'keywords.usage': 'usage stats, most used Pokémon, VGC usage, metagame, tier list, {game}, Regulation {reg}',
+  'keywords.usagePokemon':
+    '{name} usage, {name} sets, {name} moveset, {name} spreads, {name} natures, {name} items, {name} abilities, {name} teammates, VGC, {game}, Regulation {reg}',
   'keywords.quiz': 'type quiz, type chart quiz, learn type matchups, type effectiveness quiz, {game}',
   'keywords.speedTiers':
     'speed tiers, speed tier list, speed list, speed chart, speed calculator, Pokémon speed, outspeed, Trick Room, Tailwind, Choice Scarf, VGC, {game}, Regulation {reg}',
