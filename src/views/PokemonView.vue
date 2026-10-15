@@ -57,15 +57,15 @@ function onMatchupsToggle(e: Event) {
   }
 }
 
-// Its stats as the game shows them (`gameStats`), each a bar colored by its base stat (`statColor`), which it says on
-// hover.
+// Its base stats, each a bar colored by it (`statColor`), with the stat as the game shows it (`gameStats`) on hover.
 const stats = computed(() => {
   const values = gameStats(mon.value)
   return STATS.map((s, i) => {
     const base = mon.value.stats[i]!
-    return { s, v: values[i]!, base, width: barWidth(values[i]!), color: statColor(base) }
+    return { s, base, game: values[i]!, width: barWidth(base), color: statColor(base) }
   })
 })
+const baseTotal = computed(() => mon.value.stats.reduce((a, b) => a + b, 0))
 
 // The species' formes the regulation has (Megas, regional formes, Rotom's appliances), this one among them, and the
 // ones that only look different, apart. Each list is shown only when it has others.
@@ -139,21 +139,18 @@ watchEffect(async () => {
         </p>
       </div>
       <div class="stats-col">
-        <p class="stats-head">
-          <span v-tip="t('stats.gameTip')" class="tipped muted">{{ t('stats.game') }}</span>
-        </p>
         <table class="stats">
           <tbody>
             <tr v-for="st in stats" :key="st.s">
               <th class="muted">{{ t(`stat.${st.s}`) }}</th>
-              <td v-tip="t('stats.base', { base: st.base })" class="r num">{{ st.v }}</td>
+              <td v-tip="t('stats.inGame', { game: st.game })" class="r num">{{ st.base }}</td>
               <td class="bar-cell">
                 <span class="track"><span class="bar" :style="{ width: st.width, background: st.color }"></span></span>
               </td>
             </tr>
             <tr class="total">
-              <th v-tip="t('stat.bstFull')" class="muted">{{ t('stat.bst') }}</th>
-              <td class="r num">{{ gameTotal(mon) }}</td>
+              <th v-tip="t('stats.baseTotalFull')" class="muted">{{ t('stat.bst') }}</th>
+              <td v-tip="t('stats.inGame', { game: gameTotal(mon) })" class="r num">{{ baseTotal }}</td>
               <td></td>
             </tr>
           </tbody>
@@ -298,15 +295,6 @@ watchEffect(async () => {
   width: 100%;
 }
 /* Its stats' heading, saying they're as the game shows them. */
-.stats-head {
-  margin: 0 0 6px;
-  font-size: 0.85em;
-  text-align: right;
-}
-.tipped {
-  text-decoration: underline dotted;
-  text-underline-offset: 2px;
-}
 /* A stat's bar, on a faint track. */
 .track {
   position: relative;
@@ -387,9 +375,6 @@ details.matchups {
   .stats-col {
     grid-column: 1 / -1;
     margin: 8px 0 0;
-  }
-  .stats-head {
-    text-align: left;
   }
   .sprite {
     grid-area: sprite;

@@ -42,6 +42,6 @@ There is no test suite, and none should be added. Verify changes with `npm run b
 ## Conventions
 
 - Import from `src` using the `@/` alias.
-- Stats are shown as the game shows them, never as base stats: base plus 20, HP plus 75, at no stat points and a neutral nature (`gameStats`, `gameTotal` in `src/data/pokemon.ts`; `statValue` in `src/lib/stats.ts` with points and a nature). The data keeps the base stats.
+- Stats are shown as the game shows them: base plus 20, HP plus 75, at no stat points and a neutral nature (`gameStats`, `gameTotal` in `src/data/pokemon.ts`; `statValue` in `src/lib/stats.ts` with points and a nature). The one exception is a Pokémon's dex entry, which shows its base stats, the game's on hover. The data keeps the base stats.
 - localStorage access is always wrapped in try/catch, with the app falling back gracefully; keys are prefixed `sproutvgc.`.
 - Don't create or trace UI icons; the user picks icons themselves. UI icons come from Lucide (`@lucide/vue`), squared off by the `.lucide` rule in `main.css`.

@@ -599,6 +599,8 @@ export const messages = {
   'stat.bstFull': 'The total of its stats, as the game shows them',
   'stats.game': 'Stats in the game',
   'stats.base': 'Base stat: {base}',
+  'stats.inGame': 'In the game: {game}',
+  'stats.baseTotalFull': 'The total of its base stats',
   'stats.gameTip':
     'Its stats as the game shows them, with no stat points and a neutral nature: each base stat plus 20, HP plus 75. Each stat point adds 1 more, up to 32 in a stat; a nature then raises one stat by 10% and lowers another by 10%.',
   'move.name': 'Name',

@@ -46,8 +46,9 @@ export const spriteUrl = (id: PokemonId) => `${import.meta.env.BASE_URL}sprites/
 
 /** Base stat total. */
 /**
- * Its stats as the game shows them, which every page does, with no stat points and a neutral nature (`statValue`): each
- * base stat plus 20, HP plus 75. The data keeps the base stats, which the game's own pages don't show.
+ * Its stats as the game shows them, which every page but its dex entry does (that one shows its base stats, these on
+ * hover), with no stat points and a neutral nature (`statValue`): each base stat plus 20, HP plus 75. The data keeps the
+ * base stats.
  */
 export const gameStats = (p: Pokemon) => p.stats.map((base, i) => statValue(base, 0, 'neutral', i === 0))
 /** The total of its stats as the game shows them. */
