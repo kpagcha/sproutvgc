@@ -31,6 +31,7 @@ const META_PAGES: Partial<Record<Ref['kind'], string>> = {
   pokemon: 'metaPokemon',
   ability: 'metaAbility',
   item: 'metaItem',
+  move: 'metaMove',
 }
 
 /** The href of an entry's meta page, where links on the meta's pages lead; its dex entry's, for a category with none. */

@@ -1,48 +1,60 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="F extends FilterLike">
 import { FunnelX } from '@lucide/vue'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import type { MessageKey } from '@/i18n'
+import type { Ref } from '@/data/dex'
+import type { TypeId } from '@/data/types'
 import DexRef from '@/components/DexRef'
 import FilterAdder from '@/components/FilterAdder.vue'
 import TypeIcon from '@/components/TypeIcon'
 import { confirmDialog } from '@/composables/useConfirm'
 import {
-  NO_FILTERS,
+  noFilters,
+  sameFilter,
   type FilterGroup,
-  type FilterTerm,
+  type FilterLike,
   type Filters,
   type Join,
-  type PokemonFilter,
-} from '@/lib/pokemonFilters'
+  type Negatable,
+} from '@/lib/filterGroups'
 
-// The Pokémon list's filters (`pokemonFilters.ts`), in groups: each its filters joined by "or" or "and", and the
-// groups joined the same way. The word between two of them switches it; "not" on a filter negates it.
-const model = defineModel<Filters>({ required: true })
+// A list's filters (`filterGroups.ts`: the Pokémon list's, `pokemonFilters.ts`, unless given `kinds` and `options`
+// for `FilterAdder`), in groups: each its filters joined by "or" or "and", and the groups joined the same way. The word
+// between two of them switches it; "not" on a filter negates it. A filter of a dex entry is its name, a link (to its
+// meta page with `meta`); one that isn't (a move's tag) is named by `name`.
+const model = defineModel<Filters<F>>({ required: true })
+const props = defineProps<{
+  kinds?: readonly string[]
+  options?: (kind: string) => { id: string; name: string }[]
+  /** A filter's name, for one that isn't a dex entry; undefined for one that is. */
+  name?: (f: F) => string | undefined
+  meta?: boolean
+}>()
+const nameOf = (f: F) => props.name?.(f) ?? refName(f as unknown as Ref)
 
 const flip = (join: Join): Join => (join === 'any' ? 'all' : 'any')
 const joinWord = (join: Join): MessageKey => (join === 'any' ? 'filter.or' : 'filter.and')
 
-function setGroup(i: number, group: FilterGroup | null) {
+function setGroup(i: number, group: FilterGroup<F> | null) {
   const groups = model.value.groups.slice()
   // A group with no filters left goes too.
   if (group?.terms.length) groups[i] = group
   else groups.splice(i, 1)
   model.value = { ...model.value, groups }
 }
-const setTerm = (g: FilterGroup, i: number, j: number, term: FilterTerm | null) =>
+const setTerm = (g: FilterGroup<F>, i: number, j: number, term: Negatable<F> | null) =>
   setGroup(i, { ...g, terms: g.terms.flatMap((x, k) => (k !== j ? [x] : term ? [term] : [])) })
-const addTo = (g: FilterGroup, i: number, filter: PokemonFilter) =>
-  g.terms.some((x) => x.kind === filter.kind && x.id === filter.id) ||
-  setGroup(i, { ...g, terms: [...g.terms, filter] })
+const addTo = (g: FilterGroup<F>, i: number, filter: FilterLike) =>
+  g.terms.some((x) => sameFilter(x, filter)) || setGroup(i, { ...g, terms: [...g.terms, filter as F] })
 
-function addGroup(filter: PokemonFilter) {
-  model.value = { ...model.value, groups: [...model.value.groups, { join: 'any', terms: [filter] }] }
+function addGroup(filter: FilterLike) {
+  model.value = { ...model.value, groups: [...model.value.groups, { join: 'any', terms: [filter as F] }] }
 }
 
 async function clearAll() {
   if (await confirmDialog({ message: t('filter.clearConfirm'), confirm: t('filter.clear'), danger: true }))
-    model.value = NO_FILTERS
+    model.value = noFilters()
 }
 </script>
 
@@ -79,23 +91,24 @@ async function clearAll() {
             >
               {{ t('filter.not') }}
             </button>
-            <span class="muted">{{ t(`filter.kind.${f.kind}`) }}:</span>
-            <TypeIcon v-if="f.kind === 'type'" :type="f.id" />
-            <DexRef :to="f" />
+            <span class="muted">{{ t(`filter.kind.${f.kind}` as MessageKey) }}:</span>
+            <TypeIcon v-if="f.kind === 'type'" :type="f.id as TypeId" />
+            <span v-if="name?.(f)">{{ name(f) }}</span>
+            <DexRef v-else :to="f as unknown as Ref" :meta />
             <button
               type="button"
               class="remove"
-              :aria-label="t('filter.remove', { name: refName(f) })"
+              :aria-label="t('filter.remove', { name: nameOf(f) })"
               @click="setTerm(g, i, j, null)"
             >
               ×
             </button>
           </span>
         </template>
-        <FilterAdder @add="addTo(g, i, $event)" />
+        <FilterAdder :kinds :options @add="addTo(g, i, $event)" />
       </div>
     </template>
-    <FilterAdder :label="t(model.groups.length ? 'filter.addGroup' : 'filter.add')" @add="addGroup" />
+    <FilterAdder :label="t(model.groups.length ? 'filter.addGroup' : 'filter.add')" :kinds :options @add="addGroup" />
     <button
       v-if="model.groups.length"
       v-tip="t('filter.clearAll')"

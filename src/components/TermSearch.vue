@@ -2,12 +2,14 @@
 import Marked from '@/components/Marked'
 import { computed, ref, useId, useTemplateRef, watch } from 'vue'
 import { Search } from '@lucide/vue'
-import { sameRef, type ItemId, type PokemonId } from '@/data/dex'
-import { t } from '@/i18n'
+import type { ItemId, PokemonId } from '@/data/dex'
+import { t, type MessageKey } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { useSearch, type SectionKind } from '@/composables/useSearch'
-import type { Term, TermKind } from '@/lib/searchTerms'
+import { fold, split } from '@/lib/search'
+import { isExtraKind, type ExtraKind, type ExtraTerm, type Term, type TermKind } from '@/lib/searchTerms'
 import type { Marks } from '@/lib/search'
+import type { Ref } from '@/data/dex'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
@@ -31,7 +33,16 @@ const props = defineProps<{
   hotkey?: string
   /** How many of the list the text finds by name. */
   nameCount: number
+  /** Terms that aren't dex entries (a move's category, tag or reach): each kind's, by name, found by the text as the
+   * dex's entries are, after the types. */
+  extra?: { kind: ExtraKind; options: readonly { id: string; name: string }[] }[]
+  /** The option that keeps the text a search by name: "Pokémon named …" by default. */
+  named?: MessageKey
 }>()
+const same = (a: Term, b: Term) => a.kind === b.kind && a.id === b.id
+/** A term's name: an extra one's as given, a dex entry's its own. */
+const termName = (term: Term) =>
+  props.extra?.find((g) => g.kind === term.kind)?.options.find((o) => o.id === term.id)?.name ?? refName(term as Ref)
 const text = defineModel<string>('text', { required: true })
 const terms = defineModel<Term[]>('terms', { required: true })
 /** The term highlighted while the options are open, which the list behind shows added; null otherwise. */
@@ -39,7 +50,10 @@ const preview = defineModel<Term | null>('preview', { default: null })
 
 /** A kind lists this many at most. */
 const PER_KIND = 5
-const SECTION_KINDS = computed(() => props.kinds.filter((k): k is Exclude<TermKind, 'type'> => k !== 'type'))
+// The kinds the dex's search finds: not types (found apart), nor what isn't a dex entry (`extra`).
+const SECTION_KINDS = computed(() =>
+  props.kinds.filter((k): k is Exclude<TermKind, 'type' | ExtraKind> => k !== 'type' && !isExtraKind(k)),
+)
 const { results } = useSearch(() => text.value, SECTION_KINDS.value as SectionKind[])
 
 interface Option {
@@ -53,18 +67,33 @@ const groups = computed(() => {
   const r = results.value
   if (!r) return []
   const offer = (term: Term, name: string, parts: Marks): Option[] => {
-    if (terms.value.some((x) => sameRef(x, term))) return []
+    if (terms.value.some((x) => same(x, term))) return []
     const n = props.count(term)
     return n ? [{ term, name, parts, n }] : []
   }
   const types = props.kinds.includes('type')
     ? r.types.flatMap((x) => offer({ kind: 'type', id: x.id }, refName({ kind: 'type', id: x.id }), x.parts))
     : []
+  // The extra kinds' terms the text finds by name, as the dex's search finds its entries'.
+  const q = fold(text.value.trim())
+  const extras = (props.extra ?? []).map((g) => ({
+    kind: g.kind as TermKind,
+    options: q
+      ? g.options
+          .flatMap((o) => {
+            const parts = split(o.name, q)
+            return parts ? offer({ kind: g.kind, id: o.id } as ExtraTerm, o.name, parts) : []
+          })
+          .slice(0, PER_KIND)
+      : [],
+  }))
   const sections = r.sections.map((s) => ({
     kind: s.kind as TermKind,
     options: s.hits.flatMap((h) => offer({ kind: s.kind, id: h.id } as Term, h.name, h.parts)).slice(0, PER_KIND),
   }))
-  return [{ kind: 'type' as TermKind, options: types.slice(0, PER_KIND) }, ...sections].filter((g) => g.options.length)
+  return [{ kind: 'type' as TermKind, options: types.slice(0, PER_KIND) }, ...extras, ...sections].filter(
+    (g) => g.options.length,
+  )
 })
 const options = computed(() => groups.value.flatMap((g) => g.options))
 
@@ -90,7 +119,7 @@ function pick(o: Option) {
   input.value?.focus()
 }
 function remove(term: Term) {
-  terms.value = terms.value.filter((x) => !sameRef(x, term))
+  terms.value = terms.value.filter((x) => !same(x, term))
   input.value?.focus()
 }
 function onKey(e: KeyboardEvent) {
@@ -116,6 +145,9 @@ const KIND_LABEL = {
   move: 'filter.kind.move',
   item: 'filter.kind.item',
   pokemon: 'filter.kind.pokemon',
+  category: 'filter.kind.category',
+  flag: 'filter.kind.flag',
+  reach: 'filter.kind.reach',
 } as const
 const listId = useId()
 const optionId = (i: number) => `${listId}-${i}`
@@ -132,11 +164,11 @@ const indexOf = (o: Option) => options.value.indexOf(o) + byName.value
         <TypeIcon v-if="term.kind === 'type'" :type="term.id" />
         <ItemIcon v-else-if="term.kind === 'item'" :id="term.id as ItemId" :scale="0.67" />
         <PokemonIcon v-else-if="term.kind === 'pokemon'" :id="term.id as PokemonId" :scale="0.75" />
-        <span v-if="term.kind !== 'type'">{{ refName(term) }}</span>
+        <span v-if="term.kind !== 'type'">{{ termName(term) }}</span>
         <button
           type="button"
           class="remove"
-          :aria-label="t('filter.remove', { name: refName(term) })"
+          :aria-label="t('filter.remove', { name: termName(term) })"
           @click.stop="remove(term)"
         >
           ×
@@ -182,7 +214,7 @@ const indexOf = (o: Option) => options.value.indexOf(o) + byName.value
         @mousedown.prevent="dismissed = true"
         @mouseenter="active = 0"
       >
-        <span class="option-name">{{ t('filter.named', { text: text.trim() }) }}</span>
+        <span class="option-name">{{ t(named ?? 'filter.named', { text: text.trim() }) }}</span>
         <span class="option-count">{{ nameCount }}</span>
       </li>
       <template v-for="g in groups" :key="g.kind">

@@ -2,17 +2,25 @@
 import { computed, nextTick, ref, useTemplateRef } from 'vue'
 import { availableIds } from '@/data/dex'
 import { TYPES } from '@/data/types'
-import { locale, t, typeName } from '@/i18n'
+import { locale, t, typeName, type MessageKey } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import { FILTER_KINDS, type FilterKind, type PokemonFilter } from '@/lib/pokemonFilters'
+import type { FilterLike } from '@/lib/filterGroups'
+import { FILTER_KINDS, type PokemonFilter } from '@/lib/pokemonFilters'
 
-// Adds a filter to a group of the Pokémon list's: a button that opens a pick of its kind, then of the entry, by name.
-// Picking one adds it and closes again. `label` names the button (the first filter, when there are none).
-defineProps<{ label?: string }>()
-const emit = defineEmits<{ add: [filter: PokemonFilter] }>()
+// Adds a filter to a group of a list's (the Pokémon list's, unless given its own `kinds` and `options`): a button that
+// opens a pick of its kind, then of the entry, by name. Picking one adds it and closes again. `label` names the button
+// (the first filter, when there are none).
+const props = defineProps<{
+  label?: string
+  kinds?: readonly string[]
+  /** A kind's choices, by name; the Pokémon list's by default (types, and the regulation's abilities and moves). */
+  options?: (kind: string) => { id: string; name: string }[]
+}>()
+const emit = defineEmits<{ add: [filter: FilterLike] }>()
 
+const kinds = computed(() => props.kinds ?? FILTER_KINDS)
 const open = ref(false)
-const kind = ref<FilterKind>('type')
+const kind = ref(kinds.value[0]!)
 const kindSelect = useTemplateRef('kindSelect')
 
 async function start() {
@@ -22,8 +30,9 @@ async function start() {
 }
 
 const options = computed(() => {
+  if (props.options) return props.options(kind.value)
   if (kind.value === 'type') return TYPES.map((id) => ({ id: id as string, name: typeName(id) }))
-  const k = kind.value
+  const k = kind.value as 'ability' | 'move'
   return availableIds(k)
     .map((id) => ({ id: id as string, name: refName({ kind: k, id } as PokemonFilter) }))
     .sort((a, b) => a.name.localeCompare(b.name, locale.value))
@@ -32,7 +41,7 @@ const options = computed(() => {
 function pick(e: Event) {
   const select = e.target as HTMLSelectElement
   if (!select.value) return
-  emit('add', { kind: kind.value, id: select.value } as PokemonFilter)
+  emit('add', { kind: kind.value, id: select.value })
   open.value = false
 }
 </script>
@@ -40,9 +49,9 @@ function pick(e: Event) {
 <template>
   <span v-if="open" class="adder" @keydown.escape="open = false">
     <select ref="kindSelect" v-model="kind" class="search" :aria-label="t('filter.kind')">
-      <option v-for="k in FILTER_KINDS" :key="k" :value="k">{{ t(`filter.kind.${k}`) }}</option>
+      <option v-for="k in kinds" :key="k" :value="k">{{ t(`filter.kind.${k}` as MessageKey) }}</option>
     </select>
-    <select :key="kind" class="search" :aria-label="t(`filter.kind.${kind}`)" @change="pick">
+    <select :key="kind" class="search" :aria-label="t(`filter.kind.${kind}` as MessageKey)" @change="pick">
       <option value="">{{ t('filter.choose') }}</option>
       <option v-for="o in options" :key="o.id" :value="o.id">{{ o.name }}</option>
     </select>

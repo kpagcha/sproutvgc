@@ -67,5 +67,33 @@ export interface Move {
 
 export const MOVES = DATA as unknown as Record<MoveId, Move>
 
+/**
+ * Whom a move reaches, in short, for the move rankings: Showdown's targets grouped by what they mean in a double
+ * battle (its full target, `move.target.*`, says exactly whom).
+ */
+export const REACHES = ['one', 'foes', 'around', 'self', 'ally', 'side', 'foeSide', 'field'] as const
+export type Reach = (typeof REACHES)[number]
+const REACH: Record<Target, Reach> = {
+  normal: 'one',
+  any: 'one',
+  randomNormal: 'one',
+  scripted: 'one',
+  allAdjacentFoes: 'foes',
+  allAdjacent: 'around',
+  self: 'self',
+  adjacentAlly: 'ally',
+  adjacentAllyOrSelf: 'ally',
+  allies: 'side',
+  allySide: 'side',
+  allyTeam: 'side',
+  foeSide: 'foeSide',
+  all: 'field',
+}
+export const reachOf = (m: Move): Reach => REACH[m.target]
+
+/** A move's priority as shown, when it has one: "+4", "−7" (a minus sign); null at 0. */
+export const priorityLabel = (m: Move) =>
+  m.priority > 0 ? `+${m.priority}` : m.priority < 0 ? `−${-m.priority}` : null
+
 /** Moves that hit more than one Pokémon: their damage is reduced to 0.75× when they do. */
 export const isSpread = (m: Move) => m.target === 'allAdjacentFoes' || m.target === 'allAdjacent'

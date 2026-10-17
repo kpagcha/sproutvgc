@@ -26,9 +26,9 @@ import SkeletonRows from '@/components/SkeletonRows.vue'
 // filters are models, for a page that keeps them in its URL; unbound, the table keeps them itself. With `panels`, the
 // filters (after what's given in the slot: the page's heading) and the table go in panels of their own (for `.panels`);
 // without, both go in the caller's. A Pokémon's usage page gives each move's share of its sets (`shares`: a column of
-// its own, the table sorted by it at first), and leaves out PP (`noPp`) and the filters (`noFilters`), the descriptions
-// under the names, each a line of its own the whole width of its row (`stacked`); its whole movepool shown, it keeps the
-// search alone (`search`).
+// its own, the table sorted by it at first, each move leading to its meta page rather than its dex entry), and leaves
+// out PP (`noPp`) and the filters (`noFilters`), the descriptions under the names, each a line of its own the whole
+// width of its row (`stacked`); its whole movepool shown, it keeps the search alone (`search`).
 const props = defineProps<{
   ids: readonly MoveId[]
   descriptions?: boolean
@@ -187,7 +187,7 @@ const skeleton = computed(() => [
       <template v-else>
         <div v-for="r in sorted" :key="r.id" class="row" role="row">
           <div role="cell" class="grow">
-            <AppLink :to="{ name: 'move', params: { id: r.id } }" class="name">
+            <AppLink :to="{ name: shares ? 'metaMove' : 'move', params: { id: r.id } }" class="name">
               <Marked v-if="r.parts" :p="r.parts" />
               <template v-else>{{ r.name }}</template>
             </AppLink>

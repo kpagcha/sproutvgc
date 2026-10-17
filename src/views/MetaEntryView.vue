@@ -1,32 +1,49 @@
 <script setup lang="ts">
-import { computed, useTemplateRef } from 'vue'
+import { computed, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { ability, available, item, pokemon, type AbilityId, type ItemId, type PokemonId } from '@/data/dex'
+import {
+  ability,
+  available,
+  item,
+  move,
+  pokemon,
+  type AbilityId,
+  type ItemId,
+  type MoveId,
+  type PokemonId,
+} from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { sinceLabel, has, percent } from '@/data/meta'
-import { POKEMON, splitForme } from '@/data/pokemon'
+import { MOVES, priorityLabel, reachOf } from '@/data/moves'
+import { loadLearnsets, movesOf, POKEMON, splitForme } from '@/data/pokemon'
 import { locale, t, typeName, type MessageKey } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
-import { points, ranksOf, standings, STEADY, usageOf, usersOf } from '@/lib/entryUsage'
+import { points, ranksOf, scaleOf, standings, STEADY, usageOf, usersOf } from '@/lib/entryUsage'
+import { fold, split } from '@/lib/search'
 import { useMeta } from '@/composables/useMeta'
 import { usePreviousMeta } from '@/composables/usePreviousMeta'
 import { useRowColumns } from '@/composables/useRowColumns'
 import { useSort } from '@/composables/useSort'
 import AppLink from '@/components/AppLink'
+import CategoryIcon from '@/components/CategoryIcon'
 import DexText from '@/components/DexText'
 import ItemIcon from '@/components/ItemIcon.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import SearchBox from '@/components/SearchBox.vue'
 import TypeIcon from '@/components/TypeIcon'
 import SortHeader from '@/components/SortHeader.vue'
 
-// An ability's or item's meta page (`kind`), its dex entry's sibling (each links to the other): how it's used in the
-// meta snapshot shown (`useMeta`): its rank among its kind and its usage, the teams running it (`entryUsage.ts`, as its
-// rankings count it), with their change since the dataset before; then every Pokémon whose sets run it, with how often
-// they do and the usage they bring it; and, for an ability, those that can have it but whose sets don't (any Pokémon
-// can hold any item). One view for both, alike but for what's in `KINDS`.
-type Kind = 'ability' | 'item'
+// An ability's, item's or move's meta page (`kind`), its dex entry's sibling (each links to the other): how it's used
+// in the meta snapshot shown (`useMeta`): its rank among its kind and its usage (`entryUsage.ts`, as its rankings count
+// it: the teams running an ability or item, the share of all Pokémon running a move), with their change since the
+// dataset before; then every Pokémon whose sets run it, searchable, with how often they do and the usage they bring it;
+// and those that could run it but whose sets don't: for an ability, those that can have it; for a move, those that
+// learn it (the first `IDLE_MAX`); none for an item, any Pokémon able to hold any. A move's heading has its type,
+// category and priority (only when it has one), its numbers, whom it reaches and its tags, each leading to the move
+// rankings narrowed by it. One view for the three, alike but for what's in `KINDS`.
+type Kind = 'ability' | 'item' | 'move'
 const props = defineProps<{ kind: Kind }>()
 
 const KINDS = {
@@ -58,6 +75,20 @@ const KINDS = {
       notFound: 'item.notFound',
     },
   },
+  move: {
+    ref: (id: string) => move(id as MoveId),
+    field: 'moves',
+    dex: 'move',
+    text: {
+      usageTip: 'moveUsage.usageTip',
+      runBy: 'metaAbility.runBy',
+      none: 'metaAbility.none',
+      pokemon: 'metaAbility.pokemon',
+      shareTip: 'metaAbility.shareTip',
+      bringsTip: 'metaAbility.bringsTip',
+      notFound: 'move.notFound',
+    },
+  },
 } as const satisfies Record<Kind, { text: Record<string, MessageKey> } & Record<string, unknown>>
 const cfg = computed(() => KINDS[props.kind])
 /** The page's text. */
@@ -76,7 +107,7 @@ const { previous, prevData } = usePreviousMeta(snapshot)
 
 const all = computed(() => usersOf(data.value ?? {}, cfg.value.field))
 const users = computed(() => all.value.get(id.value) ?? [])
-const usage = computed(() => usageOf(users.value))
+const usage = computed(() => usageOf(users.value) / scaleOf(data.value ?? {}, cfg.value.field))
 const rank = computed(() => ranksOf(all.value).get(id.value))
 /** Its rank and usage in the dataset before, and their change: undefined until that's in, or with none. */
 const then = computed(() => {
@@ -96,6 +127,9 @@ const rows = computed(() =>
     return { ...u, species, forme, name: refName(pokemon(u.id)) }
   }),
 )
+// The Pokémon running it, searched by name; cleared on another entry's page.
+const search = shallowRef('')
+watch(id, () => (search.value = ''))
 type Row = (typeof rows.value)[number]
 type Key = 'name' | 'share' | 'usage'
 const { key, desc, toggle, sorted } = useSort<Row, Key>({
@@ -109,14 +143,36 @@ const { key, desc, toggle, sorted } = useSort<Row, Key>({
 /** The most it brings, the full length of the bars. */
 const top = computed(() => Math.max(0, ...rows.value.map((r) => r.usage)))
 
-/** The Pokémon in the data that can have it but whose sets don't run it, by usage: an ability's alone. */
+const shown = computed(() => {
+  const q = fold(search.value.trim())
+  return q ? sorted.value.filter((r) => split(r.name, q)) : sorted.value
+})
+
+// A move's numbers and reach, for its heading.
+const moveData = computed(() => (props.kind === 'move' ? MOVES[id.value as MoveId] : undefined))
+
+// The Pokémon in the data that could run it but whose sets don't, by usage: those that can have an ability, or learn
+// a move (the learnsets loaded for it).
+const learnsets = shallowRef<Record<PokemonId, MoveId[]> | null>(null)
+watch(
+  () => props.kind,
+  (kind) => {
+    if (kind === 'move') void loadLearnsets().then((sets) => (learnsets.value = sets))
+  },
+  { immediate: true },
+)
+const could = (mon: PokemonId) =>
+  props.kind === 'ability'
+    ? POKEMON[mon].abilities.includes(id.value as AbilityId)
+    : props.kind === 'move' && !!learnsets.value && movesOf(learnsets.value, mon).includes(id.value as MoveId)
 const idle = computed(() =>
-  Object.entries(props.kind === 'ability' ? (data.value ?? {}) : {})
-    .filter(([mon]) => POKEMON[mon as PokemonId].abilities.includes(id.value as AbilityId))
-    .filter(([mon]) => !users.value.some((u) => u.id === mon))
+  Object.entries(data.value ?? {})
+    .filter(([mon]) => could(mon as PokemonId) && !users.value.some((u) => u.id === mon))
     .sort((a, b) => a[1]!.rank - b[1]!.rank)
     .map(([mon]) => mon as PokemonId),
 )
+/** The most of them shown: a move can have hundreds. */
+const IDLE_MAX = 30
 
 useRowColumns(useTemplateRef('head'))
 </script>
@@ -131,10 +187,53 @@ useRowColumns(useTemplateRef('head'))
     <!-- The heading: its name and the way to its dex entry, what it does, and how much it's used. -->
     <div class="panel" :class="{ 'meta-stale': loading }">
       <div class="title-row">
-        <h1 class="entry-name"><ItemIcon v-if="kind === 'item'" :id="id as ItemId" />{{ refName(ref) }}</h1>
+        <h1 class="entry-name">
+          <ItemIcon v-if="kind === 'item'" :id="id as ItemId" />
+          <template v-if="moveData">
+            <AppLink :to="{ name: 'types', params: { type: moveData.type } }" class="badge-link"
+              ><TypeIcon v-tip="typeName(moveData.type)" :type="moveData.type"
+            /></AppLink>
+            <AppLink :to="{ name: 'moveRankings', query: { f: `category:${moveData.category}` } }" class="badge-link"
+              ><CategoryIcon v-tip="t(`move.category.${moveData.category}`)" :category="moveData.category"
+            /></AppLink>
+          </template>
+          {{ refName(ref) }}
+          <span v-if="moveData && priorityLabel(moveData)" v-tip="t('move.priority')" class="priority num">{{
+            priorityLabel(moveData)
+          }}</span>
+        </h1>
         <AppLink :to="{ name: cfg.dex, params: { id } }" class="other-page">{{ t('pokemon.dex') }} ›</AppLink>
       </div>
       <p v-if="text" class="muted desc"><DexText :text="text.short" /></p>
+      <!-- A move's numbers, whom it reaches (the move rankings narrowed to it) and its tags (likewise). -->
+      <p v-if="moveData" class="move-facts">
+        <span
+          >{{ t('move.power') }} <b class="num">{{ moveData.power || '—' }}</b></span
+        >
+        <span
+          >{{ t('move.accuracy') }}
+          <b class="num">{{ moveData.accuracy === true ? '—' : `${moveData.accuracy}%` }}</b></span
+        >
+        <span
+          >{{ t('move.pp') }} <b class="num">{{ moveData.pp }}</b></span
+        >
+        <span class="chips">
+          <AppLink
+            v-tip="t(`move.target.${moveData.target}`)"
+            :to="{ name: 'moveRankings', query: { f: `reach:${reachOf(moveData)}` } }"
+            class="chip"
+            >{{ t(`move.reach.${reachOf(moveData)}`) }}</AppLink
+          >
+          <AppLink
+            v-for="f in moveData.flags"
+            :key="f"
+            v-tip="t(`move.flagTip.${f}`)"
+            :to="{ name: 'moveRankings', query: { f: `flag:${f}` } }"
+            class="chip"
+            >{{ t(`move.flag.${f}`) }}</AppLink
+          >
+        </span>
+      </p>
       <p v-if="hasList && rank !== undefined" class="used">
         <span class="used-part"
           >{{ t('usage.rank') }}<b class="num">{{ rank }}</b
@@ -164,8 +263,13 @@ useRowColumns(useTemplateRef('head'))
 
     <!-- The Pokémon whose sets run it. -->
     <div v-if="hasList && rows.length" class="panel" :class="{ 'meta-stale': loading }" :aria-busy="loading">
-      <h2>{{ tx('pokemon') }}</h2>
-      <div class="dex-table" role="table">
+      <div class="table-head">
+        <h2>{{ tx('pokemon') }}</h2>
+        <div v-if="rows.length > 8" class="table-search">
+          <SearchBox v-model="search" :placeholder="t('pokedex.search')" :aria-label="t('pokedex.search')" />
+        </div>
+      </div>
+      <div v-if="shown.length" class="dex-table" role="table">
         <div ref="head" class="row head" role="row">
           <SortHeader :label="t('usage.pokemon')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
           <div role="columnheader" class="wide-only">{{ t('pokedex.types') }}</div>
@@ -186,7 +290,7 @@ useRowColumns(useTemplateRef('head'))
             @sort="toggle('usage')"
           />
         </div>
-        <div v-for="r in sorted" :key="r.id" class="row" role="row">
+        <div v-for="r in shown" :key="r.id" class="row" role="row">
           <div role="cell" class="grow">
             <AppLink :to="{ name: 'metaPokemon', params: { id: r.id } }" class="mon">
               <PokemonIcon :id="r.id" />
@@ -209,12 +313,13 @@ useRowColumns(useTemplateRef('head'))
           </div>
         </div>
       </div>
+      <p v-else class="muted">{{ t('metaEntry.noMatch') }}</p>
       <!-- Those that could, but don't. -->
       <template v-if="idle.length">
-        <p class="muted note">{{ t('metaAbility.idle') }}</p>
+        <p class="muted note">{{ t(kind === 'move' ? 'metaMove.idle' : 'metaAbility.idle') }}</p>
         <div class="idle">
           <AppLink
-            v-for="mon in idle"
+            v-for="mon in idle.slice(0, IDLE_MAX)"
             :key="mon"
             v-tip:group="refName(pokemon(mon))"
             :to="{ name: 'metaPokemon', params: { id: mon } }"
@@ -222,6 +327,7 @@ useRowColumns(useTemplateRef('head'))
           >
             <PokemonIcon :id="mon" />
           </AppLink>
+          <span v-if="idle.length > IDLE_MAX" class="muted more">+{{ idle.length - IDLE_MAX }}</span>
         </div>
       </template>
       <p v-if="snapshot" class="muted note">
@@ -238,14 +344,75 @@ useRowColumns(useTemplateRef('head'))
 .desc {
   margin: 0 0 8px;
 }
+/* A move's priority: a small badge after its name, only for the moves that have one. */
+.priority {
+  align-self: center;
+  padding: 0 5px;
+  font-size: 0.6em;
+  line-height: 1.4;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+}
+.badge-link {
+  display: inline-flex;
+  align-self: center;
+}
+/* A move's numbers, then whom it reaches and its tags as chips. */
+.move-facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
+  margin: 0 0 8px;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.chip {
+  padding: 1px 6px;
+  font-size: 0.9em;
+  color: inherit;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+.chip:hover {
+  text-decoration: none;
+  border-color: var(--accent);
+}
+/* The table's heading, with the search beside it as there's room. */
+.table-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
+  margin-bottom: 8px;
+}
+.table-head h2 {
+  margin: 0;
+}
+.table-search {
+  flex: 0 1 280px;
+}
+.more {
+  align-self: center;
+  margin-left: 6px;
+  font-size: 0.85em;
+}
 /* An item's icon before its name, centered on it. The name aligns by its baseline, so the heading's baseline is the
    name's (not the icon's foot, a flex box's first item's), and the link after it on the row lines up with it. */
 .entry-name {
+  /* A move's type and category badges at their desktop size, on phones too: beside a heading, not in a list. */
+  --icon-scale: 1;
   display: flex;
   align-items: baseline;
   gap: 4px;
 }
-.entry-name > :deep(.sheet-icon) {
+.entry-name > :deep(.sheet-icon),
+.entry-name > :deep(.type-icon),
+.entry-name > :deep(.category-icon) {
   align-self: center;
 }
 /* How much it's used: its rank, usage and how many Pokémon run it, on a line. */

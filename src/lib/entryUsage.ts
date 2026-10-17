@@ -1,13 +1,13 @@
 // The usage of what Pokémon's sets run (abilities, items), from a meta snapshot's data by Pokémon: an entry's usage is
 // the teams running it, each Pokémon with it counting its usage by the share of its sets that run it. For their
-// rankings (`UsageRankingsView`) and their meta pages (`MetaEntryView`).
+// rankings (`UsageRankingsView`, `MoveRankingsView`) and their meta pages (`MetaEntryView`).
 
 import type { PokemonId } from '@/data/dex'
 import type { MetaData } from '@/data/meta'
 import { locale } from '@/i18n'
 
 /** The lists of a Pokémon's sets an entry's usage can be counted from. */
-export type UsageField = 'abilities' | 'items'
+export type UsageField = 'abilities' | 'items' | 'moves'
 
 /** A Pokémon running an entry: the share of its sets that do, and the usage that brings the entry. */
 export interface User {
@@ -37,10 +37,19 @@ export const usageOf = (list: readonly User[]) => list.reduce((sum, u) => sum + 
 export const ranksOf = (by: Map<string, User[]>) =>
   new Map([...by].sort((a, b) => usageOf(b[1]) - usageOf(a[1])).map(([id], i) => [id, i + 1]))
 
+/**
+ * What an entry's summed usage is divided by. Abilities and items, one a set, count per team: the teams running it.
+ * Moves, four a set, count per Pokémon: the share of all Pokémon on teams whose sets run it (Protect's, summed per
+ * team, would be several times 100%). The ranks are the same either way.
+ */
+export const scaleOf = (d: MetaData, field: UsageField) =>
+  field === 'moves' ? Object.values(d).reduce((sum, m) => sum + (m!.usage ?? 0), 0) || 1 : 1
+
 /** Each entry's rank and usage, for the trends against the dataset before. */
 export function standings(d: MetaData, field: UsageField) {
   const by = usersOf(d, field)
-  return { ranks: ranksOf(by), usage: new Map([...by].map(([id, list]) => [id, usageOf(list)])) }
+  const scale = scaleOf(d, field)
+  return { ranks: ranksOf(by), usage: new Map([...by].map(([id, list]) => [id, usageOf(list) / scale])) }
 }
 
 /** Changes in usage under this read as noise: shown, but not colored. */

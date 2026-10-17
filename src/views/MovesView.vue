@@ -41,7 +41,11 @@ const flag = param<Flag>('flag', FLAGS)
       v-model:category="category"
       v-model:flag="flag"
     >
-      <h1>{{ t('title.moves') }}</h1>
+      <!-- Their usage rankings, as they link here. -->
+      <div class="title-row">
+        <h1>{{ t('title.moves') }}</h1>
+        <RouterLink :to="{ name: 'moveRankings' }" class="other-page">{{ t('lists.toMeta') }} ›</RouterLink>
+      </div>
       <p class="muted">{{ t('moves.intro', { reg: REGULATION, n: ids.length }) }}</p>
     </MoveTable>
   </div>

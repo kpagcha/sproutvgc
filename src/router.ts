@@ -4,7 +4,6 @@ import { afterPageExit } from '@/lib/pageExit'
 import { TYPES } from '@/data/types'
 import type { MessageKey } from '@/i18n'
 import type { AreaId } from '@/lib/areas'
-import type { RankingList } from '@/components/RankingsTabs.vue'
 import { loadDexNames } from '@/i18n/refName'
 import { hasFavorites } from '@/composables/useFavorites'
 import { hasRecent, visitPage } from '@/composables/useRecent'
@@ -70,15 +69,6 @@ const soon = (area: AreaId, section: string, path: string, titleKey: MessageKey,
   meta: { titleKey, descKey, ...inArea(area, section) },
 })
 
-// A ranking not built yet (the Pokémon's is `/meta/pokemon`): the tabs to the others, and that it's coming.
-const rankingsSoon = (list: RankingList, name: string, titleKey: MessageKey, descKey: MessageKey) => ({
-  path: `/meta/${list}`,
-  name,
-  component: () => import('@/views/RankingsSoonView.vue'),
-  props: { list },
-  meta: { titleKey, descKey, ...inArea('meta', 'rankings') },
-})
-
 // The abilities' or items' rankings: one view, the list its prop.
 const usageRankings = (
   list: 'abilities' | 'items',
@@ -101,8 +91,12 @@ const usageRankings = (
   },
 })
 
-// An ability's or item's meta page: one view, the kind its prop.
-const metaEntry = (list: 'abilities' | 'items', name: 'metaAbility' | 'metaItem', kind: 'ability' | 'item') => ({
+// An ability's, item's or move's meta page: one view, the kind its prop.
+const metaEntry = (
+  list: 'abilities' | 'items' | 'moves',
+  name: 'metaAbility' | 'metaItem' | 'metaMove',
+  kind: 'ability' | 'item' | 'move',
+) => ({
   path: `/meta/${list}/:id`,
   name,
   component: () => import('@/views/MetaEntryView.vue'),
@@ -319,7 +313,22 @@ export const router = createRouter({
         ...inArea('meta', 'rankings'),
       },
     },
-    rankingsSoon('moves', 'moveRankings', 'title.moveRankings', 'desc.moveRankings'),
+    {
+      path: '/meta/moves',
+      name: 'moveRankings',
+      component: () => import('@/views/MoveRankingsView.vue'),
+      meta: {
+        titleKey: 'title.moveRankings',
+        descKey: 'desc.moveRankings',
+        headKey: 'head.moveRankings',
+        keywordsKey: 'keywords.moveRankings',
+        dexNames: true,
+        descriptions: ['move'],
+        recent: once('moveRankings'),
+        ...inArea('meta', 'rankings'),
+      },
+    },
+    metaEntry('moves', 'metaMove', 'move'),
     usageRankings('items', 'itemRankings', 'item'),
     usageRankings('abilities', 'abilityRankings', 'ability'),
     metaEntry('abilities', 'metaAbility', 'ability'),

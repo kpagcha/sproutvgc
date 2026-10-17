@@ -106,13 +106,14 @@ const preview = shallowRef<Term | null>(null)
 const shownTerms = computed(() => (preview.value ? [...terms.value, preview.value] : terms.value))
 /** The share of a Pokémon's sets running a term's ability, move or item, when the snapshot has it. */
 function shareOf(id: PokemonId, term: Term): number | undefined {
-  if (term.kind === 'type' || term.kind === 'pokemon') return undefined
+  if (term.kind !== 'ability' && term.kind !== 'move' && term.kind !== 'item') return undefined
   return data.value?.[id]?.[LIST[term.kind]]?.find((x) => x.id === term.id)?.share
 }
 function matches(id: PokemonId, term: Term): boolean {
   if (term.kind === 'type') return POKEMON[id].types.includes(term.id)
   if (term.kind === 'ability') return POKEMON[id].abilities.includes(term.id)
   if (term.kind === 'pokemon') return id === term.id
+  if (term.kind !== 'move' && term.kind !== 'item') return false
   return (shareOf(id, term) ?? 0) >= MIN_SHARE
 }
 const passes = (id: PokemonId, list: readonly Term[] = terms.value) => list.every((x) => matches(id, x))
@@ -121,8 +122,10 @@ const termCount = (term: Term) => rows.value.filter((r) => passes(r.id, [...term
 /** The terms whose share of each Pokémon's sets shows, a column each. */
 const shareTerms = computed(() =>
   shownTerms.value.filter(
-    (x): x is Exclude<Term, { kind: 'type' | 'pokemon' }> =>
-      x.kind !== 'type' && x.kind !== 'pokemon' && !!snapshot.value && has(snapshot.value, LIST[x.kind]),
+    (x): x is Extract<Term, { kind: 'ability' | 'move' | 'item' }> =>
+      (x.kind === 'ability' || x.kind === 'move' || x.kind === 'item') &&
+      !!snapshot.value &&
+      has(snapshot.value, LIST[x.kind]),
   ),
 )
 
@@ -425,7 +428,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
                     :data-share="m.share ?? 0"
                     :data-kind="m.kind"
                     :data-id="m.id"
-                    ><DexRef :to="m"
+                    ><DexRef :to="m" meta
                   /></span>
                 </li>
               </ul>
@@ -487,7 +490,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
                   :data-share="m.share ?? 0"
                   :data-kind="m.kind"
                   :data-id="m.id"
-                  ><DexRef :to="m"
+                  ><DexRef :to="m" meta
                 /></span>
               </span>
             </div>
