@@ -326,16 +326,22 @@ const sections = computed(() =>
     <SectionNav v-if="m" :sections="sections" />
 
     <div id="sec-stats" class="panel head" :class="{ 'meta-stale': loading }">
-      <img
-        v-if="!mon.noSprite"
-        class="pixel sprite"
-        :src="spriteUrl(id)"
-        :alt="refName(ref_)"
-        width="96"
-        height="96"
-        draggable="false"
-      />
-      <span v-else class="sprite icon-sprite"><PokemonIcon :id="id" :scale="2" /></span>
+      <!-- The sprite, and its weight in the panel's bottom left corner (on phones, last, at the left). -->
+      <div class="sprite-col">
+        <img
+          v-if="!mon.noSprite"
+          class="pixel sprite"
+          :src="spriteUrl(id)"
+          :alt="refName(ref_)"
+          width="96"
+          height="96"
+          draggable="false"
+        />
+        <span v-else class="sprite icon-sprite"><PokemonIcon :id="id" :scale="2" /></span>
+        <p class="weight muted">
+          {{ t('pokemon.weight') }} <span class="num">{{ mon.weight }} kg</span>
+        </p>
+      </div>
       <div class="facts">
         <EntryTitle :to="ref_" meta />
         <div class="types">
@@ -656,6 +662,20 @@ const sections = computed(() =>
 </template>
 
 <style scoped>
+/* The sprite, centered in what's left over its weight, which sits at the bottom left. */
+.sprite-col {
+  flex: none;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+}
+.sprite-col .sprite {
+  margin: auto 0;
+}
+.weight {
+  margin: 0;
+  font-size: 0.85em;
+}
 /* Room above each section for the row of links stuck to the top, when scrolled to it; the moves' and items' table
    headers stick under that row rather than behind it. */
 .panel {
@@ -1245,6 +1265,16 @@ h2 {
 }
 /* Phones, as its dex entry: the name and types beside the sprite, then its use and the stats below, at the left. */
 @media (max-width: 560px) {
+  .sprite-col {
+    display: contents;
+  }
+  .sprite-col .sprite {
+    margin: 0;
+  }
+  .weight {
+    grid-column: 1 / -1;
+    order: 1;
+  }
   .head {
     display: grid;
     grid-template-columns: 96px minmax(0, 1fr);
