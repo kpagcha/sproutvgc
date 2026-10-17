@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, h, ref, render, shallowRef, watch } from 'vue'
+import { computed, h, ref, render, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { ChevronsDown, ChevronsUp } from '@lucide/vue'
+import { ChevronsDown, ChevronsUp, Info } from '@lucide/vue'
 import { ability, available, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { MOVES } from '@/data/moves'
 import {
@@ -292,6 +292,10 @@ const teammates = computed(() =>
     .map((x) => ({ ...x, ...splitForme(x.id, refName(pokemon(x.id))) })),
 )
 
+// What its stats are and, when there's a meta, what they're set against: the tooltip of the icon by their total, drawn
+// hidden in the page and handed to it.
+const statsTipBody = useTemplateRef<HTMLElement>('statsTipBody')
+
 // Its sections, as the row of links at its top lists them: those it shows.
 const sections = computed(() =>
   [
@@ -363,10 +367,6 @@ const sections = computed(() =>
       </div>
       <!-- Its stats as the dex has them, each with its sets' most common nature's mark. -->
       <div class="stats-col">
-        <p class="stats-head">
-          <span v-tip="t('stats.gameTip')" class="tipped muted">{{ t('stats.game') }}</span>
-          <span v-if="field" v-tip="t('usageMon.vsTip')" class="tipped muted">{{ t('usageMon.vs') }}</span>
-        </p>
         <table class="stats">
           <tbody>
             <tr v-for="st in stats" :key="st.s">
@@ -393,7 +393,39 @@ const sections = computed(() =>
             <tr class="total">
               <th v-tip="t('stat.bstFull')" class="muted">{{ t('stat.bst') }}</th>
               <td class="r num">{{ gameTotal(mon) }}</td>
-              <td></td>
+              <!-- What the stats are, and what they're set against, an icon's tooltip (tapped on phones). -->
+              <td>
+                <span
+                  v-tip="statsTipBody"
+                  class="stats-info"
+                  tabindex="0"
+                  role="img"
+                  :aria-label="statsTipBody?.textContent ?? undefined"
+                >
+                  <Info :size="14" aria-hidden="true" />
+                </span>
+                <div hidden>
+                  <div ref="statsTipBody" class="stats-tip">
+                    <p class="tip-title">{{ t('usageMon.statsTip.head') }}</p>
+                    <ul>
+                      <li>{{ t('usageMon.statsTip.base') }}</li>
+                      <li>{{ t('usageMon.statsTip.points') }}</li>
+                      <li>{{ t('usageMon.statsTip.nature') }}</li>
+                    </ul>
+                    <p v-if="stats.some((st) => st.effect !== 'neutral')" class="tip-key">
+                      <span class="up"><ChevronsUp :size="12" :stroke-width="3" aria-hidden="true" /></span
+                      ><span class="down"><ChevronsDown :size="12" :stroke-width="3" aria-hidden="true" /></span>
+                      {{ t('usageMon.statsTip.marked') }}
+                    </p>
+                    <template v-if="field">
+                      <p class="tip-title">{{ t('usageMon.statsTip.vsHead') }}</p>
+                      <p>{{ t('usageMon.statsTip.vs') }}</p>
+                      <p class="tip-key"><span class="key-band"></span>{{ t('usageMon.statsTip.band') }}</p>
+                      <p class="tip-key"><span class="key-median"></span>{{ t('usageMon.statsTip.median') }}</p>
+                    </template>
+                  </div>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -824,14 +856,63 @@ const sections = computed(() =>
   margin-left: -1px;
   background: var(--text);
 }
-/* What the stats are, and what they're set against, each explained on hover. */
-.stats-head {
+/* What the stats are, and what they're set against, explained on hover or tapped. */
+.stats-info {
+  display: inline-flex;
+  vertical-align: -2px;
+  color: var(--muted);
+  cursor: help;
+}
+.stats-info:hover,
+.stats-info:focus-visible {
+  color: var(--text);
+}
+/* Its tooltip: a heading over what the numbers are, then one over what the bars set them against, with a key to the
+   marks. */
+.stats-tip {
+  max-width: 280px;
+}
+.stats-tip p,
+.stats-tip ul {
+  margin: 0;
+}
+.stats-tip ul {
+  padding-left: 14px;
+}
+.stats-tip .tip-title {
+  font-weight: bold;
+}
+.stats-tip .tip-title + * {
+  margin-top: 2px;
+}
+.stats-tip * + .tip-title {
+  margin-top: 8px;
+}
+.stats-tip .tip-key {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 2px 14px;
-  margin: 0 0 6px;
-  font-size: 0.85em;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.stats-tip .tip-key > .up,
+.stats-tip .tip-key > .down {
+  display: inline-flex;
+}
+.stats-tip .tip-key > .down {
+  margin-left: -6px;
+}
+.key-band {
+  flex: none;
+  width: 18px;
+  height: 10px;
+  background: var(--border);
+}
+.key-median {
+  flex: none;
+  width: 2px;
+  height: 14px;
+  margin: 0 8px;
+  background: var(--text);
 }
 .stats .total td,
 .stats .total th {
