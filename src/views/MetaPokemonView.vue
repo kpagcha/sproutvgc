@@ -1,10 +1,21 @@
 <script setup lang="ts">
-import { computed, h, render, shallowRef, watch } from 'vue'
+import { computed, h, ref, render, shallowRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ChevronsDown, ChevronsUp } from '@lucide/vue'
-import { ability, available, move, pokemon, type PokemonId } from '@/data/dex'
+import { ability, available, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { MOVES } from '@/data/moves'
-import { POKEMON, STATS, barAt, gameStats, gameTotal, splitForme, spriteUrl, statColor } from '@/data/pokemon'
+import {
+  POKEMON,
+  STATS,
+  barAt,
+  gameStats,
+  gameTotal,
+  loadLearnsets,
+  movesOf,
+  splitForme,
+  spriteUrl,
+  statColor,
+} from '@/data/pokemon'
 import { datasetDates, GENERATED_SNAPSHOTS, loadHistory, percent, type MetaHistory } from '@/data/meta'
 import { natureEffectOn, natureEffects, natureName } from '@/data/natures'
 import { locale, t } from '@/i18n'
@@ -136,6 +147,28 @@ const moves = computed(() =>
   (m.value?.moves ?? []).flatMap((x) => (MOVES[x.id] ? [{ ref: move(x.id), share: x.share }] : [])),
 )
 const moveShares = computed(() => Object.fromEntries(moves.value.map((x) => [x.ref.id, x.share])))
+// Or its whole movepool, as its dex entry has it, searchable (the link under the table): the moves its sets run with
+// their share, the rest on under `LIST_MIN` of them. Back to its sets' on another Pokémon.
+const movepool = ref(false)
+// Its sets' view, the most run, as Smogon's own moveset files show them; the data keeps every one over `LIST_MIN`.
+const SETS_MOVES = 10
+const learnset = shallowRef<MoveId[] | null>(null)
+watch(id, () => {
+  movepool.value = false
+  learnset.value = null
+})
+watch(movepool, async (on) => {
+  if (!on || learnset.value) return
+  const current = id.value
+  const sets = await loadLearnsets()
+  if (id.value === current) learnset.value = movesOf(sets, current)
+})
+const moveIds = computed(() => {
+  const used = moves.value.map((x) => x.ref.id)
+  if (!movepool.value || !learnset.value) return used.slice(0, SETS_MOVES)
+  const seen = new Set(used)
+  return [...used, ...learnset.value.filter((x) => !seen.has(x) && MOVES[x])]
+})
 // Its abilities, in its heading: every one it can have, with the share of its sets running it, the most run first. The
 // data keeps those on at least `LIST_MIN` of its sets: one it doesn't have is under that.
 const LIST_MIN = 0.01
@@ -410,13 +443,22 @@ const sections = computed(() =>
             <ListOptions />
           </div>
           <MoveTable
-            :ids="moves.map((x) => x.ref.id)"
+            :key="movepool ? 'pool' : 'sets'"
+            :ids="moveIds"
             :shares="moveShares"
+            :under="`<${percent(LIST_MIN)}`"
             :descriptions="showDescriptions"
+            :search="movepool"
+            :placeholder="t('nav.search')"
             no-pp
             no-filters
             stacked
           />
+          <p class="links">
+            <button type="button" class="link-button" :aria-pressed="movepool" @click="movepool = !movepool">
+              {{ t(movepool ? 'usageMon.setsMoves' : 'usageMon.movepool') }} ›
+            </button>
+          </p>
         </section>
         <section v-if="items.length" id="sec-items" class="panel card items-card">
           <div class="panel-head">
@@ -849,6 +891,18 @@ const sections = computed(() =>
 }
 .panel-head h2 {
   margin-bottom: 0;
+}
+/* A way to show something else, as the links beside it look. */
+.link-button {
+  padding: 0;
+  font: inherit;
+  color: var(--link);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.link-button:hover {
+  text-decoration: underline;
 }
 h2 {
   margin-top: 0;

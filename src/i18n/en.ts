@@ -1129,6 +1129,8 @@ export const messages = {
   'pokemon.meta': 'Meta entry',
   'pokemon.dex': 'Dex entry',
   'usageMon.moves': 'Moves',
+  'usageMon.movepool': 'Whole movepool',
+  'usageMon.setsMoves': 'Only the moves its sets run',
   'usageMon.items': 'Items',
   'usageMon.abilities': 'Abilities',
   'listOptions.title': 'List options',

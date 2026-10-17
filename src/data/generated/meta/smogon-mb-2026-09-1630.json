@@ -236,7 +236,10 @@
       { "id": "quickguard", "share": 0.1874 },
       { "id": "gunkshot", "share": 0.0897 },
       { "id": "rockslide", "share": 0.0893 },
-      { "id": "coaching", "share": 0.0619 }
+      { "id": "coaching", "share": 0.0619 },
+      { "id": "throatchop", "share": 0.0422 },
+      { "id": "rocktomb", "share": 0.0145 },
+      { "id": "taunt", "share": 0.0144 }
     ],
     "items": [
       { "id": "focussash", "share": 0.4684 },
@@ -488,7 +491,13 @@
       { "id": "faketears", "share": 0.0405 },
       { "id": "lightscreen", "share": 0.034 },
       { "id": "tickle", "share": 0.0299 },
-      { "id": "worryseed", "share": 0.028 }
+      { "id": "worryseed", "share": 0.028 },
+      { "id": "dazzlinggleam", "share": 0.0278 },
+      { "id": "energyball", "share": 0.0246 },
+      { "id": "taunt", "share": 0.0177 },
+      { "id": "grassknot", "share": 0.0176 },
+      { "id": "helpinghand", "share": 0.0122 },
+      { "id": "trickroom", "share": 0.0114 }
     ],
     "items": [
       { "id": "focussash", "share": 0.7018 },
@@ -621,7 +630,17 @@
       { "id": "hypervoice", "share": 0.1327 },
       { "id": "imprison", "share": 0.0732 },
       { "id": "roar", "share": 0.0681 },
-      { "id": "nastyplot", "share": 0.0677 }
+      { "id": "nastyplot", "share": 0.0677 },
+      { "id": "raindance", "share": 0.0311 },
+      { "id": "psychicfangs", "share": 0.0235 },
+      { "id": "allyswitch", "share": 0.0224 },
+      { "id": "energyball", "share": 0.0195 },
+      { "id": "grassknot", "share": 0.0142 },
+      { "id": "psyshock", "share": 0.0141 },
+      { "id": "psychicnoise", "share": 0.0127 },
+      { "id": "psychup", "share": 0.0124 },
+      { "id": "foulplay", "share": 0.0115 },
+      { "id": "storedpower", "share": 0.01 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.7714 },
@@ -870,7 +889,9 @@
       { "id": "helpinghand", "share": 0.1181 },
       { "id": "closecombat", "share": 0.063 },
       { "id": "taunt", "share": 0.0382 },
-      { "id": "willowisp", "share": 0.03 }
+      { "id": "willowisp", "share": 0.03 },
+      { "id": "snarl", "share": 0.0157 },
+      { "id": "roar", "share": 0.0136 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.6335 },
@@ -1775,7 +1796,8 @@
       { "id": "muddywater", "share": 0.066 },
       { "id": "raindance", "share": 0.0405 },
       { "id": "helpinghand", "share": 0.0274 },
-      { "id": "icywind", "share": 0.0202 }
+      { "id": "icywind", "share": 0.0202 },
+      { "id": "uturn", "share": 0.0198 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.5332 },
@@ -2132,7 +2154,9 @@
       { "id": "thunderbolt", "share": 0.0333 },
       { "id": "nastyplot", "share": 0.0239 },
       { "id": "weatherball", "share": 0.0166 },
-      { "id": "raindance", "share": 0.0164 }
+      { "id": "raindance", "share": 0.0164 },
+      { "id": "frostbreath", "share": 0.0161 },
+      { "id": "destinybond", "share": 0.0119 }
     ],
     "items": [{ "id": "froslassite", "share": 1 }],
     "abilities": [{ "id": "snowwarning", "share": 1 }],
@@ -2229,7 +2253,10 @@
       { "id": "hurricane", "share": 0.1478 },
       { "id": "dracometeor", "share": 0.0858 },
       { "id": "flamethrower", "share": 0.021 },
-      { "id": "thunder", "share": 0.019 }
+      { "id": "thunder", "share": 0.019 },
+      { "id": "airslash", "share": 0.0161 },
+      { "id": "icebeam", "share": 0.0117 },
+      { "id": "roost", "share": 0.011 }
     ],
     "items": [{ "id": "dragoninite", "share": 1 }],
     "abilities": [{ "id": "multiscale", "share": 1 }],
@@ -2548,7 +2575,8 @@
       { "id": "faketears", "share": 0.0554 },
       { "id": "suckerpunch", "share": 0.0505 },
       { "id": "scaryface", "share": 0.0501 },
-      { "id": "throatchop", "share": 0.0155 }
+      { "id": "throatchop", "share": 0.0155 },
+      { "id": "taunt", "share": 0.0123 }
     ],
     "items": [
       { "id": "lightclay", "share": 0.882 },
@@ -2649,7 +2677,10 @@
       { "id": "trick", "share": 0.0599 },
       { "id": "focusblast", "share": 0.0454 },
       { "id": "dazzlinggleam", "share": 0.0234 },
-      { "id": "steelbeam", "share": 0.02 }
+      { "id": "steelbeam", "share": 0.02 },
+      { "id": "flashcannon", "share": 0.0164 },
+      { "id": "substitute", "share": 0.0134 },
+      { "id": "psychic", "share": 0.0116 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.6372 },
@@ -2773,7 +2804,8 @@
       { "id": "knockoff", "share": 0.0485 },
       { "id": "flipturn", "share": 0.0428 },
       { "id": "rockslide", "share": 0.0419 },
-      { "id": "liquidation", "share": 0.0202 }
+      { "id": "liquidation", "share": 0.0202 },
+      { "id": "waterfall", "share": 0.0173 }
     ],
     "items": [{ "id": "swampertite", "share": 1 }],
     "abilities": [{ "id": "swiftswim", "share": 1 }],
@@ -2891,7 +2923,14 @@
       { "id": "afteryou", "share": 0.2086 },
       { "id": "encore", "share": 0.1083 },
       { "id": "bite", "share": 0.104 },
-      { "id": "helpinghand", "share": 0.1007 }
+      { "id": "helpinghand", "share": 0.1007 },
+      { "id": "beatup", "share": 0.0677 },
+      { "id": "charm", "share": 0.0634 },
+      { "id": "sunnyday", "share": 0.0409 },
+      { "id": "uturn", "share": 0.0326 },
+      { "id": "raindance", "share": 0.0241 },
+      { "id": "batonpass", "share": 0.0187 },
+      { "id": "lowkick", "share": 0.0139 }
     ],
     "items": [
       { "id": "widelens", "share": 0.4869 },
@@ -3118,7 +3157,13 @@
       { "id": "hardpress", "share": 0.1039 },
       { "id": "stompingtantrum", "share": 0.077 },
       { "id": "thunderpunch", "share": 0.076 },
-      { "id": "meteormash", "share": 0.0379 }
+      { "id": "meteormash", "share": 0.0379 },
+      { "id": "brickbreak", "share": 0.033 },
+      { "id": "rockslide", "share": 0.0279 },
+      { "id": "hammerarm", "share": 0.023 },
+      { "id": "cosmicpower", "share": 0.0182 },
+      { "id": "irondefense", "share": 0.0154 },
+      { "id": "stoneedge", "share": 0.0153 }
     ],
     "items": [{ "id": "metagrossite", "share": 1 }],
     "abilities": [{ "id": "toughclaws", "share": 1 }],
@@ -3325,7 +3370,8 @@
       { "id": "solarbeam", "share": 0.1266 },
       { "id": "yawn", "share": 0.033 },
       { "id": "ancientpower", "share": 0.0224 },
-      { "id": "flamethrower", "share": 0.0214 }
+      { "id": "flamethrower", "share": 0.0214 },
+      { "id": "clearsmog", "share": 0.0213 }
     ],
     "items": [
       { "id": "charcoal", "share": 0.944 },
@@ -3393,7 +3439,9 @@
       { "id": "coil", "share": 0.3021 },
       { "id": "hypnosis", "share": 0.2669 },
       { "id": "haze", "share": 0.1705 },
-      { "id": "lifedew", "share": 0.1048 }
+      { "id": "lifedew", "share": 0.1048 },
+      { "id": "helpinghand", "share": 0.0163 },
+      { "id": "dragontail", "share": 0.0109 }
     ],
     "items": [
       { "id": "leftovers", "share": 0.5063 },
@@ -3722,7 +3770,12 @@
       { "id": "perishsong", "share": 0.0362 },
       { "id": "haze", "share": 0.0336 },
       { "id": "energyball", "share": 0.0244 },
-      { "id": "flipturn", "share": 0.0226 }
+      { "id": "flipturn", "share": 0.0226 },
+      { "id": "icebeam", "share": 0.0219 },
+      { "id": "lifedew", "share": 0.0135 },
+      { "id": "icywind", "share": 0.0117 },
+      { "id": "drainingkiss", "share": 0.0114 },
+      { "id": "weatherball", "share": 0.0103 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.52 },
@@ -3831,7 +3884,15 @@
       { "id": "foulplay", "share": 0.2916 },
       { "id": "fakeout", "share": 0.2781 },
       { "id": "protect", "share": 0.1304 },
-      { "id": "taunt", "share": 0.0992 }
+      { "id": "taunt", "share": 0.0992 },
+      { "id": "quash", "share": 0.0708 },
+      { "id": "swagger", "share": 0.0412 },
+      { "id": "gravity", "share": 0.0383 },
+      { "id": "safeguard", "share": 0.0342 },
+      { "id": "snarl", "share": 0.0263 },
+      { "id": "sunnyday", "share": 0.0155 },
+      { "id": "thunderwave", "share": 0.0145 },
+      { "id": "knockoff", "share": 0.0115 }
     ],
     "items": [
       { "id": "lightclay", "share": 0.4672 },
@@ -3918,7 +3979,11 @@
       { "id": "encore", "share": 0.1938 },
       { "id": "icywind", "share": 0.1196 },
       { "id": "helpinghand", "share": 0.1012 },
-      { "id": "surf", "share": 0.0794 }
+      { "id": "surf", "share": 0.0794 },
+      { "id": "haze", "share": 0.0644 },
+      { "id": "earthpower", "share": 0.0623 },
+      { "id": "raindance", "share": 0.0433 },
+      { "id": "psychup", "share": 0.0207 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.5495 },
@@ -4040,7 +4105,8 @@
       { "id": "icepunch", "share": 0.0625 },
       { "id": "superpower", "share": 0.0221 },
       { "id": "crunch", "share": 0.0218 },
-      { "id": "brickbreak", "share": 0.0134 }
+      { "id": "brickbreak", "share": 0.0134 },
+      { "id": "earthquake", "share": 0.0109 }
     ],
     "items": [{ "id": "tyranitarite", "share": 1 }],
     "abilities": [{ "id": "sandstream", "share": 1 }],
@@ -4262,7 +4328,11 @@
       { "id": "highjumpkick", "share": 0.1849 },
       { "id": "uturn", "share": 0.1299 },
       { "id": "knockoff", "share": 0.0505 },
-      { "id": "zenheadbutt", "share": 0.0457 }
+      { "id": "zenheadbutt", "share": 0.0457 },
+      { "id": "helpinghand", "share": 0.031 },
+      { "id": "playrough", "share": 0.0263 },
+      { "id": "petalblizzard", "share": 0.0161 },
+      { "id": "charm", "share": 0.0145 }
     ],
     "items": [
       { "id": "widelens", "share": 0.4262 },
@@ -4380,7 +4450,13 @@
       { "id": "willowisp", "share": 0.1193 },
       { "id": "taunt", "share": 0.1055 },
       { "id": "acrobatics", "share": 0.0873 },
-      { "id": "airslash", "share": 0.0452 }
+      { "id": "airslash", "share": 0.0452 },
+      { "id": "heatwave", "share": 0.0394 },
+      { "id": "overheat", "share": 0.0382 },
+      { "id": "upperhand", "share": 0.0343 },
+      { "id": "raindance", "share": 0.0296 },
+      { "id": "swordsdance", "share": 0.0236 },
+      { "id": "feint", "share": 0.0106 }
     ],
     "items": [
       { "id": "sharpbeak", "share": 0.52 },
@@ -4483,7 +4559,9 @@
       { "id": "highhorsepower", "share": 0.0509 },
       { "id": "brickbreak", "share": 0.0494 },
       { "id": "crunch", "share": 0.0438 },
-      { "id": "lashout", "share": 0.0365 }
+      { "id": "lashout", "share": 0.0365 },
+      { "id": "dragondance", "share": 0.0344 },
+      { "id": "earthquake", "share": 0.0141 }
     ],
     "items": [
       { "id": "chopleberry", "share": 0.4295 },
@@ -4601,7 +4679,10 @@
       { "id": "moonblast", "share": 0.2008 },
       { "id": "disable", "share": 0.1207 },
       { "id": "raindance", "share": 0.0338 },
-      { "id": "roar", "share": 0.0185 }
+      { "id": "roar", "share": 0.0185 },
+      { "id": "dazzlinggleam", "share": 0.0175 },
+      { "id": "helpinghand", "share": 0.0163 },
+      { "id": "snowscape", "share": 0.0106 }
     ],
     "items": [
       { "id": "nevermeltice", "share": 0.3641 },
@@ -4846,7 +4927,9 @@
       { "id": "dracometeor", "share": 0.0415 },
       { "id": "bodypress", "share": 0.0365 },
       { "id": "helpinghand", "share": 0.0272 },
-      { "id": "irondefense", "share": 0.0231 }
+      { "id": "irondefense", "share": 0.0231 },
+      { "id": "flashcannon", "share": 0.0216 },
+      { "id": "dragonpulse", "share": 0.0213 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.4739 },
@@ -5107,7 +5190,8 @@
       { "id": "acidspray", "share": 0.0252 },
       { "id": "mudshot", "share": 0.0198 },
       { "id": "protect", "share": 0.0148 },
-      { "id": "toxic", "share": 0.0139 }
+      { "id": "toxic", "share": 0.0139 },
+      { "id": "stealthrock", "share": 0.0118 }
     ],
     "items": [
       { "id": "focussash", "share": 0.8964 },
@@ -5192,7 +5276,8 @@
       { "id": "leechseed", "share": 0.0513 },
       { "id": "sludgewave", "share": 0.0322 },
       { "id": "weatherball", "share": 0.0153 },
-      { "id": "leafstorm", "share": 0.015 }
+      { "id": "leafstorm", "share": 0.015 },
+      { "id": "synthesis", "share": 0.012 }
     ],
     "items": [{ "id": "venusaurite", "share": 1 }],
     "abilities": [{ "id": "thickfat", "share": 1 }],
@@ -5382,7 +5467,11 @@
       { "id": "trick", "share": 0.1699 },
       { "id": "electroweb", "share": 0.1478 },
       { "id": "eerieimpulse", "share": 0.0923 },
-      { "id": "discharge", "share": 0.0777 }
+      { "id": "discharge", "share": 0.0777 },
+      { "id": "thunderwave", "share": 0.0263 },
+      { "id": "thunder", "share": 0.0144 },
+      { "id": "helpinghand", "share": 0.013 },
+      { "id": "reflect", "share": 0.0116 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.3307 },
@@ -5543,7 +5632,8 @@
       { "id": "protect", "share": 0.3493 },
       { "id": "bulkup", "share": 0.2514 },
       { "id": "taunt", "share": 0.0388 },
-      { "id": "dualwingbeat", "share": 0.0124 }
+      { "id": "dualwingbeat", "share": 0.0124 },
+      { "id": "uturn", "share": 0.0116 }
     ],
     "items": [
       { "id": "leftovers", "share": 0.7647 },
@@ -5918,7 +6008,8 @@
       { "id": "throatchop", "share": 0.0745 },
       { "id": "uturn", "share": 0.0661 },
       { "id": "playrough", "share": 0.0353 },
-      { "id": "brickbreak", "share": 0.0211 }
+      { "id": "brickbreak", "share": 0.0211 },
+      { "id": "thunderpunch", "share": 0.016 }
     ],
     "items": [
       { "id": "focussash", "share": 0.6643 },
@@ -6013,7 +6104,10 @@
       { "id": "dragonpulse", "share": 0.1314 },
       { "id": "heatwave", "share": 0.1199 },
       { "id": "flamethrower", "share": 0.066 },
-      { "id": "uturn", "share": 0.0636 }
+      { "id": "uturn", "share": 0.0636 },
+      { "id": "flashcannon", "share": 0.0242 },
+      { "id": "taunt", "share": 0.0111 },
+      { "id": "focusblast", "share": 0.0108 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.5488 },
@@ -6119,7 +6213,17 @@
       { "id": "scaleshot", "share": 0.0895 },
       { "id": "rockslide", "share": 0.0434 },
       { "id": "firepunch", "share": 0.0351 },
-      { "id": "icespinner", "share": 0.0299 }
+      { "id": "icespinner", "share": 0.0299 },
+      { "id": "dragondance", "share": 0.0238 },
+      { "id": "ironhead", "share": 0.0225 },
+      { "id": "earthquake", "share": 0.0205 },
+      { "id": "thunderpunch", "share": 0.018 },
+      { "id": "stompingtantrum", "share": 0.0146 },
+      { "id": "dragontail", "share": 0.0139 },
+      { "id": "haze", "share": 0.0132 },
+      { "id": "dracometeor", "share": 0.0116 },
+      { "id": "dragonpulse", "share": 0.0101 },
+      { "id": "whirlwind", "share": 0.0101 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.5172 },
@@ -6244,7 +6348,14 @@
       { "id": "rockslide", "share": 0.2574 },
       { "id": "phantomforce", "share": 0.2319 },
       { "id": "uturn", "share": 0.1648 },
-      { "id": "shadowclaw", "share": 0.1589 }
+      { "id": "shadowclaw", "share": 0.1589 },
+      { "id": "rocktomb", "share": 0.1297 },
+      { "id": "taunt", "share": 0.0891 },
+      { "id": "gunkshot", "share": 0.0489 },
+      { "id": "encore", "share": 0.0312 },
+      { "id": "coaching", "share": 0.0269 },
+      { "id": "poisonjab", "share": 0.015 },
+      { "id": "seedbomb", "share": 0.0112 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.3194 },
@@ -6371,7 +6482,15 @@
       { "id": "calmmind", "share": 0.1225 },
       { "id": "thunderbolt", "share": 0.1119 },
       { "id": "imprison", "share": 0.0794 },
-      { "id": "hyperbeam", "share": 0.0626 }
+      { "id": "hyperbeam", "share": 0.0626 },
+      { "id": "moonblast", "share": 0.0489 },
+      { "id": "expandingforce", "share": 0.0435 },
+      { "id": "grassknot", "share": 0.0386 },
+      { "id": "mysticalfire", "share": 0.0377 },
+      { "id": "aurasphere", "share": 0.0317 },
+      { "id": "round", "share": 0.0185 },
+      { "id": "energyball", "share": 0.0123 },
+      { "id": "shadowball", "share": 0.0114 }
     ],
     "items": [{ "id": "gardevoirite", "share": 1 }],
     "abilities": [{ "id": "pixilate", "share": 1 }],
@@ -6473,7 +6592,10 @@
       { "id": "brickbreak", "share": 0.1951 },
       { "id": "drainpunch", "share": 0.1389 },
       { "id": "protect", "share": 0.0966 },
-      { "id": "crunch", "share": 0.0461 }
+      { "id": "crunch", "share": 0.0461 },
+      { "id": "bodyslam", "share": 0.0239 },
+      { "id": "rockslide", "share": 0.0185 },
+      { "id": "lastresort", "share": 0.0181 }
     ],
     "items": [{ "id": "kangaskhanite", "share": 1 }],
     "abilities": [{ "id": "parentalbond", "share": 1 }],
@@ -6551,7 +6673,22 @@
       { "id": "curse", "share": 0.2072 },
       { "id": "phantomforce", "share": 0.2054 },
       { "id": "psychicfangs", "share": 0.1502 },
-      { "id": "uturn", "share": 0.1243 }
+      { "id": "uturn", "share": 0.1243 },
+      { "id": "thunderbolt", "share": 0.1069 },
+      { "id": "hex", "share": 0.088 },
+      { "id": "reflect", "share": 0.0736 },
+      { "id": "beatup", "share": 0.0713 },
+      { "id": "round", "share": 0.068 },
+      { "id": "dragontail", "share": 0.0463 },
+      { "id": "flamethrower", "share": 0.0408 },
+      { "id": "suckerpunch", "share": 0.0378 },
+      { "id": "dragoncheer", "share": 0.0345 },
+      { "id": "dragondance", "share": 0.0233 },
+      { "id": "dragonpulse", "share": 0.0189 },
+      { "id": "substitute", "share": 0.0163 },
+      { "id": "disable", "share": 0.0149 },
+      { "id": "dragonclaw", "share": 0.0123 },
+      { "id": "thunderwave", "share": 0.0119 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.3543 },
@@ -6666,7 +6803,8 @@
       { "id": "nightslash", "share": 0.1261 },
       { "id": "coaching", "share": 0.1053 },
       { "id": "thunderpunch", "share": 0.012 },
-      { "id": "shadowsneak", "share": 0.012 }
+      { "id": "shadowsneak", "share": 0.012 },
+      { "id": "feint", "share": 0.0114 }
     ],
     "items": [
       { "id": "focussash", "share": 0.3044 },
@@ -6839,7 +6977,8 @@
       { "id": "suckerpunch", "share": 0.0577 },
       { "id": "muddywater", "share": 0.0416 },
       { "id": "voltswitch", "share": 0.0382 },
-      { "id": "toxic", "share": 0.0278 }
+      { "id": "toxic", "share": 0.0278 },
+      { "id": "acidspray", "share": 0.0114 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.656 },
@@ -7053,7 +7192,12 @@
       { "id": "dracometeor", "share": 0.2505 },
       { "id": "dragonclaw", "share": 0.1857 },
       { "id": "ironhead", "share": 0.0746 },
-      { "id": "swordsdance", "share": 0.0707 }
+      { "id": "swordsdance", "share": 0.0707 },
+      { "id": "dragonpulse", "share": 0.0592 },
+      { "id": "scaleshot", "share": 0.0303 },
+      { "id": "sleeptalk", "share": 0.0168 },
+      { "id": "rest", "share": 0.0168 },
+      { "id": "poisonjab", "share": 0.0104 }
     ],
     "items": [{ "id": "garchompite", "share": 1 }],
     "abilities": [{ "id": "sandforce", "share": 1 }],
@@ -7168,7 +7312,13 @@
       { "id": "rockslide", "share": 0.2025 },
       { "id": "detect", "share": 0.0871 },
       { "id": "ironhead", "share": 0.0496 },
-      { "id": "icepunch", "share": 0.0397 }
+      { "id": "icepunch", "share": 0.0397 },
+      { "id": "bulkup", "share": 0.0206 },
+      { "id": "swordsdance", "share": 0.0194 },
+      { "id": "throatchop", "share": 0.0132 },
+      { "id": "crunch", "share": 0.0121 },
+      { "id": "thunderpunch", "share": 0.0109 },
+      { "id": "coaching", "share": 0.0101 }
     ],
     "items": [{ "id": "scraftinite", "share": 1 }],
     "abilities": [{ "id": "intimidate", "share": 1 }],
@@ -7325,7 +7475,10 @@
       { "id": "auroraveil", "share": 0.2013 },
       { "id": "icebeam", "share": 0.0885 },
       { "id": "taunt", "share": 0.0314 },
-      { "id": "weatherball", "share": 0.0297 }
+      { "id": "weatherball", "share": 0.0297 },
+      { "id": "flashcannon", "share": 0.0207 },
+      { "id": "allyswitch", "share": 0.0165 },
+      { "id": "frostbreath", "share": 0.0104 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.4646 },
@@ -7411,7 +7564,13 @@
       { "id": "upperhand", "share": 0.1329 },
       { "id": "iciclecrash", "share": 0.1166 },
       { "id": "protect", "share": 0.1131 },
-      { "id": "iceshard", "share": 0.1071 }
+      { "id": "iceshard", "share": 0.1071 },
+      { "id": "taunt", "share": 0.0499 },
+      { "id": "poisonjab", "share": 0.0396 },
+      { "id": "fling", "share": 0.0169 },
+      { "id": "brickbreak", "share": 0.0146 },
+      { "id": "helpinghand", "share": 0.0126 },
+      { "id": "throatchop", "share": 0.0116 }
     ],
     "items": [
       { "id": "focussash", "share": 0.8343 },
@@ -7581,7 +7740,10 @@
       { "id": "hypervoice", "share": 0.0766 },
       { "id": "flamethrower", "share": 0.0539 },
       { "id": "snarl", "share": 0.0322 },
-      { "id": "taunt", "share": 0.0164 }
+      { "id": "taunt", "share": 0.0164 },
+      { "id": "round", "share": 0.0143 },
+      { "id": "willowisp", "share": 0.0129 },
+      { "id": "yawn", "share": 0.0127 }
     ],
     "items": [{ "id": "pyroarite", "share": 1 }],
     "abilities": [{ "id": "firemane", "share": 1 }],
@@ -7648,7 +7810,12 @@
       { "id": "trickroom", "share": 0.2466 },
       { "id": "protect", "share": 0.045 },
       { "id": "calmmind", "share": 0.0285 },
-      { "id": "scald", "share": 0.0275 }
+      { "id": "scald", "share": 0.0275 },
+      { "id": "psychic", "share": 0.02 },
+      { "id": "expandingforce", "share": 0.0133 },
+      { "id": "muddywater", "share": 0.0117 },
+      { "id": "psychicterrain", "share": 0.011 },
+      { "id": "yawn", "share": 0.0109 }
     ],
     "items": [{ "id": "slowbronite", "share": 1 }],
     "abilities": [{ "id": "shellarmor", "share": 1 }],
@@ -7716,7 +7883,9 @@
       { "id": "knockoff", "share": 0.0858 },
       { "id": "rocktomb", "share": 0.0808 },
       { "id": "iciclespear", "share": 0.0312 },
-      { "id": "heavyslam", "share": 0.027 }
+      { "id": "heavyslam", "share": 0.027 },
+      { "id": "stompingtantrum", "share": 0.0172 },
+      { "id": "superpower", "share": 0.0129 }
     ],
     "items": [
       { "id": "focussash", "share": 0.4232 },
@@ -7902,7 +8071,8 @@
       { "id": "closecombat", "share": 0.1588 },
       { "id": "shadowball", "share": 0.127 },
       { "id": "swordsdance", "share": 0.0924 },
-      { "id": "flashcannon", "share": 0.0767 }
+      { "id": "flashcannon", "share": 0.0767 },
+      { "id": "substitute", "share": 0.0238 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.4358 },
@@ -8005,7 +8175,10 @@
       { "id": "knockoff", "share": 0.1557 },
       { "id": "tailwind", "share": 0.0432 },
       { "id": "quickattack", "share": 0.0396 },
-      { "id": "uturn", "share": 0.0353 }
+      { "id": "uturn", "share": 0.0353 },
+      { "id": "brickbreak", "share": 0.0231 },
+      { "id": "feint", "share": 0.0222 },
+      { "id": "assurance", "share": 0.0111 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.6566 },
@@ -8096,7 +8269,11 @@
       { "id": "overheat", "share": 0.0721 },
       { "id": "energyball", "share": 0.0639 },
       { "id": "flamethrower", "share": 0.0457 },
-      { "id": "calmmind", "share": 0.0418 }
+      { "id": "calmmind", "share": 0.0418 },
+      { "id": "minimize", "share": 0.0403 },
+      { "id": "acidarmor", "share": 0.0403 },
+      { "id": "trick", "share": 0.0194 },
+      { "id": "psychic", "share": 0.0172 }
     ],
     "items": [
       { "id": "focussash", "share": 0.8007 },
@@ -8178,7 +8355,12 @@
       { "id": "willowisp", "share": 0.3029 },
       { "id": "swordsdance", "share": 0.2164 },
       { "id": "shadowclaw", "share": 0.1942 },
-      { "id": "taunt", "share": 0.1808 }
+      { "id": "taunt", "share": 0.1808 },
+      { "id": "phantomforce", "share": 0.1079 },
+      { "id": "destinybond", "share": 0.0519 },
+      { "id": "drainpunch", "share": 0.0435 },
+      { "id": "psychup", "share": 0.0122 },
+      { "id": "woodhammer", "share": 0.0117 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.3128 },
@@ -8259,7 +8441,22 @@
       { "id": "willowisp", "share": 0.2165 },
       { "id": "memento", "share": 0.2087 },
       { "id": "hyperbeam", "share": 0.199 },
-      { "id": "round", "share": 0.1858 }
+      { "id": "round", "share": 0.1858 },
+      { "id": "extrasensory", "share": 0.1233 },
+      { "id": "flamethrower", "share": 0.1009 },
+      { "id": "psychic", "share": 0.0762 },
+      { "id": "nastyplot", "share": 0.0687 },
+      { "id": "raindance", "share": 0.0622 },
+      { "id": "trick", "share": 0.0512 },
+      { "id": "focusblast", "share": 0.043 },
+      { "id": "curse", "share": 0.0404 },
+      { "id": "grassknot", "share": 0.0386 },
+      { "id": "snarl", "share": 0.0225 },
+      { "id": "hex", "share": 0.0209 },
+      { "id": "darkpulse", "share": 0.0189 },
+      { "id": "detect", "share": 0.0182 },
+      { "id": "uturn", "share": 0.0162 },
+      { "id": "burningjealousy", "share": 0.016 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.398 },
@@ -8341,7 +8538,13 @@
       { "id": "icepunch", "share": 0.0813 },
       { "id": "earthquake", "share": 0.0588 },
       { "id": "earthpower", "share": 0.0358 },
-      { "id": "icebeam", "share": 0.016 }
+      { "id": "icebeam", "share": 0.016 },
+      { "id": "rockslide", "share": 0.0157 },
+      { "id": "mirrorcoat", "share": 0.0152 },
+      { "id": "avalanche", "share": 0.0151 },
+      { "id": "lowkick", "share": 0.013 },
+      { "id": "muddywater", "share": 0.0129 },
+      { "id": "waterfall", "share": 0.0112 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.4656 },
@@ -8507,7 +8710,18 @@
       { "id": "crunch", "share": 0.1337 },
       { "id": "bellydrum", "share": 0.1215 },
       { "id": "smackdown", "share": 0.0835 },
-      { "id": "earthquake", "share": 0.0793 }
+      { "id": "earthquake", "share": 0.0793 },
+      { "id": "highhorsepower", "share": 0.0651 },
+      { "id": "bodyslam", "share": 0.0505 },
+      { "id": "curse", "share": 0.0295 },
+      { "id": "icepunch", "share": 0.0279 },
+      { "id": "facade", "share": 0.0271 },
+      { "id": "heatcrash", "share": 0.0243 },
+      { "id": "encore", "share": 0.0191 },
+      { "id": "rest", "share": 0.0187 },
+      { "id": "thunderpunch", "share": 0.0163 },
+      { "id": "rockslide", "share": 0.0131 },
+      { "id": "recycle", "share": 0.0109 }
     ],
     "items": [
       { "id": "leftovers", "share": 0.8263 },
@@ -8581,7 +8795,8 @@
       { "id": "destinybond", "share": 0.0786 },
       { "id": "dazzlinggleam", "share": 0.0408 },
       { "id": "raindance", "share": 0.0397 },
-      { "id": "willowisp", "share": 0.0248 }
+      { "id": "willowisp", "share": 0.0248 },
+      { "id": "imprison", "share": 0.0114 }
     ],
     "items": [
       { "id": "focussash", "share": 0.978 },
@@ -8642,7 +8857,12 @@
       { "id": "fierydance", "share": 0.2387 },
       { "id": "gigadrain", "share": 0.2239 },
       { "id": "overheat", "share": 0.2115 },
-      { "id": "tailwind", "share": 0.2094 }
+      { "id": "tailwind", "share": 0.2094 },
+      { "id": "willowisp", "share": 0.0896 },
+      { "id": "flamethrower", "share": 0.0787 },
+      { "id": "whirlwind", "share": 0.0352 },
+      { "id": "psychic", "share": 0.0218 },
+      { "id": "morningsun", "share": 0.0171 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.2594 },
@@ -8777,7 +8997,8 @@
       { "id": "hex", "share": 0.0795 },
       { "id": "hydropump", "share": 0.0773 },
       { "id": "soak", "share": 0.0746 },
-      { "id": "surf", "share": 0.0573 }
+      { "id": "surf", "share": 0.0573 },
+      { "id": "lastrespects", "share": 0.029 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.6625 },
@@ -8864,7 +9085,9 @@
       { "id": "protect", "share": 0.2917 },
       { "id": "ceaselessedge", "share": 0.2834 },
       { "id": "detect", "share": 0.1005 },
-      { "id": "aquajet", "share": 0.0836 }
+      { "id": "aquajet", "share": 0.0836 },
+      { "id": "swordsdance", "share": 0.05 },
+      { "id": "knockoff", "share": 0.0317 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.4425 },
@@ -8952,7 +9175,8 @@
       { "id": "protect", "share": 0.2418 },
       { "id": "chillingwater", "share": 0.073 },
       { "id": "icebeam", "share": 0.0705 },
-      { "id": "frostbreath", "share": 0.0482 }
+      { "id": "frostbreath", "share": 0.0482 },
+      { "id": "weatherball", "share": 0.019 }
     ],
     "items": [
       { "id": "nevermeltice", "share": 0.3516 },
@@ -9028,7 +9252,13 @@
       { "id": "protect", "share": 0.1205 },
       { "id": "babydolleyes", "share": 0.0699 },
       { "id": "mysticalfire", "share": 0.069 },
-      { "id": "imprison", "share": 0.0583 }
+      { "id": "imprison", "share": 0.0583 },
+      { "id": "helpinghand", "share": 0.0507 },
+      { "id": "scorchingsands", "share": 0.0407 },
+      { "id": "disable", "share": 0.0193 },
+      { "id": "willowisp", "share": 0.0125 },
+      { "id": "snarl", "share": 0.0123 },
+      { "id": "flamethrower", "share": 0.0102 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.7255 },
@@ -9111,7 +9341,12 @@
       { "id": "bellydrum", "share": 0.3186 },
       { "id": "swordsdance", "share": 0.1265 },
       { "id": "roost", "share": 0.0379 },
-      { "id": "brickbreak", "share": 0.0332 }
+      { "id": "brickbreak", "share": 0.0332 },
+      { "id": "thunderpunch", "share": 0.0311 },
+      { "id": "rockslide", "share": 0.0301 },
+      { "id": "firepunch", "share": 0.0259 },
+      { "id": "temperflare", "share": 0.0143 },
+      { "id": "earthquake", "share": 0.0126 }
     ],
     "items": [{ "id": "charizarditex", "share": 1 }],
     "abilities": [{ "id": "toughclaws", "share": 1 }],
@@ -9217,7 +9452,9 @@
       { "id": "trailblaze", "share": 0.0542 },
       { "id": "knockoff", "share": 0.0497 },
       { "id": "uturn", "share": 0.0401 },
-      { "id": "brickbreak", "share": 0.0269 }
+      { "id": "brickbreak", "share": 0.0269 },
+      { "id": "roost", "share": 0.0148 },
+      { "id": "superpower", "share": 0.0123 }
     ],
     "items": [{ "id": "scizorite", "share": 1 }],
     "abilities": [{ "id": "technician", "share": 1 }],
@@ -9299,7 +9536,10 @@
       { "id": "skillswap", "share": 0.0328 },
       { "id": "raindance", "share": 0.0321 },
       { "id": "hypnosis", "share": 0.0179 },
-      { "id": "expandingforce", "share": 0.0144 }
+      { "id": "expandingforce", "share": 0.0144 },
+      { "id": "psychup", "share": 0.0118 },
+      { "id": "helpinghand", "share": 0.0117 },
+      { "id": "sunnyday", "share": 0.0104 }
     ],
     "items": [
       { "id": "mentalherb", "share": 0.4449 },
@@ -9414,7 +9654,13 @@
       { "id": "willowisp", "share": 0.1089 },
       { "id": "infernalparade", "share": 0.1029 },
       { "id": "burnup", "share": 0.0926 },
-      { "id": "protect", "share": 0.0863 }
+      { "id": "protect", "share": 0.0863 },
+      { "id": "solarbeam", "share": 0.0774 },
+      { "id": "extrasensory", "share": 0.0675 },
+      { "id": "curse", "share": 0.0395 },
+      { "id": "mysticalfire", "share": 0.0261 },
+      { "id": "focusblast", "share": 0.0125 },
+      { "id": "lavaplume", "share": 0.0113 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.9101 },
@@ -9491,7 +9737,17 @@
       { "id": "surf", "share": 0.0895 },
       { "id": "mirrorcoat", "share": 0.0866 },
       { "id": "stickyweb", "share": 0.0608 },
-      { "id": "icywind", "share": 0.0536 }
+      { "id": "icywind", "share": 0.0536 },
+      { "id": "entrainment", "share": 0.0517 },
+      { "id": "soak", "share": 0.048 },
+      { "id": "lunge", "share": 0.0331 },
+      { "id": "waterfall", "share": 0.0287 },
+      { "id": "raindance", "share": 0.018 },
+      { "id": "waterpulse", "share": 0.0161 },
+      { "id": "bugbuzz", "share": 0.0155 },
+      { "id": "bugbite", "share": 0.0128 },
+      { "id": "poisonjab", "share": 0.0111 },
+      { "id": "crunch", "share": 0.0108 }
     ],
     "items": [
       { "id": "mysticwater", "share": 0.5981 },
@@ -9579,7 +9835,12 @@
       { "id": "encore", "share": 0.1463 },
       { "id": "dazzlinggleam", "share": 0.0679 },
       { "id": "charm", "share": 0.0665 },
-      { "id": "endeavor", "share": 0.0441 }
+      { "id": "endeavor", "share": 0.0441 },
+      { "id": "eerieimpulse", "share": 0.0263 },
+      { "id": "helpinghand", "share": 0.0138 },
+      { "id": "thunder", "share": 0.0106 },
+      { "id": "drainpunch", "share": 0.0106 },
+      { "id": "volttackle", "share": 0.0102 }
     ],
     "items": [
       { "id": "expertbelt", "share": 0.4216 },
@@ -9671,7 +9932,15 @@
       { "id": "darkpulse", "share": 0.1209 },
       { "id": "drainingkiss", "share": 0.0555 },
       { "id": "psyshock", "share": 0.0532 },
-      { "id": "magicpowder", "share": 0.0524 }
+      { "id": "magicpowder", "share": 0.0524 },
+      { "id": "skillswap", "share": 0.0392 },
+      { "id": "lifedew", "share": 0.0375 },
+      { "id": "healpulse", "share": 0.0339 },
+      { "id": "calmmind", "share": 0.0318 },
+      { "id": "afteryou", "share": 0.0256 },
+      { "id": "gigadrain", "share": 0.025 },
+      { "id": "helpinghand", "share": 0.0219 },
+      { "id": "nuzzle", "share": 0.0202 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.4418 },
@@ -9744,7 +10013,9 @@
       { "id": "protect", "share": 0.0569 },
       { "id": "acidspray", "share": 0.0547 },
       { "id": "poisonjab", "share": 0.0334 },
-      { "id": "leafblade", "share": 0.0211 }
+      { "id": "leafblade", "share": 0.0211 },
+      { "id": "toxic", "share": 0.0144 },
+      { "id": "leafstorm", "share": 0.0122 }
     ],
     "items": [{ "id": "victreebelite", "share": 1 }],
     "abilities": [{ "id": "innardsout", "share": 1 }],
@@ -9817,7 +10088,10 @@
       { "id": "electroweb", "share": 0.1998 },
       { "id": "trick", "share": 0.1797 },
       { "id": "thunder", "share": 0.0392 },
-      { "id": "lightscreen", "share": 0.0338 }
+      { "id": "lightscreen", "share": 0.0338 },
+      { "id": "shadowball", "share": 0.0327 },
+      { "id": "nastyplot", "share": 0.0275 },
+      { "id": "painsplit", "share": 0.022 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.5893 },
@@ -9925,7 +10199,17 @@
       { "id": "drainpunch", "share": 0.1735 },
       { "id": "eerieimpulse", "share": 0.171 },
       { "id": "feint", "share": 0.1702 },
-      { "id": "charm", "share": 0.1692 }
+      { "id": "charm", "share": 0.1692 },
+      { "id": "knockoff", "share": 0.0811 },
+      { "id": "discharge", "share": 0.0768 },
+      { "id": "nuzzle", "share": 0.0632 },
+      { "id": "playrough", "share": 0.0444 },
+      { "id": "alluringvoice", "share": 0.0404 },
+      { "id": "upperhand", "share": 0.0296 },
+      { "id": "electroweb", "share": 0.028 },
+      { "id": "dazzlinggleam", "share": 0.0197 },
+      { "id": "brickbreak", "share": 0.0163 },
+      { "id": "focusblast", "share": 0.0139 }
     ],
     "items": [{ "id": "raichunitex", "share": 1 }],
     "abilities": [{ "id": "electricsurge", "share": 1 }],
@@ -10020,7 +10304,11 @@
       { "id": "feint", "share": 0.1483 },
       { "id": "knockoff", "share": 0.0453 },
       { "id": "fling", "share": 0.0403 },
-      { "id": "rockslide", "share": 0.0235 }
+      { "id": "rockslide", "share": 0.0235 },
+      { "id": "rocktomb", "share": 0.0219 },
+      { "id": "icehammer", "share": 0.017 },
+      { "id": "thunderwave", "share": 0.0105 },
+      { "id": "swordsdance", "share": 0.0101 }
     ],
     "items": [
       { "id": "shucaberry", "share": 0.3112 },
@@ -10231,7 +10519,17 @@
       { "id": "taunt", "share": 0.1287 },
       { "id": "energyball", "share": 0.1011 },
       { "id": "thunderbolt", "share": 0.0979 },
-      { "id": "yawn", "share": 0.0753 }
+      { "id": "yawn", "share": 0.0753 },
+      { "id": "psychicnoise", "share": 0.0727 },
+      { "id": "shadowball", "share": 0.0665 },
+      { "id": "hypervoice", "share": 0.0388 },
+      { "id": "afteryou", "share": 0.0386 },
+      { "id": "imprison", "share": 0.0266 },
+      { "id": "lightscreen", "share": 0.0186 },
+      { "id": "psychicterrain", "share": 0.0178 },
+      { "id": "gravity", "share": 0.015 },
+      { "id": "raindance", "share": 0.0117 },
+      { "id": "reflect", "share": 0.0109 }
     ],
     "items": [
       { "id": "mentalherb", "share": 0.4841 },
@@ -10324,7 +10622,11 @@
       { "id": "bulkup", "share": 0.1005 },
       { "id": "throatchop", "share": 0.0994 },
       { "id": "icepunch", "share": 0.0977 },
-      { "id": "encore", "share": 0.0526 }
+      { "id": "encore", "share": 0.0526 },
+      { "id": "taunt", "share": 0.0346 },
+      { "id": "liquidation", "share": 0.0262 },
+      { "id": "aquajet", "share": 0.0122 },
+      { "id": "substitute", "share": 0.0115 }
     ],
     "items": [
       { "id": "mysticwater", "share": 0.6115 },
@@ -10436,7 +10738,18 @@
       { "id": "protect", "share": 0.3073 },
       { "id": "rockslide", "share": 0.1919 },
       { "id": "vacuumwave", "share": 0.174 },
-      { "id": "nastyplot", "share": 0.1283 }
+      { "id": "nastyplot", "share": 0.1283 },
+      { "id": "swordsdance", "share": 0.1094 },
+      { "id": "stoneedge", "share": 0.1033 },
+      { "id": "icepunch", "share": 0.0444 },
+      { "id": "earthquake", "share": 0.0432 },
+      { "id": "drainpunch", "share": 0.0429 },
+      { "id": "extremespeed", "share": 0.0415 },
+      { "id": "psychic", "share": 0.0283 },
+      { "id": "steelbeam", "share": 0.0253 },
+      { "id": "dragonpulse", "share": 0.0183 },
+      { "id": "psychup", "share": 0.0161 },
+      { "id": "darkpulse", "share": 0.0105 }
     ],
     "items": [{ "id": "lucarionite", "share": 1 }],
     "abilities": [{ "id": "adaptability", "share": 1 }],
@@ -10542,7 +10855,14 @@
       { "id": "heatwave", "share": 0.1358 },
       { "id": "dracometeor", "share": 0.1226 },
       { "id": "flamethrower", "share": 0.0934 },
-      { "id": "thunderbolt", "share": 0.0766 }
+      { "id": "thunderbolt", "share": 0.0766 },
+      { "id": "roost", "share": 0.0541 },
+      { "id": "hyperbeam", "share": 0.0398 },
+      { "id": "fireblast", "share": 0.0212 },
+      { "id": "icebeam", "share": 0.0182 },
+      { "id": "rockslide", "share": 0.017 },
+      { "id": "surf", "share": 0.0118 },
+      { "id": "snarl", "share": 0.0108 }
     ],
     "items": [{ "id": "drampanite", "share": 1 }],
     "abilities": [{ "id": "berserk", "share": 1 }],
@@ -10602,7 +10922,9 @@
       { "id": "icepunch", "share": 0.0461 },
       { "id": "curse", "share": 0.0433 },
       { "id": "thunderwave", "share": 0.0391 },
-      { "id": "stoneedge", "share": 0.0289 }
+      { "id": "stoneedge", "share": 0.0289 },
+      { "id": "highhorsepower", "share": 0.0173 },
+      { "id": "ironhead", "share": 0.0127 }
     ],
     "items": [{ "id": "aggronite", "share": 1 }],
     "abilities": [{ "id": "filter", "share": 1 }],
@@ -10671,7 +10993,9 @@
       { "id": "bodypress", "share": 0.0949 },
       { "id": "stoneedge", "share": 0.0754 },
       { "id": "stompingtantrum", "share": 0.0254 },
-      { "id": "closecombat", "share": 0.0182 }
+      { "id": "closecombat", "share": 0.0182 },
+      { "id": "smackdown", "share": 0.0152 },
+      { "id": "rest", "share": 0.0121 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.4469 },
@@ -10741,7 +11065,9 @@
       { "id": "encore", "share": 0.0567 },
       { "id": "lifedew", "share": 0.0514 },
       { "id": "lightscreen", "share": 0.0414 },
-      { "id": "wish", "share": 0.024 }
+      { "id": "wish", "share": 0.024 },
+      { "id": "helpinghand", "share": 0.0222 },
+      { "id": "yawn", "share": 0.0117 }
     ],
     "items": [
       { "id": "mentalherb", "share": 0.9186 },
@@ -10812,7 +11138,11 @@
       { "id": "protect", "share": 0.144 },
       { "id": "strengthsap", "share": 0.1362 },
       { "id": "gigadrain", "share": 0.1057 },
-      { "id": "leechseed", "share": 0.0554 }
+      { "id": "leechseed", "share": 0.0554 },
+      { "id": "grassknot", "share": 0.0231 },
+      { "id": "acidspray", "share": 0.0176 },
+      { "id": "weatherball", "share": 0.017 },
+      { "id": "pollenpuff", "share": 0.0128 }
     ],
     "items": [
       { "id": "focussash", "share": 0.7471 },
@@ -10888,7 +11218,13 @@
       { "id": "heatwave", "share": 0.2435 },
       { "id": "bravebird", "share": 0.1568 },
       { "id": "coaching", "share": 0.1281 },
-      { "id": "scorchingsands", "share": 0.054 }
+      { "id": "scorchingsands", "share": 0.054 },
+      { "id": "overheat", "share": 0.0401 },
+      { "id": "swordsdance", "share": 0.0392 },
+      { "id": "blazekick", "share": 0.0153 },
+      { "id": "firepunch", "share": 0.0129 },
+      { "id": "willowisp", "share": 0.0112 },
+      { "id": "batonpass", "share": 0.011 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.5741 },
@@ -10981,7 +11317,15 @@
       { "id": "aromaticmist", "share": 0.3476 },
       { "id": "dazzlinggleam", "share": 0.1422 },
       { "id": "helpinghand", "share": 0.0619 },
-      { "id": "lightscreen", "share": 0.0476 }
+      { "id": "lightscreen", "share": 0.0476 },
+      { "id": "alluringvoice", "share": 0.0423 },
+      { "id": "babydolleyes", "share": 0.0382 },
+      { "id": "calmmind", "share": 0.0171 },
+      { "id": "energyball", "share": 0.0159 },
+      { "id": "charm", "share": 0.0148 },
+      { "id": "psyshock", "share": 0.0135 },
+      { "id": "magicroom", "share": 0.0133 },
+      { "id": "drainingkiss", "share": 0.0132 }
     ],
     "items": [
       { "id": "babiriberry", "share": 0.7877 },
@@ -11063,7 +11407,13 @@
       { "id": "afteryou", "share": 0.1925 },
       { "id": "icepunch", "share": 0.1545 },
       { "id": "gigaimpact", "share": 0.0781 },
-      { "id": "machpunch", "share": 0.0531 }
+      { "id": "machpunch", "share": 0.0531 },
+      { "id": "highjumpkick", "share": 0.0406 },
+      { "id": "quickattack", "share": 0.0295 },
+      { "id": "thunderpunch", "share": 0.0162 },
+      { "id": "swordsdance", "share": 0.0148 },
+      { "id": "drainpunch", "share": 0.0116 },
+      { "id": "facade", "share": 0.0109 }
     ],
     "items": [{ "id": "lopunnite", "share": 1 }],
     "abilities": [{ "id": "scrappy", "share": 1 }],
@@ -11131,7 +11481,15 @@
       { "id": "disable", "share": 0.1378 },
       { "id": "playrough", "share": 0.1294 },
       { "id": "stompingtantrum", "share": 0.1111 },
-      { "id": "psychicfangs", "share": 0.0964 }
+      { "id": "psychicfangs", "share": 0.0964 },
+      { "id": "destinybond", "share": 0.0741 },
+      { "id": "icefang", "share": 0.074 },
+      { "id": "poltergeist", "share": 0.0614 },
+      { "id": "crunch", "share": 0.0529 },
+      { "id": "bodypress", "share": 0.0486 },
+      { "id": "yawn", "share": 0.0357 },
+      { "id": "nightshade", "share": 0.0167 },
+      { "id": "thunderfang", "share": 0.0133 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.3302 },
@@ -11234,7 +11592,14 @@
       { "id": "wildcharge", "share": 0.2459 },
       { "id": "burnup", "share": 0.1664 },
       { "id": "heatwave", "share": 0.0776 },
-      { "id": "morningsun", "share": 0.0723 }
+      { "id": "morningsun", "share": 0.0723 },
+      { "id": "overheat", "share": 0.0694 },
+      { "id": "crunch", "share": 0.0243 },
+      { "id": "closecombat", "share": 0.0212 },
+      { "id": "flamethrower", "share": 0.015 },
+      { "id": "temperflare", "share": 0.0127 },
+      { "id": "playrough", "share": 0.0125 },
+      { "id": "roar", "share": 0.0115 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.6563 },
@@ -11345,7 +11710,26 @@
       { "id": "thunderbolt", "share": 0.0771 },
       { "id": "dazzlinggleam", "share": 0.0608 },
       { "id": "moonlight", "share": 0.0516 },
-      { "id": "flamethrower", "share": 0.0416 }
+      { "id": "flamethrower", "share": 0.0416 },
+      { "id": "thunderwave", "share": 0.0414 },
+      { "id": "calmmind", "share": 0.0411 },
+      { "id": "icywind", "share": 0.0411 },
+      { "id": "wish", "share": 0.0402 },
+      { "id": "healpulse", "share": 0.0376 },
+      { "id": "cosmicpower", "share": 0.0349 },
+      { "id": "lightscreen", "share": 0.0339 },
+      { "id": "charm", "share": 0.025 },
+      { "id": "reflect", "share": 0.0188 },
+      { "id": "endeavor", "share": 0.0176 },
+      { "id": "knockoff", "share": 0.0172 },
+      { "id": "skillswap", "share": 0.0166 },
+      { "id": "storedpower", "share": 0.0149 },
+      { "id": "alluringvoice", "share": 0.0136 },
+      { "id": "stealthrock", "share": 0.0124 },
+      { "id": "nightshade", "share": 0.0117 },
+      { "id": "fireblast", "share": 0.0113 },
+      { "id": "icebeam", "share": 0.011 },
+      { "id": "drainingkiss", "share": 0.0107 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.4974 },
@@ -11441,7 +11825,19 @@
       { "id": "healpulse", "share": 0.2466 },
       { "id": "icebeam", "share": 0.1477 },
       { "id": "protect", "share": 0.1203 },
-      { "id": "raindance", "share": 0.11 }
+      { "id": "raindance", "share": 0.11 },
+      { "id": "snarl", "share": 0.0456 },
+      { "id": "flamethrower", "share": 0.0378 },
+      { "id": "toxic", "share": 0.0343 },
+      { "id": "psyshock", "share": 0.0338 },
+      { "id": "eeriespell", "share": 0.023 },
+      { "id": "psychicterrain", "share": 0.0224 },
+      { "id": "yawn", "share": 0.0197 },
+      { "id": "futuresight", "share": 0.019 },
+      { "id": "thunderwave", "share": 0.0173 },
+      { "id": "helpinghand", "share": 0.0147 },
+      { "id": "powergem", "share": 0.0128 },
+      { "id": "slackoff", "share": 0.0112 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.3949 },
@@ -11511,7 +11907,11 @@
       { "id": "grassknot", "share": 0.22 },
       { "id": "gigadrain", "share": 0.127 },
       { "id": "shedtail", "share": 0.0666 },
-      { "id": "focusblast", "share": 0.0629 }
+      { "id": "focusblast", "share": 0.0629 },
+      { "id": "quickguard", "share": 0.0268 },
+      { "id": "upperhand", "share": 0.0182 },
+      { "id": "vacuumwave", "share": 0.0142 },
+      { "id": "rocktomb", "share": 0.0129 }
     ],
     "items": [{ "id": "sceptilite", "share": 1 }],
     "abilities": [{ "id": "lightningrod", "share": 1 }],
@@ -11599,7 +11999,17 @@
       { "id": "hydropump", "share": 0.1647 },
       { "id": "watershuriken", "share": 0.1359 },
       { "id": "blizzard", "share": 0.1272 },
-      { "id": "rockslide", "share": 0.1224 }
+      { "id": "rockslide", "share": 0.1224 },
+      { "id": "gunkshot", "share": 0.1007 },
+      { "id": "weatherball", "share": 0.0731 },
+      { "id": "swordsdance", "share": 0.0661 },
+      { "id": "lowkick", "share": 0.0658 },
+      { "id": "uturn", "share": 0.0654 },
+      { "id": "surf", "share": 0.0464 },
+      { "id": "flipturn", "share": 0.0272 },
+      { "id": "nightslash", "share": 0.0183 },
+      { "id": "liquidation", "share": 0.0174 },
+      { "id": "icywind", "share": 0.017 }
     ],
     "items": [{ "id": "greninjite", "share": 1 }],
     "abilities": [{ "id": "protean", "share": 1 }],
@@ -11684,7 +12094,18 @@
       { "id": "gigadrain", "share": 0.3061 },
       { "id": "discharge", "share": 0.2154 },
       { "id": "dragonpulse", "share": 0.1335 },
-      { "id": "supercellslam", "share": 0.1155 }
+      { "id": "supercellslam", "share": 0.1155 },
+      { "id": "grassknot", "share": 0.0894 },
+      { "id": "wildcharge", "share": 0.0534 },
+      { "id": "flashcannon", "share": 0.0478 },
+      { "id": "thunder", "share": 0.0425 },
+      { "id": "muddywater", "share": 0.0321 },
+      { "id": "rockslide", "share": 0.0258 },
+      { "id": "bulkup", "share": 0.0247 },
+      { "id": "closecombat", "share": 0.0231 },
+      { "id": "electroweb", "share": 0.019 },
+      { "id": "voltswitch", "share": 0.0144 },
+      { "id": "dragonclaw", "share": 0.0137 }
     ],
     "items": [{ "id": "eelektrossite", "share": 1 }],
     "abilities": [{ "id": "eelevate", "share": 1 }],
@@ -11795,7 +12216,18 @@
       { "id": "raindance", "share": 0.2052 },
       { "id": "tickle", "share": 0.1221 },
       { "id": "faketears", "share": 0.1201 },
-      { "id": "psychic", "share": 0.1179 }
+      { "id": "psychic", "share": 0.1179 },
+      { "id": "skillswap", "share": 0.0962 },
+      { "id": "helpinghand", "share": 0.0939 },
+      { "id": "thunderwave", "share": 0.0936 },
+      { "id": "yawn", "share": 0.0923 },
+      { "id": "protect", "share": 0.0835 },
+      { "id": "gravity", "share": 0.0725 },
+      { "id": "sunnyday", "share": 0.0687 },
+      { "id": "quickguard", "share": 0.0674 },
+      { "id": "alluringvoice", "share": 0.0459 },
+      { "id": "charm", "share": 0.0213 },
+      { "id": "thunderbolt", "share": 0.013 }
     ],
     "items": [
       { "id": "lightclay", "share": 0.3189 },
@@ -11883,7 +12315,16 @@
       { "id": "aurasphere", "share": 0.2808 },
       { "id": "psychic", "share": 0.1751 },
       { "id": "allyswitch", "share": 0.1584 },
-      { "id": "psychicterrain", "share": 0.1418 }
+      { "id": "psychicterrain", "share": 0.1418 },
+      { "id": "psyshock", "share": 0.1203 },
+      { "id": "endure", "share": 0.0917 },
+      { "id": "calmmind", "share": 0.0772 },
+      { "id": "flamethrower", "share": 0.0467 },
+      { "id": "lightscreen", "share": 0.0382 },
+      { "id": "reflect", "share": 0.0286 },
+      { "id": "willowisp", "share": 0.0268 },
+      { "id": "energyball", "share": 0.0133 },
+      { "id": "substitute", "share": 0.011 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.4235 },
@@ -11983,7 +12424,14 @@
       { "id": "knockoff", "share": 0.2442 },
       { "id": "closecombat", "share": 0.2267 },
       { "id": "leechseed", "share": 0.1488 },
-      { "id": "drainpunch", "share": 0.1109 }
+      { "id": "drainpunch", "share": 0.1109 },
+      { "id": "seedbomb", "share": 0.0577 },
+      { "id": "rockslide", "share": 0.0445 },
+      { "id": "bellydrum", "share": 0.0381 },
+      { "id": "feint", "share": 0.0281 },
+      { "id": "grassyglide", "share": 0.0232 },
+      { "id": "bulkup", "share": 0.0127 },
+      { "id": "highhorsepower", "share": 0.0117 }
     ],
     "items": [{ "id": "chesnaughtite", "share": 1 }],
     "abilities": [{ "id": "bulletproof", "share": 1 }],
@@ -12049,7 +12497,21 @@
       { "id": "grassknot", "share": 0.2519 },
       { "id": "discharge", "share": 0.1633 },
       { "id": "surf", "share": 0.1454 },
-      { "id": "glare", "share": 0.1429 }
+      { "id": "glare", "share": 0.1429 },
+      { "id": "lightscreen", "share": 0.1219 },
+      { "id": "darkpulse", "share": 0.1205 },
+      { "id": "allyswitch", "share": 0.1075 },
+      { "id": "weatherball", "share": 0.1017 },
+      { "id": "thunder", "share": 0.0682 },
+      { "id": "dragonpulse", "share": 0.0618 },
+      { "id": "focusblast", "share": 0.0421 },
+      { "id": "risingvoltage", "share": 0.0299 },
+      { "id": "electrify", "share": 0.0297 },
+      { "id": "hyperbeam", "share": 0.0226 },
+      { "id": "eerieimpulse", "share": 0.0174 },
+      { "id": "paraboliccharge", "share": 0.0141 },
+      { "id": "solarbeam", "share": 0.0117 },
+      { "id": "raindance", "share": 0.0104 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.4465 },
@@ -12140,7 +12602,10 @@
       { "id": "willowisp", "share": 0.0376 },
       { "id": "overheat", "share": 0.0353 },
       { "id": "hex", "share": 0.0196 },
-      { "id": "substitute", "share": 0.0195 }
+      { "id": "substitute", "share": 0.0195 },
+      { "id": "solarbeam", "share": 0.0151 },
+      { "id": "minimize", "share": 0.0148 },
+      { "id": "painsplit", "share": 0.0109 }
     ],
     "items": [{ "id": "chandelurite", "share": 1 }],
     "abilities": [{ "id": "infiltrator", "share": 1 }],
@@ -12221,7 +12686,12 @@
       { "id": "dualwingbeat", "share": 0.1993 },
       { "id": "crosschop", "share": 0.13 },
       { "id": "highjumpkick", "share": 0.092 },
-      { "id": "encore", "share": 0.0474 }
+      { "id": "encore", "share": 0.0474 },
+      { "id": "rockslide", "share": 0.0413 },
+      { "id": "swordsdance", "share": 0.0291 },
+      { "id": "lowkick", "share": 0.0281 },
+      { "id": "quickguard", "share": 0.0175 },
+      { "id": "taunt", "share": 0.0165 }
     ],
     "items": [{ "id": "hawluchanite", "share": 1 }],
     "abilities": [{ "id": "noguard", "share": 1 }],
@@ -12286,7 +12756,13 @@
       { "id": "rockslide", "share": 0.1802 },
       { "id": "heavyslam", "share": 0.0762 },
       { "id": "roar", "share": 0.0724 },
-      { "id": "earthquake", "share": 0.0464 }
+      { "id": "earthquake", "share": 0.0464 },
+      { "id": "curse", "share": 0.0449 },
+      { "id": "bodypress", "share": 0.0272 },
+      { "id": "stealthrock", "share": 0.013 },
+      { "id": "stockpile", "share": 0.0106 },
+      { "id": "whirlwind", "share": 0.0101 },
+      { "id": "helpinghand", "share": 0.01 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.6172 },
@@ -12354,7 +12830,12 @@
       { "id": "thunderpunch", "share": 0.0855 },
       { "id": "icepunch", "share": 0.0667 },
       { "id": "crabhammer", "share": 0.0572 },
-      { "id": "knockoff", "share": 0.0332 }
+      { "id": "knockoff", "share": 0.0332 },
+      { "id": "brickbreak", "share": 0.0272 },
+      { "id": "bulkup", "share": 0.0271 },
+      { "id": "gunkshot", "share": 0.0242 },
+      { "id": "earthquake", "share": 0.0192 },
+      { "id": "wideguard", "share": 0.0115 }
     ],
     "items": [{ "id": "crabominite", "share": 1 }],
     "abilities": [{ "id": "ironfist", "share": 1 }],
@@ -12480,7 +12961,18 @@
       { "id": "poisonjab", "share": 0.2311 },
       { "id": "crunch", "share": 0.1809 },
       { "id": "liquidation", "share": 0.1379 },
-      { "id": "gunkshot", "share": 0.1058 }
+      { "id": "gunkshot", "share": 0.1058 },
+      { "id": "haze", "share": 0.0717 },
+      { "id": "taunt", "share": 0.0421 },
+      { "id": "waterfall", "share": 0.0231 },
+      { "id": "aquajet", "share": 0.0213 },
+      { "id": "toxic", "share": 0.0191 },
+      { "id": "painsplit", "share": 0.0179 },
+      { "id": "aquatail", "share": 0.0144 },
+      { "id": "toxicspikes", "share": 0.014 },
+      { "id": "selfdestruct", "share": 0.0132 },
+      { "id": "rest", "share": 0.0126 },
+      { "id": "acupressure", "share": 0.0104 }
     ],
     "items": [
       { "id": "leftovers", "share": 0.5906 },
@@ -12577,7 +13069,9 @@
       { "id": "substitute", "share": 0.1439 },
       { "id": "voltswitch", "share": 0.1382 },
       { "id": "powergem", "share": 0.1217 },
-      { "id": "dazzlinggleam", "share": 0.0641 }
+      { "id": "dazzlinggleam", "share": 0.0641 },
+      { "id": "discharge", "share": 0.0312 },
+      { "id": "thunder", "share": 0.0154 }
     ],
     "items": [{ "id": "ampharosite", "share": 1 }],
     "abilities": [{ "id": "moldbreaker", "share": 1 }],
@@ -12638,7 +13132,13 @@
       { "id": "sludgewave", "share": 0.1772 },
       { "id": "thunderbolt", "share": 0.1646 },
       { "id": "focusblast", "share": 0.0811 },
-      { "id": "scald", "share": 0.0644 }
+      { "id": "scald", "share": 0.0644 },
+      { "id": "haze", "share": 0.0463 },
+      { "id": "icywind", "share": 0.0273 },
+      { "id": "thunder", "share": 0.0203 },
+      { "id": "acidspray", "share": 0.0147 },
+      { "id": "venoshock", "share": 0.0136 },
+      { "id": "raindance", "share": 0.0101 }
     ],
     "items": [{ "id": "dragalgite", "share": 1 }],
     "abilities": [{ "id": "regenerator", "share": 1 }],
@@ -12700,7 +13200,14 @@
       { "id": "dazzlinggleam", "share": 0.1044 },
       { "id": "calmmind", "share": 0.0931 },
       { "id": "protect", "share": 0.0724 },
-      { "id": "healingwish", "share": 0.0384 }
+      { "id": "healingwish", "share": 0.0384 },
+      { "id": "healpulse", "share": 0.0322 },
+      { "id": "drainingkiss", "share": 0.031 },
+      { "id": "flamethrower", "share": 0.0281 },
+      { "id": "encore", "share": 0.0263 },
+      { "id": "skillswap", "share": 0.025 },
+      { "id": "hypervoice", "share": 0.0126 },
+      { "id": "lightscreen", "share": 0.0107 }
     ],
     "items": [{ "id": "audinite", "share": 1 }],
     "abilities": [{ "id": "healer", "share": 1 }],
@@ -12765,7 +13272,13 @@
       { "id": "protect", "share": 0.114 },
       { "id": "destinybond", "share": 0.0347 },
       { "id": "icywind", "share": 0.0344 },
-      { "id": "poltergeist", "share": 0.0332 }
+      { "id": "poltergeist", "share": 0.0332 },
+      { "id": "suckerpunch", "share": 0.0324 },
+      { "id": "darkpulse", "share": 0.0162 },
+      { "id": "shadowball", "share": 0.0133 },
+      { "id": "disable", "share": 0.0117 },
+      { "id": "helpinghand", "share": 0.0116 },
+      { "id": "toxic", "share": 0.0101 }
     ],
     "items": [
       { "id": "roseliberry", "share": 0.8724 },
@@ -12833,7 +13346,16 @@
       { "id": "dazzlinggleam", "share": 0.0742 },
       { "id": "disable", "share": 0.0623 },
       { "id": "thunderbolt", "share": 0.0565 },
-      { "id": "encore", "share": 0.0524 }
+      { "id": "encore", "share": 0.0524 },
+      { "id": "charm", "share": 0.0333 },
+      { "id": "calmmind", "share": 0.0315 },
+      { "id": "raindance", "share": 0.0266 },
+      { "id": "lightscreen", "share": 0.0237 },
+      { "id": "reflect", "share": 0.0231 },
+      { "id": "helpinghand", "share": 0.0199 },
+      { "id": "aromaticmist", "share": 0.0151 },
+      { "id": "wish", "share": 0.0151 },
+      { "id": "mistyexplosion", "share": 0.0129 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.7363 },
@@ -12897,7 +13419,13 @@
       { "id": "flipturn", "share": 0.1418 },
       { "id": "bulkup", "share": 0.1295 },
       { "id": "recover", "share": 0.0876 },
-      { "id": "selfdestruct", "share": 0.0643 }
+      { "id": "selfdestruct", "share": 0.0643 },
+      { "id": "skillswap", "share": 0.0588 },
+      { "id": "waterfall", "share": 0.0437 },
+      { "id": "psychic", "share": 0.0261 },
+      { "id": "icebeam", "share": 0.0166 },
+      { "id": "hydropump", "share": 0.0116 },
+      { "id": "gravity", "share": 0.0113 }
     ],
     "items": [{ "id": "starminite", "share": 1 }],
     "abilities": [{ "id": "hugepower", "share": 1 }],
@@ -12979,7 +13507,12 @@
       { "id": "swordsdance", "share": 0.0527 },
       { "id": "heavyslam", "share": 0.0486 },
       { "id": "stompingtantrum", "share": 0.0429 },
-      { "id": "bodypress", "share": 0.0336 }
+      { "id": "bodypress", "share": 0.0336 },
+      { "id": "stoneedge", "share": 0.0313 },
+      { "id": "poisonjab", "share": 0.0266 },
+      { "id": "heatcrash", "share": 0.0253 },
+      { "id": "drillrun", "share": 0.0176 },
+      { "id": "rockwrecker", "share": 0.0119 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.6622 },
@@ -13053,7 +13586,9 @@
       { "id": "allyswitch", "share": 0.176 },
       { "id": "irondefense", "share": 0.1119 },
       { "id": "nightshade", "share": 0.1061 },
-      { "id": "faketears", "share": 0.0501 }
+      { "id": "faketears", "share": 0.0501 },
+      { "id": "disable", "share": 0.0308 },
+      { "id": "hex", "share": 0.0129 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.596 },
@@ -13114,7 +13649,19 @@
       { "id": "cosmicpower", "share": 0.1041 },
       { "id": "airslash", "share": 0.0957 },
       { "id": "icywind", "share": 0.089 },
-      { "id": "nightshade", "share": 0.0735 }
+      { "id": "nightshade", "share": 0.0735 },
+      { "id": "moonlight", "share": 0.0406 },
+      { "id": "dazzlinggleam", "share": 0.0404 },
+      { "id": "sunnyday", "share": 0.0362 },
+      { "id": "thunderbolt", "share": 0.0286 },
+      { "id": "psychic", "share": 0.0251 },
+      { "id": "drainingkiss", "share": 0.0236 },
+      { "id": "psychup", "share": 0.023 },
+      { "id": "healpulse", "share": 0.0213 },
+      { "id": "calmmind", "share": 0.0187 },
+      { "id": "chargebeam", "share": 0.0176 },
+      { "id": "knockoff", "share": 0.0126 },
+      { "id": "encore", "share": 0.0107 }
     ],
     "items": [{ "id": "clefablite", "share": 1 }],
     "abilities": [{ "id": "magicbounce", "share": 1 }],
@@ -13187,7 +13734,14 @@
       { "id": "closecombat", "share": 0.1082 },
       { "id": "rocktomb", "share": 0.0561 },
       { "id": "upperhand", "share": 0.044 },
-      { "id": "taunt", "share": 0.0379 }
+      { "id": "taunt", "share": 0.0379 },
+      { "id": "shadowsneak", "share": 0.036 },
+      { "id": "dualwingbeat", "share": 0.0237 },
+      { "id": "uturn", "share": 0.0224 },
+      { "id": "knockoff", "share": 0.014 },
+      { "id": "swordsdance", "share": 0.0119 },
+      { "id": "haze", "share": 0.0118 },
+      { "id": "coaching", "share": 0.0101 }
     ],
     "items": [
       { "id": "scopelens", "share": 0.5463 },
@@ -13276,7 +13830,14 @@
       { "id": "roost", "share": 0.2416 },
       { "id": "firespin", "share": 0.216 },
       { "id": "icebeam", "share": 0.0766 },
-      { "id": "dracometeor", "share": 0.055 }
+      { "id": "dracometeor", "share": 0.055 },
+      { "id": "flamethrower", "share": 0.0324 },
+      { "id": "dragonpulse", "share": 0.028 },
+      { "id": "haze", "share": 0.0184 },
+      { "id": "hurricane", "share": 0.0176 },
+      { "id": "breakingswipe", "share": 0.0167 },
+      { "id": "dazzlinggleam", "share": 0.0155 },
+      { "id": "roar", "share": 0.0143 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.4087 },
@@ -13375,7 +13936,10 @@
       { "id": "rockslide", "share": 0.1405 },
       { "id": "drillrun", "share": 0.1378 },
       { "id": "dualwingbeat", "share": 0.0566 },
-      { "id": "roost", "share": 0.0474 }
+      { "id": "roost", "share": 0.0474 },
+      { "id": "drillpeck", "share": 0.0439 },
+      { "id": "bodypress", "share": 0.0353 },
+      { "id": "taunt", "share": 0.0263 }
     ],
     "items": [{ "id": "skarmorite", "share": 1 }],
     "abilities": [{ "id": "stalwart", "share": 1 }],
@@ -13446,7 +14010,18 @@
       { "id": "shadowsneak", "share": 0.2157 },
       { "id": "closecombat", "share": 0.14 },
       { "id": "wideguard", "share": 0.0657 },
-      { "id": "zenheadbutt", "share": 0.0424 }
+      { "id": "zenheadbutt", "share": 0.0424 },
+      { "id": "taunt", "share": 0.0359 },
+      { "id": "tripleaxel", "share": 0.0348 },
+      { "id": "bulkup", "share": 0.0325 },
+      { "id": "stoneedge", "share": 0.0302 },
+      { "id": "psychup", "share": 0.0218 },
+      { "id": "earthquake", "share": 0.0202 },
+      { "id": "trickroom", "share": 0.0189 },
+      { "id": "icepunch", "share": 0.0183 },
+      { "id": "leafblade", "share": 0.0176 },
+      { "id": "endure", "share": 0.0155 },
+      { "id": "knockoff", "share": 0.0151 }
     ],
     "items": [{ "id": "galladite", "share": 1 }],
     "abilities": [{ "id": "innerfocus", "share": 1 }],
@@ -13512,7 +14087,12 @@
       { "id": "trickroom", "share": 0.3155 },
       { "id": "storedpower", "share": 0.2181 },
       { "id": "psychocut", "share": 0.1521 },
-      { "id": "zenheadbutt", "share": 0.0838 }
+      { "id": "zenheadbutt", "share": 0.0838 },
+      { "id": "skillswap", "share": 0.0455 },
+      { "id": "topsyturvy", "share": 0.0413 },
+      { "id": "nightslash", "share": 0.0237 },
+      { "id": "rockslide", "share": 0.0234 },
+      { "id": "poisonjab", "share": 0.0157 }
     ],
     "items": [{ "id": "malamarite", "share": 1 }],
     "abilities": [{ "id": "contrary", "share": 1 }],
@@ -13684,7 +14264,24 @@
       { "id": "risingvoltage", "share": 0.2469 },
       { "id": "alluringvoice", "share": 0.1675 },
       { "id": "electroweb", "share": 0.1536 },
-      { "id": "detect", "share": 0.0697 }
+      { "id": "detect", "share": 0.0697 },
+      { "id": "thunder", "share": 0.0648 },
+      { "id": "lightscreen", "share": 0.0543 },
+      { "id": "charm", "share": 0.052 },
+      { "id": "quickattack", "share": 0.0458 },
+      { "id": "faketears", "share": 0.0408 },
+      { "id": "yawn", "share": 0.0356 },
+      { "id": "thunderwave", "share": 0.0288 },
+      { "id": "batonpass", "share": 0.0249 },
+      { "id": "agility", "share": 0.0246 },
+      { "id": "curse", "share": 0.0246 },
+      { "id": "bodyslam", "share": 0.0246 },
+      { "id": "electricterrain", "share": 0.0182 },
+      { "id": "sunnyday", "share": 0.0171 },
+      { "id": "wish", "share": 0.013 },
+      { "id": "round", "share": 0.0129 },
+      { "id": "hypervoice", "share": 0.012 },
+      { "id": "eerieimpulse", "share": 0.0107 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.4182 },
@@ -13758,7 +14355,8 @@
       { "id": "earthquake", "share": 0.0626 },
       { "id": "stompingtantrum", "share": 0.061 },
       { "id": "throatchop", "share": 0.014 },
-      { "id": "megahorn", "share": 0.0136 }
+      { "id": "megahorn", "share": 0.0136 },
+      { "id": "superpower", "share": 0.0105 }
     ],
     "items": [{ "id": "scolipite", "share": 1 }],
     "abilities": [{ "id": "shellarmor", "share": 1 }],
@@ -13840,7 +14438,9 @@
       { "id": "helpinghand", "share": 0.1752 },
       { "id": "smackdown", "share": 0.1104 },
       { "id": "substitute", "share": 0.0575 },
-      { "id": "highhorsepower", "share": 0.0172 }
+      { "id": "highhorsepower", "share": 0.0172 },
+      { "id": "bulldoze", "share": 0.0155 },
+      { "id": "coil", "share": 0.0136 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.6573 },
@@ -13921,7 +14521,12 @@
       { "id": "skillswap", "share": 0.1441 },
       { "id": "coaching", "share": 0.1139 },
       { "id": "psychocut", "share": 0.1099 },
-      { "id": "quickguard", "share": 0.0842 }
+      { "id": "quickguard", "share": 0.0842 },
+      { "id": "zenheadbutt", "share": 0.0516 },
+      { "id": "taunt", "share": 0.0347 },
+      { "id": "protect", "share": 0.0345 },
+      { "id": "upperhand", "share": 0.0258 },
+      { "id": "bulletpunch", "share": 0.0133 }
     ],
     "items": [
       { "id": "focussash", "share": 0.6683 },
@@ -13990,7 +14595,11 @@
       { "id": "skillswap", "share": 0.111 },
       { "id": "throatchop", "share": 0.1012 },
       { "id": "zenheadbutt", "share": 0.0288 },
-      { "id": "expandingforce", "share": 0.0287 }
+      { "id": "expandingforce", "share": 0.0287 },
+      { "id": "nightslash", "share": 0.0211 },
+      { "id": "taunt", "share": 0.0159 },
+      { "id": "batonpass", "share": 0.0132 },
+      { "id": "switcheroo", "share": 0.0108 }
     ],
     "items": [
       { "id": "leftovers", "share": 0.6946 },
@@ -14069,7 +14678,21 @@
       { "id": "perishsong", "share": 0.1273 },
       { "id": "dragondance", "share": 0.0933 },
       { "id": "firespin", "share": 0.0911 },
-      { "id": "heatwave", "share": 0.0878 }
+      { "id": "heatwave", "share": 0.0878 },
+      { "id": "dragonpulse", "share": 0.0853 },
+      { "id": "willowisp", "share": 0.0815 },
+      { "id": "helpinghand", "share": 0.0797 },
+      { "id": "sing", "share": 0.0794 },
+      { "id": "dragoncheer", "share": 0.0461 },
+      { "id": "cottonguard", "share": 0.0414 },
+      { "id": "flamethrower", "share": 0.0411 },
+      { "id": "round", "share": 0.0406 },
+      { "id": "breakingswipe", "share": 0.0343 },
+      { "id": "moonblast", "share": 0.0245 },
+      { "id": "substitute", "share": 0.0183 },
+      { "id": "icebeam", "share": 0.0115 },
+      { "id": "earthquake", "share": 0.0114 },
+      { "id": "roar", "share": 0.011 }
     ],
     "items": [{ "id": "altarianite", "share": 1 }],
     "abilities": [{ "id": "pixilate", "share": 1 }],
@@ -14169,7 +14792,15 @@
       { "id": "rockslide", "share": 0.3323 },
       { "id": "earthquake", "share": 0.0781 },
       { "id": "meteormash", "share": 0.0778 },
-      { "id": "stompingtantrum", "share": 0.074 }
+      { "id": "stompingtantrum", "share": 0.074 },
+      { "id": "stoneedge", "share": 0.066 },
+      { "id": "stealthrock", "share": 0.0442 },
+      { "id": "psychup", "share": 0.0421 },
+      { "id": "brickbreak", "share": 0.0386 },
+      { "id": "hammerarm", "share": 0.0265 },
+      { "id": "shadowclaw", "share": 0.023 },
+      { "id": "bodypress", "share": 0.0218 },
+      { "id": "thunderpunch", "share": 0.0187 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.2152 },
@@ -14257,7 +14888,13 @@
       { "id": "knockoff", "share": 0.3238 },
       { "id": "wideguard", "share": 0.197 },
       { "id": "detect", "share": 0.1853 },
-      { "id": "thunderpunch", "share": 0.1675 }
+      { "id": "thunderpunch", "share": 0.1675 },
+      { "id": "poisonjab", "share": 0.1625 },
+      { "id": "firepunch", "share": 0.0804 },
+      { "id": "earthquake", "share": 0.0199 },
+      { "id": "rockblast", "share": 0.0168 },
+      { "id": "bulkup", "share": 0.0148 },
+      { "id": "lowsweep", "share": 0.0114 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.4432 },
@@ -14386,7 +15023,19 @@
       { "id": "psychup", "share": 0.2048 },
       { "id": "raindance", "share": 0.1809 },
       { "id": "substitute", "share": 0.1802 },
-      { "id": "calmmind", "share": 0.1631 }
+      { "id": "calmmind", "share": 0.1631 },
+      { "id": "steelbeam", "share": 0.1242 },
+      { "id": "foulplay", "share": 0.1231 },
+      { "id": "sandstorm", "share": 0.0709 },
+      { "id": "mistyterrain", "share": 0.0573 },
+      { "id": "storedpower", "share": 0.0563 },
+      { "id": "sunnyday", "share": 0.0475 },
+      { "id": "fairylock", "share": 0.0471 },
+      { "id": "protect", "share": 0.0432 },
+      { "id": "imprison", "share": 0.0164 },
+      { "id": "magicroom", "share": 0.0131 },
+      { "id": "irondefense", "share": 0.012 },
+      { "id": "magnetrise", "share": 0.011 }
     ],
     "items": [
       { "id": "lightclay", "share": 0.5306 },
@@ -14547,7 +15196,13 @@
       { "id": "swordsdance", "share": 0.1717 },
       { "id": "facade", "share": 0.0797 },
       { "id": "icepunch", "share": 0.0759 },
-      { "id": "waterfall", "share": 0.0546 }
+      { "id": "waterfall", "share": 0.0546 },
+      { "id": "rockslide", "share": 0.0322 },
+      { "id": "flipturn", "share": 0.028 },
+      { "id": "aquatail", "share": 0.0175 },
+      { "id": "dragonclaw", "share": 0.0172 },
+      { "id": "curse", "share": 0.0135 },
+      { "id": "substitute", "share": 0.0107 }
     ],
     "items": [{ "id": "feraligite", "share": 1 }],
     "abilities": [{ "id": "dragonize", "share": 1 }],
@@ -14629,7 +15284,13 @@
       { "id": "scaleshot", "share": 0.253 },
       { "id": "icywind", "share": 0.1631 },
       { "id": "temperflare", "share": 0.1622 },
-      { "id": "helpinghand", "share": 0.0711 }
+      { "id": "helpinghand", "share": 0.0711 },
+      { "id": "earthquake", "share": 0.0653 },
+      { "id": "icefang", "share": 0.0603 },
+      { "id": "crunch", "share": 0.0508 },
+      { "id": "stoneedge", "share": 0.0185 },
+      { "id": "roar", "share": 0.0184 },
+      { "id": "ironhead", "share": 0.0135 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.3673 },
@@ -14739,7 +15400,16 @@
       { "id": "highhorsepower", "share": 0.1419 },
       { "id": "stoneedge", "share": 0.1161 },
       { "id": "rockslide", "share": 0.0738 },
-      { "id": "hammerarm", "share": 0.0507 }
+      { "id": "hammerarm", "share": 0.0507 },
+      { "id": "closecombat", "share": 0.0455 },
+      { "id": "lowkick", "share": 0.0351 },
+      { "id": "dynamicpunch", "share": 0.0318 },
+      { "id": "phantomforce", "share": 0.0251 },
+      { "id": "shadowpunch", "share": 0.0249 },
+      { "id": "firepunch", "share": 0.0231 },
+      { "id": "knockoff", "share": 0.0186 },
+      { "id": "superpower", "share": 0.0165 },
+      { "id": "thunderpunch", "share": 0.013 }
     ],
     "items": [{ "id": "golurkite", "share": 1 }],
     "abilities": [{ "id": "unseenfist", "share": 1 }],
@@ -14800,7 +15470,12 @@
       { "id": "acrobatics", "share": 0.0725 },
       { "id": "detect", "share": 0.0594 },
       { "id": "swordsdance", "share": 0.0581 },
-      { "id": "icespinner", "share": 0.0548 }
+      { "id": "icespinner", "share": 0.0548 },
+      { "id": "tripleaxel", "share": 0.0274 },
+      { "id": "flipturn", "share": 0.0223 },
+      { "id": "uturn", "share": 0.0181 },
+      { "id": "liquidation", "share": 0.0151 },
+      { "id": "upperhand", "share": 0.0132 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.7478 },
@@ -14866,7 +15541,16 @@
       { "id": "dracometeor", "share": 0.2081 },
       { "id": "dragonpulse", "share": 0.1947 },
       { "id": "curse", "share": 0.1089 },
-      { "id": "gyroball", "share": 0.0947 }
+      { "id": "gyroball", "share": 0.0947 },
+      { "id": "feint", "share": 0.0934 },
+      { "id": "stompingtantrum", "share": 0.0912 },
+      { "id": "flamethrower", "share": 0.0875 },
+      { "id": "icebeam", "share": 0.0748 },
+      { "id": "thunderbolt", "share": 0.0721 },
+      { "id": "surf", "share": 0.0154 },
+      { "id": "blizzard", "share": 0.0119 },
+      { "id": "muddywater", "share": 0.0115 },
+      { "id": "ironhead", "share": 0.0109 }
     ],
     "items": [
       { "id": "leftovers", "share": 0.6445 },
@@ -14963,7 +15647,15 @@
       { "id": "thunderbolt", "share": 0.1809 },
       { "id": "earthpower", "share": 0.1665 },
       { "id": "hurricane", "share": 0.1354 },
-      { "id": "grassknot", "share": 0.1225 }
+      { "id": "grassknot", "share": 0.1225 },
+      { "id": "glare", "share": 0.0903 },
+      { "id": "roost", "share": 0.0675 },
+      { "id": "calmmind", "share": 0.0666 },
+      { "id": "snarl", "share": 0.0556 },
+      { "id": "hyperbeam", "share": 0.0458 },
+      { "id": "icebeam", "share": 0.0386 },
+      { "id": "energyball", "share": 0.0254 },
+      { "id": "whirlwind", "share": 0.0106 }
     ],
     "items": [
       { "id": "chopleberry", "share": 0.2675 },
@@ -15039,7 +15731,13 @@
       { "id": "stealthrock", "share": 0.1552 },
       { "id": "vacuumwave", "share": 0.1149 },
       { "id": "roost", "share": 0.1048 },
-      { "id": "icywind", "share": 0.0473 }
+      { "id": "icywind", "share": 0.0473 },
+      { "id": "weatherball", "share": 0.0291 },
+      { "id": "blizzard", "share": 0.0268 },
+      { "id": "aquajet", "share": 0.0146 },
+      { "id": "steelbeam", "share": 0.0139 },
+      { "id": "flipturn", "share": 0.0129 },
+      { "id": "chillingwater", "share": 0.0107 }
     ],
     "items": [
       { "id": "leftovers", "share": 0.2725 },
@@ -15136,7 +15834,19 @@
       { "id": "bulletpunch", "share": 0.2469 },
       { "id": "stoneedge", "share": 0.1543 },
       { "id": "protect", "share": 0.1506 },
-      { "id": "detect", "share": 0.135 }
+      { "id": "detect", "share": 0.135 },
+      { "id": "finalgambit", "share": 0.0992 },
+      { "id": "feint", "share": 0.0787 },
+      { "id": "vacuumwave", "share": 0.0682 },
+      { "id": "icepunch", "share": 0.0531 },
+      { "id": "darkpulse", "share": 0.0394 },
+      { "id": "upperhand", "share": 0.0342 },
+      { "id": "quickguard", "share": 0.0338 },
+      { "id": "coaching", "share": 0.0284 },
+      { "id": "swordsdance", "share": 0.0251 },
+      { "id": "bonerush", "share": 0.0236 },
+      { "id": "helpinghand", "share": 0.0203 },
+      { "id": "circlethrow", "share": 0.0129 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.5079 },
@@ -15216,7 +15926,16 @@
       { "id": "earthquake", "share": 0.3475 },
       { "id": "dualwingbeat", "share": 0.3458 },
       { "id": "knockoff", "share": 0.1112 },
-      { "id": "stealthrock", "share": 0.0917 }
+      { "id": "stealthrock", "share": 0.0917 },
+      { "id": "icefang", "share": 0.0648 },
+      { "id": "powerwhip", "share": 0.0636 },
+      { "id": "toxic", "share": 0.0318 },
+      { "id": "uturn", "share": 0.0272 },
+      { "id": "toxicspikes", "share": 0.0214 },
+      { "id": "gunkshot", "share": 0.0122 },
+      { "id": "firefang", "share": 0.0117 },
+      { "id": "sandstorm", "share": 0.0107 },
+      { "id": "brickbreak", "share": 0.0102 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.2725 },
@@ -15315,7 +16034,16 @@
       { "id": "detect", "share": 0.2633 },
       { "id": "wish", "share": 0.2447 },
       { "id": "taunt", "share": 0.1978 },
-      { "id": "helpinghand", "share": 0.1579 }
+      { "id": "helpinghand", "share": 0.1579 },
+      { "id": "psychup", "share": 0.1191 },
+      { "id": "lightscreen", "share": 0.0481 },
+      { "id": "quickattack", "share": 0.0439 },
+      { "id": "focusenergy", "share": 0.0439 },
+      { "id": "roar", "share": 0.0239 },
+      { "id": "calmmind", "share": 0.0213 },
+      { "id": "batonpass", "share": 0.0139 },
+      { "id": "darkpulse", "share": 0.0122 },
+      { "id": "alluringvoice", "share": 0.0101 }
     ],
     "items": [
       { "id": "leftovers", "share": 0.5304 },
@@ -15392,7 +16120,10 @@
       { "id": "discharge", "share": 0.0694 },
       { "id": "thunder", "share": 0.0459 },
       { "id": "lightscreen", "share": 0.04 },
-      { "id": "psychicfangs", "share": 0.0259 }
+      { "id": "psychicfangs", "share": 0.0259 },
+      { "id": "scaryface", "share": 0.016 },
+      { "id": "electroball", "share": 0.0159 },
+      { "id": "howl", "share": 0.0109 }
     ],
     "items": [{ "id": "manectite", "share": 1 }],
     "abilities": [{ "id": "intimidate", "share": 1 }],
@@ -15454,7 +16185,9 @@
       { "id": "discharge", "share": 0.1784 },
       { "id": "willowisp", "share": 0.1405 },
       { "id": "risingvoltage", "share": 0.1069 },
-      { "id": "helpinghand", "share": 0.0686 }
+      { "id": "helpinghand", "share": 0.0686 },
+      { "id": "shadowball", "share": 0.0307 },
+      { "id": "electricterrain", "share": 0.0127 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.756 },
@@ -15533,7 +16266,17 @@
       { "id": "bulldoze", "share": 0.1371 },
       { "id": "powertrip", "share": 0.1131 },
       { "id": "closecombat", "share": 0.0978 },
-      { "id": "taunt", "share": 0.0644 }
+      { "id": "taunt", "share": 0.0644 },
+      { "id": "crunch", "share": 0.0454 },
+      { "id": "stoneedge", "share": 0.0374 },
+      { "id": "rocktomb", "share": 0.0357 },
+      { "id": "ironhead", "share": 0.0353 },
+      { "id": "throatchop", "share": 0.035 },
+      { "id": "shadowclaw", "share": 0.0292 },
+      { "id": "gunkshot", "share": 0.0216 },
+      { "id": "lowkick", "share": 0.0207 },
+      { "id": "lashout", "share": 0.0147 },
+      { "id": "dragonclaw", "share": 0.0111 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.5334 },
@@ -15624,7 +16367,15 @@
       { "id": "airslash", "share": 0.2317 },
       { "id": "superfang", "share": 0.0903 },
       { "id": "uturn", "share": 0.0699 },
-      { "id": "boomburst", "share": 0.0445 }
+      { "id": "boomburst", "share": 0.0445 },
+      { "id": "hurricane", "share": 0.0419 },
+      { "id": "dragoncheer", "share": 0.0356 },
+      { "id": "defog", "share": 0.0355 },
+      { "id": "heatwave", "share": 0.0213 },
+      { "id": "shadowball", "share": 0.0181 },
+      { "id": "switcheroo", "share": 0.0157 },
+      { "id": "screech", "share": 0.0125 },
+      { "id": "hypervoice", "share": 0.0101 }
     ],
     "items": [
       { "id": "focussash", "share": 0.6926 },
@@ -15744,7 +16495,21 @@
       { "id": "volttackle", "share": 0.2427 },
       { "id": "nuzzle", "share": 0.2308 },
       { "id": "discharge", "share": 0.2249 },
-      { "id": "alluringvoice", "share": 0.2033 }
+      { "id": "alluringvoice", "share": 0.2033 },
+      { "id": "endeavor", "share": 0.1583 },
+      { "id": "grassknot", "share": 0.1154 },
+      { "id": "voltswitch", "share": 0.104 },
+      { "id": "surf", "share": 0.0988 },
+      { "id": "thunderbolt", "share": 0.0754 },
+      { "id": "brickbreak", "share": 0.0423 },
+      { "id": "feint", "share": 0.0244 },
+      { "id": "agility", "share": 0.0182 },
+      { "id": "electroweb", "share": 0.0162 },
+      { "id": "thunder", "share": 0.016 },
+      { "id": "bodyslam", "share": 0.0144 },
+      { "id": "knockoff", "share": 0.0141 },
+      { "id": "quickattack", "share": 0.0113 },
+      { "id": "irontail", "share": 0.011 }
     ],
     "items": [
       { "id": "lightball", "share": 0.8384 },
@@ -15819,7 +16584,12 @@
       { "id": "detect", "share": 0.1354 },
       { "id": "lunge", "share": 0.0621 },
       { "id": "brickbreak", "share": 0.0539 },
-      { "id": "quickattack", "share": 0.0402 }
+      { "id": "quickattack", "share": 0.0402 },
+      { "id": "rockslide", "share": 0.0311 },
+      { "id": "xscissor", "share": 0.0279 },
+      { "id": "highhorsepower", "share": 0.0258 },
+      { "id": "bugbite", "share": 0.0207 },
+      { "id": "swordsdance", "share": 0.0107 }
     ],
     "items": [{ "id": "pinsirite", "share": 1 }],
     "abilities": [{ "id": "aerilate", "share": 1 }],
@@ -15957,7 +16727,24 @@
       { "id": "thunderbolt", "share": 0.1292 },
       { "id": "trickroom", "share": 0.1216 },
       { "id": "expandingforce", "share": 0.1215 },
-      { "id": "protect", "share": 0.1182 }
+      { "id": "protect", "share": 0.1182 },
+      { "id": "shadowball", "share": 0.108 },
+      { "id": "disable", "share": 0.0896 },
+      { "id": "imprison", "share": 0.0641 },
+      { "id": "hypnosis", "share": 0.0615 },
+      { "id": "energyball", "share": 0.0447 },
+      { "id": "reflect", "share": 0.0408 },
+      { "id": "helpinghand", "share": 0.0352 },
+      { "id": "gravity", "share": 0.0349 },
+      { "id": "drainingkiss", "share": 0.0321 },
+      { "id": "taunt", "share": 0.0284 },
+      { "id": "alluringvoice", "share": 0.0276 },
+      { "id": "psyshock", "share": 0.0216 },
+      { "id": "destinybond", "share": 0.0197 },
+      { "id": "mysticalfire", "share": 0.0168 },
+      { "id": "psychicnoise", "share": 0.0165 },
+      { "id": "calmmind", "share": 0.0156 },
+      { "id": "healingwish", "share": 0.0142 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.7229 },
@@ -16052,7 +16839,16 @@
       { "id": "firepunch", "share": 0.1158 },
       { "id": "rockslide", "share": 0.1135 },
       { "id": "aurasphere", "share": 0.1048 },
-      { "id": "heatwave", "share": 0.0713 }
+      { "id": "heatwave", "share": 0.0713 },
+      { "id": "coaching", "share": 0.0707 },
+      { "id": "overheat", "share": 0.06 },
+      { "id": "machpunch", "share": 0.0596 },
+      { "id": "uturn", "share": 0.0358 },
+      { "id": "drainpunch", "share": 0.0279 },
+      { "id": "endeavor", "share": 0.0278 },
+      { "id": "nastyplot", "share": 0.0265 },
+      { "id": "thunderpunch", "share": 0.0217 },
+      { "id": "flamethrower", "share": 0.0208 }
     ],
     "items": [
       { "id": "focussash", "share": 0.9048 },
@@ -16125,7 +16921,11 @@
       { "id": "coaching", "share": 0.1124 },
       { "id": "knockoff", "share": 0.1117 },
       { "id": "drainpunch", "share": 0.0679 },
-      { "id": "taunt", "share": 0.046 }
+      { "id": "taunt", "share": 0.046 },
+      { "id": "encore", "share": 0.0271 },
+      { "id": "acidspray", "share": 0.0151 },
+      { "id": "bulletpunch", "share": 0.0117 },
+      { "id": "superfang", "share": 0.0102 }
     ],
     "items": [
       { "id": "shucaberry", "share": 0.3668 },
@@ -16286,7 +17086,13 @@
       { "id": "muddywater", "share": 0.1833 },
       { "id": "yawn", "share": 0.1447 },
       { "id": "icebeam", "share": 0.1325 },
-      { "id": "powergem", "share": 0.1242 }
+      { "id": "powergem", "share": 0.1242 },
+      { "id": "focusblast", "share": 0.1213 },
+      { "id": "blizzard", "share": 0.0243 },
+      { "id": "psychicnoise", "share": 0.0229 },
+      { "id": "swagger", "share": 0.0182 },
+      { "id": "icywind", "share": 0.0145 },
+      { "id": "grassknot", "share": 0.0136 }
     ],
     "items": [
       { "id": "colburberry", "share": 0.5415 },
@@ -16356,7 +17162,11 @@
       { "id": "stompingtantrum", "share": 0.0524 },
       { "id": "horndrill", "share": 0.0466 },
       { "id": "drillrun", "share": 0.0465 },
-      { "id": "megahorn", "share": 0.0363 }
+      { "id": "megahorn", "share": 0.0363 },
+      { "id": "shadowclaw", "share": 0.0293 },
+      { "id": "rapidspin", "share": 0.0113 },
+      { "id": "brickbreak", "share": 0.0104 },
+      { "id": "fissure", "share": 0.0102 }
     ],
     "items": [{ "id": "excadrite", "share": 1 }],
     "abilities": [{ "id": "piercingdrill", "share": 1 }],
@@ -16426,7 +17236,15 @@
       { "id": "pollenpuff", "share": 0.1587 },
       { "id": "yawn", "share": 0.1129 },
       { "id": "dracometeor", "share": 0.1129 },
-      { "id": "leafstorm", "share": 0.0971 }
+      { "id": "leafstorm", "share": 0.0971 },
+      { "id": "hydropump", "share": 0.0754 },
+      { "id": "recover", "share": 0.0663 },
+      { "id": "nastyplot", "share": 0.046 },
+      { "id": "bodypress", "share": 0.0279 },
+      { "id": "infestation", "share": 0.0251 },
+      { "id": "dragoncheer", "share": 0.0223 },
+      { "id": "bugbite", "share": 0.0147 },
+      { "id": "dragontail", "share": 0.0109 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.2783 },
@@ -16499,7 +17317,18 @@
       { "id": "boomburst", "share": 0.1348 },
       { "id": "storedpower", "share": 0.1218 },
       { "id": "cosmicpower", "share": 0.0929 },
-      { "id": "yawn", "share": 0.0523 }
+      { "id": "yawn", "share": 0.0523 },
+      { "id": "disable", "share": 0.0523 },
+      { "id": "helpinghand", "share": 0.0498 },
+      { "id": "extrasensory", "share": 0.0373 },
+      { "id": "drainingkiss", "share": 0.0336 },
+      { "id": "psyshock", "share": 0.0322 },
+      { "id": "expandingforce", "share": 0.0276 },
+      { "id": "chargebeam", "share": 0.0237 },
+      { "id": "psychicnoise", "share": 0.023 },
+      { "id": "dazzlinggleam", "share": 0.0173 },
+      { "id": "encore", "share": 0.014 },
+      { "id": "grassknot", "share": 0.011 }
     ],
     "items": [{ "id": "chimechite", "share": 1 }],
     "abilities": [{ "id": "levitate", "share": 1 }],
@@ -16565,7 +17394,8 @@
       { "id": "earthquake", "share": 0.1656 },
       { "id": "liquidation", "share": 0.1025 },
       { "id": "poisonfang", "share": 0.0392 },
-      { "id": "destinybond", "share": 0.038 }
+      { "id": "destinybond", "share": 0.038 },
+      { "id": "rocktomb", "share": 0.0124 }
     ],
     "items": [{ "id": "sharpedonite", "share": 1 }],
     "abilities": [{ "id": "strongjaw", "share": 1 }],
@@ -16625,7 +17455,20 @@
       { "id": "rockslide", "share": 0.1035 },
       { "id": "crunch", "share": 0.0894 },
       { "id": "dragondance", "share": 0.0811 },
-      { "id": "detect", "share": 0.0744 }
+      { "id": "detect", "share": 0.0744 },
+      { "id": "faketears", "share": 0.0669 },
+      { "id": "brickbreak", "share": 0.0651 },
+      { "id": "lashout", "share": 0.0642 },
+      { "id": "endeavor", "share": 0.0495 },
+      { "id": "taunt", "share": 0.0431 },
+      { "id": "helpinghand", "share": 0.0404 },
+      { "id": "icepunch", "share": 0.0242 },
+      { "id": "coaching", "share": 0.0237 },
+      { "id": "lowkick", "share": 0.0216 },
+      { "id": "throatchop", "share": 0.0215 },
+      { "id": "roar", "share": 0.0166 },
+      { "id": "zenheadbutt", "share": 0.0145 },
+      { "id": "beatup", "share": 0.0102 }
     ],
     "items": [
       { "id": "expertbelt", "share": 0.1843 },
@@ -16716,7 +17559,20 @@
       { "id": "shellsmash", "share": 0.1455 },
       { "id": "hydrocannon", "share": 0.143 },
       { "id": "weatherball", "share": 0.1413 },
-      { "id": "icebeam", "share": 0.1329 }
+      { "id": "icebeam", "share": 0.1329 },
+      { "id": "muddywater", "share": 0.1175 },
+      { "id": "lifedew", "share": 0.0614 },
+      { "id": "aquajet", "share": 0.0441 },
+      { "id": "wavecrash", "share": 0.0342 },
+      { "id": "bodypress", "share": 0.0309 },
+      { "id": "chillingwater", "share": 0.0258 },
+      { "id": "hydropump", "share": 0.0222 },
+      { "id": "rockslide", "share": 0.0176 },
+      { "id": "zenheadbutt", "share": 0.0169 },
+      { "id": "whirlpool", "share": 0.0164 },
+      { "id": "irondefense", "share": 0.0135 },
+      { "id": "helpinghand", "share": 0.0133 },
+      { "id": "darkpulse", "share": 0.0121 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.4546 },
@@ -16807,7 +17663,15 @@
       { "id": "psychic", "share": 0.1853 },
       { "id": "yawn", "share": 0.1272 },
       { "id": "calmmind", "share": 0.056 },
-      { "id": "bodypress", "share": 0.0511 }
+      { "id": "bodypress", "share": 0.0511 },
+      { "id": "irondefense", "share": 0.051 },
+      { "id": "thunderwave", "share": 0.0455 },
+      { "id": "lightscreen", "share": 0.0267 },
+      { "id": "psychicnoise", "share": 0.0266 },
+      { "id": "futuresight", "share": 0.0217 },
+      { "id": "grassknot", "share": 0.0202 },
+      { "id": "helpinghand", "share": 0.0122 },
+      { "id": "psyshock", "share": 0.0105 }
     ],
     "items": [
       { "id": "leftovers", "share": 0.7432 },
@@ -16876,7 +17740,11 @@
       { "id": "swordsdance", "share": 0.1117 },
       { "id": "pollenpuff", "share": 0.0909 },
       { "id": "xscissor", "share": 0.0643 },
-      { "id": "fellstinger", "share": 0.0534 }
+      { "id": "fellstinger", "share": 0.0534 },
+      { "id": "knockoff", "share": 0.0312 },
+      { "id": "throatchop", "share": 0.0142 },
+      { "id": "crosspoison", "share": 0.0139 },
+      { "id": "focusenergy", "share": 0.0128 }
     ],
     "items": [{ "id": "beedrillite", "share": 1 }],
     "abilities": [{ "id": "adaptability", "share": 1 }],
@@ -16939,7 +17807,8 @@
       { "id": "seedbomb", "share": 0.0841 },
       { "id": "foulplay", "share": 0.0634 },
       { "id": "protect", "share": 0.0451 },
-      { "id": "powerwhip", "share": 0.0309 }
+      { "id": "powerwhip", "share": 0.0309 },
+      { "id": "leechseed", "share": 0.0104 }
     ],
     "items": [
       { "id": "occaberry", "share": 0.7178 },
@@ -17005,7 +17874,17 @@
       { "id": "detect", "share": 0.1797 },
       { "id": "acidarmor", "share": 0.1446 },
       { "id": "flipturn", "share": 0.1099 },
-      { "id": "batonpass", "share": 0.0737 }
+      { "id": "batonpass", "share": 0.0737 },
+      { "id": "alluringvoice", "share": 0.0643 },
+      { "id": "muddywater", "share": 0.0636 },
+      { "id": "helpinghand", "share": 0.0413 },
+      { "id": "rest", "share": 0.0347 },
+      { "id": "icywind", "share": 0.0298 },
+      { "id": "hydropump", "share": 0.0291 },
+      { "id": "shadowball", "share": 0.0216 },
+      { "id": "wish", "share": 0.0171 },
+      { "id": "dive", "share": 0.0147 },
+      { "id": "blizzard", "share": 0.0127 }
     ],
     "items": [
       { "id": "leftovers", "share": 0.81 },
@@ -17133,7 +18012,11 @@
       { "id": "protect", "share": 0.1558 },
       { "id": "dragonclaw", "share": 0.1486 },
       { "id": "breakingswipe", "share": 0.0851 },
-      { "id": "earthquake", "share": 0.0435 }
+      { "id": "earthquake", "share": 0.0435 },
+      { "id": "crunch", "share": 0.0429 },
+      { "id": "dragondance", "share": 0.0389 },
+      { "id": "firefang", "share": 0.0208 },
+      { "id": "ironhead", "share": 0.0116 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.8351 },
@@ -17203,7 +18086,16 @@
       { "id": "dragonpulse", "share": 0.17 },
       { "id": "leafstorm", "share": 0.1233 },
       { "id": "quickguard", "share": 0.0828 },
-      { "id": "dragoncheer", "share": 0.0598 }
+      { "id": "dragoncheer", "share": 0.0598 },
+      { "id": "acrobatics", "share": 0.0458 },
+      { "id": "rocktomb", "share": 0.0428 },
+      { "id": "shedtail", "share": 0.0428 },
+      { "id": "fling", "share": 0.0317 },
+      { "id": "gigadrain", "share": 0.0311 },
+      { "id": "detect", "share": 0.0256 },
+      { "id": "sunnyday", "share": 0.0205 },
+      { "id": "drainpunch", "share": 0.0173 },
+      { "id": "thunderpunch", "share": 0.0127 }
     ],
     "items": [
       { "id": "persimberry", "share": 0.6294 },
@@ -17284,7 +18176,14 @@
       { "id": "helpinghand", "share": 0.1116 },
       { "id": "expandingforce", "share": 0.0929 },
       { "id": "psyshock", "share": 0.0702 },
-      { "id": "calmmind", "share": 0.0614 }
+      { "id": "calmmind", "share": 0.0614 },
+      { "id": "recover", "share": 0.0578 },
+      { "id": "allyswitch", "share": 0.0418 },
+      { "id": "thunder", "share": 0.0315 },
+      { "id": "acidarmor", "share": 0.0312 },
+      { "id": "storedpower", "share": 0.026 },
+      { "id": "psychicterrain", "share": 0.0167 },
+      { "id": "grassknot", "share": 0.0137 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.5343 },
@@ -17352,7 +18251,15 @@
       { "id": "stringshot", "share": 0.1616 },
       { "id": "megahorn", "share": 0.1471 },
       { "id": "knockoff", "share": 0.1283 },
-      { "id": "stickyweb", "share": 0.0906 }
+      { "id": "stickyweb", "share": 0.0906 },
+      { "id": "leechlife", "share": 0.0664 },
+      { "id": "infestation", "share": 0.0501 },
+      { "id": "lunge", "share": 0.0446 },
+      { "id": "shadowsneak", "share": 0.0316 },
+      { "id": "fellstinger", "share": 0.0301 },
+      { "id": "nightshade", "share": 0.028 },
+      { "id": "toxicthread", "share": 0.0161 },
+      { "id": "electroweb", "share": 0.0123 }
     ],
     "items": [
       { "id": "scopelens", "share": 0.4531 },
@@ -17421,7 +18328,15 @@
       { "id": "curse", "share": 0.216 },
       { "id": "earthquake", "share": 0.1697 },
       { "id": "rockslide", "share": 0.1652 },
-      { "id": "destinybond", "share": 0.1292 }
+      { "id": "destinybond", "share": 0.1292 },
+      { "id": "selfdestruct", "share": 0.0744 },
+      { "id": "haze", "share": 0.0589 },
+      { "id": "guardsplit", "share": 0.042 },
+      { "id": "faketears", "share": 0.0339 },
+      { "id": "taunt", "share": 0.0281 },
+      { "id": "raindance", "share": 0.0159 },
+      { "id": "memento", "share": 0.013 },
+      { "id": "irondefense", "share": 0.0119 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.3556 },
@@ -17491,7 +18406,23 @@
       { "id": "helpinghand", "share": 0.1967 },
       { "id": "gravity", "share": 0.1407 },
       { "id": "earthpower", "share": 0.1177 },
-      { "id": "energyball", "share": 0.1149 }
+      { "id": "energyball", "share": 0.1149 },
+      { "id": "lunge", "share": 0.0979 },
+      { "id": "trick", "share": 0.0769 },
+      { "id": "hypnosis", "share": 0.0691 },
+      { "id": "roar", "share": 0.0619 },
+      { "id": "throatchop", "share": 0.0418 },
+      { "id": "earthquake", "share": 0.0381 },
+      { "id": "thunderbolt", "share": 0.0376 },
+      { "id": "scaryface", "share": 0.0364 },
+      { "id": "shadowball", "share": 0.0346 },
+      { "id": "lightscreen", "share": 0.0268 },
+      { "id": "thunderwave", "share": 0.0231 },
+      { "id": "disable", "share": 0.0219 },
+      { "id": "bulldoze", "share": 0.0199 },
+      { "id": "facade", "share": 0.0148 },
+      { "id": "imprison", "share": 0.0117 },
+      { "id": "doubleedge", "share": 0.0103 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.4939 },
@@ -17586,7 +18517,10 @@
       { "id": "taunt", "share": 0.0303 },
       { "id": "psychicfangs", "share": 0.0301 },
       { "id": "stompingtantrum", "share": 0.0234 },
-      { "id": "suckerpunch", "share": 0.0232 }
+      { "id": "suckerpunch", "share": 0.0232 },
+      { "id": "playrough", "share": 0.022 },
+      { "id": "drillrun", "share": 0.0174 },
+      { "id": "howl", "share": 0.0147 }
     ],
     "items": [
       { "id": "focussash", "share": 0.8975 },
@@ -17648,7 +18582,13 @@
       { "id": "rockslide", "share": 0.2651 },
       { "id": "leechseed", "share": 0.1849 },
       { "id": "sandtomb", "share": 0.1576 },
-      { "id": "stockpile", "share": 0.1514 }
+      { "id": "stockpile", "share": 0.1514 },
+      { "id": "seedbomb", "share": 0.1002 },
+      { "id": "ironhead", "share": 0.0808 },
+      { "id": "rockblast", "share": 0.0727 },
+      { "id": "roar", "share": 0.0184 },
+      { "id": "bodypress", "share": 0.0166 },
+      { "id": "rocktomb", "share": 0.0129 }
     ],
     "items": [
       { "id": "whiteherb", "share": 0.6532 },
@@ -17734,7 +18674,9 @@
       { "id": "endeavor", "share": 0.1155 },
       { "id": "rapidspin", "share": 0.0319 },
       { "id": "batonpass", "share": 0.015 },
-      { "id": "brickbreak", "share": 0.0136 }
+      { "id": "brickbreak", "share": 0.0136 },
+      { "id": "voltswitch", "share": 0.0134 },
+      { "id": "swagger", "share": 0.0129 }
     ],
     "items": [
       { "id": "focussash", "share": 0.6711 },
@@ -17799,7 +18741,18 @@
       { "id": "thunderwave", "share": 0.186 },
       { "id": "copycat", "share": 0.1628 },
       { "id": "protect", "share": 0.1214 },
-      { "id": "sunnyday", "share": 0.1173 }
+      { "id": "sunnyday", "share": 0.1173 },
+      { "id": "screech", "share": 0.117 },
+      { "id": "snarl", "share": 0.1071 },
+      { "id": "charm", "share": 0.0953 },
+      { "id": "swagger", "share": 0.0725 },
+      { "id": "throatchop", "share": 0.043 },
+      { "id": "torment", "share": 0.041 },
+      { "id": "raindance", "share": 0.0226 },
+      { "id": "taunt", "share": 0.0185 },
+      { "id": "grassknot", "share": 0.0155 },
+      { "id": "batonpass", "share": 0.0112 },
+      { "id": "doubleteam", "share": 0.0102 }
     ],
     "items": [
       { "id": "focussash", "share": 0.9348 },
@@ -17884,7 +18837,10 @@
       { "id": "stoneedge", "share": 0.0314 },
       { "id": "dragonclaw", "share": 0.0258 },
       { "id": "poisonjab", "share": 0.0236 },
-      { "id": "rockpolish", "share": 0.0205 }
+      { "id": "rockpolish", "share": 0.0205 },
+      { "id": "aquacutter", "share": 0.0192 },
+      { "id": "shadowclaw", "share": 0.0177 },
+      { "id": "waterfall", "share": 0.0112 }
     ],
     "items": [{ "id": "barbaracite", "share": 1 }],
     "abilities": [{ "id": "toughclaws", "share": 1 }],
@@ -17949,7 +18905,27 @@
       { "id": "willowisp", "share": 0.1945 },
       { "id": "encore", "share": 0.173 },
       { "id": "lightscreen", "share": 0.1681 },
-      { "id": "drainpunch", "share": 0.1655 }
+      { "id": "drainpunch", "share": 0.1655 },
+      { "id": "poltergeist", "share": 0.1512 },
+      { "id": "bulkup", "share": 0.1337 },
+      { "id": "detect", "share": 0.1334 },
+      { "id": "raindance", "share": 0.1117 },
+      { "id": "reflect", "share": 0.107 },
+      { "id": "darkpulse", "share": 0.1043 },
+      { "id": "nightshade", "share": 0.094 },
+      { "id": "poisonjab", "share": 0.084 },
+      { "id": "quash", "share": 0.0633 },
+      { "id": "painsplit", "share": 0.0616 },
+      { "id": "feint", "share": 0.0512 },
+      { "id": "suckerpunch", "share": 0.0328 },
+      { "id": "protect", "share": 0.0284 },
+      { "id": "spite", "share": 0.0276 },
+      { "id": "shadowball", "share": 0.022 },
+      { "id": "snarl", "share": 0.0148 },
+      { "id": "disable", "share": 0.0147 },
+      { "id": "gravity", "share": 0.0132 },
+      { "id": "nastyplot", "share": 0.0112 },
+      { "id": "calmmind", "share": 0.011 }
     ],
     "items": [{ "id": "sablenite", "share": 1 }],
     "abilities": [{ "id": "magicbounce", "share": 1 }],
@@ -18012,7 +18988,8 @@
       { "id": "seedbomb", "share": 0.0603 },
       { "id": "ironhead", "share": 0.0586 },
       { "id": "highhorsepower", "share": 0.0423 },
-      { "id": "throatchop", "share": 0.0214 }
+      { "id": "throatchop", "share": 0.0214 },
+      { "id": "firstimpression", "share": 0.0149 }
     ],
     "items": [{ "id": "falinksite", "share": 1 }],
     "abilities": [{ "id": "defiant", "share": 1 }],
@@ -18089,7 +19066,11 @@
       { "id": "shadowball", "share": 0.1095 },
       { "id": "extrasensory", "share": 0.0903 },
       { "id": "focusblast", "share": 0.0343 },
-      { "id": "flamethrower", "share": 0.0322 }
+      { "id": "flamethrower", "share": 0.0322 },
+      { "id": "solarbeam", "share": 0.0303 },
+      { "id": "helpinghand", "share": 0.0166 },
+      { "id": "willowisp", "share": 0.0129 },
+      { "id": "lavaplume", "share": 0.0113 }
     ],
     "items": [
       { "id": "charcoal", "share": 0.8069 },
@@ -18145,7 +19126,12 @@
       { "id": "protect", "share": 0.3157 },
       { "id": "stoneedge", "share": 0.2737 },
       { "id": "poisonjab", "share": 0.1923 },
-      { "id": "wideguard", "share": 0.1277 }
+      { "id": "wideguard", "share": 0.1277 },
+      { "id": "detect", "share": 0.1031 },
+      { "id": "crosschop", "share": 0.0537 },
+      { "id": "darkestlariat", "share": 0.0415 },
+      { "id": "bulkup", "share": 0.0224 },
+      { "id": "crosspoison", "share": 0.0179 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.678 },
@@ -18218,7 +19204,15 @@
       { "id": "protect", "share": 0.0619 },
       { "id": "icebeam", "share": 0.0472 },
       { "id": "doubleteam", "share": 0.0462 },
-      { "id": "icywind", "share": 0.0335 }
+      { "id": "icywind", "share": 0.0335 },
+      { "id": "frostbreath", "share": 0.0231 },
+      { "id": "thunderbolt", "share": 0.0225 },
+      { "id": "helpinghand", "share": 0.0212 },
+      { "id": "haze", "share": 0.0196 },
+      { "id": "nastyplot", "share": 0.0184 },
+      { "id": "psychic", "share": 0.017 },
+      { "id": "auroraveil", "share": 0.0165 },
+      { "id": "chillingwater", "share": 0.0123 }
     ],
     "items": [
       { "id": "focussash", "share": 0.8849 },
@@ -18278,7 +19272,9 @@
       { "id": "auroraveil", "share": 0.1331 },
       { "id": "round", "share": 0.0382 },
       { "id": "weatherball", "share": 0.0264 },
-      { "id": "discharge", "share": 0.0156 }
+      { "id": "discharge", "share": 0.0156 },
+      { "id": "calmmind", "share": 0.0143 },
+      { "id": "icywind", "share": 0.0129 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.2691 },
@@ -18361,7 +19357,11 @@
       { "id": "reflect", "share": 0.2579 },
       { "id": "dragonpulse", "share": 0.2211 },
       { "id": "taunt", "share": 0.2035 },
-      { "id": "sunnyday", "share": 0.1755 }
+      { "id": "sunnyday", "share": 0.1755 },
+      { "id": "gigadrain", "share": 0.044 },
+      { "id": "synthesis", "share": 0.041 },
+      { "id": "energyball", "share": 0.0224 },
+      { "id": "helpinghand", "share": 0.0105 }
     ],
     "items": [
       { "id": "widelens", "share": 0.4607 },
@@ -18446,7 +19446,19 @@
       { "id": "switcheroo", "share": 0.2473 },
       { "id": "lowkick", "share": 0.2054 },
       { "id": "extrasensory", "share": 0.1065 },
-      { "id": "grassknot", "share": 0.0974 }
+      { "id": "grassknot", "share": 0.0974 },
+      { "id": "icywind", "share": 0.081 },
+      { "id": "upperhand", "share": 0.0704 },
+      { "id": "surf", "share": 0.0668 },
+      { "id": "weatherball", "share": 0.0581 },
+      { "id": "flipturn", "share": 0.049 },
+      { "id": "gunkshot", "share": 0.045 },
+      { "id": "sludgewave", "share": 0.0357 },
+      { "id": "helpinghand", "share": 0.0266 },
+      { "id": "uturn", "share": 0.0118 },
+      { "id": "liquidation", "share": 0.0112 },
+      { "id": "taunt", "share": 0.011 },
+      { "id": "icepunch", "share": 0.0104 }
     ],
     "items": [
       { "id": "focussash", "share": 0.4486 },
@@ -18526,7 +19538,15 @@
       { "id": "bodypress", "share": 0.3809 },
       { "id": "sunnyday", "share": 0.1832 },
       { "id": "leafstorm", "share": 0.183 },
-      { "id": "dragonpulse", "share": 0.1641 }
+      { "id": "dragonpulse", "share": 0.1641 },
+      { "id": "recover", "share": 0.1292 },
+      { "id": "helpinghand", "share": 0.1042 },
+      { "id": "recycle", "share": 0.0283 },
+      { "id": "suckerpunch", "share": 0.0242 },
+      { "id": "reflect", "share": 0.0219 },
+      { "id": "lightscreen", "share": 0.0219 },
+      { "id": "gigadrain", "share": 0.0108 },
+      { "id": "gyroball", "share": 0.0101 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.4619 },
@@ -18595,7 +19615,10 @@
       { "id": "roar", "share": 0.0769 },
       { "id": "swordsdance", "share": 0.0603 },
       { "id": "yawn", "share": 0.0391 },
-      { "id": "focusenergy", "share": 0.0388 }
+      { "id": "focusenergy", "share": 0.0388 },
+      { "id": "raindance", "share": 0.0296 },
+      { "id": "helpinghand", "share": 0.0211 },
+      { "id": "quickattack", "share": 0.0101 }
     ],
     "items": [
       { "id": "miracleseed", "share": 0.6707 },
@@ -18660,7 +19683,14 @@
       { "id": "encore", "share": 0.2464 },
       { "id": "willowisp", "share": 0.1912 },
       { "id": "toxic", "share": 0.1418 },
-      { "id": "flamethrower", "share": 0.1388 }
+      { "id": "flamethrower", "share": 0.1388 },
+      { "id": "disable", "share": 0.0956 },
+      { "id": "taunt", "share": 0.0693 },
+      { "id": "acidspray", "share": 0.0441 },
+      { "id": "thunderwave", "share": 0.0322 },
+      { "id": "dragonpulse", "share": 0.0231 },
+      { "id": "endeavor", "share": 0.0185 },
+      { "id": "nastyplot", "share": 0.0134 }
     ],
     "items": [
       { "id": "focussash", "share": 0.8041 },
@@ -18733,7 +19763,25 @@
       { "id": "psyshock", "share": 0.1675 },
       { "id": "trickroom", "share": 0.1603 },
       { "id": "focusblast", "share": 0.1297 },
-      { "id": "frostbreath", "share": 0.1093 }
+      { "id": "frostbreath", "share": 0.1093 },
+      { "id": "iceshard", "share": 0.0974 },
+      { "id": "blizzard", "share": 0.0718 },
+      { "id": "icebeam", "share": 0.0684 },
+      { "id": "encore", "share": 0.0585 },
+      { "id": "hypnosis", "share": 0.0428 },
+      { "id": "psychicterrain", "share": 0.0363 },
+      { "id": "icywind", "share": 0.034 },
+      { "id": "screech", "share": 0.034 },
+      { "id": "thunderwave", "share": 0.0286 },
+      { "id": "helpinghand", "share": 0.0225 },
+      { "id": "skillswap", "share": 0.0206 },
+      { "id": "nastyplot", "share": 0.0191 },
+      { "id": "shadowball", "share": 0.0168 },
+      { "id": "foulplay", "share": 0.0158 },
+      { "id": "expandingforce", "share": 0.0155 },
+      { "id": "thunderbolt", "share": 0.0155 },
+      { "id": "allyswitch", "share": 0.0126 },
+      { "id": "powerswap", "share": 0.0119 }
     ],
     "items": [
       { "id": "focussash", "share": 0.3579 },
@@ -18834,7 +19882,10 @@
       { "id": "protect", "share": 0.0791 },
       { "id": "trick", "share": 0.0694 },
       { "id": "energyball", "share": 0.0263 },
-      { "id": "drainingkiss", "share": 0.015 }
+      { "id": "drainingkiss", "share": 0.015 },
+      { "id": "calmmind", "share": 0.0141 },
+      { "id": "sleeptalk", "share": 0.0117 },
+      { "id": "batonpass", "share": 0.0103 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.9587 },
@@ -18901,7 +19952,14 @@
       { "id": "bodypress", "share": 0.2205 },
       { "id": "lifedew", "share": 0.2182 },
       { "id": "dragonclaw", "share": 0.1874 },
-      { "id": "curse", "share": 0.1848 }
+      { "id": "curse", "share": 0.1848 },
+      { "id": "acidarmor", "share": 0.0357 },
+      { "id": "scald", "share": 0.0187 },
+      { "id": "blizzard", "share": 0.0185 },
+      { "id": "focusblast", "share": 0.0171 },
+      { "id": "dragonpulse", "share": 0.017 },
+      { "id": "thunder", "share": 0.0119 },
+      { "id": "fireblast", "share": 0.0115 }
     ],
     "items": [
       { "id": "habanberry", "share": 0.4786 },
@@ -18977,7 +20035,16 @@
       { "id": "zenheadbutt", "share": 0.3202 },
       { "id": "quickguard", "share": 0.2033 },
       { "id": "irondefense", "share": 0.0849 },
-      { "id": "knockoff", "share": 0.0827 }
+      { "id": "knockoff", "share": 0.0827 },
+      { "id": "seedbomb", "share": 0.074 },
+      { "id": "helpinghand", "share": 0.0693 },
+      { "id": "brickbreak", "share": 0.0362 },
+      { "id": "highhorsepower", "share": 0.0345 },
+      { "id": "leechseed", "share": 0.0311 },
+      { "id": "taunt", "share": 0.0287 },
+      { "id": "rockslide", "share": 0.0182 },
+      { "id": "bulkup", "share": 0.016 },
+      { "id": "synthesis", "share": 0.015 }
     ],
     "items": [
       { "id": "leftovers", "share": 0.4341 },
@@ -19049,7 +20116,20 @@
       { "id": "dazzlinggleam", "share": 0.1481 },
       { "id": "trickroom", "share": 0.1422 },
       { "id": "shadowball", "share": 0.0676 },
-      { "id": "lightscreen", "share": 0.0538 }
+      { "id": "lightscreen", "share": 0.0538 },
+      { "id": "substitute", "share": 0.0476 },
+      { "id": "reflect", "share": 0.0399 },
+      { "id": "psychicterrain", "share": 0.0394 },
+      { "id": "yawn", "share": 0.0352 },
+      { "id": "psychicfangs", "share": 0.0343 },
+      { "id": "gravity", "share": 0.0284 },
+      { "id": "weatherball", "share": 0.0246 },
+      { "id": "skillswap", "share": 0.0219 },
+      { "id": "trick", "share": 0.0213 },
+      { "id": "psyshock", "share": 0.0192 },
+      { "id": "calmmind", "share": 0.0186 },
+      { "id": "psychicnoise", "share": 0.017 },
+      { "id": "imprison", "share": 0.0153 }
     ],
     "items": [
       { "id": "focussash", "share": 0.5537 },
@@ -19126,7 +20206,12 @@
       { "id": "yawn", "share": 0.0936 },
       { "id": "alluringvoice", "share": 0.0856 },
       { "id": "heatwave", "share": 0.0812 },
-      { "id": "hex", "share": 0.0736 }
+      { "id": "hex", "share": 0.0736 },
+      { "id": "roar", "share": 0.0508 },
+      { "id": "snarl", "share": 0.0352 },
+      { "id": "scorchingsands", "share": 0.0312 },
+      { "id": "hypervoice", "share": 0.0123 },
+      { "id": "belch", "share": 0.0122 }
     ],
     "items": [
       { "id": "leftovers", "share": 0.3181 },
@@ -19200,7 +20285,26 @@
       { "id": "sludgebomb", "share": 0.1007 },
       { "id": "flamethrower", "share": 0.0936 },
       { "id": "slackoff", "share": 0.0808 },
-      { "id": "focusblast", "share": 0.0789 }
+      { "id": "focusblast", "share": 0.0789 },
+      { "id": "calmmind", "share": 0.0788 },
+      { "id": "healpulse", "share": 0.0593 },
+      { "id": "grassknot", "share": 0.0503 },
+      { "id": "yawn", "share": 0.046 },
+      { "id": "zenheadbutt", "share": 0.0396 },
+      { "id": "imprison", "share": 0.0384 },
+      { "id": "psychup", "share": 0.0335 },
+      { "id": "storedpower", "share": 0.031 },
+      { "id": "psyshock", "share": 0.026 },
+      { "id": "sludgewave", "share": 0.0226 },
+      { "id": "bodypress", "share": 0.0219 },
+      { "id": "bellydrum", "share": 0.0168 },
+      { "id": "expandingforce", "share": 0.015 },
+      { "id": "psychicterrain", "share": 0.0148 },
+      { "id": "sunnyday", "share": 0.0144 },
+      { "id": "raindance", "share": 0.0127 },
+      { "id": "irondefense", "share": 0.0126 },
+      { "id": "shadowball", "share": 0.0105 },
+      { "id": "blizzard", "share": 0.0105 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.3958 },
@@ -19273,7 +20377,16 @@
       { "id": "nastyplot", "share": 0.1367 },
       { "id": "dazzlinggleam", "share": 0.1239 },
       { "id": "speedswap", "share": 0.1086 },
-      { "id": "futuresight", "share": 0.104 }
+      { "id": "futuresight", "share": 0.104 },
+      { "id": "calmmind", "share": 0.0977 },
+      { "id": "psyshock", "share": 0.0519 },
+      { "id": "taunt", "share": 0.0365 },
+      { "id": "substitute", "share": 0.0351 },
+      { "id": "trickroom", "share": 0.035 },
+      { "id": "grassknot", "share": 0.0306 },
+      { "id": "psychicterrain", "share": 0.0164 },
+      { "id": "reflect", "share": 0.0143 },
+      { "id": "lightscreen", "share": 0.0143 }
     ],
     "items": [{ "id": "alakazite", "share": 1 }],
     "abilities": [{ "id": "trace", "share": 1 }],
@@ -19525,7 +20638,20 @@
       { "id": "skillswap", "share": 0.2803 },
       { "id": "lightscreen", "share": 0.1554 },
       { "id": "protect", "share": 0.0735 },
-      { "id": "psychup", "share": 0.0632 }
+      { "id": "psychup", "share": 0.0632 },
+      { "id": "storedpower", "share": 0.0524 },
+      { "id": "thunderbolt", "share": 0.0479 },
+      { "id": "raindance", "share": 0.0321 },
+      { "id": "calmmind", "share": 0.031 },
+      { "id": "magicroom", "share": 0.0307 },
+      { "id": "darkpulse", "share": 0.0303 },
+      { "id": "alluringvoice", "share": 0.0282 },
+      { "id": "thunderwave", "share": 0.0265 },
+      { "id": "psyshock", "share": 0.0248 },
+      { "id": "quickguard", "share": 0.0221 },
+      { "id": "faketears", "share": 0.0218 },
+      { "id": "charm", "share": 0.0122 },
+      { "id": "shadowball", "share": 0.0122 }
     ],
     "items": [{ "id": "meowsticite", "share": 1 }],
     "abilities": [{ "id": "trace", "share": 1 }],
@@ -19587,7 +20713,15 @@
       { "id": "bulkup", "share": 0.1941 },
       { "id": "trailblaze", "share": 0.1771 },
       { "id": "highhorsepower", "share": 0.1386 },
-      { "id": "heatcrash", "share": 0.118 }
+      { "id": "heatcrash", "share": 0.118 },
+      { "id": "rockslide", "share": 0.0535 },
+      { "id": "helpinghand", "share": 0.0291 },
+      { "id": "knockoff", "share": 0.0248 },
+      { "id": "earthquake", "share": 0.0169 },
+      { "id": "headsmash", "share": 0.0151 },
+      { "id": "lowkick", "share": 0.0151 },
+      { "id": "ironhead", "share": 0.0151 },
+      { "id": "heavyslam", "share": 0.0115 }
     ],
     "items": [{ "id": "emboarite", "share": 1 }],
     "abilities": [{ "id": "moldbreaker", "share": 1 }],
@@ -19654,7 +20788,13 @@
       { "id": "stealthrock", "share": 0.222 },
       { "id": "irondefense", "share": 0.1438 },
       { "id": "earthquake", "share": 0.1316 },
-      { "id": "explosion", "share": 0.0943 }
+      { "id": "explosion", "share": 0.0943 },
+      { "id": "curse", "share": 0.077 },
+      { "id": "heavyslam", "share": 0.0664 },
+      { "id": "helpinghand", "share": 0.0573 },
+      { "id": "icepunch", "share": 0.0115 },
+      { "id": "block", "share": 0.011 },
+      { "id": "rockpolish", "share": 0.01 }
     ],
     "items": [
       { "id": "leftovers", "share": 0.6255 },
@@ -19728,7 +20868,21 @@
       { "id": "allyswitch", "share": 0.2198 },
       { "id": "lightscreen", "share": 0.205 },
       { "id": "reflect", "share": 0.1996 },
-      { "id": "psychicterrain", "share": 0.1813 }
+      { "id": "psychicterrain", "share": 0.1813 },
+      { "id": "energyball", "share": 0.1792 },
+      { "id": "dazzlinggleam", "share": 0.1404 },
+      { "id": "trickroom", "share": 0.0996 },
+      { "id": "shadowball", "share": 0.0941 },
+      { "id": "psyshock", "share": 0.0897 },
+      { "id": "magicroom", "share": 0.0694 },
+      { "id": "focusblast", "share": 0.063 },
+      { "id": "skillswap", "share": 0.0537 },
+      { "id": "thunderwave", "share": 0.0303 },
+      { "id": "sunnyday", "share": 0.0244 },
+      { "id": "raindance", "share": 0.0209 },
+      { "id": "imprison", "share": 0.0174 },
+      { "id": "trick", "share": 0.0152 },
+      { "id": "foulplay", "share": 0.0101 }
     ],
     "items": [
       { "id": "focussash", "share": 0.6309 },
@@ -19803,7 +20957,9 @@
       { "id": "flamecharge", "share": 0.1683 },
       { "id": "willowisp", "share": 0.0368 },
       { "id": "bulkup", "share": 0.023 },
-      { "id": "rocktomb", "share": 0.0222 }
+      { "id": "rocktomb", "share": 0.0222 },
+      { "id": "earthquake", "share": 0.0176 },
+      { "id": "bodypress", "share": 0.0121 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.6386 },
@@ -19881,7 +21037,11 @@
       { "id": "icepunch", "share": 0.0774 },
       { "id": "icebeam", "share": 0.0575 },
       { "id": "taunt", "share": 0.0542 },
-      { "id": "rockslide", "share": 0.0484 }
+      { "id": "rockslide", "share": 0.0484 },
+      { "id": "grassknot", "share": 0.031 },
+      { "id": "chillingwater", "share": 0.0292 },
+      { "id": "stuffcheeks", "share": 0.022 },
+      { "id": "recycle", "share": 0.0177 }
     ],
     "items": [
       { "id": "lumberry", "share": 0.7423 },
@@ -19953,7 +21113,13 @@
       { "id": "gigaimpact", "share": 0.1547 },
       { "id": "iciclecrash", "share": 0.1324 },
       { "id": "taunt", "share": 0.1223 },
-      { "id": "disable", "share": 0.0796 }
+      { "id": "disable", "share": 0.0796 },
+      { "id": "crunch", "share": 0.0742 },
+      { "id": "sheercold", "share": 0.06 },
+      { "id": "foulplay", "share": 0.0554 },
+      { "id": "icespinner", "share": 0.0428 },
+      { "id": "icywind", "share": 0.0387 },
+      { "id": "gyroball", "share": 0.0216 }
     ],
     "items": [{ "id": "glalitite", "share": 1 }],
     "abilities": [{ "id": "refrigerate", "share": 1 }],
@@ -20073,7 +21239,12 @@
       { "id": "icebeam", "share": 0.1808 },
       { "id": "thunderpunch", "share": 0.1495 },
       { "id": "crunch", "share": 0.139 },
-      { "id": "ironhead", "share": 0.0822 }
+      { "id": "ironhead", "share": 0.0822 },
+      { "id": "zenheadbutt", "share": 0.0386 },
+      { "id": "headsmash", "share": 0.0359 },
+      { "id": "stompingtantrum", "share": 0.0224 },
+      { "id": "curse", "share": 0.0216 },
+      { "id": "superpower", "share": 0.0109 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.728 },
@@ -20141,7 +21312,18 @@
       { "id": "nightslash", "share": 0.1915 },
       { "id": "shadowclaw", "share": 0.1913 },
       { "id": "brutalswing", "share": 0.144 },
-      { "id": "psychocut", "share": 0.1387 }
+      { "id": "psychocut", "share": 0.1387 },
+      { "id": "xscissor", "share": 0.1147 },
+      { "id": "playrough", "share": 0.0927 },
+      { "id": "substitute", "share": 0.0907 },
+      { "id": "focusenergy", "share": 0.0837 },
+      { "id": "shadowsneak", "share": 0.0639 },
+      { "id": "swordsdance", "share": 0.0616 },
+      { "id": "irontail", "share": 0.0403 },
+      { "id": "throatchop", "share": 0.0312 },
+      { "id": "perishsong", "share": 0.0158 },
+      { "id": "superpower", "share": 0.0143 },
+      { "id": "batonpass", "share": 0.0115 }
     ],
     "items": [{ "id": "absolite", "share": 1 }],
     "abilities": [{ "id": "magicbounce", "share": 1 }],
@@ -20209,7 +21391,14 @@
       { "id": "helpinghand", "share": 0.1773 },
       { "id": "poisonjab", "share": 0.123 },
       { "id": "drainpunch", "share": 0.1211 },
-      { "id": "detect", "share": 0.0608 }
+      { "id": "detect", "share": 0.0608 },
+      { "id": "psychocut", "share": 0.0493 },
+      { "id": "thunderpunch", "share": 0.0486 },
+      { "id": "psychup", "share": 0.0453 },
+      { "id": "icepunch", "share": 0.0243 },
+      { "id": "quickguard", "share": 0.0234 },
+      { "id": "skillswap", "share": 0.0166 },
+      { "id": "feint", "share": 0.0166 }
     ],
     "items": [{ "id": "medichamite", "share": 1 }],
     "abilities": [{ "id": "purepower", "share": 1 }],
@@ -20271,7 +21460,12 @@
       { "id": "roost", "share": 0.3141 },
       { "id": "bravebird", "share": 0.1587 },
       { "id": "uturn", "share": 0.0469 },
-      { "id": "boomburst", "share": 0.0397 }
+      { "id": "boomburst", "share": 0.0397 },
+      { "id": "heatwave", "share": 0.0397 },
+      { "id": "hurricane", "share": 0.0326 },
+      { "id": "flashcannon", "share": 0.0326 },
+      { "id": "helpinghand", "share": 0.0268 },
+      { "id": "endeavor", "share": 0.021 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.4212 },
@@ -20352,7 +21546,16 @@
       { "id": "tickle", "share": 0.2712 },
       { "id": "electroweb", "share": 0.2435 },
       { "id": "lightscreen", "share": 0.2196 },
-      { "id": "taunt", "share": 0.2164 }
+      { "id": "taunt", "share": 0.2164 },
+      { "id": "charm", "share": 0.2129 },
+      { "id": "airslash", "share": 0.1385 },
+      { "id": "energyball", "share": 0.0951 },
+      { "id": "speedswap", "share": 0.0908 },
+      { "id": "thunderwave", "share": 0.0673 },
+      { "id": "discharge", "share": 0.0456 },
+      { "id": "helpinghand", "share": 0.0289 },
+      { "id": "acrobatics", "share": 0.0282 },
+      { "id": "thunderbolt", "share": 0.0184 }
     ],
     "items": [
       { "id": "focussash", "share": 0.8689 },
@@ -20417,7 +21620,22 @@
       { "id": "thunderbolt", "share": 0.2158 },
       { "id": "thunderwave", "share": 0.2158 },
       { "id": "supercellslam", "share": 0.1976 },
-      { "id": "psychicfangs", "share": 0.1947 }
+      { "id": "psychicfangs", "share": 0.1947 },
+      { "id": "playrough", "share": 0.1202 },
+      { "id": "protect", "share": 0.1104 },
+      { "id": "helpinghand", "share": 0.0769 },
+      { "id": "electricterrain", "share": 0.0634 },
+      { "id": "throatchop", "share": 0.0591 },
+      { "id": "risingvoltage", "share": 0.0549 },
+      { "id": "electroweb", "share": 0.0434 },
+      { "id": "agility", "share": 0.036 },
+      { "id": "babydolleyes", "share": 0.0329 },
+      { "id": "irontail", "share": 0.019 },
+      { "id": "facade", "share": 0.0175 },
+      { "id": "quickattack", "share": 0.0173 },
+      { "id": "bodyslam", "share": 0.0131 },
+      { "id": "crunch", "share": 0.0129 },
+      { "id": "doubleedge", "share": 0.0112 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.5115 },
@@ -20501,7 +21719,14 @@
       { "id": "taunt", "share": 0.0721 },
       { "id": "swordsdance", "share": 0.065 },
       { "id": "throatchop", "share": 0.0636 },
-      { "id": "encore", "share": 0.0381 }
+      { "id": "encore", "share": 0.0381 },
+      { "id": "feint", "share": 0.0341 },
+      { "id": "coaching", "share": 0.0284 },
+      { "id": "highjumpkick", "share": 0.0276 },
+      { "id": "bodypress", "share": 0.0243 },
+      { "id": "uturn", "share": 0.0241 },
+      { "id": "quickguard", "share": 0.0173 },
+      { "id": "rockslide", "share": 0.0124 }
     ],
     "items": [
       { "id": "whiteherb", "share": 0.8789 },
@@ -20561,7 +21786,11 @@
       { "id": "powergem", "share": 0.1513 },
       { "id": "paraboliccharge", "share": 0.1394 },
       { "id": "thunder", "share": 0.1007 },
-      { "id": "discharge", "share": 0.0986 }
+      { "id": "discharge", "share": 0.0986 },
+      { "id": "charge", "share": 0.0944 },
+      { "id": "lightscreen", "share": 0.0725 },
+      { "id": "voltswitch", "share": 0.0331 },
+      { "id": "dragonpulse", "share": 0.01 }
     ],
     "items": [
       { "id": "leftovers", "share": 0.7674 },
@@ -20685,7 +21914,15 @@
       { "id": "trick", "share": 0.1618 },
       { "id": "discharge", "share": 0.1148 },
       { "id": "nastyplot", "share": 0.0564 },
-      { "id": "thunder", "share": 0.0496 }
+      { "id": "thunder", "share": 0.0496 },
+      { "id": "lightscreen", "share": 0.0353 },
+      { "id": "eerieimpulse", "share": 0.0307 },
+      { "id": "helpinghand", "share": 0.0225 },
+      { "id": "raindance", "share": 0.0186 },
+      { "id": "painsplit", "share": 0.0183 },
+      { "id": "shadowball", "share": 0.0161 },
+      { "id": "thunderwave", "share": 0.0129 },
+      { "id": "foulplay", "share": 0.0105 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.351 },
@@ -20778,7 +22015,16 @@
       { "id": "recover", "share": 0.2109 },
       { "id": "bodyslam", "share": 0.2101 },
       { "id": "chillingwater", "share": 0.2101 },
-      { "id": "blizzard", "share": 0.2101 }
+      { "id": "blizzard", "share": 0.2101 },
+      { "id": "protect", "share": 0.1776 },
+      { "id": "mirrorcoat", "share": 0.0649 },
+      { "id": "rockslide", "share": 0.0568 },
+      { "id": "iciclecrash", "share": 0.0553 },
+      { "id": "auroraveil", "share": 0.0521 },
+      { "id": "frostbreath", "share": 0.0472 },
+      { "id": "earthquake", "share": 0.0446 },
+      { "id": "surf", "share": 0.0391 },
+      { "id": "heavyslam", "share": 0.0111 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.4141 },
@@ -20848,7 +22094,19 @@
       { "id": "dazzlinggleam", "share": 0.2139 },
       { "id": "healingwish", "share": 0.0974 },
       { "id": "imprison", "share": 0.0857 },
-      { "id": "moonblast", "share": 0.0855 }
+      { "id": "moonblast", "share": 0.0855 },
+      { "id": "expandingforce", "share": 0.0777 },
+      { "id": "psychicterrain", "share": 0.0761 },
+      { "id": "reflect", "share": 0.0722 },
+      { "id": "lightscreen", "share": 0.0691 },
+      { "id": "thunderwave", "share": 0.0634 },
+      { "id": "substitute", "share": 0.055 },
+      { "id": "energyball", "share": 0.0511 },
+      { "id": "psyshock", "share": 0.0423 },
+      { "id": "futuresight", "share": 0.03 },
+      { "id": "moonlight", "share": 0.0286 },
+      { "id": "shadowball", "share": 0.0249 },
+      { "id": "skillswap", "share": 0.0159 }
     ],
     "items": [
       { "id": "mentalherb", "share": 0.3231 },
@@ -20983,7 +22241,17 @@
       { "id": "aquajet", "share": 0.1491 },
       { "id": "crunch", "share": 0.1082 },
       { "id": "stoneedge", "share": 0.0968 },
-      { "id": "swordsdance", "share": 0.0773 }
+      { "id": "swordsdance", "share": 0.0773 },
+      { "id": "icepunch", "share": 0.0728 },
+      { "id": "heavyslam", "share": 0.0525 },
+      { "id": "throatchop", "share": 0.0477 },
+      { "id": "playrough", "share": 0.0444 },
+      { "id": "shadowclaw", "share": 0.0391 },
+      { "id": "frostbreath", "share": 0.039 },
+      { "id": "superpower", "share": 0.039 },
+      { "id": "taunt", "share": 0.0234 },
+      { "id": "lowkick", "share": 0.0209 },
+      { "id": "earthquake", "share": 0.0204 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.6806 },
@@ -21059,7 +22327,15 @@
       { "id": "gigadrain", "share": 0.1836 },
       { "id": "icebeam", "share": 0.0935 },
       { "id": "frostbreath", "share": 0.086 },
-      { "id": "energyball", "share": 0.0641 }
+      { "id": "energyball", "share": 0.0641 },
+      { "id": "earthpower", "share": 0.0477 },
+      { "id": "icehammer", "share": 0.0128 },
+      { "id": "earthquake", "share": 0.0126 },
+      { "id": "helpinghand", "share": 0.0125 },
+      { "id": "lowkick", "share": 0.0125 },
+      { "id": "seedbomb", "share": 0.0125 },
+      { "id": "brickbreak", "share": 0.0109 },
+      { "id": "avalanche", "share": 0.0109 }
     ],
     "items": [
       { "id": "expertbelt", "share": 0.4003 },
@@ -21140,7 +22416,12 @@
       { "id": "knockoff", "share": 0.267 },
       { "id": "feint", "share": 0.2427 },
       { "id": "focusenergy", "share": 0.2233 },
-      { "id": "shadowclaw", "share": 0.1507 }
+      { "id": "shadowclaw", "share": 0.1507 },
+      { "id": "psychocut", "share": 0.1142 },
+      { "id": "swordsdance", "share": 0.1042 },
+      { "id": "taunt", "share": 0.0351 },
+      { "id": "playrough", "share": 0.0251 },
+      { "id": "superpower", "share": 0.0208 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.4905 },
@@ -21207,7 +22488,10 @@
       { "id": "energyball", "share": 0.3103 },
       { "id": "dazzlinggleam", "share": 0.1125 },
       { "id": "toxic", "share": 0.0339 },
-      { "id": "venoshock", "share": 0.0237 }
+      { "id": "venoshock", "share": 0.0237 },
+      { "id": "leechseed", "share": 0.0163 },
+      { "id": "lifedew", "share": 0.0161 },
+      { "id": "gigadrain", "share": 0.0106 }
     ],
     "items": [
       { "id": "focussash", "share": 0.5062 },
@@ -21271,7 +22555,17 @@
       { "id": "protect", "share": 0.2798 },
       { "id": "calmmind", "share": 0.1838 },
       { "id": "sunnyday", "share": 0.1513 },
-      { "id": "psychic", "share": 0.0507 }
+      { "id": "psychic", "share": 0.0507 },
+      { "id": "grassyterrain", "share": 0.0394 },
+      { "id": "helpinghand", "share": 0.0344 },
+      { "id": "petalblizzard", "share": 0.0262 },
+      { "id": "synthesis", "share": 0.0201 },
+      { "id": "psychicnoise", "share": 0.02 },
+      { "id": "drainingkiss", "share": 0.0192 },
+      { "id": "gigadrain", "share": 0.0187 },
+      { "id": "wish", "share": 0.014 },
+      { "id": "substitute", "share": 0.0131 },
+      { "id": "charm", "share": 0.0106 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.5017 },
@@ -21346,7 +22640,17 @@
       { "id": "drainpunch", "share": 0.2018 },
       { "id": "partingshot", "share": 0.1573 },
       { "id": "protect", "share": 0.1543 },
-      { "id": "bulkup", "share": 0.133 }
+      { "id": "bulkup", "share": 0.133 },
+      { "id": "stormthrow", "share": 0.1267 },
+      { "id": "icepunch", "share": 0.0859 },
+      { "id": "comeuppance", "share": 0.0821 },
+      { "id": "hammerarm", "share": 0.0772 },
+      { "id": "gunkshot", "share": 0.0637 },
+      { "id": "bulletpunch", "share": 0.0513 },
+      { "id": "firepunch", "share": 0.0476 },
+      { "id": "rockslide", "share": 0.0336 },
+      { "id": "ironhead", "share": 0.0189 },
+      { "id": "brutalswing", "share": 0.0137 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.3782 },
@@ -21419,7 +22723,14 @@
       { "id": "highhorsepower", "share": 0.091 },
       { "id": "crunch", "share": 0.0626 },
       { "id": "mirrorcoat", "share": 0.0519 },
-      { "id": "rockblast", "share": 0.0416 }
+      { "id": "rockblast", "share": 0.0416 },
+      { "id": "auroraveil", "share": 0.0395 },
+      { "id": "recover", "share": 0.0254 },
+      { "id": "earthquake", "share": 0.0223 },
+      { "id": "curse", "share": 0.0219 },
+      { "id": "icespinner", "share": 0.0181 },
+      { "id": "icefang", "share": 0.0168 },
+      { "id": "heavyslam", "share": 0.0106 }
     ],
     "items": [
       { "id": "widelens", "share": 0.4112 },
@@ -21492,7 +22803,8 @@
       { "id": "destinybond", "share": 0.0692 },
       { "id": "bulletseed", "share": 0.0672 },
       { "id": "trickroom", "share": 0.0246 },
-      { "id": "powerwhip", "share": 0.024 }
+      { "id": "powerwhip", "share": 0.024 },
+      { "id": "grassknot", "share": 0.0207 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.9754 },
@@ -21547,7 +22859,13 @@
       { "id": "flamethrower", "share": 0.2165 },
       { "id": "hurricane", "share": 0.1115 },
       { "id": "overheat", "share": 0.0699 },
-      { "id": "airslash", "share": 0.043 }
+      { "id": "airslash", "share": 0.043 },
+      { "id": "willowisp", "share": 0.0219 },
+      { "id": "dig", "share": 0.0202 },
+      { "id": "flareblitz", "share": 0.016 },
+      { "id": "breakingswipe", "share": 0.0144 },
+      { "id": "aerialace", "share": 0.0144 },
+      { "id": "sunnyday", "share": 0.0139 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.5201 },
@@ -21619,7 +22937,13 @@
       { "id": "taunt", "share": 0.1721 },
       { "id": "gunkshot", "share": 0.1262 },
       { "id": "upperhand", "share": 0.1252 },
-      { "id": "coaching", "share": 0.0337 }
+      { "id": "coaching", "share": 0.0337 },
+      { "id": "drainpunch", "share": 0.0295 },
+      { "id": "earthquake", "share": 0.0271 },
+      { "id": "ironhead", "share": 0.0266 },
+      { "id": "quickguard", "share": 0.0266 },
+      { "id": "bulkup", "share": 0.0212 },
+      { "id": "brickbreak", "share": 0.0198 }
     ],
     "items": [
       { "id": "whiteherb", "share": 0.4285 },
@@ -21691,7 +23015,12 @@
       { "id": "gigadrain", "share": 0.2072 },
       { "id": "energyball", "share": 0.2054 },
       { "id": "leechseed", "share": 0.1687 },
-      { "id": "willowisp", "share": 0.1466 }
+      { "id": "willowisp", "share": 0.1466 },
+      { "id": "solarbeam", "share": 0.0843 },
+      { "id": "growth", "share": 0.0298 },
+      { "id": "seedbomb", "share": 0.0234 },
+      { "id": "stompingtantrum", "share": 0.0207 },
+      { "id": "flareblitz", "share": 0.0194 }
     ],
     "items": [
       { "id": "focussash", "share": 0.2499 },
@@ -21773,7 +23102,10 @@
       { "id": "blizzard", "share": 0.284 },
       { "id": "icebeam", "share": 0.2099 },
       { "id": "sunnyday", "share": 0.0325 },
-      { "id": "flamethrower", "share": 0.0282 }
+      { "id": "flamethrower", "share": 0.0282 },
+      { "id": "hurricane", "share": 0.0271 },
+      { "id": "thunderbolt", "share": 0.0192 },
+      { "id": "hex", "share": 0.0148 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.4775 },
@@ -21838,7 +23170,8 @@
       { "id": "taunt", "share": 0.0521 },
       { "id": "flamethrower", "share": 0.0492 },
       { "id": "overheat", "share": 0.0238 },
-      { "id": "endeavor", "share": 0.011 }
+      { "id": "endeavor", "share": 0.011 },
+      { "id": "beatup", "share": 0.011 }
     ],
     "items": [
       { "id": "focussash", "share": 0.9398 },
@@ -21898,7 +23231,23 @@
       { "id": "forestscurse", "share": 0.2931 },
       { "id": "leechseed", "share": 0.1753 },
       { "id": "woodhammer", "share": 0.0842 },
-      { "id": "skillswap", "share": 0.0754 }
+      { "id": "skillswap", "share": 0.0754 },
+      { "id": "phantomforce", "share": 0.0628 },
+      { "id": "destinybond", "share": 0.054 },
+      { "id": "rockslide", "share": 0.0517 },
+      { "id": "suckerpunch", "share": 0.0477 },
+      { "id": "shadowclaw", "share": 0.0432 },
+      { "id": "scaryface", "share": 0.0404 },
+      { "id": "trick", "share": 0.0401 },
+      { "id": "toxic", "share": 0.0348 },
+      { "id": "growth", "share": 0.0345 },
+      { "id": "haze", "share": 0.0319 },
+      { "id": "rest", "share": 0.0273 },
+      { "id": "painsplit", "share": 0.0184 },
+      { "id": "substitute", "share": 0.0168 },
+      { "id": "curse", "share": 0.0158 },
+      { "id": "raindance", "share": 0.0153 },
+      { "id": "knockoff", "share": 0.0131 }
     ],
     "items": [
       { "id": "sitrusberry", "share": 0.6876 },
@@ -22029,7 +23378,11 @@
       { "id": "earthpower", "share": 0.0786 },
       { "id": "eruption", "share": 0.0571 },
       { "id": "heatwave", "share": 0.0347 },
-      { "id": "solarbeam", "share": 0.024 }
+      { "id": "solarbeam", "share": 0.024 },
+      { "id": "lavaplume", "share": 0.0227 },
+      { "id": "temperflare", "share": 0.0167 },
+      { "id": "growth", "share": 0.0128 },
+      { "id": "willowisp", "share": 0.01 }
     ],
     "items": [
       { "id": "choicescarf", "share": 0.8833 },
@@ -22096,7 +23449,11 @@
       { "id": "glare", "share": 0.2 },
       { "id": "earthquake", "share": 0.179 },
       { "id": "coil", "share": 0.1364 },
-      { "id": "stoneedge", "share": 0.1127 }
+      { "id": "stoneedge", "share": 0.1127 },
+      { "id": "drillrun", "share": 0.0454 },
+      { "id": "bulldoze", "share": 0.0379 },
+      { "id": "sandstorm", "share": 0.0296 },
+      { "id": "stealthrock", "share": 0.0232 }
     ],
     "items": [
       { "id": "brightpowder", "share": 0.6362 },
@@ -22222,7 +23579,9 @@
       { "id": "sandstorm", "share": 0.1589 },
       { "id": "sludgebomb", "share": 0.059 },
       { "id": "thunderwave", "share": 0.0219 },
-      { "id": "substitute", "share": 0.0219 }
+      { "id": "substitute", "share": 0.0219 },
+      { "id": "painsplit", "share": 0.0203 },
+      { "id": "scald", "share": 0.0202 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.5053 },
@@ -22340,7 +23699,13 @@
       { "id": "skillswap", "share": 0.2394 },
       { "id": "psychicnoise", "share": 0.1378 },
       { "id": "expandingforce", "share": 0.135 },
-      { "id": "darkpulse", "share": 0.1005 }
+      { "id": "darkpulse", "share": 0.1005 },
+      { "id": "calmmind", "share": 0.0685 },
+      { "id": "nastyplot", "share": 0.0661 },
+      { "id": "energyball", "share": 0.038 },
+      { "id": "psychicterrain", "share": 0.0352 },
+      { "id": "charm", "share": 0.0131 },
+      { "id": "faketears", "share": 0.0131 }
     ],
     "items": [{ "id": "meowsticite", "share": 1 }],
     "abilities": [{ "id": "trace", "share": 1 }],
@@ -22400,7 +23765,13 @@
       { "id": "bodypress", "share": 0.1688 },
       { "id": "highhorsepower", "share": 0.1332 },
       { "id": "earthquake", "share": 0.098 },
-      { "id": "selfdestruct", "share": 0.0945 }
+      { "id": "selfdestruct", "share": 0.0945 },
+      { "id": "stompingtantrum", "share": 0.0634 },
+      { "id": "fissure", "share": 0.0616 },
+      { "id": "heavyslam", "share": 0.0403 },
+      { "id": "gyroball", "share": 0.0379 },
+      { "id": "curse", "share": 0.0268 },
+      { "id": "drillrun", "share": 0.0267 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.6938 },
@@ -22469,7 +23840,16 @@
       { "id": "taunt", "share": 0.2732 },
       { "id": "lowkick", "share": 0.2594 },
       { "id": "brickbreak", "share": 0.259 },
-      { "id": "leafstorm", "share": 0.1648 }
+      { "id": "leafstorm", "share": 0.1648 },
+      { "id": "superpower", "share": 0.1534 },
+      { "id": "leechseed", "share": 0.0982 },
+      { "id": "acrobatics", "share": 0.0471 },
+      { "id": "focusblast", "share": 0.0304 },
+      { "id": "gigadrain", "share": 0.0257 },
+      { "id": "gunkshot", "share": 0.0252 },
+      { "id": "belch", "share": 0.0231 },
+      { "id": "stuffcheeks", "share": 0.0161 },
+      { "id": "helpinghand", "share": 0.0137 }
     ],
     "items": [
       { "id": "focussash", "share": 0.4715 },
@@ -22538,7 +23918,13 @@
       { "id": "barbbarrage", "share": 0.2375 },
       { "id": "destinybond", "share": 0.0682 },
       { "id": "poisonjab", "share": 0.0666 },
-      { "id": "aquajet", "share": 0.0537 }
+      { "id": "aquajet", "share": 0.0537 },
+      { "id": "aquatail", "share": 0.0527 },
+      { "id": "waterfall", "share": 0.0324 },
+      { "id": "toxicspikes", "share": 0.0313 },
+      { "id": "gunkshot", "share": 0.0211 },
+      { "id": "spite", "share": 0.0146 },
+      { "id": "raindance", "share": 0.0146 }
     ],
     "items": [
       { "id": "lifeorb", "share": 0.6474 },

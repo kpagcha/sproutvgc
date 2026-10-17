@@ -17,6 +17,9 @@ const CUTOFFS = [1760, 1630, 1500, 0] as const
 /** How much of each list to keep: Smogon's own moveset files show about as much. Less than 1% is noise. Speeds are
  * kept whole (`speeds`), as the app adds them up: what's left out would be left out of its totals too. */
 const KEEP = { list: 10, spreads: 6, min: 0.01 }
+// Its moves, every one over `KEEP.min`: its meta page shows its whole movepool with the share of each (its sets' view
+// the top `KEEP.list` of them).
+const KEEP_MOVES = Infinity
 
 // What `src/data/meta.ts` reads (`MetaSnapshot`, `PokemonMeta`), with IDs as plain strings.
 export interface Snapshot {
@@ -200,7 +203,7 @@ export class Smogon {
           rank: i + 1,
           usage: round(d.usage),
           brought: brought.has(name) ? round(brought.get(name)!) : undefined,
-          moves: top(d.Moves, total, KEEP.list, (m) => m !== '' && check(known.moves, 'move')(m)),
+          moves: top(d.Moves, total, KEEP_MOVES, (m) => m !== '' && check(known.moves, 'move')(m)),
           // "nothing": no item.
           items: top(d.Items, total, KEEP.list, (it) => it !== 'nothing' && check(known.items, 'item')(it)),
           abilities: top(d.Abilities, total, KEEP.list, check(known.abilities, 'ability')),

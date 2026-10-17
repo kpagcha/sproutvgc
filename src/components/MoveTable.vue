@@ -27,14 +27,19 @@ import SkeletonRows from '@/components/SkeletonRows.vue'
 // filters (after what's given in the slot: the page's heading) and the table go in panels of their own (for `.panels`);
 // without, both go in the caller's. A Pokémon's usage page gives each move's share of its sets (`shares`: a column of
 // its own, the table sorted by it at first), and leaves out PP (`noPp`) and the filters (`noFilters`), the descriptions
-// under the names, each a line of its own the whole width of its row (`stacked`).
+// under the names, each a line of its own the whole width of its row (`stacked`); its whole movepool shown, it keeps the
+// search alone (`search`).
 const props = defineProps<{
   ids: readonly MoveId[]
   descriptions?: boolean
   placeholder?: string
   shares?: Partial<Record<MoveId, number>>
+  /** What a move without a share shows ("<1%", under what the data keeps), rather than "—". */
+  under?: string
   noPp?: boolean
   noFilters?: boolean
+  /** With `noFilters`, the search box still shown. */
+  search?: boolean
   /** The descriptions under the names, as on phones, where the table is narrow. */
   stacked?: boolean
   query?: string
@@ -138,22 +143,24 @@ const skeleton = computed(() => [
 </script>
 
 <template>
-  <div v-if="!noFilters" :class="{ panel: panels }">
+  <div v-if="!noFilters || search" :class="{ panel: panels }">
     <slot />
     <div class="filters">
       <SearchBox v-model="query" :placeholder="placeholder ?? ''" :aria-label="placeholder" />
-      <select v-model="type" class="search select" :aria-label="t('move.type')">
-        <option value="">{{ t('pokedex.anyType') }}</option>
-        <option v-for="ty in TYPES" :key="ty" :value="ty">{{ typeName(ty) }}</option>
-      </select>
-      <select v-model="category" class="search select" :aria-label="t('move.category')">
-        <option value="">{{ t('moves.anyCategory') }}</option>
-        <option v-for="c in CATEGORIES" :key="c" :value="c">{{ t(`move.category.${c}`) }}</option>
-      </select>
-      <select v-model="flag" class="search select" :aria-label="t('move.flags')">
-        <option value="">{{ t('moves.anyFlag') }}</option>
-        <option v-for="{ f, name } in flags" :key="f" :value="f">{{ name }}</option>
-      </select>
+      <template v-if="!noFilters">
+        <select v-model="type" class="search select" :aria-label="t('move.type')">
+          <option value="">{{ t('pokedex.anyType') }}</option>
+          <option v-for="ty in TYPES" :key="ty" :value="ty">{{ typeName(ty) }}</option>
+        </select>
+        <select v-model="category" class="search select" :aria-label="t('move.category')">
+          <option value="">{{ t('moves.anyCategory') }}</option>
+          <option v-for="c in CATEGORIES" :key="c" :value="c">{{ t(`move.category.${c}`) }}</option>
+        </select>
+        <select v-model="flag" class="search select" :aria-label="t('move.flags')">
+          <option value="">{{ t('moves.anyFlag') }}</option>
+          <option v-for="{ f, name } in flags" :key="f" :value="f">{{ name }}</option>
+        </select>
+      </template>
     </div>
   </div>
   <div :class="{ panel: panels, 'table-box': stacked }">
@@ -200,7 +207,7 @@ const skeleton = computed(() => [
           <div role="cell" class="wide-only r num">{{ r.data.accuracy === true ? '—' : r.data.accuracy }}</div>
           <div v-if="!noPp" role="cell" class="wide-only r num">{{ r.data.pp }}</div>
           <div v-if="shares" role="cell" class="r num meter" :style="{ '--share': shares[r.id] ?? 0 }">
-            {{ shares[r.id] === undefined ? '—' : percent(shares[r.id]!) }}
+            {{ shares[r.id] === undefined ? (under ?? '—') : percent(shares[r.id]!) }}
           </div>
           <div v-if="descriptions && stacked && shortOf(r.id)" role="cell" class="muted span-desc">
             <DexText :text="shortOf(r.id)" />
