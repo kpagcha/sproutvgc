@@ -134,6 +134,7 @@ export const messages = {
   'head.matchups': 'Type calculator: weaknesses and coverage',
   'head.metaPokemon': 'Usage, sets and spreads',
   'head.pokemonRankings': 'Pokémon usage rankings: the most used Pokémon',
+  'head.abilityRankings': 'Ability usage rankings: the most used abilities',
   'head.quiz': 'Type quiz: learn the type chart',
   'keywords.home':
     '{game} dex, VGC, competitive Pokémon, Pokédex, speed tiers, speed calculator, type chart, usage stats, usage rankings, Regulation {reg}',
@@ -144,6 +145,7 @@ export const messages = {
     'type calculator, weakness calculator, type matchups, type coverage, coverage calculator, dual types, VGC, {game}',
   'keywords.pokemonRankings':
     'usage stats, usage rankings, most used Pokémon, VGC usage, metagame, tier list, {game}, Regulation {reg}',
+  'keywords.abilityRankings': 'ability usage, most used abilities, VGC usage stats, metagame, {game}, Regulation {reg}',
   'keywords.metaPokemon':
     '{name} usage, {name} sets, {name} build, {name} VGC, {name} moveset, {name} spreads, {name} natures, {name} items, {name} abilities, {name} teammates, VGC, {game}, Regulation {reg}',
   'keywords.quiz': 'type quiz, type chart quiz, learn type matchups, type effectiveness quiz, {game}',
@@ -1210,6 +1212,15 @@ export const messages = {
     "Faded: under {share} usage. They're on few teams, so their numbers and sets rest on a handful of them.",
   'usage.filteredSets': 'Filtering by item, ability or move counts what at least {share} of its sets run.',
   'usage.none': 'There are no usage stats for Regulation {reg} yet.',
+  'abilityUsage.intro': 'How often each ability is run in Regulation {reg}, and by which Pokémon.',
+  'abilityUsage.search': 'Search abilities',
+  'abilityUsage.users': 'Top Pokémon',
+  'abilityUsage.usersTip': 'The Pokémon whose teams run it most',
+  'abilityUsage.userTip': '{name} · {share} of its sets',
+  'abilityUsage.usageTip': 'The share of teams running it',
+  'abilityUsage.usageNote':
+    "Usage: each Pokémon's usage by the share of its sets running the ability, summed. A team with two Pokémon running it counts twice.",
+  'abilityUsage.noMatch': 'No ability matches.',
   'meta.players.0': 'All players',
   'meta.players.1500': 'Average players',
   'meta.players.1630': 'Good players',

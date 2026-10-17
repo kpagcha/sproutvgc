@@ -176,6 +176,7 @@ export function seoPages(): Plugin {
           lead: names.pokemon[id]!,
           schema: 'WebPage',
         })),
+        searched('meta/abilities', 'abilityRankings', 'WebPage'),
         searched('meta/speed-tiers', 'speedTiers'),
         searched('meta/speed-tiers/compare', 'speedCompare'),
         { path: 'tools', title: 'title.tools', desc: 'desc.tools', schema: 'CollectionPage' },

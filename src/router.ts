@@ -282,7 +282,21 @@ export const router = createRouter({
     },
     rankingsSoon('moves', 'moveRankings', 'title.moveRankings', 'desc.moveRankings'),
     rankingsSoon('items', 'itemRankings', 'title.itemRankings', 'desc.itemRankings'),
-    rankingsSoon('abilities', 'abilityRankings', 'title.abilityRankings', 'desc.abilityRankings'),
+    {
+      path: '/meta/abilities',
+      name: 'abilityRankings',
+      component: () => import('@/views/AbilityRankingsView.vue'),
+      meta: {
+        titleKey: 'title.abilityRankings',
+        descKey: 'desc.abilityRankings',
+        headKey: 'head.abilityRankings',
+        keywordsKey: 'keywords.abilityRankings',
+        dexNames: true,
+        descriptions: ['ability'],
+        recent: once('abilityRankings'),
+        ...inArea('meta', 'rankings'),
+      },
+    },
     soon('meta', 'reports', '/meta/reports', 'title.reports', 'desc.reports'),
     {
       path: '/meta/speed-tiers',
