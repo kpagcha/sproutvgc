@@ -12,7 +12,7 @@ import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import DexText from '@/components/DexText'
 
-// The dex searched, grouped by category (`useSearch`), the reader's favorites first and starred: the home page's
+// The dex searched, grouped by category (`useSearch`), after the site's pages and the meta pages (on the home page), the reader's favorites first and starred: the home page's
 // results, the search page's, and the Pokémon list's. On the Pokémon list (given its `filters`), types, abilities and moves filter it rather than open their pages.
 const props = defineProps<{ query: string; results: SearchResults; filters?: Filters }>()
 
@@ -39,6 +39,25 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
         </RouterLink>
       </li>
     </ul>
+  </section>
+  <!-- The meta pages of the Pokémon found, in the meta shown (the home page's), each with its usage rank. -->
+  <section v-if="results.meta.hits.length" class="panel section">
+    <RouterLink :to="{ name: 'rankings', query: { q: query } }" class="section-head">
+      <span class="section-title font-display">{{ t('search.meta') }} <span class="arrow">›</span></span>
+    </RouterLink>
+    <ul class="chip-hits">
+      <li v-for="h in results.meta.hits" :key="h.id">
+        <RouterLink :to="h.to" class="chip-hit">
+          <PokemonIcon :id="h.id as PokemonId" />
+          <span><Marked :p="h.parts" /></span
+          ><Star v-if="h.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" />
+          <span class="muted">#{{ h.rank }}</span>
+        </RouterLink>
+      </li>
+    </ul>
+    <RouterLink v-if="results.meta.more" :to="{ name: 'rankings', query: { q: query } }" class="more">
+      {{ t('home.more', { n: results.meta.more }) }}
+    </RouterLink>
   </section>
   <section v-for="s in results.sections" :key="s.kind" class="panel section">
     <RouterLink :to="{ path: s.list, query: { q: query } }" class="section-head">
@@ -88,7 +107,10 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
       </li>
     </ul>
   </section>
-  <p v-if="!results.pages.length && !results.types.length && !results.sections.length" class="muted none">
+  <p
+    v-if="!results.pages.length && !results.meta.hits.length && !results.types.length && !results.sections.length"
+    class="muted none"
+  >
     {{ t('home.none') }}
   </p>
 </template>

@@ -180,6 +180,7 @@ export const messages = {
   'home.toolsPitch': 'Calculate and build.',
   'home.quizzesPitch': 'Learn the type chart and the speed tiers.',
   'search.pages': 'Pages',
+  'search.meta': 'Meta entries',
   'recent.title': 'Recently viewed',
   'recent.clear': 'Clear',
   'home.typesDesc': 'Every type with its weaknesses, resistances and immunities.',

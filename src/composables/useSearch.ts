@@ -9,6 +9,7 @@ import { loadDexNames, refName } from '@/i18n/refName'
 import { fold, split, type Marks } from '@/lib/search'
 import { useFavorites } from '@/composables/useFavorites'
 import { AREAS } from '@/lib/areas'
+import type { MetaData } from '@/data/meta'
 
 export type SectionKind = 'pokemon' | 'move' | 'ability' | 'item' | 'condition'
 
@@ -53,8 +54,15 @@ export interface PageHit {
   soon?: boolean
 }
 
+/** A Pokémon's meta page found by its name: one in the meta snapshot shown, with its usage rank. */
+export interface MetaHit extends Hit {
+  rank: number
+}
+
 export interface SearchResults {
   pages: PageHit[]
+  /** The meta pages, with their total: the section shows `LIMIT` and links to the rankings for the rest. */
+  meta: { hits: MetaHit[]; more: number }
   types: { id: TypeId; parts: Marks }[]
   sections: ((typeof SECTIONS)[number] & { hits: Hit[]; more: number })[]
 }
@@ -82,16 +90,34 @@ function searchPages(q: string): PageHit[] {
   })
 }
 
+/** The order hits show in: the reader's favorites first, then names starting with the search, then `rest`. */
+const byRelevance =
+  <H extends Hit>(rest: (a: H, b: H) => number) =>
+  (a: H, b: H) =>
+    +b.fav - +a.fav || +!!a.parts[0] - +!!b.parts[0] || rest(a, b)
+
 /**
  * The dex searched by name in the reader's language, as the home and search pages do it: types, and `kinds`; with
- * `pages`, the site's pages too.
+ * `pages`, the site's pages too; given the `meta` shown, the meta pages of its Pokémon.
  */
 export function useSearch(
   query: () => string,
   kinds: readonly SectionKind[] = SECTIONS.map((s) => s.kind),
-  { pages = false } = {},
+  { pages = false, meta }: { pages?: boolean; meta?: () => MetaData | null } = {},
 ) {
-  const { isFavorite } = useFavorites()
+  const { isFavorite, isMetaFavorite } = useFavorites()
+  /** The meta snapshot's Pokémon matching the folded query `q`: their starred meta entries first, then by usage. */
+  function searchMeta(q: string): SearchResults['meta'] {
+    const hits = Object.entries(meta?.() ?? {})
+      .flatMap(([id, m]): MetaHit[] => {
+        const name = refName({ kind: 'pokemon', id } as Ref)
+        const parts = split(name, q)
+        const to = { name: 'metaPokemon', params: { id } }
+        return parts ? [{ id, name, parts, to, fav: isMetaFavorite(id), rank: m!.rank }] : []
+      })
+      .sort(byRelevance((a, b) => a.rank - b.rank))
+    return { hits: hits.slice(0, LIMIT), more: Math.max(0, hits.length - LIMIT) }
+  }
   /** Each category's entries matching the search; categories without any left out. */
   const results = computed((): SearchResults | null => {
     const q = fold(query().trim())
@@ -113,20 +139,26 @@ export function useSearch(
             const parts = split(name, q)
             return parts ? [{ id, name, parts, to: { name: section.route, params: { id } }, fav: isFavorite(ref) }] : []
           })
-          .sort(
-            (a, b) => +b.fav - +a.fav || +!!a.parts[0] - +!!b.parts[0] || a.name.localeCompare(b.name, locale.value),
-          )
+          .sort(byRelevance((a, b) => a.name.localeCompare(b.name, locale.value)))
         return { ...section, hits: hits.slice(0, LIMIT), more: Math.max(0, hits.length - LIMIT) }
       })
       .filter((s) => s.hits.length)
-    return { pages: pages ? searchPages(q) : [], types, sections }
+    return { pages: pages ? searchPages(q) : [], meta: searchMeta(q), types, sections }
   })
 
-  /** The only result, if the search has exactly one: Enter opens it. */
+  /** The only result, if the search has exactly one: Enter opens it. A Pokémon found as both its meta page and its
+   * dex entry is one result, its meta page. */
   const only = computed((): RouteLocationRaw | null => {
     const r = results.value
     if (!r) return null
     const hits = r.sections.flatMap((s) => s.hits)
+    const [m, ...others] = r.meta.hits
+    if (m && (others.length || r.meta.more || r.pages.length || r.types.length)) return null
+    if (m) {
+      const dex = r.sections.find((s) => s.kind === 'pokemon')
+      const same = hits.length === 1 && dex?.hits[0]?.id === m.id && !dex.more
+      return hits.length && !same ? null : m.to
+    }
     if (r.pages.length === 1 && !r.types.length && !hits.length) return r.pages[0]!.to
     if (r.pages.length) return null
     if (r.types.length === 1 && !hits.length) return `/dex/types/${r.types[0]!.id}`

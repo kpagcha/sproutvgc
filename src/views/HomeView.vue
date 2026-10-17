@@ -6,6 +6,7 @@ import { GAME_NAME, REGULATION } from '@/data/format'
 import { AREAS, PITCH, type AreaId } from '@/lib/areas'
 import { preloadSearch, searchFocus, useSearch } from '@/composables/useSearch'
 import { useSlashFocus } from '@/composables/useSlashFocus'
+import { useMeta } from '@/composables/useMeta'
 import FavoritesPanel from '@/components/FavoritesPanel.vue'
 import MetaHighlights from '@/components/MetaHighlights.vue'
 import RecentPanel from '@/components/RecentPanel.vue'
@@ -13,7 +14,7 @@ import SearchResults from '@/components/SearchResults.vue'
 import SearchBox from '@/components/SearchBox.vue'
 import logoUrl from '@/assets/logo.png'
 
-// The front door to the whole site: the search (of the dex and the site's pages), and under it, side by side, the
+// The front door to the whole site: the search (of the site's pages, the meta pages and the dex), and under it, side by side, the
 // areas (where to go: Meta's and Tools' with their sections) and the meta at a glance (what the site is most about,
 // `MetaHighlights`); then the reader's favorites and recently viewed. While searching, the results take the place of all but the search.
 
@@ -43,7 +44,10 @@ watch(searchFocus, focusBox)
 // "/" focuses the box too, as on the speed tiers.
 useSlashFocus(() => box.value?.focus({ preventScroll: true }))
 
-const { results, only } = useSearch(() => query.value, undefined, { pages: true })
+// The site's search: its pages, the meta pages of the Pokémon in the meta shown (first, as the site leads with it),
+// and the dex.
+const { data: meta } = useMeta()
+const { results, only } = useSearch(() => query.value, undefined, { pages: true, meta: () => meta.value })
 function openOnly() {
   if (only.value) void router.push(only.value)
 }
