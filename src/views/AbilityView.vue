@@ -28,7 +28,7 @@ const holders = computed(() => (HOLDERS as Record<string, PokemonId[]>)[id.value
       <div class="title-row">
         <EntryTitle :to="ref" />
         <RouterLink :to="{ name: 'metaAbility', params: { id } }" class="other-page"
-          >{{ t('ability.usage') }} ›</RouterLink
+          >{{ t('pokemon.meta') }} ›</RouterLink
         >
       </div>
       <!-- The long description; the short one is for the list, and stands in when there's nothing more to say. -->

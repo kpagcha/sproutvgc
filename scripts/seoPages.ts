@@ -111,21 +111,24 @@ export function seoPages(): Plugin {
       const latest = pool.reduce<Snapshot | undefined>((a, s) => (!a || s.to > a.to ? s : a), undefined)
       const datasetKey = (s: Snapshot) =>
         [s.regulation, s.provider.url, s.kind, s.season ?? '', s.period, s.from, s.to].join('|')
-      // And the abilities with a meta page: those some set there runs.
+      // And the abilities and items with a meta page: those some set there runs.
       const inMeta = new Set<string>()
       const abilitiesRun = new Set<string>()
+      const itemsHeld = new Set<string>()
       for (const s of latest ? pool.filter((s) => datasetKey(s) === datasetKey(latest)) : []) {
         const data = JSON.parse(await readFile(join(metaDir, `${s.id}.json`), 'utf8')) as Record<
           string,
-          { abilities?: { id: string; share?: number }[] }
+          { abilities?: { id: string; share?: number }[]; items?: { id: string; share?: number }[] }
         >
         for (const [id, m] of Object.entries(data)) {
           inMeta.add(id)
           for (const a of m.abilities ?? []) if (a.share) abilitiesRun.add(a.id)
+          for (const it of m.items ?? []) if (it.share) itemsHeld.add(it.id)
         }
       }
       const usageIds = dex.availableIds('pokemon').filter((id) => inMeta.has(id))
       const abilityIds = dex.availableIds('ability').filter((id) => abilitiesRun.has(id))
+      const itemIds = dex.availableIds('item').filter((id) => itemsHeld.has(id))
 
       const msg = (key: string, name = '') =>
         en.messages[key]!.replaceAll('{game}', GAME)
@@ -186,6 +189,15 @@ export function seoPages(): Plugin {
           schema: 'WebPage',
         })),
         searched('meta/items', 'itemRankings', 'WebPage'),
+        ...itemIds.map((id): Page => ({
+          path: `meta/items/${id}`,
+          title: 'title.metaItem',
+          head: 'head.metaItem',
+          desc: 'desc.metaItem',
+          keywords: 'keywords.metaItem',
+          lead: names.item[id]!,
+          schema: 'WebPage',
+        })),
         searched('meta/abilities', 'abilityRankings', 'WebPage'),
         ...abilityIds.map((id): Page => ({
           path: `meta/abilities/${id}`,

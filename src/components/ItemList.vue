@@ -16,7 +16,7 @@ import SortHeader from '@/components/SortHeader.vue'
 
 // Items as the dex lists them: each its icon and name, a link to its page (the search's matches marked, when it gives
 // them), and its short description beside it (under it on phones). Given each one's share of a Pokémon's sets
-// (`shares`, its usage page), a table as the moves' (`MoveTable`): a header, a row each, sortable by name or share
+// (`shares`, its usage page, each leading to its meta page rather than its dex entry), a table as the moves' (`MoveTable`): a header, a row each, sortable by name or share
 // (by share at first), its description under its name (unless `noDescriptions`), its share a number with its bar under
 // it.
 const props = defineProps<{
@@ -48,7 +48,7 @@ useRowColumns(useTemplateRef('head'))
     </div>
     <div v-for="it in sorted" :key="it.id" class="row" role="row">
       <div role="cell" class="grow">
-        <AppLink :to="{ name: 'item', params: { id: it.id } }" class="name item-name">
+        <AppLink :to="{ name: 'metaItem', params: { id: it.id } }" class="name item-name">
           <ItemIcon :id="it.id" />{{ it.name }}
         </AppLink>
         <div v-if="!noDescriptions" class="muted below"><DexText :text="it.text" /></div>

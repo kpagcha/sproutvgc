@@ -101,6 +101,23 @@ const usageRankings = (
   },
 })
 
+// An ability's or item's meta page: one view, the kind its prop.
+const metaEntry = (list: 'abilities' | 'items', name: 'metaAbility' | 'metaItem', kind: 'ability' | 'item') => ({
+  path: `/meta/${list}/:id`,
+  name,
+  component: () => import('@/views/MetaEntryView.vue'),
+  props: { kind },
+  meta: {
+    titleKey: `title.${name}` as const,
+    descKey: `desc.${name}` as const,
+    headKey: `head.${name}` as const,
+    keywordsKey: `keywords.${name}` as const,
+    dexNames: true,
+    descriptions: [kind],
+    ...inArea('meta', 'rankings'),
+  },
+})
+
 // An area's own page, listing its sections.
 const area = (id: AreaId, titleKey: MessageKey, descKey: MessageKey) => ({
   path: `/${id}`,
@@ -305,20 +322,8 @@ export const router = createRouter({
     rankingsSoon('moves', 'moveRankings', 'title.moveRankings', 'desc.moveRankings'),
     usageRankings('items', 'itemRankings', 'item'),
     usageRankings('abilities', 'abilityRankings', 'ability'),
-    {
-      path: '/meta/abilities/:id',
-      name: 'metaAbility',
-      component: () => import('@/views/MetaAbilityView.vue'),
-      meta: {
-        titleKey: 'title.metaAbility',
-        descKey: 'desc.metaAbility',
-        headKey: 'head.metaAbility',
-        keywordsKey: 'keywords.metaAbility',
-        dexNames: true,
-        descriptions: ['ability'],
-        ...inArea('meta', 'rankings'),
-      },
-    },
+    metaEntry('abilities', 'metaAbility', 'ability'),
+    metaEntry('items', 'metaItem', 'item'),
     soon('meta', 'reports', '/meta/reports', 'title.reports', 'desc.reports'),
     {
       path: '/meta/speed-tiers',

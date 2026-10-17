@@ -27,7 +27,11 @@ export function refHref(ref: Ref): string | undefined {
 }
 
 /** The categories with a meta page per entry, its dex entry's sibling: their route. */
-const META_PAGES: Partial<Record<Ref['kind'], string>> = { pokemon: 'metaPokemon', ability: 'metaAbility' }
+const META_PAGES: Partial<Record<Ref['kind'], string>> = {
+  pokemon: 'metaPokemon',
+  ability: 'metaAbility',
+  item: 'metaItem',
+}
 
 /** The href of an entry's meta page, where links on the meta's pages lead; its dex entry's, for a category with none. */
 export function metaHref(ref: Ref): string | undefined {

@@ -31,7 +31,13 @@ const megas = computed(() => Object.entries(data.value.megas ?? {}) as [PokemonI
       <div class="head">
         <ItemIcon :id="id" :scale="2" />
         <div>
-          <EntryTitle :to="ref_" />
+          <!-- Its meta page, as that page links here. -->
+          <div class="title-row">
+            <EntryTitle :to="ref_" />
+            <RouterLink :to="{ name: 'metaItem', params: { id } }" class="other-page"
+              >{{ t('pokemon.meta') }} ›</RouterLink
+            >
+          </div>
           <span class="muted">{{ t(`items.kind1.${data.kind}`) }}</span>
         </div>
       </div>

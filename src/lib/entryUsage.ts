@@ -1,6 +1,6 @@
 // The usage of what Pokémon's sets run (abilities, items), from a meta snapshot's data by Pokémon: an entry's usage is
 // the teams running it, each Pokémon with it counting its usage by the share of its sets that run it. For their
-// rankings (`UsageRankingsView`) and an ability's meta page (`MetaAbilityView`).
+// rankings (`UsageRankingsView`) and their meta pages (`MetaEntryView`).
 
 import type { PokemonId } from '@/data/dex'
 import type { MetaData } from '@/data/meta'

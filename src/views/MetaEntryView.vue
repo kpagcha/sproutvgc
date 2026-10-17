@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, useTemplateRef } from 'vue'
 import { useRoute } from 'vue-router'
-import { ability, available, pokemon, type AbilityId, type PokemonId } from '@/data/dex'
+import { ability, available, item, pokemon, type AbilityId, type ItemId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { sinceLabel, has, percent } from '@/data/meta'
 import { POKEMON, splitForme } from '@/data/pokemon'
-import { locale, t, typeName } from '@/i18n'
+import { locale, t, typeName, type MessageKey } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { points, ranksOf, standings, STEADY, usageOf, usersOf } from '@/lib/entryUsage'
@@ -15,33 +15,73 @@ import { useRowColumns } from '@/composables/useRowColumns'
 import { useSort } from '@/composables/useSort'
 import AppLink from '@/components/AppLink'
 import DexText from '@/components/DexText'
+import ItemIcon from '@/components/ItemIcon.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
 import SortHeader from '@/components/SortHeader.vue'
 
-// An ability's meta page, its dex entry's sibling (each links to the other): how it's used in the meta snapshot shown
-// (`useMeta`): its rank among the abilities and its usage, the teams running it (`entryUsage.ts`, as the ability
+// An ability's or item's meta page (`kind`), its dex entry's sibling (each links to the other): how it's used in the
+// meta snapshot shown (`useMeta`): its rank among its kind and its usage, the teams running it (`entryUsage.ts`, as its
 // rankings count it), with their change since the dataset before; then every Pokémon whose sets run it, with how often
-// they do and the usage they bring it; and those that can have it but whose sets don't.
+// they do and the usage they bring it; and, for an ability, those that can have it but whose sets don't (any Pokémon
+// can hold any item). One view for both, alike but for what's in `KINDS`.
+type Kind = 'ability' | 'item'
+const props = defineProps<{ kind: Kind }>()
+
+const KINDS = {
+  ability: {
+    ref: (id: string) => ability(id as AbilityId),
+    field: 'abilities',
+    dex: 'ability',
+    text: {
+      usageTip: 'abilityUsage.usageTip',
+      runBy: 'metaAbility.runBy',
+      none: 'metaAbility.none',
+      pokemon: 'metaAbility.pokemon',
+      shareTip: 'metaAbility.shareTip',
+      bringsTip: 'metaAbility.bringsTip',
+      notFound: 'ability.notFound',
+    },
+  },
+  item: {
+    ref: (id: string) => item(id as ItemId),
+    field: 'items',
+    dex: 'item',
+    text: {
+      usageTip: 'itemUsage.usageTip',
+      runBy: 'metaItem.runBy',
+      none: 'metaItem.none',
+      pokemon: 'metaItem.pokemon',
+      shareTip: 'metaItem.shareTip',
+      bringsTip: 'metaItem.bringsTip',
+      notFound: 'item.notFound',
+    },
+  },
+} as const satisfies Record<Kind, { text: Record<string, MessageKey> } & Record<string, unknown>>
+const cfg = computed(() => KINDS[props.kind])
+/** The page's text. */
+const tx = (k: keyof (typeof KINDS)[Kind]['text'], params?: Record<string, string | number>) =>
+  t(cfg.value.text[k], params)
+
 const route = useRoute()
-const id = computed(() => String(route.params.id) as AbilityId)
-const ref = computed(() => ability(id.value))
+const id = computed(() => String(route.params.id))
+const ref = computed(() => cfg.value.ref(id.value))
 const exists = computed(() => available(ref.value))
-const text = computed(() => description('ability', id.value))
+const text = computed(() => description(props.kind, id.value))
 
 const { snapshot, data, loading } = useMeta()
-const hasAbilities = computed(() => !!snapshot.value && has(snapshot.value, 'abilities'))
+const hasList = computed(() => !!snapshot.value && has(snapshot.value, cfg.value.field))
 const { previous, prevData } = usePreviousMeta(snapshot)
 
-const all = computed(() => usersOf(data.value ?? {}, 'abilities'))
+const all = computed(() => usersOf(data.value ?? {}, cfg.value.field))
 const users = computed(() => all.value.get(id.value) ?? [])
 const usage = computed(() => usageOf(users.value))
 const rank = computed(() => ranksOf(all.value).get(id.value))
 /** Its rank and usage in the dataset before, and their change: undefined until that's in, or with none. */
 const then = computed(() => {
   if (!prevData.value) return undefined
-  const s = standings(prevData.value, 'abilities')
+  const s = standings(prevData.value, cfg.value.field)
   const prevRank = s.ranks.get(id.value)
   return {
     climb: prevRank === undefined || rank.value === undefined ? undefined : prevRank - rank.value,
@@ -64,15 +104,15 @@ const { key, desc, toggle, sorted } = useSort<Row, Key>({
   initial: 'usage',
   startsDesc: (k) => k !== 'name',
   locale,
-  remember: 'metaAbility',
+  remember: `meta.${props.kind}`,
 })
 /** The most it brings, the full length of the bars. */
 const top = computed(() => Math.max(0, ...rows.value.map((r) => r.usage)))
 
-/** The Pokémon in the data that can have it but whose sets don't run it, by usage. */
+/** The Pokémon in the data that can have it but whose sets don't run it, by usage: an ability's alone. */
 const idle = computed(() =>
-  Object.entries(data.value ?? {})
-    .filter(([mon]) => POKEMON[mon as PokemonId].abilities.includes(id.value))
+  Object.entries(props.kind === 'ability' ? (data.value ?? {}) : {})
+    .filter(([mon]) => POKEMON[mon as PokemonId].abilities.includes(id.value as AbilityId))
     .filter(([mon]) => !users.value.some((u) => u.id === mon))
     .sort((a, b) => a[1]!.rank - b[1]!.rank)
     .map(([mon]) => mon as PokemonId),
@@ -84,18 +124,18 @@ useRowColumns(useTemplateRef('head'))
 <template>
   <template v-if="exists">
     <!-- The data shown, on the row of the way back: what the whole page is of. -->
-    <Teleport to="#back-actions-metaAbility" defer>
+    <Teleport :to="`#back-actions-${String(route.name)}`" defer>
       <MetaDialog />
     </Teleport>
 
     <!-- The heading: its name and the way to its dex entry, what it does, and how much it's used. -->
     <div class="panel" :class="{ 'meta-stale': loading }">
       <div class="title-row">
-        <h1>{{ refName(ref) }}</h1>
-        <AppLink :to="{ name: 'ability', params: { id } }" class="other-page">{{ t('pokemon.dex') }} ›</AppLink>
+        <h1 class="entry-name"><ItemIcon v-if="kind === 'item'" :id="id as ItemId" />{{ refName(ref) }}</h1>
+        <AppLink :to="{ name: cfg.dex, params: { id } }" class="other-page">{{ t('pokemon.dex') }} ›</AppLink>
       </div>
       <p v-if="text" class="muted desc"><DexText :text="text.short" /></p>
-      <p v-if="hasAbilities && rank !== undefined" class="used">
+      <p v-if="hasList && rank !== undefined" class="used">
         <span class="used-part"
           >{{ t('usage.rank') }}<b class="num">{{ rank }}</b
           ><span
@@ -107,7 +147,7 @@ useRowColumns(useTemplateRef('head'))
           ><span v-else-if="then?.fresh" class="climb fresh">{{ t('usage.new') }}</span></span
         >
         <span class="used-part"
-          >{{ t('usage.usage') }} <b v-tip="t('abilityUsage.usageTip')" class="num">{{ percent(usage) }}</b
+          >{{ t('usage.usage') }} <b v-tip="tx('usageTip')" class="num">{{ percent(usage) }}</b
           ><span
             v-if="then && previous"
             v-tip="t('usage.changeTip', { dates: sinceLabel(previous, snapshot) })"
@@ -116,22 +156,22 @@ useRowColumns(useTemplateRef('head'))
             >{{ points(then.change) }}</span
           ></span
         >
-        <span class="used-part muted">{{ t('metaAbility.runBy', { n: users.length }) }}</span>
+        <span class="used-part muted">{{ tx('runBy', { n: users.length }) }}</span>
       </p>
-      <p v-else-if="hasAbilities && data" class="muted">{{ t('metaAbility.none', { name: refName(ref) }) }}</p>
-      <p v-else-if="!hasAbilities" class="muted">{{ t('usage.none', { reg: REGULATION }) }}</p>
+      <p v-else-if="hasList && data" class="muted">{{ tx('none', { name: refName(ref) }) }}</p>
+      <p v-else-if="!hasList" class="muted">{{ t('usage.none', { reg: REGULATION }) }}</p>
     </div>
 
     <!-- The Pokémon whose sets run it. -->
-    <div v-if="hasAbilities && rows.length" class="panel" :class="{ 'meta-stale': loading }" :aria-busy="loading">
-      <h2>{{ t('metaAbility.pokemon') }}</h2>
+    <div v-if="hasList && rows.length" class="panel" :class="{ 'meta-stale': loading }" :aria-busy="loading">
+      <h2>{{ tx('pokemon') }}</h2>
       <div class="dex-table" role="table">
         <div ref="head" class="row head" role="row">
           <SortHeader :label="t('usage.pokemon')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
           <div role="columnheader" class="wide-only">{{ t('pokedex.types') }}</div>
           <SortHeader
             :label="t('metaAbility.share')"
-            :tip="t('metaAbility.shareTip', { name: refName(ref) })"
+            :tip="tx('shareTip', { name: refName(ref) })"
             right
             :active="key === 'share'"
             :desc="desc"
@@ -139,7 +179,7 @@ useRowColumns(useTemplateRef('head'))
           />
           <SortHeader
             :label="t('metaAbility.brings')"
-            :tip="t('metaAbility.bringsTip', { name: refName(ref) })"
+            :tip="tx('bringsTip', { name: refName(ref) })"
             right
             :active="key === 'usage'"
             :desc="desc"
@@ -190,13 +230,23 @@ useRowColumns(useTemplateRef('head'))
     </div>
   </template>
   <div v-else class="panel">
-    <p>{{ t('ability.notFound', { id, reg: REGULATION }) }}</p>
+    <p>{{ tx('notFound', { id, reg: REGULATION }) }}</p>
   </div>
 </template>
 
 <style scoped>
 .desc {
   margin: 0 0 8px;
+}
+/* An item's icon before its name, centered on it. The name aligns by its baseline, so the heading's baseline is the
+   name's (not the icon's foot, a flex box's first item's), and the link after it on the row lines up with it. */
+.entry-name {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.entry-name > :deep(.sheet-icon) {
+  align-self: center;
 }
 /* How much it's used: its rank, usage and how many Pokémon run it, on a line. */
 .used {

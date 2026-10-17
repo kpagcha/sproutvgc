@@ -391,7 +391,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
               <AppLink
                 v-if="r.item"
                 v-tip:group="!canHover && refName(r.item)"
-                :to="{ name: 'item', params: { id: r.item.id } }"
+                :to="{ name: 'metaItem', params: { id: r.item.id } }"
                 class="item shared"
                 :style="{ '--share': r.item.share ?? 0 }"
                 :data-share="r.item.share ?? 0"
@@ -460,7 +460,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
             <div v-if="setsShown" role="cell" class="set-line">
               <AppLink
                 v-if="r.item"
-                :to="{ name: 'item', params: { id: r.item.id } }"
+                :to="{ name: 'metaItem', params: { id: r.item.id } }"
                 class="part shared"
                 :style="{ '--share': r.item.share ?? 0 }"
                 :data-share="r.item.share ?? 0"

@@ -64,7 +64,7 @@ const LISTS = {
     kind: 'item',
     ref: (id: Id) => item(id as ItemId),
     field: 'items',
-    entry: 'item',
+    entry: 'metaItem',
     dex: 'items',
     /** Any Pokémon can hold any item: a Pokémon term leaves what its sets hold. */
     canHave: (mon: PokemonId, id: Id) => !!shareOf(mon, id),
