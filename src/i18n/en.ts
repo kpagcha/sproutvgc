@@ -637,6 +637,8 @@ export const messages = {
   'pokemon.evolvesFrom': 'Evolves from',
   'pokemon.evolvesInto': 'Evolves into',
   'pokemon.formes': 'Forms',
+  'pokemon.secEvolutions': 'Evolutions',
+  'pokemon.secFamily': 'Evolutions & forms',
   'pokemon.looks': '{n} looks',
   'pokemon.defense': 'Type matchups',
   'pokemon.moves': 'Moves',

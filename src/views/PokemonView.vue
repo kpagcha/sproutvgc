@@ -26,6 +26,7 @@ import ItemIcon from '@/components/ItemIcon.vue'
 import MoveTable from '@/components/MoveTable.vue'
 import PokemonChips from '@/components/PokemonChips.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import SectionNav from '@/components/SectionNav.vue'
 import TypeIcon from '@/components/TypeIcon'
 
 // One Pokémon: its sprite, types, abilities and base stats, how it changes (Mega Evolution, other formes) and evolves,
@@ -90,11 +91,31 @@ watchEffect(async () => {
   const sets = await loadLearnsets()
   if (id.value === current) learnset.value = movesOf(sets, current)
 })
+
+// Its sections, as the row of links at its top lists them (as its meta page's do): those it shows. The one of how it
+// evolves and its forms is named after what it has of them.
+const related = computed(() => others(formes.value) || others(looks.value) || !!mon.value.prevo || !!mon.value.evos)
+const relatedLabel = computed(() => {
+  const evolves = !!mon.value.prevo || !!mon.value.evos
+  const forms = others(formes.value) || others(looks.value)
+  return t(evolves && forms ? 'pokemon.secFamily' : evolves ? 'pokemon.secEvolutions' : 'pokemon.formes')
+})
+const sections = computed(() =>
+  [
+    { id: 'dex-stats', label: t('usageMon.secStats'), shown: true },
+    { id: 'dex-family', label: relatedLabel.value, shown: related.value },
+    { id: 'dex-matchups', label: t('pokemon.defense'), shown: true },
+    { id: 'dex-moves', label: t('pokemon.moves'), shown: true },
+  ].filter((x) => x.shown),
+)
 </script>
 
 <template>
   <template v-if="exists">
-    <div class="panel head">
+    <!-- Its sections, a row of links stuck to the top, the one being read marked. -->
+    <SectionNav :sections="sections" />
+
+    <div id="dex-stats" class="panel head">
       <img
         v-if="!mon.noSprite"
         class="pixel sprite"
@@ -161,7 +182,7 @@ watchEffect(async () => {
       </div>
     </div>
 
-    <div v-if="others(formes) || others(looks) || mon.prevo || mon.evos" class="panel">
+    <div v-if="related" id="dex-family" class="panel">
       <dl class="relations">
         <template v-if="mon.prevo">
           <dt class="muted">{{ t('pokemon.evolvesFrom') }}</dt>
@@ -182,14 +203,14 @@ watchEffect(async () => {
       </details>
     </div>
 
-    <details class="panel matchups" :open="matchupsOpen" @toggle="onMatchupsToggle">
+    <details id="dex-matchups" class="panel matchups" :open="matchupsOpen" @toggle="onMatchupsToggle">
       <summary>
         <h2>{{ t('pokemon.defense') }}</h2>
       </summary>
       <DefenseResults :types="mon.types" bare />
     </details>
 
-    <div class="panel">
+    <div id="dex-moves" class="panel">
       <h2>{{ t('pokemon.moves') }}</h2>
       <MoveTable v-if="learnset" :ids="learnset" descriptions :placeholder="t('pokemon.searchMoves')" />
     </div>
@@ -200,6 +221,14 @@ watchEffect(async () => {
 </template>
 
 <style scoped>
+/* Room above each section for the row of links stuck to the top, when scrolled to it; the moves' table headers stick
+   under that row rather than behind it. */
+.panel {
+  scroll-margin-top: 48px;
+}
+:deep(.dex-table .head) {
+  top: 37px;
+}
 .head {
   display: flex;
   flex-wrap: wrap;
