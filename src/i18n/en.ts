@@ -1231,8 +1231,6 @@ export const messages = {
   'abilityUsage.usersTip': 'The Pokémon whose teams run it most',
   'abilityUsage.userTip': '{name} · {share} of its sets',
   'abilityUsage.usageTip': 'The share of teams running it',
-  'abilityUsage.usageNote':
-    "Usage: each Pokémon's usage by the share of its sets running the ability, summed. A team with two Pokémon running it counts twice.",
   'abilityUsage.noMatch': 'No ability matches.',
   'metaAbility.runBy': 'Run by {n} Pokémon',
   'metaAbility.none': "No Pokémon's sets run {name} in this dataset.",
@@ -1248,8 +1246,6 @@ export const messages = {
   'itemUsage.usersTip': 'The Pokémon whose teams hold it most',
   'itemUsage.userTip': '{name} · {share} of its sets',
   'itemUsage.usageTip': 'The share of teams holding it',
-  'itemUsage.usageNote':
-    "Usage: each Pokémon's usage by the share of its sets holding the item, summed. A team with two Pokémon holding it counts twice.",
   'itemUsage.noMatch': 'No item matches.',
   'itemUsage.category': 'Category',
   'itemUsage.anyCategory': 'Any category',

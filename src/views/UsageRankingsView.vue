@@ -57,7 +57,6 @@ const LISTS = {
       userTip: 'abilityUsage.userTip',
       usageTip: 'abilityUsage.usageTip',
       monShareTip: 'abilityUsage.monShareTip',
-      usageNote: 'abilityUsage.usageNote',
       noMatch: 'abilityUsage.noMatch',
     },
   },
@@ -78,7 +77,6 @@ const LISTS = {
       userTip: 'itemUsage.userTip',
       usageTip: 'itemUsage.usageTip',
       monShareTip: 'itemUsage.monShareTip',
-      usageNote: 'itemUsage.usageNote',
       noMatch: 'itemUsage.noMatch',
     },
   },
@@ -358,7 +356,6 @@ const colVars = computed(() => ({
         </template>
       </div>
       <p v-else class="muted">{{ tx('noMatch') }}</p>
-      <p class="muted note">{{ tx('usageNote') }}</p>
       <p class="muted note">
         {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
       </p>
