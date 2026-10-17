@@ -108,6 +108,7 @@ const metaEntry = (
     keywordsKey: `keywords.${name}` as const,
     dexNames: true,
     descriptions: [kind],
+    recent: ({ params }: RouteLocationNormalized) => `${name}:${String(params.id)}`,
     ...inArea('meta', 'rankings'),
   },
 })

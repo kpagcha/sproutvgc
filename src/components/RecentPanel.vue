@@ -34,7 +34,7 @@ const keyOf = (r: (typeof items.value)[number]) => (r.kind === 'entry' ? `${r.re
     </summary>
     <div class="chips">
       <template v-for="r in items" :key="keyOf(r)">
-        <EntryChip v-if="r.kind === 'entry'" :to="r.ref" />
+        <EntryChip v-if="r.kind === 'entry'" :to="r.ref" dex />
         <PageChip v-else :visit="r" />
       </template>
     </div>

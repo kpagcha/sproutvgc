@@ -2,15 +2,26 @@
 import type { PageVisit } from '@/composables/useRecent'
 import { router } from '@/router'
 import { POKEMON } from '@/data/pokemon'
-import type { PokemonId } from '@/data/dex'
+import { available, type ItemId, type PokemonId, type Ref } from '@/data/dex'
 import { isType, type TypeId } from '@/data/types'
 import { readBuild } from '@/lib/speedBuild'
 import { readList } from '@/lib/speedLineup'
 
 /** The Pokémon a query names, if the regulation has it. */
 const mon = (id: string | undefined) => (id && id in POKEMON ? (id as PokemonId) : null)
+/** The entry whose meta page a route is, if it's an ability's, item's or move's. */
+const META_ENTRIES: Partial<Record<string, 'ability' | 'item' | 'move'>> = {
+  metaAbility: 'ability',
+  metaItem: 'item',
+  metaMove: 'move',
+}
 const typesOf = (v: string | undefined, max: number): TypeId[] =>
   [...new Set((v ?? '').split(',').filter(isType)).values()].slice(0, max)
+
+function metaEntry(kind: 'ability' | 'item' | 'move', id: string) {
+  const ref = { kind, id } as Ref
+  return available(ref) ? ref : null
+}
 
 /** What a page visited shows of itself: its route, and the Pokémon or types that tell it apart. */
 function view(visit: PageVisit) {
@@ -36,6 +47,8 @@ function view(visit: PageVisit) {
     found: name === 'speedTiers' && q.find !== q.mine ? mon(q.find) : null,
     /** The Pokémon whose usage page it is. */
     usage: name === 'metaPokemon' ? mon(String(to.params.id)) : null,
+    /** The ability, item or move whose meta page it is, if the regulation has it. */
+    entry: META_ENTRIES[name] ? metaEntry(META_ENTRIES[name], String(to.params.id)) : null,
     trickRoom: name.startsWith('speed') && q.trickroom === '1',
     // The type matchups' types, or the type the speed tiers are filtered by.
     types: name.startsWith('matchups')
@@ -49,13 +62,16 @@ function view(visit: PageVisit) {
 }
 
 /**
- * Whether a page visited can still be shown: a page that still exists, a comparison or a usage page of ones the
+ * Whether a page visited can still be shown: a page that still exists, a comparison or a meta page of ones the
  * regulation has.
  */
 export function shownVisit(visit: PageVisit) {
   const v = view(visit)
   return (
-    !!v.titleKey && (!v.groups || v.groups.every((g) => g.length > 0)) && (v.to.name !== 'metaPokemon' || !!v.usage)
+    !!v.titleKey &&
+    (!v.groups || v.groups.every((g) => g.length > 0)) &&
+    (v.to.name !== 'metaPokemon' || !!v.usage) &&
+    (!META_ENTRIES[String(v.to.name)] || !!v.entry)
   )
 }
 </script>
@@ -69,15 +85,24 @@ import { refName } from '@/i18n/refName'
 import { follow } from '@/lib/links'
 import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
+import ItemIcon from '@/components/ItemIcon.vue'
+import { moveType } from '@/components/EntryChip.vue'
 
 // A page with a view of its own (in its URL) as a chip reopening it as it was: the home page's recently viewed and
 // favorites (a setup starred), beside the dex entries' chips (`EntryChip`), in their style. A comparison is its
 // Pokémon's icons, each team's (or the speed order's list), their names read out; any other page its name, with the
 // Pokémon picked on it (a usage page's; the speed tiers' yours, with its build, the Pokémon found and the type it's
-// filtered by) or its types (the type matchups'); Trick Room, on, said in short.
+// filtered by), the entry it's of (an ability's, item's or move's meta page's, by name) or its types (the type
+// matchups'); Trick Room, on, said in short. A meta page is its Pokémon or entry alone, unnamed: beside them, the dex
+// entries' chips say they're the dex's.
 // `untitled` (on the page itself, which needs no naming): its name left out but when there's nothing else to show.
 const props = defineProps<{ visit: PageVisit; untitled?: boolean }>()
 const v = computed(() => view(props.visit))
+/** Whether it's named: not a meta page, its entry or Pokémon saying which it is. */
+const titled = computed(
+  () =>
+    !v.value.usage && !v.value.entry && (!props.untitled || (!v.value.mine && !v.value.found && !v.value.types.length)),
+)
 /** A comparison's Pokémon by name, for what reads the chip out: its icons alone say nothing. */
 const label = computed(() => v.value.groups?.map((g) => g.map((id) => refName(pokemon(id))).join(', ')).join(' vs '))
 /** The most icons a group shows, the rest counted. */
@@ -99,8 +124,13 @@ const GROUP_MAX = 6
       </template>
     </template>
     <template v-else>
-      <template v-if="!untitled || (!v.usage && !v.mine && !v.found && !v.types.length)">{{ t(v.titleKey!) }}</template>
+      <template v-if="titled">{{ t(v.titleKey!) }}</template>
       <PokemonIcon v-if="v.usage" :id="v.usage" />
+      <template v-if="v.entry">
+        <ItemIcon v-if="v.entry.kind === 'item'" :id="v.entry.id as ItemId" />
+        <TypeIcon v-else-if="v.entry.kind === 'move' && moveType(v.entry.id)" :type="moveType(v.entry.id)!" />
+        {{ refName(v.entry) }}
+      </template>
       <template v-if="v.mine">
         <PokemonIcon :id="v.mine" />
         <span class="build muted"

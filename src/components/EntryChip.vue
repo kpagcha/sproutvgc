@@ -3,11 +3,11 @@ import { shallowRef } from 'vue'
 import type { MoveId } from '@/data/dex'
 import type { Move } from '@/data/moves'
 
-// The moves' data, for their types, shared by every chip and loaded by the first move's: the pages showing chips
-// (the home page) don't need it otherwise.
+// The moves' data, for their types, shared by every chip (`PageChip`'s too) and loaded by the first move's: the pages
+// showing chips (the home page) don't need it otherwise.
 const moves = shallowRef<Record<MoveId, Move> | null>(null)
 let loading = false
-function moveType(id: string) {
+export function moveType(id: string) {
   if (!moves.value && !loading) {
     loading = true
     void import('@/data/moves').then((m) => (moves.value = m.MOVES))
@@ -18,6 +18,7 @@ function moveType(id: string) {
 
 <script setup lang="ts">
 import type { ItemId, PokemonId, Ref } from '@/data/dex'
+import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { computed } from 'vue'
 import { follow, hrefOf, refHref } from '@/lib/links'
@@ -27,8 +28,9 @@ import TypeIcon from '@/components/TypeIcon'
 
 // A dex entry as a flat chip linking to its page, with its icon (a move its type, once the moves' data is in): the
 // home page's favorites and recently viewed. All the same height whether or not they have an icon. With `meta`, a
-// Pokémon's meta entry instead of its dex entry.
-const props = defineProps<{ to: Ref; meta?: boolean }>()
+// Pokémon's meta entry instead of its dex entry. With `dex`, said to be the dex's (the recently viewed, where meta
+// pages show beside it).
+const props = defineProps<{ to: Ref; meta?: boolean; dex?: boolean }>()
 const href = computed(() =>
   props.meta ? hrefOf({ name: 'metaPokemon', params: { id: props.to.id } }) : refHref(props.to),
 )
@@ -36,6 +38,7 @@ const href = computed(() =>
 
 <template>
   <a :href class="entry-chip" @click="follow">
+    <span v-if="dex" class="muted">{{ t('title.dex') }}</span>
     <PokemonIcon v-if="to.kind === 'pokemon'" :id="to.id as PokemonId" />
     <ItemIcon v-else-if="to.kind === 'item'" :id="to.id as ItemId" />
     <TypeIcon v-else-if="to.kind === 'move' && moveType(to.id)" :type="moveType(to.id)!" />
