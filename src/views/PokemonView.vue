@@ -18,7 +18,6 @@ import {
 import { t, tSlots, typeName, type MessageKey } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
-import DefenseResults from '@/components/DefenseResults.vue'
 import DexRef from '@/components/DexRef'
 import EntryTitle from '@/components/EntryTitle.vue'
 import DexText, { hoverTip } from '@/components/DexText'
@@ -38,25 +37,6 @@ const exists = computed(() => available(ref_.value))
 const mon = computed(() => POKEMON[id.value])
 
 const abilities = computed(() => mon.value.abilities.map(ability))
-
-// The type matchups, collapsed unless opened: whether they're open is remembered across visits, for every Pokémon.
-const MATCHUPS_KEY = 'sproutvgc.pokemon.matchups'
-function readMatchupsOpen(): boolean {
-  try {
-    return localStorage.getItem(MATCHUPS_KEY) === '1'
-  } catch {
-    return false
-  }
-}
-const matchupsOpen = ref(readMatchupsOpen())
-function onMatchupsToggle(e: Event) {
-  matchupsOpen.value = (e.target as HTMLDetailsElement).open
-  try {
-    localStorage.setItem(MATCHUPS_KEY, matchupsOpen.value ? '1' : '0')
-  } catch {
-    // Storage unavailable: the choice lasts for this page load.
-  }
-}
 
 // Its base stats, each a bar colored by it (`statColor`), with the stat as the game shows it (`gameStats`) on hover.
 const stats = computed(() => {
@@ -104,7 +84,6 @@ const sections = computed(() =>
   [
     { id: 'dex-stats', label: t('usageMon.secStats'), shown: true },
     { id: 'dex-family', label: relatedLabel.value, shown: related.value },
-    { id: 'dex-matchups', label: t('pokemon.defense'), shown: true },
     { id: 'dex-moves', label: t('pokemon.moves'), shown: true },
   ].filter((x) => x.shown),
 )
@@ -205,13 +184,6 @@ const sections = computed(() =>
         <PokemonChips :ids="looks" :current="id" formes />
       </details>
     </div>
-
-    <details id="dex-matchups" class="panel matchups" :open="matchupsOpen" @toggle="onMatchupsToggle">
-      <summary>
-        <h2>{{ t('pokemon.defense') }}</h2>
-      </summary>
-      <DefenseResults :types="mon.types" bare />
-    </details>
 
     <div id="dex-moves" class="panel">
       <h2>{{ t('pokemon.moves') }}</h2>
@@ -371,22 +343,6 @@ const sections = computed(() =>
 }
 details {
   margin-top: 8px;
-}
-/* The type matchups' panel, its heading the toggle: the marker beside it, the heading inline so it sits on the marker's
-   line. */
-details.matchups {
-  margin-top: 0;
-}
-.matchups > summary {
-  cursor: pointer;
-  width: fit-content;
-}
-.matchups > summary h2 {
-  display: inline;
-  margin: 0;
-}
-.matchups[open] > summary {
-  margin-bottom: 12px;
 }
 @media (max-width: 560px) {
   .sprite-col {

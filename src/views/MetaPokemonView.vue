@@ -30,6 +30,7 @@ import { useListOptions } from '@/composables/useListOptions'
 import { useMeta } from '@/composables/useMeta'
 import { useSpeedOptions } from '@/composables/useSpeedOptions'
 import AppLink from '@/components/AppLink'
+import DefenseResults from '@/components/DefenseResults.vue'
 import ItemList from '@/components/ItemList.vue'
 import MoveTable from '@/components/MoveTable.vue'
 import DexRef from '@/components/DexRef'
@@ -307,6 +308,7 @@ const sections = computed(() =>
     { id: 'sec-spreads', label: t('usageMon.secSpreads'), shown: spreads.value.length > 0 },
     { id: 'sec-history', label: t('usageMon.secHistory'), shown: months.value.length > 1 },
     { id: 'sec-teammates', label: t('usageMon.teammates'), shown: teammates.value.length > 0 },
+    { id: 'sec-matchups', label: t('pokemon.defense'), shown: true },
   ].filter((x) => x.shown),
 )
 </script>
@@ -654,6 +656,12 @@ const sections = computed(() =>
         </ul>
       </section>
     </template>
+
+    <!-- Its types' matchups defending, last: not of the meta, so shown with or without its data. -->
+    <section id="sec-matchups" class="panel">
+      <h2>{{ t('pokemon.defense') }}</h2>
+      <DefenseResults :types="mon.types" bare />
+    </section>
 
     <!-- How many battles the data shown covers, at the page's end. -->
     <p v-if="snapshot?.battles" class="muted battles">
