@@ -1173,21 +1173,24 @@ const rangeRows = computed<RangeRow[]>(() => {
  * isn't. */
 const topEntry = (id: PokemonId) =>
   entries.value.filter((x) => x.id === id && !x.boost).sort((a, b) => (b.share ?? 0) - (a.share ?? 0))[0]
-/** Yours, tapped: nothing, as on its row (its page still opens in a new tab). */
-function holdMine(ev: MouseEvent) {
+/** Yours, tapped: its card, to change its build (dropped from the bar, or beside the ladder brought into view); its
+ * page still opens in a new tab. */
+function openMine(ev: MouseEvent) {
   if (ev.ctrlKey || ev.metaKey || ev.shiftKey) return
   ev.preventDefault()
   ev.stopPropagation()
+  if (side.value) reveal(yoursCard.value)
+  else yoursOpen.value = true
 }
 function onRangeChip(ev: MouseEvent, id: PokemonId) {
   const e = topEntry(id)
-  if (id === mine.value) holdMine(ev)
+  if (id === mine.value) openMine(ev)
   else if (e) onChip(ev, e)
 }
 /** A row's Pokémon tapped: measured against the chip it stands for. */
 function onRow(ev: MouseEvent, key: string) {
   const e = ladderRows.value.chips.get(key)
-  if (key === 'mine') holdMine(ev)
+  if (key === 'mine') openMine(ev)
   else if (e) onChip(ev, e)
 }
 /** A mark tapped, with yours: measured against that Speed of its row, at the most common build reaching it (with its
@@ -1297,6 +1300,8 @@ const versus = computed(() => {
       id: e.id,
       name: [e.species, e.forme].filter(Boolean).join(' '),
       speed: target,
+      mine: mine.value,
+      mineName: refName(pokemon(mine.value)),
       mineSpeed: mySpeed.value!,
       trickRoom: trickRoom.value,
       points: myPoints.value,
@@ -2561,18 +2566,6 @@ const { start: startTour } = useTour(
             </div>
             <p v-if="!mine" class="muted small wide-only yours-intro">{{ t('speed.yoursIntro') }}</p>
             <template v-else>
-              <!-- Its Speed, right under the pick, following the build below as it changes; a tap shows where it landed on
-               the ladder. -->
-              <button type="button" class="btn primary big-go" @click="toMine">
-                <span class="big-go-speed">{{ mySpeed }}</span>
-                <span>{{ t('speed.showYours') }}</span>
-              </button>
-              <!-- Narrower, the ladder is under this card, its opponents band out of view: a way to it, said as it's
-               picked. -->
-              <button v-if="!side" type="button" class="btn opponents-go" @click="toOpponents">
-                <span class="opponents-tag">{{ t('speed.opponentsHead') }}</span>
-                <span>{{ t('speed.opponentsGo') }}</span>
-              </button>
               <!-- Its build and modifiers, then what they come to: each a section of its own, labeled above. -->
               <!-- The meta's builds of it, to pick one in a tap, as the comparison has them. -->
               <section v-if="myCommon.length" class="yours-section">
@@ -2694,6 +2687,20 @@ const { start: startTour } = useTour(
               <section v-if="myChanged" class="yours-section">
                 <button type="button" class="btn inverted" @click="resetMine">
                   <RotateCcw :size="16" aria-hidden="true" />{{ t('speed.resetYours') }}
+                </button>
+              </section>
+              <section class="yours-section yours-go">
+                <!-- Its Speed, at the card's foot, following the build above as it changes; a tap shows where it landed on
+                 the ladder. -->
+                <button type="button" class="btn primary big-go" @click="toMine">
+                  <span class="big-go-speed">{{ mySpeed }}</span>
+                  <span>{{ t('speed.showYours') }}</span>
+                </button>
+                <!-- Narrower, the ladder is under this card, its opponents band out of view: a way to it, said as it's
+                 picked. -->
+                <button v-if="!side" type="button" class="btn opponents-go" @click="toOpponents">
+                  <span class="opponents-tag">{{ t('speed.opponentsHead') }}</span>
+                  <span>{{ t('speed.opponentsGo') }}</span>
                 </button>
               </section>
             </template>
@@ -3670,6 +3677,13 @@ const { start: startTour } = useTour(
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
+}
+/* The ways to the ladder, at the card's foot, spaced by the section. */
+.yours-go {
+  gap: 8px;
+}
+.yours-go > :is(.big-go, .opponents-go) {
+  margin-top: 0;
 }
 /* The common builds' row, the card's width, scrolling sideways (wrapping on phones). */
 .yours-section > .builds {

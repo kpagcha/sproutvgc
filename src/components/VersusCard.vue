@@ -2,17 +2,17 @@
 import { computed } from 'vue'
 import { ArrowRight, Columns2, X } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
-import { t } from '@/i18n'
+import { t, tSlots } from '@/i18n'
 import type { NamedLocation } from '@/lib/links'
 import type { pointsToMoveFirst } from '@/lib/speed'
 import { pointsText } from '@/lib/speedBuild'
 import AppLink from '@/components/AppLink'
 import PokemonIcon from '@/components/PokemonIcon'
 
-// Yours against a Pokémon on the speed tiers' ladder (the chip tapped): its name (a link to its usage page) on top; then
-// whether yours moves first as it's built, at what Speeds (its own finding its chip), and for its nature the points that
-// do it (what's left to spare, or, when none do, what another nature would need); and the way to the comparison of the
-// two, where every nature's shown. A panel of its own under yours beside the ladder; narrower, a card floating at the
+// Yours against a Pokémon on the speed tiers' ladder (the chip tapped), in a sentence, the two as their icons: whether
+// yours moves first as it's built, at what Speeds (its own finding its chip), and for its nature the points that do it
+// (what's left to spare, or, when none do, what another nature would need); and the way to the comparison of the two,
+// where every nature's shown. A panel of its own under yours beside the ladder; narrower, a card floating at the
 // foot of the screen.
 type Result = ReturnType<typeof pointsToMoveFirst>
 const props = defineProps<{
@@ -20,7 +20,9 @@ const props = defineProps<{
   id: PokemonId
   name: string
   speed: number
-  /** Yours: its Speed, and Speed points. */
+  /** Yours: which, its name, its Speed, and Speed points. */
+  mine: PokemonId
+  mineName: string
   mineSpeed: number
   points: number
   trickRoom: boolean
@@ -36,52 +38,67 @@ const emit = defineEmits<{ close: []; locate: [] }>()
 const verdict = computed(() =>
   props.mineSpeed === props.speed ? 'tie' : props.mineSpeed > props.speed !== props.trickRoom ? 'first' : 'after',
 )
-/** What yours' nature takes: the points, and what's to spare of yours (more than it needs, outside Trick Room). */
+/** What it takes: yours' nature's points (with what's to spare of yours, outside Trick Room); when they can't, the
+ * nature that would. */
 const plan = computed(() => {
   const r = props.result
+  if (props.other) return t(`speed.planOther.${props.other.effect}`, { amount: pointsText(props.other.result) })
   if (!r) return t('speed.planNever')
   if ('ties' in r) return t('speed.planTies', { points: r.ties })
   const amount = pointsText(r)
   const spare = 'from' in r && props.points > r.from ? t('speed.planSpare', { n: props.points - r.from }) : ''
   return `${t('speed.planWith', { amount })}${spare ? ` ${spare}` : ''}`
 })
+const canHover = window.matchMedia('(hover: hover)').matches
 </script>
 
 <template>
-  <!-- A band of the opponents' red: the Pokémon it's against (a link to its usage page), under a small "Against" so a long
-       name has the band's width to wrap in, and a way to close it, as yours' band clears it. -->
-  <section class="panel banded versus-card small" role="status">
-    <div class="band">
-      <div class="title">
-        <AppLink :to="{ name: 'metaPokemon', params: { id: props.id } }" class="mon"
-          ><PokemonIcon :id="props.id" /><strong>{{ props.name }}</strong></AppLink
-        >
-      </div>
-      <button type="button" class="btn on-band inverted close" @click="emit('close')">
-        <X :size="14" aria-hidden="true" />{{ t('speed.vsClose') }}
+  <!-- One sentence, the two Pokémon in it as their icons (the opponent's a link to its usage page): yours and its Speed,
+       whether it moves first, the opponent and its Speed (finding its chip on the ladder), and what it takes. Then the
+       ways on, and a way to close it in the corner. -->
+  <section class="panel versus-card small" role="status">
+    <div class="head">
+      <p class="line">
+        <template v-for="(part, i) in tSlots('speed.vsLine')" :key="i">
+          <template v-if="typeof part === 'string'">{{ part }}</template>
+          <span v-else-if="part.slot === 'mine'" v-tip="canHover && props.mineName" class="mon"
+            ><PokemonIcon :id="props.mine" /><span class="visually-hidden">{{ props.mineName }}</span></span
+          >
+          <strong v-else-if="part.slot === 'a'" class="num">{{ props.mineSpeed }}</strong>
+          <strong v-else-if="part.slot === 'verb'" class="verb" :class="verdict">{{
+            t(`speed.vsVerb.${verdict}`)
+          }}</strong>
+          <AppLink
+            v-else-if="part.slot === 'them'"
+            v-tip="canHover && props.name"
+            :to="{ name: 'metaPokemon', params: { id: props.id } }"
+            class="mon"
+            ><PokemonIcon :id="props.id" /><span class="visually-hidden">{{ props.name }}</span></AppLink
+          >
+          <button
+            v-else-if="part.slot === 'b'"
+            type="button"
+            class="speed num"
+            :aria-label="t('speed.vsLocate')"
+            @click="emit('locate')"
+          >
+            {{ props.speed }}
+          </button>
+          <template v-else-if="part.slot === 'plan'">{{ plan }}</template>
+        </template>
+      </p>
+      <button type="button" class="btn close" :aria-label="t('speed.vsClose')" @click="emit('close')">
+        <X :size="18" aria-hidden="true" />
       </button>
     </div>
-    <!-- Yours as it's built: moves first, ties or moves after, at what Speeds (its, finding its chip on the ladder). -->
-    <p class="verdict" :class="verdict">
-      {{ t(`speed.vsNow.${verdict}`) }}
-      <span class="speeds"
-        >{{ props.mineSpeed }} <span class="vs">vs</span>{{ ' '
-        }}<button type="button" class="speed" :aria-label="t('speed.vsLocate')" @click="emit('locate')">
-          {{ props.speed }}
-        </button></span
-      >
-    </p>
-    <!-- Its nature: the points that do it; when none do, another nature's. -->
-    <p class="plan">{{ plan }}</p>
-    <p v-if="props.other" class="plan">
-      {{ t(`speed.planOther.${props.other.effect}`, { amount: pointsText(props.other.result) }) }}
-    </p>
-    <!-- Its chip on the ladder, found; and to the comparison's own page: a button that stands out, its arrow saying it
-         goes there. -->
+    <!-- Its chip on the ladder, found; and to the comparison's own page, a button that stands out, its arrow saying it
+         goes there: on one line, one under the other when they don't fit. -->
     <div class="actions">
-      <button type="button" class="btn show-link" @click="emit('locate')">{{ t('speed.vsShow') }}</button>
+      <button type="button" class="btn show-link" :aria-label="t('speed.vsLocate')" @click="emit('locate')">
+        {{ t('speed.vsShow') }}
+      </button>
       <AppLink :to="props.compareTo" class="btn primary compare-link"
-        ><Columns2 :size="16" aria-hidden="true" />{{ t('compare.open') }}<ArrowRight :size="16" aria-hidden="true"
+        ><Columns2 :size="16" aria-hidden="true" />{{ t('speed.vsCompare') }}<ArrowRight :size="16" aria-hidden="true"
       /></AppLink>
     </div>
   </section>
@@ -94,43 +111,41 @@ const plan = computed(() => {
 .small {
   font-size: 0.875em;
 }
-/* Its band in the opponents' red, as the ladder's is with yours picked: on one line, Close at its end. */
-:root:root .versus-card.banded > .band {
+.head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
-  color: var(--opponent-text);
-  background: var(--opponent);
 }
-.title {
+.line {
   flex: 1;
   min-width: 0;
+  margin: 0;
+  line-height: 1.9;
 }
-/* "Against", small above the name. */
-.eyebrow {
-  display: block;
-  font-size: 0.75em;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  opacity: 0.85;
-}
-.band a {
-  color: inherit;
-}
-/* The Pokémon it's against: its icon beside its name, which wraps beside it when long, the icon centered on it. */
+/* A Pokémon, as its icon: on the line, centered on its text. */
 .mon {
-  display: flex;
-  align-items: center;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 0;
 }
 .mon :deep(.sheet-icon) {
-  flex: none;
   margin-block: -6px;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+/* Whether yours moves first, in the color of how it goes for it. */
+.verb.after {
+  color: var(--opponent);
+}
+.verb.tie {
+  color: var(--muted);
 }
 /* Its Speed, which finds its chip on the ladder: underlined as a link is, dotted as what shows rather than goes. */
 .speed {
   padding: 0;
   font: inherit;
+  font-weight: bold;
   color: inherit;
   background: none;
   border: none;
@@ -141,53 +156,26 @@ const plan = computed(() => {
 .speed:hover {
   text-decoration-style: solid;
 }
-/* Close, as yours' band's Clear is: filled with the band's text color, in the opponents' red. */
-:root:root .versus-card .btn.on-band.inverted {
+/* Close: the icon alone, with no fill or outline. */
+:root:root .versus-card .btn.close {
   flex: none;
-  margin-block: -2px;
-  color: var(--opponent);
-  background: var(--opponent-text);
-  border-color: var(--opponent-text);
-}
-:root:root .versus-card .btn.on-band.inverted:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--opponent-text) 85%, var(--opponent));
-}
-:root:root .versus-card .btn.on-band.inverted:active:not(:disabled) {
-  background: color-mix(in srgb, var(--opponent-text) 70%, var(--opponent));
-}
-/* The verdict: bold, in the color of how it goes for yours; the Speeds beside it. */
-.verdict {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 2px 10px;
-  margin: 0;
-  font-weight: bold;
-}
-.verdict.after {
-  color: var(--opponent);
-}
-.verdict.tie {
+  margin: -4px -4px 0 0;
+  padding: 4px;
   color: var(--muted);
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
 }
-.speeds {
+:root:root .versus-card .btn.close:hover {
   color: var(--text);
-  font-variant-numeric: tabular-nums;
 }
-.vs {
-  font-weight: normal;
-  color: var(--muted);
-}
-.plan {
-  margin: 6px 0 0;
-}
-/* The two on a line, the comparison taking what's left; one under the other when they don't fit. */
+/* The two on a line, in short, the comparison taking what's left; one under the other when they don't fit (a longer
+   language's). */
 .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 .show-link {
   flex: 1 0 auto;
@@ -199,5 +187,13 @@ const plan = computed(() => {
 }
 .compare-link:hover {
   text-decoration: none;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 </style>
