@@ -4,20 +4,22 @@ import { Trash2 } from '@lucide/vue'
 import { available } from '@/data/dex'
 import { t } from '@/i18n'
 import { useRecent } from '@/composables/useRecent'
+import { useOpenState } from '@/composables/useOpenState'
 import EntryChip from '@/components/EntryChip.vue'
 import PageChip, { shownVisit } from '@/components/PageChip.vue'
 
 // The home page's recently viewed: the entries whose pages the reader opened lately, and the pages with a view of
 // their own (the speed tiers, a comparison, the type matchups) as they were left, most recent first, as chips
 // (`EntryChip`, `PageChip`), beside the favorites and in the same panel. Those the regulation doesn't have are left
-// out. Nothing shows until a page has been opened; it starts folded on every visit, and can be cleared.
+// out. Nothing shows until a page has been opened; it starts folded, then stays as the reader last left it, and can be cleared.
 const { recent, clear } = useRecent()
+const { open, onToggle } = useOpenState('sproutvgc.recent.open', false)
 const items = computed(() => recent.value.filter((r) => (r.kind === 'entry' ? available(r.ref) : shownVisit(r))))
 const keyOf = (r: (typeof items.value)[number]) => (r.kind === 'entry' ? `${r.ref.kind}:${r.ref.id}` : `page:${r.page}`)
 </script>
 
 <template>
-  <details v-if="items.length" class="panel banded grey recent">
+  <details v-if="items.length" :open class="panel banded grey recent" @toggle="onToggle">
     <summary>
       <h2 class="title">{{ t('recent.title') }}</h2>
       <button

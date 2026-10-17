@@ -5,13 +5,14 @@ import { Trash2 } from '@lucide/vue'
 import { t } from '@/i18n'
 import type { PageVisit } from '@/composables/useRecent'
 import { pickVisit, usePageHistory } from '@/composables/usePageHistory'
+import { useOpenState } from '@/composables/useOpenState'
 import PageChip, { shownVisit } from '@/components/PageChip.vue'
 
 // At the top of a page whose setup can be starred (the speed tiers, the comparison), the setups it was at lately
 // (`usePageHistory`), most recent first, as the home page's recently viewed shows pages (`PageChip`), each reopening it
 // so, the one shown now marked (rather than left out, so the row keeps still as the page changes). Picking one visits
 // it where it is, rather than moving it to the front. Those the regulation can't show are left out. It shows once
-// there's one, folded each time the page is opened, and can be cleared, a band as the home page's recently viewed
+// there's one, folded until the reader unfolds it (each page's remembered as last left), and can be cleared, a band as the home page's recently viewed
 // (`RecentPanel`), in grey, the chips under it.
 const route = useRoute()
 const page = computed(() => String(route.name))
@@ -20,6 +21,7 @@ const current = computed((): PageVisit | null => {
   return query ? { page: page.value, path: route.path, query } : null
 })
 const { items: all, clear } = usePageHistory(page, current)
+const { open, onToggle } = useOpenState(`sproutvgc.pageHistory.open.${page.value}`, false)
 /** The most shown. */
 const MAX = 8
 const items = computed(() => all.value.filter((i) => shownVisit(i.visit)).slice(0, MAX))
@@ -31,7 +33,7 @@ function onPick(e: MouseEvent) {
 </script>
 
 <template>
-  <details v-if="items.length" class="panel banded grey page-history">
+  <details v-if="items.length" :open class="panel banded grey page-history" @toggle="onToggle">
     <summary>
       <h2 class="title">
         {{ t('recent.title') }} <span class="count">{{ items.length }}</span>
