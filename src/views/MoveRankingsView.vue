@@ -524,14 +524,20 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   .dex-table .row > :first-child {
     padding-inline: 6px 4px;
   }
-  /* Every column on a phone's width: the badges smaller, the cells closer. */
+  /* Every column on a phone's width: the badges smaller than the page's phone scale (1.5), the cells closer. */
   .dex-table {
-    --icon-scale: 0.8;
+    --icon-scale: 1.2;
     --badge: calc(32px * var(--icon-scale) + 6px);
     --num: minmax(2.6em, auto);
+    --row-height: 4.4em;
   }
   .dex-table .row > * {
     padding-inline: 3px;
+  }
+  /* Its three rows some room around and between them. */
+  .dex-table .row:not(.head) {
+    row-gap: 4px;
+    padding-block: 6px;
   }
   /* Each move three rows: its name over the columns, the rank beside both, what it does under them. */
   .dex-table .row:not(.head) > .rank {
