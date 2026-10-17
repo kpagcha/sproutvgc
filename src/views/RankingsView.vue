@@ -44,18 +44,9 @@ const broughtAll = computed(
   () => showBrought.value && snapshot.value?.unweighted?.includes('brought') && !!snapshot.value.cutoff,
 )
 
-// Trends: against the dataset before the one shown in its series (`previous`, the month before), each Pokémon's rank
-// then (a mark by its rank: up or down so many places, or new to it) and the usage it gained or lost since, in points,
-// a column of its own. Changes under `STEADY` read as noise: shown, but not colored. None for a series' first dataset.
+// Trends: against the dataset before the one shown (`previous`, the month before), each Pokémon's rank then, a mark by
+// its rank: up or down so many places, or new to it. None for the first dataset there is.
 const previous = computed(() => GENERATED_SNAPSHOTS.find((s) => s.id === snapshot.value?.previous))
-const STEADY = 0.005
-/** A change in usage, in percentage points: "+3.2", "−1.8". */
-const points = (x: number) =>
-  (x * 100).toLocaleString(locale.value, {
-    signDisplay: 'exceptZero',
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-  })
 
 const rows = computed(() =>
   Object.entries(data.value ?? {}).map(([key, m]) => {
@@ -71,7 +62,6 @@ const rows = computed(() =>
       // Places gained (up) or lost since the previous dataset, or whether it's new to it.
       climb: m!.prev ? m!.prev.rank - m!.rank : undefined,
       fresh: !!previous.value && !m!.prev,
-      change: m!.usage !== undefined && m!.prev?.usage !== undefined ? m!.usage - m!.prev.usage : undefined,
       brought: m!.brought,
       // Its most common set, at a glance: item, ability and moves, each with the share of its sets that run it (a bar
       // under it, `shared`).
@@ -82,13 +72,13 @@ const rows = computed(() =>
   }),
 )
 type Row = (typeof rows.value)[number]
-type Key = 'rank' | 'name' | 'usage' | 'change' | 'brought'
+type Key = 'rank' | 'name' | 'usage' | 'brought'
 
 const { key, desc, toggle, sorted } = useSort<Row, Key>({
   rows,
   value: (r, k) => (k === 'name' ? r.name : k === 'rank' ? r.rank : (r[k] ?? -Infinity)),
   initial: 'rank',
-  startsDesc: (k) => k === 'usage' || k === 'change' || k === 'brought',
+  startsDesc: (k) => k === 'usage' || k === 'brought',
   locale,
   remember: 'usage',
 })
@@ -246,7 +236,6 @@ const columns = computed(() => {
       sm: 'var(--usage)',
     })
   list.push(...shareTerms.value.map(() => ({ cell: 'r', xl: 'var(--usage)', md: 'var(--usage)', sm: 'var(--usage)' })))
-  if (previous.value) list.push({ cell: 'r', xl: 'var(--change)', md: 'var(--change)', sm: 'var(--change)' })
   if (showBrought.value) list.push({ cell: 'wide-only r', xl: 'var(--num)', md: 'var(--num)', sm: null })
   return list
 })
@@ -317,7 +306,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         <div ref="head" class="row head" role="row">
           <SortHeader
             :label="t('usage.rank')"
-            :tip="t('usage.rankFull')"
+            :tip="previous ? t('usage.rankSince', { dates: sinceLabel(previous, snapshot) }) : t('usage.rankFull')"
             :class="{ 'with-climb': previous }"
             right
             :active="key === 'rank'"
@@ -355,15 +344,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
               refName(x)
             }}</span>
           </div>
-          <SortHeader
-            v-if="previous"
-            :label="t('usage.change')"
-            :tip="t('usage.changeTip', { dates: sinceLabel(previous, snapshot) })"
-            right
-            :active="key === 'change'"
-            :desc="desc"
-            @sort="toggle('change')"
-          />
           <SortHeader
             v-if="showBrought"
             class="wide-only"
@@ -468,14 +448,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
               {{ shareOf(r.id, x) === undefined ? '—' : percent(shareOf(r.id, x)!) }}
             </div>
             <div
-              v-if="previous"
-              role="cell"
-              class="r num change"
-              :class="r.change !== undefined && Math.abs(r.change) >= STEADY && (r.change > 0 ? 'up' : 'down')"
-            >
-              {{ r.change === undefined ? '' : points(r.change) }}
-            </div>
-            <div
               v-if="showBrought"
               role="cell"
               class="wide-only r num meter brought"
@@ -523,12 +495,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         </template>
       </div>
       <p v-else class="muted">{{ t('usage.noMatch') }}</p>
-      <p class="muted note phone-only-block">
-        {{ t('usage.usage') }}: {{ t('usage.usageTip') }}.
-        <template v-if="previous"
-          >{{ t('usage.change') }}: {{ t('usage.changeTip', { dates: sinceLabel(previous, snapshot) }) }}.</template
-        >
-      </p>
+      <p class="muted note phone-only-block">{{ t('usage.usage') }}: {{ t('usage.usageTip') }}.</p>
       <p v-if="anyRare" class="muted note">{{ t('usage.rare', { share: percent(RARE) }) }}</p>
       <p v-if="terms.some((x) => x.kind === 'move' || x.kind === 'item')" class="muted note">
         {{ t('usage.termSets', { share: percent(MIN_SHARE) }) }}
@@ -553,7 +520,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   --name: 13em;
   --ability: 9em;
   --usage: 4.5em;
-  --change: minmax(3.5em, auto);
   --row-height: 2.3em;
   --cols: var(--cols-md);
 }
@@ -575,7 +541,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
     --cols: var(--cols-sm);
     --num: minmax(1.8em, auto);
     --usage: 4em;
-    --change: minmax(3em, auto);
   }
   /* The rank in line with the panel's text: left-aligned, so a short one leaves no gap before it. */
   .dex-table .row > :first-child {
@@ -784,17 +749,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
-}
-/* The change in usage: muted while it's steady, in the color of its direction once it isn't. */
-.change {
-  font-size: 0.9em;
-  color: var(--muted);
-}
-.change.up {
-  color: var(--good);
-}
-.change.down {
-  color: var(--bad);
 }
 /* The search, on a line of its own; the Sets switch and what it does (on the data's line) only where the set columns
    don't fit. */

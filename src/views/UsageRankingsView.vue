@@ -3,7 +3,7 @@ import { computed, shallowRef, useTemplateRef } from 'vue'
 import { ability, item, pokemon, type AbilityId, type ItemId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { sinceLabel, has, percent } from '@/data/meta'
-import { points, ranksOf, standings, STEADY, usageOf, usersOf } from '@/lib/entryUsage'
+import { ranksOf, standings, usageOf, usersOf } from '@/lib/entryUsage'
 import { usePreviousMeta } from '@/composables/usePreviousMeta'
 import { locale, t, type MessageKey } from '@/i18n'
 import { description, shortText } from '@/i18n/descriptions'
@@ -93,9 +93,8 @@ const hasList = computed(() => !!snapshot.value && has(snapshot.value, cfg.value
 /** The Pokémon shown with each entry: those whose teams run it most. */
 const TOP = 5
 
-// Trends, as the Pokémon rankings': against the dataset before the one shown in its series (`previous`, the month
-// before), each entry's rank then (a mark by its rank: up or down so many places, or new to it) and the usage it
-// gained or lost since, in points (`STEADY` and under, not colored), filling in once its data is in.
+// Trends, as the Pokémon rankings': against the dataset before the one shown (`previous`, the month before), each
+// entry's rank then, a mark by its rank: up or down so many places, or new to it, filling in once its data is in.
 const { previous, prevData } = usePreviousMeta(snapshot)
 const before = computed(() => (prevData.value ? standings(prevData.value, cfg.value.field) : null))
 
@@ -119,18 +118,17 @@ const rows = computed(() => {
       // Places gained (up) or lost since the previous dataset, or whether it's new to it.
       climb: prevRank === undefined ? undefined : prevRank - rank,
       fresh: !!then && prevRank === undefined,
-      change: then ? usage - (then.usage.get(id) ?? 0) : undefined,
     }
   })
 })
 type Row = (typeof rows.value)[number]
-type Key = 'rank' | 'name' | 'usage' | 'change'
+type Key = 'rank' | 'name' | 'usage'
 
 const { key, desc, toggle, sorted } = useSort<Row, Key>({
   rows,
-  value: (r, k) => (k === 'change' ? (r.change ?? -Infinity) : r[k]),
+  value: (r, k) => r[k],
   initial: 'rank',
-  startsDesc: (k) => k === 'usage' || k === 'change',
+  startsDesc: (k) => k === 'usage',
   locale,
   remember: `usage.${props.list}`,
 })
@@ -190,8 +188,8 @@ const top = computed(() => Math.max(0, ...rows.value.map((r) => r.usage)))
 
 const { entered, restoring } = usePageEntered()
 useRowColumns(useTemplateRef('head'))
-// The columns: rank, the entry, its Pokémon (not on phones, where they go under the row), usage, each Pokémon term's
-// share, and the change.
+// The columns: rank, the entry, its Pokémon (not on phones, where they go under the row), usage, and each Pokémon
+// term's share.
 const columns = computed(() => {
   const list: { cell: string; wide: string; sm: string | null }[] = [
     { cell: 'r', wide: 'minmax(3em, auto)', sm: 'minmax(1.8em, auto)' },
@@ -200,7 +198,6 @@ const columns = computed(() => {
     { cell: 'r', wide: '5em', sm: '4em' },
     ...monTerms.value.map(() => ({ cell: 'r', wide: '4.5em', sm: '4em' })),
   ]
-  if (previous.value) list.push({ cell: 'r', wide: 'minmax(3.5em, auto)', sm: 'minmax(3em, auto)' })
   return list
 })
 const colVars = computed(() => ({
@@ -252,7 +249,7 @@ const colVars = computed(() => ({
         <div ref="head" class="row head" role="row">
           <SortHeader
             :label="t('usage.rank')"
-            :tip="t('usage.rankFull')"
+            :tip="previous ? t('usage.rankSince', { dates: sinceLabel(previous, snapshot) }) : t('usage.rankFull')"
             :class="{ 'with-climb': previous }"
             right
             :active="key === 'rank'"
@@ -280,15 +277,6 @@ const colVars = computed(() => ({
           >
             <PokemonIcon :id="x.id" :scale="0.75" />
           </div>
-          <SortHeader
-            v-if="previous"
-            :label="t('usage.change')"
-            :tip="t('usage.changeTip', { dates: sinceLabel(previous, snapshot) })"
-            right
-            :active="key === 'change'"
-            :desc="desc"
-            @sort="toggle('change')"
-          />
         </div>
         <SkeletonRows v-if="!entered || !data" :cells="columns.map((c) => c.cell)" height="3.4em" />
         <template v-else>
@@ -338,22 +326,11 @@ const colVars = computed(() => ({
             >
               {{ shareOf(x.id, r.id) === undefined ? '—' : percent(shareOf(x.id, r.id)!) }}
             </div>
-            <div
-              v-if="previous"
-              role="cell"
-              class="r num change"
-              :class="r.change !== undefined && Math.abs(r.change) >= STEADY && (r.change > 0 ? 'up' : 'down')"
-            >
-              {{ r.change === undefined ? '' : points(r.change) }}
-            </div>
           </div>
         </template>
       </div>
       <p v-else class="muted">{{ tx('noMatch') }}</p>
       <p class="muted note">{{ tx('usageNote') }}</p>
-      <p v-if="previous" class="muted note phone-only-block">
-        {{ t('usage.change') }}: {{ t('usage.changeTip', { dates: sinceLabel(previous, snapshot) }) }}.
-      </p>
       <p class="muted note">
         {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
       </p>
@@ -369,7 +346,7 @@ const colVars = computed(() => ({
   gap: 2px;
 }
 /* Rank, the entry (its name over its short description), its Pokémon (room for all five icons and the count after
-   them: the rows take the header's widths), its usage, each Pokémon term's share and its change (`columns`). On phones
+   them: the rows take the header's widths), its usage and each Pokémon term's share (`columns`). On phones
    its Pokémon go on a line under the row. */
 .dex-table {
   --users: calc(5 * 40px + 4 * 2px + 2.5em);
@@ -409,9 +386,6 @@ const colVars = computed(() => ({
   .dex-table {
     --cols: var(--cols-sm);
   }
-  .phone-only-block {
-    display: block;
-  }
   .dex-table .row > :first-child {
     padding-inline: 6px 4px;
     text-align: left;
@@ -429,11 +403,8 @@ const colVars = computed(() => ({
 .usage {
   font-weight: bold;
 }
-.phone-only-block {
-  display: none;
-}
 /* As the Pokémon rankings': the rank's mark, places gained or lost since the previous dataset or new to it, small after
-   the rank in a slot as wide for every rank; and the change in usage, muted while it's steady. */
+   the rank in a slot as wide for every rank. */
 .rank {
   white-space: nowrap;
 }
@@ -457,16 +428,6 @@ const colVars = computed(() => ({
 .fresh {
   color: var(--accent);
   font-weight: bold;
-}
-.change {
-  font-size: 0.9em;
-  color: var(--muted);
-}
-.change.up {
-  color: var(--good);
-}
-.change.down {
-  color: var(--bad);
 }
 .visually-hidden {
   position: absolute;

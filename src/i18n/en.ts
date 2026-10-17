@@ -1197,6 +1197,7 @@ export const messages = {
   'usage.search': 'Search Pokémon, types, abilities, moves, items',
   'usage.rank': '#',
   'usage.rankFull': 'Rank by usage',
+  'usage.rankSince': 'Rank by usage, with places gained or lost since {dates}',
   'usage.pokemon': 'Pokémon',
   'usage.item': 'Item',
   'usage.ability': 'Ability',
