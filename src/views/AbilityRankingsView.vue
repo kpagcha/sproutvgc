@@ -4,10 +4,14 @@ import { ability, pokemon, type AbilityId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { datasetDates, GENERATED_SNAPSHOTS, has, loadMeta, percent, type MetaData } from '@/data/meta'
 import { locale, t } from '@/i18n'
-import { description } from '@/i18n/descriptions'
+import { description, shortText } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
+import { formatTerms, parseTerms, type Term } from '@/lib/searchTerms'
+import { POKEMON } from '@/data/pokemon'
+import { useRouter } from 'vue-router'
 import { useActiveQuery } from '@/composables/useActiveQuery'
+import { useSlashFocus } from '@/composables/useSlashFocus'
 import { useMeta } from '@/composables/useMeta'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { useRowColumns } from '@/composables/useRowColumns'
@@ -17,7 +21,7 @@ import DexText from '@/components/DexText'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import RankingsTabs from '@/components/RankingsTabs.vue'
-import SearchBox from '@/components/SearchBox.vue'
+import TermSearch from '@/components/TermSearch.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 import SortHeader from '@/components/SortHeader.vue'
 
@@ -114,17 +118,75 @@ const { key, desc, toggle, sorted } = useSort<Row, Key>({
   remember: 'abilityUsage',
 })
 
-// The search, by name; the home page's links here with its query (`?q=`).
+// The search, as the Pokémon rankings': its text finds the list's abilities by name or by what their short description
+// says ("terrain", "Speed"), and its terms (`?f=`, picked from what the text finds, `TermSearch`) narrow it to those a
+// Pokémon can have, each such Pokémon's share of its sets running each ability a column of its own. While a term is
+// highlighted in the search's options (`preview`), the list shows it added, faded a little: what picking it would do.
+const router = useRouter()
+const TERM_KINDS = ['pokemon'] as const
+const terms = computed({
+  get: () => parseTerms(query.value.f, TERM_KINDS),
+  set: (list: Term[]) => void router.replace({ query: { ...query.value, f: formatTerms(list) } }),
+})
+const preview = shallowRef<Term | null>(null)
+const shownTerms = computed(() => (preview.value ? [...terms.value, preview.value] : terms.value))
+type MonTerm = Extract<Term, { kind: 'pokemon' }>
+const monTerms = computed(() => shownTerms.value.filter((x): x is MonTerm => x.kind === 'pokemon'))
+const matches = (id: AbilityId, term: Term) => term.kind === 'pokemon' && POKEMON[term.id].abilities.includes(id)
+const passes = (id: AbilityId, list: readonly Term[] = terms.value) => list.every((x) => matches(id, x))
+/** How many of the list a term would leave, added to the others: offered with it. */
+const termCount = (term: Term) => rows.value.filter((r) => passes(r.id, [...terms.value, term])).length
+/** The share of a Pokémon's sets running an ability, when the snapshot has it. */
+const shareOf = (mon: PokemonId, id: AbilityId) => data.value?.[mon]?.abilities?.find((x) => x.id === id)?.share
+
+const termSearch = useTemplateRef('termSearch')
+useSlashFocus(() => {
+  if (!termSearch.value) return false
+  termSearch.value.focus({ preventScroll: true })
+})
+// The home page's search links here with its query (`?q=`).
 const search = shallowRef(typeof query.value.q === 'string' ? query.value.q : '')
-const shown = computed(() => {
+/** What the text finds: an ability by name, or by its short description, where it's whole words ("rain" finds
+ * "rain", not "terrain"). Null with no text. */
+const finder = computed(() => {
   const q = fold(search.value.trim())
-  return q ? sorted.value.filter((r) => split(r.name, q)) : sorted.value
+  if (!q) return null
+  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const words = new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, 'u')
+  return (r: Row) => !!split(r.name, q) || words.test(fold(shortText(ability(r.id)) ?? ''))
+})
+/** How many the text finds, with the terms. */
+const named = computed(() => {
+  const found = finder.value
+  return found ? sorted.value.filter((r) => found(r) && passes(r.id)).length : 0
+})
+const shown = computed(() => {
+  if (preview.value) return sorted.value.filter((r) => passes(r.id, shownTerms.value))
+  const found = finder.value
+  return sorted.value.filter((r) => (!found || found(r)) && passes(r.id))
 })
 /** The most used, the full length of the usage bars. */
 const top = computed(() => Math.max(0, ...rows.value.map((r) => r.usage)))
 
 const { entered, restoring } = usePageEntered()
 useRowColumns(useTemplateRef('head'))
+// The columns: rank, the ability, its Pokémon (not on phones, where they go under the row), usage, each Pokémon term's
+// share, and the change.
+const columns = computed(() => {
+  const list: { cell: string; wide: string; sm: string | null }[] = [
+    { cell: 'r', wide: 'minmax(3em, auto)', sm: 'minmax(1.8em, auto)' },
+    { cell: 'grow', wide: 'minmax(0, 1fr)', sm: 'minmax(0, 1fr)' },
+    { cell: 'wide-only', wide: 'var(--users)', sm: null },
+    { cell: 'r', wide: '5em', sm: '4em' },
+    ...monTerms.value.map(() => ({ cell: 'r', wide: '4.5em', sm: '4em' })),
+  ]
+  if (previous.value) list.push({ cell: 'r', wide: 'minmax(3.5em, auto)', sm: 'minmax(3em, auto)' })
+  return list
+})
+const colVars = computed(() => ({
+  '--cols-wide': columns.value.map((c) => c.wide).join(' '),
+  '--cols-sm': columns.value.flatMap((c) => c.sm ?? []).join(' '),
+}))
 </script>
 
 <template>
@@ -145,13 +207,28 @@ useRowColumns(useTemplateRef('head'))
           </span>
         </div>
         <div class="find">
-          <SearchBox v-model="search" :placeholder="t('abilityUsage.search')" :aria-label="t('abilityUsage.search')" />
+          <TermSearch
+            ref="termSearch"
+            v-model:text="search"
+            hotkey="/"
+            v-model:terms="terms"
+            v-model:preview="preview"
+            :name-count="named"
+            :placeholder="t('abilityUsage.search')"
+            :kinds="TERM_KINDS"
+            :count="termCount"
+          />
         </div>
       </template>
       <p v-else class="muted">{{ t('usage.none', { reg: REGULATION }) }}</p>
     </div>
-    <div v-if="hasAbilities && snapshot" class="panel" :class="{ 'meta-stale': loading }" :aria-busy="loading">
-      <div v-if="!data || shown.length" class="dex-table" :class="{ restoring, trends: previous }" role="table">
+    <div
+      v-if="hasAbilities && snapshot"
+      class="panel"
+      :class="{ 'meta-stale': loading, previewing: preview }"
+      :aria-busy="loading"
+    >
+      <div v-if="!data || shown.length" class="dex-table" :class="{ restoring }" :style="colVars" role="table">
         <div ref="head" class="row head" role="row">
           <SortHeader
             :label="t('usage.rank')"
@@ -174,6 +251,15 @@ useRowColumns(useTemplateRef('head'))
             :desc="desc"
             @sort="toggle('usage')"
           />
+          <div
+            v-for="x in monTerms"
+            :key="x.id"
+            v-tip="t('abilityUsage.monShareTip', { name: refName(x) })"
+            role="columnheader"
+            class="r"
+          >
+            <PokemonIcon :id="x.id" :scale="0.75" />
+          </div>
           <SortHeader
             v-if="previous"
             :label="t('usage.change')"
@@ -184,11 +270,7 @@ useRowColumns(useTemplateRef('head'))
             @sort="toggle('change')"
           />
         </div>
-        <SkeletonRows
-          v-if="!entered || !data"
-          :cells="previous ? ['r', 'grow', 'wide-only', 'r', 'r'] : ['r', 'grow', 'wide-only', 'r']"
-          height="3.4em"
-        />
+        <SkeletonRows v-if="!entered || !data" :cells="columns.map((c) => c.cell)" height="3.4em" />
         <template v-else>
           <div v-for="r in shown" :key="r.id" class="row" role="row">
             <div role="cell" class="r num muted rank">
@@ -226,6 +308,15 @@ useRowColumns(useTemplateRef('head'))
               {{ percent(r.usage) }}
             </div>
             <div
+              v-for="x in monTerms"
+              :key="x.id"
+              role="cell"
+              class="r num meter term-share"
+              :style="{ '--share': shareOf(x.id, r.id) ?? 0 }"
+            >
+              {{ shareOf(x.id, r.id) === undefined ? '—' : percent(shareOf(x.id, r.id)!) }}
+            </div>
+            <div
               v-if="previous"
               role="cell"
               class="r num change"
@@ -250,15 +341,22 @@ useRowColumns(useTemplateRef('head'))
 
 <style scoped>
 /* Rank, the ability (its name over its short description), its Pokémon (room for all five icons and the count after
-   them: the rows take the header's widths), its usage and its change. On phones its Pokémon go on a line under the
-   row. */
+   them: the rows take the header's widths), its usage, each Pokémon term's share and its change (`columns`). On phones
+   its Pokémon go on a line under the row. */
 .dex-table {
   --users: calc(5 * 40px + 4 * 2px + 2.5em);
-  --cols: minmax(3em, auto) minmax(0, 1fr) var(--users) 5em;
+  --cols: var(--cols-wide);
   --row-height: 3.4em;
 }
-.dex-table.trends {
-  --cols: minmax(3em, auto) minmax(0, 1fr) var(--users) 5em minmax(3.5em, auto);
+/* The list with a term highlighted in the search's options: a preview, faded a little. */
+.previewing .dex-table {
+  opacity: 0.75;
+}
+/* A Pokémon term's share: its bar thinner and muted, as the Pokémon rankings' terms', so it doesn't vie with usage. */
+.meter.term-share::after {
+  bottom: 4px;
+  height: 2px;
+  background: var(--muted);
 }
 .dex-table .row > .grow {
   padding-block: 6px;
@@ -281,10 +379,7 @@ useRowColumns(useTemplateRef('head'))
 }
 @media (max-width: 720px) {
   .dex-table {
-    --cols: minmax(1.8em, auto) minmax(0, 1fr) 4em;
-  }
-  .dex-table.trends {
-    --cols: minmax(1.8em, auto) minmax(0, 1fr) 4em minmax(3em, auto);
+    --cols: var(--cols-sm);
   }
   .phone-only-block {
     display: block;

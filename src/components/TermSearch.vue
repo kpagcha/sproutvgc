@@ -2,17 +2,18 @@
 import Marked from '@/components/Marked'
 import { computed, ref, useId, useTemplateRef, watch } from 'vue'
 import { Search } from '@lucide/vue'
-import { sameRef, type ItemId } from '@/data/dex'
+import { sameRef, type ItemId, type PokemonId } from '@/data/dex'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { useSearch, type SectionKind } from '@/composables/useSearch'
 import type { Term, TermKind } from '@/lib/searchTerms'
 import type { Marks } from '@/lib/search'
 import ItemIcon from '@/components/ItemIcon.vue'
+import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
 
 // An advanced search box: what's typed searches the list by name, as any search box, and finds the types, abilities,
-// moves and items of `kinds` too, listed under it with how many of the list each would leave (`count`; those leaving
+// moves, items and Pokémon of `kinds` too, listed under it with how many of the list each would leave (`count`; those leaving
 // none left out). Picking one, by clicking it or with the arrow keys and Enter, makes it a term of the search, a chip
 // in the box before the text, and clears the text; a chip's cross takes it off again, as Backspace in an empty box
 // takes off the last. The list is the dex's search (`useSearch`), a few of each kind. A magnifying glass leads the box,
@@ -114,6 +115,7 @@ const KIND_LABEL = {
   ability: 'filter.kind.ability',
   move: 'filter.kind.move',
   item: 'filter.kind.item',
+  pokemon: 'filter.kind.pokemon',
 } as const
 const listId = useId()
 const optionId = (i: number) => `${listId}-${i}`
@@ -129,6 +131,7 @@ const indexOf = (o: Option) => options.value.indexOf(o) + byName.value
       <span v-for="term in terms" :key="`${term.kind}:${term.id}`" class="chip">
         <TypeIcon v-if="term.kind === 'type'" :type="term.id" />
         <ItemIcon v-else-if="term.kind === 'item'" :id="term.id as ItemId" :scale="0.67" />
+        <PokemonIcon v-else-if="term.kind === 'pokemon'" :id="term.id as PokemonId" :scale="0.75" />
         <span v-if="term.kind !== 'type'">{{ refName(term) }}</span>
         <button
           type="button"
@@ -197,6 +200,7 @@ const indexOf = (o: Option) => options.value.indexOf(o) + byName.value
         >
           <TypeIcon v-if="o.term.kind === 'type'" :type="o.term.id" />
           <ItemIcon v-else-if="o.term.kind === 'item'" :id="o.term.id as ItemId" :scale="0.67" />
+          <PokemonIcon v-else-if="o.term.kind === 'pokemon'" :id="o.term.id as PokemonId" />
           <span v-if="o.term.kind !== 'type'" class="option-name"><Marked :p="o.parts" /></span>
           <span class="option-count">{{ o.n }}</span>
         </li>
