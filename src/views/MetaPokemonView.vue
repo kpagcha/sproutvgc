@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, h, ref, render, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { ChevronsDown, ChevronsUp, Info } from '@lucide/vue'
+import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp, Info } from '@lucide/vue'
 import { ability, available, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { MOVES } from '@/data/moves'
 import {
@@ -490,8 +490,12 @@ const sections = computed(() =>
             stacked
           />
           <p class="links">
-            <button type="button" class="link-button" :aria-pressed="movepool" @click="movepool = !movepool">
-              {{ t(movepool ? 'usageMon.setsMoves' : 'usageMon.movepool') }} ›
+            <!-- A toggle, not a way to another page: muted, with a chevron saying it unfolds here, as the pickers' "show
+                 all". -->
+            <button type="button" class="more-toggle" :aria-pressed="movepool" @click="movepool = !movepool">
+              <component :is="movepool ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />{{
+                t(movepool ? 'usageMon.setsMoves' : 'usageMon.movepool')
+              }}
             </button>
           </p>
         </section>
@@ -997,16 +1001,21 @@ const sections = computed(() =>
   margin-bottom: 0;
 }
 /* A way to show something else, as the links beside it look. */
-.link-button {
-  padding: 0;
+.more-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px 2px 2px;
   font: inherit;
-  color: var(--link);
+  font-size: 0.9em;
+  color: var(--muted);
   background: none;
   border: none;
   cursor: pointer;
 }
-.link-button:hover {
-  text-decoration: underline;
+.more-toggle:hover {
+  color: var(--text);
+  background: var(--hover);
 }
 h2 {
   margin-top: 0;
