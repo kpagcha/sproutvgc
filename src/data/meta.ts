@@ -56,8 +56,9 @@ export interface MetaSnapshot {
   capabilities: MetaCapability[]
   /** What it has that covers every player, whatever its cutoff (Smogon's brought counts): labeled as such. */
   unweighted?: MetaCapability[]
-  /** The snapshot before it in its series (same source, regulation, players and kind of period), for the trends: its
-   * Pokémon's `prev` are from there, and one without is new to it. None for a series' first. */
+  /** The snapshot before it in its series (same source, regulation, players and kind of period), or, for a
+   * regulation's first, the last of the regulation before it in its family (M-B's for M-C's), for the trends: its
+   * Pokémon's `prev` are from there, and one without is new to it. None for a family's first. */
   previous?: string
   /** Its series' history (`loadHistory`), when the series has more than it. */
   history?: string
@@ -389,6 +390,13 @@ export const datasetDates = (d: Pick<MetaDataset, 'from' | 'to'>) =>
     year: 'numeric',
     timeZone: 'UTC',
   }).formatRange(new Date(`${d.from}T00:00:00Z`), new Date(`${d.to}T00:00:00Z`))
+
+/** The dataset a snapshot's trends are against (its `previous`), for "since …": its dates, and its regulation when
+ * it's another's (a regulation's first month is against the last of the one before it). */
+export const sinceLabel = (previous: MetaSnapshot, shown: MetaSnapshot | undefined) =>
+  previous.regulation === shown?.regulation
+    ? datasetDates(previous)
+    : `${t('meta.regulation', { reg: previous.regulation })}, ${datasetDates(previous)}`
 
 /** Whose teams a cutoff counts most: "Strong players (1760+)". */
 export const players = (c: Cutoff) =>

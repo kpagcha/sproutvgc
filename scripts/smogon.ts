@@ -255,24 +255,39 @@ export class Smogon {
 }
 
 /**
- * Each snapshot's previous one in its series (`previous`): the same source, regulation, players and kind of period, the
- * latest that ended before it began. Each Pokémon then gets its rank and usage there (`prev`); one it doesn't have is
- * new to the series. A first snapshot has neither. Works on any adapter's snapshots, by what they say of themselves.
+ * Each snapshot's previous one (`previous`): the one before it in its series (the same source, regulation, players and
+ * kind of period); for a regulation's first, the last of the regulation before it in its family (M-A, M-B and M-C are
+ * all Regulation M's: M-C's first month follows M-B's last, even the same month), so the trends run on across them.
+ * Each Pokémon then gets its rank and usage there (`prev`); one it doesn't have is new to it. The family's first has
+ * neither. Works on any adapter's snapshots, by what they say of themselves.
  */
 export function withPrevious(index: Record<string, Snapshot>, data: Record<string, Record<string, MetaEntry>>) {
+  // The series of each family, by source, players and kind of period, its regulations in the order they began.
+  const families = new Map<string, Snapshot[][]>()
   for (const list of seriesOf(index).values()) {
-    list.forEach((s, i) => {
-      const before = list[i - 1]
-      if (!before) return
-      s.previous = before.id
-      const then = data[before.id]!
-      for (const [id, m] of Object.entries(data[s.id]!)) {
-        const p = then[id]
-        if (p) m.prev = { rank: p.rank, usage: p.usage }
-      }
+    const s = list[0]!
+    const key = [s.provider.name, family(s.regulation), s.cutoff, s.period].join('|')
+    families.set(key, [...(families.get(key) ?? []), list])
+  }
+  for (const lists of families.values()) {
+    lists.sort((a, b) => a[0]!.from.localeCompare(b[0]!.from) || a[0]!.regulation.localeCompare(b[0]!.regulation))
+    lists.forEach((list, j) => {
+      list.forEach((s, i) => {
+        const before = i ? list[i - 1] : lists[j - 1]?.at(-1)
+        if (!before) return
+        s.previous = before.id
+        const then = data[before.id]!
+        for (const [id, m] of Object.entries(data[s.id]!)) {
+          const p = then[id]
+          if (p) m.prev = { rank: p.rank, usage: p.usage }
+        }
+      })
     })
   }
 }
+
+/** A regulation's family: "M" for "M-A", "M-B" and "M-C"; one without a letter after it is its own. */
+const family = (regulation: string) => regulation.replace(/-[A-Z]$/i, '')
 
 /**
  * The snapshots by series (the same source, regulation, players and kind of period), each series' in order, by a key

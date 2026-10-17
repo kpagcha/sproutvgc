@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router'
 import { ability, item, move, pokemon, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
-import { datasetDates, GENERATED_SNAPSHOTS, has, percent, players } from '@/data/meta'
+import { sinceLabel, GENERATED_SNAPSHOTS, has, percent, players } from '@/data/meta'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
@@ -358,7 +358,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
           <SortHeader
             v-if="previous"
             :label="t('usage.change')"
-            :tip="t('usage.changeTip', { dates: datasetDates(previous) })"
+            :tip="t('usage.changeTip', { dates: sinceLabel(previous, snapshot) })"
             right
             :active="key === 'change'"
             :desc="desc"
@@ -526,7 +526,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
       <p class="muted note phone-only-block">
         {{ t('usage.usage') }}: {{ t('usage.usageTip') }}.
         <template v-if="previous"
-          >{{ t('usage.change') }}: {{ t('usage.changeTip', { dates: datasetDates(previous) }) }}.</template
+          >{{ t('usage.change') }}: {{ t('usage.changeTip', { dates: sinceLabel(previous, snapshot) }) }}.</template
         >
       </p>
       <p v-if="anyRare" class="muted note">{{ t('usage.rare', { share: percent(RARE) }) }}</p>

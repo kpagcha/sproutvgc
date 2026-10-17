@@ -2,7 +2,7 @@
 import { computed, shallowRef, useTemplateRef } from 'vue'
 import { ability, item, pokemon, type AbilityId, type ItemId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
-import { datasetDates, has, percent } from '@/data/meta'
+import { sinceLabel, has, percent } from '@/data/meta'
 import { points, ranksOf, standings, STEADY, usageOf, usersOf } from '@/lib/entryUsage'
 import { usePreviousMeta } from '@/composables/usePreviousMeta'
 import { locale, t, type MessageKey } from '@/i18n'
@@ -283,7 +283,7 @@ const colVars = computed(() => ({
           <SortHeader
             v-if="previous"
             :label="t('usage.change')"
-            :tip="t('usage.changeTip', { dates: datasetDates(previous) })"
+            :tip="t('usage.changeTip', { dates: sinceLabel(previous, snapshot) })"
             right
             :active="key === 'change'"
             :desc="desc"
@@ -352,7 +352,7 @@ const colVars = computed(() => ({
       <p v-else class="muted">{{ tx('noMatch') }}</p>
       <p class="muted note">{{ tx('usageNote') }}</p>
       <p v-if="previous" class="muted note phone-only-block">
-        {{ t('usage.change') }}: {{ t('usage.changeTip', { dates: datasetDates(previous) }) }}.
+        {{ t('usage.change') }}: {{ t('usage.changeTip', { dates: sinceLabel(previous, snapshot) }) }}.
       </p>
       <p class="muted note">
         {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>

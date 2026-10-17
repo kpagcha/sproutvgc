@@ -3,7 +3,7 @@ import { computed, useTemplateRef } from 'vue'
 import { useRoute } from 'vue-router'
 import { ability, available, pokemon, type AbilityId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
-import { datasetDates, has, percent } from '@/data/meta'
+import { sinceLabel, has, percent } from '@/data/meta'
 import { POKEMON, splitForme } from '@/data/pokemon'
 import { locale, t, typeName } from '@/i18n'
 import { description } from '@/i18n/descriptions'
@@ -110,7 +110,7 @@ useRowColumns(useTemplateRef('head'))
           >{{ t('usage.usage') }} <b v-tip="t('abilityUsage.usageTip')" class="num">{{ percent(usage) }}</b
           ><span
             v-if="then && previous"
-            v-tip="t('usage.changeTip', { dates: datasetDates(previous) })"
+            v-tip="t('usage.changeTip', { dates: sinceLabel(previous, snapshot) })"
             class="change num"
             :class="Math.abs(then.change) >= STEADY && (then.change > 0 ? 'up' : 'down')"
             >{{ points(then.change) }}</span
