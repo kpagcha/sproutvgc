@@ -349,7 +349,9 @@ const colVars = computed(() => ({
    them: the rows take the header's widths), its usage and each Pokémon term's share (`columns`). On phones
    its Pokémon go on a line under the row. */
 .dex-table {
-  --users: calc(5 * 40px + 4 * 2px + 2.5em);
+  /* Five icons and their gaps, the count's slot (`.more`: its margin, and 3em of its smaller text), and the cell's
+     padding, with as much again on the right, clear of the usage column. */
+  --users: calc(5 * 40px + 4 * 2px + 6px + 0.85 * 3em + 2 * 6px + 6px);
   --cols: var(--cols-wide);
   --row-height: 3.4em;
 }
@@ -379,7 +381,9 @@ const colVars = computed(() => ({
   display: inline-flex;
 }
 .more {
-  margin-left: 4px;
+  flex: none;
+  min-width: 3em;
+  margin-left: 6px;
   font-size: 0.85em;
 }
 @media (max-width: 720px) {
