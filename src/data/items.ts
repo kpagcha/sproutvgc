@@ -3,6 +3,7 @@
 
 import DATA from '@/data/generated/items.data.json'
 import type { ItemId, PokemonId } from '@/data/dex'
+import type { ItemCategory } from '@/data/itemCategories'
 
 export const ITEM_KINDS = ['held', 'berry', 'mega'] as const
 export type ItemKind = (typeof ITEM_KINDS)[number]
@@ -11,6 +12,8 @@ export interface Item {
   /** Its cell on the icon sheet. */
   icon: number
   kind: ItemKind
+  /** What it's for in a battle (`itemCategories.ts`). */
+  category: ItemCategory
   /** A Mega Stone's Megas, by the Pokémon holding it. */
   megas?: Partial<Record<PokemonId, PokemonId>>
   /** The only Pokémon it works for, besides Mega Stones (Ogerpon's masks). */

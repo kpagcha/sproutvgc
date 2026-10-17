@@ -11,6 +11,8 @@ import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
 import { formatTerms, parseTerms, type Term } from '@/lib/searchTerms'
 import { POKEMON } from '@/data/pokemon'
+import { ITEMS } from '@/data/items'
+import { ITEM_CATEGORIES, type ItemCategory } from '@/data/itemCategories'
 import { useRouter } from 'vue-router'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useSlashFocus } from '@/composables/useSlashFocus'
@@ -148,7 +150,22 @@ const shownTerms = computed(() => (preview.value ? [...terms.value, preview.valu
 type MonTerm = Extract<Term, { kind: 'pokemon' }>
 const monTerms = computed(() => shownTerms.value.filter((x): x is MonTerm => x.kind === 'pokemon'))
 const matches = (id: Id, term: Term) => term.kind === 'pokemon' && cfg.value.canHave(term.id, id)
-const passes = (id: Id, list: readonly Term[] = terms.value) => list.every((x) => matches(id, x))
+const passesTerms = (id: Id, list: readonly Term[]) => list.every((x) => matches(id, x))
+
+// Items narrowed by what they're for (`?cat=`, `ITEM_CATEGORIES`), a select beside the search, each choice with how
+// many of the list (with the search's terms) it leaves.
+const category = computed({
+  get: (): ItemCategory | '' => {
+    const c = query.value.cat
+    return props.list === 'items' && ITEM_CATEGORIES.includes(c as ItemCategory) ? (c as ItemCategory) : ''
+  },
+  set: (c: ItemCategory | '') => void router.replace({ query: { ...query.value, cat: c || undefined } }),
+})
+const inCategory = (id: Id, c: ItemCategory | '' = category.value) => !c || ITEMS[id as ItemId].category === c
+const categoryCount = (c: ItemCategory) =>
+  rows.value.filter((r) => inCategory(r.id, c) && passesTerms(r.id, terms.value)).length
+
+const passes = (id: Id, list: readonly Term[] = terms.value) => passesTerms(id, list) && inCategory(id)
 /** How many of the list a term would leave, added to the others: offered with it. */
 const termCount = (term: Term) => rows.value.filter((r) => passes(r.id, [...terms.value, term])).length
 /** The share of a Pokémon's sets running an entry, when the snapshot has it. */
@@ -235,6 +252,17 @@ const colVars = computed(() => ({
             :kinds="TERM_KINDS"
             :count="termCount"
           />
+          <select
+            v-if="list === 'items'"
+            v-model="category"
+            class="search select"
+            :aria-label="t('itemUsage.category')"
+          >
+            <option value="">{{ t('itemUsage.anyCategory') }}</option>
+            <option v-for="c in ITEM_CATEGORIES" :key="c" :value="c" :disabled="!categoryCount(c) && category !== c">
+              {{ t(`itemCategory.${c}`) }} ({{ categoryCount(c) }})
+            </option>
+          </select>
         </div>
       </template>
       <p v-else class="muted">{{ t('usage.none', { reg: REGULATION }) }}</p>
@@ -452,8 +480,20 @@ const colVars = computed(() => ({
   gap: 4px 16px;
   margin-bottom: 12px;
 }
+/* The search, and for items the category beside it, wrapping under it where there's no room. */
 .find {
-  max-width: 480px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.find > :first-child {
+  flex: 0 1 480px;
+  min-width: 0;
+}
+.select {
+  width: auto;
+  margin: 0;
 }
 /* As the Pokémon rankings' usage: a bar along the bottom of the cell, against the most used one's. */
 .meter {

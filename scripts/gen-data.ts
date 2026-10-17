@@ -24,6 +24,7 @@ import { LOCALES, type Locale } from '../src/i18n/locales.ts'
 import { LANGUAGES, type Language } from './languages.ts'
 import { MOVES_EVERYONE_USES, NAMES, type CategoryKey } from './overrides.ts'
 import { ConditionScan } from './conditions.ts'
+import { itemCategorizer } from './itemCategories.ts'
 import { SPEED_ABILITIES, SPEED_ITEMS } from '../src/lib/speed.ts'
 import { histories, Smogon, withPrevious, type MetaEntry, type Snapshot } from './smogon.ts'
 import { ITEM_ICONS, POKEMON_ICONS, SpriteSource, iconIndexes, sheetLayout, trimSheet } from './sprites.ts'
@@ -433,6 +434,12 @@ async function main() {
   const legalItems = byId(dex.items.all().filter((i) => i.num > 0 && itemAvailable(i)))
   const pokemonCell = new Map(byId(roster).map((s, i) => [s.id, i]))
   const itemCell = new Map(legalItems.map((it, i) => [it.id, i]))
+  // Each item's category, for the item rankings to filter by (`itemCategories.ts`): every one the regulation has
+  // gets one, or the generator stops, to place it there.
+  const categoryOf = itemCategorizer(dex as unknown as Parameters<typeof itemCategorizer>[0])
+  const uncategorized = legalItems.filter((it) => !categoryOf(it.id)).map((it) => it.id)
+  if (uncategorized.length)
+    throw new Error(`Items with no category; place them in scripts/itemCategories.ts:\n  ${uncategorized.join('\n  ')}`)
   const speciesId = (name: string) => dex.species.get(name).id
 
   // Each legal Pokémon's gen5 sprite. Showdown hasn't drawn some new Megas yet: their pages show their icon instead.
@@ -522,6 +529,7 @@ async function main() {
         return {
           icon: itemCell.get(id),
           kind: megas.length ? 'mega' : it.isBerry ? 'berry' : 'held',
+          category: categoryOf(id),
           // The legal Megas it brings out, by the Pokémon holding it.
           ...(megas.length && { megas: Object.fromEntries(megas.filter(([, to]) => legal.has(to))) }),
           // The Pokémon it only works for, besides Mega Stones (Ogerpon's masks).
