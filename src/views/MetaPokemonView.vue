@@ -18,7 +18,7 @@ import {
 } from '@/data/pokemon'
 import { datasetDates, GENERATED_SNAPSHOTS, loadHistory, percent, type MetaHistory } from '@/data/meta'
 import { natureEffectOn, natureEffects, natureName } from '@/data/natures'
-import { locale, t } from '@/i18n'
+import { locale, t, typeName } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { MIN_SHARE, speedBuilds } from '@/lib/speed'
@@ -346,7 +346,7 @@ const sections = computed(() =>
         <EntryTitle :to="ref_" meta />
         <div class="types">
           <AppLink v-for="ty in mon.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
-            <TypeIcon :type="ty" :scale="2" />
+            <TypeIcon v-tip="typeName(ty)" :type="ty" />
           </AppLink>
           <AppLink :to="{ name: 'pokemon', params: { id } }" class="other-page">{{ t('pokemon.dex') }} ›</AppLink>
         </div>

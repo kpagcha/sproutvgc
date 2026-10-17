@@ -15,7 +15,7 @@ import {
   spriteUrl,
   statColor,
 } from '@/data/pokemon'
-import { t, tSlots, type MessageKey } from '@/i18n'
+import { t, tSlots, typeName, type MessageKey } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import DefenseResults from '@/components/DefenseResults.vue'
@@ -136,7 +136,7 @@ const sections = computed(() =>
         <EntryTitle :to="ref_" />
         <div class="types">
           <RouterLink v-for="ty in mon.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
-            <TypeIcon :type="ty" :scale="2" />
+            <TypeIcon v-tip="typeName(ty)" :type="ty" />
           </RouterLink>
           <!-- Its meta page, as that page links here. -->
           <RouterLink :to="{ name: 'metaPokemon', params: { id } }" class="other-page"
