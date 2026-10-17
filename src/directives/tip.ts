@@ -139,11 +139,13 @@ function destroy(el: TipEl, groupName?: string) {
 // would otherwise create hundreds on mounting.
 const TRIGGERS = ['mouseenter', 'focus'] as const
 function arm(el: TipEl, content: TipContent, groupName?: string) {
+  el.dataset.tip = ''
   el._tipContent = content
   el._tipGroup = groupName
   for (const type of TRIGGERS) el.addEventListener(type, wake)
 }
 function disarm(el: TipEl) {
+  delete el.dataset.tip
   delete el._tipContent
   delete el._tipGroup
   for (const type of TRIGGERS) el.removeEventListener(type, wake)
@@ -152,6 +154,7 @@ function wake(this: TipEl, e: Event) {
   const content = this._tipContent!
   const groupName = this._tipGroup
   disarm(this)
+  this.dataset.tip = ''
   create(this, content, groupName, true)
   this.dispatchEvent(new (e.constructor as typeof Event)(e.type, e))
 }

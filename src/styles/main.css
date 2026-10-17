@@ -384,6 +384,14 @@ mark {
 [data-tippy-root]:has(> .tippy-box[data-state='visible']) {
   pointer-events: auto !important;
 }
+/* On a screen with no hover, a tooltip opens and closes on taps: two in a row on its text would select a word. */
+@media (any-hover: none) {
+  [data-tip] {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+}
 .tippy-box[data-theme~='sproutvgc'] {
   background: var(--panel);
   color: var(--text);
