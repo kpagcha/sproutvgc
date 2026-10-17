@@ -9,6 +9,8 @@ defineProps<{
   title: string
 }>()
 
+// Its tooltip only where there's hovering: a tap opens the drop-down, its label saying the same.
+const canHover = window.matchMedia('(hover: hover)').matches
 const open = ref(false)
 const root = useTemplateRef<HTMLElement>('root')
 function onPointerDown(e: PointerEvent) {
@@ -30,7 +32,7 @@ onBeforeUnmount(() => (open.value = false))
 <template>
   <div ref="root" class="options-menu">
     <button
-      v-tip="title"
+      v-tip="canHover && title"
       type="button"
       class="toggle"
       :class="{ open }"

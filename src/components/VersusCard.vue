@@ -95,7 +95,8 @@ const canHover = window.matchMedia('(hover: hover)').matches
          goes there: on one line, one under the other when they don't fit. -->
     <div class="actions">
       <button type="button" class="btn show-link" :aria-label="t('speed.vsLocate')" @click="emit('locate')">
-        {{ t('speed.vsShow') }}
+        <span class="long">{{ t('speed.vsShowLong') }}</span
+        ><span class="short">{{ t('speed.vsShow') }}</span>
       </button>
       <AppLink :to="props.compareTo" class="btn primary compare-link"
         ><Columns2 :size="16" aria-hidden="true" />{{ t('speed.vsCompare') }}<ArrowRight :size="16" aria-hidden="true"
@@ -169,19 +170,32 @@ const canHover = window.matchMedia('(hover: hover)').matches
 :root:root .versus-card .btn.close:hover {
   color: var(--text);
 }
-/* The two on a line, in short, the comparison taking what's left; one under the other when they don't fit (a longer
-   language's). */
+/* The two on a line, halves alike, Show's long label where its half has room for it (a phone's width but the narrowest);
+   one under the other when they don't fit (a longer language's). */
 .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 8px;
+  container-type: inline-size;
 }
-.show-link {
-  flex: 1 0 auto;
+.actions > .btn {
+  flex: 1 1 0;
+  min-width: max-content;
+  justify-content: center;
+}
+.show-link .long {
+  display: none;
+}
+@container (min-width: 320px) {
+  .show-link .long {
+    display: inline;
+  }
+  .show-link .short {
+    display: none;
+  }
 }
 .compare-link {
-  flex: 999 0 auto;
   gap: 6px;
   font-weight: bold;
 }
