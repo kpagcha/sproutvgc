@@ -138,7 +138,7 @@ const sections = computed(() =>
           <RouterLink v-for="ty in mon.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
             <TypeIcon v-tip="typeName(ty)" :type="ty" />
           </RouterLink>
-          <!-- Its meta page, as that page links here. -->
+          <!-- Its meta page. -->
           <RouterLink :to="{ name: 'metaPokemon', params: { id } }" class="other-page"
             >{{ t('pokemon.meta') }} ›</RouterLink
           >

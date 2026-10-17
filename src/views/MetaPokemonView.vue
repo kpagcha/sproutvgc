@@ -345,7 +345,6 @@ const sections = computed(() =>
           <AppLink v-for="ty in mon.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
             <TypeIcon v-tip="typeName(ty)" :type="ty" />
           </AppLink>
-          <AppLink :to="{ name: 'pokemon', params: { id } }" class="other-page">{{ t('pokemon.dex') }} ›</AppLink>
         </div>
         <!-- How much it's used, smaller: its rank, usage and how often it's brought, with their changes. -->
         <p v-if="m" class="used">
@@ -726,10 +725,6 @@ const sections = computed(() =>
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
-}
-.other-page {
-  margin-left: 8px;
-  font-weight: bold;
 }
 /* How much it's used: a line of its own, smaller than the stats. */
 .used {

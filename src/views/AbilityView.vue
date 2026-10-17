@@ -24,7 +24,7 @@ const holders = computed(() => (HOLDERS as Record<string, PokemonId[]>)[id.value
 <template>
   <div class="panel">
     <template v-if="exists">
-      <!-- Its meta page, as that page links here. -->
+      <!-- Its meta page. -->
       <div class="title-row">
         <EntryTitle :to="ref" />
         <RouterLink :to="{ name: 'metaAbility', params: { id } }" class="other-page"

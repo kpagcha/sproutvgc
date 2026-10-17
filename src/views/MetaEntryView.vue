@@ -35,7 +35,7 @@ import SearchBox from '@/components/SearchBox.vue'
 import TypeIcon from '@/components/TypeIcon'
 import SortHeader from '@/components/SortHeader.vue'
 
-// An ability's, item's or move's meta page (`kind`), its dex entry's sibling (each links to the other): how it's used
+// An ability's, item's or move's meta page (`kind`), its dex entry's sibling (which links here): how it's used
 // in the meta snapshot shown (`useMeta`): its rank among its kind and its usage (`entryUsage.ts`, as its rankings count
 // it: the teams running an ability or item, the share of all Pokémon running a move), with their change since the
 // dataset before; then every Pokémon whose sets run it, searchable, with how often they do and the usage they bring it;
@@ -50,7 +50,6 @@ const KINDS = {
   ability: {
     ref: (id: string) => ability(id as AbilityId),
     field: 'abilities',
-    dex: 'ability',
     text: {
       usageTip: 'abilityUsage.usageTip',
       runBy: 'metaAbility.runBy',
@@ -64,7 +63,6 @@ const KINDS = {
   item: {
     ref: (id: string) => item(id as ItemId),
     field: 'items',
-    dex: 'item',
     text: {
       usageTip: 'itemUsage.usageTip',
       runBy: 'metaItem.runBy',
@@ -78,7 +76,6 @@ const KINDS = {
   move: {
     ref: (id: string) => move(id as MoveId),
     field: 'moves',
-    dex: 'move',
     text: {
       usageTip: 'moveUsage.usageTip',
       runBy: 'metaAbility.runBy',
@@ -202,7 +199,6 @@ useRowColumns(useTemplateRef('head'))
             priorityLabel(moveData)
           }}</span>
         </h1>
-        <AppLink :to="{ name: cfg.dex, params: { id } }" class="other-page">{{ t('pokemon.dex') }} ›</AppLink>
       </div>
       <p v-if="text" class="muted desc"><DexText :text="text.short" /></p>
       <!-- A move's numbers, whom it reaches (the move rankings narrowed to it) and its tags (likewise). -->

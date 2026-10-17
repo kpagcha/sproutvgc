@@ -44,7 +44,7 @@ watchEffect(async () => {
 <template>
   <div class="panel">
     <template v-if="exists">
-      <!-- Its meta page, as that page links here. -->
+      <!-- Its meta page. -->
       <div class="title-row">
         <EntryTitle :to="ref_" />
         <RouterLink :to="{ name: 'metaMove', params: { id } }" class="other-page">{{ t('pokemon.meta') }} ›</RouterLink>

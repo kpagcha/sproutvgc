@@ -45,7 +45,6 @@ const LISTS = {
     field: 'abilities',
     /** Where a row leads: an ability's meta page, as the Pokémon rankings' rows lead to theirs. */
     entry: 'metaAbility',
-    dex: 'abilities',
     /** A Pokémon term leaves what it can have. */
     canHave: (mon: PokemonId, id: Id) => POKEMON[mon].abilities.includes(id as AbilityId),
     text: {
@@ -65,7 +64,6 @@ const LISTS = {
     ref: (id: Id) => item(id as ItemId),
     field: 'items',
     entry: 'metaItem',
-    dex: 'items',
     /** Any Pokémon can hold any item: a Pokémon term leaves what its sets hold. */
     canHave: (mon: PokemonId, id: Id) => !!shareOf(mon, id),
     text: {
@@ -225,10 +223,8 @@ const colVars = computed(() => ({
   <div>
     <div class="panel banded">
       <RankingsTabs :current="list" />
-      <!-- The dex's list of them, as it links here. -->
       <div class="title-row">
         <h1>{{ tx('title') }}</h1>
-        <AppLink :to="{ name: cfg.dex }" class="other-page">{{ t('lists.toDex') }} ›</AppLink>
       </div>
       <p class="muted intro">{{ tx('intro', { reg: snapshot?.regulation ?? REGULATION }) }}</p>
       <template v-if="hasList && snapshot">

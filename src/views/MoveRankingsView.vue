@@ -256,10 +256,8 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   <div>
     <div class="panel banded">
       <RankingsTabs current="moves" />
-      <!-- The dex's list of them, as it links here. -->
       <div class="title-row">
         <h1>{{ t('title.moveRankings') }}</h1>
-        <AppLink :to="{ name: 'moves' }" class="other-page">{{ t('lists.toDex') }} ›</AppLink>
       </div>
       <p class="muted intro">{{ t('moveUsage.intro', { reg: snapshot?.regulation ?? REGULATION }) }}</p>
       <template v-if="hasMoves && snapshot">
