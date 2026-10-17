@@ -35,7 +35,11 @@ const shown = computed(() => {
   <!-- The heading and the search, and the list, in panels of their own on phones, one panel on wider screens. -->
   <div class="panels">
     <div class="panel">
-      <h1>{{ t('title.abilities') }}</h1>
+      <!-- Their usage rankings, as they link here. -->
+      <div class="title-row">
+        <h1>{{ t('title.abilities') }}</h1>
+        <RouterLink :to="{ name: 'abilityRankings' }" class="other-page">{{ t('lists.toMeta') }} ›</RouterLink>
+      </div>
       <p class="muted">{{ t('abilities.intro', { reg: REGULATION }) }}</p>
       <SearchBox v-model="query" :placeholder="t('abilities.search')" :aria-label="t('abilities.search')" />
     </div>

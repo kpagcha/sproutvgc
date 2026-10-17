@@ -305,7 +305,11 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
   <!-- The heading and the filters, and the table, in panels of their own on phones, one panel on wider screens. -->
   <div class="panels">
     <div class="panel">
-      <h1>{{ t('title.pokemon') }}</h1>
+      <!-- Its usage rankings, as they link here. -->
+      <div class="title-row">
+        <h1>{{ t('title.pokemon') }}</h1>
+        <AppLink :to="{ name: 'rankings' }" class="other-page">{{ t('lists.toMeta') }} ›</AppLink>
+      </div>
       <p class="muted">{{ t('pokedex.intro', { reg: REGULATION, ...counts }) }}</p>
       <div class="filters">
         <SearchBox

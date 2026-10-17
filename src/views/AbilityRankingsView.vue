@@ -131,7 +131,11 @@ useRowColumns(useTemplateRef('head'))
   <div>
     <div class="panel banded">
       <RankingsTabs current="abilities" />
-      <h1>{{ t('title.abilityRankings') }}</h1>
+      <!-- The dex's list of them, as it links here. -->
+      <div class="title-row">
+        <h1>{{ t('title.abilityRankings') }}</h1>
+        <AppLink :to="{ name: 'abilities' }" class="other-page">{{ t('lists.toDex') }} ›</AppLink>
+      </div>
       <p class="muted intro">{{ t('abilityUsage.intro', { reg: snapshot?.regulation ?? REGULATION }) }}</p>
       <template v-if="hasAbilities && snapshot">
         <div class="source">

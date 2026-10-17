@@ -1136,6 +1136,8 @@ export const messages = {
   'usageMon.secHistory': 'By month',
   'pokemon.meta': 'Meta entry',
   'pokemon.dex': 'Dex entry',
+  'lists.toMeta': 'Usage rankings',
+  'lists.toDex': 'Dex list',
   'usageMon.moves': 'Moves',
   'usageMon.movepool': 'Whole movepool',
   'usageMon.setsMoves': 'Only the moves its sets run',

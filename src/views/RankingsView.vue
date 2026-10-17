@@ -263,7 +263,11 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   <div>
     <div class="panel banded">
       <RankingsTabs current="pokemon" />
-      <h1>{{ t('title.pokemonRankings') }}</h1>
+      <!-- The dex's list of them, as it links here. -->
+      <div class="title-row">
+        <h1>{{ t('title.pokemonRankings') }}</h1>
+        <AppLink :to="{ name: 'pokedex' }" class="other-page">{{ t('lists.toDex') }} ›</AppLink>
+      </div>
       <p class="muted intro">{{ t('usage.intro', { reg: snapshot?.regulation ?? REGULATION }) }}</p>
       <template v-if="snapshot">
         <!-- The data shown, and on its line, where the set columns don't fit (but on phones), the switch that shows
