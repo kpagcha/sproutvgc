@@ -315,9 +315,6 @@ const sections = computed(() =>
   <template v-if="exists">
     <!-- The data shown, on the row of the way back: what the whole page is of. -->
     <Teleport to="#back-actions-metaPokemon" defer>
-      <span v-if="snapshot?.battles" class="muted battles">
-        {{ t('usage.battles', { n: snapshot.battles.toLocaleString(locale) }) }}
-      </span>
       <MetaDialog />
     </Teleport>
 
@@ -655,6 +652,11 @@ const sections = computed(() =>
         </ul>
       </section>
     </template>
+
+    <!-- How many battles the data shown covers, at the page's end. -->
+    <p v-if="snapshot?.battles" class="muted battles">
+      {{ t('usage.battles', { n: snapshot.battles.toLocaleString(locale) }) }}
+    </p>
   </template>
   <div v-else class="panel">
     <p>{{ t('usageMon.notFound', { id }) }}</p>
@@ -685,8 +687,9 @@ const sections = computed(() =>
   top: 37px;
 }
 .battles {
-  align-self: center;
-  font-size: 0.9em;
+  margin: 0;
+  font-size: 0.85em;
+  text-align: right;
 }
 /* The heading, as the dex's: the sprite, the facts, the stats at the right. */
 .head {
