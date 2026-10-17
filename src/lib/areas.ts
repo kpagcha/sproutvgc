@@ -95,11 +95,3 @@ export const AREAS: Area[] = [
 ]
 
 export const areaOf = (id: unknown) => AREAS.find((a) => a.id === id)
-
-/** The areas' one-line pitch, on the home page. */
-export const PITCH: Record<AreaId, MessageKey> = {
-  dex: 'home.dexPitch',
-  meta: 'home.metaPitch',
-  tools: 'home.toolsPitch',
-  quizzes: 'home.quizzesPitch',
-}

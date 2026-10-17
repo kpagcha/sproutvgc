@@ -186,7 +186,6 @@ export const messages = {
   'desc.quiz': 'Learn the {game} type chart with spaced repetition. Matchups you miss come back until you know them.',
 
   'home.intro': 'A competitive companion for {game}, up to date with Regulation {reg}.',
-  'home.dexPitch': "What's in Regulation {reg}, and what it does.",
   'home.explore': 'Explore',
   'home.metaTitle': 'Top of the meta',
   'home.metaAll': 'All rankings',
@@ -194,9 +193,6 @@ export const messages = {
   'home.metaRising': 'Rising',
   'home.metaFalling': 'Falling',
   'home.metaMoversTip': 'The biggest changes in usage since the data before, in percentage points',
-  'home.metaPitch': 'What players use, and how it does.',
-  'home.toolsPitch': 'Calculate and build.',
-  'home.quizzesPitch': 'Learn the type chart and the speed tiers.',
   'search.pages': 'Pages',
   'search.meta': 'Meta entries',
   'recent.title': 'Recently viewed',

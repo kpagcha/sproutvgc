@@ -3,7 +3,7 @@ import { computed, onMounted, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { t } from '@/i18n'
 import { GAME_NAME, REGULATION } from '@/data/format'
-import { AREAS, PITCH, type AreaId } from '@/lib/areas'
+import { AREAS, type AreaId } from '@/lib/areas'
 import { preloadSearch, searchFocus, useSearch } from '@/composables/useSearch'
 import { useSlashFocus } from '@/composables/useSlashFocus'
 import { useMeta } from '@/composables/useMeta'
@@ -15,7 +15,7 @@ import SearchBox from '@/components/SearchBox.vue'
 import logoUrl from '@/assets/logo.png'
 
 // The front door to the whole site: the search (of the site's pages, the meta pages and the dex), and under it, side by side, the
-// areas (where to go: Meta's and Tools' with their sections) and the meta at a glance (what the site is most about,
+// areas (where to go, by name: Meta's and Tools' with their sections) and the meta at a glance (what the site is most about,
 // `MetaHighlights`); then the reader's favorites and recently viewed. While searching, the results take the place of all but the search.
 
 // The search is kept in the URL (`?q=`), so coming back from a result brings the results back.
@@ -92,7 +92,6 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
           <div v-for="a in AREAS" :key="a.id" class="area">
             <RouterLink :to="{ name: a.route }" class="area-head">
               <span class="area-title font-display">{{ t(a.label) }} <span class="arrow">›</span></span>
-              <span class="muted pitch">{{ t(PITCH[a.id], params) }}</span>
             </RouterLink>
             <ul v-if="WITH_SECTIONS.has(a.id)" class="area-sections">
               <li v-for="s in a.sections" :key="s.key">
@@ -163,7 +162,7 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
 .band-title {
   margin: 0;
 }
-/* An area a block each, ink rules between them: its name and what it is (a link), then, for Meta and Tools, its
+/* An area a block each, ink rules between them: its name (a link), then, for Meta and Tools, its
    sections as chips. */
 .explore {
   display: flex;
@@ -198,9 +197,6 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
 }
 .arrow {
   color: var(--accent);
-}
-.pitch {
-  font-size: 0.875em;
 }
 .area-sections {
   display: flex;
