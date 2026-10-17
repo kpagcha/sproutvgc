@@ -26,6 +26,15 @@ export function refHref(ref: Ref): string | undefined {
   return page && hrefOf({ name: page.route, params: { [page.param ?? 'id']: ref.id } })
 }
 
+/** The categories with a meta page per entry, its dex entry's sibling: their route. */
+const META_PAGES: Partial<Record<Ref['kind'], string>> = { pokemon: 'metaPokemon', ability: 'metaAbility' }
+
+/** The href of an entry's meta page, where links on the meta's pages lead; its dex entry's, for a category with none. */
+export function metaHref(ref: Ref): string | undefined {
+  const route = META_PAGES[ref.kind]
+  return route ? hrefOf({ name: route, params: { id: ref.id } }) : refHref(ref)
+}
+
 /**
  * A click handler that has the router follow a plain click on a link of the app's, the clicked one or one it's in (so
  * a list can have one for all its links). Clicks with a modifier key or another button, and links elsewhere, are left

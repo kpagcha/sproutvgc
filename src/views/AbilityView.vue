@@ -24,14 +24,26 @@ const holders = computed(() => (HOLDERS as Record<string, PokemonId[]>)[id.value
 <template>
   <div class="panel">
     <template v-if="exists">
-      <EntryTitle :to="ref" />
+      <!-- Its meta page, as that page links here. -->
+      <div class="title-row">
+        <EntryTitle :to="ref" />
+        <RouterLink :to="{ name: 'metaAbility', params: { id } }" class="other-page"
+          >{{ t('ability.usage') }} ›</RouterLink
+        >
+      </div>
       <!-- The long description; the short one is for the list, and stands in when there's nothing more to say. -->
       <p v-if="text"><DexText :text="text.long ?? text.short" /></p>
 
       <RefInteractions :to="ref" />
 
       <section v-if="holders.length">
-        <h2>{{ t('ability.pokemon') }}</h2>
+        <!-- And by usage: the Pokémon rankings narrowed to them, with how often each runs it. -->
+        <div class="title-row">
+          <h2>{{ t('ability.pokemon') }}</h2>
+          <RouterLink :to="{ name: 'rankings', query: { f: `ability:${id}` } }" class="other-page"
+            >{{ t('ability.pokemonUsage') }} ›</RouterLink
+          >
+        </div>
         <PokemonChips :ids="holders" />
       </section>
     </template>

@@ -79,6 +79,28 @@ const rankingsSoon = (list: RankingList, name: string, titleKey: MessageKey, des
   meta: { titleKey, descKey, ...inArea('meta', 'rankings') },
 })
 
+// The abilities' or items' rankings: one view, the list its prop.
+const usageRankings = (
+  list: 'abilities' | 'items',
+  name: 'abilityRankings' | 'itemRankings',
+  kind: 'ability' | 'item',
+) => ({
+  path: `/meta/${list}`,
+  name,
+  component: () => import('@/views/UsageRankingsView.vue'),
+  props: { list },
+  meta: {
+    titleKey: `title.${name}` as const,
+    descKey: `desc.${name}` as const,
+    headKey: `head.${name}` as const,
+    keywordsKey: `keywords.${name}` as const,
+    dexNames: true,
+    descriptions: [kind],
+    recent: once(name),
+    ...inArea('meta', 'rankings'),
+  },
+})
+
 // An area's own page, listing its sections.
 const area = (id: AreaId, titleKey: MessageKey, descKey: MessageKey) => ({
   path: `/${id}`,
@@ -281,19 +303,19 @@ export const router = createRouter({
       },
     },
     rankingsSoon('moves', 'moveRankings', 'title.moveRankings', 'desc.moveRankings'),
-    rankingsSoon('items', 'itemRankings', 'title.itemRankings', 'desc.itemRankings'),
+    usageRankings('items', 'itemRankings', 'item'),
+    usageRankings('abilities', 'abilityRankings', 'ability'),
     {
-      path: '/meta/abilities',
-      name: 'abilityRankings',
-      component: () => import('@/views/AbilityRankingsView.vue'),
+      path: '/meta/abilities/:id',
+      name: 'metaAbility',
+      component: () => import('@/views/MetaAbilityView.vue'),
       meta: {
-        titleKey: 'title.abilityRankings',
-        descKey: 'desc.abilityRankings',
-        headKey: 'head.abilityRankings',
-        keywordsKey: 'keywords.abilityRankings',
+        titleKey: 'title.metaAbility',
+        descKey: 'desc.metaAbility',
+        headKey: 'head.metaAbility',
+        keywordsKey: 'keywords.metaAbility',
         dexNames: true,
         descriptions: ['ability'],
-        recent: once('abilityRankings'),
         ...inArea('meta', 'rankings'),
       },
     },

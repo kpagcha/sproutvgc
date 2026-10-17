@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { computed, shallowRef, useTemplateRef, watch } from 'vue'
-import { ability, pokemon, type AbilityId, type PokemonId } from '@/data/dex'
+import { computed, shallowRef, useTemplateRef } from 'vue'
+import { ability, item, pokemon, type AbilityId, type ItemId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
-import { datasetDates, GENERATED_SNAPSHOTS, has, loadMeta, percent, type MetaData } from '@/data/meta'
-import { locale, t } from '@/i18n'
+import { datasetDates, has, percent } from '@/data/meta'
+import { points, ranksOf, standings, STEADY, usageOf, usersOf } from '@/lib/entryUsage'
+import { usePreviousMeta } from '@/composables/usePreviousMeta'
+import { locale, t, type MessageKey } from '@/i18n'
 import { description, shortText } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
@@ -18,83 +20,98 @@ import { useRowColumns } from '@/composables/useRowColumns'
 import { useSort } from '@/composables/useSort'
 import AppLink from '@/components/AppLink'
 import DexText from '@/components/DexText'
+import ItemIcon from '@/components/ItemIcon.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
-import RankingsTabs from '@/components/RankingsTabs.vue'
+import RankingsTabs, { type RankingList } from '@/components/RankingsTabs.vue'
 import TermSearch from '@/components/TermSearch.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 import SortHeader from '@/components/SortHeader.vue'
 
-// The abilities players run, by usage, from the meta snapshot shown (`useMeta`), as the Pokémon rankings: each with
-// its short description, the Pokémon that run it most, and its usage, the teams running it: the usage of each Pokémon
-// with it by the share of its sets that run it, summed.
+// The abilities or items players run (`list`), by usage, from the meta snapshot shown (`useMeta`), as the Pokémon
+// rankings: each with its short description, the Pokémon that run it most, and its usage, the teams running it: the
+// usage of each Pokémon with it by the share of its sets that run it, summed. One page each, alike but for what's
+// listed (`LISTS`).
+type Listed = Exclude<RankingList, 'pokemon' | 'moves'>
+type Id = AbilityId | ItemId
+const props = defineProps<{ list: Listed }>()
+
+const LISTS = {
+  abilities: {
+    kind: 'ability',
+    ref: (id: Id) => ability(id as AbilityId),
+    field: 'abilities',
+    /** Where a row leads: an ability's meta page, as the Pokémon rankings' rows lead to theirs. */
+    entry: 'metaAbility',
+    dex: 'abilities',
+    /** A Pokémon term leaves what it can have. */
+    canHave: (mon: PokemonId, id: Id) => POKEMON[mon].abilities.includes(id as AbilityId),
+    text: {
+      title: 'title.abilityRankings',
+      intro: 'abilityUsage.intro',
+      search: 'abilityUsage.search',
+      name: 'usage.ability',
+      usersTip: 'abilityUsage.usersTip',
+      userTip: 'abilityUsage.userTip',
+      usageTip: 'abilityUsage.usageTip',
+      monShareTip: 'abilityUsage.monShareTip',
+      usageNote: 'abilityUsage.usageNote',
+      noMatch: 'abilityUsage.noMatch',
+    },
+  },
+  items: {
+    kind: 'item',
+    ref: (id: Id) => item(id as ItemId),
+    field: 'items',
+    entry: 'item',
+    dex: 'items',
+    /** Any Pokémon can hold any item: a Pokémon term leaves what its sets hold. */
+    canHave: (mon: PokemonId, id: Id) => !!shareOf(mon, id),
+    text: {
+      title: 'title.itemRankings',
+      intro: 'itemUsage.intro',
+      search: 'itemUsage.search',
+      name: 'usage.item',
+      usersTip: 'itemUsage.usersTip',
+      userTip: 'itemUsage.userTip',
+      usageTip: 'itemUsage.usageTip',
+      monShareTip: 'itemUsage.monShareTip',
+      usageNote: 'itemUsage.usageNote',
+      noMatch: 'itemUsage.noMatch',
+    },
+  },
+} as const satisfies Record<Listed, { text: Record<string, MessageKey> } & Record<string, unknown>>
+const cfg = computed(() => LISTS[props.list])
+/** The page's text. */
+const tx = (k: keyof (typeof LISTS)[Listed]['text'], params?: Record<string, string | number>) =>
+  t(cfg.value.text[k], params)
+
 const query = useActiveQuery()
 const { snapshot, data, loading } = useMeta()
-const hasAbilities = computed(() => !!snapshot.value && has(snapshot.value, 'abilities'))
+const hasList = computed(() => !!snapshot.value && has(snapshot.value, cfg.value.field))
 
-/** The Pokémon shown with each ability: those whose teams run it most. */
+/** The Pokémon shown with each entry: those whose teams run it most. */
 const TOP = 5
 
-type User = { id: PokemonId; share: number; usage: number }
-/** Each ability's Pokémon in a snapshot's data: the share of their sets running it, and the usage that brings it. */
-function usersOf(d: MetaData) {
-  const by = new Map<AbilityId, User[]>()
-  for (const [key, m] of Object.entries(d)) {
-    for (const a of m!.abilities ?? []) {
-      if (!a.share) continue
-      const list = by.get(a.id) ?? []
-      list.push({ id: key as PokemonId, share: a.share, usage: (m!.usage ?? 0) * a.share })
-      by.set(a.id, list)
-    }
-  }
-  return by
-}
-const usageOf = (list: User[]) => list.reduce((sum, u) => sum + u.usage, 0)
-/** Each ability's rank in a snapshot's data, by usage. */
-const ranksOf = (by: Map<AbilityId, User[]>) =>
-  new Map([...by].sort((a, b) => usageOf(b[1]) - usageOf(a[1])).map(([id], i) => [id, i + 1]))
-
 // Trends, as the Pokémon rankings': against the dataset before the one shown in its series (`previous`, the month
-// before), each ability's rank then (a mark by its rank: up or down so many places, or new to it) and the usage it
-// gained or lost since, in points. Changes under `STEADY` read as noise: shown, but not colored. That dataset's data
-// loads on its own, the trends filling in once it's in.
-const previous = computed(() => GENERATED_SNAPSHOTS.find((s) => s.id === snapshot.value?.previous))
-const prevData = shallowRef<MetaData | null>(null)
-watch(
-  previous,
-  async (s) => {
-    prevData.value = null
-    if (!s) return
-    const d = await loadMeta(s)
-    if (previous.value === s) prevData.value = d
-  },
-  { immediate: true },
-)
-const before = computed(() => {
-  if (!prevData.value) return null
-  const by = usersOf(prevData.value)
-  return { ranks: ranksOf(by), usage: new Map([...by].map(([id, list]) => [id, usageOf(list)])) }
-})
-const STEADY = 0.005
-/** A change in usage, in percentage points: "+3.2", "−1.8". */
-const points = (x: number) =>
-  (x * 100).toLocaleString(locale.value, {
-    signDisplay: 'exceptZero',
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-  })
+// before), each entry's rank then (a mark by its rank: up or down so many places, or new to it) and the usage it
+// gained or lost since, in points (`STEADY` and under, not colored), filling in once its data is in.
+const { previous, prevData } = usePreviousMeta(snapshot)
+const before = computed(() => (prevData.value ? standings(prevData.value, cfg.value.field) : null))
 
 const rows = computed(() => {
-  const by = usersOf(data.value ?? {})
+  const by = usersOf(data.value ?? {}, cfg.value.field)
   const ranks = ranksOf(by)
   const then = before.value
-  return [...by].map(([id, users]) => {
+  return [...by].map(([key, users]) => {
+    const id = key as Id
     const usage = usageOf(users)
     const rank = ranks.get(id)!
     const prevRank = then?.ranks.get(id)
     return {
       id,
-      name: refName(ability(id)),
+      ref: cfg.value.ref(id),
+      name: refName(cfg.value.ref(id)),
       rank,
       usage,
       users: users.sort((a, b) => b.usage - a.usage).slice(0, TOP),
@@ -115,12 +132,12 @@ const { key, desc, toggle, sorted } = useSort<Row, Key>({
   initial: 'rank',
   startsDesc: (k) => k === 'usage' || k === 'change',
   locale,
-  remember: 'abilityUsage',
+  remember: `usage.${props.list}`,
 })
 
-// The search, as the Pokémon rankings': its text finds the list's abilities by name or by what their short description
+// The search, as the Pokémon rankings': its text finds the list's entries by name or by what their short description
 // says ("terrain", "Speed"), and its terms (`?f=`, picked from what the text finds, `TermSearch`) narrow it to those a
-// Pokémon can have, each such Pokémon's share of its sets running each ability a column of its own. While a term is
+// Pokémon can have (`canHave`), each such Pokémon's share of its sets running each a column of its own. While a term is
 // highlighted in the search's options (`preview`), the list shows it added, faded a little: what picking it would do.
 const router = useRouter()
 const TERM_KINDS = ['pokemon'] as const
@@ -132,12 +149,15 @@ const preview = shallowRef<Term | null>(null)
 const shownTerms = computed(() => (preview.value ? [...terms.value, preview.value] : terms.value))
 type MonTerm = Extract<Term, { kind: 'pokemon' }>
 const monTerms = computed(() => shownTerms.value.filter((x): x is MonTerm => x.kind === 'pokemon'))
-const matches = (id: AbilityId, term: Term) => term.kind === 'pokemon' && POKEMON[term.id].abilities.includes(id)
-const passes = (id: AbilityId, list: readonly Term[] = terms.value) => list.every((x) => matches(id, x))
+const matches = (id: Id, term: Term) => term.kind === 'pokemon' && cfg.value.canHave(term.id, id)
+const passes = (id: Id, list: readonly Term[] = terms.value) => list.every((x) => matches(id, x))
 /** How many of the list a term would leave, added to the others: offered with it. */
 const termCount = (term: Term) => rows.value.filter((r) => passes(r.id, [...terms.value, term])).length
-/** The share of a Pokémon's sets running an ability, when the snapshot has it. */
-const shareOf = (mon: PokemonId, id: AbilityId) => data.value?.[mon]?.abilities?.find((x) => x.id === id)?.share
+/** The share of a Pokémon's sets running an entry, when the snapshot has it. */
+function shareOf(mon: PokemonId, id: Id): number | undefined {
+  const list: readonly { id: string; share?: number }[] | undefined = data.value?.[mon]?.[cfg.value.field]
+  return list?.find((x) => x.id === id)?.share
+}
 
 const termSearch = useTemplateRef('termSearch')
 useSlashFocus(() => {
@@ -146,14 +166,14 @@ useSlashFocus(() => {
 })
 // The home page's search links here with its query (`?q=`).
 const search = shallowRef(typeof query.value.q === 'string' ? query.value.q : '')
-/** What the text finds: an ability by name, or by its short description, where it's whole words ("rain" finds
+/** What the text finds: an entry by name, or by its short description, where it's whole words ("rain" finds
  * "rain", not "terrain"). Null with no text. */
 const finder = computed(() => {
   const q = fold(search.value.trim())
   if (!q) return null
   const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const words = new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, 'u')
-  return (r: Row) => !!split(r.name, q) || words.test(fold(shortText(ability(r.id)) ?? ''))
+  return (r: Row) => !!split(r.name, q) || words.test(fold(shortText(r.ref) ?? ''))
 })
 /** How many the text finds, with the terms. */
 const named = computed(() => {
@@ -170,7 +190,7 @@ const top = computed(() => Math.max(0, ...rows.value.map((r) => r.usage)))
 
 const { entered, restoring } = usePageEntered()
 useRowColumns(useTemplateRef('head'))
-// The columns: rank, the ability, its Pokémon (not on phones, where they go under the row), usage, each Pokémon term's
+// The columns: rank, the entry, its Pokémon (not on phones, where they go under the row), usage, each Pokémon term's
 // share, and the change.
 const columns = computed(() => {
   const list: { cell: string; wide: string; sm: string | null }[] = [
@@ -192,14 +212,14 @@ const colVars = computed(() => ({
 <template>
   <div>
     <div class="panel banded">
-      <RankingsTabs current="abilities" />
+      <RankingsTabs :current="list" />
       <!-- The dex's list of them, as it links here. -->
       <div class="title-row">
-        <h1>{{ t('title.abilityRankings') }}</h1>
-        <AppLink :to="{ name: 'abilities' }" class="other-page">{{ t('lists.toDex') }} ›</AppLink>
+        <h1>{{ tx('title') }}</h1>
+        <AppLink :to="{ name: cfg.dex }" class="other-page">{{ t('lists.toDex') }} ›</AppLink>
       </div>
-      <p class="muted intro">{{ t('abilityUsage.intro', { reg: snapshot?.regulation ?? REGULATION }) }}</p>
-      <template v-if="hasAbilities && snapshot">
+      <p class="muted intro">{{ tx('intro', { reg: snapshot?.regulation ?? REGULATION }) }}</p>
+      <template v-if="hasList && snapshot">
         <div class="source">
           <MetaDialog />
           <span v-if="snapshot.battles" class="muted">
@@ -214,7 +234,7 @@ const colVars = computed(() => ({
             v-model:terms="terms"
             v-model:preview="preview"
             :name-count="named"
-            :placeholder="t('abilityUsage.search')"
+            :placeholder="tx('search')"
             :kinds="TERM_KINDS"
             :count="termCount"
           />
@@ -223,7 +243,7 @@ const colVars = computed(() => ({
       <p v-else class="muted">{{ t('usage.none', { reg: REGULATION }) }}</p>
     </div>
     <div
-      v-if="hasAbilities && snapshot"
+      v-if="hasList && snapshot"
       class="panel"
       :class="{ 'meta-stale': loading, previewing: preview }"
       :aria-busy="loading"
@@ -239,13 +259,13 @@ const colVars = computed(() => ({
             :desc="desc"
             @sort="toggle('rank')"
           />
-          <SortHeader :label="t('usage.ability')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
+          <SortHeader :label="tx('name')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
           <div role="columnheader" class="wide-only">
-            <span v-tip="t('abilityUsage.usersTip')" class="tipped">{{ t('abilityUsage.users') }}</span>
+            <span v-tip="tx('usersTip')" class="tipped">{{ t('usage.topPokemon') }}</span>
           </div>
           <SortHeader
             :label="t('usage.usage')"
-            :tip="t('abilityUsage.usageTip')"
+            :tip="tx('usageTip')"
             right
             :active="key === 'usage'"
             :desc="desc"
@@ -254,7 +274,7 @@ const colVars = computed(() => ({
           <div
             v-for="x in monTerms"
             :key="x.id"
-            v-tip="t('abilityUsage.monShareTip', { name: refName(x) })"
+            v-tip="tx('monShareTip', { name: refName(x) })"
             role="columnheader"
             class="r"
           >
@@ -287,15 +307,17 @@ const colVars = computed(() => ({
               >
             </div>
             <div role="cell" class="grow">
-              <AppLink :to="{ name: 'ability', params: { id: r.id } }" class="name">{{ r.name }}</AppLink>
-              <p class="muted text"><DexText :text="description('ability', r.id)?.short ?? ''" /></p>
+              <AppLink :to="{ name: cfg.entry, params: { id: r.id } }" class="name"
+                ><ItemIcon v-if="list === 'items'" :id="r.id as ItemId" />{{ r.name }}</AppLink
+              >
+              <p class="muted text"><DexText :text="description(cfg.kind, r.id)?.short ?? ''" /></p>
             </div>
             <!-- Its Pokémon: a column of their own on wider screens, a line under the row on phones. -->
             <div role="cell" class="users">
               <AppLink
                 v-for="u in r.users"
                 :key="u.id"
-                v-tip:group="t('abilityUsage.userTip', { name: refName(pokemon(u.id)), share: percent(u.share) })"
+                v-tip:group="tx('userTip', { name: refName(pokemon(u.id)), share: percent(u.share) })"
                 :to="{ name: 'metaPokemon', params: { id: u.id } }"
                 :aria-label="refName(pokemon(u.id))"
                 class="user"
@@ -327,8 +349,8 @@ const colVars = computed(() => ({
           </div>
         </template>
       </div>
-      <p v-else class="muted">{{ t('abilityUsage.noMatch') }}</p>
-      <p class="muted note">{{ t('abilityUsage.usageNote') }}</p>
+      <p v-else class="muted">{{ tx('noMatch') }}</p>
+      <p class="muted note">{{ tx('usageNote') }}</p>
       <p v-if="previous" class="muted note phone-only-block">
         {{ t('usage.change') }}: {{ t('usage.changeTip', { dates: datasetDates(previous) }) }}.
       </p>
@@ -340,7 +362,13 @@ const colVars = computed(() => ({
 </template>
 
 <style scoped>
-/* Rank, the ability (its name over its short description), its Pokémon (room for all five icons and the count after
+/* An item's icon before its name, lined up with it. */
+.name:has(.sheet-icon) {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+/* Rank, the entry (its name over its short description), its Pokémon (room for all five icons and the count after
    them: the rows take the header's widths), its usage, each Pokémon term's share and its change (`columns`). On phones
    its Pokémon go on a line under the row. */
 .dex-table {

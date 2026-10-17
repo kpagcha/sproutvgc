@@ -431,7 +431,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
                     :data-share="r.ability.share ?? 0"
                     :data-kind="r.ability.kind"
                     :data-id="r.ability.id"
-                    ><DexRef :to="r.ability"
+                    ><DexRef :to="r.ability" meta
                   /></span>
                 </li>
               </ul>
@@ -504,7 +504,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
                 :data-share="r.ability.share ?? 0"
                 :data-kind="r.ability.kind"
                 :data-id="r.ability.id"
-                ><DexRef :to="r.ability"
+                ><DexRef :to="r.ability" meta
               /></span>
               <span v-if="r.moves.length" class="moves">
                 <span

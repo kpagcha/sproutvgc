@@ -203,8 +203,8 @@ h3,
 h1 {
   font-size: calc(18px * var(--display-scale, 1) * var(--text-scale));
 }
-/* A list page's heading with the way to its counterpart in the other area (the dex's list, its usage rankings) after
-   it, on its line. */
+/* A heading with the way to its counterpart in the other area after it, on its line: a list's (the dex's list, its
+   usage rankings), an entry's (an ability's usage), a section's. An entry's title keeps its own margin otherwise. */
 .title-row {
   display: flex;
   flex-wrap: wrap;
@@ -212,7 +212,9 @@ h1 {
   gap: 0 16px;
   margin-bottom: 8px;
 }
-.title-row > h1 {
+.title-row > h1,
+.title-row > h2,
+:root .title-row > .entry-title {
   margin: 0;
 }
 .title-row > .other-page {

@@ -460,7 +460,7 @@ const sections = computed(() =>
         <ul class="abilities">
           <li v-for="(a, i) in abilities" :key="a.key" :class="{ main: i === 0 && a.share }">
             <span class="ability-head">
-              <DexRef :to="a.ref" class="ability-name" />
+              <DexRef :to="a.ref" meta class="ability-name" />
               <span class="num">{{ a.share === undefined ? `<${percent(LIST_MIN)}` : percent(a.share) }}</span>
             </span>
             <span class="bar" :style="{ '--share': a.share ?? 0 }"></span>

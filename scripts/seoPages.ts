@@ -111,12 +111,21 @@ export function seoPages(): Plugin {
       const latest = pool.reduce<Snapshot | undefined>((a, s) => (!a || s.to > a.to ? s : a), undefined)
       const datasetKey = (s: Snapshot) =>
         [s.regulation, s.provider.url, s.kind, s.season ?? '', s.period, s.from, s.to].join('|')
+      // And the abilities with a meta page: those some set there runs.
       const inMeta = new Set<string>()
+      const abilitiesRun = new Set<string>()
       for (const s of latest ? pool.filter((s) => datasetKey(s) === datasetKey(latest)) : []) {
-        const data = JSON.parse(await readFile(join(metaDir, `${s.id}.json`), 'utf8')) as Record<string, unknown>
-        for (const id of Object.keys(data)) inMeta.add(id)
+        const data = JSON.parse(await readFile(join(metaDir, `${s.id}.json`), 'utf8')) as Record<
+          string,
+          { abilities?: { id: string; share?: number }[] }
+        >
+        for (const [id, m] of Object.entries(data)) {
+          inMeta.add(id)
+          for (const a of m.abilities ?? []) if (a.share) abilitiesRun.add(a.id)
+        }
       }
       const usageIds = dex.availableIds('pokemon').filter((id) => inMeta.has(id))
+      const abilityIds = dex.availableIds('ability').filter((id) => abilitiesRun.has(id))
 
       const msg = (key: string, name = '') =>
         en.messages[key]!.replaceAll('{game}', GAME)
@@ -176,7 +185,17 @@ export function seoPages(): Plugin {
           lead: names.pokemon[id]!,
           schema: 'WebPage',
         })),
+        searched('meta/items', 'itemRankings', 'WebPage'),
         searched('meta/abilities', 'abilityRankings', 'WebPage'),
+        ...abilityIds.map((id): Page => ({
+          path: `meta/abilities/${id}`,
+          title: 'title.metaAbility',
+          head: 'head.metaAbility',
+          desc: 'desc.metaAbility',
+          keywords: 'keywords.metaAbility',
+          lead: names.ability[id]!,
+          schema: 'WebPage',
+        })),
         searched('meta/speed-tiers', 'speedTiers'),
         searched('meta/speed-tiers/compare', 'speedCompare'),
         { path: 'tools', title: 'title.tools', desc: 'desc.tools', schema: 'CollectionPage' },
