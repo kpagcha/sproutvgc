@@ -1,61 +1,63 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, useTemplateRef } from 'vue'
-import { availableIds } from '@/data/dex'
-import { TYPES } from '@/data/types'
-import { locale, t, typeName, type MessageKey } from '@/i18n'
-import { refName } from '@/i18n/refName'
-import type { FilterLike } from '@/lib/filterGroups'
-import { FILTER_KINDS, type PokemonFilter } from '@/lib/pokemonFilters'
+import { t, type MessageKey } from '@/i18n'
+import { termOptions, toTerm, type Term, type TermKind } from '@/lib/searchTerms'
 
-// Adds a filter to a group of a list's (the Pokémon list's, unless given its own `kinds` and `options`): a button that
-// opens a pick of its kind, then of the entry, by name. Picking one adds it and closes again. `label` names the button
-// (the first filter, when there are none).
+// Adds a filter to a group of a list's (`FilterGroups`): a button that opens the explicit choices, what to filter by
+// (`kinds`; with only one, straight to its entries) and then the entry, every one of that kind by name
+// (`termOptions`), those `taken` already left out. Picking one adds it and closes again, as Escape or its cross does.
+// `label` names the button (a new group). `shown` shows the choices with no button to open them, nor a cross to close
+// them: the first filter's, the advanced mode's start.
 const props = defineProps<{
   label?: string
-  kinds?: readonly string[]
-  /** A kind's choices, by name; the Pokémon list's by default (types, and the regulation's abilities and moves). */
-  options?: (kind: string) => { id: string; name: string }[]
+  shown?: boolean
+  kinds: readonly TermKind[]
+  /** The terms already there, not offered again. */
+  taken: readonly Term[]
 }>()
-const emit = defineEmits<{ add: [filter: FilterLike] }>()
+const emit = defineEmits<{ add: [term: Term] }>()
 
-const kinds = computed(() => props.kinds ?? FILTER_KINDS)
 const open = ref(false)
-const kind = ref(kinds.value[0]!)
+const kind = ref<TermKind>(props.kinds[0]!)
 const kindSelect = useTemplateRef('kindSelect')
+const entrySelect = useTemplateRef('entrySelect')
 
 async function start() {
+  if (!props.kinds.includes(kind.value)) kind.value = props.kinds[0]!
   open.value = true
   await nextTick()
-  kindSelect.value?.focus()
+  ;(kindSelect.value ?? entrySelect.value)?.focus()
 }
 
-const options = computed(() => {
-  if (props.options) return props.options(kind.value)
-  if (kind.value === 'type') return TYPES.map((id) => ({ id: id as string, name: typeName(id) }))
-  const k = kind.value as 'ability' | 'move'
-  return availableIds(k)
-    .map((id) => ({ id: id as string, name: refName({ kind: k, id } as PokemonFilter) }))
-    .sort((a, b) => a.name.localeCompare(b.name, locale.value))
-})
+const options = computed(() =>
+  termOptions(kind.value).filter((o) => !props.taken.some((x) => x.kind === kind.value && x.id === o.id)),
+)
 
 function pick(e: Event) {
   const select = e.target as HTMLSelectElement
-  if (!select.value) return
-  emit('add', { kind: kind.value, id: select.value })
+  const term = select.value ? toTerm(kind.value, select.value) : null
+  if (!term) return
+  emit('add', term)
   open.value = false
 }
 </script>
 
 <template>
-  <span v-if="open" class="adder" @keydown.escape="open = false">
-    <select ref="kindSelect" v-model="kind" class="search" :aria-label="t('filter.kind')">
+  <span v-if="open || shown" class="adder" @keydown.escape="open = false">
+    <select v-if="kinds.length > 1" ref="kindSelect" v-model="kind" class="search" :aria-label="t('filter.kind')">
       <option v-for="k in kinds" :key="k" :value="k">{{ t(`filter.kind.${k}` as MessageKey) }}</option>
     </select>
-    <select :key="kind" class="search" :aria-label="t(`filter.kind.${kind}` as MessageKey)" @change="pick">
+    <select
+      ref="entrySelect"
+      :key="kind"
+      class="search"
+      :aria-label="t(`filter.kind.${kind}` as MessageKey)"
+      @change="pick"
+    >
       <option value="">{{ t('filter.choose') }}</option>
       <option v-for="o in options" :key="o.id" :value="o.id">{{ o.name }}</option>
     </select>
-    <button type="button" class="remove" :aria-label="t('filter.cancel')" @click="open = false">×</button>
+    <button v-if="!shown" type="button" class="remove" :aria-label="t('filter.cancel')" @click="open = false">×</button>
   </span>
   <button
     v-else

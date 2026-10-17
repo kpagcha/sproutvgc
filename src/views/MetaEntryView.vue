@@ -21,6 +21,9 @@ import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { points, ranksOf, scaleOf, standings, STEADY, usageOf, usersOf } from '@/lib/entryUsage'
 import { fold, split } from '@/lib/search'
+import { noFilters, passesGroups } from '@/lib/filterGroups'
+import { monMatches, MON_TERM_KINDS, SET_LIST } from '@/lib/monTerms'
+import type { TermFilters } from '@/lib/searchTerms'
 import { useMeta } from '@/composables/useMeta'
 import { usePreviousMeta } from '@/composables/usePreviousMeta'
 import { useRowColumns } from '@/composables/useRowColumns'
@@ -31,7 +34,7 @@ import DexText from '@/components/DexText'
 import ItemIcon from '@/components/ItemIcon.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
-import SearchBox from '@/components/SearchBox.vue'
+import FilterSearch from '@/components/FilterSearch.vue'
 import TypeIcon from '@/components/TypeIcon'
 import SortHeader from '@/components/SortHeader.vue'
 
@@ -124,9 +127,24 @@ const rows = computed(() =>
     return { ...u, species, forme, name: refName(pokemon(u.id)) }
   }),
 )
-// The Pokémon running it, searched by name; cleared on another entry's page.
+// The Pokémon running it, searched by name and filtered as the Pokémon rankings are (`FilterSearch`, `monTerms.ts`):
+// by type, ability, or a move or item their sets run; cleared on another entry's page.
 const search = shallowRef('')
-watch(id, () => (search.value = ''))
+const filters = shallowRef<TermFilters>(noFilters())
+const preview = shallowRef<TermFilters | null>(null)
+watch(id, () => {
+  search.value = ''
+  filters.value = noFilters()
+})
+const termKinds = computed(() =>
+  MON_TERM_KINDS.filter((k) => k === 'type' || k === 'ability' || (snapshot.value && has(snapshot.value, SET_LIST[k]))),
+)
+const passes = (mon: PokemonId, f: TermFilters) => passesGroups(f, (x) => monMatches(data.value, mon, x))
+const count = (f: TermFilters) => rows.value.filter((r) => passes(r.id, f)).length
+const named = computed(() => {
+  const q = fold(search.value.trim())
+  return q ? rows.value.filter((r) => split(r.name, q) && passes(r.id, filters.value)).length : 0
+})
 type Row = (typeof rows.value)[number]
 type Key = 'name' | 'share' | 'usage'
 const { key, desc, toggle, sorted } = useSort<Row, Key>({
@@ -141,8 +159,9 @@ const { key, desc, toggle, sorted } = useSort<Row, Key>({
 const top = computed(() => Math.max(0, ...rows.value.map((r) => r.usage)))
 
 const shown = computed(() => {
+  if (preview.value) return sorted.value.filter((r) => passes(r.id, preview.value!))
   const q = fold(search.value.trim())
-  return q ? sorted.value.filter((r) => split(r.name, q)) : sorted.value
+  return sorted.value.filter((r) => (!q || split(r.name, q)) && passes(r.id, filters.value))
 })
 
 // A move's numbers and reach, for its heading.
@@ -262,10 +281,19 @@ useRowColumns(useTemplateRef('head'))
       <div class="table-head">
         <h2>{{ tx('pokemon') }}</h2>
         <div v-if="rows.length > 8" class="table-search">
-          <SearchBox v-model="search" :placeholder="t('pokedex.search')" :aria-label="t('pokedex.search')" />
+          <FilterSearch
+            v-model:text="search"
+            v-model:filters="filters"
+            v-model:preview="preview"
+            :subject="t('filter.subject.pokemon')"
+            :name-count="named"
+            :kinds="termKinds"
+            :count
+            meta
+          />
         </div>
       </div>
-      <div v-if="shown.length" class="dex-table" role="table">
+      <div v-if="shown.length" class="dex-table" :class="{ previewing: preview }" role="table">
         <div ref="head" class="row head" role="row">
           <SortHeader :label="t('usage.pokemon')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
           <div role="columnheader" class="wide-only">{{ t('pokedex.types') }}</div>
@@ -390,7 +418,11 @@ useRowColumns(useTemplateRef('head'))
   margin: 0;
 }
 .table-search {
-  flex: 0 1 280px;
+  flex: 1 1 320px;
+}
+/* The table with a term highlighted in the search's options: a preview, faded a little. */
+.dex-table.previewing {
+  opacity: 0.75;
 }
 .more {
   align-self: center;

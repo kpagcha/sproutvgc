@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import Marked from '@/components/Marked'
-import { computed, ref } from 'vue'
+import { computed, ref, shallowRef } from 'vue'
 import { useRoute } from 'vue-router'
 import { availableIds, condition } from '@/data/dex'
-import { CONDITIONS, SUBKINDS } from '@/data/conditions'
+import { CONDITIONS, SUBKINDS, type Subkind } from '@/data/conditions'
 import { REGULATION } from '@/data/format'
 import { t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
+import { passesGroups } from '@/lib/filterGroups'
+import type { TermFilters } from '@/lib/searchTerms'
+import { useUrlFilters } from '@/composables/useUrlFilters'
 import DexText from '@/components/DexText'
-import SearchBox from '@/components/SearchBox.vue'
+import FilterSearch from '@/components/FilterSearch.vue'
 
 // Every condition with an entry of its own, by kind (statuses, volatile effects, side and field effects, weather,
 // terrains), with its short description. In the order `conditions.ts` lists them: related ones together.
@@ -23,12 +26,23 @@ const conditions = computed(() =>
   })),
 )
 
-// The home page's search links here with its query (`?q=`).
+// The search (`FilterSearch`): its text finds conditions by name (the home page's search links here with it, `?q=`),
+// and their kinds to filter them by (`?f=`, `?fm=`).
 const initial = useRoute().query.q
 const query = ref(typeof initial === 'string' ? initial : '')
-const groups = computed(() => {
+const KINDS = ['subkind'] as const
+const filters = useUrlFilters(() => KINDS)
+const preview = shallowRef<TermFilters | null>(null)
+const passes = (sub: Subkind, f: TermFilters) => passesGroups(f, (x) => x.kind === 'subkind' && sub === x.id)
+const count = (f: TermFilters) => conditions.value.filter((c) => passes(c.sub, f)).length
+const named = computed(() => {
   const q = fold(query.value.trim())
+  return q ? conditions.value.filter((c) => split(c.name, q) && passes(c.sub, filters.value)).length : 0
+})
+const groups = computed(() => {
+  const q = preview.value ? '' : fold(query.value.trim())
   const shown = conditions.value.flatMap((c) => {
+    if (!passes(c.sub, preview.value ?? filters.value)) return []
     const parts = q ? split(c.name, q) : null
     return !q || parts ? [{ ...c, parts }] : []
   })
@@ -42,9 +56,18 @@ const groups = computed(() => {
     <div class="panel">
       <h1>{{ t('title.conditions') }}</h1>
       <p class="muted">{{ t('conditions.intro', { reg: REGULATION }) }}</p>
-      <SearchBox v-model="query" :placeholder="t('conditions.search')" :aria-label="t('conditions.search')" />
+      <FilterSearch
+        v-model:text="query"
+        v-model:filters="filters"
+        v-model:preview="preview"
+        class="list-search"
+        :subject="t('filter.subject.conditions')"
+        :name-count="named"
+        :kinds="KINDS"
+        :count
+      />
     </div>
-    <div class="panel">
+    <div class="panel" :class="{ previewing: preview }">
       <section v-for="g in groups" :key="g.sub">
         <h2>{{ t(`conditions.sub.${g.sub}`) }}</h2>
         <dl class="entries">
@@ -65,6 +88,12 @@ const groups = computed(() => {
 </template>
 
 <style scoped>
+.list-search {
+  margin-bottom: 12px;
+}
+.previewing section {
+  opacity: 0.75;
+}
 section + section {
   margin-top: 16px;
 }

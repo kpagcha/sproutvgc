@@ -1,7 +1,6 @@
-<script setup lang="ts" generic="F extends FilterLike">
+<script setup lang="ts">
 import { FunnelX } from '@lucide/vue'
 import { t } from '@/i18n'
-import { refName } from '@/i18n/refName'
 import type { MessageKey } from '@/i18n'
 import type { Ref } from '@/data/dex'
 import type { TypeId } from '@/data/types'
@@ -9,48 +8,32 @@ import DexRef from '@/components/DexRef'
 import FilterAdder from '@/components/FilterAdder.vue'
 import TypeIcon from '@/components/TypeIcon'
 import { confirmDialog } from '@/composables/useConfirm'
-import {
-  noFilters,
-  sameFilter,
-  type FilterGroup,
-  type FilterLike,
-  type Filters,
-  type Join,
-  type Negatable,
-} from '@/lib/filterGroups'
+import { noFilters, withFilterIn, withGroup, type FilterGroup, type Join, type Negatable } from '@/lib/filterGroups'
+import { isExtraKind, termName, type Term, type TermFilters, type TermKind } from '@/lib/searchTerms'
 
-// A list's filters (`filterGroups.ts`: the Pokémon list's, `pokemonFilters.ts`, unless given `kinds` and `options`
-// for `FilterAdder`), in groups: each its filters joined by "or" or "and", and the groups joined the same way. The word
-// between two of them switches it; "not" on a filter negates it. A filter of a dex entry is its name, a link (to its
-// meta page with `meta`); one that isn't (a move's tag) is named by `name`.
-const model = defineModel<Filters<F>>({ required: true })
-const props = defineProps<{
-  kinds?: readonly string[]
-  options?: (kind: string) => { id: string; name: string }[]
-  /** A filter's name, for one that isn't a dex entry; undefined for one that is. */
-  name?: (f: F) => string | undefined
+// A list's filters in the advanced mode (`FilterSearch`): groups, each its filters joined by "and" or "or", and the
+// groups joined the same way. The word between two of them switches it; "not" on a filter negates it. A filter of a
+// dex entry is its name, a link (to its meta page with `meta`); one that isn't (a move's tag) its name. Each group adds
+// filters of `kinds` from the explicit choices of what to filter by and then the entry (`FilterAdder`), as does the
+// button for a new group; with none yet, those choices are shown from the start.
+const model = defineModel<TermFilters>({ required: true })
+defineProps<{
+  kinds: readonly TermKind[]
   meta?: boolean
 }>()
-const nameOf = (f: F) => props.name?.(f) ?? refName(f as unknown as Ref)
 
 const flip = (join: Join): Join => (join === 'any' ? 'all' : 'any')
 const joinWord = (join: Join): MessageKey => (join === 'any' ? 'filter.or' : 'filter.and')
 
-function setGroup(i: number, group: FilterGroup<F> | null) {
+function setGroup(i: number, group: FilterGroup<Term> | null) {
   const groups = model.value.groups.slice()
   // A group with no filters left goes too.
   if (group?.terms.length) groups[i] = group
   else groups.splice(i, 1)
   model.value = { ...model.value, groups }
 }
-const setTerm = (g: FilterGroup<F>, i: number, j: number, term: Negatable<F> | null) =>
+const setTerm = (g: FilterGroup<Term>, i: number, j: number, term: Negatable<Term> | null) =>
   setGroup(i, { ...g, terms: g.terms.flatMap((x, k) => (k !== j ? [x] : term ? [term] : [])) })
-const addTo = (g: FilterGroup<F>, i: number, filter: FilterLike) =>
-  g.terms.some((x) => sameFilter(x, filter)) || setGroup(i, { ...g, terms: [...g.terms, filter as F] })
-
-function addGroup(filter: FilterLike) {
-  model.value = { ...model.value, groups: [...model.value.groups, { join: 'any', terms: [filter as F] }] }
-}
 
 async function clearAll() {
   if (await confirmDialog({ message: t('filter.clearConfirm'), confirm: t('filter.clear'), danger: true }))
@@ -93,22 +76,28 @@ async function clearAll() {
             </button>
             <span class="muted">{{ t(`filter.kind.${f.kind}` as MessageKey) }}:</span>
             <TypeIcon v-if="f.kind === 'type'" :type="f.id as TypeId" />
-            <span v-if="name?.(f)">{{ name(f) }}</span>
-            <DexRef v-else :to="f as unknown as Ref" :meta />
+            <span v-if="isExtraKind(f.kind)">{{ termName(f) }}</span>
+            <DexRef v-else :to="f as Ref" :meta />
             <button
               type="button"
               class="remove"
-              :aria-label="t('filter.remove', { name: nameOf(f) })"
+              :aria-label="t('filter.remove', { name: termName(f) })"
               @click="setTerm(g, i, j, null)"
             >
               ×
             </button>
           </span>
         </template>
-        <FilterAdder :kinds :options @add="addTo(g, i, $event)" />
+        <FilterAdder :kinds :taken="g.terms" @add="model = withFilterIn(model, i, $event)" />
       </div>
     </template>
-    <FilterAdder :label="t(model.groups.length ? 'filter.addGroup' : 'filter.add')" :kinds :options @add="addGroup" />
+    <FilterAdder
+      :label="t('filter.addGroup')"
+      :shown="!model.groups.length"
+      :kinds
+      :taken="[]"
+      @add="model = withGroup(model, $event)"
+    />
     <button
       v-if="model.groups.length"
       v-tip="t('filter.clearAll')"

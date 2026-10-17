@@ -1,27 +1,18 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, shallowRef, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
-import { availableIds, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
+import { move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { has, percent, sinceLabel } from '@/data/meta'
-import { CATEGORIES, FLAGS, MOVES, priorityLabel, REACHES, reachOf } from '@/data/moves'
+import { MOVES, priorityLabel, reachOf } from '@/data/moves'
 import { loadLearnsets, movesOf } from '@/data/pokemon'
-import { TYPES } from '@/data/types'
-import { locale, t, typeName, type MessageKey } from '@/i18n'
+import { locale, t, typeName } from '@/i18n'
 import { description, shortText } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { ranksOf, scaleOf, standings, usageOf, usersOf } from '@/lib/entryUsage'
 import { fold, split } from '@/lib/search'
-import {
-  allFilters,
-  formatGroups,
-  parseGroups,
-  passesGroups,
-  withFilter,
-  type Filters,
-  type Negatable,
-} from '@/lib/filterGroups'
-import { toTerm, type ExtraKind, type Term } from '@/lib/searchTerms'
+import { passesGroups, positiveFilters } from '@/lib/filterGroups'
+import { formatTermFilters, parseTermFilters, type Term, type TermFilters } from '@/lib/searchTerms'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useMeta } from '@/composables/useMeta'
 import { usePageEntered } from '@/composables/usePageEntered'
@@ -32,13 +23,12 @@ import { useSort } from '@/composables/useSort'
 import AppLink from '@/components/AppLink'
 import CategoryIcon from '@/components/CategoryIcon'
 import DexText from '@/components/DexText'
-import FilterGroups from '@/components/FilterGroups.vue'
+import FilterSearch from '@/components/FilterSearch.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import RankingsTabs from '@/components/RankingsTabs.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 import SortHeader from '@/components/SortHeader.vue'
-import TermSearch from '@/components/TermSearch.vue'
 import TypeIcon from '@/components/TypeIcon'
 
 // The moves players run, by usage, from the meta snapshot shown (`useMeta`), as the ability and item rankings: each
@@ -108,83 +98,43 @@ const { key, desc, toggle, sorted } = useSort<Row, Key>({
   remember: 'usage.moves',
 })
 
-// The search and filters, as the Pokémon list's: the text finds moves by name or by what their short description says
-// (whole words: "rain" isn't "terrain"), and finds what to filter them by too, as terms (`TermSearch`): a type, a
-// category, a tag, a reach, or a Pokémon (the moves it learns, its learnset loaded on demand). Picking one adds it to
-// the filters (`FilterGroups`, `filterGroups.ts`: groups joined AND or OR, any filter negated, more added from their
-// own picker), kept in the URL (`?f=`, `?fm=`). Picked from the search, a filter joins the last group, a first one
-// joining all (Fire, then Physical: Fire and Physical moves). Each Pokémon filtered by (not negated) adds a column of
-// its sets' share running each move. While a term is highlighted in the search's options (`preview`), the list shows
-// it added, faded a little: what picking it would do.
+// The search and filters (`FilterSearch`): the text finds moves by name or by what their short description says (whole
+// words: "rain" isn't "terrain"), and finds what to filter them by too: a type, a category, a tag, a reach, or a
+// Pokémon (the moves it learns, its learnset loaded on demand), kept in the URL (`?f=`, `?fm=`). Each Pokémon filtered
+// by (not negated) adds a column of its sets' share running each move. While a term is highlighted in the search's
+// options (`preview`), the list shows it added, faded a little: what picking it would do.
 type MoveFilter = Extract<Term, { kind: 'type' | 'category' | 'flag' | 'reach' | 'pokemon' }>
 const FILTER_KINDS = ['type', 'category', 'flag', 'reach', 'pokemon'] as const
-const filters = computed<Filters<MoveFilter>>({
-  get: () =>
-    parseGroups(query.value.f, query.value.fm, (kind, id) =>
-      (FILTER_KINDS as readonly string[]).includes(kind) ? (toTerm(kind, id) as MoveFilter | null) : null,
-    ),
-  set: (f) => void router.replace({ query: { ...query.value, ...formatGroups(f) } }),
+const filters = computed<TermFilters>({
+  get: () => parseTermFilters(query.value.f, query.value.fm, FILTER_KINDS),
+  set: (f) => void router.replace({ query: { ...query.value, ...formatTermFilters(f) } }),
 })
-const added = (f: Filters<MoveFilter>, term: Term) => withFilter(f, term as MoveFilter, 'all')
-// The search box keeps no terms of its own: what's picked there joins the filters under it.
-const terms = computed<Term[]>({
-  get: () => [],
-  set: (list) => {
-    const term = list.at(-1)
-    if (term) filters.value = added(filters.value, term)
-  },
-})
-const preview = shallowRef<Term | null>(null)
-/** The filters the list shows: the URL's, and the term highlighted in the search's options. */
-const shownFilters = computed(() => (preview.value ? added(filters.value, preview.value) : filters.value))
+const preview = shallowRef<TermFilters | null>(null)
+/** The filters the list shows: the URL's, or with the term highlighted in the search's options. */
+const shownFilters = computed(() => preview.value ?? filters.value)
 
 const learnsets = shallowRef<Record<PokemonId, MoveId[]> | null>(null)
 void loadLearnsets().then((sets) => (learnsets.value = sets))
 /** Whether a move matches a filter: one of a Pokémon's can't tell until the learnsets are in. */
-function matches(r: Row, f: MoveFilter): boolean | null {
+function matches(r: Row, f: Term): boolean | null {
   if (f.kind === 'type') return r.data.type === f.id
   if (f.kind === 'category') return r.data.category === f.id
   if (f.kind === 'flag') return r.data.flags.includes(f.id)
   if (f.kind === 'reach') return r.reach === f.id
-  return learnsets.value ? movesOf(learnsets.value, f.id).includes(r.id) : null
+  if (f.kind === 'pokemon') return learnsets.value ? movesOf(learnsets.value, f.id).includes(r.id) : null
+  return false
 }
-const passes = (r: Row, f: Filters<MoveFilter> = filters.value) => passesGroups(f, (x) => matches(r, x))
-/** How many of the list a term would leave, added to the filters: offered with it. */
-const termCount = (term: Term) => rows.value.filter((r) => passes(r, added(filters.value, term))).length
+const passes = (r: Row, f: TermFilters = filters.value) => passesGroups(f, (x) => matches(r, x))
+/** How many of the list these filters would leave: offered with each term. */
+const count = (f: TermFilters) => rows.value.filter((r) => passes(r, f)).length
 /** The Pokémon filtered by (not negated), a column each of their sets' share running each move. */
 const monTerms = computed(() =>
-  allFilters(shownFilters.value).filter(
-    (x): x is Negatable<Extract<MoveFilter, { kind: 'pokemon' }>> => x.kind === 'pokemon' && !x.not,
+  positiveFilters(shownFilters.value).filter(
+    (x): x is Extract<MoveFilter, { kind: 'pokemon' }> => x.kind === 'pokemon',
   ),
 )
 /** The share of a Pokémon's sets running a move, when the snapshot has it. */
 const shareOf = (mon: PokemonId, id: MoveId) => data.value?.[mon]?.moves?.find((x) => x.id === id)?.share
-
-// What isn't a dex entry, named: the categories, tags and reaches, for the search to find and the filters to show.
-const EXTRA_NAMES: Record<ExtraKind, (id: string) => string> = {
-  category: (id) => t(`move.category.${id}` as MessageKey),
-  flag: (id) => t(`move.flag.${id}` as MessageKey),
-  reach: (id) => t(`move.reach.${id}` as MessageKey),
-}
-const extra = computed(() =>
-  (
-    [
-      ['category', CATEGORIES],
-      ['flag', FLAGS],
-      ['reach', REACHES],
-    ] as const
-  ).map(([kind, ids]) => ({ kind, options: ids.map((id) => ({ id, name: EXTRA_NAMES[kind](id) })) })),
-)
-const filterName = (f: MoveFilter) => (f.kind in EXTRA_NAMES ? EXTRA_NAMES[f.kind as ExtraKind](f.id) : undefined)
-/** A filter kind's choices, by name, for the filters' own picker. */
-function filterOptions(kind: string): { id: string; name: string }[] {
-  if (kind === 'type') return TYPES.map((id) => ({ id, name: typeName(id) }))
-  if (kind === 'pokemon')
-    return availableIds('pokemon')
-      .map((id) => ({ id: id as string, name: refName(pokemon(id)) }))
-      .sort((a, b) => a.name.localeCompare(b.name, locale.value))
-  return extra.value.find((g) => g.kind === kind)?.options ?? []
-}
 
 const termSearch = useTemplateRef('termSearch')
 useSlashFocus(() => {
@@ -268,28 +218,20 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
           </span>
         </div>
         <div class="find">
-          <TermSearch
+          <FilterSearch
             ref="termSearch"
             v-model:text="search"
-            hotkey="/"
-            v-model:terms="terms"
+            v-model:filters="filters"
             v-model:preview="preview"
+            hotkey="/"
+            :subject="t('filter.subject.moves')"
+            :match="['name', 'effect']"
             :name-count="named"
-            :placeholder="t('moveUsage.search')"
             :kinds="FILTER_KINDS"
-            :count="termCount"
-            :extra
-            named="moveUsage.named"
+            :count
+            meta
           />
         </div>
-        <FilterGroups
-          v-model="filters"
-          class="move-filters"
-          :kinds="FILTER_KINDS"
-          :options="filterOptions"
-          :name="filterName"
-          meta
-        />
       </template>
       <p v-else class="muted">{{ t('usage.none', { reg: REGULATION }) }}</p>
     </div>
@@ -624,13 +566,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   align-items: center;
   gap: 4px 16px;
   margin-bottom: 12px;
-}
-/* The search, and the filters under it. */
-.find {
-  max-width: 480px;
-}
-.move-filters {
-  margin: 8px 0 0;
 }
 /* As the other rankings' usage: a bar along the bottom of the cell, against the most used one's. */
 .meter {

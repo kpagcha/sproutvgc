@@ -493,7 +493,6 @@ const sections = computed(() =>
             :under="`<${percent(LIST_MIN)}`"
             :descriptions="showDescriptions"
             :search="movepool"
-            :placeholder="t('nav.search')"
             no-pp
             no-filters
             stacked

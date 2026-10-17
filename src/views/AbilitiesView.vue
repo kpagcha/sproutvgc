@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import Marked from '@/components/Marked'
-import { computed, ref } from 'vue'
+import { computed, ref, shallowRef } from 'vue'
 import { useRoute } from 'vue-router'
-import { ability, availableIds } from '@/data/dex'
+import { ability, availableIds, type AbilityId } from '@/data/dex'
+import { POKEMON } from '@/data/pokemon'
 import { REGULATION } from '@/data/format'
 import { locale, t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
+import { passesGroups } from '@/lib/filterGroups'
+import type { Term, TermFilters } from '@/lib/searchTerms'
+import { useUrlFilters } from '@/composables/useUrlFilters'
 import DexText from '@/components/DexText'
-import SearchBox from '@/components/SearchBox.vue'
+import FilterSearch from '@/components/FilterSearch.vue'
 
 // Every ability the regulation has, by name in the reader's language, with its short description.
 const abilities = computed(() =>
@@ -18,15 +22,26 @@ const abilities = computed(() =>
     .sort((a, b) => a.name.localeCompare(b.name, locale.value)),
 )
 
-// The home page's search links here with its query (`?q=`).
+// The search (`FilterSearch`): its text finds abilities by name (the home page's search links here with it, `?q=`),
+// and the Pokémon to filter them by, those it can have (`?f=`, `?fm=`).
 const initial = useRoute().query.q
 const query = ref(typeof initial === 'string' ? initial : '')
-const shown = computed(() => {
+const KINDS = ['pokemon'] as const
+const filters = useUrlFilters(() => KINDS)
+const preview = shallowRef<TermFilters | null>(null)
+const matches = (id: AbilityId, f: Term) => f.kind === 'pokemon' && POKEMON[f.id].abilities.includes(id)
+const passes = (id: AbilityId, f: TermFilters) => passesGroups(f, (x) => matches(id, x))
+const count = (f: TermFilters) => abilities.value.filter((a) => passes(a.id, f)).length
+const named = computed(() => {
   const q = fold(query.value.trim())
-  if (!q) return abilities.value.map((a) => ({ ...a, parts: null }))
+  return q ? abilities.value.filter((a) => split(a.name, q) && passes(a.id, filters.value)).length : 0
+})
+const shown = computed(() => {
+  const q = preview.value ? '' : fold(query.value.trim())
   return abilities.value.flatMap((a) => {
-    const parts = split(a.name, q)
-    return parts ? [{ ...a, parts }] : []
+    if (!passes(a.id, preview.value ?? filters.value)) return []
+    const parts = q ? split(a.name, q) : null
+    return !q || parts ? [{ ...a, parts }] : []
   })
 })
 </script>
@@ -41,9 +56,18 @@ const shown = computed(() => {
         <RouterLink :to="{ name: 'abilityRankings' }" class="other-page">{{ t('lists.toMeta') }} ›</RouterLink>
       </div>
       <p class="muted">{{ t('abilities.intro', { reg: REGULATION }) }}</p>
-      <SearchBox v-model="query" :placeholder="t('abilities.search')" :aria-label="t('abilities.search')" />
+      <FilterSearch
+        v-model:text="query"
+        v-model:filters="filters"
+        v-model:preview="preview"
+        class="list-search"
+        :subject="t('filter.subject.abilities')"
+        :name-count="named"
+        :kinds="KINDS"
+        :count
+      />
     </div>
-    <div class="panel">
+    <div class="panel" :class="{ previewing: preview }">
       <dl v-if="shown.length" class="entries">
         <template v-for="a in shown" :key="a.id">
           <dt>
@@ -61,6 +85,12 @@ const shown = computed(() => {
 </template>
 
 <style scoped>
+.list-search {
+  margin-bottom: 12px;
+}
+.previewing .entries {
+  opacity: 0.75;
+}
 .entries {
   display: grid;
   grid-template-columns: max-content 1fr;

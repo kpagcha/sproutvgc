@@ -1,49 +1,37 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, useTemplateRef, watchEffect } from 'vue'
+import { computed, onUnmounted, ref, shallowRef, useTemplateRef, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   ability,
   available as isAvailable,
   availableIds,
   pokemon,
-  sameRef,
   type MoveId,
   type PokemonId,
   type Ref,
 } from '@/data/dex'
 import { REGULATION } from '@/data/format'
-import { TYPES, type TypeId } from '@/data/types'
 import { POKEMON, STATS, gameStats, gameTotal, loadLearnsets, speciesOf, splitForme, type StatId } from '@/data/pokemon'
-import { locale, t, typeName } from '@/i18n'
-import { loadDescriptions, shortText } from '@/i18n/descriptions'
+import { locale, t } from '@/i18n'
+import { shortText } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, sliceMarks, split, type Marks } from '@/lib/search'
-import {
-  NO_FILTERS,
-  allTerms,
-  formatFilters,
-  isPlain,
-  parseFilters,
-  passes,
-  type Filters,
-  type PokemonFilter,
-} from '@/lib/pokemonFilters'
+import { allFilters } from '@/lib/filterGroups'
+import { FILTER_KINDS, parseFilters, passes } from '@/lib/pokemonFilters'
+import { formatTermFilters, type TermFilters } from '@/lib/searchTerms'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { useRowColumns } from '@/composables/useRowColumns'
-import { useSearch } from '@/composables/useSearch'
 import { useSort } from '@/composables/useSort'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
-import SearchBox from '@/components/SearchBox.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 import AppLink from '@/components/AppLink'
 import DexRef from '@/components/DexRef'
 import PokemonIcon from '@/components/PokemonIcon'
 import Marked from '@/components/Marked'
-import SearchResults from '@/components/SearchResults.vue'
-import FilterGroups from '@/components/FilterGroups.vue'
-import { confirmDialog } from '@/composables/useConfirm'
+import FilterSearch from '@/components/FilterSearch.vue'
+import { useSlashFocus } from '@/composables/useSlashFocus'
 
 // Every Pokémon the regulation has, with its types, abilities and base stats, sortable by its name and stats. Formes
 // that only look different (Vivillon's patterns) are left to their species' page. Its links are `AppLink`s and its
@@ -89,7 +77,9 @@ const counts = computed(() => ({
 const canHover = window.matchMedia('(hover: hover)').matches
 const abilityTip = (a: Ref) => (canHover ? shortText(a) : undefined)
 
-// The search (`?q=`) and the filters (`?f=`, `?fm=`) are kept in the URL, so the home page's search can link here with them.
+// The search (`?q=`) and the filters (`?f=`, `?fm=`), one box (`FilterSearch`), kept in the URL: the text finds
+// Pokémon by name, and the types, abilities and moves to filter them by. While a term is highlighted in its options
+// (`preview`), the list shows it added, faded a little: what picking it would do.
 const route = useActiveQuery()
 const router = useRouter()
 const query = computed({
@@ -98,87 +88,36 @@ const query = computed({
 })
 const filters = computed({
   get: () => parseFilters(route.value.f, route.value.fm),
-  set: (f: Filters) => void router.replace({ query: { ...route.value, ...formatFilters(f) } }),
+  set: (f: TermFilters) => void router.replace({ query: { ...route.value, ...formatTermFilters(f) } }),
 })
+const preview = shallowRef<TermFilters | null>(null)
 
-// Plainly, the filters are a list, a Pokémon passing any of them, beside a pick of one type it has to have. In the
-// advanced mode (`FilterGroups`), they're groups, joined by AND or OR, any of them negated: the mode is on when the
-// reader turns it on (remembered), or when the URL's filters need it.
-const ADVANCED_KEY = 'sproutvgc.pokedex.advancedFilters'
-function readAdvanced() {
-  try {
-    return localStorage.getItem(ADVANCED_KEY) === '1'
-  } catch {
-    return false
-  }
-}
-const advancedPicked = ref(readAdvanced())
-const advanced = computed(() => advancedPicked.value || !isPlain(filters.value))
-function pickAdvanced(on: boolean) {
-  advancedPicked.value = on
-  try {
-    localStorage.setItem(ADVANCED_KEY, on ? '1' : '0')
-  } catch {
-    // Storage unavailable: the choice lasts until the page is closed.
-  }
-}
-const type = ref<TypeId | ''>('')
-async function toggleAdvanced() {
-  if (!advanced.value) {
-    // The type picked becomes a group of its own, which the others have to pass as well.
-    if (type.value) {
-      const groups = [
-        ...filters.value.groups,
-        { join: 'any' as const, terms: [{ kind: 'type' as const, id: type.value }] },
-      ]
-      filters.value = { join: 'all', groups }
-      type.value = ''
-    }
-    pickAdvanced(true)
-    return
-  }
-  // Filters the plain list can't show are cleared on the way back, once confirmed.
-  if (!isPlain(filters.value)) {
-    if (!(await confirmDialog({ message: t('filter.plainConfirm'), confirm: t('filter.clear'), danger: true }))) return
-    filters.value = NO_FILTERS
-  }
-  pickAdvanced(false)
-}
-const plainFilters = computed(() => filters.value.groups[0]?.terms ?? [])
-function removeFilter(filter: PokemonFilter) {
-  const terms = plainFilters.value.filter((x) => !sameRef(x, filter))
-  filters.value = terms.length ? { join: 'all', groups: [{ join: 'any', terms }] } : NO_FILTERS
-}
-
-// Backspace in an empty search box takes off the last filter, as if it were part of the search.
-function removeLastFilter() {
-  const groups = filters.value.groups
-  const last = groups.at(-1)
-  if (query.value || !last) return
-  const terms = last.terms.slice(0, -1)
-  filters.value = {
-    ...filters.value,
-    groups: terms.length ? [...groups.slice(0, -1), { ...last, terms }] : groups.slice(0, -1),
-  }
-}
-
-// Filtering by move needs the learnsets, which only load then.
+// Filtering by move needs the learnsets, which load once there's a move to filter by, or text that could find one.
 const learnsets = ref<Record<PokemonId, MoveId[]> | null>(null)
 watchEffect(async () => {
-  if (!learnsets.value && allTerms(filters.value).some((f) => f.kind === 'move'))
+  if (!learnsets.value && (query.value || allFilters(filters.value).some((f) => f.kind === 'move')))
     learnsets.value = await loadLearnsets()
 })
+/** How many of the list these filters would leave: offered with each term. */
+const count = (f: TermFilters) => rows.value.filter((r) => passes(r.id, f, learnsets.value)).length
+/** How many the text finds by name, with the filters. */
+const named = computed(() => {
+  const q = fold(query.value.trim())
+  return q ? rows.value.filter((r) => split(r.name, q) && passes(r.id, filters.value, learnsets.value)).length : 0
+})
 
-// What else the search finds, grouped as on the home page: abilities, moves and types, each with a link to filter by
-// it. Their descriptions load in the background.
-const { results } = useSearch(() => query.value, ['ability', 'move'])
-const others = computed(() => (results.value?.types.length || results.value?.sections.length ? results.value : null))
-onMounted(() => void loadDescriptions(['ability', 'move']))
+const search = useTemplateRef('search')
+useSlashFocus(() => {
+  if (!search.value) return false
+  search.value.focus({ preventScroll: true })
+})
 
 const shown = computed(() => {
+  // A term highlighted shows the list with it added, rather than the text's search by name.
+  if (preview.value)
+    return rows.value.flatMap((r) => (passes(r.id, preview.value!, learnsets.value) ? [{ ...r, parts: null }] : []))
   const q = fold(query.value.trim())
   return rows.value.flatMap((r) => {
-    if (!advanced.value && type.value && !r.data.types.includes(type.value)) return []
     if (!passes(r.id, filters.value, learnsets.value)) return []
     const parts = q ? split(r.name, q) : null
     return !q || parts ? [{ ...r, parts }] : []
@@ -311,45 +250,20 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
         <AppLink :to="{ name: 'rankings' }" class="other-page">{{ t('lists.toMeta') }} ›</AppLink>
       </div>
       <p class="muted">{{ t('pokedex.intro', { reg: REGULATION, ...counts }) }}</p>
-      <div class="filters">
-        <SearchBox
-          v-model="query"
-          :placeholder="t('pokedex.search')"
-          :aria-label="t('pokedex.search')"
-          @keydown.backspace="removeLastFilter"
-        />
-        <select v-if="!advanced" v-model="type" class="search type-filter" :aria-label="t('pokedex.type')">
-          <option value="">{{ t('pokedex.anyType') }}</option>
-          <option v-for="ty in TYPES" :key="ty" :value="ty">{{ typeName(ty) }}</option>
-        </select>
-        <button
-          type="button"
-          class="btn advanced-toggle"
-          :class="{ on: advanced }"
-          :aria-pressed="advanced"
-          @click="toggleAdvanced"
-        >
-          {{ t('filter.advanced') }}
-        </button>
-      </div>
-      <FilterGroups v-if="advanced" v-model="filters" />
-      <ul v-else-if="plainFilters.length" class="active-filters">
-        <li v-for="f in plainFilters" :key="`${f.kind}:${f.id}`" class="active-filter">
-          <span class="muted">{{ t(`filter.kind.${f.kind}`) }}:</span>
-          <TypeIcon v-if="f.kind === 'type'" :type="f.id" />
-          <DexRef :to="f" />
-          <button
-            type="button"
-            class="remove"
-            :aria-label="t('filter.remove', { name: refName(f) })"
-            @click="removeFilter(f)"
-          >
-            ×
-          </button>
-        </li>
-      </ul>
+      <FilterSearch
+        ref="search"
+        v-model:text="query"
+        v-model:filters="filters"
+        v-model:preview="preview"
+        class="list-search"
+        hotkey="/"
+        :subject="t('filter.subject.pokemon')"
+        :name-count="named"
+        :kinds="FILTER_KINDS"
+        :count
+      />
     </div>
-    <div class="panel">
+    <div class="panel" :class="{ previewing: preview }">
       <div v-if="sorted.length" class="dex-table" :class="{ restoring }" role="table">
         <div ref="head" class="row head" role="row">
           <SortHeader
@@ -462,7 +376,6 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
       <p v-else class="muted">{{ t('pokedex.none') }}</p>
     </div>
   </div>
-  <SearchResults v-if="others" :query :results="others" :filters />
 </template>
 
 <style scoped>
@@ -500,55 +413,12 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
   visibility: hidden;
   white-space: normal;
 }
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 8px;
-}
-.type-filter {
-  width: auto;
-}
-.advanced-toggle {
-  align-self: flex-start;
-  min-height: 0;
+.list-search {
   margin-bottom: 12px;
-  padding: 6px 10px;
-  line-height: inherit;
 }
-.advanced-toggle.on {
-  background: var(--sel);
-}
-.active-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 16px;
-  margin: 0 0 12px;
-  padding: 0;
-  list-style: none;
-}
-.active-filters li {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.active-filter {
-  padding: 2px 2px 2px 8px;
-  background: var(--panel-alt);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-}
-.remove {
-  padding: 0 6px;
-  font: inherit;
-  font-size: 1.15em;
-  line-height: 1;
-  color: var(--muted);
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-.remove:hover {
-  color: inherit;
+/* The list with a term highlighted in the search's options: a preview, faded a little. */
+.previewing .dex-table {
+  opacity: 0.75;
 }
 .mon {
   display: flex;

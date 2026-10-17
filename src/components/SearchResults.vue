@@ -1,27 +1,18 @@
 <script setup lang="ts">
 import Marked from '@/components/Marked'
-import type { RouteLocationRaw } from 'vue-router'
-import { Funnel, Star } from '@lucide/vue'
+import { Star } from '@lucide/vue'
 import { t } from '@/i18n'
 import type { ItemId, PokemonId } from '@/data/dex'
 import { description, isDescribed } from '@/i18n/descriptions'
 import type { SearchResults, SectionKind } from '@/composables/useSearch'
-import { addFilter, isFilterKind, type Filters, type PokemonFilter } from '@/lib/pokemonFilters'
 import TypeIcon from '@/components/TypeIcon'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import DexText from '@/components/DexText'
 
-// The dex searched, grouped by category (`useSearch`), after the site's pages and the meta pages (on the home page), the reader's favorites first and starred: the home page's
-// results, the search page's, and the Pokémon list's. On the Pokémon list (given its `filters`), types, abilities and moves filter it rather than open their pages.
-const props = defineProps<{ query: string; results: SearchResults; filters?: Filters }>()
-
-/** Where a result leads: its page, or on the Pokémon list, the list filtered by it. */
-function target(kind: SectionKind | 'type', id: string, page: RouteLocationRaw): RouteLocationRaw {
-  return props.filters && isFilterKind(kind) ? addFilter({ kind, id } as PokemonFilter, props.filters) : page
-}
-/** Whether a result filters the Pokémon list. */
-const filtering = (kind: SectionKind | 'type') => !!props.filters && isFilterKind(kind)
+// The dex searched, grouped by category (`useSearch`), after the site's pages and the meta pages (on the home page), the
+// reader's favorites first and starred: the home page's results, and an area's.
+defineProps<{ query: string; results: SearchResults }>()
 
 const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (description(kind, id)?.short ?? '') : '')
 </script>
@@ -75,13 +66,10 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
     <dl v-else class="entries">
       <template v-for="h in s.hits" :key="h.id">
         <dt>
-          <RouterLink :to="target(s.kind, h.id, h.to)" :replace="filtering(s.kind)" class="entry-name">
+          <RouterLink :to="h.to" class="entry-name">
             <ItemIcon v-if="s.kind === 'item'" :id="h.id as ItemId" />
             <span><Marked :p="h.parts" /></span
             ><Star v-if="h.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" />
-            <span v-if="filtering(s.kind)" class="btn chip"
-              ><Funnel :size="12" :stroke-width="3" />{{ t('filter.add') }}</span
-            >
           </RouterLink>
         </dt>
         <dd class="muted"><DexText :text="short(s.kind, h.id)" /></dd>
@@ -97,12 +85,9 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
     </RouterLink>
     <ul class="chip-hits">
       <li v-for="ty in results.types" :key="ty.id">
-        <RouterLink :to="target('type', ty.id, `/dex/types/${ty.id}`)" :replace="filtering('type')" class="chip-hit">
+        <RouterLink :to="`/dex/types/${ty.id}`" class="chip-hit">
           <TypeIcon :type="ty.id" />
           <span><Marked :p="ty.parts" /></span>
-          <span v-if="filtering('type')" class="btn chip"
-            ><Funnel :size="12" :stroke-width="3" />{{ t('filter.add') }}</span
-          >
         </RouterLink>
       </li>
     </ul>
@@ -186,11 +171,6 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
   display: inline-flex;
   align-items: center;
   gap: 4px;
-}
-/* The filter badge, a little apart from the name. */
-.chip {
-  margin-left: 4px;
-  font-weight: normal;
 }
 .more {
   align-self: flex-start;

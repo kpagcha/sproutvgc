@@ -1,0 +1,304 @@
+<script setup lang="ts">
+import { computed, useId, useTemplateRef, watch } from 'vue'
+import { Search } from '@lucide/vue'
+import type { ItemId, PokemonId } from '@/data/dex'
+import { locale, t } from '@/i18n'
+import { useAdvancedFilters } from '@/composables/useAdvancedFilters'
+import { confirmDialog } from '@/composables/useConfirm'
+import { useTermPicker, type TermOption } from '@/composables/useTermPicker'
+import { isPlain, noFilters, without, withFilter, withoutLast } from '@/lib/filterGroups'
+import { searchedBy, termName, type Term, type TermFilters, type TermKind, type TextMatch } from '@/lib/searchTerms'
+import FilterGroups from '@/components/FilterGroups.vue'
+import ItemIcon from '@/components/ItemIcon.vue'
+import PokemonIcon from '@/components/PokemonIcon'
+import TermOptions from '@/components/TermOptions.vue'
+import TypeIcon from '@/components/TypeIcon'
+
+// A list's search and filters, one box for both, as every list on the site has them. What's typed searches the list
+// (by name, or by what its entries do too: `match`), and finds the terms of `kinds` to filter it by (a type, an
+// ability, a move's category… `searchTerms.ts`), listed under the box with how many of the list each would leave
+// (`count`; those leaving none left out); the placeholder says what it searches by. Picking one, by clicking it or with
+// the arrow keys and Enter, adds it to the filters (`filters`, kept in the URL by the page) and clears the text.
+// Plainly the filters are chips in the box before the text, all to pass, a chip's cross taking one off again, as
+// Backspace in an empty box takes off the last. In the advanced mode (its button beside the box, one choice for every
+// list, `useAdvancedFilters`; on too while the filters need it) they're groups under the box (`FilterGroups`), joined
+// by AND or OR, any negated, each adding filters from the explicit choices of what to filter by and then the entry,
+// what's picked in the box joining the last group.
+// The list behind shows what Enter would do: while the options are open, the one highlighted makes `preview` the
+// filters with it added, for the page to show. When the text finds some of the list by name too (`nameCount`), the
+// options lead with that, highlighted at first, which keeps the text as a search, as Escape or leaving the box does.
+// Without `subject` there's no search by text: it only finds terms. A magnifying glass leads the box, and the key the
+// page focuses it with (`hotkey`) ends it, as the site's search boxes have them.
+const props = withDefaults(
+  defineProps<{
+    kinds: readonly TermKind[]
+    /** How many the list would have with these filters. */
+    count: (filters: TermFilters) => number
+    /** What the list is of, for the placeholder ("Search moves by…") and the search by text's option; none for a box
+     * that only finds terms. */
+    subject?: string
+    /** What the text searches the list by. */
+    match?: readonly TextMatch[]
+    /** How many of the list the text finds. */
+    nameCount?: number
+    /** The key the page focuses it with, hinted at in it while there's nothing to clear (`SearchBox`'s). */
+    hotkey?: string
+    /** Filters of dex entries link to their meta pages. */
+    meta?: boolean
+  }>(),
+  { match: () => ['name'], subject: undefined, nameCount: 0, hotkey: undefined },
+)
+const text = defineModel<string>('text', { default: '' })
+const filters = defineModel<TermFilters>('filters', { required: true })
+/** The filters with the term highlighted added, while the options are open; null otherwise. */
+const preview = defineModel<TermFilters | null>('preview', { default: null })
+
+const placeholder = computed(() => {
+  const by = searchedBy(props.subject ? props.match : [], props.kinds)
+  return props.subject ? t('filter.placeholder', { what: props.subject, by }) : t('filter.placeholderTerms', { by })
+})
+/** The search by text, leading the options: "Moves named “ice”". */
+const lead = computed(() => {
+  const q = text.value.trim()
+  if (!props.subject || !q || !props.nameCount) return []
+  const what = props.subject.charAt(0).toLocaleUpperCase(locale.value) + props.subject.slice(1)
+  const key = props.match.includes('effect') ? 'filter.namedOrDoing' : 'filter.named'
+  return [{ label: t(key, { what, text: q }), n: props.nameCount }]
+})
+
+const { advanced: advancedPicked, setAdvanced } = useAdvancedFilters()
+const plain = computed(() => isPlain(filters.value))
+const advanced = computed(() => props.kinds.length > 0 && (advancedPicked.value || !plain.value))
+async function toggleAdvanced() {
+  // Filters the plain box can't show are cleared on the way back, once confirmed.
+  if (advanced.value && !plain.value) {
+    if (!(await confirmDialog({ message: t('filter.plainConfirm'), confirm: t('filter.clear'), danger: true }))) return
+    filters.value = noFilters()
+  }
+  setAdvanced(!advanced.value)
+}
+/** The chips in the box: the plain filters. */
+const chips = computed(() => (advanced.value ? [] : (filters.value.groups[0]?.terms ?? [])))
+
+const input = useTemplateRef('input')
+defineExpose({ focus: (options?: FocusOptions) => input.value?.focus(options) })
+const picker = useTermPicker({
+  text,
+  kinds: () => props.kinds,
+  count: (term) => props.count(withFilter(filters.value, term)),
+  // Plainly, what's in the box already; in groups, what's in the last one, which a pick joins.
+  taken: () => filters.value.groups.at(-1)?.terms ?? [],
+  lead: () => lead.value.length,
+  onPick: (o) => pick(o),
+})
+const { groups, open, focused, dismissed, active, highlighted, indexOf } = picker
+watch(highlighted, (term) => (preview.value = term ? withFilter(filters.value, term) : null), { immediate: true })
+
+function pick(o: TermOption | number) {
+  if (typeof o === 'number') {
+    dismissed.value = true
+    return
+  }
+  filters.value = withFilter(filters.value, o.term)
+  text.value = ''
+  input.value?.focus()
+}
+function remove(term: Term) {
+  filters.value = without(filters.value, term)
+  input.value?.focus()
+}
+function onKey(e: KeyboardEvent) {
+  if (e.key === 'Backspace' && !text.value && filters.value.groups.length) {
+    filters.value = withoutLast(filters.value)
+    return
+  }
+  picker.onKey(e)
+}
+/** The box's cross: the text, and plainly the chips too (the groups have a clearing of their own). */
+const clearable = computed(() => !!text.value || chips.value.length > 0)
+function clear() {
+  text.value = ''
+  if (!advanced.value) filters.value = noFilters()
+  input.value?.focus()
+}
+const listId = useId()
+</script>
+
+<template>
+  <div class="filter-search">
+    <div class="search-row">
+      <!-- The box: the plain filters as chips, then the text. Clicking anywhere in it is typing in it. -->
+      <div class="box" @click="input?.focus()">
+        <Search class="glass" :size="16" :stroke-width="2.5" aria-hidden="true" />
+        <span v-for="term in chips" :key="`${term.kind}:${term.id}`" class="chip">
+          <TypeIcon v-if="term.kind === 'type'" :type="term.id" />
+          <ItemIcon v-else-if="term.kind === 'item'" :id="term.id as ItemId" :scale="0.67" />
+          <PokemonIcon v-else-if="term.kind === 'pokemon'" :id="term.id as PokemonId" :scale="0.75" />
+          <span v-if="term.kind !== 'type'">{{ termName(term) }}</span>
+          <button
+            type="button"
+            class="remove"
+            :aria-label="t('filter.remove', { name: termName(term) })"
+            @click.stop="remove(term)"
+          >
+            ×
+          </button>
+        </span>
+        <input
+          ref="input"
+          v-model="text"
+          type="text"
+          class="text"
+          :placeholder="chips.length ? '' : placeholder"
+          :aria-label="placeholder"
+          :aria-keyshortcuts="hotkey"
+          role="combobox"
+          autocomplete="off"
+          :aria-expanded="open"
+          :aria-controls="listId"
+          :aria-activedescendant="open ? `${listId}-${active}` : undefined"
+          @focus="focused = true"
+          @blur="focused = false"
+          @keydown="onKey"
+        />
+        <button v-if="clearable" type="button" class="clear" :aria-label="t('search.clear')" @click.stop="clear">
+          ×
+        </button>
+        <kbd v-else-if="hotkey" class="hotkey" aria-hidden="true">{{ hotkey }}</kbd>
+        <TermOptions
+          v-show="open"
+          :id="listId"
+          :groups
+          :active
+          :index-of="indexOf"
+          :lead
+          @pick="pick"
+          @hover="active = $event"
+        />
+      </div>
+      <button
+        v-if="kinds.length"
+        type="button"
+        class="btn switch advanced-toggle"
+        :class="{ on: advanced }"
+        :aria-pressed="advanced"
+        @click="toggleAdvanced"
+      >
+        {{ t('filter.advanced') }}
+      </button>
+    </div>
+    <FilterGroups v-if="advanced" v-model="filters" class="groups" :kinds :meta />
+  </div>
+</template>
+
+<style scoped>
+.filter-search {
+  width: 100%;
+}
+.search-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+/* The box, as the site's search fields are: the chips and the text in a row, wrapping. */
+.box {
+  position: relative;
+  display: flex;
+  flex: 1 1 260px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  max-width: 480px;
+  min-height: 38px;
+  padding: 3px 32px 3px 4px;
+  background: var(--panel-alt);
+  border: 2px solid var(--ink);
+  cursor: text;
+}
+.box:focus-within {
+  border-color: var(--accent);
+  box-shadow: var(--hard);
+}
+/* The text, borderless in the box, taking what's left of its line. */
+:root:root .box .text {
+  flex: 1 1 8em;
+  min-width: 8em;
+  padding: 3px 4px;
+  font: inherit;
+  color: inherit;
+  text-overflow: ellipsis;
+  background: none;
+  border: none;
+  box-shadow: none;
+  outline: none;
+}
+/* The magnifying glass leading the box, as `SearchBox`'s. */
+.glass {
+  flex: none;
+  margin: 0 2px 0 6px;
+  color: var(--muted);
+}
+/* The key that focuses it, where the clear button goes, as `SearchBox`'s. */
+.hotkey {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  min-width: 18px;
+  padding: 2px 4px;
+  font:
+    11px/1 Verdana,
+    sans-serif;
+  text-align: center;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  pointer-events: none;
+}
+/* Touch-first devices (phones, tablets) usually have no keyboard to press it on. */
+@media (hover: none) and (pointer: coarse) {
+  .hotkey {
+    display: none;
+  }
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 0 1px 4px;
+  font-size: 0.9em;
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+}
+.remove,
+.clear {
+  padding: 0 6px;
+  font: inherit;
+  line-height: 1;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.remove {
+  font-size: 1.1em;
+}
+.remove:hover,
+.clear:hover {
+  color: inherit;
+}
+.clear {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  font-size: 1.3em;
+  transform: translateY(-50%);
+}
+.advanced-toggle {
+  flex: none;
+}
+.groups {
+  margin: 10px 0 0;
+}
+</style>

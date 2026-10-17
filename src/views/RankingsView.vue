@@ -9,7 +9,9 @@ import { sinceLabel, GENERATED_SNAPSHOTS, has, percent, players } from '@/data/m
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
-import { formatTerms, parseTerms, type Term } from '@/lib/searchTerms'
+import { passesGroups, positiveFilters, allFilters } from '@/lib/filterGroups'
+import { formatTermFilters, parseTermFilters, type Term, type TermFilters } from '@/lib/searchTerms'
+import { isSetTerm, MIN_SHARE, monMatches, MON_TERM_KINDS, setShare, SET_LIST, type SetTerm } from '@/lib/monTerms'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useMeta } from '@/composables/useMeta'
 import { usePageEntered } from '@/composables/usePageEntered'
@@ -24,7 +26,7 @@ import MetaDialog from '@/components/MetaDialog.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
-import TermSearch from '@/components/TermSearch.vue'
+import FilterSearch from '@/components/FilterSearch.vue'
 import RankingsTabs from '@/components/RankingsTabs.vue'
 
 // The regulation's Pokémon by usage, from the meta snapshot shown (`useMeta`: the one picked, on this page or another,
@@ -83,49 +85,33 @@ const { key, desc, toggle, sorted } = useSort<Row, Key>({
   remember: 'usage',
 })
 
-// The search: its text finds the list's Pokémon by name, and its terms (`?f=`, picked from what the text finds,
-// `TermSearch`) narrow it to those of a type, that can have an ability, or whose sets run a move or item, on at least
-// `MIN_SHARE` of them (what a few sets run doesn't make it one that runs it). With a term of what sets run (an ability,
-// a move, an item), each Pokémon's share of its sets running it is a column of its own. The list stays by usage.
+// The search and filters (`FilterSearch`): its text finds the list's Pokémon by name, and its filters (`?f=`, `?fm=`)
+// narrow it to those of a type, that can have an ability, or whose sets run a move or item, on at least `MIN_SHARE` of
+// them (`monTerms.ts`: what a few sets run doesn't make it one that runs it). With a filter of what sets run (an ability, a move, an
+// item), not negated, each Pokémon's share of its sets running it is a column of its own. The list stays by usage.
 // While a term is highlighted in the search's options (`preview`), the list shows it added, rather than the text's
 // search by name, faded a little: what picking it would do.
 const router = useRouter()
-const MIN_SHARE = 0.05
-const TERM_KINDS = ['type', 'ability', 'move', 'item'] as const
-const LIST = { item: 'items', ability: 'abilities', move: 'moves' } as const
 /** The kinds the snapshot can search by: types and abilities always; moves and items with its sets. */
 const termKinds = computed(() =>
-  TERM_KINDS.filter((k) => k === 'type' || k === 'ability' || (snapshot.value && has(snapshot.value, LIST[k]))),
+  MON_TERM_KINDS.filter((k) => k === 'type' || k === 'ability' || (snapshot.value && has(snapshot.value, SET_LIST[k]))),
 )
-const terms = computed({
-  get: () => parseTerms(query.value.f, termKinds.value),
-  set: (list: Term[]) => void router.replace({ query: { ...query.value, f: formatTerms(list) } }),
+const filters = computed<TermFilters>({
+  get: () => parseTermFilters(query.value.f, query.value.fm, termKinds.value),
+  set: (f) => void router.replace({ query: { ...query.value, ...formatTermFilters(f) } }),
 })
-const preview = shallowRef<Term | null>(null)
-/** The terms the list shows: the search's, and the one highlighted in its options. */
-const shownTerms = computed(() => (preview.value ? [...terms.value, preview.value] : terms.value))
-/** The share of a Pokémon's sets running a term's ability, move or item, when the snapshot has it. */
-function shareOf(id: PokemonId, term: Term): number | undefined {
-  if (term.kind !== 'ability' && term.kind !== 'move' && term.kind !== 'item') return undefined
-  return data.value?.[id]?.[LIST[term.kind]]?.find((x) => x.id === term.id)?.share
-}
-function matches(id: PokemonId, term: Term): boolean {
-  if (term.kind === 'type') return POKEMON[id].types.includes(term.id)
-  if (term.kind === 'ability') return POKEMON[id].abilities.includes(term.id)
-  if (term.kind === 'pokemon') return id === term.id
-  if (term.kind !== 'move' && term.kind !== 'item') return false
-  return (shareOf(id, term) ?? 0) >= MIN_SHARE
-}
-const passes = (id: PokemonId, list: readonly Term[] = terms.value) => list.every((x) => matches(id, x))
-/** How many of the list a term would leave, added to the others: offered with it. */
-const termCount = (term: Term) => rows.value.filter((r) => passes(r.id, [...terms.value, term])).length
-/** The terms whose share of each Pokémon's sets shows, a column each. */
+const preview = shallowRef<TermFilters | null>(null)
+/** The filters the list shows: the search's, or with the term highlighted in its options. */
+const shownFilters = computed(() => preview.value ?? filters.value)
+const shareOf = (id: PokemonId, term: Term) => setShare(data.value, id, term)
+const matches = (id: PokemonId, term: Term) => monMatches(data.value, id, term)
+const passes = (id: PokemonId, f: TermFilters = filters.value) => passesGroups(f, (x) => matches(id, x))
+/** How many of the list these filters would leave: offered with each term. */
+const count = (f: TermFilters) => rows.value.filter((r) => passes(r.id, f)).length
+/** The filters whose share of each Pokémon's sets shows, a column each. */
 const shareTerms = computed(() =>
-  shownTerms.value.filter(
-    (x): x is Extract<Term, { kind: 'ability' | 'move' | 'item' }> =>
-      (x.kind === 'ability' || x.kind === 'move' || x.kind === 'item') &&
-      !!snapshot.value &&
-      has(snapshot.value, LIST[x.kind]),
+  positiveFilters(shownFilters.value).filter(
+    (x): x is SetTerm => isSetTerm(x) && !!snapshot.value && has(snapshot.value, SET_LIST[x.kind]),
   ),
 )
 
@@ -142,7 +128,7 @@ const named = computed(() => {
   return q ? sorted.value.filter((r) => split(r.name, q) && passes(r.id)).length : 0
 })
 const shown = computed(() => {
-  if (preview.value) return sorted.value.filter((r) => passes(r.id, shownTerms.value))
+  if (preview.value) return sorted.value.filter((r) => passes(r.id, preview.value!))
   const q = fold(search.value.trim())
   return sorted.value.filter((r) => (!q || split(r.name, q)) && passes(r.id))
 })
@@ -278,16 +264,16 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         </div>
         <div class="find-row">
           <div class="find">
-            <TermSearch
+            <FilterSearch
               ref="termSearch"
               v-model:text="search"
-              hotkey="/"
-              v-model:terms="terms"
+              v-model:filters="filters"
               v-model:preview="preview"
+              hotkey="/"
+              :subject="t('filter.subject.pokemon')"
               :name-count="named"
-              :placeholder="t('usage.search')"
               :kinds="termKinds"
-              :count="termCount"
+              :count
             />
           </div>
         </div>
@@ -498,7 +484,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
       <p v-else class="muted">{{ t('usage.noMatch') }}</p>
       <p class="muted note phone-only-block">{{ t('usage.usage') }}: {{ t('usage.usageTip') }}.</p>
       <p v-if="anyRare" class="muted note">{{ t('usage.rare', { share: percent(RARE) }) }}</p>
-      <p v-if="terms.some((x) => x.kind === 'move' || x.kind === 'item')" class="muted note">
+      <p v-if="allFilters(filters).some((x) => x.kind === 'move' || x.kind === 'item')" class="muted note">
         {{ t('usage.termSets', { share: percent(MIN_SHARE) }) }}
       </p>
       <p v-if="broughtAll && snapshot.cutoff" class="muted note">
@@ -761,7 +747,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   margin-bottom: 12px;
 }
 .find {
-  flex: 0 1 480px;
+  flex: 1 1 0;
   min-width: 0;
 }
 @media (min-width: 1100px) {
@@ -772,9 +758,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 }
 /* Phones: no intro. */
 @media (max-width: 720px) {
-  .find {
-    flex: 1 1 0;
-  }
   .intro {
     display: none;
   }

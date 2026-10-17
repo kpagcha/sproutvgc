@@ -9,10 +9,10 @@ import { locale, t, type MessageKey } from '@/i18n'
 import { description, shortText } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
-import { formatTerms, parseTerms, type Term } from '@/lib/searchTerms'
+import { passesGroups, positiveFilters } from '@/lib/filterGroups'
+import { formatTermFilters, parseTermFilters, type Term, type TermFilters, type TermKind } from '@/lib/searchTerms'
 import { POKEMON } from '@/data/pokemon'
 import { ITEMS } from '@/data/items'
-import { ITEM_CATEGORIES, type ItemCategory } from '@/data/itemCategories'
 import { useRouter } from 'vue-router'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useSlashFocus } from '@/composables/useSlashFocus'
@@ -26,7 +26,7 @@ import ItemIcon from '@/components/ItemIcon.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import RankingsTabs, { type RankingList } from '@/components/RankingsTabs.vue'
-import TermSearch from '@/components/TermSearch.vue'
+import FilterSearch from '@/components/FilterSearch.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 import SortHeader from '@/components/SortHeader.vue'
 
@@ -45,12 +45,12 @@ const LISTS = {
     field: 'abilities',
     /** Where a row leads: an ability's meta page, as the Pokémon rankings' rows lead to theirs. */
     entry: 'metaAbility',
+    subject: 'filter.subject.abilities',
     /** A Pokémon term leaves what it can have. */
     canHave: (mon: PokemonId, id: Id) => POKEMON[mon].abilities.includes(id as AbilityId),
     text: {
       title: 'title.abilityRankings',
       intro: 'abilityUsage.intro',
-      search: 'abilityUsage.search',
       name: 'usage.ability',
       usersTip: 'abilityUsage.usersTip',
       userTip: 'abilityUsage.userTip',
@@ -64,12 +64,12 @@ const LISTS = {
     ref: (id: Id) => item(id as ItemId),
     field: 'items',
     entry: 'metaItem',
+    subject: 'filter.subject.items',
     /** Any Pokémon can hold any item: a Pokémon term leaves what its sets hold. */
     canHave: (mon: PokemonId, id: Id) => !!shareOf(mon, id),
     text: {
       title: 'title.itemRankings',
       intro: 'itemUsage.intro',
-      search: 'itemUsage.search',
       name: 'usage.item',
       usersTip: 'itemUsage.usersTip',
       userTip: 'itemUsage.userTip',
@@ -131,39 +131,29 @@ const { key, desc, toggle, sorted } = useSort<Row, Key>({
   remember: `usage.${props.list}`,
 })
 
-// The search, as the Pokémon rankings': its text finds the list's entries by name or by what their short description
-// says ("terrain", "Speed"), and its terms (`?f=`, picked from what the text finds, `TermSearch`) narrow it to those a
-// Pokémon can have (`canHave`), each such Pokémon's share of its sets running each a column of its own. While a term is
-// highlighted in the search's options (`preview`), the list shows it added, faded a little: what picking it would do.
+// The search and filters, as the Pokémon rankings' (`FilterSearch`): its text finds the list's entries by name or by
+// what their short description says ("terrain", "Speed"), and its filters (`?f=`, `?fm=`) narrow it to those a Pokémon
+// can have (`canHave`), each such Pokémon (not negated) a column of its sets' share running each, and items to what
+// they're for (`ITEM_CATEGORIES`). While a term is highlighted in the search's options (`preview`), the list shows it
+// added, faded a little: what picking it would do.
 const router = useRouter()
-const TERM_KINDS = ['pokemon'] as const
-const terms = computed({
-  get: () => parseTerms(query.value.f, TERM_KINDS),
-  set: (list: Term[]) => void router.replace({ query: { ...query.value, f: formatTerms(list) } }),
+const termKinds = computed((): TermKind[] => (props.list === 'items' ? ['pokemon', 'itemCategory'] : ['pokemon']))
+const filters = computed<TermFilters>({
+  get: () => parseTermFilters(query.value.f, query.value.fm, termKinds.value),
+  set: (f) => void router.replace({ query: { ...query.value, ...formatTermFilters(f) } }),
 })
-const preview = shallowRef<Term | null>(null)
-const shownTerms = computed(() => (preview.value ? [...terms.value, preview.value] : terms.value))
+const preview = shallowRef<TermFilters | null>(null)
+const shownFilters = computed(() => preview.value ?? filters.value)
 type MonTerm = Extract<Term, { kind: 'pokemon' }>
-const monTerms = computed(() => shownTerms.value.filter((x): x is MonTerm => x.kind === 'pokemon'))
-const matches = (id: Id, term: Term) => term.kind === 'pokemon' && cfg.value.canHave(term.id, id)
-const passesTerms = (id: Id, list: readonly Term[]) => list.every((x) => matches(id, x))
-
-// Items narrowed by what they're for (`?cat=`, `ITEM_CATEGORIES`), a select beside the search, each choice with how
-// many of the list (with the search's terms) it leaves.
-const category = computed({
-  get: (): ItemCategory | '' => {
-    const c = query.value.cat
-    return props.list === 'items' && ITEM_CATEGORIES.includes(c as ItemCategory) ? (c as ItemCategory) : ''
-  },
-  set: (c: ItemCategory | '') => void router.replace({ query: { ...query.value, cat: c || undefined } }),
-})
-const inCategory = (id: Id, c: ItemCategory | '' = category.value) => !c || ITEMS[id as ItemId].category === c
-const categoryCount = (c: ItemCategory) =>
-  rows.value.filter((r) => inCategory(r.id, c) && passesTerms(r.id, terms.value)).length
-
-const passes = (id: Id, list: readonly Term[] = terms.value) => passesTerms(id, list) && inCategory(id)
-/** How many of the list a term would leave, added to the others: offered with it. */
-const termCount = (term: Term) => rows.value.filter((r) => passes(r.id, [...terms.value, term])).length
+const monTerms = computed(() => positiveFilters(shownFilters.value).filter((x): x is MonTerm => x.kind === 'pokemon'))
+function matches(id: Id, term: Term): boolean {
+  if (term.kind === 'pokemon') return cfg.value.canHave(term.id, id)
+  if (term.kind === 'itemCategory') return ITEMS[id as ItemId].category === term.id
+  return false
+}
+const passes = (id: Id, f: TermFilters = filters.value) => passesGroups(f, (x) => matches(id, x))
+/** How many of the list these filters would leave: offered with each term. */
+const count = (f: TermFilters) => rows.value.filter((r) => passes(r.id, f)).length
 /** The share of a Pokémon's sets running an entry, when the snapshot has it. */
 function shareOf(mon: PokemonId, id: Id): number | undefined {
   const list: readonly { id: string; share?: number }[] | undefined = data.value?.[mon]?.[cfg.value.field]
@@ -192,7 +182,7 @@ const named = computed(() => {
   return found ? sorted.value.filter((r) => found(r) && passes(r.id)).length : 0
 })
 const shown = computed(() => {
-  if (preview.value) return sorted.value.filter((r) => passes(r.id, shownTerms.value))
+  if (preview.value) return sorted.value.filter((r) => passes(r.id, preview.value!))
   const found = finder.value
   return sorted.value.filter((r) => (!found || found(r)) && passes(r.id))
 })
@@ -235,28 +225,18 @@ const colVars = computed(() => ({
           </span>
         </div>
         <div class="find">
-          <TermSearch
+          <FilterSearch
             ref="termSearch"
             v-model:text="search"
-            hotkey="/"
-            v-model:terms="terms"
+            v-model:filters="filters"
             v-model:preview="preview"
+            hotkey="/"
+            :subject="t(cfg.subject)"
+            :match="['name', 'effect']"
             :name-count="named"
-            :placeholder="tx('search')"
-            :kinds="TERM_KINDS"
-            :count="termCount"
+            :kinds="termKinds"
+            :count
           />
-          <select
-            v-if="list === 'items'"
-            v-model="category"
-            class="search select"
-            :aria-label="t('itemUsage.category')"
-          >
-            <option value="">{{ t('itemUsage.anyCategory') }}</option>
-            <option v-for="c in ITEM_CATEGORIES" :key="c" :value="c" :disabled="!categoryCount(c) && category !== c">
-              {{ t(`itemCategory.${c}`) }} ({{ categoryCount(c) }})
-            </option>
-          </select>
         </div>
       </template>
       <p v-else class="muted">{{ t('usage.none', { reg: REGULATION }) }}</p>
@@ -472,21 +452,6 @@ const colVars = computed(() => ({
   align-items: center;
   gap: 4px 16px;
   margin-bottom: 12px;
-}
-/* The search, and for items the category beside it, wrapping under it where there's no room. */
-.find {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-.find > :first-child {
-  flex: 0 1 480px;
-  min-width: 0;
-}
-.select {
-  width: auto;
-  margin: 0;
 }
 /* As the Pokémon rankings' usage: a bar along the bottom of the cell, against the most used one's. */
 .meter {

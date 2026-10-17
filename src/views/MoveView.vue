@@ -1,18 +1,23 @@
 <script setup lang="ts">
-import { computed, ref, watchEffect } from 'vue'
+import { computed, ref, shallowRef, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
-import { available, move, type MoveId, type PokemonId } from '@/data/dex'
+import { available, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { isSpread, MOVES } from '@/data/moves'
 import { POKEMON, loadLearnsets } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
+import { refName } from '@/i18n/refName'
+import { noFilters } from '@/lib/filterGroups'
+import { passes } from '@/lib/pokemonFilters'
+import { fold, split } from '@/lib/search'
+import type { TermFilters } from '@/lib/searchTerms'
 import CategoryIcon from '@/components/CategoryIcon'
 import EntryTitle from '@/components/EntryTitle.vue'
 import DexText from '@/components/DexText'
 import PokemonChips from '@/components/PokemonChips.vue'
 import RefInteractions from '@/components/RefInteractions.vue'
-import SearchBox from '@/components/SearchBox.vue'
+import FilterSearch from '@/components/FilterSearch.vue'
 import TypeIcon from '@/components/TypeIcon'
 
 // One move: its numbers, whom it hits, its description and flags, what it does to types beyond the chart, and the
@@ -29,12 +34,23 @@ const priority = computed(() => (data.value.priority > 0 ? `+${data.value.priori
 // The Pokémon that learn it, by species: formes a battle brings out (Megas) learn what their base forme does, and
 // formes that only look different what their species does, so they'd only repeat it.
 const learners = ref<PokemonId[]>([])
+// Searched and filtered by type or ability, as the Pokémon list is (`FilterSearch`); cleared on another move's page.
 const query = ref('')
+const KINDS = ['type', 'ability'] as const
+const filters = shallowRef<TermFilters>(noFilters())
+const preview = shallowRef<TermFilters | null>(null)
+const count = (f: TermFilters) => learners.value.filter((p) => passes(p, f, null)).length
+const named = computed(() => {
+  const q = fold(query.value.trim())
+  return q ? learners.value.filter((p) => split(refName(pokemon(p)), q) && passes(p, filters.value, null)).length : 0
+})
+const shownLearners = computed(() => learners.value.filter((p) => passes(p, preview.value ?? filters.value, null)))
 watchEffect(async () => {
   const current = id.value
   const sets = await loadLearnsets()
   if (id.value !== current) return
   query.value = ''
+  filters.value = noFilters()
   learners.value = (Object.keys(sets) as PokemonId[]).filter(
     (p) => !POKEMON[p].battleOnly && !POKEMON[p].cosmetic && sets[p].includes(current),
   )
@@ -53,7 +69,7 @@ watchEffect(async () => {
         <RouterLink :to="{ name: 'types', params: { type: data.type } }"
           ><TypeIcon :type="data.type" :scale="2"
         /></RouterLink>
-        <RouterLink :to="{ name: 'moves', query: { category: data.category } }"
+        <RouterLink :to="{ name: 'moves', query: { f: `category:${data.category}` } }"
           ><CategoryIcon :category="data.category" :scale="2"
         /></RouterLink>
       </div>
@@ -83,7 +99,7 @@ watchEffect(async () => {
       <p v-if="isSpread(data)" class="muted">{{ t('move.spread') }}</p>
       <ul v-if="data.flags.length" class="flags">
         <li v-for="f in data.flags" :key="f" v-tip="t(`move.flagTip.${f}`)">
-          <RouterLink :to="{ name: 'moves', query: { flag: f } }">{{ t(`move.flag.${f}`) }}</RouterLink>
+          <RouterLink :to="{ name: 'moves', query: { f: `flag:${f}` } }">{{ t(`move.flag.${f}`) }}</RouterLink>
         </li>
       </ul>
 
@@ -91,8 +107,17 @@ watchEffect(async () => {
 
       <section v-if="learners.length">
         <h2>{{ t('move.pokemon', { n: learners.length }) }}</h2>
-        <SearchBox v-model="query" :placeholder="t('pokedex.search')" :aria-label="t('pokedex.search')" />
-        <PokemonChips :ids="learners" :query />
+        <FilterSearch
+          v-model:text="query"
+          v-model:filters="filters"
+          v-model:preview="preview"
+          class="list-search"
+          :subject="t('filter.subject.pokemon')"
+          :name-count="named"
+          :kinds="KINDS"
+          :count
+        />
+        <PokemonChips :ids="shownLearners" :query="preview ? '' : query" :class="{ previewing: preview }" />
       </section>
     </template>
     <p v-else>{{ t('move.notFound', { id, reg: REGULATION }) }}</p>
@@ -100,6 +125,12 @@ watchEffect(async () => {
 </template>
 
 <style scoped>
+.list-search {
+  margin-bottom: 12px;
+}
+.previewing {
+  opacity: 0.75;
+}
 .badges {
   display: flex;
   align-items: center;

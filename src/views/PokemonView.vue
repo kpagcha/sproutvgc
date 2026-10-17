@@ -187,7 +187,7 @@ const sections = computed(() =>
 
     <div id="dex-moves" class="panel">
       <h2>{{ t('pokemon.moves') }}</h2>
-      <MoveTable v-if="learnset" :ids="learnset" descriptions :placeholder="t('pokemon.searchMoves')" />
+      <MoveTable v-if="learnset" :ids="learnset" descriptions />
     </div>
   </template>
   <div v-else class="panel">

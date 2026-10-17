@@ -2,6 +2,16 @@
 import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch, type Component } from 'vue'
 import { AnimatePresence, motion } from 'motion-v'
 import { useRoute, useRouter } from 'vue-router'
+import { allFilters, passesGroups, without } from '@/lib/filterGroups'
+import {
+  formatTermFilters,
+  parseTermFilters,
+  termName,
+  type Term,
+  type TermFilters,
+  type TermKind,
+} from '@/lib/searchTerms'
+import FilterSearch from '@/components/FilterSearch.vue'
 import {
   ArrowLeftRight,
   ArrowRight,
@@ -29,11 +39,10 @@ import {
   type PokemonId,
   type Ref,
 } from '@/data/dex'
-import { TYPES, isType, type TypeId } from '@/data/types'
 import { REGULATION } from '@/data/format'
 import { POKEMON, itemBound, splitForme } from '@/data/pokemon'
 import { has, metaLabel, pastRoster, percent, type PokemonMeta, type Share, usageRanks } from '@/data/meta'
-import { locale, t, tSplit, typeName } from '@/i18n'
+import { locale, t, tSplit } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { center, reveal } from '@/lib/scroll'
 import { FADE, PRESS } from '@/lib/motion'
@@ -735,23 +744,30 @@ const pool = computed<Entry[]>(() => {
   return list
 })
 
-// Filtering the ladder (`?type=`, `?ability=`, `?item=`, together): only the Pokémon of a type, with an ability, or
-// holding an item. In the meta, an ability or item its sets run, on at least `MIN_SHARE` of them, as the chips show
-// them; otherwise (every Pokémon shown, or one with no sets) an ability it can have, and items only from sets. Yours
-// stays, and how often it moves first is then against those filtered alone.
-const queryId = <T extends string>(k: string, ids: readonly T[]): T | null => {
-  const v = query.value[k]
-  return typeof v === 'string' && (ids as readonly string[]).includes(v) ? (v as T) : null
-}
-const filterType = computed<TypeId | null>(() => {
-  const v = query.value.type
-  return typeof v === 'string' && isType(v) ? v : null
-})
-const filterAbility = computed(() => queryId<AbilityId>('ability', availableIds('ability')))
+// Filtering the ladder (`?f=`, `?fm=`, `FilterSearch`): only the Pokémon of a type, with an ability, or holding an
+// item, in groups as every list's filters can be. In the meta, an ability or item its sets run, on at least `MIN_SHARE`
+// of them, as the chips show them; otherwise (every Pokémon shown, or one with no sets) an ability it can have, and
+// items only from sets. Yours stays, and how often it moves first is then against those filtered alone. A link from
+// before (`?type=`, `?ability=`, `?item=`) is read as its filters.
 /** Items filter only the meta, whose sets have them. */
 const itemsFilterable = computed(() => bySets.value && !!snapshot.value && has(snapshot.value, 'items'))
-const filterItem = computed(() => (itemsFilterable.value ? queryId<ItemId>('item', availableIds('item')) : null))
-const filtering = computed(() => !!(filterType.value || filterAbility.value || filterItem.value))
+const filterKinds = computed((): TermKind[] =>
+  itemsFilterable.value ? ['type', 'ability', 'item'] : ['type', 'ability'],
+)
+const filters = computed<TermFilters>({
+  get: () => {
+    const { f, type, ability, item } = query.value
+    const old = Object.entries({ type, ability, item })
+      .flatMap(([k, v]) => (typeof v === 'string' && v ? [`${k}:${v}`] : []))
+      .join(',')
+    return parseTermFilters(f ?? (old || undefined), query.value.fm, filterKinds.value)
+  },
+  set: (f) =>
+    void router.replace({
+      query: { ...query.value, type: undefined, ability: undefined, item: undefined, ...formatTermFilters(f) },
+    }),
+})
+const filtering = computed(() => filters.value.groups.length > 0)
 /** A Pokémon's abilities and items, as the filters go by them. */
 function traits(id: PokemonId): { abilities: AbilityId[]; items: ItemId[] } {
   const m = bySets.value ? data.value?.[id] : undefined
@@ -762,92 +778,19 @@ function traits(id: PokemonId): { abilities: AbilityId[]; items: ItemId[] } {
     items: m?.items ? run(m.items) : [],
   }
 }
-type FilterKind = 'type' | 'ability' | 'item'
-/** Whether a Pokémon passes the filters, but for the one of `except`'s kind. */
-function passes(id: PokemonId, except?: FilterKind): boolean {
-  const type = except === 'type' ? null : filterType.value
-  const ab = except === 'ability' ? null : filterAbility.value
-  const it = except === 'item' ? null : filterItem.value
-  if (type && !POKEMON[id].types.includes(type)) return false
-  if (!ab && !it) return true
-  const { abilities, items } = traits(id)
-  return (!ab || abilities.includes(ab)) && (!it || items.includes(it))
+function matches(id: PokemonId, term: Term): boolean {
+  if (term.kind === 'type') return POKEMON[id].types.includes(term.id)
+  if (term.kind === 'ability') return traits(id).abilities.includes(term.id)
+  if (term.kind === 'item') return traits(id).items.includes(term.id)
+  return false
 }
+/** Whether a Pokémon passes the filters. */
+const passes = (id: PokemonId, f: TermFilters = filters.value) => passesGroups(f, (x) => matches(id, x))
 /** The chips shown: the view's, filtered. */
 const entries = computed<Entry[]>(() => (filtering.value ? pool.value.filter((e) => passes(e.id)) : pool.value))
-// What each filter can pick: what the Pokémon of the view passing the other filters have, with how many of them have
-// it, by name (types in their usual order), so no pick leaves the ladder empty; the one picked always, though none
-// have it.
+/** How many of the view's Pokémon these filters would leave: offered with each term. */
 const poolIds = computed(() => [...new Set(pool.value.map((e) => e.id))])
-function options<T extends string>(
-  kind: FilterKind,
-  of: (id: PokemonId) => readonly T[],
-  name: (id: T) => string,
-  picked: T | null,
-) {
-  const counts = new Map<T, number>()
-  for (const id of poolIds.value) {
-    if (passes(id, kind)) for (const x of new Set(of(id))) counts.set(x, (counts.get(x) ?? 0) + 1)
-  }
-  if (picked && !counts.has(picked)) counts.set(picked, 0)
-  return [...counts].map(([id, n]) => ({ id, n, name: name(id) }))
-}
-const byName = <T extends { name: string }>(list: T[]) =>
-  list.sort((a, b) => a.name.localeCompare(b.name, locale.value))
-const typeOptions = computed(() => {
-  const list = options('type', (id) => POKEMON[id].types, typeName, filterType.value)
-  return TYPES.flatMap((ty) => list.find((o) => o.id === ty) ?? [])
-})
-const abilityOptions = computed(() =>
-  byName(
-    options(
-      'ability',
-      (id) => traits(id).abilities,
-      (a) => refName(ability(a)),
-      filterAbility.value,
-    ),
-  ),
-)
-const itemOptions = computed(() =>
-  itemsFilterable.value
-    ? byName(
-        options(
-          'item',
-          (id) => traits(id).items,
-          (i) => refName(item(i)),
-          filterItem.value,
-        ),
-      )
-    : [],
-)
-/** The filters, each a choice of what the Pokémon shown have: in the toolbar, and in the pinned bar's dialog. */
-const filterPicks = computed(() => [
-  {
-    key: 'type' as const,
-    value: filterType.value,
-    label: t('speed.filterType'),
-    any: t('speed.anyType'),
-    options: typeOptions.value,
-  },
-  {
-    key: 'ability' as const,
-    value: filterAbility.value,
-    label: t('speed.filterAbility'),
-    any: t('speed.anyAbility'),
-    options: abilityOptions.value,
-  },
-  ...(itemsFilterable.value
-    ? [
-        {
-          key: 'item' as const,
-          value: filterItem.value,
-          label: t('speed.filterItem'),
-          any: t('speed.anyItem'),
-          options: itemOptions.value,
-        },
-      ]
-    : []),
-])
+const filterCount = (f: TermFilters) => poolIds.value.filter((id) => passes(id, f)).length
 // The filters fold away behind a button beside the find, marked while any is on: folded out under it in the toolbar on
 // wide screens; in a dialog over the page on phones, and from the pinned bar (`filtersSheet`).
 const filtersOpen = shallowRef(false)
@@ -857,7 +800,9 @@ function toggleFilters(fromBar: boolean) {
   else filtersOpen.value = !filtersOpen.value
 }
 const clearFilters = () =>
-  void router.replace({ query: { ...query.value, type: undefined, ability: undefined, item: undefined } })
+  void router.replace({
+    query: { ...query.value, type: undefined, ability: undefined, item: undefined, f: undefined, fm: undefined },
+  })
 // The pinned bar's modifiers, in a dialog over the page from its strip.
 const modsSheet = shallowRef(false)
 /** How many modifiers are on, said on the strip's chip. */
@@ -2088,33 +2033,7 @@ const { start: startTour } = useTour(
               :aria-label="t('speed.filter')"
             >
               <span class="small filters-label">{{ t('speed.filter') }}</span>
-              <span v-for="f in filterPicks" :key="f.key" class="filter" :class="{ on: f.value }">
-                <TypeIcon
-                  v-if="f.key === 'type' && filterType"
-                  :type="filterType"
-                  class="filter-icon"
-                  aria-hidden="true"
-                />
-                <ItemIcon
-                  v-else-if="f.key === 'item' && filterItem"
-                  :id="filterItem"
-                  :scale="0.67"
-                  class="filter-icon"
-                  aria-hidden="true"
-                />
-                <select
-                  class="search filter-pick"
-                  :value="f.value ?? ''"
-                  :aria-label="f.label"
-                  @change="set(f.key, ($event.target as HTMLSelectElement).value || undefined)"
-                >
-                  <option value="">{{ f.any }}</option>
-                  <option v-for="o in f.options" :key="o.id" :value="o.id">{{ o.name }} ({{ o.n }})</option>
-                </select>
-              </span>
-              <button v-if="filtering" type="button" class="btn inverted filters-clear" @click="clearFilters">
-                <X :size="14" aria-hidden="true" />{{ t('speed.clearFilters') }}
-              </button>
+              <FilterSearch v-model:filters="filters" class="filter-search" :kinds="filterKinds" :count="filterCount" />
             </div>
           </div>
           <!-- With yours picked, the ladder is its opponents: said over it, with what tapping one does. -->
@@ -2252,19 +2171,19 @@ const { start: startTour } = useTour(
                 >
                   {{ t('speed.stageShort', { stage: stageLabel(stage) }) }}<X :size="14" aria-hidden="true" />
                 </button>
-                <template v-for="f in filterPicks" :key="f.key">
-                  <button
-                    v-if="f.value"
-                    type="button"
-                    class="btn switch on off-chip"
-                    :aria-label="t('speed.turnOff', { name: f.options.find((o) => o.id === f.value)?.name ?? '' })"
-                    @click="set(f.key, undefined)"
-                  >
-                    <TypeIcon v-if="f.key === 'type' && filterType" :type="filterType" aria-hidden="true" />
-                    <ItemIcon v-else-if="f.key === 'item' && filterItem" :id="filterItem" :scale="0.67" />
-                    {{ f.options.find((o) => o.id === f.value)?.name }}<X :size="14" aria-hidden="true" />
-                  </button>
-                </template>
+                <button
+                  v-for="f in allFilters(filters)"
+                  :key="`${f.kind}:${f.id}`"
+                  type="button"
+                  class="btn switch on off-chip"
+                  :aria-label="t('speed.turnOff', { name: termName(f) })"
+                  @click="filters = without(filters, f)"
+                >
+                  <TypeIcon v-if="f.kind === 'type'" :type="f.id" aria-hidden="true" />
+                  <ItemIcon v-else-if="f.kind === 'item'" :id="f.id" :scale="0.67" />
+                  <template v-if="f.not">{{ t('filter.not') }}&nbsp;</template>{{ termName(f)
+                  }}<X :size="14" aria-hidden="true" />
+                </button>
                 <!-- The view and who's shown, as in the band over the toolbar. -->
                 <template v-if="choicesShown">
                   <ChoiceDialog
@@ -2310,30 +2229,7 @@ const { start: startTour } = useTour(
                 </button>
               </div>
               <div class="sheet-section" role="group" :aria-label="t('speed.filter')">
-                <span v-for="f in filterPicks" :key="f.key" class="filter" :class="{ on: f.value }">
-                  <TypeIcon
-                    v-if="f.key === 'type' && filterType"
-                    :type="filterType"
-                    class="filter-icon"
-                    aria-hidden="true"
-                  />
-                  <ItemIcon
-                    v-else-if="f.key === 'item' && filterItem"
-                    :id="filterItem"
-                    :scale="0.67"
-                    class="filter-icon"
-                    aria-hidden="true"
-                  />
-                  <select
-                    class="search filter-pick"
-                    :value="f.value ?? ''"
-                    :aria-label="f.label"
-                    @change="set(f.key, ($event.target as HTMLSelectElement).value || undefined)"
-                  >
-                    <option value="">{{ f.any }}</option>
-                    <option v-for="o in f.options" :key="o.id" :value="o.id">{{ o.name }} ({{ o.n }})</option>
-                  </select>
-                </span>
+                <FilterSearch v-model:filters="filters" :kinds="filterKinds" :count="filterCount" />
               </div>
               <div class="drop-actions">
                 <button type="button" class="btn inverted" :disabled="!filtering" @click="clearFilters">
@@ -3223,7 +3119,7 @@ const { start: startTour } = useTour(
   flex-basis: 100%;
   margin: 0;
 }
-/* The filters, on a line of their own under the find: each a choice, its pick's icon before it once picked. */
+/* The filters, on a line of their own under the find: what's searched, and the groups in the advanced mode. */
 .filters {
   display: flex;
   flex-basis: 100%;
@@ -3234,38 +3130,9 @@ const { start: startTour } = useTour(
 .filters-label {
   font-weight: bold;
 }
-.filter {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-/* On phones, the choices share the lines, each as wide as its share. */
-@media (max-width: 720px) {
-  .filter {
-    flex: 1 1 9em;
-    min-width: 0;
-  }
-  .filter-pick {
-    flex: 1;
-    min-width: 0;
-    max-width: none;
-  }
-}
-/* As wide as what they hold: the search fields' width limit would cut them off. */
-.filter-pick {
-  width: auto;
-  margin: 0;
-}
-.filter-pick {
-  max-width: 14em;
-}
-.filter.on .filter-pick {
-  border-color: var(--ink);
-  background: var(--sel);
-}
-.filters-clear {
-  gap: 4px;
-  padding-block: 4px;
+.filter-search {
+  flex: 1 1 320px;
+  min-width: 0;
 }
 /* The resets: under what they reset, to the left. */
 .reset {
@@ -3502,16 +3369,6 @@ const { start: startTour } = useTour(
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
-/* As tall as their choice: the phones' width share would be their height in a column. */
-.sheet-section > .filter {
-  display: flex;
-  flex: none;
-}
-.sheet-section .filter-pick {
-  flex: 1;
-  min-width: 0;
-  max-width: none;
 }
 .filters-sheet > .drop-actions {
   justify-content: space-between;

@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import Marked from '@/components/Marked'
-import { computed, onUnmounted, ref, useTemplateRef, watch } from 'vue'
-import { move, type MoveId } from '@/data/dex'
-import { CATEGORIES, FLAGS, MOVES, type Category, type Flag, type Move } from '@/data/moves'
-import { TYPES, type TypeId } from '@/data/types'
+import { computed, onUnmounted, ref, shallowRef, useTemplateRef, watch, watchEffect } from 'vue'
+import { move, type MoveId, type PokemonId } from '@/data/dex'
+import { CATEGORIES, MOVES, reachOf, type Move } from '@/data/moves'
+import { loadLearnsets, movesOf } from '@/data/pokemon'
+import { TYPES } from '@/data/types'
 import type { MessageKey } from '@/i18n'
-import { locale, t, typeName } from '@/i18n'
+import { locale, t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
+import { allFilters, noFilters as none, passesGroups } from '@/lib/filterGroups'
+import type { Term, TermFilters, TermKind } from '@/lib/searchTerms'
 import { percent } from '@/data/meta'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { useRowColumns } from '@/composables/useRowColumns'
@@ -18,12 +21,14 @@ import CategoryIcon from '@/components/CategoryIcon'
 import DexText from '@/components/DexText'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
-import SearchBox from '@/components/SearchBox.vue'
+import FilterSearch from '@/components/FilterSearch.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 
-// A table of moves with their type, category, power, accuracy and PP, sortable by any of them, searchable by name and
-// filtered by type, category and flag; with `descriptions`, each move's short description too. The category and flag
-// filters are models, for a page that keeps them in its URL; unbound, the table keeps them itself. With `panels`, the
+// A table of moves with their type, category, power, accuracy and PP, sortable by any of them, searched by name and
+// filtered by the terms of `kinds` (type, category and tag unless given; reach, and the Pokémon that learn them, its
+// learnsets loaded on demand), one box for both (`FilterSearch`); with `descriptions`, each move's short description
+// too. The filters are a model, for a page that keeps them in its URL; unbound, the table keeps them itself. With
+// `panels`, the
 // filters (after what's given in the slot: the page's heading) and the table go in panels of their own (for `.panels`);
 // without, both go in the caller's. A Pokémon's usage page gives each move's share of its sets (`shares`: a column of
 // its own, the table sorted by it at first, each move leading to its meta page rather than its dex entry), and leaves
@@ -32,7 +37,8 @@ import SkeletonRows from '@/components/SkeletonRows.vue'
 const props = defineProps<{
   ids: readonly MoveId[]
   descriptions?: boolean
-  placeholder?: string
+  /** What it's filtered by; none, with `noFilters`. */
+  kinds?: readonly TermKind[]
   shares?: Partial<Record<MoveId, number>>
   /** What a move without a share shows ("<1%", under what the data keeps), rather than "—". */
   under?: string
@@ -59,18 +65,39 @@ watch(
   () => props.query,
   (q) => (query.value = q ?? ''),
 )
-const type = ref<TypeId | ''>('')
-const category = defineModel<Category | ''>('category', { default: '' })
-const flag = defineModel<Flag | ''>('flag', { default: '' })
-// The flags by name, in the reader's language.
-const flags = computed(() =>
-  FLAGS.map((f) => ({ f, name: t(`move.flag.${f}`) })).sort((a, b) => a.name.localeCompare(b.name, locale.value)),
+const kinds = computed((): readonly TermKind[] =>
+  props.noFilters ? [] : (props.kinds ?? ['type', 'category', 'flag']),
 )
+const filters = defineModel<TermFilters>('filters', { default: () => none() })
+const preview = shallowRef<TermFilters | null>(null)
+// Filtering by the Pokémon that learn them needs the learnsets, which load once it can.
+const learnsets = shallowRef<Record<PokemonId, MoveId[]> | null>(null)
+watchEffect(async () => {
+  if (!learnsets.value && kinds.value.includes('pokemon') && (query.value || allFilters(filters.value).length))
+    learnsets.value = await loadLearnsets()
+})
+function matches(r: (typeof rows.value)[number], f: Term): boolean | null {
+  if (f.kind === 'type') return r.data.type === f.id
+  if (f.kind === 'category') return r.data.category === f.id
+  if (f.kind === 'flag') return r.data.flags.includes(f.id)
+  if (f.kind === 'reach') return reachOf(r.data) === f.id
+  if (f.kind === 'pokemon') return learnsets.value ? movesOf(learnsets.value, f.id).includes(r.id) : null
+  return false
+}
+const passes = (r: (typeof rows.value)[number], f: TermFilters) => passesGroups(f, (x) => matches(r, x))
+/** How many of the moves these filters would leave: offered with each term. */
+const count = (f: TermFilters) => rows.value.filter((r) => passes(r, f)).length
+/** How many the text finds by name, with the filters. */
+const named = computed(() => {
+  const q = fold(query.value.trim())
+  return q ? rows.value.filter((r) => split(r.name, q) && passes(r, filters.value)).length : 0
+})
 const shown = computed(() => {
+  // A term highlighted shows the table with it added, rather than the text's search by name.
+  if (preview.value) return rows.value.flatMap((r) => (passes(r, preview.value!) ? [{ ...r, parts: null }] : []))
   const q = fold(query.value.trim())
   return rows.value.flatMap((r) => {
-    if ((type.value && r.data.type !== type.value) || (category.value && r.data.category !== category.value)) return []
-    if (flag.value && !r.data.flags.includes(flag.value)) return []
+    if (!passes(r, filters.value)) return []
     const parts = q ? split(r.name, q) : null
     return !q || parts ? [{ ...r, parts }] : []
   })
@@ -145,26 +172,25 @@ const skeleton = computed(() => [
 <template>
   <div v-if="!noFilters || search" :class="{ panel: panels }">
     <slot />
-    <div class="filters">
-      <SearchBox v-model="query" :placeholder="placeholder ?? ''" :aria-label="placeholder" />
-      <template v-if="!noFilters">
-        <select v-model="type" class="search select" :aria-label="t('move.type')">
-          <option value="">{{ t('pokedex.anyType') }}</option>
-          <option v-for="ty in TYPES" :key="ty" :value="ty">{{ typeName(ty) }}</option>
-        </select>
-        <select v-model="category" class="search select" :aria-label="t('move.category')">
-          <option value="">{{ t('moves.anyCategory') }}</option>
-          <option v-for="c in CATEGORIES" :key="c" :value="c">{{ t(`move.category.${c}`) }}</option>
-        </select>
-        <select v-model="flag" class="search select" :aria-label="t('move.flags')">
-          <option value="">{{ t('moves.anyFlag') }}</option>
-          <option v-for="{ f, name } in flags" :key="f" :value="f">{{ name }}</option>
-        </select>
-      </template>
-    </div>
+    <FilterSearch
+      v-model:text="query"
+      v-model:filters="filters"
+      v-model:preview="preview"
+      class="filters"
+      :subject="t('filter.subject.moves')"
+      :name-count="named"
+      :kinds
+      :count
+    />
   </div>
   <div :class="{ panel: panels, 'table-box': stacked }">
-    <div v-if="sorted.length" class="dex-table" :class="{ restoring, tight: stacked }" :style="cols" role="table">
+    <div
+      v-if="sorted.length"
+      class="dex-table"
+      :class="{ restoring, tight: stacked, previewing: preview }"
+      :style="cols"
+      role="table"
+    >
       <div ref="head" class="row head" role="row">
         <SortHeader :label="t('move.name')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
         <SortHeader
@@ -199,7 +225,7 @@ const skeleton = computed(() => [
             <AppLink :to="{ name: 'types', params: { type: r.data.type } }"><TypeIcon :type="r.data.type" /></AppLink>
           </div>
           <div role="cell" class="category">
-            <AppLink :to="{ name: 'moves', query: { category: r.data.category } }"
+            <AppLink :to="{ name: 'moves', query: { f: `category:${r.data.category}` } }"
               ><CategoryIcon :category="r.data.category"
             /></AppLink>
           </div>
@@ -335,12 +361,11 @@ const skeleton = computed(() => [
   background: var(--accent);
 }
 .filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 8px;
+  margin-bottom: 12px;
 }
-.select {
-  width: auto;
+/* The table with a term highlighted in the search's options: a preview, faded a little. */
+.dex-table.previewing {
+  opacity: 0.75;
 }
 .below {
   font-size: 0.9em;
