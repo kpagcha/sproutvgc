@@ -336,7 +336,7 @@ const sections = computed(() =>
         <EntryTitle :to="ref_" meta />
         <div class="types">
           <AppLink v-for="ty in mon.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
-            <TypeIcon :type="ty" />
+            <TypeIcon :type="ty" :scale="2" />
           </AppLink>
           <AppLink :to="{ name: 'pokemon', params: { id } }" class="other-page">{{ t('pokemon.dex') }} ›</AppLink>
         </div>
@@ -645,8 +645,8 @@ const sections = computed(() =>
 }
 .sprite {
   flex: none;
-  width: 144px;
-  height: 144px;
+  width: 192px;
+  height: 192px;
 }
 .icon-sprite {
   display: flex;
@@ -654,7 +654,7 @@ const sections = computed(() =>
   justify-content: center;
 }
 .facts {
-  flex: 1 1 220px;
+  flex: 1 1 300px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1162,14 +1162,32 @@ h2 {
 .month-rank {
   font-size: 0.8em;
 }
-/* Phones: the sprite smaller, beside the name, types and use; the stats under them, the whole width. */
+/* Phones, as its dex entry: the name and types beside the sprite, then its use and the stats below, at the left. */
 @media (max-width: 560px) {
   .head {
     display: grid;
     grid-template-columns: 96px minmax(0, 1fr);
-    gap: 12px;
+    grid-template-areas:
+      'sprite title'
+      'sprite types';
+    gap: 8px 12px;
+  }
+  .facts {
+    display: contents;
+  }
+  .facts > * {
+    grid-column: 1 / -1;
+  }
+  .facts .entry-title {
+    grid-area: title;
+    align-self: end;
+  }
+  .head .types {
+    grid-area: types;
+    align-self: start;
   }
   .sprite {
+    grid-area: sprite;
     width: 96px;
     height: 96px;
   }
@@ -1178,7 +1196,7 @@ h2 {
   }
   .stats-col {
     grid-column: 1 / -1;
-    margin: 0;
+    margin: 8px 0 0;
   }
 }
 </style>
