@@ -227,8 +227,8 @@ useRowColumns(useTemplateRef('head'))
 // and each Pokémon term's share. The description, under them, is no column.
 const columns = computed(() => {
   const list: { cell: string; xl: string; md: string | null; sm: string | null }[] = [
-    // On phones, a rank's mark goes under it: as wide as the rank alone.
-    { cell: 'r', xl: 'minmax(3em, auto)', md: 'minmax(3em, auto)', sm: '2.4em' },
+    // On phones, room for a three-digit rank and its mark beside it, so every row's the same.
+    { cell: 'r', xl: 'minmax(3em, auto)', md: 'minmax(3em, auto)', sm: '4em' },
     // On phones the move is a row of its own over the others, not a column.
     { cell: 'grow', xl: 'minmax(0, 1fr)', md: 'minmax(0, 1fr)', sm: null },
     { cell: '', xl: 'var(--badge)', md: 'var(--badge)', sm: 'var(--badge)' },
@@ -523,7 +523,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   }
   .dex-table .row > :first-child {
     padding-inline: 6px 4px;
-    text-align: left;
   }
   /* Every column on a phone's width: the badges smaller, the cells closer. */
   .dex-table {
@@ -559,14 +558,15 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
     border: 1px solid var(--border);
     border-radius: 3px;
   }
-  /* The rank's mark under it, not beside it, and the header's room for it with it. */
-  .climb {
-    display: block;
-    width: auto;
-    margin-left: 0;
+  /* The rank's mark tighter, and the header's room for it with it (more specific than the rules after this block,
+     which would win otherwise). */
+  .rank .climb {
+    width: 2.6em;
+    margin-left: 1px;
+    font-size: 0.65em;
   }
-  .with-climb :deep(.sort) {
-    margin-right: 0;
+  .dex-table .with-climb :deep(.sort) {
+    margin-right: calc(1px + 1.7em);
   }
   .wide-label {
     display: none;
