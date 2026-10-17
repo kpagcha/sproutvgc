@@ -475,7 +475,15 @@ const sections = computed(() =>
         <section v-if="moves.length" id="sec-moves" class="panel card moves-card">
           <div class="panel-head">
             <h2>{{ t('usageMon.moves') }}</h2>
-            <ListOptions />
+            <!-- A toggle, not a way to another page: muted, with a chevron saying it unfolds here, as the pickers' "show
+                 all"; cut short where the header has no room for it. -->
+            <button type="button" class="more-toggle" :aria-pressed="movepool" @click="movepool = !movepool">
+              <component :is="movepool ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" /><span
+                class="more-label"
+                >{{ t(movepool ? 'usageMon.setsMoves' : 'usageMon.movepool') }}</span
+              >
+            </button>
+            <ListOptions class="head-options" />
           </div>
           <MoveTable
             :key="movepool ? 'pool' : 'sets'"
@@ -489,15 +497,6 @@ const sections = computed(() =>
             no-filters
             stacked
           />
-          <p class="links">
-            <!-- A toggle, not a way to another page: muted, with a chevron saying it unfolds here, as the pickers' "show
-                 all". -->
-            <button type="button" class="more-toggle" :aria-pressed="movepool" @click="movepool = !movepool">
-              <component :is="movepool ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />{{
-                t(movepool ? 'usageMon.setsMoves' : 'usageMon.movepool')
-              }}
-            </button>
-          </p>
         </section>
         <section v-if="items.length" id="sec-items" class="panel card items-card">
           <div class="panel-head">
@@ -1000,18 +999,33 @@ const sections = computed(() =>
 .panel-head h2 {
   margin-bottom: 0;
 }
-/* A way to show something else, as the links beside it look. */
+/* Beside the moves' heading, whether they're its sets' top or its whole movepool: as long as there's room for. */
 .more-toggle {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
+  margin-right: auto;
   padding: 2px 6px 2px 2px;
   font: inherit;
   font-size: 0.9em;
+  font-weight: bold;
   color: var(--muted);
   background: none;
   border: none;
   cursor: pointer;
+}
+.more-toggle > svg {
+  flex: none;
+}
+.more-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.panel-head h2,
+.head-options {
+  flex: none;
 }
 .more-toggle:hover {
   color: var(--text);
