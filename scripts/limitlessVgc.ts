@@ -29,7 +29,10 @@ const FRESH_DAYS = 21
 const PAUSE_MS = 300
 
 export interface TournamentEvent {
+  /** Its name as a slug, with its year (`slugOf`): its page's address. */
   id: string
+  /** Its number on Limitless VGC, short, for the IDs of several events picked together. */
+  n: number
   name: string
   /** The day it started, as an ISO date. */
   date: string
@@ -198,7 +201,8 @@ export class LimitlessVgc {
           if (!m) continue
           const id = Number(m[5])
           byEvent.set(id, {
-            id: `limitlessvgc-${id}`,
+            id: slugOf(decode(m[3]!), m[1]!),
+            n: id,
             name: decode(m[3]!),
             date: m[1]!,
             country: m[2]!,
@@ -253,6 +257,23 @@ function parseTeam(html: string): RawSlot[] {
         moves: [...moves.matchAll(/<li>([^<]*)<\/li>/g)].map((m) => toId(decode(m[1]!))).filter(Boolean),
       }
     })
+}
+
+/**
+ * An event's name as a slug, for its page's address: lowercased, accents dropped, what's after a comma left out (a
+ * Regional's state, an International's city: "Regional Louisville, KY" is `regional-louisville`, "NAIC 2026, New
+ * Orleans" is `naic-2026`), the World Championships `worlds`, and its year added when the name hasn't one
+ * (`regional-nice-2026`, `worlds-2026`). Two events of one name and year are told apart by the generator.
+ */
+export function slugOf(name: string, date: string): string {
+  const slug = name
+    .split(',')[0]!
+    .normalize('NFD')
+    .toLowerCase()
+    .replace(/world championships?/, 'worlds')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+  return /\b\d{4}\b/.test(slug) ? slug : `${slug}-${date.slice(0, 4)}`
 }
 
 /** A regulation's format on the site: "M-C" is "m-c". */

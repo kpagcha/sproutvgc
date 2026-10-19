@@ -1,96 +1,7 @@
 {
-  "limitlessvgc-446": {
-    "id": "limitlessvgc-446",
-    "name": "Regional Nice",
-    "date": "2026-10-17",
-    "country": "FR",
-    "players": 862,
-    "type": "regional",
-    "category": "official",
-    "regulation": "M-C",
-    "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
-    "url": "https://limitlessvgc.com/tournaments/446",
-    "teams": 125,
-    "winner": {
-      "player": "Louis Fontvieille",
-      "country": "FR",
-      "team": ["raichumegax", "golisopodmega", "archaludon", "pelipper", "basculegionf", "sneasler"]
-    }
-  },
-  "limitlessvgc-445": {
-    "id": "limitlessvgc-445",
-    "name": "Regional Louisville, KY",
-    "date": "2026-10-10",
-    "country": "US",
-    "players": 1013,
-    "type": "regional",
-    "category": "official",
-    "regulation": "M-C",
-    "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
-    "url": "https://limitlessvgc.com/tournaments/445",
-    "teams": 145,
-    "winner": {
-      "player": "Joseph Ugarte",
-      "country": "US",
-      "team": ["farigiraf", "incineroar", "charizardmegay", "sylveon", "venusaur", "garchomp"]
-    }
-  },
-  "limitlessvgc-444": {
-    "id": "limitlessvgc-444",
-    "name": "Regional Recife",
-    "date": "2026-10-03",
-    "country": "BR",
-    "players": 222,
-    "type": "regional",
-    "category": "official",
-    "regulation": "M-C",
-    "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
-    "url": "https://limitlessvgc.com/tournaments/444",
-    "teams": 31,
-    "winner": {
-      "player": "Juan Francisco Salerno",
-      "country": "AR",
-      "team": ["sylveon", "toxapex", "garchomp", "venusaur", "charizardmegay", "incineroar"]
-    }
-  },
-  "limitlessvgc-443": {
-    "id": "limitlessvgc-443",
-    "name": "Regional Frankfurt",
-    "date": "2026-09-26",
-    "country": "DE",
-    "players": 1129,
-    "type": "regional",
-    "category": "official",
-    "regulation": "M-C",
-    "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
-    "url": "https://limitlessvgc.com/tournaments/443",
-    "teams": 163,
-    "winner": {
-      "player": "Eric Rios",
-      "country": "ES",
-      "team": ["gholdengo", "volcarona", "garchompmegaz", "incineroar", "rillaboom", "raichumegay"]
-    }
-  },
-  "limitlessvgc-442": {
-    "id": "limitlessvgc-442",
-    "name": "Regional Brisbane",
-    "date": "2026-09-26",
-    "country": "AU",
-    "players": 327,
-    "type": "regional",
-    "category": "official",
-    "regulation": "M-C",
-    "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
-    "url": "https://limitlessvgc.com/tournaments/442",
-    "teams": 47,
-    "winner": {
-      "player": "Kiran Singh",
-      "country": "AU",
-      "team": ["archaludon", "pelipper", "grimmsnarl", "charizardmegay", "garchompmegaz", "venusaur"]
-    }
-  },
-  "limitlessvgc-441": {
-    "id": "limitlessvgc-441",
+  "regional-baltimore-2026": {
+    "id": "regional-baltimore-2026",
+    "n": 441,
     "name": "Regional Baltimore, MD",
     "date": "2026-09-19",
     "country": "US",
@@ -107,8 +18,104 @@
       "team": ["excadrill", "salamencemega", "tyranitarmega", "indeedee", "corviknight", "sneasler"]
     }
   },
-  "limitlessvgc-437": {
-    "id": "limitlessvgc-437",
+  "regional-brisbane-2026": {
+    "id": "regional-brisbane-2026",
+    "n": 442,
+    "name": "Regional Brisbane",
+    "date": "2026-09-26",
+    "country": "AU",
+    "players": 327,
+    "type": "regional",
+    "category": "official",
+    "regulation": "M-C",
+    "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
+    "url": "https://limitlessvgc.com/tournaments/442",
+    "teams": 47,
+    "winner": {
+      "player": "Kiran Singh",
+      "country": "AU",
+      "team": ["archaludon", "pelipper", "grimmsnarl", "charizardmegay", "garchompmegaz", "venusaur"]
+    }
+  },
+  "regional-frankfurt-2026": {
+    "id": "regional-frankfurt-2026",
+    "n": 443,
+    "name": "Regional Frankfurt",
+    "date": "2026-09-26",
+    "country": "DE",
+    "players": 1129,
+    "type": "regional",
+    "category": "official",
+    "regulation": "M-C",
+    "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
+    "url": "https://limitlessvgc.com/tournaments/443",
+    "teams": 163,
+    "winner": {
+      "player": "Eric Rios",
+      "country": "ES",
+      "team": ["gholdengo", "volcarona", "garchompmegaz", "incineroar", "rillaboom", "raichumegay"]
+    }
+  },
+  "regional-recife-2026": {
+    "id": "regional-recife-2026",
+    "n": 444,
+    "name": "Regional Recife",
+    "date": "2026-10-03",
+    "country": "BR",
+    "players": 222,
+    "type": "regional",
+    "category": "official",
+    "regulation": "M-C",
+    "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
+    "url": "https://limitlessvgc.com/tournaments/444",
+    "teams": 31,
+    "winner": {
+      "player": "Juan Francisco Salerno",
+      "country": "AR",
+      "team": ["sylveon", "toxapex", "garchomp", "venusaur", "charizardmegay", "incineroar"]
+    }
+  },
+  "regional-louisville-2026": {
+    "id": "regional-louisville-2026",
+    "n": 445,
+    "name": "Regional Louisville, KY",
+    "date": "2026-10-10",
+    "country": "US",
+    "players": 1013,
+    "type": "regional",
+    "category": "official",
+    "regulation": "M-C",
+    "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
+    "url": "https://limitlessvgc.com/tournaments/445",
+    "teams": 145,
+    "winner": {
+      "player": "Joseph Ugarte",
+      "country": "US",
+      "team": ["farigiraf", "incineroar", "charizardmegay", "sylveon", "venusaur", "garchomp"]
+    }
+  },
+  "regional-nice-2026": {
+    "id": "regional-nice-2026",
+    "n": 446,
+    "name": "Regional Nice",
+    "date": "2026-10-17",
+    "country": "FR",
+    "players": 862,
+    "type": "regional",
+    "category": "official",
+    "regulation": "M-C",
+    "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
+    "url": "https://limitlessvgc.com/tournaments/446",
+    "teams": 125,
+    "winner": {
+      "player": "Louis Fontvieille",
+      "country": "FR",
+      "team": ["raichumegax", "golisopodmega", "archaludon", "pelipper", "basculegionf", "sneasler"]
+    }
+  },
+  "worlds-2026": {
+    "id": "worlds-2026",
+    "n": 437,
     "name": "World Championships 2026",
     "date": "2026-08-27",
     "country": "US",
@@ -125,26 +132,28 @@
       "team": ["floettemega", "basculegion", "kingambit", "dragonitemega", "garchomp", "sneasler"]
     }
   },
-  "limitlessvgc-436": {
-    "id": "limitlessvgc-436",
-    "name": "NAIC 2026, New Orleans",
-    "date": "2026-06-11",
+  "regional-indianapolis-2026": {
+    "id": "regional-indianapolis-2026",
+    "n": 434,
+    "name": "Regional Indianapolis, IN",
+    "date": "2026-05-30",
     "country": "US",
-    "players": 1096,
-    "type": "international",
+    "players": 1013,
+    "type": "regional",
     "category": "official",
     "regulation": "M-A",
     "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
-    "url": "https://limitlessvgc.com/tournaments/436",
-    "teams": 156,
+    "url": "https://limitlessvgc.com/tournaments/434",
+    "teams": 145,
     "winner": {
-      "player": "Francesco Pio Pero",
-      "country": "IT",
-      "team": ["charizardmegay", "sylveon", "kingambit", "basculegion", "garchomp", "aerodactylmega"]
+      "player": "Arsal Puri",
+      "country": "US",
+      "team": ["venusaur", "charizardmegay", "garchomp", "incineroar", "floettemega", "sinistcha"]
     }
   },
-  "limitlessvgc-435": {
-    "id": "limitlessvgc-435",
+  "special-event-turin-2026": {
+    "id": "special-event-turin-2026",
+    "n": 435,
     "name": "Special Event Turin",
     "date": "2026-06-06",
     "country": "IT",
@@ -161,22 +170,23 @@
       "team": ["incineroar", "floettemega", "sneasler", "kingambit", "gengarmega", "kommoo"]
     }
   },
-  "limitlessvgc-434": {
-    "id": "limitlessvgc-434",
-    "name": "Regional Indianapolis, IN",
-    "date": "2026-05-30",
+  "naic-2026": {
+    "id": "naic-2026",
+    "n": 436,
+    "name": "NAIC 2026, New Orleans",
+    "date": "2026-06-11",
     "country": "US",
-    "players": 1013,
-    "type": "regional",
+    "players": 1096,
+    "type": "international",
     "category": "official",
     "regulation": "M-A",
     "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
-    "url": "https://limitlessvgc.com/tournaments/434",
-    "teams": 145,
+    "url": "https://limitlessvgc.com/tournaments/436",
+    "teams": 156,
     "winner": {
-      "player": "Arsal Puri",
-      "country": "US",
-      "team": ["venusaur", "charizardmegay", "garchomp", "incineroar", "floettemega", "sinistcha"]
+      "player": "Francesco Pio Pero",
+      "country": "IT",
+      "team": ["charizardmegay", "sylveon", "kingambit", "basculegion", "garchomp", "aerodactylmega"]
     }
   }
 }

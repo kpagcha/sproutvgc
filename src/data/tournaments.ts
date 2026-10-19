@@ -17,7 +17,10 @@ export type EventType =
 export type TournamentCategory = 'official'
 
 export interface TournamentEvent {
+  /** Its name as a slug, with its year: its page's address (`regional-nice-2026`). */
   id: string
+  /** Its number on Limitless VGC, short, for the IDs of several events picked together. */
+  n: number
   name: string
   /** The day it started, as an ISO date. */
   date: string
@@ -64,6 +67,7 @@ export const EVENTS: readonly TournamentEvent[] = Object.values(Object.values(IN
   b.date.localeCompare(a.date),
 )
 const BY_ID = new Map(EVENTS.map((e) => [e.id, e]))
+const BY_N = new Map(EVENTS.map((e) => [e.n, e]))
 
 /** An event's standings, its listed players by placing, loaded once. */
 const standings = new Map<string, Promise<(Standing & { placing: number })[]>>()
@@ -88,8 +92,6 @@ export const eventsOf = (regulation: string, category: TournamentCategory = 'off
 
 const PREFIX = 'tournaments-'
 const regulationKey = (regulation: string) => regulation.toLowerCase().replace(/[^a-z0-9]/g, '')
-/** An event's short ID in a snapshot's: its number on the site. */
-const short = (id: string) => id.replace(/^limitlessvgc-/, '')
 
 /** The snapshot of every event of a regulation, as the meta's default list has it (`VITE_META_SETS`). */
 export const tournamentSnapshotId = (regulation: string) => `${PREFIX}${regulationKey(regulation)}`
@@ -106,8 +108,8 @@ export function tournamentSnapshot(regulation: string, events: readonly string[]
     picked.length === all.length
       ? tournamentSnapshotId(regulation)
       : `${tournamentSnapshotId(regulation)}~${picked
-          .map((e) => short(e.id))
-          .sort()
+          .map((e) => e.n)
+          .sort((a, b) => a - b)
           .join('.')}`
   let s = made.get(id)
   if (!s) {
@@ -135,7 +137,7 @@ export function tournamentSnapshotOf(id: string): MetaSnapshot | undefined {
   const regulation = EVENTS.find((e) => regulationKey(e.regulation) === m[1])?.regulation
   if (!regulation) return undefined
   const all = eventsOf(regulation)
-  const events = m[2] ? m[2].split('.').map((n) => `limitlessvgc-${n}`) : all.map((e) => e.id)
+  const events = m[2] ? m[2].split('.').flatMap((n) => BY_N.get(Number(n))?.id ?? []) : all.map((e) => e.id)
   const s = tournamentSnapshot(regulation, events)
   // Only the ID it'd have: an ID naming events it hasn't, or naming them all, isn't one.
   return s?.id === id ? s : undefined

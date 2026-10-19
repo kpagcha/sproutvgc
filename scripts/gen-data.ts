@@ -768,7 +768,8 @@ async function main() {
   await writeJson('meta/rosters.json', rosters)
 
   // Tournaments: every official event of each regulation on Limitless VGC (the current one and those Smogon's months
-  // or earlier runs pinned), as listed there (`tournaments/index.json`, by ID: `limitlessvgc-446`), and each one's
+  // or earlier runs pinned), as listed there (`tournaments/index.json`, by ID, its name as a slug: `regional-nice-2026`;
+  // the oldest of two of one name and year keeps it, the other gets its month too), and each one's
   // standings, the players whose teams it publishes with the sets they brought (`tournaments/<id>.json`, by placing).
   // A past regulation's teams aren't held to the dex: what it no longer has is left out.
   const updateTournaments = process.argv.includes('--update') || process.argv.includes('--update-tournaments')
@@ -796,8 +797,11 @@ async function main() {
         `Pinned Limitless VGC's events of Regulation ${r}: ${sources.limitlessvgc[r].join(', ') || 'none yet'}`,
       )
     }
-    for (const n of [...sources.limitlessvgc[r]].reverse()) {
+    // Oldest first, so that an event's address stays the same when a later one shares its name.
+    for (const n of sources.limitlessvgc[r]) {
       const { event, standings } = await limitless.event(n, r, knownSets, r === reg)
+      if (events[event.id]) event.id = `${event.id}-${event.date.slice(5, 7)}`
+      if (events[event.id]) throw new Error(`Two tournaments would be ${event.id}: tell them apart in slugOf`)
       events[event.id] = event
       await writeJson(
         `tournaments/${event.id}.json`,
