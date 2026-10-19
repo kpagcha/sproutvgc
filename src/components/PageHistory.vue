@@ -38,8 +38,14 @@ function onPick(e: MouseEvent) {
       <h2 class="title">
         {{ t('recent.title') }} <span class="count">{{ items.length }}</span>
       </h2>
-      <button type="button" class="btn on-band clear" @click.prevent="clear">
-        <Trash2 :size="14" aria-hidden="true" />{{ t('recent.clear') }}
+      <button
+        v-tip="t('recent.clear')"
+        type="button"
+        class="btn on-band clear"
+        :aria-label="t('recent.clear')"
+        @click.prevent="clear"
+      >
+        <Trash2 :size="14" aria-hidden="true" />
       </button>
     </summary>
     <div class="chips" @click.capture="onPick">
@@ -70,12 +76,16 @@ function onPick(e: MouseEvent) {
   font-weight: normal;
   opacity: 0.8;
 }
-/* Clearing sits at the band's end, as the home page's does. */
+/* Clearing sits at the band's end, as the home page's does: its icon alone, unoutlined until pointed at. */
 .clear {
   position: absolute;
   top: 50%;
   right: 12px;
   translate: 0 -50%;
+}
+:root:root .clear.btn.on-band {
+  padding: 2px 4px;
+  border-color: transparent;
 }
 .chips {
   display: flex;

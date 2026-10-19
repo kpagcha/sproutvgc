@@ -555,7 +555,7 @@ function resetAll() {
       <div class="head">
         <h1>{{ t('title.speedCompare') }}<SetupStar /></h1>
         <MetaDialog v-if="metaSpeeds" class="head-meta" />
-        <HelpToggle class="head-help" :open="helpOpen" controls="compare-help" fit icon-only @toggle="toggleHelp" />
+        <HelpToggle class="head-help" :open="helpOpen" controls="compare-help" fit @toggle="toggleHelp" />
         <TourToggle class="head-tour" @start="startTour" />
       </div>
       <div v-if="helpOpen" id="compare-help" class="help-body panel sunken small">
@@ -987,11 +987,6 @@ function resetAll() {
 }
 .head-meta {
   flex: 0 1 auto;
-}
-@media (max-width: 720px) {
-  .head-help :deep(span) {
-    display: none;
-  }
 }
 /* How to read the page, in a well under the heading. */
 .help-body {

@@ -2758,11 +2758,6 @@ const { start: startTour } = useTour(
   align-items: center;
   margin: 0;
 }
-@media (max-width: 720px) {
-  .head-help :deep(span) {
-    display: none;
-  }
-}
 .head-meta {
   flex: 0 1 auto;
 }
