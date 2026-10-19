@@ -3,19 +3,11 @@ import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ChevronDown, ChevronUp } from '@lucide/vue'
 import { ability, item, move, pokemon } from '@/data/dex'
-import { datasetDates, percent } from '@/data/meta'
+import { datasetDates, percent, regulationSnapshot } from '@/data/meta'
 import { MOVES } from '@/data/moves'
 import { natureEffects, natureName } from '@/data/natures'
 import { POKEMON, splitForme, spriteUrl } from '@/data/pokemon'
-import {
-  eventOf,
-  listed,
-  loadRounds,
-  loadStandings,
-  tournamentSnapshot,
-  type Round,
-  type Standing,
-} from '@/data/tournaments'
+import { eventOf, listed, loadRounds, loadStandings, type Round, type Standing } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { DAYS, decidedMatches, playersOf, pokemonStats, recordsOf, type Day } from '@/lib/tournamentStats'
@@ -30,12 +22,12 @@ import SectionNav from '@/components/SectionNav.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
 
-// One official tournament: what it was (type, date, country, players, how many made Day 2), the way to its meta (its
-// teams alone), and, under tabs for the day (the top cut, the default, Day 2, Day 1, then the whole event apart, in
-// the URL as `?day=`), its standings (the whole event's in three parts, the top cut, the rest of Day 2 and Day 1; a
-// day's its players with their record that day) and then its Pokémon (each one's share of the day's teams and how its
-// teams did in the day's matches, by usage or win rate, the top ones or all, each leading to its meta page on this
-// event's data); the two a row of links stuck to the top, the one being read marked (`SectionNav`).
+// One official tournament: what it was (type, date, country, players, how many made Day 2), the way to its
+// regulation's meta, and, under tabs for the day (the top cut, the default, Day 2, Day 1, then the whole event apart,
+// in the URL as `?day=`), its standings (the whole event's in three parts, the top cut, the rest of Day 2 and Day 1;
+// a day's its players with their record that day) and then its Pokémon (each one's share of the day's teams and how
+// its teams did in the day's matches, by usage or win rate, the top ones or all, each leading to its meta page on its
+// regulation's data); the two a row of links stuck to the top, the one being read marked (`SectionNav`).
 // Each player's placing, name and country, record (marked when they dropped), and the six they brought, as icons;
 // unfolded (one by one, or all at once), their whole sets, a card each, each entry leading to its meta page: its
 // sprite and types over a band of its first type's color, its item, ability and nature (with the stats it raises and
@@ -97,20 +89,10 @@ const about = computed(() =>
       })
     : '',
 )
-/** A Pokémon's meta page on this event's data, at the day's players (Day 1's being everyone's). */
-const metaOf = computed(
-  () =>
-    event.value &&
-    tournamentSnapshot(
-      event.value.regulation,
-      [event.value.id],
-      day.value === 'day2' ? 'day2' : day.value === 'cut' ? 'topCut' : 'all',
-    )?.id,
-)
+/** The way to its regulation's meta (its latest data; the default, for the current one, its URL left bare once it's
+ * shown): the event's own Meta, and each Pokémon's meta page. */
+const metaOf = computed(() => event.value && regulationSnapshot(event.value.regulation)?.id)
 const monName = (pid: Parameters<typeof pokemon>[0]) => splitForme(pid, refName(pokemon(pid)))
-
-/** The way to its meta: the snapshot of it alone. */
-const meta = computed(() => event.value && tournamentSnapshot(event.value.regulation, [event.value.id])?.id)
 
 // The rows unfolded, by placing; all of those shown at once with the toggle over them.
 const open = ref(new Set<number>())
@@ -128,8 +110,8 @@ function toggleAll() {
 }
 
 // The rows that have come near the screen (within about a screen of it), by placing: an unfolded row builds its sets
-// only then, so unfolding a whole field (thousands of cards) builds the few on screen at once and the rest as they come.
-// Once built, a row's sets stay, so scrolling back doesn't move the page; until then it keeps their room.
+// only then, so unfolding a whole field (thousands of cards) builds the few on screen at once and the rest as they
+// come. Once built, a row's sets stay, so scrolling back doesn't move the page; until then it keeps their room.
 const near = ref(new Set<number>())
 watch(id, () => (near.value = new Set()))
 const observer = new IntersectionObserver(
@@ -182,8 +164,8 @@ const ordinal = (n: number) => `#${n}`
         <span>{{ t('tournaments.players', { n: count(event.players) }) }}</span>
         <span>{{ t('tournaments.day2', { n: count(event.day2) }) }}</span>
       </p>
-      <p v-if="meta" class="links">
-        <AppLink :to="{ name: 'rankings', query: { meta } }">{{ t('tournaments.eventMeta') }} ›</AppLink>
+      <p v-if="metaOf" class="links">
+        <AppLink :to="{ name: 'rankings', query: { meta: metaOf } }">{{ t('tournaments.eventMeta') }} ›</AppLink>
       </p>
     </div>
 
@@ -412,8 +394,8 @@ h1 {
 .note {
   margin: 12px 0 0;
 }
-/* Room above each section for the row of links stuck to the top, when scrolled to it; the Pokémon table's header sticks
-   under that row rather than behind it. */
+/* Room above each section for the row of links stuck to the top, when scrolled to it; the Pokémon table's header
+   sticks under that row rather than behind it. */
 .day-tabs,
 .stats-panel {
   scroll-margin-top: 48px;
@@ -548,9 +530,9 @@ h1 {
 .part-head:first-child {
   padding-top: 4px;
 }
-/* A player, a row to unfold (`player-row`: not `row`, which the Pokémon's table rows are, as every dex table's): placing,
-   name and country, record, the six as icons, and the chevron. Far down the field,
-   rows aren't laid out until near the screen. */
+/* A player, a row to unfold (`player-row`: not `row`, which the Pokémon's table rows are, as every dex table's):
+   placing, name and country, record, the six as icons, and the chevron. Far down the field, rows aren't laid out
+   until near the screen. */
 .standing {
   content-visibility: auto;
   contain-intrinsic-size: auto 42px;

@@ -246,6 +246,19 @@ const latestSnapshots = computed<MetaSnapshot[]>(() => {
 /** The snapshot shown by default: the latest dataset's first. */
 export const defaultSnapshot = computed<MetaSnapshot | undefined>(() => latestSnapshots.value[0])
 
+/**
+ * A regulation's data, for a way to its meta from elsewhere (a tournament's): its latest dataset (the default, for the
+ * current regulation), at the players shown when it has them, else its first. None when it has none.
+ */
+export function regulationSnapshot(regulation: string): MetaSnapshot | undefined {
+  const pool = snapshots.value.filter((s) => s.regulation === regulation && s.kind !== 'tournament')
+  const latest = pool.reduce<MetaSnapshot | undefined>((a, s) => (!a || s.to > a.to ? s : a), undefined)
+  if (!latest) return undefined
+  const dataset = pool.filter((s) => datasetKey(s) === datasetKey(latest))
+  const now = selectedSnapshot.value
+  return dataset.find((s) => now && subsetKey(s) === subsetKey(now)) ?? dataset[0]
+}
+
 const PICK_KEY = 'sproutvgc.metaSet'
 /** A pick of the latest dataset, saved as its subset alone (`latest:1630`), so that it stays the latest as new ones
  * come; any other is saved as its ID. */

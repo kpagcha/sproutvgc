@@ -2,7 +2,8 @@
 import { computed } from 'vue'
 import { REGULATION } from '@/data/format'
 import { datasetDates } from '@/data/meta'
-import { EVENTS, tournamentSnapshotId, type TournamentEvent } from '@/data/tournaments'
+import { regulationSnapshot } from '@/data/meta'
+import { EVENTS, type TournamentEvent } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
 import AppLink from '@/components/AppLink'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -19,7 +20,7 @@ const groups = computed(() => {
       ([a, ea], [b, eb]) =>
         Number(b === REGULATION) - Number(a === REGULATION) || eb[0]!.date.localeCompare(ea[0]!.date),
     )
-    .map(([regulation, events]) => ({ regulation, events, meta: tournamentSnapshotId(regulation) }))
+    .map(([regulation, events]) => ({ regulation, events, meta: regulationSnapshot(regulation)?.id }))
 })
 const day = (date: string) => datasetDates({ from: date, to: date })
 const count = (n: number) => n.toLocaleString(locale.value)
