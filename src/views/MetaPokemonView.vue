@@ -2,7 +2,7 @@
 import { computed, h, ref, render, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp, Info } from '@lucide/vue'
-import { ability, available, item, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
+import { ability, available, availableIds, item, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { MOVES } from '@/data/moves'
 import {
   POKEMON,
@@ -12,6 +12,7 @@ import {
   gameTotal,
   loadLearnsets,
   movesOf,
+  speciesOf,
   splitForme,
   spriteUrl,
   statColor,
@@ -39,6 +40,7 @@ import DexText from '@/components/DexText'
 import EntryTitle from '@/components/EntryTitle.vue'
 import EffectTag from '@/components/EffectTag'
 import MetaDialog from '@/components/MetaDialog.vue'
+import PokemonChips from '@/components/PokemonChips.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import ListOptions from '@/components/ListOptions.vue'
 import OptionsMenu from '@/components/OptionsMenu.vue'
@@ -60,6 +62,12 @@ const id = computed(() => String(route.params.id) as PokemonId)
 const ref_ = computed(() => pokemon(id.value))
 const exists = computed(() => available(ref_.value))
 const mon = computed(() => POKEMON[id.value])
+// The species' other formes the dex has (Megas, regional formes, Rotom's appliances; not those that only look
+// different), this one among them, each leading to its meta page. Shown only when it has others.
+const formes = computed(() => {
+  const species = speciesOf(id.value)
+  return availableIds('pokemon').filter((p) => speciesOf(p) === species && !POKEMON[p].cosmetic)
+})
 const { snapshot, data, loading } = useMeta()
 const m = computed(() => data.value?.[id.value])
 // Whether its lists show what each entry does (`ListOptions`, at the top right of each).
@@ -235,9 +243,15 @@ const metaSpeeds = computed((): SpreadPoint[] => {
   return [...bySpeed].map(([speed, w]) => ({ speed, share: w / total, builds: [] })).sort((a, b) => b.speed - a.speed)
 })
 // The speed tiers with it as yours, at its most common build (as picking it there puts it).
+const commonBuild = computed(() => m.value?.speeds && speedBuilds(m.value.speeds)[0])
 const tiersQuery = computed(() => {
-  const b = m.value?.speeds && speedBuilds(m.value.speeds)[0]
+  const b = commonBuild.value
   return { mine: id.value, ...(b && { mynat: b.effect, mypts: String(b.points) }) }
+})
+// The comparison with it as yours, at its most common build too.
+const compareQuery = computed(() => {
+  const b = commonBuild.value
+  return { a: id.value, ...(b && { anat: b.effect, apts: String(b.points) }) }
 })
 // Its side: its sets, or its most common Speed alone.
 const mostCommon = computed(() => (spread.value.length ? commonSpeed(spread.value) : null))
@@ -359,6 +373,11 @@ const sections = computed(() =>
           <AppLink v-for="ty in mon.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
             <TypeIcon v-tip="typeName(ty)" :type="ty" />
           </AppLink>
+        </div>
+        <!-- Its other formes, each a link to its meta page. -->
+        <div v-if="formes.length > 1" class="formes">
+          <span class="muted">{{ t('pokemon.formes') }}</span>
+          <PokemonChips :ids="formes" :current="id" formes meta />
         </div>
         <!-- How much it's used, smaller: its rank, usage and how often it's brought, with their changes. -->
         <p v-if="m" class="used">
@@ -597,7 +616,7 @@ const sections = computed(() =>
         </template>
         <p class="links">
           <AppLink :to="{ name: 'speedTiers', query: tiersQuery }">{{ t('usageMon.toTiers') }} ›</AppLink>
-          <AppLink :to="{ name: 'speedCompare', query: { a: id } }">{{ t('usageMon.toCompare') }} ›</AppLink>
+          <AppLink :to="{ name: 'speedCompare', query: compareQuery }">{{ t('usageMon.toCompare') }} ›</AppLink>
         </p>
       </section>
 
@@ -772,6 +791,12 @@ const sections = computed(() =>
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
+}
+.formes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
 }
 /* How much it's used: a line of its own, smaller than the stats. */
 .used {
