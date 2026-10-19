@@ -56,9 +56,8 @@ const model = defineModel<T>({ required: true })
 .tab.apart {
   margin-left: auto;
 }
-/* Not shown: outlined dashed on its top and sides, standing a little off the panel rather than on its edge. */
+/* Not shown: outlined dashed on its top and sides, its sides reaching down to the panel's edge. */
 .tab.apart:not(.on) {
-  margin-bottom: 4px;
   border-color: var(--border-strong);
   border-style: dashed dashed none;
 }
