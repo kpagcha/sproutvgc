@@ -67,6 +67,9 @@ export interface MetaSnapshot {
   teams?: number
   /** The events it adds up, for tournaments (`tournaments.ts`). */
   events?: string[]
+  /** Whose teams it counts, for tournaments: Day 2's, the only ones whose team lists are published. Its subset, as
+   * Smogon's cutoffs are theirs. */
+  players?: 'day2'
   capabilities: MetaCapability[]
   /** What it has that covers every player, whatever its cutoff (Smogon's brought counts): labeled as such. */
   unweighted?: MetaCapability[]
@@ -384,6 +387,7 @@ const periodLabel = (s: MetaSnapshot): string =>
 export function subsetParts(s: MetaSnapshot): string[] {
   const parts: string[] = []
   if (s.cutoff !== undefined) parts.push(players(s.cutoff))
+  if (s.players) parts.push(t(`meta.tplayers.${s.players}`))
   if (s.bestOf === 3) parts.push(t('meta.bo3'))
   return parts
 }
@@ -392,6 +396,7 @@ export function subsetParts(s: MetaSnapshot): string[] {
 export function subsetShort(s: MetaSnapshot): string {
   const parts: string[] = []
   if (s.cutoff !== undefined) parts.push(s.cutoff ? `${s.cutoff}+` : t('meta.players.0'))
+  if (s.players) parts.push(t(`meta.tplayers.${s.players}`))
   if (s.bestOf === 3) parts.push(t('meta.bo3'))
   return parts.join(' · ')
 }

@@ -2,9 +2,9 @@
 // into `generated/tournaments/` (`index.json` the events, `<id>.json` each one's standings), and added up here for
 // whichever events are picked, into the shape every page reads (`MetaData`). They aren't snapshots generated whole as
 // Smogon's are: any set of a regulation's events can be picked, so each set is a snapshot made on demand, its ID naming
-// them (`tournaments-mc` every one of the regulation's, `tournaments-mc~445.446` those two). Only the top placings of
-// each event are there (those whose teams Limitless VGC publishes), and their sets have no stat points: no spreads nor
-// Speeds.
+// them (`tournaments-mc` every one of the regulation's, `tournaments-mc~445.446` those two). Only each event's Day 2
+// players are there (those whose teams Limitless VGC publishes: its subset, `players`), and their sets have no stat
+// points: no spreads nor Speeds.
 
 import type { AbilityId, ItemId, MoveId, PokemonId } from '@/data/dex'
 import type { MetaData, MetaSnapshot, PokemonMeta, Share } from '@/data/meta'
@@ -123,6 +123,7 @@ export function tournamentSnapshot(regulation: string, events: readonly string[]
       period: 'event',
       teams: picked.reduce((n, e) => n + e.teams, 0),
       events: picked.map((e) => e.id),
+      players: 'day2',
       capabilities: ['usage', 'moves', 'items', 'abilities', 'teammates', 'natures', 'builds'],
     }
     made.set(id, s)

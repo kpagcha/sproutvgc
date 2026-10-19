@@ -16,12 +16,12 @@ import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
 
-// One official tournament: what it was (type, date, country, players, how many teams are listed), the way to its meta
-// (its teams alone, as the data card would pick it), and its standings: each listed player's placing, name and country,
-// and the six they brought, as icons; unfolded (one by one, or all at once), their whole sets, a card each, each entry
-// leading to its meta page: its sprite and types over a band of its first type's color, its item, ability and nature
-// (with the stats it raises and lowers) on rows of their own, and its moves two by two, each tinted with its type. Only the top placings' teams are published: the
-// standings stop where they do.
+// One official tournament: what it was (type, date, country, players, how many made Day 2), the way to its meta (its
+// teams alone), and its Day 2 standings, the only players whose teams are published: each one's placing, name and
+// country, and the six they brought, as icons; unfolded (one by one, or all at once), their whole sets, a card each,
+// each entry leading to its meta page: its sprite and types over a band of its first type's color, its item, ability
+// and nature (with the stats it raises and lowers) on rows of their own, and its moves two by two, each tinted with its
+// type.
 const route = useRoute()
 const id = computed(() => String(route.params.id))
 const event = computed(() => eventOf(id.value))
@@ -68,9 +68,10 @@ const ordinal = (n: number) => `#${n}`
         <span>{{ event.country }}</span>
         <span>{{ t('meta.regulation', { reg: event.regulation }) }}</span>
         <span>{{ t('tournaments.players', { n: count(event.players) }) }}</span>
+        <span>{{ t('tournaments.day2', { n: count(event.teams) }) }}</span>
       </p>
       <p class="muted small">
-        {{ t('tournaments.listedNote', { n: count(event.teams), players: count(event.players) }) }}
+        {{ t('tournaments.day2Note') }}
       </p>
       <p v-if="meta" class="links">
         <AppLink :to="{ name: 'rankings', query: { meta } }">{{ t('tournaments.eventMeta') }} ›</AppLink>
@@ -226,7 +227,7 @@ h1 {
 .standing + .standing {
   border-top: 1px solid var(--border);
 }
-/* A listed player, a row to unfold: placing, name and country, the six as icons, and the chevron. */
+/* A Day 2 player, a row to unfold: placing, name and country, the six as icons, and the chevron. */
 .row {
   display: grid;
   grid-template-columns: 3.5em minmax(0, 1fr) auto auto;

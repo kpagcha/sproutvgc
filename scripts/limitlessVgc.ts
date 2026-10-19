@@ -1,7 +1,7 @@
 // Official tournaments from Limitless VGC (limitlessvgc.com; notes/usage-stats.md): each event of a regulation, its
-// standings and every listed player's team, as the sets they brought (Pokémon, item, ability, nature, moves; no stat
-// points, which the team lists don't have). It covers the top placings of each event, those whose teams it publishes,
-// not the whole field. Its robots.txt allows everything; RK9's terms forbid scraping, so its lists aren't read.
+// Day 2 standings and every Day 2 player's team, as the sets they brought (Pokémon, item, ability, nature, moves; no
+// stat points, which the team lists don't have): it publishes the teams of those who made Day 2 alone, not the whole
+// field's. Its robots.txt allows everything; RK9's terms forbid scraping, so its lists aren't read.
 // Pages are cached: a team page never changes (only who used it, which isn't read), and an event's page is read again
 // while the event is recent, as its teams come in over the days after it.
 
