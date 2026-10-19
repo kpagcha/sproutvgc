@@ -46,7 +46,7 @@ export interface TournamentEvent {
   teams: number
 }
 
-/** A Pokémon as brought: its ID, then its item, ability and nature (Showdown IDs, null when the list doesn't say),
+/** A Pokémon as brought: its ID (a Mega's when it holds its Mega Stone, as Smogon's stats count it), then its item, ability and nature (Showdown IDs, null when the list doesn't say),
  * then its moves. */
 export type TeamSlot = [pokemon: string, item: string | null, ability: string | null, nature: string | null, string[]]
 
@@ -66,6 +66,8 @@ export interface Known {
   items: ReadonlySet<string>
   abilities: ReadonlySet<string>
   natures: ReadonlySet<string>
+  /** The Mega a Pokémon holding an item becomes, when the item is its Mega Stone. */
+  mega: (pokemon: string, item: string) => string | undefined
 }
 
 type Get = (url: string) => Promise<Buffer | null>
@@ -140,9 +142,10 @@ export class LimitlessVgc {
           unknown.add(`Pokémon "${s.pokemon}"`)
           continue
         }
+        const item = check(known.items, 'item', s.item)
         team.push([
-          pokemon,
-          check(known.items, 'item', s.item),
+          (item && known.mega(pokemon, item)) || pokemon,
+          item,
           check(known.abilities, 'ability', s.ability),
           check(known.natures, 'nature', s.nature),
           s.moves.flatMap((m) => check(known.moves, 'move', m) ?? []),

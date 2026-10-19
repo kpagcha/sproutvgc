@@ -6,10 +6,10 @@
     "team": [
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["protect", "shadowball", "nastyplot", "makeitrain"]],
       ["volcarona", "rockyhelmet", "flamebody", "timid", ["overheat", "strugglebug", "ragepowder", "tailwind"]],
-      ["garchomp", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["partingshot", "fakeout", "flareblitz", "darkestlariat"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["grassyglide", "woodhammer", "fakeout", "uturn"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]]
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]]
     ]
   },
   "2": {
@@ -18,7 +18,7 @@
     "list": 7039,
     "team": [
       ["farigiraf", "sitrusberry", "armortail", "sassy", ["psychic", "trickroom", "helpinghand", "protect"]],
-      ["garchomp", "garchompitez", "roughskin", "modest", ["dracometeor", "flamethrower", "powergem", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dracometeor", "flamethrower", "powergem", "protect"]],
       ["sneasler", "whiteherb", "unburden", "adamant", ["closecombat", "gunkshot", "fakeout", "protect"]],
       ["torkoal", "charcoal", "drought", "quiet", ["eruption", "earthpower", "weatherball", "protect"]],
       ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "yawn", "detect"]],
@@ -30,9 +30,9 @@
     "country": "NL",
     "list": 7040,
     "team": [
-      ["charizard", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "ancientpower", "protect"]],
       ["kingambit", "chopleberry", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "protect"]],
-      ["meowsticf", "meowsticite", "competitive", "timid", ["expandingforce", "thunderbolt", "fakeout", "protect"]],
+      ["meowsticmmega", "meowsticite", "competitive", "timid", ["expandingforce", "thunderbolt", "fakeout", "protect"]],
       ["sneasler", "psychicseed", "unburden", "adamant", ["closecombat", "direclaw", "rockslide", "protect"]],
       ["indeedee", "focussash", "psychicsurge", "timid", ["expandingforce", "energyball", "imprison", "trickroom"]],
       ["kommoo", "leftovers", "soundproof", "modest", ["clangingscales", "aurasphere", "clangoroussoul", "protect"]]
@@ -44,7 +44,7 @@
     "list": 7041,
     "team": [
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
-      ["dragonite", "dragoninite", "innerfocus", "modest", ["dragonpulse", "heatwave", "tailwind", "protect"]],
+      ["dragonitemega", "dragoninite", "innerfocus", "modest", ["dragonpulse", "heatwave", "tailwind", "protect"]],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["flareblitz", "throatchop", "partingshot", "fakeout"]],
       [
         "rillaboom",
@@ -54,7 +54,7 @@
         ["grassyglide", "woodhammer", "highhorsepower", "fakeout"]
       ],
       ["sneasler", "whiteherb", "unburden", "adamant", ["closecombat", "direclaw", "rocktomb", "protect"]],
-      ["floetteeternal", "floettite", "flowerveil", "bold", ["drainingkiss", "dazzlinggleam", "calmmind", "protect"]]
+      ["floettemega", "floettite", "flowerveil", "bold", ["drainingkiss", "dazzlinggleam", "calmmind", "protect"]]
     ]
   },
   "5": {
@@ -64,7 +64,7 @@
     "team": [
       ["vivillon", "focussash", "compoundeyes", "timid", ["sleeppowder", "ragepowder", "hurricane", "protect"]],
       ["politoed", "sitrusberry", "drizzle", "calm", ["weatherball", "perishsong", "encore", "protect"]],
-      ["gengar", "gengarite", "cursedbody", "modest", ["shadowball", "sludgebomb", "perishsong", "protect"]],
+      ["gengarmega", "gengarite", "cursedbody", "modest", ["shadowball", "sludgebomb", "perishsong", "protect"]],
       ["incineroar", "passhoberry", "intimidate", "relaxed", ["protect", "fakeout", "flareblitz", "partingshot"]],
       ["rillaboom", "occaberry", "grassysurge", "adamant", ["fakeout", "grassyglide", "uturn", "protect"]],
       ["kommoo", "leftovers", "soundproof", "modest", ["clangingscales", "clangoroussoul", "aurasphere", "protect"]]
@@ -80,7 +80,7 @@
       ["garchomp", "choicescarf", "roughskin", "adamant", ["dragonclaw", "earthquake", "stompingtantrum", "rockslide"]],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "partingshot", "flareblitz", "throatchop"]],
       ["venusaur", "lifeorb", "chlorophyll", "modest", ["protect", "leafstorm", "sludgebomb", "earthpower"]],
-      ["charizard", "charizarditey", "blaze", "timid", ["protect", "heatwave", "weatherball", "ancientpower"]]
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["protect", "heatwave", "weatherball", "ancientpower"]]
     ]
   },
   "7": {
@@ -88,10 +88,10 @@
     "country": "NL",
     "list": 7044,
     "team": [
-      ["froslass", "froslassite", "cursedbody", "timid", ["protect", "blizzard", "shadowball", "auroraveil"]],
+      ["froslassmega", "froslassite", "cursedbody", "timid", ["protect", "blizzard", "shadowball", "auroraveil"]],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["flareblitz", "darkestlariat", "fakeout", "partingshot"]],
       ["basculegion", "choicescarf", "adaptability", "jolly", ["wavecrash", "lastrespects", "flipturn", "aquajet"]],
-      ["glimmora", "glimmoranite", "toxicdebris", "timid", ["spikyshield", "sludgebomb", "powergem", "earthpower"]],
+      ["glimmoramega", "glimmoranite", "toxicdebris", "timid", ["spikyshield", "sludgebomb", "powergem", "earthpower"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "uturn", "grassyglide", "fakeout"]],
       ["volcarona", "grassyseed", "flamebody", "modest", ["protect", "heatwave", "gigadrain", "quiverdance"]]
     ]
@@ -101,7 +101,7 @@
     "country": "IT",
     "list": 7045,
     "team": [
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["dazzlinggleam", "drainingkiss", "calmmind", "protect"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["dazzlinggleam", "drainingkiss", "calmmind", "protect"]],
       [
         "rillaboom",
         "miracleseed",
@@ -110,7 +110,7 @@
         ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
       ],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["flareblitz", "taunt", "partingshot", "fakeout"]],
-      ["dragonite", "dragoninite", "innerfocus", "modest", ["dragonpulse", "heatwave", "tailwind", "protect"]],
+      ["dragonitemega", "dragoninite", "innerfocus", "modest", ["dragonpulse", "heatwave", "tailwind", "protect"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
       ["sneasler", "whiteherb", "unburden", "adamant", ["direclaw", "closecombat", "rocktomb", "protect"]]
     ]
@@ -121,8 +121,8 @@
     "list": 7046,
     "team": [
       ["sneasler", "grassyseed", "unburden", "adamant", ["protect", "direclaw", "closecombat", "acrobatics"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["protect", "hypervoice", "dracometeor", "tailwind"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "fakeout"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["protect", "hypervoice", "dracometeor", "tailwind"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "fakeout"]],
       [
         "rillaboom",
         "miracleseed",
@@ -139,12 +139,12 @@
     "country": "IT",
     "list": 7047,
     "team": [
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "helpinghand", "flareblitz", "partingshot"]],
       ["sinistcha", "kasibberry", "hospitality", "bold", ["matchagotcha", "protect", "ragepowder", "trickroom"]],
       ["kommoo", "leftovers", "soundproof", "modest", ["clangingscales", "aurasphere", "clangoroussoul", "protect"]],
       ["kingambit", "focussash", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "lowkick", "ironhead"]],
-      ["delphox", "delphoxite", "blaze", "timid", ["heatwave", "psychic", "nastyplot", "protect"]]
+      ["delphoxmega", "delphoxite", "blaze", "timid", ["heatwave", "psychic", "nastyplot", "protect"]]
     ]
   },
   "11": {
@@ -152,9 +152,9 @@
     "country": "DE",
     "list": 7048,
     "team": [
-      ["raichu", "raichunitey", "lightningrod", "timid", ["fakeout", "zapcannon", "focusblast", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["fakeout", "zapcannon", "focusblast", "protect"]],
       ["pelipper", "lifeorb", "drizzle", "modest", ["weatherball", "hurricane", "tailwind", "protect"]],
-      ["golisopod", "golisopite", "emergencyexit", "adamant", ["leechlife", "ironhead", "drillrun", "protect"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["leechlife", "ironhead", "drillrun", "protect"]],
       ["kingambit", "focussash", "defiant", "adamant", ["suckerpunch", "kowtowcleave", "ironhead", "lowkick"]],
       ["archaludon", "leftovers", "stamina", "modest", ["electroshot", "dragonpulse", "snarl", "protect"]],
       ["farigiraf", "sitrusberry", "armortail", "quiet", ["twinbeam", "helpinghand", "trickroom", "protect"]]
@@ -165,11 +165,11 @@
     "country": "IT",
     "list": 7049,
     "team": [
-      ["tyranitar", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "lowkick", "protect"]],
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "lowkick", "protect"]],
       ["sneasler", "whiteherb", "unburden", "adamant", ["closecombat", "coaching", "direclaw", "protect"]],
       ["indeedee", "choicescarf", "psychicsurge", "modest", ["expandingforce", "mysticalfire", "trick", "protect"]],
       ["excadrill", "focussash", "sandrush", "adamant", ["ironhead", "highhorsepower", "rockslide", "protect"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["dracometeor", "flamethrower", "hypervoice", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["dracometeor", "flamethrower", "hypervoice", "protect"]],
       ["corviknight", "occaberry", "mirrorarmor", "impish", ["bravebird", "taunt", "tailwind", "roost"]]
     ]
   },
@@ -178,7 +178,7 @@
     "country": "IT",
     "list": 7050,
     "team": [
-      ["staraptor", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
       [
         "rillaboom",
         "miracleseed",
@@ -188,7 +188,7 @@
       ],
       ["primarina", "leftovers", "liquidvoice", "modest", ["hypervoice", "moonblast", "calmmind", "protect"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
       ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]]
     ]
   },
@@ -200,8 +200,8 @@
       ["archaludon", "leftovers", "stamina", "bold", ["dragonpulse", "electroshot", "snarl", "protect"]],
       ["pelipper", "focussash", "drizzle", "timid", ["weatherball", "hurricane", "tailwind", "protect"]],
       ["garchomp", "choicescarf", "roughskin", "adamant", ["earthquake", "stompingtantrum", "dragonclaw", "rockslide"]],
-      ["golisopod", "golisopite", "emergencyexit", "adamant", ["leechlife", "drillrun", "ironhead", "protect"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["leechlife", "drillrun", "ironhead", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
       ["farigiraf", "sitrusberry", "armortail", "bold", ["psychic", "raindance", "trickroom", "roar"]]
     ]
   },
@@ -219,8 +219,8 @@
       ],
       ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]],
       ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
-      ["froslass", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "auroraveil", "protect"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["froslassmega", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "auroraveil", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
       ["sneasler", "whiteherb", "unburden", "adamant", ["closecombat", "direclaw", "fakeout", "protect"]]
     ]
   },
@@ -232,7 +232,7 @@
       ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "detect"]],
       ["arcaninehisui", "focussash", "rockhead", "jolly", ["headsmash", "flareblitz", "extremespeed", "protect"]],
       ["gholdengo", "lifeorb", "goodasgold", "timid", ["makeitrain", "shadowball", "nastyplot", "protect"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
       [
         "rillaboom",
         "miracleseed",
@@ -240,7 +240,7 @@
         "adamant",
         ["grassyglide", "woodhammer", "fakeout", "highhorsepower"]
       ],
-      ["staraptor", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]]
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]]
     ]
   },
   "17": {
@@ -250,8 +250,8 @@
     "team": [
       ["sneasler", "psychicseed", "unburden", "adamant", ["gunkshot", "closecombat", "rockslide", "protect"]],
       ["armarouge", "kasibberry", "flashfire", "modest", ["armorcannon", "expandingforce", "wideguard", "protect"]],
-      ["dragonite", "dragoninite", "multiscale", "timid", ["dragonpulse", "heatwave", "tailwind", "protect"]],
-      ["gengar", "gengarite", "cursedbody", "modest", ["sludgebomb", "shadowball", "protect", "disable"]],
+      ["dragonitemega", "dragoninite", "multiscale", "timid", ["dragonpulse", "heatwave", "tailwind", "protect"]],
+      ["gengarmega", "gengarite", "cursedbody", "modest", ["sludgebomb", "shadowball", "protect", "disable"]],
       ["indeedee", "focussash", "psychicsurge", "timid", ["expandingforce", "mysticalfire", "encore", "protect"]],
       ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "yawn", "detect"]]
     ]
@@ -262,11 +262,11 @@
     "list": 7055,
     "team": [
       ["garchomp", "choicescarf", "roughskin", "adamant", ["earthquake", "dragonclaw", "rockslide", "stompingtantrum"]],
-      ["delphox", "delphoxite", "blaze", "timid", ["heatwave", "psychic", "nastyplot", "protect"]],
+      ["delphoxmega", "delphoxite", "blaze", "timid", ["heatwave", "psychic", "nastyplot", "protect"]],
       ["indeedeef", "rockyhelmet", "psychicsurge", "bold", ["followme", "psychic", "helpinghand", "sing"]],
       ["incineroar", "sitrusberry", "intimidate", "careful", ["fakeout", "throatchop", "flareblitz", "partingshot"]],
       ["sinistcha", "cobaberry", "hospitality", "bold", ["matchagotcha", "ragepowder", "lifedew", "protect"]],
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "calmmind", "protect"]]
+      ["floettemega", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "calmmind", "protect"]]
     ]
   },
   "19": {
@@ -274,9 +274,9 @@
     "country": "DE",
     "list": 7056,
     "team": [
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["protect", "dazzlinggleam", "calmmind", "moonblast"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["protect", "dazzlinggleam", "calmmind", "moonblast"]],
       ["gholdengo", "lifeorb", "goodasgold", "timid", ["protect", "shadowball", "nastyplot", "makeitrain"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["protect", "tailwind", "hypervoice", "dracometeor"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["protect", "tailwind", "hypervoice", "dracometeor"]],
       ["rillaboom", "sitrusberry", "grassysurge", "adamant", ["fakeout", "grassyglide", "woodhammer", "uturn"]],
       ["incineroar", "rockyhelmet", "intimidate", "impish", ["fakeout", "partingshot", "flareblitz", "throatchop"]],
       ["sneasler", "grassyseed", "unburden", "adamant", ["protect", "closecombat", "direclaw", "rockslide"]]
@@ -287,11 +287,11 @@
     "country": "GR",
     "list": 7057,
     "team": [
-      ["gengar", "gengarite", "cursedbody", "modest", ["protect", "perishsong", "shadowball", "sludgebomb"]],
+      ["gengarmega", "gengarite", "cursedbody", "modest", ["protect", "perishsong", "shadowball", "sludgebomb"]],
       ["incineroar", "sitrusberry", "intimidate", "sassy", ["protect", "fakeout", "flareblitz", "partingshot"]],
       ["kingambit", "lifeorb", "defiant", "adamant", ["protect", "suckerpunch", "swordsdance", "kowtowcleave"]],
       ["sneasler", "grassyseed", "unburden", "adamant", ["protect", "fakeout", "gunkshot", "closecombat"]],
-      ["altaria", "altarianite", "cloudnine", "calm", ["protect", "perishsong", "hypervoice", "dracometeor"]],
+      ["altariamega", "altarianite", "cloudnine", "calm", ["protect", "perishsong", "hypervoice", "dracometeor"]],
       ["rillaboom", "ejectbutton", "grassysurge", "careful", ["uturn", "protect", "fakeout", "grassyglide"]]
     ]
   },
@@ -301,9 +301,9 @@
     "list": 7058,
     "team": [
       ["incineroar", "sitrusberry", "intimidate", "careful", ["fakeout", "helpinghand", "flareblitz", "partingshot"]],
-      ["garchomp", "garchompitez", "roughskin", "modest", ["protect", "flamethrower", "dracometeor", "powergem"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["protect", "flamethrower", "dracometeor", "powergem"]],
       ["kingambit", "chopleberry", "defiant", "adamant", ["protect", "suckerpunch", "ironhead", "kowtowcleave"]],
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["protect", "drainingkiss", "calmmind", "dazzlinggleam"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["protect", "drainingkiss", "calmmind", "dazzlinggleam"]],
       ["sneasler", "focussash", "poisontouch", "jolly", ["feint", "fakeout", "direclaw", "closecombat"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["fakeout", "grassyglide", "woodhammer", "highhorsepower"]]
     ]
@@ -315,8 +315,8 @@
     "team": [
       ["basculegion", "choicescarf", "adaptability", "jolly", ["wavecrash", "lastrespects", "flipturn", "aquajet"]],
       ["incineroar", "sitrusberry", "intimidate", "careful", ["fakeout", "flareblitz", "partingshot", "roar"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "encore"]],
-      ["floetteeternal", "floettite", "flowerveil", "timid", ["protect", "drainingkiss", "dazzlinggleam", "calmmind"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "encore"]],
+      ["floettemega", "floettite", "flowerveil", "timid", ["protect", "drainingkiss", "dazzlinggleam", "calmmind"]],
       ["volcarona", "grassyseed", "flamebody", "modest", ["protect", "heatwave", "quiverdance", "gigadrain"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["fakeout", "grassyglide", "woodhammer", "highhorsepower"]]
     ]
@@ -326,10 +326,10 @@
     "country": "FI",
     "list": 7060,
     "team": [
-      ["charizard", "charizarditey", "blaze", "timid", ["weatherball", "heatwave", "hurricane", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["weatherball", "heatwave", "hurricane", "protect"]],
       ["venusaur", "focussash", "chlorophyll", "modest", ["leafstorm", "sludgebomb", "sleeppowder", "protect"]],
       ["archaludon", "leftovers", "stamina", "calm", ["flashcannon", "dragonpulse", "electroshot", "protect"]],
-      ["garchomp", "garchompitez", "roughskin", "modest", ["dracometeor", "earthpower", "powergem", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dracometeor", "earthpower", "powergem", "protect"]],
       ["grimmsnarl", "lightclay", "prankster", "sassy", ["spiritbreak", "reflect", "lightscreen", "partingshot"]],
       ["pelipper", "sitrusberry", "drizzle", "bold", ["weatherball", "hurricane", "tailwind", "wideguard"]]
     ]
@@ -340,8 +340,8 @@
     "list": 7046,
     "team": [
       ["sneasler", "grassyseed", "unburden", "adamant", ["protect", "direclaw", "closecombat", "acrobatics"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["protect", "hypervoice", "dracometeor", "tailwind"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "fakeout"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["protect", "hypervoice", "dracometeor", "tailwind"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "fakeout"]],
       [
         "rillaboom",
         "miracleseed",
@@ -360,9 +360,9 @@
     "team": [
       ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
       ["milotic", "sitrusberry", "competitive", "calm", ["muddywater", "hypnosis", "coil", "icebeam"]],
-      ["staraptor", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
       ["rillaboom", "lifeorb", "grassysurge", "adamant", ["grassyglide", "woodhammer", "highhorsepower", "fakeout"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
       ["gholdengo", "grassyseed", "goodasgold", "modest", ["shadowball", "makeitrain", "nastyplot", "protect"]]
     ]
   },
@@ -371,8 +371,8 @@
     "country": "FR",
     "list": 7062,
     "team": [
-      ["dragonite", "dragoninite", "multiscale", "modest", ["protect", "dragonpulse", "hurricane", "weatherball"]],
-      ["golisopod", "golisopite", "emergencyexit", "adamant", ["protect", "leechlife", "ironhead", "liquidation"]],
+      ["dragonitemega", "dragoninite", "multiscale", "modest", ["protect", "dragonpulse", "hurricane", "weatherball"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["protect", "leechlife", "ironhead", "liquidation"]],
       ["indeedee", "focussash", "psychicsurge", "timid", ["protect", "expandingforce", "hypervoice", "helpinghand"]],
       ["sneasler", "psychicseed", "unburden", "adamant", ["protect", "closecombat", "direclaw", "throatchop"]],
       ["archaludon", "magnet", "sturdy", "timid", ["protect", "electroshot", "dracometeor", "thunderbolt"]],
@@ -385,9 +385,9 @@
     "list": 7063,
     "team": [
       ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
       ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
-      ["froslass", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "auroraveil", "protect"]],
+      ["froslassmega", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "auroraveil", "protect"]],
       ["sneasler", "grassyseed", "unburden", "adamant", ["closecombat", "direclaw", "rockslide", "protect"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]]
     ]
@@ -399,7 +399,7 @@
     "team": [
       ["vivillon", "focussash", "compoundeyes", "timid", ["sleeppowder", "ragepowder", "hurricane", "protect"]],
       ["politoed", "sitrusberry", "drizzle", "calm", ["weatherball", "perishsong", "encore", "protect"]],
-      ["gengar", "gengarite", "cursedbody", "modest", ["shadowball", "sludgebomb", "perishsong", "protect"]],
+      ["gengarmega", "gengarite", "cursedbody", "modest", ["shadowball", "sludgebomb", "perishsong", "protect"]],
       ["incineroar", "passhoberry", "intimidate", "relaxed", ["protect", "fakeout", "flareblitz", "partingshot"]],
       ["rillaboom", "occaberry", "grassysurge", "adamant", ["fakeout", "grassyglide", "uturn", "protect"]],
       ["kommoo", "leftovers", "soundproof", "modest", ["clangingscales", "clangoroussoul", "aurasphere", "protect"]]
@@ -410,9 +410,15 @@
     "country": "ES",
     "list": 7064,
     "team": [
-      ["glimmora", "glimmoranite", "toxicdebris", "modest", ["sludgebomb", "powergem", "earthpower", "spikyshield"]],
+      [
+        "glimmoramega",
+        "glimmoranite",
+        "toxicdebris",
+        "modest",
+        ["sludgebomb", "powergem", "earthpower", "spikyshield"]
+      ],
       ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "tailwind", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "tailwind", "protect"]],
       [
         "rillaboom",
         "miracleseed",
@@ -429,10 +435,10 @@
     "country": "DE",
     "list": 7065,
     "team": [
-      ["charizard", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "solarbeam", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "solarbeam", "protect"]],
       ["farigiraf", "sitrusberry", "armortail", "bold", ["twinbeam", "thunderbolt", "helpinghand", "trickroom"]],
       ["garchomp", "lifeorb", "roughskin", "jolly", ["earthquake", "dragonclaw", "stompingtantrum", "protect"]],
-      ["aerodactyl", "aerodactylite", "unnerve", "jolly", ["dualwingbeat", "rockslide", "icefang", "tailwind"]],
+      ["aerodactylmega", "aerodactylite", "unnerve", "jolly", ["dualwingbeat", "rockslide", "icefang", "tailwind"]],
       ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "protect"]],
       ["kingambit", "focussash", "defiant", "adamant", ["ironhead", "kowtowcleave", "lowkick", "suckerpunch"]]
     ]
@@ -444,7 +450,7 @@
     "team": [
       ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "protect"]],
       ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "tailwind", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "tailwind", "protect"]],
       ["azumarill", "sitrusberry", "hugepower", "adamant", ["aquajet", "playrough", "bellydrum", "protect"]],
       [
         "rillaboom",
@@ -453,7 +459,7 @@
         "adamant",
         ["fakeout", "grassyglide", "woodhammer", "highhorsepower"]
       ],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]]
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]]
     ]
   },
   "32": {
@@ -465,7 +471,7 @@
       ["garchomp", "softsand", "roughskin", "adamant", ["protect", "stompingtantrum", "earthquake", "rockslide"]],
       ["grimmsnarl", "lightclay", "prankster", "sassy", ["spiritbreak", "lightscreen", "reflect", "partingshot"]],
       ["venusaur", "focussash", "chlorophyll", "modest", ["protect", "sleeppowder", "sludgebomb", "earthpower"]],
-      ["charizard", "charizarditey", "blaze", "modest", ["protect", "heatwave", "weatherball", "roar"]],
+      ["charizardmegay", "charizarditey", "blaze", "modest", ["protect", "heatwave", "weatherball", "roar"]],
       ["archaludon", "leftovers", "stamina", "calm", ["protect", "electroshot", "flashcannon", "dragonpulse"]]
     ]
   },
@@ -484,8 +490,8 @@
         "adamant",
         ["fakeout", "grassyglide", "highhorsepower", "woodhammer"]
       ],
-      ["staraptor", "staraptite", "intimidate", "jolly", ["protect", "tailwind", "closecombat", "bravebird"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "fakeout"]]
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["protect", "tailwind", "closecombat", "bravebird"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "fakeout"]]
     ]
   },
   "34": {
@@ -494,11 +500,17 @@
     "list": 7069,
     "team": [
       ["politoed", "sitrusberry", "drizzle", "calm", ["weatherball", "icebeam", "protect", "perishsong"]],
-      ["golisopod", "golisopite", "emergencyexit", "adamant", ["leechlife", "suckerpunch", "swordsdance", "protect"]],
+      [
+        "golisopodmega",
+        "golisopite",
+        "emergencyexit",
+        "adamant",
+        ["leechlife", "suckerpunch", "swordsdance", "protect"]
+      ],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "fakeout", "uturn"]],
       ["gholdengo", "leftovers", "goodasgold", "timid", ["makeitrain", "shadowball", "nastyplot", "protect"]],
       ["incineroar", "chopleberry", "intimidate", "adamant", ["fakeout", "flareblitz", "darkestlariat", "partingshot"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "substitute", "focusblast", "protect"]]
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "substitute", "focusblast", "protect"]]
     ]
   },
   "35": {
@@ -507,7 +519,7 @@
     "list": 6933,
     "team": [
       ["sneasler", "grassyseed", "unburden", "adamant", ["direclaw", "closecombat", "rocktomb", "protect"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
       [
         "rillaboom",
         "miracleseed",
@@ -515,7 +527,7 @@
         "adamant",
         ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
       ],
-      ["salamence", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "tailwind", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "tailwind", "protect"]],
       ["gholdengo", "lifeorb", "goodasgold", "timid", ["makeitrain", "shadowball", "nastyplot", "protect"]],
       ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]]
     ]
@@ -529,8 +541,8 @@
       ["sneasler", "whiteherb", "unburden", "adamant", ["gunkshot", "closecombat", "fakeout", "protect"]],
       ["rillaboom", "occaberry", "grassysurge", "adamant", ["woodhammer", "grassyglide", "fakeout", "uturn"]],
       ["basculegion", "choicescarf", "adaptability", "jolly", ["lastrespects", "wavecrash", "flipturn", "aquajet"]],
-      ["froslass", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "auroraveil", "protect"]],
-      ["blaziken", "blazikenite", "speedboost", "adamant", ["closecombat", "flareblitz", "rockslide", "protect"]]
+      ["froslassmega", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "auroraveil", "protect"]],
+      ["blazikenmega", "blazikenite", "speedboost", "adamant", ["closecombat", "flareblitz", "rockslide", "protect"]]
     ]
   },
   "37": {
@@ -543,7 +555,7 @@
       ["basculegion", "lifeorb", "adaptability", "adamant", ["protect", "wavecrash", "lastrespects", "aquajet"]],
       ["glimmora", "focussash", "toxicdebris", "modest", ["spikyshield", "powergem", "sludgebomb", "earthpower"]],
       ["volcarona", "rockyhelmet", "flamebody", "bold", ["protect", "ragepowder", "strugglebug", "fierydance"]],
-      ["garchomp", "garchompitez", "roughskin", "modest", ["protect", "dracometeor", "earthpower", "flamethrower"]]
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["protect", "dracometeor", "earthpower", "flamethrower"]]
     ]
   },
   "38": {
@@ -552,9 +564,9 @@
     "list": 7063,
     "team": [
       ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
       ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
-      ["froslass", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "auroraveil", "protect"]],
+      ["froslassmega", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "auroraveil", "protect"]],
       ["sneasler", "grassyseed", "unburden", "adamant", ["closecombat", "direclaw", "rockslide", "protect"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]]
     ]
@@ -565,10 +577,16 @@
     "list": 7072,
     "team": [
       ["incineroar", "chopleberry", "intimidate", "sassy", ["protect", "throatchop", "fakeout", "partingshot"]],
-      ["gengar", "gengarite", "cursedbody", "modest", ["protect", "shadowball", "sludgebomb", "perishsong"]],
+      ["gengarmega", "gengarite", "cursedbody", "modest", ["protect", "shadowball", "sludgebomb", "perishsong"]],
       ["archaludon", "leftovers", "stamina", "bold", ["protect", "dragonpulse", "electroshot", "aurasphere"]],
       ["politoed", "sitrusberry", "drizzle", "calm", ["protect", "weatherball", "encore", "perishsong"]],
-      ["golisopod", "golisopite", "emergencyexit", "adamant", ["leechlife", "suckerpunch", "swordsdance", "protect"]],
+      [
+        "golisopodmega",
+        "golisopite",
+        "emergencyexit",
+        "adamant",
+        ["leechlife", "suckerpunch", "swordsdance", "protect"]
+      ],
       ["rillaboom", "occaberry", "grassysurge", "careful", ["protect", "grassyglide", "fakeout", "uturn"]]
     ]
   },
@@ -582,7 +600,7 @@
       ["garchomp", "choicescarf", "roughskin", "adamant", ["dragonclaw", "earthquake", "stompingtantrum", "rockslide"]],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "partingshot", "flareblitz", "throatchop"]],
       ["venusaur", "lifeorb", "chlorophyll", "modest", ["protect", "leafstorm", "sludgebomb", "earthpower"]],
-      ["charizard", "charizarditey", "blaze", "timid", ["protect", "heatwave", "weatherball", "ancientpower"]]
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["protect", "heatwave", "weatherball", "ancientpower"]]
     ]
   },
   "41": {
@@ -598,9 +616,15 @@
         "adamant",
         ["grassyglide", "woodhammer", "highhorsepower", "fakeout"]
       ],
-      ["metagross", "metagrossite", "clearbody", "adamant", ["psychicfangs", "ironhead", "stompingtantrum", "protect"]],
+      [
+        "metagrossmega",
+        "metagrossite",
+        "clearbody",
+        "adamant",
+        ["psychicfangs", "ironhead", "stompingtantrum", "protect"]
+      ],
       ["volcarona", "grassyseed", "flamebody", "timid", ["heatwave", "gigadrain", "quiverdance", "protect"]],
-      ["garchomp", "garchompitez", "roughskin", "modest", ["dracometeor", "flamethrower", "powergem", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dracometeor", "flamethrower", "powergem", "protect"]],
       ["sneasler", "whiteherb", "unburden", "jolly", ["direclaw", "closecombat", "coaching", "fakeout"]]
     ]
   },
@@ -611,9 +635,15 @@
     "team": [
       ["sneasler", "whiteherb", "unburden", "adamant", ["closecombat", "direclaw", "fakeout", "protect"]],
       ["basculegion", "choicescarf", "adaptability", "jolly", ["wavecrash", "lastrespects", "aquajet", "flipturn"]],
-      ["garchomp", "garchompitez", "roughskin", "timid", ["dracometeor", "flamethrower", "earthpower", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "timid", ["dracometeor", "flamethrower", "earthpower", "protect"]],
       ["glimmora", "focussash", "toxicdebris", "timid", ["powergem", "sludgebomb", "earthpower", "spikyshield"]],
-      ["metagross", "metagrossite", "clearbody", "jolly", ["psychicfangs", "stompingtantrum", "icepunch", "protect"]],
+      [
+        "metagrossmega",
+        "metagrossite",
+        "clearbody",
+        "jolly",
+        ["psychicfangs", "stompingtantrum", "icepunch", "protect"]
+      ],
       ["kingambit", "lifeorb", "defiant", "brave", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]]
     ]
   },
@@ -623,7 +653,7 @@
     "list": 7075,
     "team": [
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
-      ["staraptor", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
       ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "quickattack", "hyperbeam", "detect"]],
       ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
       [
@@ -633,7 +663,7 @@
         "adamant",
         ["fakeout", "grassyglide", "highhorsepower", "woodhammer"]
       ],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["fakeout", "zapcannon", "focusblast", "protect"]]
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["fakeout", "zapcannon", "focusblast", "protect"]]
     ]
   },
   "44": {
@@ -641,10 +671,10 @@
     "country": "ES",
     "list": 7076,
     "team": [
-      ["gardevoir", "gardevoirite", "trace", "timid", ["hypervoice", "expandingforce", "calmmind", "protect"]],
+      ["gardevoirmega", "gardevoirite", "trace", "timid", ["hypervoice", "expandingforce", "calmmind", "protect"]],
       ["basculegion", "mysticwater", "adaptability", "adamant", ["wavecrash", "lastrespects", "aquajet", "protect"]],
       ["indeedeef", "colburberry", "psychicsurge", "calm", ["protect", "followme", "psychic", "helpinghand"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["protect", "hypervoice", "tailwind", "dracometeor"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["protect", "hypervoice", "tailwind", "dracometeor"]],
       ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "lowkick", "protect"]],
       ["sneasler", "psychicseed", "unburden", "adamant", ["protect", "closecombat", "direclaw", "throatchop"]]
     ]
@@ -658,8 +688,8 @@
       ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "yawn", "detect"]],
       ["volcarona", "grassyseed", "flamebody", "modest", ["heatwave", "gigadrain", "quiverdance", "protect"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "drumbeating", "grassyglide", "fakeout"]],
-      ["garchomp", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]]
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]]
     ]
   },
   "46": {
@@ -670,7 +700,7 @@
       ["incineroar", "sitrusberry", "intimidate", "careful", ["flareblitz", "taunt", "fakeout", "partingshot"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
       ["sneasler", "whiteherb", "unburden", "adamant", ["direclaw", "closecombat", "rocktomb", "protect"]],
-      ["dragonite", "dragoninite", "innerfocus", "modest", ["dragonpulse", "heatwave", "tailwind", "protect"]],
+      ["dragonitemega", "dragoninite", "innerfocus", "modest", ["dragonpulse", "heatwave", "tailwind", "protect"]],
       [
         "rillaboom",
         "miracleseed",
@@ -678,7 +708,7 @@
         "adamant",
         ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
       ],
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["dazzlinggleam", "drainingkiss", "calmmind", "protect"]]
+      ["floettemega", "floettite", "flowerveil", "modest", ["dazzlinggleam", "drainingkiss", "calmmind", "protect"]]
     ]
   },
   "47": {
@@ -687,11 +717,11 @@
     "list": 7079,
     "team": [
       ["milotic", "sitrusberry", "competitive", "modest", ["scald", "icebeam", "icywind", "protect"]],
-      ["staraptor", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
       ["sinistcha", "colburberry", "hospitality", "bold", ["matchagotcha", "ragepowder", "protect", "trickroom"]],
       ["excadrill", "focussash", "sandrush", "adamant", ["ironhead", "highhorsepower", "rockslide", "protect"]],
-      ["tyranitar", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "lowkick", "protect"]]
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "lowkick", "protect"]]
     ]
   },
   "48": {
@@ -700,7 +730,7 @@
     "list": 7080,
     "team": [
       ["incineroar", "sitrusberry", "intimidate", "careful", ["flareblitz", "throatchop", "fakeout", "partingshot"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "encore", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "encore", "protect"]],
       [
         "rillaboom",
         "miracleseed",
@@ -709,7 +739,7 @@
         ["woodhammer", "grassyglide", "fakeout", "highhorsepower"]
       ],
       ["basculegion", "choicescarf", "adaptability", "jolly", ["wavecrash", "lastrespects", "flipturn", "aquajet"]],
-      ["garchomp", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]],
       ["volcarona", "grassyseed", "flamebody", "modest", ["heatwave", "gigadrain", "quiverdance", "protect"]]
     ]
   },
@@ -721,9 +751,9 @@
       ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "rockslide", "protect"]],
       ["milotic", "psychicseed", "competitive", "calm", ["muddywater", "recover", "coil", "hypnosis"]],
       ["dragapult", "lifeorb", "infiltrator", "timid", ["protect", "dracometeor", "shadowball", "willowisp"]],
-      ["golisopod", "golisopite", "emergencyexit", "adamant", ["protect", "leechlife", "ironhead", "drillrun"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["protect", "leechlife", "ironhead", "drillrun"]],
       ["indeedeef", "rockyhelmet", "psychicsurge", "relaxed", ["psychic", "trickroom", "followme", "helpinghand"]],
-      ["staraptor", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]]
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]]
     ]
   },
   "50": {
@@ -731,7 +761,7 @@
     "country": "UK",
     "list": 7082,
     "team": [
-      ["blastoise", "blastoisinite", "raindish", "quiet", ["fakeout", "waterspout", "aurasphere", "darkpulse"]],
+      ["blastoisemega", "blastoisinite", "raindish", "quiet", ["fakeout", "waterspout", "aurasphere", "darkpulse"]],
       ["torkoal", "charcoal", "drought", "quiet", ["eruption", "weatherball", "earthpower", "protect"]],
       ["indeedeef", "psychicseed", "psychicsurge", "relaxed", ["followme", "helpinghand", "trickroom", "healingwish"]],
       ["farigiraf", "sitrusberry", "armortail", "relaxed", ["trickroom", "protect", "psychic", "thunderbolt"]],
@@ -746,7 +776,7 @@
     "team": [
       ["gholdengo", "lifeorb", "goodasgold", "timid", ["makeitrain", "shadowball", "nastyplot", "protect"]],
       ["grimmsnarl", "lightclay", "prankster", "careful", ["lightscreen", "reflect", "spiritbreak", "powerswap"]],
-      ["dragonite", "dragoninite", "multiscale", "modest", ["dragonpulse", "heatwave", "tailwind", "protect"]],
+      ["dragonitemega", "dragoninite", "multiscale", "modest", ["dragonpulse", "heatwave", "tailwind", "protect"]],
       ["sneasler", "focussash", "unburden", "adamant", ["closecombat", "direclaw", "fakeout", "protect"]],
       ["incineroar", "chopleberry", "intimidate", "impish", ["fakeout", "darkestlariat", "flareblitz", "partingshot"]],
       ["garchomp", "sitrusberry", "roughskin", "adamant", ["stompingtantrum", "dragonclaw", "rockslide", "protect"]]
@@ -759,10 +789,10 @@
     "team": [
       ["kingambit", "chopleberry", "defiant", "adamant", ["kowtowcleave", "ironhead", "suckerpunch", "protect"]],
       ["sneasler", "psychicseed", "unburden", "adamant", ["direclaw", "closecombat", "rockslide", "protect"]],
-      ["meowsticf", "meowsticite", "competitive", "timid", ["expandingforce", "thunderbolt", "fakeout", "protect"]],
+      ["meowsticmmega", "meowsticite", "competitive", "timid", ["expandingforce", "thunderbolt", "fakeout", "protect"]],
       ["indeedee", "focussash", "psychicsurge", "timid", ["expandingforce", "hypervoice", "trickroom", "imprison"]],
       ["kommoo", "leftovers", "soundproof", "modest", ["clangingscales", "aurasphere", "clangoroussoul", "protect"]],
-      ["charizard", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "solarbeam", "protect"]]
+      ["charizardmegay", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "solarbeam", "protect"]]
     ]
   },
   "53": {
@@ -779,8 +809,20 @@
         "adamant",
         ["grassyglide", "highhorsepower", "woodhammer", "fakeout"]
       ],
-      ["salamence", "salamencite", "intimidate", "modest", ["protect", "hypervoice", "flamethrower", "dracometeor"]],
-      ["glimmora", "glimmoranite", "toxicdebris", "modest", ["spikyshield", "earthpower", "sludgebomb", "powergem"]],
+      [
+        "salamencemega",
+        "salamencite",
+        "intimidate",
+        "modest",
+        ["protect", "hypervoice", "flamethrower", "dracometeor"]
+      ],
+      [
+        "glimmoramega",
+        "glimmoranite",
+        "toxicdebris",
+        "modest",
+        ["spikyshield", "earthpower", "sludgebomb", "powergem"]
+      ],
       ["kingambit", "focussash", "defiant", "adamant", ["kowtowcleave", "lowkick", "suckerpunch", "protect"]]
     ]
   },
@@ -793,7 +835,7 @@
       ["incineroar", "sitrusberry", "intimidate", "impish", ["flareblitz", "darkestlariat", "partingshot", "fakeout"]],
       ["aegislash", "focussash", "stancechange", "adamant", ["poltergeist", "closecombat", "shadowsneak", "wideguard"]],
       ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "quickattack", "yawn", "protect"]],
-      ["charizard", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "ancientpower", "protect"]],
       ["garchomp", "choicescarf", "roughskin", "adamant", ["earthquake", "stompingtantrum", "rockslide", "dragonclaw"]]
     ]
   },
@@ -802,11 +844,17 @@
     "country": "IT",
     "list": 7087,
     "team": [
-      ["pyroar", "pyroarite", "unnerve", "timid", ["heatwave", "overheat", "scorchingsands", "protect"]],
+      ["pyroarmega", "pyroarite", "unnerve", "timid", ["heatwave", "overheat", "scorchingsands", "protect"]],
       ["whimsicott", "focussash", "prankster", "timid", ["moonblast", "tailwind", "sunnyday", "protect"]],
       ["indeedeef", "rockyhelmet", "psychicsurge", "bold", ["psychic", "helpinghand", "followme", "protect"]],
       ["kommoo", "lifeorb", "soundproof", "modest", ["clangingscales", "aurasphere", "flamethrower", "protect"]],
-      ["gardevoir", "gardevoirite", "synchronize", "timid", ["hypervoice", "expandingforce", "calmmind", "protect"]],
+      [
+        "gardevoirmega",
+        "gardevoirite",
+        "synchronize",
+        "timid",
+        ["hypervoice", "expandingforce", "calmmind", "protect"]
+      ],
       ["basculegion", "mysticwater", "adaptability", "adamant", ["wavecrash", "lastrespects", "aquajet", "protect"]]
     ]
   },
@@ -815,7 +863,7 @@
     "country": "IT",
     "list": 7045,
     "team": [
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["dazzlinggleam", "drainingkiss", "calmmind", "protect"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["dazzlinggleam", "drainingkiss", "calmmind", "protect"]],
       [
         "rillaboom",
         "miracleseed",
@@ -824,7 +872,7 @@
         ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
       ],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["flareblitz", "taunt", "partingshot", "fakeout"]],
-      ["dragonite", "dragoninite", "innerfocus", "modest", ["dragonpulse", "heatwave", "tailwind", "protect"]],
+      ["dragonitemega", "dragoninite", "innerfocus", "modest", ["dragonpulse", "heatwave", "tailwind", "protect"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
       ["sneasler", "whiteherb", "unburden", "adamant", ["direclaw", "closecombat", "rocktomb", "protect"]]
     ]
@@ -836,7 +884,7 @@
     "team": [
       ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
       ["rillaboom", "lifeorb", "grassysurge", "adamant", ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
       ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "protect"]],
       ["gholdengo", "grassyseed", "goodasgold", "modest", ["protect", "makeitrain", "shadowball", "nastyplot"]],
       ["garchomp", "choicescarf", "roughskin", "adamant", ["dragonclaw", "rockslide", "stompingtantrum", "outrage"]]
@@ -851,8 +899,8 @@
       ["incineroar", "rockyhelmet", "intimidate", "careful", ["flareblitz", "throatchop", "partingshot", "fakeout"]],
       ["basculegion", "choicescarf", "adaptability", "jolly", ["wavecrash", "lastrespects", "aquajet", "flipturn"]],
       ["rillaboom", "sitrusberry", "grassysurge", "adamant", ["woodhammer", "grassyglide", "uturn", "fakeout"]],
-      ["garchomp", "garchompitez", "roughskin", "modest", ["dragonpulse", "powergem", "earthpower", "protect"]],
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "calmmind", "protect"]]
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "powergem", "earthpower", "protect"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "calmmind", "protect"]]
     ]
   },
   "59": {
@@ -864,8 +912,8 @@
       ["excadrill", "focussash", "sandrush", "adamant", ["highhorsepower", "ironhead", "rockslide", "protect"]],
       ["milotic", "leftovers", "competitive", "bold", ["scald", "icebeam", "recover", "protect"]],
       ["volcarona", "grassyseed", "flamebody", "bold", ["protect", "heatwave", "gigadrain", "quiverdance"]],
-      ["tyranitar", "tyranitarite", "sandstream", "adamant", ["knockoff", "rockslide", "lowkick", "protect"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["hypervoice", "tailwind", "dracometeor", "protect"]]
+      ["tyranitarmega", "tyranitarite", "sandstream", "adamant", ["knockoff", "rockslide", "lowkick", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "tailwind", "dracometeor", "protect"]]
     ]
   },
   "60": {
@@ -873,11 +921,11 @@
     "country": "NL",
     "list": 7091,
     "team": [
-      ["charizard", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "ancientpower", "protect"]],
       ["gholdengo", "lifeorb", "goodasgold", "timid", ["makeitrain", "shadowball", "protect", "nastyplot"]],
       ["milotic", "leftovers", "competitive", "modest", ["scald", "icebeam", "icywind", "protect"]],
       ["incineroar", "sitrusberry", "intimidate", "adamant", ["flareblitz", "throatchop", "fakeout", "partingshot"]],
-      ["aerodactyl", "aerodactylite", "unnerve", "jolly", ["rockslide", "dualwingbeat", "tailwind", "protect"]],
+      ["aerodactylmega", "aerodactylite", "unnerve", "jolly", ["rockslide", "dualwingbeat", "tailwind", "protect"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "superpower", "fakeout", "grassyglide"]]
     ]
   },
@@ -889,7 +937,7 @@
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["grassyglide", "fakeout", "woodhammer", "protect"]],
       ["hippowdon", "leftovers", "sandstream", "careful", ["protect", "yawn", "highhorsepower", "stoneedge"]],
       ["kingambit", "blackglasses", "defiant", "adamant", ["kowtowcleave", "protect", "suckerpunch", "swordsdance"]],
-      ["gengar", "gengarite", "cursedbody", "timid", ["protect", "shadowball", "sludgebomb", "substitute"]],
+      ["gengarmega", "gengarite", "cursedbody", "timid", ["protect", "shadowball", "sludgebomb", "substitute"]],
       ["incineroar", "sitrusberry", "intimidate", "adamant", ["partingshot", "fakeout", "flareblitz", "darkestlariat"]],
       ["sneasler", "lifeorb", "poisontouch", "jolly", ["protect", "closecombat", "fakeout", "direclaw"]]
     ]
@@ -901,9 +949,9 @@
     "team": [
       ["grapploct", "lifeorb", "technician", "adamant", ["stormthrow", "stompingtantrum", "machpunch", "detect"]],
       ["pelipper", "damprock", "drizzle", "modest", ["weatherball", "hurricane", "tailwind", "protect"]],
-      ["mawile", "mawilite", "hypercutter", "adamant", ["ironhead", "playrough", "suckerpunch", "protect"]],
+      ["mawilemega", "mawilite", "hypercutter", "adamant", ["ironhead", "playrough", "suckerpunch", "protect"]],
       ["farigiraf", "sitrusberry", "armortail", "relaxed", ["psychic", "raindance", "helpinghand", "trickroom"]],
-      ["kangaskhan", "kangaskhanite", "scrappy", "adamant", ["doubleedge", "hammerarm", "crunch", "fakeout"]],
+      ["kangaskhanmega", "kangaskhanite", "scrappy", "adamant", ["doubleedge", "hammerarm", "crunch", "fakeout"]],
       ["archaludon", "leftovers", "stamina", "modest", ["flashcannon", "dragonpulse", "electroshot", "protect"]]
     ]
   },
@@ -914,8 +962,8 @@
     "team": [
       ["grimmsnarl", "lightclay", "prankster", "sassy", ["spiritbreak", "reflect", "lightscreen", "partingshot"]],
       ["farigiraf", "sitrusberry", "armortail", "bold", ["psychic", "roar", "trickroom", "protect"]],
-      ["golisopod", "golisopite", "emergencyexit", "adamant", ["leechlife", "drillrun", "ironhead", "protect"]],
-      ["charizard", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "hurricane", "protect"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["leechlife", "drillrun", "ironhead", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "hurricane", "protect"]],
       ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "dragonpulse", "snarl", "protect"]],
       ["politoed", "mysticwater", "drizzle", "modest", ["weatherball", "muddywater", "icebeam", "protect"]]
     ]
@@ -926,8 +974,14 @@
     "list": 7095,
     "team": [
       ["indeedeef", "rockyhelmet", "psychicsurge", "bold", ["followme", "trickroom", "helpinghand", "safeguard"]],
-      ["camerupt", "cameruptite", "solidrock", "quiet", ["heatwave", "flamethrower", "earthpower", "ancientpower"]],
-      ["gardevoir", "gardevoirite", "synchronize", "modest", ["expandingforce", "hypervoice", "calmmind", "protect"]],
+      ["cameruptmega", "cameruptite", "solidrock", "quiet", ["heatwave", "flamethrower", "earthpower", "ancientpower"]],
+      [
+        "gardevoirmega",
+        "gardevoirite",
+        "synchronize",
+        "modest",
+        ["expandingforce", "hypervoice", "calmmind", "protect"]
+      ],
       ["sneasler", "psychicseed", "unburden", "adamant", ["direclaw", "throatchop", "closecombat", "protect"]],
       ["farigiraf", "sitrusberry", "armortail", "quiet", ["expandingforce", "thunderbolt", "trickroom", "nastyplot"]],
       ["incineroar", "whiteherb", "intimidate", "brave", ["fakeout", "closecombat", "throatchop", "flareblitz"]]
@@ -938,7 +992,7 @@
     "country": "FR",
     "list": 7045,
     "team": [
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["dazzlinggleam", "drainingkiss", "calmmind", "protect"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["dazzlinggleam", "drainingkiss", "calmmind", "protect"]],
       [
         "rillaboom",
         "miracleseed",
@@ -947,7 +1001,7 @@
         ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
       ],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["flareblitz", "taunt", "partingshot", "fakeout"]],
-      ["dragonite", "dragoninite", "innerfocus", "modest", ["dragonpulse", "heatwave", "tailwind", "protect"]],
+      ["dragonitemega", "dragoninite", "innerfocus", "modest", ["dragonpulse", "heatwave", "tailwind", "protect"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
       ["sneasler", "whiteherb", "unburden", "adamant", ["direclaw", "closecombat", "rocktomb", "protect"]]
     ]
@@ -960,8 +1014,8 @@
       ["venusaur", "focussash", "chlorophyll", "modest", ["leafstorm", "sludgebomb", "sleeppowder", "protect"]],
       ["pelipper", "sitrusberry", "drizzle", "bold", ["weatherball", "hurricane", "tailwind", "wideguard"]],
       ["annihilape", "choicescarf", "defiant", "jolly", ["closecombat", "shadowclaw", "icepunch", "uturn"]],
-      ["swampert", "swampertite", "torrent", "adamant", ["wavecrash", "highhorsepower", "icepunch", "protect"]],
-      ["charizard", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["swampertmega", "swampertite", "torrent", "adamant", ["wavecrash", "highhorsepower", "icepunch", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "ancientpower", "protect"]],
       ["archaludon", "leftovers", "stamina", "bold", ["dracometeor", "electroshot", "snarl", "protect"]]
     ]
   },
@@ -971,9 +1025,15 @@
     "list": 7097,
     "team": [
       ["basculegion", "choicescarf", "adaptability", "jolly", ["wavecrash", "aquajet", "lastrespects", "flipturn"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
       ["talonflame", "lifeorb", "galewings", "jolly", ["bravebird", "flareblitz", "tailwind", "protect"]],
-      ["garchomp", "garchompitez", "roughskin", "modest", ["dracometeor", "earthpower", "flamethrower", "protect"]],
+      [
+        "garchompmegaz",
+        "garchompitez",
+        "roughskin",
+        "modest",
+        ["dracometeor", "earthpower", "flamethrower", "protect"]
+      ],
       ["glimmora", "focussash", "toxicdebris", "modest", ["powergem", "sludgebomb", "earthpower", "spikyshield"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "uturn", "fakeout"]]
     ]
@@ -983,8 +1043,14 @@
     "country": "DE",
     "list": 7098,
     "team": [
-      ["pyroar", "pyroarite", "unnerve", "timid", ["heatwave", "overheat", "solarbeam", "protect"]],
-      ["gardevoir", "gardevoirite", "synchronize", "modest", ["hypervoice", "expandingforce", "imprison", "protect"]],
+      ["pyroarmega", "pyroarite", "unnerve", "timid", ["heatwave", "overheat", "solarbeam", "protect"]],
+      [
+        "gardevoirmega",
+        "gardevoirite",
+        "synchronize",
+        "modest",
+        ["hypervoice", "expandingforce", "imprison", "protect"]
+      ],
       ["ninetales", "choicescarf", "drought", "modest", ["heatwave", "faketears", "overheat", "solarbeam"]],
       ["whimsicott", "focussash", "prankster", "timid", ["moonblast", "tailwind", "protect", "sunnyday"]],
       ["basculegion", "lifeorb", "adaptability", "adamant", ["lastrespects", "wavecrash", "aquajet", "protect"]],
@@ -1003,11 +1069,11 @@
         "adamant",
         ["woodhammer", "highhorsepower", "grassyglide", "fakeout"]
       ],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "fakeout"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "fakeout"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["protect", "makeitrain", "shadowball", "nastyplot"]],
       ["milotic", "sitrusberry", "competitive", "calm", ["muddywater", "coil", "hypnosis", "icebeam"]],
       ["ceruledge", "grassyseed", "flashfire", "adamant", ["protect", "bitterblade", "shadowsneak", "swordsdance"]],
-      ["staraptor", "staraptite", "intimidate", "jolly", ["protect", "bravebird", "closecombat", "tailwind"]]
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["protect", "bravebird", "closecombat", "tailwind"]]
     ]
   },
   "70": {
@@ -1024,9 +1090,9 @@
         "adamant",
         ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
       ],
-      ["charizard", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "ancientpower", "protect"]],
       ["garchomp", "choicescarf", "roughskin", "adamant", ["dragonclaw", "earthquake", "rockslide", "stompingtantrum"]],
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["drainingkiss", "dazzlinggleam", "calmmind", "protect"]]
+      ["floettemega", "floettite", "flowerveil", "modest", ["drainingkiss", "dazzlinggleam", "calmmind", "protect"]]
     ]
   },
   "71": {
@@ -1044,8 +1110,8 @@
       ],
       ["gholdengo", "grassyseed", "goodasgold", "timid", ["protect", "nastyplot", "makeitrain", "shadowball"]],
       ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]],
-      ["staraptor", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["fakeout", "zapcannon", "focusblast", "protect"]]
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["fakeout", "zapcannon", "focusblast", "protect"]]
     ]
   },
   "72": {
@@ -1057,8 +1123,14 @@
       ["grimmsnarl", "lightclay", "prankster", "sassy", ["spiritbreak", "reflect", "lightscreen", "partingshot"]],
       ["archaludon", "leftovers", "stamina", "calm", ["dragonpulse", "electroshot", "snarl", "protect"]],
       ["pelipper", "sitrusberry", "drizzle", "modest", ["weatherball", "hurricane", "tailwind", "wideguard"]],
-      ["charizard", "charizarditey", "blaze", "timid", ["weatherball", "heatwave", "hurricane", "protect"]],
-      ["golisopod", "golisopite", "emergencyexit", "adamant", ["leechlife", "ironhead", "suckerpunch", "swordsdance"]]
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["weatherball", "heatwave", "hurricane", "protect"]],
+      [
+        "golisopodmega",
+        "golisopite",
+        "emergencyexit",
+        "adamant",
+        ["leechlife", "ironhead", "suckerpunch", "swordsdance"]
+      ]
     ]
   },
   "73": {
@@ -1066,11 +1138,11 @@
     "country": "NL",
     "list": 7103,
     "team": [
-      ["delphox", "delphoxite", "blaze", "timid", ["heatwave", "psychic", "nastyplot", "protect"]],
+      ["delphoxmega", "delphoxite", "blaze", "timid", ["heatwave", "psychic", "nastyplot", "protect"]],
       ["sinistcha", "cobaberry", "hospitality", "bold", ["matchagotcha", "ragepowder", "lifedew", "protect"]],
       ["maushold", "chopleberry", "friendguard", "impish", ["superfang", "feint", "followme", "protect"]],
       ["sneasler", "focussash", "poisontouch", "jolly", ["poisonjab", "closecombat", "fakeout", "quickguard"]],
-      ["blastoise", "blastoisinite", "raindish", "modest", ["darkpulse", "waterspout", "shellsmash", "protect"]],
+      ["blastoisemega", "blastoisinite", "raindish", "modest", ["darkpulse", "waterspout", "shellsmash", "protect"]],
       ["indeedeef", "rockyhelmet", "psychicsurge", "relaxed", ["psychic", "followme", "skillswap", "helpinghand"]]
     ]
   },
@@ -1082,8 +1154,8 @@
       ["venusaur", "focussash", "chlorophyll", "modest", ["leafstorm", "sludgebomb", "sleeppowder", "protect"]],
       ["pelipper", "sitrusberry", "drizzle", "bold", ["weatherball", "hurricane", "tailwind", "wideguard"]],
       ["annihilape", "choicescarf", "defiant", "jolly", ["closecombat", "shadowclaw", "icepunch", "uturn"]],
-      ["swampert", "swampertite", "torrent", "adamant", ["wavecrash", "highhorsepower", "icepunch", "protect"]],
-      ["charizard", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["swampertmega", "swampertite", "torrent", "adamant", ["wavecrash", "highhorsepower", "icepunch", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "ancientpower", "protect"]],
       ["archaludon", "leftovers", "stamina", "bold", ["dracometeor", "electroshot", "snarl", "protect"]]
     ]
   },
@@ -1093,7 +1165,7 @@
     "list": 7104,
     "team": [
       ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]],
-      ["froslass", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "auroraveil", "protect"]],
+      ["froslassmega", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "auroraveil", "protect"]],
       ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
       [
         "rillaboom",
@@ -1103,7 +1175,7 @@
         ["fakeout", "grassyglide", "woodhammer", "highhorsepower"]
       ],
       ["sneasler", "whiteherb", "unburden", "adamant", ["closecombat", "direclaw", "fakeout", "protect"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]]
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]]
     ]
   },
   "76": {
@@ -1115,8 +1187,8 @@
       ["garchomp", "lifeorb", "roughskin", "jolly", ["earthquake", "stompingtantrum", "dragonclaw", "protect"]],
       ["volcarona", "sitrusberry", "flamebody", "timid", ["ragepowder", "overheat", "strugglebug", "tailwind"]],
       ["archaludon", "leftovers", "stamina", "calm", ["protect", "dragonpulse", "electroshot", "flashcannon"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["protect", "hypervoice", "tailwind", "dracometeor"]],
-      ["glimmora", "glimmoranite", "toxicdebris", "timid", ["sludgebomb", "spikyshield", "earthpower", "powergem"]]
+      ["salamencemega", "salamencite", "intimidate", "timid", ["protect", "hypervoice", "tailwind", "dracometeor"]],
+      ["glimmoramega", "glimmoranite", "toxicdebris", "timid", ["sludgebomb", "spikyshield", "earthpower", "powergem"]]
     ]
   },
   "77": {
@@ -1127,8 +1199,8 @@
       ["pelipper", "choicescarf", "drizzle", "timid", ["weatherball", "hurricane", "tailwind", "surf"]],
       ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "protect", "flashcannon", "dracometeor"]],
       ["rillaboom", "sitrusberry", "grassysurge", "adamant", ["fakeout", "grassyglide", "woodhammer", "uturn"]],
-      ["garchomp", "garchompitez", "roughskin", "modest", ["dracometeor", "earthpower", "powergem", "protect"]],
-      ["golisopod", "golisopite", "emergencyexit", "brave", ["aquajet", "liquidation", "leechlife", "swordsdance"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dracometeor", "earthpower", "powergem", "protect"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "brave", ["aquajet", "liquidation", "leechlife", "swordsdance"]],
       ["basculegion", "lifeorb", "swiftswim", "adamant", ["wavecrash", "aquajet", "protect", "lastrespects"]]
     ]
   },
@@ -1140,9 +1212,9 @@
       ["maushold", "chopleberry", "friendguard", "careful", ["feint", "encore", "taunt", "followme"]],
       ["incineroar", "sitrusberry", "intimidate", "careful", ["fakeout", "flareblitz", "throatchop", "partingshot"]],
       ["sinistcha", "occaberry", "hospitality", "bold", ["matchagotcha", "ragepowder", "trickroom", "protect"]],
-      ["delphox", "delphoxite", "blaze", "timid", ["heatwave", "psychic", "nastyplot", "protect"]],
+      ["delphoxmega", "delphoxite", "blaze", "timid", ["heatwave", "psychic", "nastyplot", "protect"]],
       ["dragapult", "lifeorb", "clearbody", "jolly", ["dragondarts", "phantomforce", "willowisp", "protect"]],
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["dazzlinggleam", "drainingkiss", "calmmind", "protect"]]
+      ["floettemega", "floettite", "flowerveil", "modest", ["dazzlinggleam", "drainingkiss", "calmmind", "protect"]]
     ]
   },
   "79": {
@@ -1151,9 +1223,9 @@
     "list": 7107,
     "team": [
       ["grimmsnarl", "lightclay", "prankster", "sassy", ["partingshot", "lightscreen", "reflect", "spiritbreak"]],
-      ["garchomp", "garchompitez", "roughskin", "modest", ["powergem", "dracometeor", "earthpower", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["powergem", "dracometeor", "earthpower", "protect"]],
       ["pelipper", "sitrusberry", "drizzle", "bold", ["hurricane", "weatherball", "wideguard", "tailwind"]],
-      ["charizard", "charizarditey", "blaze", "timid", ["protect", "heatwave", "weatherball", "scorchingsands"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["protect", "heatwave", "weatherball", "scorchingsands"]],
       ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "dragonpulse", "flashcannon", "protect"]],
       ["venusaur", "focussash", "chlorophyll", "modest", ["protect", "leafstorm", "sleeppowder", "sludgebomb"]]
     ]
@@ -1166,8 +1238,8 @@
       ["venusaur", "focussash", "chlorophyll", "modest", ["leafstorm", "sludgebomb", "sleeppowder", "protect"]],
       ["pelipper", "sitrusberry", "drizzle", "bold", ["weatherball", "hurricane", "tailwind", "wideguard"]],
       ["annihilape", "choicescarf", "defiant", "jolly", ["closecombat", "shadowclaw", "icepunch", "uturn"]],
-      ["swampert", "swampertite", "torrent", "adamant", ["wavecrash", "highhorsepower", "icepunch", "protect"]],
-      ["charizard", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["swampertmega", "swampertite", "torrent", "adamant", ["wavecrash", "highhorsepower", "icepunch", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "ancientpower", "protect"]],
       ["archaludon", "leftovers", "stamina", "bold", ["dracometeor", "electroshot", "snarl", "protect"]]
     ]
   },
@@ -1183,11 +1255,11 @@
         "adamant",
         ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
       ],
-      ["dragonite", "dragoninite", "innerfocus", "modest", ["protect", "dragonpulse", "heatwave", "tailwind"]],
+      ["dragonitemega", "dragoninite", "innerfocus", "modest", ["protect", "dragonpulse", "heatwave", "tailwind"]],
       ["incineroar", "sitrusberry", "intimidate", "careful", ["flareblitz", "throatchop", "partingshot", "fakeout"]],
       ["sneasler", "grassyseed", "unburden", "adamant", ["protect", "closecombat", "rockslide", "swordsdance"]],
       ["gholdengo", "choicescarf", "goodasgold", "modest", ["makeitrain", "shadowball", "powergem", "trick"]],
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["protect", "dazzlinggleam", "drainingkiss", "calmmind"]]
+      ["floettemega", "floettite", "flowerveil", "modest", ["protect", "dazzlinggleam", "drainingkiss", "calmmind"]]
     ]
   },
   "82": {
@@ -1195,10 +1267,10 @@
     "country": "NL",
     "list": 7044,
     "team": [
-      ["froslass", "froslassite", "cursedbody", "timid", ["protect", "blizzard", "shadowball", "auroraveil"]],
+      ["froslassmega", "froslassite", "cursedbody", "timid", ["protect", "blizzard", "shadowball", "auroraveil"]],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["flareblitz", "darkestlariat", "fakeout", "partingshot"]],
       ["basculegion", "choicescarf", "adaptability", "jolly", ["wavecrash", "lastrespects", "flipturn", "aquajet"]],
-      ["glimmora", "glimmoranite", "toxicdebris", "timid", ["spikyshield", "sludgebomb", "powergem", "earthpower"]],
+      ["glimmoramega", "glimmoranite", "toxicdebris", "timid", ["spikyshield", "sludgebomb", "powergem", "earthpower"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "uturn", "grassyglide", "fakeout"]],
       ["volcarona", "grassyseed", "flamebody", "modest", ["protect", "heatwave", "gigadrain", "quiverdance"]]
     ]
@@ -1210,8 +1282,8 @@
     "team": [
       ["kingambit", "focussash", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "lowkick"]],
       ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "detect"]],
-      ["charizard", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "solarbeam", "protect"]],
-      ["aerodactyl", "aerodactylite", "unnerve", "jolly", ["rockslide", "dualwingbeat", "tailwind", "wideguard"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "solarbeam", "protect"]],
+      ["aerodactylmega", "aerodactylite", "unnerve", "jolly", ["rockslide", "dualwingbeat", "tailwind", "wideguard"]],
       ["garchomp", "lifeorb", "roughskin", "jolly", ["earthquake", "stompingtantrum", "dragonclaw", "protect"]],
       ["farigiraf", "sitrusberry", "armortail", "modest", ["psychic", "thunderbolt", "roar", "trickroom"]]
     ]
@@ -1222,7 +1294,7 @@
     "list": 7075,
     "team": [
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
-      ["staraptor", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
       ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "quickattack", "hyperbeam", "detect"]],
       ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
       [
@@ -1232,7 +1304,7 @@
         "adamant",
         ["fakeout", "grassyglide", "highhorsepower", "woodhammer"]
       ],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["fakeout", "zapcannon", "focusblast", "protect"]]
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["fakeout", "zapcannon", "focusblast", "protect"]]
     ]
   },
   "85": {
@@ -1241,10 +1313,10 @@
     "list": 7110,
     "team": [
       ["incineroar", "sitrusberry", "intimidate", "impish", ["flareblitz", "taunt", "fakeout", "partingshot"]],
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "calmmind", "protect"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "calmmind", "protect"]],
       ["garchomp", "choicescarf", "roughskin", "adamant", ["dragonclaw", "stompingtantrum", "rockslide", "rocktomb"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "fakeout", "uturn"]],
-      ["staraptor", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
       ["gholdengo", "lifeorb", "goodasgold", "timid", ["makeitrain", "shadowball", "nastyplot", "protect"]]
     ]
   },
@@ -1263,8 +1335,8 @@
       ],
       ["gholdengo", "lifeorb", "goodasgold", "timid", ["makeitrain", "shadowball", "nastyplot", "protect"]],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["throatchop", "helpinghand", "partingshot", "fakeout"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
-      ["garchomp", "garchompitez", "roughskin", "modest", ["protect", "powergem", "earthpower", "dragonpulse"]]
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["protect", "powergem", "earthpower", "dragonpulse"]]
     ]
   },
   "87": {
@@ -1274,8 +1346,8 @@
     "team": [
       ["grimmsnarl", "lightclay", "prankster", "sassy", ["spiritbreak", "reflect", "lightscreen", "partingshot"]],
       ["farigiraf", "sitrusberry", "armortail", "bold", ["psychic", "roar", "trickroom", "protect"]],
-      ["golisopod", "golisopite", "emergencyexit", "adamant", ["leechlife", "drillrun", "ironhead", "protect"]],
-      ["charizard", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "hurricane", "protect"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["leechlife", "drillrun", "ironhead", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "hurricane", "protect"]],
       ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "dragonpulse", "snarl", "protect"]],
       ["politoed", "mysticwater", "drizzle", "modest", ["weatherball", "muddywater", "icebeam", "protect"]]
     ]
@@ -1296,7 +1368,7 @@
         ["fakeout", "grassyglide", "woodhammer", "highhorsepower"]
       ],
       ["taurospaldeaaqua", "focussash", "intimidate", "jolly", ["protect", "aquajet", "ragingbull", "closecombat"]],
-      ["glimmora", "glimmoranite", "toxicdebris", "modest", ["spikyshield", "powergem", "sludgebomb", "earthpower"]]
+      ["glimmoramega", "glimmoranite", "toxicdebris", "modest", ["spikyshield", "powergem", "sludgebomb", "earthpower"]]
     ]
   },
   "89": {
@@ -1311,11 +1383,11 @@
         "adamant",
         ["woodhammer", "highhorsepower", "grassyglide", "fakeout"]
       ],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "fakeout"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "fakeout"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["protect", "makeitrain", "shadowball", "nastyplot"]],
       ["milotic", "sitrusberry", "competitive", "calm", ["muddywater", "coil", "hypnosis", "icebeam"]],
       ["ceruledge", "grassyseed", "flashfire", "adamant", ["protect", "bitterblade", "shadowsneak", "swordsdance"]],
-      ["staraptor", "staraptite", "intimidate", "jolly", ["protect", "bravebird", "closecombat", "tailwind"]]
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["protect", "bravebird", "closecombat", "tailwind"]]
     ]
   },
   "90": {
@@ -1325,8 +1397,8 @@
     "team": [
       ["sinistcha", "occaberry", "hospitality", "bold", ["protect", "matchagotcha", "ragepowder", "lifedew"]],
       ["maushold", "chopleberry", "friendguard", "bold", ["protect", "superfang", "feint", "followme"]],
-      ["blastoise", "blastoisinite", "raindish", "modest", ["protect", "waterspout", "darkpulse", "shellsmash"]],
-      ["delphox", "delphoxite", "blaze", "timid", ["protect", "heatwave", "psychic", "nastyplot"]],
+      ["blastoisemega", "blastoisinite", "raindish", "modest", ["protect", "waterspout", "darkpulse", "shellsmash"]],
+      ["delphoxmega", "delphoxite", "blaze", "timid", ["protect", "heatwave", "psychic", "nastyplot"]],
       ["sneasler", "focussash", "poisontouch", "jolly", ["fakeout", "closecombat", "poisonjab", "quickguard"]],
       ["incineroar", "sitrusberry", "intimidate", "careful", ["fakeout", "flareblitz", "throatchop", "partingshot"]]
     ]
@@ -1345,7 +1417,7 @@
         "adamant",
         ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
       ],
-      ["salamence", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "tailwind", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "tailwind", "protect"]],
       ["sneasler", "grassyseed", "unburden", "adamant", ["direclaw", "closecombat", "fakeout", "protect"]],
       ["kingambit", "chopleberry", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "lowkick"]]
     ]
@@ -1355,9 +1427,9 @@
     "country": "FR",
     "list": 7115,
     "team": [
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
       ["milotic", "leftovers", "competitive", "modest", ["scald", "icebeam", "icywind", "protect"]],
-      ["staraptor", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
       ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "protect", "extremespeed"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "fakeout", "highhorsepower"]]
@@ -1372,7 +1444,7 @@
       ["kingambit", "blackglasses", "defiant", "brave", ["kowtowcleave", "ironhead", "suckerpunch", "swordsdance"]],
       ["hatterene", "lifeorb", "magicbounce", "quiet", ["expandingforce", "dazzlinggleam", "trickroom", "protect"]],
       ["farigiraf", "sitrusberry", "armortail", "modest", ["expandingforce", "thunderbolt", "trickroom", "protect"]],
-      ["camerupt", "cameruptite", "solidrock", "quiet", ["heatwave", "earthpower", "ancientpower", "protect"]],
+      ["cameruptmega", "cameruptite", "solidrock", "quiet", ["heatwave", "earthpower", "ancientpower", "protect"]],
       ["indeedeef", "psychicseed", "psychicsurge", "relaxed", ["psychic", "followme", "helpinghand", "trickroom"]]
     ]
   },
@@ -1381,9 +1453,9 @@
     "country": "NL",
     "list": 7117,
     "team": [
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "encore", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "encore", "protect"]],
       ["volcarona", "grassyseed", "flamebody", "modest", ["fierydance", "strugglebug", "quiverdance", "protect"]],
-      ["garchomp", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]],
       ["incineroar", "sitrusberry", "intimidate", "careful", ["fakeout", "flareblitz", "throatchop", "partingshot"]],
       ["basculegion", "choicescarf", "adaptability", "jolly", ["wavecrash", "lastrespects", "aquajet", "flipturn"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["fakeout", "grassyglide", "woodhammer", "highhorsepower"]]
@@ -1397,8 +1469,8 @@
       ["kingambit", "lifeorb", "defiant", "adamant", ["protect", "suckerpunch", "kowtowcleave", "swordsdance"]],
       ["sneasler", "whiteherb", "unburden", "adamant", ["protect", "closecombat", "direclaw", "fakeout"]],
       ["arcaninehisui", "focussash", "punkrock", "jolly", ["protect", "headsmash", "flareblitz", "extremespeed"]],
-      ["froslass", "froslassite", "cursedbody", "timid", ["protect", "blizzard", "shadowball", "auroraveil"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "encore"]],
+      ["froslassmega", "froslassite", "cursedbody", "timid", ["protect", "blizzard", "shadowball", "auroraveil"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "encore"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]]
     ]
   },
@@ -1410,8 +1482,8 @@
       ["incineroar", "sitrusberry", "intimidate", "careful", ["flareblitz", "throatchop", "fakeout", "partingshot"]],
       ["espathra", "grassyseed", "speedboost", "timid", ["luminacrash", "calmmind", "batonpass", "protect"]],
       ["goodrahisui", "leftovers", "shellarmor", "modest", ["dragonpulse", "flashcannon", "flamethrower", "protect"]],
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["dazzlinggleam", "drainingkiss", "calmmind", "protect"]],
-      ["absol", "absolitez", "justified", "adamant", ["shadowclaw", "nightslash", "closecombat", "detect"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["dazzlinggleam", "drainingkiss", "calmmind", "protect"]],
+      ["absolmegaz", "absolitez", "justified", "adamant", ["shadowclaw", "nightslash", "closecombat", "detect"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "fakeout", "highhorsepower"]]
     ]
   },
@@ -1421,9 +1493,9 @@
     "list": 7063,
     "team": [
       ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
       ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
-      ["froslass", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "auroraveil", "protect"]],
+      ["froslassmega", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "auroraveil", "protect"]],
       ["sneasler", "grassyseed", "unburden", "adamant", ["closecombat", "direclaw", "rockslide", "protect"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]]
     ]
@@ -1435,10 +1507,16 @@
     "team": [
       ["annihilape", "leftovers", "defiant", "adamant", ["ragefist", "drainpunch", "bulkup", "protect"]],
       ["rillaboom", "lifeorb", "grassysurge", "adamant", ["fakeout", "woodhammer", "grassyglide", "highhorsepower"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["fakeout", "zapcannon", "focusblast", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["fakeout", "zapcannon", "focusblast", "protect"]],
       ["ninetalesalola", "lightclay", "snowwarning", "timid", ["blizzard", "auroraveil", "icywind", "howl"]],
       ["volcarona", "grassyseed", "flamebody", "modest", ["fierydance", "bugbuzz", "quiverdance", "protect"]],
-      ["baxcalibur", "baxcalibrite", "thermalexchange", "adamant", ["glaiverush", "iceshard", "swordsdance", "protect"]]
+      [
+        "baxcaliburmega",
+        "baxcalibrite",
+        "thermalexchange",
+        "adamant",
+        ["glaiverush", "iceshard", "swordsdance", "protect"]
+      ]
     ]
   },
   "99": {
@@ -1446,11 +1524,11 @@
     "country": "DE",
     "list": 7121,
     "team": [
-      ["tyranitar", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "protect", "lowkick"]],
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "protect", "lowkick"]],
       ["milotic", "sitrusberry", "competitive", "calm", ["scald", "icebeam", "icywind", "protect"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
       ["excadrill", "focussash", "sandrush", "adamant", ["protect", "rockslide", "highhorsepower", "ironhead"]],
-      ["salamence", "salamencite", "intimidate", "modest", ["flamethrower", "hypervoice", "tailwind", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "modest", ["flamethrower", "hypervoice", "tailwind", "protect"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["grassyglide", "woodhammer", "fakeout", "highhorsepower"]]
     ]
   },
@@ -1460,7 +1538,7 @@
     "list": 6933,
     "team": [
       ["sneasler", "grassyseed", "unburden", "adamant", ["direclaw", "closecombat", "rocktomb", "protect"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
       [
         "rillaboom",
         "miracleseed",
@@ -1468,7 +1546,7 @@
         "adamant",
         ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
       ],
-      ["salamence", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "tailwind", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "tailwind", "protect"]],
       ["gholdengo", "lifeorb", "goodasgold", "timid", ["makeitrain", "shadowball", "nastyplot", "protect"]],
       ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]]
     ]
@@ -1485,8 +1563,8 @@
         "adamant",
         ["woodhammer", "highhorsepower", "grassyglide", "fakeout"]
       ],
-      ["garchomp", "garchompitez", "roughskin", "modest", ["protect", "dragonpulse", "earthpower", "powergem"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "electroweb"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["protect", "dragonpulse", "earthpower", "powergem"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "electroweb"]],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["darkestlariat", "flareblitz", "partingshot", "fakeout"]],
       ["volcarona", "rockyhelmet", "flamebody", "timid", ["strugglebug", "overheat", "tailwind", "ragepowder"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["protect", "makeitrain", "nastyplot", "shadowball"]]
@@ -1498,11 +1576,11 @@
     "list": 7123,
     "team": [
       ["annihilape", "choicescarf", "defiant", "adamant", ["closecombat", "shadowclaw", "icepunch", "uturn"]],
-      ["charizard", "charizarditey", "blaze", "timid", ["heatwave", "hurricane", "weatherball", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "hurricane", "weatherball", "protect"]],
       ["politoed", "mysticwater", "drizzle", "modest", ["weatherball", "protect", "muddywater", "icebeam"]],
       ["archaludon", "leftovers", "stamina", "bold", ["snarl", "electroshot", "protect", "dragonpulse"]],
       ["farigiraf", "sitrusberry", "armortail", "bold", ["psychic", "trickroom", "protect", "helpinghand"]],
-      ["golisopod", "golisopite", "emergencyexit", "adamant", ["leechlife", "ironhead", "drillrun", "protect"]]
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["leechlife", "ironhead", "drillrun", "protect"]]
     ]
   },
   "103": {
@@ -1510,8 +1588,8 @@
     "country": "IT",
     "list": 7124,
     "team": [
-      ["salamence", "salamencite", "intimidate", "timid", ["dracometeor", "hypervoice", "tailwind", "protect"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["dracometeor", "hypervoice", "tailwind", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
       ["milotic", "leftovers", "competitive", "calm", ["muddywater", "icebeam", "icywind", "protect"]],
       ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
@@ -1523,8 +1601,8 @@
     "country": "IT",
     "list": 7125,
     "team": [
-      ["froslass", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "auroraveil", "protect"]],
-      ["salamence", "salamencite", "intimidate", "modest", ["hypervoice", "dracometeor", "tailwind", "protect"]],
+      ["froslassmega", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "auroraveil", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "modest", ["hypervoice", "dracometeor", "tailwind", "protect"]],
       ["kingambit", "chopleberry", "defiant", "adamant", ["kowtowcleave", "ironhead", "suckerpunch", "lowkick"]],
       ["armarouge", "focussash", "flashfire", "modest", ["expandingforce", "armorcannon", "wideguard", "protect"]],
       ["sneasler", "psychicseed", "unburden", "adamant", ["closecombat", "gunkshot", "throatchop", "protect"]],
@@ -1544,9 +1622,9 @@
         "adamant",
         ["grassyglide", "woodhammer", "highhorsepower", "fakeout"]
       ],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
       ["volcarona", "grassyseed", "flamebody", "modest", ["heatwave", "strugglebug", "quiverdance", "protect"]],
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "calmmind", "protect"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "calmmind", "protect"]],
       ["incineroar", "sitrusberry", "intimidate", "careful", ["flareblitz", "darkestlariat", "partingshot", "fakeout"]]
     ]
   },
@@ -1563,7 +1641,7 @@
         ["highhorsepower", "woodhammer", "grassyglide", "fakeout"]
       ],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["flareblitz", "throatchop", "fakeout", "partingshot"]],
-      ["charizard", "charizarditey", "blaze", "timid", ["heatwave", "ancientpower", "weatherball", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "ancientpower", "weatherball", "protect"]],
       [
         "garchomp",
         "choicescarf",
@@ -1572,7 +1650,7 @@
         ["stompingtantrum", "rocktomb", "dragonclaw", "breakingswipe"]
       ],
       ["sneasler", "grassyseed", "unburden", "jolly", ["direclaw", "rocktomb", "fakeout", "closecombat"]],
-      ["floetteeternal", "floettite", "flowerveil", "timid", ["moonblast", "calmmind", "dazzlinggleam", "protect"]]
+      ["floettemega", "floettite", "flowerveil", "timid", ["moonblast", "calmmind", "dazzlinggleam", "protect"]]
     ]
   },
   "107": {
@@ -1587,8 +1665,8 @@
         "adamant",
         ["woodhammer", "highhorsepower", "grassyglide", "fakeout"]
       ],
-      ["garchomp", "garchompitez", "roughskin", "modest", ["protect", "dragonpulse", "earthpower", "powergem"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "electroweb"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["protect", "dragonpulse", "earthpower", "powergem"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "electroweb"]],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["darkestlariat", "flareblitz", "partingshot", "fakeout"]],
       ["volcarona", "rockyhelmet", "flamebody", "timid", ["strugglebug", "overheat", "tailwind", "ragepowder"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["protect", "makeitrain", "nastyplot", "shadowball"]]
@@ -1600,8 +1678,8 @@
     "list": 7128,
     "team": [
       ["gholdengo", "choicescarf", "goodasgold", "modest", ["makeitrain", "shadowball", "powergem", "trick"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
-      ["staraptor", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
       ["volcarona", "grassyseed", "flamebody", "timid", ["flamethrower", "bugbuzz", "quiverdance", "protect"]],
       [
         "rillaboom",
@@ -1618,8 +1696,8 @@
     "country": "DK",
     "list": 7129,
     "team": [
-      ["golisopod", "golisopite", "emergencyexit", "adamant", ["leechlife", "ironhead", "protect", "suckerpunch"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "fakeout", "focusblast", "protect"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["leechlife", "ironhead", "protect", "suckerpunch"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "fakeout", "focusblast", "protect"]],
       ["archaludon", "leftovers", "stamina", "modest", ["electroshot", "snarl", "protect", "dragonpulse"]],
       ["pelipper", "sitrusberry", "drizzle", "modest", ["weatherball", "hurricane", "wideguard", "tailwind"]],
       ["rillaboom", "lifeorb", "grassysurge", "adamant", ["woodhammer", "grassyglide", "fakeout", "highhorsepower"]],
@@ -1631,11 +1709,11 @@
     "country": "FR",
     "list": 7130,
     "team": [
-      ["delphox", "delphoxite", "blaze", "timid", ["heatwave", "psychic", "nastyplot", "protect"]],
+      ["delphoxmega", "delphoxite", "blaze", "timid", ["heatwave", "psychic", "nastyplot", "protect"]],
       ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]],
       ["sneasler", "focussash", "poisontouch", "jolly", ["fakeout", "closecombat", "poisonjab", "quickguard"]],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "flareblitz", "throatchop", "partingshot"]],
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["dazzlinggleam", "moonblast", "calmmind", "protect"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["dazzlinggleam", "moonblast", "calmmind", "protect"]],
       ["sinistcha", "colburberry", "hospitality", "bold", ["matchagotcha", "ragepowder", "trickroom", "protect"]]
     ]
   },
@@ -1647,7 +1725,7 @@
       ["incineroar", "passhoberry", "intimidate", "sassy", ["fakeout", "flareblitz", "protect", "partingshot"]],
       ["mamoswine", "focussash", "oblivious", "jolly", ["highhorsepower", "iciclecrash", "iceshard", "protect"]],
       ["politoed", "sitrusberry", "drizzle", "calm", ["weatherball", "perishsong", "hypnosis", "protect"]],
-      ["gengar", "gengarite", "cursedbody", "modest", ["shadowball", "sludgebomb", "perishsong", "protect"]],
+      ["gengarmega", "gengarite", "cursedbody", "modest", ["shadowball", "sludgebomb", "perishsong", "protect"]],
       ["rillaboom", "ejectbutton", "grassysurge", "sassy", ["fakeout", "grassyglide", "protect", "uturn"]],
       ["archaludon", "leftovers", "stamina", "modest", ["electroshot", "dragonpulse", "flashcannon", "protect"]]
     ]
@@ -1667,8 +1745,8 @@
         ["woodhammer", "highhorsepower", "grassyglide", "fakeout"]
       ],
       ["incineroar", "rockyhelmet", "intimidate", "impish", ["flareblitz", "throatchop", "fakeout", "partingshot"]],
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "calmmind", "protect"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["dracometeor", "hypervoice", "tailwind", "protect"]]
+      ["floettemega", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "calmmind", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["dracometeor", "hypervoice", "tailwind", "protect"]]
     ]
   },
   "113": {
@@ -1676,10 +1754,10 @@
     "country": "IT",
     "list": 7133,
     "team": [
-      ["froslass", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "auroraveil", "protect"]],
+      ["froslassmega", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "auroraveil", "protect"]],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["flareblitz", "throatchop", "fakeout", "partingshot"]],
       ["volcarona", "grassyseed", "flamebody", "modest", ["fierydance", "bugbuzz", "quiverdance", "protect"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
       [
         "rillaboom",
         "miracleseed",
@@ -1698,7 +1776,7 @@
       ["venusaur", "focussash", "chlorophyll", "modest", ["sludgebomb", "earthpower", "sleeppowder", "protect"]],
       ["garchomp", "choicescarf", "roughskin", "adamant", ["earthquake", "dragonclaw", "rockslide", "stompingtantrum"]],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["flareblitz", "throatchop", "fakeout", "partingshot"]],
-      ["charizard", "charizarditey", "blaze", "modest", ["weatherball", "heatwave", "solarbeam", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "modest", ["weatherball", "heatwave", "solarbeam", "protect"]],
       ["toxapex", "leftovers", "regenerator", "calm", ["infestation", "toxic", "wideguard", "banefulbunker"]],
       ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "yawn", "quickattack", "detect"]]
     ]
@@ -1710,8 +1788,8 @@
     "team": [
       ["volcarona", "rockyhelmet", "flamebody", "bold", ["strugglebug", "overheat", "ragepowder", "protect"]],
       ["dragapult", "lifeorb", "clearbody", "timid", ["dracometeor", "shadowball", "willowisp", "protect"]],
-      ["glimmora", "glimmoranite", "toxicdebris", "timid", ["sludgebomb", "powergem", "earthpower", "spikyshield"]],
-      ["staraptor", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
+      ["glimmoramega", "glimmoranite", "toxicdebris", "timid", ["sludgebomb", "powergem", "earthpower", "spikyshield"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "uturn", "fakeout"]],
       ["swampert", "leftovers", "torrent", "impish", ["wavecrash", "highhorsepower", "wideguard", "protect"]]
     ]
@@ -1722,7 +1800,7 @@
     "list": 7136,
     "team": [
       [
-        "gardevoir",
+        "gardevoirmega",
         "gardevoirite",
         "synchronize",
         "modest",
@@ -1731,7 +1809,7 @@
       ["indeedeef", "colburberry", "psychicsurge", "bold", ["psychic", "followme", "helpinghand", "protect"]],
       ["armarouge", "focussash", "flashfire", "timid", ["armorcannon", "expandingforce", "wideguard", "protect"]],
       ["annihilape", "choicescarf", "defiant", "jolly", ["closecombat", "phantomforce", "shadowclaw", "icepunch"]],
-      ["lucario", "lucarionitez", "innerfocus", "timid", ["flashcannon", "aurasphere", "darkpulse", "detect"]],
+      ["lucariomegaz", "lucarionitez", "innerfocus", "timid", ["flashcannon", "aurasphere", "darkpulse", "detect"]],
       ["sneasler", "psychicseed", "unburden", "adamant", ["closecombat", "direclaw", "rocktomb", "protect"]]
     ]
   },
@@ -1742,8 +1820,8 @@
     "team": [
       ["volcarona", "sitrusberry", "flamebody", "timid", ["heatwave", "strugglebug", "quiverdance", "protect"]],
       ["pawmot", "focussash", "ironfist", "jolly", ["closecombat", "doubleshock", "revivalblessing", "fakeout"]],
-      ["salamence", "salamencite", "intimidate", "hasty", ["hypervoice", "doubleedge", "tailwind", "protect"]],
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["dazzlinggleam", "drainingkiss", "calmmind", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "hasty", ["hypervoice", "doubleedge", "tailwind", "protect"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["dazzlinggleam", "drainingkiss", "calmmind", "protect"]],
       [
         "rillaboom",
         "miracleseed",
@@ -1760,11 +1838,11 @@
     "list": 7138,
     "team": [
       ["sneasler", "whiteherb", "unburden", "adamant", ["direclaw", "protect", "closecombat", "coaching"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["protect", "hypervoice", "flamethrower", "dracometeor"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["protect", "hypervoice", "flamethrower", "dracometeor"]],
       ["excadrill", "focussash", "sandrush", "jolly", ["highhorsepower", "protect", "rockslide", "ironhead"]],
       ["indeedee", "choicescarf", "psychicsurge", "modest", ["mysticalfire", "trick", "protect", "expandingforce"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "protect", "shadowball", "nastyplot"]],
-      ["tyranitar", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "lowkick", "protect"]]
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "lowkick", "protect"]]
     ]
   },
   "119": {
@@ -1773,11 +1851,11 @@
     "list": 7139,
     "team": [
       ["sneasler", "whiteherb", "unburden", "adamant", ["closecombat", "direclaw", "fakeout", "throatchop"]],
-      ["tyranitar", "tyranitarite", "sandstream", "adamant", ["rockslide", "knockoff", "lowkick", "protect"]],
+      ["tyranitarmega", "tyranitarite", "sandstream", "adamant", ["rockslide", "knockoff", "lowkick", "protect"]],
       ["excadrill", "focussash", "sandrush", "adamant", ["highhorsepower", "rockslide", "ironhead", "protect"]],
       ["armarouge", "lifeorb", "flashfire", "modest", ["heatwave", "expandingforce", "armorcannon", "protect"]],
       ["indeedeef", "colburberry", "psychicsurge", "bold", ["psychic", "followme", "trickroom", "helpinghand"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["dracometeor", "hypervoice", "tailwind", "protect"]]
+      ["salamencemega", "salamencite", "intimidate", "timid", ["dracometeor", "hypervoice", "tailwind", "protect"]]
     ]
   },
   "120": {
@@ -1786,9 +1864,9 @@
     "list": 7140,
     "team": [
       ["sinistcha", "sitrusberry", "hospitality", "bold", ["matchagotcha", "ragepowder", "trickroom", "protect"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["protect", "hypervoice", "dracometeor", "flamethrower"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["protect", "hypervoice", "dracometeor", "flamethrower"]],
       ["excadrill", "focussash", "sandrush", "jolly", ["protect", "rockslide", "highhorsepower", "ironhead"]],
-      ["tyranitar", "tyranitarite", "sandforce", "jolly", ["rockslide", "protect", "knockoff", "lowkick"]],
+      ["tyranitarmega", "tyranitarite", "sandforce", "jolly", ["rockslide", "protect", "knockoff", "lowkick"]],
       ["basculegion", "choicescarf", "adaptability", "jolly", ["wavecrash", "aquajet", "lastrespects", "flipturn"]],
       ["corviknight", "leftovers", "mirrorarmor", "careful", ["bulkup", "roost", "bravebird", "tailwind"]]
     ]
@@ -1798,11 +1876,11 @@
     "country": "DE",
     "list": 7141,
     "team": [
-      ["raichu", "raichunitex", "lightningrod", "jolly", ["volttackle", "voltswitch", "fakeout", "protect"]],
+      ["raichumegax", "raichunitex", "lightningrod", "jolly", ["volttackle", "voltswitch", "fakeout", "protect"]],
       ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "protect"]],
       ["sinistcha", "colburberry", "hospitality", "bold", ["matchagotcha", "ragepowder", "lifedew", "protect"]],
       ["kommoo", "leftovers", "soundproof", "timid", ["clangingscales", "aurasphere", "clangoroussoul", "protect"]],
-      ["delphox", "delphoxite", "blaze", "timid", ["heatwave", "psyshock", "nastyplot", "protect"]],
+      ["delphoxmega", "delphoxite", "blaze", "timid", ["heatwave", "psyshock", "nastyplot", "protect"]],
       ["indeedeef", "sitrusberry", "synchronize", "bold", ["psychic", "fakeout", "followme", "protect"]]
     ]
   },
@@ -1812,7 +1890,7 @@
     "list": 7075,
     "team": [
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
-      ["staraptor", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
       ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "quickattack", "hyperbeam", "detect"]],
       ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
       [
@@ -1822,7 +1900,7 @@
         "adamant",
         ["fakeout", "grassyglide", "highhorsepower", "woodhammer"]
       ],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["fakeout", "zapcannon", "focusblast", "protect"]]
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["fakeout", "zapcannon", "focusblast", "protect"]]
     ]
   },
   "123": {
@@ -1832,8 +1910,8 @@
     "team": [
       ["kommoo", "leftovers", "bulletproof", "timid", ["clangingscales", "flamethrower", "clangoroussoul", "protect"]],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "flareblitz", "throatchop", "partingshot"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "tailwind", "protect"]],
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["dazzlinggleam", "moonblast", "lightofruin", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "tailwind", "protect"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["dazzlinggleam", "moonblast", "lightofruin", "protect"]],
       [
         "rillaboom",
         "miracleseed",
@@ -1854,7 +1932,7 @@
       ["sneasler", "whiteherb", "unburden", "jolly", ["direclaw", "fakeout", "closecombat", "rockslide"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
       ["tsareena", "occaberry", "queenlymajesty", "adamant", ["powerwhip", "lowkick", "tripleaxel", "protect"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["dracometeor", "hypervoice", "tailwind", "protect"]]
+      ["salamencemega", "salamencite", "intimidate", "timid", ["dracometeor", "hypervoice", "tailwind", "protect"]]
     ]
   },
   "125": {
@@ -1865,9 +1943,9 @@
       ["kingambit", "focussash", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "lowkick", "ironhead"]],
       ["indeedeef", "rockyhelmet", "psychicsurge", "bold", ["psychic", "followme", "protect", "helpinghand"]],
       ["sneasler", "psychicseed", "unburden", "adamant", ["closecombat", "direclaw", "throatchop", "protect"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["hypervoice", "tailwind", "dracometeor", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "tailwind", "dracometeor", "protect"]],
       ["armarouge", "lifeorb", "flashfire", "timid", ["armorcannon", "expandingforce", "wideguard", "protect"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "protect", "fakeout"]]
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "protect", "fakeout"]]
     ]
   },
   "126": {
@@ -1877,7 +1955,7 @@
     "team": [
       ["rillaboom", "ejectbutton", "grassysurge", "careful", ["fakeout", "grassyglide", "uturn", "protect"]],
       ["politoed", "sitrusberry", "drizzle", "calm", ["weatherball", "encore", "perishsong", "protect"]],
-      ["gengar", "gengarite", "cursedbody", "modest", ["shadowball", "sludgebomb", "perishsong", "protect"]],
+      ["gengarmega", "gengarite", "cursedbody", "modest", ["shadowball", "sludgebomb", "perishsong", "protect"]],
       ["vivillon", "focussash", "compoundeyes", "timid", ["sleeppowder", "ragepowder", "hurricane", "protect"]],
       ["incineroar", "passhoberry", "intimidate", "sassy", ["flareblitz", "partingshot", "fakeout", "protect"]],
       ["archaludon", "leftovers", "stamina", "bold", ["flashcannon", "dragonpulse", "electroshot", "protect"]]
@@ -1889,8 +1967,8 @@
     "list": 7146,
     "team": [
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "fakeout", "protect"]],
-      ["raichu", "raichunitey", "lightningrod", "jolly", ["zapcannon", "focusblast", "fakeout", "protect"]],
-      ["garchomp", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "jolly", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
       ["sneasler", "grassyseed", "unburden", "jolly", ["direclaw", "closecombat", "fakeout", "protect"]],
       ["arcaninehisui", "focussash", "rockhead", "jolly", ["headsmash", "flareblitz", "extremespeed", "protect"]]
@@ -1902,8 +1980,8 @@
     "list": 7147,
     "team": [
       ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "detect"]],
-      ["staraptor", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
       [
         "rillaboom",
         "miracleseed",
@@ -1922,8 +2000,8 @@
     "team": [
       ["grimmsnarl", "lightclay", "prankster", "sassy", ["spiritbreak", "reflect", "lightscreen", "partingshot"]],
       ["farigiraf", "sitrusberry", "armortail", "bold", ["psychic", "roar", "trickroom", "protect"]],
-      ["golisopod", "golisopite", "emergencyexit", "adamant", ["leechlife", "drillrun", "ironhead", "protect"]],
-      ["charizard", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "hurricane", "protect"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["leechlife", "drillrun", "ironhead", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "hurricane", "protect"]],
       ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "dragonpulse", "snarl", "protect"]],
       ["politoed", "mysticwater", "drizzle", "modest", ["weatherball", "muddywater", "icebeam", "protect"]]
     ]
@@ -1935,9 +2013,9 @@
     "team": [
       ["sneasler", "focussash", "poisontouch", "jolly", ["fakeout", "poisonjab", "quickguard", "closecombat"]],
       ["incineroar", "sitrusberry", "intimidate", "careful", ["throatchop", "fakeout", "partingshot", "flareblitz"]],
-      ["delphox", "delphoxite", "blaze", "timid", ["heatwave", "protect", "psychic", "nastyplot"]],
+      ["delphoxmega", "delphoxite", "blaze", "timid", ["heatwave", "protect", "psychic", "nastyplot"]],
       ["maushold", "chopleberry", "friendguard", "impish", ["followme", "protect", "feint", "superfang"]],
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "calmmind", "protect"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "calmmind", "protect"]],
       ["sinistcha", "cobaberry", "hospitality", "bold", ["ragepowder", "lifedew", "protect", "matchagotcha"]]
     ]
   },
@@ -1946,9 +2024,9 @@
     "country": "DE",
     "list": 7149,
     "team": [
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
       ["incineroar", "sitrusberry", "intimidate", "careful", ["flareblitz", "throatchop", "partingshot", "fakeout"]],
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "calmmind", "protect"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "calmmind", "protect"]],
       ["sneasler", "grassyseed", "unburden", "adamant", ["closecombat", "direclaw", "rocktomb", "protect"]],
       ["rillaboom", "occaberry", "grassysurge", "adamant", ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]]
@@ -1967,10 +2045,10 @@
         "adamant",
         ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
       ],
-      ["lucario", "lucarionitez", "innerfocus", "timid", ["aurasphere", "flashcannon", "calmmind", "detect"]],
+      ["lucariomegaz", "lucarionitez", "innerfocus", "timid", ["aurasphere", "flashcannon", "calmmind", "detect"]],
       ["gholdengo", "lifeorb", "goodasgold", "timid", ["makeitrain", "shadowball", "nastyplot", "protect"]],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["throatchop", "flareblitz", "partingshot", "fakeout"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "protect", "fakeout"]]
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "protect", "fakeout"]]
     ]
   },
   "133": {
@@ -1981,9 +2059,9 @@
       ["rillaboom", "ejectbutton", "grassysurge", "careful", ["grassyglide", "uturn", "fakeout", "protect"]],
       ["politoed", "sitrusberry", "drizzle", "calm", ["weatherball", "encore", "perishsong", "protect"]],
       ["archaludon", "leftovers", "stamina", "bold", ["dragonpulse", "aurasphere", "electroshot", "protect"]],
-      ["froslass", "froslassite", "cursedbody", "modest", ["blizzard", "shadowball", "auroraveil", "protect"]],
+      ["froslassmega", "froslassite", "cursedbody", "modest", ["blizzard", "shadowball", "auroraveil", "protect"]],
       ["incineroar", "chopleberry", "intimidate", "sassy", ["flareblitz", "partingshot", "fakeout", "protect"]],
-      ["gengar", "gengarite", "cursedbody", "modest", ["shadowball", "sludgebomb", "perishsong", "protect"]]
+      ["gengarmega", "gengarite", "cursedbody", "modest", ["shadowball", "sludgebomb", "perishsong", "protect"]]
     ]
   },
   "134": {
@@ -1995,8 +2073,8 @@
       ["corviknight", "psychicseed", "mirrorarmor", "careful", ["powertrip", "bravebird", "bulkup", "roost"]],
       ["excadrill", "focussash", "sandrush", "jolly", ["ironhead", "highhorsepower", "rockslide", "protect"]],
       ["indeedee", "choicescarf", "psychicsurge", "modest", ["protect", "trick", "expandingforce", "mysticalfire"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["hypervoice", "flamethrower", "dracometeor", "protect"]],
-      ["tyranitar", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "lowkick", "protect"]]
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "flamethrower", "dracometeor", "protect"]],
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "lowkick", "protect"]]
     ]
   },
   "135": {
@@ -2006,8 +2084,14 @@
     "team": [
       ["hydreigon", "lifeorb", "levitate", "modest", ["darkpulse", "dracometeor", "snarl", "protect"]],
       ["whimsicott", "focussash", "prankster", "timid", ["protect", "moonblast", "tailwind", "encore"]],
-      ["charizard", "charizarditey", "solarpower", "modest", ["heatwave", "weatherball", "solarbeam", "protect"]],
-      ["glimmora", "glimmoranite", "toxicdebris", "modest", ["sludgebomb", "powergem", "spikyshield", "earthpower"]],
+      ["charizardmegay", "charizarditey", "solarpower", "modest", ["heatwave", "weatherball", "solarbeam", "protect"]],
+      [
+        "glimmoramega",
+        "glimmoranite",
+        "toxicdebris",
+        "modest",
+        ["sludgebomb", "powergem", "spikyshield", "earthpower"]
+      ],
       ["basculegion", "mysticwater", "adaptability", "adamant", ["lastrespects", "protect", "aquajet", "wavecrash"]],
       ["sirfetchd", "blackbelt", "scrappy", "adamant", ["meteorassault", "closecombat", "feint", "detect"]]
     ]
@@ -2017,11 +2101,11 @@
     "country": "IT",
     "list": 7154,
     "team": [
-      ["golisopod", "golisopite", "emergencyexit", "brave", ["protect", "drillrun", "ironhead", "leechlife"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "brave", ["protect", "drillrun", "ironhead", "leechlife"]],
       ["grimmsnarl", "lightclay", "prankster", "careful", ["reflect", "lightscreen", "spiritbreak", "partingshot"]],
       ["pelipper", "focussash", "drizzle", "timid", ["hurricane", "weatherball", "tailwind", "protect"]],
       ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "snarl", "dragonpulse", "protect"]],
-      ["swampert", "swampertite", "damp", "adamant", ["wavecrash", "earthquake", "icepunch", "protect"]],
+      ["swampertmega", "swampertite", "damp", "adamant", ["wavecrash", "earthquake", "icepunch", "protect"]],
       ["farigiraf", "sitrusberry", "armortail", "bold", ["helpinghand", "twinbeam", "trickroom", "thunderbolt"]]
     ]
   },
@@ -2034,7 +2118,7 @@
       ["gholdengo", "choicescarf", "goodasgold", "modest", ["makeitrain", "shadowball", "trick", "powergem"]],
       ["pelipper", "lifeorb", "drizzle", "modest", ["hurricane", "protect", "tailwind", "weatherball"]],
       ["sneasler", "psychicseed", "unburden", "adamant", ["direclaw", "throatchop", "closecombat", "protect"]],
-      ["swampert", "swampertite", "torrent", "adamant", ["wavecrash", "earthquake", "icepunch", "protect"]],
+      ["swampertmega", "swampertite", "torrent", "adamant", ["wavecrash", "earthquake", "icepunch", "protect"]],
       ["archaludon", "leftovers", "stamina", "bold", ["dragonpulse", "aurasphere", "electroshot", "protect"]]
     ]
   },
@@ -2052,8 +2136,8 @@
         "adamant",
         ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
       ],
-      ["floetteeternal", "floettite", "flowerveil", "modest", ["protect", "moonblast", "dazzlinggleam", "calmmind"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "encore"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["protect", "moonblast", "dazzlinggleam", "calmmind"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "encore"]],
       ["sneasler", "grassyseed", "unburden", "adamant", ["protect", "closecombat", "direclaw", "rockslide"]]
     ]
   },
@@ -2063,8 +2147,8 @@
     "list": 6859,
     "team": [
       ["excadrill", "focussash", "sandrush", "jolly", ["ironhead", "highhorsepower", "rockslide", "protect"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "flamethrower", "protect"]],
-      ["tyranitar", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "lowkick", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "flamethrower", "protect"]],
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "lowkick", "protect"]],
       ["indeedee", "choicescarf", "psychicsurge", "modest", ["expandingforce", "mysticalfire", "trick", "protect"]],
       ["corviknight", "psychicseed", "mirrorarmor", "careful", ["bravebird", "powertrip", "bulkup", "roost"]],
       ["sneasler", "whiteherb", "unburden", "adamant", ["direclaw", "closecombat", "coaching", "protect"]]
@@ -2080,7 +2164,7 @@
       ["basculegion", "choicescarf", "adaptability", "jolly", ["aquajet", "wavecrash", "flipturn", "lastrespects"]],
       ["rillaboom", "ejectbutton", "grassysurge", "adamant", ["fakeout", "grassyglide", "uturn", "protect"]],
       ["ninetalesalola", "focussash", "snowwarning", "timid", ["moonblast", "blizzard", "encore", "protect"]],
-      ["gengar", "gengarite", "cursedbody", "timid", ["shadowball", "sludgebomb", "perishsong", "protect"]]
+      ["gengarmega", "gengarite", "cursedbody", "timid", ["shadowball", "sludgebomb", "perishsong", "protect"]]
     ]
   },
   "141": {
@@ -2088,9 +2172,9 @@
     "country": "UK",
     "list": 7158,
     "team": [
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "protect", "focusblast", "fakeout"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "protect", "focusblast", "fakeout"]],
       ["incineroar", "leftovers", "intimidate", "adamant", ["fakeout", "flareblitz", "throatchop", "partingshot"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["flamethrower", "protect", "hypervoice", "tailwind"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["flamethrower", "protect", "hypervoice", "tailwind"]],
       ["basculegion", "sitrusberry", "adaptability", "adamant", ["lastrespects", "wavecrash", "protect", "aquajet"]],
       ["grimmsnarl", "lightclay", "prankster", "careful", ["reflect", "lightscreen", "spiritbreak", "partingshot"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]]
@@ -2103,7 +2187,7 @@
     "team": [
       ["volcarona", "sitrusberry", "flamebody", "bold", ["tailwind", "ragepowder", "overheat", "protect"]],
       ["sneasler", "whiteherb", "unburden", "adamant", ["gunkshot", "protect", "closecombat", "coaching"]],
-      ["tyranitar", "tyranitarite", "sandstream", "jolly", ["knockoff", "dragondance", "rockslide", "protect"]],
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["knockoff", "dragondance", "rockslide", "protect"]],
       ["excadrill", "focussash", "sandrush", "adamant", ["rockslide", "protect", "ironhead", "highhorsepower"]],
       ["indeedee", "choicescarf", "psychicsurge", "modest", ["expandingforce", "helpinghand", "trick", "protect"]],
       ["dragapult", null, "cursedbody", "timid", ["dracometeor", "shadowball", "willowisp", "protect"]]
@@ -2114,9 +2198,9 @@
     "country": "DE",
     "list": 7160,
     "team": [
-      ["aerodactyl", "aerodactylite", "unnerve", "jolly", ["protect", "tailwind", "rockslide", "dualwingbeat"]],
+      ["aerodactylmega", "aerodactylite", "unnerve", "jolly", ["protect", "tailwind", "rockslide", "dualwingbeat"]],
       ["farigiraf", "sitrusberry", "armortail", "calm", ["helpinghand", "trickroom", "psychic", "thunderbolt"]],
-      ["charizard", "charizarditey", "blaze", "timid", ["protect", "heatwave", "weatherball", "solarbeam"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["protect", "heatwave", "weatherball", "solarbeam"]],
       ["sylveon", "fairyfeather", "pixilate", "modest", ["detect", "hypervoice", "hyperbeam", "quickattack"]],
       ["kingambit", "focussash", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "lowkick"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["grassyglide", "woodhammer", "highhorsepower", "fakeout"]]
@@ -2129,9 +2213,15 @@
     "team": [
       ["milotic", "psychicseed", "competitive", "calm", ["muddywater", "coil", "hypnosis", "recover"]],
       ["dragapult", "lifeorb", "infiltrator", "modest", ["dracometeor", "shadowball", "willowisp", "protect"]],
-      ["staraptor", "staraptite", "intimidate", "adamant", ["bravebird", "closecombat", "roost", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "adamant", ["bravebird", "closecombat", "roost", "protect"]],
       ["indeedeef", "rockyhelmet", "psychicsurge", "relaxed", ["psychic", "helpinghand", "followme", "trickroom"]],
-      ["golisopod", "golisopite", "emergencyexit", "adamant", ["leechlife", "ironhead", "suckerpunch", "swordsdance"]],
+      [
+        "golisopodmega",
+        "golisopite",
+        "emergencyexit",
+        "adamant",
+        ["leechlife", "ironhead", "suckerpunch", "swordsdance"]
+      ],
       ["armarouge", "twistedspoon", "flashfire", "modest", ["armorcannon", "wideguard", "expandingforce", "trickroom"]]
     ]
   },
@@ -2148,9 +2238,15 @@
         ["fakeout", "woodhammer", "grassyglide", "highhorsepower"]
       ],
       ["garchomp", "choicescarf", "roughskin", "adamant", ["dragonclaw", "earthquake", "stompingtantrum", "rockslide"]],
-      ["salamence", "salamencite", "intimidate", "modest", ["dracometeor", "hypervoice", "tailwind", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "modest", ["dracometeor", "hypervoice", "tailwind", "protect"]],
       ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]],
-      ["glimmora", "glimmoranite", "toxicdebris", "modest", ["sludgebomb", "powergem", "earthpower", "spikyshield"]],
+      [
+        "glimmoramega",
+        "glimmoranite",
+        "toxicdebris",
+        "modest",
+        ["sludgebomb", "powergem", "earthpower", "spikyshield"]
+      ],
       ["volcarona", "rockyhelmet", "flamebody", "timid", ["overheat", "strugglebug", "ragepowder", "protect"]]
     ]
   },
@@ -2162,9 +2258,9 @@
       ["kingambit", "blackglasses", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "fakeout", "grassyglide", "uturn"]],
       ["primarina", "leftovers", "liquidvoice", "modest", ["hypervoice", "moonblast", "calmmind", "protect"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["dracometeor", "hypervoice", "tailwind", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["dracometeor", "hypervoice", "tailwind", "protect"]],
       ["ceruledge", "grassyseed", "flashfire", "adamant", ["bitterblade", "shadowsneak", "bulkup", "protect"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]]
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]]
     ]
   },
   "147": {
@@ -2172,11 +2268,11 @@
     "country": "DE",
     "list": 7164,
     "team": [
-      ["delphox", "delphoxite", "blaze", "timid", ["protect", "nastyplot", "psychic", "heatwave"]],
+      ["delphoxmega", "delphoxite", "blaze", "timid", ["protect", "nastyplot", "psychic", "heatwave"]],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "flareblitz", "partingshot", "throatchop"]],
       ["kingambit", "chopleberry", "defiant", "adamant", ["protect", "swordsdance", "suckerpunch", "kowtowcleave"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["grassyglide", "woodhammer", "uturn", "fakeout"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["protect", "dracometeor", "hypervoice", "flamethrower"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["protect", "dracometeor", "hypervoice", "flamethrower"]],
       ["sneasler", "grassyseed", "unburden", "adamant", ["protect", "closecombat", "direclaw", "fakeout"]]
     ]
   },
@@ -2185,9 +2281,15 @@
     "country": "ES",
     "list": 7064,
     "team": [
-      ["glimmora", "glimmoranite", "toxicdebris", "modest", ["sludgebomb", "powergem", "earthpower", "spikyshield"]],
+      [
+        "glimmoramega",
+        "glimmoranite",
+        "toxicdebris",
+        "modest",
+        ["sludgebomb", "powergem", "earthpower", "spikyshield"]
+      ],
       ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "tailwind", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "tailwind", "protect"]],
       [
         "rillaboom",
         "miracleseed",
@@ -2204,10 +2306,10 @@
     "country": "UK",
     "list": 7165,
     "team": [
-      ["staraptor", "staraptite", "intimidate", "adamant", ["protect", "bravebird", "closecombat", "roost"]],
+      ["staraptormega", "staraptite", "intimidate", "adamant", ["protect", "bravebird", "closecombat", "roost"]],
       ["armarouge", "focussash", "flashfire", "modest", ["protect", "armorcannon", "expandingforce", "wideguard"]],
       ["milotic", "psychicseed", "competitive", "calm", ["muddywater", "coil", "hypnosis", "recover"]],
-      ["gengar", "gengarite", "cursedbody", "modest", ["protect", "shadowball", "sludgebomb", "focusblast"]],
+      ["gengarmega", "gengarite", "cursedbody", "modest", ["protect", "shadowball", "sludgebomb", "focusblast"]],
       ["dragapult", "lifeorb", "infiltrator", "modest", ["dracometeor", "shadowball", "willowisp", "protect"]],
       ["indeedeef", "rockyhelmet", "psychicsurge", "bold", ["followme", "psychic", "helpinghand", "trickroom"]]
     ]
@@ -2225,9 +2327,15 @@
         "adamant",
         ["fakeout", "highhorsepower", "grassyglide", "woodhammer"]
       ],
-      ["salamence", "salamencite", "intimidate", "modest", ["protect", "hypervoice", "dracometeor", "flamethrower"]],
+      [
+        "salamencemega",
+        "salamencite",
+        "intimidate",
+        "modest",
+        ["protect", "hypervoice", "dracometeor", "flamethrower"]
+      ],
       ["sneasler", "focussash", "poisontouch", "jolly", ["direclaw", "protect", "closecombat", "fakeout"]],
-      ["glimmora", "glimmoranite", "toxicdebris", "timid", ["powergem", "sludgebomb", "spikyshield", "earthpower"]],
+      ["glimmoramega", "glimmoranite", "toxicdebris", "timid", ["powergem", "sludgebomb", "spikyshield", "earthpower"]],
       ["kingambit", "blackglasses", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]]
     ]
   },
@@ -2237,8 +2345,8 @@
     "list": 7167,
     "team": [
       ["archaludon", "leftovers", "stamina", "bold", ["electroshot", "snarl", "dragonpulse", "protect"]],
-      ["garchomp", "garchompitez", "roughskin", "timid", ["dragonpulse", "earthpower", "powergem", "protect"]],
-      ["golisopod", "golisopite", "emergencyexit", "adamant", ["leechlife", "drillrun", "ironhead", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "timid", ["dragonpulse", "earthpower", "powergem", "protect"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["leechlife", "drillrun", "ironhead", "protect"]],
       ["overqwil", "lifeorb", "swiftswim", "adamant", ["gunkshot", "throatchop", "taunt", "protect"]],
       ["farigiraf", "sitrusberry", "armortail", "bold", ["twinbeam", "trickroom", "protect", "helpinghand"]],
       ["politoed", "mysticwater", "drizzle", "modest", ["weatherball", "icebeam", "muddywater", "protect"]]
@@ -2250,10 +2358,10 @@
     "list": 7168,
     "team": [
       ["farigiraf", "sitrusberry", "armortail", "bold", ["psychic", "helpinghand", "trickroom", "protect"]],
-      ["charizard", "charizarditey", "blaze", "timid", ["heatwave", "hurricane", "weatherball", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "hurricane", "weatherball", "protect"]],
       ["grimmsnarl", "lightclay", "prankster", "sassy", ["lightscreen", "reflect", "spiritbreak", "partingshot"]],
       ["politoed", "mysticwater", "drizzle", "modest", ["muddywater", "icebeam", "weatherball", "protect"]],
-      ["golisopod", "golisopite", "emergencyexit", "adamant", ["leechlife", "ironhead", "drillrun", "protect"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["leechlife", "ironhead", "drillrun", "protect"]],
       ["archaludon", "leftovers", "stamina", "bold", ["dragonpulse", "electroshot", "snarl", "protect"]]
     ]
   },
@@ -2269,11 +2377,11 @@
         "adamant",
         ["woodhammer", "highhorsepower", "grassyglide", "fakeout"]
       ],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "fakeout"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "fakeout"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["protect", "makeitrain", "shadowball", "nastyplot"]],
       ["milotic", "sitrusberry", "competitive", "calm", ["muddywater", "coil", "hypnosis", "icebeam"]],
       ["ceruledge", "grassyseed", "flashfire", "adamant", ["protect", "bitterblade", "shadowsneak", "swordsdance"]],
-      ["staraptor", "staraptite", "intimidate", "jolly", ["protect", "bravebird", "closecombat", "tailwind"]]
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["protect", "bravebird", "closecombat", "tailwind"]]
     ]
   },
   "154": {
@@ -2281,11 +2389,11 @@
     "country": "DE",
     "list": 7169,
     "team": [
-      ["sceptile", "sceptilite", "overgrow", "timid", ["dragonpulse", "energyball", "earthpower", "detect"]],
+      ["sceptilemega", "sceptilite", "overgrow", "timid", ["dragonpulse", "energyball", "earthpower", "detect"]],
       ["sneasler", "psychicseed", "unburden", "adamant", ["closecombat", "direclaw", "rockslide", "fakeout"]],
       ["rotomheat", "choicescarf", "levitate", "timid", ["discharge", "overheat", "trick", "electroweb"]],
       ["indeedee", "focussash", "psychicsurge", "timid", ["expandingforce", "trickroom", "imprison", "protect"]],
-      ["staraptor", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]]
     ]
   },
@@ -2294,9 +2402,9 @@
     "country": "DE",
     "list": 7170,
     "team": [
-      ["staraptor", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
       ["ceruledge", "grassyseed", "flashfire", "adamant", ["bitterblade", "shadowsneak", "swordsdance", "protect"]],
-      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
       [
         "rillaboom",
         "miracleseed",
@@ -2317,8 +2425,14 @@
       ["pelipper", "focussash", "drizzle", "modest", ["weatherball", "hurricane", "wideguard", "protect"]],
       ["farigiraf", "sitrusberry", "armortail", "bold", ["twinbeam", "shadowball", "trickroom", "protect"]],
       ["archaludon", "leftovers", "stamina", "modest", ["electroshot", "dragonpulse", "flashcannon", "protect"]],
-      ["garchomp", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]],
-      ["golisopod", "golisopite", "emergencyexit", "adamant", ["leechlife", "suckerpunch", "swordsdance", "protect"]]
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]],
+      [
+        "golisopodmega",
+        "golisopite",
+        "emergencyexit",
+        "adamant",
+        ["leechlife", "suckerpunch", "swordsdance", "protect"]
+      ]
     ]
   },
   "157": {
@@ -2326,8 +2440,8 @@
     "country": "BE",
     "list": 7172,
     "team": [
-      ["meowsticf", "meowsticite", "competitive", "timid", ["expandingforce", "fakeout", "thunderbolt", "protect"]],
-      ["charizard", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["meowsticmmega", "meowsticite", "competitive", "timid", ["expandingforce", "fakeout", "thunderbolt", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "ancientpower", "protect"]],
       ["garchomp", "lifeorb", "roughskin", "jolly", ["dragonclaw", "protect", "stompingtantrum", "rockslide"]],
       ["sneasler", "psychicseed", "unburden", "adamant", ["direclaw", "protect", "closecombat", "rockslide"]],
       ["kingambit", "focussash", "defiant", "adamant", ["suckerpunch", "ironhead", "lowkick", "kowtowcleave"]],
@@ -2339,9 +2453,9 @@
     "country": "IT",
     "list": 7173,
     "team": [
-      ["gengar", "gengarite", "cursedbody", "modest", ["shadowball", "sludgebomb", "substitute", "protect"]],
+      ["gengarmega", "gengarite", "cursedbody", "modest", ["shadowball", "sludgebomb", "substitute", "protect"]],
       ["milotic", "psychicseed", "competitive", "calm", ["muddywater", "coil", "hypnosis", "recover"]],
-      ["staraptor", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
       ["armarouge", "focussash", "flashfire", "modest", ["armorcannon", "expandingforce", "wideguard", "protect"]],
       ["indeedeef", "rockyhelmet", "psychicsurge", "relaxed", ["psychic", "followme", "helpinghand", "protect"]],
       ["dragapult", "lifeorb", "infiltrator", "timid", ["dracometeor", "shadowball", "disable", "protect"]]
@@ -2356,8 +2470,8 @@
       ["milotic", "sitrusberry", "competitive", "calm", ["scald", "icebeam", "icywind", "protect"]],
       ["excadrill", "focussash", "sandrush", "jolly", ["highhorsepower", "ironhead", "rockslide", "protect"]],
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
-      ["tyranitar", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "lowkick", "protect"]],
-      ["salamence", "salamencite", "intimidate", "timid", ["hypervoice", "flamethrower", "tailwind", "protect"]]
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "lowkick", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "flamethrower", "tailwind", "protect"]]
     ]
   },
   "160": {
@@ -2367,10 +2481,10 @@
     "team": [
       ["armarouge", "focussash", "flashfire", "modest", ["armorcannon", "expandingforce", "wideguard", "protect"]],
       ["dragapult", "lifeorb", "infiltrator", "timid", ["dracometeor", "shadowball", "willowisp", "protect"]],
-      ["gengar", "gengarite", "cursedbody", "modest", ["shadowball", "focusblast", "protect", "sludgebomb"]],
+      ["gengarmega", "gengarite", "cursedbody", "modest", ["shadowball", "focusblast", "protect", "sludgebomb"]],
       ["milotic", "psychicseed", "competitive", "calm", ["muddywater", "coil", "hypnosis", "recover"]],
       ["indeedeef", "rockyhelmet", "psychicsurge", "relaxed", ["psychic", "followme", "helpinghand", "trickroom"]],
-      ["staraptor", "staraptite", "intimidate", "adamant", ["protect", "closecombat", "bravebird", "roost"]]
+      ["staraptormega", "staraptite", "intimidate", "adamant", ["protect", "closecombat", "bravebird", "roost"]]
     ]
   },
   "161": {
@@ -2380,7 +2494,7 @@
     "team": [
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
       ["sneasler", "psychicseed", "unburden", "adamant", ["closecombat", "direclaw", "rockslide", "protect"]],
-      ["staraptor", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
       ["persianalola", "choicescarf", "furcoat", "timid", ["snarl", "foulplay", "switcheroo", "charm"]],
       ["armarouge", "focussash", "flashfire", "modest", ["armorcannon", "expandingforce", "wideguard", "protect"]],
       ["indeedeef", "rockyhelmet", "psychicsurge", "relaxed", ["psychic", "followme", "helpinghand", "trickroom"]]
@@ -2393,9 +2507,9 @@
     "team": [
       ["farigiraf", "lifeorb", "armortail", "quiet", ["twinbeam", "hypervoice", "helpinghand", "protect"]],
       ["blaziken", "focussash", "speedboost", "timid", ["heatwave", "aurasphere", "coaching", "protect"]],
-      ["metagross", "metagrossite", "clearbody", "adamant", ["hardpress", "psychicfangs", "bodypress", "protect"]],
+      ["metagrossmega", "metagrossite", "clearbody", "adamant", ["hardpress", "psychicfangs", "bodypress", "protect"]],
       ["sableye", "lightclay", "prankster", "calm", ["taunt", "lightscreen", "raindance", "willowisp"]],
-      ["garchomp", "garchompitez", "roughskin", "modest", ["dragonpulse", "powergem", "earthpower", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "powergem", "earthpower", "protect"]],
       ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "dragonpulse", "snarl", "protect"]]
     ]
   },
@@ -2405,11 +2519,11 @@
     "list": 7177,
     "team": [
       ["archaludon", "leftovers", "stamina", "modest", ["dragonpulse", "flashcannon", "electroshot", "protect"]],
-      ["salamence", "salamencite", "intimidate", "naive", ["doubleedge", "hypervoice", "flamethrower", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "naive", ["doubleedge", "hypervoice", "flamethrower", "protect"]],
       ["annihilape", "choicescarf", "defiant", "jolly", ["phantomforce", "closecombat", "ragefist", "uturn"]],
       ["pelipper", "focussash", "drizzle", "timid", ["weatherball", "hurricane", "tailwind", "wideguard"]],
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["fakeout", "grassyglide", "woodhammer", "uturn"]],
-      ["golisopod", "golisopite", "emergencyexit", "adamant", ["leechlife", "ironhead", "swordsdance", "protect"]]
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["leechlife", "ironhead", "swordsdance", "protect"]]
     ]
   }
 }

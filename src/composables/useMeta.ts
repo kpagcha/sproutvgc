@@ -2,10 +2,10 @@ import { computed, onActivated, onBeforeUnmount, onDeactivated, shallowReactive,
 import { useRoute, useRouter } from 'vue-router'
 import {
   defaultSnapshot,
+  findSnapshot,
   loadMeta,
   selectSnapshot,
   selectedSnapshot,
-  snapshots,
   type MetaData,
   type MetaSnapshot,
 } from '@/data/meta'
@@ -61,7 +61,7 @@ export function useMeta() {
   function fromUrl() {
     const id = route.query.meta
     if (!active || route.name !== page || typeof id !== 'string' || id === selectedSnapshot.value?.id) return
-    if (snapshots.value.some((s) => s.id === id)) selectSnapshot(id)
+    if (findSnapshot(id)) selectSnapshot(id)
   }
   /** The snapshot shown, in the URL, unless it's the default. After the page's own navigation at its start, if any
    * (it opened bare, as it was left), so as not to undo it: the router replaces the query a moment later. */

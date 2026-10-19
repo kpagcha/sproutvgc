@@ -8,12 +8,21 @@
 // source, is a matter of changing it. The reader picks among them by regulation, dataset and players (`MetaCard`); the
 // default is the current regulation's latest dataset. On the dev server, the settings page overrides which are shown
 // (`setActiveSnapshots`), saved in this browser.
+// Tournaments are snapshots too, made on demand for whichever of a regulation's events are picked (`tournaments.ts`).
 // Sources and their formats: notes/usage-stats.md.
 
 import type { AbilityId, ItemId, MoveId, PokemonId } from '@/data/dex'
 import { computed, ref } from 'vue'
 import { REGULATION } from '@/data/format'
 import { locale, t } from '@/i18n'
+import {
+  loadTournaments,
+  snapshotEvents,
+  tournamentSnapshot,
+  tournamentSnapshotOf,
+  eventsOf,
+  EVENTS,
+} from '@/data/tournaments'
 
 /** The kind of play a snapshot observes, which its label names. */
 export type MetaKind = 'showdown' | 'ingame' | 'tournament'
@@ -31,6 +40,7 @@ export type MetaCapability =
   | 'spreads'
   | 'speeds'
   | 'natures'
+  | 'builds'
 
 /** Smogon's rating cutoffs: the players whose teams count most. */
 export type Cutoff = 0 | 1500 | 1630 | 1760
@@ -53,6 +63,10 @@ export interface MetaSnapshot {
   cutoff?: Cutoff
   bestOf?: 1 | 3
   battles?: number
+  /** The teams it counts, for tournaments. */
+  teams?: number
+  /** The events it adds up, for tournaments (`tournaments.ts`). */
+  events?: string[]
   capabilities: MetaCapability[]
   /** What it has that covers every player, whatever its cutoff (Smogon's brought counts): labeled as such. */
   unweighted?: MetaCapability[]
@@ -97,8 +111,21 @@ export interface PokemonMeta {
   speeds?: { points: number; nature: string; share: number }[]
   /** Its sets' natures (by Showdown ID), from all of them, most common first. */
   natures?: Share<string>[]
+  /** The teams it's on, where the source counts them (tournaments). */
+  teams?: number
+  /** Its whole sets as brought, the same item, ability, nature and moves together, most common first. */
+  builds?: Build[]
   /** Its rank and usage in the snapshot's `previous`, when it was there. */
   prev?: { rank: number; usage?: number }
+}
+
+/** A whole set: item, ability, nature (each null when the source doesn't say) and moves, and its share of the sets. */
+export interface Build {
+  item: ItemId | null
+  ability: AbilityId | null
+  nature: string | null
+  moves: MoveId[]
+  share: number
 }
 
 export type MetaData = Partial<Record<PokemonId, PokemonMeta>>
@@ -115,7 +142,19 @@ const FILES = import.meta.glob<MetaData>(['./generated/meta/*.json', '!./generat
   import: 'default',
 })
 
-const GENERATED = Object.values(INDEX)[0] ?? {}
+/** Every snapshot there is by default: the generated ones, then each regulation's tournaments, all its events. */
+const GENERATED: Record<string, MetaSnapshot> = {
+  ...(Object.values(INDEX)[0] ?? {}),
+  ...Object.fromEntries(
+    [...new Set(EVENTS.map((e) => e.regulation))].flatMap((r) => {
+      const s = tournamentSnapshot(
+        r,
+        eventsOf(r).map((e) => e.id),
+      )
+      return s ? [[s.id, s]] : []
+    }),
+  ),
+}
 
 /** Every snapshot generated, in the generator's order, for the dev settings to pick from. */
 export const GENERATED_SNAPSHOTS: readonly MetaSnapshot[] = Object.values(GENERATED)
@@ -165,12 +204,30 @@ export function setActiveSnapshots(ids: readonly string[] | null) {
 /** The snapshots the app shows, in order. */
 export const snapshots = computed<MetaSnapshot[]>(() => active.value.flatMap((id) => GENERATED[id] ?? []))
 
+/** A snapshot shown, by its ID: one of those listed, or some of a regulation's events when all of them are. */
+export function findSnapshot(id: string | null | undefined): MetaSnapshot | undefined {
+  if (!id) return undefined
+  const listed = snapshots.value.find((s) => s.id === id)
+  if (listed) return listed
+  const s = tournamentSnapshotOf(id)
+  const all =
+    s &&
+    tournamentSnapshot(
+      s.regulation,
+      eventsOf(s.regulation).map((e) => e.id),
+    )
+  return all && snapshots.value.includes(all) ? s : undefined
+}
+
 /**
  * The latest dataset's snapshots, what's shown by default: the current regulation's latest (any regulation's,
  * when the current one has none yet), in their order.
  */
 const latestSnapshots = computed<MetaSnapshot[]>(() => {
-  const list = snapshots.value
+  // Tournaments are picked, not the default: they cover only each event's top placings.
+  const list = snapshots.value.some((s) => s.kind !== 'tournament')
+    ? snapshots.value.filter((s) => s.kind !== 'tournament')
+    : snapshots.value
   const pool = list.some((s) => s.regulation === REGULATION) ? list.filter((s) => s.regulation === REGULATION) : list
   const latest = pool.reduce<MetaSnapshot | undefined>((a, s) => (!a || s.to > a.to ? s : a), undefined)
   return latest ? pool.filter((s) => datasetKey(s) === datasetKey(latest)) : []
@@ -206,7 +263,7 @@ export const selectedSnapshot = computed<MetaSnapshot | undefined>(() => {
     const subset = p.slice(LATEST.length)
     return latest.find((s) => subsetKey(s) === subset || String(s.cutoff) === subset) ?? latest[0]
   }
-  return snapshots.value.find((s) => s.id === p) ?? latest[0]
+  return findSnapshot(p) ?? latest[0]
 })
 
 /** Whether the snapshot shown is of another dataset than the latest (another regulation or period), whatever its
@@ -225,7 +282,7 @@ export function showLatest() {
 
 /** Shows `id`'s snapshot on every page, remembered in this browser. */
 export function selectSnapshot(id: string) {
-  const s = snapshots.value.find((x) => x.id === id)
+  const s = findSnapshot(id)
   const save = s && latestSnapshots.value.includes(s) ? `${LATEST}${subsetKey(s)}` : id
   picked.value = save
   try {
@@ -271,6 +328,7 @@ export async function loadHistory(s: MetaSnapshot): Promise<MetaHistory | null> 
 }
 
 export function loadMeta(s: MetaSnapshot): Promise<MetaData> {
+  if (s.events) return loadTournaments(s)
   let p = loaded.get(s.id)
   if (!p) {
     const file = FILES[`./generated/meta/${s.id}.json`]
@@ -297,10 +355,20 @@ export const datasetParts = (s: MetaSnapshot): string[] => [
 
 /** What a snapshot's dataset is within its regulation: its source and period ("Showdown ladder", "Sep 2026"). */
 export function sourceParts(s: MetaSnapshot): string[] {
+  if (s.events) return [t('meta.kind.tournament'), eventsLabel(s)]
   const parts = [t(`meta.kind.${s.kind}`)]
   if (s.season) parts.push(t('meta.season', { season: s.season }))
   parts.push(periodLabel(s))
   return parts
+}
+
+/** The events a tournament snapshot adds up: its name when one, "6 events" when they're all its regulation's, else
+ * "2 of 6 events". */
+function eventsLabel(s: MetaSnapshot): string {
+  const events = snapshotEvents(s)
+  const total = eventsOf(s.regulation).length
+  if (events.length === 1) return events[0]!.name
+  return events.length === total ? t('meta.events', { n: total }) : t('meta.eventsOf', { n: events.length, total })
 }
 
 /** Whether the snapshots shown are of several regulations: then each one's label names its own. */
@@ -344,8 +412,12 @@ export interface MetaDataset {
   snapshots: MetaSnapshot[]
 }
 
-const datasetKey = (s: MetaSnapshot) =>
-  [s.regulation, s.provider.url, s.kind, s.season ?? '', s.period, s.from, s.to].join('|')
+/** The dataset a snapshot is of, as a key: its source and period within its regulation; a regulation's tournaments, any
+ * of its events, are one. */
+export const datasetKey = (s: MetaSnapshot) =>
+  s.events
+    ? [s.regulation, s.kind].join('|')
+    : [s.regulation, s.provider.url, s.kind, s.season ?? '', s.period, s.from, s.to].join('|')
 
 /** Snapshots by dataset, by regulation (see below), each's snapshots in their order. */
 export function metaDatasets(list: readonly MetaSnapshot[]): MetaDataset[] {
@@ -369,7 +441,7 @@ export function metaDatasets(list: readonly MetaSnapshot[]): MetaDataset[] {
     d.snapshots.push(s)
   }
   // A regulation's datasets together: the current regulation's first, then the one with the latest, each one's latest
-  // first.
+  // first, its tournaments last (they aren't the default).
   const all = [...byKey.values()]
   const last = new Map<string, string>()
   for (const d of all) if (d.to > (last.get(d.regulation) ?? '')) last.set(d.regulation, d.to)
@@ -378,6 +450,7 @@ export function metaDatasets(list: readonly MetaSnapshot[]): MetaDataset[] {
       Number(b.regulation === REGULATION) - Number(a.regulation === REGULATION) ||
       last.get(b.regulation)!.localeCompare(last.get(a.regulation)!) ||
       b.regulation.localeCompare(a.regulation) ||
+      Number(a.snapshots[0]!.kind === 'tournament') - Number(b.snapshots[0]!.kind === 'tournament') ||
       b.to.localeCompare(a.to),
   )
 }

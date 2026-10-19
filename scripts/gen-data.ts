@@ -773,7 +773,19 @@ async function main() {
   // A past regulation's teams aren't held to the dex: what it no longer has is left out.
   const updateTournaments = process.argv.includes('--update') || process.argv.includes('--update-tournaments')
   const limitless = new LimitlessVgc(join(CACHE, 'limitlessvgc'), (url) => getBinary(url, true), updateTournaments)
-  const knownSets = { ...known, natures: new Set(Object.keys(natureNames)) }
+  const knownSets = {
+    ...known,
+    natures: new Set(Object.keys(natureNames)),
+    // A Pokémon holding its own Mega Stone, counted as the Mega, as Smogon's stats count it: the stone's Megas, by the
+    // species they're of (the lists give Floette Eternal as "floette").
+    mega: (pokemon: string, item: string) => {
+      const base = dex.species.get(pokemon).baseSpecies
+      const to = Object.entries(dex.items.get(item).megaStone ?? {}).find(
+        ([from]) => dex.species.get(from).baseSpecies === base,
+      )?.[1]
+      return to && legal.has(speciesId(to)) ? speciesId(to) : undefined
+    },
+  }
   rmSync(join(OUT, 'tournaments'), { recursive: true, force: true })
   const events: Record<string, TournamentEvent> = {}
   const regulations = new Set([reg, ...Object.keys(sources.smogon), ...Object.keys(sources.limitlessvgc)])

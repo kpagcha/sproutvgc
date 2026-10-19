@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, shallowRef } from 'vue'
 import { ChevronDown, Database } from '@lucide/vue'
 import { datasetParts, metaLabel, offLatest, selectedSnapshot, subsetShort } from '@/data/meta'
 import { t } from '@/i18n'
@@ -8,37 +8,20 @@ import MetaCard from '@/components/MetaCard.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
 
 // The meta's data shown, as a button saying it (its dataset, "Showdown ladder · Sep 2026", and its subset in short,
-// "1760+") that opens its card (`MetaCard`) to see what it is and pick another: dropping from the button, closed by a
-// press outside it or Escape. On phones, the button is its icon alone (what it shows read out, and in the card), as
-// the favorites' is, and the card opens in a dialog over the page. Its icon pulses while the data picked loads, and
-// it's tinted in the accent while the data isn't the latest (another regulation or period than the default's), the
-// card then having the way back to it.
+// "1760+") that opens its card (`MetaCard`) to see what it is and pick another, in a dialog over the page, on any
+// screen (`ModalDialog`: closed by a press around it or Escape), its card scrolling when it's taller than the screen.
+// On phones, the button is its icon alone (what it shows read out, and in the card), as the favorites' is. Its icon
+// pulses while the data picked loads, and it's tinted in the accent while the data isn't the latest (another
+// regulation or period than the default's), the card then having the way back to it.
 const open = ref(false)
-const root = useTemplateRef<HTMLElement>('root')
 
 const phoneQuery = window.matchMedia('(max-width: 720px)')
 const phone = shallowRef(phoneQuery.matches)
 const onPhone = (e: MediaQueryListEvent) => (phone.value = e.matches)
 phoneQuery.addEventListener('change', onPhone)
-
-function onPointerDown(e: PointerEvent) {
-  if (!root.value?.contains(e.target as Node)) open.value = false
-}
-const onKey = (e: KeyboardEvent) => e.key === 'Escape' && (open.value = false)
-watch([open, phone], ([on, p]) => {
-  if (on && !p) {
-    document.addEventListener('pointerdown', onPointerDown)
-    document.addEventListener('keydown', onKey)
-  } else {
-    document.removeEventListener('pointerdown', onPointerDown)
-    document.removeEventListener('keydown', onKey)
-  }
-})
 onBeforeUnmount(() => {
   open.value = false
   phoneQuery.removeEventListener('change', onPhone)
-  document.removeEventListener('pointerdown', onPointerDown)
-  document.removeEventListener('keydown', onKey)
 })
 
 const dataset = computed(() => (selectedSnapshot.value ? datasetParts(selectedSnapshot.value).join(' · ') : ''))
@@ -46,13 +29,13 @@ const subset = computed(() => (selectedSnapshot.value ? subsetShort(selectedSnap
 </script>
 
 <template>
-  <div v-if="selectedSnapshot" ref="root" class="meta-dialog">
+  <div v-if="selectedSnapshot" class="meta-dialog">
     <button
       type="button"
       class="btn toggle"
       :class="{ off: offLatest }"
       :aria-expanded="open"
-      :aria-haspopup="phone ? 'dialog' : undefined"
+      aria-haspopup="dialog"
       :aria-label="
         t('meta.pick', { label: metaLabel(selectedSnapshot) }) + (offLatest ? ` (${t('meta.notLatest')})` : '')
       "
@@ -66,12 +49,9 @@ const subset = computed(() => (selectedSnapshot.value ? subsetShort(selectedSnap
       </template>
       <ChevronDown :size="14" class="chevron" :class="{ open }" aria-hidden="true" />
     </button>
-    <ModalDialog v-if="phone" v-model:open="open" :label="t('meta.data')">
-      <MetaCard @close="open = false" />
+    <ModalDialog v-model:open="open" :label="t('meta.data')">
+      <MetaCard class="meta-dialog-card" @close="open = false" />
     </ModalDialog>
-    <div v-else-if="open" class="pop">
-      <MetaCard @close="open = false" />
-    </div>
   </div>
 </template>
 
@@ -127,12 +107,8 @@ const subset = computed(() => (selectedSnapshot.value ? subsetShort(selectedSnap
     padding: 3px 8px;
   }
 }
-/* Under the button, over the page. */
-.pop {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  z-index: 60;
-  width: min(380px, calc(100vw - 32px));
+/* The card, no wider than its rows need, in the middle of the screen: over the dialog's own width for what it holds. */
+:global(:root:root .modal-dialog > .meta-dialog-card) {
+  max-width: 440px;
 }
 </style>

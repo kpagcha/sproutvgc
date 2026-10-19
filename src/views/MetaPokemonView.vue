@@ -2,7 +2,7 @@
 import { computed, h, ref, render, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp, Info } from '@lucide/vue'
-import { ability, available, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
+import { ability, available, item, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { MOVES } from '@/data/moves'
 import {
   POKEMON,
@@ -31,6 +31,7 @@ import { useMeta } from '@/composables/useMeta'
 import { useSpeedOptions } from '@/composables/useSpeedOptions'
 import AppLink from '@/components/AppLink'
 import DefenseResults from '@/components/DefenseResults.vue'
+import ItemIcon from '@/components/ItemIcon.vue'
 import ItemList from '@/components/ItemList.vue'
 import MoveTable from '@/components/MoveTable.vue'
 import DexRef from '@/components/DexRef'
@@ -52,7 +53,8 @@ import TypeIcon from '@/components/TypeIcon'
 // lowers it, and its natures; then, smaller, its rank, usage and how often it's brought. Then what its sets run (moves,
 // items, abilities, each with its share of them), its most common exact spreads (each a row of bars: the points in each
 // stat, and the stat they give), its Speeds as the speed tiers draw them, its usage over the months of the dataset's
-// series, and last its teammates. The dex has the rest of it, a link away.
+// series, and last its teammates. Where the data has them (tournaments' team lists), its whole builds come after its
+// moves and items: the same item, ability, nature and moves together. The dex has the rest of it, a link away.
 const route = useRoute()
 const id = computed(() => String(route.params.id) as PokemonId)
 const ref_ = computed(() => pokemon(id.value))
@@ -195,6 +197,15 @@ const spreads = computed(() =>
   })),
 )
 
+// Its most common builds, a card each: its rank and share of its sets, then its item, ability and nature, then its
+// moves, the most run of them first, as its moves' list has them.
+const builds = computed(() =>
+  (m.value?.builds ?? []).map((b) => ({
+    ...b,
+    moves: [...b.moves].sort((x, y) => (moveShares.value[y] ?? 0) - (moveShares.value[x] ?? 0)),
+  })),
+)
+
 // Its Speeds at its sets, as the speed tiers draw a row, with nothing on: the Speeds its builds reach.
 const BARE: SpeedBuild = { ...FASTEST, effect: 'neutral', points: 0 }
 const spread = computed(() => (m.value?.speeds ? setSpread(id.value, speedBuilds(m.value.speeds), BARE) : []))
@@ -304,6 +315,7 @@ const sections = computed(() =>
     { id: 'sec-abilities', label: t('usageMon.abilities'), shown: true },
     { id: 'sec-moves', label: t('usageMon.moves'), shown: moves.value.length > 0 },
     { id: 'sec-items', label: t('usageMon.items'), shown: items.value.length > 0 },
+    { id: 'sec-builds', label: t('usageMon.secBuilds'), shown: builds.value.length > 0 },
     { id: 'sec-speed', label: t('usageMon.speed'), shown: spread.value.length > 0 },
     { id: 'sec-spreads', label: t('usageMon.secSpreads'), shown: spreads.value.length > 0 },
     { id: 'sec-history', label: t('usageMon.secHistory'), shown: months.value.length > 1 },
@@ -506,6 +518,32 @@ const sections = computed(() =>
           <ItemList :items="items" :shares="itemShares" :no-descriptions="!showDescriptions" />
         </section>
       </div>
+
+      <!-- Its most common whole builds, a card each, side by side, wrapping. -->
+      <section v-if="builds.length" id="sec-builds" class="panel" :class="{ 'meta-stale': loading }">
+        <h2 v-tip="t('usageMon.buildsTip')" class="tipped-head">{{ t('usageMon.builds') }}</h2>
+        <p v-if="m.teams" class="muted small builds-of">{{ t('usageMon.buildsOf', { n: m.teams }) }}</p>
+        <ol class="builds">
+          <li v-for="(b, i) in builds" :key="i" class="build" :class="{ main: i === 0 }">
+            <span class="build-head meter" :style="{ '--share': b.share }"
+              ><strong>#{{ i + 1 }}</strong> · {{ percent(b.share) }}</span
+            >
+            <span class="build-item">
+              <template v-if="b.item"><ItemIcon :id="b.item" /><DexRef :to="item(b.item)" meta /></template>
+              <span v-else class="muted">{{ t('usageMon.noItem') }}</span>
+            </span>
+            <span class="build-traits">
+              <DexRef v-if="b.ability" :to="ability(b.ability)" meta />
+              <span v-if="b.nature" v-tip:group="natureTip(b.nature)" class="build-nature">{{
+                natureName(b.nature)
+              }}</span>
+            </span>
+            <ul class="build-moves">
+              <li v-for="mv in b.moves" :key="mv"><DexRef :to="move(mv)" meta /></li>
+            </ul>
+          </li>
+        </ol>
+      </section>
 
       <!-- Its Speeds, as the speed tiers draw a row, and the ways to them. -->
       <section v-if="spread.length" id="sec-speed" class="panel" :class="{ 'meta-stale': loading }">
@@ -989,6 +1027,51 @@ const sections = computed(() =>
   width: calc(100% * var(--share, 0));
   height: 3px;
   background: var(--accent);
+}
+/* Its builds, a card each, as many to a row as fit. */
+.builds-of {
+  margin: -4px 0 8px;
+}
+.builds {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.build {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+}
+.build.main {
+  border-color: var(--accent);
+}
+.build-head {
+  font-size: 0.85em;
+}
+.build-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: bold;
+}
+.build-traits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+}
+.build-nature {
+  font-weight: bold;
+}
+.build-moves {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 /* A list's heading, its options at the right (`ListOptions`): whether the short descriptions show. */
 .panel-head {
