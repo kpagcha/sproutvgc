@@ -143,13 +143,18 @@ const ordinal = (n: number) => `#${n}`
                 :class="{ dropped: s.dropped }"
                 >{{ s.wins }}–{{ s.losses }}<span v-if="s.dropped" class="drop">{{ t('tournaments.drop') }}</span></span
               >
-              <span class="team" aria-hidden="true">
+              <span v-if="s.team.length" class="team" aria-hidden="true">
                 <PokemonIcon v-for="(slot, i) in s.team" :id="slot[0]" :key="i" />
               </span>
+              <!-- Neither a team list nor its Pokémon: the standings didn't say. -->
+              <span v-else class="team muted small">{{ t('tournaments.noList') }}</span>
               <component :is="open.has(s.placing) ? ChevronUp : ChevronDown" :size="16" class="chevron" />
             </button>
             <!-- Its whole sets, a card each, once it's come near the screen; their room until then. -->
-            <div v-if="open.has(s.placing) && !near.has(s.placing)" class="sets-room" aria-hidden="true"></div>
+            <p v-if="open.has(s.placing) && !s.team.length" class="muted small no-team">
+              {{ t('tournaments.noTeam') }}
+            </p>
+            <div v-else-if="open.has(s.placing) && !near.has(s.placing)" class="sets-room" aria-hidden="true"></div>
             <ul v-else-if="open.has(s.placing)" class="sets">
               <li
                 v-for="([mon, it, ab, nature, moves], i) in s.team"
@@ -320,8 +325,10 @@ h1 {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* Six icons wide, whatever the team (five, or none known), so the records line up down the column. */
 .team {
   display: flex;
+  width: calc(6 * 40px);
 }
 .chevron {
   color: var(--muted);
@@ -345,6 +352,10 @@ h1 {
   margin: 0;
   padding: 8px 10px;
 }
+.no-team {
+  margin: 0;
+  padding: 4px 4px 12px 3.5em;
+}
 /* On phones, the team under the name. */
 @media (max-width: 560px) {
   .row {
@@ -364,6 +375,7 @@ h1 {
   .team {
     grid-area: team;
     flex-wrap: wrap;
+    width: auto;
   }
   .chevron {
     grid-area: chevron;

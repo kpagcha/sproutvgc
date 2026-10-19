@@ -806,6 +806,7 @@ export const messages = {
   'tournaments.drop': 'Drop',
   'tournaments.droppedTip': 'Dropped after round {round}',
   'tournaments.noList': 'No team list',
+  'tournaments.noTeam': "Their team list isn't published, nor which Pokémon they brought.",
   'tournaments.day2': '{n} in Day 2',
   'meta.tplayers.all': 'All players',
   'meta.tplayers.day2': 'Day 2',
