@@ -11,7 +11,7 @@ npm run dev         # dev server (base path `/`), also on the LAN for testing on
 npm run build       # marker check + vue-tsc type-check + production build, in parallel (base path `/sproutvgc/`)
 npm run lint        # ESLint (lint:fix to autofix)
 npm run format      # Prettier (no semicolons, single quotes, 120 columns)
-npm run gen-data    # regenerate src/data/generated/ (add `-- --update` to repin the sources to their latest commits, `-- --update-smogon` for Smogon's month alone, `-- --update-tournaments` for the tournaments alone)
+npm run gen-data    # regenerate src/data/generated/ (add `-- --update` to repin the sources to their latest commits, `-- --update-smogon` for Smogon's month alone, `-- --update-tournaments` for the tournaments alone, `-- --offline-tournaments` to make no requests for them, leaving out any event not already generated or cached whole)
 npm run check-text  # check the markers in our curated text (also part of `build`)
 npm run bench-search  # time the search's matching over every language's names, at 1×, 10× and 50× the dex (`-- 1 100` for other scales)
 ```

@@ -1,14 +1,20 @@
-// Official tournaments from Limitless VGC (limitlessvgc.com; notes/usage-stats.md): each event of a regulation, its
-// Day 2 standings and every Day 2 player's team, as the sets they brought (Pokémon, item, ability, nature, moves; no
-// stat points, which the team lists don't have): it publishes the teams of those who made Day 2 alone, not the whole
-// field's. Its robots.txt allows everything; RK9's terms forbid scraping, so its lists aren't read.
-// Pages are cached: a team page never changes (only who used it, which isn't read), and an event's page is read again
-// while the event is recent, as its teams come in over the days after it.
+// Official tournaments from Limitless VGC (notes/usage-stats.md): each event of a regulation, its whole field's
+// standings (every player's placing, record, whether they made Day 2 and the top cut, and when they dropped), the team
+// each one brought, as whole sets (Pokémon, item, ability, nature, moves; no stat points, which team lists don't have),
+// and every round's matches. Which events a regulation has, and of what type, comes from limitlessvgc.com's lists, whose
+// event pages link their standings; the standings, matches and team lists come from the JSON its standings site
+// (standings.limitlessvgc.com) loads, undocumented (`mew.limitlesstcg.com/labs/data/vgc`): one request for the
+// standings, one per round for its matches, and one per player for their team list, about a thousand for a Regional.
+// So the requests are slow (one a second), say who's asking (`get`'s User-Agent, set by the generator), and are made
+// once: every response is cached, and an event once generated is kept from its committed files (the generator's), never
+// requested again. Both sites' robots.txt allow everything; RK9's terms forbid scraping, so its lists aren't read.
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
 const SITE = 'https://limitlessvgc.com'
+const STANDINGS = 'https://standings.limitlessvgc.com'
+const API = 'https://mew.limitlesstcg.com/labs/data/vgc'
 export const PROVIDER = { name: 'Limitless VGC', url: 'https://limitlessvgc.com/' }
 
 /** The kinds of event it lists, by its filter's values, with the name we give each. */
@@ -23,45 +29,69 @@ const TYPES = {
 } as const
 export type EventType = (typeof TYPES)[keyof typeof TYPES]
 
-/** How long after an event its page is read again rather than taken from the cache: teams are published over days. */
-const FRESH_DAYS = 21
-/** A pause between requests, to go easy on the site. */
-const PAUSE_MS = 300
+/** A pause before each request, to go easy on the sites: one a second. */
+const PAUSE_MS = 1000
+/** The division read: Masters, the one the meta is about. */
+const DIVISION = 'MA'
+/** The shape of what's generated for an event: an event generated in another is generated again, not kept. */
+export const FORMAT = 2
 
 export interface TournamentEvent {
   /** Its name as a slug, with its year (`slugOf`): its page's address. */
   id: string
   /** Its number on Limitless VGC, short, for the IDs of several events picked together. */
   n: number
+  /** Its number on the standings site. */
+  t: number
+  /** The shape it was generated in (`FORMAT`). */
+  format: number
   name: string
   /** The day it started, as an ISO date. */
   date: string
   country: string
-  /** Every player, whether or not their team is listed. */
+  /** Every player in its standings, those who made Day 2, and the top cut's. */
   players: number
+  day2: number
+  topCut: number
+  /** Its rounds: Swiss on Day 1 and Day 2, then the top cut's. */
+  rounds: number
   type: EventType
   /** What kind of tournament it is, the datasets' category: Limitless VGC lists only official ones. */
   category: 'official'
   regulation: string
   provider: { name: string; url: string }
+  /** Its standings on Limitless VGC. */
   url: string
-  /** The players whose teams are listed. */
+  /** The players whose team lists are there. */
   teams: number
   /** Who won, and the Pokémon they brought, for the list of events to show without loading the standings. */
   winner?: { player: string; country: string; team: string[] }
 }
 
-/** A Pokémon as brought: its ID (a Mega's when it holds its Mega Stone, as Smogon's stats count it), then its item, ability and nature (Showdown IDs, null when the list doesn't say),
- * then its moves. */
+/** A Pokémon as brought: its ID (a Mega's when it holds its Mega Stone, as Smogon's stats count it), then its item,
+ * ability and nature (Showdown IDs, null when the list doesn't say), then its moves. Without a team list, the Pokémon
+ * alone (the rest null, no moves). */
 export type TeamSlot = [pokemon: string, item: string | null, ability: string | null, nature: string | null, string[]]
 
 export interface Standing {
   placing: number
   player: string
   country: string
-  /** Limitless VGC's team list, shared by every player who brought the same one. */
-  list: number
+  wins: number
+  losses: number
+  /** Whether they made Day 2, and the top cut. */
+  day2?: true
+  topCut?: true
+  /** The round they dropped in, if they did. */
+  dropped?: number
   team: TeamSlot[]
+}
+
+/** A round's matches, each its two players by placing (the second null for a bye) and who won: 1 the first, 2 the
+ * second, 0 neither (a tie, or not played). Its phase: 1 Day 1's Swiss, 2 Day 2's, 3 the top cut. */
+export interface Round {
+  phase: number
+  matches: [number, number | null, 0 | 1 | 2][]
 }
 
 /** What the dex has, to check the site's names against: a Pokémon's ID by its Limitless ID, or whether an ID exists. */
@@ -77,93 +107,222 @@ export interface Known {
 
 type Get = (url: string) => Promise<Buffer | null>
 
+// The standings site's JSON, the little of it read.
+interface ApiTournament {
+  round: number
+  completed: number
+}
+interface ApiStanding {
+  tp_id: number
+  name: string
+  country: string | null
+  placement: number
+  wins: number
+  losses: number
+  day2: number
+  topcut: number
+  dropped: number
+  drop_round: number | null
+  teamlist: number
+  team: string | null
+}
+interface ApiSlot {
+  id: string
+  item: string | null
+  ability: string | null
+  nature: string | null
+  moves: string[]
+}
+interface ApiMatch {
+  phase: number
+  p1_id: number
+  p2_id: number | null
+  winner: number | null
+}
+
+/** Asked to fetch while it mustn't (`offline`): what the event would have needed. */
+class Offline extends Error {}
+
 export class LimitlessVgc {
   private cache: string
   private get: Get
   /** Whether to read the lists of events again, for new ones, rather than take them from the cache. */
   private update: boolean
-  constructor(cache: string, get: Get, update: boolean) {
+  /** Whether to make no requests at all, generating from the cache alone: an event it hasn't whole is left out. */
+  private offline: boolean
+  /** The requests made so far this run. */
+  requests = 0
+  constructor(cache: string, get: Get, options: { update: boolean; offline: boolean }) {
     this.cache = cache
     this.get = get
-    this.update = update
+    this.update = options.update
+    this.offline = options.offline
   }
 
   private async fetch(url: string): Promise<string> {
+    if (this.offline) throw new Offline(url)
     await new Promise((wait) => setTimeout(wait, PAUSE_MS))
+    this.requests++
     const body = await this.get(url)
     if (!body) throw new Error(`Limitless VGC has no ${url}`)
     return body.toString('utf8')
   }
 
-  /** A page, through the cache unless `fresh`. */
-  private async page(path: string, file: string, fresh = false): Promise<string> {
-    const cached = join(this.cache, file)
-    if (fresh || !existsSync(cached)) {
-      const html = await this.fetch(`${SITE}${path}`)
-      mkdirSync(dirname(cached), { recursive: true })
-      writeFileSync(cached, html)
-      return html
+  /** A URL's body, through the cache unless `fresh` (and online). */
+  private async cached(url: string, file: string, fresh = false): Promise<string> {
+    const path = join(this.cache, file)
+    if ((fresh && !this.offline) || !existsSync(path)) {
+      const body = await this.fetch(url)
+      mkdirSync(dirname(path), { recursive: true })
+      writeFileSync(path, body)
+      return body
     }
-    return readFileSync(cached, 'utf8')
+    return readFileSync(path, 'utf8')
   }
 
-  /** Every event of a regulation, oldest first, by its number on the site. */
+  /** The standings site's JSON, its `message`, through the cache. */
+  private async api<T>(path: string, file: string, fresh = false): Promise<T> {
+    const body = JSON.parse(await this.cached(`${API}/${path}`, `api/${file}`, fresh)) as { ok: boolean; message: T }
+    if (!body.ok) throw new Error(`Limitless VGC's ${path}: ${JSON.stringify(body.message)}`)
+    return body.message
+  }
+
+  /** Every event of a regulation, oldest first, by its number on limitlessvgc.com. */
   async events(regulation: string): Promise<number[]> {
     return [...(await this.listed(regulation)).keys()].sort((a, b) => a - b)
   }
 
   /**
-   * An event and its standings. Stops on any name the dex doesn't have when `strict` (the current regulation's); else
-   * leaves it out, saying so (a past regulation's, which may have what the dex no longer does).
+   * An event, its standings and its rounds, or nothing while it isn't over (its standings aren't final) or, offline,
+   * while the cache hasn't all of it. Stops on any name the dex doesn't have when `strict` (the current regulation's);
+   * else leaves it out, saying so (a past regulation's, which may have what the dex no longer does).
    */
   async event(
     n: number,
     regulation: string,
     known: Known,
     strict: boolean,
-  ): Promise<{ event: TournamentEvent; standings: Standing[] }> {
-    const info = await this.info(n, regulation)
-    const recent = Date.now() - Date.parse(`${info.date}T00:00:00Z`) < FRESH_DAYS * 864e5
-    const html = await this.page(`/tournaments/${n}`, `events/${n}.html`, this.update && recent)
+  ): Promise<{ event: TournamentEvent; standings: Standing[]; rounds: Record<number, Round> } | null> {
+    const info = (await this.listed(regulation)).get(n)
+    if (!info) throw new Error(`Limitless VGC doesn't list event ${n} under Regulation ${regulation}`)
+    try {
+      return await this.read(n, info, regulation, known, strict)
+    } catch (error) {
+      if (!(error instanceof Offline)) throw error
+      console.warn(`Limitless VGC's ${info.name} isn't all in the cache: left out (offline)`)
+      return null
+    }
+  }
+
+  private async read(
+    n: number,
+    info: Omit<TournamentEvent, 'teams' | 't' | 'format' | 'day2' | 'topCut' | 'rounds'>,
+    regulation: string,
+    known: Known,
+    strict: boolean,
+  ) {
+    // Its page links its standings, by their number there.
+    const page = await this.cached(`${SITE}/tournaments/${n}`, `events/${n}.html`)
+    const t = Number(page.match(/standings\.limitlessvgc\.com\/(\d+)\/standings/)?.[1])
+    if (!t) throw new Error(`Limitless VGC's ${info.name} links no standings`)
+    // Until it's over, its state is read again each run; once it is, what's cached is final.
+    const cachedOver = (() => {
+      const path = join(this.cache, `api/${t}/tournament.json`)
+      return (
+        existsSync(path) && (JSON.parse(readFileSync(path, 'utf8')) as { message: ApiTournament }).message.completed
+      )
+    })()
+    const q = `tournamentId=${t}&division=${DIVISION}`
+    const tournament = await this.api<ApiTournament>(
+      `tournament?id=${t}&division=${DIVISION}`,
+      `${t}/tournament.json`,
+      !cachedOver,
+    )
+    if (!tournament.completed) {
+      console.warn(`Limitless VGC's ${info.name} isn't over yet: left out until it is`)
+      return null
+    }
+    const field = await this.api<ApiStanding[]>(`standings?${q}`, `${t}/standings.json`, !cachedOver)
+    const lists = field.filter((p) => p.teamlist).length
+    const uncached = field.filter((p) => p.teamlist && !existsSync(join(this.cache, `api/${t}/teams/${p.tp_id}.json`)))
+    if (uncached.length && !this.offline)
+      console.log(
+        `Limitless VGC's ${info.name}: ${uncached.length} team lists to fetch, about ${Math.ceil((uncached.length * PAUSE_MS) / 60000)} minutes`,
+      )
+
     const unknown = new Set<string>()
-    const check = (set: ReadonlySet<string>, what: string, id: string | null) => {
+    // A list leaving one out has its label alone ("Held Item:").
+    const check = (set: ReadonlySet<string>, what: string, name: string | null) => {
+      const id = name && !/:\s*$/.test(name) ? toId(name) : null
       if (id === null || set.has(id)) return id
       unknown.add(`${what} "${id}"`)
       return null
     }
+    const pokemonOf = (limitless: string) => {
+      const id = known.pokemon(limitless)
+      if (!id) unknown.add(`Pokémon "${limitless}"`)
+      return id
+    }
 
     const standings: Standing[] = []
-    for (const row of html.split(/(?=<tr data-rank=)/).slice(1)) {
-      const head = row.match(/^<tr data-rank="(\d+)" data-name="([^"]*)" data-country="([^"]*)"/)
-      const list = row.match(/href="\/teams\/(\d+)"/)
-      if (!head || !list) continue
-      if (standings.some((s) => s.placing === Number(head[1])))
-        throw new Error(`Limitless VGC's ${info.name} lists placing ${head[1]} twice`)
-      const slots = await this.team(Number(list[1]))
+    const placingOf = new Map<number, number>()
+    for (const p of [...field].sort((a, b) => a.placement - b.placement)) {
+      if (standings.some((s) => s.placing === p.placement))
+        throw new Error(`Limitless VGC's ${info.name} has placing ${p.placement} twice`)
+      placingOf.set(p.tp_id, p.placement)
+      const slots = p.teamlist
+        ? await this.api<ApiSlot[]>(`teamlist?tournamentId=${t}&playerId=${p.tp_id}`, `${t}/teams/${p.tp_id}.json`)
+        : null
       const team: TeamSlot[] = []
-      for (const s of slots) {
-        const pokemon = known.pokemon(s.pokemon)
-        if (!pokemon) {
-          unknown.add(`Pokémon "${s.pokemon}"`)
-          continue
+      if (slots) {
+        for (const s of slots) {
+          const pokemon = pokemonOf(s.id)
+          if (!pokemon) continue
+          const item = check(known.items, 'item', s.item)
+          team.push([
+            (item && known.mega(pokemon, item)) || pokemon,
+            item,
+            check(known.abilities, 'ability', s.ability),
+            check(known.natures, 'nature', s.nature),
+            s.moves.flatMap((m) => check(known.moves, 'move', m) ?? []),
+          ])
         }
-        const item = check(known.items, 'item', s.item)
-        team.push([
-          (item && known.mega(pokemon, item)) || pokemon,
-          item,
-          check(known.abilities, 'ability', s.ability),
-          check(known.natures, 'nature', s.nature),
-          s.moves.flatMap((m) => check(known.moves, 'move', m) ?? []),
-        ])
+      } else {
+        // No team list: the Pokémon alone, as its standings name them.
+        for (const s of (p.team ?? '').split(',').filter(Boolean)) {
+          const pokemon = pokemonOf(s)
+          if (pokemon) team.push([pokemon, null, null, null, []])
+        }
       }
       standings.push({
-        placing: Number(head[1]),
-        player: decode(head[2]!),
-        country: head[3]!,
-        list: Number(list[1]),
+        placing: p.placement,
+        player: p.name,
+        country: p.country ?? '',
+        wins: p.wins,
+        losses: p.losses,
+        ...(p.day2 ? { day2: true as const } : {}),
+        ...(p.topcut ? { topCut: true as const } : {}),
+        ...(p.dropped && p.drop_round ? { dropped: p.drop_round } : {}),
         team,
       })
     }
+
+    // Its rounds, each's matches by the players' placings.
+    const rounds: Record<number, Round> = {}
+    for (let r = 1; r <= tournament.round; r++) {
+      const matches = await this.api<ApiMatch[]>(`pairings?${q}&round=${r}`, `${t}/pairings/${r}.json`)
+      const at = (id: number | null) => (id === null ? null : (placingOf.get(id) ?? null))
+      rounds[r] = {
+        phase: matches[0]?.phase ?? 0,
+        matches: matches.flatMap(({ p1_id, p2_id, winner }) => {
+          const a = at(p1_id)
+          if (a === null) return []
+          const won = winner === p1_id ? 1 : winner !== null && winner === p2_id ? 2 : 0
+          return [[a, at(p2_id), won] as [number, number | null, 0 | 1 | 2]]
+        }),
+      }
+    }
+
     if (unknown.size) {
       const msg = `Limitless VGC's ${info.name} (Regulation ${regulation}) names what the dex hasn't: ${[...unknown].join(', ')}`
       if (strict) throw new Error(msg)
@@ -171,26 +330,34 @@ export class LimitlessVgc {
     }
     const first = standings.find((s) => s.placing === 1)
     const winner = first && { player: first.player, country: first.country, team: first.team.map(([p]) => p) }
-    return { event: { ...info, teams: standings.length, ...(winner && { winner }) }, standings }
-  }
-
-  /** What the regulation's list says of an event: its name, date, country, players and type. */
-  private async info(n: number, regulation: string): Promise<Omit<TournamentEvent, 'teams'>> {
-    const info = (await this.listed(regulation)).get(n)
-    if (!info) throw new Error(`Limitless VGC doesn't list event ${n} under Regulation ${regulation}`)
-    return info
+    const event: TournamentEvent = {
+      ...info,
+      t,
+      format: FORMAT,
+      players: standings.length,
+      day2: standings.filter((s) => s.day2).length,
+      topCut: standings.filter((s) => s.topCut).length,
+      rounds: tournament.round,
+      url: `${STANDINGS}/${t}/standings`,
+      teams: lists,
+      ...(winner && { winner }),
+    }
+    return { event, standings, rounds }
   }
 
   /** The regulation's events as its lists give them, one list per type of event (its format on the site is "m-c"),
    * read once a run: through the cache, unless updating. */
-  private lists = new Map<string, Map<number, Omit<TournamentEvent, 'teams'>>>()
-  private async listed(regulation: string): Promise<Map<number, Omit<TournamentEvent, 'teams'>>> {
+  private lists = new Map<
+    string,
+    Map<number, Omit<TournamentEvent, 'teams' | 't' | 'format' | 'day2' | 'topCut' | 'rounds'>>
+  >()
+  private async listed(regulation: string) {
     let byEvent = this.lists.get(regulation)
     if (!byEvent) {
       byEvent = new Map()
       for (const [type, name] of Object.entries(TYPES)) {
-        const html = await this.page(
-          `/tournaments?time=all&type=${type}&format=${format(regulation)}&region=all`,
+        const html = await this.cached(
+          `${SITE}/tournaments?time=all&type=${type}&format=${format(regulation)}&region=all`,
           `lists/${format(regulation)}-${type}.html`,
           this.update,
         )
@@ -208,7 +375,7 @@ export class LimitlessVgc {
             country: m[2]!,
             players: Number(m[4]),
             type: name,
-            category: 'official',
+            category: 'official' as const,
             regulation,
             provider: PROVIDER,
             url: `${SITE}/tournaments/${id}`,
@@ -219,44 +386,6 @@ export class LimitlessVgc {
     }
     return byEvent
   }
-
-  /** A team list's six, as the site names them: the Pokémon by its ID there ("basculegion-f"), the rest made IDs. */
-  private teams = new Map<number, Promise<RawSlot[]>>()
-  private team(list: number): Promise<RawSlot[]> {
-    let p = this.teams.get(list)
-    if (!p) this.teams.set(list, (p = this.page(`/teams/${list}`, `teams/${list}.html`).then(parseTeam)))
-    return p
-  }
-}
-
-interface RawSlot {
-  pokemon: string
-  item: string | null
-  ability: string | null
-  nature: string | null
-  moves: string[]
-}
-
-function parseTeam(html: string): RawSlot[] {
-  return html
-    .split(/(?=<div class="pkmn" data-id=)/)
-    .slice(1)
-    .map((block) => {
-      const text = (cls: string) => {
-        const m = block.match(new RegExp(`<div class="${cls}">([^<]*)</div>`))
-        return m ? decode(m[1]!).trim() : null
-      }
-      const id = (s: string | null) => (s ? toId(s) || null : null)
-      const moves = block.match(/<ul class="moves">([\s\S]*?)<\/ul>/)?.[1] ?? ''
-      return {
-        pokemon: block.match(/^<div class="pkmn" data-id="([^"]+)"/)![1]!,
-        // A list with no item has the label alone, "Held Item:".
-        item: id(text('item')?.replace(/^Held Item:?$/, '') ?? null),
-        ability: id(text('ability')?.replace(/^Ability:\s*/, '') ?? null),
-        nature: id(text('nature')?.replace(/\s*Nature$/, '') ?? null),
-        moves: [...moves.matchAll(/<li>([^<]*)<\/li>/g)].map((m) => toId(decode(m[1]!))).filter(Boolean),
-      }
-    })
 }
 
 /**

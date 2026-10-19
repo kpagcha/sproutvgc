@@ -2,7 +2,8 @@
 // names in every locale from PokéAPI's data (`languages.ts` says where) and `overrides.ts`, which fills in what
 // PokéAPI lacks or has outdated. The regulation is `VITE_REGULATION` in `.env`. Run with `npm run gen-data`; `npm run gen-data -- --update` first moves every pin to
 // the latest version, `-- --update-smogon` only Smogon's months (what the monthly refresh workflow runs), and
-// `-- --update-tournaments` only the tournaments (the weekly one).
+// `-- --update-tournaments` only the tournaments (the weekly one); `-- --offline-tournaments` makes no requests for
+// tournaments, leaving out any event not already generated or cached whole.
 //
 // Showdown's own code loads the data (through jiti, which runs its TypeScript), so the Champions mod is merged over
 // Gen 9 and the format's rules apply exactly as on Showdown. Availability comes from the regulation's legal Pokémon:
@@ -29,7 +30,7 @@ import { ConditionScan } from './conditions.ts'
 import { itemCategorizer } from './itemCategories.ts'
 import { SPEED_ABILITIES, SPEED_ITEMS } from '../src/lib/speed.ts'
 import { histories, Smogon, withPrevious, type MetaEntry, type Snapshot } from './smogon.ts'
-import { LimitlessVgc, type TournamentEvent } from './limitlessVgc.ts'
+import { FORMAT as TOURNAMENT_FORMAT, LimitlessVgc, type TournamentEvent } from './limitlessVgc.ts'
 import { ITEM_ICONS, POKEMON_ICONS, SpriteSource, iconIndexes, sheetLayout, trimSheet } from './sprites.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -41,6 +42,9 @@ const SPRITES_OUT = join(ROOT, 'src/assets/sprites')
 const PUBLIC_SPRITES = join(ROOT, 'public/sprites')
 
 const SHOWDOWN_REPO = 'https://github.com/smogon/pokemon-showdown.git'
+/** Who's asking, on the requests to the sites without an API of their own for us (Limitless VGC's): the site, to be
+ * reached at. */
+const USER_AGENT = 'sproutvgc (+https://kpagcha.github.io/sproutvgc/)'
 const POKEAPI_RAW = 'https://raw.githubusercontent.com/PokeAPI/pokeapi'
 const CLIENT_REPO = 'https://github.com/smogon/pokemon-showdown-client.git'
 const CLIENT_RAW = 'https://raw.githubusercontent.com/smogon/pokemon-showdown-client'
@@ -204,9 +208,9 @@ async function get(url: string): Promise<string> {
 }
 
 /** The body of a GET request as bytes, or null when `missingOk` and there's nothing there (404). */
-async function getBinary(url: string, missingOk: boolean): Promise<Buffer | null> {
+async function getBinary(url: string, missingOk: boolean, headers?: Record<string, string>): Promise<Buffer | null> {
   for (let attempt = 1; ; attempt++) {
-    const res = await fetch(url).catch((error: Error) => error)
+    const res = await fetch(url, { headers }).catch((error: Error) => error)
     if (res instanceof Response && res.ok) return Buffer.from(await res.arrayBuffer())
     if (missingOk && res instanceof Response && res.status === 404) return null
     const retry = !(res instanceof Response) || res.status >= 500
@@ -768,12 +772,18 @@ async function main() {
   await writeJson('meta/rosters.json', rosters)
 
   // Tournaments: every official event of each regulation on Limitless VGC (the current one and those Smogon's months
-  // or earlier runs pinned), as listed there (`tournaments/index.json`, by ID, its name as a slug: `regional-nice-2026`;
-  // the oldest of two of one name and year keeps it, the other gets its month too), and each one's
-  // standings, the players whose teams it publishes with the sets they brought (`tournaments/<id>.json`, by placing).
-  // A past regulation's teams aren't held to the dex: what it no longer has is left out.
+  // or earlier runs pinned), once it's over, as listed there (`tournaments/index.json`, by ID, its name as a slug:
+  // `regional-nice-2026`; the oldest of two of one name and year keeps it, the other gets its month too), each one's
+  // standings, its whole field by placing with the sets each player brought (`tournaments/<id>.json`), and its rounds'
+  // matches (`tournaments/<id>.rounds.json`). An event generated before, in the same shape, is kept from its committed
+  // files rather than requested again: about a thousand requests a Regional, made once. A past regulation's teams
+  // aren't held to the dex: what it no longer has is left out.
   const updateTournaments = process.argv.includes('--update') || process.argv.includes('--update-tournaments')
-  const limitless = new LimitlessVgc(join(CACHE, 'limitlessvgc'), (url) => getBinary(url, true), updateTournaments)
+  const limitless = new LimitlessVgc(
+    join(CACHE, 'limitlessvgc'),
+    (url) => getBinary(url, true, { 'User-Agent': USER_AGENT }),
+    { update: updateTournaments, offline: process.argv.includes('--offline-tournaments') },
+  )
   const knownSets = {
     ...known,
     natures: new Set(Object.keys(natureNames)),
@@ -787,7 +797,24 @@ async function main() {
       return to && legal.has(speciesId(to)) ? speciesId(to) : undefined
     },
   }
-  rmSync(join(OUT, 'tournaments'), { recursive: true, force: true })
+  // The events generated before, in this shape, by their number, with their files as they are.
+  const before = new Map<number, { event: TournamentEvent; files: Record<string, string> }>()
+  const tournamentsOut = join(OUT, 'tournaments')
+  if (existsSync(join(tournamentsOut, 'index.json'))) {
+    const index = JSON.parse(readFileSync(join(tournamentsOut, 'index.json'), 'utf8')) as Record<
+      string,
+      TournamentEvent
+    >
+    for (const e of Object.values(index)) {
+      const names = [`${e.id}.json`, `${e.id}.rounds.json`]
+      if (e.format !== TOURNAMENT_FORMAT || !names.every((f) => existsSync(join(tournamentsOut, f)))) continue
+      before.set(e.n, {
+        event: e,
+        files: Object.fromEntries(names.map((f) => [f, readFileSync(join(tournamentsOut, f), 'utf8')])),
+      })
+    }
+  }
+  rmSync(tournamentsOut, { recursive: true, force: true })
   const events: Record<string, TournamentEvent> = {}
   const regulations = new Set([reg, ...Object.keys(sources.smogon), ...Object.keys(sources.limitlessvgc)])
   for (const r of regulations) {
@@ -799,7 +826,16 @@ async function main() {
     }
     // Oldest first, so that an event's address stays the same when a later one shares its name.
     for (const n of sources.limitlessvgc[r]) {
-      const { event, standings } = await limitless.event(n, r, knownSets, r === reg)
+      const kept = before.get(n)
+      if (kept) {
+        events[kept.event.id] = kept.event
+        mkdirSync(tournamentsOut, { recursive: true })
+        for (const [file, text] of Object.entries(kept.files)) writeFileSync(join(tournamentsOut, file), text)
+        continue
+      }
+      const found = await limitless.event(n, r, knownSets, r === reg)
+      if (!found) continue
+      const { event, standings, rounds } = found
       if (events[event.id]) event.id = `${event.id}-${event.date.slice(5, 7)}`
       if (events[event.id]) throw new Error(`Two tournaments would be ${event.id}: tell them apart in slugOf`)
       events[event.id] = event
@@ -807,9 +843,11 @@ async function main() {
         `tournaments/${event.id}.json`,
         Object.fromEntries(standings.map(({ placing, ...s }) => [placing, s])),
       )
+      await writeJson(`tournaments/${event.id}.rounds.json`, rounds)
     }
   }
   await writeJson('tournaments/index.json', events)
+  if (limitless.requests) console.log(`Made ${limitless.requests} requests to Limitless VGC`)
 
   // Sprites: the icon sheets cut down to the regulation's entries, in ID order, and each legal Pokémon's own sprite.
   const clientData = await get(`${CLIENT_RAW}/${sources.client}/play.pokemonshowdown.com/src/battle-dex-data.ts`)
