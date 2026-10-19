@@ -232,9 +232,15 @@ const metaSpeeds = computed((): SpreadPoint[] => {
   return [...bySpeed].map(([speed, w]) => ({ speed, share: w / total, builds: [] })).sort((a, b) => b.speed - a.speed)
 })
 // The speed tiers with it as yours, at its most common build (as picking it there puts it).
+const commonBuild = computed(() => m.value?.speeds && speedBuilds(m.value.speeds)[0])
 const tiersQuery = computed(() => {
-  const b = m.value?.speeds && speedBuilds(m.value.speeds)[0]
+  const b = commonBuild.value
   return { mine: id.value, ...(b && { mynat: b.effect, mypts: String(b.points) }) }
+})
+// The comparison with it as yours, at its most common build too.
+const compareQuery = computed(() => {
+  const b = commonBuild.value
+  return { a: id.value, ...(b && { anat: b.effect, apts: String(b.points) }) }
 })
 // Its side: its sets, or its most common Speed alone.
 const mostCommon = computed(() => (spread.value.length ? commonSpeed(spread.value) : null))
@@ -570,7 +576,7 @@ const sections = computed(() =>
         </template>
         <p class="links">
           <AppLink :to="{ name: 'speedTiers', query: tiersQuery }">{{ t('usageMon.toTiers') }} ›</AppLink>
-          <AppLink :to="{ name: 'speedCompare', query: { a: id } }">{{ t('usageMon.toCompare') }} ›</AppLink>
+          <AppLink :to="{ name: 'speedCompare', query: compareQuery }">{{ t('usageMon.toCompare') }} ›</AppLink>
         </p>
       </section>
 
