@@ -18,7 +18,6 @@ import EffectTag from '@/components/EffectTag'
 import FolderTabs from '@/components/FolderTabs.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
-import SectionNav from '@/components/SectionNav.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
 
@@ -27,7 +26,7 @@ import TypeIcon from '@/components/TypeIcon'
 // in the URL as `?day=`), its standings (the whole event's in three parts, the top cut, the rest of Day 2 and Day 1;
 // a day's its players with their record that day) and then its Pokémon (each one's share of the day's teams and how
 // its teams did in the day's matches, by usage or win rate, the top ones or all, each leading to its meta page on its
-// regulation's data); the two a row of links stuck to the top, the one being read marked (`SectionNav`).
+// regulation's data).
 // Each player's placing, name and country, record (marked when they dropped), and the six they brought, as icons;
 // unfolded (one by one, or all at once), their whole sets, a card each, each entry leading to its meta page: its
 // sprite and types over a band of its first type's color, its item, ability and nature (with the stats it raises and
@@ -142,12 +141,6 @@ const shownParts = computed(() => {
 const dayRecords = computed(() => (day.value !== 'all' && rounds.value ? recordsOf(rounds.value, day.value) : null))
 const recordOf = (s: Standing & { placing: number }) => dayRecords.value?.get(s.placing) ?? s
 
-/** Its sections, a row of links stuck to the top, the one being read marked. */
-const sections = computed(() => [
-  { id: 'sec-standings', label: t('tournaments.standings') },
-  { id: 'sec-pokemon', label: t('tournaments.pokemonStats') },
-])
-
 const count = (n: number) => n.toLocaleString(locale.value)
 const ordinal = (n: number) => `#${n}`
 </script>
@@ -170,11 +163,8 @@ const ordinal = (n: number) => `#${n}`
     </div>
 
     <!-- The day: tabs standing on the standings' band, the whole event apart at the end. -->
-    <!-- Its sections, a row of links stuck to the top: the standings (from the day's tabs) and the Pokémon. -->
-    <SectionNav :sections="sections" />
 
     <FolderTabs
-      id="sec-standings"
       class="day-tabs"
       :model-value="day"
       :label="t('tournaments.days')"
@@ -300,7 +290,7 @@ const ordinal = (n: number) => `#${n}`
     </section>
 
     <!-- The day's Pokémon, under its standings. -->
-    <section id="sec-pokemon" class="panel banded stats-panel">
+    <section class="panel banded stats-panel">
       <div class="band">
         <h2 class="band-title">
           {{ t('tournaments.pokemonStats') }} <span class="band-day">· {{ t(`tournaments.day.${day}`) }}</span>
@@ -394,15 +384,6 @@ h1 {
 .note {
   margin: 12px 0 0;
 }
-/* Room above each section for the row of links stuck to the top, when scrolled to it; the Pokémon table's header
-   sticks under that row rather than behind it. */
-.day-tabs,
-.stats-panel {
-  scroll-margin-top: 48px;
-}
-.stats-panel :deep(.dex-table .head) {
-  top: 37px;
-}
 /* The day's tabs standing on the standings' band: the one shown in the band's color. */
 .day-tabs {
   --tab-bg: var(--accent);
@@ -417,6 +398,11 @@ h1 {
 }
 .about {
   margin: 2px 0 8px;
+}
+/* Its rows laid out from the start, not when they come into view as dex tables' are: a few dozen at most, and laid out
+   as the page scrolls into them, the page's length changed under the scroll, making it jump. */
+.dex-table.stats .row {
+  content-visibility: visible;
 }
 /* Its columns in rem, not em: the header row's text is smaller than the rows', and em widths would shrink with it,
    leaving the header out of line with the numbers under it. */
