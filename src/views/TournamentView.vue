@@ -29,8 +29,8 @@ import TypeIcon from '@/components/TypeIcon'
 // regulation's data).
 // Each player's placing, name and country, record (marked when they dropped), and the six they brought, as icons;
 // unfolded (one by one, or all at once), their whole sets, a card each, each entry leading to its meta page: its
-// sprite and types over a band of its first type's color, its item, ability and nature (with the stats it raises and
-// lowers) on rows of their own, and its moves two by two, each tinted with its type. A player whose team list isn't
+// sprite and types in a band, its item, ability and nature (with the stats it raises and lowers) on rows of their
+// own, and its moves two by two, each with its type's badge. A player whose team list isn't
 // there has the Pokémon alone. Rows far down the field aren't laid out until near the screen.
 const route = useRoute()
 const router = useRouter()
@@ -224,12 +224,7 @@ const ordinal = (n: number) => `#${n}`
             </p>
             <div v-else-if="open.has(s.placing) && !near.has(s.placing)" class="sets-room" aria-hidden="true"></div>
             <ul v-else-if="open.has(s.placing)" class="sets">
-              <li
-                v-for="([mon, it, ab, nature, moves], i) in s.team"
-                :key="i"
-                class="set"
-                :data-type="POKEMON[mon]?.types[0]"
-              >
+              <li v-for="([mon, it, ab, nature, moves], i) in s.team" :key="i" class="set">
                 <div class="set-head">
                   <img
                     v-if="!POKEMON[mon]?.noSprite"
@@ -274,7 +269,7 @@ const ordinal = (n: number) => `#${n}`
                   </template>
                 </dl>
                 <ul v-if="moves.length" class="set-moves">
-                  <li v-for="mv in moves" :key="mv" class="set-move" :data-type="MOVES[mv]?.type">
+                  <li v-for="mv in moves" :key="mv" class="set-move">
                     <TypeIcon v-if="MOVES[mv]" :type="MOVES[mv].type" /><DexRef :to="move(mv)" meta />
                   </li>
                 </ul>
@@ -633,7 +628,7 @@ h1 {
   padding: 4px 4px 12px;
   list-style: none;
 }
-/* A set: an ink-framed card with a hard shadow, its Pokémon's first type its color (`--tc`, from `data-type`). */
+/* A set: an ink-framed card with a hard shadow. */
 .set {
   display: flex;
   flex-direction: column;
@@ -642,14 +637,14 @@ h1 {
   border: 1px solid var(--ink);
   box-shadow: var(--hard-sm);
 }
-/* Its head: a band of its type's color, washed toward the panel, the sprite at the left wholly inside it, its name and
-   types beside it. */
+/* Its head: a band in the panel's other shade, the sprite at the left wholly inside it, its name and types beside
+   it. */
 .set-head {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 2px 10px 2px 6px;
-  background: color-mix(in srgb, var(--tc, var(--accent)) 28%, var(--panel));
+  background: var(--panel-alt);
   border-bottom: 1px solid var(--ink);
 }
 .set-sprite {
@@ -720,7 +715,7 @@ h1 {
 .set-nature .down {
   color: var(--bad);
 }
-/* Its moves, two by two: each a chip of its type, its badge and name over a wash of its color, edged in it. */
+/* Its moves, two by two: each a chip, its type's badge and its name. */
 .set-moves {
   --icon-scale: 1;
   display: grid;
@@ -737,8 +732,8 @@ h1 {
   min-width: 0;
   padding: 3px 5px 3px 3px;
   font-size: 0.9em;
-  background: color-mix(in srgb, var(--tc) 14%, var(--panel));
-  border: 1px solid color-mix(in srgb, var(--tc) 55%, var(--border));
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
 }
 .set-move :deep(a) {
   overflow: hidden;
