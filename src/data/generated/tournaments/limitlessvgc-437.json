@@ -1,0 +1,749 @@
+{
+  "1": {
+    "player": "Takuma Yamazaki",
+    "country": "JP",
+    "list": 6808,
+    "team": [
+      ["floetteeternal", "floettite", "flowerveil", "timid", ["moonblast", "dazzlinggleam", "lightofruin", "protect"]],
+      ["basculegion", "lifeorb", "adaptability", "adamant", ["wavecrash", "lastrespects", "aquajet", "protect"]],
+      ["kingambit", "chopleberry", "defiant", "adamant", ["suckerpunch", "kowtowcleave", "lowkick", "ironhead"]],
+      ["dragonite", "dragoninite", "multiscale", "modest", ["dragonpulse", "heatwave", "extremespeed", "protect"]],
+      ["garchomp", "choicescarf", "roughskin", "adamant", ["dragonclaw", "stompingtantrum", "earthquake", "rockslide"]],
+      ["sneasler", "focussash", "poisontouch", "jolly", ["closecombat", "direclaw", "fakeout", "feint"]]
+    ]
+  },
+  "2": {
+    "player": "Hiroshi Onishi",
+    "country": "JP",
+    "list": 6809,
+    "team": [
+      ["kingambit", "occaberry", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "lowkick"]],
+      ["basculegion", "lifeorb", "adaptability", "adamant", ["wavecrash", "lastrespects", "aquajet", "protect"]],
+      ["garchomp", "sitrusberry", "roughskin", "jolly", ["dragonclaw", "earthquake", "rockslide", "protect"]],
+      ["charizard", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["whimsicott", "focussash", "prankster", "timid", ["moonblast", "tailwind", "encore", "protect"]],
+      ["floetteeternal", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "lightofruin", "protect"]]
+    ]
+  },
+  "3": {
+    "player": "Zachary Weed",
+    "country": "US",
+    "list": 6810,
+    "team": [
+      ["froslass", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "auroraveil", "protect"]],
+      ["sneasler", "whiteherb", "unburden", "adamant", ["closecombat", "gunkshot", "fakeout", "protect"]],
+      ["lycanrocdusk", "focussash", "toughclaws", "adamant", ["rockslide", "closecombat", "accelerock", "protect"]],
+      ["basculegion", "lifeorb", "adaptability", "jolly", ["wavecrash", "lastrespects", "aquajet", "protect"]],
+      ["kingambit", "blackglasses", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]],
+      ["scovillain", "scovillainite", "moody", "bold", ["overheat", "gigadrain", "ragepowder", "protect"]]
+    ]
+  },
+  "4": {
+    "player": "João Felipe Leite",
+    "country": "BR",
+    "list": 6811,
+    "team": [
+      ["froslass", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "auroraveil", "protect"]],
+      ["kingambit", "blackglasses", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]],
+      ["sneasler", "whiteherb", "unburden", "adamant", ["fakeout", "closecombat", "direclaw", "protect"]],
+      ["lycanrocdusk", "focussash", "toughclaws", "adamant", ["accelerock", "closecombat", "rockslide", "protect"]],
+      ["basculegion", "lifeorb", "adaptability", "adamant", ["wavecrash", "lastrespects", "aquajet", "protect"]],
+      ["scovillain", "scovillainite", "moody", "bold", ["overheat", "gigadrain", "ragepowder", "protect"]]
+    ]
+  },
+  "5": {
+    "player": "Antonio Sánchez",
+    "country": "ES",
+    "list": 6812,
+    "team": [
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "partingshot", "flareblitz", "protect"]],
+      ["toxapex", "leftovers", "regenerator", "relaxed", ["banefulbunker", "infestation", "toxic", "wideguard"]],
+      ["garchomp", "choicescarf", "roughskin", "adamant", ["stompingtantrum", "earthquake", "dragonclaw", "rockslide"]],
+      ["charizard", "charizarditey", "blaze", "timid", ["protect", "heatwave", "solarbeam", "weatherball"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["protect", "sludgebomb", "earthpower", "sleeppowder"]],
+      ["sylveon", "fairyfeather", "pixilate", "quiet", ["detect", "hypervoice", "quickattack", "yawn"]]
+    ]
+  },
+  "6": {
+    "player": "YUYA WAKASUGI",
+    "country": "JP",
+    "list": 6813,
+    "team": [
+      ["whimsicott", "focussash", "prankster", "timid", ["moonblast", "tailwind", "encore", "protect"]],
+      ["basculegion", "lifeorb", "adaptability", "adamant", ["wavecrash", "lastrespects", "aquajet", "protect"]],
+      ["floetteeternal", "floettite", "flowerveil", "timid", ["moonblast", "dazzlinggleam", "lightofruin", "protect"]],
+      ["dragonite", "dragoninite", "innerfocus", "modest", ["dragonpulse", "heatwave", "thunderbolt", "protect"]],
+      ["sneasler", "whiteherb", "unburden", "jolly", ["direclaw", "closecombat", "rockslide", "fakeout"]],
+      ["kingambit", "chopleberry", "defiant", "adamant", ["kowtowcleave", "ironhead", "lowkick", "suckerpunch"]]
+    ]
+  },
+  "7": {
+    "player": "Stefano Greppi",
+    "country": "IT",
+    "list": 6814,
+    "team": [
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "protect"]],
+      ["aerodactyl", "aerodactylite", "unnerve", "jolly", ["rockslide", "dualwingbeat", "tailwind", "icefang"]],
+      ["farigiraf", "sitrusberry", "armortail", "bold", ["psychic", "thunderbolt", "trickroom", "protect"]],
+      ["garchomp", "lifeorb", "roughskin", "jolly", ["earthquake", "rocktomb", "dragonclaw", "protect"]],
+      ["kingambit", "focussash", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "lowkick"]],
+      ["charizard", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "solarbeam", "protect"]]
+    ]
+  },
+  "8": {
+    "player": "Giovanni Piscitelli",
+    "country": "IT",
+    "list": 6815,
+    "team": [
+      ["garchomp", "lifeorb", "roughskin", "jolly", ["earthquake", "dragonclaw", "rockslide", "protect"]],
+      ["kingambit", "chopleberry", "defiant", "adamant", ["kowtowcleave", "ironhead", "suckerpunch", "lowkick"]],
+      ["charizard", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["whimsicott", "focussash", "prankster", "timid", ["moonblast", "encore", "tailwind", "protect"]],
+      ["basculegion", "mysticwater", "adaptability", "adamant", ["wavecrash", "lastrespects", "aquajet", "protect"]],
+      ["floetteeternal", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "lightofruin", "protect"]]
+    ]
+  },
+  "9": {
+    "player": "Shohei Kimura",
+    "country": "JP",
+    "list": 6816,
+    "team": [
+      ["charizard", "charizarditey", "solarpower", "timid", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["kingambit", "blackglasses", "defiant", "adamant", ["kowtowcleave", "ironhead", "suckerpunch", "protect"]],
+      ["floetteeternal", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "lightofruin", "protect"]],
+      ["whimsicott", "focussash", "prankster", "timid", ["moonblast", "tailwind", "encore", "protect"]],
+      ["garchomp", "lifeorb", "roughskin", "jolly", ["dragonclaw", "earthquake", "rockslide", "protect"]],
+      ["basculegion", "colburberry", "adaptability", "adamant", ["wavecrash", "lastrespects", "aquajet", "protect"]]
+    ]
+  },
+  "10": {
+    "player": "Carson St Denis",
+    "country": "US",
+    "list": 6817,
+    "team": [
+      ["garchomp", "lifeorb", "roughskin", "jolly", ["earthquake", "rockslide", "dragonclaw", "protect"]],
+      ["sneasler", "whiteherb", "unburden", "adamant", ["closecombat", "direclaw", "rocktomb", "protect"]],
+      ["kingambit", "chopleberry", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "lowkick", "ironhead"]],
+      ["basculegion", "mysticwater", "adaptability", "adamant", ["aquajet", "wavecrash", "lastrespects", "protect"]],
+      ["charizard", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "solarbeam", "protect"]],
+      ["whimsicott", "focussash", "prankster", "timid", ["encore", "moonblast", "tailwind", "protect"]]
+    ]
+  },
+  "11": {
+    "player": "Cary D'Ortona",
+    "country": "US",
+    "list": 6818,
+    "team": [
+      ["farigiraf", "sitrusberry", "armortail", "calm", ["psychic", "helpinghand", "trickroom", "protect"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "extremespeed", "headsmash", "protect"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "protect"]],
+      ["staraptor", "staraptite", "intimidate", "jolly", ["dualwingbeat", "closecombat", "tailwind", "protect"]],
+      ["raichu", "raichunitey", "lightningrod", "timid", ["fakeout", "zapcannon", "focusblast", "protect"]],
+      ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "swordsdance", "suckerpunch", "protect"]]
+    ]
+  },
+  "12": {
+    "player": "Emilio Forbes",
+    "country": "US",
+    "list": 6819,
+    "team": [
+      ["aerodactyl", "aerodactylite", "unnerve", "jolly", ["rockslide", "dualwingbeat", "tailwind", "protect"]],
+      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "yawn", "protect"]],
+      ["tsareena", "focussash", "queenlymajesty", "jolly", ["powerwhip", "tripleaxel", "lowkick", "protect"]],
+      ["sneasler", "whiteherb", "unburden", "jolly", ["closecombat", "direclaw", "fakeout", "feint"]]
+    ]
+  },
+  "13": {
+    "player": "Navjit Joshi",
+    "country": "CA",
+    "list": 6820,
+    "team": [
+      ["whimsicott", "occaberry", "prankster", "timid", ["tailwind", "grassknot", "moonblast", "charm"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["headsmash", "flareblitz", "protect", "extremespeed"]],
+      ["raichu", "raichunitey", "lightningrod", "timid", ["focusblast", "zapcannon", "protect", "fakeout"]],
+      ["kingambit", "lifeorb", "defiant", "adamant", ["protect", "ironhead", "suckerpunch", "kowtowcleave"]],
+      ["staraptor", "staraptite", "intimidate", "jolly", ["protect", "closecombat", "roost", "bravebird"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["detect", "calmmind", "hyperbeam", "hypervoice"]]
+    ]
+  },
+  "14": {
+    "player": "Justin Tang",
+    "country": "US",
+    "list": 6821,
+    "team": [
+      ["sneasler", "focussash", "poisontouch", "jolly", ["fakeout", "closecombat", "poisonjab", "quickguard"]],
+      ["sinistcha", "colburberry", "hospitality", "bold", ["matchagotcha", "ragepowder", "trickroom", "protect"]],
+      ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]],
+      ["blastoise", "blastoisinite", "raindish", "modest", ["waterspout", "darkpulse", "shellsmash", "protect"]],
+      ["delphox", "delphoxite", "blaze", "timid", ["heatwave", "psychic", "nastyplot", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "careful", ["partingshot", "flareblitz", "throatchop", "fakeout"]]
+    ]
+  },
+  "15": {
+    "player": "Filip Woźniak",
+    "country": "PL",
+    "list": 6822,
+    "team": [
+      ["venusaur", "occaberry", "chlorophyll", "timid", ["leafstorm", "sludgebomb", "sleeppowder", "protect"]],
+      ["primarina", "lifeorb", "liquidvoice", "quiet", ["protect", "hypervoice", "moonblast", "aquajet"]],
+      ["kingambit", "focussash", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "protect"]],
+      ["farigiraf", "sitrusberry", "armortail", "bold", ["psychic", "thunderbolt", "protect", "trickroom"]],
+      ["torkoal", "charcoal", "drought", "quiet", ["weatherball", "helpinghand", "eruption", "protect"]],
+      ["blaziken", "blazikenite", "speedboost", "adamant", ["flareblitz", "closecombat", "rockslide", "detect"]]
+    ]
+  },
+  "16": {
+    "player": "Chloe Bourke",
+    "country": "AU",
+    "list": 6823,
+    "team": [
+      ["kingambit", "chopleberry", "defiant", "adamant", ["protect", "kowtowcleave", "suckerpunch", "lowkick"]],
+      ["kleavor", "focussash", "sharpness", "adamant", ["protect", "stoneaxe", "xscissor", "feint"]],
+      ["metagross", "metagrossite", "clearbody", "jolly", ["protect", "ironhead", "psychicfangs", "icepunch"]],
+      ["whimsicott", "fairyfeather", "prankster", "timid", ["protect", "moonblast", "tailwind", "encore"]],
+      ["raichu", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "fakeout"]],
+      ["basculegion", "lifeorb", "adaptability", "adamant", ["protect", "wavecrash", "lastrespects", "aquajet"]]
+    ]
+  },
+  "17": {
+    "player": "Narawitch Naenna",
+    "country": "TH",
+    "list": 6824,
+    "team": [
+      ["pelipper", "sitrusberry", "drizzle", "modest", ["hurricane", "weatherball", "wideguard", "tailwind"]],
+      ["charizard", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "hurricane", "protect"]],
+      ["archaludon", "leftovers", "stamina", "calm", ["protect", "dragonpulse", "flashcannon", "electroshot"]],
+      ["grimmsnarl", "lightclay", "prankster", "sassy", ["lightscreen", "spiritbreak", "reflect", "partingshot"]],
+      ["swampert", "swampertite", "torrent", "adamant", ["icepunch", "wavecrash", "earthquake", "protect"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["protect", "sludgebomb", "sleeppowder", "leafstorm"]]
+    ]
+  },
+  "18": {
+    "player": "Nikolaj Høj Nielsen",
+    "country": "DK",
+    "list": 6825,
+    "team": [
+      ["camerupt", "cameruptite", "solidrock", "quiet", ["protect", "earthpower", "heatwave", "ancientpower"]],
+      ["kingambit", "expertbelt", "defiant", "adamant", ["kowtowcleave", "ironhead", "suckerpunch", "lowkick"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "protect"]],
+      ["kangaskhan", "lifeorb", "scrappy", "brave", ["doubleedge", "fakeout", "hammerarm", "icepunch"]],
+      ["farigiraf", "sitrusberry", "armortail", "calm", ["psychic", "thunderbolt", "trickroom", "helpinghand"]],
+      ["aerodactyl", "aerodactylite", "unnerve", "jolly", ["rockslide", "dualwingbeat", "icefang", "tailwind"]]
+    ]
+  },
+  "19": {
+    "player": "Taran Birdee",
+    "country": "GB",
+    "list": 6826,
+    "team": [
+      ["basculegion", "lifeorb", "adaptability", "adamant", ["lastrespects", "wavecrash", "aquajet", "protect"]],
+      ["garchomp", "sitrusberry", "roughskin", "adamant", ["stompingtantrum", "dragonclaw", "rockslide", "protect"]],
+      ["charizard", "charizarditey", "drought", "modest", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["whimsicott", "focussash", "prankster", "timid", ["tailwind", "moonblast", "encore", "protect"]],
+      ["kingambit", "chopleberry", "defiant", "adamant", ["kowtowcleave", "ironhead", "suckerpunch", "lowkick"]],
+      ["floetteeternal", "floettite", "flowerveil", "timid", ["moonblast", "dazzlinggleam", "lightofruin", "protect"]]
+    ]
+  },
+  "20": {
+    "player": "Raghav Malaviya",
+    "country": "US",
+    "list": 6827,
+    "team": [
+      ["swampert", "swampertite", "torrent", "adamant", ["wavecrash", "earthquake", "icepunch", "protect"]],
+      ["grimmsnarl", "lightclay", "prankster", "sassy", ["spiritbreak", "reflect", "lightscreen", "partingshot"]],
+      ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "dragonpulse", "flashcannon", "protect"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["sleeppowder", "sludgebomb", "leafstorm", "protect"]],
+      ["charizard", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "hurricane", "protect"]],
+      ["pelipper", "sitrusberry", "drizzle", "bold", ["weatherball", "hurricane", "wideguard", "tailwind"]]
+    ]
+  },
+  "21": {
+    "player": "alexander canseco salas",
+    "country": "MX",
+    "list": 6828,
+    "team": [
+      ["sneasler", "focussash", "poisontouch", "jolly", ["closecombat", "rockslide", "direclaw", "fakeout"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hyperbeam", "quickattack", "hypervoice", "protect"]],
+      ["farigiraf", "sitrusberry", "armortail", "quiet", ["thunderbolt", "psychic", "protect", "trickroom"]],
+      ["staraptor", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
+      ["kingambit", "chopleberry", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "protect"]],
+      ["garchomp", "lifeorb", "roughskin", "jolly", ["rockslide", "stompingtantrum", "dragonclaw", "protect"]]
+    ]
+  },
+  "22": {
+    "player": "Simone Sanvito",
+    "country": "IT",
+    "list": 6829,
+    "team": [
+      ["excadrill", "focussash", "sandrush", "adamant", ["highhorsepower", "ironhead", "rockslide", "protect"]],
+      ["staraptor", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
+      ["sinistcha", "colburberry", "hospitality", "bold", ["matchagotcha", "shadowball", "ragepowder", "protect"]],
+      ["milotic", "sitrusberry", "competitive", "calm", ["scald", "icebeam", "icywind", "protect"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      ["tyranitar", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "lowkick", "protect"]]
+    ]
+  },
+  "23": {
+    "player": "William Brown",
+    "country": "US",
+    "list": 6827,
+    "team": [
+      ["swampert", "swampertite", "torrent", "adamant", ["wavecrash", "earthquake", "icepunch", "protect"]],
+      ["grimmsnarl", "lightclay", "prankster", "sassy", ["spiritbreak", "reflect", "lightscreen", "partingshot"]],
+      ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "dragonpulse", "flashcannon", "protect"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["sleeppowder", "sludgebomb", "leafstorm", "protect"]],
+      ["charizard", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "hurricane", "protect"]],
+      ["pelipper", "sitrusberry", "drizzle", "bold", ["weatherball", "hurricane", "wideguard", "tailwind"]]
+    ]
+  },
+  "24": {
+    "player": "Dawei Si",
+    "country": "CN",
+    "list": 6830,
+    "team": [
+      ["sinistcha", "kasibberry", "hospitality", "bold", ["protect", "matchagotcha", "ragepowder", "lifedew"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "darkestlariat", "flareblitz", "partingshot"]],
+      ["delphox", "delphoxite", "blaze", "timid", ["protect", "heatwave", "psychic", "nastyplot"]],
+      ["vanilluxe", "choicescarf", "snowwarning", "timid", ["blizzard", "freezedry", "sheercold", "icywind"]],
+      ["milotic", "leftovers", "competitive", "bold", ["hypnosis", "coil", "protect", "muddywater"]],
+      ["floetteeternal", "floettite", "flowerveil", "modest", ["protect", "dazzlinggleam", "calmmind", "moonblast"]]
+    ]
+  },
+  "25": {
+    "player": "Oliver Eskolin",
+    "country": "FI",
+    "list": 6831,
+    "team": [
+      ["tyranitar", "tyranitarite", "sandstream", "adamant", ["rockslide", "knockoff", "dragondance", "protect"]],
+      ["milotic", "sitrusberry", "competitive", "modest", ["scald", "icebeam", "haze", "protect"]],
+      ["sinistcha", "colburberry", "hospitality", "bold", ["matchagotcha", "trickroom", "ragepowder", "protect"]],
+      ["gholdengo", "lifeorb", "goodasgold", "timid", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      ["staraptor", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
+      ["excadrill", "focussash", "sandrush", "adamant", ["ironhead", "highhorsepower", "rockslide", "protect"]]
+    ]
+  },
+  "26": {
+    "player": "Justin Cerioni",
+    "country": "IT",
+    "list": 6832,
+    "team": [
+      ["aegislash", "focussash", "stancechange", "adamant", ["poltergeist", "shadowsneak", "closecombat", "wideguard"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "quickattack", "yawn", "detect"]],
+      ["venusaur", null, "chlorophyll", "modest", ["leafstorm", "sludgebomb", "earthpower", "protect"]],
+      ["charizard", "charizarditey", "blaze", "timid", ["weatherball", "heatwave", "ancientpower", "protect"]],
+      ["garchomp", "choicescarf", "roughskin", "adamant", ["earthquake", "rockslide", "dragonclaw", "stompingtantrum"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "flareblitz", "darkestlariat", "partingshot"]]
+    ]
+  },
+  "27": {
+    "player": "Paul Chua",
+    "country": "US",
+    "list": 6833,
+    "team": [
+      ["charizard", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "quickattack", "yawn", "detect"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "flareblitz", "throatchop", "partingshot"]],
+      ["venusaur", "lifeorb", "chlorophyll", "modest", ["leafstorm", "protect", "earthpower", "sludgebomb"]],
+      ["toxapex", "leftovers", "regenerator", "relaxed", ["toxic", "infestation", "wideguard", "banefulbunker"]],
+      ["garchomp", "choicescarf", "roughskin", "adamant", ["dragonclaw", "earthquake", "rockslide", "stompingtantrum"]]
+    ]
+  },
+  "28": {
+    "player": "Rahim Farzan",
+    "country": "DE",
+    "list": 6834,
+    "team": [
+      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["staraptor", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
+      ["kingambit", "chopleberry", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "lowkick", "ironhead"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "detect"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
+      ["basculegion", "lifeorb", "adaptability", "adamant", ["wavecrash", "lastrespects", "aquajet", "protect"]]
+    ]
+  },
+  "29": {
+    "player": "Mattie Morgan",
+    "country": "IE",
+    "list": 6835,
+    "team": [
+      ["kingambit", "occaberry", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "lowkick"]],
+      ["floetteeternal", "floettite", "flowerveil", "modest", ["lightofruin", "moonblast", "dazzlinggleam", "protect"]],
+      ["charizard", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["basculegion", "mysticwater", "adaptability", "adamant", ["wavecrash", "aquajet", "lastrespects", "protect"]],
+      ["garchomp", "lifeorb", "roughskin", "jolly", ["earthquake", "dragonclaw", "rockslide", "protect"]],
+      ["whimsicott", "focussash", "prankster", "timid", ["moonblast", "encore", "tailwind", "protect"]]
+    ]
+  },
+  "30": {
+    "player": "Kiran Singh",
+    "country": "AU",
+    "list": 6836,
+    "team": [
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      ["milotic", "sitrusberry", "competitive", "modest", ["scald", "icebeam", "haze", "protect"]],
+      ["excadrill", "focussash", "sandrush", "adamant", ["ironhead", "highhorsepower", "rockslide", "protect"]],
+      ["staraptor", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
+      ["tyranitar", "tyranitarite", "sandstream", "adamant", ["rockslide", "knockoff", "dragondance", "protect"]],
+      ["sinistcha", "colburberry", "hospitality", "bold", ["matchagotcha", "ragepowder", "trickroom", "protect"]]
+    ]
+  },
+  "31": {
+    "player": "Jonathan Marston",
+    "country": "GB",
+    "list": 6837,
+    "team": [
+      ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "protect"]],
+      ["whimsicott", "occaberry", "prankster", "calm", ["moonblast", "tickle", "tailwind", "encore"]],
+      ["basculegion", "choicescarf", "adaptability", "jolly", ["lastrespects", "wavecrash", "soak", "flipturn"]],
+      ["staraptor", "staraptite", "intimidate", "jolly", ["closecombat", "dualwingbeat", "roost", "protect"]],
+      ["kleavor", "focussash", "sharpness", "adamant", ["stoneaxe", "protect", "xscissor", "closecombat"]],
+      ["maushold", "chopleberry", "friendguard", "timid", ["followme", "protect", "superfang", "charm"]]
+    ]
+  },
+  "32": {
+    "player": "Yan Sym",
+    "country": "BR",
+    "list": 6838,
+    "team": [
+      ["farigiraf", "sitrusberry", "armortail", "calm", ["psychic", "helpinghand", "trickroom", "protect"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
+      ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]],
+      ["staraptor", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
+      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "detect"]]
+    ]
+  },
+  "33": {
+    "player": "Alex Underhill",
+    "country": "US",
+    "list": 6827,
+    "team": [
+      ["swampert", "swampertite", "torrent", "adamant", ["wavecrash", "earthquake", "icepunch", "protect"]],
+      ["grimmsnarl", "lightclay", "prankster", "sassy", ["spiritbreak", "reflect", "lightscreen", "partingshot"]],
+      ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "dragonpulse", "flashcannon", "protect"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["sleeppowder", "sludgebomb", "leafstorm", "protect"]],
+      ["charizard", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "hurricane", "protect"]],
+      ["pelipper", "sitrusberry", "drizzle", "bold", ["weatherball", "hurricane", "wideguard", "tailwind"]]
+    ]
+  },
+  "34": {
+    "player": "Ryoma Okamoto",
+    "country": "JP",
+    "list": 6839,
+    "team": [
+      ["venusaur", "widelens", "chlorophyll", "modest", ["leafstorm", "sludgebomb", "protect", "sleeppowder"]],
+      ["incineroar", "sitrusberry", "intimidate", "careful", ["flareblitz", "darkestlariat", "fakeout", "partingshot"]],
+      ["charizard", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["aerodactyl", "focussash", "unnerve", "jolly", ["rockslide", "dualwingbeat", "protect", "tailwind"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "detect"]],
+      ["garchomp", "lifeorb", "roughskin", "jolly", ["dragonclaw", "earthquake", "stompingtantrum", "protect"]]
+    ]
+  },
+  "35": {
+    "player": "Nader El bacha",
+    "country": "BR",
+    "list": 6840,
+    "team": [
+      ["glimmora", "lifeorb", "toxicdebris", "timid", ["sludgebomb", "powergem", "earthpower", "spikyshield"]],
+      ["basculegion", "choicescarf", "adaptability", "adamant", ["wavecrash", "lastrespects", "aquajet", "flipturn"]],
+      ["kingambit", "chopleberry", "defiant", "brave", ["kowtowcleave", "ironhead", "suckerpunch", "lowkick"]],
+      ["whimsicott", "focussash", "prankster", "timid", ["moonblast", "tailwind", "protect", "encore"]],
+      ["staraptor", "staraptite", "intimidate", "adamant", ["closecombat", "bravebird", "roost", "protect"]],
+      ["tyranitar", "sitrusberry", "sandstream", "adamant", ["rockslide", "knockoff", "protect", "earthquake"]]
+    ]
+  },
+  "36": {
+    "player": "Victor Jimenez Coll",
+    "country": "ES",
+    "list": 6841,
+    "team": [
+      ["whimsicott", "focussash", "prankster", "timid", ["protect", "moonblast", "encore", "tailwind"]],
+      ["floetteeternal", "floettite", "flowerveil", "modest", ["protect", "dazzlinggleam", "lightofruin", "moonblast"]],
+      ["glimmora", "shucaberry", "toxicdebris", "timid", ["spikyshield", "powergem", "sludgebomb", "earthpower"]],
+      ["basculegion", "lifeorb", "adaptability", "adamant", ["protect", "wavecrash", "lastrespects", "aquajet"]],
+      ["kingambit", "occaberry", "defiant", "adamant", ["lowkick", "kowtowcleave", "suckerpunch", "ironhead"]],
+      ["charizard", "charizarditey", "blaze", "modest", ["protect", "heatwave", "weatherball", "ancientpower"]]
+    ]
+  },
+  "37": {
+    "player": "聡太 嶋谷",
+    "country": "JP",
+    "list": 6842,
+    "team": [
+      ["staraptor", "staraptite", "intimidate", "jolly", ["bravebird", "tailwind", "closecombat", "protect"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "quickattack", "yawn", "detect"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
+      ["kingambit", "occaberry", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "protect"]],
+      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["farigiraf", "sitrusberry", "armortail", "bold", ["psychic", "trickroom", "helpinghand", "protect"]]
+    ]
+  },
+  "38": {
+    "player": "Ryan Kenrick Chua",
+    "country": "PH",
+    "list": 6843,
+    "team": [
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["protect", "extremespeed", "rockslide", "flareblitz"]],
+      ["staraptor", "staraptite", "intimidate", "jolly", ["protect", "tailwind", "bravebird", "closecombat"]],
+      ["raichu", "raichunitey", "lightningrod", "timid", ["protect", "fakeout", "focusblast", "zapcannon"]],
+      ["kingambit", "lifeorb", "defiant", "adamant", ["protect", "swordsdance", "suckerpunch", "kowtowcleave"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["detect", "quickattack", "yawn", "hypervoice"]],
+      ["farigiraf", "sitrusberry", "armortail", "calm", ["protect", "helpinghand", "trickroom", "psychic"]]
+    ]
+  },
+  "39": {
+    "player": "Kota Kawabe",
+    "country": "JP",
+    "list": 6844,
+    "team": [
+      ["floetteeternal", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "lightofruin", "protect"]],
+      ["delphox", "delphoxite", "blaze", "timid", ["heatwave", "psychic", "willowisp", "protect"]],
+      ["whimsicott", "focussash", "prankster", "timid", ["moonblast", "encore", "tailwind", "protect"]],
+      ["kingambit", "chopleberry", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "lowkick"]],
+      ["garchomp", "lifeorb", "roughskin", "jolly", ["stompingtantrum", "dragonclaw", "rockslide", "protect"]],
+      ["basculegion", "choicescarf", "adaptability", "jolly", ["wavecrash", "aquajet", "flipturn", "lastrespects"]]
+    ]
+  },
+  "40": {
+    "player": "Caelan Brown",
+    "country": "US",
+    "list": 6845,
+    "team": [
+      ["dragonite", "lifeorb", "innerfocus", "adamant", ["dragonclaw", "superpower", "extremespeed", "protect"]],
+      ["ninetalesalola", "choicescarf", "snowwarning", "timid", ["blizzard", "icywind", "freezedry", "encore"]],
+      ["sneasler", "focussash", "unburden", "adamant", ["closecombat", "direclaw", "rockslide", "protect"]],
+      ["swampert", "leftovers", "torrent", "brave", ["highhorsepower", "flipturn", "yawn", "protect"]],
+      ["gengar", "gengarite", "cursedbody", "modest", ["shadowball", "sludgebomb", "substitute", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "adamant", ["flareblitz", "throatchop", "fakeout", "partingshot"]]
+    ]
+  },
+  "41": {
+    "player": "Naoto Mizobuchi",
+    "country": "JP",
+    "list": 6846,
+    "team": [
+      ["charizard", "charizarditey", "blaze", "modest", ["heatwave", "ancientpower", "weatherball", "protect"]],
+      ["aerodactyl", "focussash", "unnerve", "jolly", ["rockslide", "dualwingbeat", "tailwind", "protect"]],
+      ["garchomp", "lifeorb", "roughskin", "jolly", ["dragonclaw", "rockslide", "earthquake", "protect"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "detect"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "flareblitz", "throatchop", "partingshot"]],
+      ["venusaur", "widelens", "chlorophyll", "modest", ["sleeppowder", "leafstorm", "sludgebomb", "protect"]]
+    ]
+  },
+  "42": {
+    "player": "Adrien Hurley",
+    "country": "US",
+    "list": 6847,
+    "team": [
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "detect"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "flareblitz", "partingshot", "throatchop"]],
+      ["garchomp", "choicescarf", "roughskin", "adamant", ["dragonclaw", "earthquake", "stompingtantrum", "rockslide"]],
+      ["charizard", "charizarditey", "solarpower", "timid", ["heatwave", "ancientpower", "weatherball", "protect"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["sleeppowder", "sludgebomb", "leafstorm", "protect"]],
+      ["aerodactyl", "aerodactylite", "unnerve", "jolly", ["rockslide", "icefang", "tailwind", "protect"]]
+    ]
+  },
+  "43": {
+    "player": "Caleb Wijesinha",
+    "country": "AU",
+    "list": 6848,
+    "team": [
+      ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "protect", "swordsdance", "suckerpunch"]],
+      ["sinistcha", "colburberry", "hospitality", "bold", ["matchagotcha", "ragepowder", "trickroom", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "careful", ["fakeout", "flareblitz", "helpinghand", "partingshot"]],
+      ["sneasler", "focussash", "poisontouch", "jolly", ["closecombat", "fakeout", "quickguard", "direclaw"]],
+      ["delphox", "delphoxite", "blaze", "timid", ["protect", "psychic", "nastyplot", "heatwave"]],
+      ["floetteeternal", "floettite", "flowerveil", "modest", ["dazzlinggleam", "protect", "drainingkiss", "calmmind"]]
+    ]
+  },
+  "44": {
+    "player": "Louis Markl",
+    "country": "DE",
+    "list": 6849,
+    "team": [
+      ["floetteeternal", "floettite", "flowerveil", "timid", ["protect", "dazzlinggleam", "calmmind", "drainingkiss"]],
+      ["kingambit", "blackglasses", "defiant", "adamant", ["protect", "suckerpunch", "kowtowcleave", "swordsdance"]],
+      ["sinistcha", "focussash", "hospitality", "modest", ["protect", "ragepowder", "matchagotcha", "shadowball"]],
+      ["basculegion", "choicescarf", "adaptability", "jolly", ["flipturn", "wavecrash", "aquajet", "lastrespects"]],
+      ["incineroar", "sitrusberry", "intimidate", "careful", ["fakeout", "partingshot", "flareblitz", "helpinghand"]],
+      ["sneasler", "whiteherb", "unburden", "adamant", ["protect", "fakeout", "direclaw", "closecombat"]]
+    ]
+  },
+  "45": {
+    "player": "Yuya Tada",
+    "country": "JP",
+    "list": 6850,
+    "team": [
+      ["garchomp", null, "roughskin", "jolly", ["dragonclaw", "stompingtantrum", "rockslide", "protect"]],
+      ["basculegion", "mysticwater", "adaptability", "adamant", ["wavecrash", "lastrespects", "aquajet", "protect"]],
+      ["kingambit", "occaberry", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "lowkick", "ironhead"]],
+      ["whimsicott", "focussash", "prankster", "timid", ["moonblast", "tailwind", "encore", "protect"]],
+      ["floetteeternal", "floettite", "flowerveil", "timid", ["moonblast", "dazzlinggleam", "lightofruin", "protect"]],
+      ["charizard", "charizarditey", "solarpower", "timid", ["heatwave", "weatherball", "ancientpower", "protect"]]
+    ]
+  },
+  "46": {
+    "player": "Markus Hamann",
+    "country": "DE",
+    "list": 6834,
+    "team": [
+      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["staraptor", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
+      ["kingambit", "chopleberry", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "lowkick", "ironhead"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "detect"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
+      ["basculegion", "lifeorb", "adaptability", "adamant", ["wavecrash", "lastrespects", "aquajet", "protect"]]
+    ]
+  },
+  "47": {
+    "player": "Hirofumi Kimura",
+    "country": "JP",
+    "list": 6851,
+    "team": [
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "flareblitz", "partingshot", "helpinghand"]],
+      ["sinistcha", "colburberry", "hospitality", "bold", ["matchagotcha", "ragepowder", "protect", "trickroom"]],
+      ["blastoise", "blastoisinite", "torrent", "timid", ["waterspout", "darkpulse", "protect", "shellsmash"]],
+      ["sneasler", "focussash", "poisontouch", "jolly", ["closecombat", "direclaw", "quickguard", "fakeout"]],
+      ["kingambit", "blackglasses", "defiant", "adamant", ["suckerpunch", "kowtowcleave", "protect", "swordsdance"]],
+      ["delphox", "delphoxite", "blaze", "timid", ["heatwave", "nastyplot", "psychic", "protect"]]
+    ]
+  },
+  "48": {
+    "player": "Behzad Muntazir",
+    "country": "US",
+    "list": 6852,
+    "team": [
+      ["farigiraf", "sitrusberry", "armortail", "sassy", ["psychic", "helpinghand", "trickroom", "protect"]],
+      ["torkoal", "charcoal", "drought", "quiet", ["eruption", "weatherball", "protect", "ancientpower"]],
+      [
+        "incineroar",
+        "blackglasses",
+        "intimidate",
+        "relaxed",
+        ["flareblitz", "darkestlariat", "fakeout", "partingshot"]
+      ],
+      ["venusaur", null, "chlorophyll", "modest", ["leafstorm", "sludgebomb", "earthpower", "protect"]],
+      ["staraptor", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "roost", "protect"]],
+      ["sneasler", "focussash", "poisontouch", "adamant", ["fakeout", "direclaw", "closecombat", "rockslide"]]
+    ]
+  },
+  "49": {
+    "player": "Dorian Quiñonez",
+    "country": "PE",
+    "list": 6853,
+    "team": [
+      ["dragonite", "lifeorb", "innerfocus", "adamant", ["dragonclaw", "superpower", "extremespeed", "protect"]],
+      ["sneasler", "focussash", "unburden", "adamant", ["closecombat", "direclaw", "rockslide", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["partingshot", "flareblitz", "throatchop", "fakeout"]],
+      ["kingambit", "blackglasses", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "protect", "lowkick"]],
+      ["ninetalesalola", "choicescarf", "snowwarning", "timid", ["blizzard", "freezedry", "icywind", "encore"]],
+      ["gengar", "gengarite", "cursedbody", "timid", ["shadowball", "sludgebomb", "substitute", "protect"]]
+    ]
+  },
+  "50": {
+    "player": "Tom Winter",
+    "country": "GB",
+    "list": 6854,
+    "team": [
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "flareblitz", "helpinghand", "partingshot"]],
+      ["charizard", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["basculegion", "choicescarf", "adaptability", "jolly", ["wavecrash", "lastrespects", "flipturn", "aquajet"]],
+      ["venusaur", "widelens", "chlorophyll", "modest", ["leafstorm", "earthpower", "sleeppowder", "protect"]],
+      ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]],
+      ["sneasler", "focussash", "poisontouch", "jolly", ["closecombat", "direclaw", "protect", "fakeout"]]
+    ]
+  },
+  "51": {
+    "player": "Brandon Davis",
+    "country": "US",
+    "list": 6855,
+    "team": [
+      ["sylveon", "lifeorb", "pixilate", "quiet", ["detect", "quickattack", "hypervoice", "hyperbeam"]],
+      ["incineroar", "whiteherb", "intimidate", "adamant", ["fakeout", "flareblitz", "darkestlariat", "closecombat"]],
+      ["abomasnow", "abomasite", "snowwarning", "quiet", ["iceshard", "blizzard", "energyball", "earthpower"]],
+      ["maushold", "widelens", "technician", "jolly", ["protect", "followme", "afteryou", "populationbomb"]],
+      ["farigiraf", "sitrusberry", "armortail", "relaxed", ["trickroom", "helpinghand", "twinbeam", "thunderbolt"]],
+      ["camerupt", "cameruptite", "solidrock", "quiet", ["protect", "earthpower", "heatwave", "ancientpower"]]
+    ]
+  },
+  "52": {
+    "player": "Nils Dunlop",
+    "country": "SE",
+    "list": 6856,
+    "team": [
+      ["venusaur", "focussash", "chlorophyll", "modest", ["leafstorm", "sludgebomb", "sleeppowder", "protect"]],
+      ["mudsdale", "lifeorb", "innerfocus", "brave", ["highhorsepower", "rockslide", "heavyslam", "protect"]],
+      ["charizard", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["farigiraf", "sitrusberry", "armortail", "calm", ["psychic", "thunderbolt", "trickroom", "protect"]],
+      ["incineroar", "chopleberry", "intimidate", "adamant", ["fakeout", "flareblitz", "darkestlariat", "partingshot"]],
+      ["floetteeternal", "floettite", "flowerveil", "modest", ["dazzlinggleam", "moonblast", "lightofruin", "protect"]]
+    ]
+  },
+  "53": {
+    "player": "Pok Yin Evan Choi",
+    "country": "HK",
+    "list": 6857,
+    "team": [
+      ["charizard", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "solarbeam", "protect"]],
+      ["kingambit", "focussash", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "lowkick"]],
+      ["aerodactyl", "aerodactylite", "unnerve", "jolly", ["rockslide", "dualwingbeat", "tailwind", "protect"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "protect"]],
+      ["farigiraf", "sitrusberry", "armortail", "relaxed", ["psychic", "thunderbolt", "trickroom", "helpinghand"]],
+      ["garchomp", "lifeorb", "roughskin", "jolly", ["dragonclaw", "stompingtantrum", "earthquake", "protect"]]
+    ]
+  },
+  "54": {
+    "player": "Joji Kaieda",
+    "country": "AU",
+    "list": 6809,
+    "team": [
+      ["kingambit", "occaberry", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "lowkick"]],
+      ["basculegion", "lifeorb", "adaptability", "adamant", ["wavecrash", "lastrespects", "aquajet", "protect"]],
+      ["garchomp", "sitrusberry", "roughskin", "jolly", ["dragonclaw", "earthquake", "rockslide", "protect"]],
+      ["charizard", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["whimsicott", "focussash", "prankster", "timid", ["moonblast", "tailwind", "encore", "protect"]],
+      ["floetteeternal", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "lightofruin", "protect"]]
+    ]
+  },
+  "55": {
+    "player": "Enrique Grimaldo",
+    "country": "US",
+    "list": 6858,
+    "team": [
+      ["sinistcha", "kasibberry", "hospitality", "calm", ["matchagotcha", "ragepowder", "trickroom", "protect"]],
+      ["basculegion", "choicescarf", "adaptability", "jolly", ["wavecrash", "lastrespects", "soak", "flipturn"]],
+      ["archaludon", "leftovers", "stamina", "modest", ["electroshot", "dragonpulse", "protect", "flashcannon"]],
+      ["floetteeternal", "floettite", "flowerveil", "modest", ["calmmind", "moonblast", "dazzlinggleam", "protect"]],
+      ["pelipper", "focussash", "drizzle", "modest", ["hurricane", "weatherball", "tailwind", "wideguard"]],
+      ["incineroar", "sitrusberry", "intimidate", "adamant", ["flareblitz", "fakeout", "partingshot", "throatchop"]]
+    ]
+  },
+  "56": {
+    "player": "Stefano De Maria",
+    "country": "IT",
+    "list": 6824,
+    "team": [
+      ["pelipper", "sitrusberry", "drizzle", "modest", ["hurricane", "weatherball", "wideguard", "tailwind"]],
+      ["charizard", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "hurricane", "protect"]],
+      ["archaludon", "leftovers", "stamina", "calm", ["protect", "dragonpulse", "flashcannon", "electroshot"]],
+      ["grimmsnarl", "lightclay", "prankster", "sassy", ["lightscreen", "spiritbreak", "reflect", "partingshot"]],
+      ["swampert", "swampertite", "torrent", "adamant", ["icepunch", "wavecrash", "earthquake", "protect"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["protect", "sludgebomb", "sleeppowder", "leafstorm"]]
+    ]
+  },
+  "57": {
+    "player": "Jannik Koch",
+    "country": "DE",
+    "list": 6834,
+    "team": [
+      ["raichu", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["staraptor", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
+      ["kingambit", "chopleberry", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "lowkick", "ironhead"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "detect"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
+      ["basculegion", "lifeorb", "adaptability", "adamant", ["wavecrash", "lastrespects", "aquajet", "protect"]]
+    ]
+  }
+}

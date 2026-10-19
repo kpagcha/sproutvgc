@@ -1,14 +1,16 @@
 // Generates `src/data/generated/` from Pokémon Showdown's Champions mod, at the commit pinned in `sources.json`, and
 // names in every locale from PokéAPI's data (`languages.ts` says where) and `overrides.ts`, which fills in what
 // PokéAPI lacks or has outdated. The regulation is `VITE_REGULATION` in `.env`. Run with `npm run gen-data`; `npm run gen-data -- --update` first moves every pin to
-// the latest version, and `-- --update-smogon` only Smogon's months (what the monthly refresh workflow runs).
+// the latest version, `-- --update-smogon` only Smogon's months (what the monthly refresh workflow runs), and
+// `-- --update-tournaments` only the tournaments (the weekly one).
 //
 // Showdown's own code loads the data (through jiti, which runs its TypeScript), so the Champions mod is merged over
 // Gen 9 and the format's rules apply exactly as on Showdown. Availability comes from the regulation's legal Pokémon:
 // an ability is available when one of them can have it, a move when one of them learns it.
 //
 // Sprites come from Showdown's server, trimmed to the regulation's entries (`sprites.ts`), and the meta from Smogon's
-// usage stats for each regulation's format, every month of them, past regulations' too (`smogon.ts`).
+// usage stats for each regulation's format, every month of them, past regulations' too (`smogon.ts`), and the official
+// tournaments' teams from Limitless VGC (`limitlessVgc.ts`).
 
 import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
@@ -27,6 +29,7 @@ import { ConditionScan } from './conditions.ts'
 import { itemCategorizer } from './itemCategories.ts'
 import { SPEED_ABILITIES, SPEED_ITEMS } from '../src/lib/speed.ts'
 import { histories, Smogon, withPrevious, type MetaEntry, type Snapshot } from './smogon.ts'
+import { LimitlessVgc, type TournamentEvent } from './limitlessVgc.ts'
 import { ITEM_ICONS, POKEMON_ICONS, SpriteSource, iconIndexes, sheetLayout, trimSheet } from './sprites.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -56,6 +59,11 @@ interface Sources {
    * Past regulations stay, as their history: each one listed is generated, current or not.
    */
   smogon: Record<string, string[]>
+  /**
+   * The official tournaments on Limitless VGC, by regulation (`"M-C": [443, 444]`), by their number there, oldest
+   * first: every one it lists. Past regulations stay, as Smogon's months do.
+   */
+  limitlessvgc: Record<string, number[]>
 }
 
 // The little of Showdown's API used here.
@@ -376,6 +384,7 @@ async function main() {
     client: parsed.client ?? latestCommit(CLIENT_REPO),
     sprites: parsed.sprites ?? today,
     smogon: typeof parsed.smogon === 'object' ? parsed.smogon : {},
+    limitlessvgc: typeof parsed.limitlessvgc === 'object' ? parsed.limitlessvgc : {},
   }
   if (process.argv.includes('--update')) {
     sources.showdown = latestCommit(SHOWDOWN_REPO)
@@ -758,6 +767,34 @@ async function main() {
   await writeJson('meta/index.json', index)
   await writeJson('meta/rosters.json', rosters)
 
+  // Tournaments: every official event of each regulation on Limitless VGC (the current one and those Smogon's months
+  // or earlier runs pinned), as listed there (`tournaments/index.json`, by ID: `limitlessvgc-446`), and each one's
+  // standings, the players whose teams it publishes with the sets they brought (`tournaments/<id>.json`, by placing).
+  // A past regulation's teams aren't held to the dex: what it no longer has is left out.
+  const updateTournaments = process.argv.includes('--update') || process.argv.includes('--update-tournaments')
+  const limitless = new LimitlessVgc(join(CACHE, 'limitlessvgc'), (url) => getBinary(url, true), updateTournaments)
+  const knownSets = { ...known, natures: new Set(Object.keys(natureNames)) }
+  rmSync(join(OUT, 'tournaments'), { recursive: true, force: true })
+  const events: Record<string, TournamentEvent> = {}
+  const regulations = new Set([reg, ...Object.keys(sources.smogon), ...Object.keys(sources.limitlessvgc)])
+  for (const r of regulations) {
+    if (!sources.limitlessvgc[r] || updateTournaments) {
+      sources.limitlessvgc[r] = await limitless.events(r)
+      console.log(
+        `Pinned Limitless VGC's events of Regulation ${r}: ${sources.limitlessvgc[r].join(', ') || 'none yet'}`,
+      )
+    }
+    for (const n of [...sources.limitlessvgc[r]].reverse()) {
+      const { event, standings } = await limitless.event(n, r, knownSets, r === reg)
+      events[event.id] = event
+      await writeJson(
+        `tournaments/${event.id}.json`,
+        Object.fromEntries(standings.map(({ placing, ...s }) => [placing, s])),
+      )
+    }
+  }
+  await writeJson('tournaments/index.json', events)
+
   // Sprites: the icon sheets cut down to the regulation's entries, in ID order, and each legal Pokémon's own sprite.
   const clientData = await get(`${CLIENT_RAW}/${sources.client}/play.pokemonshowdown.com/src/battle-dex-data.ts`)
   const iconIndex = iconIndexes(clientData)
@@ -789,6 +826,7 @@ async function main() {
     client: sources.client,
     sprites: sources.sprites,
     smogon: sources.smogon,
+    limitlessvgc: sources.limitlessvgc,
   })
   const pinned = JSON.stringify(sources, null, 2) + '\n'
   if (pinned !== saved) {
