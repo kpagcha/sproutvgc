@@ -18,7 +18,6 @@ import {
 } from '@/data/meta'
 import { locale, t } from '@/i18n'
 import { metaLoading } from '@/composables/useMeta'
-import { eventsOf, snapshotEvents, tournamentSnapshot } from '@/data/tournaments'
 
 // The meta's data, to see and pick (`MetaDialog`'s card), in steps, each shown when there's a choice: the regulation
 // (the current one first), then its datasets, a plain list of them, the latest first (what one source observed over
@@ -26,13 +25,15 @@ import { eventsOf, snapshotEvents, tournamentSnapshot } from '@/data/tournaments
 // source), and its subsets (whose teams count most), what they mean said once over them. Picking a subset shows it on every page and closes the card; another regulation
 // or dataset shows its latest, keeping the subset when it has it, and leaves the card open for the next step. While
 // it isn't the latest dataset, its band has the way back to it (Latest), at the same players, which closes it. Under
-// the steps, Confirm closes it too, as the speed editor's does: what's picked is shown already. A regulation's
-// tournaments are one dataset, every event of it by default; its events, folded under it until some are picked, pick
-// which it adds up, the card staying open.
+// the steps, Confirm closes it too, as the speed editor's does: what's picked is shown already. Tournaments aren't
+// offered here (their own pages lead to them, `TournamentsView`): one shown is listed while it is, to say so and to
+// leave it.
 const emit = defineEmits<{ close: [] }>()
 const id = useId()
 
-const datasets = computed(() => metaDatasets(snapshots.value))
+const datasets = computed(() =>
+  metaDatasets(snapshots.value.filter((s) => s.kind !== 'tournament' || s === selectedSnapshot.value)),
+)
 const current = computed<MetaDataset | undefined>(() => {
   const s = selectedSnapshot.value
   return datasets.value.find((d) => s && d.key === datasetKey(s)) ?? datasets.value[0]
@@ -65,23 +66,6 @@ function latest() {
 }
 const subsetLabel = (s: MetaSnapshot) => subsetParts(s).join(' · ')
 
-/** The tournaments shown: its regulation's events, and those it adds up. */
-const tournaments = computed(() => {
-  const s = selectedSnapshot.value
-  if (!s?.events) return null
-  const all = eventsOf(s.regulation)
-  return { all, picked: new Set(snapshotEvents(s).map((e) => e.id)), regulation: s.regulation }
-})
-/** Adds an event to those added up, or takes it out, keeping one at least; the card stays open. */
-function toggleEvent(id: string) {
-  const tm = tournaments.value
-  if (!tm) return
-  const picked = new Set(tm.picked)
-  if (picked.has(id)) picked.delete(id)
-  else picked.add(id)
-  const s = picked.size && tournamentSnapshot(tm.regulation, [...picked])
-  if (s) selectSnapshot(s.id)
-}
 /** What the one shown is: its own label, for tournaments (the events it adds up), else its dataset's. */
 const shownLabel = computed(() =>
   selectedSnapshot.value?.events ? datasetParts(selectedSnapshot.value).join(' · ') : current.value?.label,
@@ -153,40 +137,6 @@ const about = (d: MetaDataset) =>
           {{ about(current) }} · {{ t('usage.from') }}
           <a :href="current.provider.url" target="_blank" rel="noopener">{{ current.provider.name }}</a>
         </p>
-      </section>
-      <!-- A regulation's tournaments: which of its events are added up, folded until some are picked. -->
-      <section v-if="tournaments && tournaments.all.length > 1" class="section">
-        <details class="events" :open="tournaments.picked.size < tournaments.all.length">
-          <summary class="heading">
-            {{ t('meta.pickEvents') }}
-            <span class="count">{{
-              t('meta.pickEventsCount', { n: tournaments.picked.size, total: tournaments.all.length })
-            }}</span>
-          </summary>
-          <div class="options">
-            <!-- Ticked, not filled as a radio's pick: most often all of them are. -->
-            <label v-for="e in tournaments.all" :key="e.id" class="option">
-              <input
-                type="checkbox"
-                :checked="tournaments.picked.has(e.id)"
-                :disabled="tournaments.picked.size === 1 && tournaments.picked.has(e.id)"
-                @change="toggleEvent(e.id)"
-              />
-              <span>
-                <span class="name">{{ e.name }}</span>
-                <span class="muted small event-about"
-                  >{{ datasetDates({ from: e.date, to: e.date }) }} ·
-                  {{
-                    t('meta.eventTeams', {
-                      teams: e.teams.toLocaleString(locale),
-                      players: e.players.toLocaleString(locale),
-                    })
-                  }}</span
-                >
-              </span>
-            </label>
-          </div>
-        </details>
       </section>
       <!-- Its subsets, what they mean said once over them. -->
       <section v-if="current && current.snapshots.length > 1" class="section">
@@ -313,20 +263,6 @@ const about = (d: MetaDataset) =>
 }
 .note {
   margin: 0 0 8px;
-}
-/* The events, folded under their heading, which says how many are picked. */
-.events summary {
-  cursor: pointer;
-}
-.events[open] summary {
-  margin-bottom: 6px;
-}
-.events .count {
-  margin-left: 4px;
-  font-weight: bold;
-}
-.event-about {
-  display: block;
 }
 .option .name {
   font-weight: bold;
