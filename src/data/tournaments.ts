@@ -61,6 +61,13 @@ export interface Standing {
   team: Slot[]
 }
 
+/** A round's matches, each its two players by placing (the second null for a bye) and who won: 1 the first, 2 the
+ * second, 0 neither. Its phase: 1 Day 1's Swiss, 2 Day 2's, 3 the top cut. */
+export interface Round {
+  phase: number
+  matches: [number, number | null, 0 | 1 | 2][]
+}
+
 /** Whether a slot is a whole set, from a team list, not the Pokémon alone. */
 export const listed = ([, item, ability, nature, moves]: Slot) => !!(item || ability || nature || moves.length)
 
@@ -87,7 +94,23 @@ export const EVENTS: readonly TournamentEvent[] = Object.values(Object.values(IN
 const BY_ID = new Map(EVENTS.map((e) => [e.id, e]))
 const BY_N = new Map(EVENTS.map((e) => [e.n, e]))
 
-/** An event's standings, its listed players by placing, loaded once. */
+const ROUNDS = import.meta.glob<Record<number, Round>>('./generated/tournaments/*.rounds.json', {
+  import: 'default',
+})
+
+/** An event's rounds, by number, loaded once. */
+const rounds = new Map<string, Promise<Record<number, Round>>>()
+export function loadRounds(id: string): Promise<Record<number, Round>> {
+  let p = rounds.get(id)
+  if (!p) {
+    const file = ROUNDS[`./generated/tournaments/${id}.rounds.json`]
+    if (!file) return Promise.reject(new Error(`No rounds for the event "${id}"`))
+    rounds.set(id, (p = file()))
+  }
+  return p
+}
+
+/** An event's standings, its players by placing, loaded once. */
 const standings = new Map<string, Promise<(Standing & { placing: number })[]>>()
 export function loadStandings(id: string): Promise<(Standing & { placing: number })[]> {
   let p = standings.get(id)

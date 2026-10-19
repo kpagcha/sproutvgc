@@ -35,7 +35,7 @@ const GAP_MS = 125
 /** The division read: Masters, the one the meta is about. */
 const DIVISION = 'MA'
 /** The shape of what's generated for an event: an event generated in another is generated again, not kept. */
-export const FORMAT = 2
+export const FORMAT = 3
 
 export interface TournamentEvent {
   /** Its name as a slug, with its year (`slugOf`): its page's address. */
@@ -135,10 +135,11 @@ interface ApiSlot {
   nature: string | null
   moves: string[]
 }
+/** A match, its two players by their number in the event (as the standings' `tp_id`; the second none for a bye) and
+ * the winner's (another, -1, when neither won). */
 interface ApiMatch {
-  phase: number
-  p1_id: number
-  p2_id: number | null
+  player1: number
+  player2: number | null
   winner: number | null
 }
 
@@ -331,20 +332,28 @@ export class LimitlessVgc {
       })
     }
 
-    // Its rounds, each's matches by the players' placings.
+    // Its rounds, each's matches by the players' placings, and its phase, from who plays it (the pairings don't say):
+    // the top cut's when only the top cut's players do, Day 2's when only Day 2's, else Day 1's.
     const rounds: Record<number, Round> = {}
+    const byPlacing = new Map(standings.map((st) => [st.placing, st]))
     for (let r = 1; r <= tournament.round; r++) {
       const matches = await this.api<ApiMatch[]>(`pairings?${q}&round=${r}`, `${t}/pairings/${r}.json`)
       const at = (id: number | null) => (id === null ? null : (placingOf.get(id) ?? null))
-      rounds[r] = {
-        phase: matches[0]?.phase ?? 0,
-        matches: matches.flatMap(({ p1_id, p2_id, winner }) => {
-          const a = at(p1_id)
-          if (a === null) return []
-          const won = winner === p1_id ? 1 : winner !== null && winner === p2_id ? 2 : 0
-          return [[a, at(p2_id), won] as [number, number | null, 0 | 1 | 2]]
-        }),
-      }
+      const pairs = matches.flatMap(({ player1, player2, winner }) => {
+        const a = at(player1)
+        if (a === null) return []
+        const won = winner === player1 ? 1 : winner !== null && winner === player2 ? 2 : 0
+        return [[a, at(player2), won] as [number, number | null, 0 | 1 | 2]]
+      })
+      const playing = pairs.flatMap(([a, b]) => (b === null ? [a] : [a, b])).map((p) => byPlacing.get(p))
+      const phase = !playing.length
+        ? 0
+        : playing.every((st) => st?.topCut)
+          ? 3
+          : playing.every((st) => st?.day2)
+            ? 2
+            : 1
+      rounds[r] = { phase, matches: pairs }
     }
 
     if (unknown.size) {

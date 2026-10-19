@@ -3,9 +3,10 @@ import { nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vu
 
 // A page's sections as a row of links stuck to the top of the screen, the one being read marked as the page scrolls
 // (each section an element with the `id` given): the last whose top has passed a line a third of the way down the
-// screen, or the last of all at the page's bottom. Clicking one scrolls to it. The row scrolls sideways where they don't
-// fit, keeping the one marked in view. The page gives its sections room above them for the row
-// (`scroll-margin-top`), and whatever else sticks to the top goes under it (`--sticky-offset`).
+// screen, or the last of all at the page's bottom, checked as the page scrolls and as it changes size. Clicking one
+// scrolls to it. The row scrolls sideways where they don't fit, keeping the one marked in view. The page gives its
+// sections room above them for the row (`scroll-margin-top`), and whatever else sticks to the top goes under it
+// (`--sticky-offset`).
 const props = defineProps<{ sections: readonly { id: string; label: string }[] }>()
 
 const active = shallowRef<string | null>(null)
@@ -33,9 +34,14 @@ function onScroll() {
 }
 window.addEventListener('scroll', onScroll, { passive: true })
 window.addEventListener('resize', onScroll)
+// And as the page grows or shrinks (what's under a section loading): a page short enough to be at its bottom marks its
+// last section until then.
+const resized = new ResizeObserver(onScroll)
+resized.observe(document.documentElement)
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', onScroll)
   window.removeEventListener('resize', onScroll)
+  resized.disconnect()
   cancelAnimationFrame(frame)
 })
 watch(

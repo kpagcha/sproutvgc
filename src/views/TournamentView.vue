@@ -1,50 +1,122 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ChevronDown, ChevronUp } from '@lucide/vue'
 import { ability, item, move, pokemon } from '@/data/dex'
-import { datasetDates } from '@/data/meta'
+import { datasetDates, percent } from '@/data/meta'
 import { MOVES } from '@/data/moves'
 import { natureEffects, natureName } from '@/data/natures'
-import { POKEMON, spriteUrl } from '@/data/pokemon'
-import { eventOf, listed, loadStandings, tournamentSnapshot, type Standing } from '@/data/tournaments'
+import { POKEMON, splitForme, spriteUrl } from '@/data/pokemon'
+import {
+  eventOf,
+  listed,
+  loadRounds,
+  loadStandings,
+  tournamentSnapshot,
+  type Round,
+  type Standing,
+} from '@/data/tournaments'
 import { locale, t } from '@/i18n'
+import { refName } from '@/i18n/refName'
+import { DAYS, decidedMatches, playersOf, pokemonStats, recordsOf, type Day } from '@/lib/tournamentStats'
+import { useSort } from '@/composables/useSort'
 import AppLink from '@/components/AppLink'
 import DexRef from '@/components/DexRef'
 import EffectTag from '@/components/EffectTag'
+import FolderTabs from '@/components/FolderTabs.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import SectionNav from '@/components/SectionNav.vue'
+import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
 
 // One official tournament: what it was (type, date, country, players, how many made Day 2), the way to its meta (its
-// teams alone), and its standings, its whole field in three parts (the top cut, the rest of Day 2, and Day 1): each
-// player's placing, name and country, record (marked when they dropped), and the six they brought, as icons; unfolded
-// (one by one, or all at once), their whole sets, a card each, each entry leading to its meta page: its sprite and
-// types over a band of its first type's color, its item, ability and nature (with the stats it raises and lowers) on
-// rows of their own, and its moves two by two, each tinted with its type. A player whose team list isn't there has the
-// Pokémon alone. Rows far down the field aren't laid out until near the screen.
+// teams alone), and, under tabs for the day (the top cut, the default, Day 2, Day 1, then the whole event apart, in
+// the URL as `?day=`), its standings (the whole event's in three parts, the top cut, the rest of Day 2 and Day 1; a
+// day's its players with their record that day) and then its Pokémon (each one's share of the day's teams and how its
+// teams did in the day's matches, by usage or win rate, the top ones or all, each leading to its meta page on this
+// event's data); the two a row of links stuck to the top, the one being read marked (`SectionNav`).
+// Each player's placing, name and country, record (marked when they dropped), and the six they brought, as icons;
+// unfolded (one by one, or all at once), their whole sets, a card each, each entry leading to its meta page: its
+// sprite and types over a band of its first type's color, its item, ability and nature (with the stats it raises and
+// lowers) on rows of their own, and its moves two by two, each tinted with its type. A player whose team list isn't
+// there has the Pokémon alone. Rows far down the field aren't laid out until near the screen.
 const route = useRoute()
+const router = useRouter()
 const id = computed(() => String(route.params.id))
 const event = computed(() => eventOf(id.value))
 const standings = shallowRef<(Standing & { placing: number })[] | null>(null)
+const rounds = shallowRef<Record<number, Round> | null>(null)
 watch(
   id,
   async (current) => {
     standings.value = null
+    rounds.value = null
     if (!eventOf(current)) return
-    const s = await loadStandings(current)
-    if (id.value === current) standings.value = s
+    const [s, r] = await Promise.all([loadStandings(current), loadRounds(current)])
+    if (id.value !== current) return
+    standings.value = s
+    rounds.value = r
   },
   { immediate: true },
 )
 
+/** The day shown, its tab, kept in the URL: the top cut unless another's picked. */
+const day = computed<Day>(
+  () => ((DAYS as readonly string[]).find((d) => d === route.query.day) as Day | undefined) ?? 'cut',
+)
+function setDay(d: Day) {
+  void router.replace({ query: { ...route.query, day: d === 'cut' ? undefined : d } })
+}
+
+// The day's Pokémon, sorted by usage or win rate; the top ones, or all of them.
+const stats = computed(() =>
+  standings.value && rounds.value ? pokemonStats(standings.value, rounds.value, day.value) : [],
+)
+const {
+  sorted: sortedStats,
+  key: statKey,
+  desc: statDesc,
+  toggle: sortStats,
+} = useSort({
+  rows: stats,
+  value: (s, k: 'usage' | 'winRate') => (k === 'usage' ? s.teams : (s.winRate ?? -1)),
+  initial: 'usage',
+  startsDesc: () => true,
+  locale,
+})
+const TOP = 20
+const allStats = ref(false)
+const shownStats = computed(() => (allStats.value ? sortedStats.value : sortedStats.value.slice(0, TOP)))
+/** What the day's numbers are of: its players, and its matches with a winner. */
+const about = computed(() =>
+  standings.value && rounds.value
+    ? t('tournaments.statsAbout', {
+        players: count(playersOf(standings.value, day.value).length),
+        matches: count(decidedMatches(rounds.value, day.value)),
+      })
+    : '',
+)
+/** A Pokémon's meta page on this event's data, at the day's players (Day 1's being everyone's). */
+const metaOf = computed(
+  () =>
+    event.value &&
+    tournamentSnapshot(
+      event.value.regulation,
+      [event.value.id],
+      day.value === 'day2' ? 'day2' : day.value === 'cut' ? 'topCut' : 'all',
+    )?.id,
+)
+const monName = (pid: Parameters<typeof pokemon>[0]) => splitForme(pid, refName(pokemon(pid)))
+
 /** The way to its meta: the snapshot of it alone. */
 const meta = computed(() => event.value && tournamentSnapshot(event.value.regulation, [event.value.id])?.id)
 
-// The rows unfolded, by placing; all of them at once with the toggle over them.
+// The rows unfolded, by placing; all of those shown at once with the toggle over them.
 const open = ref(new Set<number>())
 watch(id, () => (open.value = new Set()))
-const allOpen = computed(() => !!standings.value?.length && open.value.size === standings.value.length)
+const shownPlacings = computed(() => shownParts.value.flatMap((p) => p.rows.map((s) => s.placing)))
+const allOpen = computed(() => !!shownPlacings.value.length && shownPlacings.value.every((p) => open.value.has(p)))
 function toggle(placing: number) {
   const next = new Set(open.value)
   if (next.has(placing)) next.delete(placing)
@@ -52,7 +124,7 @@ function toggle(placing: number) {
   open.value = next
 }
 function toggleAll() {
-  open.value = allOpen.value ? new Set() : new Set(standings.value?.map((s) => s.placing))
+  open.value = allOpen.value ? new Set() : new Set(shownPlacings.value)
 }
 
 // The rows that have come near the screen (within about a screen of it), by placing: an unfolded row builds its sets
@@ -73,15 +145,26 @@ const watchRow = (el: unknown) => {
 }
 onBeforeUnmount(() => observer.disconnect())
 
-/** The standings in their parts: the top cut, the rest of Day 2, and Day 1, those there are. */
-const parts = computed(() => {
+/** The standings shown: the whole event's in their parts (the top cut, the rest of Day 2, and Day 1, those there are),
+ * a day's its players alone. */
+const shownParts = computed(() => {
   const all = standings.value ?? []
+  if (day.value !== 'all') return [{ key: day.value, rows: playersOf(all, day.value) }]
   return [
     { key: 'topCut' as const, rows: all.filter((s) => s.topCut) },
     { key: 'day2' as const, rows: all.filter((s) => s.day2 && !s.topCut) },
     { key: 'day1' as const, rows: all.filter((s) => !s.day2 && !s.topCut) },
   ].filter((p) => p.rows.length)
 })
+/** Each player's record: the whole event's, or the day's. */
+const dayRecords = computed(() => (day.value !== 'all' && rounds.value ? recordsOf(rounds.value, day.value) : null))
+const recordOf = (s: Standing & { placing: number }) => dayRecords.value?.get(s.placing) ?? s
+
+/** Its sections, a row of links stuck to the top, the one being read marked. */
+const sections = computed(() => [
+  { id: 'sec-standings', label: t('tournaments.standings') },
+  { id: 'sec-pokemon', label: t('tournaments.pokemonStats') },
+])
 
 const count = (n: number) => n.toLocaleString(locale.value)
 const ordinal = (n: number) => `#${n}`
@@ -104,6 +187,18 @@ const ordinal = (n: number) => `#${n}`
       </p>
     </div>
 
+    <!-- The day: tabs standing on the standings' band, the whole event apart at the end. -->
+    <!-- Its sections, a row of links stuck to the top: the standings (from the day's tabs) and the Pokémon. -->
+    <SectionNav :sections="sections" />
+
+    <FolderTabs
+      id="sec-standings"
+      class="day-tabs"
+      :model-value="day"
+      :label="t('tournaments.days')"
+      :options="DAYS.map((d) => ({ value: d, label: t(`tournaments.day.${d}`), apart: d === 'all' }))"
+      @update:model-value="setDay"
+    />
     <section class="panel banded">
       <div class="band">
         <h2 class="band-title">{{ t('tournaments.standings') }}</h2>
@@ -115,9 +210,9 @@ const ordinal = (n: number) => `#${n}`
       </div>
       <p v-if="!standings" class="muted">{{ t('tournaments.loading') }}</p>
       <ol v-else class="standings">
-        <template v-for="part in parts" :key="part.key">
+        <template v-for="part in shownParts" :key="part.key">
           <!-- Each part under its name, when there's more than one. -->
-          <li v-if="parts.length > 1" class="part-head">{{ t(`tournaments.part.${part.key}`) }}</li>
+          <li v-if="shownParts.length > 1" class="part-head">{{ t(`tournaments.part.${part.key}`) }}</li>
           <li
             v-for="s in part.rows"
             :key="s.placing"
@@ -128,7 +223,7 @@ const ordinal = (n: number) => `#${n}`
           >
             <button
               type="button"
-              class="row"
+              class="player-row"
               :aria-expanded="open.has(s.placing)"
               :aria-label="t('tournaments.rowLabel', { placing: s.placing, player: s.player })"
               @click="toggle(s.placing)"
@@ -141,7 +236,8 @@ const ordinal = (n: number) => `#${n}`
                 v-tip="s.dropped ? t('tournaments.droppedTip', { round: s.dropped }) : undefined"
                 class="record num"
                 :class="{ dropped: s.dropped }"
-                >{{ s.wins }}–{{ s.losses }}<span v-if="s.dropped" class="drop">{{ t('tournaments.drop') }}</span></span
+                >{{ recordOf(s).wins }}–{{ recordOf(s).losses
+                }}<span v-if="s.dropped" class="drop">{{ t('tournaments.drop') }}</span></span
               >
               <span v-if="s.team.length" class="team" aria-hidden="true">
                 <PokemonIcon v-for="(slot, i) in s.team" :id="slot[0]" :key="i" />
@@ -220,6 +316,69 @@ const ordinal = (n: number) => `#${n}`
         {{ t('usage.from') }} <a :href="event.url" rel="noopener">{{ event.provider.name }}</a>
       </p>
     </section>
+
+    <!-- The day's Pokémon, under its standings. -->
+    <section id="sec-pokemon" class="panel banded stats-panel">
+      <div class="band">
+        <h2 class="band-title">
+          {{ t('tournaments.pokemonStats') }} <span class="band-day">· {{ t(`tournaments.day.${day}`) }}</span>
+        </h2>
+      </div>
+      <p class="muted small about">{{ about }}</p>
+      <p v-if="!standings || !rounds" class="muted">{{ t('tournaments.loading') }}</p>
+      <div v-else class="dex-table stats" role="table" :aria-label="t('tournaments.pokemonStats')">
+        <div class="row head" role="row">
+          <div role="columnheader" class="r">#</div>
+          <div role="columnheader">{{ t('tournaments.col.pokemon') }}</div>
+          <SortHeader
+            :label="t('tournaments.col.usage')"
+            :tip="t('tournaments.col.usageTip')"
+            right
+            :active="statKey === 'usage'"
+            :desc="statDesc"
+            @sort="sortStats('usage')"
+          />
+          <SortHeader
+            :label="t('tournaments.col.winRate')"
+            :tip="t('tournaments.col.winRateTip')"
+            right
+            :active="statKey === 'winRate'"
+            :desc="statDesc"
+            @sort="sortStats('winRate')"
+          />
+          <div role="columnheader" class="r wide-only">{{ t('tournaments.col.record') }}</div>
+        </div>
+        <div v-for="(s, i) in shownStats" :key="s.id" class="row" role="row">
+          <div role="cell" class="r num muted">{{ i + 1 }}</div>
+          <div role="cell" class="mon-cell">
+            <AppLink :to="{ name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }" class="mon">
+              <PokemonIcon :id="s.id" /><span class="mon-name"
+                ><span>{{ monName(s.id).species }}</span
+                ><span v-if="monName(s.id).forme" class="forme">{{ monName(s.id).forme }}</span></span
+              >
+            </AppLink>
+          </div>
+          <div role="cell" class="r num">{{ percent(s.usage) }}</div>
+          <!-- Its win rate; on phones, its record under it, the record's column left out there. -->
+          <div role="cell" class="r num" :class="{ muted: s.winRate === null }">
+            {{ s.winRate === null ? '—' : percent(s.winRate)
+            }}<span class="phone-record muted">{{ s.wins }}–{{ s.losses }}</span>
+          </div>
+          <div role="cell" class="r num muted wide-only">{{ s.wins }}–{{ s.losses }}</div>
+        </div>
+      </div>
+      <button
+        v-if="stats.length > TOP"
+        type="button"
+        class="more-toggle"
+        :aria-pressed="allStats"
+        @click="allStats = !allStats"
+      >
+        <component :is="allStats ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />{{
+          allStats ? t('tournaments.showTop', { n: TOP }) : t('tournaments.showAllMons', { n: stats.length })
+        }}
+      </button>
+    </section>
   </div>
   <div v-else class="panel">
     <p class="muted">{{ t('tournaments.unknown') }}</p>
@@ -252,6 +411,103 @@ h1 {
 }
 .note {
   margin: 12px 0 0;
+}
+/* Room above each section for the row of links stuck to the top, when scrolled to it; the Pokémon table's header sticks
+   under that row rather than behind it. */
+.day-tabs,
+.stats-panel {
+  scroll-margin-top: 48px;
+}
+.stats-panel :deep(.dex-table .head) {
+  top: 37px;
+}
+/* The day's tabs standing on the standings' band: the one shown in the band's color. */
+.day-tabs {
+  --tab-bg: var(--accent);
+}
+.day-tabs :deep(.tab.on) {
+  color: var(--accent-text);
+}
+/* The day's Pokémon: its table as the rankings' (rank, Pokémon, usage, win rate, record), the top ones and a toggle
+   for the rest; the day named on its band. */
+.band-day {
+  font-weight: normal;
+}
+.about {
+  margin: 2px 0 8px;
+}
+/* Its columns in rem, not em: the header row's text is smaller than the rows', and em widths would shrink with it,
+   leaving the header out of line with the numbers under it. */
+.dex-table.stats {
+  --cols: 2.5rem minmax(0, 1fr) 5rem 5.5rem 6rem;
+}
+/* On phones, four columns: the record under the win rate. */
+.phone-record {
+  display: none;
+}
+@media (max-width: 720px) {
+  .dex-table.stats {
+    --cols: 1.75rem minmax(0, 1fr) 4rem 4.5rem;
+  }
+  .phone-record {
+    display: block;
+    font-size: 0.8em;
+  }
+}
+.mon-cell {
+  overflow: hidden;
+}
+.mon {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  margin: -3px 0;
+  color: inherit;
+  font-weight: bold;
+}
+/* Its name cut short where its room ends (never into the numbers); its forme a small tag after it, under it when it
+   doesn't fit, as the rankings show it. */
+.mon-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 4px;
+  min-width: 0;
+}
+.mon-name > :first-child {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.forme {
+  padding: 0 5px;
+  font-size: 0.85em;
+  font-weight: normal;
+  color: var(--muted);
+  white-space: nowrap;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+.more-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 2px 6px 2px 2px;
+  font: inherit;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.more-toggle:hover {
+  color: var(--text);
+  background: var(--hover);
 }
 .links {
   margin: 8px 0 0;
@@ -292,13 +548,16 @@ h1 {
 .part-head:first-child {
   padding-top: 4px;
 }
-/* A player, a row to unfold: placing, name and country, record, the six as icons, and the chevron. Far down the field,
+/* A player, a row to unfold (`player-row`: not `row`, which the Pokémon's table rows are, as every dex table's): placing,
+   name and country, record, the six as icons, and the chevron. Far down the field,
    rows aren't laid out until near the screen. */
 .standing {
   content-visibility: auto;
   contain-intrinsic-size: auto 42px;
+  /* Its width, for its team's icons to be laid out by (below). */
+  container: standing / inline-size;
 }
-.row {
+.player-row {
   display: grid;
   grid-template-columns: 3.5em minmax(0, 1fr) auto auto auto;
   align-items: center;
@@ -312,7 +571,7 @@ h1 {
   border: none;
   cursor: pointer;
 }
-.row:hover {
+.player-row:hover {
   background: var(--hover);
 }
 .placing {
@@ -356,11 +615,12 @@ h1 {
   margin: 0;
   padding: 4px 4px 12px 3.5em;
 }
-/* On phones, the team under the name. */
+/* On phones, the team under the name: across the whole row, indented to the name, so its six fit on one line however
+   wide the record is. */
 @media (max-width: 560px) {
-  .row {
+  .player-row {
     grid-template-columns: 3em minmax(0, 1fr) auto auto;
-    grid-template-areas: 'placing player record chevron' 'placing team team team';
+    grid-template-areas: 'placing player record chevron' 'team team team team';
   }
   .record {
     grid-area: record;
@@ -373,12 +633,23 @@ h1 {
     grid-area: player;
   }
   .team {
+    /* Its icons at their desktop size: six in a row where they fit, else three by two (below, by the row's width). */
+    --icon-scale: 1;
     grid-area: team;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(6, 40px);
     width: auto;
+    padding-left: calc(3em + 8px);
   }
   .chevron {
     grid-area: chevron;
+  }
+}
+/* A row too narrow for six icons after its padding and the name's indent (4px each side, 3em and a gap, 6 × 40px:
+   about 301px on a phone): three by two. */
+@container standing (max-width: 300px) {
+  .team {
+    grid-template-columns: repeat(3, 40px);
   }
 }
 /* Their room, before they're built: about as tall as they'll be (two rows of cards; three, then six, narrower). */
