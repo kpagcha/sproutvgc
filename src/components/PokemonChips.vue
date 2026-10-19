@@ -12,8 +12,15 @@ import PokemonIcon from '@/components/PokemonIcon'
 // Pokémon as a row of links, each with its icon, by name in the reader's language. `current`, if among them, is the
 // page's own Pokémon: shown, but not a link. `query`, if given, keeps only the ones whose name it finds, as the dex's
 // searches do, with the match highlighted. `formes` names a species' formes by the forme alone, as the Pokémon list
-// does under their species (its formes listed together, the species first).
-const props = defineProps<{ ids: readonly PokemonId[]; current?: PokemonId; query?: string; formes?: boolean }>()
+// does under their species (its formes listed together, the species first). `meta` leads each to its meta page rather
+// than its dex entry.
+const props = defineProps<{
+  ids: readonly PokemonId[]
+  current?: PokemonId
+  query?: string
+  formes?: boolean
+  meta?: boolean
+}>()
 const all = computed(() =>
   props.ids
     .map((id) => ({ id, full: refName(pokemon(id)) }))
@@ -34,7 +41,7 @@ const mons = computed(() => {
     <li v-for="m in mons" :key="m.id">
       <component
         :is="m.id === current ? 'span' : RouterLink"
-        :to="m.id === current ? undefined : { name: 'pokemon', params: { id: m.id } }"
+        :to="m.id === current ? undefined : { name: meta ? 'metaPokemon' : 'pokemon', params: { id: m.id } }"
         class="chip"
         :class="{ current: m.id === current }"
         :aria-current="m.id === current ? 'page' : undefined"

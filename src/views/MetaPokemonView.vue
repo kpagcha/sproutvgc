@@ -2,7 +2,7 @@
 import { computed, h, ref, render, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp, Info } from '@lucide/vue'
-import { ability, available, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
+import { ability, available, availableIds, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { MOVES } from '@/data/moves'
 import {
   POKEMON,
@@ -12,6 +12,7 @@ import {
   gameTotal,
   loadLearnsets,
   movesOf,
+  speciesOf,
   splitForme,
   spriteUrl,
   statColor,
@@ -38,6 +39,7 @@ import DexText from '@/components/DexText'
 import EntryTitle from '@/components/EntryTitle.vue'
 import EffectTag from '@/components/EffectTag'
 import MetaDialog from '@/components/MetaDialog.vue'
+import PokemonChips from '@/components/PokemonChips.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import ListOptions from '@/components/ListOptions.vue'
 import OptionsMenu from '@/components/OptionsMenu.vue'
@@ -58,6 +60,12 @@ const id = computed(() => String(route.params.id) as PokemonId)
 const ref_ = computed(() => pokemon(id.value))
 const exists = computed(() => available(ref_.value))
 const mon = computed(() => POKEMON[id.value])
+// The species' other formes the dex has (Megas, regional formes, Rotom's appliances; not those that only look
+// different), this one among them, each leading to its meta page. Shown only when it has others.
+const formes = computed(() => {
+  const species = speciesOf(id.value)
+  return availableIds('pokemon').filter((p) => speciesOf(p) === species && !POKEMON[p].cosmetic)
+})
 const { snapshot, data, loading } = useMeta()
 const m = computed(() => data.value?.[id.value])
 // Whether its lists show what each entry does (`ListOptions`, at the top right of each).
@@ -347,6 +355,11 @@ const sections = computed(() =>
           <AppLink v-for="ty in mon.types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
             <TypeIcon v-tip="typeName(ty)" :type="ty" />
           </AppLink>
+        </div>
+        <!-- Its other formes, each a link to its meta page. -->
+        <div v-if="formes.length > 1" class="formes">
+          <span class="muted">{{ t('pokemon.formes') }}</span>
+          <PokemonChips :ids="formes" :current="id" formes meta />
         </div>
         <!-- How much it's used, smaller: its rank, usage and how often it's brought, with their changes. -->
         <p v-if="m" class="used">
@@ -732,6 +745,12 @@ const sections = computed(() =>
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
+}
+.formes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
 }
 /* How much it's used: a line of its own, smaller than the stats. */
 .used {
