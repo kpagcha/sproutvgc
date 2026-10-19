@@ -5,11 +5,13 @@ import { ChevronDown, ChevronUp } from '@lucide/vue'
 import { ability, item, move, pokemon } from '@/data/dex'
 import { datasetDates } from '@/data/meta'
 import { MOVES } from '@/data/moves'
-import { natureName } from '@/data/natures'
+import { natureEffects, natureName } from '@/data/natures'
+import { POKEMON, spriteUrl } from '@/data/pokemon'
 import { eventOf, loadStandings, tournamentSnapshot, type Standing } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
 import AppLink from '@/components/AppLink'
 import DexRef from '@/components/DexRef'
+import EffectTag from '@/components/EffectTag'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
@@ -17,7 +19,8 @@ import TypeIcon from '@/components/TypeIcon'
 // One official tournament: what it was (type, date, country, players, how many teams are listed), the way to its meta
 // (its teams alone, as the data card would pick it), and its standings: each listed player's placing, name and country,
 // and the six they brought, as icons; unfolded (one by one, or all at once), their whole sets, a card each, each entry
-// leading to its meta page, each move with its type's badge. Only the top placings' teams are published: the
+// leading to its meta page: its sprite and types over a band of its first type's color, its item, ability and nature
+// (with the stats it raises and lowers) on rows of their own, and its moves two by two, each tinted with its type. Only the top placings' teams are published: the
 // standings stop where they do.
 const route = useRoute()
 const id = computed(() => String(route.params.id))
@@ -104,21 +107,54 @@ const ordinal = (n: number) => `#${n}`
           </button>
           <!-- Its whole sets, a card each. -->
           <ul v-if="open.has(s.placing)" class="sets">
-            <li v-for="([mon, it, ab, nature, moves], i) in s.team" :key="i" class="set">
-              <span class="set-mon">
-                <PokemonIcon :id="mon" />
-                <DexRef :to="pokemon(mon)" meta />
-              </span>
-              <span class="set-item">
-                <template v-if="it"><ItemIcon :id="it" /><DexRef :to="item(it)" meta /></template>
-                <span v-else class="muted">{{ t('usageMon.noItem') }}</span>
-              </span>
-              <span class="set-traits">
-                <DexRef v-if="ab" :to="ability(ab)" meta />
-                <span v-if="nature" class="nature">{{ natureName(nature) }}</span>
-              </span>
+            <li
+              v-for="([mon, it, ab, nature, moves], i) in s.team"
+              :key="i"
+              class="set"
+              :data-type="POKEMON[mon]?.types[0]"
+            >
+              <div class="set-head">
+                <img
+                  v-if="!POKEMON[mon]?.noSprite"
+                  class="pixel set-sprite"
+                  :src="spriteUrl(mon)"
+                  alt=""
+                  width="96"
+                  height="96"
+                  loading="lazy"
+                  draggable="false"
+                />
+                <span v-else class="set-sprite icon-sprite"><PokemonIcon :id="mon" /></span>
+                <span class="set-who">
+                  <DexRef :to="pokemon(mon)" meta class="set-name" />
+                  <span class="set-types">
+                    <TypeIcon v-for="ty in POKEMON[mon]?.types ?? []" :key="ty" :type="ty" />
+                  </span>
+                </span>
+              </div>
+              <dl class="set-facts">
+                <dt>{{ t('tournaments.set.item') }}</dt>
+                <dd>
+                  <template v-if="it"><ItemIcon :id="it" /><DexRef :to="item(it)" meta /></template>
+                  <span v-else class="muted">{{ t('usageMon.noItem') }}</span>
+                </dd>
+                <template v-if="ab">
+                  <dt>{{ t('tournaments.set.ability') }}</dt>
+                  <dd><DexRef :to="ability(ab)" meta /></dd>
+                </template>
+                <template v-if="nature">
+                  <dt>{{ t('tournaments.set.nature') }}</dt>
+                  <dd class="set-nature">
+                    <strong>{{ natureName(nature) }}</strong>
+                    <template v-if="natureEffects(nature)">
+                      <EffectTag effect="up" :stat="natureEffects(nature)!.plus" class="up" />
+                      <EffectTag effect="down" :stat="natureEffects(nature)!.minus" class="down" />
+                    </template>
+                  </dd>
+                </template>
+              </dl>
               <ul class="set-moves">
-                <li v-for="mv in moves" :key="mv">
+                <li v-for="mv in moves" :key="mv" class="set-move" :data-type="MOVES[mv]?.type">
                   <TypeIcon v-if="MOVES[mv]" :type="MOVES[mv].type" /><DexRef :to="move(mv)" meta />
                 </li>
               </ul>
@@ -254,43 +290,117 @@ h1 {
   padding: 4px 4px 12px;
   list-style: none;
 }
+/* A set: an ink-framed card with a hard shadow, its Pokémon's first type its color (`--tc`, from `data-type`). */
 .set {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 8px;
-  background: var(--panel-alt);
-  border: 1px solid var(--border);
+  min-width: 0;
+  background: var(--panel);
+  border: 1px solid var(--ink);
+  box-shadow: var(--hard-sm);
 }
-.set-mon,
-.set-item {
+/* Its head: a band of its type's color, washed toward the panel, the sprite at the left wholly inside it, its name and
+   types beside it. */
+.set-head {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-weight: bold;
+  gap: 10px;
+  padding: 2px 10px 2px 6px;
+  background: color-mix(in srgb, var(--tc, var(--accent)) 28%, var(--panel));
+  border-bottom: 1px solid var(--ink);
 }
-.set-traits {
+.set-sprite {
+  flex: none;
+  /* Half its size: an even scale, so its pixels stay even. */
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.icon-sprite {
   display: flex;
-  flex-wrap: wrap;
-  gap: 2px 10px;
+  align-items: center;
+  justify-content: center;
 }
-.nature {
+.set-who {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.set-name {
+  font-size: 1.05em;
   font-weight: bold;
 }
-.set-moves {
+.set-types {
   /* Type badges at their desktop size on phones too, as small as the text. */
   --icon-scale: 1;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  gap: 4px;
 }
-.set-moves li {
+/* Its item, ability and nature, a row each: a small label, then what it is. */
+.set-facts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 4px 10px;
+  margin: 0;
+  padding: 8px 10px 6px;
+}
+.set-facts dt {
+  font-size: 0.72em;
+  font-weight: bold;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.set-facts dd {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  min-width: 0;
+  margin: 0;
+  font-weight: bold;
+}
+.set-nature {
+  flex-wrap: wrap;
+  column-gap: 8px;
+}
+.set-nature :deep(.nature-effect) {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.85em;
+}
+.set-nature .up {
+  color: var(--good);
+}
+.set-nature .down {
+  color: var(--bad);
+}
+/* Its moves, two by two: each a chip of its type, its badge and name over a wash of its color, edged in it. */
+.set-moves {
+  --icon-scale: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0;
+  padding: 4px 8px 8px;
+  list-style: none;
+}
+.set-move {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 3px 5px 3px 3px;
+  font-size: 0.9em;
+  background: color-mix(in srgb, var(--tc) 14%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--tc) 55%, var(--border));
+}
+.set-move :deep(a) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 @media (max-width: 720px) {
   .sets {
