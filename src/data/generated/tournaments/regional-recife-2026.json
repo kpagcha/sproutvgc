@@ -1,8 +1,11 @@
 {
   "1": {
-    "player": "Juan Francisco Salerno",
+    "player": "juan salerno",
     "country": "AR",
-    "list": 7178,
+    "wins": 14,
+    "losses": 0,
+    "day2": true,
+    "topCut": true,
     "team": [
       ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "yawn", "quickattack", "protect"]],
       ["toxapex", "leftovers", "regenerator", "relaxed", ["infestation", "toxic", "wideguard", "banefulbunker"]],
@@ -15,7 +18,10 @@
   "2": {
     "player": "Luciano Begot",
     "country": "BR",
-    "list": 7179,
+    "wins": 12,
+    "losses": 2,
+    "day2": true,
+    "topCut": true,
     "team": [
       ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]],
       ["politoed", "mysticwater", "drizzle", "modest", ["muddywater", "icebeam", "weatherball", "protect"]],
@@ -28,7 +34,10 @@
   "3": {
     "player": "Nader El bacha",
     "country": "BR",
-    "list": 7180,
+    "wins": 10,
+    "losses": 3,
+    "day2": true,
+    "topCut": true,
     "team": [
       [
         "salamencemega",
@@ -47,7 +56,10 @@
   "4": {
     "player": "Hugo Nascimento Vilela dos Santos",
     "country": "BR",
-    "list": 7181,
+    "wins": 10,
+    "losses": 3,
+    "day2": true,
+    "topCut": true,
     "team": [
       ["swampertmega", "swampertite", "torrent", "adamant", ["wavecrash", "earthquake", "icepunch", "protect"]],
       ["pelipper", "sitrusberry", "drizzle", "bold", ["hurricane", "weatherball", "tailwind", "wideguard"]],
@@ -60,7 +72,10 @@
   "5": {
     "player": "Yan Sym",
     "country": "BR",
-    "list": 7182,
+    "wins": 9,
+    "losses": 3,
+    "day2": true,
+    "topCut": true,
     "team": [
       ["torkoal", "charcoal", "drought", "quiet", ["eruption", "heatwave", "earthpower", "protect"]],
       ["incineroar", "chopleberry", "intimidate", "adamant", ["flareblitz", "darkestlariat", "fakeout", "partingshot"]],
@@ -73,7 +88,10 @@
   "6": {
     "player": "Pedro H Soares Feitosa",
     "country": "BR",
-    "list": 7183,
+    "wins": 9,
+    "losses": 3,
+    "day2": true,
+    "topCut": true,
     "team": [
       [
         "rillaboom",
@@ -92,7 +110,10 @@
   "7": {
     "player": "Victor Vieira",
     "country": "BR",
-    "list": 7184,
+    "wins": 9,
+    "losses": 3,
+    "day2": true,
+    "topCut": true,
     "team": [
       ["sneasler", "whiteherb", "unburden", "adamant", ["protect", "direclaw", "closecombat", "fakeout"]],
       ["salamencemega", "salamencite", "intimidate", "timid", ["protect", "hypervoice", "dracometeor", "tailwind"]],
@@ -111,7 +132,10 @@
   "8": {
     "player": "Gabriel Agati",
     "country": "BR",
-    "list": 7185,
+    "wins": 9,
+    "losses": 3,
+    "day2": true,
+    "topCut": true,
     "team": [
       ["gholdengo", "lifeorb", "goodasgold", "modest", ["protect", "makeitrain", "shadowball", "nastyplot"]],
       ["incineroar", "sitrusberry", "intimidate", "impish", ["partingshot", "flareblitz", "darkestlariat", "fakeout"]],
@@ -130,7 +154,10 @@
   "9": {
     "player": "Thiago Lattanzi",
     "country": "BR",
-    "list": 7186,
+    "wins": 8,
+    "losses": 3,
+    "day2": true,
+    "topCut": true,
     "team": [
       ["sneasler", "psychicseed", "unburden", "adamant", ["protect", "rocktomb", "direclaw", "closecombat"]],
       ["armarouge", "focussash", "weakarmor", "timid", ["armorcannon", "expandingforce", "wideguard", "protect"]],
@@ -143,7 +170,10 @@
   "10": {
     "player": "Thiago Barbosa",
     "country": "BR",
-    "list": 7187,
+    "wins": 8,
+    "losses": 3,
+    "day2": true,
+    "topCut": true,
     "team": [
       ["sneasler", "focussash", "poisontouch", "jolly", ["closecombat", "poisonjab", "fakeout", "quickguard"]],
       ["delphoxmega", "delphoxite", "blaze", "timid", ["heatwave", "psychic", "nastyplot", "protect"]],
@@ -156,7 +186,10 @@
   "11": {
     "player": "Sergio Igarashi",
     "country": "BR",
-    "list": 7188,
+    "wins": 8,
+    "losses": 3,
+    "day2": true,
+    "topCut": true,
     "team": [
       ["charizardmegay", "charizarditey", "blaze", "modest", ["protect", "heatwave", "weatherball", "solarbeam"]],
       ["farigiraf", "sitrusberry", "armortail", "bold", ["expandingforce", "thunderbolt", "trickroom", "protect"]],
@@ -169,7 +202,10 @@
   "12": {
     "player": "Júlio Eller",
     "country": "BR",
-    "list": 7189,
+    "wins": 8,
+    "losses": 3,
+    "day2": true,
+    "topCut": true,
     "team": [
       ["floettemega", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "calmmind", "protect"]],
       ["sneasler", "whiteherb", "unburden", "jolly", ["closecombat", "direclaw", "fakeout", "protect"]],
@@ -182,7 +218,9 @@
   "13": {
     "player": "Rafael Morales",
     "country": "BR",
-    "list": 7190,
+    "wins": 7,
+    "losses": 3,
+    "day2": true,
     "team": [
       ["gardevoirmega", "gardevoirite", "trace", "timid", ["protect", "hypervoice", "expandingforce", "thunderbolt"]],
       ["indeedeef", "rockyhelmet", "psychicsurge", "bold", ["protect", "followme", "psyshock", "helpinghand"]],
@@ -195,7 +233,9 @@
   "14": {
     "player": "Pedro Cadaval",
     "country": "BR",
-    "list": 7191,
+    "wins": 7,
+    "losses": 3,
+    "day2": true,
     "team": [
       ["garchomp", "focussash", "roughskin", "jolly", ["protect", "rockslide", "stompingtantrum", "dragonclaw"]],
       ["volcarona", "grassyseed", "flamebody", "modest", ["protect", "fierydance", "bugbuzz", "quiverdance"]],
@@ -208,39 +248,45 @@
   "15": {
     "player": "Yan Fernandes",
     "country": "BR",
-    "list": 7050,
+    "wins": 7,
+    "losses": 3,
+    "day2": true,
     "team": [
-      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
       [
         "rillaboom",
         "miracleseed",
         "grassysurge",
         "adamant",
-        ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
+        ["woodhammer", "highhorsepower", "grassyglide", "fakeout"]
       ],
-      ["primarina", "leftovers", "liquidvoice", "modest", ["hypervoice", "moonblast", "calmmind", "protect"]],
-      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
-      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
-      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]]
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["protect", "flareblitz", "headsmash", "extremespeed"]],
+      ["primarina", "leftovers", "liquidvoice", "modest", ["protect", "hypervoice", "moonblast", "calmmind"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["protect", "closecombat", "bravebird", "tailwind"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "fakeout"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["protect", "makeitrain", "shadowball", "nastyplot"]]
     ]
   },
   "16": {
     "player": "Mario Queiroz",
     "country": "BR",
-    "list": 7060,
+    "wins": 7,
+    "losses": 3,
+    "day2": true,
     "team": [
-      ["charizardmegay", "charizarditey", "blaze", "timid", ["weatherball", "heatwave", "hurricane", "protect"]],
-      ["venusaur", "focussash", "chlorophyll", "modest", ["leafstorm", "sludgebomb", "sleeppowder", "protect"]],
-      ["archaludon", "leftovers", "stamina", "calm", ["flashcannon", "dragonpulse", "electroshot", "protect"]],
+      ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "dragonpulse", "flashcannon", "protect"]],
+      ["grimmsnarl", "lightclay", "prankster", "sassy", ["spiritbreak", "partingshot", "lightscreen", "reflect"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "hurricane", "protect"]],
       ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dracometeor", "earthpower", "powergem", "protect"]],
-      ["grimmsnarl", "lightclay", "prankster", "sassy", ["spiritbreak", "reflect", "lightscreen", "partingshot"]],
-      ["pelipper", "sitrusberry", "drizzle", "bold", ["weatherball", "hurricane", "tailwind", "wideguard"]]
+      ["pelipper", "sitrusberry", "drizzle", "bold", ["hurricane", "weatherball", "tailwind", "wideguard"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["sludgebomb", "leafstorm", "sleeppowder", "protect"]]
     ]
   },
   "17": {
     "player": "Tomas Barreto",
     "country": "BR",
-    "list": 7192,
+    "wins": 7,
+    "losses": 3,
+    "day2": true,
     "team": [
       ["salamencemega", "salamencite", "intimidate", "timid", ["protect", "dracometeor", "flamethrower", "hypervoice"]],
       ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["protect", "rockslide", "lowkick", "knockoff"]],
@@ -253,7 +299,9 @@
   "18": {
     "player": "Valentin Iñigo Leiva Lopez",
     "country": "AR",
-    "list": 7193,
+    "wins": 7,
+    "losses": 3,
+    "day2": true,
     "team": [
       ["incineroar", "sitrusberry", "intimidate", "careful", ["throatchop", "fakeout", "flareblitz", "partingshot"]],
       [
@@ -272,7 +320,9 @@
   "19": {
     "player": "Fernando Albuquerque",
     "country": "BR",
-    "list": 7194,
+    "wins": 7,
+    "losses": 3,
+    "day2": true,
     "team": [
       ["indeedeef", "rockyhelmet", "psychicsurge", "bold", ["psychic", "imprison", "trickroom", "followme"]],
       ["salamencemega", "salamencite", "intimidate", "timid", ["protect", "flamethrower", "hypervoice", "dracometeor"]],
@@ -285,7 +335,9 @@
   "20": {
     "player": "Tiago Pimentel",
     "country": "BR",
-    "list": 7195,
+    "wins": 7,
+    "losses": 3,
+    "day2": true,
     "team": [
       ["glimmora", "focussash", "toxicdebris", "timid", ["powergem", "sludgebomb", "earthpower", "spikyshield"]],
       ["charizardmegay", "charizarditey", "solarpower", "timid", ["heatwave", "weatherball", "dragonpulse", "protect"]],
@@ -304,7 +356,9 @@
   "21": {
     "player": "Gabriel Rigo",
     "country": "BR",
-    "list": 7196,
+    "wins": 7,
+    "losses": 3,
+    "day2": true,
     "team": [
       ["volcarona", "sitrusberry", "flamebody", "timid", ["overheat", "tailwind", "strugglebug", "ragepowder"]],
       ["glimmoramega", "glimmoranite", "toxicdebris", "timid", ["powergem", "sludgebomb", "earthpower", "spikyshield"]],
@@ -317,7 +371,9 @@
   "22": {
     "player": "Leonardo Alves Gomes",
     "country": "BR",
-    "list": 7197,
+    "wins": 7,
+    "losses": 3,
+    "day2": true,
     "team": [
       ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "hurricane", "protect"]],
       ["pelipper", "sitrusberry", "drizzle", "bold", ["hurricane", "weatherball", "tailwind", "wideguard"]],
@@ -328,22 +384,26 @@
     ]
   },
   "23": {
-    "player": "Cristhian Andrade",
+    "player": "cristhian andrade",
     "country": "BR",
-    "list": 7197,
+    "wins": 7,
+    "losses": 3,
+    "day2": true,
     "team": [
-      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "hurricane", "protect"]],
+      ["archaludon", "leftovers", "stamina", "calm", ["protect", "electroshot", "dragonpulse", "flashcannon"]],
       ["pelipper", "sitrusberry", "drizzle", "bold", ["hurricane", "weatherball", "tailwind", "wideguard"]],
-      ["archaludon", "leftovers", "stamina", "calm", ["dragonpulse", "flashcannon", "electroshot", "protect"]],
-      ["venusaur", "focussash", "chlorophyll", "modest", ["sludgebomb", "leafstorm", "sleeppowder", "protect"]],
-      ["grimmsnarl", "lightclay", "prankster", "sassy", ["spiritbreak", "partingshot", "lightscreen", "reflect"]],
+      ["grimmsnarl", "lightclay", "prankster", "sassy", ["spiritbreak", "reflect", "lightscreen", "partingshot"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["protect", "sleeppowder", "sludgebomb", "leafstorm"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["weatherball", "heatwave", "hurricane", "protect"]],
       ["garchompmegaz", "garchompitez", "roughskin", "timid", ["dragonpulse", "earthpower", "powergem", "protect"]]
     ]
   },
   "24": {
     "player": "Raul Gioielli",
     "country": "BR",
-    "list": 7198,
+    "wins": 7,
+    "losses": 3,
+    "day2": true,
     "team": [
       ["basculegion", "grassyseed", "adaptability", "adamant", ["lastrespects", "protect", "wavecrash", "aquajet"]],
       ["kingambit", "chopleberry", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "protect"]],
@@ -356,20 +416,24 @@
   "25": {
     "player": "SAMUEL RIBEIRO",
     "country": "BR",
-    "list": 7197,
+    "wins": 7,
+    "losses": 3,
+    "day2": true,
     "team": [
-      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "hurricane", "protect"]],
-      ["pelipper", "sitrusberry", "drizzle", "bold", ["hurricane", "weatherball", "tailwind", "wideguard"]],
-      ["archaludon", "leftovers", "stamina", "calm", ["dragonpulse", "flashcannon", "electroshot", "protect"]],
-      ["venusaur", "focussash", "chlorophyll", "modest", ["sludgebomb", "leafstorm", "sleeppowder", "protect"]],
-      ["grimmsnarl", "lightclay", "prankster", "sassy", ["spiritbreak", "partingshot", "lightscreen", "reflect"]],
-      ["garchompmegaz", "garchompitez", "roughskin", "timid", ["dragonpulse", "earthpower", "powergem", "protect"]]
+      ["archaludon", "leftovers", "stamina", "calm", ["dragonpulse", "electroshot", "flashcannon", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "timid", ["dragonpulse", "earthpower", "powergem", "protect"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["leafstorm", "sludgebomb", "sleeppowder", "protect"]],
+      ["pelipper", "sitrusberry", "drizzle", "bold", ["hurricane", "weatherball", "wideguard", "tailwind"]],
+      ["grimmsnarl", "lightclay", "prankster", "sassy", ["spiritbreak", "lightscreen", "partingshot", "reflect"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["weatherball", "heatwave", "hurricane", "protect"]]
     ]
   },
   "26": {
     "player": "João Victor Lopes Barbosa Moreira",
     "country": "BR",
-    "list": 7199,
+    "wins": 7,
+    "losses": 3,
+    "day2": true,
     "team": [
       ["talonflame", "sharpbeak", "galewings", "timid", ["overheat", "airslash", "tailwind", "protect"]],
       ["raichumegay", "raichunitey", "lightningrod", "timid", ["fakeout", "zapcannon", "focusblast", "protect"]],
@@ -382,7 +446,9 @@
   "27": {
     "player": "Rogério da Costa Junior",
     "country": "BR",
-    "list": 7200,
+    "wins": 6,
+    "losses": 4,
+    "day2": true,
     "team": [
       ["sneasler", "whiteherb", "unburden", "adamant", ["fakeout", "coaching", "closecombat", "direclaw"]],
       ["tyranitarmega", "tyranitarite", "sandstream", "adamant", ["protect", "knockoff", "rockslide", "lowkick"]],
@@ -395,26 +461,30 @@
   "28": {
     "player": "Victor Rachik",
     "country": "BR",
-    "list": 7184,
+    "wins": 6,
+    "losses": 4,
+    "day2": true,
     "team": [
-      ["sneasler", "whiteherb", "unburden", "adamant", ["protect", "direclaw", "closecombat", "fakeout"]],
-      ["salamencemega", "salamencite", "intimidate", "timid", ["protect", "hypervoice", "dracometeor", "tailwind"]],
-      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "encore"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "tailwind", "protect"]],
       [
         "rillaboom",
         "miracleseed",
         "grassysurge",
         "adamant",
-        ["woodhammer", "highhorsepower", "grassyglide", "fakeout"]
+        ["grassyglide", "woodhammer", "highhorsepower", "fakeout"]
       ],
-      ["volcarona", "sitrusberry", "flamebody", "calm", ["protect", "strugglebug", "overheat", "ragepowder"]],
-      ["arcaninehisui", "focussash", "rockhead", "jolly", ["protect", "flareblitz", "headsmash", "extremespeed"]]
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "encore", "protect"]],
+      ["volcarona", "sitrusberry", "flamebody", "calm", ["strugglebug", "overheat", "ragepowder", "protect"]],
+      ["sneasler", "whiteherb", "unburden", "adamant", ["direclaw", "closecombat", "fakeout", "protect"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]]
     ]
   },
   "29": {
     "player": "Ernesto Serpa",
     "country": "PE",
-    "list": 7201,
+    "wins": 6,
+    "losses": 4,
+    "day2": true,
     "team": [
       ["incineroar", "sitrusberry", "intimidate", "careful", ["fakeout", "flareblitz", "snarl", "partingshot"]],
       ["sneasler", "focussash", "poisontouch", "jolly", ["poisonjab", "closecombat", "fakeout", "quickguard"]],
@@ -427,7 +497,9 @@
   "30": {
     "player": "Eduardo Oliveira",
     "country": "BR",
-    "list": 7202,
+    "wins": 6,
+    "losses": 4,
+    "day2": true,
     "team": [
       ["rillaboom", "miracleseed", "grassysurge", "adamant", ["fakeout", "grassyglide", "woodhammer", "uturn"]],
       ["sneasler", "grassyseed", "unburden", "jolly", ["protect", "closecombat", "direclaw", "taunt"]],
@@ -438,22 +510,3123 @@
     ]
   },
   "31": {
-    "player": "Guilherme de Oliveira Queiroz",
+    "player": "Guilherme Queiroz",
     "country": "BR",
-    "list": 7183,
+    "wins": 6,
+    "losses": 4,
+    "day2": true,
     "team": [
       [
         "rillaboom",
         "miracleseed",
         "grassysurge",
         "adamant",
-        ["woodhammer", "fakeout", "highhorsepower", "grassyglide"]
+        ["woodhammer", "fakeout", "grassyglide", "highhorsepower"]
       ],
-      ["sneasler", "whiteherb", "unburden", "jolly", ["closecombat", "fakeout", "quickguard", "direclaw"]],
-      ["dragonitemega", "dragoninite", "multiscale", "modest", ["protect", "dragonpulse", "heatwave", "tailwind"]],
-      ["delphoxmega", "delphoxite", "blaze", "timid", ["protect", "psyshock", "heatwave", "nastyplot"]],
-      ["kingambit", "lifeorb", "defiant", "adamant", ["protect", "kowtowcleave", "lowkick", "suckerpunch"]],
-      ["basculegion", "focussash", "adaptability", "adamant", ["protect", "liquidation", "lastrespects", "aquajet"]]
+      ["dragonitemega", "dragoninite", "multiscale", "modest", ["protect", "dragonpulse", "tailwind", "heatwave"]],
+      ["basculegion", "focussash", "adaptability", "adamant", ["protect", "liquidation", "aquajet", "lastrespects"]],
+      ["kingambit", "lifeorb", "defiant", "adamant", ["protect", "suckerpunch", "kowtowcleave", "lowkick"]],
+      ["sneasler", "whiteherb", "unburden", "jolly", ["closecombat", "direclaw", "quickguard", "fakeout"]],
+      ["delphoxmega", "delphoxite", "blaze", "timid", ["protect", "heatwave", "psyshock", "nastyplot"]]
+    ]
+  },
+  "32": {
+    "player": "Sebastian Rodriguez",
+    "country": "PE",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["grimmsnarl", "lightclay", "prankster", "sassy", ["spiritbreak", "lightscreen", "reflect", "partingshot"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "protect", "hurricane", "weatherball"]],
+      ["pelipper", "sitrusberry", "drizzle", "bold", ["wideguard", "weatherball", "hurricane", "tailwind"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["earthpower", "dracometeor", "powergem", "protect"]],
+      ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "dragonpulse", "flashcannon", "protect"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["protect", "sludgebomb", "leafstorm", "sleeppowder"]]
+    ]
+  },
+  "33": {
+    "player": "Camilo Liberona",
+    "country": "CL",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["glimmoramega", "glimmoranite", "toxicdebris", "modest", ["sludgebomb", "powergem", "earthpower", "energyball"]],
+      ["staraptormega", "staraptite", "intimidate", "adamant", ["bravebird", "closecombat", "roost", "protect"]],
+      ["armarouge", "psychicseed", "flashfire", "modest", ["expandingforce", "flamethrower", "calmmind", "trickroom"]],
+      ["kingambit", "focussash", "defiant", "brave", ["kowtowcleave", "ironhead", "lowkick", "suckerpunch"]],
+      ["torkoal", "lifeorb", "drought", "quiet", ["eruption", "earthpower", "solarbeam", "flamethrower"]],
+      ["indeedeef", "rockyhelmet", "psychicsurge", "relaxed", ["followme", "healpulse", "trickroom", "skillswap"]]
+    ]
+  },
+  "34": {
+    "player": "Claudio Kamoda",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["delphoxmega", "delphoxite", "blaze", "timid", ["heatwave", "psychic", "nastyplot", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "relaxed", ["flareblitz", "darkestlariat", "fakeout", "partingshot"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["sinistcha", "rockyhelmet", "hospitality", "bold", ["matchagotcha", "ragepowder", "trickroom", "protect"]],
+      ["kingambit", "focussash", "defiant", "adamant", ["kowtowcleave", "lowkick", "suckerpunch", "ironhead"]],
+      ["kommoo", "leftovers", "soundproof", "modest", ["clangingscales", "aurasphere", "clangoroussoul", "protect"]]
+    ]
+  },
+  "35": {
+    "player": "Breno Silva",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["incineroar", "sitrusberry", "intimidate", "relaxed", ["flareblitz", "partingshot", "fakeout", "darkestlariat"]],
+      ["kommoo", "leftovers", "soundproof", "modest", ["clangingscales", "aurasphere", "protect", "clangoroussoul"]],
+      ["delphoxmega", "delphoxite", "blaze", "timid", ["heatwave", "psychic", "nastyplot", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["kingambit", "focussash", "defiant", "adamant", ["suckerpunch", "kowtowcleave", "ironhead", "lowkick"]],
+      ["sinistcha", "rockyhelmet", "hospitality", "bold", ["matchagotcha", "trickroom", "protect", "ragepowder"]]
+    ]
+  },
+  "36": {
+    "player": "Robson Hamilton Carréa Filho",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]],
+      ["volcarona", "rockyhelmet", "flamebody", "timid", ["ragepowder", "tailwind", "strugglebug", "overheat"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["fakeout", "zapcannon", "focusblast", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "partingshot", "flareblitz", "darkestlariat"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["nastyplot", "shadowball", "makeitrain", "protect"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["fakeout", "grassyglide", "woodhammer", "uturn"]]
+    ]
+  },
+  "37": {
+    "player": "Tiago Correia",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["volcarona", "rockyhelmet", "flamebody", "timid", ["overheat", "strugglebug", "ragepowder", "tailwind"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["protect", "shadowball", "nastyplot", "makeitrain"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["grassyglide", "woodhammer", "fakeout", "uturn"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["partingshot", "fakeout", "flareblitz", "darkestlariat"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]]
+    ]
+  },
+  "38": {
+    "player": "Luis Santos",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["woodhammer", "highhorsepower", "grassyglide", "fakeout"]
+      ],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "fakeout"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["protect", "hypervoice", "dracometeor", "tailwind"]],
+      ["sneasler", "grassyseed", "unburden", "adamant", ["direclaw", "closecombat", "protect", "acrobatics"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
+      ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]]
+    ]
+  },
+  "39": {
+    "player": "David Ammann",
+    "country": "CH",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["basculegion", "choicescarf", "adaptability", "jolly", ["wavecrash", "lastrespects", "aquajet", "flipturn"]],
+      ["sneasler", "grassyseed", "unburden", "adamant", ["closecombat", "direclaw", "rocktomb", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "flamethrower", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "careful", ["fakeout", "flareblitz", "throatchop", "partingshot"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["fakeout", "woodhammer", "grassyglide", "highhorsepower"]
+      ],
+      ["floettemega", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "calmmind", "protect"]]
+    ]
+  },
+  "40": {
+    "player": "André Peixoto",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["dragapult", "lifeorb", "infiltrator", "timid", ["dracometeor", "shadowball", "willowisp", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["milotic", "psychicseed", "competitive", "calm", ["muddywater", "coil", "hypnosis", "recover"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "rockslide", "protect"]],
+      ["indeedeef", "rockyhelmet", "psychicsurge", "relaxed", ["followme", "psychic", "helpinghand", "protect"]],
+      ["metagrossmega", "metagrossite", "clearbody", "jolly", ["psychicfangs", "bodypress", "psychup", "protect"]]
+    ]
+  },
+  "41": {
+    "player": "Daniel Santana",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["salamencemega", "salamencite", "intimidate", "naive", ["hypervoice", "flamethrower", "doubleedge", "protect"]],
+      ["tyranitar", "airballoon", "sandstream", "adamant", ["rockslide", "knockoff", "protect", "brickbreak"]],
+      ["sneasler", "psychicseed", "unburden", "adamant", ["throatchop", "direclaw", "closecombat", "protect"]],
+      ["excadrill", "focussash", "sandrush", "adamant", ["protect", "ironhead", "earthquake", "highhorsepower"]],
+      ["indeedee", "choicescarf", "psychicsurge", "timid", ["imprison", "expandingforce", "hypervoice", "trickroom"]],
+      ["primarina", "lifeorb", "liquidvoice", "modest", ["helpinghand", "hypervoice", "moonblast", "protect"]]
+    ]
+  },
+  "42": {
+    "player": "Filipe Rocha",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["grimmsnarl", "lightclay", "prankster", "sassy", ["partingshot", "spiritbreak", "reflect", "lightscreen"]],
+      ["archaludon", "leftovers", "stamina", "calm", ["protect", "dragonpulse", "flashcannon", "electroshot"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["protect", "powergem", "earthpower", "dracometeor"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["hurricane", "weatherball", "heatwave", "protect"]],
+      ["pelipper", "sitrusberry", "drizzle", "bold", ["hurricane", "tailwind", "wideguard", "weatherball"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["protect", "sludgebomb", "leafstorm", "sleeppowder"]]
+    ]
+  },
+  "43": {
+    "player": "Gustavo kengo",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["garchomp", "lifeorb", "roughskin", "jolly", ["dragonclaw", "stompingtantrum", "earthquake", "protect"]],
+      ["aerodactylmega", "aerodactylite", "unnerve", "jolly", ["rockslide", "dualwingbeat", "tailwind", "protect"]],
+      ["farigiraf", "sitrusberry", "armortail", "bold", ["trickroom", "thunderbolt", "protect", "expandingforce"]],
+      ["charizardmegay", "charizarditey", "blaze", "modest", ["protect", "weatherball", "heatwave", "solarbeam"]],
+      ["kingambit", "focussash", "defiant", "adamant", ["suckerpunch", "kowtowcleave", "ironhead", "lowkick"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["protect", "hypervoice", "hyperbeam", "quickattack"]]
+    ]
+  },
+  "44": {
+    "player": "VINICIUS CAVALCANTI",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["sneasler", "whiteherb", "unburden", "adamant", ["direclaw", "closecombat", "rockslide", "protect"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["grassyglide", "woodhammer", "highhorsepower", "fakeout"]
+      ],
+      ["salamencemega", "salamencite", "intimidate", "modest", ["hypervoice", "flamethrower", "tailwind", "protect"]],
+      ["excadrill", "focussash", "sandrush", "adamant", ["rockslide", "ironhead", "highhorsepower", "protect"]],
+      ["milotic", "sitrusberry", "competitive", "modest", ["scald", "icywind", "haze", "protect"]],
+      ["tyranitarmega", "tyranitarite", "sandstream", "adamant", ["knockoff", "rockslide", "lowkick", "protect"]]
+    ]
+  },
+  "45": {
+    "player": "Sebastian Escalante",
+    "country": "AR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["farigiraf", "sitrusberry", "armortail", "sassy", ["psychic", "trickroom", "protect", "helpinghand"]],
+      ["charizardmegay", "charizarditey", "blaze", "modest", ["protect", "heatwave", "weatherball", "ancientpower"]],
+      ["incineroar", "charcoal", "intimidate", "impish", ["fakeout", "flareblitz", "partingshot", "closecombat"]],
+      ["sylveon", "fairyfeather", "pixilate", "quiet", ["protect", "hypervoice", "hyperbeam", "yawn"]],
+      ["venusaur", "focussash", "chlorophyll", "timid", ["sludgebomb", "protect", "leafstorm", "sleeppowder"]],
+      ["dragapult", "lifeorb", "clearbody", "timid", ["dracometeor", "shadowball", "protect", "uturn"]]
+    ]
+  },
+  "46": {
+    "player": "Caio José Valença Guimarães",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["gholdengo", "lifeorb", "goodasgold", "timid", ["protect", "shadowball", "makeitrain", "nastyplot"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["detect", "hypervoice", "hyperbeam", "calmmind"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["fakeout", "woodhammer", "grassyglide", "uturn"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["protect", "bravebird", "closecombat", "tailwind"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "fakeout", "zapcannon", "focusblast"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["protect", "flareblitz", "headsmash", "extremespeed"]]
+    ]
+  },
+  "47": {
+    "player": "Lucas M.",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["primarina", "leftovers", "liquidvoice", "modest", ["hypervoice", "moonblast", "calmmind", "protect"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["grassyglide", "woodhammer", "fakeout", "highhorsepower"]
+      ],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["bravebird", "tailwind", "closecombat", "protect"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]]
+    ]
+  },
+  "48": {
+    "player": "Weslei Henrique Almeida Silva",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["archaludon", "leftovers", "stamina", "calm", ["dragonpulse", "flashcannon", "electroshot", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "hurricane", "protect"]],
+      ["pelipper", "sitrusberry", "drizzle", "bold", ["hurricane", "weatherball", "tailwind", "wideguard"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "timid", ["dragonpulse", "earthpower", "powergem", "protect"]],
+      ["grimmsnarl", "lightclay", "prankster", "sassy", ["spiritbreak", "partingshot", "lightscreen", "reflect"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["leafstorm", "sludgebomb", "sleeppowder", "protect"]]
+    ]
+  },
+  "49": {
+    "player": "Danilo Martins",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["indeedee", "focussash", "psychicsurge", "timid", ["imprison", "mysticalfire", "expandingforce", "trickroom"]],
+      ["kingambit", "chopleberry", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "protect"]],
+      ["meowsticmmega", "meowsticite", "competitive", "timid", ["expandingforce", "fakeout", "thunderbolt", "protect"]],
+      ["kommoo", "leftovers", "soundproof", "modest", ["clangingscales", "clangoroussoul", "aurasphere", "protect"]],
+      ["sneasler", "psychicseed", "unburden", "adamant", ["direclaw", "rockslide", "closecombat", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "modest", ["ancientpower", "heatwave", "protect", "weatherball"]]
+    ]
+  },
+  "50": {
+    "player": "Artur Féres",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["farigiraf", "grassyseed", "armortail", "modest", ["psychic", "thunderbolt", "helpinghand", "trickroom"]],
+      ["incineroar", "sitrusberry", "intimidate", "adamant", ["flareblitz", "throatchop", "fakeout", "partingshot"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["grassyglide", "fakeout", "woodhammer", "highhorsepower"]
+      ],
+      ["sylveon", "leftovers", "pixilate", "modest", ["hypervoice", "calmmind", "detect", "moonblast"]],
+      ["charizardmegay", "charizarditey", "blaze", "modest", ["heatwave", "ancientpower", "weatherball", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]]
+    ]
+  },
+  "51": {
+    "player": "Christian Rangel",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      ["volcarona", "rockyhelmet", "flamebody", "timid", ["overheat", "strugglebug", "ragepowder", "tailwind"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["flareblitz", "darkestlariat", "fakeout", "partingshot"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "uturn", "fakeout"]]
+    ]
+  },
+  "52": {
+    "player": "Rafael Ribeiro",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["protect", "closecombat", "bravebird", "tailwind"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
+      ],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["protect", "headsmash", "flareblitz", "extremespeed"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["protect", "makeitrain", "shadowball", "nastyplot"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "fakeout"]],
+      ["primarina", "leftovers", "liquidvoice", "modest", ["protect", "hypervoice", "moonblast", "calmmind"]]
+    ]
+  },
+  "53": {
+    "player": "Guilherme Oliveira",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["milotic", "sitrusberry", "competitive", "modest", ["scald", "icywind", "protect", "icebeam"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "protect", "nastyplot"]],
+      ["rillaboom", "grassyseed", "grassysurge", "adamant", ["woodhammer", "fakeout", "grassyglide", "highhorsepower"]],
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "protect", "lowkick"]],
+      ["excadrill", "focussash", "sandrush", "adamant", ["rockslide", "highhorsepower", "ironhead", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["dracometeor", "hypervoice", "tailwind", "protect"]]
+    ]
+  },
+  "54": {
+    "player": "Pedro Correia",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "uturn", "fakeout"]],
+      ["excadrill", "focussash", "sandrush", "adamant", ["highhorsepower", "ironhead", "rockslide", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "flamethrower", "tailwind", "protect"]],
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["knockoff", "rockslide", "lowkick", "protect"]],
+      ["milotic", "sitrusberry", "competitive", "modest", ["scald", "icebeam", "icywind", "protect"]],
+      ["gholdengo", "lifeorb", "goodasgold", "timid", ["makeitrain", "shadowball", "nastyplot", "protect"]]
+    ]
+  },
+  "55": {
+    "player": "Eduardo Fachineti",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["milotic", "grassyseed", "competitive", "calm", ["scald", "icebeam", "dragontail", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
+      ["rillaboom", "sitrusberry", "grassysurge", "adamant", ["woodhammer", "grassyglide", "uturn", "fakeout"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]]
+    ]
+  },
+  "56": {
+    "player": "Gabriel Castro",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      [
+        "golisopodmega",
+        "golisopite",
+        "emergencyexit",
+        "adamant",
+        ["leechlife", "swordsdance", "ironhead", "suckerpunch"]
+      ],
+      ["incineroar", "ejectbutton", "intimidate", "impish", ["partingshot", "protect", "fakeout", "flareblitz"]],
+      ["gengarmega", "gengarite", "cursedbody", "timid", ["perishsong", "shadowball", "protect", "disable"]],
+      ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "flashcannon", "dragonpulse", "protect"]],
+      ["chesnaught", "lifeorb", "bulletproof", "adamant", ["spikyshield", "wideguard", "closecombat", "knockoff"]],
+      ["politoed", "sitrusberry", "drizzle", "calm", ["weatherball", "encore", "protect", "perishsong"]]
+    ]
+  },
+  "57": {
+    "player": "Arthur Fernandes",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["delphoxmega", "delphoxite", "blaze", "timid", ["nastyplot", "protect", "heatwave", "psychic"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["protect", "calmmind", "moonblast", "dazzlinggleam"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "partingshot", "throatchop", "flareblitz"]],
+      ["kingambit", "lifeorb", "defiant", "adamant", ["swordsdance", "kowtowcleave", "suckerpunch", "protect"]],
+      ["sinistcha", "colburberry", "hospitality", "bold", ["matchagotcha", "ragepowder", "protect", "trickroom"]],
+      ["sneasler", "focussash", "poisontouch", "jolly", ["fakeout", "quickguard", "poisonjab", "closecombat"]]
+    ]
+  },
+  "58": {
+    "player": "Manuel Urbano",
+    "country": "AR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["garchomp", null, "roughskin", "jolly", ["dragonclaw", "stompingtantrum", "earthquake", "protect"]],
+      ["aerodactylmega", "aerodactylite", "unnerve", "jolly", ["rockslide", "dualwingbeat", "tailwind", "wideguard"]],
+      ["farigiraf", "sitrusberry", "armortail", "modest", ["psychic", "helpinghand", "trickroom", "protect"]],
+      ["kingambit", "focussash", "defiant", "adamant", ["kowtowcleave", "ironhead", "lowkick", "suckerpunch"]],
+      ["charizardmegay", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "solarbeam", "protect"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "detect"]]
+    ]
+  },
+  "59": {
+    "player": "Jonas paulo Macedo ferreira",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["gholdengo", "lifeorb", "goodasgold", "timid", ["makeitrain", "protect", "shadowball", "nastyplot"]],
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["protect", "lowkick", "rockslide", "knockoff"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["protect", "flamethrower", "dracometeor", "hypervoice"]],
+      ["indeedeef", "rockyhelmet", "psychicsurge", "bold", ["psychic", "followme", "trickroom", "imprison"]],
+      ["excadrill", "focussash", "sandrush", "adamant", ["protect", "earthquake", "highhorsepower", "ironhead"]],
+      ["sneasler", "psychicseed", "unburden", "adamant", ["fakeout", "throatchop", "closecombat", "direclaw"]]
+    ]
+  },
+  "60": {
+    "player": "Silvio Ueda",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
+      ],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "tailwind", "protect"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["sneasler", "whiteherb", "unburden", "adamant", ["closecombat", "direclaw", "rocktomb", "fakeout"]],
+      ["gholdengo", "grassyseed", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]]
+    ]
+  },
+  "61": {
+    "player": "John Igor",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["gengarmega", "gengarite", "cursedbody", "modest", ["shadowball", "sludgebomb", "focusblast", "protect"]],
+      ["dragapult", "lifeorb", "infiltrator", "timid", ["dracometeor", "shadowball", "willowisp", "protect"]],
+      ["armarouge", "focussash", "flashfire", "modest", ["armorcannon", "expandingforce", "wideguard", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "adamant", ["closecombat", "bravebird", "roost", "protect"]],
+      ["indeedeef", "rockyhelmet", "psychicsurge", "bold", ["psychic", "followme", "trickroom", "helpinghand"]],
+      ["milotic", "psychicseed", "competitive", "calm", ["muddywater", "coil", "hypnosis", "recover"]]
+    ]
+  },
+  "62": {
+    "player": "Luca Rodrigues",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "dragonpulse", "snarl", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "adamant", ["closecombat", "dualwingbeat", "roost", "protect"]],
+      ["politoed", "mysticwater", "drizzle", "modest", ["muddywater", "weatherball", "icebeam", "protect"]],
+      ["grimmsnarl", "lightclay", "prankster", "calm", ["reflect", "lightscreen", "partingshot", "scaryface"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["leechlife", "ironhead", "drillrun", "protect"]],
+      ["farigiraf", "sitrusberry", "armortail", "calm", ["psychic", "helpinghand", "trickroom", "protect"]]
+    ]
+  },
+  "63": {
+    "player": "Felipe Zborowski",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["basculegion", "choicescarf", "adaptability", "jolly", ["wavecrash", "flipturn", "aquajet", "lastrespects"]],
+      ["sneasler", "psychicseed", "unburden", "adamant", ["direclaw", "closecombat", "throatchop", "protect"]],
+      ["gardevoirmega", "gardevoirite", "trace", "timid", ["expandingforce", "hypervoice", "calmmind", "protect"]],
+      ["indeedeef", "rockyhelmet", "psychicsurge", "bold", ["psychic", "trickroom", "helpinghand", "followme"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "careful", ["snarl", "flareblitz", "partingshot", "fakeout"]]
+    ]
+  },
+  "64": {
+    "player": "Lorenzo Felix",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["gholdengo", "lifeorb", "goodasgold", "timid", ["protect", "makeitrain", "shadowball", "nastyplot"]],
+      ["floettemega", "floettite", "flowerveil", "bold", ["calmmind", "dazzlinggleam", "drainingkiss", "protect"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["woodhammer", "grassyglide", "fakeout", "highhorsepower"]
+      ],
+      ["incineroar", "sitrusberry", "intimidate", "adamant", ["throatchop", "flareblitz", "partingshot", "fakeout"]],
+      ["sneasler", "grassyseed", "unburden", "adamant", ["protect", "closecombat", "rockslide", "direclaw"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]]
+    ]
+  },
+  "65": {
+    "player": "Emilson Soares Mendes Filho",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "dragonpulse", "flashcannon", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "hurricane", "protect"]],
+      ["pelipper", "sitrusberry", "drizzle", "timid", ["hurricane", "soak", "tailwind", "wideguard"]],
+      ["swampertmega", "swampertite", "damp", "mild", ["wavecrash", "earthpower", "icebeam", "protect"]],
+      ["grimmsnarl", "lightclay", "prankster", "sassy", ["spiritbreak", "mistyterrain", "lightscreen", "reflect"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["sludgebomb", "earthpower", "leafstorm", "protect"]]
+    ]
+  },
+  "66": {
+    "player": "Leonardo Soriano",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["farigiraf", "sitrusberry", "armortail", "bold", ["roar", "twinbeam", "trickroom", "thunderbolt"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "quickattack", "hyperbeam", "detect"]],
+      ["kingambit", "focussash", "defiant", "adamant", ["suckerpunch", "kowtowcleave", "lowkick", "ironhead"]],
+      ["charizardmegay", "charizarditey", "blaze", "modest", ["protect", "heatwave", "solarbeam", "weatherball"]],
+      ["garchomp", "lifeorb", "roughskin", "jolly", ["earthquake", "protect", "dragonclaw", "stompingtantrum"]],
+      ["aerodactylmega", "aerodactylite", "unnerve", "jolly", ["rockslide", "dualwingbeat", "icefang", "tailwind"]]
+    ]
+  },
+  "67": {
+    "player": "Chongjun Peng",
+    "country": "CN",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dracometeor", "flamethrower", "powergem", "protect"]],
+      ["torkoal", "charcoal", "drought", "quiet", ["eruption", "earthpower", "weatherball", "protect"]],
+      ["sneasler", "whiteherb", "unburden", "adamant", ["closecombat", "direclaw", "fakeout", "protect"]],
+      ["farigiraf", "sitrusberry", "armortail", "sassy", ["psychic", "trickroom", "helpinghand", "protect"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "yawn", "detect"]],
+      ["incineroar", "chopleberry", "intimidate", "adamant", ["flareblitz", "darkestlariat", "partingshot", "fakeout"]]
+    ]
+  },
+  "68": {
+    "player": "Mateus Santos",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["indeedeef", "rockyhelmet", "psychicsurge", "relaxed", ["psychic", "trickroom", "helpinghand", "followme"]],
+      ["torkoal", "charcoal", "drought", "quiet", ["protect", "eruption", "weatherball", "earthpower"]],
+      ["kingambit", "chopleberry", "defiant", "adamant", ["protect", "ironhead", "kowtowcleave", "suckerpunch"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["protect", "headsmash", "flareblitz", "extremespeed"]],
+      ["gardevoirmega", "gardevoirite", "trace", "modest", ["protect", "expandingforce", "hypervoice", "trickroom"]],
+      ["dragapult", "lifeorb", "infiltrator", "timid", ["protect", "dracometeor", "shadowball", "willowisp"]]
+    ]
+  },
+  "69": {
+    "player": "Arthur Schmitz",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["farigiraf", "sitrusberry", "armortail", "relaxed", ["trickroom", "helpinghand", "psychic", "sunnyday"]],
+      ["kingambit", "lifeorb", "defiant", "brave", ["kowtowcleave", "ironhead", "suckerpunch", "protect"]],
+      ["incineroar", "whiteherb", "intimidate", "adamant", ["fakeout", "throatchop", "flareblitz", "closecombat"]],
+      ["sylveon", "fairyfeather", "pixilate", "quiet", ["hypervoice", "hyperbeam", "detect", "quickattack"]],
+      ["cameruptmega", "cameruptite", "solidrock", "quiet", ["eruption", "earthpower", "ancientpower", "protect"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["fakeout", "woodhammer", "grassyglide", "uturn"]]
+    ]
+  },
+  "70": {
+    "player": "Leonardo Sedaca Camargo de Melo",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["sneasler", "psychicseed", "unburden", "adamant", ["direclaw", "closecombat", "rockslide", "protect"]],
+      ["indeedee", "focussash", "psychicsurge", "timid", ["expandingforce", "trickroom", "imprison", "energyball"]],
+      ["kingambit", "chopleberry", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["kommoo", "leftovers", "soundproof", "modest", ["clangingscales", "aurasphere", "clangoroussoul", "protect"]],
+      ["meowsticmmega", "meowsticite", "competitive", "timid", ["fakeout", "thunderbolt", "expandingforce", "protect"]]
+    ]
+  },
+  "71": {
+    "player": "Leandro Ferreira",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["gengarmega", "gengarite", "cursedbody", "modest", ["shadowball", "sludgebomb", "perishsong", "protect"]],
+      ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "dragonpulse", "flashcannon", "protect"]],
+      ["politoed", "sitrusberry", "drizzle", "calm", ["muddywater", "psychup", "perishsong", "protect"]],
+      ["raichumegax", "raichunitex", "lightningrod", "timid", ["voltswitch", "fakeout", "lightscreen", "reflect"]],
+      ["espathra", "electricseed", "speedboost", "timid", ["luminacrash", "calmmind", "batonpass", "protect"]],
+      ["incineroar", "ejectbutton", "intimidate", "relaxed", ["throatchop", "fakeout", "partingshot", "protect"]]
+    ]
+  },
+  "72": {
+    "player": "Matheus Vasconcellos",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["excadrill", "focussash", "sandrush", "jolly", ["ironhead", "highhorsepower", "rockslide", "protect"]],
+      ["volcarona", "sitrusberry", "flamebody", "timid", ["tailwind", "overheat", "strugglebug", "ragepowder"]],
+      ["sneasler", "whiteherb", "unburden", "adamant", ["direclaw", "closecombat", "fakeout", "coaching"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["fakeout", "highhorsepower", "woodhammer", "grassyglide"]
+      ],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "flamethrower", "protect"]],
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "lowkick", "protect"]]
+    ]
+  },
+  "73": {
+    "player": "Hugo Sales",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["blastoisemega", "blastoisinite", "raindish", "modest", ["protect", "waterspout", "darkpulse", "shellsmash"]],
+      ["maushold", "chopleberry", "friendguard", "impish", ["protect", "feint", "superfang", "followme"]],
+      ["delphoxmega", "delphoxite", "blaze", "timid", ["protect", "heatwave", "psychic", "nastyplot"]],
+      ["incineroar", "sitrusberry", "intimidate", "sassy", ["flareblitz", "snarl", "fakeout", "partingshot"]],
+      ["sneasler", "focussash", "poisontouch", "jolly", ["poisonjab", "closecombat", "fakeout", "quickguard"]],
+      ["sinistcha", "occaberry", "hospitality", "bold", ["protect", "ragepowder", "matchagotcha", "lifedew"]]
+    ]
+  },
+  "74": {
+    "player": "carlos eduardo alves da costa lima",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["gholdengo", "lifeorb", "goodasgold", "timid", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      ["archaludon", "leftovers", "stamina", "modest", ["electroshot", "dragonpulse", "snarl", "protect"]],
+      ["farigiraf", "sitrusberry", "armortail", "bold", ["imprison", "trickroom", "psychic", "protect"]],
+      ["pelipper", "focussash", "drizzle", "modest", ["hurricane", "tailwind", "weatherball", "wideguard"]],
+      ["swampertmega", "swampertite", "torrent", "adamant", ["highhorsepower", "wavecrash", "icepunch", "protect"]],
+      ["grimmsnarl", "lightclay", "prankster", "impish", ["taunt", "partingshot", "reflect", "lightscreen"]]
+    ]
+  },
+  "75": {
+    "player": "Mateus Nepomuceno",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["primarina", "lifeorb", "liquidvoice", "quiet", ["protect", "hypervoice", "aquajet", "moonblast"]],
+      ["farigiraf", "sitrusberry", "armortail", "bold", ["protect", "psychic", "thunderbolt", "trickroom"]],
+      ["blazikenmega", "blazikenite", "speedboost", "adamant", ["closecombat", "detect", "flareblitz", "rockslide"]],
+      ["rillaboom", "ejectbutton", "grassysurge", "brave", ["fakeout", "woodhammer", "highhorsepower", "uturn"]],
+      ["torkoal", "charcoal", "drought", "quiet", ["eruption", "protect", "helpinghand", "weatherball"]],
+      ["kingambit", "focussash", "defiant", "adamant", ["kowtowcleave", "ironhead", "suckerpunch", "protect"]]
+    ]
+  },
+  "76": {
+    "player": "André Luiz Bormann Soares",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["shadowball", "makeitrain", "nastyplot", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "protect", "fakeout"]],
+      ["basculegion", "colburberry", "adaptability", "adamant", ["aquajet", "wavecrash", "lastrespects", "protect"]],
+      ["incineroar", "chopleberry", "intimidate", "impish", ["throatchop", "flareblitz", "fakeout", "partingshot"]],
+      ["rillaboom", "sitrusberry", "grassysurge", "adamant", ["grassyglide", "fakeout", "woodhammer", "uturn"]]
+    ]
+  },
+  "77": {
+    "player": "Renato Fernandes",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["fakeout", "zapcannon", "focusblast", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "partingshot", "darkestlariat", "flareblitz"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["fakeout", "woodhammer", "grassyglide", "uturn"]],
+      ["volcarona", "rockyhelmet", "flamebody", "timid", ["overheat", "ragepowder", "strugglebug", "tailwind"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["protect", "nastyplot", "makeitrain", "shadowball"]]
+    ]
+  },
+  "78": {
+    "player": "Matheus Castello",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["sinistcha", "rockyhelmet", "hospitality", "bold", ["protect", "matchagotcha", "trickroom", "ragepowder"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["protect", "dazzlinggleam", "moonblast", "calmmind"]],
+      ["kingambit", "lifeorb", "defiant", "adamant", ["protect", "kowtowcleave", "suckerpunch", "swordsdance"]],
+      ["sneasler", "focussash", "poisontouch", "jolly", ["direclaw", "closecombat", "fakeout", "quickguard"]],
+      ["delphoxmega", "delphoxite", "blaze", "timid", ["protect", "heatwave", "psychic", "nastyplot"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["partingshot", "flareblitz", "throatchop", "fakeout"]]
+    ]
+  },
+  "79": {
+    "player": "Felipe Elsner Silva",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["basculegion", "mysticwater", "adaptability", "jolly", ["wavecrash", "aquajet", "lastrespects", "protect"]],
+      ["sneasler", "grassyseed", "unburden", "jolly", ["direclaw", "fakeout", "closecombat", "protect"]],
+      [
+        "rillaboom",
+        "sitrusberry",
+        "grassysurge",
+        "adamant",
+        ["grassyglide", "highhorsepower", "fakeout", "brickbreak"]
+      ],
+      ["gardevoirmega", "gardevoirite", "trace", "modest", ["expandingforce", "hypervoice", "thunderbolt", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["protect", "hypervoice", "dragonpulse", "heatwave"]],
+      ["kingambit", "focussash", "defiant", "adamant", ["kowtowcleave", "ironhead", "suckerpunch", "brickbreak"]]
+    ]
+  },
+  "80": {
+    "player": "Vitor Régis",
+    "country": "BR",
+    "wins": 5,
+    "losses": 3,
+    "team": [
+      ["hydreigon", "choicescarf", "levitate", "modest", ["dracometeor", "darkpulse", "snarl", "flamethrower"]],
+      ["altaria", "habanberry", "cloudnine", "sassy", ["perishsong", "helpinghand", "willowisp", "protect"]],
+      ["rillaboom", "ejectbutton", "grassysurge", "sassy", ["fakeout", "grassyglide", "uturn", "protect"]],
+      ["vivillon", "focussash", "compoundeyes", "timid", ["sleeppowder", "bugbuzz", "ragepowder", "protect"]],
+      ["incineroar", "chopleberry", "intimidate", "sassy", ["fakeout", "flareblitz", "partingshot", "protect"]],
+      ["gengarmega", "gengarite", "cursedbody", "modest", ["sludgebomb", "shadowball", "perishsong", "protect"]]
+    ]
+  },
+  "81": {
+    "player": "Yuri Bastos",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["primarina", "leftovers", "liquidvoice", "modest", ["protect", "perishsong", "hypervoice", "moonblast"]],
+      ["incineroar", "chopleberry", "intimidate", "impish", ["protect", "fakeout", "partingshot", "darkestlariat"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["protect", "fakeout", "uturn", "grassyglide"]],
+      ["pelipper", "sitrusberry", "drizzle", "bold", ["protect", "tailwind", "weatherball", "hurricane"]],
+      ["manectricmega", "manectite", "lightningrod", "timid", ["protect", "snarl", "thunder", "raindance"]],
+      ["gengarmega", "gengarite", "cursedbody", "modest", ["protect", "perishsong", "sludgebomb", "shadowball"]]
+    ]
+  },
+  "82": {
+    "player": "Gabriel Aston",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
+      ],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["headsmash", "flareblitz", "extremespeed", "protect"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "quickattack", "hyperbeam", "detect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "tailwind", "protect"]]
+    ]
+  },
+  "83": {
+    "player": "Alisson Barros",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
+      ],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      ["primarina", "leftovers", "liquidvoice", "modest", ["hypervoice", "moonblast", "calmmind", "protect"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["headsmash", "flareblitz", "extremespeed", "protect"]]
+    ]
+  },
+  "84": {
+    "player": "Gianluca Langellotti",
+    "country": "AR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["partingshot", "fakeout", "darkestlariat", "flareblitz"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["protect", "dragonpulse", "earthpower", "powergem"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["uturn", "fakeout", "grassyglide", "woodhammer"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "fakeout", "zapcannon", "focusblast"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["protect", "nastyplot", "makeitrain", "shadowball"]],
+      ["volcarona", "rockyhelmet", "flamebody", "timid", ["tailwind", "ragepowder", "overheat", "strugglebug"]]
+    ]
+  },
+  "85": {
+    "player": "Felipe Fredes",
+    "country": "CL",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["grimmsnarl", "lightclay", "prankster", "careful", ["spiritbreak", "lightscreen", "reflect", "partingshot"]],
+      ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "flashcannon", "dragonpulse", "protect"]],
+      ["venusaur", "lifeorb", "chlorophyll", "modest", ["sludgebomb", "leafstorm", "earthpower", "protect"]],
+      ["pelipper", "focussash", "drizzle", "modest", ["hurricane", "weatherball", "tailwind", "wideguard"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "hurricane", "protect"]],
+      ["garchomp", "choicescarf", "roughskin", "adamant", ["dragonclaw", "rockslide", "stompingtantrum", "earthquake"]]
+    ]
+  },
+  "86": {
+    "player": "Ricardo Torrijos",
+    "country": "CL",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["politoed", "sitrusberry", "drizzle", "calm", ["protect", "perishsong", "weatherball", "dive"]],
+      ["incineroar", "passhoberry", "intimidate", "relaxed", ["fakeout", "partingshot", "throatchop", "protect"]],
+      ["gengarmega", "gengarite", "cursedbody", "modest", ["sludgebomb", "shadowball", "perishsong", "protect"]],
+      [
+        "golisopodmega",
+        "golisopite",
+        "emergencyexit",
+        "adamant",
+        ["leechlife", "suckerpunch", "swordsdance", "protect"]
+      ],
+      ["rillaboom", "miracleseed", "grassysurge", "brave", ["fakeout", "grassyglide", "protect", "uturn"]],
+      ["archaludon", "leftovers", "stamina", "bold", ["electroshot", "protect", "dragonpulse", "aurasphere"]]
+    ]
+  },
+  "87": {
+    "player": "Alessandro Ferreira",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["headsmash", "flareblitz", "extremespeed", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["grassyglide", "woodhammer", "fakeout", "uturn"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "detect"]]
+    ]
+  },
+  "88": {
+    "player": "Fernando Saraiva",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["dragapult", "lifeorb", "infiltrator", "timid", ["dracometeor", "shadowball", "willowisp", "protect"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["extremespeed", "flareblitz", "headsmash", "protect"]],
+      ["metagrossmega", "metagrossite", "clearbody", "jolly", ["psychicfangs", "bodypress", "psychup", "protect"]],
+      ["milotic", "psychicseed", "competitive", "calm", ["muddywater", "coil", "hypnosis", "recover"]],
+      ["indeedeef", "rockyhelmet", "psychicsurge", "bold", ["psychic", "followme", "helpinghand", "protect"]],
+      ["altaria", "habanberry", "cloudnine", "timid", ["icebeam", "tailwind", "willowisp", "protect"]]
+    ]
+  },
+  "89": {
+    "player": "Alvaro Akillys",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["archaludon", "leftovers", "stamina", "calm", ["protect", "electroshot", "snarl", "dragonpulse"]],
+      ["charizardmegay", "charizarditey", "solarpower", "timid", ["heatwave", "weatherball", "hurricane", "protect"]],
+      ["pelipper", "sitrusberry", "drizzle", "bold", ["weatherball", "tailwind", "hurricane", "wideguard"]],
+      ["annihilape", "choicescarf", "defiant", "adamant", ["ragefist", "closecombat", "icepunch", "throatchop"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "timid", ["dragonpulse", "powergem", "protect", "earthpower"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["sleeppowder", "leafstorm", "protect", "sludgebomb"]]
+    ]
+  },
+  "90": {
+    "player": "Guilherme Machado Fajardo",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["incineroar", "passhoberry", "intimidate", "impish", ["fakeout", "flareblitz", "snarl", "partingshot"]],
+      ["archaludon", "leftovers", "stamina", "bold", ["electroshot", "dragonpulse", "flashcannon", "protect"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["dazzlinggleam", "drainingkiss", "calmmind", "protect"]],
+      ["raichumegax", "raichunitex", "lightningrod", "timid", ["fakeout", "risingvoltage", "helpinghand", "protect"]],
+      ["politoed", "sitrusberry", "drizzle", "modest", ["muddywater", "weatherball", "psychup", "protect"]],
+      ["espathra", "electricseed", "speedboost", "timid", ["luminacrash", "calmmind", "batonpass", "protect"]]
+    ]
+  },
+  "91": {
+    "player": "Anderson Leal",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["tailwind", "protect", "closecombat", "bravebird"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "nastyplot", "shadowball", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["milotic", "sitrusberry", "competitive", "calm", ["hypnosis", "icebeam", "coil", "muddywater"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["woodhammer", "highhorsepower", "fakeout", "grassyglide"]
+      ],
+      ["ceruledge", "grassyseed", "flashfire", "adamant", ["shadowsneak", "protect", "bitterblade", "swordsdance"]]
+    ]
+  },
+  "92": {
+    "player": "Murilo Matias",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["indeedee", "choicescarf", "psychicsurge", "modest", ["mysticalfire", "expandingforce", "trick", "protect"]],
+      ["sneasler", "whiteherb", "unburden", "adamant", ["direclaw", "closecombat", "coaching", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "protect", "flamethrower"]],
+      ["corviknight", "psychicseed", "mirrorarmor", "careful", ["bravebird", "bulkup", "powertrip", "roost"]],
+      ["excadrill", "focussash", "sandrush", "jolly", ["ironhead", "highhorsepower", "rockslide", "protect"]],
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "lowkick", "protect"]]
+    ]
+  },
+  "93": {
+    "player": "Eduardo Alcantara",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["grimmsnarl", "lightclay", "prankster", "sassy", ["protect", "reflect", "lightscreen", "spiritbreak"]],
+      ["pelipper", "sitrusberry", "drizzle", "modest", ["tailwind", "wideguard", "hurricane", "weatherball"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["protect", "powergem", "earthpower", "dracometeor"]],
+      ["charizardmegay", "charizarditey", "blaze", "modest", ["protect", "solarbeam", "heatwave", "weatherball"]],
+      ["archaludon", "leftovers", "stamina", "modest", ["protect", "electroshot", "flashcannon", "dragonpulse"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["protect", "sleeppowder", "earthpower", "sludgebomb"]]
+    ]
+  },
+  "94": {
+    "player": "Pedro Paulo Da Silva Fonseca Filho",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["sneasler", "whiteherb", "unburden", "adamant", ["protect", "closecombat", "direclaw", "xscissor"]],
+      ["froslassmega", "froslassite", "snowcloak", "timid", ["blizzard", "protect", "destinybond", "shadowball"]],
+      ["basculegion", "choicescarf", "adaptability", "jolly", ["wavecrash", "aquajet", "psychicfangs", "lastrespects"]],
+      ["indeedee", "twistedspoon", "psychicsurge", "modest", ["hypervoice", "trickroom", "protect", "expandingforce"]],
+      ["arcaninehisui", "focussash", "rockhead", "adamant", ["protect", "wildcharge", "headsmash", "flareblitz"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["leechlife", "liquidation", "protect", "ironhead"]]
+    ]
+  },
+  "95": {
+    "player": "Pedro Alves",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["excadrill", "focussash", "sandrush", "jolly", ["highhorsepower", "ironhead", "rockslide", "protect"]],
+      ["sneasler", "whiteherb", "unburden", "adamant", ["direclaw", "closecombat", "protect", "coaching"]],
+      ["corviknight", "psychicseed", "mirrorarmor", "careful", ["powertrip", "bravebird", "roost", "bulkup"]],
+      ["indeedee", "choicescarf", "psychicsurge", "modest", ["expandingforce", "trick", "mysticalfire", "protect"]],
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "lowkick", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "flamethrower", "protect"]]
+    ]
+  },
+  "96": {
+    "player": "Márcio Moreira",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["sneasler", "grassyseed", "unburden", "adamant", ["protect", "closecombat", "direclaw", "rockslide"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["protect", "calmmind", "drainingkiss", "dazzlinggleam"]],
+      ["dragonitemega", "dragoninite", "multiscale", "modest", ["protect", "tailwind", "dracometeor", "heatwave"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "partingshot", "throatchop", "flareblitz"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["fakeout", "grassyglide", "woodhammer", "highhorsepower"]
+      ],
+      ["indeedee", "choicescarf", "psychicsurge", "timid", ["trick", "expandingforce", "dazzlinggleam", "mysticalfire"]]
+    ]
+  },
+  "97": {
+    "player": "Danilo Souza",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "protect", "fakeout"]],
+      ["primarina", "leftovers", "liquidvoice", "modest", ["hypervoice", "calmmind", "moonblast", "protect"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["nastyplot", "makeitrain", "shadowball", "protect"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["headsmash", "flareblitz", "extremespeed", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "protect", "tailwind"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["grassyglide", "highhorsepower", "woodhammer", "fakeout"]]
+    ]
+  },
+  "98": {
+    "player": "Diego Pestana",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["volcarona", "sitrusberry", "flamebody", "modest", ["heatwave", "ragepowder", "bugbuzz", "tailwind"]],
+      [
+        "golisopodmega",
+        "golisopite",
+        "emergencyexit",
+        "adamant",
+        ["liquidation", "leechlife", "ironhead", "wideguard"]
+      ],
+      ["mimikyu", "brightpowder", "disguise", "jolly", ["playrough", "lightscreen", "shadowsneak", "phantomforce"]],
+      ["kommoo", "whiteherb", "soundproof", "modest", ["clangingscales", "clangoroussoul", "aurasphere", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "adamant", ["closecombat", "bravebird", "protect", "roost"]],
+      ["jolteon", "lifeorb", "voltabsorb", "modest", ["thunderbolt", "shadowball", "faketears", "detect"]]
+    ]
+  },
+  "99": {
+    "player": "Yago simas",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["grimmsnarl", "lightclay", "prankster", "calm", ["foulplay", "lightscreen", "reflect", "partingshot"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["leechlife", "protect", "swordsdance", "ironhead"]],
+      ["pelipper", "focussash", "drizzle", "timid", ["hurricane", "weatherball", "tailwind", "wideguard"]],
+      ["sinistcha", "sitrusberry", "hospitality", "relaxed", ["matchagotcha", "protect", "ragepowder", "trickroom"]],
+      ["swampertmega", "swampertite", "damp", "adamant", ["earthquake", "wavecrash", "icepunch", "protect"]],
+      ["archaludon", "leftovers", "stamina", "modest", ["electroshot", "dragonpulse", "flashcannon", "protect"]]
+    ]
+  },
+  "100": {
+    "player": "Matheus Carretta",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["woodhammer", "grassyglide", "fakeout", "highhorsepower"]
+      ],
+      ["primarina", "leftovers", "liquidvoice", "modest", ["hypervoice", "moonblast", "calmmind", "protect"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["shadowball", "makeitrain", "nastyplot", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["tailwind", "closecombat", "bravebird", "protect"]]
+    ]
+  },
+  "101": {
+    "player": "João Augusto Barbosa",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["fakeout", "woodhammer", "highhorsepower", "grassyglide"]
+      ],
+      ["farigiraf", "grassyseed", "armortail", "modest", ["psychicnoise", "thunderbolt", "helpinghand", "trickroom"]],
+      ["kingambit", "focussash", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "lowkick"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["powergem", "earthpower", "dragonpulse", "protect"]],
+      ["toxapex", "leftovers", "regenerator", "calm", ["toxic", "infestation", "banefulbunker", "wideguard"]],
+      ["charizardmegay", "charizarditey", "blaze", "calm", ["weatherball", "solarbeam", "heatwave", "protect"]]
+    ]
+  },
+  "102": {
+    "player": "Diego Cavalcante",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "powergem", "earthpower", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "partingshot", "flareblitz", "darkestlariat"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "fakeout", "uturn"]],
+      ["volcarona", "rockyhelmet", "flamebody", "timid", ["overheat", "strugglebug", "tailwind", "ragepowder"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["protect", "shadowball", "makeitrain", "nastyplot"]]
+    ]
+  },
+  "103": {
+    "player": "Ami Morais",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "protect", "encore"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["headsmash", "flareblitz", "extremespeed", "protect"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["fakeout", "grassyglide", "woodhammer", "highhorsepower"]
+      ],
+      ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]],
+      ["sneasler", "grassyseed", "unburden", "adamant", ["fakeout", "direclaw", "closecombat", "rockslide"]],
+      ["froslassmega", "froslassite", "cursedbody", "modest", ["blizzard", "shadowball", "auroraveil", "protect"]]
+    ]
+  },
+  "104": {
+    "player": "Wesley Stenio Batista Moreira",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["archaludon", "leftovers", "stamina", "modest", ["electroshot", "flashcannon", "dragonpulse", "protect"]],
+      ["swampertmega", "swampertite", "damp", "adamant", ["earthquake", "wavecrash", "icepunch", "protect"]],
+      ["gengarmega", "gengarite", "cursedbody", "timid", ["shadowball", "disable", "perishsong", "protect"]],
+      ["sinistcha", "colburberry", "hospitality", "bold", ["matchagotcha", "ragepowder", "lifedew", "protect"]],
+      ["pelipper", "focussash", "drizzle", "modest", ["weatherball", "hurricane", "tailwind", "wideguard"]],
+      ["incineroar", "ejectbutton", "intimidate", "impish", ["fakeout", "throatchop", "partingshot", "protect"]]
+    ]
+  },
+  "105": {
+    "player": "Marcos Oliveira",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["grimmsnarl", "lightclay", "prankster", "careful", ["partingshot", "reflect", "lightscreen", "spiritbreak"]],
+      ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "flashcannon", "dragonpulse", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "timid", ["earthpower", "powergem", "dragonpulse", "protect"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["sludgebomb", "sleeppowder", "protect", "energyball"]],
+      ["pelipper", "sitrusberry", "drizzle", "modest", ["weatherball", "wideguard", "hurricane", "tailwind"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "hurricane", "protect"]]
+    ]
+  },
+  "106": {
+    "player": "Sávio Lima Soares",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "protect"]],
+      ["incineroar", "rockyhelmet", "intimidate", "careful", ["flareblitz", "throatchop", "fakeout", "partingshot"]],
+      ["sinistcha", "colburberry", "hospitality", "bold", ["matchagotcha", "ragepowder", "trickroom", "protect"]],
+      ["blastoisemega", "blastoisinite", "raindish", "modest", ["waterspout", "darkpulse", "shellsmash", "protect"]],
+      ["delphoxmega", "delphoxite", "blaze", "timid", ["heatwave", "psychic", "nastyplot", "protect"]],
+      ["sneasler", "focussash", "poisontouch", "jolly", ["poisonjab", "closecombat", "fakeout", "quickguard"]]
+    ]
+  },
+  "107": {
+    "player": "Sousa Neto",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["ceruledge", "grassyseed", "flashfire", "adamant", ["bitterblade", "shadowsneak", "swordsdance", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
+      ["milotic", "sitrusberry", "competitive", "calm", ["muddywater", "icebeam", "coil", "hypnosis"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["woodhammer", "grassyglide", "fakeout", "highhorsepower"]
+      ],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]]
+    ]
+  },
+  "108": {
+    "player": "Antonio Carlos Tucci Thiesen",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
+      ["sneasler", "whiteherb", "unburden", "jolly", ["fakeout", "closecombat", "direclaw", "coaching"]],
+      ["excadrill", "focussash", "sandrush", "jolly", ["highhorsepower", "ironhead", "rockslide", "protect"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "quickattack", "calmmind", "protect"]],
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "lowkick", "protect"]],
+      ["dragapult", "lifeorb", "clearbody", "timid", ["dragonpulse", "shadowball", "willowisp", "protect"]]
+    ]
+  },
+  "109": {
+    "player": "Caio Lattanzi",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["sneasler", "grassyseed", "unburden", "adamant", ["rocktomb", "closecombat", "direclaw", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["partingshot", "flareblitz", "throatchop", "fakeout"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["fakeout", "highhorsepower", "grassyglide", "woodhammer"]
+      ],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "encore"]],
+      ["delphoxmega", "delphoxite", "blaze", "timid", ["protect", "heatwave", "psyshock", "nastyplot"]],
+      ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "lowkick", "protect"]]
+    ]
+  },
+  "110": {
+    "player": "Thomas Barbosa",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["indeedee", "choicescarf", "psychicsurge", "modest", ["expandingforce", "protect", "trick", "mysticalfire"]],
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["rockslide", "protect", "lowkick", "knockoff"]],
+      ["sneasler", "whiteherb", "unburden", "adamant", ["direclaw", "protect", "coaching", "closecombat"]],
+      ["corviknight", "psychicseed", "mirrorarmor", "careful", ["bravebird", "bulkup", "roost", "powertrip"]],
+      ["excadrill", "focussash", "sandrush", "jolly", ["ironhead", "protect", "rockslide", "highhorsepower"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "protect", "flamethrower", "dracometeor"]]
+    ]
+  },
+  "111": {
+    "player": "RODRIGO PECANHA",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["kingambit", "chopleberry", "supremeoverlord", "brave", ["kowtowcleave", "suckerpunch", "protect", "ironhead"]],
+      ["charizardmegay", "charizarditey", "solarpower", "modest", ["heatwave", "solarbeam", "roar", "protect"]],
+      ["whimsicott", "fairyfeather", "prankster", "timid", ["moonblast", "tailwind", "encore", "protect"]],
+      ["garchomp", "sitrusberry", "roughskin", "jolly", ["dragonclaw", "earthquake", "rockslide", "protect"]],
+      ["basculegion", "choicescarf", "adaptability", "adamant", ["wavecrash", "lastrespects", "aquajet", "flipturn"]],
+      ["glimmora", "focussash", "toxicdebris", "modest", ["powergem", "sludgebomb", "earthpower", "spikyshield"]]
+    ]
+  },
+  "112": {
+    "player": "Murilo Camargo",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["milotic", "sitrusberry", "competitive", "calm", ["muddywater", "icebeam", "coil", "hypnosis"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
+      ],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
+      ["ceruledge", "grassyseed", "flashfire", "adamant", ["bitterblade", "shadowsneak", "swordsdance", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]]
+    ]
+  },
+  "113": {
+    "player": "Victor Lopes",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["swampertmega", "swampertite", "torrent", "adamant", ["protect", "icepunch", "wavecrash", "earthquake"]],
+      ["annihilape", "choicescarf", "defiant", "adamant", ["closecombat", "shadowclaw", "uturn", "icepunch"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["sleeppowder", "sludgebomb", "leafstorm", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "hurricane", "protect"]],
+      ["pelipper", "sitrusberry", "drizzle", "bold", ["tailwind", "weatherball", "hurricane", "wideguard"]],
+      ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "flashcannon", "dragonpulse", "protect"]]
+    ]
+  },
+  "114": {
+    "player": "Lucas Ferraro",
+    "country": "AR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["milotic", "sitrusberry", "competitive", "modest", ["scald", "icywind", "icebeam", "protect"]],
+      ["kingambit", "chopleberry", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "tailwind", "protect"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["fakeout", "woodhammer", "grassyglide", "highhorsepower"]
+      ],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]]
+    ]
+  },
+  "115": {
+    "player": "Rodrigo Malhada",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["grassyglide", "woodhammer", "fakeout", "uturn"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["partingshot", "fakeout", "flareblitz", "darkestlariat"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["protect", "shadowball", "nastyplot", "makeitrain"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["volcarona", "rockyhelmet", "flamebody", "timid", ["overheat", "strugglebug", "ragepowder", "tailwind"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]]
+    ]
+  },
+  "116": {
+    "player": "Felipe Ferreira",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["primarina", "lifeorb", "liquidvoice", "modest", ["hypervoice", "moonblast", "dazzlinggleam", "protect"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["grassyglide", "woodhammer", "highhorsepower", "fakeout"]
+      ],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
+      ["volcarona", "grassyseed", "flamebody", "modest", ["heatwave", "bugbuzz", "quiverdance", "protect"]],
+      ["gholdengo", "choicescarf", "goodasgold", "modest", ["makeitrain", "shadowball", "powergem", "trick"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]]
+    ]
+  },
+  "117": {
+    "player": "Gustavo Gomes",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["dragapult", "lifeorb", "clearbody", "jolly", ["dragondarts", "suckerpunch", "dragonclaw", "phantomforce"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "upperhand", "protect"]],
+      ["indeedeef", "rockyhelmet", "psychicsurge", "relaxed", ["psychic", "followme", "trickroom", "imprison"]],
+      ["whimsicott", "focussash", "prankster", "timid", ["moonblast", "sunnyday", "tailwind", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "blazekick", "protect"]],
+      ["typhlosionhisui", "choicescarf", "blaze", "timid", ["eruption", "heatwave", "solarbeam", "shadowball"]]
+    ]
+  },
+  "118": {
+    "player": "José Neto",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["archaludon", "leftovers", "stamina", "calm", ["flashcannon", "electroshot", "snarl", "protect"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["sludgebomb", "leafstorm", "sleeppowder", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]],
+      ["pelipper", "sitrusberry", "drizzle", "bold", ["hurricane", "weatherball", "tailwind", "wideguard"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "hurricane", "weatherball", "protect"]],
+      ["grimmsnarl", "lightclay", "prankster", "careful", ["spiritbreak", "lightscreen", "reflect", "partingshot"]]
+    ]
+  },
+  "119": {
+    "player": "Eduardo Gerab",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "protect", "shadowball", "nastyplot"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["quickattack", "detect", "hyperbeam", "hypervoice"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["protect", "closecombat", "dualwingbeat", "tailwind"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]]
+    ]
+  },
+  "120": {
+    "player": "Leo Conde",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["staraptormega", "staraptite", "intimidate", "adamant", ["closecombat", "bravebird", "roost", "protect"]],
+      ["indeedeef", "psychicseed", "psychicsurge", "bold", ["helpinghand", "mysticalfire", "protect", "trickroom"]],
+      ["whimsicott", "focussash", "chlorophyll", "timid", ["taunt", "tailwind", "encore", "moonblast"]],
+      ["gardevoirmega", "gardevoirite", "trace", "modest", ["expandingforce", "hypervoice", "protect", "calmmind"]],
+      ["garchomp", "lifeorb", "roughskin", "jolly", ["stompingtantrum", "rockslide", "earthquake", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "bold", ["fakeout", "flareblitz", "throatchop", "partingshot"]]
+    ]
+  },
+  "121": {
+    "player": "Miguel Neto",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["kommoo", "focussash", "soundproof", "jolly", ["aurasphere", "clangingscales", "vacuumwave", "protect"]],
+      [
+        "meowsticmmega",
+        "meowsticite",
+        "competitive",
+        "modest",
+        ["expandingforce", "thunderbolt", "fakeout", "protect"]
+      ],
+      ["sneasler", "psychicseed", "unburden", "jolly", ["direclaw", "closecombat", "rockslide", "protect"]],
+      ["indeedeef", "sitrusberry", "psychicsurge", "relaxed", ["helpinghand", "followme", "trickroom", "imprison"]],
+      ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "ironhead", "suckerpunch", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "calm", ["weatherball", "heatwave", "ancientpower", "protect"]]
+    ]
+  },
+  "122": {
+    "player": "João Guilherme",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      ["sneasler", "grassyseed", "unburden", "adamant", ["closecombat", "throatchop", "direclaw", "protect"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["extremespeed", "rockslide", "flareblitz", "protect"]],
+      ["primarina", "leftovers", "liquidvoice", "modest", ["hypervoice", "moonblast", "calmmind", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "modest", ["dragonpulse", "hypervoice", "tailwind", "protect"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "fakeout", "highhorsepower"]]
+    ]
+  },
+  "123": {
+    "player": "Mikael Rutkowski",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["dragonitemega", "dragoninite", "multiscale", "modest", ["protect", "tailwind", "heatwave", "dragonpulse"]],
+      ["sneasler", "focussash", "unburden", "jolly", ["fakeout", "coaching", "direclaw", "closecombat"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "fakeout", "zapcannon", "focusblast"]],
+      ["armarouge", "lifeorb", "flashfire", "modest", ["protect", "energyball", "expandingforce", "armorcannon"]],
+      ["indeedeef", "colburberry", "psychicsurge", "bold", ["protect", "psychic", "followme", "trickroom"]],
+      ["kommoo", "psychicseed", "soundproof", "jolly", ["protect", "clangoroussoul", "drainpunch", "dragonclaw"]]
+    ]
+  },
+  "124": {
+    "player": "Hugo Cunha",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["incineroar", "sitrusberry", "intimidate", "adamant", ["darkestlariat", "flareblitz", "partingshot", "fakeout"]],
+      ["tyranitarmega", "tyranitarite", "sandstream", "adamant", ["rockslide", "knockoff", "dragondance", "protect"]],
+      ["aggronmega", "aggronite", "sturdy", "sassy", ["protect", "bodypress", "irondefense", "heavyslam"]],
+      ["farigiraf", "grassyseed", "armortail", "sassy", ["protect", "lightscreen", "psychic", "trickroom"]],
+      ["rillaboom", "miracleseed", "grassysurge", "brave", ["grassyglide", "highhorsepower", "woodhammer", "fakeout"]],
+      ["milotic", "leftovers", "competitive", "sassy", ["muddywater", "hypnosis", "recover", "coil"]]
+    ]
+  },
+  "125": {
+    "player": "Xoakin Rinaldi",
+    "country": "AR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dracometeor", "earthpower", "powergem", "protect"]],
+      [
+        "metagrossmega",
+        "metagrossite",
+        "clearbody",
+        "adamant",
+        ["psychicfangs", "bodypress", "steelroller", "protect"]
+      ],
+      ["sneasler", "psychicseed", "unburden", "adamant", ["closecombat", "throatchop", "rockslide", "protect"]],
+      ["milotic", "leftovers", "competitive", "modest", ["scald", "icywind", "icebeam", "protect"]],
+      [
+        "indeedee",
+        "choicescarf",
+        "psychicsurge",
+        "modest",
+        ["expandingforce", "dazzlinggleam", "trickroom", "imprison"]
+      ]
+    ]
+  },
+  "126": {
+    "player": "CAIO LEÃO LUSTOSA DE SOUZA",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["suckerpunch", "ironhead", "drillrun", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["protect", "powergem", "dragonpulse", "flamethrower"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["grassyglide", "woodhammer", "highhorsepower", "fakeout"]
+      ],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      ["basculegion", "choicescarf", "adaptability", "jolly", ["lastrespects", "wavecrash", "aquajet", "flipturn"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "darkestlariat", "flareblitz", "partingshot"]]
+    ]
+  },
+  "127": {
+    "player": "Lucas Pimenta",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["powergem", "flamethrower", "dragonpulse", "protect"]],
+      ["excadrill", "focussash", "sandrush", "adamant", ["highhorsepower", "ironhead", "rockslide", "protect"]],
+      ["farigiraf", "colburberry", "armortail", "calm", ["protect", "helpinghand", "twinbeam", "trickroom"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "protect", "nastyplot"]],
+      [
+        "rillaboom",
+        "sitrusberry",
+        "grassysurge",
+        "adamant",
+        ["grassyglide", "woodhammer", "fakeout", "highhorsepower"]
+      ],
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "protect", "highhorsepower"]]
+    ]
+  },
+  "128": {
+    "player": "Roberto Pompeu Pumar Filho",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["indeedeef", "rockyhelmet", "psychicsurge", "relaxed", ["followme", "helpinghand", "psychic", "trickroom"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["protect", "powergem", "dragonpulse", "earthpower"]],
+      ["gholdengo", "lifeorb", "goodasgold", "timid", ["makeitrain", "protect", "nastyplot", "shadowball"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "protect", "focusblast", "fakeout"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["fakeout", "woodhammer", "highhorsepower", "grassyglide"]
+      ],
+      ["typhlosionhisui", "choicescarf", "blaze", "modest", ["eruption", "shadowball", "overheat", "heatwave"]]
+    ]
+  },
+  "129": {
+    "player": "Luís Gurgel",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["kommoo", "leftovers", "soundproof", "modest", ["clangingscales", "clangoroussoul", "aurasphere", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["flareblitz", "throatchop", "fakeout", "partingshot"]],
+      ["delphoxmega", "delphoxite", "blaze", "timid", ["heatwave", "psychic", "nastyplot", "protect"]],
+      ["sneasler", "focussash", "poisontouch", "jolly", ["closecombat", "poisonjab", "fakeout", "quickguard"]],
+      ["sinistcha", "colburberry", "hospitality", "bold", ["matchagotcha", "ragepowder", "trickroom", "protect"]],
+      ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]]
+    ]
+  },
+  "130": {
+    "player": "RAFAEL DELGADO",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dracometeor", "powergem", "flamethrower", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "careful", ["flareblitz", "throatchop", "partingshot", "fakeout"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
+      ],
+      ["volcarona", "grassyseed", "flamebody", "modest", ["flamethrower", "gigadrain", "quiverdance", "protect"]],
+      [
+        "metagrossmega",
+        "metagrossite",
+        "clearbody",
+        "adamant",
+        ["ironhead", "psychicfangs", "stompingtantrum", "protect"]
+      ],
+      ["sneasler", "whiteherb", "unburden", "adamant", ["closecombat", "direclaw", "fakeout", "coaching"]]
+    ]
+  },
+  "131": {
+    "player": "Pedro Arthur da Cunha Medeiros",
+    "country": "BR",
+    "wins": 4,
+    "losses": 4,
+    "team": [
+      ["sneasler", "grassyseed", "unburden", "jolly", ["direclaw", "closecombat", "protect", "fakeout"]],
+      ["pelipper", "damprock", "drizzle", "modest", ["hurricane", "tailwind", "weatherball", "wideguard"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "tailwind", "protect"]],
+      ["archaludon", "leftovers", "stamina", "modest", ["electroshot", "dragonpulse", "flashcannon", "protect"]],
+      ["rillaboom", "sitrusberry", "grassysurge", "adamant", ["fakeout", "grassyglide", "knockoff", "taunt"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "brave", ["suckerpunch", "leechlife", "protect", "swordsdance"]]
+    ]
+  },
+  "132": {
+    "player": "Gustavo Felipe Sá Brito",
+    "country": "BR",
+    "wins": 3,
+    "losses": 4,
+    "dropped": 7,
+    "team": [
+      ["hydreigon", "choicescarf", "levitate", "modest", ["dracometeor", "darkpulse", "heatwave", "earthpower"]],
+      ["sneasler", "whiteherb", "unburden", "jolly", ["fakeout", "closecombat", "throatchop", "protect"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["fakeout", "grassyglide", "woodhammer", "uturn"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
+      [
+        "metagrossmega",
+        "metagrossite",
+        "clearbody",
+        "jolly",
+        ["steelroller", "psychicfangs", "highhorsepower", "protect"]
+      ],
+      ["sylveon", "lifeorb", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "detect"]]
+    ]
+  },
+  "133": {
+    "player": "João Mário Fernandes",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]],
+      ["froslassmega", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "protect", "auroraveil"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["sneasler", "whiteherb", "unburden", "adamant", ["direclaw", "closecombat", "fakeout", "protect"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["woodhammer", "grassyglide", "fakeout", "highhorsepower"]
+      ],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "protect", "extremespeed"]]
+    ]
+  },
+  "134": {
+    "player": "Lucas Medeiros",
+    "country": "BR",
+    "wins": 3,
+    "losses": 4,
+    "dropped": 7,
+    "team": [
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["flareblitz", "darkestlariat", "partingshot", "fakeout"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      ["primarina", "leftovers", "liquidvoice", "modest", ["hypervoice", "moonblast", "calmmind", "protect"]],
+      [
+        "garchompmegaz",
+        "garchompitez",
+        "roughskin",
+        "modest",
+        ["dragonpulse", "earthpower", "flamethrower", "protect"]
+      ],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["grassyglide", "woodhammer", "uturn", "fakeout"]]
+    ]
+  },
+  "135": {
+    "player": "Felipe Tavares",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["pelipper", "rockyhelmet", "drizzle", "bold", ["hurricane", "weatherball", "tailwind", "wideguard"]],
+      ["farigiraf", "sitrusberry", "armortail", "relaxed", ["expandingforce", "helpinghand", "roar", "trickroom"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["weatherball", "heatwave", "hurricane", "protect"]],
+      ["grimmsnarl", "lightclay", "prankster", "sassy", ["spiritbreak", "lightscreen", "reflect", "partingshot"]],
+      ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "dragonpulse", "flashcannon", "protect"]],
+      ["rillaboom", "lifeorb", "grassysurge", "adamant", ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]]
+    ]
+  },
+  "136": {
+    "player": "Thomas Lima",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["archaludon", "leftovers", "stamina", "calm", ["protect", "flashcannon", "dragonpulse", "electroshot"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["protect", "shadowball", "nastyplot", "makeitrain"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["fakeout", "grassyglide", "woodhammer", "highhorsepower"]
+      ],
+      ["pelipper", "focussash", "drizzle", "modest", ["tailwind", "wideguard", "muddywater", "hurricane"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "timid", ["protect", "powergem", "flamethrower", "dragonpulse"]],
+      ["volcarona", "grassyseed", "flamebody", "timid", ["protect", "quiverdance", "gigadrain", "heatwave"]]
+    ]
+  },
+  "137": {
+    "player": "Rafael Santos",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["quickattack", "hyperbeam", "hypervoice", "detect"]],
+      ["gholdengo", "lifeorb", "goodasgold", "timid", ["nastyplot", "shadowball", "makeitrain", "protect"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["fakeout", "grassyglide", "woodhammer", "highhorsepower"]
+      ],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["tailwind", "bravebird", "closecombat", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["fakeout", "zapcannon", "focusblast", "protect"]],
+      ["arcaninehisui", "leftovers", "rockhead", "jolly", ["extremespeed", "flareblitz", "headsmash", "protect"]]
+    ]
+  },
+  "138": {
+    "player": "Gabriel Moura",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["venusaur", "focussash", "chlorophyll", "modest", ["leafstorm", "sludgebomb", "sleeppowder", "protect"]],
+      ["archaludon", "leftovers", "stamina", "calm", ["electroshot", "flashcannon", "dragonpulse", "protect"]],
+      ["pelipper", "sitrusberry", "drizzle", "bold", ["weatherball", "wideguard", "tailwind", "hurricane"]],
+      ["grimmsnarl", "lightclay", "prankster", "sassy", ["spiritbreak", "reflect", "lightscreen", "partingshot"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "timid", ["dracometeor", "earthpower", "powergem", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "hurricane", "protect"]]
+    ]
+  },
+  "139": {
+    "player": "Alexsander Camargo",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["hatterene", "lifeorb", "magicbounce", "quiet", ["expandingforce", "dazzlinggleam", "skillswap", "trickroom"]],
+      ["torkoal", "charcoal", "drought", "modest", ["eruption", "weatherball", "earthpower", "protect"]],
+      ["cameruptmega", "cameruptite", "solidrock", "quiet", ["flamethrower", "eruption", "earthpower", "protect"]],
+      [
+        "indeedeef",
+        "rockyhelmet",
+        "psychicsurge",
+        "relaxed",
+        ["followme", "dazzlinggleam", "helpinghand", "trickroom"]
+      ],
+      ["drampamega", "drampanite", "cloudnine", "quiet", ["dragonpulse", "hypervoice", "calmmind", "protect"]],
+      ["gallade", "whiteherb", "sharpness", "brave", ["sacredsword", "psychocut", "wideguard", "trickroom"]]
+    ]
+  },
+  "140": {
+    "player": "lucas viniccius",
+    "country": "BR",
+    "wins": 3,
+    "losses": 4,
+    "dropped": 7,
+    "team": [
+      ["sneasler", "focussash", "poisontouch", "jolly", ["direclaw", "feint", "fakeout", "closecombat"]],
+      ["basculegion", "lifeorb", "adaptability", "jolly", ["protect", "lastrespects", "wavecrash", "aquajet"]],
+      ["garchomp", "choicescarf", "roughskin", "adamant", ["rockslide", "earthquake", "dragonclaw", "stompingtantrum"]],
+      ["dragonitemega", "dragoninite", "multiscale", "modest", ["heatwave", "extremespeed", "protect", "dragonpulse"]],
+      ["floettemega", "floettite", "fairyaura", "timid", ["lightofruin", "dazzlinggleam", "moonblast", "protect"]],
+      ["kingambit", "chopleberry", "defiant", "adamant", ["kowtowcleave", "ironhead", "lowkick", "suckerpunch"]]
+    ]
+  },
+  "141": {
+    "player": "Vítor Manoel Rosa",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["salamencemega", "salamencite", "intimidate", "calm", ["protect", "tailwind", "hypervoice", "dragonpulse"]],
+      ["salazzle", "focussash", "corrosion", "timid", ["fakeout", "sludgewave", "toxic", "overheat"]],
+      ["sableye", "lightclay", "prankster", "careful", ["reflect", "lightscreen", "fakeout", "skillswap"]],
+      ["goodrahisui", "chopleberry", "shellarmor", "calm", ["thunderbolt", "lifedew", "shelter", "bodypress"]],
+      ["farigiraf", "sitrusberry", "armortail", "bold", ["trickroom", "expandingforce", "protect", "dazzlinggleam"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "sassy", ["drillrun", "leechlife", "ironhead", "protect"]]
+    ]
+  },
+  "142": {
+    "player": "Andrey Paiva",
+    "country": "BR",
+    "wins": 3,
+    "losses": 4,
+    "dropped": 7,
+    "team": [
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "fakeout", "zapcannon", "focusblast"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "timid", ["protect", "dragonpulse", "flamethrower", "powergem"]],
+      ["basculegion", "choicescarf", "adaptability", "jolly", ["lastrespects", "wavecrash", "flipturn", "aquajet"]],
+      ["arcaninehisui", "focussash", "rockhead", "adamant", ["protect", "flareblitz", "headsmash", "extremespeed"]],
+      ["sneasler", "grassyseed", "unburden", "adamant", ["direclaw", "closecombat", "protect", "rockslide"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "highhorsepower", "grassyglide", "fakeout"]]
+    ]
+  },
+  "143": {
+    "player": "Williams Silva",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["grassyglide", "woodhammer", "fakeout", "uturn"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["partingshot", "fakeout", "flareblitz", "darkestlariat"]],
+      ["volcarona", "rockyhelmet", "flamebody", "timid", ["overheat", "strugglebug", "ragepowder", "tailwind"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["protect", "shadowball", "nastyplot", "makeitrain"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]]
+    ]
+  },
+  "144": {
+    "player": "Bruno Rebello",
+    "country": "BR",
+    "wins": 3,
+    "losses": 4,
+    "dropped": 7,
+    "team": [
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "bravebird", "tailwind", "protect"]],
+      ["grimmsnarl", "lightclay", "prankster", "careful", ["spiritbreak", "reflect", "lightscreen", "partingshot"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
+      ],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      ["primarina", "leftovers", "liquidvoice", "modest", ["hypervoice", "drainingkiss", "calmmind", "protect"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]]
+    ]
+  },
+  "145": {
+    "player": "Lucas Araújo",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["pelipper", "focussash", "drizzle", "modest", ["hurricane", "weatherball", "wideguard", "protect"]],
+      ["farigiraf", "sitrusberry", "armortail", "bold", ["twinbeam", "helpinghand", "protect", "trickroom"]],
+      ["basculegion", "choicescarf", "adaptability", "jolly", ["aquajet", "flipturn", "wavecrash", "lastrespects"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["ironhead", "leechlife", "liquidation", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dracometeor", "earthpower", "powergem", "protect"]],
+      ["archaludon", "leftovers", "stamina", "bold", ["electroshot", "flashcannon", "dragonpulse", "protect"]]
+    ]
+  },
+  "146": {
+    "player": "Arthur Oliveira",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["indeedeef", "rockyhelmet", "psychicsurge", "relaxed", ["followme", "imprison", "trickroom", "psychic"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "rockslide", "wildcharge", "protect"]],
+      [
+        "gardevoirmega",
+        "gardevoirite",
+        "telepathy",
+        "modest",
+        ["hypervoice", "expandingforce", "moonblast", "protect"]
+      ],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      ["basculegion", "choicescarf", "adaptability", "jolly", ["wavecrash", "aquajet", "lastrespects", "flipturn"]]
+    ]
+  },
+  "147": {
+    "player": "Jean Erick",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["lucariomegaz", "lucarionitez", "innerfocus", "modest", ["steelbeam", "aurasphere", "darkpulse", "detect"]],
+      ["garchomp", "lifeorb", "roughskin", "adamant", ["dragonclaw", "stompingtantrum", "rockslide", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "careful", ["throatchop", "flareblitz", "fakeout", "snarl"]],
+      ["toxtricity", "choicescarf", "punkrock", "timid", ["overdrive", "sludgebomb", "psychicnoise", "snarl"]],
+      ["milotic", "leftovers", "competitive", "calm", ["scald", "icywind", "recover", "protect"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["grassyglide", "highhorsepower", "fakeout", "uturn"]]
+    ]
+  },
+  "148": {
+    "player": "Vinicius Vianney",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "uturn", "fakeout"]],
+      ["ditto", "choicescarf", "imposter", "timid", ["transform"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "powergem", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "flareblitz", "darkestlariat", "partingshot"]],
+      ["gholdengo", "lifeorb", "goodasgold", "timid", ["nastyplot", "makeitrain", "protect", "shadowball"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["fakeout", "protect", "focusblast", "zapcannon"]]
+    ]
+  },
+  "149": {
+    "player": "Elmiro Novaes",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["hatterene", "focussash", "magicbounce", "quiet", ["trickroom", "expandingforce", "dazzlinggleam", "protect"]],
+      ["gallade", "scopelens", "sharpness", "adamant", ["psychocut", "sacredsword", "leafblade", "wideguard"]],
+      ["indeedeef", "colburberry", "psychicsurge", "relaxed", ["followme", "helpinghand", "trickroom", "psychic"]],
+      ["torkoal", "charcoal", "drought", "quiet", ["eruption", "flamethrower", "solarbeam", "protect"]],
+      ["cameruptmega", "cameruptite", "solidrock", "quiet", ["ancientpower", "earthpower", "heatwave", "protect"]],
+      ["clawitzer", "lifeorb", "megalauncher", "quiet", ["waterpulse", "aurasphere", "darkpulse", "protect"]]
+    ]
+  },
+  "150": {
+    "player": "Davor Miranda",
+    "country": "CL",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["primarina", "leftovers", "liquidvoice", "modest", ["hypervoice", "moonblast", "calmmind", "protect"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
+      ],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]]
+    ]
+  },
+  "151": {
+    "player": "Rafael Aziz da Silva Rocha",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["lucariomegaz", "lucarionitez", "steadfast", "modest", ["flashcannon", "aurasphere", "vacuumwave", "detect"]],
+      ["charizardmegay", "charizarditey", "solarpower", "modest", ["protect", "solarbeam", "ancientpower", "heatwave"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["grassyglide", "uturn", "fakeout", "woodhammer"]],
+      ["armarouge", "lifeorb", "weakarmor", "quiet", ["heatwave", "trickroom", "wideguard", "expandingforce"]],
+      ["incineroar", "sitrusberry", "intimidate", "adamant", ["throatchop", "fakeout", "partingshot", "flareblitz"]],
+      ["indeedeef", "colburberry", "psychicsurge", "bold", ["psychic", "followme", "helpinghand", "trickroom"]]
+    ]
+  },
+  "152": {
+    "player": "Helder Câmara",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "quickattack", "hyperbeam", "detect"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["woodhammer", "grassyglide", "fakeout", "highhorsepower"]
+      ],
+      ["charizardmegay", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["garchomp", "lifeorb", "roughskin", "jolly", ["dragonclaw", "stompingtantrum", "rockslide", "protect"]],
+      ["whimsicott", "focussash", "prankster", "timid", ["moonblast", "tailwind", "encore", "protect"]],
+      ["lucariomegaz", "lucarionitez", "innerfocus", "modest", ["aurasphere", "flashcannon", "steelbeam", "detect"]]
+    ]
+  },
+  "153": {
+    "player": "Gustavo Araújo",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "uturn", "fakeout"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["flareblitz", "darkestlariat", "partingshot", "fakeout"]],
+      ["volcarona", "rockyhelmet", "flamebody", "timid", ["overheat", "strugglebug", "ragepowder", "tailwind"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "earthpower", "protect", "powergem"]]
+    ]
+  },
+  "154": {
+    "player": "Camila Barbosa",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "swordsdance", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["flareblitz", "throatchop", "fakeout", "partingshot"]],
+      ["sinistcha", "colburberry", "hospitality", "bold", ["matchagotcha", "ragepowder", "trickroom", "protect"]],
+      ["delphoxmega", "delphoxite", "blaze", "timid", ["heatwave", "psychic", "nastyplot", "protect"]],
+      ["sneasler", "focussash", "poisontouch", "jolly", ["closecombat", "poisonjab", "fakeout", "irondefense"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "calmmind", "protect"]]
+    ]
+  },
+  "155": {
+    "player": "Lucas Cavalcanti",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["quickattack", "protect", "hyperbeam", "hypervoice"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "protect", "dualwingbeat", "roost"]],
+      ["scovillainmega", "scovillainite", "moody", "bold", ["gigadrain", "ragepowder", "protect", "flamethrower"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["flareblitz", "fakeout", "partingshot", "taunt"]],
+      ["espathra", "leftovers", "speedboost", "modest", ["calmmind", "protect", "dazzlinggleam", "storedpower"]],
+      [
+        "rillaboom",
+        "terrainextender",
+        "grassysurge",
+        "jolly",
+        ["fakeout", "grassyglide", "woodhammer", "highhorsepower"]
+      ]
+    ]
+  },
+  "156": {
+    "player": "João Vieira",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["milotic", "leftovers", "competitive", "bold", ["scald", "icywind", "icebeam", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["powergem", "earthpower", "dragonpulse", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "encore", "focusblast"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["grassyglide", "highhorsepower", "fakeout", "woodhammer"]
+      ],
+      ["sneasler", "grassyseed", "unburden", "jolly", ["closecombat", "direclaw", "throatchop", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["flareblitz", "throatchop", "fakeout", "partingshot"]]
+    ]
+  },
+  "157": {
+    "player": "Matheus Veloso Santiago",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["corviknight", "psychicseed", "mirrorarmor", "careful", ["bravebird", "powertrip", "bulkup", "roost"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "flamethrower", "dracometeor", "protect"]],
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "lowkick", "protect"]],
+      ["indeedee", "choicescarf", "psychicsurge", "timid", ["expandingforce", "mysticalfire", "trick", "protect"]],
+      ["sneasler", "whiteherb", "unburden", "adamant", ["direclaw", "closecombat", "coaching", "protect"]],
+      ["excadrill", "focussash", "sandrush", "jolly", ["highhorsepower", "rockslide", "ironhead", "protect"]]
+    ]
+  },
+  "158": {
+    "player": "Rodrigo Monteiro",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["dragonitemega", "dragoninite", "multiscale", "timid", ["dracometeor", "thunder", "rockslide", "hurricane"]],
+      ["grimmsnarl", "rockyhelmet", "prankster", "relaxed", ["partingshot", "fakeout", "spiritbreak", "mistyterrain"]],
+      ["zoroarkhisui", "focussash", "illusion", "timid", ["extrasensory", "shadowball", "icywind", "darkpulse"]],
+      ["scraftymega", "scraftinite", "intimidate", "jolly", ["drainpunch", "poisonjab", "throatchop", "fakeout"]],
+      ["politoed", "sitrusberry", "drizzle", "modest", ["weatherball", "protect", "perishsong", "icywind"]],
+      ["archaludon", "leftovers", "stamina", "timid", ["electroshot", "flashcannon", "protect", "dracometeor"]]
+    ]
+  },
+  "159": { "player": "Brenno Negrellos Pezzino", "country": "", "wins": 3, "losses": 5, "team": [] },
+  "160": {
+    "player": "Allan Moura",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["rillaboom", "ejectbutton", "grassysurge", "sassy", ["fakeout", "grassyglide", "protect", "uturn"]],
+      ["gengarmega", "gengarite", "cursedbody", "modest", ["shadowball", "perishsong", "sludgebomb", "protect"]],
+      [
+        "golisopodmega",
+        "golisopite",
+        "emergencyexit",
+        "adamant",
+        ["leechlife", "suckerpunch", "protect", "swordsdance"]
+      ],
+      ["politoed", "sitrusberry", "drizzle", "calm", ["encore", "perishsong", "protect", "weatherball"]],
+      ["archaludon", "leftovers", "stamina", "bold", ["electroshot", "protect", "dragonpulse", "flashcannon"]],
+      ["incineroar", "passhoberry", "intimidate", "careful", ["fakeout", "partingshot", "throatchop", "protect"]]
+    ]
+  },
+  "161": {
+    "player": "Rodolfo Cicolin",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["armarouge", "lifeorb", "weakarmor", "modest", ["armorcannon", "expandingforce", "aurasphere", "protect"]],
+      ["grimmsnarl", "lightclay", "prankster", "careful", ["spiritbreak", "foulplay", "reflect", "lightscreen"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "extremespeed", "headsmash", "protect"]],
+      ["lucariomegaz", "lucarionitez", "innerfocus", "timid", ["calmmind", "aurasphere", "flashcannon", "detect"]],
+      ["salamencemega", "salamencite", "intimidate", "jolly", ["doubleedge", "breakingswipe", "tailwind", "protect"]],
+      ["indeedeef", "rockyhelmet", "psychicsurge", "relaxed", ["psychic", "followme", "helpinghand", "protect"]]
+    ]
+  },
+  "162": {
+    "player": "Welton Dionisio",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["kingambit", "lifeorb", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "protect"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hyperbeam", "hypervoice", "quickattack", "detect"]],
+      ["rillaboom", "sitrusberry", "grassysurge", "adamant", ["fakeout", "grassyglide", "woodhammer", "uturn"]],
+      ["charizardmegay", "charizarditey", "blaze", "modest", ["protect", "heatwave", "weatherball", "ancientpower"]],
+      ["sneasler", "whiteherb", "unburden", "adamant", ["fakeout", "direclaw", "protect", "closecombat"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["protect", "tailwind", "dracometeor", "hypervoice"]]
+    ]
+  },
+  "163": {
+    "player": "André Andrade",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["ironhead", "leechlife", "protect", "drillrun"]],
+      ["pelipper", "sitrusberry", "drizzle", "modest", ["tailwind", "weatherball", "hurricane", "wideguard"]],
+      ["archaludon", "leftovers", "stamina", "calm", ["snarl", "protect", "electroshot", "dragonpulse"]],
+      ["farigiraf", "colburberry", "armortail", "bold", ["trickroom", "roar", "protect", "psychic"]],
+      ["sneasler", "whiteherb", "unburden", "adamant", ["direclaw", "fakeout", "closecombat", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["powergem", "dracometeor", "flamethrower", "protect"]]
+    ]
+  },
+  "164": {
+    "player": "Anderson Marques",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      [
+        "slowbrogalar",
+        "quickclaw",
+        "quickdraw",
+        "quiet",
+        ["shellsidearm", "expandingforce", "fireblast", "focusblast"]
+      ],
+      ["manectricmega", "manectite", "lightningrod", "timid", ["thunderbolt", "overheat", "snarl", "flamethrower"]],
+      ["froslassmega", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "thunderbolt", "destinybond"]],
+      ["indeedee", "focussash", "psychicsurge", "timid", ["expandingforce", "mysticalfire", "trickroom", "imprison"]],
+      ["sneasler", "psychicseed", "unburden", "jolly", ["direclaw", "closecombat", "rockslide", "upperhand"]],
+      ["annihilape", "choicescarf", "defiant", "jolly", ["rockslide", "closecombat", "gunkshot", "shadowclaw"]]
+    ]
+  },
+  "165": {
+    "player": "Lucas Almeida",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      [
+        "gardevoirmega",
+        "gardevoirite",
+        "synchronize",
+        "timid",
+        ["protect", "expandingforce", "hypervoice", "hyperbeam"]
+      ],
+      ["indeedeef", "colburberry", "psychicsurge", "relaxed", ["psychic", "followme", "trickroom", "helpinghand"]],
+      ["volcarona", "rockyhelmet", "flamebody", "timid", ["overheat", "ragepowder", "strugglebug", "tailwind"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "fakeout", "zapcannon", "focusblast"]],
+      ["arcaninehisui", "focussash", "rockhead", "adamant", ["extremespeed", "flareblitz", "headsmash", "protect"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["fakeout", "grassyglide", "woodhammer", "stompingtantrum"]
+      ]
+    ]
+  },
+  "166": {
+    "player": "Tiago Perrelli",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["kommoo", "lifeorb", "soundproof", "modest", ["clangingscales", "clangoroussoul", "aurasphere", "protect"]],
+      ["kangaskhanmega", "kangaskhanite", "scrappy", "adamant", ["doubleedge", "drainpunch", "fakeout", "suckerpunch"]],
+      ["sinistcha", "sitrusberry", "hospitality", "bold", ["matchagotcha", "shadowball", "ragepowder", "trickroom"]],
+      ["aerodactyl", "focussash", "unnerve", "jolly", ["rockslide", "dualwingbeat", "protect", "tailwind"]],
+      ["absolmegaz", "absolitez", "justified", "adamant", ["nightslash", "protect", "shadowclaw", "closecombat"]],
+      ["incineroar", "leftovers", "intimidate", "careful", ["darkestlariat", "partingshot", "fakeout", "flareblitz"]]
+    ]
+  },
+  "167": {
+    "player": "THIAGO ANDRADE",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["froslassmega", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "auroraveil", "protect"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["headsmash", "flareblitz", "extremespeed", "protect"]],
+      [
+        "rillaboom",
+        "sitrusberry",
+        "grassysurge",
+        "adamant",
+        ["fakeout", "grassyglide", "woodhammer", "highhorsepower"]
+      ],
+      ["kingambit", "blackglasses", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "ironhead", "protect"]],
+      ["sneasler", "grassyseed", "unburden", "adamant", ["closecombat", "direclaw", "rockslide", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["fakeout", "zapcannon", "focusblast", "protect"]]
+    ]
+  },
+  "168": {
+    "player": "João Gabriel Borba e Silva",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["milotic", "leftovers", "competitive", "bold", ["muddywater", "coil", "hypnosis", "protect"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["fakeout", "grassyglide", "woodhammer", "highhorsepower"]
+      ],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "detect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["powergem", "earthpower", "dracometeor", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "careful", ["fakeout", "flareblitz", "throatchop", "partingshot"]]
+    ]
+  },
+  "169": {
+    "player": "Pedro Henrique de Oliveira",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["sneasler", "whiteherb", "unburden", "adamant", ["direclaw", "closecombat", "coaching", "protect"]],
+      ["milotic", "leftovers", "competitive", "bold", ["scald", "icebeam", "dragoncheer", "protect"]],
+      ["armarouge", "passhoberry", "flashfire", "quiet", ["heatwave", "expandingforce", "willowisp", "wideguard"]],
+      ["garchomp", "focussash", "roughskin", "jolly", ["dragonclaw", "stompingtantrum", "rockslide", "protect"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["fakeout", "grassyglide", "knockoff", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "dracometeor", "flamethrower", "protect"]]
+    ]
+  },
+  "170": {
+    "player": "Renata Eskiavetty",
+    "country": "CL",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["sneasler", "psychicseed", "unburden", "adamant", ["closecombat", "direclaw", "rocktomb", "protect"]],
+      ["kingambit", "chopleberry", "defiant", "brave", ["kowtowcleave", "ironhead", "protect", "suckerpunch"]],
+      ["indeedeef", "rockyhelmet", "psychicsurge", "bold", ["followme", "helpinghand", "psychic", "trickroom"]],
+      ["typhlosionhisui", "choicescarf", "blaze", "modest", ["eruption", "heatwave", "overheat", "shadowball"]],
+      [
+        "gardevoirmega",
+        "gardevoirite",
+        "synchronize",
+        "modest",
+        ["calmmind", "expandingforce", "hypervoice", "protect"]
+      ],
+      ["torkoal", "charcoal", "drought", "quiet", ["eruption", "protect", "earthpower", "heatwave"]]
+    ]
+  },
+  "171": {
+    "player": "João Sousa",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["farigiraf", "sitrusberry", "armortail", "bold", ["twinbeam", "thunderbolt", "trickroom", "helpinghand"]],
+      ["pelipper", "lifeorb", "drizzle", "modest", ["weatherball", "hurricane", "tailwind", "protect"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["ironhead", "leechlife", "drillrun", "protect"]],
+      ["incineroar", "focussash", "intimidate", "careful", ["flareblitz", "throatchop", "fakeout", "partingshot"]],
+      ["archaludon", "leftovers", "stamina", "modest", ["electroshot", "dragonpulse", "snarl", "protect"]],
+      ["swampertmega", "swampertite", "torrent", "adamant", ["wavecrash", "earthquake", "icepunch", "protect"]]
+    ]
+  },
+  "172": {
+    "player": "Clarissa Gonçalves Silveira Barros",
+    "country": "BR",
+    "wins": 3,
+    "losses": 5,
+    "team": [
+      ["sneasler", "whiteherb", "unburden", "adamant", ["direclaw", "closecombat", "coaching", "protect"]],
+      ["excadrill", "focussash", "sandrush", "jolly", ["highhorsepower", "rockslide", "ironhead", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "flamethrower", "dracometeor", "protect"]],
+      ["corviknight", "psychicseed", "mirrorarmor", "careful", ["bravebird", "powertrip", "bulkup", "roost"]],
+      ["indeedee", "choicescarf", "psychicsurge", "timid", ["expandingforce", "mysticalfire", "trick", "protect"]],
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "lowkick", "protect"]]
+    ]
+  },
+  "173": {
+    "player": "RONILDO Melo",
+    "country": "BR",
+    "wins": 2,
+    "losses": 4,
+    "dropped": 6,
+    "team": [
+      ["garchompmegaz", "garchompitez", "roughskin", "adamant", ["earthpower", "dragonpulse", "powergem", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["fakeout", "grassyglide", "woodhammer", "uturn"]],
+      ["volcarona", "rockyhelmet", "flamebody", "timid", ["overheat", "strugglebug", "tailwind", "ragepowder"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["flareblitz", "darkestlariat", "fakeout", "partingshot"]]
+    ]
+  },
+  "174": {
+    "player": "Gustavo Nunes Moreno",
+    "country": "BR",
+    "wins": 2,
+    "losses": 3,
+    "dropped": 5,
+    "team": [
+      ["kommoo", "leftovers", "soundproof", "modest", ["clangingscales", "protect", "clangoroussoul", "aurasphere"]],
+      ["sinistcha", "rockyhelmet", "hospitality", "bold", ["ragepowder", "protect", "matchagotcha", "trickroom"]],
+      ["kingambit", "focussash", "defiant", "adamant", ["kowtowcleave", "ironhead", "suckerpunch", "lowkick"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "focusblast", "zapcannon", "fakeout"]],
+      ["delphoxmega", "delphoxite", "blaze", "timid", ["protect", "heatwave", "psychic", "nastyplot"]],
+      ["incineroar", "sitrusberry", "intimidate", "relaxed", ["fakeout", "flareblitz", "darkestlariat", "partingshot"]]
+    ]
+  },
+  "175": {
+    "player": "João Marcelo Queiroz Lopes",
+    "country": "BR",
+    "wins": 2,
+    "losses": 4,
+    "dropped": 6,
+    "team": [
+      ["floettemega", "floettite", "flowerveil", "modest", ["moonblast", "dazzlinggleam", "calmmind", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "sassy", ["flareblitz", "throatchop", "partingshot", "fakeout"]],
+      ["basculegion", "choicescarf", "adaptability", "jolly", ["lastrespects", "wavecrash", "flipturn", "aquajet"]],
+      ["ceruledge", "colburberry", "flashfire", "adamant", ["bitterblade", "protect", "bulkup", "shadowsneak"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "uturn", "fakeout"]],
+      ["sneasler", "grassyseed", "unburden", "adamant", ["protect", "closecombat", "rockslide", "direclaw"]]
+    ]
+  },
+  "176": {
+    "player": "Nicholas Costa",
+    "country": "BR",
+    "wins": 2,
+    "losses": 4,
+    "dropped": 6,
+    "team": [
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["protect", "nastyplot", "makeitrain", "shadowball"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["fakeout", "woodhammer", "grassyglide", "highhorsepower"]
+      ],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "fakeout", "zapcannon", "focusblast"]],
+      ["volcarona", "rockyhelmet", "flamebody", "timid", ["tailwind", "ragepowder", "fierydance", "strugglebug"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "timid", ["protect", "dragonpulse", "earthpower", "powergem"]],
+      ["primarina", "leftovers", "liquidvoice", "modest", ["protect", "calmmind", "hypervoice", "moonblast"]]
+    ]
+  },
+  "177": {
+    "player": "Rodolfo Arandas",
+    "country": "BR",
+    "wins": 2,
+    "losses": 3,
+    "dropped": 5,
+    "team": [
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["grassyglide", "woodhammer", "highhorsepower", "fakeout"]
+      ],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["closecombat", "dualwingbeat", "tailwind", "protect"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "quickattack", "hyperbeam", "detect"]],
+      ["gholdengo", "lifeorb", "goodasgold", "timid", ["makeitrain", "shadowball", "protect", "nastyplot"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]]
+    ]
+  },
+  "178": {
+    "player": "Erik Dunces",
+    "country": "BR",
+    "wins": 2,
+    "losses": 6,
+    "team": [
+      ["grimmsnarl", "lightclay", "prankster", "calm", ["foulplay", "reflect", "lightscreen", "partingshot"]],
+      ["pelipper", "wacanberry", "drizzle", "timid", ["weatherball", "tailwind", "wideguard", "protect"]],
+      ["archaludon", "leftovers", "stamina", "modest", ["thunderbolt", "dragonpulse", "electroshot", "protect"]],
+      ["charizardmegay", "charizarditey", "blaze", "bold", ["weatherball", "ancientpower", "roar", "protect"]],
+      ["rillaboom", "occaberry", "grassysurge", "brave", ["grassyglide", "woodhammer", "fakeout", "uturn"]],
+      ["farigiraf", "sitrusberry", "armortail", "relaxed", ["protect", "twinbeam", "helpinghand", "trickroom"]]
+    ]
+  },
+  "179": {
+    "player": "Bruno Leite",
+    "country": "BR",
+    "wins": 2,
+    "losses": 4,
+    "dropped": 6,
+    "team": [
+      ["gardevoirmega", "gardevoirite", "trace", "modest", ["psychic", "hypervoice", "shadowball", "protect"]],
+      ["talonflame", "expertbelt", "galewings", "timid", ["airslash", "tailwind", "overheat", "protect"]],
+      ["sneasler", "psychicseed", "unburden", "adamant", ["direclaw", "closecombat", "protect", "rockslide"]],
+      ["kommoo", "lifeorb", "soundproof", "modest", ["clangingscales", "flamethrower", "aurasphere", "protect"]],
+      ["indeedeef", "rockyhelmet", "psychicsurge", "relaxed", ["followme", "psychic", "helpinghand", "protect"]],
+      ["armarouge", "focussash", "weakarmor", "modest", ["armorcannon", "expandingforce", "energyball", "protect"]]
+    ]
+  },
+  "180": {
+    "player": "Arthur Vinícius",
+    "country": "BR",
+    "wins": 2,
+    "losses": 5,
+    "dropped": 7,
+    "team": [
+      ["torkoal", "charcoal", "drought", "quiet", ["eruption", "helpinghand", "weatherball", "protect"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "brave", ["leechlife", "ironhead", "drillrun", "protect"]],
+      ["armarouge", "lifeorb", "flashfire", "quiet", ["expandingforce", "armorcannon", "trickroom", "protect"]],
+      ["gardevoirmega", "gardevoirite", "trace", "modest", ["hypervoice", "expandingforce", "trickroom", "protect"]],
+      ["indeedeef", "rockyhelmet", "psychicsurge", "relaxed", ["psychic", "helpinghand", "followme", "trickroom"]],
+      ["sneasler", "psychicseed", "unburden", "adamant", ["closecombat", "direclaw", "throatchop", "protect"]]
+    ]
+  },
+  "181": {
+    "player": "Francisco Melo",
+    "country": "BR",
+    "wins": 2,
+    "losses": 4,
+    "dropped": 6,
+    "team": [
+      ["incineroar", "sitrusberry", "intimidate", "careful", ["throatchop", "partingshot", "fakeout", "flareblitz"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["focusblast", "zapcannon", "protect", "encore"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["tailwind", "hypervoice", "dracometeor", "protect"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["woodhammer", "highhorsepower", "fakeout", "grassyglide"]
+      ],
+      ["sneasler", "whiteherb", "unburden", "adamant", ["direclaw", "rocktomb", "protect", "closecombat"]]
+    ]
+  },
+  "182": {
+    "player": "Giovanni Mariotto",
+    "country": "BR",
+    "wins": 2,
+    "losses": 6,
+    "team": [
+      ["excadrill", "focussash", "sandrush", "jolly", ["protect", "highhorsepower", "ironhead", "rockslide"]],
+      ["sneasler", "psychicseed", "unburden", "jolly", ["protect", "direclaw", "closecombat", "throatchop"]],
+      ["indeedeef", "rockyhelmet", "psychicsurge", "relaxed", ["protect", "followme", "helpinghand", "psychic"]],
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["protect", "rockslide", "knockoff", "lowkick"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["protect", "hypervoice", "dracometeor", "flamethrower"]],
+      ["talonflame", "sharpbeak", "galewings", "adamant", ["protect", "tailwind", "bravebird", "flareblitz"]]
+    ]
+  },
+  "183": {
+    "player": "José Bezerra",
+    "country": "BR",
+    "wins": 2,
+    "losses": 3,
+    "dropped": 5,
+    "team": [
+      ["tyrantrum", "choicescarf", "strongjaw", "jolly", ["highhorsepower", "rockslide", "psychicfangs", "icefang"]],
+      ["gholdengo", "leftovers", "goodasgold", "modest", ["shadowball", "focusblast", "protect", "substitute"]],
+      ["hippowdon", "sitrusberry", "sandstream", "brave", ["rocktomb", "highhorsepower", "slackoff", "protect"]],
+      ["mimikyu", "lifeorb", "disguise", "jolly", ["playrough", "phantomforce", "protect", "shadowsneak"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["roost", "closecombat", "dualwingbeat", "protect"]],
+      ["glimmora", "focussash", "toxicdebris", "timid", ["powergem", "earthpower", "mortalspin", "spikyshield"]]
+    ]
+  },
+  "184": {
+    "player": "Emily Vieira",
+    "country": "BR",
+    "wins": 2,
+    "losses": 6,
+    "team": [
+      ["venusaur", "focussash", "chlorophyll", "modest", ["leafstorm", "sludgebomb", "earthpower", "sleeppowder"]],
+      ["gardevoirmega", "gardevoirite", "trace", "modest", ["hypervoice", "thunderbolt", "expandingforce", "protect"]],
+      ["indeedeef", "colburberry", "psychicsurge", "brave", ["followme", "helpinghand", "psychic", "trickroom"]],
+      ["sneasler", "psychicseed", "unburden", "adamant", ["closecombat", "direclaw", "rockslide", "protect"]],
+      ["basculegion", "choicescarf", "adaptability", "adamant", ["flipturn", "lastrespects", "wavecrash", "headsmash"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["heatwave", "weatherball", "ancientpower", "protect"]]
+    ]
+  },
+  "185": {
+    "player": "Lucas Kiguti",
+    "country": "BR",
+    "wins": 2,
+    "losses": 6,
+    "team": [
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["protect", "nastyplot", "shadowball", "makeitrain"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["protect", "hypervoice", "dragonpulse", "tailwind"]],
+      ["volcarona", "sitrusberry", "flamebody", "timid", ["ragepowder", "strugglebug", "overheat", "tailwind"]],
+      ["indeedeef", "psychicseed", "psychicsurge", "bold", ["followme", "psychic", "protect", "helpinghand"]],
+      ["milotic", "leftovers", "competitive", "modest", ["protect", "recover", "icywind", "scald"]],
+      ["floettemega", "floettite", "flowerveil", "modest", ["protect", "lightofruin", "moonblast", "dazzlinggleam"]]
+    ]
+  },
+  "186": {
+    "player": "Pedro Façanha",
+    "country": "BR",
+    "wins": 2,
+    "losses": 6,
+    "team": [
+      ["armarouge", "lifeorb", "flashfire", "quiet", ["expandingforce", "armorcannon", "trickroom", "wideguard"]],
+      ["kingambit", "focussash", "defiant", "brave", ["kowtowcleave", "suckerpunch", "ironhead", "lowkick"]],
+      ["sneasler", "psychicseed", "unburden", "adamant", ["closecombat", "direclaw", "throatchop", "protect"]],
+      ["torkoal", "charcoal", "drought", "quiet", ["eruption", "weatherball", "earthpower", "protect"]],
+      [
+        "gardevoirmega",
+        "gardevoirite",
+        "synchronize",
+        "modest",
+        ["hypervoice", "expandingforce", "thunderbolt", "protect"]
+      ],
+      ["indeedeef", "rockyhelmet", "psychicsurge", "relaxed", ["psychic", "helpinghand", "followme", "trickroom"]]
+    ]
+  },
+  "187": {
+    "player": "Lu Gonçalves",
+    "country": "BR",
+    "wins": 2,
+    "losses": 6,
+    "team": [
+      ["aerodactyl", "focussash", "unnerve", "jolly", ["rockslide", "dualwingbeat", "tailwind", "protect"]],
+      ["indeedeef", "colburberry", "psychicsurge", "sassy", ["psychic", "followme", "trickroom", "helpinghand"]],
+      ["rotomheat", "choicescarf", "levitate", "timid", ["electroweb", "voltswitch", "overheat", "willowisp"]],
+      ["gardevoirmega", "gardevoirite", "trace", "modest", ["hypervoice", "expandingforce", "trickroom", "protect"]],
+      ["garchomp", "lifeorb", "roughskin", "adamant", ["stompingtantrum", "dragonclaw", "rockslide", "protect"]],
+      ["annihilape", "leftovers", "defiant", "adamant", ["drainpunch", "ragefist", "bulkup", "protect"]]
+    ]
+  },
+  "188": {
+    "player": "Matheus Ferraz Leal",
+    "country": "BR",
+    "wins": 2,
+    "losses": 6,
+    "team": [
+      ["gholdengo", "lifeorb", "goodasgold", "timid", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["detect", "hypervoice", "hyperbeam", "quickattack"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["protect", "extremespeed", "flareblitz", "headsmash"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["protect", "bravebird", "tailwind", "closecombat"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "fakeout", "zapcannon", "focusblast"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["grassyglide", "woodhammer", "fakeout", "highhorsepower"]]
+    ]
+  },
+  "189": {
+    "player": "Wilson Filho",
+    "country": "BR",
+    "wins": 2,
+    "losses": 6,
+    "team": [
+      ["excadrill", "focussash", "sandrush", "jolly", ["ironhead", "highhorsepower", "rockslide", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["hypervoice", "doubleedge", "flamethrower", "protect"]],
+      ["corviknight", "psychicseed", "mirrorarmor", "careful", ["bravebird", "powertrip", "bulkup", "roost"]],
+      ["tyranitarmega", "tyranitarite", "sandstream", "jolly", ["rockslide", "knockoff", "lowkick", "protect"]],
+      [
+        "indeedee",
+        "lifeorb",
+        "psychicsurge",
+        "modest",
+        ["expandingforce", "mysticalfire", "dazzlinggleam", "helpinghand"]
+      ],
+      ["sneasler", "whiteherb", "unburden", "adamant", ["fakeout", "closecombat", "direclaw", "coaching"]]
+    ]
+  },
+  "190": {
+    "player": "Vinicius Verçosa",
+    "country": "BR",
+    "wins": 2,
+    "losses": 6,
+    "team": [
+      ["jolteon", "lifeorb", "voltabsorb", "modest", ["thunderbolt", "voltswitch", "shadowball", "protect"]],
+      ["ninetalesalola", "lightclay", "snowwarning", "timid", ["blizzard", "protect", "auroraveil", "moonblast"]],
+      ["sneasler", "focussash", "poisontouch", "jolly", ["direclaw", "fakeout", "protect", "brickbreak"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["poisonjab", "protect", "liquidation", "leechlife"]],
+      ["delphoxmega", "delphoxite", "blaze", "modest", ["heatwave", "psychic", "nastyplot", "protect"]],
+      ["sinistcha", "leftovers", "hospitality", "calm", ["matchagotcha", "trickroom", "ragepowder", "protect"]]
+    ]
+  },
+  "191": {
+    "player": "tiago andré pereira da silva",
+    "country": "BR",
+    "wins": 2,
+    "losses": 4,
+    "dropped": 6,
+    "team": [
+      ["sneasler", "whiteherb", "unburden", "adamant", ["closecombat", "gunkshot", "fakeout", "protect"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "yawn", "detect"]],
+      ["farigiraf", "sitrusberry", "armortail", "sassy", ["psychic", "trickroom", "helpinghand", "protect"]],
+      ["torkoal", "rockyhelmet", "drought", "quiet", ["eruption", "earthpower", "weatherball", "protect"]],
+      ["incineroar", "chopleberry", "intimidate", "adamant", ["flareblitz", "darkestlariat", "partingshot", "fakeout"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dracometeor", "flamethrower", "powergem", "protect"]]
+    ]
+  },
+  "192": {
+    "player": "Matheus Lobo",
+    "country": "BR",
+    "wins": 2,
+    "losses": 4,
+    "dropped": 6,
+    "team": [
+      ["pelipper", "sitrusberry", "drizzle", "modest", ["tailwind", "wideguard", "weatherball", "hurricane"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["protect", "swordsdance", "leechlife", "ironhead"]],
+      ["incineroar", "grassyseed", "intimidate", "impish", ["fakeout", "flareblitz", "throatchop", "partingshot"]],
+      ["archaludon", "leftovers", "stamina", "modest", ["protect", "dragonpulse", "electroshot", "flashcannon"]],
+      ["rillaboom", "lifeorb", "grassysurge", "adamant", ["fakeout", "grassyglide", "highhorsepower", "woodhammer"]],
+      ["pawmot", "focussash", "ironfist", "jolly", ["doubleshock", "closecombat", "icepunch", "fakeout"]]
+    ]
+  },
+  "193": {
+    "player": "Alonso Junior",
+    "country": "BR",
+    "wins": 2,
+    "losses": 6,
+    "team": [
+      ["volcarona", "grassyseed", "flamebody", "modest", ["flamethrower", "gigadrain", "quiverdance", "protect"]],
+      ["glimmoramega", "glimmoranite", "toxicdebris", "timid", ["powergem", "sludgebomb", "earthpower", "spikyshield"]],
+      ["basculegion", "choicescarf", "adaptability", "adamant", ["wavecrash", "lastrespects", "aquajet", "flipturn"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "flareblitz", "darkestlariat", "partingshot"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["fakeout", "woodhammer", "grassyglide", "uturn"]],
+      ["froslassmega", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "auroraveil", "protect"]]
+    ]
+  },
+  "194": {
+    "player": "Fabio Sarabia",
+    "country": "BR",
+    "wins": 2,
+    "losses": 6,
+    "team": [
+      ["sirfetchd", "leek", "scrappy", "brave", ["meteorassault", "nightslash", "leafblade", "detect"]],
+      [
+        "tyranitarmega",
+        "tyranitarite",
+        "sandstream",
+        "adamant",
+        ["rockslide", "knockoff", "highhorsepower", "protect"]
+      ],
+      ["golisopodmega", "golisopite", "emergencyexit", "brave", ["leechlife", "ironhead", "closecombat", "wideguard"]],
+      ["aerodactyl", "focussash", "unnerve", "jolly", ["rockslide", "dualwingbeat", "taunt", "tailwind"]],
+      ["indeedeef", "colburberry", "psychicsurge", "relaxed", ["psychic", "followme", "trickroom", "protect"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "thunderbolt", "protect"]]
+    ]
+  },
+  "195": {
+    "player": "Lucas Costa",
+    "country": "BR",
+    "wins": 1,
+    "losses": 4,
+    "dropped": 5,
+    "team": [
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["grassyglide", "woodhammer", "uturn", "fakeout"]],
+      ["incineroar", "sitrusberry", "intimidate", "careful", ["fakeout", "throatchop", "flareblitz", "partingshot"]],
+      ["golisopodmega", "golisopite", "emergencyexit", "adamant", ["leechlife", "ironhead", "closecombat", "protect"]],
+      ["archaludon", "leftovers", "stamina", "modest", ["electroshot", "dragonpulse", "flashcannon", "protect"]],
+      ["pelipper", "focussash", "drizzle", "modest", ["hurricane", "weatherball", "tailwind", "protect"]],
+      ["basculegion", "choicescarf", "adaptability", "jolly", ["lastrespects", "aquajet", "flipturn", "wavecrash"]]
+    ]
+  },
+  "196": {
+    "player": "Paulo Roberto",
+    "country": "BR",
+    "wins": 1,
+    "losses": 6,
+    "dropped": 7,
+    "team": [
+      ["incineroar", "passhoberry", "intimidate", "relaxed", ["protect", "fakeout", "throatchop", "partingshot"]],
+      ["politoed", "sitrusberry", "drizzle", "bold", ["protect", "encore", "weatherball", "perishsong"]],
+      ["archaludon", "leftovers", "stamina", "calm", ["protect", "electroball", "flashcannon", "dragonpulse"]],
+      ["gengarmega", "gengarite", "cursedbody", "modest", ["protect", "shadowball", "sludgebomb", "perishsong"]],
+      ["rillaboom", "ejectbutton", "grassysurge", "sassy", ["highhorsepower", "fakeout", "grassyglide", "uturn"]],
+      ["vivillon", "focussash", "compoundeyes", "timid", ["protect", "ragepowder", "sleeppowder", "hurricane"]]
+    ]
+  },
+  "197": {
+    "player": "Ana Cláudia Lira",
+    "country": "BR",
+    "wins": 1,
+    "losses": 6,
+    "dropped": 7,
+    "team": [
+      ["kingambit", "chopleberry", "defiant", "adamant", ["kowtowcleave", "ironhead", "suckerpunch", "lowkick"]],
+      ["armarouge", "lifeorb", "flashfire", "quiet", ["expandingforce", "armorcannon", "trickroom", "protect"]],
+      ["sneasler", "psychicseed", "unburden", "adamant", ["direclaw", "closecombat", "throatchop", "protect"]],
+      [
+        "gardevoirmega",
+        "gardevoirite",
+        "synchronize",
+        "modest",
+        ["hypervoice", "expandingforce", "trickroom", "protect"]
+      ],
+      ["torkoal", "charcoal", "drought", "quiet", ["eruption", "weatherball", "helpinghand", "protect"]],
+      ["indeedeef", "colburberry", "psychicsurge", "relaxed", ["followme", "psychic", "helpinghand", "trickroom"]]
+    ]
+  },
+  "198": {
+    "player": "Isaac Moreira",
+    "country": "BR",
+    "wins": 1,
+    "losses": 3,
+    "dropped": 4,
+    "team": [
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["protect", "headsmash", "flareblitz", "extremespeed"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["detect", "hypervoice", "hyperbeam", "quickattack"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["protect", "makeitrain", "shadowball", "nastyplot"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["grassyglide", "woodhammer", "highhorsepower", "fakeout"]
+      ],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["protect", "closecombat", "bravebird", "tailwind"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "zapcannon", "focusblast", "fakeout"]]
+    ]
+  },
+  "199": {
+    "player": "Nicolás Miniero",
+    "country": "AR",
+    "wins": 1,
+    "losses": 4,
+    "dropped": 5,
+    "team": [
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "detect", "yawn", "hyperbeam"]],
+      ["farigiraf", "sitrusberry", "armortail", "sassy", ["helpinghand", "protect", "twinbeam", "trickroom"]],
+      ["torkoal", "charcoal", "drought", "quiet", ["eruption", "protect", "earthpower", "weatherball"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["protect", "flamethrower", "dracometeor", "powergem"]],
+      ["incineroar", "chopleberry", "intimidate", "adamant", ["fakeout", "partingshot", "flareblitz", "darkestlariat"]],
+      ["sneasler", "whiteherb", "unburden", "adamant", ["fakeout", "protect", "gunkshot", "closecombat"]]
+    ]
+  },
+  "200": {
+    "player": "Victor Bezerra",
+    "country": "BR",
+    "wins": 1,
+    "losses": 5,
+    "dropped": 6,
+    "team": [
+      ["incineroar", "passhoberry", "intimidate", "careful", ["fakeout", "partingshot", "flareblitz", "throatchop"]],
+      ["indeedee", "colburberry", "psychicsurge", "modest", ["expandingforce", "energyball", "protect", "imprison"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["protect", "voltswitch", "zapcannon", "focusblast"]],
+      ["sneasler", "psychicseed", "unburden", "jolly", ["fakeout", "closecombat", "direclaw", "protect"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["protect", "dracometeor", "hypervoice", "flamethrower"]],
+      ["basculegion", "choicescarf", "adaptability", "jolly", ["aquajet", "flipturn", "wavecrash", "lastrespects"]]
+    ]
+  },
+  "201": {
+    "player": "Rômulo Andrade",
+    "country": "BR",
+    "wins": 1,
+    "losses": 5,
+    "dropped": 6,
+    "team": [
+      ["lycanrocdusk", "hardstone", "toughclaws", "jolly", ["accelerock", "rockslide", "taunt", "protect"]],
+      ["farigiraf", "leftovers", "armortail", "relaxed", ["twinbeam", "thunderbolt", "helpinghand", "trickroom"]],
+      ["rillaboom", "lifeorb", "grassysurge", "adamant", ["grassyglide", "sunnyday", "highhorsepower", "fakeout"]],
+      ["blazikenmega", "blazikenite", "speedboost", "adamant", ["uturn", "closecombat", "flareblitz", "detect"]],
+      ["froslassmega", "froslassite", "cursedbody", "timid", ["blizzard", "shadowball", "haze", "protect"]],
+      ["kingambit", "focussash", "defiant", "adamant", ["kowtowcleave", "suckerpunch", "brickbreak", "ironhead"]]
+    ]
+  },
+  "202": {
+    "player": "Bruno Quiroga",
+    "country": "AR",
+    "wins": 1,
+    "losses": 4,
+    "dropped": 5,
+    "team": [
+      ["volcarona", "rockyhelmet", "flamebody", "timid", ["overheat", "tailwind", "strugglebug", "ragepowder"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "protect", "nastyplot"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "fakeout", "uturn"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "protect", "fakeout"]],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["flareblitz", "darkestlariat", "fakeout", "partingshot"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dracometeor", "earthpower", "protect", "powergem"]]
+    ]
+  },
+  "203": {
+    "player": "Marcello Menezes",
+    "country": "BR",
+    "wins": 1,
+    "losses": 3,
+    "dropped": 4,
+    "team": [
+      ["floettemega", "floettite", "flowerveil", "modest", ["dazzlinggleam", "moonblast", "lightofruin", "protect"]],
+      ["basculegion", "expertbelt", "adaptability", "adamant", ["lastrespects", "aquajet", "wavecrash", "protect"]],
+      ["pinsirmega", "pinsirite", "hypercutter", "jolly", ["feint", "bodyslam", "stormthrow", "protect"]],
+      ["kingambit", "blackglasses", "defiant", "adamant", ["suckerpunch", "kowtowcleave", "ironhead", "lowkick"]],
+      ["aerodactyl", "focussash", "unnerve", "jolly", ["tailwind", "wideguard", "rockslide", "dualwingbeat"]],
+      ["garchomp", "lifeorb", "roughskin", "jolly", ["dragonclaw", "rockslide", "earthquake", "protect"]]
+    ]
+  },
+  "204": {
+    "player": "Gustavo Melo",
+    "country": "BR",
+    "wins": 1,
+    "losses": 4,
+    "dropped": 5,
+    "team": [
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["protect", "heatwave", "ancientpower", "weatherball"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["protect", "dracometeor", "earthpower", "powergem"]],
+      ["archaludon", "leftovers", "stamina", "bold", ["protect", "electroshot", "snarl", "dracometeor"]],
+      ["annihilape", "choicescarf", "defiant", "jolly", ["uturn", "shadowclaw", "closecombat", "icepunch"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["protect", "sleeppowder", "sludgebomb", "leafstorm"]],
+      ["pelipper", "sitrusberry", "drizzle", "bold", ["wideguard", "tailwind", "weatherball", "hurricane"]]
+    ]
+  },
+  "205": {
+    "player": "Lucas Silva",
+    "country": "BR",
+    "wins": 1,
+    "losses": 5,
+    "dropped": 6,
+    "team": [
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["fakeout", "woodhammer", "grassyglide", "uturn"]],
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      ["kingambit", "blackglasses", "defiant", "adamant", ["ironhead", "kowtowcleave", "suckerpunch", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "adamant", ["flareblitz", "partingshot", "fakeout", "helpinghand"]],
+      ["salamencemega", "salamencite", "intimidate", "timid", ["dracometeor", "hypervoice", "tailwind", "protect"]],
+      ["sneasler", "grassyseed", "unburden", "adamant", ["closecombat", "direclaw", "fakeout", "protect"]]
+    ]
+  },
+  "206": {
+    "player": "wander garrido",
+    "country": "BR",
+    "wins": 1,
+    "losses": 5,
+    "dropped": 6,
+    "team": [
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["grassyglide", "woodhammer", "uturn", "fakeout"]],
+      ["milotic", "leftovers", "competitive", "modest", ["scald", "icywind", "protect", "recover"]],
+      [
+        "basculegion",
+        "choicescarf",
+        "swiftswim",
+        "adamant",
+        ["liquidation", "flipturn", "lastrespects", "psychicfangs"]
+      ],
+      ["gardevoirmega", "gardevoirite", "telepathy", "timid", ["psychic", "hypervoice", "imprison", "trickroom"]],
+      ["sneasler", "whiteherb", "unburden", "adamant", ["direclaw", "uturn", "fakeout", "closecombat"]],
+      ["incineroar", "sitrusberry", "intimidate", "careful", ["fakeout", "partingshot", "flareblitz", "darkestlariat"]]
+    ]
+  },
+  "207": {
+    "player": "Lucas Veiga De Aquino Souza Leite",
+    "country": "BR",
+    "wins": 1,
+    "losses": 6,
+    "dropped": 7,
+    "team": [
+      ["floettemega", "floettite", "flowerveil", "modest", ["calmmind", "moonblast", "dazzlinggleam", "protect"]],
+      ["gholdengo", "lifeorb", "goodasgold", "timid", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["highhorsepower", "woodhammer", "grassyglide", "fakeout"]
+      ],
+      ["sneasler", "grassyseed", "unburden", "adamant", ["closecombat", "direclaw", "rockslide", "protect"]],
+      ["incineroar", "sitrusberry", "intimidate", "careful", ["flareblitz", "throatchop", "partingshot", "fakeout"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]]
+    ]
+  },
+  "208": {
+    "player": "ARTHUR ALVES",
+    "country": "BR",
+    "wins": 1,
+    "losses": 7,
+    "team": [
+      [
+        "alakazammega",
+        "alakazite",
+        "magicguard",
+        "modest",
+        ["expandingforce", "dazzlinggleam", "shadowball", "protect"]
+      ],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "dazzlinggleam", "protect"]],
+      ["armarouge", "sitrusberry", "flashfire", "modest", ["heatwave", "expandingforce", "wideguard", "protect"]],
+      ["indeedeef", "focussash", "psychicsurge", "bold", ["followme", "dazzlinggleam", "trickroom", "mysticalfire"]],
+      ["hawlucha", "whiteherb", "unburden", "jolly", ["rockslide", "highjumpkick", "ironhead", "detect"]],
+      ["sinistcha", "leftovers", "hospitality", "calm", ["matchagotcha", "lifedew", "ragepowder", "trickroom"]]
+    ]
+  },
+  "209": {
+    "player": "Pedro Simões",
+    "country": "BR",
+    "wins": 1,
+    "losses": 7,
+    "team": [
+      ["archaludon", "chopleberry", "stalwart", "modest", ["electroshot", "dragonpulse", "flashcannon", "protect"]],
+      ["tinkaton", "shucaberry", "moldbreaker", "jolly", ["gigatonhammer", "playrough", "fakeout", "protect"]],
+      ["farigiraf", "sitrusberry", "armortail", "bold", ["twinbeam", "trickroom", "thunderbolt", "helpinghand"]],
+      ["heracrossmega", "heracronite", "moxie", "adamant", ["closecombat", "detect", "pinmissile", "rockblast"]],
+      ["whimsicott", "fairyfeather", "prankster", "modest", ["moonblast", "tailwind", "helpinghand", "protect"]],
+      ["pelipper", "lifeorb", "drizzle", "modest", ["hurricane", "tailwind", "weatherball", "wideguard"]]
+    ]
+  },
+  "210": {
+    "player": "Felipe Menelau",
+    "country": "BR",
+    "wins": 1,
+    "losses": 5,
+    "dropped": 6,
+    "team": [
+      ["hatterene", "lifeorb", "magicbounce", "quiet", ["expandingforce", "dazzlinggleam", "trickroom", "protect"]],
+      ["froslassmega", "froslassite", "cursedbody", "modest", ["blizzard", "auroraveil", "shadowball", "protect"]],
+      ["indeedeef", "colburberry", "psychicsurge", "bold", ["psychic", "trickroom", "followme", "helpinghand"]],
+      ["torkoal", "charcoal", "drought", "quiet", ["protect", "eruption", "weatherball", "helpinghand"]],
+      ["kingambit", "focussash", "defiant", "adamant", ["lowkick", "kowtowcleave", "ironhead", "protect"]],
+      ["blazikenmega", "blazikenite", "speedboost", "adamant", ["detect", "flareblitz", "closecombat", "rockslide"]]
+    ]
+  },
+  "211": {
+    "player": "Tiago Façanha Peixoto",
+    "country": "BR",
+    "wins": 1,
+    "losses": 5,
+    "dropped": 6,
+    "team": [
+      ["rillaboom", "ejectbutton", "grassysurge", "careful", ["fakeout", "grassyglide", "uturn", "protect"]],
+      ["incineroar", "passhoberry", "intimidate", "sassy", ["protect", "throatchop", "partingshot", "fakeout"]],
+      ["vivillon", "focussash", "compoundeyes", "timid", ["protect", "sleeppowder", "ragepowder", "hurricane"]],
+      ["archaludon", "leftovers", "stamina", "bold", ["electroshot", "flashcannon", "dragonpulse", "protect"]],
+      ["gengarmega", "gengarite", "cursedbody", "modest", ["protect", "perishsong", "sludgebomb", "shadowball"]],
+      ["politoed", "sitrusberry", "drizzle", "calm", ["encore", "weatherball", "perishsong", "protect"]]
+    ]
+  },
+  "212": {
+    "player": "Vinicius Moscão Junqueira",
+    "country": "BR",
+    "wins": 0,
+    "losses": 1,
+    "dropped": 1,
+    "team": [
+      ["milotic", "leftovers", "competitive", "calm", ["muddywater", "coil", "hypnosis", "protect"]],
+      ["ninetalesalola", "focussash", "snowwarning", "timid", ["protect", "blizzard", "encore", "freezedry"]],
+      ["ceruledge", "colburberry", "flashfire", "adamant", ["bitterblade", "shadowsneak", "bulkup", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["grassyglide", "highhorsepower", "woodhammer", "fakeout"]
+      ],
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["throatchop", "fakeout", "flareblitz", "partingshot"]]
+    ]
+  },
+  "213": {
+    "player": "Walter Ezequiel Pandiani",
+    "country": "UY",
+    "wins": 0,
+    "losses": 1,
+    "dropped": 1,
+    "team": [
+      ["incineroar", "chopleberry", "intimidate", "relaxed", ["flareblitz", "partingshot", "fakeout", "snarl"]],
+      ["farigiraf", "sitrusberry", "armortail", "modest", ["protect", "trickroom", "psychic", "helpinghand"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["detect", "hypervoice", "hyperbeam", "calmmind"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["fakeout", "woodhammer", "grassyglide", "uturn"]],
+      ["charizardmegay", "charizarditey", "blaze", "modest", ["protect", "heatwave", "weatherball", "ancientpower"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["protect", "powergem", "earthpower", "dracometeor"]]
+    ]
+  },
+  "214": {
+    "player": "Gustavo Leite",
+    "country": "BR",
+    "wins": 0,
+    "losses": 4,
+    "dropped": 4,
+    "team": [
+      ["gholdengo", "lifeorb", "goodasgold", "modest", ["protect", "makeitrain", "nastyplot", "shadowball"]],
+      [
+        "rillaboom",
+        "miracleseed",
+        "grassysurge",
+        "adamant",
+        ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]
+      ],
+      ["ceruledge", "grassyseed", "flashfire", "adamant", ["bitterblade", "shadowsneak", "swordsdance", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["milotic", "sitrusberry", "competitive", "calm", ["muddywater", "icebeam", "coil", "hypnosis"]],
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]]
+    ]
+  },
+  "215": {
+    "player": "Beatriz Jereissate",
+    "country": "BR",
+    "wins": 0,
+    "losses": 4,
+    "dropped": 4,
+    "team": [
+      ["staraptormega", "staraptite", "intimidate", "jolly", ["bravebird", "closecombat", "tailwind", "protect"]],
+      ["raichumegay", "raichunitey", "lightningrod", "timid", ["zapcannon", "focusblast", "fakeout", "protect"]],
+      ["gholdengo", "lifeorb", "goodasgold", "timid", ["makeitrain", "shadowball", "nastyplot", "protect"]],
+      ["sylveon", "fairyfeather", "pixilate", "modest", ["hypervoice", "hyperbeam", "quickattack", "detect"]],
+      ["arcaninehisui", "focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "extremespeed", "protect"]],
+      ["rillaboom", "miracleseed", "grassysurge", "adamant", ["woodhammer", "grassyglide", "highhorsepower", "fakeout"]]
+    ]
+  },
+  "216": {
+    "player": "Marke Dantas",
+    "country": "BR",
+    "wins": 0,
+    "losses": 2,
+    "dropped": 2,
+    "team": [
+      ["ampharosmega", "ampharosite", "static", "bold", ["cottonguard", "dragonpulse", "protect", "thunderbolt"]],
+      ["heracrossmega", "heracronite", "moxie", "jolly", ["brickbreak", "detect", "lunge", "rockblast"]],
+      ["farigiraf", "mentalherb", "armortail", "quiet", ["expandingforce", "hypervoice", "trickroom", "helpinghand"]],
+      ["milotic", "leftovers", "competitive", "bold", ["scald", "recover", "icywind", "protect"]],
+      ["whimsicott", "focussash", "prankster", "timid", ["moonblast", "worryseed", "tailwind", "taunt"]],
+      ["incineroar", "sitrusberry", "intimidate", "careful", ["darkestlariat", "flareblitz", "fakeout", "partingshot"]]
+    ]
+  },
+  "217": {
+    "player": "Lucas Vinícius",
+    "country": "BR",
+    "wins": 0,
+    "losses": 2,
+    "dropped": 2,
+    "team": [
+      ["primarina", "sitrusberry", "liquidvoice", "modest", ["moonblast", "protect", "haze", "hypervoice"]],
+      ["incineroar", "chopleberry", "intimidate", "naughty", ["flareblitz", "closecombat", "fakeout", "darkestlariat"]],
+      ["dragapult", "lifeorb", "clearbody", "adamant", ["dragondarts", "phantomforce", "steelwing", "protect"]],
+      ["lucariomegaz", "lucarionitez", "innerfocus", "modest", ["flashcannon", "detect", "darkpulse", "aurasphere"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["flamethrower", "protect", "solarbeam", "ancientpower"]],
+      ["farigiraf", "colburberry", "armortail", "mild", ["hypervoice", "helpinghand", "expandingforce", "protect"]]
+    ]
+  },
+  "218": {
+    "player": "Fernando Ferreira",
+    "country": "AR",
+    "wins": 0,
+    "losses": 3,
+    "dropped": 3,
+    "team": [
+      ["charizardmegay", "charizarditey", "blaze", "modest", ["heatwave", "weatherball", "ancientpower", "protect"]],
+      ["farigiraf", "sitrusberry", "armortail", "sassy", ["psychic", "trickroom", "helpinghand", "protect"]],
+      ["dragapult", "lifeorb", "clearbody", "timid", ["dracometeor", "shadowball", "uturn", "protect"]],
+      ["venusaur", "focussash", "chlorophyll", "timid", ["leafstorm", "sleeppowder", "sludgebomb", "protect"]],
+      ["incineroar", "charcoal", "intimidate", "impish", ["flareblitz", "partingshot", "closecombat", "fakeout"]],
+      ["sylveon", "fairyfeather", "pixilate", "quiet", ["hypervoice", "hyperbeam", "yawn", "detect"]]
+    ]
+  },
+  "219": {
+    "player": "Otto Araujo",
+    "country": "BR",
+    "wins": 0,
+    "losses": 4,
+    "dropped": 4,
+    "team": [
+      ["pelipper", "sitrusberry", "drizzle", "modest", ["weatherball", "hurricane", "tailwind", "wideguard"]],
+      ["grimmsnarl", "lightclay", "prankster", "careful", ["spiritbreak", "lightscreen", "reflect", "partingshot"]],
+      ["charizardmegay", "charizarditey", "blaze", "timid", ["weatherball", "heatwave", "hurricane", "protect"]],
+      ["archaludon", "leftovers", "stamina", "modest", ["electroshot", "dragonpulse", "flashcannon", "protect"]],
+      ["garchompmegaz", "garchompitez", "roughskin", "modest", ["dragonpulse", "powergem", "earthpower", "protect"]],
+      ["venusaur", "focussash", "chlorophyll", "modest", ["leafstorm", "protect", "sleeppowder", "sludgebomb"]]
+    ]
+  },
+  "220": {
+    "player": "Raimundo Júnior",
+    "country": "BR",
+    "wins": 0,
+    "losses": 4,
+    "dropped": 4,
+    "team": [
+      ["armarouge", "mentalherb", "flashfire", "quiet", ["expandingforce", "armorcannon", "trickroom", "protect"]],
+      ["abomasnowmega", "abomasite", "snowwarning", "quiet", ["gigadrain", "blizzard", "protect", "weatherball"]],
+      ["torkoal", "charcoal", "drought", "quiet", ["eruption", "earthpower", "heatwave", "protect"]],
+      ["indeedeef", "psychicseed", "psychicsurge", "relaxed", ["psychic", "helpinghand", "followme", "trickroom"]],
+      ["incineroar", "sitrusberry", "intimidate", "careful", ["throatchop", "partingshot", "fakeout", "flareblitz"]],
+      ["mawilemega", "mawilite", "intimidate", "brave", ["ironhead", "protect", "playrough", "suckerpunch"]]
+    ]
+  },
+  "221": {
+    "player": "Raphael Oliveira",
+    "country": "BR",
+    "wins": 0,
+    "losses": 4,
+    "dropped": 4,
+    "team": [
+      ["incineroar", "sitrusberry", "intimidate", "impish", ["fakeout", "flareblitz", "partingshot", "darkestlariat"]],
+      ["gholdengo", "metalcoat", "goodasgold", "timid", ["protect", "thunderbolt", "shadowball", "makeitrain"]],
+      ["sneasler", "grassyseed", "unburden", "jolly", ["protect", "direclaw", "rockslide", "closecombat"]],
+      ["salamencemega", "salamencite", "intimidate", "modest", ["protect", "tailwind", "hypervoice", "dragonpulse"]],
+      ["floettemega", "floettite", "flowerveil", "timid", ["protect", "calmmind", "drainingkiss", "dazzlinggleam"]],
+      ["rillaboom", "lifeorb", "grassysurge", "adamant", ["fakeout", "grassyglide", "woodhammer", "highhorsepower"]]
+    ]
+  },
+  "222": {
+    "player": "Mateus Honório",
+    "country": "BR",
+    "wins": 0,
+    "losses": 4,
+    "dropped": 4,
+    "team": [
+      [
+        "metagrossmega",
+        "metagrossite",
+        "clearbody",
+        "brave",
+        ["meteormash", "thunderpunch", "stealthrock", "rockslide"]
+      ],
+      ["garchompmega", "garchompite", "sandveil", "adamant", ["earthquake", "ironhead", "liquidation", "facade"]],
+      ["charizard", "focusband", "blaze", "modest", ["flamethrower", "outrage", "weatherball", "blastburn"]],
+      ["orthworm", "quickclaw", "eartheater", "adamant", ["heavyslam", "irondefense", "stealthrock", "rockblast"]],
+      ["hawlucha", "sitrusberry", "unburden", "naive", ["flyingpress", "taunt", "entrainment", "roost"]],
+      ["samurotthisui", "focussash", "torrent", "adamant", ["ceaselessedge", "lashout", "razorshell", "raindance"]]
     ]
   }
 }

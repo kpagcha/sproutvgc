@@ -5,7 +5,7 @@
 // event pages link their standings; the standings, matches and team lists come from the JSON its standings site
 // (standings.limitlessvgc.com) loads, undocumented (`mew.limitlesstcg.com/labs/data/vgc`): one request for the
 // standings, one per round for its matches, and one per player for their team list, about a thousand for a Regional.
-// So the requests are slow (one a second), say who's asking (`get`'s User-Agent, set by the generator), and are made
+// So the requests are paced (a few at once, at most 8 a second), say who's asking (`get`'s User-Agent, set by the generator), and are made
 // once: every response is cached, and an event once generated is kept from its committed files (the generator's), never
 // requested again. Both sites' robots.txt allow everything; RK9's terms forbid scraping, so its lists aren't read.
 
@@ -29,8 +29,9 @@ const TYPES = {
 } as const
 export type EventType = (typeof TYPES)[keyof typeof TYPES]
 
-/** A pause before each request, to go easy on the sites: one a second. */
-const PAUSE_MS = 1000
+/** How many requests at once, and the least time between two starting: at most 8 a second, to go easy on the sites. */
+const PARALLEL = 4
+const GAP_MS = 125
 /** The division read: Masters, the one the meta is about. */
 const DIVISION = 'MA'
 /** The shape of what's generated for an event: an event generated in another is generated again, not kept. */
@@ -116,7 +117,8 @@ interface ApiStanding {
   tp_id: number
   name: string
   country: string | null
-  placement: number
+  /** None for a player disqualified. */
+  placement: number | null
   wins: number
   losses: number
   day2: number
@@ -159,9 +161,13 @@ export class LimitlessVgc {
     this.offline = options.offline
   }
 
+  /** When the next request may start, so that they start `GAP_MS` apart at least, however many are waiting. */
+  private next = 0
   private async fetch(url: string): Promise<string> {
     if (this.offline) throw new Offline(url)
-    await new Promise((wait) => setTimeout(wait, PAUSE_MS))
+    const start = Math.max(Date.now(), this.next)
+    this.next = start + GAP_MS
+    await new Promise((wait) => setTimeout(wait, start - Date.now()))
     this.requests++
     const body = await this.get(url)
     if (!body) throw new Error(`Limitless VGC has no ${url}`)
@@ -194,8 +200,10 @@ export class LimitlessVgc {
 
   /**
    * An event, its standings and its rounds, or nothing while it isn't over (its standings aren't final) or, offline,
-   * while the cache hasn't all of it. Stops on any name the dex doesn't have when `strict` (the current regulation's);
-   * else leaves it out, saying so (a past regulation's, which may have what the dex no longer does).
+   * while the cache hasn't all of it. Stops on any Pokémon the dex doesn't have when `strict` (the current regulation's:
+   * most likely a name of ours to fix); else leaves it out, saying so (a past regulation's, which may have what the dex
+   * no longer does). An item, ability, move or nature the regulation hasn't is a player's slip on their team list, not
+   * ours: left out, said so, either way.
    */
   async event(
     n: number,
@@ -242,20 +250,36 @@ export class LimitlessVgc {
       console.warn(`Limitless VGC's ${info.name} isn't over yet: left out until it is`)
       return null
     }
-    const field = await this.api<ApiStanding[]>(`standings?${q}`, `${t}/standings.json`, !cachedOver)
+    const all = await this.api<ApiStanding[]>(`standings?${q}`, `${t}/standings.json`, !cachedOver)
+    // Its standings, those disqualified left out (they have no placing): their matches stay, their opponents' results
+    // standing, against no one.
+    const field = all.filter((p): p is ApiStanding & { placement: number } => p.placement !== null)
+    if (field.length < all.length)
+      console.log(`Limitless VGC's ${info.name}: ${all.length - field.length} disqualified, left out of the standings`)
     const lists = field.filter((p) => p.teamlist).length
     const uncached = field.filter((p) => p.teamlist && !existsSync(join(this.cache, `api/${t}/teams/${p.tp_id}.json`)))
-    if (uncached.length && !this.offline)
+    if (uncached.length && !this.offline) {
       console.log(
-        `Limitless VGC's ${info.name}: ${uncached.length} team lists to fetch, about ${Math.ceil((uncached.length * PAUSE_MS) / 60000)} minutes`,
+        `Limitless VGC's ${info.name}: ${uncached.length} team lists to fetch, about ${Math.ceil((uncached.length * GAP_MS) / 60000)} minutes`,
       )
+      // Fetched a few at once into the cache, then read from it in order below.
+      await inParallel(uncached, (p) =>
+        this.api(`teamlist?tournamentId=${t}&playerId=${p.tp_id}`, `${t}/teams/${p.tp_id}.json`),
+      )
+    }
+    // Its rounds' pairings, likewise.
+    await inParallel(
+      Array.from({ length: tournament.round }, (_, i) => i + 1),
+      (r) => this.api(`pairings?${q}&round=${r}`, `${t}/pairings/${r}.json`),
+    )
 
     const unknown = new Set<string>()
+    const slips = new Set<string>()
     // A list leaving one out has its label alone ("Held Item:").
     const check = (set: ReadonlySet<string>, what: string, name: string | null) => {
       const id = name && !/:\s*$/.test(name) ? toId(name) : null
       if (id === null || set.has(id)) return id
-      unknown.add(`${what} "${id}"`)
+      slips.add(`${what} "${id}"`)
       return null
     }
     const pokemonOf = (limitless: string) => {
@@ -328,6 +352,10 @@ export class LimitlessVgc {
       if (strict) throw new Error(msg)
       console.warn(`${msg} (left out)`)
     }
+    if (slips.size)
+      console.warn(
+        `Limitless VGC's ${info.name}: team lists name what Regulation ${regulation} hasn't, left out: ${[...slips].join(', ')}`,
+      )
     const first = standings.find((s) => s.placing === 1)
     const winner = first && { player: first.player, country: first.country, team: first.team.map(([p]) => p) }
     const event: TournamentEvent = {
@@ -403,6 +431,15 @@ export function slugOf(name: string, date: string): string {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
   return /\b\d{4}\b/.test(slug) ? slug : `${slug}-${date.slice(0, 4)}`
+}
+
+/** `task` on each of `items`, `PARALLEL` at a time, failing as soon as one does. */
+async function inParallel<T>(items: readonly T[], task: (item: T) => Promise<unknown>): Promise<void> {
+  let i = 0
+  const worker = async () => {
+    while (i < items.length) await task(items[i++]!)
+  }
+  await Promise.all(Array.from({ length: Math.min(PARALLEL, items.length) }, worker))
 }
 
 /** A regulation's format on the site: "M-C" is "m-c". */

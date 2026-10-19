@@ -1,0 +1,155 @@
+{
+  "1": {
+    "phase": 0,
+    "matches": [
+      [854, null, 0],
+      [700, null, 0],
+      [844, null, 0],
+      [890, null, 0],
+      [876, null, 0],
+      [333, null, 0],
+      [608, null, 0],
+      [378, null, 0]
+    ]
+  },
+  "2": {
+    "phase": 0,
+    "matches": [
+      [890, null, 0],
+      [919, null, 0],
+      [370, null, 0],
+      [962, null, 0],
+      [876, null, 0],
+      [126, null, 0],
+      [608, null, 0],
+      [649, null, 0],
+      [586, null, 0],
+      [272, null, 0]
+    ]
+  },
+  "3": {
+    "phase": 0,
+    "matches": [
+      [126, null, 0],
+      [919, null, 0],
+      [333, null, 0],
+      [378, null, 0],
+      [649, null, 0],
+      [174, null, 0],
+      [700, null, 0],
+      [586, null, 0],
+      [167, null, 0],
+      [844, null, 0],
+      [563, null, 0],
+      [984, null, 0],
+      [854, null, 0],
+      [272, null, 0]
+    ]
+  },
+  "4": {
+    "phase": 0,
+    "matches": [
+      [126, null, 0],
+      [685, null, 0],
+      [174, null, 0],
+      [370, null, 0],
+      [649, null, 0],
+      [563, null, 0],
+      [608, null, 0],
+      [890, null, 0],
+      [844, null, 0],
+      [586, null, 0]
+    ]
+  },
+  "5": {
+    "phase": 0,
+    "matches": [
+      [132, null, 0],
+      [126, null, 0],
+      [700, null, 0],
+      [370, null, 0],
+      [378, null, 0],
+      [333, null, 0],
+      [167, null, 0],
+      [563, null, 0],
+      [272, null, 0],
+      [586, null, 0],
+      [984, null, 0]
+    ]
+  },
+  "6": {
+    "phase": 0,
+    "matches": [
+      [174, null, 0],
+      [132, null, 0],
+      [333, null, 0],
+      [700, null, 0],
+      [962, null, 0],
+      [890, null, 0],
+      [685, null, 0],
+      [126, null, 0],
+      [167, null, 0],
+      [919, null, 0],
+      [649, null, 0],
+      [844, null, 0],
+      [586, null, 0]
+    ]
+  },
+  "7": {
+    "phase": 0,
+    "matches": [
+      [174, null, 0],
+      [333, null, 0],
+      [126, null, 0],
+      [919, null, 0],
+      [370, null, 0],
+      [649, null, 0],
+      [167, null, 0],
+      [586, null, 0]
+    ]
+  },
+  "8": {
+    "phase": 0,
+    "matches": [
+      [132, null, 0],
+      [378, null, 0],
+      [876, null, 0],
+      [700, null, 0],
+      [919, null, 0],
+      [370, null, 0],
+      [649, null, 0],
+      [586, null, 0],
+      [984, null, 0]
+    ]
+  },
+  "9": { "phase": 0, "matches": [[132, null, 0]] },
+  "10": {
+    "phase": 0,
+    "matches": [
+      [370, null, 0],
+      [132, null, 0],
+      [378, null, 0],
+      [919, null, 0]
+    ]
+  },
+  "11": {
+    "phase": 0,
+    "matches": [
+      [378, null, 0],
+      [370, null, 0],
+      [132, 174, 0]
+    ]
+  },
+  "12": {
+    "phase": 0,
+    "matches": [
+      [174, null, 0],
+      [919, null, 0],
+      [370, null, 0]
+    ]
+  },
+  "13": { "phase": 0, "matches": [] },
+  "14": { "phase": 0, "matches": [[378, null, 0]] },
+  "15": { "phase": 0, "matches": [] },
+  "16": { "phase": 0, "matches": [] }
+}
