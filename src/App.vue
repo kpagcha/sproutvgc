@@ -20,6 +20,7 @@ import SectionMenu from '@/components/SectionMenu.vue'
 import AreaNav from '@/components/AreaNav.vue'
 import { AREAS } from '@/lib/areas'
 import { lastTiersQuery } from '@/lib/tiersState'
+import { eventOf } from '@/data/tournaments'
 import logoUrl from '@/assets/logo.png'
 import { searchFocus } from '@/composables/useSearch'
 
@@ -59,12 +60,14 @@ watchEffect(() => {
   const type = typeof route.params.type === 'string' && isType(route.params.type) ? route.params.type : null
   const page = typeof route.name === 'string' ? ENTRY_PAGES[route.name] : undefined
   const id = String(route.params.id)
-  // Conditions are curated, not generated: named by the locale, or after their move.
+  // Conditions are curated, not generated: named by the locale, or after their move. A tournament by its name.
   const entry = page
     ? generatedName(page.kind, id)
     : route.name === 'condition'
       ? refName({ kind: 'condition', id } as Ref)
-      : undefined
+      : route.name === 'tournament'
+        ? eventOf(id)?.name
+        : undefined
   const key = route.meta.headKey ?? route.meta.titleKey
   const name = key ? t(key) : null
   const lead = type ? typeName(type) : entry
@@ -73,7 +76,11 @@ watchEffect(() => {
   const desc = type
     ? t('desc.type', { ...params, type: typeName(type) })
     : entry
-      ? t(page?.desc ?? 'desc.condition', { ...params, ability: entry, name: entry })
+      ? t(page?.desc ?? (route.name === 'tournament' ? 'desc.tournament' : 'desc.condition'), {
+          ...params,
+          ability: entry,
+          name: entry,
+        })
       : t(route.meta.descKey ?? 'desc.home', params)
   document.title = title
   setMeta('meta[name="description"]', desc)
@@ -89,6 +96,7 @@ const LISTS: Partial<Record<string, { to: RouteLocationRaw; label: MessageKey }>
   metaAbility: { to: { name: 'abilityRankings' }, label: 'title.abilityRankings' },
   metaItem: { to: { name: 'itemRankings' }, label: 'title.itemRankings' },
   metaMove: { to: { name: 'moveRankings' }, label: 'title.moveRankings' },
+  tournament: { to: { name: 'tournaments' }, label: 'title.tournaments' },
   ability: { to: { name: 'abilities' }, label: 'title.abilities' },
   pokemon: { to: { name: 'pokedex' }, label: 'title.pokemon' },
   move: { to: { name: 'moves' }, label: 'title.moves' },

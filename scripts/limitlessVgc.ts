@@ -44,6 +44,8 @@ export interface TournamentEvent {
   url: string
   /** The players whose teams are listed. */
   teams: number
+  /** Who won, and the Pokémon they brought, for the list of events to show without loading the standings. */
+  winner?: { player: string; country: string; team: string[] }
 }
 
 /** A Pokémon as brought: its ID (a Mega's when it holds its Mega Stone, as Smogon's stats count it), then its item, ability and nature (Showdown IDs, null when the list doesn't say),
@@ -164,7 +166,9 @@ export class LimitlessVgc {
       if (strict) throw new Error(msg)
       console.warn(`${msg} (left out)`)
     }
-    return { event: { ...info, teams: standings.length }, standings }
+    const first = standings.find((s) => s.placing === 1)
+    const winner = first && { player: first.player, country: first.country, team: first.team.map(([p]) => p) }
+    return { event: { ...info, teams: standings.length, ...(winner && { winner }) }, standings }
   }
 
   /** What the regulation's list says of an event: its name, date, country, players and type. */

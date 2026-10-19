@@ -31,18 +31,24 @@ export interface TournamentEvent {
   url: string
   /** The players whose teams are listed. */
   teams: number
+  /** Who won, and the Pokémon they brought. */
+  winner?: { player: string; country: string; team: PokemonId[] }
 }
 
 /** A Pokémon as brought: its ID (a Mega's when it holds its stone), item, ability, nature, moves. */
-type Slot = [PokemonId, ItemId | null, AbilityId | null, string | null, MoveId[]]
+export type Slot = [PokemonId, ItemId | null, AbilityId | null, string | null, MoveId[]]
 
 /** A listed player's placing, as the event file has it, by placing. */
-interface Standing {
+export interface Standing {
   player: string
   country: string
+  /** Limitless VGC's team list, shared by every player who brought the same one. */
   list: number
   team: Slot[]
 }
+
+/** An event by its ID. */
+export const eventOf = (id: string): TournamentEvent | undefined => BY_ID.get(id)
 
 const INDEX = import.meta.glob<Record<string, TournamentEvent>>('./generated/tournaments/index.json', {
   eager: true,
@@ -58,6 +64,23 @@ export const EVENTS: readonly TournamentEvent[] = Object.values(Object.values(IN
   b.date.localeCompare(a.date),
 )
 const BY_ID = new Map(EVENTS.map((e) => [e.id, e]))
+
+/** An event's standings, its listed players by placing, loaded once. */
+const standings = new Map<string, Promise<(Standing & { placing: number })[]>>()
+export function loadStandings(id: string): Promise<(Standing & { placing: number })[]> {
+  let p = standings.get(id)
+  if (!p) {
+    const file = FILES[`./generated/tournaments/${id}.json`]
+    if (!file) return Promise.reject(new Error(`No data for the event "${id}"`))
+    p = file().then((f) =>
+      Object.entries(f)
+        .map(([placing, s]) => ({ ...s, placing: Number(placing) }))
+        .sort((a, b) => a.placing - b.placing),
+    )
+    standings.set(id, p)
+  }
+  return p
+}
 
 /** A regulation's events of a category, the latest first. */
 export const eventsOf = (regulation: string, category: TournamentCategory = 'official') =>

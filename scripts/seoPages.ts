@@ -5,7 +5,7 @@
 // in the reader's language. Also `sitemap.xml`, listing them, and 404.html, the app's index.html as it was.
 //
 // The pages are the areas, the dex's lists and every entry the regulation has, the types, the usage stats and the usage
-// page of every Pokémon the default dataset has, and the working tools; not the settings, nor what's still coming soon. The app's own data and text load through jiti, as the generator's do.
+// page of every Pokémon the default dataset has, the tournaments and each one's standings, and the working tools; not the settings, nor what's still coming soon. The app's own data and text load through jiti, as the generator's do.
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createJiti } from 'jiti'
@@ -136,6 +136,10 @@ export function seoPages(): Plugin {
       const abilityIds = dex.availableIds('ability').filter((id) => abilitiesRun.has(id))
       const itemIds = dex.availableIds('item').filter((id) => itemsHeld.has(id))
       const moveIds = dex.availableIds('move').filter((id) => movesRun.has(id))
+      // Every tournament generated, each with its standings' page.
+      const events = JSON.parse(
+        await readFile(join(root, 'src/data/generated/tournaments/index.json'), 'utf8').catch(() => '{}'),
+      ) as Record<string, { name: string }>
 
       const msg = (key: string, name = '') =>
         en.messages[key]!.replaceAll('{game}', GAME)
@@ -223,6 +227,15 @@ export function seoPages(): Plugin {
           desc: 'desc.metaAbility',
           keywords: 'keywords.metaAbility',
           lead: names.ability[id]!,
+          schema: 'WebPage',
+        })),
+        searched('meta/tournaments', 'tournaments', 'CollectionPage'),
+        ...Object.entries(events).map(([id, e]): Page => ({
+          path: `meta/tournaments/${id}`,
+          title: 'title.tournament',
+          desc: 'desc.tournament',
+          keywords: 'keywords.tournament',
+          lead: e.name,
           schema: 'WebPage',
         })),
         searched('meta/speed-tiers', 'speedTiers'),

@@ -334,7 +334,36 @@ export const router = createRouter({
     usageRankings('abilities', 'abilityRankings', 'ability'),
     metaEntry('abilities', 'metaAbility', 'ability'),
     metaEntry('items', 'metaItem', 'item'),
-    soon('meta', 'reports', '/meta/reports', 'title.reports', 'desc.reports'),
+    // The official tournaments, and each one's standings.
+    {
+      path: '/meta/tournaments',
+      name: 'tournaments',
+      component: () => import('@/views/TournamentsView.vue'),
+      meta: {
+        titleKey: 'title.tournaments',
+        descKey: 'desc.tournaments',
+        headKey: 'head.tournaments',
+        keywordsKey: 'keywords.tournaments',
+        recent: once('tournaments'),
+        ...inArea('meta', 'tournaments'),
+      },
+    },
+    {
+      path: '/meta/tournaments/:id',
+      name: 'tournament',
+      component: () => import('@/views/TournamentView.vue'),
+      meta: {
+        titleKey: 'title.tournament',
+        descKey: 'desc.tournament',
+        keywordsKey: 'keywords.tournament',
+        dexNames: true,
+        descriptions: ['ability', 'move', 'item'],
+        recent: ({ params }) => `tournament:${String(params.id)}`,
+        ...inArea('meta', 'tournaments'),
+      },
+    },
+    // Its address while it was coming soon.
+    { path: '/meta/reports', redirect: { name: 'tournaments' } },
     {
       path: '/meta/speed-tiers',
       name: 'speedTiers',

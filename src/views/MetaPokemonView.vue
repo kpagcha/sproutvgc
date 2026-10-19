@@ -198,7 +198,7 @@ const spreads = computed(() =>
 )
 
 // Its most common builds, a card each: its rank and share of its sets, then its item, ability and nature, then its
-// moves, the most run of them first, as its moves' list has them.
+// moves, the most run of them first, as its moves' list has them, each with its type's badge.
 const builds = computed(() =>
   (m.value?.builds ?? []).map((b) => ({
     ...b,
@@ -539,7 +539,9 @@ const sections = computed(() =>
               }}</span>
             </span>
             <ul class="build-moves">
-              <li v-for="mv in b.moves" :key="mv"><DexRef :to="move(mv)" meta /></li>
+              <li v-for="mv in b.moves" :key="mv">
+                <TypeIcon v-if="MOVES[mv]" :type="MOVES[mv].type" /><DexRef :to="move(mv)" meta />
+              </li>
             </ul>
           </li>
         </ol>
@@ -1028,13 +1030,13 @@ const sections = computed(() =>
   height: 3px;
   background: var(--accent);
 }
-/* Its builds, a card each, as many to a row as fit. */
+/* Its builds, a card each, as many to a row as fit: five on wide screens, its ten in two even rows. */
 .builds-of {
   margin: -4px 0 8px;
 }
 .builds {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
   gap: 8px;
   margin: 0;
   padding: 0;
@@ -1069,9 +1071,19 @@ const sections = computed(() =>
   font-weight: bold;
 }
 .build-moves {
+  /* Type badges at their desktop size on phones too, as small as the text. */
+  --icon-scale: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   margin: 0;
   padding: 0;
   list-style: none;
+}
+.build-moves li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 /* A list's heading, its options at the right (`ListOptions`): whether the short descriptions show. */
 .panel-head {

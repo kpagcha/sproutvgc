@@ -6,6 +6,7 @@ import { available, type ItemId, type PokemonId, type Ref } from '@/data/dex'
 import { isType, type TypeId } from '@/data/types'
 import { readBuild } from '@/lib/speedBuild'
 import { readList } from '@/lib/speedLineup'
+import { eventOf } from '@/data/tournaments'
 
 /** The Pokémon a query names, if the regulation has it. */
 const mon = (id: string | undefined) => (id && id in POKEMON ? (id as PokemonId) : null)
@@ -49,6 +50,8 @@ function view(visit: PageVisit) {
     usage: name === 'metaPokemon' ? mon(String(to.params.id)) : null,
     /** The ability, item or move whose meta page it is, if the regulation has it. */
     entry: META_ENTRIES[name] ? metaEntry(META_ENTRIES[name], String(to.params.id)) : null,
+    /** The tournament whose standings it is. */
+    event: name === 'tournament' ? (eventOf(String(to.params.id)) ?? null) : null,
     trickRoom: name.startsWith('speed') && q.trickroom === '1',
     // The type matchups' types, or the type the speed tiers are filtered by.
     types: name.startsWith('matchups')
@@ -71,7 +74,8 @@ export function shownVisit(visit: PageVisit) {
     !!v.titleKey &&
     (!v.groups || v.groups.every((g) => g.length > 0)) &&
     (v.to.name !== 'metaPokemon' || !!v.usage) &&
-    (!META_ENTRIES[String(v.to.name)] || !!v.entry)
+    (!META_ENTRIES[String(v.to.name)] || !!v.entry) &&
+    (v.to.name !== 'tournament' || !!v.event)
   )
 }
 </script>
@@ -94,14 +98,17 @@ import { moveType } from '@/components/EntryChip.vue'
 // Pokémon picked on it (a usage page's; the speed tiers' yours, with its build, the Pokémon found and the type it's
 // filtered by), the entry it's of (an ability's, item's or move's meta page's, by name) or its types (the type
 // matchups'); Trick Room, on, said in short. A meta page is its Pokémon or entry alone, unnamed: beside them, the dex
-// entries' chips say they're the dex's.
+// entries' chips say they're the dex's. A tournament's is its name.
 // `untitled` (on the page itself, which needs no naming): its name left out but when there's nothing else to show.
 const props = defineProps<{ visit: PageVisit; untitled?: boolean }>()
 const v = computed(() => view(props.visit))
 /** Whether it's named: not a meta page, its entry or Pokémon saying which it is. */
 const titled = computed(
   () =>
-    !v.value.usage && !v.value.entry && (!props.untitled || (!v.value.mine && !v.value.found && !v.value.types.length)),
+    !v.value.usage &&
+    !v.value.entry &&
+    !v.value.event &&
+    (!props.untitled || (!v.value.mine && !v.value.found && !v.value.types.length)),
 )
 /** A comparison's Pokémon by name, for what reads the chip out: its icons alone say nothing. */
 const label = computed(() => v.value.groups?.map((g) => g.map((id) => refName(pokemon(id))).join(', ')).join(' vs '))
@@ -143,6 +150,7 @@ const GROUP_MAX = 6
       </template>
       <template v-if="v.found"><span v-if="v.mine" class="muted">vs</span><PokemonIcon :id="v.found" /></template>
       <TypeIcon v-for="ty in v.types" :key="ty" :type="ty" />
+      <template v-if="v.event">{{ v.event.name }}</template>
     </template>
     <span v-if="v.trickRoom" class="tr">{{ t('speed.trShort') }}</span>
   </a>

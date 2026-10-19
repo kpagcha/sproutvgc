@@ -38,14 +38,7 @@ export const AREAS: Area[] = [
     title: 'title.meta',
     sections: [
       { key: 'rankings', route: 'rankings', label: 'nav.rankings', title: 'title.rankings', desc: 'desc.rankings' },
-      {
-        key: 'reports',
-        route: 'reports',
-        label: 'nav.reports',
-        title: 'title.reports',
-        desc: 'desc.reports',
-        soon: true,
-      },
+      { key: 'tournaments', route: 'tournaments', label: 'nav.tournaments', desc: 'desc.tournaments' },
       { key: 'speedTiers', route: 'speedTiers', label: 'nav.speedTiers', desc: 'desc.speedTiers' },
       {
         key: 'speedCompare',

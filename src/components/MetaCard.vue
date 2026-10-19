@@ -153,7 +153,6 @@ const about = (d: MetaDataset) =>
           {{ about(current) }} · {{ t('usage.from') }}
           <a :href="current.provider.url" target="_blank" rel="noopener">{{ current.provider.name }}</a>
         </p>
-        <p v-if="tournaments" class="muted small note-after">{{ t('meta.topPlacings') }}</p>
       </section>
       <!-- A regulation's tournaments: which of its events are added up, folded until some are picked. -->
       <section v-if="tournaments && tournaments.all.length > 1" class="section">
@@ -165,12 +164,8 @@ const about = (d: MetaDataset) =>
             }}</span>
           </summary>
           <div class="options">
-            <label
-              v-for="e in tournaments.all"
-              :key="e.id"
-              class="option"
-              :class="{ on: tournaments.picked.has(e.id) }"
-            >
+            <!-- Ticked, not filled as a radio's pick: most often all of them are. -->
+            <label v-for="e in tournaments.all" :key="e.id" class="option">
               <input
                 type="checkbox"
                 :checked="tournaments.picked.has(e.id)"
@@ -318,9 +313,6 @@ const about = (d: MetaDataset) =>
 }
 .note {
   margin: 0 0 8px;
-}
-.note-after {
-  margin-top: 4px;
 }
 /* The events, folded under their heading, which says how many are picked. */
 .events summary {

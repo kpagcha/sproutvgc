@@ -10,7 +10,12 @@
     "regulation": "M-C",
     "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
     "url": "https://limitlessvgc.com/tournaments/446",
-    "teams": 125
+    "teams": 125,
+    "winner": {
+      "player": "Louis Fontvieille",
+      "country": "FR",
+      "team": ["raichumegax", "golisopodmega", "archaludon", "pelipper", "basculegionf", "sneasler"]
+    }
   },
   "limitlessvgc-445": {
     "id": "limitlessvgc-445",
@@ -23,7 +28,12 @@
     "regulation": "M-C",
     "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
     "url": "https://limitlessvgc.com/tournaments/445",
-    "teams": 145
+    "teams": 145,
+    "winner": {
+      "player": "Joseph Ugarte",
+      "country": "US",
+      "team": ["farigiraf", "incineroar", "charizardmegay", "sylveon", "venusaur", "garchomp"]
+    }
   },
   "limitlessvgc-444": {
     "id": "limitlessvgc-444",
@@ -36,7 +46,12 @@
     "regulation": "M-C",
     "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
     "url": "https://limitlessvgc.com/tournaments/444",
-    "teams": 31
+    "teams": 31,
+    "winner": {
+      "player": "Juan Francisco Salerno",
+      "country": "AR",
+      "team": ["sylveon", "toxapex", "garchomp", "venusaur", "charizardmegay", "incineroar"]
+    }
   },
   "limitlessvgc-443": {
     "id": "limitlessvgc-443",
@@ -49,7 +64,12 @@
     "regulation": "M-C",
     "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
     "url": "https://limitlessvgc.com/tournaments/443",
-    "teams": 163
+    "teams": 163,
+    "winner": {
+      "player": "Eric Rios",
+      "country": "ES",
+      "team": ["gholdengo", "volcarona", "garchompmegaz", "incineroar", "rillaboom", "raichumegay"]
+    }
   },
   "limitlessvgc-442": {
     "id": "limitlessvgc-442",
@@ -62,7 +82,12 @@
     "regulation": "M-C",
     "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
     "url": "https://limitlessvgc.com/tournaments/442",
-    "teams": 47
+    "teams": 47,
+    "winner": {
+      "player": "Kiran Singh",
+      "country": "AU",
+      "team": ["archaludon", "pelipper", "grimmsnarl", "charizardmegay", "garchompmegaz", "venusaur"]
+    }
   },
   "limitlessvgc-441": {
     "id": "limitlessvgc-441",
@@ -75,7 +100,12 @@
     "regulation": "M-C",
     "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
     "url": "https://limitlessvgc.com/tournaments/441",
-    "teams": 155
+    "teams": 155,
+    "winner": {
+      "player": "Joseph Ugarte",
+      "country": "US",
+      "team": ["excadrill", "salamencemega", "tyranitarmega", "indeedee", "corviknight", "sneasler"]
+    }
   },
   "limitlessvgc-437": {
     "id": "limitlessvgc-437",
@@ -88,7 +118,12 @@
     "regulation": "M-B",
     "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
     "url": "https://limitlessvgc.com/tournaments/437",
-    "teams": 57
+    "teams": 57,
+    "winner": {
+      "player": "Takuma Yamazaki",
+      "country": "JP",
+      "team": ["floettemega", "basculegion", "kingambit", "dragonitemega", "garchomp", "sneasler"]
+    }
   },
   "limitlessvgc-436": {
     "id": "limitlessvgc-436",
@@ -101,7 +136,12 @@
     "regulation": "M-A",
     "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
     "url": "https://limitlessvgc.com/tournaments/436",
-    "teams": 156
+    "teams": 156,
+    "winner": {
+      "player": "Francesco Pio Pero",
+      "country": "IT",
+      "team": ["charizardmegay", "sylveon", "kingambit", "basculegion", "garchomp", "aerodactylmega"]
+    }
   },
   "limitlessvgc-435": {
     "id": "limitlessvgc-435",
@@ -114,7 +154,12 @@
     "regulation": "M-A",
     "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
     "url": "https://limitlessvgc.com/tournaments/435",
-    "teams": 135
+    "teams": 135,
+    "winner": {
+      "player": "Marco Hemantha Kaludura Silva",
+      "country": "IT",
+      "team": ["incineroar", "floettemega", "sneasler", "kingambit", "gengarmega", "kommoo"]
+    }
   },
   "limitlessvgc-434": {
     "id": "limitlessvgc-434",
@@ -127,6 +172,11 @@
     "regulation": "M-A",
     "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
     "url": "https://limitlessvgc.com/tournaments/434",
-    "teams": 145
+    "teams": 145,
+    "winner": {
+      "player": "Arsal Puri",
+      "country": "US",
+      "team": ["venusaur", "charizardmegay", "garchomp", "incineroar", "floettemega", "sinistcha"]
+    }
   }
 }
