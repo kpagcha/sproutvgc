@@ -22,6 +22,7 @@ import {
   tournamentSnapshotOf,
   eventsOf,
   EVENTS,
+  TOURNAMENT_PLAYERS,
 } from '@/data/tournaments'
 
 /** The kind of play a snapshot observes, which its label names. */
@@ -45,6 +46,9 @@ export type MetaCapability =
 /** Smogon's rating cutoffs: the players whose teams count most. */
 export type Cutoff = 0 | 1500 | 1630 | 1760
 
+/** A tournament's players whose teams count: everyone, those who made Day 2, or the top cut. */
+export type TournamentPlayers = 'all' | 'day2' | 'topCut'
+
 export interface MetaSnapshot {
   /** Its data's file, `generated/meta/<id>.json`, and how `VITE_META_SETS` names it. */
   id: string
@@ -67,9 +71,8 @@ export interface MetaSnapshot {
   teams?: number
   /** The events it adds up, for tournaments (`tournaments.ts`). */
   events?: string[]
-  /** Whose teams it counts, for tournaments: Day 2's, the only ones whose team lists are published. Its subset, as
-   * Smogon's cutoffs are theirs. */
-  players?: 'day2'
+  /** Whose teams it counts, for tournaments: its subset, as Smogon's cutoffs are theirs. */
+  players?: TournamentPlayers
   capabilities: MetaCapability[]
   /** What it has that covers every player, whatever its cutoff (Smogon's brought counts): labeled as such. */
   unweighted?: MetaCapability[]
@@ -114,7 +117,7 @@ export interface PokemonMeta {
   speeds?: { points: number; nature: string; share: number }[]
   /** Its sets' natures (by Showdown ID), from all of them, most common first. */
   natures?: Share<string>[]
-  /** The teams it's on, where the source counts them (tournaments). */
+  /** Its sets the shares of its lists are of, where the source counts them (tournaments' team lists). */
   teams?: number
   /** Its whole sets as brought, the same item, ability, nature and moves together, most common first. */
   builds?: Build[]
@@ -150,11 +153,15 @@ const GENERATED: Record<string, MetaSnapshot> = {
   ...(Object.values(INDEX)[0] ?? {}),
   ...Object.fromEntries(
     [...new Set(EVENTS.map((e) => e.regulation))].flatMap((r) => {
-      const s = tournamentSnapshot(
-        r,
-        eventsOf(r).map((e) => e.id),
-      )
-      return s ? [[s.id, s]] : []
+      // Every event of it, a snapshot for each of whose teams count.
+      return TOURNAMENT_PLAYERS.flatMap((p) => {
+        const s = tournamentSnapshot(
+          r,
+          eventsOf(r).map((e) => e.id),
+          p,
+        )
+        return s ? [[s.id, s]] : []
+      })
     }),
   ),
 }
@@ -256,7 +263,7 @@ function savedPick(): string | null {
 
 const picked = ref<string | null>(savedPick())
 
-const subsetKey = (s: MetaSnapshot) => `${s.cutoff ?? ''}|${s.bestOf ?? ''}`
+const subsetKey = (s: MetaSnapshot) => `${s.cutoff ?? ''}|${s.bestOf ?? ''}|${s.players ?? ''}`
 
 /** The snapshot every page shows: the one the reader picked, while it's still shown, or else the latest's first. */
 export const selectedSnapshot = computed<MetaSnapshot | undefined>(() => {

@@ -4,7 +4,6 @@ import { RotateCcw, X } from '@lucide/vue'
 import {
   datasetDates,
   datasetKey,
-  datasetParts,
   metaDatasets,
   offLatest,
   selectSnapshot,
@@ -25,22 +24,24 @@ import { metaLoading } from '@/composables/useMeta'
 // source), and its subsets (whose teams count most), what they mean said once over them. Picking a subset shows it on every page and closes the card; another regulation
 // or dataset shows its latest, keeping the subset when it has it, and leaves the card open for the next step. While
 // it isn't the latest dataset, its band has the way back to it (Latest), at the same players, which closes it. Under
-// the steps, Confirm closes it too, as the speed editor's does: what's picked is shown already. Tournaments aren't
-// offered here (their own pages lead to them, `TournamentsView`): one shown is listed while it is, to say so and to
-// leave it.
+// the steps, Confirm closes it too, as the speed editor's does: what's picked is shown already. Tournaments aren't part
+// of it (their own pages lead to them, `TournamentsView`): while one is shown, its regulation's datasets are listed,
+// none picked, and picking one leaves it.
 const emit = defineEmits<{ close: [] }>()
 const id = useId()
 
-const datasets = computed(() =>
-  metaDatasets(snapshots.value.filter((s) => s.kind !== 'tournament' || s === selectedSnapshot.value)),
-)
+const datasets = computed(() => metaDatasets(snapshots.value.filter((s) => s.kind !== 'tournament')))
+/** The dataset shown, none while it's a tournament's. */
 const current = computed<MetaDataset | undefined>(() => {
   const s = selectedSnapshot.value
+  if (s?.kind === 'tournament') return undefined
   return datasets.value.find((d) => s && d.key === datasetKey(s)) ?? datasets.value[0]
 })
 const regulations = computed(() => [...new Set(datasets.value.map((d) => d.regulation))])
+/** The regulation shown: its dataset's, or the tournament's shown. */
+const regulation = computed(() => current.value?.regulation ?? selectedSnapshot.value?.regulation)
 /** The current regulation's datasets. */
-const inRegulation = computed(() => datasets.value.filter((d) => d.regulation === current.value?.regulation))
+const inRegulation = computed(() => datasets.value.filter((d) => d.regulation === regulation.value))
 /** A dataset's name among its regulation's: its source and period ("Showdown ladder · Sep 2026"). */
 const datasetName = (d: MetaDataset) => sourceParts(d.snapshots[0]!).join(' · ')
 
@@ -66,19 +67,13 @@ function latest() {
 }
 const subsetLabel = (s: MetaSnapshot) => subsetParts(s).join(' · ')
 
-/** What the one shown is: its own label, for tournaments (the events it adds up), else its dataset's. */
-const shownLabel = computed(() =>
-  selectedSnapshot.value?.events ? datasetParts(selectedSnapshot.value).join(' · ') : current.value?.label,
-)
 /** What its subsets mean, said once over them: Smogon's cutoffs, when they're what tells them apart. */
 const cutoffs = computed(() => !!current.value?.snapshots.some((s) => s.cutoff !== undefined))
 const about = (d: MetaDataset) =>
   [
     d.battles !== undefined && t('meta.battles', { n: d.battles.toLocaleString(locale.value) }),
-    selectedSnapshot.value?.events &&
-      t('meta.teams', { n: (selectedSnapshot.value.teams ?? 0).toLocaleString(locale.value) }),
     t('meta.regulation', { reg: d.regulation }),
-    datasetDates(selectedSnapshot.value?.events ? selectedSnapshot.value : d),
+    datasetDates(d),
   ]
     .filter(Boolean)
     .join(' · ')
@@ -109,13 +104,8 @@ const about = (d: MetaDataset) =>
       <section v-if="regulations.length > 1" class="section">
         <h3 :id="`${id}-regulations`" class="heading">{{ t('meta.regulations') }}</h3>
         <div class="options inline" role="radiogroup" :aria-labelledby="`${id}-regulations`">
-          <label v-for="r in regulations" :key="r" class="option" :class="{ on: r === current?.regulation }">
-            <input
-              type="radio"
-              :name="`${id}-regulation`"
-              :checked="r === current?.regulation"
-              @change="pickRegulation(r)"
-            />
+          <label v-for="r in regulations" :key="r" class="option" :class="{ on: r === regulation }">
+            <input type="radio" :name="`${id}-regulation`" :checked="r === regulation" @change="pickRegulation(r)" />
             <span class="name">{{ r }}</span>
           </label>
         </div>
@@ -132,7 +122,7 @@ const about = (d: MetaDataset) =>
       </section>
       <!-- What the one shown is. -->
       <section v-if="current" class="section about">
-        <p class="name">{{ shownLabel }}</p>
+        <p class="name">{{ current.label }}</p>
         <p class="muted small">
           {{ about(current) }} · {{ t('usage.from') }}
           <a :href="current.provider.url" target="_blank" rel="noopener">{{ current.provider.name }}</a>

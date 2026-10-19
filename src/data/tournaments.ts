@@ -1,13 +1,13 @@
 // Tournaments, as the meta's data (`meta.ts`): each event's teams, generated from Limitless VGC (`scripts/limitlessVgc.ts`)
-// into `generated/tournaments/` (`index.json` the events, `<id>.json` each one's standings), and added up here for
-// whichever events are picked, into the shape every page reads (`MetaData`). They aren't snapshots generated whole as
-// Smogon's are: any set of a regulation's events can be picked, so each set is a snapshot made on demand, its ID naming
-// them (`tournaments-mc` every one of the regulation's, `tournaments-mc~445.446` those two). Only each event's Day 2
-// players are there (those whose teams Limitless VGC publishes: its subset, `players`), and their sets have no stat
-// points: no spreads nor Speeds.
+// into `generated/tournaments/` (`index.json` the events, `<id>.json` each one's standings, its whole field, and
+// `<id>.rounds.json` its matches), and added up here for whichever events are picked, into the shape every page reads
+// (`MetaData`). They aren't snapshots generated whole as Smogon's are: any set of a regulation's events can be picked,
+// and whose teams count (`players`: everyone, the default; those who made Day 2, `@day2`; the top cut, `@topcut`), so
+// each is a snapshot made on demand, its ID naming them (`tournaments-mc` every event of M-C and every player,
+// `tournaments-mc~445.446@day2` those two's Day 2). Their sets have no stat points: no spreads nor Speeds.
 
 import type { AbilityId, ItemId, MoveId, PokemonId } from '@/data/dex'
-import type { MetaData, MetaSnapshot, PokemonMeta, Share } from '@/data/meta'
+import type { MetaData, MetaSnapshot, PokemonMeta, Share, TournamentPlayers } from '@/data/meta'
 
 /** What kind of event: Limitless VGC's types. */
 export type EventType =
@@ -25,30 +25,48 @@ export interface TournamentEvent {
   /** The day it started, as an ISO date. */
   date: string
   country: string
-  /** Every player, whether or not their team is listed. */
+  /** Every player in its standings, those who made Day 2, and the top cut's. */
   players: number
+  day2: number
+  topCut: number
+  /** Its rounds: Swiss on Day 1 and Day 2, then the top cut's. */
+  rounds: number
   type: EventType
   category: TournamentCategory
   regulation: string
   provider: { name: string; url: string }
+  /** Its standings on Limitless VGC. */
   url: string
-  /** The players whose teams are listed. */
+  /** The players whose team lists are there. */
   teams: number
   /** Who won, and the Pokémon they brought. */
   winner?: { player: string; country: string; team: PokemonId[] }
 }
 
-/** A Pokémon as brought: its ID (a Mega's when it holds its stone), item, ability, nature, moves. */
+/** A Pokémon as brought: its ID (a Mega's when it holds its stone), item, ability, nature, moves; with no team list,
+ * the Pokémon alone (the rest null, no moves). */
 export type Slot = [PokemonId, ItemId | null, AbilityId | null, string | null, MoveId[]]
 
-/** A listed player's placing, as the event file has it, by placing. */
+/** A player's placing, as the event file has it, by placing. */
 export interface Standing {
   player: string
   country: string
-  /** Limitless VGC's team list, shared by every player who brought the same one. */
-  list: number
+  wins: number
+  losses: number
+  /** Whether they made Day 2, and the top cut. */
+  day2?: true
+  topCut?: true
+  /** The round they dropped in, if they did. */
+  dropped?: number
   team: Slot[]
 }
+
+/** Whether a slot is a whole set, from a team list, not the Pokémon alone. */
+export const listed = ([, item, ability, nature, moves]: Slot) => !!(item || ability || nature || moves.length)
+
+/** Whether a player's team counts among `players`. */
+const among = (s: Standing, players: TournamentPlayers) =>
+  players === 'all' || (players === 'day2' ? !!s.day2 : !!s.topCut)
 
 /** An event by its ID. */
 export const eventOf = (id: string): TournamentEvent | undefined => BY_ID.get(id)
@@ -58,7 +76,7 @@ const INDEX = import.meta.glob<Record<string, TournamentEvent>>('./generated/tou
   import: 'default',
 })
 const FILES = import.meta.glob<Record<string, Standing>>(
-  ['./generated/tournaments/*.json', '!./generated/tournaments/index.json'],
+  ['./generated/tournaments/*.json', '!./generated/tournaments/index.json', '!./generated/tournaments/*.rounds.json'],
   { import: 'default' },
 )
 
@@ -99,18 +117,29 @@ export const tournamentSnapshotId = (regulation: string) => `${PREFIX}${regulati
 /** The snapshots made so far, by ID, so that the same events are the same snapshot. */
 const made = new Map<string, MetaSnapshot>()
 
-/** The snapshot of some of a regulation's events (every one, when they're all of them), or none without events. */
-export function tournamentSnapshot(regulation: string, events: readonly string[]): MetaSnapshot | undefined {
+/** Whose teams count, in a snapshot's ID: nothing for everyone. */
+const PLAYERS_ID: Record<TournamentPlayers, string> = { all: '', day2: '@day2', topCut: '@topcut' }
+/** Whose teams count, the default first: a tournament dataset's subsets. */
+export const TOURNAMENT_PLAYERS: readonly TournamentPlayers[] = ['all', 'day2', 'topCut']
+
+/** The snapshot of some of a regulation's events (every one, when they're all of them), the teams of `players`
+ * counting, or none without events. */
+export function tournamentSnapshot(
+  regulation: string,
+  events: readonly string[],
+  players: TournamentPlayers = 'all',
+): MetaSnapshot | undefined {
   const all = eventsOf(regulation)
   const picked = all.filter((e) => events.includes(e.id))
   if (!picked.length) return undefined
-  const id =
+  const which =
     picked.length === all.length
-      ? tournamentSnapshotId(regulation)
-      : `${tournamentSnapshotId(regulation)}~${picked
+      ? ''
+      : `~${picked
           .map((e) => e.n)
           .sort((a, b) => a - b)
           .join('.')}`
+  const id = `${tournamentSnapshotId(regulation)}${which}${PLAYERS_ID[players]}`
   let s = made.get(id)
   if (!s) {
     s = {
@@ -121,9 +150,9 @@ export function tournamentSnapshot(regulation: string, events: readonly string[]
       from: picked.at(-1)!.date,
       to: picked[0]!.date,
       period: 'event',
-      teams: picked.reduce((n, e) => n + e.teams, 0),
+      teams: picked.reduce((n, e) => n + (players === 'all' ? e.players : players === 'day2' ? e.day2 : e.topCut), 0),
       events: picked.map((e) => e.id),
-      players: 'day2',
+      players,
       capabilities: ['usage', 'moves', 'items', 'abilities', 'teammates', 'natures', 'builds'],
     }
     made.set(id, s)
@@ -131,15 +160,16 @@ export function tournamentSnapshot(regulation: string, events: readonly string[]
   return s
 }
 
-/** The snapshot an ID names (`tournaments-mc`, `tournaments-mc~445.446`), if its regulation has those events. */
+/** The snapshot an ID names (`tournaments-mc`, `tournaments-mc~445.446@day2`), if its regulation has those events. */
 export function tournamentSnapshotOf(id: string): MetaSnapshot | undefined {
-  const m = id.match(/^tournaments-([a-z0-9]+)(?:~([\d.]+))?$/)
+  const m = id.match(/^tournaments-([a-z0-9]+)(?:~([\d.]+))?(@day2|@topcut)?$/)
   if (!m) return undefined
   const regulation = EVENTS.find((e) => regulationKey(e.regulation) === m[1])?.regulation
   if (!regulation) return undefined
   const all = eventsOf(regulation)
   const events = m[2] ? m[2].split('.').flatMap((n) => BY_N.get(Number(n))?.id ?? []) : all.map((e) => e.id)
-  const s = tournamentSnapshot(regulation, events)
+  const players = TOURNAMENT_PLAYERS.find((p) => PLAYERS_ID[p] === (m[3] ?? '')) ?? 'all'
+  const s = tournamentSnapshot(regulation, events, players)
   // Only the ID it'd have: an ID naming events it hasn't, or naming them all, isn't one.
   return s?.id === id ? s : undefined
 }
@@ -153,8 +183,9 @@ const KEEP = { list: 10, min: 0.01 }
 
 const loaded = new Map<string, Promise<MetaData>>()
 
-/** A tournament snapshot's data, its events' teams added up: each Pokémon's share of the teams, and of its sets each
- * item, ability, nature, move, teammate and whole build. Loaded once. */
+/** A tournament snapshot's data, its events' teams added up (those of the players it counts): each Pokémon's share of
+ * the teams and of its teammates', and of its sets from team lists, each item, ability, nature, move and whole build.
+ * Loaded once. */
 export function loadTournaments(s: MetaSnapshot): Promise<MetaData> {
   let p = loaded.get(s.id)
   if (!p) {
@@ -164,7 +195,15 @@ export function loadTournaments(s: MetaSnapshot): Promise<MetaData> {
         if (!file) throw new Error(`No data for the event "${id}"`)
         return file()
       }),
-    ).then((files) => addUp(files.flatMap((f) => Object.values(f).map((st) => st.team))))
+    ).then((files) =>
+      addUp(
+        files.flatMap((f) =>
+          Object.values(f)
+            .filter((st) => among(st, s.players ?? 'all'))
+            .map((st) => st.team),
+        ),
+      ),
+    )
     loaded.set(s.id, p)
   }
   return p
@@ -186,7 +225,9 @@ class Tally<K> extends Map<K, number> {
 }
 
 interface Counts {
+  /** The teams it's on, and its sets from team lists among them, what its lists' shares are of. */
   sets: number
+  listed: number
   items: Tally<ItemId>
   abilities: Tally<AbilityId>
   natures: Tally<string>
@@ -206,6 +247,7 @@ function addUp(teams: Slot[][]): MetaData {
       if (!c) {
         c = {
           sets: 0,
+          listed: 0,
           items: new Tally(),
           abilities: new Tally(),
           natures: new Tally(),
@@ -216,11 +258,13 @@ function addUp(teams: Slot[][]): MetaData {
         counts.set(pokemon, c)
       }
       c.sets++
+      for (const [other] of team) if (other !== pokemon) c.teammates.add(other)
+      if (!listed([pokemon, item, ability, nature, moves])) continue
+      c.listed++
       if (item) c.items.add(item)
       if (ability) c.abilities.add(ability)
       if (nature) c.natures.add(nature)
       for (const m of moves) c.moves.add(m)
-      for (const [other] of team) if (other !== pokemon) c.teammates.add(other)
       c.builds.add(JSON.stringify([item, ability, nature, [...moves].sort()]))
     }
   }
@@ -231,13 +275,13 @@ function addUp(teams: Slot[][]): MetaData {
       const meta: PokemonMeta = {
         rank: i + 1,
         usage: round(c.sets / teams.length),
-        teams: c.sets,
-        moves: c.moves.top(c.sets, Infinity) as Share<MoveId>[],
-        items: c.items.top(c.sets, KEEP.list),
-        abilities: c.abilities.top(c.sets, KEEP.list),
-        natures: c.natures.top(c.sets, KEEP.list),
+        teams: c.listed,
+        moves: c.moves.top(c.listed, Infinity) as Share<MoveId>[],
+        items: c.items.top(c.listed, KEEP.list),
+        abilities: c.abilities.top(c.listed, KEEP.list),
+        natures: c.natures.top(c.listed, KEEP.list),
         teammates: c.teammates.top(c.sets, KEEP.list),
-        builds: c.builds.top(c.sets, BUILDS).map(({ id, share }) => {
+        builds: c.builds.top(c.listed, BUILDS).map(({ id, share }) => {
           const [item, ability, nature, moves] = JSON.parse(id) as [
             ItemId | null,
             AbilityId | null,
