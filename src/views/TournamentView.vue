@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, shallowRef, watch } from 'vue'
+import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useMediaQuery } from '@vueuse/core'
+import { useElementSize, useMediaQuery } from '@vueuse/core'
 import { ChevronDown, ChevronUp } from '@lucide/vue'
 import { available, pokemon, type PokemonId } from '@/data/dex'
 import { datasetDates, loadMeta, metaLabel, percent, regulationSnapshot, usageRanks } from '@/data/meta'
@@ -364,12 +364,16 @@ watch(standings, async (all) => {
 const teamsWith = (pid: PokemonStat['id']) =>
   available(pokemon(pid)) ? { name: 'tournament', params: { id: id.value }, query: { f: `pokemon:${pid}` } } : null
 
+/** The tabs' band, stuck to the top as the page scrolls; its height, for the Pokémon's table's header to stick under it. */
+const bandTabs = useTemplateRef<{ $el: HTMLElement }>('bandTabs')
+const { height: bandHeight } = useElementSize(() => bandTabs.value?.$el, undefined, { box: 'border-box' })
+
 const num = (n: number) => n.toLocaleString(locale.value)
 const ordinal = (n: number) => `#${n}`
 </script>
 
 <template>
-  <div v-if="event">
+  <div v-if="event" :style="{ '--band-height': `${bandHeight}px` }">
     <div class="panel">
       <h1>{{ event.name }}</h1>
       <p class="facts">
@@ -387,7 +391,7 @@ const ordinal = (n: number) => `#${n}`
 
     <!-- Its standings and its Pokémon, a page each, as tabs on the panel's band. -->
     <section v-if="tab === 'standings'" class="panel banded">
-      <BandTabs :label="t('tournaments.tabs')" :current="tab" :tabs />
+      <BandTabs ref="bandTabs" :label="t('tournaments.tabs')" :current="tab" :tabs />
       <FilterSearch
         v-model:text="query"
         v-model:filters="filters"
@@ -511,7 +515,7 @@ const ordinal = (n: number) => `#${n}`
 
     <!-- Its Pokémon: the day's, each one's usage, win rate and record. -->
     <section v-else class="panel banded">
-      <BandTabs :label="t('tournaments.tabs')" :current="tab" :tabs />
+      <BandTabs ref="bandTabs" :label="t('tournaments.tabs')" :current="tab" :tabs />
       <!-- The Pokémon off the meta that shone, a card each: its best placing and whose, or how often its teams made
            Day 2; its rank on the ladder and its teams here. -->
       <section v-if="standoutList.length" class="standouts">
@@ -734,6 +738,16 @@ const ordinal = (n: number) => `#${n}`
 <style scoped>
 h1 {
   margin-bottom: 4px;
+}
+/* The tabs' band stuck to the top as the page scrolls (its standings and Pokémon are long), over what scrolls under it;
+   the Pokémon's table's header stuck under it, and a player scrolled to under it too. */
+.band-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+.dex-table.stats .head {
+  top: var(--band-height, 0px);
 }
 /* What it was, on a line, dot-separated, wrapping between them: each dot ends the one before it, so a line never starts
    with one. */
@@ -1176,8 +1190,8 @@ h1 {
    it comes into view: laid out as the page scrolls into them, their heights guessed until then (a phone's rows two
    lines, an unfolded one its sets), the page's length changed under the scroll, making it jump. */
 .standing {
-  /* Room above it when a link scrolls to it. */
-  scroll-margin-top: 12px;
+  /* Room above it when a link scrolls to it, under the tabs' band. */
+  scroll-margin-top: calc(var(--band-height, 0px) + 12px);
   /* Its width, for its team's icons to be laid out by (below). */
   container: standing / inline-size;
 }
