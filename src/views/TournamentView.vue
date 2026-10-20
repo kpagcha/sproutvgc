@@ -30,8 +30,8 @@ import TypeIcon from '@/components/TypeIcon'
 // Each player's placing, name and country, record (marked when they dropped), and the six they brought, as icons;
 // unfolded (one by one, or all at once), their whole sets, a card each, each entry leading to its meta page: its
 // sprite and types in a band, its item after the types, then its ability and nature (the stats it raises and lowers
-// on hover) on a line, and its moves two by two, each with its type's badge. A player whose team list isn't
-// there has the Pokémon alone. Rows far down the field aren't laid out until near the screen.
+// on hover) on a line, and its moves two by two (on phones, one under another), each with its type's badge. A
+// player whose team list isn't there has the Pokémon alone. Rows far down the field aren't laid out until near the screen.
 // A nature says what it does on hover, or tapped, as on a Pokémon's meta page: the stat it raises and the one it
 // lowers, each with its chevron. Drawn once per nature, the tooltips sharing it.
 const natureTips = new Map<string, Element>()
@@ -736,8 +736,12 @@ h1 {
   .sets {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  /* Its moves one under another, the cards being narrow. */
+  .set-moves {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .sets-room {
-    height: 670px;
+    height: 860px;
   }
 }
 @media (max-width: 420px) {
@@ -745,7 +749,7 @@ h1 {
     grid-template-columns: minmax(0, 1fr);
   }
   .sets-room {
-    height: 1340px;
+    height: 1720px;
   }
 }
 </style>
