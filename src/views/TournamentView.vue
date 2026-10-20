@@ -269,7 +269,7 @@ const ordinal = (n: number) => `#${n}`
                 <PokemonIcon v-for="(slot, i) in s.team" :id="slot[0]" :key="i" />
               </span>
               <!-- Neither a team list nor its Pokémon: the standings didn't say. -->
-              <span v-else class="team muted small">{{ t('tournaments.noList') }}</span>
+              <span v-else class="team none muted small">{{ t('tournaments.noList') }}</span>
               <component :is="open.has(s.placing) ? ChevronUp : ChevronDown" :size="16" class="chevron" />
             </button>
             <!-- Its whole sets, a card each. -->
@@ -762,6 +762,11 @@ h1 {
   .chevron {
     grid-area: chevron;
   }
+}
+/* No team, a line of text where its icons would be: not in their grid, where it'd wrap a word to an icon's column. */
+.team.none {
+  display: block;
+  white-space: nowrap;
 }
 /* A row too narrow for six icons after its padding and the name's indent (4px each side, 3em and a gap, 6 × 40px:
    about 301px on a phone): three by two. */
