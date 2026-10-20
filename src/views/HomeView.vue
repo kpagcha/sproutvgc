@@ -15,7 +15,7 @@ import SearchBox from '@/components/SearchBox.vue'
 import logoUrl from '@/assets/logo.png'
 
 // The front door to the whole site: the search (of the site's pages, the meta pages and the dex), and under it the
-// areas, a card each, two to a row (where to go: its name and its sections, links alone; Meta and Tools standing out), then the meta at a glance (what the site is most about, `MetaHighlights`); then
+// areas, a card each, one under another (where to go: its name and its sections, links alone; Meta and Tools standing out), then the meta at a glance (what the site is most about, `MetaHighlights`); then
 // the reader's favorites and recently viewed. While searching, the results take the place of all but the search.
 
 /** The areas that stand out, the site's own (what players use, and what to work with): on an accent shadow over a
@@ -83,7 +83,7 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
     </div>
     <SearchResults v-if="results" :query :results />
     <template v-else>
-      <!-- Under them, the site's areas, a card each, two to a row (where to go), then the meta at a glance (what it's
+      <!-- Under them, the site's areas, a card each, one under another (where to go), then the meta at a glance (what it's
            about). -->
       <nav class="areas" :aria-label="t('home.explore')">
         <section v-for="a in AREAS" :key="a.id" class="panel area" :class="{ featured: FEATURED.has(a.id) }">
@@ -143,21 +143,22 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
   margin: 16px 0 0;
 }
 
-/* The areas: a card each, two to a row, one on phones; each its name (a link) and its sections. */
+/* The areas: a card each, one under another; each its name (a link) and its sections. */
 .areas {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px 20px;
+  gap: 16px;
   margin-bottom: 20px;
 }
+/* Its name, then its sections beside it, wrapping in the room left (under it on phones, or when that's too narrow), its
+   name on the line of their first row's text. */
 .area {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px 16px;
   margin: 0;
 }
 .area-head {
-  align-self: start;
   font-weight: bold;
   font-size: calc(18px * var(--display-scale, 1) * var(--text-scale));
   color: var(--text);
@@ -166,6 +167,8 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
   color: var(--accent);
 }
 .area-sections {
+  flex: 1 1 0;
+  min-width: 12em;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -191,16 +194,13 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
   color: var(--muted);
   border-style: dashed;
 }
-/* Meta and Tools: a hard shadow in the accent, a faint dotted ground, a larger name, their sections raised buttons
+/* Meta and Tools: a hard shadow in the accent, a faint dotted ground, their sections raised buttons
    (lifting on hover, pressed flat when clicked). */
 :root:root .area.featured {
   background:
     radial-gradient(color-mix(in srgb, var(--accent) 22%, transparent) 1px, transparent 1.5px) 0 0 / 10px 10px,
     var(--panel);
   box-shadow: 6px 6px 0 var(--accent);
-}
-.featured .area-head {
-  font-size: calc(26px * var(--display-scale, 1) * var(--text-scale));
 }
 .featured .area-sections {
   gap: 10px;
@@ -235,8 +235,13 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
 }
 
 @media (max-width: 560px) {
-  .areas {
-    grid-template-columns: minmax(0, 1fr);
+  .area {
+    flex-direction: column;
+    align-items: start;
+  }
+  .area-sections {
+    flex: none;
+    min-width: 0;
   }
   /* On phones, Meta's and Tools' buttons a little smaller. */
   .featured .area-sections {
