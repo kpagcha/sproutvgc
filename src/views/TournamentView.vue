@@ -542,6 +542,11 @@ h1 {
 .player-row:hover {
   background: var(--hover);
 }
+/* Unfolded: its row in the color of what's picked, ruled off from its sets. */
+.standing.open .player-row {
+  background: var(--sel);
+  border-bottom: 1px solid var(--border-strong);
+}
 .placing {
   font-weight: bold;
   text-align: right;
