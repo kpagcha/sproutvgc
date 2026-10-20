@@ -38,8 +38,7 @@ import TypeIcon from '@/components/TypeIcon'
 // Each player's placing, name and country, record (marked when they dropped), and the six they brought, as icons;
 // unfolded, their whole sets, a card each, each entry leading to its meta page: its sprite and types in a band, its item after the types, then its ability and nature (the stats it raises and lowers
 // on hover) on a line, and its moves two by two (on phones, one under another), each with its type's badge. A
-// player whose team list isn't there has the Pokémon alone. Rows far down the field aren't laid out until near the
-// screen.
+// player whose team list isn't there has the Pokémon alone.
 // A nature says what it does on hover, or tapped, as on a Pokémon's meta page: the stat it raises and the one it
 // lowers, each with its chevron. Drawn once per nature, the tooltips sharing it.
 const natureTips = new Map<string, Element>()
@@ -553,11 +552,10 @@ h1 {
   margin-top: 0;
 }
 /* A player, a row to unfold (`player-row`: not `row`, which the Pokémon's table rows are, as every dex table's):
-   placing, name and country, record, the six as icons, and the chevron. Far down the field, rows aren't laid out
-   until near the screen. */
+   placing, name and country, record, the six as icons, and the chevron. Every row laid out from the start, not when
+   it comes into view: laid out as the page scrolls into them, their heights guessed until then (a phone's rows two
+   lines, an unfolded one its sets), the page's length changed under the scroll, making it jump. */
 .standing {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 42px;
   /* Its width, for its team's icons to be laid out by (below). */
   container: standing / inline-size;
 }
