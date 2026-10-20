@@ -115,6 +115,11 @@ const {
   locale,
 })
 const TOP = 20
+/** The fewest matches a win rate is worth going by: from fewer (the top cut's, often), it's faint. */
+const MIN_MATCHES = 20
+const few = (s: PokemonStat) => s.wins + s.losses < MIN_MATCHES
+/** The most used Pokémon's usage, the one its bars are against. */
+const topUsage = computed(() => stats.value[0]?.usage ?? 0)
 const allStats = ref(false)
 const shownStats = computed(() => (allStats.value ? sortedStats.value : sortedStats.value.slice(0, TOP)))
 /** What the day's numbers are of: its players, and its matches with a winner. */
@@ -339,7 +344,7 @@ const ordinal = (n: number) => `#${n}`
           />
           <SortHeader
             :label="t('tournaments.col.winRate')"
-            :tip="t('tournaments.col.winRateTip')"
+            :tip="t('tournaments.col.winRateTip', { n: MIN_MATCHES })"
             right
             :active="statKey === 'winRate'"
             :desc="statDesc"
@@ -362,13 +367,27 @@ const ordinal = (n: number) => `#${n}`
               >
             </AppLink>
           </div>
-          <div role="cell" class="r num">{{ percent(s.usage) }}</div>
-          <!-- Its win rate; on phones, its record under it, the record's column left out there. -->
-          <div role="cell" class="r num" :class="{ muted: s.winRate === null }">
-            {{ s.winRate === null ? '—' : percent(s.winRate)
-            }}<span class="phone-record muted">{{ s.wins }}–{{ s.losses }}</span>
+          <div role="cell" class="r num meter" :style="{ '--share': s.usage / (topUsage || 1) }">
+            {{ percent(s.usage) }}
           </div>
-          <div role="cell" class="r num muted wide-only">{{ s.wins }}–{{ s.losses }}</div>
+          <!-- Its win rate; on phones, its record under it, the record's column left out there. -->
+          <div
+            v-tip="s.winRate !== null && few(s) ? t('tournaments.fewMatches', { n: s.wins + s.losses }) : undefined"
+            role="cell"
+            class="r num"
+            :class="s.winRate === null ? 'muted' : ['wr', s.winRate >= 0.5 ? 'up' : 'down', { few: few(s) }]"
+            :style="s.winRate !== null && { '--dev': Math.abs(s.winRate - 0.5) * 2 }"
+          >
+            {{ s.winRate === null ? '—' : percent(s.winRate)
+            }}<span class="phone-record record-wl"
+              ><span :class="{ more: s.wins > s.losses }">{{ s.wins }}</span
+              >–<span :class="{ more: s.losses > s.wins }">{{ s.losses }}</span></span
+            >
+          </div>
+          <div role="cell" class="r num wide-only record-wl">
+            <span :class="{ more: s.wins > s.losses }">{{ s.wins }}</span
+            >–<span :class="{ more: s.losses > s.wins }">{{ s.losses }}</span>
+          </div>
           <div role="cell" class="r">
             <AppLink :to="{ name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }" class="to-meta"
               >{{ t('tournaments.toMeta') }} ›</AppLink
@@ -518,6 +537,78 @@ h1 {
 .tipped {
   text-decoration: underline dotted;
   text-underline-offset: 2px;
+}
+/* Usage as the rankings show it: a bar along the bottom of the cell, from the left, on a faint track the cell's width,
+   against the most used Pokémon's (`--share`, 0 to 1), so the top of the event reads at a glance. */
+.meter {
+  --inset: 6px;
+  position: relative;
+}
+.meter::before,
+.meter::after {
+  content: '';
+  position: absolute;
+  left: var(--inset);
+}
+.meter::before {
+  right: var(--inset);
+  bottom: 4px;
+  height: 1px;
+  background: var(--border);
+}
+.meter::after {
+  bottom: 3px;
+  width: calc((100% - 2 * var(--inset)) * var(--share, 0));
+  height: 3px;
+  background: var(--accent);
+}
+/* Win rate: a bar from the middle of a faint track (even, marked), rightwards in the good color above it, leftwards
+   in the bad below, as far as it's from even (`--dev`, 0 to 1: 0% or 100% the whole half); from too few matches, the
+   bar and the number faint. */
+.wr {
+  --inset: 6px;
+  position: relative;
+}
+.wr::before,
+.wr::after {
+  content: '';
+  position: absolute;
+}
+.wr::before {
+  right: var(--inset);
+  bottom: 1px;
+  left: var(--inset);
+  height: 8px;
+  background:
+    linear-gradient(var(--muted), var(--muted)) 50% 0 / 1px 100% no-repeat,
+    linear-gradient(var(--border), var(--border)) 0 calc(100% - 3px) / 100% 1px no-repeat;
+}
+.wr::after {
+  bottom: 3px;
+  width: calc((100% - 2 * var(--inset)) / 2 * var(--dev, 0));
+  height: 3px;
+}
+.wr.up::after {
+  left: 50%;
+  background: var(--good);
+}
+.wr.down::after {
+  right: 50%;
+  background: var(--bad);
+}
+.wr.few {
+  color: var(--muted);
+}
+.wr.few::after {
+  opacity: 0.4;
+}
+/* A record, muted, the larger of its wins and losses in the text's color and bold. */
+.record-wl {
+  color: var(--muted);
+}
+.record-wl .more {
+  font-weight: bold;
+  color: var(--text);
 }
 .to-meta {
   font-size: 0.85em;
