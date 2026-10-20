@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
+import { computed, h, onBeforeUnmount, ref, render, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ChevronDown, ChevronUp } from '@lucide/vue'
 import { ability, item, move, pokemon } from '@/data/dex'
@@ -29,9 +29,26 @@ import TypeIcon from '@/components/TypeIcon'
 // regulation's data).
 // Each player's placing, name and country, record (marked when they dropped), and the six they brought, as icons;
 // unfolded (one by one, or all at once), their whole sets, a card each, each entry leading to its meta page: its
-// sprite and types in a band, its item, ability and nature (with the stats it raises and lowers) on rows of their
-// own, and its moves two by two, each with its type's badge. A player whose team list isn't
+// sprite and types in a band, its item after the types, then its ability and nature (the stats it raises and lowers
+// on hover) on a line, and its moves two by two, each with its type's badge. A player whose team list isn't
 // there has the Pokémon alone. Rows far down the field aren't laid out until near the screen.
+// A nature says what it does on hover, or tapped, as on a Pokémon's meta page: the stat it raises and the one it
+// lowers, each with its chevron. Drawn once per nature, the tooltips sharing it.
+const natureTips = new Map<string, Element>()
+function natureTip(id: string) {
+  const e = natureEffects(id)
+  if (!e) return t('usageMon.natureNeutral')
+  let el = natureTips.get(id)
+  if (!el) {
+    el = document.createElement('span')
+    render(
+      h('span', [h(EffectTag, { effect: 'up', stat: e.plus }), ' ', h(EffectTag, { effect: 'down', stat: e.minus })]),
+      el,
+    )
+    natureTips.set(id, el)
+  }
+  return el
+}
 const route = useRoute()
 const router = useRouter()
 const id = computed(() => String(route.params.id))
@@ -241,33 +258,21 @@ const ordinal = (n: number) => `#${n}`
                     <DexRef :to="pokemon(mon)" meta class="set-name" />
                     <span class="set-types">
                       <TypeIcon v-for="ty in POKEMON[mon]?.types ?? []" :key="ty" :type="ty" />
+                      <span v-if="listed([mon, it, ab, nature, moves])" class="set-item">
+                        <template v-if="it"><ItemIcon :id="it" /><DexRef :to="item(it)" meta /></template>
+                        <span v-else class="muted">{{ t('usageMon.noItem') }}</span>
+                      </span>
                     </span>
                   </span>
                 </div>
                 <p v-if="!listed([mon, it, ab, nature, moves])" class="muted small no-list">
                   {{ t('tournaments.noList') }}
                 </p>
-                <dl v-else class="set-facts">
-                  <dt>{{ t('tournaments.set.item') }}</dt>
-                  <dd>
-                    <template v-if="it"><ItemIcon :id="it" /><DexRef :to="item(it)" meta /></template>
-                    <span v-else class="muted">{{ t('usageMon.noItem') }}</span>
-                  </dd>
-                  <template v-if="ab">
-                    <dt>{{ t('tournaments.set.ability') }}</dt>
-                    <dd><DexRef :to="ability(ab)" meta /></dd>
-                  </template>
-                  <template v-if="nature">
-                    <dt>{{ t('tournaments.set.nature') }}</dt>
-                    <dd class="set-nature">
-                      <strong>{{ natureName(nature) }}</strong>
-                      <template v-if="natureEffects(nature)">
-                        <EffectTag effect="up" :stat="natureEffects(nature)!.plus" class="up" />
-                        <EffectTag effect="down" :stat="natureEffects(nature)!.minus" class="down" />
-                      </template>
-                    </dd>
-                  </template>
-                </dl>
+                <div v-else-if="ab || nature" class="set-facts">
+                  <DexRef v-if="ab" :to="ability(ab)" meta />
+                  <span v-if="ab && nature" class="muted" aria-hidden="true">·</span>
+                  <span v-if="nature" v-tip:group="natureTip(nature)" class="muted">{{ natureName(nature) }}</span>
+                </div>
                 <ul v-if="moves.length" class="set-moves">
                   <li v-for="mv in moves" :key="mv" class="set-move">
                     <TypeIcon v-if="MOVES[mv]" :type="MOVES[mv].type" /><DexRef :to="move(mv)" meta />
@@ -674,46 +679,33 @@ h1 {
   /* Type badges at their desktop size on phones too, as small as the text. */
   --icon-scale: 1;
   display: flex;
-  gap: 4px;
-}
-/* Its item, ability and nature, a row each: a small label, then what it is. */
-.set-facts {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: 4px 10px;
-  margin: 0;
-  padding: 8px 10px 6px;
+  gap: 4px;
+  min-width: 0;
 }
-.set-facts dt {
-  font-size: 0.72em;
-  font-weight: bold;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.set-facts dd {
+/* Its item after the type badges, at their height, a little apart from them. */
+.set-item {
   display: flex;
   align-items: center;
   gap: 4px;
   min-width: 0;
-  margin: 0;
+  margin-left: 6px;
+  font-size: 0.92em;
   font-weight: bold;
 }
-.set-nature {
+.set-item :deep(a) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Its ability and, muted, its nature, on one line. */
+.set-facts {
+  display: flex;
   flex-wrap: wrap;
-  column-gap: 8px;
-}
-.set-nature :deep(.nature-effect) {
-  display: inline-flex;
   align-items: center;
-  font-size: 0.85em;
-}
-.set-nature .up {
-  color: var(--good);
-}
-.set-nature .down {
-  color: var(--bad);
+  gap: 2px 6px;
+  padding: 8px 10px 4px;
+  font-weight: bold;
 }
 /* Its moves, two by two: each a chip, its type's badge and its name. */
 .set-moves {
