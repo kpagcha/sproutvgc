@@ -132,6 +132,8 @@ export const messages = {
   'desc.tournaments':
     "The official {game} tournaments: each event's standings and the teams its top players brought, item, ability, nature and moves.",
   'desc.tournament': "{name}: its standings and the teams its top players brought, each Pokémon's whole set.",
+  'desc.tournamentPokemon':
+    "{name}: each Pokémon's usage, win rate and record, over the whole event, Day 2 or the top cut.",
   'desc.speedTiers':
     '{game} speed tiers for Regulation {reg}: a speed list and speed chart of every Pokémon at the Speeds players run, with Trick Room, Tailwind and Choice Scarf. See what yours outspeeds.',
   'desc.speedCompare':
@@ -644,6 +646,7 @@ export const messages = {
   'filter.subject.abilities': 'abilities',
   'filter.subject.items': 'items',
   'filter.subject.conditions': 'conditions',
+  'filter.subject.players': 'players',
   'filter.placeholder': 'Search {what} by {by}',
   'filter.placeholderTerms': 'Filter by {by}',
   'filter.named': '{what} named “{text}”',
@@ -793,6 +796,8 @@ export const messages = {
   'keywords.tournaments':
     '{game} tournaments, VGC regionals, {game} tournament teams, {game} tournament results, VGC team sheets, {reg} tournaments',
   'keywords.tournament': '{name}, {name} results, {name} teams, {game} tournament, VGC regional',
+  'head.tournamentPokemon': 'Pokémon usage and win rates',
+  'keywords.tournamentPokemon': '{name} usage, {name} Pokémon, {name} win rates, {game} tournament usage, VGC usage',
   'tournaments.none': 'No tournaments yet.',
   'tournaments.toMeta': 'Meta',
   'tournaments.players': '{n} players',
@@ -800,11 +805,14 @@ export const messages = {
   'tournaments.winnerTeam': "{player}'s team",
   'tournaments.eventMeta': 'Meta',
   'tournaments.standings': 'Standings',
-  'tournaments.days': 'Day',
-  'tournaments.day.all': 'All',
-  'tournaments.day.day1': 'Day 1',
+  'tournaments.tabs': 'Tournament',
+  'tournaments.teamsOf': 'Teams',
+  'tournaments.day.all': 'Whole event',
   'tournaments.day.day2': 'Day 2',
   'tournaments.day.cut': 'Top cut',
+  'tournaments.showDay1': 'Day 1 ({n} players)',
+  'tournaments.noPlayers': 'No player matches.',
+  'tournaments.teamsWithTip': 'The teams with it in the standings',
   'tournaments.pokemonStats': 'Pokémon',
   'tournaments.statsAbout': "{players} players' teams · {matches} matches",
   'tournaments.col.pokemon': 'Pokémon',
@@ -818,7 +826,6 @@ export const messages = {
   'tournaments.part.topCut': 'Top cut',
   'tournaments.part.day2': 'Day 2',
   'tournaments.part.day1': 'Day 1',
-  'tournaments.part.cut': 'Top cut',
   'tournaments.drop': 'Drop',
   'tournaments.droppedTip': 'Dropped after round {round}',
   'tournaments.noList': 'No team list',

@@ -68,7 +68,9 @@ watchEffect(() => {
       : route.name === 'tournament'
         ? eventOf(id)?.name
         : undefined
-  const key = route.meta.headKey ?? route.meta.titleKey
+  // A tournament's Pokémon, a page of its own.
+  const tournamentMons = route.name === 'tournament' && route.params.tab === 'pokemon'
+  const key = tournamentMons ? 'head.tournamentPokemon' : (route.meta.headKey ?? route.meta.titleKey)
   const name = key ? t(key) : null
   const lead = type ? typeName(type) : entry
   const title = name ? `${lead ? `${lead} · ` : ''}${name} · ${GAME_NAME} · sproutvgc` : `sproutvgc · ${GAME_NAME} dex`
@@ -76,15 +78,24 @@ watchEffect(() => {
   const desc = type
     ? t('desc.type', { ...params, type: typeName(type) })
     : entry
-      ? t(page?.desc ?? (route.name === 'tournament' ? 'desc.tournament' : 'desc.condition'), {
-          ...params,
-          ability: entry,
-          name: entry,
-        })
+      ? t(
+          page?.desc ??
+            (tournamentMons
+              ? 'desc.tournamentPokemon'
+              : route.name === 'tournament'
+                ? 'desc.tournament'
+                : 'desc.condition'),
+          {
+            ...params,
+            ability: entry,
+            name: entry,
+          },
+        )
       : t(route.meta.descKey ?? 'desc.home', params)
   document.title = title
   setMeta('meta[name="description"]', desc)
-  setKeywords(route.meta.keywordsKey ? t(route.meta.keywordsKey, { ...params, ...(entry && { name: entry }) }) : null)
+  const keywords = tournamentMons ? 'keywords.tournamentPokemon' : route.meta.keywordsKey
+  setKeywords(keywords ? t(keywords, { ...params, ...(entry && { name: entry }) }) : null)
   setMeta('meta[property="og:title"]', title)
   setMeta('meta[property="og:description"]', desc)
 })

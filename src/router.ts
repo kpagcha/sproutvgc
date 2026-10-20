@@ -334,7 +334,7 @@ export const router = createRouter({
     usageRankings('abilities', 'abilityRankings', 'ability'),
     metaEntry('abilities', 'metaAbility', 'ability'),
     metaEntry('items', 'metaItem', 'item'),
-    // The official tournaments, and each one's standings.
+    // The official tournaments, and each one's standings and Pokémon, a page each (`/pokemon` the second).
     {
       path: '/meta/tournaments',
       name: 'tournaments',
@@ -349,7 +349,7 @@ export const router = createRouter({
       },
     },
     {
-      path: '/meta/tournaments/:id',
+      path: '/meta/tournaments/:id/:tab(pokemon)?',
       name: 'tournament',
       component: () => import('@/views/TournamentView.vue'),
       meta: {

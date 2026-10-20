@@ -2,7 +2,7 @@
 import { computed, h, ref, render, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ChevronDown, ChevronUp } from '@lucide/vue'
-import { ability, item, move, pokemon } from '@/data/dex'
+import { ability, available, item, move, pokemon } from '@/data/dex'
 import { datasetDates, percent, regulationSnapshot } from '@/data/meta'
 import { MOVES } from '@/data/moves'
 import { natureEffects, natureName } from '@/data/natures'
@@ -10,26 +10,33 @@ import { POKEMON, splitForme, spriteUrl } from '@/data/pokemon'
 import { eventOf, listed, loadRounds, loadStandings, type Round, type Standing } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import { DAYS, decidedMatches, playersOf, pokemonStats, recordsOf, type Day } from '@/lib/tournamentStats'
+import { passesGroups } from '@/lib/filterGroups'
+import type { NamedLocation } from '@/lib/links'
+import { fold } from '@/lib/search'
+import type { Term, TermFilters } from '@/lib/searchTerms'
+import { DAYS, decidedMatches, playersOf, pokemonStats, type Day, type PokemonStat } from '@/lib/tournamentStats'
 import { useSort } from '@/composables/useSort'
+import { useUrlFilters } from '@/composables/useUrlFilters'
 import AppLink from '@/components/AppLink'
+import BandTabs from '@/components/BandTabs.vue'
 import DexRef from '@/components/DexRef'
 import EffectTag from '@/components/EffectTag'
-import FolderTabs from '@/components/FolderTabs.vue'
+import FilterSearch from '@/components/FilterSearch.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import SegmentedControl from '@/components/SegmentedControl.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
 
 // One official tournament: what it was (type, date, country, players, how many made Day 2), the way to its
-// regulation's meta, and, under tabs for the day (the top cut, the default, Day 2, Day 1, then the whole event apart,
-// in the URL as `?day=`), its standings (the whole event's in three parts, the top cut, the rest of Day 2 and Day 1;
-// a day's its players with their record that day) and then its Pokémon (each one's share of the day's teams and how
-// its teams did in the day's matches, by usage or win rate, the top ones or all, each leading to its meta page on its
-// regulation's data).
+// regulation's meta, and two tabs, a page each: its standings (`/meta/tournaments/:id`: the whole field in three
+// parts, the top cut, the rest of Day 2 and Day 1, Day 1 folded away until asked for; searched by player and filtered
+// by a Pokémon, item, ability or move a team has, `?f=`, every player found then shown) and its Pokémon
+// (`/meta/tournaments/:id/pokemon`: the whole event's, Day 2's or the top cut's, `?day=`, each one's share of those
+// teams and how they did in those rounds' matches, by usage or win rate, the top ones or all, each leading to the
+// standings filtered to the teams with it, and to its meta page on its regulation's data).
 // Each player's placing, name and country, record (marked when they dropped), and the six they brought, as icons;
-// unfolded, their whole sets, a card each, each entry leading to its meta page: its
-// sprite and types in a band, its item after the types, then its ability and nature (the stats it raises and lowers
+// unfolded, their whole sets, a card each, each entry leading to its meta page: its sprite and types in a band, its item after the types, then its ability and nature (the stats it raises and lowers
 // on hover) on a line, and its moves two by two (on phones, one under another), each with its type's badge. A
 // player whose team list isn't there has the Pokémon alone. Rows far down the field aren't laid out until near the
 // screen.
@@ -70,13 +77,27 @@ watch(
   { immediate: true },
 )
 
-/** The day shown, its tab, kept in the URL: the top cut unless another's picked. */
-const day = computed<Day>(
-  () => ((DAYS as readonly string[]).find((d) => d === route.query.day) as Day | undefined) ?? 'cut',
-)
-function setDay(d: Day) {
-  void router.replace({ query: { ...route.query, day: d === 'cut' ? undefined : d } })
-}
+/** The tab shown, a page each (`/meta/tournaments/:id`, `/meta/tournaments/:id/pokemon`): its standings, or its
+ * Pokémon. */
+const tab = computed(() => (route.params.tab === 'pokemon' ? 'pokemon' : 'standings'))
+const tabs = computed((): { value: 'standings' | 'pokemon'; label: string; to: NamedLocation }[] => [
+  {
+    value: 'standings',
+    label: t('tournaments.standings'),
+    to: { name: 'tournament', params: { id: id.value } },
+  },
+  {
+    value: 'pokemon',
+    label: t('tournaments.pokemonStats'),
+    to: { name: 'tournament', params: { id: id.value, tab: 'pokemon' } },
+  },
+])
+
+/** The day the Pokémon are of, kept in the URL: the whole event unless another's picked. */
+const day = computed<Day>({
+  get: () => ((DAYS as readonly string[]).find((d) => d === route.query.day) as Day | undefined) ?? 'all',
+  set: (d) => void router.replace({ query: { ...route.query, day: d === 'all' ? undefined : d } }),
+})
 
 // The day's Pokémon, sorted by usage or win rate; the top ones, or all of them.
 const stats = computed(() =>
@@ -101,8 +122,8 @@ const shownStats = computed(() => (allStats.value ? sortedStats.value : sortedSt
 const about = computed(() =>
   standings.value && rounds.value
     ? t('tournaments.statsAbout', {
-        players: count(playersOf(standings.value, day.value).length),
-        matches: count(decidedMatches(rounds.value, day.value)),
+        players: num(playersOf(standings.value, day.value).length),
+        matches: num(decidedMatches(rounds.value, day.value)),
       })
     : '',
 )
@@ -121,22 +142,55 @@ function toggle(placing: number) {
   open.value = next
 }
 
-/** The standings shown: the whole event's in their parts (the top cut, the rest of Day 2, and Day 1, those there are),
- * a day's its players alone. */
-const shownParts = computed(() => {
-  const all = standings.value ?? []
-  if (day.value !== 'all') return [{ key: day.value, rows: playersOf(all, day.value) }]
+// The standings' search (`FilterSearch`): its text finds players by name, and the Pokémon, items, abilities and moves
+// to filter them by, a team with it (`?f=`, `?fm=`; the Pokémon tab's rows link here with theirs).
+type Placed = Standing & { placing: number }
+const KINDS = ['pokemon', 'item', 'ability', 'move'] as const
+const filters = useUrlFilters(() => KINDS)
+const preview = shallowRef<TermFilters | null>(null)
+const query = ref('')
+watch(id, () => (query.value = ''))
+function matches(s: Placed, f: Term) {
+  if (f.kind === 'pokemon') return s.team.some(([p]) => p === f.id)
+  if (f.kind === 'item') return s.team.some(([, it]) => it === f.id)
+  if (f.kind === 'ability') return s.team.some(([, , ab]) => ab === f.id)
+  if (f.kind === 'move') return s.team.some(([, , , , moves]) => (moves as string[]).includes(f.id))
+  return false
+}
+const passes = (s: Placed, f: TermFilters) => passesGroups(f, (x) => matches(s, x))
+const named = (s: Placed, q: string) => fold(s.player).includes(q)
+const count = (f: TermFilters) => (standings.value ?? []).filter((s) => passes(s, f)).length
+const nameCount = computed(() => {
+  const q = fold(query.value.trim())
+  return q ? (standings.value ?? []).filter((s) => named(s, q) && passes(s, filters.value)).length : 0
+})
+/** Whether the standings are narrowed, by a filter or the text: then every player found shows, Day 1's too. */
+const narrowed = computed(() => !!query.value.trim() || filters.value.groups.length > 0 || !!preview.value)
+
+/** Day 1's players, shown once asked for (or while narrowed): the top cut and Day 2 are what most come for. */
+const day1Shown = ref(false)
+watch(id, () => (day1Shown.value = false))
+/** The standings shown, in their parts (the top cut, the rest of Day 2, and Day 1, those there are). */
+const parts = computed(() => {
+  const q = preview.value ? '' : fold(query.value.trim())
+  const f = preview.value ?? filters.value
+  const all = (standings.value ?? []).filter((s) => passes(s, f) && (!q || named(s, q)))
   return [
     { key: 'topCut' as const, rows: all.filter((s) => s.topCut) },
     { key: 'day2' as const, rows: all.filter((s) => s.day2 && !s.topCut) },
     { key: 'day1' as const, rows: all.filter((s) => !s.day2 && !s.topCut) },
   ].filter((p) => p.rows.length)
 })
-/** Each player's record: the whole event's, or the day's. */
-const dayRecords = computed(() => (day.value !== 'all' && rounds.value ? recordsOf(rounds.value, day.value) : null))
-const recordOf = (s: Standing & { placing: number }) => dayRecords.value?.get(s.placing) ?? s
+/** Day 1's players, while they're folded away: how many, for the way to them. */
+const day1Folded = computed(() =>
+  narrowed.value || day1Shown.value ? 0 : (parts.value.find((p) => p.key === 'day1')?.rows.length ?? 0),
+)
+const shownParts = computed(() => (day1Folded.value ? parts.value.filter((p) => p.key !== 'day1') : parts.value))
+/** A Pokémon's row on the Pokémon tab leads to the standings narrowed to the teams with it, if the dex has it. */
+const teamsWith = (pid: PokemonStat['id']) =>
+  available(pokemon(pid)) ? { name: 'tournament', params: { id: id.value }, query: { f: `pokemon:${pid}` } } : null
 
-const count = (n: number) => n.toLocaleString(locale.value)
+const num = (n: number) => n.toLocaleString(locale.value)
 const ordinal = (n: number) => `#${n}`
 </script>
 
@@ -149,29 +203,31 @@ const ordinal = (n: number) => `#${n}`
         <span>{{ datasetDates({ from: event.date, to: event.date }) }}</span>
         <span>{{ event.country }}</span>
         <span>{{ t('meta.regulation', { reg: event.regulation }) }}</span>
-        <span>{{ t('tournaments.players', { n: count(event.players) }) }}</span>
-        <span>{{ t('tournaments.day2', { n: count(event.day2) }) }}</span>
+        <span>{{ t('tournaments.players', { n: num(event.players) }) }}</span>
+        <span>{{ t('tournaments.day2', { n: num(event.day2) }) }}</span>
       </p>
       <p v-if="metaOf" class="links">
         <AppLink :to="{ name: 'rankings', query: { meta: metaOf } }">{{ t('tournaments.eventMeta') }} ›</AppLink>
       </p>
     </div>
 
-    <!-- The day: tabs standing on the standings' band, the whole event apart at the end. -->
-
-    <FolderTabs
-      class="day-tabs"
-      :model-value="day"
-      :label="t('tournaments.days')"
-      :options="DAYS.map((d) => ({ value: d, label: t(`tournaments.day.${d}`), apart: d === 'all' }))"
-      @update:model-value="setDay"
-    />
-    <section class="panel banded">
-      <div class="band">
-        <h2 class="band-title">{{ t('tournaments.standings') }}</h2>
-      </div>
+    <!-- Its standings and its Pokémon, a page each, as tabs on the panel's band. -->
+    <section v-if="tab === 'standings'" class="panel banded">
+      <BandTabs :label="t('tournaments.tabs')" :current="tab" :tabs />
+      <FilterSearch
+        v-model:text="query"
+        v-model:filters="filters"
+        v-model:preview="preview"
+        class="standings-search"
+        :subject="t('filter.subject.players')"
+        :name-count="nameCount"
+        :kinds="KINDS"
+        :count
+        meta
+      />
       <p v-if="!standings" class="muted">{{ t('tournaments.loading') }}</p>
-      <ol v-else class="standings">
+      <p v-else-if="!shownParts.length" class="muted">{{ t('tournaments.noPlayers') }}</p>
+      <ol v-else class="standings" :class="{ previewing: preview }">
         <template v-for="part in shownParts" :key="part.key">
           <!-- Each part under its name, when there's more than one. -->
           <li v-if="shownParts.length > 1" class="part-head">{{ t(`tournaments.part.${part.key}`) }}</li>
@@ -191,8 +247,7 @@ const ordinal = (n: number) => `#${n}`
                 v-tip="s.dropped ? t('tournaments.droppedTip', { round: s.dropped }) : undefined"
                 class="record num"
                 :class="{ dropped: s.dropped }"
-                >{{ recordOf(s).wins }}–{{ recordOf(s).losses
-                }}<span v-if="s.dropped" class="drop">{{ t('tournaments.drop') }}</span></span
+                >{{ s.wins }}–{{ s.losses }}<span v-if="s.dropped" class="drop">{{ t('tournaments.drop') }}</span></span
               >
               <span v-if="s.team.length" class="team" aria-hidden="true">
                 <PokemonIcon v-for="(slot, i) in s.team" :id="slot[0]" :key="i" />
@@ -248,25 +303,33 @@ const ordinal = (n: number) => `#${n}`
           </li>
         </template>
       </ol>
+      <!-- Day 1's players, folded away until asked for. -->
+      <button v-if="day1Folded" type="button" class="more-toggle" @click="day1Shown = true">
+        <ChevronDown :size="14" aria-hidden="true" />{{ t('tournaments.showDay1', { n: num(day1Folded) }) }}
+      </button>
       <!-- Where it's from, at the end of the page. -->
       <p class="muted note">
         {{ t('usage.from') }} <a :href="event.url" rel="noopener">{{ event.provider.name }}</a>
       </p>
     </section>
 
-    <!-- The day's Pokémon, under its standings. -->
-    <section class="panel banded stats-panel">
-      <div class="band">
-        <h2 class="band-title">
-          {{ t('tournaments.pokemonStats') }} <span class="band-day">· {{ t(`tournaments.day.${day}`) }}</span>
-        </h2>
-      </div>
+    <!-- Its Pokémon: the day's, each one's usage, win rate and record. -->
+    <section v-else class="panel banded">
+      <BandTabs :label="t('tournaments.tabs')" :current="tab" :tabs />
+      <SegmentedControl
+        v-model="day"
+        class="day-choice"
+        :label="t('tournaments.teamsOf')"
+        :options="DAYS.map((d) => ({ value: d, label: t(`tournaments.day.${d}`) }))"
+      />
       <p class="muted small about">{{ about }}</p>
       <p v-if="!standings || !rounds" class="muted">{{ t('tournaments.loading') }}</p>
       <div v-else class="dex-table stats" role="table" :aria-label="t('tournaments.pokemonStats')">
         <div class="row head" role="row">
           <div role="columnheader" class="r">#</div>
-          <div role="columnheader">{{ t('tournaments.col.pokemon') }}</div>
+          <div role="columnheader">
+            <span v-tip="t('tournaments.teamsWithTip')" class="tipped">{{ t('tournaments.col.pokemon') }}</span>
+          </div>
           <SortHeader
             :label="t('tournaments.col.usage')"
             :tip="t('tournaments.col.usageTip')"
@@ -284,11 +347,16 @@ const ordinal = (n: number) => `#${n}`
             @sort="sortStats('winRate')"
           />
           <div role="columnheader" class="r wide-only">{{ t('tournaments.col.record') }}</div>
+          <div role="columnheader" :aria-label="t('tournaments.toMeta')"></div>
         </div>
         <div v-for="(s, i) in shownStats" :key="s.id" class="row" role="row">
           <div role="cell" class="r num muted">{{ i + 1 }}</div>
           <div role="cell" class="mon-cell">
-            <AppLink :to="{ name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }" class="mon">
+            <!-- The teams with it, in the standings; its meta page when the dex hasn't it to filter them by. -->
+            <AppLink
+              :to="teamsWith(s.id) ?? { name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }"
+              class="mon"
+            >
               <PokemonIcon :id="s.id" /><span class="mon-name"
                 ><span>{{ monName(s.id).species }}</span
                 ><span v-if="monName(s.id).forme" class="forme">{{ monName(s.id).forme }}</span></span
@@ -302,6 +370,11 @@ const ordinal = (n: number) => `#${n}`
             }}<span class="phone-record muted">{{ s.wins }}–{{ s.losses }}</span>
           </div>
           <div role="cell" class="r num muted wide-only">{{ s.wins }}–{{ s.losses }}</div>
+          <div role="cell" class="r">
+            <AppLink :to="{ name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }" class="to-meta"
+              >{{ t('tournaments.toMeta') }} ›</AppLink
+            >
+          </div>
         </div>
       </div>
       <button
@@ -349,17 +422,17 @@ h1 {
 .note {
   margin: 12px 0 0;
 }
-/* The day's tabs standing on the standings' band: the one shown in the band's color. */
-.day-tabs {
-  --tab-bg: var(--accent);
+/* The standings' search, over them; the list faded while it shows what a filter highlighted would leave. */
+.standings-search {
+  margin-bottom: 12px;
 }
-.day-tabs :deep(.tab.on) {
-  color: var(--accent-text);
+.standings.previewing {
+  opacity: 0.75;
 }
-/* The day's Pokémon: its table as the rankings' (rank, Pokémon, usage, win rate, record), the top ones and a toggle
-   for the rest; the day named on its band. */
-.band-day {
-  font-weight: normal;
+/* The Pokémon: the day they're of, then their table as the rankings' (rank, Pokémon, usage, win rate, record, the way
+   to its meta page), the top ones and a toggle for the rest. */
+.day-choice {
+  margin-bottom: 8px;
 }
 .about {
   margin: 2px 0 8px;
@@ -372,7 +445,7 @@ h1 {
 /* Its columns in rem, not em: the header row's text is smaller than the rows', and em widths would shrink with it,
    leaving the header out of line with the numbers under it. */
 .dex-table.stats {
-  --cols: 2.5rem minmax(0, 1fr) 5rem 5.5rem 6rem;
+  --cols: 2.5rem minmax(0, 1fr) 5rem 5.5rem 6rem 4rem;
 }
 /* On phones, four columns: the record under the win rate. */
 .phone-record {
@@ -380,7 +453,7 @@ h1 {
 }
 @media (max-width: 720px) {
   .dex-table.stats {
-    --cols: 1.75rem minmax(0, 1fr) 4rem 4.5rem;
+    --cols: 1.75rem minmax(0, 1fr) 4rem 4.5rem 3.5rem;
   }
   .phone-record {
     display: block;
@@ -442,18 +515,19 @@ h1 {
   color: var(--text);
   background: var(--hover);
 }
+/* A header with a tooltip: underlined dotted, as `SortHeader`'s are. */
+.tipped {
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+}
+.to-meta {
+  font-size: 0.85em;
+  font-weight: bold;
+  white-space: nowrap;
+}
 .links {
   margin: 8px 0 0;
   font-weight: bold;
-}
-.band {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.band-title {
-  margin: 0;
 }
 .standings {
   margin: 0;
@@ -463,18 +537,20 @@ h1 {
 .standing + .standing {
   border-top: 1px solid var(--border);
 }
-/* A part's name, over its players: the top cut, Day 2, Day 1. */
+/* A part's name, over its players: the top cut, Day 2, Day 1, a strip in the panel's other shade between ink lines,
+   set apart from the part before. */
 .part-head {
-  padding: 12px 4px 4px;
-  font-size: 0.8em;
+  margin-top: 16px;
+  padding: 5px 8px;
+  font-size: 0.85em;
   font-weight: bold;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--muted);
-  border-bottom: 1px solid var(--border-strong);
+  background: var(--panel-alt);
+  border-block: 2px solid var(--ink);
 }
 .part-head:first-child {
-  padding-top: 4px;
+  margin-top: 0;
 }
 /* A player, a row to unfold (`player-row`: not `row`, which the Pokémon's table rows are, as every dex table's):
    placing, name and country, record, the six as icons, and the chevron. Far down the field, rows aren't laid out
