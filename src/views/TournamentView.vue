@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, h, nextTick, ref, render, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useMediaQuery } from '@vueuse/core'
 import { ChevronDown, ChevronUp } from '@lucide/vue'
 import { ability, available, item, move, pokemon } from '@/data/dex'
 import { datasetDates, percent, regulationSnapshot } from '@/data/meta'
@@ -135,20 +136,22 @@ const rankedStats = computed(() =>
     ? [...sortedStats.value.filter(enough), ...stats.value.filter((s) => !enough(s))]
     : sortedStats.value,
 )
-/** Where those with too few matches start, when sorted by win rate and some are, a line over them saying so. */
 /** The Pokémon with a win rate, the most used first; the chart's, the first of them. */
 const chartable = computed(() => stats.value.filter((s) => s.winRate !== null))
 /** How many of them the chart shows at fewest, and unless another's picked. */
+const phone = useMediaQuery('(max-width: 720px)')
 const CHART_MIN = 5
-const CHART_DEFAULT = 30
-/** How many of the most used the chart shows, kept in the URL (`?chart=`): 30 unless another's picked, all of them
- * when there are no more. */
+/** On a phone, fewer: more crowd its narrow chart. */
+const chartDefault = computed(() => (phone.value ? 15 : 30))
+/** How many of the most used the chart shows, kept in the URL (`?chart=`): 30 (15 on a phone) unless another's
+ * picked, all of them when there are no more. */
 const chartN = computed<number>({
   get: () => {
     const n = Number(route.query.chart)
-    return Math.min(Number.isInteger(n) && n >= CHART_MIN ? n : CHART_DEFAULT, chartable.value.length)
+    return Math.min(Number.isInteger(n) && n >= CHART_MIN ? n : chartDefault.value, chartable.value.length)
   },
-  set: (n) => void router.replace({ query: { ...route.query, chart: n === CHART_DEFAULT ? undefined : String(n) } }),
+  set: (n) =>
+    void router.replace({ query: { ...route.query, chart: n === chartDefault.value ? undefined : String(n) } }),
 })
 /** The slider's value while it's dragged, the chart following only once it's let go. */
 const draggedN = ref<number | null>(null)
@@ -157,6 +160,7 @@ function releaseN(e: Event) {
   draggedN.value = null
 }
 const charted = computed(() => chartable.value.slice(0, chartN.value))
+/** Where those with too few matches start, when sorted by win rate and some are, a line over them saying so. */
 const fewFrom = computed(() => (statKey.value === 'winRate' ? rankedStats.value.findIndex((s) => !enough(s)) : -1))
 /** How far from even a win rate's bar can reach, its half filled from there on: most sit close to even (a Pokémon on
  * many teams meets itself often, a win and a loss), so the bar's scale is that close range, not 0% to 100%. */
