@@ -254,9 +254,13 @@ const count = (n: number) => n.toLocaleString(locale.value)
   border: 2px solid var(--ink);
   box-shadow: var(--hard-sm);
 }
+/* A major event's stripe inside its outline, square at its ends (a border of another color would meet the outline at
+   a slant). */
 .event.major {
-  border-left-width: 8px;
-  border-left-color: var(--accent);
+  padding-left: 16px;
+  box-shadow:
+    inset 6px 0 0 var(--accent),
+    var(--hard-sm);
 }
 .event:hover {
   background: var(--hover);
