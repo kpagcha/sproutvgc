@@ -28,7 +28,7 @@ import TypeIcon from '@/components/TypeIcon'
 // its teams did in the day's matches, by usage or win rate, the top ones or all, each leading to its meta page on its
 // regulation's data).
 // Each player's placing, name and country, record (marked when they dropped), and the six they brought, as icons;
-// unfolded (one by one, or all at once), their whole sets, a card each, each entry leading to its meta page: its
+// unfolded, their whole sets, a card each, each entry leading to its meta page: its
 // sprite and types in a band, its item after the types, then its ability and nature (the stats it raises and lowers
 // on hover) on a line, and its moves two by two (on phones, one under another), each with its type's badge. A
 // player whose team list isn't there has the Pokémon alone. Rows far down the field aren't laid out until near the screen.
@@ -110,24 +110,18 @@ const about = computed(() =>
 const metaOf = computed(() => event.value && regulationSnapshot(event.value.regulation)?.id)
 const monName = (pid: Parameters<typeof pokemon>[0]) => splitForme(pid, refName(pokemon(pid)))
 
-// The rows unfolded, by placing; all of those shown at once with the toggle over them.
+// The rows unfolded, by placing.
 const open = ref(new Set<number>())
 watch(id, () => (open.value = new Set()))
-const shownPlacings = computed(() => shownParts.value.flatMap((p) => p.rows.map((s) => s.placing)))
-const allOpen = computed(() => !!shownPlacings.value.length && shownPlacings.value.every((p) => open.value.has(p)))
 function toggle(placing: number) {
   const next = new Set(open.value)
   if (next.has(placing)) next.delete(placing)
   else next.add(placing)
   open.value = next
 }
-function toggleAll() {
-  open.value = allOpen.value ? new Set() : new Set(shownPlacings.value)
-}
 
 // The rows that have come near the screen (within about a screen of it), by placing: an unfolded row builds its sets
-// only then, so unfolding a whole field (thousands of cards) builds the few on screen at once and the rest as they
-// come. Once built, a row's sets stay, so scrolling back doesn't move the page; until then it keeps their room.
+// only then. Once built, a row's sets stay, so scrolling back doesn't move the page; until then it keeps their room.
 const near = ref(new Set<number>())
 watch(id, () => (near.value = new Set()))
 const observer = new IntersectionObserver(
@@ -191,11 +185,6 @@ const ordinal = (n: number) => `#${n}`
     <section class="panel banded">
       <div class="band">
         <h2 class="band-title">{{ t('tournaments.standings') }}</h2>
-        <button v-if="standings?.length" type="button" class="btn on-band" :aria-pressed="allOpen" @click="toggleAll">
-          <component :is="allOpen ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />{{
-            t(allOpen ? 'tournaments.hideSets' : 'tournaments.showSets')
-          }}
-        </button>
       </div>
       <p v-if="!standings" class="muted">{{ t('tournaments.loading') }}</p>
       <ol v-else class="standings">
@@ -489,11 +478,6 @@ h1 {
 }
 .band-title {
   margin: 0;
-}
-:root:root .on-band {
-  gap: 4px;
-  min-height: 0;
-  padding: 2px 8px;
 }
 .standings {
   margin: 0;

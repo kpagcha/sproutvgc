@@ -827,8 +827,6 @@ export const messages = {
   'meta.tplayers.all': 'All players',
   'meta.tplayers.day2': 'Day 2',
   'meta.tplayers.topCut': 'Top cut',
-  'tournaments.showSets': 'Show every set',
-  'tournaments.hideSets': 'Hide the sets',
   'tournaments.loading': 'Loading the standings…',
   'tournaments.rowLabel': '#{placing} {player}: show the team',
   'tournaments.unknown': "There's no such tournament.",
