@@ -831,7 +831,7 @@ export const messages = {
   'tournaments.chartNoteFadedEdge':
     'icons fainter the fewer matches they have; those under {n} matches past the scale sit at its edge',
   'tournaments.chartShown': 'Most used',
-  'tournaments.chartOf': '{n} of {of}',
+  'tournaments.chartOf': 'of {of}',
   'tournaments.fewMatches': 'Fewer than {n} matches, too few to rank by win rate',
   'tournaments.showAllMons': 'All {n}',
   'tournaments.showTop': 'The top {n}',

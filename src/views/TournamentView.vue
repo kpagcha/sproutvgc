@@ -159,6 +159,13 @@ function releaseN(e: Event) {
   chartN.value = Number((e.target as HTMLInputElement).value)
   draggedN.value = null
 }
+/** A number typed in its box, within the slider's range; one that isn't a number puts the box back. */
+function typeN(e: Event) {
+  const box = e.target as HTMLInputElement
+  const n = Math.round(Number(box.value))
+  if (box.value !== '' && Number.isFinite(n)) chartN.value = Math.min(Math.max(n, CHART_MIN), chartable.value.length)
+  box.value = String(chartN.value)
+}
 const charted = computed(() => chartable.value.slice(0, chartN.value))
 /** Where those with too few matches start, when sorted by win rate and some are, a line over them saying so. */
 const fewFrom = computed(() => (statKey.value === 'winRate' ? rankedStats.value.findIndex((s) => !enough(s)) : -1))
@@ -429,9 +436,18 @@ const ordinal = (n: number) => `#${n}`
             @input="draggedN = Number(($event.target as HTMLInputElement).value)"
             @change="releaseN"
           />
-          <span class="chart-n-value">{{
-            t('tournaments.chartOf', { n: draggedN ?? chartN, of: chartable.length })
-          }}</span>
+          <span class="chart-n-value">
+            <input
+              type="number"
+              class="chart-n-box"
+              :min="CHART_MIN"
+              :max="chartable.length"
+              :value="draggedN ?? chartN"
+              :aria-label="t('tournaments.chartShown')"
+              @change="typeN"
+            />
+            {{ t('tournaments.chartOf', { of: chartable.length }) }}
+          </span>
         </label>
       </div>
       <p class="muted small about">
@@ -585,6 +601,10 @@ h1 {
 .chart-n-value {
   min-width: 6ch;
   font-variant-numeric: tabular-nums;
+}
+.chart-n .chart-n-box {
+  width: 4em;
+  font: inherit;
 }
 .about {
   margin: 2px 0 8px;
