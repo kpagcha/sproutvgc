@@ -248,6 +248,15 @@ const nameCount = computed(() => {
   const q = fold(query.value.trim())
   return q ? (standings.value ?? []).filter((s) => named(s, q) && passes(s, filters.value)).length : 0
 })
+/** The Pokémon filtered by (not those filtered out), each with its numbers as the Pokémon tab's list has them, the whole
+ * event's, and its place there by usage. */
+const filteredStats = computed(() => {
+  const ids = new Set(
+    filters.value.groups.flatMap((g) => g.terms.filter((f) => f.kind === 'pokemon' && !f.not).map((f) => f.id)),
+  )
+  const all = standings.value && rounds.value ? pokemonStats(standings.value, rounds.value, 'all') : []
+  return all.flatMap((s, i) => (ids.has(s.id) ? [{ s, rank: i + 1 }] : []))
+})
 /** Whether the standings are narrowed, by a filter or the text: then every player found shows, Day 1's too. */
 const narrowed = computed(() => !!query.value.trim() || filters.value.groups.length > 0 || !!preview.value)
 
@@ -322,6 +331,53 @@ const ordinal = (n: number) => `#${n}`
         :count
         meta
       />
+      <!-- The Pokémon filtered by, with their numbers in the whole event, as the Pokémon tab's list has them. -->
+      <div v-if="filteredStats.length" class="filtered-stats" role="table" :aria-label="t('tournaments.pokemonStats')">
+        <div class="fs-row fs-head" role="row">
+          <span role="columnheader">{{ t('tournaments.col.pokemon') }}</span>
+          <span role="columnheader" class="r">#</span>
+          <span role="columnheader" class="r"
+            ><span v-tip="t('tournaments.col.usageTip')" class="tipped">{{ t('tournaments.col.usage') }}</span></span
+          >
+          <span role="columnheader" class="r"
+            ><span v-tip="t('tournaments.col.winRateTip')" class="tipped">{{
+              t('tournaments.col.winRate')
+            }}</span></span
+          >
+          <span role="columnheader" class="r">{{ t('tournaments.col.record') }}</span>
+        </div>
+        <div v-for="{ s, rank } in filteredStats" :key="s.id" class="fs-row" role="row">
+          <span role="cell">
+            <AppLink :to="{ name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }" class="mon">
+              <PokemonIcon :id="s.id" /><span class="mon-name"
+                ><span>{{ monName(s.id).species }}</span
+                ><span v-if="monName(s.id).forme" class="forme">{{ monName(s.id).forme }}</span></span
+              >
+            </AppLink>
+          </span>
+          <span role="cell" class="r num muted">{{ rank }}</span>
+          <span role="cell" class="r num meter" :style="{ '--share': s.usage }">{{ percent(s.usage) }}</span>
+          <span
+            role="cell"
+            class="r num"
+            :class="
+              s.winRate === null
+                ? 'muted'
+                : ['wr', s.winRate >= 0.5 ? 'up' : 'down', { unsure: s.wins + s.losses < MIN_MATCHES.all }]
+            "
+            :style="
+              s.winRate === null
+                ? undefined
+                : { '--dev': Math.min(Math.abs(s.winRate - 0.5) / WR_RANGE, 1), '--strength': strength(s, 'all') }
+            "
+            >{{ s.winRate === null ? '—' : percent(s.winRate) }}</span
+          >
+          <span role="cell" class="r num record-wl"
+            ><span :class="{ more: s.wins > s.losses }">{{ s.wins }}</span
+            >–<span :class="{ more: s.losses > s.wins }">{{ s.losses }}</span></span
+          >
+        </div>
+      </div>
       <p v-if="!standings" class="muted">{{ t('tournaments.loading') }}</p>
       <p v-else-if="!shownParts.length" class="muted">{{ t('tournaments.noPlayers') }}</p>
       <ol v-else class="standings" :class="{ previewing: preview }">
@@ -574,6 +630,51 @@ h1 {
 /* The standings' search, over them; the list faded while it shows what a filter highlighted would leave. */
 .standings-search {
   margin-bottom: 12px;
+}
+/* The Pokémon filtered by, a row each under one head, their columns lined up as the Pokémon tab's table's are. */
+.filtered-stats {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 3rem 7rem 7rem 7rem;
+  column-gap: 12px;
+  margin: 0 0 12px;
+}
+.fs-row {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+.fs-head {
+  padding: 0 0 4px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.filtered-stats .r {
+  text-align: right;
+}
+/* Every cell its content centered over room for the bars along the bottom of the usage's and the win rate's, as the
+   table's, so the numbers and names line up. */
+.fs-row:not(.fs-head) > * {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 2px 0 8px;
+}
+.fs-row:not(.fs-head) > :first-child {
+  justify-content: flex-start;
+}
+.filtered-stats .meter,
+.filtered-stats .wr {
+  --inset: 0px;
+}
+@media (max-width: 720px) {
+  .filtered-stats {
+    grid-template-columns: minmax(0, 1fr) 2rem 4.5rem 4.5rem 5.5rem;
+    column-gap: 8px;
+  }
 }
 .standings.previewing {
   opacity: 0.75;
