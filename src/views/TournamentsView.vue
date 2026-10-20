@@ -9,8 +9,7 @@ import PokemonIcon from '@/components/PokemonIcon'
 // The official tournaments, as one timeline, the latest first: down a line by month and then by day (the events of one
 // day at one mark), each a card leading to its standings (`TournamentView`): its name, type, country and players, and
 // who won with what. The bigger events (Worlds, the Internationals) have a bigger mark. Each regulation's run of events
-// starts at a divider across the line, with the way to its meta, every one of its events added up. Where it's all from
-// at the end.
+// starts at a divider across the line, with the way to its meta, every one of its events added up.
 const MAJOR: readonly EventType[] = ['worlds', 'international']
 const major = (e: TournamentEvent) => MAJOR.includes(e.type)
 
@@ -43,7 +42,6 @@ const runs = computed(() => {
     meta: regulationSnapshot(regulation)?.id,
   }))
 })
-const provider = computed(() => EVENTS[0]?.provider)
 
 const format = (date: string, options: Intl.DateTimeFormatOptions) =>
   new Intl.DateTimeFormat(locale.value, { ...options, timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`))
@@ -109,18 +107,11 @@ const count = (n: number) => n.toLocaleString(locale.value)
           </ol>
         </li>
       </ol>
-      <!-- Where it's from, at the end of the page. -->
-      <p v-if="provider" class="muted note">
-        {{ t('usage.from') }} <a :href="provider.url" rel="noopener">{{ provider.name }}</a>
-      </p>
     </section>
   </div>
 </template>
 
 <style scoped>
-.note {
-  margin: 12px 0 0;
-}
 .small {
   font-size: 0.875em;
 }
