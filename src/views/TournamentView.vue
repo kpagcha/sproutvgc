@@ -115,7 +115,20 @@ const {
   locale,
 })
 const TOP = 20
-/** The fewest matches a win rate is worth going by: from fewer (the top cut's, often), it's faint. */
+/** The fewest matches a win rate is worth sorting by, per day: Pokémon with fewer go after the rest, by usage, whichever
+ * way the win rates run, so a 2–0 doesn't top the list. Less for the smaller days: the top cut's most played Pokémon
+ * often have under 20. */
+const MIN_MATCHES: Record<Day, number> = { all: 20, day2: 10, cut: 5 }
+const minMatches = computed(() => MIN_MATCHES[day.value])
+const enough = (s: PokemonStat) => s.wins + s.losses >= minMatches.value
+/** The day's Pokémon as sorted, those with too few matches last when sorted by win rate. */
+const rankedStats = computed(() =>
+  statKey.value === 'winRate'
+    ? [...sortedStats.value.filter(enough), ...stats.value.filter((s) => !enough(s))]
+    : sortedStats.value,
+)
+/** Where those with too few matches start, when sorted by win rate and some are, a line over them saying so. */
+const fewFrom = computed(() => (statKey.value === 'winRate' ? rankedStats.value.findIndex((s) => !enough(s)) : -1))
 /** How far from even a win rate's bar can reach, its half filled from there on: most sit close to even (a Pokémon on
  * many teams meets itself often, a win and a loss), so the bar's scale is that close range, not 0% to 100%. */
 const WR_RANGE = 0.1
@@ -133,7 +146,7 @@ const unsure = (s: PokemonStat) => evidence(s) < 1
 /** The most used Pokémon's usage, the one its bars are against. */
 const topUsage = computed(() => stats.value[0]?.usage ?? 0)
 const allStats = ref(false)
-const shownStats = computed(() => (allStats.value ? sortedStats.value : sortedStats.value.slice(0, TOP)))
+const shownStats = computed(() => (allStats.value ? rankedStats.value : rankedStats.value.slice(0, TOP)))
 /** What the day's numbers are of: its players, and its matches with a winner. */
 const about = computed(() =>
   standings.value && rounds.value
@@ -392,41 +405,46 @@ const ordinal = (n: number) => `#${n}`
           <div role="columnheader" class="r">{{ t('tournaments.col.record') }}</div>
           <div role="columnheader" :aria-label="t('tournaments.toMeta')"></div>
         </div>
-        <div v-for="(s, i) in shownStats" :key="s.id" class="row" role="row">
-          <div role="cell" class="r num muted">{{ i + 1 }}</div>
-          <div role="cell" class="mon-cell">
-            <!-- The teams with it, in the standings; its meta page when the dex hasn't it to filter them by. -->
-            <AppLink
-              :to="teamsWith(s.id) ?? { name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }"
-              class="mon"
-            >
-              <PokemonIcon :id="s.id" /><span class="mon-name"
-                ><span>{{ monName(s.id).species }}</span
-                ><span v-if="monName(s.id).forme" class="forme">{{ monName(s.id).forme }}</span></span
+        <template v-for="(s, i) in shownStats" :key="s.id">
+          <div v-if="i === fewFrom" class="few" role="row">
+            <div role="cell">{{ t('tournaments.fewMatches', { n: minMatches }) }}</div>
+          </div>
+          <div class="row" role="row">
+            <div role="cell" class="r num muted">{{ i + 1 }}</div>
+            <div role="cell" class="mon-cell">
+              <!-- The teams with it, in the standings; its meta page when the dex hasn't it to filter them by. -->
+              <AppLink
+                :to="teamsWith(s.id) ?? { name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }"
+                class="mon"
               >
-            </AppLink>
-          </div>
-          <div role="cell" class="r num meter" :style="{ '--share': s.usage / (topUsage || 1) }">
-            {{ percent(s.usage) }}
-          </div>
-          <div
-            role="cell"
-            class="r num"
-            :class="s.winRate === null ? 'muted' : ['wr', s.winRate >= 0.5 ? 'up' : 'down', { unsure: unsure(s) }]"
-            :style="wrStyle(s)"
-          >
-            {{ s.winRate === null ? '—' : percent(s.winRate) }}
-          </div>
-          <div role="cell" class="r num record-wl">
-            <span :class="{ more: s.wins > s.losses }">{{ s.wins }}</span
-            >–<span :class="{ more: s.losses > s.wins }">{{ s.losses }}</span>
-          </div>
-          <div role="cell" class="r">
-            <AppLink :to="{ name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }" class="to-meta"
-              >{{ t('tournaments.toMeta') }} ›</AppLink
+                <PokemonIcon :id="s.id" /><span class="mon-name"
+                  ><span>{{ monName(s.id).species }}</span
+                  ><span v-if="monName(s.id).forme" class="forme">{{ monName(s.id).forme }}</span></span
+                >
+              </AppLink>
+            </div>
+            <div role="cell" class="r num meter" :style="{ '--share': s.usage / (topUsage || 1) }">
+              {{ percent(s.usage) }}
+            </div>
+            <div
+              role="cell"
+              class="r num"
+              :class="s.winRate === null ? 'muted' : ['wr', s.winRate >= 0.5 ? 'up' : 'down', { unsure: unsure(s) }]"
+              :style="wrStyle(s)"
             >
+              {{ s.winRate === null ? '—' : percent(s.winRate) }}
+            </div>
+            <div role="cell" class="r num record-wl">
+              <span :class="{ more: s.wins > s.losses }">{{ s.wins }}</span
+              >–<span :class="{ more: s.losses > s.wins }">{{ s.losses }}</span>
+            </div>
+            <div role="cell" class="r">
+              <AppLink :to="{ name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }" class="to-meta"
+                >{{ t('tournaments.toMeta') }} ›</AppLink
+              >
+            </div>
           </div>
-        </div>
+        </template>
       </div>
       <button
         v-if="stats.length > TOP"
@@ -526,6 +544,13 @@ h1 {
   .dex-table.stats .row > :nth-child(6) {
     grid-area: meta;
   }
+}
+/* The line over those with too few matches to sort by their win rate. */
+.few {
+  padding: 10px 8px 4px;
+  border-top: 1px dashed var(--border);
+  color: var(--muted);
+  font-size: 0.85em;
 }
 .mon-cell {
   overflow: hidden;

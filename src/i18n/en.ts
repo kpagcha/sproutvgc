@@ -822,6 +822,7 @@ export const messages = {
   'tournaments.col.winRateTip':
     'How often teams with it won their matches (byes not counted). The bar shows how far above or below 50% it is, faded when it could just be luck',
   'tournaments.col.record': 'Record',
+  'tournaments.fewMatches': 'Fewer than {n} matches, too few to rank by win rate',
   'tournaments.showAllMons': 'All {n}',
   'tournaments.showTop': 'The top {n}',
   'tournaments.part.topCut': 'Top cut',
