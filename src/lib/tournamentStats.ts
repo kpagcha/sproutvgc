@@ -4,7 +4,7 @@
 // teams did in those rounds' matches (byes and matches neither won left out: they say nothing of the teams).
 
 import type { PokemonId } from '@/data/dex'
-import type { Round, Standing } from '@/data/tournaments'
+import type { EventUsage, Round, Standing } from '@/data/tournaments'
 
 export type Day = 'all' | 'day2' | 'cut'
 /** The days, as their choice goes: the whole event, the default, then Day 2 and the top cut. */
@@ -31,6 +31,8 @@ export interface PokemonStat {
   wins: number
   losses: number
   winRate: number | null
+  /** The best placing of the day's teams with it. */
+  best: number
 }
 
 /** Each Pokémon on the day's players' teams, the most used first. */
@@ -40,10 +42,16 @@ export function pokemonStats(standings: readonly Placed[], rounds: Record<number
   const stats = new Map<PokemonId, PokemonStat>()
   const stat = (id: PokemonId) => {
     let s = stats.get(id)
-    if (!s) stats.set(id, (s = { id, teams: 0, usage: 0, wins: 0, losses: 0, winRate: null }))
+    if (!s) stats.set(id, (s = { id, teams: 0, usage: 0, wins: 0, losses: 0, winRate: null, best: Infinity }))
     return s
   }
-  for (const mons of team.values()) for (const id of mons) stat(id).teams++
+  for (const [placing, mons] of team) {
+    for (const id of mons) {
+      const s = stat(id)
+      s.teams++
+      s.best = Math.min(s.best, placing)
+    }
+  }
   for (const r of roundsOf(rounds, day)) {
     for (const [a, b, won] of r.matches) {
       if (b === null || won === 0) continue
@@ -59,6 +67,105 @@ export function pokemonStats(standings: readonly Placed[], rounds: Record<number
       winRate: s.wins + s.losses ? s.wins / (s.wins + s.losses) : null,
     }))
     .sort((x, y) => y.teams - x.teams || x.id.localeCompare(y.id))
+}
+
+/** Where a day's numbers are in an event's `EventUsage`. */
+const SLOT: Record<Day, 0 | 1 | 2> = { all: 0, day2: 1, cut: 2 }
+
+/** Each Pokémon's share of the day's teams over some events, pooled (each team counting once, so a bigger event counts
+ * more), and how many teams that is. */
+export function pooledUsage(
+  usage: Record<string, EventUsage>,
+  events: readonly string[],
+  day: Day,
+): { teams: number; share: Map<PokemonId, number> } {
+  const i = SLOT[day]
+  let teams = 0
+  const counts = new Map<PokemonId, number>()
+  for (const e of events) {
+    const u = usage[e]
+    if (!u) continue
+    teams += u.teams[i]
+    for (const [id, n] of Object.entries(u.pokemon) as [PokemonId, number[]][])
+      if (n[i]) counts.set(id, (counts.get(id) ?? 0) + n[i]!)
+  }
+  return { teams, share: new Map([...counts].map(([id, n]) => [id, n / (teams || 1)])) }
+}
+
+/** The Pokémon that made the top cut at some events: on a team there. */
+export const cutAt = (usage: Record<string, EventUsage>, events: readonly string[]): Set<PokemonId> =>
+  new Set(
+    events.flatMap((e) =>
+      (Object.entries(usage[e]?.pokemon ?? {}) as [PokemonId, number[]][]).filter(([, n]) => n[2]).map(([id]) => id),
+    ),
+  )
+
+/** Off the meta: outside the ladder's top `OFF_META_RANK` (or not on it), and on under `NICHE_USAGE` of the event's
+ * teams, so one the event took up (a ladder's #45 on 14% of its teams) isn't. */
+export const OFF_META_RANK = 40
+export const NICHE_USAGE = 0.05
+/** The fewest teams with it for its Day 2 rate to be gone by, and how sure it must be to be over the field's: its lower
+ * bound at 95% (Wilson's, one-sided), so 1 of 1 or 2 of 3 doesn't count. */
+const MIN_TEAMS = 5
+const Z = 1.645
+const lowerBound = (k: number, n: number) => {
+  const p = k / n
+  const z2 = Z * Z
+  return (p + z2 / (2 * n) - Z * Math.sqrt((p * (1 - p)) / n + z2 / (4 * n * n))) / (1 + z2 / n)
+}
+
+export interface Standout {
+  id: PokemonId
+  /** Its share of the whole field's teams, and their number. */
+  usage: number
+  teams: number
+  /** Its rank on the ladder, none when it isn't there. */
+  ladder: number | null
+  /** Its best placing, and whether that made the top cut. */
+  best: number
+  cut: boolean
+  /** Its teams that made Day 2, and that share's lower bound when it's surely over the field's. */
+  day2: number
+  sure?: number
+  /** Its first top cut of the regulation: none at the events before it (when there were some). */
+  firstCut: boolean
+}
+
+/** The Pokémon off the meta that shone at an event: those that made its top cut, by their best placing, then those whose
+ * teams surely made Day 2 more often than the field's did, the surest first. */
+export function standouts(
+  standings: readonly Placed[],
+  ladder: Partial<Record<PokemonId, number>>,
+  cutBefore: ReadonlySet<PokemonId> | null,
+): Standout[] {
+  const field = standings.filter((s) => s.team.length)
+  const fieldRate = field.filter((s) => s.day2).length / (field.length || 1)
+  const byMon = new Map<PokemonId, Placed[]>()
+  for (const s of field) for (const id of new Set(s.team.map(([p]) => p))) byMon.set(id, [...(byMon.get(id) ?? []), s])
+  const found: Standout[] = []
+  for (const [id, teams] of byMon) {
+    const usage = teams.length / field.length
+    const rank = ladder[id] ?? null
+    if ((rank !== null && rank <= OFF_META_RANK) || usage >= NICHE_USAGE) continue
+    const best = teams[0]!
+    const day2 = teams.filter((s) => s.day2).length
+    const low = teams.length >= MIN_TEAMS ? lowerBound(day2, teams.length) : 0
+    if (!best.topCut && low <= fieldRate) continue
+    found.push({
+      id,
+      usage,
+      teams: teams.length,
+      ladder: rank,
+      best: best.placing,
+      cut: !!best.topCut,
+      day2,
+      ...(low > fieldRate && { sure: low }),
+      firstCut: !!best.topCut && !!cutBefore && !cutBefore.has(id),
+    })
+  }
+  return found.sort((a, b) =>
+    a.cut !== b.cut ? (a.cut ? -1 : 1) : a.cut ? a.best - b.best : (b.sure ?? 0) - (a.sure ?? 0),
+  )
 }
 
 /** The day's matches with a winner, those its win rates come from. */

@@ -30,7 +30,7 @@ import { ConditionScan } from './conditions.ts'
 import { itemCategorizer } from './itemCategories.ts'
 import { SPEED_ABILITIES, SPEED_ITEMS } from '../src/lib/speed.ts'
 import { histories, Smogon, withPrevious, type MetaEntry, type Snapshot } from './smogon.ts'
-import { FORMAT as TOURNAMENT_FORMAT, LimitlessVgc, type TournamentEvent } from './limitlessVgc.ts'
+import { FORMAT as TOURNAMENT_FORMAT, LimitlessVgc, type Standing, type TournamentEvent } from './limitlessVgc.ts'
 import { ITEM_ICONS, POKEMON_ICONS, SpriteSource, iconIndexes, sheetLayout, trimSheet } from './sprites.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -816,6 +816,25 @@ async function main() {
   }
   rmSync(tournamentsOut, { recursive: true, force: true })
   const events: Record<string, TournamentEvent> = {}
+  // Each event's Pokémon in a few numbers (`tournaments/usage.json`), for an event's Pokémon to be set against the
+  // events before it without loading their whole standings: the teams of the whole field, Day 2 and the top cut (those
+  // with a Pokémon known), and for each Pokémon how many of each had it and its best placing.
+  const usage: Record<string, { teams: number[]; pokemon: Record<string, number[]> }> = {}
+  const addUsage = (id: string, standings: Record<string, Pick<Standing, 'day2' | 'topCut' | 'team'>>) => {
+    const teams = [0, 0, 0]
+    const pokemon: Record<string, number[]> = {}
+    for (const [placing, s] of Object.entries(standings)) {
+      if (!s.team.length) continue
+      const counts = [true, !!s.day2, !!s.topCut]
+      counts.forEach((c, i) => c && teams[i]!++)
+      for (const p of new Set(s.team.map(([mon]) => mon))) {
+        const n = (pokemon[p] ??= [0, 0, 0, Number(placing)])
+        counts.forEach((c, i) => c && n[i]!++)
+        n[3] = Math.min(n[3]!, Number(placing))
+      }
+    }
+    usage[id] = { teams, pokemon }
+  }
   const regulations = new Set([reg, ...Object.keys(sources.smogon), ...Object.keys(sources.limitlessvgc)])
   for (const r of regulations) {
     if (!sources.limitlessvgc[r] || updateTournaments) {
@@ -831,6 +850,7 @@ async function main() {
         events[kept.event.id] = kept.event
         mkdirSync(tournamentsOut, { recursive: true })
         for (const [file, text] of Object.entries(kept.files)) writeFileSync(join(tournamentsOut, file), text)
+        addUsage(kept.event.id, JSON.parse(kept.files[`${kept.event.id}.json`]!) as Record<string, Standing>)
         continue
       }
       const found = await limitless.event(n, r, knownSets, r === reg)
@@ -844,9 +864,11 @@ async function main() {
         Object.fromEntries(standings.map(({ placing, ...s }) => [placing, s])),
       )
       await writeJson(`tournaments/${event.id}.rounds.json`, rounds)
+      addUsage(event.id, Object.fromEntries(standings.map((s) => [s.placing, s])))
     }
   }
   await writeJson('tournaments/index.json', events)
+  await writeJson('tournaments/usage.json', usage)
   if (limitless.requests) console.log(`Made ${limitless.requests} requests to Limitless VGC`)
 
   // Sprites: the icon sheets cut down to the regulation's entries, in ID order, and each legal Pokémon's own sprite.

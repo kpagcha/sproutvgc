@@ -84,7 +84,12 @@ const INDEX = import.meta.glob<Record<string, TournamentEvent>>('./generated/tou
   import: 'default',
 })
 const FILES = import.meta.glob<Record<string, Standing>>(
-  ['./generated/tournaments/*.json', '!./generated/tournaments/index.json', '!./generated/tournaments/*.rounds.json'],
+  [
+    './generated/tournaments/*.json',
+    '!./generated/tournaments/index.json',
+    '!./generated/tournaments/usage.json',
+    '!./generated/tournaments/*.rounds.json',
+  ],
   { import: 'default' },
 )
 
@@ -109,6 +114,32 @@ export function loadRounds(id: string): Promise<Record<number, Round>> {
     rounds.set(id, (p = file()))
   }
   return p
+}
+
+/** An event's Pokémon in a few numbers, as `usage.json` has them: the teams (with a Pokémon known) of the whole field,
+ * Day 2 and the top cut, and for each Pokémon how many of each had it, then its best placing. */
+export interface EventUsage {
+  teams: [all: number, day2: number, topCut: number]
+  pokemon: Partial<Record<PokemonId, [all: number, day2: number, topCut: number, best: number]>>
+}
+
+/** Every event's Pokémon in a few numbers, by event, loaded once: for an event's to be set against those before it
+ * without loading their standings. */
+const USAGE = import.meta.glob<Record<string, EventUsage>>('./generated/tournaments/usage.json', {
+  import: 'default',
+})
+let usage: Promise<Record<string, EventUsage>> | undefined
+export const loadEventUsage = () => (usage ??= Object.values(USAGE)[0]?.() ?? Promise.resolve({}))
+
+/** The events an event's Pokémon are set against: the earlier ones of its regulation (not those on its own dates), or,
+ * for its regulation's first, the regulation's before it (the latest whose events were all earlier). Its regulation
+ * named when it's another. */
+export function baselineOf(event: TournamentEvent): { events: TournamentEvent[]; regulation?: string } {
+  const before = EVENTS.filter((e) => e.category === event.category && e.date < event.date)
+  const own = before.filter((e) => e.regulation === event.regulation)
+  if (own.length || !before.length) return { events: own }
+  const regulation = before[0]!.regulation
+  return { events: before.filter((e) => e.regulation === regulation), regulation }
 }
 
 /** The standings loaded so far, by event, for what's named after a player as soon as theirs are in (a player's page's
