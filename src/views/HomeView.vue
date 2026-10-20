@@ -3,8 +3,6 @@ import { computed, onMounted, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { t } from '@/i18n'
 import { GAME_NAME, REGULATION } from '@/data/format'
-import type { PokemonId } from '@/data/dex'
-import { POKEMON, spriteUrl } from '@/data/pokemon'
 import { AREAS, type AreaId } from '@/lib/areas'
 import { preloadSearch, searchFocus, useSearch } from '@/composables/useSearch'
 import { useSlashFocus } from '@/composables/useSlashFocus'
@@ -17,12 +15,11 @@ import SearchBox from '@/components/SearchBox.vue'
 import logoUrl from '@/assets/logo.png'
 
 // The front door to the whole site: the search (of the site's pages, the meta pages and the dex), and under it the
-// areas, a card each, two to a row (where to go: its name and its sections, links alone, a Pokémon blended into its
-// corner; Meta and Tools standing out), then the meta at a glance (what the site is most about, `MetaHighlights`); then
+// areas, a card each, two to a row (where to go: its name and its sections, links alone; Meta and Tools standing out), then the meta at a glance (what the site is most about, `MetaHighlights`); then
 // the reader's favorites and recently viewed. While searching, the results take the place of all but the search.
 
 /** The areas that stand out, the site's own (what players use, and what to work with): on an accent shadow over a
- * dotted ground, their sections raised buttons, their Pokémon large. */
+ * dotted ground, their sections raised buttons. */
 const FEATURED = new Set<AreaId>(['meta', 'tools'])
 
 // The search is kept in the URL (`?q=`), so coming back from a result brings the results back.
@@ -57,17 +54,6 @@ const { data: meta } = useMeta()
 const { results, only } = useSearch(() => query.value, undefined, { pages: true, meta: () => meta.value })
 function openOnly() {
   if (only.value) void router.push(only.value)
-}
-
-// Each area's Pokémon, at its card's corner: Meta's the meta's most used now (Kingambit while there's none), Tools' Klefki
-// (keys), the dex's Rotom (the Rotom Dex), the quizzes' Alakazam (said to be the cleverest).
-const topOfMeta = computed(
-  () => Object.entries(meta.value ?? {}).find(([, m]) => m?.rank === 1)?.[0] as PokemonId | undefined,
-)
-const MASCOTS: Record<AreaId, PokemonId> = { meta: 'kingambit', tools: 'klefki', dex: 'rotom', quizzes: 'alakazam' }
-function mascot(area: AreaId): string | undefined {
-  const id = area === 'meta' ? (topOfMeta.value ?? MASCOTS.meta) : MASCOTS[area]
-  return POKEMON[id] && !POKEMON[id].noSprite ? spriteUrl(id) : undefined
 }
 
 // The regulation's hyphens don't break ("M-C" stays on one line): U+2011, the non-breaking hyphen.
@@ -114,15 +100,6 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
               >
             </li>
           </ul>
-          <img
-            v-if="mascot(a.id)"
-            class="pixel mascot"
-            :src="mascot(a.id)"
-            alt=""
-            width="96"
-            height="96"
-            draggable="false"
-          />
         </section>
       </nav>
       <MetaHighlights class="highlights" />
@@ -166,8 +143,7 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
   margin: 16px 0 0;
 }
 
-/* The areas: a card each, two to a row, one on phones; each its name (a link) and its sections, its Pokémon at its
-   bottom-right corner, the card's text kept clear of it. */
+/* The areas: a card each, two to a row, one on phones; each its name (a link) and its sections. */
 .areas {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -175,20 +151,12 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
   margin-bottom: 20px;
 }
 .area {
-  /* Its Pokémon's size. */
-  --mascot: 96px;
-  position: relative;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  min-height: 112px;
   margin: 0;
-  padding-right: calc(var(--mascot) + 8px);
-  overflow: hidden;
 }
 .area-head {
-  position: relative;
-  z-index: 1;
   align-self: start;
   font-weight: bold;
   font-size: calc(18px * var(--display-scale, 1) * var(--text-scale));
@@ -198,8 +166,6 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
   color: var(--accent);
 }
 .area-sections {
-  position: relative;
-  z-index: 1;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -225,28 +191,9 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
   color: var(--muted);
   border-style: dashed;
 }
-/* Its Pokémon, at the corner, part of the card rather than on it: a little see-through and less saturated, the card's
-   color coming through, and fading out towards the card's text. Drawn at a whole multiple of its size, which keeps its
-   pixels. */
-.mascot {
-  position: absolute;
-  right: -10px;
-  bottom: -12px;
-  width: var(--mascot);
-  height: var(--mascot);
-  image-rendering: pixelated;
-  pointer-events: none;
-  opacity: 0.7;
-  filter: saturate(0.75);
-  mask-image: linear-gradient(to right, transparent, #000 55%);
-}
-
 /* Meta and Tools: a hard shadow in the accent, a faint dotted ground, a larger name, their sections raised buttons
-   (lifting on hover, pressed flat when clicked), and their Pokémon twice its size, cut off by the card's edge. */
+   (lifting on hover, pressed flat when clicked). */
 :root:root .area.featured {
-  --mascot: 172px;
-  min-height: 150px;
-  padding-right: 150px;
   background:
     radial-gradient(color-mix(in srgb, var(--accent) 22%, transparent) 1px, transparent 1.5px) 0 0 / 10px 10px,
     var(--panel);
@@ -283,10 +230,6 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
   border: 2px dashed var(--border-strong);
   box-shadow: none;
 }
-.featured .mascot {
-  right: -30px;
-  bottom: -28px;
-}
 .highlights {
   margin: 0 0 16px;
 }
@@ -295,19 +238,7 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
   .areas {
     grid-template-columns: minmax(0, 1fr);
   }
-  /* On phones, Meta's and Tools' Pokémon at its own size too, every one tucked partly off the card's right edge (the
-     blank around it there), and Meta's and Tools' buttons a little smaller, so they fit two to a line beside it. */
-  .area,
-  :root:root .area.featured {
-    --mascot: 96px;
-    min-height: 0;
-    padding-right: 76px;
-  }
-  .mascot,
-  .featured .mascot {
-    right: -14px;
-    bottom: -6px;
-  }
+  /* On phones, Meta's and Tools' buttons a little smaller. */
   .featured .area-sections {
     gap: 8px;
   }
