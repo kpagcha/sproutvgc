@@ -312,8 +312,6 @@ const fadeVariants = {
     </main>
     <footer class="wrap footer muted">
       <RouterLink to="/credits">{{ t('title.credits') }}</RouterLink>
-      <span aria-hidden="true">·</span>
-      <span>{{ t('footer.copyright') }}</span>
     </footer>
     <ConfirmDialog />
   </MotionConfig>
@@ -505,12 +503,5 @@ main {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-/* The credits' link and the dot kept whole; the copyright wrapping where a phone hasn't the width for it. */
-.footer > :not(:last-child) {
-  white-space: nowrap;
-}
-.footer > :last-child {
-  min-width: 0;
 }
 </style>

@@ -554,7 +554,7 @@ export const messages = {
     "Pairs you miss, and close pairs you get right, are saved for SM-2 spaced repetition: a miss is asked again after {a} and then {b} more questions; right answers come back after 1 day, 6 days, and then longer gaps. Saved pairs come first when due, and don't move your level.",
   'speedQuiz.about.reset': 'Reset level takes you back to level 1 and base; your saved pairs stay.',
 
-  'footer.copyright': 'Pokémon © Nintendo, Game Freak and Creatures',
+  'credits.copyright': 'Pokémon © Nintendo, Game Freak and Creatures',
 
   'title.credits': 'Credits',
   'desc.credits': 'Credits for sproutvgc, a competitive dex for {game}.',
@@ -585,10 +585,9 @@ export const messages = {
   'entry.row.specific': '{type} moves',
   'credits.intro':
     'sproutvgc is an unofficial fan project, not affiliated with Nintendo, Game Freak or The Pokémon Company.',
-  'credits.iconsTitle': 'Type and category icons',
-  'credits.iconsBody': 'The type and move category icons, and the logo, come from the {source}.',
+  'credits.iconsTitle': 'Type and category icons, logo',
   'credits.uiIconsTitle': 'Interface icons',
-  'credits.uiIconsBody': 'The interface icons are {source} (ISC).',
+  'credits.license': '{license} license',
   'credits.trademarks': 'Pokémon and Pokémon character and type names are trademarks of Nintendo.',
 
   'nav.pokemon': 'Pokémon',
@@ -782,12 +781,11 @@ export const messages = {
   'favorites.clearConfirmButton': 'Remove all',
   'favorites.clearKind': 'Clear the favorites in {category}',
   'favorites.clearKindConfirm': 'Remove the {n} favorites in {category}? This can’t be undone.',
-  'credits.spritesTitle': 'Sprites',
-  'credits.spritesBody': 'The Pokémon and item sprites and icons come from {source}.',
-  'credits.dataTitle': 'Data',
-  'credits.dataBody': 'The game data comes from {showdown} (MIT), and the names in other languages from {pokeapi}.',
-  'credits.metaTitle': 'Usage data',
-  'credits.metaBody': 'The usage stats come from {sources}.',
+  'credits.spritesTitle': 'Pokémon and item sprites',
+  'credits.dataTitle': 'Game data',
+  'credits.namesNote': 'Names in other languages from {pokeapi}',
+  'credits.metaTitle': 'Usage stats',
+  'credits.tournamentsTitle': 'Tournament results',
 
   'meta.kind.showdown': 'Showdown ladder',
   'meta.kind.ingame': 'In-game ranked',
