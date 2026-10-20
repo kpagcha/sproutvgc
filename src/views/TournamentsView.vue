@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import { Eye } from '@lucide/vue'
 import { regulationSnapshot } from '@/data/meta'
 import { EVENTS, type EventType, type TournamentEvent } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
@@ -9,7 +10,8 @@ import PokemonIcon from '@/components/PokemonIcon'
 // The official tournaments, as one timeline, the latest first: down a line by month and then by day (the events of one
 // day at one mark), each a card leading to its standings (`TournamentView`): its name, type, country and players, and
 // who won with what. The bigger events (Worlds, the Internationals) have a bigger mark. Each regulation's run of events
-// starts at a divider across the line, with the way to its meta, every one of its events added up.
+// starts at a divider across the line, with the way to its meta, every one of its events added up. A recent event's
+// winner (`SPOILER_DAYS`) is blurred, so the list doesn't spoil it, until revealed, one event at a time, remembered.
 const MAJOR: readonly EventType[] = ['worlds', 'international']
 const major = (e: TournamentEvent) => MAJOR.includes(e.type)
 
@@ -42,6 +44,33 @@ const runs = computed(() => {
     meta: regulationSnapshot(regulation)?.id,
   }))
 })
+
+/** How long after its start an event's winner stays hidden: the last week's events. */
+const SPOILER_DAYS = 7
+const DAY = 24 * 60 * 60 * 1000
+const recent = (e: TournamentEvent) => Date.now() - Date.parse(`${e.date}T00:00:00Z`) < SPOILER_DAYS * DAY
+
+/** The recent events whose winner the reader revealed, by ID, remembered (those no longer recent dropped). */
+const KEY = 'sproutvgc.tournaments.revealed'
+function readRevealed(): string[] {
+  try {
+    const ids: unknown = JSON.parse(localStorage.getItem(KEY) ?? '[]')
+    return Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string') : []
+  } catch {
+    return []
+  }
+}
+const revealed = ref(new Set(readRevealed().filter((id) => EVENTS.some((e) => e.id === id && recent(e)))))
+/** Whether an event's winner is hidden: recent, and not revealed. */
+const hidden = (e: TournamentEvent) => recent(e) && !revealed.value.has(e.id)
+function reveal(e: TournamentEvent) {
+  revealed.value = new Set([...revealed.value, e.id])
+  try {
+    localStorage.setItem(KEY, JSON.stringify([...revealed.value]))
+  } catch {
+    // Revealed for this visit alone.
+  }
+}
 
 const format = (date: string, options: Intl.DateTimeFormatOptions) =>
   new Intl.DateTimeFormat(locale.value, { ...options, timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`))
@@ -90,7 +119,28 @@ const count = (n: number) => n.toLocaleString(locale.value)
                             {{ t('tournaments.players', { n: count(e.players) }) }}</span
                           >
                         </span>
-                        <span v-if="e.winner" class="winner">
+                        <!-- A recent event's winner blurred, a tap on it revealing it rather than following the card. -->
+                        <span
+                          v-if="e.winner && hidden(e)"
+                          class="winner hidden"
+                          role="button"
+                          tabindex="0"
+                          :aria-label="t('tournaments.revealWinner')"
+                          @click.prevent.stop="reveal(e)"
+                          @keydown.enter.prevent.stop="reveal(e)"
+                          @keydown.space.prevent.stop="reveal(e)"
+                        >
+                          <span class="blurred" aria-hidden="true">
+                            <span class="team"><PokemonIcon v-for="(p, i) in e.winner.team" :id="p" :key="i" /></span>
+                            <span class="small"
+                              ><span class="muted">{{ t('tournaments.winner') }}</span> {{ e.winner.player }}</span
+                            >
+                          </span>
+                          <span class="reveal small"
+                            ><Eye :size="14" aria-hidden="true" />{{ t('tournaments.reveal') }}</span
+                          >
+                        </span>
+                        <span v-else-if="e.winner" class="winner">
                           <span class="team" :aria-label="t('tournaments.winnerTeam', { player: e.winner.player })">
                             <PokemonIcon v-for="(p, i) in e.winner.team" :id="p" :key="i" />
                           </span>
@@ -273,6 +323,32 @@ const count = (n: number) => n.toLocaleString(locale.value)
 }
 .team {
   display: flex;
+}
+/* A recent event's winner: blurred past reading, its label to reveal it over the middle. */
+.winner.hidden {
+  position: relative;
+  cursor: pointer;
+}
+.blurred {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  filter: blur(7px);
+  user-select: none;
+}
+.reveal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+.winner.hidden:hover .reveal,
+.winner.hidden:focus-visible .reveal {
+  text-decoration: underline;
 }
 /* Narrower: who won under the event's name, its team first. */
 @media (max-width: 720px) {

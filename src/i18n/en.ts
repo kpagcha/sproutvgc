@@ -802,6 +802,8 @@ export const messages = {
   'tournaments.toMeta': 'Meta',
   'tournaments.players': '{n} players',
   'tournaments.winner': 'Won by',
+  'tournaments.reveal': 'Show winner',
+  'tournaments.revealWinner': 'Show who won, and with what',
   'tournaments.champion': 'Champion',
   'tournaments.winnerTeam': "{player}'s team",
   'tournaments.eventMeta': 'Meta',
