@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, h, ref, render, shallowRef, watch } from 'vue'
+import { computed, h, nextTick, ref, render, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ChevronDown, ChevronUp } from '@lucide/vue'
 import { ability, available, item, move, pokemon } from '@/data/dex'
@@ -148,14 +148,22 @@ const about = computed(() =>
 const metaOf = computed(() => event.value && regulationSnapshot(event.value.regulation)?.id)
 const monName = (pid: Parameters<typeof pokemon>[0]) => splitForme(pid, refName(pokemon(pid)))
 
-// The rows unfolded, by placing.
-const open = ref(new Set<number>())
-watch(id, () => (open.value = new Set()))
+// The rows unfolded, by placing, kept in the URL (`?open=3.12`), so a link opens on them.
+const open = computed(
+  () =>
+    new Set(
+      String(route.query.open ?? '')
+        .split('.')
+        .map(Number)
+        .filter((n) => Number.isInteger(n) && n > 0),
+    ),
+)
 function toggle(placing: number) {
   const next = new Set(open.value)
   if (next.has(placing)) next.delete(placing)
   else next.add(placing)
-  open.value = next
+  const list = [...next].sort((a, b) => a - b)
+  void router.replace({ query: { ...route.query, open: list.length ? list.join('.') : undefined } })
 }
 
 // The standings' search (`FilterSearch`): its text finds players by name, and the Pokémon, items, abilities and moves
@@ -202,6 +210,19 @@ const day1Folded = computed(() =>
   narrowed.value || day1Shown.value ? 0 : (parts.value.find((p) => p.key === 'day1')?.rows.length ?? 0),
 )
 const shownParts = computed(() => (day1Folded.value ? parts.value.filter((p) => p.key !== 'day1') : parts.value))
+
+// Arriving on unfolded rows (a link shared), Day 1 shown if one's there, and the page scrolled to the first once its
+// standings are in, after the router's own scrolling (to the top, a frame or two before). Not when the browser
+// restores where the page was (a reload, going back).
+const restoring = !!(window.history.state as { scroll?: unknown } | null)?.scroll
+watch(standings, async (all) => {
+  if (!all || !open.value.size || restoring) return
+  if (all.some((s) => open.value.has(s.placing) && !s.day2 && !s.topCut)) day1Shown.value = true
+  await nextTick()
+  await new Promise(requestAnimationFrame)
+  await new Promise(requestAnimationFrame)
+  document.querySelector(`.standing[data-placing="${Math.min(...open.value)}"]`)?.scrollIntoView({ block: 'start' })
+})
 /** A Pokémon's row on the Pokémon tab leads to the standings narrowed to the teams with it, if the dex has it. */
 const teamsWith = (pid: PokemonStat['id']) =>
   available(pokemon(pid)) ? { name: 'tournament', params: { id: id.value }, query: { f: `pokemon:${pid}` } } : null
@@ -247,7 +268,13 @@ const ordinal = (n: number) => `#${n}`
         <template v-for="part in shownParts" :key="part.key">
           <!-- Each part under its name, when there's more than one. -->
           <li v-if="shownParts.length > 1" class="part-head">{{ t(`tournaments.part.${part.key}`) }}</li>
-          <li v-for="s in part.rows" :key="s.placing" class="standing" :class="{ open: open.has(s.placing) }">
+          <li
+            v-for="s in part.rows"
+            :key="s.placing"
+            :data-placing="s.placing"
+            class="standing"
+            :class="{ open: open.has(s.placing) }"
+          >
             <button
               type="button"
               class="player-row"
@@ -667,6 +694,8 @@ h1 {
    it comes into view: laid out as the page scrolls into them, their heights guessed until then (a phone's rows two
    lines, an unfolded one its sets), the page's length changed under the scroll, making it jump. */
 .standing {
+  /* Room above it when a link scrolls to it. */
+  scroll-margin-top: 12px;
   /* Its width, for its team's icons to be laid out by (below). */
   container: standing / inline-size;
 }
