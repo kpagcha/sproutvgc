@@ -14,7 +14,18 @@ import { passesGroups } from '@/lib/filterGroups'
 import type { NamedLocation } from '@/lib/links'
 import { fold } from '@/lib/search'
 import type { Term, TermFilters } from '@/lib/searchTerms'
-import { DAYS, decidedMatches, playersOf, pokemonStats, type Day, type PokemonStat } from '@/lib/tournamentStats'
+import {
+  DAYS,
+  decidedMatches,
+  chartReach,
+  MIN_MATCHES,
+  pinned,
+  playersOf,
+  pokemonStats,
+  strength,
+  type Day,
+  type PokemonStat,
+} from '@/lib/tournamentStats'
 import { useSort } from '@/composables/useSort'
 import { useUrlFilters } from '@/composables/useUrlFilters'
 import AppLink from '@/components/AppLink'
@@ -27,6 +38,7 @@ import PokemonIcon from '@/components/PokemonIcon'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
+import WinRateChart from '@/components/WinRateChart.vue'
 
 // One official tournament: what it was (type, date, country, players, how many made Day 2), the way to its
 // regulation's meta, and two tabs, a page each: its standings (`/meta/tournaments/:id`: the whole field in three
@@ -115,10 +127,6 @@ const {
   locale,
 })
 const TOP = 20
-/** The fewest matches a win rate is worth sorting by, per day: Pokémon with fewer go after the rest, by usage, whichever
- * way the win rates run, so a 2–0 doesn't top the list. Less for the smaller days: the top cut's most played Pokémon
- * often have under 20. */
-const MIN_MATCHES: Record<Day, number> = { all: 20, day2: 10, cut: 5 }
 const minMatches = computed(() => MIN_MATCHES[day.value])
 const enough = (s: PokemonStat) => s.wins + s.losses >= minMatches.value
 /** The day's Pokémon as sorted, those with too few matches last when sorted by win rate. */
@@ -128,21 +136,37 @@ const rankedStats = computed(() =>
     : sortedStats.value,
 )
 /** Where those with too few matches start, when sorted by win rate and some are, a line over them saying so. */
+/** The Pokémon with a win rate, the most used first; the chart's, the first of them. */
+const chartable = computed(() => stats.value.filter((s) => s.winRate !== null))
+/** How many of them the chart shows at fewest, and unless another's picked. */
+const CHART_MIN = 5
+const CHART_DEFAULT = 30
+/** How many of the most used the chart shows, kept in the URL (`?chart=`): 30 unless another's picked, all of them
+ * when there are no more. */
+const chartN = computed<number>({
+  get: () => {
+    const n = Number(route.query.chart)
+    return Math.min(Number.isInteger(n) && n >= CHART_MIN ? n : CHART_DEFAULT, chartable.value.length)
+  },
+  set: (n) => void router.replace({ query: { ...route.query, chart: n === CHART_DEFAULT ? undefined : String(n) } }),
+})
+/** The slider's value while it's dragged, the chart following only once it's let go. */
+const draggedN = ref<number | null>(null)
+function releaseN(e: Event) {
+  chartN.value = Number((e.target as HTMLInputElement).value)
+  draggedN.value = null
+}
+const charted = computed(() => chartable.value.slice(0, chartN.value))
 const fewFrom = computed(() => (statKey.value === 'winRate' ? rankedStats.value.findIndex((s) => !enough(s)) : -1))
 /** How far from even a win rate's bar can reach, its half filled from there on: most sit close to even (a Pokémon on
  * many teams meets itself often, a win and a loss), so the bar's scale is that close range, not 0% to 100%. */
 const WR_RANGE = 0.1
-/** How far from even a win rate is in standard errors, (wins − losses) / √matches: how much it can be gone by, a
- * small gap over many matches counting for more than a large one over a few. Its bar is faint up to 1, solid from 2. A
- * guide, not a test: a team's six share each result, and a team plays every round. */
-const evidence = (s: PokemonStat) => Math.abs(s.wins - s.losses) / Math.sqrt(s.wins + s.losses)
-const strength = (s: PokemonStat) => Math.min(Math.max(evidence(s) - 1, 0), 1)
 const wrStyle = (s: PokemonStat) =>
   s.winRate === null
     ? undefined
-    : { '--dev': Math.min(Math.abs(s.winRate - 0.5) / WR_RANGE, 1), '--strength': strength(s) }
-/** Whether a win rate could be chance, its number faint too. */
-const unsure = (s: PokemonStat) => evidence(s) < 1
+    : { '--dev': Math.min(Math.abs(s.winRate - 0.5) / WR_RANGE, 1), '--strength': strength(s, day.value) }
+/** Whether a win rate has too few matches to go by, its number faint too. */
+const unsure = (s: PokemonStat) => !enough(s)
 /** The most used Pokémon's usage, the one its bars are against. */
 const topUsage = computed(() => stats.value[0]?.usage ?? 0)
 const allStats = ref(false)
@@ -156,6 +180,18 @@ const about = computed(() =>
       })
     : '',
 )
+/** What the chart's marks say, after `about`: that they fade with fewer matches, when one does, and that those past its
+ * scale are at its edge, when one is. */
+const chartAbout = computed(() => {
+  const reach = chartReach(charted.value, day.value)
+  const faded = charted.value.some((s) => strength(s, day.value) < 1)
+  const edge = charted.value.some((s) => pinned(s, reach))
+  return faded && edge
+    ? t('tournaments.chartNoteFadedEdge', { n: minMatches.value })
+    : faded
+      ? t('tournaments.chartNoteFaded')
+      : ''
+})
 /** The way to its regulation's meta (its latest data; the default, for the current one, its URL left bare once it's
  * shown): the event's own Meta, and each Pokémon's meta page. */
 const metaOf = computed(() => event.value && regulationSnapshot(event.value.regulation)?.id)
@@ -372,15 +408,39 @@ const ordinal = (n: number) => `#${n}`
     <!-- Its Pokémon: the day's, each one's usage, win rate and record. -->
     <section v-else class="panel banded">
       <BandTabs :label="t('tournaments.tabs')" :current="tab" :tabs />
-      <SegmentedControl
-        v-model="day"
-        class="day-choice"
-        :label="t('tournaments.teamsOf')"
-        :options="DAYS.map((d) => ({ value: d, label: t(`tournaments.day.${d}`) }))"
-      />
-      <p class="muted small about">{{ about }}</p>
+      <div class="stats-controls">
+        <SegmentedControl
+          v-model="day"
+          class="day-choice"
+          :label="t('tournaments.teamsOf')"
+          :options="DAYS.map((d) => ({ value: d, label: t(`tournaments.day.${d}`) }))"
+        />
+        <label v-if="chartable.length > CHART_MIN" class="chart-n">
+          <span class="muted">{{ t('tournaments.chartShown') }}</span>
+          <input
+            type="range"
+            :min="CHART_MIN"
+            :max="chartable.length"
+            :value="draggedN ?? chartN"
+            @input="draggedN = Number(($event.target as HTMLInputElement).value)"
+            @change="releaseN"
+          />
+          <span class="chart-n-value">{{
+            t('tournaments.chartOf', { n: draggedN ?? chartN, of: chartable.length })
+          }}</span>
+        </label>
+      </div>
+      <p class="muted small about">
+        {{ about }}<template v-if="chartAbout"> · {{ chartAbout }}</template>
+      </p>
       <p v-if="!standings || !rounds" class="muted">{{ t('tournaments.loading') }}</p>
-      <div v-else class="dex-table stats" role="table" :aria-label="t('tournaments.pokemonStats')">
+      <WinRateChart
+        v-if="standings && rounds && charted.length"
+        :stats="charted"
+        :day
+        :to="(s) => teamsWith(s.id) ?? { name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }"
+      />
+      <div v-if="standings && rounds" class="dex-table stats" role="table" :aria-label="t('tournaments.pokemonStats')">
         <div class="row head" role="row">
           <div role="columnheader" class="r">#</div>
           <div role="columnheader">
@@ -500,8 +560,27 @@ h1 {
 }
 /* The Pokémon: the day they're of, then their table as the rankings' (rank, Pokémon, usage, win rate, record, the way
    to its meta page), the top ones and a toggle for the rest. */
-.day-choice {
+/* The day and how many the chart shows, on one row, wrapping on narrow screens. */
+.stats-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
   margin-bottom: 8px;
+}
+.chart-n {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.chart-n input {
+  width: 10rem;
+}
+/* As wide as its longest, so the slider doesn't shift as the number changes. */
+.chart-n-value {
+  min-width: 6ch;
+  font-variant-numeric: tabular-nums;
 }
 .about {
   margin: 2px 0 8px;
@@ -637,8 +716,8 @@ h1 {
   background: var(--accent);
 }
 /* Win rate: a bar from the middle of a faint track (even, marked), rightwards in the good color above it, leftwards
-   in the bad below, as far as it's from even (`--dev`, 0 to 1, the half filled `WR_RANGE` from even), as solid as it
-   can be gone by (`--strength`, 0 to 1); one that could be chance, its number faint too. */
+   in the bad below, as far as it's from even (`--dev`, 0 to 1, the half filled `WR_RANGE` from even), as solid as the
+   matches behind it make it (`--strength`, 0 to 1); one under the day's minimum, its number faint too. */
 .wr {
   --inset: 6px;
   position: relative;

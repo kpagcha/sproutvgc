@@ -64,3 +64,33 @@ export function pokemonStats(standings: readonly Placed[], rounds: Record<number
 /** The day's matches with a winner, those its win rates come from. */
 export const decidedMatches = (rounds: Record<number, Round>, day: Day) =>
   roundsOf(rounds, day).reduce((n, r) => n + r.matches.filter(([, b, won]) => b !== null && won !== 0).length, 0)
+
+/** The fewest matches a win rate is worth going by, per day: Pokémon with fewer go after the rest when sorted by win
+ * rate, by usage, whichever way the win rates run, so a 2–0 doesn't top the list, and don't set the chart's reach. Less for
+ * the smaller days: the top cut's most played Pokémon often have under 20. */
+export const MIN_MATCHES: Record<Day, number> = { all: 20, day2: 10, cut: 5 }
+
+/** How many times the day's minimum of matches a win rate's mark is solid from. */
+const SOLID_AT = 5
+/** How solid a win rate's mark is, 0 to 1, by the matches behind it: faint at the day's minimum and under, solid from
+ * `SOLID_AT` times it, on a log scale between (20 matches to 40 counting as much as 40 to 80). */
+export function strength(s: PokemonStat, day: Day): number {
+  const min = MIN_MATCHES[day]
+  const f = Math.log((s.wins + s.losses) / min) / Math.log(SOLID_AT)
+  return Math.min(Math.max(f, 0), 1)
+}
+
+/** How far from even the win-rate chart reaches at least, so a day whose Pokémon all sit close to it isn't blown up. */
+const MIN_REACH = 0.1
+/** The chart's win rates' marks, a step apart, its reach a whole number of them. */
+export const WR_STEP = 0.05
+/** How far from even the win-rate chart reaches, both ways: the farthest win rate of those with the day's minimum of
+ * matches (all of them, if none has), to the next step. One with fewer that's farther is pinned to its edge, so a 2–0
+ * doesn't stretch the chart and squash the rest around even. */
+export function chartReach(stats: readonly PokemonStat[], day: Day): number {
+  const sure = stats.filter((s) => s.wins + s.losses >= MIN_MATCHES[day])
+  const far = Math.max(MIN_REACH, ...(sure.length ? sure : stats).map((s) => Math.abs((s.winRate ?? 0.5) - 0.5)))
+  return Math.ceil(far / WR_STEP - 1e-9) * WR_STEP
+}
+/** Whether a win rate is past the chart's reach, pinned to its edge. */
+export const pinned = (s: PokemonStat, reach: number) => Math.abs((s.winRate ?? 0.5) - 0.5) > reach + 1e-9
