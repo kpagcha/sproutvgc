@@ -650,7 +650,7 @@ const sections = computed(() =>
               >
                 <span class="invest-bar" :style="{ '--share': x.points / MAX_POINTS }"></span>
                 <span class="invest-text" aria-hidden="true"
-                  ><span class="invest-pts">{{ x.points }}</span
+                  ><span class="invest-pts" :class="{ none: !x.points }">{{ x.points }}</span
                   ><span class="invest-val"
                     ><component
                       :is="x.effect === 'up' ? ChevronsUp : ChevronsDown"
@@ -1317,7 +1317,7 @@ h2 {
   font-weight: bold;
   white-space: nowrap;
 }
-/* A stat of a spread: a bar of its points, on a faint track, with over it the points (muted) at its start and the stat
+/* A stat of a spread: a bar of its points, on a faint track, with over it the points at its start and the stat
    they give at its end, the nature's mark after it: the bar the good color under the stat the nature raises, the cell
    outlined in the bad around the one it lowers. */
 .invest {
@@ -1352,8 +1352,14 @@ h2 {
   font-size: 0.85em;
   font-variant-numeric: tabular-nums;
 }
+/* Its points: those put in it set off a little, in the text's color; none, faded back. */
 .invest-pts {
+  font-weight: 500;
+}
+.invest-pts.none {
+  font-weight: normal;
   color: var(--muted);
+  opacity: 0.5;
 }
 .invest-val {
   display: inline-flex;
