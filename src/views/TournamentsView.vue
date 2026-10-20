@@ -9,8 +9,7 @@ import AppLink from '@/components/AppLink'
 import PokemonIcon from '@/components/PokemonIcon'
 
 // The official tournaments: each regulation's events, the current regulation's first, the latest first, each a row
-// leading to its standings (`TournamentView`): its date, name, type, country and players, how many made Day 2, and who
-// won with what. Each regulation's band has the way to its meta, every one of its
+// leading to its standings (`TournamentView`): its date, name, type, country and players, and who won with what. Each regulation's band has the way to its meta, every one of its
 // events added up, and the last, where it's all from.
 const groups = computed(() => {
   const byRegulation = new Map<string, TournamentEvent[]>()
@@ -47,8 +46,7 @@ const count = (n: number) => n.toLocaleString(locale.value)
               <span class="name">{{ e.name }}</span>
               <span class="muted small"
                 >{{ t(`tournaments.type.${e.type}`) }} · {{ e.country }} ·
-                {{ t('tournaments.players', { n: count(e.players) }) }} ·
-                {{ t('tournaments.day2', { n: count(e.day2) }) }}</span
+                {{ t('tournaments.players', { n: count(e.players) }) }}</span
               >
             </span>
             <span v-if="e.winner" class="winner">
