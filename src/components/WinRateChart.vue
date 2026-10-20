@@ -56,8 +56,8 @@ const plot = useTemplateRef<HTMLElement>('plot')
 const { width, height } = useElementSize(plot)
 /** The room inside the plot's edges the marks keep, in pixels, so the icons at its ends stay within it: less on a
  * narrow chart. Set on the plot as `--pad-x` and `--pad-y` for the CSS that places them. */
-const padX = computed(() => (width.value < 560 ? 16 : 22))
-const PAD_Y = 16
+const padX = computed(() => (width.value < 560 ? 18 : 24))
+const PAD_Y = 18
 /** The usages marked across within the chart's range, each labeled unless too close to the last one labeled. */
 const xTicks = computed(() => {
   let last = -Infinity
@@ -103,8 +103,10 @@ const points = computed(() =>
 // most used first, each with its numbers. With a mouse, the card follows the pointer, and a click follows the icon's
 // link when it's alone, or leaves the card open over several, to pick one from; on a touch screen, a tap leaves the card
 // open whatever's there. Its rows are then the links; a click or tap off it puts it away. An icon focused from the keyboard shows its own.
-const HIT = 28
-const NEAR = 16
+const HIT = 32
+const NEAR = 20
+/** The icons a little over their size on the sheet: 48 by 36, whole pixels, so no cell bleeds into the next. */
+const ICON_SCALE = 1.2
 /** Each icon's place in the plot, in pixels from its top left. */
 const placed = computed(() =>
   points.value.map((p) => ({
@@ -246,7 +248,7 @@ const tipOf = (s: PokemonStat) =>
         @blur="onBlur"
         :aria-label="tipOf(p.s)"
       >
-        <PokemonIcon :id="p.s.id" />
+        <PokemonIcon :id="p.s.id" :scale="ICON_SCALE" />
       </AppLink>
       <div v-if="peek" ref="peekEl" class="peek" :class="{ below: peekBelow, stuck: peek.stuck }" :style="peekStyle">
         <AppLink v-for="p in peek.group" :key="p.s.id" :to="to(p.s)" class="peek-row" :aria-label="tipOf(p.s)">
