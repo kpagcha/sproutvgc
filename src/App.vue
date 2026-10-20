@@ -505,6 +505,12 @@ main {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+/* The credits' link and the dot kept whole; the copyright wrapping where a phone hasn't the width for it. */
+.footer > :not(:last-child) {
   white-space: nowrap;
+}
+.footer > :last-child {
+  min-width: 0;
 }
 </style>
