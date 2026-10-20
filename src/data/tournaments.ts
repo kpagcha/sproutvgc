@@ -6,6 +6,7 @@
 // each is a snapshot made on demand, its ID naming them (`tournaments-mc` every event of M-C and every player,
 // `tournaments-mc~445.446@day2` those two's Day 2). Their sets have no stat points: no spreads nor Speeds.
 
+import { shallowReactive } from 'vue'
 import type { AbilityId, ItemId, MoveId, PokemonId } from '@/data/dex'
 import type { MetaData, MetaSnapshot, PokemonMeta, Share, TournamentPlayers } from '@/data/meta'
 
@@ -110,6 +111,12 @@ export function loadRounds(id: string): Promise<Record<number, Round>> {
   return p
 }
 
+/** The standings loaded so far, by event, for what's named after a player as soon as theirs are in (a player's page's
+ * title). */
+const loadedStandings = shallowReactive(new Map<string, (Standing & { placing: number })[]>())
+/** A player of an event, by placing, once its standings are loaded. */
+export const playerOf = (id: string, placing: number) => loadedStandings.get(id)?.find((s) => s.placing === placing)
+
 /** An event's standings, its players by placing, loaded once. */
 const standings = new Map<string, Promise<(Standing & { placing: number })[]>>()
 export function loadStandings(id: string): Promise<(Standing & { placing: number })[]> {
@@ -117,11 +124,13 @@ export function loadStandings(id: string): Promise<(Standing & { placing: number
   if (!p) {
     const file = FILES[`./generated/tournaments/${id}.json`]
     if (!file) return Promise.reject(new Error(`No data for the event "${id}"`))
-    p = file().then((f) =>
-      Object.entries(f)
+    p = file().then((f) => {
+      const all = Object.entries(f)
         .map(([placing, s]) => ({ ...s, placing: Number(placing) }))
-        .sort((a, b) => a.placing - b.placing),
-    )
+        .sort((a, b) => a.placing - b.placing)
+      loadedStandings.set(id, all)
+      return all
+    })
     standings.set(id, p)
   }
   return p

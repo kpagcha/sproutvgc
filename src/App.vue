@@ -20,7 +20,7 @@ import SectionMenu from '@/components/SectionMenu.vue'
 import AreaNav from '@/components/AreaNav.vue'
 import { AREAS } from '@/lib/areas'
 import { lastTiersQuery } from '@/lib/tiersState'
-import { eventOf } from '@/data/tournaments'
+import { eventOf, playerOf } from '@/data/tournaments'
 import logoUrl from '@/assets/logo.png'
 import { searchFocus } from '@/composables/useSearch'
 
@@ -54,20 +54,30 @@ const ENTRY_PAGES: Partial<Record<string, { kind: GeneratedKind; desc: MessageKe
   metaMove: { kind: 'move', desc: 'desc.metaMove' },
 }
 
+/** A tournament's player's page's title: their name and the event's, the event's alone until its standings are in. */
+function playerTitle(id: string, placing: number) {
+  const event = eventOf(id)?.name
+  const player = playerOf(id, placing)?.player
+  return event && player ? `${player} · ${event}` : event
+}
+
 watchEffect(() => {
   // A type's own page (/types/fire) and a dex entry's (/abilities/levitate) are titled and described as that type or
   // entry; pages without a description use the home page's.
   const type = typeof route.params.type === 'string' && isType(route.params.type) ? route.params.type : null
   const page = typeof route.name === 'string' ? ENTRY_PAGES[route.name] : undefined
   const id = String(route.params.id)
-  // Conditions are curated, not generated: named by the locale, or after their move. A tournament by its name.
+  // Conditions are curated, not generated: named by the locale, or after their move. A tournament by its name, a
+  // player of one by theirs and its (once its standings are in).
   const entry = page
     ? generatedName(page.kind, id)
     : route.name === 'condition'
       ? refName({ kind: 'condition', id } as Ref)
       : route.name === 'tournament'
         ? eventOf(id)?.name
-        : undefined
+        : route.name === 'tournamentPlayer'
+          ? playerTitle(id, Number(route.params.placing))
+          : undefined
   // A tournament's Pokémon, a page of its own.
   const tournamentMons = route.name === 'tournament' && route.params.tab === 'pokemon'
   const key = tournamentMons ? 'head.tournamentPokemon' : (route.meta.headKey ?? route.meta.titleKey)
@@ -84,7 +94,9 @@ watchEffect(() => {
               ? 'desc.tournamentPokemon'
               : route.name === 'tournament'
                 ? 'desc.tournament'
-                : 'desc.condition'),
+                : route.name === 'tournamentPlayer'
+                  ? 'desc.tournamentPlayer'
+                  : 'desc.condition'),
           {
             ...params,
             ability: entry,
@@ -122,6 +134,9 @@ function backLink(r: RouteLocationNormalizedLoaded): { to: RouteLocationRaw; lab
     return { to: { name: 'matchups', query }, label: 'nav.matchups' }
   }
   // The speed comparison leads back to the speed tiers as they were left.
+  // A tournament's player leads back to its standings.
+  if (r.name === 'tournamentPlayer')
+    return { to: { name: 'tournament', params: { id: r.params.id } }, label: 'tournaments.standings' }
   if (r.name === 'speedCompare')
     return { to: { name: 'speedTiers', query: lastTiersQuery.value }, label: 'nav.speedTiers' }
   return (typeof r.name === 'string' ? LISTS[r.name] : undefined) ?? null

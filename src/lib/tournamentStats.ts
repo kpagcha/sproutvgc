@@ -94,3 +94,51 @@ export function chartReach(stats: readonly PokemonStat[], day: Day): number {
 }
 /** Whether a win rate is past the chart's reach, pinned to its edge. */
 export const pinned = (s: PokemonStat, reach: number) => Math.abs((s.winRate ?? 0.5) - 0.5) > reach + 1e-9
+
+/** How a player's match went: won, lost, neither (a tie, or both given a loss), or a bye, a round won with no one to
+ * play. */
+export type Result = 'win' | 'loss' | 'tie' | 'bye'
+
+export interface PlayerMatch {
+  round: number
+  phase: number
+  /** Their opponent by placing; none for a bye, or an opponent since disqualified (out of the standings). */
+  opponent: number | null
+  result: Result
+  /** In the top cut, how many rounds were left after it: 0 the final, 1 the semifinals, 2 the quarterfinals… */
+  left?: number
+}
+
+/** A player's matches, round by round, the first first. */
+export function playerMatches(rounds: Record<number, Round>, placing: number): PlayerMatch[] {
+  const cut = Object.entries(rounds)
+    .filter(([, r]) => r.phase === 3)
+    .map(([n]) => Number(n))
+  const last = Math.max(...cut)
+  return Object.entries(rounds)
+    .map(([n, r]) => ({ round: Number(n), r }))
+    .sort((x, y) => x.round - y.round)
+    .flatMap(({ round, r }) => {
+      const m = r.matches.find(([a, b]) => a === placing || b === placing)
+      if (!m) return []
+      const [a, b, won] = m
+      const first = a === placing
+      const opponent = first ? b : a
+      const result: Result =
+        opponent === null && won === 1 ? 'bye' : won === 0 ? 'tie' : (won === 1) === first ? 'win' : 'loss'
+      return [{ round, phase: r.phase, opponent, result, ...(r.phase === 3 && { left: last - round }) }]
+    })
+}
+
+/** The top 8's placings as medals (`main.css`'s `.medal`): gold, silver, bronze for the semifinals, and a plain one for
+ * the quarterfinals. */
+export const medalOf = (placing: number) =>
+  placing === 1
+    ? 'medal gold'
+    : placing === 2
+      ? 'medal silver'
+      : placing <= 4
+        ? 'medal bronze'
+        : placing <= 8
+          ? 'medal'
+          : ''

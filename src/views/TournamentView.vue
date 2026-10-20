@@ -1,14 +1,12 @@
 <script setup lang="ts">
-import { computed, h, nextTick, ref, render, shallowRef, watch } from 'vue'
+import { computed, nextTick, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useMediaQuery } from '@vueuse/core'
 import { ChevronDown, ChevronUp } from '@lucide/vue'
-import { ability, available, item, move, pokemon } from '@/data/dex'
+import { available, pokemon } from '@/data/dex'
 import { datasetDates, percent, regulationSnapshot } from '@/data/meta'
-import { MOVES } from '@/data/moves'
-import { natureEffects, natureName } from '@/data/natures'
-import { POKEMON, splitForme, spriteUrl } from '@/data/pokemon'
-import { eventOf, listed, loadRounds, loadStandings, type Round, type Standing } from '@/data/tournaments'
+import { splitForme } from '@/data/pokemon'
+import { eventOf, loadRounds, loadStandings, type Round, type Standing } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { passesGroups } from '@/lib/filterGroups'
@@ -26,19 +24,17 @@ import {
   strength,
   type Day,
   type PokemonStat,
+  medalOf,
 } from '@/lib/tournamentStats'
 import { useSort } from '@/composables/useSort'
 import { useUrlFilters } from '@/composables/useUrlFilters'
 import AppLink from '@/components/AppLink'
 import BandTabs from '@/components/BandTabs.vue'
-import DexRef from '@/components/DexRef'
-import EffectTag from '@/components/EffectTag'
 import FilterSearch from '@/components/FilterSearch.vue'
-import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 import SortHeader from '@/components/SortHeader.vue'
-import TypeIcon from '@/components/TypeIcon'
+import TeamSets from '@/components/TeamSets.vue'
 import WinRateChart from '@/components/WinRateChart.vue'
 
 // One official tournament: what it was (type, date, country, players, how many made Day 2), the way to its
@@ -49,26 +45,7 @@ import WinRateChart from '@/components/WinRateChart.vue'
 // teams and how they did in those rounds' matches, by usage or win rate, the top ones or all, each leading to the
 // standings filtered to the teams with it, and to its meta page on its regulation's data).
 // Each player's placing, name and country, record (marked when they dropped), and the six they brought, as icons;
-// unfolded, their whole sets, a card each, each entry leading to its meta page: its sprite and types in a band, its item after the types, then its ability and nature (the stats it raises and lowers
-// on hover) on a line, and its moves two by two (on phones, one under another), each with its type's badge. A
-// player whose team list isn't there has the Pokémon alone.
-// A nature says what it does on hover, or tapped, as on a Pokémon's meta page: the stat it raises and the one it
-// lowers, each with its chevron. Drawn once per nature, the tooltips sharing it.
-const natureTips = new Map<string, Element>()
-function natureTip(id: string) {
-  const e = natureEffects(id)
-  if (!e) return t('usageMon.natureNeutral')
-  let el = natureTips.get(id)
-  if (!el) {
-    el = document.createElement('span')
-    render(
-      h('span', [h(EffectTag, { effect: 'up', stat: e.plus }), ' ', h(EffectTag, { effect: 'down', stat: e.minus })]),
-      el,
-    )
-    natureTips.set(id, el)
-  }
-  return el
-}
+// unfolded, their whole sets (`TeamSets`) and the way to their page, their matches round by round.
 const route = useRoute()
 const router = useRouter()
 const id = computed(() => String(route.params.id))
@@ -218,6 +195,10 @@ const open = computed(
         .filter((n) => Number.isInteger(n) && n > 0),
     ),
 )
+/** A click on a player's row unfolds it, but on their name, the way to their page. */
+function rowClick(e: MouseEvent, placing: number) {
+  if (!(e.target as Element).closest('a')) toggle(placing)
+}
 function toggle(placing: number) {
   const next = new Set(open.value)
   if (next.has(placing)) next.delete(placing)
@@ -295,18 +276,6 @@ watch(standings, async (all) => {
 /** A Pokémon's row on the Pokémon tab leads to the standings narrowed to the teams with it, if the dex has it. */
 const teamsWith = (pid: PokemonStat['id']) =>
   available(pokemon(pid)) ? { name: 'tournament', params: { id: id.value }, query: { f: `pokemon:${pid}` } } : null
-
-/** The top 8's placings as medals: gold, silver, bronze for the semifinals, and a plain one for the quarterfinals. */
-const medalOf = (placing: number) =>
-  placing === 1
-    ? 'medal gold'
-    : placing === 2
-      ? 'medal silver'
-      : placing <= 4
-        ? 'medal bronze'
-        : placing <= 8
-          ? 'medal'
-          : ''
 
 const num = (n: number) => n.toLocaleString(locale.value)
 const ordinal = (n: number) => `#${n}`
@@ -403,16 +372,15 @@ const ordinal = (n: number) => `#${n}`
             class="standing"
             :class="{ open: open.has(s.placing), won: s.placing === 1 }"
           >
-            <button
-              type="button"
-              class="player-row"
-              :aria-expanded="open.has(s.placing)"
-              :aria-label="t('tournaments.rowLabel', { placing: s.placing, player: s.player })"
-              @click="toggle(s.placing)"
-            >
+            <!-- The row unfolds on a click anywhere but the player's name, the way to their page; the chevron its button,
+                 for the keyboard. -->
+            <div class="player-row" @click="rowClick($event, s.placing)">
               <span class="placing num" :class="medalOf(s.placing)">{{ ordinal(s.placing) }}</span>
               <span class="player"
-                >{{ s.player }} <span class="muted small">{{ s.country }}</span
+                ><AppLink :to="{ name: 'tournamentPlayer', params: { id, placing: String(s.placing) } }" class="name">{{
+                  s.player
+                }}</AppLink>
+                <span class="muted small">{{ s.country }}</span
                 ><span v-if="s.placing === 1" class="champion">{{ t('tournaments.champion') }}</span></span
               >
               <span
@@ -426,52 +394,21 @@ const ordinal = (n: number) => `#${n}`
               </span>
               <!-- Neither a team list nor its Pokémon: the standings didn't say. -->
               <span v-else class="team none muted small">{{ t('tournaments.noList') }}</span>
-              <component :is="open.has(s.placing) ? ChevronUp : ChevronDown" :size="16" class="chevron" />
-            </button>
+              <button
+                type="button"
+                class="chevron"
+                :aria-expanded="open.has(s.placing)"
+                :aria-label="t('tournaments.rowLabel', { placing: s.placing, player: s.player })"
+                @click.stop="toggle(s.placing)"
+              >
+                <component :is="open.has(s.placing) ? ChevronUp : ChevronDown" :size="16" />
+              </button>
+            </div>
             <!-- Its whole sets, a card each. -->
             <p v-if="open.has(s.placing) && !s.team.length" class="muted small no-team">
               {{ t('tournaments.noTeam') }}
             </p>
-            <ul v-else-if="open.has(s.placing)" class="sets">
-              <li v-for="([mon, it, ab, nature, moves], i) in s.team" :key="i" class="set">
-                <div class="set-head">
-                  <img
-                    v-if="!POKEMON[mon]?.noSprite"
-                    class="pixel set-sprite"
-                    :src="spriteUrl(mon)"
-                    alt=""
-                    width="96"
-                    height="96"
-                    loading="lazy"
-                    draggable="false"
-                  />
-                  <span v-else class="set-sprite icon-sprite"><PokemonIcon :id="mon" /></span>
-                  <span class="set-who">
-                    <DexRef :to="pokemon(mon)" meta class="set-name" />
-                    <span class="set-types">
-                      <TypeIcon v-for="ty in POKEMON[mon]?.types ?? []" :key="ty" :type="ty" />
-                      <span v-if="listed([mon, it, ab, nature, moves])" class="set-item">
-                        <template v-if="it"><ItemIcon :id="it" /><DexRef :to="item(it)" meta /></template>
-                        <span v-else class="muted">{{ t('usageMon.noItem') }}</span>
-                      </span>
-                    </span>
-                  </span>
-                </div>
-                <p v-if="!listed([mon, it, ab, nature, moves])" class="muted small no-list">
-                  {{ t('tournaments.noList') }}
-                </p>
-                <div v-else-if="ab || nature" class="set-facts">
-                  <DexRef v-if="ab" :to="ability(ab)" meta />
-                  <span v-if="ab && nature" class="muted" aria-hidden="true">·</span>
-                  <span v-if="nature" v-tip:group="natureTip(nature)" class="muted">{{ natureName(nature) }}</span>
-                </div>
-                <ul v-if="moves.length" class="set-moves">
-                  <li v-for="mv in moves" :key="mv" class="set-move">
-                    <TypeIcon v-if="MOVES[mv]" :type="MOVES[mv].type" /><DexRef :to="move(mv)" meta />
-                  </li>
-                </ul>
-              </li>
-            </ul>
+            <TeamSets v-else-if="open.has(s.placing)" :team="s.team" />
           </li>
         </template>
       </ol>
@@ -479,10 +416,6 @@ const ordinal = (n: number) => `#${n}`
       <button v-if="day1Folded" type="button" class="more-toggle" @click="day1Shown = true">
         <ChevronDown :size="14" aria-hidden="true" />{{ t('tournaments.showDay1', { n: num(day1Folded) }) }}
       </button>
-      <!-- Where it's from, at the end of the page. -->
-      <p class="muted note">
-        {{ t('usage.from') }} <a :href="event.url" rel="noopener">{{ event.provider.name }}</a>
-      </p>
     </section>
 
     <!-- Its Pokémon: the day's, each one's usage, win rate and record. -->
@@ -636,9 +569,6 @@ h1 {
 }
 .small {
   font-size: 0.875em;
-}
-.note {
-  margin: 12px 0 0;
 }
 /* The standings' search, over them; the list faded while it shows what a filter highlighted would leave. */
 .standings-search {
@@ -946,44 +876,24 @@ h1 {
   grid-template-columns: 3.5em minmax(0, 1fr) auto auto auto;
   align-items: center;
   gap: 8px;
-  width: 100%;
   padding: 6px 4px;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  background: none;
-  border: none;
   cursor: pointer;
+}
+/* The player's name, the way to their page: underlined, in the text's color; apart from their country by a margin, the
+   line break between the two in the template being no space. */
+.player .name {
+  margin-right: 0.35em;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.player .name:hover {
+  color: var(--accent);
 }
 .player-row:hover {
   background: var(--hover);
 }
-/* The top 8's placings as medals, the site's ink-outlined squares with a hard shadow: gold, silver, bronze for the
-   semifinals, in the panel's color for the quarterfinals. The winner's row lit from the left in gold, a tag by their name. */
-.placing.medal {
-  justify-self: end;
-  min-width: 2.6em;
-  padding: 1px 5px;
-  text-align: center;
-  color: var(--text);
-  background: var(--panel);
-  border: 2px solid var(--ink);
-  box-shadow: var(--hard-sm);
-}
-.placing.gold,
-.placing.silver,
-.placing.bronze {
-  color: #141414;
-}
-.placing.gold {
-  background: var(--gold);
-}
-.placing.silver {
-  background: var(--silver);
-}
-.placing.bronze {
-  background: var(--bronze);
-}
+/* The winner's row lit from the left in gold, a tag by their name (the medals are `main.css`'s). */
 .standing.won .player-row {
   background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 26%, transparent), transparent 70%);
 }
@@ -1026,7 +936,12 @@ h1 {
   width: calc(6 * 40px);
 }
 .chevron {
+  display: flex;
+  padding: 2px;
   color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 /* Its record, wins–losses; a player who dropped, marked so. */
 .record {
@@ -1042,10 +957,6 @@ h1 {
   font-size: 0.75em;
   font-weight: bold;
   border: 1px solid var(--border-strong);
-}
-.no-list {
-  margin: 0;
-  padding: 8px 10px;
 }
 .no-team {
   margin: 0;
@@ -1091,128 +1002,6 @@ h1 {
 @container standing (max-width: 300px) {
   .team {
     grid-template-columns: repeat(3, 40px);
-  }
-}
-/* Its whole sets, a card each: three to a row, a team in two even rows; two, then one, on narrower screens. */
-.sets {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin: 0;
-  padding: 4px 4px 12px;
-  list-style: none;
-}
-/* A set: an ink-framed card with a hard shadow. */
-.set {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  background: var(--panel);
-  border: 1px solid var(--ink);
-  box-shadow: var(--hard-sm);
-}
-/* Its head: a band in the panel's other shade, the sprite at the left wholly inside it, its name and types beside
-   it. */
-.set-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 2px 10px 2px 6px;
-  background: var(--panel-alt);
-  border-bottom: 1px solid var(--ink);
-}
-.set-sprite {
-  flex: none;
-  /* Half its size: an even scale, so its pixels stay even. */
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-  image-rendering: pixelated;
-}
-.icon-sprite {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.set-who {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-.set-name {
-  font-size: 1.05em;
-  font-weight: bold;
-}
-.set-types {
-  /* Type badges at their desktop size on phones too, as small as the text. */
-  --icon-scale: 1;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-}
-/* Its item after the type badges, at their height, a little apart from them. */
-.set-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-  margin-left: 6px;
-  font-size: 0.92em;
-  font-weight: bold;
-}
-.set-item :deep(a) {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-/* Its ability and, muted, its nature, on one line. */
-.set-facts {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2px 6px;
-  padding: 8px 10px 4px;
-  font-weight: bold;
-}
-/* Its moves, two by two: each a chip, its type's badge and its name. */
-.set-moves {
-  --icon-scale: 1;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px;
-  margin: 0;
-  padding: 4px 8px 8px;
-  list-style: none;
-}
-.set-move {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  min-width: 0;
-  padding: 3px 5px 3px 3px;
-  font-size: 0.9em;
-  background: var(--panel-alt);
-  border: 1px solid var(--border);
-}
-.set-move :deep(a) {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-@media (max-width: 720px) {
-  .sets {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  /* Its moves one under another, the cards being narrow. */
-  .set-moves {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-@media (max-width: 420px) {
-  .sets {
-    grid-template-columns: minmax(0, 1fr);
   }
 }
 </style>

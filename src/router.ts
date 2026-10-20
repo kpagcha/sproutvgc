@@ -334,7 +334,8 @@ export const router = createRouter({
     usageRankings('abilities', 'abilityRankings', 'ability'),
     metaEntry('abilities', 'metaAbility', 'ability'),
     metaEntry('items', 'metaItem', 'item'),
-    // The official tournaments, and each one's standings and Pokémon, a page each (`/pokemon` the second).
+    // The official tournaments, and each one's standings and Pokémon, a page each (`/pokemon` the second), and each of
+    // its players'.
     {
       path: '/meta/tournaments',
       name: 'tournaments',
@@ -359,6 +360,18 @@ export const router = createRouter({
         dexNames: true,
         descriptions: ['ability', 'move', 'item'],
         recent: ({ params }) => `tournament:${String(params.id)}`,
+        ...inArea('meta', 'tournaments'),
+      },
+    },
+    // A player of a tournament, by placing: their team and their matches round by round.
+    {
+      path: '/meta/tournaments/:id/players/:placing(\\d+)',
+      name: 'tournamentPlayer',
+      component: () => import('@/views/TournamentPlayerView.vue'),
+      meta: {
+        titleKey: 'title.tournamentPlayer',
+        dexNames: true,
+        descriptions: ['ability', 'move', 'item'],
         ...inArea('meta', 'tournaments'),
       },
     },

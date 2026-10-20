@@ -611,3 +611,31 @@ details > summary {
     animation: none;
   }
 }
+
+/* A tournament's top 8's placings as medals (`medalOf`), the site's ink-outlined squares with a hard shadow: gold,
+   silver, bronze for the semifinals, in the panel's color for the quarterfinals. Starting with `:root:root`, as
+   `retro.css`'s rules do, to win over the placing's own scoped style. */
+:root:root .medal {
+  justify-self: end;
+  min-width: 2.6em;
+  padding: 1px 5px;
+  text-align: center;
+  color: var(--text);
+  background: var(--panel);
+  border: 2px solid var(--ink);
+  box-shadow: var(--hard-sm);
+}
+:root:root .medal.gold,
+:root:root .medal.silver,
+:root:root .medal.bronze {
+  color: #141414;
+}
+:root:root .medal.gold {
+  background: var(--gold);
+}
+:root:root .medal.silver {
+  background: var(--silver);
+}
+:root:root .medal.bronze {
+  background: var(--bronze);
+}
