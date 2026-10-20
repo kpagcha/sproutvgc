@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, h, onBeforeUnmount, ref, render, shallowRef, watch } from 'vue'
+import { computed, h, ref, render, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ChevronDown, ChevronUp } from '@lucide/vue'
 import { ability, item, move, pokemon } from '@/data/dex'
@@ -31,7 +31,8 @@ import TypeIcon from '@/components/TypeIcon'
 // unfolded, their whole sets, a card each, each entry leading to its meta page: its
 // sprite and types in a band, its item after the types, then its ability and nature (the stats it raises and lowers
 // on hover) on a line, and its moves two by two (on phones, one under another), each with its type's badge. A
-// player whose team list isn't there has the Pokémon alone. Rows far down the field aren't laid out until near the screen.
+// player whose team list isn't there has the Pokémon alone. Rows far down the field aren't laid out until near the
+// screen.
 // A nature says what it does on hover, or tapped, as on a Pokémon's meta page: the stat it raises and the one it
 // lowers, each with its chevron. Drawn once per nature, the tooltips sharing it.
 const natureTips = new Map<string, Element>()
@@ -120,23 +121,6 @@ function toggle(placing: number) {
   open.value = next
 }
 
-// The rows that have come near the screen (within about a screen of it), by placing: an unfolded row builds its sets
-// only then. Once built, a row's sets stay, so scrolling back doesn't move the page; until then it keeps their room.
-const near = ref(new Set<number>())
-watch(id, () => (near.value = new Set()))
-const observer = new IntersectionObserver(
-  (entries) => {
-    const come = entries.filter((e) => e.isIntersecting).map((e) => Number((e.target as HTMLElement).dataset.placing))
-    if (come.some((p) => !near.value.has(p))) near.value = new Set([...near.value, ...come])
-  },
-  { rootMargin: '100% 0px' },
-)
-/** Each row, watched for when it comes near (a function ref: called as rows render, observing one again is nothing). */
-const watchRow = (el: unknown) => {
-  if (el instanceof HTMLElement) observer.observe(el)
-}
-onBeforeUnmount(() => observer.disconnect())
-
 /** The standings shown: the whole event's in their parts (the top cut, the rest of Day 2, and Day 1, those there are),
  * a day's its players alone. */
 const shownParts = computed(() => {
@@ -191,14 +175,7 @@ const ordinal = (n: number) => `#${n}`
         <template v-for="part in shownParts" :key="part.key">
           <!-- Each part under its name, when there's more than one. -->
           <li v-if="shownParts.length > 1" class="part-head">{{ t(`tournaments.part.${part.key}`) }}</li>
-          <li
-            v-for="s in part.rows"
-            :key="s.placing"
-            :ref="watchRow"
-            :data-placing="s.placing"
-            class="standing"
-            :class="{ open: open.has(s.placing) }"
-          >
+          <li v-for="s in part.rows" :key="s.placing" class="standing" :class="{ open: open.has(s.placing) }">
             <button
               type="button"
               class="player-row"
@@ -224,11 +201,10 @@ const ordinal = (n: number) => `#${n}`
               <span v-else class="team muted small">{{ t('tournaments.noList') }}</span>
               <component :is="open.has(s.placing) ? ChevronUp : ChevronDown" :size="16" class="chevron" />
             </button>
-            <!-- Its whole sets, a card each, once it's come near the screen; their room until then. -->
+            <!-- Its whole sets, a card each. -->
             <p v-if="open.has(s.placing) && !s.team.length" class="muted small no-team">
               {{ t('tournaments.noTeam') }}
             </p>
-            <div v-else-if="open.has(s.placing) && !near.has(s.placing)" class="sets-room" aria-hidden="true"></div>
             <ul v-else-if="open.has(s.placing)" class="sets">
               <li v-for="([mon, it, ab, nature, moves], i) in s.team" :key="i" class="set">
                 <div class="set-head">
@@ -609,10 +585,6 @@ h1 {
     grid-template-columns: repeat(3, 40px);
   }
 }
-/* Their room, before they're built: about as tall as they'll be (two rows of cards; three, then six, narrower). */
-.sets-room {
-  height: 440px;
-}
 /* Its whole sets, a card each: three to a row, a team in two even rows; two, then one, on narrower screens. */
 .sets {
   display: grid;
@@ -729,16 +701,10 @@ h1 {
   .set-moves {
     grid-template-columns: minmax(0, 1fr);
   }
-  .sets-room {
-    height: 860px;
-  }
 }
 @media (max-width: 420px) {
   .sets {
     grid-template-columns: minmax(0, 1fr);
-  }
-  .sets-room {
-    height: 1720px;
   }
 }
 </style>
