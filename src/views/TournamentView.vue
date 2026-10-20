@@ -296,6 +296,18 @@ watch(standings, async (all) => {
 const teamsWith = (pid: PokemonStat['id']) =>
   available(pokemon(pid)) ? { name: 'tournament', params: { id: id.value }, query: { f: `pokemon:${pid}` } } : null
 
+/** The top 8's placings as medals: gold, silver, bronze for the semifinals, and a plain one for the quarterfinals. */
+const medalOf = (placing: number) =>
+  placing === 1
+    ? 'medal gold'
+    : placing === 2
+      ? 'medal silver'
+      : placing <= 4
+        ? 'medal bronze'
+        : placing <= 8
+          ? 'medal'
+          : ''
+
 const num = (n: number) => n.toLocaleString(locale.value)
 const ordinal = (n: number) => `#${n}`
 </script>
@@ -389,7 +401,7 @@ const ordinal = (n: number) => `#${n}`
             :key="s.placing"
             :data-placing="s.placing"
             class="standing"
-            :class="{ open: open.has(s.placing) }"
+            :class="{ open: open.has(s.placing), won: s.placing === 1 }"
           >
             <button
               type="button"
@@ -398,9 +410,10 @@ const ordinal = (n: number) => `#${n}`
               :aria-label="t('tournaments.rowLabel', { placing: s.placing, player: s.player })"
               @click="toggle(s.placing)"
             >
-              <span class="placing num">{{ ordinal(s.placing) }}</span>
+              <span class="placing num" :class="medalOf(s.placing)">{{ ordinal(s.placing) }}</span>
               <span class="player"
-                >{{ s.player }} <span class="muted small">{{ s.country }}</span></span
+                >{{ s.player }} <span class="muted small">{{ s.country }}</span
+                ><span v-if="s.placing === 1" class="champion">{{ t('tournaments.champion') }}</span></span
               >
               <span
                 v-tip="s.dropped ? t('tournaments.droppedTip', { round: s.dropped }) : undefined"
@@ -944,6 +957,53 @@ h1 {
 }
 .player-row:hover {
   background: var(--hover);
+}
+/* The top 8's placings as medals, the site's ink-outlined squares with a hard shadow: gold, silver, bronze for the
+   semifinals, in the panel's color for the quarterfinals. The winner's row lit from the left in gold, a tag by their name. */
+.placing.medal {
+  justify-self: end;
+  min-width: 2.6em;
+  padding: 1px 5px;
+  text-align: center;
+  color: var(--text);
+  background: var(--panel);
+  border: 2px solid var(--ink);
+  box-shadow: var(--hard-sm);
+}
+.placing.gold,
+.placing.silver,
+.placing.bronze {
+  color: #141414;
+}
+.placing.gold {
+  background: var(--gold);
+}
+.placing.silver {
+  background: var(--silver);
+}
+.placing.bronze {
+  background: var(--bronze);
+}
+.standing.won .player-row {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 26%, transparent), transparent 70%);
+}
+.standing.won .player-row:hover {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 38%, transparent), var(--hover) 70%);
+}
+.standing.won .player {
+  font-weight: bold;
+}
+.champion {
+  margin-left: 8px;
+  padding: 0 5px;
+  font-size: 0.7em;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  vertical-align: 0.15em;
+  color: #141414;
+  background: var(--gold);
+  border: 1px solid var(--ink);
 }
 /* Unfolded: its row in the color of what's picked, ruled off from its sets. */
 .standing.open .player-row {

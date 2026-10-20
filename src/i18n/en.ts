@@ -800,6 +800,7 @@ export const messages = {
   'tournaments.toMeta': 'Meta',
   'tournaments.players': '{n} players',
   'tournaments.winner': 'Won by',
+  'tournaments.champion': 'Champion',
   'tournaments.winnerTeam': "{player}'s team",
   'tournaments.eventMeta': 'Meta',
   'tournaments.standings': 'Standings',

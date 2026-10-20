@@ -25,6 +25,10 @@
   --found: color-mix(in srgb, var(--ink) 9%, var(--panel));
   --good: #2c7a2c;
   --bad: #b3261e;
+  /* The medals: a tournament's top placings. */
+  --gold: #e9b824;
+  --silver: #c4c9d1;
+  --bronze: #cd8a4f;
   /* What stands against yours: the speed tiers' opponents band. */
   --opponent: #b3261e;
   --opponent-text: #ffffff;
@@ -63,6 +67,9 @@
     --found: color-mix(in srgb, var(--ink) 35%, var(--panel));
     --good: #7fd07f;
     --bad: #ff8a80;
+    --gold: #f2c94c;
+    --silver: #b8bec9;
+    --bronze: #d49a64;
     --opponent: #a1302a;
     --opponent-text: #ffffff;
 
@@ -99,6 +106,9 @@
   --found: color-mix(in srgb, var(--ink) 35%, var(--panel));
   --good: #7fd07f;
   --bad: #ff8a80;
+  --gold: #f2c94c;
+  --silver: #b8bec9;
+  --bronze: #d49a64;
   --opponent: #a1302a;
   --opponent-text: #ffffff;
 
