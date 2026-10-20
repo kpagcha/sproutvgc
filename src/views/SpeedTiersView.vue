@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch, type Component } from 'vue'
 import { AnimatePresence, motion } from 'motion-v'
 import { useRoute, useRouter } from 'vue-router'
+import { copy } from '@/lib/clipboard'
 import { allFilters, passesGroups, without } from '@/lib/filterGroups'
 import {
   formatTermFilters,
@@ -1478,31 +1479,6 @@ async function share(speed: number) {
   copiedTimer = setTimeout(() => (copied.value = null), 1500)
 }
 
-/**
- * Copies `text`, saying whether it could. The clipboard API only exists on secure pages (not the dev server opened
- * over the LAN, as on a phone), so elsewhere it goes through a hidden field and the older copy command. When neither
- * works, the address bar still has the link.
- */
-async function copy(text: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text)
-    return true
-  } catch {
-    const field = document.createElement('textarea')
-    field.value = text
-    field.setAttribute('readonly', '')
-    field.style.cssText = 'position: fixed; opacity: 0; pointer-events: none'
-    document.body.append(field)
-    field.select()
-    try {
-      return document.execCommand('copy')
-    } catch {
-      return false
-    } finally {
-      field.remove()
-    }
-  }
-}
 // A shared link to a row brings it into view once the ladder is in. Only the link it came with: a row picked later
 // doesn't move the page. A Pokémon found doesn't either (the comparison's way here finds its opponent): the floating
 // button, below, goes to it.

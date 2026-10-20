@@ -6,11 +6,12 @@ import { eventOf, loadRounds, loadStandings, type Round, type Standing } from '@
 import { locale, t } from '@/i18n'
 import { medalOf, playerMatches, type PlayerMatch } from '@/lib/tournamentStats'
 import AppLink from '@/components/AppLink'
+import CopyPaste from '@/components/CopyPaste.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import TeamSets from '@/components/TeamSets.vue'
 
 // A player of an official tournament (`/meta/tournaments/:id/players/:placing`): who they are, their placing (a medal
-// in the top 8), record and how far they made it, the event they played; their team, its whole sets (`TeamSets`); and
+// in the top 8), record and how far they made it, the event they played; their team, its whole sets (`TeamSets`), to copy as a paste under them (`CopyPaste`); and
 // their matches round by round, by day (Day 1, Day 2, the top cut, each with their record that day), each its round
 // (the top cut's by name: Quarterfinals, Semifinals, Final), its result, and their opponent (placing, name, record and
 // six as icons), leading to the opponent's own page.
@@ -107,6 +108,8 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
     <section v-if="player" class="panel">
       <h2>{{ t('tournaments.team') }}</h2>
       <TeamSets v-if="player.team.length" :team="player.team" />
+      <!-- The way to copy it as a paste, under its sets at their right. -->
+      <p v-if="player.team.length" class="team-tools"><CopyPaste :team="player.team" /></p>
       <p v-else class="muted">{{ t('tournaments.noTeam') }}</p>
     </section>
 
@@ -209,6 +212,12 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
 }
 h2 {
   margin: 0 0 8px;
+}
+.team-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0;
+  padding: 0 4px;
 }
 .small {
   font-size: 0.875em;

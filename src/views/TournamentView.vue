@@ -30,6 +30,7 @@ import { useSort } from '@/composables/useSort'
 import { useUrlFilters } from '@/composables/useUrlFilters'
 import AppLink from '@/components/AppLink'
 import BandTabs from '@/components/BandTabs.vue'
+import CopyPaste from '@/components/CopyPaste.vue'
 import FilterSearch from '@/components/FilterSearch.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import SegmentedControl from '@/components/SegmentedControl.vue'
@@ -45,7 +46,8 @@ import WinRateChart from '@/components/WinRateChart.vue'
 // teams and how they did in those rounds' matches, by usage or win rate, the top ones or all, each leading to the
 // standings filtered to the teams with it, and to its meta page on its regulation's data).
 // Each player's placing, name and country, record (marked when they dropped), and the six they brought, as icons;
-// unfolded, their whole sets (`TeamSets`) and the way to their page, their matches round by round.
+// unfolded, their whole sets (`TeamSets`), to copy as a paste (`CopyPaste`); their name leads to their page, their
+// matches round by round.
 const route = useRoute()
 const router = useRouter()
 const id = computed(() => String(route.params.id))
@@ -408,7 +410,11 @@ const ordinal = (n: number) => `#${n}`
             <p v-if="open.has(s.placing) && !s.team.length" class="muted small no-team">
               {{ t('tournaments.noTeam') }}
             </p>
-            <TeamSets v-else-if="open.has(s.placing)" :team="s.team" />
+            <template v-else-if="open.has(s.placing)">
+              <TeamSets :team="s.team" />
+              <!-- The way to copy the team as a paste, under its sets at their right. -->
+              <p class="team-tools"><CopyPaste :team="s.team" /></p>
+            </template>
           </li>
         </template>
       </ol>
@@ -957,6 +963,12 @@ h1 {
   font-size: 0.75em;
   font-weight: bold;
   border: 1px solid var(--border-strong);
+}
+.team-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0;
+  padding: 0 4px 12px;
 }
 .no-team {
   margin: 0;
