@@ -116,8 +116,20 @@ const {
 })
 const TOP = 20
 /** The fewest matches a win rate is worth going by: from fewer (the top cut's, often), it's faint. */
-const MIN_MATCHES = 20
-const few = (s: PokemonStat) => s.wins + s.losses < MIN_MATCHES
+/** How far from even a win rate's bar can reach, its half filled from there on: most sit close to even (a Pokémon on
+ * many teams meets itself often, a win and a loss), so the bar's scale is that close range, not 0% to 100%. */
+const WR_RANGE = 0.1
+/** How far from even a win rate is in standard errors, (wins − losses) / √matches: how much it can be gone by, a
+ * small gap over many matches counting for more than a large one over a few. Its bar is faint up to 1, solid from 2. A
+ * guide, not a test: a team's six share each result, and a team plays every round. */
+const evidence = (s: PokemonStat) => Math.abs(s.wins - s.losses) / Math.sqrt(s.wins + s.losses)
+const strength = (s: PokemonStat) => Math.min(Math.max(evidence(s) - 1, 0), 1)
+const wrStyle = (s: PokemonStat) =>
+  s.winRate === null
+    ? undefined
+    : { '--dev': Math.min(Math.abs(s.winRate - 0.5) / WR_RANGE, 1), '--strength': strength(s) }
+/** Whether a win rate could be chance, its number faint too. */
+const unsure = (s: PokemonStat) => evidence(s) < 1
 /** The most used Pokémon's usage, the one its bars are against. */
 const topUsage = computed(() => stats.value[0]?.usage ?? 0)
 const allStats = ref(false)
@@ -344,13 +356,13 @@ const ordinal = (n: number) => `#${n}`
           />
           <SortHeader
             :label="t('tournaments.col.winRate')"
-            :tip="t('tournaments.col.winRateTip', { n: MIN_MATCHES })"
+            :tip="t('tournaments.col.winRateTip')"
             right
             :active="statKey === 'winRate'"
             :desc="statDesc"
             @sort="sortStats('winRate')"
           />
-          <div role="columnheader" class="r wide-only">{{ t('tournaments.col.record') }}</div>
+          <div role="columnheader" class="r">{{ t('tournaments.col.record') }}</div>
           <div role="columnheader" :aria-label="t('tournaments.toMeta')"></div>
         </div>
         <div v-for="(s, i) in shownStats" :key="s.id" class="row" role="row">
@@ -370,21 +382,15 @@ const ordinal = (n: number) => `#${n}`
           <div role="cell" class="r num meter" :style="{ '--share': s.usage / (topUsage || 1) }">
             {{ percent(s.usage) }}
           </div>
-          <!-- Its win rate; on phones, its record under it, the record's column left out there. -->
           <div
-            v-tip="s.winRate !== null && few(s) ? t('tournaments.fewMatches', { n: s.wins + s.losses }) : undefined"
             role="cell"
             class="r num"
-            :class="s.winRate === null ? 'muted' : ['wr', s.winRate >= 0.5 ? 'up' : 'down', { few: few(s) }]"
-            :style="s.winRate !== null && { '--dev': Math.abs(s.winRate - 0.5) * 2 }"
+            :class="s.winRate === null ? 'muted' : ['wr', s.winRate >= 0.5 ? 'up' : 'down', { unsure: unsure(s) }]"
+            :style="wrStyle(s)"
           >
-            {{ s.winRate === null ? '—' : percent(s.winRate)
-            }}<span class="phone-record record-wl"
-              ><span :class="{ more: s.wins > s.losses }">{{ s.wins }}</span
-              >–<span :class="{ more: s.losses > s.wins }">{{ s.losses }}</span></span
-            >
+            {{ s.winRate === null ? '—' : percent(s.winRate) }}
           </div>
-          <div role="cell" class="r num wide-only record-wl">
+          <div role="cell" class="r num record-wl">
             <span :class="{ more: s.wins > s.losses }">{{ s.wins }}</span
             >–<span :class="{ more: s.losses > s.wins }">{{ s.losses }}</span>
           </div>
@@ -465,17 +471,33 @@ h1 {
 .dex-table.stats {
   --cols: 2.5rem minmax(0, 1fr) 5rem 5.5rem 6rem 4rem;
 }
-/* On phones, four columns: the record under the win rate. */
-.phone-record {
-  display: none;
-}
+/* On phones, each row two lines (the header's too), so the name has the width and each number room for its bar: its
+   rank, its Pokémon and the way to its meta page, then its usage, win rate and record, a third of the width each. */
 @media (max-width: 720px) {
   .dex-table.stats {
-    --cols: 1.75rem minmax(0, 1fr) 4rem 4.5rem 3.5rem;
+    --cols: 1.75rem repeat(3, minmax(0, 1fr));
   }
-  .phone-record {
-    display: block;
-    font-size: 0.8em;
+  .dex-table.stats .row {
+    grid-template-areas: 'rank mon mon meta' 'rank usage wr record';
+  }
+  .dex-table.stats .row > :nth-child(1) {
+    grid-area: rank;
+    align-self: start;
+  }
+  .dex-table.stats .row > :nth-child(2) {
+    grid-area: mon;
+  }
+  .dex-table.stats .row > :nth-child(3) {
+    grid-area: usage;
+  }
+  .dex-table.stats .row > :nth-child(4) {
+    grid-area: wr;
+  }
+  .dex-table.stats .row > :nth-child(5) {
+    grid-area: record;
+  }
+  .dex-table.stats .row > :nth-child(6) {
+    grid-area: meta;
   }
 }
 .mon-cell {
@@ -563,8 +585,8 @@ h1 {
   background: var(--accent);
 }
 /* Win rate: a bar from the middle of a faint track (even, marked), rightwards in the good color above it, leftwards
-   in the bad below, as far as it's from even (`--dev`, 0 to 1: 0% or 100% the whole half); from too few matches, the
-   bar and the number faint. */
+   in the bad below, as far as it's from even (`--dev`, 0 to 1, the half filled `WR_RANGE` from even), as solid as it
+   can be gone by (`--strength`, 0 to 1); one that could be chance, its number faint too. */
 .wr {
   --inset: 6px;
   position: relative;
@@ -587,6 +609,7 @@ h1 {
   bottom: 3px;
   width: calc((100% - 2 * var(--inset)) / 2 * var(--dev, 0));
   height: 3px;
+  opacity: calc(0.25 + 0.75 * var(--strength, 1));
 }
 .wr.up::after {
   left: 50%;
@@ -596,11 +619,8 @@ h1 {
   right: 50%;
   background: var(--bad);
 }
-.wr.few {
+.wr.unsure {
   color: var(--muted);
-}
-.wr.few::after {
-  opacity: 0.4;
 }
 /* A record, muted, the larger of its wins and losses in the text's color and bold. */
 .record-wl {
