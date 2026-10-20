@@ -3,6 +3,8 @@ import { computed, onMounted, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { t } from '@/i18n'
 import { GAME_NAME, REGULATION } from '@/data/format'
+import type { PokemonId } from '@/data/dex'
+import { POKEMON, spriteUrl } from '@/data/pokemon'
 import { AREAS, type AreaId } from '@/lib/areas'
 import { preloadSearch, searchFocus, useSearch } from '@/composables/useSearch'
 import { useSlashFocus } from '@/composables/useSlashFocus'
@@ -14,9 +16,14 @@ import SearchResults from '@/components/SearchResults.vue'
 import SearchBox from '@/components/SearchBox.vue'
 import logoUrl from '@/assets/logo.png'
 
-// The front door to the whole site: the search (of the site's pages, the meta pages and the dex), and under it, side by side, the
-// areas (where to go, by name: Meta's and Tools' with their sections) and the meta at a glance (what the site is most about,
-// `MetaHighlights`); then the reader's favorites and recently viewed. While searching, the results take the place of all but the search.
+// The front door to the whole site: the search (of the site's pages, the meta pages and the dex), and under it the
+// areas, a card each, two to a row (where to go: its name and its sections, links alone, a Pokémon blended into its
+// corner; Meta and Tools standing out), then the meta at a glance (what the site is most about, `MetaHighlights`); then
+// the reader's favorites and recently viewed. While searching, the results take the place of all but the search.
+
+/** The areas that stand out, the site's own (what players use, and what to work with): on an accent shadow over a
+ * dotted ground, their sections raised buttons, their Pokémon large. */
+const FEATURED = new Set<AreaId>(['meta', 'tools'])
 
 // The search is kept in the URL (`?q=`), so coming back from a result brings the results back.
 const route = useRoute()
@@ -52,8 +59,16 @@ function openOnly() {
   if (only.value) void router.push(only.value)
 }
 
-/** The areas whose sections show under their name: the dex's and the quizzes' are on their own pages. */
-const WITH_SECTIONS = new Set<AreaId>(['meta', 'tools'])
+// Each area's Pokémon, at its card's corner: Meta's the meta's most used now (Kingambit while there's none), Tools' Klefki
+// (keys), the dex's Rotom (the Rotom Dex), the quizzes' Alakazam (said to be the cleverest).
+const topOfMeta = computed(
+  () => Object.entries(meta.value ?? {}).find(([, m]) => m?.rank === 1)?.[0] as PokemonId | undefined,
+)
+const MASCOTS: Record<AreaId, PokemonId> = { meta: 'kingambit', tools: 'klefki', dex: 'rotom', quizzes: 'alakazam' }
+function mascot(area: AreaId): string | undefined {
+  const id = area === 'meta' ? (topOfMeta.value ?? MASCOTS.meta) : MASCOTS[area]
+  return POKEMON[id] && !POKEMON[id].noSprite ? spriteUrl(id) : undefined
+}
 
 // The regulation's hyphens don't break ("M-C" stays on one line): U+2011, the non-breaking hyphen.
 const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharCode(0x2011)) }
@@ -82,31 +97,35 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
     </div>
     <SearchResults v-if="results" :query :results />
     <template v-else>
-      <!-- Under them, side by side: the site's areas (where to go) at the left, the meta at a glance (what it's about)
-           at the right; stacked on narrow screens, the areas first. -->
-      <div class="board">
-        <nav class="panel banded explore" :aria-label="t('home.explore')">
-          <div class="band">
-            <h2 class="band-title">{{ t('home.explore') }}</h2>
-          </div>
-          <div v-for="a in AREAS" :key="a.id" class="area">
-            <RouterLink :to="{ name: a.route }" class="area-head">
-              <span class="area-title font-display">{{ t(a.label) }} <span class="arrow">›</span></span>
-            </RouterLink>
-            <ul v-if="WITH_SECTIONS.has(a.id)" class="area-sections">
-              <li v-for="s in a.sections" :key="s.key">
-                <RouterLink
-                  v-tip="s.soon ? t('soon.title') : undefined"
-                  :to="{ name: s.route }"
-                  :class="{ soon: s.soon }"
-                  >{{ t(s.label) }}</RouterLink
-                >
-              </li>
-            </ul>
-          </div>
-        </nav>
-        <MetaHighlights />
-      </div>
+      <!-- Under them, the site's areas, a card each, two to a row (where to go), then the meta at a glance (what it's
+           about). -->
+      <nav class="areas" :aria-label="t('home.explore')">
+        <section v-for="a in AREAS" :key="a.id" class="panel area" :class="{ featured: FEATURED.has(a.id) }">
+          <RouterLink :to="{ name: a.route }" class="area-head font-display"
+            >{{ t(a.label) }} <span class="arrow">›</span></RouterLink
+          >
+          <ul class="area-sections">
+            <li v-for="sec in a.sections" :key="sec.key">
+              <RouterLink
+                v-tip="sec.soon ? t('soon.title') : undefined"
+                :to="{ name: sec.route }"
+                :class="{ soon: sec.soon }"
+                >{{ t(sec.label) }}</RouterLink
+              >
+            </li>
+          </ul>
+          <img
+            v-if="mascot(a.id)"
+            class="pixel mascot"
+            :src="mascot(a.id)"
+            alt=""
+            width="96"
+            height="96"
+            draggable="false"
+          />
+        </section>
+      </nav>
+      <MetaHighlights class="highlights" />
       <FavoritesPanel />
       <RecentPanel />
     </template>
@@ -147,62 +166,44 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
   margin: 16px 0 0;
 }
 
-/* The areas and the meta side by side, the meta a little wider, both as tall as the taller: its ten against the four
-   areas. */
-.board {
+/* The areas: a card each, two to a row, one on phones; each its name (a link) and its sections, its Pokémon at its
+   bottom-right corner, the card's text kept clear of it. */
+.areas {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
-  align-items: stretch;
-  gap: 16px;
-  margin-bottom: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+  margin-bottom: 20px;
 }
-.board > :deep(.panel) {
-  margin: 0;
-}
-.band-title {
-  margin: 0;
-}
-/* An area a block each, ink rules between them: its name (a link), then, for Meta and Tools, its
-   sections as chips. */
-.explore {
+.area {
+  /* Its Pokémon's size. */
+  --mascot: 96px;
+  position: relative;
   display: flex;
   flex-direction: column;
-  padding-bottom: 4px;
-}
-/* Spread down the panel's height (the meta's beside it), each taking an equal share of what's left. */
-.area {
-  flex: 1 1 auto;
-  padding: 10px 0;
-}
-.area + .area {
-  border-top: 1px solid var(--border);
-}
-.area:first-of-type {
-  padding-top: 0;
+  gap: 10px;
+  min-height: 112px;
+  margin: 0;
+  padding-right: calc(var(--mascot) + 8px);
+  overflow: hidden;
 }
 .area-head {
-  display: flex;
-  flex-direction: column;
-  color: var(--text);
-}
-.area-head:hover {
-  text-decoration: none;
-}
-.area-title {
+  position: relative;
+  z-index: 1;
+  align-self: start;
   font-weight: bold;
   font-size: calc(18px * var(--display-scale, 1) * var(--text-scale));
-}
-.area-head:hover .area-title {
-  text-decoration: underline;
+  color: var(--text);
 }
 .arrow {
   color: var(--accent);
 }
 .area-sections {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin: 8px 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
@@ -213,7 +214,6 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
   color: var(--text);
   background: var(--panel-alt);
   border: 1px solid var(--border);
-  border-radius: 3px;
 }
 .area-sections a:hover {
   text-decoration: none;
@@ -225,10 +225,95 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
   color: var(--muted);
   border-style: dashed;
 }
+/* Its Pokémon, at the corner, part of the card rather than on it: a little see-through and less saturated, the card's
+   color coming through, and fading out towards the card's text. Drawn at a whole multiple of its size, which keeps its
+   pixels. */
+.mascot {
+  position: absolute;
+  right: -10px;
+  bottom: -12px;
+  width: var(--mascot);
+  height: var(--mascot);
+  image-rendering: pixelated;
+  pointer-events: none;
+  opacity: 0.7;
+  filter: saturate(0.75);
+  mask-image: linear-gradient(to right, transparent, #000 55%);
+}
 
-@media (max-width: 860px) {
-  .board {
+/* Meta and Tools: a hard shadow in the accent, a faint dotted ground, a larger name, their sections raised buttons
+   (lifting on hover, pressed flat when clicked), and their Pokémon twice its size, cut off by the card's edge. */
+:root:root .area.featured {
+  --mascot: 172px;
+  min-height: 150px;
+  padding-right: 150px;
+  background:
+    radial-gradient(color-mix(in srgb, var(--accent) 22%, transparent) 1px, transparent 1.5px) 0 0 / 10px 10px,
+    var(--panel);
+  box-shadow: 6px 6px 0 var(--accent);
+}
+.featured .area-head {
+  font-size: calc(26px * var(--display-scale, 1) * var(--text-scale));
+}
+.featured .area-sections {
+  gap: 10px;
+}
+.featured .area-sections a {
+  padding: 4px 12px;
+  font-size: 0.95em;
+  font-weight: bold;
+  background: var(--panel);
+  border: 2px solid var(--ink);
+  box-shadow: var(--hard-sm);
+  transition:
+    transform 0.08s ease-out,
+    box-shadow 0.08s ease-out;
+}
+.featured .area-sections a:hover {
+  background: var(--hover);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--hard);
+}
+.featured .area-sections a:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+.featured .area-sections a.soon {
+  font-weight: normal;
+  border: 2px dashed var(--border-strong);
+  box-shadow: none;
+}
+.featured .mascot {
+  right: -30px;
+  bottom: -28px;
+}
+.highlights {
+  margin: 0 0 16px;
+}
+
+@media (max-width: 560px) {
+  .areas {
     grid-template-columns: minmax(0, 1fr);
+  }
+  /* On phones, Meta's and Tools' Pokémon at its own size too, every one tucked partly off the card's right edge (the
+     blank around it there), and Meta's and Tools' buttons a little smaller, so they fit two to a line beside it. */
+  .area,
+  :root:root .area.featured {
+    --mascot: 96px;
+    min-height: 0;
+    padding-right: 76px;
+  }
+  .mascot,
+  .featured .mascot {
+    right: -14px;
+    bottom: -6px;
+  }
+  .featured .area-sections {
+    gap: 8px;
+  }
+  .featured .area-sections a {
+    padding: 3px 9px;
+    font-size: 0.9em;
   }
 }
 @media (max-width: 560px) {

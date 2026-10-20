@@ -9,9 +9,9 @@ import { useMeta } from '@/composables/useMeta'
 import AppLink from '@/components/AppLink'
 import PokemonIcon from '@/components/PokemonIcon'
 
-// The meta at a glance, on the home page under the search: the most used Pokémon as the rankings show them (a
-// `.dex-table` of their rank, name and usage with its bar, with no header), and those whose usage rose or fell the most
-// since the dataset before (none for a series' first), each leading to its meta page, and the way to the whole
+// The meta at a glance, on the home page under the areas, the page's width: the most used Pokémon as the rankings show
+// them (a `.dex-table` of their rank, name and usage with its bar, with no header), and beside them (under them on
+// narrower screens) those whose usage rose or fell the most since the dataset before (none for a series' first), each leading to its meta page, and the way to the whole
 // rankings. The data shown is every page's (`useMeta`), named under the band. The home page doesn't wait for the dex's
 // names, so the panel holds its place until they're in, with the data.
 const { snapshot, data } = useMeta()
@@ -76,7 +76,8 @@ const ready = computed(() => named.value && !!data.value)
       <AppLink :to="{ name: 'rankings' }" class="all">{{ t('home.metaAll') }} ›</AppLink>
     </div>
     <p class="muted label">{{ metaLabel(snapshot) }}</p>
-    <template v-if="ready">
+    <!-- The most used, and beside them on wide screens (under them on narrower ones) the movers. -->
+    <div v-if="ready" class="body">
       <div class="dex-table" role="table" :aria-label="t('home.metaTop')">
         <div v-for="r in top" :key="r.id" class="row" role="row">
           <div role="cell" class="r num muted rank">
@@ -136,7 +137,7 @@ const ready = computed(() => named.value && !!data.value)
           </div>
         </div>
       </div>
-    </template>
+    </div>
     <div v-else class="waiting" aria-hidden="true"></div>
   </section>
 </template>
@@ -252,12 +253,25 @@ const ready = computed(() => named.value && !!data.value)
   clip-path: inset(50%);
   white-space: nowrap;
 }
-/* The movers under the most used, rising and falling side by side (one under the other on phones). */
+/* The movers under the most used, rising and falling side by side (one under the other on phones); on wide screens,
+   beside the most used, rising over falling, about as tall as their ten. */
 .movers {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px 24px;
   margin-top: 16px;
+}
+@media (min-width: 861px) {
+  .body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 32px;
+  }
+  .movers {
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: 0;
+  }
 }
 h3 {
   width: fit-content;
