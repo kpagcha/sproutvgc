@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, shallowRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { Round, Standing } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
@@ -18,7 +18,7 @@ import PokemonIcon from '@/components/PokemonIcon'
 
 // A tournament's rounds (`TournamentView`'s Rounds tab, `/meta/tournaments/:id/rounds`): picked from a row of them by
 // day (`?round=`), the top cut, the default, as a bracket (each round a column, its matches lined up with the next
-// round's they lead to, `BracketMatch`; a first round with byes a play-in over it, its matches alone), a Swiss round as its pairings, the players' records going into it, the most wins first,
+// round's they lead to, `BracketMatch`; a first round with byes a play-in, a stage of its own, its matches alone), a Swiss round as its pairings, the players' records going into it, the most wins first,
 // searched by player and filtered by what a team has as the standings are (`?f=`; a match found when either team is,
 // its side marked). Each match its two players, their placing, name (the way to their page), country and six as icons,
 // the winner's in bold, a bye's second side saying so ("Bye" in the bracket).
@@ -45,6 +45,7 @@ const groups = computed(() =>
 )
 const bracket = computed(() => bracketOf(props.rounds))
 type Match = Round['matches'][number]
+const matchKey = (m: Match) => `${m[0]}-${m[1]}`
 const winnerOf = (m: Match) => (m[2] === 1 ? m[0] : m[2] === 2 ? m[1] : null)
 /** The top cut's first round, when it has byes (the cut not a power of two, the top seeds skipping it): a play-in, its
  * matches played alone, each with whom its winner faced in the round after, over the bracket, which starts there. */
@@ -56,23 +57,45 @@ const playIn = computed(() => {
     .map((m) => {
       const w = winnerOf(m)
       const after = w === null ? undefined : next.matches.find(([a, b]) => a === w || b === w)
-      return { m, faces: after && (after[0] === w ? after[1] : after[0]) }
+      return { m, faces: after && (after[0] === w ? after[1] : after[0]), after: after && matchKey(after) }
     })
 })
 const columns = computed(() => (playIn.value ? bracket.value.slice(1) : bracket.value))
 /** Those who came through the play-in, marked in the bracket. */
 const playedIn = computed(() => new Set((playIn.value ?? []).flatMap(({ m }) => winnerOf(m) ?? [])))
 const lastRound = computed(() => Math.max(...Object.keys(props.rounds).map(Number)))
-/** The round shown, kept in the URL (`?round=`): a Swiss one by number; the top cut unless one's picked (the last
- * round, with no top cut). */
-const round = computed<number | 'cut'>({
+/** The round shown, kept in the URL (`?round=`): a Swiss one by number, or a stage of the top cut, its play-in
+ * (`playin`) or its bracket, the default (the last round, with no top cut). */
+const round = computed<number | 'cut' | 'playin'>({
   get: () => {
+    if (route.query.round === 'playin' && playIn.value) return 'playin'
     const n = Number(route.query.round)
     if (Number.isInteger(n) && props.rounds[n] && props.rounds[n].phase !== 3) return n
     return bracket.value.length ? 'cut' : lastRound.value
   },
   set: (r) => void router.replace({ query: { ...route.query, round: r === 'cut' ? undefined : String(r) } }),
 })
+/** The top cut's stages, as picked: its play-in when it has one, and its bracket. */
+const stages = computed(() => [
+  ...(playIn.value ? [{ value: 'playin' as const, label: t('tournaments.playIn') }] : []),
+  { value: 'cut' as const, label: t('tournaments.bracket') },
+])
+
+// A play-in match's place in the next round leads to it: the bracket shown, scrolled to that match, lit a moment.
+const lit = ref<string | null>(null)
+let unlight = 0
+async function toBracket(key: string) {
+  await router.replace({ query: { ...route.query, round: undefined } })
+  await nextTick()
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+  document
+    .querySelector(`.slot[data-match="${key}"]`)
+    ?.scrollIntoView({ block: 'center', behavior: reduced ? 'auto' : 'smooth' })
+  lit.value = key
+  clearTimeout(unlight)
+  unlight = window.setTimeout(() => (lit.value = null), 2000)
+}
+onBeforeUnmount(() => clearTimeout(unlight))
 
 /** A top cut round's name, by how many were left after it, as a player's matches name it. */
 const cutName = (left: number) =>
@@ -93,8 +116,8 @@ const hit = (s: Placed | undefined) => {
   if (!q && !f.groups.length) return false
   return (!q || named(s, q)) && (!f.groups.length || passes(s, f))
 }
-const swiss = computed(() => (round.value === 'cut' ? [] : (props.rounds[round.value]?.matches ?? [])))
-const records = computed(() => (round.value === 'cut' ? new Map() : recordsBefore(props.rounds, round.value)))
+const swiss = computed(() => (typeof round.value !== 'number' ? [] : (props.rounds[round.value]?.matches ?? [])))
+const records = computed(() => (typeof round.value !== 'number' ? new Map() : recordsBefore(props.rounds, round.value)))
 const wins = (p: number | null) => (p === null ? -1 : (records.value.get(p)?.[0] ?? 0))
 /** The round's pairings, the most wins going in first, then the better placed. */
 const pairings = computed(() =>
@@ -126,7 +149,7 @@ const sides = (m: Match) =>
     s: sideOf(p),
     won: m[2] === i + 1,
     lost: m[2] !== 0 && m[2] !== i + 1,
-    record: p === null || round.value === 'cut' ? undefined : records.value.get(p),
+    record: p === null || typeof round.value !== 'number' ? undefined : records.value.get(p),
   }))
 
 const num = (n: number) => n.toLocaleString(locale.value)
@@ -153,27 +176,46 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
       </span>
     </div>
     <div v-if="bracket.length" class="round-group">
+      <span class="group-label">{{ t('tournaments.part.topCut') }}</span>
       <span class="segments">
-        <button type="button" :class="{ on: round === 'cut' }" :aria-pressed="round === 'cut'" @click="round = 'cut'">
-          {{ t('tournaments.part.topCut') }}
+        <button
+          v-for="st in stages"
+          :key="st.value"
+          type="button"
+          :class="{ on: round === st.value }"
+          :aria-pressed="round === st.value"
+          @click="round = st.value"
+        >
+          {{ st.label }}
         </button>
       </span>
     </div>
   </nav>
 
-  <template v-if="round === 'cut'">
-    <!-- Its play-in, when it has one: its matches alone, each with whom its winner faced. -->
-    <section v-if="playIn" class="play-in">
-      <h3 class="col-head">
-        <span v-tip="t('tournaments.playInTip')" class="tipped">{{ t('tournaments.playIn') }}</span>
-      </h3>
-      <div class="play-in-matches">
-        <div v-for="{ m, faces } in playIn" :key="`${m[0]}-${m[1]}`">
-          <BracketMatch :id :match="m" :by-placing />
-          <p v-if="faces" class="faces muted small">{{ t('tournaments.playInFaces', { n: faces }) }}</p>
-        </div>
+  <!-- The top cut's play-in, when it has one: its matches alone, each with whom its winner faced. -->
+  <section v-if="round === 'playin' && playIn" class="play-in">
+    <h3 class="col-head">
+      <span v-tip="t('tournaments.playInTip')" class="tipped">{{ t('tournaments.playIn') }}</span>
+    </h3>
+    <!-- Each match a bracket of its own: joined by a line to its place in the next round, a dashed box saying whom its
+         winner faced there, the way to that match in the bracket. -->
+    <div class="play-in-matches">
+      <div v-for="{ m, faces, after } in playIn" :key="matchKey(m)" class="feed">
+        <BracketMatch :id :match="m" :by-placing />
+        <button
+          v-if="faces && after"
+          type="button"
+          class="place num"
+          :aria-label="t('tournaments.toBracketMatch', { n: faces })"
+          @click="toBracket(after)"
+        >
+          {{ t('tournaments.playInVs', { n: faces }) }}
+        </button>
       </div>
-    </section>
+    </div>
+  </section>
+
+  <template v-else-if="round === 'cut'">
     <!-- The bracket: a column per round, each two matches side by side joined to the one they lead to. -->
     <div class="bracket" :style="{ '--cols': columns.length }">
       <div v-for="(r, ci) in columns" :key="r.round" class="col">
@@ -185,7 +227,13 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
             class="pair"
             :class="{ joined: ci < columns.length - 1 && r.matches[pi * 2 + 1] }"
           >
-            <div v-for="m in r.matches.slice(pi * 2, pi * 2 + 2)" :key="`${m[0]}-${m[1]}`" class="slot">
+            <div
+              v-for="m in r.matches.slice(pi * 2, pi * 2 + 2)"
+              :key="matchKey(m)"
+              class="slot"
+              :class="{ lit: lit === matchKey(m) }"
+              :data-match="matchKey(m)"
+            >
               <BracketMatch :id :match="m" :by-placing :played-in="ci === 0 ? playedIn : undefined" />
             </div>
           </div>
@@ -377,20 +425,81 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
   width: calc(var(--gap) / 2);
   border-top: 2px solid var(--ink);
 }
-/* The play-in, over the bracket: its matches compact, not stretched to the row, their icons three a row, so three or
-   more fit to a row; each with whom its winner faced under it. Ruled off from the bracket under it. */
-.play-in {
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 2px solid var(--ink);
-}
+/* The play-in, a stage of its own: its matches as many to a row as fit, each with its place in the next round. */
 .play-in-matches {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 17rem));
-  gap: 10px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 32px;
 }
-.faces {
-  margin: 4px 0 0;
+/* A match and, a line away, its place in the next round: a dashed box, whom its winner faced, the way to that match. */
+.feed {
+  --line: 1.5rem;
+  display: grid;
+  grid-template-columns: 17rem auto;
+  align-items: center;
+  column-gap: var(--line);
+}
+.place {
+  position: relative;
+  padding: 4px 10px;
+  font: inherit;
+  font-weight: bold;
+  color: inherit;
+  white-space: nowrap;
+  background: none;
+  border: 2px dashed var(--border-strong);
+  cursor: pointer;
+}
+.place:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.place::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  width: calc(var(--line) + 2px);
+  border-top: 2px solid var(--ink);
+}
+/* A match led to from the play-in, lit a moment. */
+.slot.lit :deep(.match) {
+  animation: lit 2s ease-out;
+}
+@keyframes lit {
+  0%,
+  40% {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+    background: var(--sel);
+  }
+  100% {
+    outline: 3px solid transparent;
+    outline-offset: 2px;
+  }
+}
+/* On phones, its place under the match, the line down to it. */
+@media (max-width: 720px) {
+  .play-in-matches {
+    flex-direction: column;
+  }
+  .feed {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--line);
+  }
+  .place {
+    justify-self: center;
+  }
+  .place::before {
+    top: auto;
+    right: auto;
+    bottom: 100%;
+    left: 50%;
+    width: 0;
+    height: calc(var(--line) + 2px);
+    border-top: none;
+    border-left: 2px solid var(--ink);
+  }
 }
 /* A match: its two sides in an ink-outlined box, the winner's in bold, the loser's faded. */
 .match {
@@ -445,10 +554,6 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
   /* The rounds' names spaced from the matches over them; the play-in's rule left to its name's ground. */
   .col-head {
     margin-bottom: 8px;
-  }
-  .play-in {
-    padding-bottom: 0;
-    border-bottom: none;
   }
   .col:not(:last-child) .slot::after,
   .pair.joined::before,
