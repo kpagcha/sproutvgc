@@ -465,10 +465,11 @@ const sections = computed(() => [
 ])
 
 /** What's stuck to the top as the page scrolls: on the standings, the tabs' band; on the Pokémon, the row of links to
- * its panels (the tabs left in their panel, as the row spans them all). Its height, for the Pokémon's table's header to
+ * its panels (the tabs heading it once their band, in their panel, has scrolled under it, as the row spans them all). Its height, for the Pokémon's table's header to
  * stick under it and a player scrolled to to land under it. */
 const bandTabs = useTemplateRef<{ $el: HTMLElement }>('bandTabs')
 const sectionNav = useTemplateRef<{ $el: HTMLElement }>('sectionNav')
+const pokemonTabs = useTemplateRef<{ $el: HTMLElement }>('pokemonTabs')
 const { height: bandHeight } = useElementSize(
   () => (tab.value === 'pokemon' ? sectionNav.value?.$el : bandTabs.value?.$el),
   undefined,
@@ -633,10 +634,13 @@ const ordinal = (n: number) => `#${n}`
 
     <!-- Its Pokémon: the day's, each one's usage, win rate and record. -->
     <template v-else>
-      <!-- Its panels, a row of links stuck to the top, the one being read marked. -->
-      <SectionNav ref="sectionNav" :sections />
+      <!-- Its panels, a row of links stuck to the top, the one being read marked; the tabs over it once their band has
+           scrolled under it. -->
+      <SectionNav ref="sectionNav" :sections :after="pokemonTabs?.$el">
+        <template #lead><BandTabs bare :label="t('tournaments.tabs')" :current="tab" :tabs /></template>
+      </SectionNav>
       <section id="sec-pokemon" class="panel banded section">
-        <BandTabs :label="t('tournaments.tabs')" :current="tab" :tabs />
+        <BandTabs ref="pokemonTabs" :label="t('tournaments.tabs')" :current="tab" :tabs />
         <div class="stats-controls">
           <SegmentedControl
             v-model="day"
