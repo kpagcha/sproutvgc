@@ -19,8 +19,8 @@ import SpeedOddsTip, { type Pointed } from '@/components/SpeedOddsTip.vue'
 // The speed tiers' ladder at the sets players run: a row per Pokémon (or per build of it, or per item or ability its
 // sets run that changes Speed), placed by the Speed in the column at its left, the rows at one Speed under one number.
 // On an axis shared by every row, a mark at each Speed its sets run (taller the more of its sets run it), a thin line
-// from its slowest to its fastest, over a fainter stretch of what it could reach (Min− to Max+); a row of one build has
-// its own mark solid, the rest faint. With yours, its Speed is a line down the rows, each mark colored by who moves first
+// from its slowest to its fastest, over a fainter stretch of what it could reach (Min− to Max+); the mark at the Speed
+// it's placed at (a row of one build's, or a Pokémon's most common) solid, the rest faint. With yours, its Speed is a line down the rows, each mark colored by who moves first
 // at it (yours the accent, them the opponents' red; under Trick Room the other way round), and at the row's end the
 // share of its sets yours moves first against (and ties with); yours is a row of its own, at its Speed. A Pokémon with
 // no sets in the snapshot (every Pokémon shown) has that stretch with its four benchmarks on it, hollow and alike (how
@@ -42,7 +42,8 @@ export interface OddsRow {
   reach: { min: number; max: number }
   /** Its Speed at each benchmark in battle: what a row with no sets shows. */
   bench: Record<Benchmark, number>
-  /** A row of one of its builds: that build's Speed, its mark solid and the others faint. */
+  /** The Speed of its sets it's placed at (a row of one of its builds, or a Pokémon's at its most common): its mark
+   * solid and the others faint. */
   own?: number
   /** No sets in the snapshot: its reach alone. */
   noSets: boolean

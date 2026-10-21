@@ -985,8 +985,11 @@ const othersRows = computed(() => {
       )
       chips.set(k, e)
       const isVs = k === vsGroup
+      const speed = placeOf(b)
+      // Placed at one of its sets' Speeds (not a benchmark: no sets, or the fastest possible), that one's mark solid.
+      const own = b.builds.some((x) => x.speed === speed) ? speed : undefined
       placed.push({
-        row: { ...b, speed: placeOf(b), versus: isVs, rival: !isVs && vs?.id === e.id },
+        row: { ...b, speed, own, versus: isVs, rival: !isVs && vs?.id === e.id },
         rank: e.rank,
         share: e.boost ? 0 : 1,
       })
