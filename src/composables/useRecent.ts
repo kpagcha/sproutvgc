@@ -7,6 +7,10 @@ import type { Kind, Ref } from '@/data/dex'
 // same visit (the speed tiers whatever's picked, a comparison per pair), with where it was left, so it reopens as it
 // was. Imports nothing from the dex's data, so the router can check for them without loading it.
 
+/** Whether the recently viewed are kept and shown: the home page's and the speed pages' own (`PageHistory`). Off for
+ * now, nothing recorded nor shown, the code kept to bring them back. */
+export const RECENT_ON = false
+
 const KEY = 'sproutvgc.recent.v1'
 const LIMIT = 12
 
@@ -88,6 +92,7 @@ function save() {
 
 /** Moves a visit to the front, as it was left now. */
 function put(item: Stored) {
+  if (!RECENT_ON) return
   const id = identity(item)
   keys.value = [item, ...keys.value.filter((k) => identity(k) !== id)].slice(0, LIMIT)
   save()
@@ -97,7 +102,7 @@ function put(item: Stored) {
 export const visitPage = (visit: PageVisit) => put(visit)
 
 /** Whether the reader has opened any entry or page. */
-export const hasRecent = () => keys.value.length > 0
+export const hasRecent = () => RECENT_ON && keys.value.length > 0
 
 export function useRecent() {
   /** The entries and pages opened lately, most recent first. */

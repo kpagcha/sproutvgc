@@ -1,5 +1,5 @@
 import { computed, ref, type MaybeRefOrGetter, toValue } from 'vue'
-import { isVisit, setupKey, type PageVisit } from '@/composables/useRecent'
+import { isVisit, RECENT_ON, setupKey, type PageVisit } from '@/composables/useRecent'
 
 // The setups a page whose setup can be starred (the speed tiers, the comparison) was at lately, most recent first, saved
 // in this browser and listed at the top of the page itself (`PageHistory`): the home page's recently viewed keeps one
@@ -78,6 +78,7 @@ export function pickVisit(page: string) {
  * Pokémon starts one at the front (or, picked from the list, where it is); the same visit's setup takes its entry's
  * place. */
 export function recordSetup(visit: PageVisit, of: string | null) {
+  if (!RECENT_ON) return
   const pick = picked.delete(visit.page)
   if (of === null) return endVisit(visit.page)
   const key = setupKey(visit)

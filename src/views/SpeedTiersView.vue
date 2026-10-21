@@ -108,6 +108,7 @@ import SegmentedControl from '@/components/SegmentedControl.vue'
 import VersusCard from '@/components/VersusCard.vue'
 import SetupStar from '@/components/SetupStar.vue'
 import PageHistory from '@/components/PageHistory.vue'
+import { RECENT_ON } from '@/composables/useRecent'
 import HelpToggle from '@/components/HelpToggle.vue'
 import TourToggle from '@/components/TourToggle.vue'
 
@@ -1680,7 +1681,7 @@ const { start: startTour } = useTour(
       </button>
     </Teleport>
     <!-- The setups the page was left at lately, folded away: the page's first row, over yours' bar too. -->
-    <PageHistory />
+    <PageHistory v-if="RECENT_ON" />
     <!-- Yours' bar: yours in short, opening its card (dropped under it, narrower than the sidebar; the sidebar brought
          in, beside the ladder). -->
     <div v-show="barShown" ref="bar" class="yours-bar" data-top-bar>

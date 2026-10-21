@@ -10,6 +10,7 @@ import { useMeta } from '@/composables/useMeta'
 import FavoritesPanel from '@/components/FavoritesPanel.vue'
 import MetaHighlights from '@/components/MetaHighlights.vue'
 import RecentPanel from '@/components/RecentPanel.vue'
+import { RECENT_ON } from '@/composables/useRecent'
 import SearchResults from '@/components/SearchResults.vue'
 import SearchBox from '@/components/SearchBox.vue'
 import logoUrl from '@/assets/logo.png'
@@ -138,7 +139,7 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
       </nav>
       <MetaHighlights class="highlights" />
       <FavoritesPanel />
-      <RecentPanel />
+      <RecentPanel v-if="RECENT_ON" />
     </template>
   </div>
 </template>

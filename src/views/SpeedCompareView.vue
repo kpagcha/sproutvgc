@@ -35,6 +35,7 @@ import PokemonIcon from '@/components/PokemonIcon'
 import PokemonPicker from '@/components/PokemonPicker.vue'
 import SetupStar from '@/components/SetupStar.vue'
 import PageHistory from '@/components/PageHistory.vue'
+import { RECENT_ON } from '@/composables/useRecent'
 import SpeedAddSecond from '@/components/SpeedAddSecond.vue'
 import SpeedEditor from '@/components/SpeedEditor.vue'
 import SpeedLineup, { type LineupEntry } from '@/components/SpeedLineup.vue'
@@ -546,7 +547,7 @@ function resetAll() {
       </button>
     </Teleport>
     <!-- The setups the page was left at lately, folded away. -->
-    <PageHistory />
+    <PageHistory v-if="RECENT_ON" />
     <!-- The heading: the title and its star (saving the Pokémon and their builds to the favorites), the data the
          common builds come from (a button opening what it is, to pick another; on phones, its icon alone), and how to
          read the page at the row's end (its icon alone on phones); under it, how to read the page, opened: the formula
