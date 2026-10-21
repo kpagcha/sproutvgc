@@ -50,6 +50,7 @@ import FilterSearch from '@/components/FilterSearch.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import SectionNav from '@/components/SectionNav.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
+import OptionsMenu from '@/components/OptionsMenu.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TeamSets from '@/components/TeamSets.vue'
 import WinRateChart from '@/components/WinRateChart.vue'
@@ -655,29 +656,32 @@ const ordinal = (n: number) => `#${n}`
             :label="t('tournaments.teamsOf')"
             :options="DAYS.map((d) => ({ value: d, label: t(`tournaments.day.${d}`) }))"
           />
-          <label v-if="chartable.length > CHART_MIN" class="chart-n">
-            <span class="muted">{{ t('tournaments.chartShown') }}</span>
-            <input
-              type="range"
-              :min="CHART_MIN"
-              :max="chartable.length"
-              :value="draggedN ?? chartN"
-              @input="draggedN = Number(($event.target as HTMLInputElement).value)"
-              @change="releaseN"
-            />
-            <span class="chart-n-value">
+          <!-- How many the chart shows, in a drop-down beside the day's choice. -->
+          <OptionsMenu v-if="chartable.length > CHART_MIN" class="chart-options" :title="t('tournaments.chartOptions')">
+            <label class="chart-n">
+              <span class="muted">{{ t('tournaments.chartShown') }}</span>
               <input
-                type="number"
-                class="chart-n-box"
+                type="range"
                 :min="CHART_MIN"
                 :max="chartable.length"
                 :value="draggedN ?? chartN"
-                :aria-label="t('tournaments.chartShown')"
-                @change="typeN"
+                @input="draggedN = Number(($event.target as HTMLInputElement).value)"
+                @change="releaseN"
               />
-              {{ t('tournaments.chartOf', { of: chartable.length }) }}
-            </span>
-          </label>
+              <span class="chart-n-value">
+                <input
+                  type="number"
+                  class="chart-n-box"
+                  :min="CHART_MIN"
+                  :max="chartable.length"
+                  :value="draggedN ?? chartN"
+                  :aria-label="t('tournaments.chartShown')"
+                  @change="typeN"
+                />
+                {{ t('tournaments.chartOf', { of: chartable.length }) }}
+              </span>
+            </label>
+          </OptionsMenu>
         </div>
         <p v-if="chartAbout" class="muted small about">{{ chartAbout }}</p>
         <p v-if="!standings || !rounds" class="muted">{{ t('tournaments.loading') }}</p>
@@ -1098,12 +1102,11 @@ h1 {
 }
 /* The Pokémon: the day they're of, then their table as the rankings' (rank, Pokémon, usage, win rate, record, the way
    to its meta page), the top ones and a toggle for the rest. */
-/* The day and how many the chart shows, on one row, wrapping on narrow screens. */
+/* The day, and beside it the button to how many the chart shows. */
 .stats-controls {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
   gap: 8px 16px;
   margin-bottom: 8px;
 }
@@ -1124,21 +1127,18 @@ h1 {
   width: 4em;
   font: inherit;
 }
-/* On phones, its label on a row of its own, the slider and the number under it across the width. */
-@media (max-width: 720px) {
-  .chart-n {
-    flex-wrap: wrap;
-    flex-grow: 1;
-    row-gap: 2px;
-  }
-  .chart-n > .muted {
-    flex-basis: 100%;
-  }
-  .chart-n input[type='range'] {
-    flex: 1;
-    width: auto;
-    min-width: 0;
-  }
+/* Its label on a row of its own, the slider and the number under it. */
+.chart-n {
+  flex-wrap: wrap;
+  row-gap: 2px;
+}
+.chart-n > .muted {
+  flex-basis: 100%;
+}
+/* Its drop-down opening rightward, from the button beside the day's choice. */
+.chart-options :deep(.pop) {
+  right: auto;
+  left: 0;
 }
 .about {
   margin: 2px 0 8px;
