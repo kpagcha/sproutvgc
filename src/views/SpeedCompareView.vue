@@ -1052,17 +1052,6 @@ function resetAll() {
 .page-note {
   margin: 12px 0 0;
 }
-.switch {
-  justify-content: flex-start;
-  gap: 6px;
-  font-weight: bold;
-}
-.switch.on {
-  background: var(--sel);
-}
-.switch input {
-  margin: 0;
-}
 .small {
   font-size: 0.875em;
 }

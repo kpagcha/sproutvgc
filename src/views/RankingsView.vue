@@ -783,15 +783,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 }
 .switch {
   flex: none;
-  justify-content: flex-start;
-  gap: 6px;
-  font-weight: bold;
-}
-.switch.on {
-  background: var(--sel);
-}
-.switch input {
-  margin: 0;
 }
 /* As the dex's stats, a bar along the bottom of the cell, from the left, on a faint track the cell's width (`--share`,
    0 to 1). Usage's, solid, against the most used Pokémon's, so the top of the meta reads at a glance; brought's, a

@@ -37,13 +37,19 @@ import TypeIcon from '@/components/TypeIcon'
 // A tournament team's whole sets, a card each, each entry leading to its meta page: its sprite and types in a band,
 // its item after the types, then its ability and nature (the stats it raises and lowers on hover) on a line, and its
 // moves two by two (on phones, one under another), each with its type's badge. A Pokémon whose team list isn't there
-// is the Pokémon alone. On a tournament's standings, a player's row unfolded, and on a player's page.
-defineProps<{ team: Slot[] }>()
+// is the Pokémon alone. On a tournament's standings, a player's row unfolded, and on a player's page; there, the sets
+// the standings are filtered to marked (`marked`: a Pokémon narrowed to a build).
+defineProps<{ team: Slot[]; marked?: (slot: Slot) => boolean }>()
 </script>
 
 <template>
   <ul class="sets">
-    <li v-for="([mon, it, ab, nature, moves], i) in team" :key="i" class="set">
+    <li
+      v-for="([mon, it, ab, nature, moves], i) in team"
+      :key="i"
+      class="set"
+      :class="{ marked: marked?.([mon, it, ab, nature, moves]) }"
+    >
       <div class="set-head">
         <img
           v-if="!POKEMON[mon]?.noSprite"
@@ -109,6 +115,13 @@ defineProps<{ team: Slot[] }>()
   background: var(--panel);
   border: 1px solid var(--ink);
   box-shadow: var(--hard-sm);
+}
+/* A set the standings are filtered to: framed in the accent. */
+.set.marked {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 1px var(--accent),
+    var(--hard-sm);
 }
 /* Its head: a band in the panel's other shade, the sprite at the left wholly inside it, its name and types beside
    it. */

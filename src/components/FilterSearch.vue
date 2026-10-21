@@ -6,8 +6,19 @@ import { locale, t } from '@/i18n'
 import { useAdvancedFilters } from '@/composables/useAdvancedFilters'
 import { confirmDialog } from '@/composables/useConfirm'
 import { useTermPicker, type TermOption } from '@/composables/useTermPicker'
-import { isPlain, noFilters, without, withFilter, withoutLast } from '@/lib/filterGroups'
-import { searchedBy, termName, type Term, type TermFilters, type TermKind, type TextMatch } from '@/lib/searchTerms'
+import { isPlain, noFilters, replaced, without, withFilter, withoutLast } from '@/lib/filterGroups'
+import {
+  searchedBy,
+  termName,
+  type Detail,
+  type RefTerm,
+  type Term,
+  type TermFilters,
+  type TermKind,
+  type TextMatch,
+} from '@/lib/searchTerms'
+import { refName } from '@/i18n/refName'
+import DetailMenu from '@/components/DetailMenu.vue'
 import FilterGroups from '@/components/FilterGroups.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -27,6 +38,8 @@ import TypeIcon from '@/components/TypeIcon'
 // The list behind shows what Enter would do: while the options are open, the one highlighted makes `preview` the
 // filters with it added, for the page to show. When the text finds some of the list by name too (`nameCount`), the
 // options lead with that, highlighted at first, which keeps the text as a search, as Escape or leaving the box does.
+// On a list of teams (`details`), a Pokémon's chip, its name tapped, narrows it to a build: the one Pokémon with an
+// item, ability or moves its sets run (`DetailMenu`), its chip then naming them after it.
 // Without `subject` there's no search by text: it only finds terms. A magnifying glass leads the box, and the key the
 // page focuses it with (`hotkey`) ends it, as the site's search boxes have them.
 const props = withDefaults(
@@ -45,8 +58,10 @@ const props = withDefaults(
     hotkey?: string
     /** Filters of dex entries link to their meta pages. */
     meta?: boolean
+    /** On a list of teams, what a Pokémon's sets run, the most first, to narrow its filter to a build by. */
+    details?: (id: PokemonId) => readonly Detail[]
   }>(),
-  { match: () => ['name'], subject: undefined, nameCount: 0, hotkey: undefined },
+  { match: () => ['name'], subject: undefined, nameCount: 0, hotkey: undefined, details: undefined },
 )
 const text = defineModel<string>('text', { default: '' })
 const filters = defineModel<TermFilters>('filters', { required: true })
@@ -103,6 +118,9 @@ function pick(o: TermOption | number) {
   text.value = ''
   input.value?.focus()
 }
+/** How many of the list there'd be with `old` narrowed (or widened) to a term, for its details; and the filters so. */
+const countWith = (old: Term) => (term: Term) => props.count(replaced(filters.value, old, term))
+const change = (old: Term, term: Term) => (filters.value = replaced(filters.value, old, term))
 function remove(term: Term) {
   filters.value = without(filters.value, term)
   input.value?.focus()
@@ -130,11 +148,20 @@ const listId = useId()
       <!-- The box: the plain filters as chips, then the text. Clicking anywhere in it is typing in it. -->
       <div class="box" @click="input?.focus()">
         <Search class="glass" :size="16" :stroke-width="2.5" aria-hidden="true" />
-        <span v-for="term in chips" :key="`${term.kind}:${term.id}`" class="chip">
+        <span v-for="(term, i) in chips" :key="`${term.kind}:${term.id}:${i}`" class="chip">
           <TypeIcon v-if="term.kind === 'type'" :type="term.id" />
           <ItemIcon v-else-if="term.kind === 'item'" :id="term.id as ItemId" :scale="0.67" />
           <PokemonIcon v-else-if="term.kind === 'pokemon'" :id="term.id as PokemonId" :scale="0.75" />
-          <span v-if="term.kind !== 'type'">{{ termName(term) }}</span>
+          <DetailMenu
+            v-if="details && term.kind === 'pokemon'"
+            :term
+            :candidates="() => details!(term.id as PokemonId)"
+            :count="countWith(term)"
+            :label="t('filter.details.edit', { name: refName(term as RefTerm) })"
+            @change="change(term, $event)"
+            >{{ termName(term) }}</DetailMenu
+          >
+          <span v-else-if="term.kind !== 'type'">{{ termName(term) }}</span>
           <button
             type="button"
             class="remove"
@@ -187,7 +214,7 @@ const listId = useId()
         {{ t('filter.advanced') }}
       </button>
     </div>
-    <FilterGroups v-if="advanced" v-model="filters" class="groups" :kinds :meta />
+    <FilterGroups v-if="advanced" v-model="filters" class="groups" :kinds :meta :count :details />
   </div>
 </template>
 

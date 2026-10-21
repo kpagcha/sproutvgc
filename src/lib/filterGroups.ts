@@ -5,16 +5,20 @@
 //
 //   ?f=type:fire,move:tailwind                         (plain: Fire and Tailwind)
 //   ?f=any.type:fire,type:water;move:fakeout,!move:protect&fm=any
+//   ?f=pokemon:incineroar~item:sitrusberry~move:fakeout     (an Incineroar holding Sitrus Berry, with Fake Out)
 //
 // `f` lists the groups, split by `;`, each its filters split by `,`: `any.` before a group's first filter joins any of
 // them (they join all otherwise; `all.`, from when groups joined any by default, is still read), `!` before a filter
-// negates it. `fm=any` joins the groups any (all otherwise). What a filter is, and which ones a list takes, is the
-// list's: it parses them (`parseTerm`) and tests them (`matches`).
+// negates it. `fm=any` joins the groups any (all otherwise). A filter can carry details after it, each after a `~`,
+// that narrow what it matches (a Pokémon's on a team: its item, ability, moves). What a filter is, and which ones a
+// list takes, details too, is the list's: it parses them (`parseTerm`) and tests them (`matches`).
 
 /** A filter: a kind and an ID within it (a type, an ability, a move's tag…). */
 export interface FilterLike {
   kind: string
   id: string
+  /** What narrows it, the list's to say: a Pokémon's item, ability and moves, on the one Pokémon. */
+  with?: readonly FilterLike[]
 }
 
 /** How filters, or groups, join: an entry has to pass any of them, or all of them. */
@@ -35,19 +39,20 @@ export interface Filters<F extends FilterLike> {
 
 export const noFilters = <F extends FilterLike>(): Filters<F> => ({ join: 'all', groups: [] })
 
-/** A filter's key in the URL: `kind:id`. */
-export const filterKey = (f: FilterLike) => `${f.kind}:${f.id}`
-export const sameFilter = (a: FilterLike, b: FilterLike) => a.kind === b.kind && a.id === b.id
+/** A filter's key in the URL: `kind:id`, each of its details after a `~`. */
+export const filterKey = (f: FilterLike): string =>
+  `${f.kind}:${f.id}` + (f.with ?? []).map((w) => `~${filterKey(w)}`).join('')
+export const sameFilter = (a: FilterLike, b: FilterLike) => filterKey(a) === filterKey(b)
 
 /**
- * The filters in `?f=` and `?fm=`, each read by `parseTerm` (a kind and ID, null for one the list doesn't take, left
- * out, as are repeats within a group and groups left empty). A group joins all of its filters unless `any.` says
- * otherwise.
+ * The filters in `?f=` and `?fm=`, each read by `parseTerm` (a kind and ID, and the details after it; null for one the
+ * list doesn't take, left out, as are repeats within a group and groups left empty). A group joins all of its filters
+ * unless `any.` says otherwise.
  */
 export function parseGroups<F extends FilterLike>(
   f: unknown,
   fm: unknown,
-  parseTerm: (kind: string, id: string) => F | null,
+  parseTerm: (kind: string, id: string, details: FilterLike[]) => F | null,
 ): Filters<F> {
   if (typeof f !== 'string' || !f) return noFilters()
   const groups = f.split(';').flatMap((g): FilterGroup<F>[] => {
@@ -56,8 +61,13 @@ export function parseGroups<F extends FilterLike>(
     const terms: Negatable<F>[] = []
     for (const key of body.split(',')) {
       const not = key.startsWith('!')
-      const [kind = '', id = ''] = (not ? key.slice(1) : key).split(':')
-      const term = parseTerm(kind, id)
+      const [head = '', ...rest] = (not ? key.slice(1) : key).split('~')
+      const pair = (k: string) => {
+        const [kind = '', id = ''] = k.split(':')
+        return { kind, id }
+      }
+      const { kind, id } = pair(head)
+      const term = parseTerm(kind, id, rest.map(pair))
       if (term && !terms.some((x) => sameFilter(x, term))) terms.push(not ? { ...term, not } : term)
     }
     return terms.length ? [{ join: any ? 'any' : 'all', terms }] : []
@@ -102,6 +112,16 @@ export const withFilter = <F extends FilterLike>(filters: Filters<F>, filter: F)
 /** `filters` with a group of its own for `filter`, joined to the others. */
 export const withGroup = <F extends FilterLike>(filters: Filters<F>, filter: F): Filters<F> =>
   withFilterIn(filters, filters.groups.length, filter)
+
+/** `filters` with `filter` in place of `old`, wherever it is (`old` just going where its group has `filter` already). */
+export function replaced<F extends FilterLike>(filters: Filters<F>, old: FilterLike, filter: Negatable<F>): Filters<F> {
+  const groups = filters.groups.map((g) => {
+    if (!g.terms.some((t) => sameFilter(t, old))) return g
+    const has = g.terms.some((t) => sameFilter(t, filter))
+    return { ...g, terms: g.terms.flatMap((t) => (!sameFilter(t, old) ? [t] : has ? [] : [filter])) }
+  })
+  return { ...filters, groups }
+}
 
 /** `filters` without the last filter of its last group (the group gone with it, left empty). */
 export function withoutLast<F extends FilterLike>(filters: Filters<F>): Filters<F> {

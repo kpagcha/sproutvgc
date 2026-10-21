@@ -4,7 +4,7 @@
 // teams did in those rounds' matches (byes and matches neither won left out: they say nothing of the teams).
 
 import type { PokemonId } from '@/data/dex'
-import type { EventUsage, Round, Standing } from '@/data/tournaments'
+import type { EventUsage, Round, Slot, Standing } from '@/data/tournaments'
 
 export type Day = 'all' | 'day2' | 'cut'
 /** The days, as their choice goes: the whole event, the default, then Day 2 and the top cut. */
@@ -35,10 +35,17 @@ export interface PokemonStat {
   best: number
 }
 
-/** Each Pokémon on the day's players' teams, the most used first. */
-export function pokemonStats(standings: readonly Placed[], rounds: Record<number, Round>, day: Day): PokemonStat[] {
+/** Each Pokémon on the day's players' teams, the most used first; with `keep`, only its sets that pass it count (a
+ * build's), its share still of every team. */
+export function pokemonStats(
+  standings: readonly Placed[],
+  rounds: Record<number, Round>,
+  day: Day,
+  keep?: (slot: Slot) => boolean,
+): PokemonStat[] {
   const players = playersOf(standings, day)
-  const team = new Map(players.map((s) => [s.placing, new Set(s.team.map(([p]) => p))]))
+  const total = players.filter((s) => s.team.length).length || 1
+  const team = new Map(players.map((s) => [s.placing, new Set(s.team.filter((x) => !keep || keep(x)).map(([p]) => p))]))
   const stats = new Map<PokemonId, PokemonStat>()
   const stat = (id: PokemonId) => {
     let s = stats.get(id)
@@ -59,7 +66,6 @@ export function pokemonStats(standings: readonly Placed[], rounds: Record<number
       for (const id of team.get(won === 1 ? b : a) ?? []) stat(id).losses++
     }
   }
-  const total = [...team.values()].filter((m) => m.size).length || 1
   return [...stats.values()]
     .map((s) => ({
       ...s,

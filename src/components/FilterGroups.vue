@@ -2,25 +2,50 @@
 import { FunnelX } from '@lucide/vue'
 import { t } from '@/i18n'
 import type { MessageKey } from '@/i18n'
-import type { Ref } from '@/data/dex'
+import type { PokemonId, Ref } from '@/data/dex'
 import type { TypeId } from '@/data/types'
+import DetailMenu from '@/components/DetailMenu.vue'
 import DexRef from '@/components/DexRef'
 import FilterAdder from '@/components/FilterAdder.vue'
 import TypeIcon from '@/components/TypeIcon'
 import { confirmDialog } from '@/composables/useConfirm'
-import { noFilters, withFilterIn, withGroup, type FilterGroup, type Join, type Negatable } from '@/lib/filterGroups'
-import { isExtraKind, termName, type Term, type TermFilters, type TermKind } from '@/lib/searchTerms'
+import {
+  filterKey,
+  noFilters,
+  replaced,
+  withFilterIn,
+  withGroup,
+  type FilterGroup,
+  type Join,
+  type Negatable,
+} from '@/lib/filterGroups'
+import { refName } from '@/i18n/refName'
+import {
+  isExtraKind,
+  termName,
+  type Detail,
+  type RefTerm,
+  type Term,
+  type TermFilters,
+  type TermKind,
+} from '@/lib/searchTerms'
 
 // A list's filters in the advanced mode (`FilterSearch`): groups, each its filters joined by "and" or "or", and the
 // groups joined the same way. The word between two of them switches it; "not" on a filter negates it. A filter of a
 // dex entry is its name, a link (to its meta page with `meta`); one that isn't (a move's tag) its name. Each group adds
 // filters of `kinds` from the explicit choices of what to filter by and then the entry (`FilterAdder`), as does the
-// button for a new group; with none yet, those choices are shown from the start.
+// button for a new group; with none yet, those choices are shown from the start. On a list of teams (`details`), a
+// Pokémon's filter names its build's details after it, and "with…" narrows it to one (`DetailMenu`).
 const model = defineModel<TermFilters>({ required: true })
-defineProps<{
+const props = defineProps<{
   kinds: readonly TermKind[]
   meta?: boolean
+  /** How many of the list there'd be with some filters, for a Pokémon's details. */
+  count?: (filters: TermFilters) => number
+  /** On a list of teams, what a Pokémon's sets run, the most first, to narrow its filter to a build by. */
+  details?: (id: PokemonId) => readonly Detail[]
 }>()
+const countWith = (old: Term) => (term: Term) => props.count?.(replaced(model.value, old, term)) ?? 0
 
 const flip = (join: Join): Join => (join === 'any' ? 'all' : 'any')
 const joinWord = (join: Join): MessageKey => (join === 'any' ? 'filter.or' : 'filter.and')
@@ -54,7 +79,7 @@ async function clearAll() {
         {{ t(joinWord(model.join)) }}
       </button>
       <div class="group" :class="{ single: model.groups.length === 1 }">
-        <template v-for="(f, j) in g.terms" :key="`${f.kind}:${f.id}`">
+        <template v-for="(f, j) in g.terms" :key="`${f.kind}:${f.id}:${j}`">
           <button
             v-if="j > 0"
             v-tip="t('filter.switch')"
@@ -78,6 +103,20 @@ async function clearAll() {
             <TypeIcon v-if="f.kind === 'type'" :type="f.id as TypeId" />
             <span v-if="isExtraKind(f.kind)">{{ termName(f) }}</span>
             <DexRef v-else :to="f as Ref" :meta />
+            <template v-for="w in f.with ?? []" :key="filterKey(w)">
+              <span class="muted" aria-hidden="true">·</span>
+              <DexRef :to="w" :meta />
+            </template>
+            <DetailMenu
+              v-if="details && count && f.kind === 'pokemon'"
+              :term="f"
+              :candidates="() => details!(f.id as PokemonId)"
+              :count="countWith(f)"
+              :label="t('filter.details.edit', { name: refName(f as RefTerm) })"
+              class="with"
+              @change="setTerm(g, i, j, f.not ? { ...$event, not: true } : $event)"
+              >{{ t('filter.details.add') }}</DetailMenu
+            >
             <button
               type="button"
               class="remove"
@@ -170,6 +209,10 @@ async function clearAll() {
 .not .not-toggle {
   opacity: 1;
   color: var(--bad);
+}
+.with {
+  font-size: 0.85em;
+  color: var(--muted);
 }
 .clear {
   min-height: 22px;

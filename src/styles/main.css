@@ -289,6 +289,14 @@ img.pixel {
   opacity: 0.5;
   cursor: default;
 }
+/* A switch: a button that's on or off (`on`), its label, or a checkbox and its label, from its start. */
+.btn.switch {
+  justify-content: flex-start;
+  gap: 6px;
+}
+.btn.switch input {
+  margin: 0;
+}
 .btn.primary {
   background: var(--accent);
   border-color: var(--accent);

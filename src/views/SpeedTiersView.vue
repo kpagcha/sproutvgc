@@ -2892,17 +2892,6 @@ const { start: startTour } = useTour(
   align-self: stretch;
   margin-top: -8px;
 }
-.switch {
-  justify-content: flex-start;
-  gap: 6px;
-  font-weight: bold;
-}
-.switch.on {
-  background: var(--sel);
-}
-.switch input {
-  margin: 0;
-}
 /* The modifiers' disclosure: a button, a plus, what it opens (folded, the ones on in short) and the arrow saying
    whether it is. */
 .disclosure {

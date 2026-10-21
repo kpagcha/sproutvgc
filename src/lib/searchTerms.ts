@@ -1,7 +1,8 @@
 // The terms a list is filtered by (`FilterSearch`): typed into its search box and picked from what the text finds, or
 // added in the advanced mode's groups: a type, an ability, a move, an item or a Pokémon, or what isn't a dex entry of
 // its own (a move's category, tag or reach, an item's category, a condition's kind). What passing one means is the
-// list's. They're kept in the URL as filter groups (`filterGroups.ts`, `?f=`, `?fm=`).
+// list's. They're kept in the URL as filter groups (`filterGroups.ts`, `?f=`, `?fm=`). On a list of teams (`bound`), a
+// Pokémon can carry details, an item, ability and moves (`with`), that the one Pokémon has to have: a build.
 
 import { available, availableIds, type PokemonId, type Ref } from '@/data/dex'
 import { SUBKINDS, type Subkind } from '@/data/conditions'
@@ -22,7 +23,10 @@ export type ExtraTerm =
   | { kind: 'reach'; id: Reach }
   | { kind: 'itemCategory'; id: ItemCategory }
   | { kind: 'subkind'; id: Subkind }
-export type Term = RefTerm | ExtraTerm
+/** What narrows a Pokémon term to a build: an item, ability or move. */
+export type Detail = Ref<'item' | 'ability' | 'move'>
+export const DETAIL_KINDS = ['item', 'ability', 'move'] as const
+export type Term = (RefTerm | ExtraTerm) & { with?: readonly Detail[] }
 export type TermKind = Term['kind']
 export type ExtraKind = ExtraTerm['kind']
 export type TermFilters = Filters<Term>
@@ -45,9 +49,12 @@ const EXTRA_NAME: Record<ExtraKind, (id: string) => MessageKey> = {
   subkind: (id) => `conditions.sub1.${id}` as MessageKey,
 }
 
-/** A term's name: a dex entry's own, or what the site calls a category, tag, reach or kind. */
-export const termName = (term: Term) =>
-  isExtraKind(term.kind) ? t(EXTRA_NAME[term.kind](term.id)) : refName(term as RefTerm)
+/** A term's name: a dex entry's own (a build's, its details after it), or what the site calls a category, tag, reach
+ * or kind. */
+export const termName = (term: Term): string =>
+  isExtraKind(term.kind)
+    ? t(EXTRA_NAME[term.kind](term.id))
+    : [refName(term as RefTerm), ...(term.with ?? []).map((w) => refName(w))].join(' · ')
 
 /** A kind's terms that aren't dex entries, by name. */
 export const extraOptions = (kind: ExtraKind) =>
@@ -75,9 +82,29 @@ export function toTerm(kind: string, id: string): Term | null {
   return available(term as RefTerm) ? term : null
 }
 
-/** The filters in `?f=` and `?fm=` of the `kinds` given, leaving out any the regulation doesn't have. */
-export const parseTermFilters = (f: unknown, fm: unknown, kinds: readonly TermKind[]): TermFilters =>
-  parseGroups(f, fm, (kind, id) => ((kinds as readonly string[]).includes(kind) ? toTerm(kind, id) : null))
+/** The filters in `?f=` and `?fm=` of the `kinds` given, leaving out any the regulation doesn't have; a Pokémon's
+ * details too where the list takes them (`bound`), else the Pokémon alone. */
+export const parseTermFilters = (f: unknown, fm: unknown, kinds: readonly TermKind[], bound = false): TermFilters =>
+  parseGroups(f, fm, (kind, id, details) => {
+    const term = (kinds as readonly string[]).includes(kind) ? toTerm(kind, id) : null
+    if (!term || !bound || term.kind !== 'pokemon') return term
+    const found: Detail[] = []
+    for (const d of details) {
+      const x = (DETAIL_KINDS as readonly string[]).includes(d.kind) ? toTerm(d.kind, d.id) : null
+      if (x && !found.some((y) => y.kind === x.kind && y.id === x.id)) found.push(x as Detail)
+    }
+    return found.length ? { ...term, with: found } : term
+  })
+
+/** `term` with `detail` added, or taken off when it has it. */
+export function toggledDetail(term: Term, detail: Detail): Term {
+  const had = term.with ?? []
+  const has = had.some((w) => w.kind === detail.kind && w.id === detail.id)
+  const next = has ? had.filter((w) => w.kind !== detail.kind || w.id !== detail.id) : [...had, detail]
+  const bare = { ...term }
+  delete bare.with
+  return next.length ? { ...bare, with: next } : bare
+}
 
 /** `filters` as `?f=` and `?fm=` take them, each undefined to leave it out. */
 export const formatTermFilters = (filters: TermFilters) => formatGroups(filters)
