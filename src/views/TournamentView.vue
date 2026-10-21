@@ -1138,12 +1138,14 @@ h1 {
   --cols: 2.5rem minmax(0, 1fr) 5rem 5.5rem 6rem 3.75rem;
 }
 /* On phones, what the list is sorted by, its options joined in one outlined strip as `SegmentedControl`'s, tapped again
-   to reverse it. */
+   to reverse it; a rule over it setting the list apart from the chart. */
 .stat-sort {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 4px;
+  margin: 8px 0 4px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
   font-size: 0.875em;
 }
 .stat-sort .segments {
