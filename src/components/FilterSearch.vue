@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, useId, useTemplateRef, watch } from 'vue'
-import { Search } from '@lucide/vue'
+import { computed, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
+import { Search, SlidersHorizontal } from '@lucide/vue'
 import type { ItemId, PokemonId } from '@/data/dex'
 import { locale, t } from '@/i18n'
 import { useAdvancedFilters } from '@/composables/useAdvancedFilters'
@@ -41,7 +41,9 @@ import TypeIcon from '@/components/TypeIcon'
 // On a list of teams (`details`), a Pokémon's chip, its name tapped, narrows it to a build: the one Pokémon with an
 // item, ability or moves its sets run (`DetailMenu`), its chip then naming them after it.
 // Without `subject` there's no search by text: it only finds terms. A magnifying glass leads the box, and the key the
-// page focuses it with (`hotkey`) ends it, as the site's search boxes have them.
+// page focuses it with (`hotkey`) ends it, as the site's search boxes have them. A placeholder too long for the box
+// (on a phone) is a line of text under it instead, rather than cut short; and there the advanced mode's button is its
+// icon alone.
 const props = withDefaults(
   defineProps<{
     kinds: readonly TermKind[]
@@ -96,6 +98,28 @@ async function toggleAdvanced() {
 const chips = computed(() => (advanced.value ? [] : (filters.value.groups[0]?.terms ?? [])))
 
 const input = useTemplateRef('input')
+/** Whether the placeholder fits in the box, measured with no chips in it (they leave the text less room, and hide the
+ * placeholder anyway); else it's under the box. */
+const fits = ref(true)
+let canvas: CanvasRenderingContext2D | null | undefined
+function measure() {
+  const el = input.value
+  if (!el || chips.value.length) return
+  canvas ??= document.createElement('canvas').getContext('2d')
+  if (!canvas) return
+  const style = getComputedStyle(el)
+  canvas.font = style.font
+  const room = el.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
+  fits.value = canvas.measureText(placeholder.value).width <= room
+}
+let resized: ResizeObserver | undefined
+onMounted(() => {
+  resized = new ResizeObserver(measure)
+  if (input.value) resized.observe(input.value)
+  document.fonts?.ready.then(measure)
+})
+onBeforeUnmount(() => resized?.disconnect())
+watch([placeholder, () => chips.value.length], measure, { flush: 'post' })
 defineExpose({ focus: (options?: FocusOptions) => input.value?.focus(options) })
 const picker = useTermPicker({
   text,
@@ -176,7 +200,7 @@ const listId = useId()
           v-model="text"
           type="text"
           class="text"
-          :placeholder="chips.length ? '' : placeholder"
+          :placeholder="chips.length || !fits ? '' : placeholder"
           :aria-label="placeholder"
           :aria-keyshortcuts="hotkey"
           role="combobox"
@@ -209,11 +233,16 @@ const listId = useId()
         class="btn switch advanced-toggle"
         :class="{ on: advanced }"
         :aria-pressed="advanced"
+        :aria-label="t('filter.advanced')"
         @click="toggleAdvanced"
       >
-        {{ t('filter.advanced') }}
+        <SlidersHorizontal class="advanced-icon" :size="16" :stroke-width="2.5" aria-hidden="true" /><span
+          class="advanced-label"
+          >{{ t('filter.advanced') }}</span
+        >
       </button>
     </div>
+    <p v-if="!fits" class="hint muted small" aria-hidden="true">{{ placeholder }}</p>
     <FilterGroups v-if="advanced" v-model="filters" class="groups" :kinds :meta :count :details />
   </div>
 </template>
@@ -224,7 +253,6 @@ const listId = useId()
 }
 .search-row {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
 }
@@ -232,8 +260,9 @@ const listId = useId()
 .box {
   position: relative;
   display: flex;
-  flex: 1 1 260px;
+  flex: 1 1 0;
   flex-wrap: wrap;
+  min-width: 0;
   align-items: center;
   gap: 4px;
   max-width: 480px;
@@ -324,6 +353,21 @@ const listId = useId()
 }
 .advanced-toggle {
   flex: none;
+}
+/* Its icon on phones, in place of its label. */
+.advanced-icon {
+  display: none;
+}
+@media (max-width: 560px) {
+  .advanced-icon {
+    display: block;
+  }
+  .advanced-label {
+    display: none;
+  }
+}
+.hint {
+  margin: 4px 0 0;
 }
 .groups {
   margin: 10px 0 0;

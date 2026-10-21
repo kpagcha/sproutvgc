@@ -583,10 +583,13 @@ const ordinal = (n: number) => `#${n}`
             <div class="player-row" @click="rowClick($event, s.placing)">
               <span class="placing num" :class="medalOf(s.placing)">{{ ordinal(s.placing) }}</span>
               <span class="player"
-                ><AppLink :to="{ name: 'tournamentPlayer', params: { id, placing: String(s.placing) } }" class="name">{{
-                  s.player
-                }}</AppLink>
-                <span class="muted small">{{ s.country }}</span
+                ><span class="who"
+                  ><AppLink
+                    :to="{ name: 'tournamentPlayer', params: { id, placing: String(s.placing) } }"
+                    class="name"
+                    >{{ s.player }}</AppLink
+                  >
+                  <span class="muted small">{{ s.country }}</span></span
                 ><span v-if="s.placing === 1" class="champion">{{ t('tournaments.champion') }}</span></span
               >
               <span
@@ -1619,13 +1622,13 @@ h1 {
   font-weight: bold;
 }
 .champion {
+  flex: none;
   margin-left: 8px;
   padding: 0 5px;
   font-size: 0.7em;
   font-weight: bold;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  vertical-align: 0.15em;
   color: #141414;
   background: var(--gold);
   border: 1px solid var(--ink);
@@ -1639,7 +1642,17 @@ h1 {
   font-weight: bold;
   text-align: right;
 }
+/* The name and country cut short where they don't fit; the winner's tag after them whole or not at all: one line high,
+   it wraps to a hidden second line when there's no room for it. */
 .player {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  min-width: 0;
+  height: 1lh;
+  overflow: hidden;
+}
+.who {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
