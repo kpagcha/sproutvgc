@@ -873,8 +873,14 @@ const ordinal = (n: number) => `#${n}`
       <!-- The Pokémon whose usage rose and fell the most against the events before, the day's teams: a table each, side
            by side (one under the other on phones). -->
       <section v-if="standings && rounds" id="sec-movers" class="panel banded section movers">
-        <h2 class="band">{{ t('tournaments.movers') }}</h2>
-        <p class="muted small about">{{ moversAbout }}</p>
+        <h2 class="band">
+          <!-- What they're against, to the heading's right on wide screens, over it on phones; with nothing to compare
+               with, said under it. -->
+          <span v-if="!movers">{{ t('tournaments.movers') }}</span>
+          <span v-else-if="phone" v-tip="moversAbout" class="tipped">{{ t('tournaments.movers') }}</span>
+          <span v-else v-tip.right="moversAbout" class="tipped">{{ t('tournaments.movers') }}</span>
+        </h2>
+        <p v-if="!movers" class="muted small about">{{ moversAbout }}</p>
         <div v-if="movers" class="movers-lists">
           <div
             v-for="group in [
