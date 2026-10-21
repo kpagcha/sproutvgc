@@ -195,9 +195,21 @@ const drawn = useGradualRows(shown)
 useRowColumns(useTemplateRef('head'))
 // The columns: rank, the entry, its Pokémon (not on phones, where they go under the row), usage, and each Pokémon
 // term's share.
+/** The rank's column: its digits, its mark (`.climb`'s width and margin) and the cell's padding, on wide screens and on
+ * phones. */
+const rankRoom = computed(() => {
+  const digits = `${String(rows.value.length).length}ch`
+  const mark = previous.value ? ' + 3px + 1.8em' : ''
+  return {
+    wide: `minmax(max(3em, ${digits}${mark} + 12px), auto)`,
+    sm: `minmax(max(1.8em, ${digits}${mark} + 10px), auto)`,
+  }
+})
 const columns = computed(() => {
   const list: { cell: string; wide: string; sm: string | null }[] = [
-    { cell: 'r', wide: 'minmax(3em, auto)', sm: 'minmax(1.8em, auto)' },
+    // Room for the longest rank and its mark beside it (as `.climb` has them, with the cell's padding), so every row's
+    // the same: the header's "#" alone is narrower.
+    { cell: 'r', wide: rankRoom.value.wide, sm: rankRoom.value.sm },
     { cell: 'grow', wide: 'minmax(0, 1fr)', sm: 'minmax(0, 1fr)' },
     { cell: 'wide-only', wide: 'var(--users)', sm: null },
     { cell: 'r', wide: '5em', sm: '4em' },
