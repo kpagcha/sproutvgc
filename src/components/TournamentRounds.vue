@@ -97,6 +97,23 @@ async function toBracket(key: string) {
 }
 onBeforeUnmount(() => clearTimeout(unlight))
 
+// A player's path through the bracket, traced from their placing: their matches lit, and the lines from each they won
+// to the next; again, untraced.
+const traced = ref<number | null>(null)
+const trace = (p: number) => (traced.value = traced.value === p ? null : p)
+/** Its color: the medal's of a top 4 placing, else the accent. */
+const traceColor = computed(() =>
+  traced.value === 1
+    ? 'var(--gold)'
+    : traced.value === 2
+      ? 'var(--silver)'
+      : traced.value !== null && traced.value <= 4
+        ? 'var(--bronze)'
+        : 'var(--accent)',
+)
+const onPath = (m: Match) => traced.value !== null && (m[0] === traced.value || m[1] === traced.value)
+const advanced = (m: Match, ci: number) => ci < columns.value.length - 1 && winnerOf(m) === traced.value && onPath(m)
+
 /** A top cut round's name, by how many were left after it, as a player's matches name it. */
 const cutName = (left: number) =>
   left <= 2 ? t(`tournaments.cutRound.${left as 0 | 1 | 2}`) : t('tournaments.cutRound.n', { n: 2 ** (left + 1) })
@@ -217,7 +234,7 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
 
   <template v-else-if="round === 'cut'">
     <!-- The bracket: a column per round, each two matches side by side joined to the one they lead to. -->
-    <div class="bracket" :style="{ '--cols': columns.length }">
+    <div class="bracket" :style="{ '--cols': columns.length, '--trace': traceColor }">
       <div v-for="(r, ci) in columns" :key="r.round" class="col">
         <h3 class="col-head">{{ cutName(r.left) }}</h3>
         <div class="col-body">
@@ -225,16 +242,26 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
             v-for="(_, pi) in Math.ceil(r.matches.length / 2)"
             :key="pi"
             class="pair"
-            :class="{ joined: ci < columns.length - 1 && r.matches[pi * 2 + 1] }"
+            :class="{
+              joined: ci < columns.length - 1 && r.matches[pi * 2 + 1],
+              out: r.matches.slice(pi * 2, pi * 2 + 2).some((m) => advanced(m, ci)),
+            }"
           >
             <div
               v-for="m in r.matches.slice(pi * 2, pi * 2 + 2)"
               :key="matchKey(m)"
               class="slot"
-              :class="{ lit: lit === matchKey(m) }"
+              :class="{ lit: lit === matchKey(m), advanced: advanced(m, ci) }"
               :data-match="matchKey(m)"
             >
-              <BracketMatch :id :match="m" :by-placing :played-in="ci === 0 ? playedIn : undefined" />
+              <BracketMatch
+                :id
+                :match="m"
+                :by-placing
+                :played-in="ci === 0 ? playedIn : undefined"
+                :traced
+                @trace="trace"
+              />
             </div>
           </div>
         </div>
@@ -400,7 +427,9 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
 .slot .match {
   width: 100%;
 }
-/* The lines: from each match right, half the gap; down the pair's middles; and on to the next round's match. */
+/* The lines: from each match right, half the gap; from there to the pair's middle, each match's half of the line down
+   it; and on to the next round's match. A traced player's, from each match they won, in their path's color, over the
+   rest. */
 .col:not(:last-child) .slot::after {
   content: '';
   position: absolute;
@@ -409,13 +438,19 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
   width: calc(var(--gap) / 2);
   border-top: 2px solid var(--ink);
 }
-.pair.joined::before {
+.pair.joined .slot::before {
   content: '';
   position: absolute;
-  top: 25%;
-  bottom: 25%;
   left: calc(100% + var(--gap) / 2 - 2px);
   border-right: 2px solid var(--ink);
+}
+.pair.joined .slot:first-child::before {
+  top: 50%;
+  bottom: 0;
+}
+.pair.joined .slot:last-child::before {
+  top: 0;
+  bottom: 50%;
 }
 .pair.joined::after {
   content: '';
@@ -424,6 +459,12 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
   left: calc(100% + var(--gap) / 2);
   width: calc(var(--gap) / 2);
   border-top: 2px solid var(--ink);
+}
+.col .slot.advanced::after,
+.pair.joined .slot.advanced::before,
+.pair.out::after {
+  z-index: 1;
+  border-color: var(--trace);
 }
 /* The play-in, a stage of its own: its matches as many to a row as fit, each with its place in the next round. */
 .play-in-matches {
@@ -556,7 +597,7 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
     margin-bottom: 8px;
   }
   .col:not(:last-child) .slot::after,
-  .pair.joined::before,
+  .pair.joined .slot::before,
   .pair.joined::after {
     display: none;
   }

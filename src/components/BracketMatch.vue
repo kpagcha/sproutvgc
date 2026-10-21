@@ -18,7 +18,10 @@ const props = defineProps<{
   byPlacing: ReadonlyMap<number, Placed>
   /** The players who came through the play-in. */
   playedIn?: ReadonlySet<number>
+  /** In the bracket, the player whose path is traced, their side lit; their placing, a button, traces it. */
+  traced?: number | null
 }>()
+const emit = defineEmits<{ trace: [placing: number] }>()
 
 const sides = computed(() =>
   ([props.match[0], props.match[1]] as const).map((p, i) => ({
@@ -32,7 +35,12 @@ const sides = computed(() =>
 
 <template>
   <div class="match">
-    <div v-for="side in sides" :key="side.p ?? 'bye'" class="side" :class="{ won: side.won, lost: side.lost }">
+    <div
+      v-for="side in sides"
+      :key="side.p ?? 'bye'"
+      class="side"
+      :class="{ won: side.won, lost: side.lost, traced: traced != null && side.p === traced }"
+    >
       <template v-if="side.s">
         <span class="who"
           ><AppLink :to="{ name: 'tournamentPlayer', params: { id, placing: String(side.s.placing) } }" class="name">{{
@@ -44,7 +52,18 @@ const sides = computed(() =>
           <PokemonIcon v-for="(slot, i) in side.s.team" :id="slot[0]" :key="i" />
         </span>
         <span class="seed">
-          <span class="placing num" :class="medalOf(side.s.placing)">#{{ side.s.placing }}</span>
+          <button
+            v-if="traced !== undefined"
+            v-tip="t('tournaments.traceTip')"
+            type="button"
+            class="placing num"
+            :class="medalOf(side.s.placing)"
+            :aria-pressed="traced === side.s.placing"
+            @click="emit('trace', side.s.placing)"
+          >
+            #{{ side.s.placing }}
+          </button>
+          <span v-else class="placing num" :class="medalOf(side.s.placing)">#{{ side.s.placing }}</span>
           <span v-if="playedIn?.has(side.s.placing)" v-tip="t('tournaments.playedInTip')" class="played-in">{{
             t('tournaments.playIn')
           }}</span>
@@ -126,6 +145,30 @@ const sides = computed(() =>
 }
 .placing {
   font-weight: bold;
+}
+/* As a button, its placing as it'd be shown, pointing it can be clicked. */
+button.placing {
+  font: inherit;
+  font-weight: bold;
+  color: inherit;
+  cursor: pointer;
+}
+button.placing:not(.medal) {
+  padding: 0;
+  background: none;
+  border: none;
+}
+button.placing:not(.medal):hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+/* A traced player's side: tinted in their path's color (`--trace`, the bracket's: their medal's in the top 4, else the
+   accent), their placing in it too. */
+.side.traced {
+  background: color-mix(in srgb, var(--trace, var(--accent)) 22%, var(--panel));
+}
+.side.traced button.placing:not(.medal) {
+  color: var(--trace, var(--accent));
 }
 .played-in {
   padding: 0 3px;

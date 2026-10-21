@@ -844,6 +844,7 @@ export const messages = {
   'tournaments.recordBeforeTip': 'Their record going into the round',
   'tournaments.playIn': 'Play-in',
   'tournaments.bracket': 'Bracket',
+  'tournaments.traceTip': 'Trace their path through the bracket',
   'tournaments.playInTip': "The top cut's first round, for those not seeded through it: the top seeds had a bye",
   'tournaments.playInVs': 'vs #{n}',
   'tournaments.toBracketMatch': 'The winner faced #{n}: see the match in the bracket',
