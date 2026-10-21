@@ -547,12 +547,14 @@ export const router = createRouter({
     // Between entries of one kind (one Pokémon to another) the page stays, with no transition to wait for.
     const samePage = (to.matched[0]?.path ?? to.path) === (from.matched[0]?.path ?? from.path)
     if (!savedPosition && (to.path === from.path || (samePage && to.meta.keepScroll))) return false
+    // A match led to (`?match=`, the Rounds tab's) is scrolled to by its page, once drawn.
+    const toMatch = !savedPosition && to.query.match !== undefined
     // On first load (a reload restoring its position) there's no page leaving.
     if (!samePage && from.matched.length) {
       await afterPageExit()
       await nextTick()
     }
-    return savedPosition ?? { top: 0 }
+    return toMatch ? false : (savedPosition ?? { top: 0 })
   },
 })
 

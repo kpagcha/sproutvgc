@@ -220,6 +220,8 @@ export interface PlayerMatch {
   result: Result
   /** In the top cut, how many rounds were left after it: 0 the final, 1 the semifinals, 2 the quarterfinals… */
   left?: number
+  /** The match as the Rounds tab knows it, its two players' placings as paired (`?match=`). */
+  key: string
 }
 
 /** A player's matches, round by round, the first first. */
@@ -239,7 +241,9 @@ export function playerMatches(rounds: Record<number, Round>, placing: number): P
       const opponent = first ? b : a
       const result: Result =
         opponent === null && won === 1 ? 'bye' : won === 0 ? 'tie' : (won === 1) === first ? 'win' : 'loss'
-      return [{ round, phase: r.phase, opponent, result, ...(r.phase === 3 && { left: last - round }) }]
+      return [
+        { round, phase: r.phase, opponent, result, key: `${a}-${b}`, ...(r.phase === 3 && { left: last - round }) },
+      ]
     })
 }
 

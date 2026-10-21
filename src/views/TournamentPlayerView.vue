@@ -87,6 +87,16 @@ const roundsOf = (d: { key: string; matches: PlayerMatch[] }) => ({
   query: d.key === 'topCut' ? {} : { round: String(d.matches[0]!.round) },
 })
 
+/** A match in the Rounds tab: its Swiss round, or the top cut's stage, its play-in when it's the first of a top cut with
+ * byes, else its bracket; the match lit there (`?match=`). */
+function matchIn(m: PlayerMatch) {
+  const cut = Object.entries(rounds.value ?? {}).filter(([, r]) => r.phase === 3)
+  const first = Math.min(...cut.map(([n]) => Number(n)))
+  const playIn = m.phase === 3 && m.round === first && rounds.value![first]!.matches.some(([, b]) => b === null)
+  const round = m.phase !== 3 ? String(m.round) : playIn ? 'playin' : undefined
+  return { name: 'tournament', params: { id: id.value, tab: 'rounds' }, query: { round, match: m.key } }
+}
+
 /** A round's name: the top cut's by how many were left after it, the Swiss' by number. */
 function roundName(m: PlayerMatch) {
   if (m.left === undefined) return t('tournaments.round', { n: m.round })
@@ -162,32 +172,30 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
             <span class="num">{{ record(d.wins, d.losses, d.ties) }}</span>
           </li>
           <li v-for="m in d.matches" :key="m.round" class="match">
-            <!-- Leading to the opponent's page; a bye, or an opponent since disqualified, leading nowhere. -->
-            <AppLink
-              v-if="m.opp"
-              :to="{ name: 'tournamentPlayer', params: { id, placing: String(m.opp.placing) } }"
-              class="match-row linked"
-            >
-              <span class="round">{{ roundName(m) }}</span>
+            <div class="match-row">
+              <!-- Its round leading to it in the Rounds tab, scrolled to and lit a moment. -->
+              <AppLink :to="matchIn(m)" class="round">{{ roundName(m) }}</AppLink>
               <span v-tip="t(`tournaments.resultTip.${m.result}`)" class="result" :class="m.result">{{
                 t(`tournaments.result.${m.result}`)
               }}</span>
-              <span class="opponent"
-                ><span class="muted num">#{{ m.opp.placing }}</span> {{ m.opp.player }}
-                <CountryFlag :code="m.opp.country"
-              /></span>
-              <span class="opp-record num muted">{{ record(m.opp.wins, m.opp.losses) }}</span>
-              <span v-if="m.opp.team.length" class="team" aria-hidden="true">
-                <PokemonIcon v-for="(slot, i) in m.opp.team" :id="slot[0]" :key="i" />
-              </span>
-              <span v-else class="team none muted small">{{ t('tournaments.noList') }}</span>
-            </AppLink>
-            <div v-else class="match-row">
-              <span class="round">{{ roundName(m) }}</span>
-              <span v-tip="t(`tournaments.resultTip.${m.result}`)" class="result" :class="m.result">{{
-                t(`tournaments.result.${m.result}`)
-              }}</span>
-              <span class="opponent muted">{{
+              <!-- The opponent's name leading to their page; a bye, or an opponent since disqualified, leading nowhere. -->
+              <template v-if="m.opp">
+                <span class="opponent"
+                  ><span class="muted num">#{{ m.opp.placing }}</span>
+                  <AppLink
+                    :to="{ name: 'tournamentPlayer', params: { id, placing: String(m.opp.placing) } }"
+                    class="opp-name"
+                    >{{ m.opp.player }}</AppLink
+                  >
+                  <CountryFlag :code="m.opp.country"
+                /></span>
+                <span class="opp-record num muted">{{ record(m.opp.wins, m.opp.losses) }}</span>
+                <span v-if="m.opp.team.length" class="team" aria-hidden="true">
+                  <PokemonIcon v-for="(slot, i) in m.opp.team" :id="slot[0]" :key="i" />
+                </span>
+                <span v-else class="team none muted small">{{ t('tournaments.noList') }}</span>
+              </template>
+              <span v-else class="opponent muted">{{
                 m.result === 'bye' ? t('tournaments.byeOpponent') : t('tournaments.goneOpponent')
               }}</span>
             </div>
@@ -346,11 +354,8 @@ section {
   padding: 6px 4px;
   color: inherit;
 }
-.match-row.linked:hover {
-  background: var(--hover);
-  text-decoration: none;
-}
 .round {
+  justify-self: start;
   font-weight: bold;
   white-space: nowrap;
 }
@@ -385,6 +390,19 @@ section {
 }
 .opponent .muted {
   font-weight: normal;
+}
+/* The opponent's name spaced from their placing and flag by margins, the whitespace between them dropped by the template. */
+.opp-name {
+  margin: 0 0.35em;
+}
+/* The opponent's name and the round, the row's links, in the text's color, the accent on hover. */
+.opp-name,
+.round {
+  color: inherit;
+}
+.opp-name:hover,
+.round:hover {
+  color: var(--accent);
 }
 .opp-record {
   white-space: nowrap;

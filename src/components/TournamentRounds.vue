@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, shallowRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { Round, Standing } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
@@ -81,21 +81,48 @@ const stages = computed(() => [
   { value: 'cut' as const, label: t('tournaments.bracket') },
 ])
 
-// A play-in match's place in the next round leads to it: the bracket shown, scrolled to that match, lit a moment.
+// A match scrolled to and lit a moment: a play-in match's place in the next round, in the bracket, or one a player's
+// page leads to (`?match=`, its two players' placings as paired), in the round it says, the query then dropped so going
+// back doesn't light it again. A Swiss round's pairings are drawn a chunk a frame, so it's waited for, a few seconds at
+// most; not found, the page goes to its top, as the router would have.
 const lit = ref<string | null>(null)
 let unlight = 0
-async function toBracket(key: string) {
-  await router.replace({ query: { ...route.query, round: undefined } })
+let seeking = 0
+const FRAMES = 180
+async function light(key: string) {
+  const mine = ++seeking
   await nextTick()
+  let el: Element | null = null
+  for (let i = 0; i < FRAMES && mine === seeking; i++) {
+    el = document.querySelector(`[data-match="${key}"]`)
+    if (el) break
+    await new Promise(requestAnimationFrame)
+  }
+  if (mine !== seeking) return
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
-  document
-    .querySelector(`.slot[data-match="${key}"]`)
-    ?.scrollIntoView({ block: 'center', behavior: reduced ? 'auto' : 'smooth' })
+  if (!el) return window.scrollTo({ top: 0 })
+  el.scrollIntoView({ block: 'center', behavior: reduced ? 'auto' : 'smooth' })
   lit.value = key
   clearTimeout(unlight)
   unlight = window.setTimeout(() => (lit.value = null), 2000)
 }
-onBeforeUnmount(() => clearTimeout(unlight))
+async function toBracket(key: string) {
+  await router.replace({ query: { ...route.query, round: undefined } })
+  void light(key)
+}
+watch(
+  () => route.query.match,
+  (key) => {
+    if (typeof key !== 'string') return
+    void light(key)
+    void router.replace({ query: { ...route.query, match: undefined } })
+  },
+  { immediate: true },
+)
+onBeforeUnmount(() => {
+  clearTimeout(unlight)
+  seeking++
+})
 
 // A player's path through the bracket, traced from their placing: their matches lit, and the lines from each they won
 // to the next; again, untraced.
@@ -217,7 +244,13 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
     <!-- Each match a bracket of its own: joined by a line to its place in the next round, a dashed box saying whom its
          winner faced there, the way to that match in the bracket. -->
     <div class="play-in-matches">
-      <div v-for="{ m, faces, after } in playIn" :key="matchKey(m)" class="feed">
+      <div
+        v-for="{ m, faces, after } in playIn"
+        :key="matchKey(m)"
+        class="feed"
+        :class="{ lit: lit === matchKey(m) }"
+        :data-match="matchKey(m)"
+      >
         <BracketMatch :id :match="m" :by-placing />
         <button
           v-if="faces && after"
@@ -291,8 +324,10 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
       <li
         v-for="m in drawn"
         :key="`${m[0]}-${m[1]}`"
-        v-memo="[m, round, query, filters, id, locale]"
+        v-memo="[m, round, query, filters, id, locale, lit === matchKey(m)]"
         class="match swiss"
+        :class="{ lit: lit === matchKey(m) }"
+        :data-match="matchKey(m)"
       >
         <div
           v-for="side in sides(m)"
@@ -502,8 +537,10 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
   width: calc(var(--line) + 2px);
   border-top: 2px solid var(--ink);
 }
-/* A match led to from the play-in, lit a moment. */
-.slot.lit :deep(.match) {
+/* A match led to, from the play-in or a player's page, lit a moment. */
+.slot.lit :deep(.match),
+.feed.lit :deep(.match),
+.match.swiss.lit {
   animation: lit 2s ease-out;
 }
 @keyframes lit {
