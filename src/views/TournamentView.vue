@@ -1182,21 +1182,11 @@ h1 {
   padding: 0;
   list-style: none;
 }
-/* On phones, two to a row, so a long list doesn't push the table a screen down: their text smaller, for the names to
-   fit, and a player's wrapping rather than cut short. */
+/* On phones, one to a row, the screen's width each. */
 @media (max-width: 720px) {
   .standouts ul {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: 6px;
-  }
-  .standout {
-    font-size: 0.8125rem;
-  }
-  .standout .feat {
-    align-items: flex-start;
-  }
-  .standout .feat .who {
-    white-space: normal;
   }
 }
 .standout {
