@@ -494,7 +494,6 @@ const ordinal = (n: number) => `#${n}`
         <span>{{ event.country }}</span>
         <span>{{ t('meta.regulation', { reg: event.regulation }) }}</span>
         <span>{{ t('tournaments.players', { n: num(event.players) }) }}</span>
-        <span>{{ t('tournaments.day2', { n: num(event.day2) }) }}</span>
       </p>
       <p v-if="metaOf" class="links">
         <AppLink :to="{ name: 'rankings', query: { meta: metaOf } }">{{ t('tournaments.eventMeta') }} ›</AppLink>
