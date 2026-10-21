@@ -226,9 +226,6 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
   flex-direction: column;
   gap: 14px;
   padding: 16px 18px 20px;
-  background:
-    radial-gradient(color-mix(in srgb, var(--accent) 22%, transparent) 1px, transparent 1.5px) 0 0 / 10px 10px,
-    var(--panel);
 }
 .meta-head {
   display: flex;
