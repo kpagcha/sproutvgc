@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 import { Search, SlidersHorizontal } from '@lucide/vue'
 import type { ItemId, PokemonId } from '@/data/dex'
 import { locale, t } from '@/i18n'
@@ -44,6 +44,9 @@ import TypeIcon from '@/components/TypeIcon'
 // page focuses it with (`hotkey`) ends it, as the site's search boxes have them. A placeholder too long for the box
 // (on a phone) is a line of text under it instead, rather than cut short; and there the advanced mode's button is its
 // icon alone.
+// What's typed reaches the list (`text`) and the options once the typing pauses (`SETTLE`), so a long list isn't drawn
+// again at every key; at once when the box is emptied, and before a key that acts on the options or leaving the box.
+// Under `MIN_CHARS` it searches nothing: a letter alone finds most of any list.
 const props = withDefaults(
   defineProps<{
     kinds: readonly TermKind[]
@@ -69,6 +72,38 @@ const text = defineModel<string>('text', { default: '' })
 const filters = defineModel<TermFilters>('filters', { required: true })
 /** The filters with the term highlighted added, while the options are open; null otherwise. */
 const preview = defineModel<TermFilters | null>('preview', { default: null })
+
+/** How long the typing pauses before the list follows, in milliseconds. */
+const SETTLE = 180
+/** What's typed searches only from this many characters. */
+const MIN_CHARS = 2
+/** What's in the box, ahead of `text` while the typing goes on. */
+const typed = ref(text.value)
+/** What the box searches for: what's typed, from `MIN_CHARS` on. */
+const searched = (q: string) => (q.trim().length >= MIN_CHARS ? q : '')
+let settling: ReturnType<typeof setTimeout> | undefined
+/** Hands what's typed on to the list now; whether it changed anything. */
+function settle() {
+  clearTimeout(settling)
+  settling = undefined
+  const q = searched(typed.value)
+  if (text.value === q) return false
+  text.value = q
+  return true
+}
+watch(typed, (q) => {
+  clearTimeout(settling)
+  settling = searched(q) ? setTimeout(settle, SETTLE) : undefined
+  if (!settling) settle()
+})
+// Set from outside (the page clearing it, the URL), the box follows.
+watch(text, (q) => {
+  if (q === searched(typed.value)) return
+  clearTimeout(settling)
+  settling = undefined
+  typed.value = q
+})
+onBeforeUnmount(() => clearTimeout(settling))
 
 const placeholder = computed(() => {
   const by = searchedBy(props.subject ? props.match : [], props.kinds)
@@ -139,7 +174,7 @@ function pick(o: TermOption | number) {
     return
   }
   filters.value = withFilter(filters.value, o.term)
-  text.value = ''
+  typed.value = text.value = ''
   input.value?.focus()
 }
 /** How many of the list there'd be with `old` narrowed (or widened) to a term, for its details; and the filters so. */
@@ -149,17 +184,31 @@ function remove(term: Term) {
   filters.value = without(filters.value, term)
   input.value?.focus()
 }
-function onKey(e: KeyboardEvent) {
-  if (e.key === 'Backspace' && !text.value && filters.value.groups.length) {
+async function onKey(e: KeyboardEvent) {
+  if (e.key === 'Backspace' && !typed.value && filters.value.groups.length) {
     filters.value = withoutLast(filters.value)
     return
   }
+  // The options for what's typed, not what was a moment ago, from the first of them; Enter once the page has the text
+  // too, for whether the search by text leads them (`nameCount`).
+  if (['ArrowDown', 'ArrowUp', 'Enter'].includes(e.key) && settle()) {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      await nextTick()
+    }
+    dismissed.value = false
+    active.value = 0
+  }
   picker.onKey(e)
 }
+function leave() {
+  settle()
+  focused.value = false
+}
 /** The box's cross: the text, and plainly the chips too (the groups have a clearing of their own). */
-const clearable = computed(() => !!text.value || chips.value.length > 0)
+const clearable = computed(() => !!typed.value || chips.value.length > 0)
 function clear() {
-  text.value = ''
+  typed.value = text.value = ''
   if (!advanced.value) filters.value = noFilters()
   input.value?.focus()
 }
@@ -197,7 +246,7 @@ const listId = useId()
         </span>
         <input
           ref="input"
-          v-model="text"
+          v-model="typed"
           type="text"
           class="text"
           :placeholder="chips.length || !fits ? '' : placeholder"
@@ -209,7 +258,7 @@ const listId = useId()
           :aria-controls="listId"
           :aria-activedescendant="open ? `${listId}-${active}` : undefined"
           @focus="focused = true"
-          @blur="focused = false"
+          @blur="leave"
           @keydown="onKey"
         />
         <button v-if="clearable" type="button" class="clear" :aria-label="t('search.clear')" @click.stop="clear">
