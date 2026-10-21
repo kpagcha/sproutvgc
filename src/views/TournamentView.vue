@@ -3,7 +3,7 @@ import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useElementSize, useMediaQuery } from '@vueuse/core'
 import { ChevronDown, ChevronUp } from '@lucide/vue'
-import { ability, available, item, move, pokemon, type PokemonId } from '@/data/dex'
+import { available, pokemon, type PokemonId } from '@/data/dex'
 import { datasetDates, loadRanks, metaLabel, percent, regulationSnapshot } from '@/data/meta'
 import { splitForme } from '@/data/pokemon'
 import {
@@ -22,7 +22,8 @@ import { refName } from '@/i18n/refName'
 import { filterKey, passesGroups, positiveFilters } from '@/lib/filterGroups'
 import type { NamedLocation } from '@/lib/links'
 import { fold } from '@/lib/search'
-import type { Detail, Term, TermFilters } from '@/lib/searchTerms'
+import type { Detail, TermFilters } from '@/lib/searchTerms'
+import { detailsIn, isBuild, teamHas, TEAM_KINDS } from '@/lib/teamFilters'
 import {
   cutAt,
   DAYS,
@@ -54,18 +55,20 @@ import SegmentedControl from '@/components/SegmentedControl.vue'
 import OptionsMenu from '@/components/OptionsMenu.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TeamSets from '@/components/TeamSets.vue'
+import TournamentRounds from '@/components/TournamentRounds.vue'
 import UsageShift from '@/components/UsageShift.vue'
 import WinRateChart from '@/components/WinRateChart.vue'
 
 // One official tournament: what it was (type, date, country, players, how many made Day 2), the way to its
-// regulation's meta, and two tabs, a page each: its standings (`/meta/tournaments/:id`: the whole field in three
+// regulation's meta, and three tabs, a page each: its standings (`/meta/tournaments/:id`: the whole field in three
 // parts, the top cut, the rest of Day 2 and Day 1, Day 1 folded away until asked for; searched by player and filtered
 // by a Pokémon, item, ability or move a team has, `?f=`, a Pokémon narrowed to a build too, every player found then
 // shown; the Pokémon filtered by with their numbers and the way to their meta page, on its regulation's data) and its
 // Pokémon (`/meta/tournaments/:id/pokemon`: the whole event's, Day 2's or the top cut's, `?day=`, each one's share of
 // those teams and how they did in those rounds' matches, by usage, win rate or best placing, the top ones or all, each
 // leading to the standings filtered to the teams with it; under them, a panel each, those whose usage rose and fell the
-// most against the events before, and the Pokémon off the meta that shone).
+// most against the events before, and the Pokémon off the meta that shone) and its rounds
+// (`/meta/tournaments/:id/rounds`, `TournamentRounds`: the top cut's bracket, and each Swiss round's pairings).
 // Each player's placing, name and country, record (marked when they dropped), and the six they brought, as icons;
 // unfolded, their whole sets (`TeamSets`), to copy as a paste (`CopyPaste`); their name leads to their page, their
 // matches round by round.
@@ -91,8 +94,10 @@ watch(
 
 /** The tab shown, a page each (`/meta/tournaments/:id`, `/meta/tournaments/:id/pokemon`): its standings, or its
  * Pokémon. */
-const tab = computed(() => (route.params.tab === 'pokemon' ? 'pokemon' : 'standings'))
-const tabs = computed((): { value: 'standings' | 'pokemon'; label: string; to: NamedLocation }[] => [
+const tab = computed(() =>
+  route.params.tab === 'pokemon' ? 'pokemon' : route.params.tab === 'rounds' ? 'rounds' : 'standings',
+)
+const tabs = computed((): { value: 'standings' | 'rounds' | 'pokemon'; label: string; to: NamedLocation }[] => [
   {
     value: 'standings',
     label: t('tournaments.standings'),
@@ -102,6 +107,11 @@ const tabs = computed((): { value: 'standings' | 'pokemon'; label: string; to: N
     value: 'pokemon',
     label: t('tournaments.pokemonStats'),
     to: { name: 'tournament', params: { id: id.value, tab: 'pokemon' } },
+  },
+  {
+    value: 'rounds',
+    label: t('tournaments.rounds'),
+    to: { name: 'tournament', params: { id: id.value, tab: 'rounds' } },
   },
 ])
 
@@ -352,42 +362,13 @@ function toggle(placing: number) {
 // narrowed to a build, the one Pokémon with an item, ability or moves (`?f=pokemon:incineroar~item:sitrusberry`), from
 // what its sets here run.
 type Placed = Standing & { placing: number }
-const KINDS = ['pokemon', 'item', 'ability', 'move'] as const
+const KINDS = TEAM_KINDS
 const filters = useUrlFilters(() => KINDS, true)
 const preview = shallowRef<TermFilters | null>(null)
 const query = ref('')
 watch(id, () => (query.value = ''))
-/** Whether a set has a detail: its item, ability, or among its moves. */
-const hasDetail = ([, it, ab, , moves]: Slot, d: Detail) =>
-  d.kind === 'item' ? it === d.id : d.kind === 'ability' ? ab === d.id : moves.includes(d.id as Slot[4][number])
-/** Whether a set is a Pokémon filter's: that Pokémon, with every one of its details. */
-const isBuild = (slot: Slot, f: Term) => slot[0] === f.id && (f.with ?? []).every((d) => hasDetail(slot, d))
-function matches(s: Placed, f: Term) {
-  if (f.kind === 'pokemon') return s.team.some((x) => isBuild(x, f))
-  if (f.kind === 'item') return s.team.some(([, it]) => it === f.id)
-  if (f.kind === 'ability') return s.team.some(([, , ab]) => ab === f.id)
-  if (f.kind === 'move') return s.team.some(([, , , , moves]) => (moves as string[]).includes(f.id))
-  return false
-}
-const passes = (s: Placed, f: TermFilters) => passesGroups(f, (x) => matches(s, x))
-/** What a Pokémon's sets here run, to narrow its filter by: its items, abilities and moves, the most run first. */
-function detailsOf(pid: PokemonId): Detail[] {
-  const n = new Map<string, { d: Detail; n: number }>()
-  const add = (d: Detail) => {
-    const key = filterKey(d)
-    const x = n.get(key)
-    if (x) x.n++
-    else n.set(key, { d, n: 1 })
-  }
-  for (const s of standings.value ?? [])
-    for (const [p, it, ab, , moves] of s.team) {
-      if (p !== pid) continue
-      if (it) add(item(it))
-      if (ab) add(ability(ab))
-      for (const m of moves) add(move(m))
-    }
-  return [...n.values()].sort((a, b) => b.n - a.n).map((x) => x.d)
-}
+const passes = (s: Placed, f: TermFilters) => passesGroups(f, (x) => teamHas(s.team, x))
+const detailsOf = (pid: PokemonId) => detailsIn(standings.value ?? [], pid)
 /** The sets the filters are of, a Pokémon's narrowed to a build: marked when its team unfolds. */
 const builds = computed(() => positiveFilters(filters.value).filter((f) => f.kind === 'pokemon' && f.with?.length))
 const marked = (slot: Slot) => builds.value.some((f) => isBuild(slot, f))
@@ -472,9 +453,12 @@ const sections = computed(() => [
  * the tabs and the row of links to its panels under them; on phones, the tabs' bar, the row in it on the Pokémon. Its
  * height, for the Pokémon's table's header to stick under it and a player or panel scrolled to to land under it. */
 const bandTabs = useTemplateRef<{ band: HTMLElement | null; bar: HTMLElement | null }>('bandTabs')
+const roundsTabs = useTemplateRef<{ band: HTMLElement | null; bar: HTMLElement | null }>('roundsTabs')
 const pokemonTabs = useTemplateRef<{ band: HTMLElement | null; bar: HTMLElement | null }>('pokemonTabs')
 const sectionNav = useTemplateRef<{ $el: HTMLElement }>('sectionNav')
-const shownTabs = computed(() => (tab.value === 'pokemon' ? pokemonTabs : bandTabs).value)
+const shownTabs = computed(
+  () => (tab.value === 'pokemon' ? pokemonTabs : tab.value === 'rounds' ? roundsTabs : bandTabs).value,
+)
 const box = { box: 'border-box' } as const
 const { height: tabsHeight } = useElementSize(() => shownTabs.value?.band, undefined, box)
 const { height: barHeight } = useElementSize(() => shownTabs.value?.bar, undefined, box)
@@ -638,6 +622,13 @@ const ordinal = (n: number) => `#${n}`
       <button v-if="day1Folded" type="button" class="more-toggle" @click="day1Shown = true">
         <ChevronDown :size="14" aria-hidden="true" />{{ t('tournaments.showDay1', { n: num(day1Folded) }) }}
       </button>
+    </section>
+
+    <!-- Its rounds: the top cut's bracket, and each Swiss round's pairings. -->
+    <section v-else-if="tab === 'rounds'" class="panel banded">
+      <BandTabs ref="roundsTabs" sticky :label="t('tournaments.tabs')" :current="tab" :tabs />
+      <p v-if="!standings || !rounds" class="muted">{{ t('tournaments.loading') }}</p>
+      <TournamentRounds v-else :id :standings :rounds />
     </section>
 
     <!-- Its Pokémon: the day's, each one's usage, win rate and record. -->

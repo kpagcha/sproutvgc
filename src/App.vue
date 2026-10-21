@@ -78,9 +78,14 @@ watchEffect(() => {
         : route.name === 'tournamentPlayer'
           ? playerTitle(id, Number(route.params.placing))
           : undefined
-  // A tournament's Pokémon, a page of its own.
+  // A tournament's Pokémon and its rounds, a page each of their own.
   const tournamentMons = route.name === 'tournament' && route.params.tab === 'pokemon'
-  const key = tournamentMons ? 'head.tournamentPokemon' : (route.meta.headKey ?? route.meta.titleKey)
+  const tournamentRounds = route.name === 'tournament' && route.params.tab === 'rounds'
+  const key = tournamentMons
+    ? 'head.tournamentPokemon'
+    : tournamentRounds
+      ? 'head.tournamentRounds'
+      : (route.meta.headKey ?? route.meta.titleKey)
   const name = key ? t(key) : null
   const lead = type ? typeName(type) : entry
   const title = name ? `${lead ? `${lead} · ` : ''}${name} · ${GAME_NAME} · sproutvgc` : `sproutvgc · ${GAME_NAME} dex`
@@ -92,11 +97,13 @@ watchEffect(() => {
           page?.desc ??
             (tournamentMons
               ? 'desc.tournamentPokemon'
-              : route.name === 'tournament'
-                ? 'desc.tournament'
-                : route.name === 'tournamentPlayer'
-                  ? 'desc.tournamentPlayer'
-                  : 'desc.condition'),
+              : tournamentRounds
+                ? 'desc.tournamentRounds'
+                : route.name === 'tournament'
+                  ? 'desc.tournament'
+                  : route.name === 'tournamentPlayer'
+                    ? 'desc.tournamentPlayer'
+                    : 'desc.condition'),
           {
             ...params,
             ability: entry,

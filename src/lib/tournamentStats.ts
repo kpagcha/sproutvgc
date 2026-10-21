@@ -255,3 +255,53 @@ export const medalOf = (placing: number) =>
         : placing <= 8
           ? 'medal'
           : ''
+
+/** The top cut as a bracket: its rounds, the first first, each with how many were left after it, as `PlayerMatch`'s
+ * `left`, and its matches ordered so that each two side by side lead to the next round's match at their place (worked
+ * back from the final, each match's players found in the round before). */
+export function bracketOf(rounds: Record<number, Round>): { round: number; left: number; matches: Round['matches'] }[] {
+  const cut = Object.entries(rounds)
+    .filter(([, r]) => r.phase === 3)
+    .map(([n, r]) => ({ round: Number(n), matches: r.matches }))
+    .sort((a, b) => a.round - b.round)
+  for (let i = cut.length - 2; i >= 0; i--) {
+    const next = cut[i + 1]!.matches
+    const left = new Set(cut[i]!.matches)
+    const ordered: Round['matches'] = []
+    for (const [a, b] of next)
+      for (const p of [a, b]) {
+        const m = [...left].find(([x, y]) => p !== null && (x === p || y === p))
+        if (m) {
+          ordered.push(m)
+          left.delete(m)
+        }
+      }
+    cut[i]!.matches = [...ordered, ...left]
+  }
+  const last = cut.length - 1
+  return cut.map((r, i) => ({ ...r, left: last - i }))
+}
+
+/** Each player's record going into a round: their wins, losses and matches neither won in the rounds before it (a bye
+ * a win, as the standings count it). */
+export function recordsBefore(rounds: Record<number, Round>, round: number): Map<number, [number, number, number]> {
+  const records = new Map<number, [number, number, number]>()
+  const add = (p: number, i: 0 | 1 | 2) => {
+    const r = records.get(p) ?? [0, 0, 0]
+    r[i]++
+    records.set(p, r)
+  }
+  for (const [n, r] of Object.entries(rounds)) {
+    if (Number(n) >= round) continue
+    for (const [a, b, won] of r.matches) {
+      if (won === 0) {
+        add(a, 2)
+        if (b !== null) add(b, 2)
+      } else {
+        add(a, won === 1 ? 0 : 1)
+        if (b !== null) add(b, won === 2 ? 0 : 1)
+      }
+    }
+  }
+  return records
+}

@@ -387,7 +387,7 @@ export const router = createRouter({
       },
     },
     {
-      path: '/meta/tournaments/:id/:tab(pokemon)?',
+      path: '/meta/tournaments/:id/:tab(pokemon|rounds)?',
       name: 'tournament',
       component: () => import('@/views/TournamentView.vue'),
       meta: {
