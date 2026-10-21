@@ -156,8 +156,7 @@ const moversMax = computed(() =>
 const shiftStyle = (r: { before: number; usage: number }) => {
   const lo = Math.min(r.before, r.usage) / moversMax.value
   const hi = Math.max(r.before, r.usage) / moversMax.value
-  // Its solid part, the numbers' white over it: to its usage now (what it kept and gained, or what it kept).
-  return { '--lo': lo, '--hi': hi, '--solid': r.usage / moversMax.value }
+  return { '--lo': lo, '--hi': hi }
 }
 /** A change in usage, in percentage points: "+3.2", "−1.8". */
 const points = (x: number) =>
@@ -789,17 +788,12 @@ const ordinal = (n: number) => `#${n}`
                   </AppLink>
                 </div>
                 <!-- Its usage before and now, a bar with the numbers on it, then the change in points; one new to the
-                     events, marked so. The numbers twice: in the text's color, and over it in white where the bar's
-                     solid, so they read on either. -->
+                     events, marked so. -->
                 <div role="cell" class="shift" :class="r.change > 0 ? 'up' : 'down'" :style="shiftStyle(r)">
                   <span class="track">
                     <span class="kept"></span><span class="delta"></span>
                     <span class="num shift-label"
                       ><span v-if="r.fresh" v-tip="t('tournaments.newTip')" class="fresh">{{ t('usage.new') }}</span
-                      ><template v-else>{{ percent(r.before) }}</template> → {{ percent(r.usage) }}</span
-                    >
-                    <span class="num shift-label on-bar" aria-hidden="true"
-                      ><template v-if="r.fresh">{{ t('usage.new') }}</template
                       ><template v-else>{{ percent(r.before) }}</template> → {{ percent(r.usage) }}</span
                     >
                   </span>
@@ -1079,15 +1073,15 @@ h1 {
   --cols: minmax(0, 12rem) minmax(0, 1fr) 3.5rem;
   margin-inline: 0;
 }
-/* Its usage as a bar on a faint band, the both lists' most usage its full length: solid in the accent to what it kept
-   (its usage now when it rose, before when it fell), then what it gained, solid in the good color, or lost, hatched in
-   the bad. Its numbers on it, from its start. */
+/* Its usage as a bar on a faint band, the both lists' most usage its full length, in soft tones so the numbers on it
+   read in the text's color: grey to what it kept (its usage now when it rose, before when it fell), then what it gained,
+   a wash of the good color, or lost, faintly hatched in the bad. Its numbers on it, from its start. */
 .track {
   position: relative;
   display: block;
   min-width: 3rem;
   height: 18px;
-  background: color-mix(in srgb, var(--border) 45%, transparent);
+  background: color-mix(in srgb, var(--border) 30%, transparent);
 }
 .kept,
 .delta {
@@ -1098,24 +1092,24 @@ h1 {
 .kept {
   left: 0;
   width: calc(var(--lo) * 100%);
-  background: var(--accent);
+  background: color-mix(in srgb, var(--text) 16%, transparent);
 }
 .delta {
   left: calc(var(--lo) * 100%);
   width: calc((var(--hi) - var(--lo)) * 100%);
 }
 .up .delta {
-  background: var(--good);
+  background: color-mix(in srgb, var(--good) 38%, transparent);
 }
 .down .delta {
   background: repeating-linear-gradient(
     -45deg,
-    color-mix(in srgb, var(--bad) 45%, transparent) 0 2px,
+    color-mix(in srgb, var(--bad) 30%, transparent) 0 2px,
     transparent 2px 5px
   );
-  box-shadow: inset 0 0 0 1px var(--bad);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bad) 55%, transparent);
 }
-/* The numbers across the bar, in the text's color; their copy in white, cut to the solid part. */
+/* The numbers across the bar, in the text's color. */
 .shift-label {
   position: absolute;
   inset: 0;
@@ -1123,15 +1117,8 @@ h1 {
   align-items: center;
   padding: 0 6px;
   font-size: 0.8em;
-  font-weight: bold;
   line-height: 1;
   white-space: nowrap;
-}
-.shift-label.on-bar {
-  color: var(--accent-text);
-  text-shadow: 0 0 2px rgb(0 0 0 / 0.5);
-  clip-path: inset(0 calc((1 - var(--solid)) * 100%) 0 0);
-  pointer-events: none;
 }
 /* On phones, the name across the row with the change at its end, its bar under them, from where the name starts. */
 @media (max-width: 480px) {
@@ -1151,9 +1138,6 @@ h1 {
   .dex-table.moved .row > :nth-child(3) {
     grid-area: change;
   }
-}
-.change {
-  font-weight: bold;
 }
 .change.up {
   color: var(--good);
