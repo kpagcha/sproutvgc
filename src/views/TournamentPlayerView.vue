@@ -72,6 +72,13 @@ const swiss = computed(() => {
   return { wins: sum('wins'), losses: sum('losses'), ties: sum('ties') }
 })
 
+/** The Rounds tab at a day's: its first round, or the top cut's bracket, the tab's default. */
+const roundsOf = (d: { key: string; matches: PlayerMatch[] }) => ({
+  name: 'tournament',
+  params: { id: id.value, tab: 'rounds' },
+  query: d.key === 'topCut' ? {} : { round: String(d.matches[0]!.round) },
+})
+
 /** A round's name: the top cut's by how many were left after it, the Swiss' by number. */
 function roundName(m: PlayerMatch) {
   if (m.left === undefined) return t('tournaments.round', { n: m.round })
@@ -132,12 +139,18 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
     </section>
 
     <section v-if="player" id="sec-matches" class="panel">
-      <h2>{{ t('tournaments.matches') }}</h2>
+      <div class="section-head">
+        <h2>{{ t('tournaments.matches') }}</h2>
+        <AppLink :to="{ name: 'tournament', params: { id, tab: 'rounds' } }">{{ t('tournaments.rounds') }} ›</AppLink>
+      </div>
       <p v-if="!rounds" class="muted">{{ t('tournaments.loading') }}</p>
       <ol v-else class="matches">
         <template v-for="d in days" :key="d.key">
           <li class="part-head">
-            <span>{{ t(`tournaments.part.${d.key}`) }}</span>
+            <!-- Leading to that day's rounds: its first, or the top cut's bracket. -->
+            <AppLink v-tip="t('tournaments.dayRoundsTip')" :to="roundsOf(d)">{{
+              t(`tournaments.part.${d.key}`)
+            }}</AppLink>
             <span class="num">{{ record(d.wins, d.losses, d.ties) }}</span>
           </li>
           <li v-for="m in d.matches" :key="m.round" class="match">
@@ -236,6 +249,13 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
 h2 {
   margin: 0 0 8px;
 }
+/* The section's heading, the way to the event's rounds at its right. */
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
 /* Room above a section scrolled to for the row of links stuck to the top. */
 section {
   scroll-margin-top: 48px;
@@ -270,6 +290,9 @@ section {
   text-transform: uppercase;
   background: var(--panel-alt);
   border-block: 2px solid var(--ink);
+}
+.part-head a {
+  color: inherit;
 }
 .part-head:first-child {
   margin-top: 0;
