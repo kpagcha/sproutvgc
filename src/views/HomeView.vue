@@ -15,12 +15,16 @@ import SearchBox from '@/components/SearchBox.vue'
 import logoUrl from '@/assets/logo.png'
 
 // The front door to the whole site: the search (of the site's pages, the meta pages and the dex), and under it the
-// areas, a card each, one under another (where to go: its name and its sections, links alone; Meta and Tools standing out), then the meta at a glance (what the site is most about, `MetaHighlights`); then
-// the reader's favorites and recently viewed. While searching, the results take the place of all but the search.
+// areas: Meta first and largest (what the site is most about), its sections buttons, Tools a column
+// beside it, a row per section, and the dex and the quizzes a band of links under them;
+// then the meta at a glance (`MetaHighlights`), the reader's favorites and recently viewed. While searching, the
+// results take the place of all but the search.
 
-/** The areas that stand out, the site's own (what players use, and what to work with): on an accent shadow over a
- * dotted ground, their sections raised buttons. */
-const FEATURED = new Set<AreaId>(['meta', 'tools'])
+const areaById = (id: AreaId) => AREAS.find((a) => a.id === id)!
+const metaArea = areaById('meta')
+const toolsArea = areaById('tools')
+/** The rest, a row each of the band under them. */
+const bandAreas = [areaById('dex'), areaById('quizzes')]
 
 // The search is kept in the URL (`?q=`), so coming back from a result brings the results back.
 const route = useRoute()
@@ -85,22 +89,52 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
     <template v-else>
       <!-- Under them, the site's areas, a card each, one under another (where to go), then the meta at a glance (what it's
            about). -->
-      <nav class="areas" :aria-label="t('home.explore')">
-        <section v-for="a in AREAS" :key="a.id" class="panel area" :class="{ featured: FEATURED.has(a.id) }">
-          <RouterLink :to="{ name: a.route }" class="area-head font-display"
-            >{{ t(a.label) }} <span class="arrow">›</span></RouterLink
-          >
-          <ul class="area-sections">
-            <li v-for="sec in a.sections" :key="sec.key">
-              <RouterLink
-                v-tip="sec.soon ? t('soon.title') : undefined"
-                :to="{ name: sec.route }"
-                :class="{ soon: sec.soon }"
-                >{{ t(sec.label) }}</RouterLink
+      <nav class="explore" :aria-label="t('home.explore')">
+        <div class="explore-top">
+          <section class="panel featured meta-area">
+            <div class="meta-head">
+              <RouterLink :to="{ name: metaArea.route }" class="area-name font-display"
+                >{{ t(metaArea.label) }} <span class="arrow">›</span></RouterLink
               >
-            </li>
-          </ul>
-        </section>
+              <span class="muted meta-blurb">{{ t('meta.regulation', params) }}</span>
+            </div>
+            <ul class="meta-sections">
+              <li v-for="sec in metaArea.sections" :key="sec.key">
+                <RouterLink :to="{ name: sec.route }" class="meta-button">
+                  <span class="sec-name">{{ t(sec.label) }} <span class="arrow">›</span></span>
+                </RouterLink>
+              </li>
+            </ul>
+          </section>
+          <section class="panel featured tools-area">
+            <RouterLink :to="{ name: toolsArea.route }" class="area-name tools-head font-display"
+              >{{ t(toolsArea.label) }} <span class="arrow">›</span></RouterLink
+            >
+            <ul>
+              <li v-for="sec in toolsArea.sections" :key="sec.key">
+                <RouterLink :to="{ name: sec.route }" class="tool-row" :class="{ soon: sec.soon }">
+                  <span class="sec-name"
+                    >{{ t(sec.label) }}
+                    <span v-if="sec.soon" class="soon-tag">{{ t('soon.tag') }}</span>
+                    <span v-else class="arrow">›</span></span
+                  >
+                </RouterLink>
+              </li>
+            </ul>
+          </section>
+        </div>
+        <div class="panel band">
+          <div v-for="a in bandAreas" :key="a.id" class="band-row">
+            <RouterLink :to="{ name: a.route }" class="band-name font-display"
+              >{{ t(a.label) }} <span class="arrow">›</span></RouterLink
+            >
+            <ul class="band-links">
+              <li v-for="sec in a.sections" :key="sec.key">
+                <RouterLink :to="{ name: sec.route }">{{ t(sec.label) }}</RouterLink>
+              </li>
+            </ul>
+          </div>
+        </div>
       </nav>
       <MetaHighlights class="highlights" />
       <FavoritesPanel />
@@ -143,113 +177,190 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
   margin: 16px 0 0;
 }
 
-/* The areas: a card each, one under another; each its name (a link) and its sections. */
-.areas {
+/* The areas: Meta and Tools side by side (Meta twice as wide), on an accent shadow; the dex and the quizzes a band of
+   links under them. */
+.explore {
   display: grid;
-  gap: 16px;
+  gap: 20px;
   margin-bottom: 20px;
 }
-/* Its name, then its sections beside it, wrapping in the room left (under it on phones, or when that's too narrow), its
-   name on the line of their first row's text. */
-.area {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 10px 16px;
-  margin: 0;
-}
-.area-head {
-  font-weight: bold;
-  font-size: calc(18px * var(--display-scale, 1) * var(--text-scale));
-  color: var(--text);
-}
-.arrow {
-  color: var(--accent);
-}
-.area-sections {
-  flex: 1 1 0;
-  min-width: 12em;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+.explore ul {
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.area-sections a {
-  display: block;
-  padding: 1px 8px;
-  font-size: 0.875em;
+.explore a {
   color: var(--text);
-  background: var(--panel-alt);
-  border: 1px solid var(--border);
 }
-.area-sections a:hover {
+.explore a:hover {
   text-decoration: none;
-  background: var(--hover);
-  border-color: var(--border-strong);
 }
-/* Not built yet: dashed and fainter. */
-.area-sections a.soon {
-  color: var(--muted);
-  border-style: dashed;
+.explore-top {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 22px;
 }
-/* Meta and Tools: a hard shadow in the accent, a faint dotted ground, their sections raised buttons
-   (lifting on hover, pressed flat when clicked). */
-:root:root .area.featured {
+.explore .panel {
+  margin: 0;
+}
+.area-name {
+  font-weight: bold;
+  font-size: calc(24px * var(--display-scale, 1) * var(--text-scale));
+}
+.arrow {
+  color: var(--accent);
+}
+.sec-name {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+}
+/* Meta and Tools: a hard shadow in the accent; Meta's on a faint dotted ground. */
+:root:root .featured {
+  box-shadow: 6px 6px 0 var(--accent);
+}
+:root:root .meta-area {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 18px 20px;
   background:
     radial-gradient(color-mix(in srgb, var(--accent) 22%, transparent) 1px, transparent 1.5px) 0 0 / 10px 10px,
     var(--panel);
-  box-shadow: 6px 6px 0 var(--accent);
 }
-.featured .area-sections {
-  gap: 10px;
+.meta-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px 12px;
 }
-.featured .area-sections a {
-  padding: 4px 12px;
-  font-size: 0.95em;
-  font-weight: bold;
+.meta-blurb {
+  font-size: 0.9em;
+}
+/* Its sections raised buttons, two to a row, lifting on hover and pressed flat when clicked. */
+.meta-sections {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.meta-sections li {
+  display: flex;
+}
+.meta-button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
   background: var(--panel);
   border: 2px solid var(--ink);
-  box-shadow: var(--hard-sm);
+  box-shadow: var(--hard);
   transition:
     transform 0.08s ease-out,
     box-shadow 0.08s ease-out;
 }
-.featured .area-sections a:hover {
+.meta-button .sec-name {
+  font-size: 1.1em;
+}
+.meta-button:hover {
   background: var(--hover);
   transform: translate(-1px, -1px);
-  box-shadow: var(--hard);
+  box-shadow: 4px 4px 0 var(--ink);
 }
-.featured .area-sections a:active {
-  transform: translate(2px, 2px);
+.meta-button:active {
+  transform: translate(3px, 3px);
   box-shadow: none;
 }
-.featured .area-sections a.soon {
-  font-weight: normal;
-  border: 2px dashed var(--border-strong);
-  box-shadow: none;
+/* Tools: its name over its sections, a row each. */
+:root:root .tools-area {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+.tools-head {
+  padding: 14px 16px 10px;
+  border-bottom: 2px solid var(--ink);
+}
+.tool-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 16px;
+  border-bottom: 1px dashed var(--border);
+}
+.tools-area li:last-child .tool-row {
+  border-bottom: none;
+}
+.tool-row:hover {
+  background: var(--hover);
+}
+/* Not built yet: fainter, tagged. */
+.explore .tool-row.soon {
+  color: var(--muted);
+}
+.soon-tag {
+  font-size: 0.7em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border: 1px dashed var(--muted);
+}
+/* The dex and the quizzes: a row each, its name then its sections. */
+:root:root .band {
+  padding: 0;
+}
+.band-row {
+  display: flex;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 12px 16px;
+}
+.band-row + .band-row {
+  border-top: 1px solid var(--border);
+}
+.band-name {
+  flex: none;
+  width: 6em;
+  font-weight: bold;
+  font-size: calc(17px * var(--display-scale, 1) * var(--text-scale));
+}
+.band-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.band-links a {
+  display: block;
+  padding: 3px 11px;
+  font-size: 0.9em;
+  font-weight: 600;
+  background: var(--panel-alt);
+  border: 1.5px solid var(--ink);
+}
+.band-links a:hover {
+  background: var(--hover);
 }
 .highlights {
   margin: 0 0 16px;
 }
 
+/* Narrower, Tools under Meta; on phones, Meta's buttons one to a row and the band's names over their links. */
+@media (max-width: 760px) {
+  .explore-top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 @media (max-width: 560px) {
-  .area {
+  .meta-sections {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .band-row {
     flex-direction: column;
     align-items: start;
-  }
-  .area-sections {
-    flex: none;
-    min-width: 0;
-  }
-  /* On phones, Meta's and Tools' buttons a little smaller. */
-  .featured .area-sections {
-    gap: 8px;
-  }
-  .featured .area-sections a {
-    padding: 3px 9px;
-    font-size: 0.9em;
   }
 }
 @media (max-width: 560px) {
