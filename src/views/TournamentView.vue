@@ -54,6 +54,7 @@ import SegmentedControl from '@/components/SegmentedControl.vue'
 import OptionsMenu from '@/components/OptionsMenu.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TeamSets from '@/components/TeamSets.vue'
+import UsageShift from '@/components/UsageShift.vue'
 import WinRateChart from '@/components/WinRateChart.vue'
 
 // One official tournament: what it was (type, date, country, players, how many made Day 2), the way to its
@@ -144,7 +145,7 @@ const movers = computed(() => {
   const rows = [...new Set([...now.keys(), ...p.share.keys()])].map((id) => {
     const before = p.share.get(id) ?? 0
     const usage = now.get(id) ?? 0
-    return { id, before, usage, change: usage - before, fresh: !p.share.has(id) }
+    return { id, before, usage, change: usage - before }
   })
   const by = (sign: 1 | -1) =>
     rows
@@ -160,13 +161,6 @@ const moversMax = computed(() =>
     ...[...(movers.value?.rising ?? []), ...(movers.value?.falling ?? [])].flatMap((r) => [r.before, r.usage]),
   ),
 )
-/** Where a mover's bar's parts end, 0 to 1 of the full length: what it kept (the lower of before and now), and what it
- * gained or lost (to the higher). */
-const shiftStyle = (r: { before: number; usage: number }) => {
-  const lo = Math.min(r.before, r.usage) / moversMax.value
-  const hi = Math.max(r.before, r.usage) / moversMax.value
-  return { '--lo': lo, '--hi': hi }
-}
 /** A change in usage, in percentage points: "+3.2", "−1.8". */
 const points = (x: number) =>
   (x * 100).toLocaleString(locale.value, {
@@ -927,14 +921,8 @@ const ordinal = (n: number) => `#${n}`
                 </div>
                 <!-- Its usage before and now, a bar with the numbers on it, then the change in points; one new to the
                      events, marked so. -->
-                <div role="cell" class="shift" :class="r.change > 0 ? 'up' : 'down'" :style="shiftStyle(r)">
-                  <span class="track">
-                    <span class="kept"></span><span class="delta"></span>
-                    <span class="num shift-label"
-                      ><span v-if="r.fresh" v-tip="t('tournaments.newTip')" class="fresh">{{ t('usage.new') }}</span
-                      ><template v-else>{{ percent(r.before) }}</template> → {{ percent(r.usage) }}</span
-                    >
-                  </span>
+                <div role="cell">
+                  <UsageShift :before="r.before" :usage="r.usage" :max="moversMax" />
                 </div>
                 <div role="cell" class="r num change" :class="r.change > 0 ? 'up' : 'down'">
                   {{ points(r.change) }}
@@ -1300,53 +1288,6 @@ h1 {
   --cols: minmax(0, 12rem) minmax(0, 1fr) 3.5rem;
   margin-inline: 0;
 }
-/* Its usage as a bar on a faint band, the both lists' most usage its full length, in soft tones so the numbers on it
-   read in the text's color: grey to what it kept (its usage now when it rose, before when it fell), then what it gained,
-   a wash of the good color, or lost, faintly hatched in the bad. Its numbers on it, from its start. */
-.track {
-  position: relative;
-  display: block;
-  min-width: 3rem;
-  height: 18px;
-  background: color-mix(in srgb, var(--border) 30%, transparent);
-}
-.kept,
-.delta {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-}
-.kept {
-  left: 0;
-  width: calc(var(--lo) * 100%);
-  background: color-mix(in srgb, var(--text) 16%, transparent);
-}
-.delta {
-  left: calc(var(--lo) * 100%);
-  width: calc((var(--hi) - var(--lo)) * 100%);
-}
-.up .delta {
-  background: color-mix(in srgb, var(--good) 38%, transparent);
-}
-.down .delta {
-  background: repeating-linear-gradient(
-    -45deg,
-    color-mix(in srgb, var(--bad) 30%, transparent) 0 2px,
-    transparent 2px 5px
-  );
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bad) 55%, transparent);
-}
-/* The numbers across the bar, in the text's color. */
-.shift-label {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  padding: 0 6px;
-  font-size: 0.8em;
-  line-height: 1;
-  white-space: nowrap;
-}
 /* On phones, the name across the row with the change at its end, its bar under them, from where the name starts. */
 @media (max-width: 480px) {
   .dex-table.moved {
@@ -1371,10 +1312,6 @@ h1 {
 }
 .change.down {
   color: var(--bad);
-}
-.fresh {
-  color: var(--accent);
-  font-weight: bold;
 }
 /* Its best placing, the way to that player's page: a medal in the top 8, else plain. */
 .best {

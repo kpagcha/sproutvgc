@@ -17,7 +17,8 @@ import {
   spriteUrl,
   statColor,
 } from '@/data/pokemon'
-import { datasetDates, GENERATED_SNAPSHOTS, loadHistory, percent, type MetaHistory } from '@/data/meta'
+import { datasetDates, GENERATED_SNAPSHOTS, loadHistory, pastRoster, percent, type MetaHistory } from '@/data/meta'
+import { baselineOf, EVENTS, loadEventUsage, type EventUsage, type TournamentEvent } from '@/data/tournaments'
 import { natureEffectOn, natureEffects, natureName } from '@/data/natures'
 import { locale, t, typeName } from '@/i18n'
 import { description } from '@/i18n/descriptions'
@@ -27,10 +28,12 @@ import { FASTEST, type SpeedBuild } from '@/lib/speedBuild'
 import { commonSpeed, odds, reachOf, setSpread, type SpreadPoint } from '@/lib/speedLineup'
 import { MAX_POINTS, statValue } from '@/lib/stats'
 import { percentiles } from '@/lib/statPercentiles'
+import { pooledUsage } from '@/lib/tournamentStats'
 import { useListOptions } from '@/composables/useListOptions'
 import { useMeta } from '@/composables/useMeta'
 import { useSpeedOptions } from '@/composables/useSpeedOptions'
 import AppLink from '@/components/AppLink'
+import CountryFlag from '@/components/CountryFlag'
 import DefenseResults from '@/components/DefenseResults.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import ItemList from '@/components/ItemList.vue'
@@ -49,6 +52,7 @@ import ShareSplit from '@/components/ShareSplit.vue'
 import SpeedShare from '@/components/SpeedShare.vue'
 import SpeedSpread from '@/components/SpeedSpread.vue'
 import TypeIcon from '@/components/TypeIcon'
+import UsageShift from '@/components/UsageShift.vue'
 
 // One Pokémon in the meta shown (`useMeta`, picked on the back row). Its heading has what matters most to a player: its
 // stats as the game shows them, set against the Pokémon it'll face, each marked when its most common nature raises or
@@ -310,6 +314,71 @@ const months = computed(() => {
 })
 const topMonth = computed(() => Math.max(...months.value.map((x) => x.usage ?? 0), 0.0001))
 
+// Its official tournaments, every regulation's, the latest first, each regulation's a run of its own: how many of each
+// event's teams had it, the whole field's and the top cut's, from every event's few numbers (`loadEventUsage`), so no standings load. Its usage set against the events before each, pooled, as the
+// event's own page sets its movers' (`baselineOf`: its regulation's earlier ones, or for its first the regulation's
+// before), but for the first event of all. A regulation it wasn't legal in is its divider alone. Not of the
+// meta shown, so shown with or without its data, and only when some event had it.
+const eventUsage = shallowRef<Record<string, EventUsage> | null>(null)
+void loadEventUsage().then((u) => (eventUsage.value = u))
+interface EventRow {
+  event: TournamentEvent
+  usage: number
+  /** Its share of the teams at the events before, pooled, and what they are; null for the first event of all. */
+  before: number | null
+  beforeLabel: string
+  cut: number
+  cutOf: number
+}
+const tournaments = computed(() => {
+  const u = eventUsage.value
+  if (!u) return []
+  const runs: { regulation: string; legal: boolean; events: EventRow[] }[] = []
+  for (const e of EVENTS) {
+    const x = u[e.id]
+    if (e.category !== 'official' || !x) continue
+    let run = runs.at(-1)
+    if (run?.regulation !== e.regulation) runs.push((run = { regulation: e.regulation, legal: false, events: [] }))
+    const [all = 0, , cut = 0] = x.pokemon[id.value] ?? []
+    const [teams, , cutTeams] = x.teams
+    const b = baselineOf(e)
+    const pooled = b.events.length
+      ? pooledUsage(
+          u,
+          b.events.map((y) => y.id),
+          'all',
+        )
+      : null
+    run.events.push({
+      event: e,
+      usage: teams ? all / teams : 0,
+      before: pooled?.teams ? (pooled.share.get(id.value) ?? 0) : null,
+      beforeLabel: b.regulation
+        ? t('tournaments.trendBeforeReg', { reg: b.regulation })
+        : b.events.length === 1
+          ? b.events[0]!.name
+          : t('tournaments.trendBefore', { n: b.events.length }),
+      cut,
+      cutOf: cutTeams,
+    })
+  }
+  for (const r of runs) {
+    const roster = pastRoster(r.regulation)
+    r.legal = !roster || roster.includes(id.value) || r.events.some((x) => x.usage > 0)
+  }
+  return runs.some((r) => r.events.some((x) => x.usage > 0)) ? runs : []
+})
+const topEvent = computed(() =>
+  Math.max(...tournaments.value.flatMap((r) => r.events.flatMap((x) => [x.usage, x.before ?? 0])), 0.0001),
+)
+const eventDate = (date: string) =>
+  new Date(`${date}T00:00:00Z`).toLocaleDateString(locale.value, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
+
 // Its teammates, the least of it, last: the data keeps the ten most common, those on at least this share of its teams.
 const TEAMMATE_MIN = LIST_MIN
 const teammates = computed(() =>
@@ -334,6 +403,7 @@ const sections = computed(() =>
     { id: 'sec-spreads', label: t('usageMon.secSpreads'), shown: spreads.value.length > 0 },
     { id: 'sec-history', label: t('usageMon.secHistory'), shown: months.value.length > 1 },
     { id: 'sec-teammates', label: t('usageMon.teammates'), shown: teammates.value.length > 0 },
+    { id: 'sec-tournaments', label: t('usageMon.secTournaments'), shown: tournaments.value.length > 0 },
     { id: 'sec-matchups', label: t('pokemon.defense'), shown: true },
   ].filter((x) => x.shown),
 )
@@ -714,6 +784,70 @@ const sections = computed(() =>
         </ul>
       </section>
     </template>
+
+    <!-- Its official tournaments, the latest first, by regulation: each event's share of teams with it against the
+         events before's, and the top cut's teams with it, each event leading to its standings narrowed to them. -->
+    <section v-if="tournaments.length" id="sec-tournaments" class="panel">
+      <h2>{{ t('usageMon.tournaments') }}</h2>
+      <div class="events-table" role="table" :aria-label="t('usageMon.tournaments')">
+        <div class="ev-row ev-head muted small" role="row">
+          <!-- Each heading's tooltip on its text, not across its column. -->
+          <span role="columnheader">{{ t('usageMon.evEvent') }}</span>
+          <span role="columnheader"
+            ><span v-tip="t('usageMon.evUsageTip')" class="tipped">{{ t('tournaments.col.usage') }}</span></span
+          >
+          <span role="columnheader" class="r"
+            ><span v-tip="t('usageMon.evChangeTip')" class="tipped">{{ t('usageMon.evChange') }}</span></span
+          >
+          <span role="columnheader" class="r"
+            ><span v-tip="t('usageMon.evCutTip')" class="tipped">{{ t('tournaments.day.cut') }}</span></span
+          >
+        </div>
+        <template v-for="r in tournaments" :key="r.regulation">
+          <div class="ev-reg" role="row">
+            <span role="cell"
+              >{{ t('meta.regulation', { reg: r.regulation })
+              }}<span v-if="!r.legal" class="muted"> · {{ t('usageMon.evNotLegal') }}</span></span
+            >
+          </div>
+          <template v-if="r.legal">
+            <div v-for="x in r.events" :key="x.event.id" class="ev-row" role="row">
+              <span role="cell" class="ev-what">
+                <AppLink
+                  :to="{ name: 'tournament', params: { id: x.event.id }, query: { f: `pokemon:${id}` } }"
+                  class="ev-name"
+                  >{{ x.event.name }}</AppLink
+                >
+                <span class="muted small"
+                  ><time :datetime="x.event.date">{{ eventDate(x.event.date) }}</time> ·
+                  <CountryFlag :code="x.event.country"
+                /></span>
+              </span>
+              <!-- Its usage against the events before, a bar with the numbers on it, then the change in points. -->
+              <span
+                v-tip="x.before === null ? undefined : t('usageMon.evShiftTip', { before: x.beforeLabel })"
+                role="cell"
+                class="ev-usage"
+              >
+                <UsageShift :before="x.before" :usage="x.usage" :max="topEvent" />
+              </span>
+              <span
+                role="cell"
+                class="num ev-change"
+                :class="x.before === null || x.usage === x.before ? '' : x.usage > x.before ? 'up' : 'down'"
+                ><template v-if="x.before !== null"
+                  ><span class="ev-label muted">{{ t('usageMon.evChange') }} </span
+                  >{{ points(x.usage - x.before) }}</template
+                ></span
+              >
+              <span role="cell" class="num ev-cut"
+                ><span class="ev-label muted">{{ t('tournaments.day.cut') }} </span>{{ x.cut }}/{{ x.cutOf }}</span
+              >
+            </div>
+          </template>
+        </template>
+      </div>
+    </section>
 
     <!-- Its types' matchups defending, last: not of the meta, so shown with or without its data. -->
     <section id="sec-matchups" class="panel">
@@ -1416,6 +1550,122 @@ h2 {
 }
 .month-rank {
   font-size: 0.8em;
+}
+/* Its official tournaments: a row per event, its name and date, its share of the teams against the events before's,
+   a bar on one scale for every event, the change in points, and the top cut's teams with it; each regulation's run
+   under a divider. On phones, the name across, and its bar, change and top cut under it, the top cut labeled. */
+.events-table {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(7rem, 14rem) 3.5em 4.5em;
+  gap: 6px 14px;
+  align-items: center;
+}
+.ev-row,
+.ev-reg {
+  display: contents;
+}
+/* A regulation's divider: its name on a faint band across, no rule, so it doesn't compete with the rows' leaders. */
+.ev-reg > span {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+  padding: 3px 8px;
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+  font-weight: bold;
+}
+.ev-head .r {
+  text-align: right;
+}
+.ev-what {
+  display: grid;
+  grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
+  column-gap: 10px;
+  min-width: 0;
+}
+.ev-what > * {
+  grid-column: 1;
+}
+/* A dotted leader from its name and date to its bar, at the bar's height, so the eye keeps to the row across. */
+.ev-what::after {
+  content: '';
+  grid-row: 1 / 3;
+  grid-column: 2;
+  align-self: center;
+  min-width: 12px;
+  border-bottom: 1px dotted color-mix(in srgb, var(--muted) 55%, transparent);
+}
+.ev-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ev-change.up {
+  color: var(--good);
+}
+.ev-change.down {
+  color: var(--bad);
+}
+.ev-label {
+  display: none;
+}
+@media (max-width: 560px) {
+  .events-table {
+    display: block;
+  }
+  .ev-row.ev-head {
+    display: none;
+  }
+  /* A row per event, ruled off from the next: its name (wrapping rather than clipped) and date, its bar across, then
+     its change and top cut, labeled, on a line of their own. */
+  .ev-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: 'what what' 'bar bar' 'change cut';
+    gap: 6px 20px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .ev-row:last-child,
+  .ev-row:has(+ .ev-reg) {
+    border-bottom: 0;
+  }
+  .ev-reg,
+  .ev-reg > span {
+    display: block;
+    margin-top: 12px;
+  }
+  .ev-what {
+    grid-area: what;
+    display: flex;
+    flex-direction: column;
+  }
+  .ev-what::after {
+    display: none;
+  }
+  .ev-name {
+    white-space: normal;
+  }
+  .ev-usage {
+    grid-area: bar;
+  }
+  .ev-change {
+    grid-area: change;
+    text-align: left;
+  }
+  .ev-cut {
+    grid-area: cut;
+    text-align: left;
+  }
+  /* The first event of all, with no change: its top cut where the change would be. */
+  .ev-change:empty {
+    display: none;
+  }
+  .ev-change:empty + .ev-cut {
+    grid-area: change;
+  }
+  .ev-label {
+    display: inline;
+    margin-right: 6px;
+  }
 }
 /* Phones, as its dex entry: the name and types beside the sprite, then its use and the stats below, at the left. */
 @media (max-width: 560px) {
