@@ -643,7 +643,11 @@ const ordinal = (n: number) => `#${n}`
       </BandTabs>
       <SectionNav ref="sectionNav" attached :sections />
       <section id="sec-pokemon" class="panel banded section">
-        <h2 class="band">{{ t('tournaments.pokemonStatsHead') }}</h2>
+        <h2 class="band">
+          <!-- The players and matches counted, to the heading's right on wide screens, over it on phones. -->
+          <span v-if="phone" v-tip="about" :class="{ tipped: about }">{{ t('tournaments.pokemonStatsHead') }}</span>
+          <span v-else v-tip.right="about" :class="{ tipped: about }">{{ t('tournaments.pokemonStatsHead') }}</span>
+        </h2>
         <div class="stats-controls">
           <SegmentedControl
             v-model="day"
@@ -675,9 +679,7 @@ const ordinal = (n: number) => `#${n}`
             </span>
           </label>
         </div>
-        <p class="muted small about">
-          {{ about }}<template v-if="chartAbout"> · {{ chartAbout }}</template>
-        </p>
+        <p v-if="chartAbout" class="muted small about">{{ chartAbout }}</p>
         <p v-if="!standings || !rounds" class="muted">{{ t('tournaments.loading') }}</p>
         <WinRateChart
           v-if="standings && rounds && charted.length"
