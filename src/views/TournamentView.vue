@@ -1124,6 +1124,22 @@ h1 {
   width: 4em;
   font: inherit;
 }
+/* On phones, its label on a row of its own, the slider and the number under it across the width. */
+@media (max-width: 720px) {
+  .chart-n {
+    flex-wrap: wrap;
+    flex-grow: 1;
+    row-gap: 2px;
+  }
+  .chart-n > .muted {
+    flex-basis: 100%;
+  }
+  .chart-n input[type='range'] {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+}
 .about {
   margin: 2px 0 8px;
 }
