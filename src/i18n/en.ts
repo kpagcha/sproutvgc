@@ -853,6 +853,10 @@ export const messages = {
   'tournaments.noMovers': 'None moved by half a point or more',
   'tournaments.col.best': 'Best',
   'tournaments.col.bestTip': 'The best placing of a team with it',
+  'tournaments.sortBy': 'Sort by',
+  'tournaments.line.usage': '{n} of teams',
+  'tournaments.line.winRate': '{n} won',
+  'tournaments.line.best': 'best {placing}',
   'tournaments.newTip': 'Not on a team at the events before',
   'tournaments.standouts': 'Off-meta standouts',
   'tournaments.standoutsTip':

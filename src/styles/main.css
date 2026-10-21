@@ -647,3 +647,26 @@ details > summary {
 :root:root .medal.bronze {
   background: var(--bronze);
 }
+/* A quieter medal, for where it sits among other numbers (a tournament's Pokémon on phones): a thin outline and no
+   shadow, its color a tint. */
+:root:root .medal.soft {
+  min-width: 2.2em;
+  padding: 0 4px;
+  border-width: 1px;
+  border-color: var(--border-strong);
+  box-shadow: none;
+}
+:root:root .medal.soft.gold,
+:root:root .medal.soft.silver,
+:root:root .medal.soft.bronze {
+  color: var(--text);
+}
+:root:root .medal.soft.gold {
+  background: color-mix(in srgb, var(--gold) 40%, var(--panel));
+}
+:root:root .medal.soft.silver {
+  background: color-mix(in srgb, var(--silver) 40%, var(--panel));
+}
+:root:root .medal.soft.bronze {
+  background: color-mix(in srgb, var(--bronze) 40%, var(--panel));
+}

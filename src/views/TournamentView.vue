@@ -17,7 +17,7 @@ import {
   type Slot,
   type Standing,
 } from '@/data/tournaments'
-import { locale, t } from '@/i18n'
+import { locale, t, tSplit } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { filterKey, passesGroups, positiveFilters } from '@/lib/filterGroups'
 import type { NamedLocation } from '@/lib/links'
@@ -241,6 +241,13 @@ const {
   startsDesc: (k) => k !== 'best',
   locale,
 })
+/** What a phone's list of them can be sorted by, picked over it. */
+const STAT_SORTS = ['usage', 'winRate', 'best'] as const
+/** In that list, a win rate's hint: the good color over even, the bad under, muted with too few matches. */
+const wrHint = (s: PokemonStat) => (s.winRate === null || unsure(s) ? 'muted' : s.winRate >= 0.5 ? 'wr-up' : 'wr-down')
+/** The words around the numbers in its line: after a win rate, and around a best placing's badge. */
+const wonText = computed(() => tSplit('tournaments.line.winRate', 'n'))
+const bestText = computed(() => tSplit('tournaments.line.best', 'placing'))
 const TOP = 20
 const minMatches = computed(() => MIN_MATCHES[day.value])
 const enough = (s: PokemonStat) => s.wins + s.losses >= minMatches.value
@@ -669,7 +676,7 @@ const ordinal = (n: number) => `#${n}`
           :to="(s) => teamsWith(s.id) ?? { name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }"
         />
         <div
-          v-if="standings && rounds"
+          v-if="standings && rounds && !phone"
           class="dex-table stats"
           role="table"
           :aria-label="t('tournaments.pokemonStats')"
@@ -750,6 +757,95 @@ const ordinal = (n: number) => `#${n}`
             </div>
           </template>
         </div>
+        <!-- On phones, a list rather than columns: what it's sorted by picked over it, and in each row that number at
+             its end with its bar under the name, the rest a line of small text under them. -->
+        <template v-else-if="standings && rounds">
+          <div class="stat-sort" role="group" :aria-label="t('tournaments.sortBy')">
+            <span class="muted">{{ t('tournaments.sortBy') }}</span>
+            <span class="segments">
+              <button
+                v-for="k in STAT_SORTS"
+                :key="k"
+                type="button"
+                :class="{ on: statKey === k }"
+                :aria-pressed="statKey === k"
+                @click="sortStats(k)"
+              >
+                {{ t(`tournaments.col.${k}`)
+                }}<span v-if="statKey === k" class="arrow" :class="{ up: !statDesc }" aria-hidden="true">▾</span>
+              </button>
+            </span>
+          </div>
+          <ol class="stat-list" :aria-label="t('tournaments.pokemonStats')">
+            <template v-for="(s, i) in shownStats" :key="s.id">
+              <li v-if="i === fewFrom" class="few">{{ t('tournaments.fewMatches', { n: minMatches }) }}</li>
+              <li class="stat-item">
+                <span class="rank num muted">{{ i + 1 }}</span>
+                <AppLink
+                  :to="teamsWith(s.id) ?? { name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }"
+                  class="mon"
+                >
+                  <PokemonIcon :id="s.id" /><span class="mon-name"
+                    ><span>{{ monName(s.id).species }}</span
+                    ><span v-if="monName(s.id).forme" class="forme">{{ monName(s.id).forme }}</span></span
+                  >
+                </AppLink>
+                <AppLink
+                  v-if="statKey === 'best'"
+                  :to="{ name: 'tournamentPlayer', params: { id, placing: String(s.best) } }"
+                  class="lead best soft num"
+                  :class="medalOf(s.best)"
+                  >{{ ordinal(s.best) }}</AppLink
+                >
+                <!-- A win rate with its record beside it, what it's of. -->
+                <span v-else-if="statKey === 'winRate'" class="lead num"
+                  ><span :class="wrHint(s)">{{ s.winRate === null ? '—' : percent(s.winRate) }}</span>
+                  <span class="record-wl"
+                    >(<span :class="{ more: s.wins > s.losses }">{{ s.wins }}</span
+                    >–<span :class="{ more: s.losses > s.wins }">{{ s.losses }}</span
+                    >)</span
+                  ></span
+                >
+                <span v-else class="lead num">{{ percent(s.usage) }}</span>
+                <span
+                  v-if="statKey === 'usage'"
+                  class="lead-bar meter"
+                  :style="{ '--share': s.usage / (topUsage || 1) }"
+                  aria-hidden="true"
+                ></span>
+                <p class="line muted num">
+                  <AppLink
+                    v-if="statKey === 'best'"
+                    :to="{ name: 'tournamentPlayer', params: { id, placing: String(s.best) } }"
+                    class="who"
+                    >{{ playerAt(s.best)?.player }}</AppLink
+                  >
+                  <span v-if="statKey !== 'usage'">{{ t('tournaments.line.usage', { n: percent(s.usage) }) }}</span>
+                  <span v-if="statKey !== 'winRate'"
+                    ><template v-if="s.winRate !== null"
+                      >{{ wonText[0] }}<span :class="wrHint(s)">{{ percent(s.winRate) }}</span
+                      >{{ `${wonText[1]} ` }}</template
+                    ><span class="record-wl"
+                      >(<span :class="{ more: s.wins > s.losses }">{{ s.wins }}</span
+                      >–<span :class="{ more: s.losses > s.wins }">{{ s.losses }}</span
+                      >)</span
+                    ></span
+                  >
+                  <span v-if="statKey !== 'best'"
+                    >{{ bestText[0]
+                    }}<AppLink
+                      v-tip="playerAt(s.best)?.player"
+                      :to="{ name: 'tournamentPlayer', params: { id, placing: String(s.best) } }"
+                      class="best soft num"
+                      :class="medalOf(s.best)"
+                      >{{ ordinal(s.best) }}</AppLink
+                    >{{ bestText[1] }}</span
+                  >
+                </p>
+              </li>
+            </template>
+          </ol>
+        </template>
         <button
           v-if="stats.length > TOP"
           type="button"
@@ -1023,35 +1119,110 @@ h1 {
 .dex-table.stats {
   --cols: 2.5rem minmax(0, 1fr) 5rem 5.5rem 6rem 3.75rem;
 }
-/* On phones, each row two lines (the header's too), so the name has the width and each number room for its bar: its
-   rank, its Pokémon, then its best placing, over its record; its usage and win rate a third of the width each, its
-   record a bit more. */
-@media (max-width: 720px) {
-  .dex-table.stats {
-    --cols: 1.75rem repeat(2, minmax(0, 1fr)) minmax(0, 1.25fr);
-  }
-  .dex-table.stats .row {
-    grid-template-areas: 'rank mon mon best' 'rank usage wr record';
-  }
-  .dex-table.stats .row > :nth-child(1) {
-    grid-area: rank;
-    align-self: start;
-  }
-  .dex-table.stats .row > :nth-child(2) {
-    grid-area: mon;
-  }
-  .dex-table.stats .row > :nth-child(3) {
-    grid-area: usage;
-  }
-  .dex-table.stats .row > :nth-child(4) {
-    grid-area: wr;
-  }
-  .dex-table.stats .row > :nth-child(5) {
-    grid-area: record;
-  }
-  .dex-table.stats .row > :nth-child(6) {
-    grid-area: best;
-  }
+/* On phones, what the list is sorted by, its options joined in one outlined strip as `SegmentedControl`'s, tapped again
+   to reverse it. */
+.stat-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 0.875em;
+}
+.stat-sort .segments {
+  display: flex;
+  border: 2px solid var(--ink);
+  box-shadow: var(--hard-sm);
+}
+.stat-sort button {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 10px;
+  font: inherit;
+  color: inherit;
+  background: var(--panel-alt);
+  border: none;
+  cursor: pointer;
+}
+.stat-sort button + button {
+  border-left: 2px solid var(--ink);
+}
+.stat-sort button.on {
+  background: var(--sel);
+}
+.stat-sort .arrow {
+  font-size: 0.8em;
+}
+.stat-sort .arrow.up {
+  transform: scaleY(-1);
+}
+/* Each row its rank, its Pokémon, and the number it's sorted by at its end, usage's bar under the name (a win rate
+   in the good or bad color instead), the rest a line of small text under them, every row the same height: the forme on the name's line, plain. */
+.stat-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.stat-item {
+  display: grid;
+  grid-template-columns: 1.75rem minmax(0, 1fr) auto;
+  grid-template-areas: 'rank mon lead' '. bar bar' '. line line';
+  align-items: center;
+  column-gap: 8px;
+  padding: 8px 4px 6px;
+  border-bottom: 1px solid var(--border);
+}
+.stat-item .rank {
+  grid-area: rank;
+  align-self: start;
+  padding-top: 2px;
+  font-size: 0.9em;
+}
+.stat-item .mon {
+  grid-area: mon;
+}
+.stat-item .mon-name {
+  flex-wrap: nowrap;
+}
+.stat-item .forme {
+  padding: 0;
+  border: none;
+}
+.stat-item .lead {
+  grid-area: lead;
+  font-weight: bold;
+}
+.stat-item .lead-bar {
+  grid-area: bar;
+  height: 10px;
+  --inset: 0px;
+}
+.stat-item .line {
+  grid-area: line;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.4em;
+  margin: 2px 0 0;
+  font-size: 0.85em;
+}
+.stat-item .line > * + *::before {
+  content: '·';
+  margin-right: 0.4em;
+}
+.stat-item .who {
+  color: inherit;
+}
+/* A win rate's hint, subtle: the text's color tinted toward the good or the bad. */
+.wr-up {
+  color: color-mix(in srgb, var(--good) 45%, var(--text));
+}
+.wr-down {
+  color: color-mix(in srgb, var(--bad) 45%, var(--text));
+}
+/* Its record beside it as the lead, at the line's size and weight. */
+.stat-item .lead .record-wl {
+  font-size: 0.8em;
+  font-weight: normal;
 }
 /* The Pokémon tab's panels, landed on from its row of links under that row. */
 .section {
@@ -1366,12 +1537,11 @@ h1 {
 .wr.unsure {
   color: var(--muted);
 }
-/* A record, muted, the larger of its wins and losses in the text's color and bold. */
+/* A record, muted, the larger of its wins and losses in the text's color. */
 .record-wl {
   color: var(--muted);
 }
 .record-wl .more {
-  font-weight: bold;
   color: var(--text);
 }
 .to-meta {
