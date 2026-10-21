@@ -69,6 +69,22 @@ export interface TournamentEvent {
   winner?: { player: string; country: string; team: string[] }
 }
 
+/** An event still to come, as Limitless VGC's list of them has it: no players nor standings yet, its regulation only
+ * once announced, and its type told by its name (the list has no type of its own). */
+export interface UpcomingEvent {
+  /** Its number on Limitless VGC, which it keeps once it's over. */
+  n: number
+  name: string
+  /** The day it starts, as an ISO date. */
+  date: string
+  country: string
+  type?: EventType
+  regulation?: string
+  /** Its page on Limitless VGC, and the official one, its venue and registration, when the list links it. */
+  url: string
+  info?: string
+}
+
 /** A Pokémon as brought: its ID (a Mega's when it holds its Mega Stone, as Smogon's stats count it), then its item,
  * ability and nature (Showdown IDs, null when the list doesn't say), then its moves. Without a team list, the Pokémon
  * alone (the rest null, no moves). */
@@ -197,6 +213,39 @@ export class LimitlessVgc {
   /** Every event of a regulation, oldest first, by its number on limitlessvgc.com. */
   async events(regulation: string): Promise<number[]> {
     return [...(await this.listed(regulation)).keys()].sort((a, b) => a - b)
+  }
+
+  /** The events still to come, soonest first, from its list of them: read again when updating, else through the cache;
+   * nothing offline with none cached. */
+  async upcoming(): Promise<UpcomingEvent[] | null> {
+    let html: string
+    try {
+      html = await this.cached(`${SITE}/tournaments/upcoming`, 'lists/upcoming.html', this.update)
+    } catch (error) {
+      if (error instanceof Offline) return null
+      throw error
+    }
+    const events: UpcomingEvent[] = []
+    for (const row of html.split(/(?=<tr data-date=)/).slice(1)) {
+      const m = row.match(
+        /^<tr data-date="([\d-]+)" data-country="([^"]*)"\s+data-name="([^"]*)" data-format="([^"]*)"[\s\S]*?<a href="\/tournaments\/(\d+)">/,
+      )
+      if (!m) continue
+      const name = decode(m[3]!)
+      const info = row.split('</tr>')[0]!.match(/<a href="(https?:\/\/[^"]+)"/)?.[1]
+      const type = typeOf(name)
+      events.push({
+        n: Number(m[5]),
+        name,
+        date: m[1]!,
+        country: m[2]!,
+        ...(type && { type }),
+        ...(m[4] && { regulation: m[4].toUpperCase() }),
+        url: `${SITE}/tournaments/${m[5]}`,
+        ...(info && { info: decode(info) }),
+      })
+    }
+    return events.sort((a, b) => a.date.localeCompare(b.date) || a.n - b.n)
   }
 
   /**
@@ -440,6 +489,19 @@ export function slugOf(name: string, date: string): string {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
   return /\b\d{4}\b/.test(slug) ? slug : `${slug}-${date.slice(0, 4)}`
+}
+
+/** An event's type by its name, for the list of those to come, which has no type of its own: "Regional Puebla",
+ * "Special Event Lima", "LAIC 2026–27, São Paulo", "World Championships 2027". */
+function typeOf(name: string): EventType | undefined {
+  if (/^regional\b/i.test(name)) return 'regional'
+  if (/^special event\b/i.test(name)) return 'special'
+  if (/\b[A-Z]{2}IC\b/.test(name) || /international/i.test(name)) return 'international'
+  if (/world championships?/i.test(name)) return 'worlds'
+  if (/players'? cup/i.test(name)) return 'playersCup'
+  if (/master ball league/i.test(name)) return 'masterBallLeague'
+  if (/national/i.test(name)) return 'national'
+  return undefined
 }
 
 /** `task` on each of `items`, `PARALLEL` at a time, failing as soon as one does. */

@@ -30,7 +30,13 @@ import { ConditionScan } from './conditions.ts'
 import { itemCategorizer } from './itemCategories.ts'
 import { SPEED_ABILITIES, SPEED_ITEMS } from '../src/lib/speed.ts'
 import { histories, Smogon, withPrevious, type MetaEntry, type Snapshot } from './smogon.ts'
-import { FORMAT as TOURNAMENT_FORMAT, LimitlessVgc, type Standing, type TournamentEvent } from './limitlessVgc.ts'
+import {
+  FORMAT as TOURNAMENT_FORMAT,
+  LimitlessVgc,
+  type Standing,
+  type TournamentEvent,
+  type UpcomingEvent,
+} from './limitlessVgc.ts'
 import { ITEM_ICONS, POKEMON_ICONS, SpriteSource, iconIndexes, sheetLayout, trimSheet } from './sprites.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -780,7 +786,7 @@ async function main() {
   // or earlier runs pinned), once it's over, as listed there (`tournaments/index.json`, by ID, its name as a slug:
   // `regional-nice-2026`; the oldest of two of one name and year keeps it, the other gets its month too), each one's
   // standings, its whole field by placing with the sets each player brought (`tournaments/<id>.json`), and its rounds'
-  // matches (`tournaments/<id>.rounds.json`). An event generated before, in the same shape, is kept from its committed
+  // matches (`tournaments/<id>.rounds.json`), and those still to come (`tournaments/upcoming.json`). An event generated before, in the same shape, is kept from its committed
   // files rather than requested again: about a thousand requests a Regional, made once. A past regulation's teams
   // aren't held to the dex: what it no longer has is left out.
   const updateTournaments = process.argv.includes('--update') || process.argv.includes('--update-tournaments')
@@ -819,6 +825,12 @@ async function main() {
       })
     }
   }
+  // The events to come, as generated before: kept when offline with Limitless VGC's list of them not cached.
+  const upcomingBefore = existsSync(join(tournamentsOut, 'upcoming.json'))
+    ? Object.values(
+        JSON.parse(readFileSync(join(tournamentsOut, 'upcoming.json'), 'utf8')) as Record<string, UpcomingEvent>,
+      )
+    : []
   rmSync(tournamentsOut, { recursive: true, force: true })
   const events: Record<string, TournamentEvent> = {}
   // Each event's Pokémon in a few numbers (`tournaments/usage.json`), for an event's Pokémon to be set against the
@@ -874,6 +886,11 @@ async function main() {
   }
   await writeJson('tournaments/index.json', events)
   await writeJson('tournaments/usage.json', usage)
+  // The official events still to come (`tournaments/upcoming.json`, by their number), those generated already left
+  // out (over, though the list may not have caught up).
+  const generated = new Set(Object.values(events).map((e) => e.n))
+  const upcoming = ((await limitless.upcoming()) ?? upcomingBefore).filter((e) => !generated.has(e.n))
+  await writeJson('tournaments/upcoming.json', Object.fromEntries(upcoming.map((e) => [e.n, e])))
   if (limitless.requests) console.log(`Made ${limitless.requests} requests to Limitless VGC`)
 
   // Sprites: the icon sheets cut down to the regulation's entries, in ID order, and each legal Pokémon's own sprite.

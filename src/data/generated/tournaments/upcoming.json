@@ -1,0 +1,265 @@
+{
+  "447": {
+    "n": 447,
+    "name": "Regional Puebla",
+    "date": "2026-10-24",
+    "country": "MX",
+    "type": "regional",
+    "regulation": "M-C",
+    "url": "https://limitlessvgc.com/tournaments/447",
+    "info": "https://www.trainerchampionships.com/event/puebla-2027/"
+  },
+  "448": {
+    "n": 448,
+    "name": "Regional Gdańsk",
+    "date": "2026-10-31",
+    "country": "PL",
+    "type": "regional",
+    "regulation": "M-C",
+    "url": "https://limitlessvgc.com/tournaments/448",
+    "info": "https://www.trainerchampionships.com/event/gdansk-2027/"
+  },
+  "449": {
+    "n": 449,
+    "name": "Special Event Buenos Aires",
+    "date": "2026-11-14",
+    "country": "AR",
+    "type": "special",
+    "regulation": "M-C",
+    "url": "https://limitlessvgc.com/tournaments/449",
+    "info": "https://www.trainerchampionships.com/event/buenos-aires-2027/"
+  },
+  "450": {
+    "n": 450,
+    "name": "LAIC 2026–27, São Paulo",
+    "date": "2026-11-20",
+    "country": "BR",
+    "type": "international",
+    "regulation": "M-C",
+    "url": "https://limitlessvgc.com/tournaments/450",
+    "info": "https://championships.pokemon.com/en-us/events/internationals/2027/sao-paulo"
+  },
+  "451": {
+    "n": 451,
+    "name": "Regional Stuttgart",
+    "date": "2026-11-28",
+    "country": "DE",
+    "type": "regional",
+    "regulation": "M-C",
+    "url": "https://limitlessvgc.com/tournaments/451",
+    "info": "https://www.trainerchampionships.com/event/stuttgart-2027/"
+  },
+  "452": {
+    "n": 452,
+    "name": "Regional Las Vegas, NV",
+    "date": "2026-12-05",
+    "country": "US",
+    "type": "regional",
+    "url": "https://limitlessvgc.com/tournaments/452",
+    "info": "https://www.trainerchampionships.com/event/las-vegas-2027/"
+  },
+  "453": {
+    "n": 453,
+    "name": "Regional Sydney",
+    "date": "2027-01-16",
+    "country": "AU",
+    "type": "regional",
+    "url": "https://limitlessvgc.com/tournaments/453",
+    "info": "https://www.trainerchampionships.com/event/sydney-2027/"
+  },
+  "454": {
+    "n": 454,
+    "name": "Regional Atlanta, GA",
+    "date": "2027-01-16",
+    "country": "US",
+    "type": "regional",
+    "url": "https://limitlessvgc.com/tournaments/454",
+    "info": "https://www.trainerchampionships.com/event/atlanta-2027/"
+  },
+  "455": {
+    "n": 455,
+    "name": "Regional Mérida",
+    "date": "2027-01-23",
+    "country": "MX",
+    "type": "regional",
+    "url": "https://limitlessvgc.com/tournaments/455",
+    "info": "https://www.trainerchampionships.com/event/merida-2027/"
+  },
+  "456": {
+    "n": 456,
+    "name": "Regional Birmingham",
+    "date": "2027-01-30",
+    "country": "GB",
+    "type": "regional",
+    "url": "https://limitlessvgc.com/tournaments/456",
+    "info": "https://www.trainerchampionships.com/event/birmingham-2027/"
+  },
+  "457": {
+    "n": 457,
+    "name": "Special Event Auckland",
+    "date": "2027-01-30",
+    "country": "NZ",
+    "type": "special",
+    "url": "https://limitlessvgc.com/tournaments/457",
+    "info": "https://www.trainerchampionships.com/event/auckland-2027/"
+  },
+  "458": {
+    "n": 458,
+    "name": "EUIC 2027, London",
+    "date": "2027-02-19",
+    "country": "GB",
+    "type": "international",
+    "url": "https://limitlessvgc.com/tournaments/458"
+  },
+  "459": {
+    "n": 459,
+    "name": "Regional Santiago",
+    "date": "2027-02-27",
+    "country": "CL",
+    "type": "regional",
+    "url": "https://limitlessvgc.com/tournaments/459",
+    "info": "https://www.trainerchampionships.com/event/santiago-2027/"
+  },
+  "460": {
+    "n": 460,
+    "name": "Regional Rio de Janeiro",
+    "date": "2027-03-06",
+    "country": "BR",
+    "type": "regional",
+    "url": "https://limitlessvgc.com/tournaments/460",
+    "info": "https://www.trainerchampionships.com/event/rio-de-janeiro-2027/"
+  },
+  "461": {
+    "n": 461,
+    "name": "Regional Toronto",
+    "date": "2027-04-03",
+    "country": "CA",
+    "type": "regional",
+    "url": "https://limitlessvgc.com/tournaments/461",
+    "info": "https://www.trainerchampionships.com/event/toronto-2027/"
+  },
+  "462": {
+    "n": 462,
+    "name": "Regional Monterrey",
+    "date": "2027-04-10",
+    "country": "MX",
+    "type": "regional",
+    "url": "https://limitlessvgc.com/tournaments/462",
+    "info": "https://www.trainerchampionships.com/event/monterrey-2027/"
+  },
+  "463": {
+    "n": 463,
+    "name": "Special Event Lisbon",
+    "date": "2027-04-10",
+    "country": "PT",
+    "type": "special",
+    "url": "https://limitlessvgc.com/tournaments/463",
+    "info": "https://www.trainerchampionships.com/event/lisbon-2027/"
+  },
+  "464": {
+    "n": 464,
+    "name": "Regional Milwaukee, WI",
+    "date": "2027-04-17",
+    "country": "US",
+    "type": "regional",
+    "url": "https://limitlessvgc.com/tournaments/464",
+    "info": "https://www.trainerchampionships.com/event/milwaukee-2027/"
+  },
+  "465": {
+    "n": 465,
+    "name": "Special Event Lima",
+    "date": "2027-04-24",
+    "country": "PE",
+    "type": "special",
+    "url": "https://limitlessvgc.com/tournaments/465",
+    "info": "https://www.trainerchampionships.com/event/lima-2027/"
+  },
+  "466": {
+    "n": 466,
+    "name": "Regional Prague",
+    "date": "2027-05-08",
+    "country": "CZ",
+    "type": "regional",
+    "url": "https://limitlessvgc.com/tournaments/466",
+    "info": "https://www.trainerchampionships.com/event/prague-2027/"
+  },
+  "467": {
+    "n": 467,
+    "name": "Regional Porto Alegre",
+    "date": "2027-05-08",
+    "country": "BR",
+    "type": "regional",
+    "url": "https://limitlessvgc.com/tournaments/467",
+    "info": "https://www.trainerchampionships.com/event/porto-alegre-2027/"
+  },
+  "468": {
+    "n": 468,
+    "name": "Regional Utrecht",
+    "date": "2027-05-22",
+    "country": "NL",
+    "type": "regional",
+    "url": "https://limitlessvgc.com/tournaments/468",
+    "info": "https://www.trainerchampionships.com/event/utrecht-2027/"
+  },
+  "469": {
+    "n": 469,
+    "name": "Regional Melbourne",
+    "date": "2027-05-29",
+    "country": "AU",
+    "type": "regional",
+    "url": "https://limitlessvgc.com/tournaments/469",
+    "info": "https://www.trainerchampionships.com/event/melbourne-2027/"
+  },
+  "470": {
+    "n": 470,
+    "name": "Regional San Diego, CA",
+    "date": "2027-05-29",
+    "country": "US",
+    "type": "regional",
+    "url": "https://limitlessvgc.com/tournaments/470",
+    "info": "https://www.trainerchampionships.com/event/san-diego-2027/"
+  },
+  "471": {
+    "n": 471,
+    "name": "Special Event Bologna",
+    "date": "2027-06-05",
+    "country": "IT",
+    "type": "special",
+    "url": "https://limitlessvgc.com/tournaments/471",
+    "info": "https://www.trainerchampionships.com/event/bologna-2027/"
+  },
+  "472": {
+    "n": 472,
+    "name": "NAIC 2027, Chicago",
+    "date": "2027-06-18",
+    "country": "US",
+    "type": "international",
+    "url": "https://limitlessvgc.com/tournaments/472"
+  },
+  "473": {
+    "n": 473,
+    "name": "World Championships 2027",
+    "date": "2027-08-13",
+    "country": "SG",
+    "type": "worlds",
+    "url": "https://limitlessvgc.com/tournaments/473"
+  },
+  "474": {
+    "n": 474,
+    "name": "Regional Seattle, WA",
+    "date": "2027-02-06",
+    "country": "US",
+    "type": "regional",
+    "url": "https://limitlessvgc.com/tournaments/474",
+    "info": "https://www.trainerchampionships.com/event/seattle-2027/"
+  },
+  "475": {
+    "n": 475,
+    "name": "Regional San Antonio, TX",
+    "date": "2027-02-27",
+    "country": "US",
+    "type": "regional",
+    "url": "https://limitlessvgc.com/tournaments/475",
+    "info": "https://www.trainerchampionships.com/event/san-antonio-2027/"
+  }
+}

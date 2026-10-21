@@ -371,6 +371,21 @@ export const router = createRouter({
         ...inArea('meta', 'tournaments'),
       },
     },
+    // The events still to come.
+    {
+      path: '/meta/tournaments/upcoming',
+      name: 'upcomingTournaments',
+      component: () => import('@/views/TournamentsView.vue'),
+      props: { upcoming: true },
+      meta: {
+        titleKey: 'title.upcomingTournaments',
+        descKey: 'desc.upcomingTournaments',
+        headKey: 'head.upcomingTournaments',
+        keywordsKey: 'keywords.upcomingTournaments',
+        recent: once('upcomingTournaments'),
+        ...inArea('meta', 'tournaments'),
+      },
+    },
     {
       path: '/meta/tournaments/:id/:tab(pokemon)?',
       name: 'tournament',

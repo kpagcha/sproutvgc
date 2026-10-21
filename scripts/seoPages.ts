@@ -230,6 +230,7 @@ export function seoPages(): Plugin {
           schema: 'WebPage',
         })),
         searched('meta/tournaments', 'tournaments', 'CollectionPage'),
+        searched('meta/tournaments/upcoming', 'upcomingTournaments', 'CollectionPage'),
         ...Object.entries(events).flatMap(([id, e]): Page[] => [
           {
             path: `meta/tournaments/${id}`,

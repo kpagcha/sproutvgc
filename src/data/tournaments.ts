@@ -88,6 +88,7 @@ const FILES = import.meta.glob<Record<string, Standing>>(
     './generated/tournaments/*.json',
     '!./generated/tournaments/index.json',
     '!./generated/tournaments/usage.json',
+    '!./generated/tournaments/upcoming.json',
     '!./generated/tournaments/*.rounds.json',
   ],
   { import: 'default' },
@@ -99,6 +100,35 @@ export const EVENTS: readonly TournamentEvent[] = Object.values(Object.values(IN
 )
 const BY_ID = new Map(EVENTS.map((e) => [e.id, e]))
 const BY_N = new Map(EVENTS.map((e) => [e.n, e]))
+
+/** An event still to come, as Limitless VGC lists it: its type told by its name, its regulation once announced, and
+ * its page there and the official one (venue, registration) when listed. */
+export interface UpcomingEvent {
+  n: number
+  name: string
+  /** The day it starts, as an ISO date. */
+  date: string
+  country: string
+  type?: EventType
+  regulation?: string
+  url: string
+  info?: string
+}
+
+const UPCOMING_INDEX = import.meta.glob<Record<string, UpcomingEvent>>('./generated/tournaments/upcoming.json', {
+  eager: true,
+  import: 'default',
+})
+/** How long after its start an event still counts as to come: one under way, its standings not in yet. */
+const UNDER_WAY_DAYS = 4
+/** The events still to come, the soonest first: as of when the data was generated, so those started more than a few
+ * days ago, or generated since, left out. */
+export const UPCOMING: readonly UpcomingEvent[] = (() => {
+  const since = new Date(Date.now() - UNDER_WAY_DAYS * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+  return Object.values(Object.values(UPCOMING_INDEX)[0] ?? {})
+    .filter((e) => e.date >= since && !BY_N.has(e.n))
+    .sort((a, b) => a.date.localeCompare(b.date) || a.n - b.n)
+})()
 
 const ROUNDS = import.meta.glob<Record<number, Round>>('./generated/tournaments/*.rounds.json', {
   import: 'default',

@@ -108,6 +108,7 @@ export const messages = {
   'title.tournaments': 'Tournaments',
   'title.tournament': 'Tournament',
   'title.tournamentPlayer': 'Tournament player',
+  'title.upcomingTournaments': 'Upcoming tournaments',
   'title.metaPokemon': 'Meta',
   'title.metaAbility': 'Meta',
   'title.metaItem': 'Meta',
@@ -132,6 +133,8 @@ export const messages = {
   'desc.abilityRankings': 'Which abilities are used most in {game}, Regulation {reg}, and by which Pokémon.',
   'desc.tournaments':
     "The official {game} tournaments: each event's standings and the teams its top players brought, item, ability, nature and moves.",
+  'desc.upcomingTournaments':
+    'The official {game} tournaments still to come: Regionals, Special Events, Internationals and Worlds, by date, each with its official page.',
   'desc.tournament': "{name}: its standings and the teams its top players brought, each Pokémon's whole set.",
   'desc.tournamentPlayer': '{name}: their placing, record and team, and every match round by round.',
   'desc.tournamentPokemon':
@@ -804,7 +807,15 @@ export const messages = {
   'keywords.tournament': '{name}, {name} results, {name} teams, {game} tournament, VGC regional',
   'head.tournamentPokemon': 'Pokémon usage and win rates',
   'keywords.tournamentPokemon': '{name} usage, {name} Pokémon, {name} win rates, {game} tournament usage, VGC usage',
+  'head.upcomingTournaments': 'Upcoming official tournaments and schedule',
+  'keywords.upcomingTournaments':
+    '{game} upcoming tournaments, VGC schedule, upcoming VGC regionals, {game} regionals, VGC {reg} events',
   'tournaments.none': 'No tournaments yet.',
+  'tournaments.noneUpcoming': 'No upcoming tournaments announced.',
+  'tournaments.toUpcoming': 'Upcoming ({n})',
+  'tournaments.regulationTba': 'Regulation not announced',
+  'tournaments.officialPage': 'Official page ↗',
+  'tournaments.onLimitless': 'Limitless VGC ↗',
   'tournaments.toMeta': 'Meta',
   'tournaments.players': '{n} players',
   'tournaments.winner': 'Won by',

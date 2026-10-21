@@ -120,6 +120,7 @@ const LISTS: Partial<Record<string, { to: RouteLocationRaw; label: MessageKey }>
   metaItem: { to: { name: 'itemRankings' }, label: 'title.itemRankings' },
   metaMove: { to: { name: 'moveRankings' }, label: 'title.moveRankings' },
   tournament: { to: { name: 'tournaments' }, label: 'title.tournaments' },
+  upcomingTournaments: { to: { name: 'tournaments' }, label: 'title.tournaments' },
   ability: { to: { name: 'abilities' }, label: 'title.abilities' },
   pokemon: { to: { name: 'pokedex' }, label: 'title.pokemon' },
   move: { to: { name: 'moves' }, label: 'title.moves' },

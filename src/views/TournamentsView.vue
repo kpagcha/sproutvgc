@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { Eye } from '@lucide/vue'
 import { regulationSnapshot } from '@/data/meta'
-import { EVENTS, type EventType, type TournamentEvent } from '@/data/tournaments'
+import { EVENTS, UPCOMING, type EventType, type TournamentEvent, type UpcomingEvent } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
 import AppLink from '@/components/AppLink'
 import CountryFlag from '@/components/CountryFlag'
@@ -13,14 +13,21 @@ import PokemonIcon from '@/components/PokemonIcon'
 // who won with what. The bigger events (Worlds, the Internationals) have a bigger mark. Each regulation's run of events
 // starts at a divider across the line, with the way to its meta, every one of its events added up. A recent event's
 // winner (`SPOILER_DAYS`) is blurred, so the list doesn't spoil it, until revealed, one event at a time, remembered.
-const MAJOR: readonly EventType[] = ['worlds', 'international']
-const major = (e: TournamentEvent) => MAJOR.includes(e.type)
+// With `upcoming`, the events still to come instead (its own page, `/meta/tournaments/upcoming`), on the same timeline
+// but the soonest first, each card leading to its official page (else its page on Limitless VGC), those whose
+// regulation isn't announced yet a run of their own.
+const props = defineProps<{ upcoming?: boolean }>()
 
-function months(events: TournamentEvent[]) {
-  const byMonth = new Map<string, Map<string, TournamentEvent[]>>()
+type Listed = TournamentEvent | UpcomingEvent
+const MAJOR: readonly (EventType | undefined)[] = ['worlds', 'international']
+const major = (e: Listed) => MAJOR.includes(e.type)
+const past = (e: Listed): e is TournamentEvent => 'id' in e
+
+function months(events: Listed[]) {
+  const byMonth = new Map<string, Map<string, Listed[]>>()
   for (const e of events) {
     const key = e.date.slice(0, 7)
-    const month = byMonth.get(key) ?? new Map<string, TournamentEvent[]>()
+    const month = byMonth.get(key) ?? new Map<string, Listed[]>()
     byMonth.set(key, month)
     month.set(e.date, [...(month.get(e.date) ?? []), e])
   }
@@ -32,24 +39,25 @@ function months(events: TournamentEvent[]) {
 
 // The events by date, cut into each regulation's runs.
 const runs = computed(() => {
-  const out: { regulation: string; events: TournamentEvent[] }[] = []
-  for (const e of [...EVENTS].sort((a, b) => b.date.localeCompare(a.date))) {
+  const out: { regulation: string | undefined; events: Listed[] }[] = []
+  const events: Listed[] = props.upcoming ? [...UPCOMING] : [...EVENTS].sort((a, b) => b.date.localeCompare(a.date))
+  for (const e of events) {
     const last = out.at(-1)
-    if (last?.regulation === e.regulation) last.events.push(e)
+    if (last && last.regulation === e.regulation) last.events.push(e)
     else out.push({ regulation: e.regulation, events: [e] })
   }
   return out.map(({ regulation, events }, i) => ({
-    key: `${regulation}-${i}`,
+    key: `${regulation ?? '?'}-${i}`,
     regulation,
     months: months(events),
-    meta: regulationSnapshot(regulation)?.id,
+    meta: regulation ? regulationSnapshot(regulation)?.id : undefined,
   }))
 })
 
 /** How long after its start an event's winner stays hidden: the last week's events. */
 const SPOILER_DAYS = 7
 const DAY = 24 * 60 * 60 * 1000
-const recent = (e: TournamentEvent) => Date.now() - Date.parse(`${e.date}T00:00:00Z`) < SPOILER_DAYS * DAY
+const recent = (e: Listed) => Date.now() - Date.parse(`${e.date}T00:00:00Z`) < SPOILER_DAYS * DAY
 
 /** The recent events whose winner the reader revealed, by ID, remembered (those no longer recent dropped). */
 const KEY = 'sproutvgc.tournaments.revealed'
@@ -83,16 +91,23 @@ const count = (n: number) => n.toLocaleString(locale.value)
 
 <template>
   <div>
-    <div class="panel">
-      <h1>{{ t('title.tournaments') }}</h1>
+    <div class="panel heading">
+      <h1>{{ t(upcoming ? 'title.upcomingTournaments' : 'title.tournaments') }}</h1>
+      <AppLink v-if="!upcoming" :to="{ name: 'upcomingTournaments' }" class="to-upcoming"
+        >{{ t('tournaments.toUpcoming', { n: count(UPCOMING.length) }) }} ›</AppLink
+      >
     </div>
-    <p v-if="!runs.length" class="panel muted">{{ t('tournaments.none') }}</p>
+    <p v-if="!runs.length" class="panel muted">
+      {{ t(upcoming ? 'tournaments.noneUpcoming' : 'tournaments.none') }}
+    </p>
     <section v-else class="panel">
       <ol class="timeline">
         <li v-for="r in runs" :key="r.key" class="run">
           <div class="regulation">
-            <h2 class="regulation-name">{{ t('meta.regulation', { reg: r.regulation }) }}</h2>
-            <AppLink :to="{ name: 'rankings', query: { meta: r.meta } }" class="to-meta"
+            <h2 class="regulation-name">
+              {{ r.regulation ? t('meta.regulation', { reg: r.regulation }) : t('tournaments.regulationTba') }}
+            </h2>
+            <AppLink v-if="r.meta" :to="{ name: 'rankings', query: { meta: r.meta } }" class="to-meta"
               >{{ t('tournaments.toMeta') }} ›</AppLink
             >
           </div>
@@ -107,8 +122,29 @@ const count = (n: number) => n.toLocaleString(locale.value)
                     <span class="date">{{ dayOf(d.date) }}</span>
                   </time>
                   <ul class="events">
-                    <li v-for="e in d.events" :key="e.id">
+                    <li v-for="e in d.events" :key="e.n">
+                      <!-- An event to come: its official page, else Limitless VGC's, in a new tab. -->
+                      <a
+                        v-if="!past(e)"
+                        :href="e.info ?? e.url"
+                        target="_blank"
+                        rel="noopener"
+                        class="event"
+                        :class="{ major: major(e) }"
+                      >
+                        <span class="what">
+                          <span class="name">{{ e.name }}</span>
+                          <span class="muted small"
+                            ><template v-if="e.type">{{ t(`tournaments.type.${e.type}`) }} · </template
+                            ><CountryFlag :code="e.country"
+                          /></span>
+                        </span>
+                        <span class="small out">{{
+                          e.info ? t('tournaments.officialPage') : t('tournaments.onLimitless')
+                        }}</span>
+                      </a>
                       <AppLink
+                        v-else
                         :to="{ name: 'tournament', params: { id: e.id } }"
                         class="event"
                         :class="{ major: major(e) }"
@@ -194,6 +230,23 @@ const count = (n: number) => n.toLocaleString(locale.value)
 }
 .regulation .to-meta {
   order: 2;
+}
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+}
+.heading h1 {
+  margin: 0;
+}
+.to-upcoming {
+  font-weight: bold;
+}
+.out {
+  font-weight: bold;
+  white-space: nowrap;
 }
 .to-meta {
   color: inherit;
