@@ -730,7 +730,9 @@ async function main() {
   // for the pages showing "every Pokémon" of it: its format's, when Showdown still has it, else those its stats name.
   // Once all are in, each snapshot is given the one before it in its series (`previous`) and each Pokémon its rank and
   // usage there (`prev`), for the trends (`withPrevious`), and each series of more than one its history, every
-  // Pokémon's rank and usage in each (`meta/history/<key>.json`, `histories`), for its page.
+  // Pokémon's rank and usage in each (`meta/history/<key>.json`, `histories`), for its page. Each snapshot's ranks
+  // alone go in a file of their own too (`meta/ranks/<id>.json`), for the pages that need no more of it (a
+  // tournament's off-meta standouts), so they don't load the whole snapshot.
   const updateSmogon = process.argv.includes('--update') || process.argv.includes('--update-smogon')
   /** Smogon's ID for a regulation's format: Showdown's name for it as an ID, or, when Showdown no longer has it, the
    * current one's with the regulation swapped ("gen9championsvgc2026regma"). */
@@ -767,7 +769,10 @@ async function main() {
   withPrevious(index, metaData)
   for (const [key, history] of Object.entries(histories(index, metaData)))
     await writeJson(`meta/history/${key}.json`, history)
-  for (const [id, data] of Object.entries(metaData)) await writeJson(`meta/${id}.json`, data)
+  for (const [id, data] of Object.entries(metaData)) {
+    await writeJson(`meta/${id}.json`, data)
+    await writeJson(`meta/ranks/${id}.json`, Object.fromEntries(Object.entries(data).map(([p, m]) => [p, m.rank])))
+  }
   await writeJson('meta/index.json', index)
   await writeJson('meta/rosters.json', rosters)
 

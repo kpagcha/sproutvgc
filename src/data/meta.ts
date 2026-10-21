@@ -361,6 +361,20 @@ export function loadMeta(s: MetaSnapshot): Promise<MetaData> {
   return p
 }
 
+const RANKS = import.meta.glob<Partial<Record<PokemonId, number>>>('./generated/meta/ranks/*.json', {
+  import: 'default',
+})
+const loadedRanks = new Map<string, Promise<Partial<Record<PokemonId, number>>>>()
+/** A snapshot's ranks alone, by Pokémon, loaded once: from their own small file when it has one, else from its data. */
+export function loadRanks(s: MetaSnapshot): Promise<Partial<Record<PokemonId, number>>> {
+  let p = loadedRanks.get(s.id)
+  if (!p) {
+    const file = !s.events && RANKS[`./generated/meta/ranks/${s.id}.json`]
+    loadedRanks.set(s.id, (p = file ? file() : loadMeta(s).then(usageRanks)))
+  }
+  return p
+}
+
 const date = (iso: string, opts: Intl.DateTimeFormatOptions) =>
   new Date(`${iso}T00:00:00Z`).toLocaleDateString(locale.value, { ...opts, timeZone: 'UTC' })
 

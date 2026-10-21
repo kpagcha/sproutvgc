@@ -37,6 +37,9 @@ declare module 'vue-router' {
     /** A page whose setup can be starred, in its own recently viewed (`usePageHistory`): what counts as one visit (the
      * Pokémon it's of) and what of its query is kept, or nothing while there's none worth keeping. */
     history?: (query: LocationQuery) => { visit: string; query: Record<string, string> } | null
+    /** The data the page loads first, started as navigation does (beside its code and the names it waits for) rather
+     * than once the page is set up. */
+    prefetch?: (to: RouteLocationNormalized) => void
   }
 }
 
@@ -45,6 +48,25 @@ export const stringQuery = (query: LocationQuery, omit: readonly string[] = []) 
   Object.fromEntries(
     Object.entries(query).filter((e): e is [string, string] => typeof e[1] === 'string' && !omit.includes(e[0])),
   )
+
+/** A tournament's data, for its pages to find on its way: its standings and rounds, and on its Pokémon tab its Pokémon's
+ * usage at the events before and the ladder's ranks its standouts go by. A failed load is the page's to show. */
+function prefetchEvent(to: RouteLocationNormalized) {
+  const id = String(to.params.id)
+  const pokemonTab = to.params.tab === 'pokemon'
+  void import('@/data/tournaments').then(async (t) => {
+    const event = t.eventOf(id)
+    if (!event) return
+    const quiet = (p: Promise<unknown>) => void p.catch(() => {})
+    quiet(t.loadStandings(id))
+    quiet(t.loadRounds(id))
+    if (!pokemonTab) return
+    quiet(t.loadEventUsage())
+    const m = await import('@/data/meta')
+    const ladder = m.regulationSnapshot(event.regulation)
+    if (ladder) quiet(m.loadRanks(ladder))
+  })
+}
 
 // The page's one visit among the recently viewed, whatever its view.
 const once = (page: string) => () => page
@@ -359,6 +381,7 @@ export const router = createRouter({
         keywordsKey: 'keywords.tournament',
         dexNames: true,
         descriptions: ['ability', 'move', 'item'],
+        prefetch: prefetchEvent,
         recent: ({ params }) => `tournament:${String(params.id)}`,
         ...inArea('meta', 'tournaments'),
       },
@@ -372,6 +395,7 @@ export const router = createRouter({
         titleKey: 'title.tournamentPlayer',
         dexNames: true,
         descriptions: ['ability', 'move', 'item'],
+        prefetch: prefetchEvent,
         ...inArea('meta', 'tournaments'),
       },
     },
@@ -524,6 +548,11 @@ router.beforeEach((to) =>
     ? { path: to.path.replace(/\/+$/, ''), query: to.query, hash: to.hash, replace: true }
     : undefined,
 )
+
+// What a page loads first, started as navigation does.
+router.beforeEach((to) => {
+  to.meta.prefetch?.(to)
+})
 
 // Pages whose view is in their URL go among the recently viewed as they're opened, each change to the view (a
 // `router.replace`) keeping the visit where it's left.

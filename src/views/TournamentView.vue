@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useElementSize, useMediaQuery } from '@vueuse/core'
 import { ChevronDown, ChevronUp } from '@lucide/vue'
 import { ability, available, item, move, pokemon, type PokemonId } from '@/data/dex'
-import { datasetDates, loadMeta, metaLabel, percent, regulationSnapshot, usageRanks } from '@/data/meta'
+import { datasetDates, loadRanks, metaLabel, percent, regulationSnapshot } from '@/data/meta'
 import { splitForme } from '@/data/pokemon'
 import {
   baselineOf,
@@ -115,7 +115,14 @@ const stats = computed(() =>
 
 // Each Pokémon's trend: its usage against the events before it (`baselineOf`), pooled, the same day's teams.
 const eventUsage = shallowRef<Record<string, EventUsage> | null>(null)
-void loadEventUsage().then((u) => (eventUsage.value = u))
+// Loaded once the Pokémon tab is shown: the standings don't need it.
+watch(
+  tab,
+  (t) => {
+    if (t === 'pokemon' && !eventUsage.value) void loadEventUsage().then((u) => (eventUsage.value = u))
+  },
+  { immediate: true },
+)
 const baseline = computed(() => (event.value ? baselineOf(event.value) : null))
 const baselineIds = computed(() => baseline.value?.events.map((e) => e.id) ?? [])
 const pooled = computed(() => {
@@ -182,16 +189,19 @@ const moversAbout = computed(() => {
 })
 
 // The Pokémon off the meta that shone (`standouts`): off it by their ranks on the ladder, its regulation's data (the
-// snapshot its meta links open); a first top cut of the regulation by the events before, when they're of it.
+// snapshot its meta links open), loaded once the Pokémon tab is shown (the standings don't need them); a first top cut
+// of the regulation by the events before, when they're of it.
 const ladderSnapshot = computed(() => event.value && regulationSnapshot(event.value.regulation))
 const ladder = shallowRef<Partial<Record<PokemonId, number>> | null>(null)
+let ladderOf: string | null = null
 watch(
-  ladderSnapshot,
+  () => (tab.value === 'pokemon' ? ladderSnapshot.value : null),
   async (s) => {
+    if (!s || s.id === ladderOf) return
+    ladderOf = s.id
     ladder.value = null
-    if (!s) return
-    const ranks = usageRanks(await loadMeta(s))
-    if (ladderSnapshot.value === s) ladder.value = ranks
+    const ranks = await loadRanks(s)
+    if (ladderOf === s.id) ladder.value = ranks
   },
   { immediate: true },
 )
