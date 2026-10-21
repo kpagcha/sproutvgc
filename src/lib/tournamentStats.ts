@@ -243,6 +243,82 @@ export function playerMatches(rounds: Record<number, Round>, placing: number): P
     })
 }
 
+/** The Swiss' two cuts: to Day 2, after Day 1's rounds, and to the top cut, after Day 2's. */
+export type Cut = 'day2' | 'topCut'
+/** A match that settled a cut for a player: the win that clinched it, or the loss that put it out of reach. */
+export interface CutMark {
+  cut: Cut
+  mark: 'clinched' | 'out'
+}
+
+/** The matches that settled a player's cuts, by round: the first after which they'd finish above everyone who missed it
+ * even losing the rest, or below everyone who made it even winning the rest (3 points a win or a bye, 1 a match neither
+ * won, a round not played none). What the event's standings say each cut ended up taking, not its rules: Day 2's is a
+ * line of points, so it's the rule's; the top cut's is by placing, those on its last record split by tiebreakers. Day 2
+ * a player made, its top cut too; one who missed it, Day 2's alone. */
+export function cutMarks(rounds: Record<number, Round>, standings: readonly Placed[], placing: number) {
+  const marks = new Map<number, CutMark[]>()
+  const set = (round: number, mark: CutMark) => marks.set(round, [...(marks.get(round) ?? []), mark])
+  const me = standings.find((s) => s.placing === placing)
+  if (!me) return marks
+  const numbered = Object.entries(rounds)
+    .map(([n, r]) => ({ round: Number(n), r }))
+    .sort((x, y) => x.round - y.round)
+  const cuts = [
+    { cut: 'day2' as const, phases: [1], made: (s: Placed) => !!s.day2, among: () => true },
+    { cut: 'topCut' as const, phases: [1, 2], made: (s: Placed) => !!s.topCut, among: (s: Placed) => !!s.day2 },
+  ]
+  for (const { cut, phases, made, among } of cuts) {
+    if (!among(me)) continue
+    const stage = numbered.filter(({ r }) => phases.includes(r.phase))
+    // Each player's points over the stage, and the rounds they have a match in, for the least it took and the most that
+    // wasn't enough: only of those with a match in every round up to their last, as a round the data has none of theirs
+    // in (a hole in it: they played on) could have been a win.
+    const points = new Map<number, number>()
+    const played = new Map<number, number[]>()
+    const add = (p: number, n: number, i: number) => {
+      points.set(p, (points.get(p) ?? 0) + n)
+      played.set(p, [...(played.get(p) ?? []), i])
+    }
+    for (const [i, { r }] of stage.entries())
+      for (const [a, b, won] of r.matches) {
+        add(a, won === 0 ? 1 : won === 1 ? 3 : 0, i)
+        if (b !== null) add(b, won === 0 ? 1 : won === 2 ? 3 : 0, i)
+      }
+    const whole = (s: Placed) => {
+      const rs = played.get(s.placing) ?? []
+      return rs.length > 0 && rs.length === rs[rs.length - 1]! + 1
+    }
+    const field = standings.filter((s) => among(s) && whole(s))
+    const inPoints = field.filter(made).map((s) => points.get(s.placing)!)
+    if (!inPoints.length) continue
+    const least = Math.min(...inPoints)
+    // Those who dropped left out: they didn't miss it on their record.
+    const most = Math.max(-Infinity, ...field.filter((s) => !made(s) && !s.dropped).map((s) => points.get(s.placing)!))
+    let mine = 0
+    let holes = 0
+    for (const [i, { round, r }] of stage.entries()) {
+      const m = r.matches.find(([a, b]) => a === placing || b === placing)
+      if (!m) {
+        holes++
+        continue
+      }
+      const [a, , won] = m
+      mine += won === 0 ? 1 : (won === 1) === (a === placing) ? 3 : 0
+      const left = stage.length - 1 - i
+      if (made(me) && mine > most) {
+        set(round, { cut, mark: 'clinched' })
+        break
+      }
+      if (!made(me) && mine + 3 * (left + holes) < least) {
+        set(round, { cut, mark: 'out' })
+        break
+      }
+    }
+  }
+  return marks
+}
+
 /** The top 8's placings as medals (`main.css`'s `.medal`): gold, silver, bronze for the semifinals, and a plain one for
  * the quarterfinals. */
 export const medalOf = (placing: number) =>

@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router'
 import { datasetDates } from '@/data/meta'
 import { eventOf, loadRounds, loadStandings, type Round, type Standing } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
-import { medalOf, playerMatches, type PlayerMatch } from '@/lib/tournamentStats'
+import { cutMarks, medalOf, playerMatches, type CutMark, type PlayerMatch } from '@/lib/tournamentStats'
 import AppLink from '@/components/AppLink'
 import CopyPaste from '@/components/CopyPaste.vue'
 import CountryFlag from '@/components/CountryFlag'
@@ -71,6 +71,14 @@ const swiss = computed(() => {
   const sum = (k: 'wins' | 'losses' | 'ties') => parts.reduce((n, d) => n + d[k], 0)
   return { wins: sum('wins'), losses: sum('losses'), ties: sum('ties') }
 })
+
+/** The matches that settled their cuts, by round: the win that clinched Day 2 or the top cut, or the loss that put it
+ * out of reach. */
+const marks = computed(() =>
+  rounds.value && standings.value
+    ? cutMarks(rounds.value, standings.value, placing.value)
+    : new Map<number, CutMark[]>(),
+)
 
 /** The Rounds tab at a day's: its first round, or the top cut's bracket, the tab's default. */
 const roundsOf = (d: { key: string; matches: PlayerMatch[] }) => ({
@@ -182,6 +190,10 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
               <span class="opponent muted">{{
                 m.result === 'bye' ? t('tournaments.byeOpponent') : t('tournaments.goneOpponent')
               }}</span>
+            </div>
+            <!-- Under a match that settled a cut, a line saying which and how. -->
+            <div v-for="c in marks.get(m.round) ?? []" :key="c.cut" class="cut-mark" :class="c.mark">
+              {{ t(`tournaments.cutMark.${c.cut}.${c.mark}`) }}
             </div>
           </li>
           <!-- After Day 2's matches, their record over the whole Swiss, before the top cut. -->
@@ -296,6 +308,22 @@ section {
 }
 .part-head:first-child {
   margin-top: 0;
+}
+/* A cut a match settled, a line under it: clinched in the good color, out of reach in the bad, both dimmed toward the
+   muted text. */
+.cut-mark {
+  padding: 2px 8px 4px;
+  font-size: 0.8em;
+  font-weight: bold;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-top: 1px dashed var(--border);
+}
+.cut-mark.clinched {
+  color: color-mix(in srgb, var(--good) 65%, var(--muted));
+}
+.cut-mark.out {
+  color: color-mix(in srgb, var(--bad) 65%, var(--muted));
 }
 /* Their record over the Swiss, closing Day 2: its strip's look, under a thinner line. */
 .part-total {
