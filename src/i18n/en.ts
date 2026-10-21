@@ -589,6 +589,7 @@ export const messages = {
     'sproutvgc is an unofficial fan project, not affiliated with Nintendo, Game Freak or The Pokémon Company.',
   'credits.iconsTitle': 'Type and category icons, logo',
   'credits.uiIconsTitle': 'Interface icons',
+  'credits.flagsTitle': 'Country flags',
   'credits.license': '{license} license',
   'credits.trademarks': 'Pokémon and Pokémon character and type names are trademarks of Nintendo.',
 

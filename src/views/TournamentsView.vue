@@ -5,6 +5,7 @@ import { regulationSnapshot } from '@/data/meta'
 import { EVENTS, type EventType, type TournamentEvent } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
 import AppLink from '@/components/AppLink'
+import CountryFlag from '@/components/CountryFlag'
 import PokemonIcon from '@/components/PokemonIcon'
 
 // The official tournaments, as one timeline, the latest first: down a line by month and then by day (the events of one
@@ -115,7 +116,7 @@ const count = (n: number) => n.toLocaleString(locale.value)
                         <span class="what">
                           <span class="name">{{ e.name }}</span>
                           <span class="muted small"
-                            >{{ t(`tournaments.type.${e.type}`) }} · {{ e.country }} ·
+                            >{{ t(`tournaments.type.${e.type}`) }} · <CountryFlag :code="e.country" /> ·
                             {{ t('tournaments.players', { n: count(e.players) }) }}</span
                           >
                         </span>

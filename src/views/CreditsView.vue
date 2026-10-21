@@ -55,6 +55,13 @@ const tournaments = EVENTS[0]?.provider
           <span class="note">{{ t('credits.license', { license: 'ISC' }) }}</span>
         </dd>
       </div>
+      <div>
+        <dt>{{ t('credits.flagsTitle') }}</dt>
+        <dd>
+          <a href="https://hatscripts.github.io/circle-flags/" rel="noopener">circle-flags</a>
+          <span class="note">{{ t('credits.license', { license: 'MIT' }) }}</span>
+        </dd>
+      </div>
     </dl>
 
     <p class="legal muted">{{ t('credits.copyright') }}. {{ t('credits.trademarks') }}</p>

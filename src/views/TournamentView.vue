@@ -47,6 +47,7 @@ import AppLink from '@/components/AppLink'
 import BandTabs from '@/components/BandTabs.vue'
 import CopyPaste from '@/components/CopyPaste.vue'
 import FilterSearch from '@/components/FilterSearch.vue'
+import CountryFlag from '@/components/CountryFlag'
 import PokemonIcon from '@/components/PokemonIcon'
 import SectionNav from '@/components/SectionNav.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
@@ -491,7 +492,7 @@ const ordinal = (n: number) => `#${n}`
       <p class="facts">
         <span>{{ t(`tournaments.type.${event.type}`) }}</span>
         <span>{{ datasetDates({ from: event.date, to: event.date }) }}</span>
-        <span>{{ event.country }}</span>
+        <span v-if="event.country"><CountryFlag :code="event.country" /></span>
         <span>{{ t('meta.regulation', { reg: event.regulation }) }}</span>
         <span>{{ t('tournaments.players', { n: num(event.players) }) }}</span>
       </p>
@@ -593,7 +594,7 @@ const ordinal = (n: number) => `#${n}`
                     class="name"
                     >{{ s.player }}</AppLink
                   >
-                  <span class="muted small">{{ s.country }}</span></span
+                  <CountryFlag :code="s.country" /></span
                 ><span v-if="s.placing === 1" class="champion">{{ t('tournaments.champion') }}</span></span
               >
               <span

@@ -7,6 +7,7 @@ import { locale, t } from '@/i18n'
 import { medalOf, playerMatches, type PlayerMatch } from '@/lib/tournamentStats'
 import AppLink from '@/components/AppLink'
 import CopyPaste from '@/components/CopyPaste.vue'
+import CountryFlag from '@/components/CountryFlag'
 import PokemonIcon from '@/components/PokemonIcon'
 import SectionNav from '@/components/SectionNav.vue'
 import TeamSets from '@/components/TeamSets.vue'
@@ -96,7 +97,7 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
         <div class="title">
           <span class="placing num" :class="medalOf(player.placing)">#{{ player.placing }}</span>
           <h1>{{ player.player }}</h1>
-          <span class="muted">{{ player.country }}</span>
+          <CountryFlag :code="player.country" />
           <span v-if="player.placing === 1" class="champion">{{ t('tournaments.champion') }}</span>
         </div>
         <p class="facts">
@@ -145,8 +146,8 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
               }}</span>
               <span class="opponent"
                 ><span class="muted num">#{{ m.opp.placing }}</span> {{ m.opp.player }}
-                <span class="muted small">{{ m.opp.country }}</span></span
-              >
+                <CountryFlag :code="m.opp.country"
+              /></span>
               <span class="opp-record num muted">{{ record(m.opp.wins, m.opp.losses) }}</span>
               <span v-if="m.opp.team.length" class="team" aria-hidden="true">
                 <PokemonIcon v-for="(slot, i) in m.opp.team" :id="slot[0]" :key="i" />

@@ -513,6 +513,14 @@ details > summary {
   align-self: center;
 }
 
+/* A country's flag (`CountryFlag`), round as drawn: a little taller than a capital, on the text's middle. */
+.flag {
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  vertical-align: -0.1em;
+}
+
 /* Dex tables (Pokémon, moves): a header row of sort buttons that sticks to the top of the page, and rows. They don't
    scroll sideways, which would keep the header from sticking: phones get fewer columns instead. Not a <table>, which
    sizes its columns to everything in them, so that rows coming and going (a search, a filter) never resize the
