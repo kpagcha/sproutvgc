@@ -308,20 +308,28 @@ h2 {
   display: block;
   white-space: nowrap;
 }
-/* On phones, the round and result on the left, one over the other, the opponent and their record beside them, and
-   their six under the name. */
+/* On phones, three lines: the match (the result, a smaller badge, and its round, a smaller label, after it), the
+   opponent with their record at the end, then their six, the opponent having the row's width; three a row, in two,
+   where six don't fit. A bye's or a gone opponent's line is the opponent's. */
 @media (max-width: 560px) {
+  .match {
+    container: match / inline-size;
+  }
   .match-row {
     grid-template-columns: auto minmax(0, 1fr) auto;
-    grid-template-areas: 'round opponent record' 'result team team';
-    row-gap: 2px;
+    grid-template-areas: 'result round round' 'opponent opponent record' 'team team team';
+    gap: 2px 8px;
+    padding: 8px 4px;
   }
   .round {
     grid-area: round;
+    font-size: 0.85em;
   }
   .result {
     grid-area: result;
-    align-self: start;
+    min-width: 2em;
+    padding: 0 3px;
+    font-size: 0.75em;
   }
   .opponent {
     grid-area: opponent;
@@ -336,9 +344,11 @@ h2 {
     grid-template-columns: repeat(6, 40px);
     width: auto;
   }
-  /* A bye's or a gone opponent's line across the rest of the row. */
-  .match-row > .opponent:last-child {
-    grid-column: 2 / -1;
+}
+/* The row's padding leaves under six icons' width. */
+@container match (max-width: 247px) {
+  .team {
+    grid-template-columns: repeat(3, 40px);
   }
 }
 </style>
