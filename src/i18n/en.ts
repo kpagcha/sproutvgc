@@ -898,6 +898,8 @@ export const messages = {
   'tournaments.part.topCut': 'Top cut',
   'tournaments.part.day2': 'Day 2',
   'tournaments.part.day1': 'Day 1',
+  'tournaments.swissRecord': 'After Swiss',
+  'tournaments.swissRecordTip': 'Their record over Day 1 and Day 2 together',
   'tournaments.drop': 'Drop',
   'tournaments.droppedTip': 'Dropped after round {round}',
   'tournaments.noList': 'No team list',

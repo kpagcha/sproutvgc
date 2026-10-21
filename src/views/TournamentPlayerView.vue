@@ -64,6 +64,13 @@ const days = computed(() => {
     return { key, matches, wins, losses, ties }
   }).filter((d) => d.matches.length)
 })
+/** Their record over the Swiss, Day 1 and Day 2 together, for those who played Day 2 (a Day 1's alone is its own). */
+const swiss = computed(() => {
+  const parts = days.value.filter((d) => d.key !== 'topCut')
+  if (!parts.some((d) => d.key === 'day2')) return undefined
+  const sum = (k: 'wins' | 'losses' | 'ties') => parts.reduce((n, d) => n + d[k], 0)
+  return { wins: sum('wins'), losses: sum('losses'), ties: sum('ties') }
+})
 
 /** A round's name: the top cut's by how many were left after it, the Swiss' by number. */
 function roundName(m: PlayerMatch) {
@@ -164,6 +171,11 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
               }}</span>
             </div>
           </li>
+          <!-- After Day 2's matches, their record over the whole Swiss, before the top cut. -->
+          <li v-if="d.key === 'day2' && swiss" class="part-total">
+            <span v-tip="t('tournaments.swissRecordTip')">{{ t('tournaments.swissRecord') }}</span>
+            <span class="num">{{ record(swiss.wins, swiss.losses, swiss.ties) }}</span>
+          </li>
         </template>
       </ol>
     </section>
@@ -261,6 +273,18 @@ section {
 }
 .part-head:first-child {
   margin-top: 0;
+}
+/* Their record over the Swiss, closing Day 2: its strip's look, under a thinner line. */
+.part-total {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 8px;
+  font-size: 0.85em;
+  font-weight: bold;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--panel-alt);
+  border-top: 1px solid var(--ink);
 }
 /* A match: its round, its result, the opponent and their record, their six as icons. */
 .match-row {
