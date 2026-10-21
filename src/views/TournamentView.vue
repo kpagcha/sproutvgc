@@ -391,7 +391,7 @@ const ordinal = (n: number) => `#${n}`
 
     <!-- Its standings and its Pokémon, a page each, as tabs on the panel's band. -->
     <section v-if="tab === 'standings'" class="panel banded">
-      <BandTabs ref="bandTabs" :label="t('tournaments.tabs')" :current="tab" :tabs />
+      <BandTabs ref="bandTabs" sticky :label="t('tournaments.tabs')" :current="tab" :tabs />
       <FilterSearch
         v-model:text="query"
         v-model:filters="filters"
@@ -515,7 +515,7 @@ const ordinal = (n: number) => `#${n}`
 
     <!-- Its Pokémon: the day's, each one's usage, win rate and record. -->
     <section v-else class="panel banded">
-      <BandTabs ref="bandTabs" :label="t('tournaments.tabs')" :current="tab" :tabs />
+      <BandTabs ref="bandTabs" sticky :label="t('tournaments.tabs')" :current="tab" :tabs />
       <!-- The Pokémon off the meta that shone, a card each: its best placing and whose, or how often its teams made
            Day 2; its rank on the ladder and its teams here. -->
       <section v-if="standoutList.length" class="standouts">
@@ -739,13 +739,8 @@ const ordinal = (n: number) => `#${n}`
 h1 {
   margin-bottom: 4px;
 }
-/* The tabs' band stuck to the top as the page scrolls (its standings and Pokémon are long), over what scrolls under it;
-   the Pokémon's table's header stuck under it, and a player scrolled to under it too. */
-.band-tabs {
-  position: sticky;
-  top: 0;
-  z-index: 3;
-}
+/* The tabs' band stuck to the top as the page scrolls (its standings and Pokémon are long): the Pokémon's table's
+   header stuck under it, and a player scrolled to under it too. */
 .dex-table.stats .head {
   top: var(--band-height, 0px);
 }
