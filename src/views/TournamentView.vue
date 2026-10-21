@@ -48,6 +48,7 @@ import BandTabs from '@/components/BandTabs.vue'
 import CopyPaste from '@/components/CopyPaste.vue'
 import FilterSearch from '@/components/FilterSearch.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import SectionNav from '@/components/SectionNav.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TeamSets from '@/components/TeamSets.vue'
@@ -57,11 +58,11 @@ import WinRateChart from '@/components/WinRateChart.vue'
 // regulation's meta, and two tabs, a page each: its standings (`/meta/tournaments/:id`: the whole field in three
 // parts, the top cut, the rest of Day 2 and Day 1, Day 1 folded away until asked for; searched by player and filtered
 // by a Pokémon, item, ability or move a team has, `?f=`, a Pokémon narrowed to a build too, every player found then
-// shown) and its Pokémon
-// (`/meta/tournaments/:id/pokemon`: the whole event's, Day 2's or the top cut's, `?day=`, each one's share of those
-// teams, its trend against the events before and how they did in those rounds' matches, by usage, trend, win rate or
-// best placing, the top ones or all, each leading to the standings filtered to the teams with it, and to its meta page
-// on its regulation's data; over them, the Pokémon off the meta that shone).
+// shown; the Pokémon filtered by with their numbers and the way to their meta page, on its regulation's data) and its
+// Pokémon (`/meta/tournaments/:id/pokemon`: the whole event's, Day 2's or the top cut's, `?day=`, each one's share of
+// those teams and how they did in those rounds' matches, by usage, win rate or best placing, the top ones or all, each
+// leading to the standings filtered to the teams with it; under them, a panel each, those whose usage rose and fell the
+// most against the events before, and the Pokémon off the meta that shone).
 // Each player's placing, name and country, record (marked when they dropped), and the six they brought, as icons;
 // unfolded, their whole sets (`TeamSets`), to copy as a paste (`CopyPaste`); their name leads to their page, their
 // matches round by round.
@@ -122,14 +123,41 @@ const pooled = computed(() => {
   const p = pooledUsage(eventUsage.value, baselineIds.value, day.value)
   return p.teams ? p : null
 })
-/** Its usage's change in points, none without events before; one on no team there is new. */
-const trendOf = (s: PokemonStat) => (pooled.value ? s.usage - (pooled.value.share.get(s.id) ?? 0) : null)
-const fresh = (s: PokemonStat) => !!pooled.value && !pooled.value.share.has(s.id)
-/** Under half a point either way, steady: not marked up or down. */
+/** Under half a point either way, steady: neither rising nor falling. */
 const STEADY = 0.005
-const trendClass = (s: PokemonStat) => {
-  const x = trendOf(s)
-  return x === null || Math.abs(x) < STEADY ? 'muted' : x > 0 ? 'up' : 'down'
+const MOVERS = 8
+/** The Pokémon whose usage rose and fell the most against the events before, in points, those there gone from it too
+ * (at none); one on no team there is new. None without events before. */
+const movers = computed(() => {
+  const p = pooled.value
+  if (!p) return null
+  const now = new Map(stats.value.map((s) => [s.id, s.usage]))
+  const rows = [...new Set([...now.keys(), ...p.share.keys()])].map((id) => {
+    const before = p.share.get(id) ?? 0
+    const usage = now.get(id) ?? 0
+    return { id, before, usage, change: usage - before, fresh: !p.share.has(id) }
+  })
+  const by = (sign: 1 | -1) =>
+    rows
+      .filter((r) => sign * r.change >= STEADY)
+      .sort((a, b) => sign * (b.change - a.change) || a.id.localeCompare(b.id))
+      .slice(0, MOVERS)
+  return { rising: by(1), falling: by(-1) }
+})
+/** The movers' bars' full length, both lists': the most usage any of them had, before or now, so they compare across. */
+const moversMax = computed(() =>
+  Math.max(
+    0.01,
+    ...[...(movers.value?.rising ?? []), ...(movers.value?.falling ?? [])].flatMap((r) => [r.before, r.usage]),
+  ),
+)
+/** Where a mover's bar's parts end, 0 to 1 of the full length: what it kept (the lower of before and now), and what it
+ * gained or lost (to the higher). */
+const shiftStyle = (r: { before: number; usage: number }) => {
+  const lo = Math.min(r.before, r.usage) / moversMax.value
+  const hi = Math.max(r.before, r.usage) / moversMax.value
+  // Its solid part, the numbers' white over it: to its usage now (what it kept and gained, or what it kept).
+  return { '--lo': lo, '--hi': hi, '--solid': r.usage / moversMax.value }
 }
 /** A change in usage, in percentage points: "+3.2", "−1.8". */
 const points = (x: number) =>
@@ -138,15 +166,20 @@ const points = (x: number) =>
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
   })
-const trendTip = computed(() => {
+/** What the movers are against: the day's teams, and the events before's. */
+const moversAbout = computed(() => {
   const b = baseline.value
-  if (!pooled.value || !b) return t('tournaments.col.trendNone')
+  if (!pooled.value || !b) return t('tournaments.moversNone')
   const before = b.regulation
     ? t('tournaments.trendBeforeReg', { reg: b.regulation })
     : b.events.length === 1
       ? b.events[0]!.name
       : t('tournaments.trendBefore', { n: b.events.length })
-  return t('tournaments.col.trendTip', { before, teams: num(pooled.value.teams) })
+  return t('tournaments.moversAbout', {
+    day: t(`tournaments.day.${day.value}`),
+    before,
+    teams: num(pooled.value.teams),
+  })
 })
 
 // The Pokémon off the meta that shone (`standouts`): off it by their ranks on the ladder, its regulation's data (the
@@ -171,6 +204,13 @@ const standoutList = computed(() => {
       : null
   return standouts(standings.value, ladder.value, before)
 })
+const standoutsTip = computed(() =>
+  t('tournaments.standoutsTip', {
+    rank: OFF_META_RANK,
+    meta: ladderSnapshot.value ? metaLabel(ladderSnapshot.value) : '',
+    usage: percent(NICHE_USAGE),
+  }),
+)
 /** The field's teams (those with a Pokémon known), a standout's share is of; and the share of them that made Day 2,
  * the one a standout's is against. */
 const fieldTeams = computed(() => (standings.value ?? []).filter((s) => s.team.length).length)
@@ -186,8 +226,7 @@ const {
   toggle: sortStats,
 } = useSort({
   rows: stats,
-  value: (s, k: 'usage' | 'trend' | 'winRate' | 'best') =>
-    k === 'usage' ? s.teams : k === 'trend' ? (trendOf(s) ?? 0) : k === 'best' ? s.best : (s.winRate ?? -1),
+  value: (s, k: 'usage' | 'winRate' | 'best') => (k === 'usage' ? s.teams : k === 'best' ? s.best : (s.winRate ?? -1)),
   initial: 'usage',
   // The best placing from the first; the rest, the most first.
   startsDesc: (k) => k !== 'best',
@@ -401,9 +440,24 @@ watch(standings, async (all) => {
 const teamsWith = (pid: PokemonStat['id']) =>
   available(pokemon(pid)) ? { name: 'tournament', params: { id: id.value }, query: { f: `pokemon:${pid}` } } : null
 
-/** The tabs' band, stuck to the top as the page scrolls; its height, for the Pokémon's table's header to stick under it. */
+/** The Pokémon tab's panels, as the row of links at its top lists them: its table, the movers and the standouts, those
+ * shown. */
+const sections = computed(() => [
+  { id: 'sec-pokemon', label: t('tournaments.pokemonStats') },
+  ...(standings.value && rounds.value ? [{ id: 'sec-movers', label: t('tournaments.movers') }] : []),
+  ...(standoutList.value.length ? [{ id: 'sec-standouts', label: t('tournaments.standouts') }] : []),
+])
+
+/** What's stuck to the top as the page scrolls: on the standings, the tabs' band; on the Pokémon, the row of links to
+ * its panels (the tabs left in their panel, as the row spans them all). Its height, for the Pokémon's table's header to
+ * stick under it and a player scrolled to to land under it. */
 const bandTabs = useTemplateRef<{ $el: HTMLElement }>('bandTabs')
-const { height: bandHeight } = useElementSize(() => bandTabs.value?.$el, undefined, { box: 'border-box' })
+const sectionNav = useTemplateRef<{ $el: HTMLElement }>('sectionNav')
+const { height: bandHeight } = useElementSize(
+  () => (tab.value === 'pokemon' ? sectionNav.value?.$el : bandTabs.value?.$el),
+  undefined,
+  { box: 'border-box' },
+)
 
 const num = (n: number) => n.toLocaleString(locale.value)
 const ordinal = (n: number) => `#${n}`
@@ -455,16 +509,17 @@ const ordinal = (n: number) => `#${n}`
             }}</span></span
           >
           <span role="columnheader" class="r">{{ t('tournaments.col.record') }}</span>
+          <span role="columnheader" class="fs-meta" :aria-label="t('tournaments.toMeta')"></span>
         </div>
         <div v-for="{ key, s, rank, with: build } in filteredStats" :key class="fs-row" role="row">
           <span role="cell">
-            <AppLink :to="{ name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }" class="mon">
+            <span class="mon">
               <PokemonIcon :id="s.id" /><span class="mon-name"
                 ><span>{{ monName(s.id).species }}</span
                 ><span v-if="monName(s.id).forme" class="forme">{{ monName(s.id).forme }}</span
                 ><span v-if="build.length" class="build">{{ build.map((d) => refName(d)).join(' · ') }}</span></span
               >
-            </AppLink>
+            </span>
           </span>
           <span role="cell" class="r num muted">{{ rank ?? '' }}</span>
           <span role="cell" class="r num meter" :style="{ '--share': s.usage }">{{ percent(s.usage) }}</span>
@@ -487,6 +542,11 @@ const ordinal = (n: number) => `#${n}`
             ><span :class="{ more: s.wins > s.losses }">{{ s.wins }}</span
             >–<span :class="{ more: s.losses > s.wins }">{{ s.losses }}</span></span
           >
+          <span role="cell" class="fs-meta">
+            <AppLink :to="{ name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }" class="to-meta"
+              >{{ t('tournaments.toMeta') }} ›</AppLink
+            >
+          </span>
         </div>
       </div>
       <p v-if="!standings" class="muted">{{ t('tournaments.loading') }}</p>
@@ -553,23 +613,212 @@ const ordinal = (n: number) => `#${n}`
     </section>
 
     <!-- Its Pokémon: the day's, each one's usage, win rate and record. -->
-    <section v-else class="panel banded">
-      <BandTabs ref="bandTabs" sticky :label="t('tournaments.tabs')" :current="tab" :tabs />
+    <template v-else>
+      <!-- Its panels, a row of links stuck to the top, the one being read marked. -->
+      <SectionNav ref="sectionNav" :sections />
+      <section id="sec-pokemon" class="panel banded section">
+        <BandTabs :label="t('tournaments.tabs')" :current="tab" :tabs />
+        <div class="stats-controls">
+          <SegmentedControl
+            v-model="day"
+            class="day-choice"
+            :label="t('tournaments.teamsOf')"
+            :options="DAYS.map((d) => ({ value: d, label: t(`tournaments.day.${d}`) }))"
+          />
+          <label v-if="chartable.length > CHART_MIN" class="chart-n">
+            <span class="muted">{{ t('tournaments.chartShown') }}</span>
+            <input
+              type="range"
+              :min="CHART_MIN"
+              :max="chartable.length"
+              :value="draggedN ?? chartN"
+              @input="draggedN = Number(($event.target as HTMLInputElement).value)"
+              @change="releaseN"
+            />
+            <span class="chart-n-value">
+              <input
+                type="number"
+                class="chart-n-box"
+                :min="CHART_MIN"
+                :max="chartable.length"
+                :value="draggedN ?? chartN"
+                :aria-label="t('tournaments.chartShown')"
+                @change="typeN"
+              />
+              {{ t('tournaments.chartOf', { of: chartable.length }) }}
+            </span>
+          </label>
+        </div>
+        <p class="muted small about">
+          {{ about }}<template v-if="chartAbout"> · {{ chartAbout }}</template>
+        </p>
+        <p v-if="!standings || !rounds" class="muted">{{ t('tournaments.loading') }}</p>
+        <WinRateChart
+          v-if="standings && rounds && charted.length"
+          :stats="charted"
+          :day
+          :to="(s) => teamsWith(s.id) ?? { name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }"
+        />
+        <div
+          v-if="standings && rounds"
+          class="dex-table stats"
+          role="table"
+          :aria-label="t('tournaments.pokemonStats')"
+        >
+          <div class="row head" role="row">
+            <div role="columnheader" class="r">#</div>
+            <div role="columnheader">
+              <span v-tip="t('tournaments.teamsWithTip')" class="tipped">{{ t('tournaments.col.pokemon') }}</span>
+            </div>
+            <SortHeader
+              :label="t('tournaments.col.usage')"
+              :tip="t('tournaments.col.usageTip')"
+              right
+              :active="statKey === 'usage'"
+              :desc="statDesc"
+              @sort="sortStats('usage')"
+            />
+            <SortHeader
+              :label="t('tournaments.col.winRate')"
+              :tip="t('tournaments.col.winRateTip')"
+              right
+              :active="statKey === 'winRate'"
+              :desc="statDesc"
+              @sort="sortStats('winRate')"
+            />
+            <div role="columnheader" class="r">{{ t('tournaments.col.record') }}</div>
+            <SortHeader
+              :label="t('tournaments.col.best')"
+              :tip="t('tournaments.col.bestTip')"
+              right
+              :active="statKey === 'best'"
+              :desc="statDesc"
+              @sort="sortStats('best')"
+            />
+          </div>
+          <template v-for="(s, i) in shownStats" :key="s.id">
+            <div v-if="i === fewFrom" class="few" role="row">
+              <div role="cell">{{ t('tournaments.fewMatches', { n: minMatches }) }}</div>
+            </div>
+            <div class="row" role="row">
+              <div role="cell" class="r num muted">{{ i + 1 }}</div>
+              <div role="cell" class="mon-cell">
+                <!-- The teams with it, in the standings; its meta page when the dex hasn't it to filter them by. -->
+                <AppLink
+                  :to="teamsWith(s.id) ?? { name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }"
+                  class="mon"
+                >
+                  <PokemonIcon :id="s.id" /><span class="mon-name"
+                    ><span>{{ monName(s.id).species }}</span
+                    ><span v-if="monName(s.id).forme" class="forme">{{ monName(s.id).forme }}</span></span
+                  >
+                </AppLink>
+              </div>
+              <div role="cell" class="r num meter" :style="{ '--share': s.usage / (topUsage || 1) }">
+                {{ percent(s.usage) }}
+              </div>
+              <div
+                role="cell"
+                class="r num"
+                :class="s.winRate === null ? 'muted' : ['wr', s.winRate >= 0.5 ? 'up' : 'down', { unsure: unsure(s) }]"
+                :style="wrStyle(s)"
+              >
+                {{ s.winRate === null ? '—' : percent(s.winRate) }}
+              </div>
+              <div role="cell" class="r num record-wl">
+                <span :class="{ more: s.wins > s.losses }">{{ s.wins }}</span
+                >–<span :class="{ more: s.losses > s.wins }">{{ s.losses }}</span>
+              </div>
+              <div role="cell" class="r">
+                <AppLink
+                  v-tip="playerAt(s.best)?.player"
+                  :to="{ name: 'tournamentPlayer', params: { id, placing: String(s.best) } }"
+                  class="best num"
+                  :class="medalOf(s.best)"
+                  >{{ ordinal(s.best) }}</AppLink
+                >
+              </div>
+            </div>
+          </template>
+        </div>
+        <button
+          v-if="stats.length > TOP"
+          type="button"
+          class="more-toggle"
+          :aria-pressed="allStats"
+          @click="allStats = !allStats"
+        >
+          <component :is="allStats ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />{{
+            allStats ? t('tournaments.showTop', { n: TOP }) : t('tournaments.showAllMons', { n: stats.length })
+          }}
+        </button>
+      </section>
+      <!-- The Pokémon whose usage rose and fell the most against the events before, the day's teams: a table each, side
+           by side (one under the other on phones). -->
+      <section v-if="standings && rounds" id="sec-movers" class="panel banded section movers">
+        <h2 class="band">{{ t('tournaments.movers') }}</h2>
+        <p class="muted small about">{{ moversAbout }}</p>
+        <div v-if="movers" class="movers-lists">
+          <div
+            v-for="group in [
+              { key: 'rising', list: movers.rising, title: t('tournaments.rising') },
+              { key: 'falling', list: movers.falling, title: t('tournaments.falling') },
+            ]"
+            :key="group.key"
+          >
+            <h3>{{ group.title }}</h3>
+            <p v-if="!group.list.length" class="muted small">{{ t('tournaments.noMovers') }}</p>
+            <div v-else class="dex-table moved" role="table" :aria-label="group.title">
+              <div v-for="r in group.list" :key="r.id" class="row" role="row">
+                <div role="cell" class="mon-cell">
+                  <!-- The teams with it, in the standings; its meta page when none had it, or the dex hasn't it. -->
+                  <AppLink
+                    :to="
+                      (r.usage && teamsWith(r.id)) || {
+                        name: 'metaPokemon',
+                        params: { id: r.id },
+                        query: { meta: metaOf },
+                      }
+                    "
+                    class="mon"
+                  >
+                    <PokemonIcon :id="r.id" /><span class="mon-name"
+                      ><span>{{ monName(r.id).species }}</span
+                      ><span v-if="monName(r.id).forme" class="forme">{{ monName(r.id).forme }}</span></span
+                    >
+                  </AppLink>
+                </div>
+                <!-- Its usage before and now, a bar with the numbers on it, then the change in points; one new to the
+                     events, marked so. The numbers twice: in the text's color, and over it in white where the bar's
+                     solid, so they read on either. -->
+                <div role="cell" class="shift" :class="r.change > 0 ? 'up' : 'down'" :style="shiftStyle(r)">
+                  <span class="track">
+                    <span class="kept"></span><span class="delta"></span>
+                    <span class="num shift-label"
+                      ><span v-if="r.fresh" v-tip="t('tournaments.newTip')" class="fresh">{{ t('usage.new') }}</span
+                      ><template v-else>{{ percent(r.before) }}</template> → {{ percent(r.usage) }}</span
+                    >
+                    <span class="num shift-label on-bar" aria-hidden="true"
+                      ><template v-if="r.fresh">{{ t('usage.new') }}</template
+                      ><template v-else>{{ percent(r.before) }}</template> → {{ percent(r.usage) }}</span
+                    >
+                  </span>
+                </div>
+                <div role="cell" class="r num change" :class="r.change > 0 ? 'up' : 'down'">
+                  {{ points(r.change) }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       <!-- The Pokémon off the meta that shone, a card each: its best placing and whose, or how often its teams made
            Day 2; its rank on the ladder and its teams here. -->
-      <section v-if="standoutList.length" class="standouts">
-        <h2>
-          <span
-            v-tip="
-              t('tournaments.standoutsTip', {
-                rank: OFF_META_RANK,
-                meta: ladderSnapshot ? metaLabel(ladderSnapshot) : '',
-                usage: percent(NICHE_USAGE),
-              })
-            "
-            class="tipped"
-            >{{ t('tournaments.standouts') }}</span
-          >
+      <section v-if="standoutList.length" id="sec-standouts" class="panel banded section standouts">
+        <h2 class="band">
+          <!-- What makes one, to the heading's right on wide screens, over it on phones. -->
+          <span v-if="phone" v-tip="standoutsTip" class="tipped">{{ t('tournaments.standouts') }}</span>
+          <span v-else v-tip.right="standoutsTip" class="tipped">{{ t('tournaments.standouts') }}</span>
         </h2>
         <ul>
           <li v-for="o in standoutList" :key="o.id" class="standout">
@@ -613,160 +862,7 @@ const ordinal = (n: number) => `#${n}`
           </li>
         </ul>
       </section>
-      <div class="stats-controls">
-        <SegmentedControl
-          v-model="day"
-          class="day-choice"
-          :label="t('tournaments.teamsOf')"
-          :options="DAYS.map((d) => ({ value: d, label: t(`tournaments.day.${d}`) }))"
-        />
-        <label v-if="chartable.length > CHART_MIN" class="chart-n">
-          <span class="muted">{{ t('tournaments.chartShown') }}</span>
-          <input
-            type="range"
-            :min="CHART_MIN"
-            :max="chartable.length"
-            :value="draggedN ?? chartN"
-            @input="draggedN = Number(($event.target as HTMLInputElement).value)"
-            @change="releaseN"
-          />
-          <span class="chart-n-value">
-            <input
-              type="number"
-              class="chart-n-box"
-              :min="CHART_MIN"
-              :max="chartable.length"
-              :value="draggedN ?? chartN"
-              :aria-label="t('tournaments.chartShown')"
-              @change="typeN"
-            />
-            {{ t('tournaments.chartOf', { of: chartable.length }) }}
-          </span>
-        </label>
-      </div>
-      <p class="muted small about">
-        {{ about }}<template v-if="chartAbout"> · {{ chartAbout }}</template>
-      </p>
-      <p v-if="!standings || !rounds" class="muted">{{ t('tournaments.loading') }}</p>
-      <WinRateChart
-        v-if="standings && rounds && charted.length"
-        :stats="charted"
-        :day
-        :to="(s) => teamsWith(s.id) ?? { name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }"
-      />
-      <div v-if="standings && rounds" class="dex-table stats" role="table" :aria-label="t('tournaments.pokemonStats')">
-        <div class="row head" role="row">
-          <div role="columnheader" class="r">#</div>
-          <div role="columnheader">
-            <span v-tip="t('tournaments.teamsWithTip')" class="tipped">{{ t('tournaments.col.pokemon') }}</span>
-          </div>
-          <SortHeader
-            :label="t('tournaments.col.usage')"
-            :tip="t('tournaments.col.usageTip')"
-            right
-            :active="statKey === 'usage'"
-            :desc="statDesc"
-            @sort="sortStats('usage')"
-          />
-          <SortHeader
-            :label="t('tournaments.col.trend')"
-            :tip="trendTip"
-            right
-            :active="statKey === 'trend'"
-            :desc="statDesc"
-            @sort="sortStats('trend')"
-          />
-          <SortHeader
-            :label="t('tournaments.col.winRate')"
-            :tip="t('tournaments.col.winRateTip')"
-            right
-            :active="statKey === 'winRate'"
-            :desc="statDesc"
-            @sort="sortStats('winRate')"
-          />
-          <div role="columnheader" class="r">{{ t('tournaments.col.record') }}</div>
-          <div class="end" role="none">
-            <SortHeader
-              :label="t('tournaments.col.best')"
-              :tip="t('tournaments.col.bestTip')"
-              right
-              :active="statKey === 'best'"
-              :desc="statDesc"
-              @sort="sortStats('best')"
-            />
-            <div role="columnheader" :aria-label="t('tournaments.toMeta')"></div>
-          </div>
-        </div>
-        <template v-for="(s, i) in shownStats" :key="s.id">
-          <div v-if="i === fewFrom" class="few" role="row">
-            <div role="cell">{{ t('tournaments.fewMatches', { n: minMatches }) }}</div>
-          </div>
-          <div class="row" role="row">
-            <div role="cell" class="r num muted">{{ i + 1 }}</div>
-            <div role="cell" class="mon-cell">
-              <!-- The teams with it, in the standings; its meta page when the dex hasn't it to filter them by. -->
-              <AppLink
-                :to="teamsWith(s.id) ?? { name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }"
-                class="mon"
-              >
-                <PokemonIcon :id="s.id" /><span class="mon-name"
-                  ><span>{{ monName(s.id).species }}</span
-                  ><span v-if="monName(s.id).forme" class="forme">{{ monName(s.id).forme }}</span></span
-                >
-              </AppLink>
-            </div>
-            <div role="cell" class="r num meter" :style="{ '--share': s.usage / (topUsage || 1) }">
-              {{ percent(s.usage) }}
-            </div>
-            <div v-if="fresh(s)" v-tip="t('tournaments.newTip')" role="cell" class="r trend fresh">
-              {{ t('usage.new') }}
-            </div>
-            <div v-else role="cell" class="r num trend" :class="trendClass(s)">
-              {{ trendOf(s) === null ? '—' : points(trendOf(s)!) }}
-            </div>
-            <div
-              role="cell"
-              class="r num"
-              :class="s.winRate === null ? 'muted' : ['wr', s.winRate >= 0.5 ? 'up' : 'down', { unsure: unsure(s) }]"
-              :style="wrStyle(s)"
-            >
-              {{ s.winRate === null ? '—' : percent(s.winRate) }}
-            </div>
-            <div role="cell" class="r num record-wl">
-              <span :class="{ more: s.wins > s.losses }">{{ s.wins }}</span
-              >–<span :class="{ more: s.losses > s.wins }">{{ s.losses }}</span>
-            </div>
-            <div class="end" role="none">
-              <div role="cell" class="r">
-                <AppLink
-                  v-tip="playerAt(s.best)?.player"
-                  :to="{ name: 'tournamentPlayer', params: { id, placing: String(s.best) } }"
-                  class="best num"
-                  :class="medalOf(s.best)"
-                  >{{ ordinal(s.best) }}</AppLink
-                >
-              </div>
-              <div role="cell" class="r">
-                <AppLink :to="{ name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }" class="to-meta"
-                  >{{ t('tournaments.toMeta') }} ›</AppLink
-                >
-              </div>
-            </div>
-          </div>
-        </template>
-      </div>
-      <button
-        v-if="stats.length > TOP"
-        type="button"
-        class="more-toggle"
-        :aria-pressed="allStats"
-        @click="allStats = !allStats"
-      >
-        <component :is="allStats ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />{{
-          allStats ? t('tournaments.showTop', { n: TOP }) : t('tournaments.showAllMons', { n: stats.length })
-        }}
-      </button>
-    </section>
+    </template>
   </div>
   <div v-else class="panel">
     <p class="muted">{{ t('tournaments.unknown') }}</p>
@@ -809,7 +905,7 @@ h1 {
 /* The Pokémon filtered by, a row each under one head, their columns lined up as the Pokémon tab's table's are. */
 .filtered-stats {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 3rem 7rem 7rem 7rem;
+  grid-template-columns: minmax(0, 1fr) 3rem 7rem 7rem 7rem 3.5rem;
   column-gap: 12px;
   margin: 0 0 12px;
 }
@@ -853,22 +949,29 @@ h1 {
 }
 @media (max-width: 720px) {
   .filtered-stats {
-    grid-template-columns: minmax(0, 1fr) 2rem 4.5rem 4.5rem 5.5rem;
+    grid-template-columns: minmax(0, 1fr) 2rem 4.5rem 4.5rem 5.5rem 3rem;
     column-gap: 8px;
   }
 }
-/* On phones, no room for the name beside the numbers: the Pokémon (and its build) across the row, its numbers under,
-   from the start; the head the numbers' alone. */
+/* On phones, no room for the name beside the numbers: the Pokémon (and its build) across the row, the way to its meta
+   page at its end, its numbers under, from the start; the head the numbers' alone. */
 @media (max-width: 480px) {
   .filtered-stats {
     grid-template-columns: 2rem minmax(0, 1fr) minmax(0, 1fr) auto;
     column-gap: 12px;
   }
-  .fs-head > :first-child {
+  .fs-head > :first-child,
+  .fs-head > .fs-meta {
     display: none;
   }
   .fs-row:not(.fs-head) > :first-child {
-    grid-column: 1 / -1;
+    grid-row: 1;
+    grid-column: 1 / -2;
+    padding-bottom: 0;
+  }
+  .fs-row:not(.fs-head) > .fs-meta {
+    grid-row: 1;
+    grid-column: -2 / -1;
     padding-bottom: 0;
   }
 }
@@ -914,36 +1017,17 @@ h1 {
 /* Its columns in rem, not em: the header row's text is smaller than the rows', and em widths would shrink with it,
    leaving the header out of line with the numbers under it. */
 .dex-table.stats {
-  --cols: 2.5rem minmax(0, 1fr) 5rem 4.5rem 5.5rem 6rem 3.75rem 4rem;
-}
-/* Its best placing and the way to its meta page, a column each (their box left out of the layout, its cells padded as
-   the row's own are), but on phones, where they share the record's column. */
-.dex-table.stats .end {
-  display: contents;
-}
-.dex-table.stats .end > * {
-  min-width: 0;
-  padding: 3px 6px;
-  white-space: nowrap;
+  --cols: 2.5rem minmax(0, 1fr) 5rem 5.5rem 6rem 3.75rem;
 }
 /* On phones, each row two lines (the header's too), so the name has the width and each number room for its bar: its
-   rank, its Pokémon, then its best placing and the way to its meta page together, over its record; its usage, trend
-   and win rate a quarter of the width each, its record a bit more. */
+   rank, its Pokémon, then its best placing, over its record; its usage and win rate a third of the width each, its
+   record a bit more. */
 @media (max-width: 720px) {
   .dex-table.stats {
-    --cols: 1.75rem repeat(3, minmax(0, 1fr)) minmax(0, 1.25fr);
+    --cols: 1.75rem repeat(2, minmax(0, 1fr)) minmax(0, 1.25fr);
   }
   .dex-table.stats .row {
-    grid-template-areas: 'rank mon mon mon end' 'rank usage trend wr record';
-  }
-  .dex-table.stats .end {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
-  }
-  .dex-table.stats .end > * {
-    padding: 0;
+    grid-template-areas: 'rank mon mon best' 'rank usage wr record';
   }
   .dex-table.stats .row > :nth-child(1) {
     grid-area: rank;
@@ -956,28 +1040,130 @@ h1 {
     grid-area: usage;
   }
   .dex-table.stats .row > :nth-child(4) {
-    grid-area: trend;
-  }
-  .dex-table.stats .row > :nth-child(5) {
     grid-area: wr;
   }
-  .dex-table.stats .row > :nth-child(6) {
+  .dex-table.stats .row > :nth-child(5) {
     grid-area: record;
   }
-  .dex-table.stats .row > :nth-child(7) {
-    grid-area: end;
+  .dex-table.stats .row > :nth-child(6) {
+    grid-area: best;
   }
 }
-/* Its trend, in points: up in the good color, down in the bad, steady muted; one new to the events, the accent's. */
-.trend.up {
+/* The Pokémon tab's panels, landed on from its row of links under that row. */
+.section {
+  scroll-margin-top: calc(var(--band-height, 0px) + 12px);
+}
+/* The movers, rising and falling side by side, one under the other on phones: their Pokémon, their usage before and
+   now, and the change in points, up in the good color, down in the bad; one new to the events, the accent's. */
+.movers-lists {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 24px;
+}
+@media (max-width: 720px) {
+  .movers-lists {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.movers h3 {
+  margin: 0 0 4px;
+  font-size: 1em;
+}
+.movers p {
+  margin: 0;
+}
+.movers .about {
+  margin-bottom: 12px;
+}
+.dex-table.moved {
+  --cols: minmax(0, 12rem) minmax(0, 1fr) 3.5rem;
+  margin-inline: 0;
+}
+/* Its usage as a bar on a faint band, the both lists' most usage its full length: solid in the accent to what it kept
+   (its usage now when it rose, before when it fell), then what it gained, solid in the good color, or lost, hatched in
+   the bad. Its numbers on it, from its start. */
+.track {
+  position: relative;
+  display: block;
+  min-width: 3rem;
+  height: 18px;
+  background: color-mix(in srgb, var(--border) 45%, transparent);
+}
+.kept,
+.delta {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+.kept {
+  left: 0;
+  width: calc(var(--lo) * 100%);
+  background: var(--accent);
+}
+.delta {
+  left: calc(var(--lo) * 100%);
+  width: calc((var(--hi) - var(--lo)) * 100%);
+}
+.up .delta {
+  background: var(--good);
+}
+.down .delta {
+  background: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--bad) 45%, transparent) 0 2px,
+    transparent 2px 5px
+  );
+  box-shadow: inset 0 0 0 1px var(--bad);
+}
+/* The numbers across the bar, in the text's color; their copy in white, cut to the solid part. */
+.shift-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+  font-size: 0.8em;
+  font-weight: bold;
+  line-height: 1;
+  white-space: nowrap;
+}
+.shift-label.on-bar {
+  color: var(--accent-text);
+  text-shadow: 0 0 2px rgb(0 0 0 / 0.5);
+  clip-path: inset(0 calc((1 - var(--solid)) * 100%) 0 0);
+  pointer-events: none;
+}
+/* On phones, the name across the row with the change at its end, its bar under them, from where the name starts. */
+@media (max-width: 480px) {
+  .dex-table.moved {
+    --cols: minmax(0, 1fr) 3.5rem;
+  }
+  .dex-table.moved .row {
+    grid-template-areas: 'mon change' 'bar bar';
+  }
+  .dex-table.moved .row > :nth-child(1) {
+    grid-area: mon;
+  }
+  .dex-table.moved .row > :nth-child(2) {
+    grid-area: bar;
+    padding: 0 6px 6px 50px;
+  }
+  .dex-table.moved .row > :nth-child(3) {
+    grid-area: change;
+  }
+}
+.change {
+  font-weight: bold;
+}
+.change.up {
   color: var(--good);
 }
-.trend.down {
+.change.down {
   color: var(--bad);
 }
-.trend.fresh {
+.fresh {
   color: var(--accent);
-  font-size: 0.9em;
+  font-weight: bold;
 }
 /* Its best placing, the way to that player's page: a medal in the top 8, else plain. */
 .best {
@@ -985,11 +1171,7 @@ h1 {
   font-size: 0.9em;
 }
 /* The Pokémon off the meta that shone: a card each, as many to a row as fit. */
-.standouts {
-  margin: 0 0 16px;
-}
-.standouts h2 {
-  margin: 0 0 8px;
+.band {
   font-size: 1rem;
 }
 .standouts ul {

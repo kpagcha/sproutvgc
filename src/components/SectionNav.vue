@@ -79,7 +79,7 @@ function go(id: string) {
         :class="{ on: active === s.id }"
         :aria-current="active === s.id ? 'location' : undefined"
         @click.prevent="go(s.id)"
-        ><span class="label" :data-label="s.label">{{ s.label }}</span></a
+        >{{ s.label }}</a
       >
     </div>
   </nav>
@@ -118,19 +118,6 @@ function go(id: string) {
 }
 .link.on {
   color: var(--text);
-  font-weight: bold;
   border-bottom-color: var(--accent);
-}
-/* A bold copy of the label, out of sight, keeps it as wide as when it's bold, so marking one doesn't shift the row. */
-.label {
-  display: inline-flex;
-  flex-direction: column;
-}
-.label::after {
-  content: attr(data-label);
-  height: 0;
-  overflow: hidden;
-  visibility: hidden;
-  font-weight: bold;
 }
 </style>
