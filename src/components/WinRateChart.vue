@@ -35,9 +35,10 @@ const LABEL_GAP = 34
 
 const xRange = computed(() => {
   const usages = props.stats.map((s) => s.usage)
-  // A little room past the ends, so no icon sits on the edge's label; at least one tick's width.
-  let lo = Math.log10(Math.min(...usages)) - 0.08
-  let hi = Math.log10(Math.min(Math.max(...usages), 1)) + 0.08
+  // From the least used to the most, the room for the icons at the ends left inside the plot (`padX`); at least one
+  // tick's width.
+  let lo = Math.log10(Math.min(...usages))
+  let hi = Math.log10(Math.min(Math.max(...usages), 1))
   if (hi - lo < 0.5) {
     const mid = (lo + hi) / 2
     lo = mid - 0.25
@@ -54,9 +55,9 @@ const yOf = (wr: number) => (wr - 0.5 + reach.value) / (2 * reach.value)
 
 const plot = useTemplateRef<HTMLElement>('plot')
 const { width, height } = useElementSize(plot)
-/** The room inside the plot's edges the marks keep, in pixels, so the icons at its ends stay within it: less on a
- * narrow chart. Set on the plot as `--pad-x` and `--pad-y` for the CSS that places them. */
-const padX = computed(() => (width.value < 560 ? 18 : 24))
+/** The room inside the plot's edges the marks keep, in pixels, so the icons at its ends stay within it: half an icon's
+ * width and a little more on a wide chart. Set on the plot as `--pad-x` and `--pad-y` for the CSS that places them. */
+const padX = computed(() => (width.value < 560 ? 25 : 30))
 const PAD_Y = 18
 /** The usages marked across within the chart's range, each labeled unless too close to the last one labeled. */
 const xTicks = computed(() => {
@@ -470,12 +471,16 @@ const tipOf = (s: PokemonStat) =>
 .muted {
   color: var(--muted);
 }
+/* On phones, the gutter for the win rates' labels as narrow as they are. */
 @media (max-width: 720px) {
   .plot {
-    margin-left: 2.5rem;
+    margin-left: 2rem;
   }
   .axes {
-    margin-left: 2.5rem;
+    margin-left: 2rem;
+  }
+  .grid-y .tick {
+    right: calc(100% + 4px);
   }
 }
 </style>
