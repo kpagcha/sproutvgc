@@ -172,13 +172,23 @@ onBeforeUnmount(() => phoneQuery.removeEventListener('change', onPhone))
 
 const { entered, restoring } = usePageEntered()
 useRowColumns(useTemplateRef('head'))
+/** The rank's column: its digits, its mark (`.climb`'s width and margin) and the cell's padding, on wide screens and on
+ * phones. */
+const rankRoom = computed(() => {
+  const digits = `${String(rows.value.length).length}ch`
+  const room = (min: string) => `minmax(max(3em, ${min}), auto)`
+  return previous.value
+    ? { wide: room(`${digits} + 3px + 1.8em + 12px`), sm: room(`${digits} + 1px + 1.7em + 10px`) }
+    : { wide: room(`${digits} + 12px`), sm: room(`${digits} + 10px`) }
+})
 // The columns, and their widths on wide screens, on narrower ones and on phones (null where they're left out): rank,
 // the move, its type, category, power, accuracy and PP (not on phones), its top Pokémon (only on wide screens), usage,
 // and each Pokémon term's share. The description, under them, is no column.
 const columns = computed(() => {
   const list: { cell: string; xl: string; md: string | null; sm: string | null }[] = [
-    // On phones, room for a three-digit rank and its mark beside it, so every row's the same.
-    { cell: 'r', xl: 'minmax(3em, auto)', md: 'minmax(3em, auto)', sm: '4em' },
+    // Room for the longest rank and its mark beside it (as `.climb` has them, with the cell's padding), so every row's
+    // the same: the header's "#" alone is narrower.
+    { cell: 'r', xl: rankRoom.value.wide, md: rankRoom.value.wide, sm: rankRoom.value.sm },
     // On phones the move is a row of its own over the others, not a column.
     { cell: 'grow', xl: 'minmax(0, 1fr)', md: 'minmax(0, 1fr)', sm: null },
     { cell: '', xl: 'var(--badge)', md: 'var(--badge)', sm: 'var(--badge)' },
