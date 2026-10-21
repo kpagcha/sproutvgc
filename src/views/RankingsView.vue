@@ -13,6 +13,7 @@ import { passesGroups, positiveFilters, allFilters } from '@/lib/filterGroups'
 import { formatTermFilters, parseTermFilters, type Term, type TermFilters } from '@/lib/searchTerms'
 import { isSetTerm, MIN_SHARE, monMatches, MON_TERM_KINDS, setShare, SET_LIST, type SetTerm } from '@/lib/monTerms'
 import { useActiveQuery } from '@/composables/useActiveQuery'
+import { useGradualRows } from '@/composables/useGradualRows'
 import { useMeta } from '@/composables/useMeta'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { useRowColumns } from '@/composables/useRowColumns'
@@ -203,6 +204,7 @@ function toggleSets() {
 }
 
 const { entered, restoring } = usePageEntered()
+const drawn = useGradualRows(shown)
 useRowColumns(useTemplateRef('head'))
 // The columns, as the snapshot has them, and their widths on wide screens, on narrower ones and on phones (null where
 // they're left out). On wide screens each Pokémon's most common set fills the room, its moves taking what's left; on
@@ -344,7 +346,28 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         </div>
         <SkeletonRows v-if="!entered || !data" :cells="skeleton" height="2.3em" />
         <template v-else>
-          <div v-for="r in shown" :key="r.id" class="row" :class="{ rare: rare(r) }" role="row">
+          <!-- Each row drawn again only when what it shows changes, not with every change to the page (the search's text, its
+               options, the count it shows): hundreds of rows take a while. -->
+          <div
+            v-for="r in drawn"
+            :key="r.id"
+            v-memo="[
+              r,
+              previous,
+              showItem,
+              showAbility,
+              showMoves,
+              showUsage,
+              showBrought,
+              setsShown,
+              shareTerms,
+              top,
+              locale,
+            ]"
+            class="row"
+            :class="{ rare: rare(r) }"
+            role="row"
+          >
             <div role="cell" class="r num muted rank">
               {{ r.rank
               }}<span

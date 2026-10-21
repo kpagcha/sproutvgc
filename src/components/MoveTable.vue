@@ -9,10 +9,11 @@ import type { MessageKey } from '@/i18n'
 import { locale, t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
-import { fold, split } from '@/lib/search'
+import { fold, marksKey, split } from '@/lib/search'
 import { allFilters, noFilters as none, passesGroups } from '@/lib/filterGroups'
 import type { Term, TermFilters, TermKind } from '@/lib/searchTerms'
 import { percent } from '@/data/meta'
+import { useGradualRows } from '@/composables/useGradualRows'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { useRowColumns } from '@/composables/useRowColumns'
 import { useSort } from '@/composables/useSort'
@@ -161,6 +162,7 @@ const below = computed(() => phone.value || props.stacked)
 
 // The rows render once the page is in, with a skeleton until then: all of them can take over 100ms.
 const { entered, restoring } = usePageEntered()
+const drawn = useGradualRows(sorted)
 useRowColumns(useTemplateRef('head'))
 const skeleton = computed(() => [
   'grow',
@@ -211,7 +213,15 @@ const skeleton = computed(() => [
       </div>
       <SkeletonRows v-if="!entered" :cells="skeleton" height="2.05em" />
       <template v-else>
-        <div v-for="r in sorted" :key="r.id" class="row" role="row">
+        <!-- Each row drawn again only when what it shows changes, not with every change to the page (the search's text, its
+             options, the count it shows): hundreds of rows take a while. -->
+        <div
+          v-for="r in drawn"
+          :key="r.id"
+          v-memo="[r.id, r.name, marksKey(r.parts), shares, under, below, stacked, descriptions, noPp, locale]"
+          class="row"
+          role="row"
+        >
           <div role="cell" class="grow">
             <AppLink :to="{ name: shares ? 'metaMove' : 'move', params: { id: r.id } }" class="name">
               <Marked v-if="r.parts" :p="r.parts" />

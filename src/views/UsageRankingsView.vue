@@ -16,6 +16,7 @@ import { ITEMS } from '@/data/items'
 import { useRouter } from 'vue-router'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useSlashFocus } from '@/composables/useSlashFocus'
+import { useGradualRows } from '@/composables/useGradualRows'
 import { useMeta } from '@/composables/useMeta'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { useRowColumns } from '@/composables/useRowColumns'
@@ -190,6 +191,7 @@ const shown = computed(() => {
 const top = computed(() => Math.max(0, ...rows.value.map((r) => r.usage)))
 
 const { entered, restoring } = usePageEntered()
+const drawn = useGradualRows(shown)
 useRowColumns(useTemplateRef('head'))
 // The columns: rank, the entry, its Pokémon (not on phones, where they go under the row), usage, and each Pokémon
 // term's share.
@@ -282,7 +284,15 @@ const colVars = computed(() => ({
         </div>
         <SkeletonRows v-if="!entered || !data" :cells="columns.map((c) => c.cell)" height="3.4em" />
         <template v-else>
-          <div v-for="r in shown" :key="r.id" class="row" role="row">
+          <!-- Each row drawn again only when what it shows changes, not with every change to the page (the search's text, its
+               options, the count it shows): hundreds of rows take a while. -->
+          <div
+            v-for="r in drawn"
+            :key="r.id"
+            v-memo="[r, previous, monTerms, top, list, locale]"
+            class="row"
+            role="row"
+          >
             <div role="cell" class="r num muted rank">
               {{ r.rank
               }}<span

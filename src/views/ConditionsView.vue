@@ -12,6 +12,7 @@ import { fold, split } from '@/lib/search'
 import { passesGroups } from '@/lib/filterGroups'
 import type { TermFilters } from '@/lib/searchTerms'
 import { useUrlFilters } from '@/composables/useUrlFilters'
+import AppLink from '@/components/AppLink'
 import DexText from '@/components/DexText'
 import FilterSearch from '@/components/FilterSearch.vue'
 
@@ -73,10 +74,10 @@ const groups = computed(() => {
         <dl class="entries">
           <template v-for="c in g.items" :key="c.id">
             <dt>
-              <RouterLink :to="{ name: 'condition', params: { id: c.id } }">
+              <AppLink :to="{ name: 'condition', params: { id: c.id } }">
                 <Marked v-if="c.parts" :p="c.parts" />
                 <template v-else>{{ c.name }}</template>
-              </RouterLink>
+              </AppLink>
             </dt>
             <dd class="muted"><DexText :text="c.text" /></dd>
           </template>

@@ -14,6 +14,7 @@ import { fold, split } from '@/lib/search'
 import { passesGroups, positiveFilters } from '@/lib/filterGroups'
 import { formatTermFilters, parseTermFilters, type Term, type TermFilters } from '@/lib/searchTerms'
 import { useActiveQuery } from '@/composables/useActiveQuery'
+import { useGradualRows } from '@/composables/useGradualRows'
 import { useMeta } from '@/composables/useMeta'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { usePreviousMeta } from '@/composables/usePreviousMeta'
@@ -171,6 +172,7 @@ phoneQuery.addEventListener('change', onPhone)
 onBeforeUnmount(() => phoneQuery.removeEventListener('change', onPhone))
 
 const { entered, restoring } = usePageEntered()
+const drawn = useGradualRows(shown)
 useRowColumns(useTemplateRef('head'))
 /** The rank's column: its digits, its mark (`.climb`'s width and margin) and the cell's padding, on wide screens and on
  * phones. */
@@ -322,7 +324,9 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         </div>
         <SkeletonRows v-if="!entered || !data" :cells="columns.map((c) => c.cell)" height="3.4em" />
         <template v-else>
-          <div v-for="r in shown" :key="r.id" class="row" role="row">
+          <!-- Each row drawn again only when what it shows changes, not with every change to the page (the search's text, its
+               options, the count it shows): hundreds of rows take a while. -->
+          <div v-for="r in drawn" :key="r.id" v-memo="[r, previous, monTerms, top, locale]" class="row" role="row">
             <div role="cell" class="r num muted rank">
               {{ r.rank
               }}<span

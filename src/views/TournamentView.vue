@@ -441,6 +441,14 @@ const day1Folded = computed(() =>
   narrowed.value || day1Shown.value ? 0 : (parts.value.find((p) => p.key === 'day1')?.rows.length ?? 0),
 )
 const shownParts = computed(() => (day1Folded.value ? parts.value.filter((p) => p.key !== 'day1') : parts.value))
+/** The standings' list: each part's heading, when there's more than one (with its first player, for the rows' shape),
+ * then its players. */
+const entries = computed(() =>
+  shownParts.value.flatMap((p) => [
+    ...(shownParts.value.length > 1 ? [{ key: `head:${p.key}`, head: p.key, s: p.rows[0]! }] : []),
+    ...p.rows.map((s) => ({ key: String(s.placing), head: undefined, s })),
+  ]),
+)
 
 // Arriving on unfolded rows (a link shared), Day 1 shown if one's there, and the page scrolled to the first once its
 // standings are in, after the router's own scrolling (to the top, a frame or two before). Not when the browser
@@ -573,16 +581,18 @@ const ordinal = (n: number) => `#${n}`
       <p v-if="!standings" class="muted">{{ t('tournaments.loading') }}</p>
       <p v-else-if="!shownParts.length" class="muted">{{ t('tournaments.noPlayers') }}</p>
       <ol v-else class="standings" :class="{ previewing: preview }">
-        <template v-for="part in shownParts" :key="part.key">
-          <!-- Each part under its name, when there's more than one. -->
-          <li v-if="shownParts.length > 1" class="part-head">{{ t(`tournaments.part.${part.key}`) }}</li>
-          <li
-            v-for="s in part.rows"
-            :key="s.placing"
-            :data-placing="s.placing"
-            class="standing"
-            :class="{ open: open.has(s.placing), won: s.placing === 1 }"
-          >
+        <!-- Each part under its name, when there's more than one, then its players. Each drawn again only when what
+             it shows changes, not with every change to the page (the search's text, its options): a Regional has a
+             thousand players. -->
+        <li
+          v-for="{ key, head, s } in entries"
+          :key
+          v-memo="[head, s, open.has(s.placing), builds, id, locale]"
+          :data-placing="head ? undefined : s.placing"
+          :class="head ? 'part-head' : ['standing', { open: open.has(s.placing), won: s.placing === 1 }]"
+        >
+          <template v-if="head">{{ t(`tournaments.part.${head}`) }}</template>
+          <template v-else>
             <!-- The row unfolds on a click anywhere but the player's name, the way to their page; the chevron its button,
                  for the keyboard. -->
             <div class="player-row" @click="rowClick($event, s.placing)">
@@ -627,8 +637,8 @@ const ordinal = (n: number) => `#${n}`
               <!-- The way to copy the team as a paste, under its sets at their right. -->
               <p class="team-tools"><CopyPaste :team="s.team" /></p>
             </template>
-          </li>
-        </template>
+          </template>
+        </li>
       </ol>
       <!-- Day 1's players, folded away until asked for. -->
       <button v-if="day1Folded" type="button" class="more-toggle" @click="day1Shown = true">

@@ -6,7 +6,7 @@ import { percent } from '@/data/meta'
 import { locale, t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
-import type { Marks } from '@/lib/search'
+import { marksKey, type Marks } from '@/lib/search'
 import { useRowColumns } from '@/composables/useRowColumns'
 import { useSort } from '@/composables/useSort'
 import AppLink from '@/components/AppLink'
@@ -59,18 +59,20 @@ useRowColumns(useTemplateRef('head'))
     </div>
   </div>
   <dl v-else class="entries">
-    <template v-for="it in rows" :key="it.id">
+    <!-- Each entry drawn again only when what it shows changes, not with every change to the page (the search's text,
+         its options, the count it shows). -->
+    <div v-for="it in rows" :key="it.id" class="entry" v-memo="[it.id, it.name, it.text, marksKey(it.parts)]">
       <dt>
-        <RouterLink :to="{ name: 'item', params: { id: it.id } }" class="name">
+        <AppLink :to="{ name: 'item', params: { id: it.id } }" class="name">
           <ItemIcon :id="it.id" />
           <span>
             <Marked v-if="it.parts" :p="it.parts" />
             <template v-else>{{ it.name }}</template>
           </span>
-        </RouterLink>
+        </AppLink>
       </dt>
       <dd class="muted"><DexText :text="it.text" /></dd>
-    </template>
+    </div>
   </dl>
 </template>
 
@@ -120,6 +122,10 @@ useRowColumns(useTemplateRef('head'))
   gap: 4px 16px;
   align-items: center;
   margin: 0;
+}
+/* Each entry its name and what it does, laid out by the list's grid. */
+.entry {
+  display: contents;
 }
 .entries dt {
   font-weight: bold;

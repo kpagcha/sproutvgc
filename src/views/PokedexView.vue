@@ -15,11 +15,12 @@ import { POKEMON, STATS, gameStats, gameTotal, loadLearnsets, speciesOf, splitFo
 import { locale, t } from '@/i18n'
 import { shortText } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
-import { fold, sliceMarks, split, type Marks } from '@/lib/search'
+import { fold, marksKey, sliceMarks, split, type Marks } from '@/lib/search'
 import { allFilters } from '@/lib/filterGroups'
 import { FILTER_KINDS, parseFilters, passes } from '@/lib/pokemonFilters'
 import { formatTermFilters, type TermFilters } from '@/lib/searchTerms'
 import { useActiveQuery } from '@/composables/useActiveQuery'
+import { useGradualRows } from '@/composables/useGradualRows'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { useRowColumns } from '@/composables/useRowColumns'
 import { useSort } from '@/composables/useSort'
@@ -236,6 +237,7 @@ const widest = computed(() => {
 
 // The rows render once the page is in, with a skeleton until then: all of them take over 100ms.
 const { entered, restoring } = usePageEntered()
+const drawn = useGradualRows(lines)
 useRowColumns(useTemplateRef('head'))
 const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r']
 </script>
@@ -333,9 +335,12 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
         </div>
         <SkeletonRows v-if="!entered" :cells="SKELETON" height="2.3em" />
         <template v-else>
+          <!-- Each row drawn again only when what it shows changes, not with every change to the page (the search's text, its
+               options, the count it shows): hundreds of rows take a while. -->
           <div
-            v-for="{ row: r, child, last, parent, context, title, tag } in lines"
+            v-for="{ row: r, child, last, parent, context, title, tag } in drawn"
             :key="r.id"
+            v-memo="[r.id, child, last, parent, context, marksKey(title), marksKey(tag), phone, statIndex, locale]"
             class="row"
             :class="{ child, last, parent, context }"
             role="row"

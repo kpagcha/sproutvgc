@@ -8,10 +8,12 @@ import { REGULATION } from '@/data/format'
 import { locale, t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
-import { fold, split } from '@/lib/search'
+import { fold, marksKey, split } from '@/lib/search'
 import { passesGroups } from '@/lib/filterGroups'
 import type { Term, TermFilters } from '@/lib/searchTerms'
+import { useGradualRows } from '@/composables/useGradualRows'
 import { useUrlFilters } from '@/composables/useUrlFilters'
+import AppLink from '@/components/AppLink'
 import DexText from '@/components/DexText'
 import FilterSearch from '@/components/FilterSearch.vue'
 
@@ -44,6 +46,7 @@ const shown = computed(() => {
     return !q || parts ? [{ ...a, parts }] : []
   })
 })
+const drawn = useGradualRows(shown)
 </script>
 
 <template>
@@ -69,15 +72,17 @@ const shown = computed(() => {
     </div>
     <div class="panel" :class="{ previewing: preview }">
       <dl v-if="shown.length" class="entries">
-        <template v-for="a in shown" :key="a.id">
+        <!-- Each entry drawn again only when what it shows changes, not with every change to the page (the search's text,
+             its options, the count it shows). -->
+        <div v-for="a in drawn" :key="a.id" class="entry" v-memo="[a.id, a.name, a.text, marksKey(a.parts)]">
           <dt>
-            <RouterLink :to="{ name: 'ability', params: { id: a.id } }">
+            <AppLink :to="{ name: 'ability', params: { id: a.id } }">
               <Marked v-if="a.parts" :p="a.parts" />
               <template v-else>{{ a.name }}</template>
-            </RouterLink>
+            </AppLink>
           </dt>
           <dd class="muted"><DexText :text="a.text" /></dd>
-        </template>
+        </div>
       </dl>
       <p v-else class="muted">{{ t('abilities.none') }}</p>
     </div>
@@ -96,6 +101,10 @@ const shown = computed(() => {
   grid-template-columns: max-content 1fr;
   gap: 6px 16px;
   margin: 0;
+}
+/* Each entry its name and what it does, laid out by the list's grid. */
+.entry {
+  display: contents;
 }
 .entries dt {
   font-weight: bold;

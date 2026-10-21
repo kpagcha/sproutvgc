@@ -24,6 +24,7 @@ import { fold, split } from '@/lib/search'
 import { noFilters, passesGroups } from '@/lib/filterGroups'
 import { monMatches, MON_TERM_KINDS, SET_LIST } from '@/lib/monTerms'
 import type { TermFilters } from '@/lib/searchTerms'
+import { useGradualRows } from '@/composables/useGradualRows'
 import { useMeta } from '@/composables/useMeta'
 import { usePreviousMeta } from '@/composables/usePreviousMeta'
 import { useRowColumns } from '@/composables/useRowColumns'
@@ -163,6 +164,7 @@ const shown = computed(() => {
   const q = fold(search.value.trim())
   return sorted.value.filter((r) => (!q || split(r.name, q)) && passes(r.id, filters.value))
 })
+const drawn = useGradualRows(shown)
 
 // A move's numbers and reach, for its heading.
 const moveData = computed(() => (props.kind === 'move' ? MOVES[id.value as MoveId] : undefined))
@@ -314,7 +316,9 @@ useRowColumns(useTemplateRef('head'))
             @sort="toggle('usage')"
           />
         </div>
-        <div v-for="r in shown" :key="r.id" class="row" role="row">
+        <!-- Each row drawn again only when what it shows changes, not with every change to the page (the search's text, its
+             options, the count it shows): hundreds of rows take a while. -->
+        <div v-for="r in drawn" :key="r.id" v-memo="[r, top, locale]" class="row" role="row">
           <div role="cell" class="grow">
             <AppLink :to="{ name: 'metaPokemon', params: { id: r.id } }" class="mon">
               <PokemonIcon :id="r.id" />
