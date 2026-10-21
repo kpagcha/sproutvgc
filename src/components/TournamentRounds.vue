@@ -381,7 +381,6 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
   background: var(--hover);
 }
 .segments button.on {
-  font-weight: bold;
   background: var(--sel);
 }
 /* The bracket: a column per round, each the same height, its matches spread down it so each pair's middle is where the
