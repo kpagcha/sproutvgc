@@ -459,21 +459,24 @@ const teamsWith = (pid: PokemonStat['id']) =>
 /** The Pokémon tab's panels, as the row of links at its top lists them: its table, the movers and the standouts, those
  * shown. */
 const sections = computed(() => [
-  { id: 'sec-pokemon', label: t('tournaments.pokemonStats') },
+  { id: 'sec-pokemon', label: t('tournaments.pokemonStatsHead') },
   ...(standings.value && rounds.value ? [{ id: 'sec-movers', label: t('tournaments.movers') }] : []),
   ...(standoutList.value.length ? [{ id: 'sec-standouts', label: t('tournaments.standouts') }] : []),
 ])
 
-/** What's stuck to the top as the page scrolls: on the standings, the tabs' band; on the Pokémon, the row of links to
- * its panels (the tabs heading it once their band, in their panel, has scrolled under it, as the row spans them all). Its height, for the Pokémon's table's header to
- * stick under it and a player scrolled to to land under it. */
-const bandTabs = useTemplateRef<{ $el: HTMLElement }>('bandTabs')
+/** What's stuck to the top as the page scrolls: on wide screens, on the standings, the tabs' band, and on the Pokémon,
+ * the tabs and the row of links to its panels under them; on phones, the tabs' bar, the row in it on the Pokémon. Its
+ * height, for the Pokémon's table's header to stick under it and a player or panel scrolled to to land under it. */
+const bandTabs = useTemplateRef<{ band: HTMLElement | null; bar: HTMLElement | null }>('bandTabs')
+const pokemonTabs = useTemplateRef<{ band: HTMLElement | null; bar: HTMLElement | null }>('pokemonTabs')
 const sectionNav = useTemplateRef<{ $el: HTMLElement }>('sectionNav')
-const pokemonTabs = useTemplateRef<{ $el: HTMLElement }>('pokemonTabs')
-const { height: bandHeight } = useElementSize(
-  () => (tab.value === 'pokemon' ? sectionNav.value?.$el : bandTabs.value?.$el),
-  undefined,
-  { box: 'border-box' },
+const shownTabs = computed(() => (tab.value === 'pokemon' ? pokemonTabs : bandTabs).value)
+const box = { box: 'border-box' } as const
+const { height: tabsHeight } = useElementSize(() => shownTabs.value?.band, undefined, box)
+const { height: barHeight } = useElementSize(() => shownTabs.value?.bar, undefined, box)
+const { height: navHeight } = useElementSize(() => sectionNav.value?.$el, undefined, box)
+const bandHeight = computed(() =>
+  phone.value ? barHeight.value : tabsHeight.value + (tab.value === 'pokemon' ? navHeight.value : 0),
 )
 
 const num = (n: number) => n.toLocaleString(locale.value)
@@ -481,7 +484,7 @@ const ordinal = (n: number) => `#${n}`
 </script>
 
 <template>
-  <div v-if="event" :style="{ '--band-height': `${bandHeight}px` }">
+  <div v-if="event" :style="{ '--band-height': `${bandHeight}px`, '--tabs-h': `${tabsHeight}px` }">
     <div class="panel">
       <h1>{{ event.name }}</h1>
       <p class="facts">
@@ -634,13 +637,13 @@ const ordinal = (n: number) => `#${n}`
 
     <!-- Its Pokémon: the day's, each one's usage, win rate and record. -->
     <template v-else>
-      <!-- Its panels, a row of links stuck to the top, the one being read marked; the tabs over it once their band has
-           scrolled under it. -->
-      <SectionNav ref="sectionNav" :sections :after="pokemonTabs?.$el">
-        <template #lead><BandTabs bare :label="t('tournaments.tabs')" :current="tab" :tabs /></template>
-      </SectionNav>
+      <!-- The tabs, and under them its panels as a row of links, the one being read marked, stuck to the top. -->
+      <BandTabs ref="pokemonTabs" bare sticky :label="t('tournaments.tabs')" :current="tab" :tabs>
+        <template #bar><SectionNav in-bar :sections /></template>
+      </BandTabs>
+      <SectionNav ref="sectionNav" attached :sections />
       <section id="sec-pokemon" class="panel banded section">
-        <BandTabs ref="pokemonTabs" :label="t('tournaments.tabs')" :current="tab" :tabs />
+        <h2 class="band">{{ t('tournaments.pokemonStatsHead') }}</h2>
         <div class="stats-controls">
           <SegmentedControl
             v-model="day"

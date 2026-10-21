@@ -822,6 +822,7 @@ export const messages = {
   'tournaments.noPlayers': 'No player matches.',
   'tournaments.teamsWithTip': 'The teams with it in the standings',
   'tournaments.pokemonStats': 'Pokémon',
+  'tournaments.pokemonStatsHead': 'Usage and win rates',
   'tournaments.statsAbout': "{players} players' teams · {matches} matches",
   'tournaments.col.pokemon': 'Pokémon',
   'tournaments.col.usage': 'Usage',

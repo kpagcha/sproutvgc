@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
-import { useElementSize } from '@vueuse/core'
 
 // A page's sections as a row of links stuck to the top of the screen, the one being read marked as the page scrolls
 // (each section an element with the `id` given): the last whose top has passed a line a third of the way down the
@@ -8,9 +7,10 @@ import { useElementSize } from '@vueuse/core'
 // scrolls to it. The row scrolls sideways where they don't fit, keeping the one marked in view. The page gives its
 // sections room above them for the row (`scroll-margin-top`), and whatever else sticks to the top goes under it
 // (`--sticky-offset`).
-// What the page puts in its `lead` slot (a tournament's tabs) heads the row once `after` (where it is on the page) has
-// scrolled under it, sliding in; the room it takes taken back under the row, so what's under it doesn't move.
-const props = defineProps<{ sections: readonly { id: string; label: string }[]; after?: HTMLElement | null }>()
+// `attached`, it's a bar under tabs (a tournament's, `BandTabs` bare) in the panel's color, outlined as panels are, which
+// the tab shown opens into; on wide screens stuck under them as they stick (`--tabs-h`, their height); on phones not
+// stuck at all, the tabs' bar taking over at the top with the row in it again (`inBar`, outlined the same, not stuck).
+const props = defineProps<{ sections: readonly { id: string; label: string }[]; attached?: boolean; inBar?: boolean }>()
 
 const active = shallowRef<string | null>(null)
 const row = useTemplateRef<HTMLElement>('row')
@@ -25,13 +25,7 @@ function update() {
   const bottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2
   if (bottom && props.sections.length) current = props.sections[props.sections.length - 1]!.id
   active.value = current
-  const nav = navEl.value
-  led.value = !!props.after && !!nav && props.after.getBoundingClientRect().bottom <= nav.getBoundingClientRect().bottom
 }
-const navEl = useTemplateRef<HTMLElement>('nav')
-const lead = useTemplateRef<HTMLElement>('lead')
-const led = shallowRef(false)
-const { height: leadHeight } = useElementSize(lead, undefined, { box: 'border-box' })
 
 let frame = 0
 function onScroll() {
@@ -77,8 +71,7 @@ function go(id: string) {
 </script>
 
 <template>
-  <nav ref="nav" class="section-nav" :class="{ led }" :style="{ '--lead-h': `${leadHeight}px` }">
-    <div v-if="$slots.lead" ref="lead" class="lead" :inert="!led"><slot name="lead" /></div>
+  <nav class="section-nav" :class="{ attached, 'in-bar': inBar }">
     <div ref="row" class="row">
       <a
         v-for="s in sections"
@@ -105,29 +98,41 @@ function go(id: string) {
   background: var(--bg);
   border-bottom: 1px solid var(--border);
 }
-/* The lead, out of the way until shown: then at the top of the row, the row's margin under it less its height. */
-.lead {
-  position: absolute;
-  inset: 0 0 auto;
-  visibility: hidden;
-  opacity: 0;
-  transform: translateY(-6px);
-  transition:
-    opacity 0.15s ease-out,
-    transform 0.15s ease-out,
-    visibility 0s 0.15s;
+/* Attached under tabs: no line of its own, the row a bar outlined and shadowed as panels are; on wide screens stuck
+   under the tabs. */
+.section-nav.attached {
+  background: none;
+  border-bottom: none;
 }
-.section-nav.led {
-  margin-bottom: calc(12px - var(--lead-h));
+.section-nav.attached .row {
+  padding: 0 4px;
+  background: var(--panel);
+  border: 2px solid var(--ink);
+  border-top: none;
+  box-shadow: var(--hard);
 }
-.section-nav.led .lead {
+@media (min-width: 721px) {
+  .section-nav.attached {
+    top: var(--tabs-h, 0px);
+  }
+}
+@media (max-width: 720px) {
+  .section-nav.attached {
+    position: static;
+  }
+}
+.section-nav.in-bar {
   position: static;
-  visibility: visible;
-  opacity: 1;
-  transform: none;
-  transition:
-    opacity 0.15s ease-out,
-    transform 0.15s ease-out;
+  margin: 0;
+  background: none;
+  border-bottom: none;
+}
+/* In the tabs' bar, outlined as it is attached on the page, under the tabs' switch. */
+.section-nav.in-bar .row {
+  padding: 0 4px;
+  background: var(--panel);
+  border: 2px solid var(--ink);
+  border-top: none;
 }
 .row {
   display: flex;
