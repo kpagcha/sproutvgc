@@ -8,13 +8,15 @@ import { medalOf, playerMatches, type PlayerMatch } from '@/lib/tournamentStats'
 import AppLink from '@/components/AppLink'
 import CopyPaste from '@/components/CopyPaste.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import SectionNav from '@/components/SectionNav.vue'
 import TeamSets from '@/components/TeamSets.vue'
 
 // A player of an official tournament (`/meta/tournaments/:id/players/:placing`): who they are, their placing (a medal
 // in the top 8), record and how far they made it, the event they played; their team, its whole sets (`TeamSets`), to copy as a paste under them (`CopyPaste`); and
 // their matches round by round, by day (Day 1, Day 2, the top cut, each with their record that day), each its round
 // (the top cut's by name: Quarterfinals, Semifinals, Final), its result, and their opponent (placing, name, record and
-// six as icons), leading to the opponent's own page.
+// six as icons), leading to the opponent's own page. Its sections, the team and the matches, a row of links stuck to the
+// top, the one being read marked (`SectionNav`).
 const route = useRoute()
 const id = computed(() => String(route.params.id))
 const placing = computed(() => Number(route.params.placing))
@@ -70,6 +72,12 @@ function roundName(m: PlayerMatch) {
     : t('tournaments.cutRound.n', { n: 2 ** (m.left + 1) })
 }
 
+// Its sections, as the row of links at its top lists them.
+const sections = computed(() => [
+  { id: 'sec-team', label: t('tournaments.team') },
+  { id: 'sec-matches', label: t('tournaments.matches') },
+])
+
 const num = (n: number) => n.toLocaleString(locale.value)
 const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ties}` : ''}`
 </script>
@@ -80,6 +88,8 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
     <AppLink :to="{ name: 'tournament', params: { id } }">{{ t('tournaments.standings') }} ›</AppLink>
   </div>
   <div v-else-if="event">
+    <!-- Its sections, a row of links stuck to the top, the one being read marked. -->
+    <SectionNav v-if="player" :sections="sections" />
     <div class="panel">
       <p v-if="!player" class="muted">{{ t('tournaments.loading') }}</p>
       <template v-else>
@@ -105,7 +115,7 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
       </template>
     </div>
 
-    <section v-if="player" class="panel">
+    <section v-if="player" id="sec-team" class="panel">
       <h2>{{ t('tournaments.team') }}</h2>
       <TeamSets v-if="player.team.length" :team="player.team" />
       <!-- The way to copy it as a paste, under its sets at their right. -->
@@ -113,7 +123,7 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
       <p v-else class="muted">{{ t('tournaments.noTeam') }}</p>
     </section>
 
-    <section v-if="player" class="panel">
+    <section v-if="player" id="sec-matches" class="panel">
       <h2>{{ t('tournaments.matches') }}</h2>
       <p v-if="!rounds" class="muted">{{ t('tournaments.loading') }}</p>
       <ol v-else class="matches">
@@ -212,6 +222,10 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
 }
 h2 {
   margin: 0 0 8px;
+}
+/* Room above a section scrolled to for the row of links stuck to the top. */
+section {
+  scroll-margin-top: 48px;
 }
 .team-tools {
   display: flex;
