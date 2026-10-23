@@ -1119,18 +1119,50 @@ h1 {
   width: 4em;
   font: inherit;
 }
-/* Its label on a row of its own, the slider and the number under it. */
-.chart-n {
-  flex-wrap: wrap;
-  row-gap: 2px;
+/* Its label on a row of its own, the slider and the number under it: a grid, as a wrapping flex row's width is still
+   that of everything on one line, so the drop-down came out wider than what it shows. */
+.chart-options .chart-n {
+  display: grid;
+  grid-template-columns: minmax(0, auto) auto;
+  gap: 2px 8px;
 }
 .chart-n > .muted {
-  flex-basis: 100%;
+  grid-column: 1 / -1;
 }
 /* Its drop-down opening rightward, from the button beside the day's choice. */
 .chart-options :deep(.pop) {
   right: auto;
   left: 0;
+}
+/* Where the row doesn't fit, two: the day's label with the button at the row's end, then the day's choice; the
+   drop-down opening leftward from the button, kept on the screen. */
+@media (max-width: 720px) {
+  .stats-controls {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 6px 8px;
+  }
+  .day-choice {
+    display: contents;
+  }
+  .day-choice :deep(.segments) {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+  .chart-options {
+    grid-row: 1;
+    grid-column: 2;
+  }
+  .chart-options :deep(.pop) {
+    right: 0;
+    left: auto;
+    max-width: calc(100vw - 32px);
+  }
+  .chart-n input[type='range'] {
+    width: 100%;
+    min-width: 6rem;
+  }
 }
 .about {
   margin: 2px 0 8px;
