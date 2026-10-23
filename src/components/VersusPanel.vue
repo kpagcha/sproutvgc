@@ -31,7 +31,7 @@ const props = defineProps<{
   mineSpeed: number
   points: number
   trickRoom: boolean
-  /** The comparison of yours and them (the first two), side by side. */
+  /** The comparison of yours and them, side by side. */
   compareTo: NamedLocation | null
   floating?: boolean
 }>()
@@ -160,10 +160,13 @@ function spare(v: VersusItem): number {
   border: none;
   cursor: pointer;
 }
-/* On one line, nothing clipping them: the icons overlap, so a team's six fit beside the title on a phone. */
+/* The icons overlapping, so a team's six fit beside the title on a phone; where they still don't, they wrap to another
+   row (their margins over and under small enough that the rows don't overlap), never past the bar. */
 .verdicts {
   display: flex;
   flex: 1;
+  flex-wrap: wrap;
+  row-gap: 2px;
   min-width: 0;
 }
 /* Each its icon, its verdict a badge on its corner; the icons' transparent edges overlapping, so a team fits. */
@@ -173,11 +176,11 @@ function spare(v: VersusItem): number {
   flex: none;
   align-items: center;
 }
-.verdict-chip + .verdict-chip {
-  margin-left: -6px;
+.verdict-chip:not(:first-child) {
+  margin-left: -10px;
 }
 .verdict-chip :deep(.sheet-icon) {
-  margin-block: -6px;
+  margin-block: -1px;
 }
 .glyph {
   position: absolute;

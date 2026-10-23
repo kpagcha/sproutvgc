@@ -1,5 +1,5 @@
 // The comparison's Pokémon beyond a pair: who moves when among several, and the speed order's list as its URL keeps
-// it. Its own Pokémon in two teams (yours, `a` and `a2`; the opponents, `b` and `b2`, each build under its letters as
+// it. Its own Pokémon in two teams (yours, `a` to `a6`; the opponents, `b` to `b6`, each build under its letters as
 // `speedBuild` reads it), or, in speed order, any Pokémon at all in `list`.
 
 import type { PokemonId } from '@/data/dex'

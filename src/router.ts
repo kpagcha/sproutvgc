@@ -71,12 +71,16 @@ function prefetchEvent(to: RouteLocationNormalized) {
 // The page's one visit among the recently viewed, whatever its view.
 const once = (page: string) => () => page
 
-// The comparison's visit: yours against the opponents, one per matchup (the two, or the four), once each team has one;
-// the speed order, one whatever its list, once there's one in it.
-function compareVisit({ a, b, a2, b2, mode, list }: LocationQuery) {
+// The comparison's visit: yours against the opponents, one per matchup (the two teams, up to six each), once each team
+// has one; the speed order, one whatever its list, once there's one in it.
+const TEAM_KEYS = ['a', 'b'].flatMap((s) => [s, ...[2, 3, 4, 5, 6].map((n) => `${s}${n}`)])
+function compareVisit(query: LocationQuery) {
+  const { a, b, mode, list } = query
   if (mode === 'order') return typeof list === 'string' && list ? 'speedCompare:order' : null
   return typeof a === 'string' && typeof b === 'string'
-    ? `speedCompare:${[a, a2, b, b2].filter((x) => typeof x === 'string').join(':')}`
+    ? `speedCompare:${TEAM_KEYS.map((k) => query[k])
+        .filter((x) => typeof x === 'string')
+        .join(':')}`
     : null
 }
 

@@ -36,7 +36,7 @@ function view(visit: PageVisit) {
     ? null
     : q.mode === 'order'
       ? [readList(q.list).map((e) => e.id)]
-      : [team(['a', 'a2']), team(['b', 'b2'])]
+      : ['a', 'b'].map((s) => team([s, ...[2, 3, 4, 5, 6].map((n) => `${s}${n}`)]))
   return {
     to,
     titleKey: to.meta.titleKey,

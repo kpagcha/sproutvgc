@@ -46,8 +46,8 @@ import HelpToggle from '@/components/HelpToggle.vue'
 import TourToggle from '@/components/TourToggle.vue'
 
 // Pokémon's Speeds compared, each with a build of its own (its nature's effect, its stat points, its modifiers), in
-// one of two views (`mode`). Yours against opponents (the default): up to two a side, yours `a` and `a2`, the
-// opponents `b` and `b2` (each build under its letters: `anat`, `apts`, `amods`, `astage`…); a pair side by side,
+// one of two views (`mode`). Yours against opponents (the default): up to a team's six a side, yours `a`, `a2` to
+// `a6`, the opponents `b` to `b6` (each build under its letters: `anat`, `apts`, `amods`, `astage`…); a pair side by side,
 // which moves first and the points each needs to move before the other; more, one under the other in the order they
 // move, with how each of yours does against each opponent, and any two of them alone (`pair`). Or the speed order
 // (`mode=order`): any Pokémon, up to `LIST_MAX`, in the order they move (`list`). Everything in the URL, with
@@ -83,11 +83,14 @@ const trickRoom = computed(() => route.query.trickroom === '1')
 const canHover = window.matchMedia('(hover: hover)').matches
 const toggleTrickRoom = () => replace({ trickroom: trickRoom.value ? undefined : '1' })
 
-// Yours against the opponents: each team's first, and its second once picked.
+// Yours against the opponents: each team's first, and the rest once picked, up to a team's six.
 const SIDES = ['a', 'b'] as const
 type Side = (typeof SIDES)[number]
-const SLOTS = ['a', 'a2', 'b', 'b2'] as const
-type Slot = (typeof SLOTS)[number]
+const TEAM_MAX = 6
+type Slot = Side | `${Side}${2 | 3 | 4 | 5 | 6}`
+/** A team's slots, in order: its first, then `a2` to `a6`. */
+const slotsOf = (s: Side) => Array.from({ length: TEAM_MAX }, (_, i) => (i ? `${s}${i + 1}` : s) as Slot)
+const SLOTS: readonly Slot[] = SIDES.flatMap(slotsOf)
 const other = (s: Side): Side => (s === 'a' ? 'b' : 'a')
 const teamOf = (s: string) => (s.startsWith('a') ? ('yours' as const) : ('opponent' as const))
 const BUILD_KEYS = ['', 'nat', 'pts', 'mods', 'stage', 'sets'] as const
@@ -96,8 +99,8 @@ const idOf = (s: Slot) => {
   const id = route.query[s]
   return typeof id === 'string' && id in POKEMON ? (id as PokemonId) : null
 }
-/** A team's slots: its first and its second. */
-const teamSlots = (s: string): Slot[] => (teamOf(s) === 'yours' ? ['a', 'a2'] : ['b', 'b2'])
+/** A slot's team's slots. */
+const teamSlots = (s: string): Slot[] => slotsOf(teamOf(s) === 'yours' ? 'a' : 'b')
 /**
  * A slot's build as the URL keeps it, with Tailwind when its team has it: Tailwind is its whole side's, so one of a team
  * having it is both having it (as setting it does, `setBuild`; a link may have it on one alone).
@@ -107,7 +110,7 @@ function slotBuild(s: Slot): SpeedBuild {
   const tailwind = teamSlots(s).some((x) => readBuild(route.query, x).toggles.includes('tailwind'))
   return tailwind && !b.toggles.includes('tailwind') ? { ...b, toggles: [...b.toggles, 'tailwind'] } : b
 }
-/** Each team's first, and its second once picked. */
+/** Each team's first, and the rest once picked (one cleared, those after it move up: they're never apart). */
 const vsSlots = computed(() => SLOTS.filter((s) => s === 'a' || s === 'b' || !!idOf(s)))
 
 /**
@@ -281,10 +284,17 @@ function setBuild(key: string, b: Partial<SpeedBuild>) {
  * Tailwind is its whole side's, set or cleared for both. In speed order, each one's modifiers are its own.
  */
 function sharedToggles(key: Slot, next: readonly BuildToggle[]) {
-  const mate = teamSlots(key).find((s) => s !== key)!
-  const b = slotBuild(mate)
-  if (!idOf(mate) || b.toggles.includes('tailwind') === next.includes('tailwind')) return {}
-  return buildQuery({ ...b, toggles: toggled(b.toggles, 'tailwind') }, mate)
+  return Object.assign(
+    {},
+    ...teamSlots(key)
+      .filter((mate) => mate !== key && !!idOf(mate))
+      .map((mate) => {
+        const b = slotBuild(mate)
+        return b.toggles.includes('tailwind') === next.includes('tailwind')
+          ? {}
+          : buildQuery({ ...b, toggles: toggled(b.toggles, 'tailwind') }, mate)
+      }),
+  ) as Record<string, string | undefined>
 }
 /** One at its sets, or at one build (the one it had: its sets' most common, from when it was picked). */
 const setSets = (key: string, on: boolean) => replace({ [`${key}sets`]: on ? '1' : undefined })
@@ -311,26 +321,25 @@ const moveSlot = (to: Slot, from: Slot | null) =>
       return [`${to}${k}`, typeof v === 'string' ? v : undefined]
     }),
   )
-// A team's first cleared with its second picked, the second takes its place.
+// One of a team cleared, those after it move up a slot.
 function clear(key: string) {
   if (openKey.value === key) openKey.value = null
   if (mode.value === 'order') return setList(list.value.filter((_, i) => i !== listIndex(key)))
-  const s = key as Slot
-  const second = s === 'a' || s === 'b' ? (`${s}2` as Slot) : null
-  const q = second && idOf(second) ? { ...moveSlot(s, second), ...moveSlot(second, null) } : moveSlot(s, null)
+  const slots = teamSlots(key)
+  const q = Object.assign(
+    {},
+    ...slots.slice(slots.indexOf(key as Slot)).map((s, i, rest) => {
+      const next = rest[i + 1]
+      return moveSlot(s, next && idOf(next) ? next : null)
+    }),
+  ) as Record<string, string | undefined>
   replace({ ...q, pair: undefined })
 }
 /** Every one of the teams cleared, with their builds (and the two tapped among the matchups); the rest stays. */
 function clearTeams() {
   openKey.value = null
   folded.value = new Set()
-  replace({
-    ...moveSlot('a', null),
-    ...moveSlot('a2', null),
-    ...moveSlot('b', null),
-    ...moveSlot('b2', null),
-    pair: undefined,
-  })
+  replace({ ...Object.assign({}, ...SLOTS.map((s) => moveSlot(s, null))), pair: undefined })
 }
 /** The speed order's list emptied: asked first past a few, as it can take a while to make. */
 async function clearList() {
@@ -347,18 +356,19 @@ async function clearList() {
   setList([])
 }
 function swap() {
+  const [yours, theirs] = SIDES.map(slotsOf)
   replace({
-    ...moveSlot('a', 'b'),
-    ...moveSlot('b', 'a'),
-    ...moveSlot('a2', 'b2'),
-    ...moveSlot('b2', 'a2'),
+    ...Object.assign({}, ...yours!.flatMap((s, i) => [moveSlot(s, theirs![i]!), moveSlot(theirs![i]!, s)])),
     pair: undefined,
   })
   openKey.value = null
 }
-/** A team's second, picked (only then does the page show the list): its panel opens, to set its build. */
+/** The slot a team's next goes in: its first empty one after its first. */
+const nextSlot = (s: Side) => slotsOf(s).find((x, i) => i > 0 && !idOf(x)) ?? null
+/** Another of a team, picked (only then does the page show the list): its panel opens, to set its build. */
 function addSecond(s: Side, id: PokemonId) {
-  const key = `${s}2` as Slot
+  const key = nextSlot(s)
+  if (!key) return
   openKey.value = key
   void toListTop(
     replace({
@@ -411,9 +421,9 @@ function confirmSide(s: Side) {
 /** What an empty one picks: in the list, whose it is, as there's no team band over it. */
 const pickLabel = (team: 'yours' | 'opponent' | null) =>
   t(team === 'yours' ? 'compare.pickYours' : team === 'opponent' ? 'compare.pickOpponent' : 'compare.pick')
-// Each team offers its second from the start, once its first is picked.
+// Each team offers another from the start, once its first is picked, until it has six.
 const canAdd = (s: Side) => !!idOf(s)
-const hasSecond = (s: Side) => vsSlots.value.includes(`${s}2` as Slot)
+const teamFull = (s: Side) => !nextSlot(s)
 /** The Pokémon on a slot's team but it, which it can't be (a team has one of each species); none in speed order. */
 const takenFor = (key: string) =>
   mode.value === 'vs' ? SLOTS.filter((s) => s !== key && teamOf(s) === teamOf(key)).flatMap((s) => idOf(s) ?? []) : []
@@ -447,17 +457,16 @@ function setMode(m: Mode) {
 }
 
 /**
- * The speed tiers as they were left, with one of yours as yours (`ladderMine`) and an opponent found on the ladder
- * (`ladderFind`; what was picked there before giving way to them), and Trick Room as here.
+ * The speed tiers as they were left, with one of yours as yours (`ladderMine`) and the opponents found on the ladder
+ * (what was picked there before giving way to them), and Trick Room as here.
  */
 const ladderMine = ref<Slot>('a')
-const ladderFind = ref<Slot>('b')
 const ladderLink = computed(() => {
   const q = { ...lastTiersQuery.value }
   for (const k of TIERS_PICKS) delete q[k]
   const mineId = idOf(ladderMine.value) ? ladderMine.value : 'a'
-  const findId = idOf(ladderFind.value) ? ladderFind.value : 'b'
   const me = idOf(mineId)
+  const found = slotsOf('b').flatMap((s) => idOf(s) ?? [])
   const b = slotBuild(mineId)
   return {
     name: 'speedTiers',
@@ -471,19 +480,17 @@ const ladderLink = computed(() => {
         // The speed tiers have fewer stages: one beyond them is left out.
         mystage: [-1, 1, 2].includes(b.stage) ? String(b.stage) : undefined,
       }),
-      find: idOf(findId) ?? undefined,
+      find: found.length ? found.join(',') : undefined,
       trickroom: trickRoom.value ? '1' : undefined,
     },
   }
 })
-// With a second on either team, the link is a menu choosing which of each goes there first: a row per team with two
-// to choose from. Closed by a press outside it, or Escape.
-const ladderChoices = computed(() =>
-  SIDES.map((s) => ({
-    side: s,
-    slots: [s, `${s}2` as Slot].filter((x) => !!idOf(x)),
-  })).filter((c) => c.slots.length > 1),
-)
+// With more than one of yours, the link is a menu choosing which goes there as yours (the opponents all go, found).
+// Closed by a press outside it, or Escape.
+const ladderChoices = computed(() => {
+  const slots = slotsOf('a').filter((x) => !!idOf(x))
+  return slots.length > 1 ? [{ side: 'a' as const, slots }] : []
+})
 const ladderOpen = ref(false)
 const ladderMenu = useTemplateRef<HTMLElement>('ladderMenu')
 function onLadderPointer(e: PointerEvent) {
@@ -686,12 +693,12 @@ function resetAll() {
           <template v-for="s in SIDES" :key="s">
             <SpeedAddSecond
               :ranks
-              v-if="!hasSecond(s)"
+              v-if="!teamFull(s)"
               class="row-add"
               :team="teamOf(s)"
               :label="t(s === 'a' ? 'compare.addYours' : 'compare.addOpponent')"
               :disabled="!canAdd(s)"
-              :taken="takenFor(`${s}2`)"
+              :taken="takenFor(nextSlot(s) ?? s)"
               @pick="(id: PokemonId) => addSecond(s, id)"
             />
           </template>
@@ -831,7 +838,7 @@ function resetAll() {
           :team="teamOf(side.s)"
           :label="t('compare.addSecondShort')"
           :disabled="!canAdd(side.s)"
-          :taken="takenFor(`${side.s}2`)"
+          :taken="takenFor(nextSlot(side.s) ?? side.s)"
           @pick="(id: PokemonId) => addSecond(side.s, id)"
         />
       </div>
@@ -910,7 +917,7 @@ function resetAll() {
             :team="teamOf(side.s)"
             :label="t(side.s === 'a' ? 'compare.addYours' : 'compare.addOpponent')"
             :disabled="!canAdd(side.s)"
-            :taken="takenFor(`${side.s}2`)"
+            :taken="takenFor(nextSlot(side.s) ?? side.s)"
             @pick="(id: PokemonId) => addSecond(side.s, id)"
           />
         </div>
@@ -944,9 +951,9 @@ function resetAll() {
             :key="c.side"
             class="ladder-row"
             role="radiogroup"
-            :aria-label="t(c.side === 'a' ? 'compare.ladderYours' : 'compare.ladderFind')"
+            :aria-label="t('compare.ladderYours')"
           >
-            <span class="muted small">{{ t(c.side === 'a' ? 'compare.ladderYours' : 'compare.ladderFind') }}</span>
+            <span class="muted small">{{ t('compare.ladderYours') }}</span>
             <span class="ladder-picks">
               <button
                 v-for="sl in c.slots"
@@ -954,9 +961,9 @@ function resetAll() {
                 type="button"
                 role="radio"
                 class="btn ladder-pick"
-                :class="[teamOf(sl), { on: (c.side === 'a' ? ladderMine : ladderFind) === sl }]"
-                :aria-checked="(c.side === 'a' ? ladderMine : ladderFind) === sl"
-                @click="c.side === 'a' ? (ladderMine = sl) : (ladderFind = sl)"
+                :class="[teamOf(sl), { on: ladderMine === sl }]"
+                :aria-checked="ladderMine === sl"
+                @click="ladderMine = sl"
               >
                 <PokemonIcon :id="idOf(sl)!" />{{ refName(pokemon(idOf(sl)!)) }}
               </button>

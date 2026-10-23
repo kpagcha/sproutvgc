@@ -1056,7 +1056,7 @@ export const messages = {
   'tour.compare.intro':
     'Yours against opponents, or any Pokémon in the order they move. A quick look around; close it at any time.',
   'tour.compare.viewsTitle': 'Two views',
-  'tour.compare.views': 'Yours against opponents, up to two a side, or a list of up to 20 Pokémon in speed order.',
+  'tour.compare.views': 'Yours against opponents, up to six a side, or a list of up to 20 Pokémon in speed order.',
   'tour.compare.toolbarTitle': 'For every one',
   'tour.compare.toolbar': 'Trick Room turns the order over; swap the teams, or clear them.',
   'tour.compare.yoursTitle': 'Yours',
@@ -1065,8 +1065,9 @@ export const messages = {
   'tour.compare.opponentTitle': 'The opponent',
   'tour.compare.opponent':
     "Its Speed isn't known, so it's at every set players run: how often yours moves first, and the points it needs to move before them.",
-  'tour.compare.secondTitle': 'Two a side',
-  'tour.compare.second': 'Add a second to either team, and see how each fares against each, in the order they move.',
+  'tour.compare.secondTitle': 'Up to six a side',
+  'tour.compare.second':
+    'Add more to either team, up to six, and see how each fares against each, in the order they move.',
   'tour.compare.orderTitle': 'The list',
   'tour.compare.order': 'Add Pokémon, up to 20, each at a build of its own: they line up in the order they move.',
   'speed.help': 'How to read this',
@@ -1220,7 +1221,7 @@ export const messages = {
   'picker.showAll': 'Show all ({n})',
   'picker.showFewer': 'Show fewer',
   'compare.intro':
-    'Your Pokémon and an opponent, up to two a side, each with its build: who moves first, and what it takes.',
+    'Your Pokémon and an opponent, up to six a side, each with its build: who moves first, and what it takes.',
   'compare.pick': 'Pick a Pokémon',
   'compare.pickYours': 'Pick your Pokémon',
   'compare.pickOpponent': 'Pick an opponent',
@@ -1247,13 +1248,13 @@ export const messages = {
   'compare.mode.vsShort': 'Versus',
   'compare.mode.order': 'Speed order',
   'compare.helpMode':
-    'Yours against opponents, up to two a side, or any Pokémon at all (up to 20) in the order they move.',
+    'Yours against opponents, up to six a side, or any Pokémon at all (up to 20) in the order they move.',
   'compare.helpPlacesLabel': 'Order',
   'compare.helpPlaces':
     'With more than two, they line up in the order they move, numbered, once none is open for changing. Those as fast share a number, marked =: either moves first, at random.',
-  'compare.helpTeamsLabel': 'Two a side',
+  'compare.helpTeamsLabel': 'Six a side',
   'compare.helpTeams':
-    "Add a second to either team under its panel. A team has one of each species, its formes and Megas included: one on it shows greyed out in its other slot's list (the other team can still have it).",
+    "Add more to either team under its panel, up to six. A team has one of each species, its formes and Megas included: one on it shows greyed out in its other slots' lists (the other team can still have it).",
   'compare.helpListLabel': 'The list',
   'compare.helpList':
     'Up to 20 Pokémon, the same one more than once if you like (at different builds, say). Confirm, or tapping its band again, puts one away.',
@@ -1262,12 +1263,11 @@ export const messages = {
   'compare.helpLadder':
     'Your Pokémon there as yours, with its build, and the opponent found on the ladder; with two on a team, you choose which.',
   'compare.ladderYours': 'As yours',
-  'compare.ladderFind': 'Found on the ladder',
   'compare.helpMatchups':
     'Each of yours against each opponent: which moves first, and by how much Speed. Tap one to see the two alone.',
-  'compare.addYours': 'Add a second of yours',
-  'compare.addOpponent': 'Add a second opponent',
-  'compare.addSecondShort': 'Add a second',
+  'compare.addYours': 'Add another of yours',
+  'compare.addOpponent': 'Add another opponent',
+  'compare.addSecondShort': 'Add another',
   'compare.add': 'Add a Pokémon',
   'compare.limit': 'The list takes up to {n} Pokémon: clear one to add another.',
   'compare.emptyOrder': 'Add Pokémon to see the order they move in.',
@@ -1298,11 +1298,11 @@ export const messages = {
   'compare.colSpeed': 'Speed',
   'compare.ofSets': 'Of its sets',
   'compare.build': 'Build',
-  'compare.bothChance': '{name} moves before both {pct} of the time',
-  'compare.bothCommon': 'To move before both most common Speeds ({speeds}) at its nature: {points}',
+  'compare.bothChance': '{name} moves before them all {pct} of the time',
+  'compare.bothCommon': 'To move before all their most common Speeds ({speeds}) at its nature: {points}',
   'compare.hiddenNote': "Sets under {pct} count but aren't shown.",
   'compare.pairHint': 'Tap a matchup to see the two alone: which moves first, and what each takes.',
-  'compare.both': 'To move before both opponents',
+  'compare.both': 'To move before every opponent',
   'compare.bothOf': '{name}: before {other} at {speed}',
   'compare.ties': 'Speed ties',
   'compare.tiesNote': 'Those at the same Speed move in a random order each turn.',

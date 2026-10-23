@@ -1350,7 +1350,7 @@ function chipOf(key: string): Entry | undefined {
   }
 }
 // The comparison from yours' card: yours alone, to add opponents to there; none until there's yours. With opponents
-// found, against them (the first two, as a team has room for): each at the chip measured against, else at its sets, no
+// found, against them (up to a team's six): each at the chip measured against, else at its sets, no
 // Speed of them picked. Against one chip alone, the comparison's card has the way there instead.
 const compareTarget = computed(() => {
   if (mine.value === null) return null
@@ -1451,15 +1451,15 @@ const chipBuild = (e: Entry) =>
     e.bench ? benchBuild(e.bench) : e.effect ? { effect: e.effect, points: e.points! } : FASTEST,
     e.boost,
   )
-/** The comparison of yours and `others` (the first two, a team), each at its build, or at its sets (`sets`, when the
+/** The comparison of yours and `others` (up to a team's six), each at its build, or at its sets (`sets`, when the
  * meta has them). */
 function compareLink(others: { id: PokemonId; build: SpeedBuild; sets: boolean }[]) {
   const query: Record<string, string | undefined> = {
     ...(mine.value && { a: mine.value, ...buildQuery(myBuild.value, 'a') }),
     trickroom: trickRoom.value ? '1' : undefined,
   }
-  others.slice(0, 2).forEach((o, i) => {
-    const s = i ? 'b2' : 'b'
+  others.slice(0, 6).forEach((o, i) => {
+    const s = i ? `b${i + 1}` : 'b'
     Object.assign(query, {
       [s]: o.id,
       ...buildQuery(o.build, s),

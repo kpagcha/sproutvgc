@@ -81,7 +81,7 @@ const picked = computed(() => {
 const isPicked = (y: Mon, o: Mon) => picked.value?.y === y && picked.value.o === o
 const tap = (y: Mon, o: Mon) => emit('pair', isPicked(y, o) ? null : [y.key, o.key])
 
-/** Against two opponents at one build each, the one to beat to move before both: the one that moves first. */
+/** Against two opponents or more at one build each, the one to beat to move before them all: the one that moves first. */
 const toBeat = computed(() =>
   props.opponents.length < 2
     ? null
@@ -172,7 +172,7 @@ const against = (me: Mon, speed: number) => toMoveFirst(me.id, me.build, speed, 
     <p v-else class="muted small hint">{{ t('compare.pairHint') }}</p>
   </section>
 
-  <!-- Against two opponents, what each of yours takes to move before both. -->
+  <!-- Against two opponents or more, what each of yours takes to move before them all. -->
   <section v-if="toBeat" class="panel both">
     <h2 class="heading">{{ t('compare.both') }}</h2>
     <!-- Either at its sets: a line per one of yours, how often it moves before both, and what it takes. -->
