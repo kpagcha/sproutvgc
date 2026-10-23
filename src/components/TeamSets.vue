@@ -12,10 +12,14 @@ function natureTip(id: string) {
   if (!e) return t('usageMon.natureNeutral')
   let el = natureTips.get(id)
   if (!el) {
-    el = document.createElement('span')
-    render(
-      h('span', [h(EffectTag, { effect: 'up', stat: e.plus }), ' ', h(EffectTag, { effect: 'down', stat: e.minus })]),
-      el,
+    // Drawn once the render asking for it is done: `render` runs Vue's pending post-render work at once, a deferred
+    // Teleport among it, which would look for its target before the page is in the document.
+    const tip = (el = document.createElement('span'))
+    queueMicrotask(() =>
+      render(
+        h('span', [h(EffectTag, { effect: 'up', stat: e.plus }), ' ', h(EffectTag, { effect: 'down', stat: e.minus })]),
+        tip,
+      ),
     )
     natureTips.set(id, el)
   }
