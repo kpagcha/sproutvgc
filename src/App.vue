@@ -77,7 +77,9 @@ watchEffect(() => {
         ? eventOf(id)?.name
         : route.name === 'tournamentPlayer'
           ? playerTitle(id, Number(route.params.placing))
-          : undefined
+          : route.name === 'metaBuild'
+            ? generatedName('pokemon', id)
+            : undefined
   // A tournament's Pokémon and its rounds, a page each of their own.
   const tournamentMons = route.name === 'tournament' && route.params.tab === 'pokemon'
   const tournamentRounds = route.name === 'tournament' && route.params.tab === 'rounds'
@@ -103,7 +105,9 @@ watchEffect(() => {
                   ? 'desc.tournament'
                   : route.name === 'tournamentPlayer'
                     ? 'desc.tournamentPlayer'
-                    : 'desc.condition'),
+                    : route.name === 'metaBuild'
+                      ? 'desc.metaBuild'
+                      : 'desc.condition'),
           {
             ...params,
             ability: entry,
@@ -145,6 +149,12 @@ function backLink(r: RouteLocationNormalizedLoaded): { to: RouteLocationRaw; lab
   // A tournament's player leads back to its standings.
   if (r.name === 'tournamentPlayer')
     return { to: { name: 'tournament', params: { id: r.params.id } }, label: 'tournaments.standings' }
+  // A build leads back to its Pokémon's meta page.
+  if (r.name === 'metaBuild')
+    return {
+      to: { name: 'metaPokemon', params: { id: r.params.id }, query: { meta: r.query.meta } },
+      label: 'metaBuild.back',
+    }
   if (r.name === 'speedCompare')
     return { to: { name: 'speedTiers', query: lastTiersQuery.value }, label: 'nav.speedTiers' }
   return (typeof r.name === 'string' ? LISTS[r.name] : undefined) ?? null

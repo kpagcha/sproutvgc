@@ -1,0 +1,1952 @@
+{
+  "basculegion": [
+    1477,
+    [
+      ["choicescarf", "adaptability", "jolly", ["aquajet", "flipturn", "lastrespects", "wavecrash"], 0.3385],
+      ["mysticwater", "adaptability", "adamant", ["aquajet", "lastrespects", "protect", "wavecrash"], 0.2072],
+      ["focussash", "adaptability", "adamant", ["aquajet", "lastrespects", "liquidation", "protect"], 0.1462],
+      ["sitrusberry", "adaptability", "adamant", ["aquajet", "lastrespects", "protect", "wavecrash"], 0.0758],
+      ["choicescarf", "adaptability", "adamant", ["aquajet", "flipturn", "lastrespects", "wavecrash"], 0.0548],
+      ["focussash", "adaptability", "jolly", ["aquajet", "lastrespects", "liquidation", "protect"], 0.0515],
+      ["mysticwater", "adaptability", "jolly", ["aquajet", "lastrespects", "protect", "wavecrash"], 0.0196],
+      ["mysticwater", "swiftswim", "adamant", ["aquajet", "lastrespects", "protect", "wavecrash"], 0.0149]
+    ]
+  ],
+  "kingambit": [
+    1417,
+    [
+      ["blackglasses", "defiant", "adamant", ["kowtowcleave", "protect", "suckerpunch", "swordsdance"], 0.1757],
+      ["blackglasses", "defiant", "adamant", ["ironhead", "kowtowcleave", "protect", "suckerpunch"], 0.1658],
+      ["chopleberry", "defiant", "adamant", ["ironhead", "kowtowcleave", "protect", "suckerpunch"], 0.1616],
+      ["chopleberry", "defiant", "adamant", ["kowtowcleave", "lowkick", "protect", "suckerpunch"], 0.1397],
+      ["chopleberry", "defiant", "adamant", ["ironhead", "kowtowcleave", "lowkick", "suckerpunch"], 0.1313],
+      ["blackglasses", "defiant", "adamant", ["kowtowcleave", "lowkick", "protect", "suckerpunch"], 0.043],
+      ["occaberry", "defiant", "adamant", ["ironhead", "kowtowcleave", "protect", "suckerpunch"], 0.0325],
+      ["focussash", "defiant", "adamant", ["ironhead", "kowtowcleave", "lowkick", "suckerpunch"], 0.0212],
+      ["blackglasses", "defiant", "brave", ["ironhead", "kowtowcleave", "suckerpunch", "swordsdance"], 0.012]
+    ]
+  ],
+  "garchomp": [
+    1253,
+    [
+      ["choicescarf", "roughskin", "adamant", ["dragonclaw", "earthquake", "rockslide", "stompingtantrum"], 0.1269],
+      ["sitrusberry", "roughskin", "jolly", ["dragonclaw", "earthquake", "protect", "rockslide"], 0.1165],
+      ["sitrusberry", "roughskin", "adamant", ["dragonclaw", "earthquake", "protect", "rockslide"], 0.1077],
+      ["roseliberry", "roughskin", "jolly", ["dragonclaw", "earthquake", "poisonjab", "rockslide"], 0.0615],
+      ["sitrusberry", "roughskin", "jolly", ["dragonclaw", "earthquake", "protect", "rocktomb"], 0.0463],
+      ["roseliberry", "roughskin", "adamant", ["dragonclaw", "earthquake", "poisonjab", "rockslide"], 0.0279],
+      ["sitrusberry", "roughskin", "jolly", ["dragonclaw", "earthquake", "poisonjab", "rockslide"], 0.0255],
+      ["choicescarf", "roughskin", "adamant", ["dragonclaw", "earthquake", "rocktomb", "stompingtantrum"], 0.0247],
+      ["roseliberry", "roughskin", "jolly", ["dragonclaw", "earthquake", "protect", "rockslide"], 0.0231],
+      ["sitrusberry", "roughskin", "adamant", ["dragonclaw", "earthquake", "protect", "rocktomb"], 0.0152]
+    ]
+  ],
+  "sneasler": [
+    1152,
+    [
+      ["whiteherb", "unburden", "adamant", ["closecombat", "direclaw", "fakeout", "protect"], 0.3073],
+      ["whiteherb", "unburden", "jolly", ["closecombat", "direclaw", "fakeout", "protect"], 0.2335],
+      ["focussash", "poisontouch", "jolly", ["closecombat", "direclaw", "fakeout", "protect"], 0.0434],
+      ["whiteherb", "unburden", "adamant", ["closecombat", "fakeout", "gunkshot", "protect"], 0.0417],
+      ["focussash", "unburden", "jolly", ["closecombat", "direclaw", "fakeout", "protect"], 0.0304],
+      ["whiteherb", "unburden", "jolly", ["closecombat", "coaching", "direclaw", "fakeout"], 0.0295],
+      ["focussash", "poisontouch", "jolly", ["closecombat", "coaching", "direclaw", "fakeout"], 0.0278],
+      ["focussash", "unburden", "jolly", ["closecombat", "coaching", "direclaw", "fakeout"], 0.0217],
+      ["whiteherb", "unburden", "jolly", ["closecombat", "fakeout", "gunkshot", "protect"], 0.0208],
+      ["focussash", "unburden", "adamant", ["closecombat", "direclaw", "fakeout", "protect"], 0.02]
+    ]
+  ],
+  "incineroar": [
+    1029,
+    [
+      ["sitrusberry", "intimidate", "careful", ["fakeout", "flareblitz", "partingshot", "throatchop"], 0.1535],
+      ["sitrusberry", "intimidate", "impish", ["fakeout", "flareblitz", "partingshot", "throatchop"], 0.1079],
+      ["chopleberry", "intimidate", "careful", ["fakeout", "flareblitz", "partingshot", "throatchop"], 0.0544],
+      ["passhoberry", "intimidate", "careful", ["fakeout", "flareblitz", "partingshot", "throatchop"], 0.0379],
+      ["charcoal", "intimidate", "adamant", ["darkestlariat", "fakeout", "flareblitz", "partingshot"], 0.034],
+      ["sitrusberry", "intimidate", "careful", ["fakeout", "flareblitz", "helpinghand", "partingshot"], 0.0321],
+      ["sitrusberry", "intimidate", "adamant", ["fakeout", "flareblitz", "partingshot", "throatchop"], 0.0301],
+      ["sitrusberry", "intimidate", "impish", ["darkestlariat", "fakeout", "flareblitz", "partingshot"], 0.0282],
+      ["sitrusberry", "intimidate", "careful", ["darkestlariat", "fakeout", "flareblitz", "partingshot"], 0.0262],
+      ["sitrusberry", "intimidate", "impish", ["fakeout", "flareblitz", "helpinghand", "partingshot"], 0.0253]
+    ]
+  ],
+  "charizardmegay": [
+    939,
+    [
+      ["charizarditey", "blaze", "modest", ["heatwave", "protect", "solarbeam", "weatherball"], 0.6486],
+      ["charizarditey", "solarpower", "modest", ["heatwave", "protect", "solarbeam", "weatherball"], 0.1768],
+      ["charizarditey", "blaze", "timid", ["heatwave", "protect", "solarbeam", "weatherball"], 0.0543],
+      ["charizarditey", "solarpower", "timid", ["heatwave", "protect", "solarbeam", "weatherball"], 0.0245],
+      ["charizarditey", "solarpower", "modest", ["ancientpower", "heatwave", "protect", "weatherball"], 0.0128]
+    ]
+  ],
+  "floettemega": [
+    906,
+    [
+      ["floettite", "flowerveil", "modest", ["calmmind", "dazzlinggleam", "moonblast", "protect"], 0.2373],
+      ["floettite", "flowerveil", "modest", ["dazzlinggleam", "lightofruin", "moonblast", "protect"], 0.234],
+      ["floettite", "flowerveil", "modest", ["calmmind", "dazzlinggleam", "drainingkiss", "protect"], 0.1181],
+      ["floettite", "flowerveil", "timid", ["calmmind", "dazzlinggleam", "drainingkiss", "protect"], 0.1038],
+      ["floettite", "flowerveil", "timid", ["dazzlinggleam", "lightofruin", "moonblast", "protect"], 0.1026],
+      ["floettite", "flowerveil", "timid", ["calmmind", "dazzlinggleam", "moonblast", "protect"], 0.0728],
+      ["floettite", "flowerveil", "modest", ["calmmind", "drainingkiss", "moonblast", "protect"], 0.0563],
+      ["floettite", "flowerveil", "timid", ["calmmind", "drainingkiss", "moonblast", "protect"], 0.0188]
+    ]
+  ],
+  "sinistcha": [
+    723,
+    [
+      ["kasibberry", "hospitality", "bold", ["lifedew", "matchagotcha", "protect", "ragepowder"], 0.13],
+      ["kasibberry", "hospitality", "relaxed", ["matchagotcha", "protect", "ragepowder", "trickroom"], 0.0871],
+      ["kasibberry", "hospitality", "bold", ["lifedew", "matchagotcha", "ragepowder", "trickroom"], 0.0844],
+      ["kasibberry", "hospitality", "bold", ["matchagotcha", "protect", "ragepowder", "trickroom"], 0.0733],
+      ["sitrusberry", "hospitality", "bold", ["matchagotcha", "protect", "ragepowder", "trickroom"], 0.0733],
+      ["sitrusberry", "hospitality", "bold", ["lifedew", "matchagotcha", "ragepowder", "trickroom"], 0.0387],
+      ["kasibberry", "hospitality", "calm", ["lifedew", "matchagotcha", "protect", "ragepowder"], 0.0304],
+      ["sitrusberry", "hospitality", "relaxed", ["matchagotcha", "protect", "ragepowder", "trickroom"], 0.029],
+      ["kasibberry", "hospitality", "relaxed", ["lifedew", "matchagotcha", "protect", "ragepowder"], 0.0263],
+      ["sitrusberry", "hospitality", "bold", ["lifedew", "matchagotcha", "protect", "ragepowder"], 0.0235]
+    ]
+  ],
+  "whimsicott": [
+    715,
+    [
+      ["focussash", "prankster", "timid", ["encore", "moonblast", "protect", "tailwind"], 0.4196],
+      ["fairyfeather", "prankster", "timid", ["encore", "moonblast", "protect", "tailwind"], 0.2042],
+      ["fairyfeather", "prankster", "bold", ["encore", "moonblast", "protect", "tailwind"], 0.0503],
+      ["focussash", "prankster", "modest", ["encore", "moonblast", "protect", "tailwind"], 0.035],
+      ["focussash", "prankster", "timid", ["encore", "moonblast", "sunnyday", "tailwind"], 0.0266],
+      ["cobaberry", "prankster", "timid", ["encore", "moonblast", "protect", "tailwind"], 0.0252],
+      ["fairyfeather", "prankster", "modest", ["encore", "moonblast", "protect", "tailwind"], 0.0238],
+      ["kebiaberry", "prankster", "timid", ["encore", "moonblast", "protect", "tailwind"], 0.0168],
+      ["mentalherb", "prankster", "timid", ["encore", "moonblast", "protect", "tailwind"], 0.0168],
+      ["cobaberry", "prankster", "bold", ["encore", "moonblast", "protect", "tailwind"], 0.0126]
+    ]
+  ],
+  "archaludon": [
+    425,
+    [
+      ["leftovers", "stamina", "modest", ["dragonpulse", "electroshot", "flashcannon", "protect"], 0.4682],
+      ["leftovers", "stamina", "bold", ["dragonpulse", "electroshot", "flashcannon", "protect"], 0.0965],
+      ["leftovers", "stamina", "modest", ["dracometeor", "electroshot", "flashcannon", "protect"], 0.0682],
+      ["leftovers", "stamina", "calm", ["dragonpulse", "electroshot", "flashcannon", "protect"], 0.0612],
+      ["leftovers", "stamina", "modest", ["aurasphere", "dragonpulse", "electroshot", "protect"], 0.0306],
+      ["leftovers", "stamina", "calm", ["dracometeor", "electroshot", "flashcannon", "protect"], 0.0259],
+      ["leftovers", "stamina", "modest", ["aurasphere", "electroshot", "flashcannon", "protect"], 0.0212],
+      ["chopleberry", "stamina", "modest", ["aurasphere", "dragonpulse", "electroshot", "protect"], 0.0165],
+      ["leftovers", "stamina", "calm", ["aurasphere", "electroshot", "flashcannon", "protect"], 0.0141],
+      ["leftovers", "stamina", "bold", ["dracometeor", "electroshot", "flashcannon", "protect"], 0.0118]
+    ]
+  ],
+  "sylveon": [
+    416,
+    [
+      ["fairyfeather", "pixilate", "modest", ["detect", "hyperbeam", "hypervoice", "quickattack"], 0.3678],
+      ["fairyfeather", "pixilate", "modest", ["hyperbeam", "hypervoice", "protect", "quickattack"], 0.1923],
+      ["fairyfeather", "pixilate", "modest", ["detect", "hypervoice", "moonblast", "quickattack"], 0.1106],
+      ["fairyfeather", "pixilate", "quiet", ["detect", "hyperbeam", "hypervoice", "quickattack"], 0.0481],
+      ["fairyfeather", "pixilate", "modest", ["hypervoice", "moonblast", "protect", "quickattack"], 0.0361],
+      ["fairyfeather", "pixilate", "modest", ["detect", "hypervoice", "quickattack", "yawn"], 0.0288],
+      ["fairyfeather", "pixilate", "quiet", ["hyperbeam", "hypervoice", "protect", "quickattack"], 0.024],
+      ["fairyfeather", "pixilate", "quiet", ["detect", "hypervoice", "moonblast", "quickattack"], 0.0168],
+      ["fairyfeather", "pixilate", "modest", ["calmmind", "detect", "hypervoice", "quickattack"], 0.0144]
+    ]
+  ],
+  "farigiraf": [
+    402,
+    [
+      ["sitrusberry", "armortail", "quiet", ["helpinghand", "psychic", "thunderbolt", "trickroom"], 0.097],
+      ["sitrusberry", "armortail", "calm", ["helpinghand", "protect", "psychic", "trickroom"], 0.0448],
+      ["sitrusberry", "armortail", "bold", ["helpinghand", "protect", "psychic", "trickroom"], 0.0323],
+      ["twistedspoon", "armortail", "quiet", ["helpinghand", "hypervoice", "trickroom", "twinbeam"], 0.0323],
+      ["colburberry", "armortail", "modest", ["helpinghand", "hypervoice", "psychic", "trickroom"], 0.0224],
+      ["sitrusberry", "armortail", "modest", ["helpinghand", "hypervoice", "psychic", "trickroom"], 0.0224],
+      ["sitrusberry", "armortail", "modest", ["hypervoice", "protect", "psychic", "trickroom"], 0.0224],
+      ["sitrusberry", "armortail", "modest", ["helpinghand", "thunderbolt", "trickroom", "twinbeam"], 0.0149],
+      ["colburberry", "armortail", "bold", ["helpinghand", "protect", "psychic", "trickroom"], 0.0124],
+      ["sitrusberry", "armortail", "bold", ["hypervoice", "nastyplot", "psychic", "trickroom"], 0.0124]
+    ]
+  ],
+  "aerodactylmega": [
+    357,
+    [
+      ["aerodactylite", "unnerve", "jolly", ["dualwingbeat", "protect", "rockslide", "tailwind"], 0.6331],
+      ["aerodactylite", "unnerve", "jolly", ["dualwingbeat", "rockslide", "tailwind", "wideguard"], 0.1877],
+      ["aerodactylite", "unnerve", "jolly", ["dualwingbeat", "icefang", "protect", "rockslide"], 0.0392],
+      ["aerodactylite", "unnerve", "adamant", ["dualwingbeat", "protect", "rockslide", "tailwind"], 0.0196],
+      ["aerodactylite", "unnerve", "jolly", ["dualwingbeat", "icefang", "rockslide", "tailwind"], 0.0196],
+      ["aerodactylite", "unnerve", "adamant", ["dualwingbeat", "icefang", "protect", "rockslide"], 0.0112],
+      ["aerodactylite", "unnerve", "adamant", ["dualwingbeat", "rockslide", "tailwind", "wideguard"], 0.0112]
+    ]
+  ],
+  "pelipper": [
+    319,
+    [
+      ["sitrusberry", "drizzle", "bold", ["hurricane", "tailwind", "weatherball", "wideguard"], 0.1787],
+      ["sitrusberry", "drizzle", "modest", ["hurricane", "tailwind", "weatherball", "wideguard"], 0.1693],
+      ["focussash", "drizzle", "modest", ["hurricane", "protect", "tailwind", "weatherball"], 0.0784],
+      ["focussash", "drizzle", "modest", ["hurricane", "tailwind", "weatherball", "wideguard"], 0.0784],
+      ["focussash", "drizzle", "timid", ["hurricane", "protect", "tailwind", "weatherball"], 0.0596],
+      ["sitrusberry", "drizzle", "modest", ["hurricane", "protect", "tailwind", "weatherball"], 0.0564],
+      ["sitrusberry", "drizzle", "calm", ["hurricane", "tailwind", "weatherball", "wideguard"], 0.047],
+      ["focussash", "drizzle", "timid", ["hurricane", "tailwind", "weatherball", "wideguard"], 0.0439],
+      ["sitrusberry", "drizzle", "bold", ["hurricane", "protect", "tailwind", "weatherball"], 0.0251],
+      ["sitrusberry", "drizzle", "bold", ["hurricane", "raindance", "tailwind", "weatherball"], 0.0219]
+    ]
+  ],
+  "froslassmega": [
+    311,
+    [
+      ["froslassite", "cursedbody", "modest", ["auroraveil", "blizzard", "protect", "shadowball"], 0.5723],
+      ["froslassite", "cursedbody", "timid", ["auroraveil", "blizzard", "protect", "shadowball"], 0.1994],
+      ["froslassite", "cursedbody", "timid", ["blizzard", "protect", "shadowball", "weatherball"], 0.0514],
+      ["froslassite", "cursedbody", "timid", ["auroraveil", "blizzard", "protect", "raindance"], 0.0354],
+      ["froslassite", "snowcloak", "modest", ["auroraveil", "blizzard", "protect", "shadowball"], 0.0354],
+      ["froslassite", "snowcloak", "timid", ["auroraveil", "blizzard", "protect", "shadowball"], 0.0161]
+    ]
+  ],
+  "rotomwash": [
+    280,
+    [
+      ["sitrusberry", "levitate", "modest", ["hydropump", "protect", "thunderbolt", "willowisp"], 0.175],
+      ["magnet", "levitate", "modest", ["hydropump", "protect", "thunderbolt", "willowisp"], 0.1321],
+      ["sitrusberry", "levitate", "bold", ["hydropump", "protect", "thunderbolt", "willowisp"], 0.0714],
+      ["choicescarf", "levitate", "timid", ["electroweb", "hydropump", "thunderbolt", "voltswitch"], 0.0607],
+      ["leftovers", "levitate", "bold", ["hydropump", "lightscreen", "thunderbolt", "willowisp"], 0.05],
+      ["choicescarf", "levitate", "timid", ["electroweb", "hydropump", "voltswitch", "willowisp"], 0.0286],
+      ["leftovers", "levitate", "bold", ["hydropump", "protect", "thunderbolt", "willowisp"], 0.0286],
+      ["leftovers", "levitate", "modest", ["hydropump", "protect", "thunderbolt", "willowisp"], 0.025],
+      ["sitrusberry", "levitate", "bold", ["hydropump", "protect", "voltswitch", "willowisp"], 0.025],
+      ["choicescarf", "levitate", "timid", ["electroweb", "hydropump", "thunderbolt", "willowisp"], 0.0179]
+    ]
+  ],
+  "dragonitemega": [
+    258,
+    [
+      ["dragoninite", "multiscale", "timid", ["dragonpulse", "heatwave", "protect", "thunderbolt"], 0.0969],
+      ["dragoninite", "multiscale", "timid", ["dragonpulse", "extremespeed", "hurricane", "protect"], 0.0775],
+      ["dragoninite", "multiscale", "modest", ["dragonpulse", "flamethrower", "protect", "thunderbolt"], 0.0736],
+      ["dragoninite", "multiscale", "modest", ["dracometeor", "flamethrower", "protect", "tailwind"], 0.0426],
+      ["dragoninite", "multiscale", "modest", ["dragonpulse", "flamethrower", "protect", "tailwind"], 0.0388],
+      ["dragoninite", "multiscale", "modest", ["dragonpulse", "heatwave", "protect", "tailwind"], 0.0388],
+      ["dragoninite", "multiscale", "modest", ["dragonpulse", "hurricane", "protect", "thunderbolt"], 0.0271],
+      ["dragoninite", "multiscale", "timid", ["airslash", "dragonpulse", "protect", "thunderbolt"], 0.0271],
+      ["dragoninite", "multiscale", "timid", ["dragonpulse", "flamethrower", "protect", "tailwind"], 0.0271],
+      ["dragoninite", "multiscale", "timid", ["dragonpulse", "flamethrower", "protect", "thunderbolt"], 0.0271]
+    ]
+  ],
+  "tyranitarmega": [
+    250,
+    [
+      ["tyranitarite", "sandstream", "adamant", ["knockoff", "lowkick", "protect", "rockslide"], 0.504],
+      ["tyranitarite", "sandstream", "jolly", ["dragondance", "knockoff", "protect", "rockslide"], 0.148],
+      ["tyranitarite", "sandstream", "adamant", ["dragondance", "knockoff", "protect", "rockslide"], 0.076],
+      ["tyranitarite", "sandstream", "adamant", ["icepunch", "knockoff", "protect", "rockslide"], 0.076],
+      ["tyranitarite", "sandstream", "adamant", ["highhorsepower", "knockoff", "protect", "rockslide"], 0.028],
+      ["tyranitarite", "sandstream", "brave", ["knockoff", "lowkick", "protect", "rockslide"], 0.024],
+      ["tyranitarite", "sandstream", "adamant", ["earthquake", "knockoff", "protect", "rockslide"], 0.016],
+      ["tyranitarite", "sandstream", "careful", ["knockoff", "lowkick", "protect", "rockslide"], 0.012],
+      ["tyranitarite", "sandstream", "jolly", ["knockoff", "lowkick", "protect", "rockslide"], 0.012]
+    ]
+  ],
+  "talonflame": [
+    200,
+    [
+      [null, "galewings", "jolly", ["acrobatics", "flareblitz", "protect", "tailwind"], 0.215],
+      ["sharpbeak", "galewings", "jolly", ["bravebird", "flareblitz", "protect", "tailwind"], 0.09],
+      ["sharpbeak", "galewings", "adamant", ["dualwingbeat", "protect", "tailwind", "willowisp"], 0.08],
+      ["charcoal", "galewings", "naive", ["bravebird", "overheat", "protect", "tailwind"], 0.055],
+      [null, "galewings", "adamant", ["acrobatics", "flareblitz", "protect", "tailwind"], 0.055],
+      ["sharpbeak", "galewings", "adamant", ["dualwingbeat", "flareblitz", "protect", "tailwind"], 0.05],
+      ["sharpbeak", "galewings", "jolly", ["bravebird", "protect", "tailwind", "willowisp"], 0.045],
+      ["sharpbeak", "galewings", "jolly", ["bravebird", "flareblitz", "protect", "swordsdance"], 0.035],
+      ["sharpbeak", "galewings", "jolly", ["dualwingbeat", "flareblitz", "protect", "tailwind"], 0.035],
+      ["sharpbeak", "galewings", "jolly", ["dualwingbeat", "protect", "tailwind", "willowisp"], 0.03]
+    ]
+  ],
+  "maushold": [
+    199,
+    [
+      ["chopleberry", "friendguard", "impish", ["feint", "followme", "protect", "superfang"], 0.1055],
+      ["focussash", "friendguard", "timid", ["followme", "protect", "raindance", "superfang"], 0.0955],
+      ["focussash", "friendguard", "jolly", ["followme", "protect", "raindance", "superfang"], 0.0704],
+      ["focussash", "friendguard", "jolly", ["feint", "followme", "protect", "superfang"], 0.0653],
+      ["chopleberry", "friendguard", "timid", ["followme", "protect", "superfang", "taunt"], 0.0553],
+      ["focussash", "friendguard", "timid", ["encore", "followme", "protect", "superfang"], 0.0503],
+      ["chopleberry", "friendguard", "timid", ["followme", "protect", "raindance", "superfang"], 0.0452],
+      ["chopleberry", "friendguard", "jolly", ["feint", "followme", "protect", "superfang"], 0.0402],
+      ["focussash", "friendguard", "timid", ["followme", "helpinghand", "protect", "superfang"], 0.0402],
+      ["chopleberry", "friendguard", "impish", ["feint", "followme", "helpinghand", "protect"], 0.0302]
+    ]
+  ],
+  "venusaurmega": [
+    196,
+    [
+      ["venusaurite", "chlorophyll", "modest", ["earthpower", "gigadrain", "protect", "sludgebomb"], 0.7296],
+      ["venusaurite", "chlorophyll", "modest", ["earthpower", "protect", "sleeppowder", "sludgebomb"], 0.0612],
+      ["venusaurite", "chlorophyll", "modest", ["earthpower", "leechseed", "protect", "sludgebomb"], 0.0306],
+      ["venusaurite", "chlorophyll", "modest", ["earthpower", "energyball", "protect", "sludgebomb"], 0.0255],
+      ["venusaurite", "chlorophyll", "modest", ["gigadrain", "protect", "sleeppowder", "sludgebomb"], 0.0255],
+      ["venusaurite", "overgrow", "modest", ["earthpower", "gigadrain", "protect", "sludgebomb"], 0.0204],
+      ["venusaurite", "chlorophyll", "bold", ["earthpower", "gigadrain", "protect", "sludgebomb"], 0.0153],
+      ["venusaurite", "chlorophyll", "modest", ["earthpower", "gigadrain", "protect", "sludgewave"], 0.0102],
+      ["venusaurite", "chlorophyll", "modest", ["earthpower", "growth", "protect", "sludgebomb"], 0.0102],
+      ["venusaurite", "chlorophyll", "modest", ["gigadrain", "leechseed", "protect", "sludgebomb"], 0.0102]
+    ]
+  ],
+  "delphoxmega": [
+    194,
+    [
+      ["delphoxite", "blaze", "timid", ["heatwave", "nastyplot", "protect", "psyshock"], 0.3814],
+      ["delphoxite", "blaze", "timid", ["heatwave", "nastyplot", "protect", "psychic"], 0.1701],
+      ["delphoxite", "blaze", "timid", ["encore", "heatwave", "protect", "psychic"], 0.0825],
+      ["delphoxite", "blaze", "timid", ["heatwave", "protect", "psyshock", "substitute"], 0.0825],
+      ["delphoxite", "blaze", "timid", ["heatwave", "protect", "psychic", "substitute"], 0.067],
+      ["delphoxite", "blaze", "timid", ["calmmind", "heatwave", "protect", "psychic"], 0.0309],
+      ["delphoxite", "blaze", "timid", ["encore", "heatwave", "protect", "psyshock"], 0.0258],
+      ["delphoxite", "blaze", "modest", ["heatwave", "nastyplot", "protect", "psyshock"], 0.0206],
+      ["delphoxite", "blaze", "modest", ["heatwave", "nastyplot", "protect", "psychic"], 0.0103],
+      ["delphoxite", "blaze", "timid", ["calmmind", "heatwave", "protect", "psyshock"], 0.0103]
+    ]
+  ],
+  "scovillainmega": [
+    194,
+    [
+      ["scovillainite", "moody", "calm", ["leechseed", "overheat", "protect", "ragepowder"], 0.3454],
+      ["scovillainite", "moody", "bold", ["gigadrain", "overheat", "protect", "ragepowder"], 0.3144],
+      ["scovillainite", "moody", "bold", ["leechseed", "overheat", "protect", "ragepowder"], 0.0567],
+      ["scovillainite", "moody", "calm", ["gigadrain", "overheat", "protect", "ragepowder"], 0.0567],
+      ["scovillainite", "chlorophyll", "calm", ["leechseed", "overheat", "protect", "ragepowder"], 0.0206],
+      ["scovillainite", "moody", "bold", ["overheat", "protect", "ragepowder", "superfang"], 0.0206],
+      ["scovillainite", "moody", "calm", ["flamethrower", "leechseed", "protect", "ragepowder"], 0.0206],
+      ["scovillainite", "moody", "modest", ["gigadrain", "overheat", "protect", "ragepowder"], 0.0155],
+      ["scovillainite", "moody", "bold", ["leafstorm", "overheat", "protect", "ragepowder"], 0.0103]
+    ]
+  ],
+  "corviknight": [
+    193,
+    [
+      ["leftovers", "mirrorarmor", "careful", ["bravebird", "bulkup", "roost", "tailwind"], 0.1606],
+      ["occaberry", "mirrorarmor", "adamant", ["bravebird", "ironhead", "protect", "tailwind"], 0.1088],
+      ["leftovers", "mirrorarmor", "careful", ["bodypress", "bravebird", "bulkup", "roost"], 0.0984],
+      ["leftovers", "mirrorarmor", "adamant", ["bravebird", "bulkup", "roost", "tailwind"], 0.0622],
+      ["leftovers", "mirrorarmor", "adamant", ["bravebird", "bulkup", "ironhead", "tailwind"], 0.057],
+      ["leftovers", "mirrorarmor", "impish", ["bravebird", "bulkup", "roost", "tailwind"], 0.0466],
+      ["occaberry", "mirrorarmor", "adamant", ["bravebird", "ironhead", "roost", "tailwind"], 0.0363],
+      ["leftovers", "mirrorarmor", "impish", ["bodypress", "bravebird", "bulkup", "tailwind"], 0.0311],
+      ["leftovers", "mirrorarmor", "adamant", ["bravebird", "ironhead", "roost", "tailwind"], 0.0259],
+      ["leftovers", "mirrorarmor", "adamant", ["bravebird", "ironhead", "protect", "tailwind"], 0.0207]
+    ]
+  ],
+  "glimmora": [
+    190,
+    [
+      ["focussash", "toxicdebris", "modest", ["earthpower", "powergem", "sludgebomb", "spikyshield"], 0.6],
+      ["focussash", "toxicdebris", "timid", ["earthpower", "powergem", "sludgebomb", "spikyshield"], 0.3368],
+      ["choicescarf", "toxicdebris", "timid", ["dazzlinggleam", "earthpower", "powergem", "sludgebomb"], 0.0105]
+    ]
+  ],
+  "aerodactyl": [
+    166,
+    [
+      ["focussash", "unnerve", "jolly", ["dualwingbeat", "protect", "rockslide", "tailwind"], 0.494],
+      ["focussash", "unnerve", "jolly", ["dualwingbeat", "rockslide", "tailwind", "wideguard"], 0.1506],
+      ["focussash", "unnerve", "jolly", ["protect", "rockslide", "tailwind", "wideguard"], 0.1024],
+      ["focussash", "unnerve", "jolly", ["rockslide", "sunnyday", "tailwind", "wideguard"], 0.0964],
+      ["focussash", "unnerve", "jolly", ["icefang", "rockslide", "tailwind", "wideguard"], 0.0241],
+      ["focussash", "unnerve", "adamant", ["dualwingbeat", "protect", "rockslide", "tailwind"], 0.0181],
+      ["focussash", "unnerve", "jolly", ["protect", "rockslide", "sunnyday", "tailwind"], 0.0181]
+    ]
+  ],
+  "sableye": [
+    164,
+    [
+      ["roseliberry", "prankster", "sassy", ["foulplay", "lightscreen", "raindance", "willowisp"], 0.0671],
+      ["roseliberry", "prankster", "calm", ["encore", "lightscreen", "raindance", "reflect"], 0.061],
+      ["roseliberry", "prankster", "calm", ["encore", "lightscreen", "raindance", "willowisp"], 0.0549],
+      ["roseliberry", "prankster", "calm", ["foulplay", "lightscreen", "raindance", "reflect"], 0.0488],
+      ["roseliberry", "prankster", "sassy", ["disable", "encore", "raindance", "willowisp"], 0.0488],
+      ["roseliberry", "prankster", "calm", ["lightscreen", "quash", "raindance", "reflect"], 0.0366],
+      ["roseliberry", "prankster", "sassy", ["encore", "lightscreen", "raindance", "reflect"], 0.0366],
+      ["roseliberry", "prankster", "bold", ["encore", "lightscreen", "raindance", "reflect"], 0.0305],
+      ["roseliberry", "prankster", "calm", ["disable", "encore", "raindance", "willowisp"], 0.0305],
+      ["roseliberry", "prankster", "sassy", ["encore", "lightscreen", "raindance", "willowisp"], 0.0305]
+    ]
+  ],
+  "gengarmega": [
+    153,
+    [
+      ["gengarite", "cursedbody", "timid", ["disable", "perishsong", "protect", "shadowball"], 0.268],
+      ["gengarite", "cursedbody", "modest", ["perishsong", "protect", "shadowball", "sludgebomb"], 0.2092],
+      ["gengarite", "cursedbody", "timid", ["disable", "protect", "shadowball", "sludgebomb"], 0.1307],
+      ["gengarite", "cursedbody", "timid", ["perishsong", "protect", "shadowball", "sludgebomb"], 0.1046],
+      ["gengarite", "cursedbody", "modest", ["disable", "perishsong", "protect", "shadowball"], 0.085],
+      ["gengarite", "cursedbody", "modest", ["disable", "protect", "shadowball", "sludgebomb"], 0.0523],
+      ["gengarite", "cursedbody", "timid", ["icywind", "protect", "shadowball", "sludgebomb"], 0.0458],
+      ["gengarite", "cursedbody", "modest", ["protect", "shadowball", "sludgebomb", "willowisp"], 0.0392],
+      ["gengarite", "cursedbody", "timid", ["protect", "shadowball", "sludgebomb", "substitute"], 0.0131],
+      ["gengarite", "cursedbody", "timid", ["protect", "shadowball", "sludgebomb", "willowisp"], 0.0131]
+    ]
+  ],
+  "vivillon": [
+    153,
+    [
+      ["choicescarf", "compoundeyes", "timid", ["hurricane", "ragepowder", "raindance", "sleeppowder"], 0.2745],
+      ["focussash", "compoundeyes", "timid", ["hurricane", "protect", "ragepowder", "sleeppowder"], 0.2614],
+      ["choicescarf", "compoundeyes", "timid", ["hurricane", "pollenpuff", "ragepowder", "sleeppowder"], 0.1111],
+      ["choicescarf", "compoundeyes", "timid", ["hurricane", "ragepowder", "sleeppowder", "tailwind"], 0.0915],
+      ["focussash", "compoundeyes", "timid", ["hurricane", "pollenpuff", "ragepowder", "sleeppowder"], 0.0654],
+      ["focussash", "compoundeyes", "timid", ["hurricane", "protect", "sleeppowder", "tailwind"], 0.0458],
+      ["focussash", "compoundeyes", "timid", ["pollenpuff", "protect", "ragepowder", "sleeppowder"], 0.0261],
+      ["focussash", "compoundeyes", "timid", ["hurricane", "ragepowder", "sleeppowder", "tailwind"], 0.0196],
+      ["focussash", "compoundeyes", "timid", ["airslash", "protect", "sleeppowder", "tailwind"], 0.0131],
+      ["focussash", "compoundeyes", "timid", ["hurricane", "ragepowder", "sleeppowder", "uturn"], 0.0131]
+    ]
+  ],
+  "milotic": [
+    150,
+    [
+      ["leftovers", "competitive", "calm", ["coil", "hypnosis", "muddywater", "recover"], 0.24],
+      ["leftovers", "competitive", "bold", ["coil", "hypnosis", "muddywater", "protect"], 0.0733],
+      ["leftovers", "competitive", "bold", ["icywind", "lifedew", "protect", "scald"], 0.06],
+      ["leftovers", "competitive", "bold", ["icywind", "protect", "recover", "scald"], 0.0533],
+      ["leftovers", "competitive", "calm", ["coil", "hypnosis", "lifedew", "muddywater"], 0.0533],
+      ["leftovers", "competitive", "sassy", ["coil", "hypnosis", "lifedew", "muddywater"], 0.0533],
+      ["leftovers", "competitive", "modest", ["icywind", "lifedew", "protect", "scald"], 0.0333],
+      ["leftovers", "competitive", "bold", ["coil", "hypnosis", "muddywater", "recover"], 0.0267],
+      ["leftovers", "competitive", "calm", ["icywind", "protect", "recover", "scald"], 0.0267],
+      ["leftovers", "competitive", "modest", ["coil", "hypnosis", "muddywater", "protect"], 0.02]
+    ]
+  ],
+  "blastoisemega": [
+    141,
+    [
+      ["blastoisinite", "raindish", "modest", ["darkpulse", "fakeout", "shellsmash", "waterspout"], 0.2908],
+      ["blastoisinite", "raindish", "modest", ["darkpulse", "protect", "shellsmash", "waterspout"], 0.1773],
+      ["blastoisinite", "raindish", "quiet", ["aurasphere", "darkpulse", "fakeout", "waterspout"], 0.0851],
+      ["blastoisinite", "raindish", "modest", ["aurasphere", "darkpulse", "fakeout", "waterspout"], 0.0709],
+      ["blastoisinite", "raindish", "modest", ["aurasphere", "darkpulse", "protect", "waterspout"], 0.0709],
+      ["blastoisinite", "torrent", "modest", ["darkpulse", "fakeout", "shellsmash", "waterspout"], 0.0496],
+      ["blastoisinite", "raindish", "quiet", ["aurasphere", "fakeout", "protect", "waterspout"], 0.0213],
+      ["blastoisinite", "raindish", "modest", ["aurasphere", "fakeout", "protect", "waterspout"], 0.0142],
+      ["blastoisinite", "raindish", "modest", ["aurasphere", "fakeout", "shellsmash", "waterspout"], 0.0142],
+      ["blastoisinite", "torrent", "modest", ["aurasphere", "darkpulse", "protect", "waterspout"], 0.0142]
+    ]
+  ],
+  "kangaskhanmega": [
+    133,
+    [
+      ["kangaskhanite", "scrappy", "adamant", ["doubleedge", "fakeout", "icepunch", "lowkick"], 0.406],
+      ["kangaskhanite", "scrappy", "adamant", ["doubleedge", "drainpunch", "fakeout", "suckerpunch"], 0.1053],
+      ["kangaskhanite", "scrappy", "adamant", ["doubleedge", "fakeout", "lowkick", "suckerpunch"], 0.0977],
+      ["kangaskhanite", "scrappy", "adamant", ["doubleedge", "drainpunch", "fakeout", "icepunch"], 0.0376],
+      ["kangaskhanite", "scrappy", "adamant", ["doubleedge", "fakeout", "hammerarm", "icepunch"], 0.0376],
+      ["kangaskhanite", "scrappy", "brave", ["crunch", "doubleedge", "fakeout", "hammerarm"], 0.0301],
+      ["kangaskhanite", "scrappy", "brave", ["doubleedge", "fakeout", "hammerarm", "icepunch"], 0.0301],
+      ["kangaskhanite", "scrappy", "brave", ["doubleedge", "fakeout", "icepunch", "lowkick"], 0.0226],
+      ["kangaskhanite", "innerfocus", "brave", ["doubleedge", "fakeout", "hammerarm", "icepunch"], 0.015],
+      ["kangaskhanite", "scrappy", "adamant", ["doubleedge", "fakeout", "hammerarm", "suckerpunch"], 0.015]
+    ]
+  ],
+  "kommoo": [
+    131,
+    [
+      ["leftovers", "soundproof", "modest", ["aurasphere", "clangingscales", "clangoroussoul", "protect"], 0.5038],
+      ["leftovers", "soundproof", "timid", ["aurasphere", "clangingscales", "clangoroussoul", "protect"], 0.1985],
+      ["dragonfang", "soundproof", "modest", ["aurasphere", "clangingscales", "clangoroussoul", "protect"], 0.0458],
+      ["leftovers", "overcoat", "modest", ["aurasphere", "clangingscales", "clangoroussoul", "protect"], 0.0382],
+      ["dragonfang", "soundproof", "naive", ["clangingscales", "clangoroussoul", "drainpunch", "protect"], 0.0305],
+      ["dragonfang", "overcoat", "modest", ["aurasphere", "clangingscales", "clangoroussoul", "protect"], 0.0229],
+      ["sitrusberry", "soundproof", "modest", ["aurasphere", "clangingscales", "clangoroussoul", "protect"], 0.0229],
+      ["leftovers", "soundproof", "bold", ["bodypress", "dracometeor", "irondefense", "protect"], 0.0153],
+      ["sitrusberry", "soundproof", "timid", ["aurasphere", "clangingscales", "clangoroussoul", "protect"], 0.0153]
+    ]
+  ],
+  "ninetalesalola": [
+    131,
+    [
+      ["nevermeltice", "snowwarning", "timid", ["blizzard", "encore", "freezedry", "protect"], 0.1985],
+      ["nevermeltice", "snowwarning", "timid", ["blizzard", "disable", "encore", "protect"], 0.1527],
+      ["focussash", "snowwarning", "timid", ["blizzard", "encore", "freezedry", "protect"], 0.145],
+      ["focussash", "snowwarning", "timid", ["auroraveil", "blizzard", "encore", "protect"], 0.0611],
+      ["focussash", "snowwarning", "timid", ["blizzard", "disable", "encore", "protect"], 0.0534],
+      ["choicescarf", "snowwarning", "modest", ["blizzard", "freezedry", "icywind", "moonblast"], 0.0458],
+      ["nevermeltice", "snowwarning", "timid", ["auroraveil", "blizzard", "freezedry", "protect"], 0.0382],
+      ["focussash", "snowwarning", "timid", ["auroraveil", "blizzard", "freezedry", "protect"], 0.0305],
+      ["nevermeltice", "snowwarning", "timid", ["auroraveil", "blizzard", "encore", "protect"], 0.0229],
+      ["choicescarf", "snowwarning", "timid", ["auroraveil", "blizzard", "freezedry", "icywind"], 0.0153]
+    ]
+  ],
+  "politoed": [
+    127,
+    [
+      ["mysticwater", "drizzle", "modest", ["icebeam", "muddywater", "protect", "weatherball"], 0.1811],
+      ["sitrusberry", "drizzle", "calm", ["encore", "perishsong", "protect", "weatherball"], 0.1575],
+      ["sitrusberry", "drizzle", "bold", ["encore", "perishsong", "protect", "weatherball"], 0.0866],
+      ["sitrusberry", "drizzle", "calm", ["hypnosis", "perishsong", "protect", "weatherball"], 0.063],
+      ["sitrusberry", "drizzle", "calm", ["icebeam", "perishsong", "protect", "weatherball"], 0.0315],
+      ["sitrusberry", "drizzle", "calm", ["encore", "hypnosis", "protect", "weatherball"], 0.0236],
+      ["choicescarf", "drizzle", "timid", ["icebeam", "icywind", "muddywater", "weatherball"], 0.0157],
+      ["mysticwater", "drizzle", "modest", ["icywind", "muddywater", "protect", "weatherball"], 0.0157],
+      ["sitrusberry", "drizzle", "bold", ["encore", "icebeam", "protect", "weatherball"], 0.0157],
+      ["sitrusberry", "drizzle", "bold", ["haze", "icebeam", "protect", "weatherball"], 0.0157]
+    ]
+  ],
+  "scizormega": [
+    127,
+    [
+      ["scizorite", "technician", "adamant", ["bugbite", "bulletpunch", "protect", "swordsdance"], 0.6378],
+      ["scizorite", "technician", "adamant", ["bulletpunch", "closecombat", "protect", "swordsdance"], 0.1417],
+      ["scizorite", "technician", "adamant", ["bugbite", "bulletpunch", "knockoff", "protect"], 0.063],
+      ["scizorite", "technician", "adamant", ["bugbite", "bulletpunch", "closecombat", "protect"], 0.0472],
+      ["scizorite", "technician", "adamant", ["assurance", "bulletpunch", "protect", "swordsdance"], 0.0236]
+    ]
+  ],
+  "torkoal": [
+    123,
+    [
+      ["charcoal", "drought", "quiet", ["eruption", "heatwave", "protect", "weatherball"], 0.4228],
+      ["charcoal", "drought", "quiet", ["earthpower", "eruption", "protect", "weatherball"], 0.187],
+      ["charcoal", "drought", "quiet", ["earthpower", "eruption", "heatwave", "weatherball"], 0.0407],
+      ["charcoal", "drought", "quiet", ["eruption", "heatwave", "protect", "solarbeam"], 0.0407],
+      ["charcoal", "drought", "quiet", ["eruption", "protect", "solarbeam", "weatherball"], 0.0407],
+      ["charcoal", "drought", "modest", ["earthpower", "eruption", "protect", "weatherball"], 0.0244],
+      ["charcoal", "drought", "modest", ["eruption", "heatwave", "protect", "weatherball"], 0.0244],
+      ["charcoal", "drought", "quiet", ["earthpower", "eruption", "heatwave", "protect"], 0.0244],
+      ["charcoal", "drought", "quiet", ["earthpower", "eruption", "flamethrower", "solarbeam"], 0.0163],
+      ["charcoal", "drought", "quiet", ["eruption", "helpinghand", "protect", "weatherball"], 0.0163]
+    ]
+  ],
+  "gardevoirmega": [
+    120,
+    [
+      ["gardevoirite", "trace", "modest", ["hypervoice", "protect", "psyshock", "trickroom"], 0.2833],
+      ["gardevoirite", "telepathy", "modest", ["hypervoice", "protect", "psyshock", "trickroom"], 0.1083],
+      ["gardevoirite", "trace", "modest", ["hypervoice", "protect", "psyshock", "vacuumwave"], 0.05],
+      ["gardevoirite", "trace", "timid", ["calmmind", "hypervoice", "protect", "psyshock"], 0.05],
+      ["gardevoirite", "trace", "timid", ["hypervoice", "protect", "psyshock", "vacuumwave"], 0.05],
+      ["gardevoirite", "telepathy", "modest", ["hypervoice", "protect", "psychic", "trickroom"], 0.0333],
+      ["gardevoirite", "trace", "modest", ["calmmind", "hypervoice", "protect", "psyshock"], 0.0333],
+      ["gardevoirite", "trace", "modest", ["hypervoice", "protect", "psychic", "trickroom"], 0.0333],
+      ["gardevoirite", "synchronize", "modest", ["hypervoice", "protect", "psyshock", "trickroom"], 0.025],
+      ["gardevoirite", "telepathy", "modest", ["aurasphere", "hypervoice", "protect", "psychic"], 0.025]
+    ]
+  ],
+  "excadrill": [
+    118,
+    [
+      ["focussash", "sandrush", "adamant", ["earthquake", "ironhead", "protect", "rockslide"], 0.3898],
+      ["focussash", "sandrush", "adamant", ["highhorsepower", "ironhead", "protect", "rockslide"], 0.2373],
+      ["focussash", "sandrush", "jolly", ["earthquake", "ironhead", "protect", "rockslide"], 0.1441],
+      ["focussash", "sandrush", "jolly", ["highhorsepower", "ironhead", "protect", "rockslide"], 0.0593],
+      ["focussash", "sandrush", "adamant", ["earthquake", "highhorsepower", "ironhead", "protect"], 0.0508],
+      ["focussash", "moldbreaker", "jolly", ["earthquake", "ironhead", "protect", "rocktomb"], 0.0169],
+      ["focussash", "sandrush", "adamant", ["highhorsepower", "ironhead", "protect", "rocktomb"], 0.0169]
+    ]
+  ],
+  "venusaur": [
+    117,
+    [
+      ["focussash", "chlorophyll", "timid", ["earthpower", "protect", "sleeppowder", "sludgebomb"], 0.4444],
+      ["focussash", "chlorophyll", "modest", ["earthpower", "protect", "sleeppowder", "sludgebomb"], 0.1026],
+      ["focussash", "chlorophyll", "modest", ["leafstorm", "protect", "sleeppowder", "sludgebomb"], 0.094],
+      ["focussash", "chlorophyll", "modest", ["energyball", "protect", "sleeppowder", "sludgebomb"], 0.0684],
+      ["focussash", "chlorophyll", "timid", ["leafstorm", "protect", "sleeppowder", "sludgebomb"], 0.0513],
+      ["focussash", "chlorophyll", "modest", ["acidspray", "energyball", "protect", "sleeppowder"], 0.0256],
+      ["occaberry", "chlorophyll", "modest", ["earthpower", "protect", "sleeppowder", "sludgebomb"], 0.0256],
+      ["focussash", "chlorophyll", "modest", ["gigadrain", "protect", "sleeppowder", "sludgebomb"], 0.0171],
+      ["miracleseed", "chlorophyll", "modest", ["leafstorm", "protect", "sleeppowder", "sludgebomb"], 0.0171],
+      ["occaberry", "chlorophyll", "timid", ["leafstorm", "protect", "sleeppowder", "sludgebomb"], 0.0171]
+    ]
+  ],
+  "charizardmegax": [
+    115,
+    [
+      ["charizarditex", "blaze", "adamant", ["dragonclaw", "dragondance", "flareblitz", "protect"], 0.7217],
+      ["charizarditex", "blaze", "jolly", ["dragonclaw", "dragondance", "flareblitz", "protect"], 0.0783],
+      ["charizarditex", "blaze", "adamant", ["dragonclaw", "dragondance", "protect", "temperflare"], 0.0696],
+      ["charizarditex", "blaze", "adamant", ["breakingswipe", "dragondance", "flareblitz", "protect"], 0.0435],
+      ["charizarditex", "solarpower", "adamant", ["dragonclaw", "dragondance", "flareblitz", "protect"], 0.0348],
+      ["charizarditex", "blaze", "adamant", ["breakingswipe", "dragondance", "protect", "temperflare"], 0.0261]
+    ]
+  ],
+  "glimmoramega": [
+    108,
+    [
+      ["glimmoranite", "toxicdebris", "timid", ["earthpower", "powergem", "sludgebomb", "spikyshield"], 0.6019],
+      ["glimmoranite", "toxicdebris", "modest", ["earthpower", "powergem", "sludgebomb", "spikyshield"], 0.3611],
+      ["glimmoranite", "toxicdebris", "modest", ["earthpower", "powergem", "sludgewave", "spikyshield"], 0.0185]
+    ]
+  ],
+  "aegislash": [
+    107,
+    [
+      ["focussash", "stancechange", "adamant", ["closecombat", "poltergeist", "shadowsneak", "wideguard"], 0.1215],
+      ["spelltag", "stancechange", "adamant", ["ironhead", "kingsshield", "poltergeist", "shadowsneak"], 0.1121],
+      ["focussash", "stancechange", "adamant", ["closecombat", "kingsshield", "poltergeist", "shadowsneak"], 0.1028],
+      ["focussash", "stancechange", "adamant", ["ironhead", "kingsshield", "poltergeist", "shadowsneak"], 0.1028],
+      ["focussash", "stancechange", "adamant", ["ironhead", "poltergeist", "shadowsneak", "wideguard"], 0.1028],
+      ["spelltag", "stancechange", "adamant", ["kingsshield", "poltergeist", "sacredsword", "shadowsneak"], 0.0561],
+      ["spelltag", "stancechange", "adamant", ["closecombat", "kingsshield", "poltergeist", "shadowsneak"], 0.0467],
+      ["focussash", "stancechange", "adamant", ["kingsshield", "poltergeist", "sacredsword", "shadowsneak"], 0.0374],
+      ["spelltag", "stancechange", "brave", ["ironhead", "kingsshield", "poltergeist", "shadowsneak"], 0.028],
+      ["spelltag", "stancechange", "brave", ["kingsshield", "poltergeist", "sacredsword", "shadowsneak"], 0.028]
+    ]
+  ],
+  "hydreigon": [
+    96,
+    [
+      ["choicescarf", "levitate", "modest", ["darkpulse", "dracometeor", "heatwave", "snarl"], 0.2396],
+      ["choicescarf", "levitate", "modest", ["darkpulse", "dracometeor", "earthpower", "snarl"], 0.1458],
+      ["choicescarf", "levitate", "timid", ["darkpulse", "dracometeor", "earthpower", "snarl"], 0.1042],
+      ["habanberry", "levitate", "timid", ["darkpulse", "dracometeor", "protect", "snarl"], 0.0833],
+      ["choicescarf", "levitate", "modest", ["darkpulse", "dracometeor", "flamethrower", "snarl"], 0.0417],
+      ["habanberry", "levitate", "modest", ["darkpulse", "dracometeor", "protect", "snarl"], 0.0417],
+      ["choicescarf", "levitate", "modest", ["darkpulse", "dracometeor", "snarl", "uturn"], 0.0313],
+      ["blackglasses", "levitate", "timid", ["darkpulse", "dracometeor", "protect", "snarl"], 0.0208],
+      ["choicescarf", "levitate", "timid", ["darkpulse", "dracometeor", "flamethrower", "snarl"], 0.0208],
+      ["choicescarf", "levitate", "timid", ["darkpulse", "dracometeor", "heatwave", "snarl"], 0.0208]
+    ]
+  ],
+  "kleavor": [
+    90,
+    [
+      ["focussash", "sharpness", "jolly", ["closecombat", "feint", "protect", "stoneaxe"], 0.2222],
+      ["choicescarf", "sharpness", "jolly", ["closecombat", "rockslide", "stoneaxe", "uturn"], 0.1778],
+      ["choicescarf", "sharpness", "jolly", ["closecombat", "rockslide", "stoneaxe", "xscissor"], 0.1],
+      ["choicescarf", "sharpness", "jolly", ["closecombat", "stoneaxe", "uturn", "xscissor"], 0.0556],
+      ["focussash", "sharpness", "jolly", ["feint", "protect", "stoneaxe", "xscissor"], 0.0556],
+      ["focussash", "sharpness", "jolly", ["protect", "stoneaxe", "tailwind", "xscissor"], 0.0556],
+      ["focussash", "sharpness", "jolly", ["closecombat", "protect", "stoneaxe", "xscissor"], 0.0444],
+      ["choicescarf", "sharpness", "adamant", ["closecombat", "rockslide", "stoneaxe", "uturn"], 0.0222],
+      ["choicescarf", "sharpness", "jolly", ["aerialace", "stoneaxe", "uturn", "xscissor"], 0.0222],
+      ["choicescarf", "sharpness", "jolly", ["closecombat", "feint", "stoneaxe", "uturn"], 0.0222]
+    ]
+  ],
+  "lycanrocdusk": [
+    81,
+    [
+      ["focussash", "toughclaws", "adamant", ["accelerock", "closecombat", "protect", "rockslide"], 0.7531],
+      ["focussash", "toughclaws", "jolly", ["accelerock", "closecombat", "protect", "rockslide"], 0.1358],
+      ["focussash", "toughclaws", "adamant", ["accelerock", "closecombat", "protect", "psychicfangs"], 0.037],
+      ["focussash", "toughclaws", "adamant", ["accelerock", "closecombat", "crunch", "psychicfangs"], 0.0123],
+      ["focussash", "toughclaws", "adamant", ["accelerock", "closecombat", "howl", "protect"], 0.0123],
+      ["focussash", "toughclaws", "adamant", ["accelerock", "closecombat", "ironhead", "protect"], 0.0123],
+      ["focussash", "toughclaws", "jolly", ["accelerock", "brickbreak", "ironhead", "throatchop"], 0.0123],
+      ["focussash", "toughclaws", "jolly", ["accelerock", "closecombat", "protect", "stompingtantrum"], 0.0123],
+      ["focussash", "toughclaws", "jolly", ["accelerock", "closecombat", "quickguard", "taunt"], 0.0123]
+    ]
+  ],
+  "arcaninehisui": [
+    79,
+    [
+      ["focussash", "rockhead", "jolly", ["flareblitz", "headsmash", "protect", "rockslide"], 0.4051],
+      ["focussash", "rockhead", "jolly", ["extremespeed", "flareblitz", "headsmash", "protect"], 0.3671],
+      ["choicescarf", "rockhead", "jolly", ["extremespeed", "flareblitz", "headsmash", "rockslide"], 0.038],
+      ["charcoal", "rockhead", "jolly", ["extremespeed", "flareblitz", "headsmash", "protect"], 0.0127],
+      ["charcoal", "rockhead", "jolly", ["flareblitz", "headsmash", "protect", "rockslide"], 0.0127],
+      ["choicescarf", "intimidate", "adamant", ["flareblitz", "headsmash", "rockslide", "rocktomb"], 0.0127],
+      ["choicescarf", "intimidate", "adamant", ["flareblitz", "headsmash", "rockslide", "wildcharge"], 0.0127],
+      ["choicescarf", "rockhead", "adamant", ["closecombat", "flareblitz", "headsmash", "rockslide"], 0.0127],
+      ["choicescarf", "rockhead", "adamant", ["extremespeed", "flareblitz", "headsmash", "rockslide"], 0.0127],
+      ["choicescarf", "rockhead", "jolly", ["flareblitz", "headsmash", "psychicfangs", "rockslide"], 0.0127]
+    ]
+  ],
+  "ceruledge": [
+    59,
+    [
+      ["colburberry", "flashfire", "adamant", ["bitterblade", "protect", "shadowsneak", "swordsdance"], 0.3729],
+      ["colburberry", "flashfire", "adamant", ["bitterblade", "bulkup", "protect", "shadowsneak"], 0.2203],
+      ["charcoal", "flashfire", "adamant", ["bitterblade", "bulkup", "protect", "shadowsneak"], 0.1525],
+      ["leftovers", "flashfire", "adamant", ["bitterblade", "protect", "shadowsneak", "swordsdance"], 0.0678],
+      ["focussash", "flashfire", "jolly", ["bitterblade", "poltergeist", "shadowsneak", "swordsdance"], 0.0339],
+      ["colburberry", "flashfire", "adamant", ["bitterblade", "closecombat", "protect", "shadowsneak"], 0.0169],
+      ["colburberry", "flashfire", "adamant", ["bitterblade", "poltergeist", "protect", "shadowsneak"], 0.0169],
+      ["focussash", "flashfire", "adamant", ["bitterblade", "poltergeist", "shadowsneak", "swordsdance"], 0.0169],
+      ["focussash", "flashfire", "brave", ["bitterblade", "closecombat", "poltergeist", "sunnyday"], 0.0169],
+      ["focussash", "flashfire", "jolly", ["bitterblade", "protect", "shadowsneak", "swordsdance"], 0.0169]
+    ]
+  ],
+  "garchompmega": [
+    58,
+    [
+      ["garchompite", "roughskin", "adamant", ["dragonclaw", "earthquake", "protect", "stompingtantrum"], 0.3103],
+      ["garchompite", "roughskin", "adamant", ["dragonclaw", "earthquake", "protect", "rockslide"], 0.1379],
+      ["garchompite", "roughskin", "jolly", ["dragonclaw", "earthquake", "protect", "rockslide"], 0.1207],
+      ["garchompite", "roughskin", "adamant", ["dragonclaw", "earthquake", "protect", "rocktomb"], 0.1034],
+      ["garchompite", "roughskin", "adamant", ["dragonclaw", "protect", "rockslide", "stompingtantrum"], 0.1034],
+      ["garchompite", "roughskin", "adamant", ["earthquake", "protect", "rockslide", "stompingtantrum"], 0.0862],
+      ["garchompite", "roughskin", "jolly", ["dragonclaw", "earthquake", "protect", "stompingtantrum"], 0.0345],
+      ["garchompite", "roughskin", "adamant", ["dragonclaw", "earthquake", "poisonjab", "rockslide"], 0.0172],
+      ["garchompite", "roughskin", "adamant", ["dragonclaw", "earthquake", "protect", "swordsdance"], 0.0172],
+      ["garchompite", "roughskin", "adamant", ["earthquake", "protect", "rockslide", "scaleshot"], 0.0172]
+    ]
+  ],
+  "espathra": [
+    57,
+    [
+      ["sitrusberry", "speedboost", "timid", ["batonpass", "calmmind", "luminacrash", "protect"], 0.3684],
+      ["mentalherb", "speedboost", "timid", ["batonpass", "calmmind", "luminacrash", "protect"], 0.1579],
+      ["colburberry", "speedboost", "timid", ["batonpass", "calmmind", "luminacrash", "protect"], 0.1053],
+      ["focussash", "speedboost", "timid", ["batonpass", "calmmind", "luminacrash", "protect"], 0.0877],
+      ["colburberry", "speedboost", "bold", ["batonpass", "calmmind", "luminacrash", "protect"], 0.0351],
+      ["colburberry", "speedboost", "modest", ["batonpass", "calmmind", "luminacrash", "protect"], 0.0351],
+      ["focussash", "speedboost", "modest", ["dazzlinggleam", "luminacrash", "protect", "skillswap"], 0.0351],
+      ["focussash", "speedboost", "timid", ["helpinghand", "luminacrash", "protect", "raindance"], 0.0351],
+      ["colburberry", "speedboost", "calm", ["batonpass", "calmmind", "luminacrash", "protect"], 0.0175],
+      ["focussash", "speedboost", "modest", ["helpinghand", "lightscreen", "luminacrash", "protect"], 0.0175]
+    ]
+  ],
+  "meganiummega": [
+    54,
+    [
+      ["meganiumite", "overgrow", "modest", ["dazzlinggleam", "protect", "solarbeam", "weatherball"], 0.5],
+      ["meganiumite", "leafguard", "modest", ["dazzlinggleam", "protect", "solarbeam", "weatherball"], 0.2963],
+      ["meganiumite", "leafguard", "timid", ["dazzlinggleam", "protect", "solarbeam", "weatherball"], 0.0556],
+      ["meganiumite", "overgrow", "timid", ["dazzlinggleam", "protect", "solarbeam", "weatherball"], 0.037],
+      ["meganiumite", "leafguard", "modest", ["dazzlinggleam", "solarbeam", "synthesis", "weatherball"], 0.0185],
+      ["meganiumite", "leafguard", "timid", ["earthpower", "protect", "solarbeam", "weatherball"], 0.0185],
+      ["meganiumite", "megasol", "modest", ["dazzlinggleam", "protect", "solarbeam", "weatherball"], 0.0185],
+      ["meganiumite", "overgrow", "modest", ["dazzlinggleam", "solarbeam", "synthesis", "weatherball"], 0.0185],
+      ["meganiumite", "overgrow", "quiet", ["dazzlinggleam", "protect", "solarbeam", "weatherball"], 0.0185],
+      ["meganiumite", "overgrow", "relaxed", ["dazzlinggleam", "solarbeam", "synthesis", "weatherball"], 0.0185]
+    ]
+  ],
+  "primarina": [
+    51,
+    [
+      ["leftovers", "liquidvoice", "modest", ["calmmind", "hypervoice", "moonblast", "protect"], 0.1961],
+      ["mysticwater", "liquidvoice", "modest", ["aquajet", "hypervoice", "moonblast", "protect"], 0.0588],
+      ["sitrusberry", "liquidvoice", "modest", ["hypervoice", "lifedew", "moonblast", "protect"], 0.0588],
+      ["kebiaberry", "liquidvoice", "modest", ["hypervoice", "moonblast", "protect", "psychic"], 0.0392],
+      ["leftovers", "liquidvoice", "bold", ["calmmind", "hypervoice", "moonblast", "protect"], 0.0392],
+      ["leftovers", "liquidvoice", "quiet", ["calmmind", "hypervoice", "moonblast", "protect"], 0.0392],
+      ["mysticwater", "liquidvoice", "modest", ["calmmind", "hypervoice", "moonblast", "protect"], 0.0392],
+      ["sitrusberry", "liquidvoice", "modest", ["calmmind", "hypervoice", "moonblast", "protect"], 0.0392],
+      ["sitrusberry", "torrent", "impish", ["encore", "flipturn", "perishsong", "protect"], 0.0392],
+      ["fairyfeather", "liquidvoice", "modest", ["calmmind", "hypervoice", "moonblast", "protect"], 0.0196]
+    ]
+  ],
+  "skarmorymega": [
+    51,
+    [
+      ["skarmorite", "sturdy", "adamant", ["bravebird", "ironhead", "protect", "rocktomb"], 0.3529],
+      ["skarmorite", "sturdy", "jolly", ["bravebird", "ironhead", "protect", "rocktomb"], 0.0588],
+      ["skarmorite", "weakarmor", "adamant", ["bravebird", "ironhead", "protect", "rocktomb"], 0.0588],
+      ["skarmorite", "sturdy", "adamant", ["bravebird", "ironhead", "protect", "rockslide"], 0.0392],
+      ["skarmorite", "sturdy", "adamant", ["bravebird", "ironhead", "protect", "swordsdance"], 0.0392],
+      ["skarmorite", "sturdy", "adamant", ["bravebird", "ironhead", "protect", "tailwind"], 0.0392],
+      ["skarmorite", "sturdy", "adamant", ["bravebird", "ironhead", "protect", "taunt"], 0.0392],
+      ["skarmorite", "sturdy", "adamant", ["bravebird", "ironhead", "rocktomb", "taunt"], 0.0392],
+      ["skarmorite", "sturdy", "jolly", ["bravebird", "ironhead", "protect", "rockslide"], 0.0392],
+      ["skarmorite", "sturdy", "jolly", ["dualwingbeat", "ironhead", "protect", "tailwind"], 0.0392]
+    ]
+  ],
+  "gyaradosmega": [
+    50,
+    [
+      ["gyaradosite", "intimidate", "adamant", ["dragondance", "lashout", "protect", "waterfall"], 0.52],
+      ["gyaradosite", "intimidate", "jolly", ["dragondance", "lashout", "protect", "waterfall"], 0.12],
+      ["gyaradosite", "intimidate", "adamant", ["crunch", "dragondance", "protect", "waterfall"], 0.1],
+      ["gyaradosite", "intimidate", "jolly", ["crunch", "dragondance", "protect", "waterfall"], 0.1],
+      ["gyaradosite", "intimidate", "adamant", ["crunch", "ironhead", "protect", "waterfall"], 0.04],
+      ["gyaradosite", "intimidate", "adamant", ["crunch", "taunt", "thunderwave", "waterfall"], 0.02],
+      ["gyaradosite", "intimidate", "adamant", ["lashout", "protect", "taunt", "waterfall"], 0.02],
+      ["gyaradosite", "intimidate", "careful", ["crunch", "protect", "thunderwave", "waterfall"], 0.02],
+      ["gyaradosite", "intimidate", "jolly", ["crunch", "protect", "taunt", "waterfall"], 0.02],
+      ["gyaradosite", "intimidate", "jolly", ["dragondance", "earthquake", "lashout", "protect"], 0.02]
+    ]
+  ],
+  "palafin": [
+    50,
+    [
+      ["leftovers", "zerotohero", "adamant", ["bulkup", "jetpunch", "protect", "wavecrash"], 0.72],
+      ["mysticwater", "zerotohero", "adamant", ["closecombat", "jetpunch", "protect", "wavecrash"], 0.12],
+      ["mysticwater", "zerotohero", "adamant", ["flipturn", "jetpunch", "protect", "wavecrash"], 0.12],
+      ["mysticwater", "zerotohero", "adamant", ["encore", "jetpunch", "protect", "wavecrash"], 0.02],
+      ["mysticwater", "zerotohero", "jolly", ["flipturn", "jetpunch", "protect", "wavecrash"], 0.02]
+    ]
+  ],
+  "dragonite": [
+    47,
+    [
+      ["dragonfang", "multiscale", "adamant", ["dragonclaw", "extremespeed", "lowkick", "protect"], 0.4681],
+      ["dragonfang", "multiscale", "adamant", ["dragonclaw", "extremespeed", "protect", "tailwind"], 0.0638],
+      ["lumberry", "multiscale", "adamant", ["dragonclaw", "extremespeed", "firepunch", "protect"], 0.0638],
+      ["dragonfang", "innerfocus", "adamant", ["dragonclaw", "extremespeed", "lowkick", "protect"], 0.0426],
+      ["dragonfang", "multiscale", "adamant", ["extremespeed", "protect", "scaleshot", "tailwind"], 0.0426],
+      ["dragonfang", "multiscale", "jolly", ["dragonclaw", "extremespeed", "lowkick", "protect"], 0.0426],
+      ["dragonfang", "innerfocus", "adamant", ["dragonclaw", "extremespeed", "ironhead", "lowkick"], 0.0213],
+      ["dragonfang", "multiscale", "adamant", ["dragonclaw", "extremespeed", "ironhead", "lowkick"], 0.0213],
+      ["dragonfang", "multiscale", "adamant", ["dragonclaw", "extremespeed", "lowkick", "tailwind"], 0.0213],
+      ["dragonfang", "multiscale", "adamant", ["dragonclaw", "lowkick", "protect", "rocktomb"], 0.0213]
+    ]
+  ],
+  "lopunnymega": [
+    46,
+    [
+      ["lopunnite", "cutecharm", "jolly", ["closecombat", "encore", "fakeout", "tripleaxel"], 0.1087],
+      ["lopunnite", "limber", "jolly", ["closecombat", "encore", "fakeout", "tripleaxel"], 0.087],
+      ["lopunnite", "cutecharm", "adamant", ["closecombat", "fakeout", "icepunch", "raindance"], 0.0652],
+      ["lopunnite", "cutecharm", "jolly", ["closecombat", "encore", "fakeout", "quickattack"], 0.0652],
+      ["lopunnite", "cutecharm", "adamant", ["closecombat", "fakeout", "gigaimpact", "protect"], 0.0435],
+      ["lopunnite", "cutecharm", "jolly", ["afteryou", "closecombat", "fakeout", "tripleaxel"], 0.0435],
+      ["lopunnite", "cutecharm", "jolly", ["closecombat", "encore", "fakeout", "gigaimpact"], 0.0435],
+      ["lopunnite", "klutz", "jolly", ["closecombat", "fakeout", "gigaimpact", "tripleaxel"], 0.0435],
+      ["lopunnite", "limber", "jolly", ["closecombat", "fakeout", "protect", "tripleaxel"], 0.0435],
+      ["lopunnite", "cutecharm", "adamant", ["afteryou", "closecombat", "encore", "fakeout"], 0.0217]
+    ]
+  ],
+  "tsareena": [
+    45,
+    [
+      ["choicescarf", "queenlymajesty", "jolly", ["lowkick", "tripleaxel", "tropkick", "uturn"], 0.0889],
+      ["choicescarf", "queenlymajesty", "jolly", ["knockoff", "lowkick", "tripleaxel", "tropkick"], 0.0667],
+      ["choicescarf", "queenlymajesty", "jolly", ["knockoff", "tripleaxel", "tropkick", "uturn"], 0.0444],
+      ["sitrusberry", "queenlymajesty", "adamant", ["lowkick", "powerwhip", "protect", "taunt"], 0.0444],
+      ["sitrusberry", "queenlymajesty", "adamant", ["lowkick", "taunt", "tripleaxel", "tropkick"], 0.0444],
+      ["whiteherb", "queenlymajesty", "adamant", ["lowkick", "protect", "tripleaxel", "tropkick"], 0.0444],
+      ["blackbelt", "queenlymajesty", "brave", ["lowkick", "playrough", "protect", "tropkick"], 0.0222],
+      ["choicescarf", "queenlymajesty", "adamant", ["lowkick", "tripleaxel", "tropkick", "uturn"], 0.0222],
+      ["choicescarf", "queenlymajesty", "jolly", ["aromaticmist", "powerwhip", "tripleaxel", "zenheadbutt"], 0.0222],
+      ["choicescarf", "queenlymajesty", "jolly", ["highjumpkick", "powerwhip", "tripleaxel", "uturn"], 0.0222]
+    ]
+  ],
+  "cameruptmega": [
+    43,
+    [
+      ["cameruptite", "solidrock", "quiet", ["ancientpower", "earthpower", "heatwave", "protect"], 0.6744],
+      ["cameruptite", "solidrock", "quiet", ["ancientpower", "earthpower", "eruption", "protect"], 0.1395],
+      ["cameruptite", "solidrock", "quiet", ["earthpower", "eruption", "flamethrower", "protect"], 0.0698],
+      ["cameruptite", "solidrock", "quiet", ["earthpower", "eruption", "heatwave", "protect"], 0.0465],
+      ["cameruptite", "solidrock", "modest", ["ancientpower", "earthpower", "heatwave", "protect"], 0.0233],
+      ["cameruptite", "solidrock", "quiet", ["ancientpower", "earthpower", "eruption", "heatwave"], 0.0233],
+      ["cameruptite", "solidrock", "relaxed", ["ancientpower", "earthpower", "heatwave", "protect"], 0.0233]
+    ]
+  ],
+  "tinkaton": [
+    42,
+    [
+      ["shucaberry", "moldbreaker", "jolly", ["encore", "fakeout", "gigatonhammer", "protect"], 0.3333],
+      ["fairyfeather", "moldbreaker", "adamant", ["fakeout", "feint", "gigatonhammer", "playrough"], 0.0238],
+      ["focussash", "moldbreaker", "jolly", ["encore", "fakeout", "gigatonhammer", "protect"], 0.0238],
+      ["kingsrock", "moldbreaker", "adamant", ["encore", "fakeout", "fling", "gigatonhammer"], 0.0238],
+      ["leftovers", "moldbreaker", "brave", ["fakeout", "gigatonhammer", "icehammer", "protect"], 0.0238],
+      ["leftovers", "owntempo", "adamant", ["fakeout", "gigatonhammer", "playrough", "protect"], 0.0238],
+      ["leftovers", "owntempo", "sassy", ["encore", "fakeout", "gigatonhammer", "playrough"], 0.0238],
+      ["lumberry", "moldbreaker", "adamant", ["fakeout", "gigatonhammer", "helpinghand", "protect"], 0.0238],
+      ["mentalherb", "moldbreaker", "jolly", ["fakeout", "gigatonhammer", "helpinghand", "thunderwave"], 0.0238],
+      ["metalcoat", "moldbreaker", "jolly", ["encore", "fakeout", "gigatonhammer", "protect"], 0.0238]
+    ]
+  ],
+  "mimikyu": [
+    39,
+    [
+      ["spelltag", "disguise", "adamant", ["playrough", "protect", "shadowclaw", "shadowsneak"], 0.3333],
+      ["fairyfeather", "disguise", "adamant", ["playrough", "protect", "shadowclaw", "shadowsneak"], 0.2308],
+      ["whiteherb", "disguise", "adamant", ["playrough", "protect", "shadowclaw", "shadowsneak"], 0.0769],
+      ["fairyfeather", "disguise", "adamant", ["playrough", "protect", "shadowsneak", "willowisp"], 0.0513],
+      ["brightpowder", "disguise", "adamant", ["playrough", "protect", "shadowclaw", "trickroom"], 0.0256],
+      ["fairyfeather", "disguise", "adamant", ["playrough", "protect", "shadowsneak", "trickroom"], 0.0256],
+      ["fairyfeather", "disguise", "adamant", ["playrough", "shadowclaw", "shadowsneak", "taunt"], 0.0256],
+      ["fairyfeather", "disguise", "adamant", ["playrough", "shadowclaw", "shadowsneak", "trickroom"], 0.0256],
+      ["lumberry", "disguise", "careful", ["playrough", "protect", "shadowsneak", "trickroom"], 0.0256],
+      ["mentalherb", "disguise", "impish", ["playrough", "shadowsneak", "swordsdance", "trickroom"], 0.0256]
+    ]
+  ],
+  "scizor": [
+    36,
+    [
+      ["metalcoat", "technician", "adamant", ["bugbite", "bulletpunch", "protect", "swordsdance"], 0.3889],
+      ["sitrusberry", "technician", "adamant", ["bugbite", "bulletpunch", "protect", "swordsdance"], 0.1389],
+      ["metalcoat", "technician", "adamant", ["bulletpunch", "closecombat", "protect", "swordsdance"], 0.1111],
+      ["metalcoat", "technician", "adamant", ["bugbite", "bulletpunch", "knockoff", "protect"], 0.0833],
+      ["metalcoat", "technician", "adamant", ["bugbite", "bulletpunch", "closecombat", "protect"], 0.0556],
+      ["metalcoat", "technician", "adamant", ["bulletpunch", "closecombat", "feint", "protect"], 0.0556],
+      ["focussash", "technician", "adamant", ["bugbite", "bulletpunch", "protect", "swordsdance"], 0.0278],
+      ["metalcoat", "technician", "adamant", ["brickbreak", "bugbite", "bulletpunch", "protect"], 0.0278],
+      ["metalcoat", "technician", "adamant", ["bugbite", "bulletpunch", "dualwingbeat", "protect"], 0.0278],
+      ["metalcoat", "technician", "adamant", ["bulletpunch", "closecombat", "protect", "uturn"], 0.0278]
+    ]
+  ],
+  "rotomheat": [
+    34,
+    [
+      ["choicescarf", "levitate", "timid", ["electroweb", "overheat", "thunderbolt", "voltswitch"], 0.2353],
+      ["sitrusberry", "levitate", "modest", ["overheat", "protect", "thunderbolt", "willowisp"], 0.0882],
+      ["leftovers", "levitate", "modest", ["overheat", "protect", "voltswitch", "willowisp"], 0.0588],
+      ["passhoberry", "levitate", "bold", ["lightscreen", "overheat", "thunderbolt", "willowisp"], 0.0588],
+      ["chartiberry", "levitate", "modest", ["overheat", "protect", "thunderbolt", "willowisp"], 0.0294],
+      ["choicescarf", "levitate", "modest", ["discharge", "overheat", "thunderbolt", "voltswitch"], 0.0294],
+      ["choicescarf", "levitate", "modest", ["overheat", "thunderbolt", "trick", "voltswitch"], 0.0294],
+      ["choicescarf", "levitate", "timid", ["darkpulse", "electroball", "overheat", "voltswitch"], 0.0294],
+      ["choicescarf", "levitate", "timid", ["discharge", "electroweb", "overheat", "voltswitch"], 0.0294],
+      ["choicescarf", "levitate", "timid", ["electroweb", "overheat", "thunderbolt", "willowisp"], 0.0294]
+    ]
+  ],
+  "zoroarkhisui": [
+    33,
+    [
+      ["choicescarf", "illusion", "modest", ["icywind", "psychic", "shadowball", "taunt"], 0.1212],
+      ["choicescarf", "illusion", "modest", ["hypervoice", "icywind", "round", "shadowball"], 0.0606],
+      ["choicescarf", "illusion", "modest", ["icywind", "psychic", "shadowball", "trick"], 0.0606],
+      ["choicescarf", "illusion", "jolly", ["faketears", "icywind", "poltergeist", "protect"], 0.0303],
+      ["choicescarf", "illusion", "modest", ["flamethrower", "hypervoice", "protect", "shadowball"], 0.0303],
+      ["choicescarf", "illusion", "modest", ["flamethrower", "icywind", "round", "shadowball"], 0.0303],
+      ["choicescarf", "illusion", "modest", ["flamethrower", "icywind", "shadowball", "sludgebomb"], 0.0303],
+      ["choicescarf", "illusion", "modest", ["flamethrower", "psychic", "shadowball", "sludgebomb"], 0.0303],
+      ["choicescarf", "illusion", "modest", ["hypervoice", "psychic", "round", "shadowball"], 0.0303],
+      ["choicescarf", "illusion", "modest", ["hypervoice", "round", "shadowball", "trick"], 0.0303]
+    ]
+  ],
+  "meowscarada": [
+    28,
+    [
+      ["choicescarf", "protean", "adamant", ["flowertrick", "knockoff", "tripleaxel", "uturn"], 0.1786],
+      ["choicescarf", "protean", "adamant", ["brickbreak", "flowertrick", "knockoff", "tripleaxel"], 0.0714],
+      ["focussash", "overgrow", "adamant", ["flowertrick", "knockoff", "protect", "suckerpunch"], 0.0714],
+      ["focussash", "overgrow", "adamant", ["flowertrick", "lowkick", "protect", "suckerpunch"], 0.0714],
+      ["focussash", "overgrow", "jolly", ["flowertrick", "protect", "tripleaxel", "uturn"], 0.0714],
+      ["blackglasses", "overgrow", "jolly", ["flowertrick", "protect", "suckerpunch", "tripleaxel"], 0.0357],
+      ["choicescarf", "protean", "adamant", ["flowertrick", "knockoff", "lowkick", "tripleaxel"], 0.0357],
+      ["choicescarf", "protean", "adamant", ["flowertrick", "knockoff", "lowkick", "uturn"], 0.0357],
+      ["choicescarf", "protean", "adamant", ["flowertrick", "knockoff", "playrough", "trick"], 0.0357],
+      ["choicescarf", "protean", "adamant", ["flowertrick", "knockoff", "shadowclaw", "tripleaxel"], 0.0357]
+    ]
+  ],
+  "crabominablemega": [
+    27,
+    [
+      ["crabominite", "hypercutter", "brave", ["closecombat", "icehammer", "machpunch", "protect"], 0.2963],
+      ["crabominite", "hypercutter", "brave", ["drainpunch", "icehammer", "machpunch", "protect"], 0.2963],
+      ["crabominite", "hypercutter", "brave", ["closecombat", "icehammer", "protect", "thunderpunch"], 0.0741],
+      ["crabominite", "hypercutter", "brave", ["closecombat", "icepunch", "protect", "thunderpunch"], 0.0741],
+      ["crabominite", "hypercutter", "adamant", ["drainpunch", "icehammer", "protect", "rockslide"], 0.037],
+      ["crabominite", "hypercutter", "brave", ["closecombat", "drainpunch", "icehammer", "machpunch"], 0.037],
+      ["crabominite", "hypercutter", "brave", ["drainpunch", "icehammer", "machpunch", "thunderpunch"], 0.037],
+      ["crabominite", "hypercutter", "brave", ["drainpunch", "icehammer", "protect", "thunderpunch"], 0.037],
+      ["crabominite", "hypercutter", "brave", ["drainpunch", "icepunch", "machpunch", "protect"], 0.037],
+      ["crabominite", "hypercutter", "brave", ["drainpunch", "icepunch", "protect", "thunderpunch"], 0.037]
+    ]
+  ],
+  "dragapult": [
+    24,
+    [
+      ["focussash", "clearbody", "lonely", ["dracometeor", "phantomforce", "protect", "psychicfangs"], 0.2083],
+      ["brightpowder", "clearbody", "jolly", ["lightscreen", "phantomforce", "psychicfangs", "reflect"], 0.0417],
+      ["choicescarf", "cursedbody", "lax", ["dragondarts", "flamethrower", "phantomforce", "round"], 0.0417],
+      ["colburberry", "clearbody", "jolly", ["dragondarts", "phantomforce", "protect", "psychicfangs"], 0.0417],
+      ["colburberry", "cursedbody", "timid", ["dracometeor", "helpinghand", "shadowball", "willowisp"], 0.0417],
+      ["colburberry", "infiltrator", "timid", ["dracometeor", "protect", "shadowball", "willowisp"], 0.0417],
+      ["dragonfang", "clearbody", "jolly", ["dragondarts", "phantomforce", "protect", "psychicfangs"], 0.0417],
+      ["dragonfang", "clearbody", "jolly", ["dragondarts", "phantomforce", "psychicfangs", "willowisp"], 0.0417],
+      ["dragonfang", "infiltrator", "modest", ["dracometeor", "protect", "shadowball", "willowisp"], 0.0417],
+      ["focussash", "clearbody", "adamant", ["batonpass", "dragondance", "dragondarts", "phantomforce"], 0.0417]
+    ]
+  ],
+  "gallade": [
+    23,
+    [
+      ["choicescarf", "sharpness", "jolly", ["leafblade", "psychocut", "rocktomb", "sacredsword"], 0.1304],
+      ["focussash", "sharpness", "adamant", ["leafblade", "protect", "psychocut", "sacredsword"], 0.1304],
+      ["blackbelt", "sharpness", "brave", ["protect", "psychocut", "sacredsword", "trickroom"], 0.087],
+      ["blackbelt", "sharpness", "adamant", ["leafblade", "psychocut", "sacredsword", "trickroom"], 0.0435],
+      ["blackbelt", "sharpness", "adamant", ["nightslash", "protect", "psychocut", "sacredsword"], 0.0435],
+      ["blackbelt", "sharpness", "adamant", ["protect", "psychocut", "sacredsword", "trickroom"], 0.0435],
+      ["choicescarf", "sharpness", "jolly", ["leafblade", "nightslash", "psychocut", "sacredsword"], 0.0435],
+      ["choicescarf", "sharpness", "jolly", ["nightslash", "psychocut", "rockslide", "sacredsword"], 0.0435],
+      ["focussash", "sharpness", "brave", ["leafblade", "psychocut", "sacredsword", "trickroom"], 0.0435],
+      ["focussash", "sharpness", "brave", ["protect", "psychocut", "sacredsword", "trickroom"], 0.0435]
+    ]
+  ],
+  "samurotthisui": [
+    22,
+    [
+      ["choicescarf", "sharpness", "jolly", ["aquacutter", "flipturn", "nightslash", "sacredsword"], 0.3636],
+      ["focussash", "sharpness", "adamant", ["nightslash", "protect", "sacredsword", "suckerpunch"], 0.1364],
+      ["choicescarf", "sharpness", "jolly", ["ceaselessedge", "flipturn", "razorshell", "sacredsword"], 0.0909],
+      ["blackglasses", "sharpness", "adamant", ["aquacutter", "ceaselessedge", "protect", "suckerpunch"], 0.0455],
+      ["blackglasses", "sharpness", "adamant", ["detect", "nightslash", "sacredsword", "suckerpunch"], 0.0455],
+      ["choicescarf", "sharpness", "adamant", ["aquacutter", "ceaselessedge", "sacredsword", "suckerpunch"], 0.0455],
+      ["choicescarf", "sharpness", "adamant", ["aquacutter", "flipturn", "nightslash", "sacredsword"], 0.0455],
+      ["choicescarf", "sharpness", "jolly", ["aquacutter", "ceaselessedge", "flipturn", "sacredsword"], 0.0455],
+      ["choicescarf", "sharpness", "jolly", ["aquacutter", "ceaselessedge", "icywind", "sacredsword"], 0.0455],
+      ["focussash", "sharpness", "adamant", ["aquacutter", "nightslash", "protect", "sacredsword"], 0.0455]
+    ]
+  ],
+  "azumarill": [
+    19,
+    [
+      ["sitrusberry", "hugepower", "adamant", ["aquajet", "bellydrum", "playrough", "protect"], 0.3158],
+      ["mysticwater", "hugepower", "adamant", ["aquajet", "liquidation", "playrough", "protect"], 0.1579],
+      ["sitrusberry", "hugepower", "brave", ["aquajet", "bellydrum", "playrough", "protect"], 0.1579],
+      ["sitrusberry", "hugepower", "adamant", ["aquajet", "bellydrum", "knockoff", "protect"], 0.1053],
+      ["fairyfeather", "hugepower", "adamant", ["playrough", "protect", "superpower", "waterfall"], 0.0526],
+      ["mysticwater", "hugepower", "brave", ["aquajet", "liquidation", "playrough", "protect"], 0.0526],
+      ["scopelens", "hugepower", "adamant", ["aquajet", "liquidation", "playrough", "protect"], 0.0526],
+      ["sitrusberry", "hugepower", "jolly", ["aquajet", "bellydrum", "playrough", "protect"], 0.0526],
+      ["sitrusberry", "sapsipper", "relaxed", ["aquajet", "perishsong", "playrough", "protect"], 0.0526]
+    ]
+  ],
+  "mamoswine": [
+    19,
+    [
+      ["focussash", "oblivious", "adamant", ["earthquake", "iceshard", "iciclecrash", "protect"], 0.2105],
+      ["focussash", "oblivious", "adamant", ["earthquake", "iceshard", "iciclespear", "protect"], 0.1053],
+      ["nevermeltice", "oblivious", "adamant", ["earthquake", "iceshard", "protect", "rockslide"], 0.1053],
+      ["nevermeltice", "oblivious", "adamant", ["highhorsepower", "iceshard", "iciclecrash", "protect"], 0.1053],
+      ["choicescarf", "oblivious", "jolly", ["earthquake", "highhorsepower", "iciclecrash", "iciclespear"], 0.0526],
+      ["choicescarf", "oblivious", "jolly", ["earthquake", "highhorsepower", "iciclecrash", "rockslide"], 0.0526],
+      ["choicescarf", "oblivious", "jolly", ["earthquake", "highhorsepower", "iciclecrash", "stoneedge"], 0.0526],
+      ["choicescarf", "oblivious", "jolly", ["earthquake", "iciclespear", "rockslide", "stompingtantrum"], 0.0526],
+      ["choicescarf", "oblivious", "jolly", ["highhorsepower", "iciclespear", "ironhead", "rockslide"], 0.0526],
+      ["choicescarf", "oblivious", "jolly", ["highhorsepower", "iciclespear", "knockoff", "rockslide"], 0.0526]
+    ]
+  ],
+  "starmiemega": [
+    19,
+    [
+      ["starminite", "naturalcure", "adamant", ["aquajet", "liquidation", "protect", "zenheadbutt"], 0.2632],
+      ["starminite", "naturalcure", "adamant", ["aquajet", "icespinner", "liquidation", "protect"], 0.1579],
+      ["starminite", "naturalcure", "jolly", ["aquajet", "icespinner", "liquidation", "protect"], 0.1053],
+      ["starminite", "illuminate", "jolly", ["aquajet", "liquidation", "protect", "psychocut"], 0.0526],
+      ["starminite", "illuminate", "jolly", ["icespinner", "liquidation", "protect", "psychocut"], 0.0526],
+      ["starminite", "naturalcure", "adamant", ["aquajet", "icespinner", "protect", "psychocut"], 0.0526],
+      ["starminite", "naturalcure", "adamant", ["aquajet", "liquidation", "protect", "psychocut"], 0.0526],
+      ["starminite", "naturalcure", "adamant", ["aquajet", "protect", "psychocut", "waterfall"], 0.0526],
+      ["starminite", "naturalcure", "adamant", ["flipturn", "liquidation", "protect", "psychocut"], 0.0526],
+      ["starminite", "naturalcure", "adamant", ["icespinner", "liquidation", "protect", "psychocut"], 0.0526]
+    ]
+  ],
+  "volcarona": [
+    19,
+    [
+      ["leftovers", "flamebody", "timid", ["heatwave", "protect", "ragepowder", "tailwind"], 0.1053],
+      ["sitrusberry", "flamebody", "bold", ["overheat", "ragepowder", "strugglebug", "tailwind"], 0.1053],
+      ["charcoal", "flamebody", "modest", ["bugbuzz", "heatwave", "protect", "quiverdance"], 0.0526],
+      ["charcoal", "flamebody", "timid", ["flamethrower", "protect", "ragepowder", "tailwind"], 0.0526],
+      ["chartiberry", "flamebody", "modest", ["fierydance", "protect", "ragepowder", "tailwind"], 0.0526],
+      ["focussash", "flamebody", "timid", ["fierydance", "protect", "ragepowder", "tailwind"], 0.0526],
+      ["focussash", "flamebody", "timid", ["heatwave", "protect", "strugglebug", "tailwind"], 0.0526],
+      ["leftovers", "flamebody", "bold", ["fierydance", "protect", "ragepowder", "strugglebug"], 0.0526],
+      ["leftovers", "flamebody", "bold", ["gigadrain", "heatwave", "protect", "quiverdance"], 0.0526],
+      ["leftovers", "flamebody", "bold", ["heatwave", "protect", "ragepowder", "tailwind"], 0.0526]
+    ]
+  ],
+  "toxapex": [
+    18,
+    [
+      ["leftovers", "regenerator", "bold", ["banefulbunker", "infestation", "toxic", "wideguard"], 0.4444],
+      ["leftovers", "regenerator", "bold", ["banefulbunker", "infestation", "recover", "toxic"], 0.1111],
+      ["leftovers", "regenerator", "relaxed", ["infestation", "protect", "recover", "wideguard"], 0.1111],
+      ["leftovers", "regenerator", "bold", ["banefulbunker", "infestation", "recover", "wideguard"], 0.0556],
+      ["leftovers", "regenerator", "calm", ["banefulbunker", "infestation", "recover", "toxic"], 0.0556],
+      ["leftovers", "regenerator", "relaxed", ["infestation", "protect", "toxic", "wideguard"], 0.0556],
+      ["shucaberry", "regenerator", "impish", ["banefulbunker", "smackdown", "toxic", "wideguard"], 0.0556],
+      ["sitrusberry", "regenerator", "calm", ["haze", "icywind", "recover", "toxic"], 0.0556],
+      ["sitrusberry", "regenerator", "relaxed", ["banefulbunker", "recover", "toxic", "waterpulse"], 0.0556]
+    ]
+  ],
+  "tyranitar": [
+    18,
+    [
+      ["chopleberry", "sandstream", "adamant", ["knockoff", "lowkick", "protect", "rockslide"], 0.2222],
+      ["focussash", "sandstream", "adamant", ["highhorsepower", "knockoff", "protect", "rockslide"], 0.1111],
+      ["brightpowder", "sandstream", "jolly", ["icepunch", "knockoff", "rockslide", "thunderpunch"], 0.0556],
+      ["choicescarf", "sandstream", "jolly", ["crunch", "highhorsepower", "icepunch", "rockslide"], 0.0556],
+      ["chopleberry", "sandstream", "adamant", ["earthquake", "knockoff", "protect", "rockslide"], 0.0556],
+      ["chopleberry", "sandstream", "adamant", ["ironhead", "knockoff", "protect", "rockslide"], 0.0556],
+      ["chopleberry", "sandstream", "impish", ["icepunch", "protect", "rockslide", "superpower"], 0.0556],
+      ["chopleberry", "sandstream", "jolly", ["knockoff", "protect", "stoneedge", "thunderpunch"], 0.0556],
+      ["focussash", "sandstream", "adamant", ["highhorsepower", "knockoff", "lowkick", "rockslide"], 0.0556],
+      ["focussash", "sandstream", "adamant", ["icepunch", "knockoff", "protect", "rockslide"], 0.0556]
+    ]
+  ],
+  "oranguru": [
+    17,
+    [
+      ["mentalherb", "innerfocus", "relaxed", ["encore", "instruct", "protect", "trickroom"], 0.2353],
+      ["mentalherb", "innerfocus", "relaxed", ["encore", "instruct", "psychic", "trickroom"], 0.1176],
+      ["colburberry", "innerfocus", "calm", ["foulplay", "instruct", "psychic", "trickroom"], 0.0588],
+      ["colburberry", "innerfocus", "relaxed", ["encore", "instruct", "psychic", "trickroom"], 0.0588],
+      ["colburberry", "innerfocus", "relaxed", ["foulplay", "instruct", "psychic", "trickroom"], 0.0588],
+      ["colburberry", "innerfocus", "sassy", ["encore", "instruct", "psychic", "trickroom"], 0.0588],
+      ["colburberry", "innerfocus", "sassy", ["encore", "instruct", "thunderbolt", "trickroom"], 0.0588],
+      ["mentalherb", "innerfocus", "bold", ["instruct", "thunderbolt", "trickroom", "yawn"], 0.0588],
+      ["mentalherb", "innerfocus", "quiet", ["instruct", "protect", "psychic", "trickroom"], 0.0588],
+      ["mentalherb", "innerfocus", "relaxed", ["instruct", "psychicterrain", "round", "trickroom"], 0.0588]
+    ]
+  ],
+  "aggronmega": [
+    15,
+    [
+      ["aggronite", "sturdy", "careful", ["bodypress", "heavyslam", "irondefense", "protect"], 0.3333],
+      ["aggronite", "sturdy", "impish", ["bodypress", "heavyslam", "irondefense", "protect"], 0.1333],
+      ["aggronite", "heavymetal", "impish", ["bodypress", "heavyslam", "irondefense", "protect"], 0.0667],
+      ["aggronite", "heavymetal", "relaxed", ["bodypress", "heavyslam", "protect", "rockslide"], 0.0667],
+      ["aggronite", "sturdy", "adamant", ["ironhead", "metalburst", "stealthrock", "stoneedge"], 0.0667],
+      ["aggronite", "sturdy", "brave", ["bodypress", "heavyslam", "protect", "rockslide"], 0.0667],
+      ["aggronite", "sturdy", "calm", ["bodypress", "heavyslam", "irondefense", "protect"], 0.0667],
+      ["aggronite", "sturdy", "impish", ["bodypress", "heavyslam", "protect", "rockslide"], 0.0667],
+      ["aggronite", "sturdy", "sassy", ["bodypress", "crunch", "heavyslam", "protect"], 0.0667],
+      ["aggronite", "sturdy", "sassy", ["bodypress", "heavyslam", "irondefense", "protect"], 0.0667]
+    ]
+  ],
+  "typhlosionhisui": [
+    15,
+    [
+      ["choicescarf", "blaze", "modest", ["eruption", "heatwave", "overheat", "shadowball"], 0.4667],
+      ["choicescarf", "blaze", "modest", ["eruption", "heatwave", "shadowball", "willowisp"], 0.1333],
+      ["charcoal", "blaze", "timid", ["eruption", "overheat", "protect", "shadowball"], 0.0667],
+      ["choicescarf", "blaze", "modest", ["eruption", "heatwave", "infernalparade", "overheat"], 0.0667],
+      ["choicescarf", "blaze", "timid", ["eruption", "extrasensory", "heatwave", "shadowball"], 0.0667],
+      ["choicescarf", "blaze", "timid", ["eruption", "heatwave", "overheat", "shadowball"], 0.0667],
+      ["choicescarf", "frisk", "timid", ["eruption", "shadowball", "solarbeam", "willowisp"], 0.0667],
+      ["spelltag", "blaze", "modest", ["eruption", "heatwave", "protect", "shadowball"], 0.0667]
+    ]
+  ],
+  "hatterene": [
+    14,
+    [
+      ["fairyfeather", "magicbounce", "quiet", ["dazzlinggleam", "protect", "psychic", "trickroom"], 0.5714],
+      ["fairyfeather", "magicbounce", "quiet", ["dazzlinggleam", "expandingforce", "protect", "trickroom"], 0.1429],
+      ["babiriberry", "magicbounce", "relaxed", ["afteryou", "imprison", "psychicterrain", "trickroom"], 0.0714],
+      ["fairyfeather", "magicbounce", "modest", ["dazzlinggleam", "protect", "psyshock", "trickroom"], 0.0714],
+      ["fairyfeather", "magicbounce", "quiet", ["dazzlinggleam", "psychic", "psyshock", "trickroom"], 0.0714],
+      ["fairyfeather", "magicbounce", "sassy", ["dazzlinggleam", "protect", "psychic", "trickroom"], 0.0714]
+    ]
+  ],
+  "clefable": [
+    13,
+    [
+      ["sitrusberry", "unaware", "bold", ["followme", "helpinghand", "moonblast", "protect"], 0.3846],
+      ["focussash", "magicguard", "bold", ["followme", "helpinghand", "moonblast", "protect"], 0.0769],
+      ["leftovers", "unaware", "bold", ["followme", "helpinghand", "moonblast", "protect"], 0.0769],
+      ["leftovers", "unaware", "bold", ["followme", "lifedew", "moonblast", "protect"], 0.0769],
+      ["sitrusberry", "cutecharm", "bold", ["dazzlinggleam", "followme", "protect", "shadowball"], 0.0769],
+      ["sitrusberry", "magicguard", "bold", ["followme", "helpinghand", "moonblast", "protect"], 0.0769],
+      ["sitrusberry", "unaware", "bold", ["followme", "icywind", "moonblast", "protect"], 0.0769],
+      ["sitrusberry", "unaware", "calm", ["followme", "icywind", "moonblast", "protect"], 0.0769],
+      ["sitrusberry", "unaware", "careful", ["followme", "helpinghand", "moonblast", "protect"], 0.0769]
+    ]
+  ],
+  "lucariomega": [
+    13,
+    [
+      ["lucarionite", "innerfocus", "hasty", ["aurasphere", "bonerush", "meteormash", "stoneedge"], 0.1538],
+      ["lucarionite", "innerfocus", "jolly", ["bulletpunch", "closecombat", "meteormash", "protect"], 0.1538],
+      ["lucarionite", "innerfocus", "adamant", ["bonerush", "bulletpunch", "closecombat", "protect"], 0.0769],
+      ["lucarionite", "innerfocus", "adamant", ["closecombat", "detect", "meteormash", "rockslide"], 0.0769],
+      ["lucarionite", "innerfocus", "hasty", ["aurasphere", "detect", "meteormash", "rockslide"], 0.0769],
+      ["lucarionite", "innerfocus", "jolly", ["bonerush", "closecombat", "meteormash", "stoneedge"], 0.0769],
+      ["lucarionite", "innerfocus", "jolly", ["bulletpunch", "closecombat", "detect", "meteormash"], 0.0769],
+      ["lucarionite", "innerfocus", "jolly", ["bulletpunch", "closecombat", "protect", "swordsdance"], 0.0769],
+      ["lucarionite", "innerfocus", "modest", ["aurasphere", "flashcannon", "protect", "vacuumwave"], 0.0769],
+      ["lucarionite", "innerfocus", "naive", ["aurasphere", "bulletpunch", "detect", "meteormash"], 0.0769]
+    ]
+  ],
+  "weavile": [
+    13,
+    [
+      ["focussash", "pickpocket", "adamant", ["fakeout", "iciclecrash", "knockoff", "lowkick"], 0.3077],
+      ["focussash", "pickpocket", "jolly", ["fakeout", "knockoff", "lowkick", "tripleaxel"], 0.1538],
+      ["nevermeltice", "pressure", "jolly", ["fakeout", "knockoff", "psychocut", "tripleaxel"], 0.1538],
+      ["focussash", "pickpocket", "jolly", ["fakeout", "feint", "tripleaxel", "upperhand"], 0.0769],
+      ["focussash", "pickpocket", "jolly", ["fakeout", "iciclecrash", "lowkick", "throatchop"], 0.0769],
+      ["focussash", "pressure", "jolly", ["brickbreak", "fakeout", "throatchop", "tripleaxel"], 0.0769],
+      ["focussash", "pressure", "jolly", ["fakeout", "iciclecrash", "psychocut", "throatchop"], 0.0769],
+      ["focussash", "pressure", "jolly", ["fakeout", "knockoff", "taunt", "tripleaxel"], 0.0769]
+    ]
+  ],
+  "steelixmega": [
+    12,
+    [
+      ["steelixite", "sturdy", "brave", ["heavyslam", "highhorsepower", "protect", "wideguard"], 0.75],
+      ["steelixite", "sturdy", "adamant", ["heavyslam", "highhorsepower", "protect", "wideguard"], 0.0833],
+      ["steelixite", "sturdy", "brave", ["heavyslam", "highhorsepower", "rockslide", "wideguard"], 0.0833],
+      ["steelixite", "sturdy", "careful", ["heavyslam", "highhorsepower", "protect", "wideguard"], 0.0833]
+    ]
+  ],
+  "manectricmega": [
+    11,
+    [
+      ["manectite", "lightningrod", "timid", ["protect", "snarl", "thunder", "voltswitch"], 0.2727],
+      ["manectite", "lightningrod", "timid", ["protect", "snarl", "thunderbolt", "voltswitch"], 0.2727],
+      ["manectite", "lightningrod", "timid", ["overheat", "snarl", "thunderbolt", "voltswitch"], 0.1818],
+      ["manectite", "lightningrod", "timid", ["eerieimpulse", "overheat", "protect", "voltswitch"], 0.0909],
+      ["manectite", "lightningrod", "timid", ["lightscreen", "protect", "snarl", "voltswitch"], 0.0909],
+      ["manectite", "lightningrod", "timid", ["protect", "raindance", "snarl", "voltswitch"], 0.0909]
+    ]
+  ],
+  "araquanid": [
+    10,
+    [
+      ["mysticwater", "waterbubble", "brave", ["leechlife", "liquidation", "protect", "wideguard"], 0.3],
+      ["leftovers", "waterbubble", "brave", ["liquidation", "lunge", "protect", "wideguard"], 0.1],
+      ["mysticwater", "waterbubble", "adamant", ["bugbite", "leechlife", "liquidation", "protect"], 0.1],
+      ["mysticwater", "waterbubble", "bold", ["hydropump", "icywind", "protect", "wideguard"], 0.1],
+      ["mysticwater", "waterbubble", "brave", ["crunch", "liquidation", "lunge", "wideguard"], 0.1],
+      ["mysticwater", "waterbubble", "careful", ["entrainment", "liquidation", "raindance", "wideguard"], 0.1],
+      ["sitrusberry", "waterbubble", "adamant", ["bugbite", "liquidation", "protect", "wideguard"], 0.1],
+      ["sitrusberry", "waterbubble", "quiet", ["gigadrain", "hydropump", "protect", "surf"], 0.1]
+    ]
+  ],
+  "golurkmega": [
+    10,
+    [
+      ["golurkite", "ironfist", "adamant", ["headlongrush", "icepunch", "poltergeist", "protect"], 0.6],
+      ["golurkite", "ironfist", "brave", ["headlongrush", "icepunch", "poltergeist", "protect"], 0.2],
+      ["golurkite", "ironfist", "brave", ["drainpunch", "headlongrush", "poltergeist", "protect"], 0.1],
+      ["golurkite", "noguard", "brave", ["headlongrush", "icepunch", "poltergeist", "substitute"], 0.1]
+    ]
+  ],
+  "kangaskhan": [
+    10,
+    [
+      ["silkscarf", "scrappy", "adamant", ["fakeout", "lastresort"], 0.4],
+      ["silkscarf", "scrappy", "brave", ["fakeout", "lastresort"], 0.2],
+      ["silkscarf", "scrappy", "adamant", ["doubleedge", "drainpunch", "fakeout", "icepunch"], 0.1],
+      ["silkscarf", "scrappy", "adamant", ["doubleedge", "fakeout", "icepunch", "lowkick"], 0.1],
+      ["silkscarf", "scrappy", "brave", ["doubleedge", "fakeout", "lowkick", "suckerpunch"], 0.1],
+      [null, "scrappy", "adamant", ["doubleedge", "fakeout", "hammerarm", "icepunch"], 0.1]
+    ]
+  ],
+  "taurospaldeaaqua": [
+    10,
+    [
+      ["whiteherb", "intimidate", "jolly", ["aquajet", "closecombat", "protect", "wavecrash"], 0.3],
+      ["mysticwater", "intimidate", "adamant", ["aquajet", "closecombat", "protect", "wavecrash"], 0.2],
+      ["whiteherb", "intimidate", "adamant", ["aquajet", "closecombat", "protect", "wavecrash"], 0.2],
+      ["mysticwater", "intimidate", "adamant", ["closecombat", "protect", "ragingbull", "rocktomb"], 0.1],
+      ["mysticwater", "intimidate", "jolly", ["aquajet", "closecombat", "protect", "wavecrash"], 0.1],
+      ["sitrusberry", "intimidate", "adamant", ["closecombat", "protect", "ragingbull", "wildcharge"], 0.1]
+    ]
+  ],
+  "gyarados": [
+    9,
+    [
+      ["sitrusberry", "intimidate", "impish", ["helpinghand", "taunt", "thunderwave", "waterfall"], 0.2222],
+      ["brightpowder", "intimidate", "adamant", ["icefang", "protect", "stoneedge", "waterfall"], 0.1111],
+      ["choicescarf", "intimidate", "jolly", ["icefang", "powerwhip", "stoneedge", "waterfall"], 0.1111],
+      ["mysticwater", "intimidate", "adamant", ["icefang", "protect", "taunt", "waterfall"], 0.1111],
+      ["sitrusberry", "intimidate", "adamant", ["icefang", "taunt", "thunderwave", "waterfall"], 0.1111],
+      ["sitrusberry", "intimidate", "adamant", ["powerwhip", "protect", "taunt", "waterfall"], 0.1111],
+      ["sitrusberry", "intimidate", "careful", ["helpinghand", "icefang", "thunderwave", "waterfall"], 0.1111],
+      ["sitrusberry", "intimidate", "careful", ["helpinghand", "taunt", "thunderwave", "waterfall"], 0.1111]
+    ]
+  ],
+  "serperior": [
+    9,
+    [
+      ["sitrusberry", "contrary", "timid", ["glare", "leafstorm", "lightscreen", "reflect"], 0.5556],
+      ["choicescarf", "contrary", "modest", ["dragonpulse", "gigadrain", "leafstorm", "protect"], 0.1111],
+      ["choicescarf", "contrary", "modest", ["dragonpulse", "leafstorm", "protect", "sunnyday"], 0.1111],
+      ["cobaberry", "contrary", "timid", ["dragonpulse", "leafstorm", "protect", "taunt"], 0.1111],
+      ["miracleseed", "contrary", "timid", ["glare", "leafstorm", "lightscreen", "reflect"], 0.1111]
+    ]
+  ],
+  "snorlax": [
+    9,
+    [
+      ["leftovers", "thickfat", "relaxed", ["bodypress", "fissure", "protect", "stockpile"], 0.3333],
+      ["leftovers", "thickfat", "adamant", ["heavyslam", "protect", "rockslide", "yawn"], 0.1111],
+      ["leftovers", "thickfat", "relaxed", ["doubleedge", "highhorsepower", "protect", "yawn"], 0.1111],
+      ["leftovers", "thickfat", "relaxed", ["fissure", "protect", "smackdown", "stockpile"], 0.1111],
+      ["sitrusberry", "thickfat", "brave", ["bellydrum", "highhorsepower", "protect", "rockslide"], 0.1111],
+      ["sitrusberry", "thickfat", "impish", ["doubleedge", "fissure", "protect", "yawn"], 0.1111],
+      ["sitrusberry", "thickfat", "relaxed", ["doubleedge", "fissure", "protect", "yawn"], 0.1111]
+    ]
+  ],
+  "wyrdeer": [
+    9,
+    [
+      ["colburberry", "intimidate", "adamant", ["gravity", "hypnosis", "psyshieldbash", "trickroom"], 0.7778],
+      ["twistedspoon", "intimidate", "adamant", ["gravity", "hypnosis", "psyshieldbash", "trickroom"], 0.2222]
+    ]
+  ],
+  "feraligatrmega": [
+    8,
+    [
+      ["feraligite", "sheerforce", "adamant", ["aquajet", "doubleedge", "liquidation", "protect"], 0.25],
+      ["feraligite", "sheerforce", "adamant", ["aquajet", "bodyslam", "liquidation", "protect"], 0.125],
+      ["feraligite", "sheerforce", "adamant", ["aquajet", "doubleedge", "liquidation", "swordsdance"], 0.125],
+      ["feraligite", "sheerforce", "adamant", ["doubleedge", "dragondance", "liquidation", "protect"], 0.125],
+      ["feraligite", "sheerforce", "adamant", ["doubleedge", "facade", "liquidation", "protect"], 0.125],
+      ["feraligite", "sheerforce", "brave", ["aquajet", "doubleedge", "liquidation", "protect"], 0.125],
+      ["feraligite", "torrent", "adamant", ["aquajet", "doubleedge", "liquidation", "protect"], 0.125]
+    ]
+  ],
+  "ampharosmega": [
+    7,
+    [
+      ["ampharosite", "static", "quiet", ["dragonpulse", "paraboliccharge", "protect", "thunderbolt"], 0.2857],
+      ["ampharosite", "static", "modest", ["dragonpulse", "focusblast", "protect", "thunderbolt"], 0.1429],
+      ["ampharosite", "static", "quiet", ["dazzlinggleam", "dragonpulse", "protect", "thunderbolt"], 0.1429],
+      ["ampharosite", "static", "quiet", ["dazzlinggleam", "paraboliccharge", "powergem", "protect"], 0.1429],
+      ["ampharosite", "static", "quiet", ["dragonpulse", "focusblast", "protect", "thunderbolt"], 0.1429],
+      ["ampharosite", "static", "quiet", ["dragonpulse", "protect", "roar", "thunderbolt"], 0.1429]
+    ]
+  ],
+  "chandelure": [
+    7,
+    [
+      ["colburberry", "flashfire", "modest", ["heatwave", "hex", "protect", "trickroom"], 0.1429],
+      ["colburberry", "flashfire", "modest", ["heatwave", "protect", "shadowball", "trickroom"], 0.1429],
+      ["focussash", "flashfire", "modest", ["heatwave", "protect", "psychic", "shadowball"], 0.1429],
+      ["focussash", "flashfire", "modest", ["heatwave", "protect", "shadowball", "taunt"], 0.1429],
+      ["focussash", "flashfire", "modest", ["heatwave", "protect", "shadowball", "trickroom"], 0.1429],
+      ["focussash", "flashfire", "quiet", ["heatwave", "protect", "shadowball", "trickroom"], 0.1429],
+      ["passhoberry", "flashfire", "modest", ["heatwave", "imprison", "shadowball", "trickroom"], 0.1429]
+    ]
+  ],
+  "chandeluremega": [
+    7,
+    [
+      ["chandelurite", "flashfire", "modest", ["heatwave", "protect", "shadowball", "trickroom"], 0.2857],
+      ["chandelurite", "flamebody", "quiet", ["heatwave", "protect", "shadowball", "trickroom"], 0.1429],
+      ["chandelurite", "flashfire", "calm", ["calmmind", "heatwave", "protect", "shadowball"], 0.1429],
+      ["chandelurite", "flashfire", "calm", ["heatwave", "painsplit", "protect", "shadowball"], 0.1429],
+      ["chandelurite", "flashfire", "quiet", ["heatwave", "protect", "shadowball", "trickroom"], 0.1429],
+      ["chandelurite", "flashfire", "timid", ["heatwave", "protect", "shadowball", "willowisp"], 0.1429]
+    ]
+  ],
+  "clefablemega": [
+    7,
+    [
+      ["clefablite", "unaware", "bold", ["airslash", "dazzlinggleam", "followme", "protect"], 0.2857],
+      ["clefablite", "unaware", "calm", ["followme", "lifedew", "moonblast", "protect"], 0.2857],
+      ["clefablite", "unaware", "bold", ["dazzlinggleam", "followme", "protect", "psyshock"], 0.1429],
+      ["clefablite", "unaware", "calm", ["followme", "healingwish", "moonblast", "stealthrock"], 0.1429],
+      ["clefablite", "unaware", "modest", ["airslash", "dazzlinggleam", "followme", "protect"], 0.1429]
+    ]
+  ],
+  "ditto": [
+    7,
+    [
+      ["choicescarf", "imposter", "jolly", ["transform"], 0.1429],
+      ["choicescarf", "imposter", "lonely", ["transform"], 0.1429],
+      ["choicescarf", "imposter", "naive", ["transform"], 0.1429],
+      ["choicescarf", "imposter", "serious", ["transform"], 0.1429],
+      ["focussash", "imposter", "jolly", ["transform"], 0.1429],
+      ["focussash", "imposter", "serious", ["transform"], 0.1429],
+      ["quickclaw", "imposter", "timid", ["transform"], 0.1429]
+    ]
+  ],
+  "drampamega": [
+    7,
+    [
+      ["drampanite", "berserk", "quiet", ["dragonpulse", "earthpower", "hypervoice", "protect"], 0.2857],
+      ["drampanite", "berserk", "modest", ["earthpower", "hyperbeam", "icebeam", "protect"], 0.1429],
+      ["drampanite", "berserk", "relaxed", ["calmmind", "dragonpulse", "earthpower", "hypervoice"], 0.1429],
+      ["drampanite", "cloudnine", "quiet", ["calmmind", "dragonpulse", "hypervoice", "protect"], 0.1429],
+      ["drampanite", "cloudnine", "quiet", ["calmmind", "earthpower", "hypervoice", "protect"], 0.1429],
+      ["drampanite", "cloudnine", "quiet", ["dracometeor", "earthpower", "protect", "thunderbolt"], 0.1429]
+    ]
+  ],
+  "heliolisk": [
+    7,
+    [
+      ["brightpowder", "dryskin", "timid", ["protect", "raindance", "thunder", "weatherball"], 0.1429],
+      ["choicescarf", "dryskin", "modest", ["dragonpulse", "electroweb", "focusblast", "thunderbolt"], 0.1429],
+      ["choicescarf", "dryskin", "timid", ["electroweb", "shedtail", "thunderbolt", "voltswitch"], 0.1429],
+      ["choicescarf", "solarpower", "modest", ["electroweb", "hypervoice", "shedtail", "thunderbolt"], 0.1429],
+      ["choicescarf", "solarpower", "timid", ["allyswitch", "round", "shedtail", "thunderbolt"], 0.1429],
+      ["choicescarf", "solarpower", "timid", ["darkpulse", "dragonpulse", "hyperbeam", "thunderbolt"], 0.1429],
+      ["magnet", "dryskin", "timid", ["dragonpulse", "protect", "thunderbolt", "voltswitch"], 0.1429]
+    ]
+  ],
+  "klefki": [
+    7,
+    [
+      ["sitrusberry", "prankster", "bold", ["dazzlinggleam", "lightscreen", "reflect", "thunderwave"], 0.4286],
+      ["brightpowder", "prankster", "bold", ["dazzlinggleam", "lightscreen", "raindance", "reflect"], 0.1429],
+      ["leftovers", "prankster", "calm", ["dazzlinggleam", "protect", "raindance", "thunderwave"], 0.1429],
+      ["mentalherb", "prankster", "bold", ["dazzlinggleam", "lightscreen", "raindance", "reflect"], 0.1429],
+      ["sitrusberry", "prankster", "relaxed", ["dazzlinggleam", "lightscreen", "raindance", "reflect"], 0.1429]
+    ]
+  ],
+  "raichu": [
+    7,
+    [
+      ["focussash", "lightningrod", "modest", ["fakeout", "protect", "thunder", "voltswitch"], 0.1429],
+      ["focussash", "lightningrod", "timid", ["electroweb", "fakeout", "faketears", "voltswitch"], 0.1429],
+      ["focussash", "lightningrod", "timid", ["encore", "fakeout", "protect", "voltswitch"], 0.1429],
+      ["magnet", "lightningrod", "rash", ["electroweb", "lightscreen", "protect", "voltswitch"], 0.1429],
+      ["magnet", "lightningrod", "timid", ["encore", "fakeout", "thunderbolt", "voltswitch"], 0.1429],
+      ["shucaberry", "lightningrod", "timid", ["encore", "fakeout", "nuzzle", "thunderbolt"], 0.1429],
+      ["sitrusberry", "lightningrod", "timid", ["encore", "fakeout", "nuzzle", "thunderbolt"], 0.1429]
+    ]
+  ],
+  "slowkinggalar": [
+    7,
+    [
+      ["colburberry", "regenerator", "relaxed", ["chillyreception", "psychic", "sludgebomb", "trickroom"], 0.2857],
+      ["colburberry", "regenerator", "sassy", ["acidspray", "chillyreception", "protect", "trickroom"], 0.1429],
+      ["mentalherb", "regenerator", "relaxed", ["acidspray", "healpulse", "raindance", "trickroom"], 0.1429],
+      ["sitrusberry", "regenerator", "relaxed", ["acidspray", "psychic", "snarl", "trickroom"], 0.1429],
+      ["sitrusberry", "regenerator", "relaxed", ["chillyreception", "psyshock", "sludgebomb", "trickroom"], 0.1429],
+      ["sitrusberry", "regenerator", "sassy", ["chillyreception", "protect", "psychic", "sludgebomb"], 0.1429]
+    ]
+  ],
+  "abomasnowmega": [
+    6,
+    [
+      ["abomasite", "snowwarning", "quiet", ["auroraveil", "blizzard", "gigadrain", "protect"], 0.1667],
+      ["abomasite", "snowwarning", "quiet", ["blizzard", "earthpower", "energyball", "iceshard"], 0.1667],
+      ["abomasite", "snowwarning", "quiet", ["blizzard", "earthpower", "gigadrain", "protect"], 0.1667],
+      ["abomasite", "snowwarning", "quiet", ["blizzard", "energyball", "iceshard", "protect"], 0.1667],
+      ["abomasite", "snowwarning", "quiet", ["blizzard", "gigadrain", "iceshard", "protect"], 0.1667],
+      ["abomasite", "soundproof", "adamant", ["growth", "iceshard", "protect", "woodhammer"], 0.1667]
+    ]
+  ],
+  "cofagrigus": [
+    6,
+    [
+      ["blackglasses", "adaptability", "adamant", ["accelerock"], 0.1667],
+      ["leftovers", "mummy", "calm", ["curse", "haze", "shadowball", "willowisp"], 0.1667],
+      ["mentalherb", "mummy", "relaxed", ["bodypress", "faketears", "raindance", "trickroom"], 0.1667],
+      ["mentalherb", "mummy", "relaxed", ["bodypress", "irondefense", "shadowball", "trickroom"], 0.1667],
+      ["sitrusberry", "mummy", "relaxed", ["bodypress", "irondefense", "shadowball", "trickroom"], 0.1667],
+      ["sitrusberry", "mummy", "sassy", ["bodypress", "protect", "shadowball", "trickroom"], 0.1667]
+    ]
+  ],
+  "excadrillmega": [
+    6,
+    [
+      ["excadrite", "moldbreaker", "adamant", ["earthquake", "ironhead", "protect", "rockslide"], 0.3333],
+      ["excadrite", "moldbreaker", "jolly", ["highhorsepower", "ironhead", "protect", "rockslide"], 0.1667],
+      ["excadrite", "moldbreaker", "jolly", ["highhorsepower", "ironhead", "protect", "rocktomb"], 0.1667],
+      ["excadrite", "sandrush", "adamant", ["highhorsepower", "ironhead", "protect", "rockslide"], 0.1667],
+      ["excadrite", "sandrush", "jolly", ["drillrun", "ironhead", "protect", "rockslide"], 0.1667]
+    ]
+  ],
+  "gallademega": [
+    6,
+    [
+      ["galladite", "justified", "jolly", ["closecombat", "icepunch", "protect", "zenheadbutt"], 0.1667],
+      ["galladite", "sharpness", "adamant", ["closecombat", "protect", "rockslide", "tripleaxel"], 0.1667],
+      ["galladite", "sharpness", "adamant", ["leafblade", "protect", "rockslide", "sacredsword"], 0.1667],
+      ["galladite", "sharpness", "adamant", ["psychocut", "sacredsword", "taunt", "wideguard"], 0.1667],
+      ["galladite", "sharpness", "jolly", ["icepunch", "protect", "rocktomb", "sacredsword"], 0.1667],
+      ["galladite", "sharpness", "jolly", ["protect", "psychocut", "sacredsword", "trickroom"], 0.1667]
+    ]
+  ],
+  "gengar": [
+    6,
+    [
+      ["focussash", "cursedbody", "timid", ["icywind", "raindance", "sludgebomb", "taunt"], 0.3333],
+      ["choicescarf", "cursedbody", "timid", ["icywind", "shadowball", "sludgebomb", "trick"], 0.1667],
+      ["focussash", "cursedbody", "quiet", ["psychic", "shadowball", "sludgebomb", "trickroom"], 0.1667],
+      ["focussash", "cursedbody", "timid", ["icywind", "protect", "shadowball", "sludgebomb"], 0.1667],
+      ["focussash", "cursedbody", "timid", ["icywind", "shadowball", "sludgebomb", "taunt"], 0.1667]
+    ]
+  ],
+  "heracrossmega": [
+    6,
+    [
+      ["heracronite", "moxie", "brave", ["closecombat", "pinmissile", "protect", "rockblast"], 0.3333],
+      ["heracronite", "guts", "adamant", ["closecombat", "detect", "pinmissile", "rockblast"], 0.1667],
+      ["heracronite", "moxie", "adamant", ["bulletseed", "closecombat", "detect", "rockblast"], 0.1667],
+      ["heracronite", "moxie", "adamant", ["closecombat", "pinmissile", "protect", "rockblast"], 0.1667],
+      ["heracronite", "moxie", "jolly", ["bulletseed", "closecombat", "protect", "rockblast"], 0.1667]
+    ]
+  ],
+  "altariamega": [
+    5,
+    [
+      ["altarianite", "cloudnine", "adamant", ["bodyslam", "bravebird", "breakingswipe", "willowisp"], 0.2],
+      ["altarianite", "cloudnine", "brave", ["bodyslam", "bravebird", "dracometeor", "willowisp"], 0.2],
+      ["altarianite", "cloudnine", "modest", ["dracometeor", "hypervoice", "protect", "willowisp"], 0.2],
+      ["altarianite", "cloudnine", "modest", ["dragonpulse", "hypervoice", "protect", "tailwind"], 0.2],
+      ["altarianite", "cloudnine", "quiet", ["dragonpulse", "flamethrower", "moonblast", "protect"], 0.2]
+    ]
+  ],
+  "chesnaughtmega": [
+    5,
+    [
+      ["chesnaughtite", "bulletproof", "impish", ["bodypress", "spikyshield", "wideguard", "woodhammer"], 0.2],
+      ["chesnaughtite", "bulletproof", "relaxed", ["bodypress", "irondefense", "leechseed", "spikyshield"], 0.2],
+      ["chesnaughtite", "bulletproof", "relaxed", ["bodypress", "leechseed", "spikyshield", "wideguard"], 0.2],
+      ["chesnaughtite", "bulletproof", "relaxed", ["bodypress", "rockslide", "wideguard", "woodhammer"], 0.2],
+      ["chesnaughtite", "bulletproof", "relaxed", ["bodypress", "spikyshield", "wideguard", "woodhammer"], 0.2]
+    ]
+  ],
+  "hawluchamega": [
+    5,
+    [
+      ["hawluchanite", "limber", "jolly", ["bravebird", "closecombat", "detect", "entrainment"], 0.8],
+      ["hawluchanite", "limber", "jolly", ["crosschop", "detect", "dualwingbeat", "stoneedge"], 0.2]
+    ]
+  ],
+  "lycanroc": [
+    5,
+    [
+      ["focussash", "sandrush", "adamant", ["closecombat", "protect", "psychicfangs", "rockslide"], 0.4],
+      ["focussash", "sandrush", "adamant", ["closecombat", "endeavor", "endure", "rockslide"], 0.2],
+      ["focussash", "sandrush", "adamant", ["closecombat", "endeavor", "protect", "rockslide"], 0.2],
+      ["focussash", "sandrush", "jolly", ["closecombat", "howl", "protect", "rockslide"], 0.2]
+    ]
+  ],
+  "rotommow": [
+    5,
+    [
+      ["choicescarf", "levitate", "modest", ["discharge", "leafstorm", "protect", "trick"], 0.2],
+      ["magnet", "levitate", "modest", ["leafstorm", "protect", "thunderbolt", "willowisp"], 0.2],
+      ["sitrusberry", "levitate", "bold", ["eerieimpulse", "leafstorm", "voltswitch", "willowisp"], 0.2],
+      ["sitrusberry", "levitate", "bold", ["eerieimpulse", "protect", "voltswitch", "willowisp"], 0.2],
+      ["sitrusberry", "levitate", "calm", ["electroweb", "leafstorm", "thunderbolt", "willowisp"], 0.2]
+    ]
+  ],
+  "vanilluxe": [
+    5,
+    [
+      ["choicescarf", "snowwarning", "timid", ["auroraveil", "blizzard", "freezedry", "icywind"], 0.4],
+      ["choicescarf", "snowwarning", "timid", ["blizzard", "freezedry", "icywind", "sheercold"], 0.4],
+      ["nevermeltice", "snowwarning", "modest", ["auroraveil", "blizzard", "freezedry", "protect"], 0.2]
+    ]
+  ],
+  "arcanine": [
+    4,
+    [
+      ["sitrusberry", "intimidate", "adamant", ["closecombat", "extremespeed", "flareblitz", "morningsun"], 0.25],
+      ["sitrusberry", "intimidate", "adamant", ["extremespeed", "flareblitz", "protect", "snarl"], 0.25],
+      ["sitrusberry", "intimidate", "jolly", ["bulldoze", "extremespeed", "flareblitz", "playrough"], 0.25],
+      ["sitrusberry", "intimidate", "timid", ["overheat", "protect", "snarl", "willowisp"], 0.25]
+    ]
+  ],
+  "armarouge": [
+    4,
+    [
+      ["passhoberry", "flashfire", "modest", ["armorcannon", "psychic", "trickroom", "wideguard"], 0.5],
+      ["colburberry", "flashfire", "modest", ["aurasphere", "heatwave", "psychic", "wideguard"], 0.25],
+      ["mentalherb", "flashfire", "quiet", ["allyswitch", "armorcannon", "trickroom", "wideguard"], 0.25]
+    ]
+  ],
+  "basculegionf": [
+    4,
+    [
+      ["brightpowder", "adaptability", "modest", ["icebeam", "muddywater", "protect", "shadowball"], 0.25],
+      ["focussash", "swiftswim", "modest", ["icebeam", "muddywater", "protect", "shadowball"], 0.25],
+      ["mysticwater", "swiftswim", "modest", ["hydropump", "muddywater", "protect", "shadowball"], 0.25],
+      ["spelltag", "adaptability", "modest", ["hex", "icebeam", "muddywater", "protect"], 0.25]
+    ]
+  ],
+  "bellibolt": [
+    4,
+    [
+      ["leftovers", "electromorphosis", "modest", ["paraboliccharge", "protect", "thunderbolt", "weatherball"], 0.25],
+      ["magnet", "electromorphosis", "modest", ["discharge", "electroweb", "protect", "thunderbolt"], 0.25],
+      ["magnet", "electromorphosis", "modest", ["paraboliccharge", "protect", "soak", "thunderbolt"], 0.25],
+      ["magnet", "electromorphosis", "quiet", ["paraboliccharge", "protect", "soak", "voltswitch"], 0.25]
+    ]
+  ],
+  "conkeldurr": [
+    4,
+    [
+      ["blackbelt", "ironfist", "brave", ["detect", "drainpunch", "machpunch", "thunderpunch"], 0.25],
+      ["blastoisinite", "adaptability", "adamant", ["accelerock"], 0.25],
+      ["cobaberry", "ironfist", "brave", ["drainpunch", "icepunch", "protect", "thunderpunch"], 0.25],
+      ["roseliberry", "guts", "brave", ["closecombat", "machpunch", "poisonjab", "thunderpunch"], 0.25]
+    ]
+  ],
+  "decidueyehisui": [
+    4,
+    [
+      ["scopelens", "scrappy", "adamant", ["leafblade", "protect", "triplearrows", "upperhand"], 0.5],
+      ["kebiaberry", "scrappy", "jolly", ["haze", "leafblade", "protect", "triplearrows"], 0.25],
+      ["scopelens", "scrappy", "adamant", ["leafblade", "protect", "suckerpunch", "triplearrows"], 0.25]
+    ]
+  ],
+  "gliscor": [
+    4,
+    [
+      ["brightpowder", "sandveil", "adamant", ["dualwingbeat", "earthquake", "protect", "swordsdance"], 0.5],
+      ["leftovers", "hypercutter", "impish", ["dualwingbeat", "highhorsepower", "stoneedge", "tailwind"], 0.25],
+      [null, "hypercutter", "impish", ["acrobatics", "feint", "highhorsepower", "tailwind"], 0.25]
+    ]
+  ],
+  "goodrahisui": [
+    4,
+    [
+      ["leftovers", "shellarmor", "bold", ["bodypress", "protect", "shelter", "thunderbolt"], 0.25],
+      ["leftovers", "shellarmor", "careful", ["bodypress", "heavyslam", "lifedew", "shelter"], 0.25],
+      ["metalcoat", "sapsipper", "impish", ["breakingswipe", "ironhead", "lifedew", "protect"], 0.25],
+      ["shucaberry", "sapsipper", "relaxed", ["ancientpower", "dragonpulse", "flashcannon", "mudshot"], 0.25]
+    ]
+  ],
+  "mudsdale": [
+    4,
+    [
+      ["sitrusberry", "stamina", "brave", ["heavyslam", "highhorsepower", "protect", "rockslide"], 0.25],
+      ["softsand", "innerfocus", "brave", ["closecombat", "highhorsepower", "protect", "rockslide"], 0.25],
+      ["softsand", "innerfocus", "brave", ["earthquake", "heavyslam", "highhorsepower", "rockslide"], 0.25],
+      ["softsand", "innerfocus", "brave", ["highhorsepower", "lowkick", "protect", "rockslide"], 0.25]
+    ]
+  ],
+  "quaquaval": [
+    4,
+    [
+      ["focussash", "moxie", "adamant", ["aquastep", "closecombat", "knockoff", "protect"], 0.25],
+      ["rindoberry", "moxie", "adamant", ["aquastep", "closecombat", "icespinner", "protect"], 0.25],
+      ["shellbell", "moxie", "adamant", ["aquastep", "closecombat", "detect", "icespinner"], 0.25],
+      ["whiteherb", "moxie", "adamant", ["aquastep", "closecombat", "detect", "icespinner"], 0.25]
+    ]
+  ],
+  "torterra": [
+    4,
+    [
+      ["softsand", "shellarmor", "adamant", ["headlongrush", "protect", "wideguard", "woodhammer"], 0.5],
+      ["whiteherb", "shellarmor", "adamant", ["headlongrush", "protect", "seedbomb", "shellsmash"], 0.25],
+      ["whiteherb", "shellarmor", "sassy", ["earthquake", "ironhead", "wideguard", "woodhammer"], 0.25]
+    ]
+  ],
+  "umbreon": [
+    4,
+    [
+      ["blackglasses", "innerfocus", "bold", ["faketears", "foulplay", "roar", "snarl"], 0.25],
+      ["blackglasses", "innerfocus", "impish", ["confuseray", "detect", "foulplay", "snarl"], 0.25],
+      ["leftovers", "innerfocus", "bold", ["foulplay", "snarl", "taunt", "yawn"], 0.25],
+      ["leftovers", "innerfocus", "sassy", ["detect", "foulplay", "meanlook", "yawn"], 0.25]
+    ]
+  ],
+  "absol": [
+    3,
+    [
+      ["scopelens", "superluck", "adamant", ["closecombat", "nightslash", "protect", "suckerpunch"], 0.6667],
+      ["scopelens", "superluck", "adamant", ["nightslash", "protect", "psychocut", "suckerpunch"], 0.3333]
+    ]
+  ],
+  "altaria": [
+    3,
+    [
+      ["habanberry", "cloudnine", "impish", ["protect", "roar", "tailwind", "willowisp"], 0.3333],
+      ["leftovers", "cloudnine", "careful", ["bravebird", "protect", "tailwind", "willowisp"], 0.3333],
+      ["sitrusberry", "cloudnine", "calm", ["helpinghand", "perishsong", "protect", "tailwind"], 0.3333]
+    ]
+  ],
+  "bastiodon": [
+    3,
+    [
+      ["babiriberry", "adaptability", "adamant", ["accelerock"], 0.3333],
+      ["leftovers", "soundproof", "relaxed", ["bodypress", "irondefense", "metalburst", "protect"], 0.3333],
+      ["shucaberry", "soundproof", "relaxed", ["bodypress", "foulplay", "irondefense", "wideguard"], 0.3333]
+    ]
+  ],
+  "drampa": [
+    3,
+    [
+      ["lumberry", "cloudnine", "quiet", ["dracometeor", "heatwave", "hypervoice", "protect"], 0.3333],
+      ["sitrusberry", "cloudnine", "bold", ["dracometeor", "helpinghand", "protect", "thunderbolt"], 0.3333],
+      ["whiteherb", "berserk", "modest", ["dracometeor", "flamethrower", "hypervoice", "thunderbolt"], 0.3333]
+    ]
+  ],
+  "glaceon": [
+    3,
+    [
+      ["brightpowder", "snowcloak", "modest", ["blizzard", "freezedry", "iceshard", "protect"], 0.3333],
+      ["brightpowder", "snowcloak", "modest", ["blizzard", "freezedry", "protect", "shadowball"], 0.3333],
+      ["leftovers", "icebody", "modest", ["blizzard", "calmmind", "freezedry", "protect"], 0.3333]
+    ]
+  ],
+  "greninjamega": [
+    3,
+    [
+      ["greninjite", "protean", "timid", ["darkpulse", "hydropump", "icebeam", "protect"], 0.3333],
+      ["greninjite", "protean", "timid", ["darkpulse", "icebeam", "protect", "round"], 0.3333],
+      ["greninjite", "torrent", "hasty", ["darkpulse", "gunkshot", "icebeam", "rockslide"], 0.3333]
+    ]
+  ],
+  "hippowdon": [
+    3,
+    [
+      ["leftovers", "sandstream", "adamant", ["earthquake", "protect", "stoneedge", "yawn"], 0.3333],
+      ["passhoberry", "sandstream", "careful", ["highhorsepower", "protect", "stoneedge", "yawn"], 0.3333],
+      ["passhoberry", "sandstream", "impish", ["highhorsepower", "protect", "stoneedge", "yawn"], 0.3333]
+    ]
+  ],
+  "infernape": [
+    3,
+    [
+      ["charcoal", "blaze", "timid", ["encore", "fakeout", "overheat", "willowisp"], 0.3333],
+      ["focussash", "blaze", "timid", ["aurasphere", "fakeout", "heatwave", "protect"], 0.3333],
+      ["focussash", "blaze", "timid", ["fakeout", "focusblast", "overheat", "protect"], 0.3333]
+    ]
+  ],
+  "leafeon": [
+    3,
+    [
+      ["miracleseed", "chlorophyll", "adamant", ["detect", "knockoff", "solarblade", "swordsdance"], 0.6667],
+      ["miracleseed", "chlorophyll", "jolly", ["detect", "focusenergy", "knockoff", "leafblade"], 0.3333]
+    ]
+  ],
+  "medichammega": [
+    3,
+    [
+      ["medichamite", "purepower", "adamant", ["bulletpunch", "closecombat", "fakeout", "psychocut"], 0.3333],
+      ["medichamite", "purepower", "adamant", ["closecombat", "fakeout", "poisonjab", "rockslide"], 0.3333],
+      ["medichamite", "purepower", "jolly", ["closecombat", "fakeout", "protect", "zenheadbutt"], 0.3333]
+    ]
+  ],
+  "meowstic": [
+    3,
+    [
+      ["sitrusberry", "prankster", "bold", ["lightscreen", "psychic", "raindance", "reflect"], 0.6667],
+      ["focussash", "prankster", "jolly", ["fakeout", "helpinghand", "psychicterrain", "reflect"], 0.3333]
+    ]
+  ],
+  "orthworm": [
+    3,
+    [
+      ["sitrusberry", "eartheater", "jolly", ["bodypress", "heavyslam", "protect", "shedtail"], 0.3333],
+      ["sitrusberry", "eartheater", "relaxed", ["bodypress", "heavyslam", "protect", "shedtail"], 0.3333],
+      ["sitrusberry", "sandveil", "impish", ["bodypress", "bulldoze", "helpinghand", "shedtail"], 0.3333]
+    ]
+  ],
+  "raichualola": [
+    3,
+    [
+      ["focussash", "surgesurfer", "naive", ["eerieimpulse", "fakeout", "psychic", "thunderbolt"], 0.3333],
+      ["magnet", "surgesurfer", "modest", ["electroweb", "fakeout", "psychic", "thunderbolt"], 0.3333],
+      ["magnet", "surgesurfer", "timid", ["protect", "psychic", "thunderbolt", "voltswitch"], 0.3333]
+    ]
+  ],
+  "rhyperior": [
+    3,
+    [
+      ["hardstone", "lightningrod", "brave", ["highhorsepower", "icepunch", "protect", "rockslide"], 0.3333],
+      ["rindoberry", "solidrock", "brave", ["highhorsepower", "icepunch", "protect", "rockslide"], 0.3333],
+      ["softsand", "solidrock", "adamant", ["earthquake", "highhorsepower", "protect", "rockslide"], 0.3333]
+    ]
+  ],
+  "rotomfrost": [
+    3,
+    [
+      ["choicescarf", "levitate", "timid", ["blizzard", "darkpulse", "shadowball", "voltswitch"], 0.3333],
+      ["choicescarf", "levitate", "timid", ["blizzard", "electroweb", "thunderbolt", "voltswitch"], 0.3333],
+      ["nevermeltice", "levitate", "modest", ["blizzard", "protect", "thunderbolt", "willowisp"], 0.3333]
+    ]
+  ],
+  "victreebelmega": [
+    3,
+    [
+      ["victreebelite", "chlorophyll", "timid", ["acidspray", "gigadrain", "protect", "strengthsap"], 0.6667],
+      ["victreebelite", "chlorophyll", "modest", ["gigadrain", "protect", "sludgebomb", "strengthsap"], 0.3333]
+    ]
+  ],
+  "alakazam": [
+    2,
+    [
+      ["focussash", "innerfocus", "timid", ["encore", "protect", "psychic", "taunt"], 0.5],
+      ["twistedspoon", "innerfocus", "timid", ["protect", "psychic", "psychicterrain", "shadowball"], 0.5]
+    ]
+  ],
+  "alakazammega": [
+    2,
+    [
+      ["alakazite", "innerfocus", "timid", ["focusblast", "psychic", "safeguard", "speedswap"], 0.5],
+      ["alakazite", "magicguard", "timid", ["expandingforce", "focusblast", "protect", "shadowball"], 0.5]
+    ]
+  ],
+  "alcremie": [
+    2,
+    [
+      ["kebiaberry", "aromaveil", "modest", ["dazzlinggleam", "decorate", "protect", "psychic"], 0.5],
+      ["quickclaw", "aromaveil", "timid", ["babydolleyes", "dazzlinggleam", "decorate", "helpinghand"], 0.5]
+    ]
+  ],
+  "arbok": [
+    2,
+    [
+      ["poisonbarb", "intimidate", "adamant", ["glare", "gunkshot", "knockoff", "protect"], 0.5],
+      ["shucaberry", "intimidate", "brave", ["glare", "gunkshot", "protect", "snarl"], 0.5]
+    ]
+  ],
+  "banettemega": [
+    2,
+    [
+      ["banettite", "insomnia", "adamant", ["destinybond", "encore", "poltergeist", "shadowsneak"], 0.5],
+      ["banettite", "insomnia", "adamant", ["destinybond", "poltergeist", "raindance", "willowisp"], 0.5]
+    ]
+  ],
+  "blastoise": [2, [["choicescarf", "raindish", "timid", ["aurasphere", "flipturn", "icebeam", "waterspout"], 1]]],
+  "chesnaught": [
+    2,
+    [
+      ["roseliberry", "bulletproof", "careful", ["bodypress", "leechseed", "spikyshield", "wideguard"], 0.5],
+      ["sitrusberry", "bulletproof", "impish", ["bodypress", "spikyshield", "woodhammer", "zenheadbutt"], 0.5]
+    ]
+  ],
+  "emboarmega": [
+    2,
+    [
+      ["emboarite", "reckless", "adamant", ["closecombat", "flareblitz", "headsmash", "protect"], 0.5],
+      ["emboarite", "reckless", "adamant", ["closecombat", "flareblitz", "protect", "suckerpunch"], 0.5]
+    ]
+  ],
+  "gardevoir": [
+    2,
+    [
+      ["choicescarf", "trace", "modest", ["dazzlinggleam", "moonblast", "psyshock", "thunderbolt"], 0.5],
+      ["focussash", "telepathy", "modest", ["icywind", "moonblast", "protect", "psychic"], 0.5]
+    ]
+  ],
+  "glaliemega": [
+    2,
+    [
+      ["glalitite", "innerfocus", "adamant", ["bodyslam", "disable", "explosion", "protect"], 0.5],
+      ["glalitite", "innerfocus", "adamant", ["explosion", "icespinner", "protect", "taunt"], 0.5]
+    ]
+  ],
+  "jolteon": [
+    2,
+    [
+      ["focussash", "voltabsorb", "timid", ["electroweb", "protect", "raindance", "voltswitch"], 0.5],
+      ["magnet", "voltabsorb", "modest", ["electroweb", "helpinghand", "protect", "thunderbolt"], 0.5]
+    ]
+  ],
+  "krookodile": [
+    2,
+    [
+      ["choicescarf", "intimidate", "jolly", ["earthquake", "highhorsepower", "knockoff", "rocktomb"], 0.5],
+      ["chopleberry", "intimidate", "adamant", ["earthquake", "knockoff", "protect", "taunt"], 0.5]
+    ]
+  ],
+  "machamp": [
+    2,
+    [
+      ["leftovers", "guts", "adamant", ["bulletpunch", "rockslide", "stormthrow", "wideguard"], 0.5],
+      ["sitrusberry", "noguard", "adamant", ["bulletpunch", "dynamicpunch", "knockoff", "wideguard"], 0.5]
+    ]
+  ],
+  "medicham": [
+    2,
+    [
+      ["focussash", "purepower", "adamant", ["closecombat", "detect", "fakeout", "psychocut"], 0.5],
+      ["focussash", "purepower", "brave", ["closecombat", "fakeout", "psychocut", "trickroom"], 0.5]
+    ]
+  ],
+  "mrrime": [
+    2,
+    [
+      ["mentalherb", "screencleaner", "modest", ["fakeout", "freezedry", "protect", "trickroom"], 0.5],
+      ["nevermeltice", "screencleaner", "quiet", ["fakeout", "freezedry", "haze", "psychic"], 0.5]
+    ]
+  ],
+  "noivern": [
+    2,
+    [
+      ["dragonfang", "infiltrator", "timid", ["dracometeor", "protect", "shadowball", "uturn"], 0.5],
+      ["focussash", "telepathy", "timid", ["dracometeor", "dragoncheer", "protect", "tailwind"], 0.5]
+    ]
+  ],
+  "pikachu": [
+    2,
+    [
+      ["lightball", "lightningrod", "modest", ["alluringvoice", "fakeout", "feint", "thunder"], 0.5],
+      [null, "lightningrod", "modest", ["quickattack"], 0.5]
+    ]
+  ],
+  "rampardos": [
+    2,
+    [
+      ["choicescarf", "sheerforce", "jolly", ["crunch", "ironhead", "rockslide", "zenheadbutt"], 0.5],
+      ["hardstone", "sheerforce", "brave", ["breakingswipe", "firepunch", "protect", "rockslide"], 0.5]
+    ]
+  ],
+  "sharpedomega": [
+    2,
+    [
+      ["sharpedonite", "speedboost", "adamant", ["crunch", "icefang", "liquidation", "protect"], 0.5],
+      ["sharpedonite", "speedboost", "adamant", ["crunch", "liquidation", "protect", "psychicfangs"], 0.5]
+    ]
+  ],
+  "slowbrogalar": [
+    2,
+    [
+      ["quickclaw", "quickdraw", "brave", ["rockblast", "shellsidearm", "substitute", "zenheadbutt"], 0.5],
+      ["quickclaw", "quickdraw", "sassy", ["icebeam", "protect", "psychic", "shellsidearm"], 0.5]
+    ]
+  ],
+  "slowking": [
+    2,
+    [
+      ["colburberry", "oblivious", "sassy", ["chillyreception", "hydropump", "psychic", "trickroom"], 0.5],
+      ["colburberry", "regenerator", "relaxed", ["chillyreception", "psychic", "scald", "trickroom"], 0.5]
+    ]
+  ],
+  "spiritomb": [
+    2,
+    [
+      ["focussash", "infiltrator", "relaxed", ["destinybond", "foulplay", "snarl", "trickroom"], 0.5],
+      ["sitrusberry", "infiltrator", "sassy", ["lashout", "psychic", "trickroom", "willowisp"], 0.5]
+    ]
+  ],
+  "taurospaldeablaze": [
+    2,
+    [
+      ["whiteherb", "intimidate", "adamant", ["closecombat", "flareblitz", "protect", "rockslide"], 0.5],
+      ["whiteherb", "intimidate", "adamant", ["closecombat", "flareblitz", "protect", "rocktomb"], 0.5]
+    ]
+  ],
+  "toucannon": [
+    2,
+    [
+      ["focussash", "skilllink", "adamant", ["beakblast", "bulletseed", "rockblast", "tailwind"], 0.5],
+      ["lumberry", "skilllink", "adamant", ["beakblast", "bulletseed", "protect", "rockblast"], 0.5]
+    ]
+  ],
+  "ariados": [1, [["sitrusberry", "insomnia", "bold", ["protect", "ragepowder", "stringshot", "strugglebug"], 1]]],
+  "aurorus": [1, [["nevermeltice", "snowwarning", "bold", ["ancientpower", "blizzard", "freezedry", "protect"], 1]]],
+  "beartic": [1, [["cobaberry", "adaptability", "adamant", ["accelerock"], 1]]],
+  "beedrillmega": [1, [["beedrillite", "sniper", "adamant", ["knockoff", "poisonjab", "protect", "uturn"], 1]]],
+  "emolga": [1, [["focussash", "motordrive", "jolly", ["encore", "helpinghand", "nuzzle", "taunt"], 1]]],
+  "empoleon": [1, [["shucaberry", "competitive", "modest", ["flashcannon", "hydropump", "icebeam", "protect"], 1]]],
+  "espeon": [1, [["focussash", "magicbounce", "timid", ["powergem", "protect", "psychic", "yawn"], 1]]],
+  "floetteeternal": [
+    1,
+    [["fairyfeather", "flowerveil", "modest", ["dazzlinggleam", "moonblast", "pollenpuff", "protect"], 1]]
+  ],
+  "furfrou": [1, [["sitrusberry", "furcoat", "bold", ["cottonguard", "helpinghand", "protect", "snarl"], 1]]],
+  "garganacl": [1, [["leftovers", "purifyingsalt", "careful", ["bodypress", "recover", "saltcure", "wideguard"], 1]]],
+  "goodra": [1, [["habanberry", "sapsipper", "modest", ["dragonpulse", "icebeam", "protect", "thunderbolt"], 1]]],
+  "hawlucha": [1, [["lumberry", "unburden", "adamant", ["bravebird", "closecombat", "protect", "throatchop"], 1]]],
+  "heracross": [1, [["whiteherb", "moxie", "jolly", ["detect", "lowkick", "megahorn", "rocktomb"], 1]]],
+  "hydrapple": [1, [["whiteherb", "regenerator", "quiet", ["dracometeor", "gigadrain", "pollenpuff", "protect"], 1]]],
+  "liepard": [1, [["focussash", "prankster", "adamant", ["fakeout", "knockoff", "raindance", "suckerpunch"], 1]]],
+  "lucario": [
+    1,
+    [["choicescarf", "innerfocus", "jolly", ["closecombat", "finalgambit", "meteormash", "thunderpunch"], 1]]
+  ],
+  "luxray": [1, [["shucaberry", "intimidate", "careful", ["howl", "protect", "superpower", "wildcharge"], 1]]],
+  "lycanrocmidnight": [
+    1,
+    [["choicescarf", "noguard", "adamant", ["irontail", "rockslide", "shadowclaw", "stoneedge"], 1]]
+  ],
+  "manectric": [
+    1,
+    [["choicescarf", "lightningrod", "modest", ["hypervoice", "thunder", "thunderbolt", "voltswitch"], 1]]
+  ],
+  "morpeko": [1, [["focussash", "hungerswitch", "jolly", ["aurawheel", "batonpass", "fakeout", "protect"], 1]]],
+  "ninetales": [1, [["leftovers", "drought", "bold", ["burningjealousy", "protect", "roar", "snarl"], 1]]],
+  "pangoro": [1, [["focussash", "scrappy", "adamant", ["bulletpunch", "detect", "knockoff", "stormthrow"], 1]]],
+  "passimian": [1, [["blackbelt", "defiant", "adamant", ["closecombat", "coaching", "knockoff", "protect"], 1]]],
+  "pinsirmega": [1, [["pinsirite", "hypercutter", "adamant", ["bodyslam", "detect", "feint", "stormthrow"], 1]]],
+  "polteageist": [1, [["whiteherb", "cursedbody", "modest", ["batonpass", "protect", "shellsmash", "storedpower"], 1]]],
+  "reuniclus": [1, [["sitrusberry", "regenerator", "quiet", ["focusblast", "helpinghand", "psychic", "trickroom"], 1]]],
+  "rotomfan": [1, [["sitrusberry", "levitate", "modest", ["airslash", "electroweb", "thunderbolt", "willowisp"], 1]]],
+  "runerigus": [
+    1,
+    [["leftovers", "wanderingspirit", "sassy", ["phantomforce", "protect", "trickroom", "willowisp"], 1]]
+  ],
+  "salazzle": [1, [["focussash", "oblivious", "timid", ["dragoncheer", "fakeout", "overheat", "sludgebomb"], 1]]],
+  "simisear": [1, [["shucaberry", "blaze", "timid", ["fakeout", "overheat", "sunnyday", "willowisp"], 1]]],
+  "slowbromega": [1, [["slowbronite", "oblivious", "calm", ["amnesia", "bodypress", "irondefense", "slackoff"], 1]]],
+  "steelix": [1, [["quickclaw", "sturdy", "adamant", ["highhorsepower", "ironhead", "protect", "wideguard"], 1]]],
+  "stunfisk": [1, [["magnet", "sandveil", "quiet", ["earthpower", "eerieimpulse", "protect", "thunderbolt"], 1]]],
+  "taurospaldeacombat": [
+    1,
+    [["sitrusberry", "intimidate", "jolly", ["protect", "ragingbull", "rockslide", "throatchop"], 1]]
+  ],
+  "vaporeon": [1, [["brightpowder", "waterabsorb", "calm", ["acidarmor", "batonpass", "calmmind", "scald"], 1]]]
+}

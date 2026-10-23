@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, h, ref, render, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useMediaQuery } from '@vueuse/core'
 import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp, Info } from '@lucide/vue'
 import { ability, available, availableIds, item, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { MOVES } from '@/data/moves'
@@ -18,9 +19,20 @@ import {
   statColor,
 } from '@/data/pokemon'
 import { datasetDates, GENERATED_SNAPSHOTS, loadHistory, pastRoster, percent, type MetaHistory } from '@/data/meta'
-import { baselineOf, EVENTS, loadEventUsage, type EventUsage, type TournamentEvent } from '@/data/tournaments'
+import {
+  baselineOf,
+  buildParam,
+  buildsRegulation,
+  EVENTS,
+  eventsOf,
+  loadEventUsage,
+  loadRegulationBuilds,
+  type EventUsage,
+  type RegulationBuilds,
+  type TournamentEvent,
+} from '@/data/tournaments'
 import { natureEffectOn, natureEffects, natureName } from '@/data/natures'
-import { locale, t, typeName } from '@/i18n'
+import { locale, t, tSlots, typeName } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
 import { MIN_SHARE, speedBuilds } from '@/lib/speed'
@@ -28,7 +40,7 @@ import { FASTEST, type SpeedBuild } from '@/lib/speedBuild'
 import { commonSpeed, odds, reachOf, setSpread, type SpreadPoint } from '@/lib/speedLineup'
 import { MAX_POINTS, statValue } from '@/lib/stats'
 import { percentiles } from '@/lib/statPercentiles'
-import { pooledUsage } from '@/lib/tournamentStats'
+import { MIN_MATCHES, pooledUsage } from '@/lib/tournamentStats'
 import { useListOptions } from '@/composables/useListOptions'
 import { useMeta } from '@/composables/useMeta'
 import { useSpeedOptions } from '@/composables/useSpeedOptions'
@@ -46,6 +58,7 @@ import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonChips from '@/components/PokemonChips.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import ListOptions from '@/components/ListOptions.vue'
+import MoreToggle from '@/components/MoreToggle.vue'
 import OptionsMenu from '@/components/OptionsMenu.vue'
 import SectionNav from '@/components/SectionNav.vue'
 import ShareSplit from '@/components/ShareSplit.vue'
@@ -59,8 +72,9 @@ import UsageShift from '@/components/UsageShift.vue'
 // lowers it, and its natures; then, smaller, its rank, usage and how often it's brought. Then what its sets run (moves,
 // items, abilities, each with its share of them), its most common exact spreads (each a row of bars: the points in each
 // stat, and the stat they give), its Speeds as the speed tiers draw them, its usage over the months of the dataset's
-// series, and last its teammates. Where the data has them (tournaments' team lists), its whole builds come after its
-// moves and items: the same item, ability, nature and moves together. The dex has the rest of it, a link away.
+// series, and last its teammates. After its moves and items, its whole builds (the same item, ability, nature and moves
+// together), from tournaments' team lists: the data shown's own when it has them, else every official event of its
+// regulation's. The dex has the rest of it, a link away.
 const route = useRoute()
 const id = computed(() => String(route.params.id) as PokemonId)
 const ref_ = computed(() => pokemon(id.value))
@@ -112,10 +126,14 @@ function natureTip(id: string) {
   if (!e) return t('usageMon.natureNeutral')
   let el = natureTips.get(id)
   if (!el) {
-    el = document.createElement('span')
-    render(
-      h('span', [h(EffectTag, { effect: 'up', stat: e.plus }), ' ', h(EffectTag, { effect: 'down', stat: e.minus })]),
-      el,
+    // Drawn once the render asking for it is done: `render` runs Vue's pending post-render work at once, a deferred
+    // Teleport among it, which would look for its target before the page is in the document.
+    const tip = (el = document.createElement('span'))
+    queueMicrotask(() =>
+      render(
+        h('span', [h(EffectTag, { effect: 'up', stat: e.plus }), ' ', h(EffectTag, { effect: 'down', stat: e.minus })]),
+        tip,
+      ),
     )
     natureTips.set(id, el)
   }
@@ -212,11 +230,67 @@ const spreads = computed(() =>
 )
 
 // Its most common builds, a card each: its rank and share of its sets, then its item, ability and nature, then its
-// moves, the most run of them first, as its moves' list has them, each with its type's badge.
+// moves, the most run of them first, as its moves' list has them, each with its type's badge. The data shown's own
+// when it has them (a tournament snapshot), else those of every official event of its regulation (generated whole,
+// `loadRegulationBuilds`): the most sets there are under one set of rules, a regulation lasting a couple of months, so
+// a Pokémon's builds aren't scattered thin as they would be at an event or two, nor at Day 2's teams alone.
+// Until its regulation has had an event, those of the regulation before it, said so over them (`buildsRegulation`).
+const regulationBuilds = shallowRef<{
+  /** The regulation shown, and the one the builds are of. */
+  shown: string
+  regulation: string
+  fallback: boolean
+  builds: Partial<Record<PokemonId, RegulationBuilds>>
+}>()
+/** The day a regulation's data starts: its earliest dataset's. */
+const regulationStart = (r: string) =>
+  GENERATED_SNAPSHOTS.filter((s) => s.regulation === r).reduce<string | undefined>(
+    (a, s) => (!a || s.from < a ? s.from : a),
+    undefined,
+  )
+watch(
+  () => (snapshot.value && !snapshot.value.capabilities.includes('builds') ? snapshot.value.regulation : undefined),
+  async (shown) => {
+    if (!shown || regulationBuilds.value?.shown === shown) return
+    const from = buildsRegulation(shown, regulationStart(shown))
+    const b = from ? await loadRegulationBuilds(from.regulation) : {}
+    if (snapshot.value?.regulation === shown)
+      regulationBuilds.value = {
+        shown,
+        regulation: from?.regulation ?? shown,
+        fallback: !!from?.fallback,
+        builds: b,
+      }
+  },
+  { immediate: true },
+)
+const buildsFrom = computed(() => {
+  if (m.value?.builds) return { builds: m.value.builds, sets: m.value.teams, events: undefined }
+  const r = regulationBuilds.value
+  const own = r && r.shown === snapshot.value?.regulation ? r.builds[id.value] : undefined
+  return own
+    ? {
+        builds: own.builds,
+        sets: own.sets,
+        events: eventsOf(r!.regulation),
+        regulation: r!.regulation,
+        fallback: r!.fallback ? r!.shown : undefined,
+      }
+    : { builds: [], sets: undefined, events: undefined }
+})
+// Its first `BUILDS_TOP` (on phones `BUILDS_TOP_PHONE`) until unfolded (`MoreToggle`), then every one the data keeps.
+const BUILDS_TOP = 5
+const BUILDS_TOP_PHONE = 2
+const phone = useMediaQuery('(max-width: 720px)')
+const buildsTop = computed(() => (phone.value ? BUILDS_TOP_PHONE : BUILDS_TOP))
+const allBuilds = ref(false)
+watch(id, () => (allBuilds.value = false))
 const builds = computed(() =>
-  (m.value?.builds ?? []).map((b) => ({
+  buildsFrom.value.builds.map((b) => ({
     ...b,
     moves: [...b.moves].sort((x, y) => (moveShares.value[y] ?? 0) - (moveShares.value[x] ?? 0)),
+    // How many teams ran it, from its share of the sets.
+    teams: Math.round(b.share * (buildsFrom.value.sets ?? 0)),
   })),
 )
 
@@ -323,6 +397,23 @@ const topMonth = computed(() => Math.max(...months.value.map((x) => x.usage ?? 0
 // meta shown, so shown with or without its data, and only when some event had it.
 const eventUsage = shallowRef<Record<string, EventUsage> | null>(null)
 void loadEventUsage().then((u) => (eventUsage.value = u))
+// Its teams' win rate at the official tournaments of the regulation shown, every event's matches added up (as each
+// event's Pokémon tab counts them), from the same few numbers; none under the whole field's minimum of matches.
+const winRate = computed(() => {
+  const u = eventUsage.value
+  const r = snapshot.value?.regulation
+  if (!u || !r) return null
+  let wins = 0
+  let losses = 0
+  for (const e of eventsOf(r)) {
+    const [, , , , w = 0, l = 0] = u[e.id]?.pokemon[id.value] ?? []
+    wins += w
+    losses += l
+  }
+  return wins + losses >= MIN_MATCHES.all
+    ? { rate: wins / (wins + losses), wins, games: wins + losses, regulation: r }
+    : null
+})
 interface EventRow {
   event: TournamentEvent
   usage: number
@@ -470,6 +561,20 @@ const sections = computed(() =>
             ><strong>{{ percent(m.brought) }}</strong>
             <span v-tip="t('usage.broughtTip')" class="muted tipped">{{ t('usageMon.brought') }}</span></span
           >
+          <span v-if="winRate" class="used-part"
+            ><strong>{{ percent(winRate.rate) }}</strong>
+            <span
+              v-tip="
+                t('usageMon.winRateTip', {
+                  wins: winRate.wins.toLocaleString(locale),
+                  games: winRate.games.toLocaleString(locale),
+                  regulation: winRate.regulation,
+                })
+              "
+              class="muted tipped"
+              >{{ t('usageMon.winRate') }}</span
+            ></span
+          >
         </p>
       </div>
       <!-- Its stats as the dex has them, each with its sets' most common nature's mark. -->
@@ -613,9 +718,36 @@ const sections = computed(() =>
       <!-- Its most common whole builds, a card each, side by side, wrapping. -->
       <section v-if="builds.length" id="sec-builds" class="panel" :class="{ 'meta-stale': loading }">
         <h2>{{ t('usageMon.builds') }}</h2>
-        <p v-if="m.teams" class="muted small builds-of">{{ t('usageMon.buildsOf', { n: m.teams }) }}</p>
+        <!-- Its regulation with no events yet: the builds are the one before's, said so first. -->
+        <p v-if="buildsFrom.fallback" class="builds-fallback small">
+          <Info :size="14" aria-hidden="true" />{{
+            t('usageMon.buildsFallback', { regulation: buildsFrom.fallback, previous: buildsFrom.regulation! })
+          }}
+        </p>
+        <p v-if="buildsFrom.events?.length" class="muted small builds-of">
+          <template v-for="(part, i) in tSlots('usageMon.buildsFromEvents')" :key="i">
+            <template v-if="typeof part === 'string'">{{ part }}</template>
+            <template v-else-if="part.slot === 'n'">{{ buildsFrom.sets!.toLocaleString(locale) }}</template>
+            <AppLink
+              v-else-if="buildsFrom.events.length === 1"
+              :to="{ name: 'tournament', params: { id: buildsFrom.events[0]!.id } }"
+              >{{ buildsFrom.events[0]!.name }}</AppLink
+            >
+            <AppLink v-else :to="{ name: 'tournaments' }">{{
+              t('usageMon.buildsEvents', { n: buildsFrom.events.length, regulation: buildsFrom.regulation! })
+            }}</AppLink>
+          </template>
+        </p>
+        <p v-else-if="buildsFrom.sets" class="muted small builds-of">
+          {{ t('usageMon.buildsOf', { n: buildsFrom.sets }) }}
+        </p>
         <ol class="builds">
-          <li v-for="(b, i) in builds" :key="i" class="build" :class="{ main: i === 0 }">
+          <li
+            v-for="(b, i) in allBuilds ? builds : builds.slice(0, buildsTop)"
+            :key="i"
+            class="build"
+            :class="{ main: i === 0 }"
+          >
             <span class="build-head meter" :style="{ '--share': b.share }"
               ><strong>#{{ i + 1 }}</strong> · {{ percent(b.share) }}</span
             >
@@ -634,8 +766,24 @@ const sections = computed(() =>
                 <TypeIcon v-if="MOVES[mv]" :type="MOVES[mv].type" /><DexRef :to="move(mv)" meta />
               </li>
             </ul>
+            <!-- The way to the teams that ran it. -->
+            <AppLink
+              :to="{
+                name: 'metaBuild',
+                params: { id },
+                query: { b: buildParam(b), reg: buildsFrom.regulation ?? snapshot?.regulation, meta: route.query.meta },
+              }"
+              class="build-teams"
+              >{{
+                b.teams === 1
+                  ? t('usageMon.buildTeam')
+                  : t('usageMon.buildTeams', { n: b.teams.toLocaleString(locale) })
+              }}
+              ›</AppLink
+            >
           </li>
         </ol>
+        <MoreToggle v-model:all="allBuilds" :n="builds.length" :top="buildsTop" />
       </section>
 
       <!-- Its Speeds, as the speed tiers draw a row, and the ways to them. -->
@@ -1190,6 +1338,20 @@ const sections = computed(() =>
   height: 3px;
   background: var(--accent);
 }
+/* Its builds from the regulation before, said in a strip over them. */
+.builds-fallback {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: -4px 0 8px;
+  padding: 6px 8px;
+  background: var(--panel-alt);
+  border-left: 3px solid var(--accent);
+}
+.builds-fallback .lucide {
+  flex: none;
+  margin-top: 0.2em;
+}
 /* Its builds, a card each, as many to a row as fit: five on wide screens, its ten in two even rows. */
 .builds-of {
   margin: -4px 0 8px;
@@ -1244,6 +1406,12 @@ const sections = computed(() =>
   display: flex;
   align-items: center;
   gap: 6px;
+}
+/* The way to its teams, at the card's foot. */
+.build-teams {
+  margin-top: auto;
+  font-size: 0.85em;
+  font-weight: bold;
 }
 /* A list's heading, its options at the right (`ListOptions`): whether the short descriptions show. */
 .panel-head {

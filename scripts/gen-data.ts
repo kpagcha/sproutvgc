@@ -33,6 +33,7 @@ import { histories, Smogon, withPrevious, type MetaEntry, type Snapshot } from '
 import {
   FORMAT as TOURNAMENT_FORMAT,
   LimitlessVgc,
+  type Round,
   type Standing,
   type TournamentEvent,
   type UpcomingEvent,
@@ -835,9 +836,14 @@ async function main() {
   const events: Record<string, TournamentEvent> = {}
   // Each event's Pokémon in a few numbers (`tournaments/usage.json`), for an event's Pokémon to be set against the
   // events before it without loading their whole standings: the teams of the whole field, Day 2 and the top cut (those
-  // with a Pokémon known), and for each Pokémon how many of each had it and its best placing.
+  // with a Pokémon known), and for each Pokémon how many of each had it, its best placing, and its teams' matches won and
+  // lost over the whole event (as its Pokémon tab counts them: no byes, nor matches neither won).
   const usage: Record<string, { teams: number[]; pokemon: Record<string, number[]> }> = {}
-  const addUsage = (id: string, standings: Record<string, Pick<Standing, 'day2' | 'topCut' | 'team'>>) => {
+  const addUsage = (
+    id: string,
+    standings: Record<string, Pick<Standing, 'day2' | 'topCut' | 'team'>>,
+    rounds: Record<string, Round>,
+  ) => {
     const teams = [0, 0, 0]
     const pokemon: Record<string, number[]> = {}
     for (const [placing, s] of Object.entries(standings)) {
@@ -845,12 +851,37 @@ async function main() {
       const counts = [true, !!s.day2, !!s.topCut]
       counts.forEach((c, i) => c && teams[i]!++)
       for (const p of new Set(s.team.map(([mon]) => mon))) {
-        const n = (pokemon[p] ??= [0, 0, 0, Number(placing)])
+        const n = (pokemon[p] ??= [0, 0, 0, Number(placing), 0, 0])
         counts.forEach((c, i) => c && n[i]!++)
         n[3] = Math.min(n[3]!, Number(placing))
       }
     }
+    const mons = (placing: number) => new Set((standings[placing]?.team ?? []).map(([mon]) => mon))
+    for (const r of Object.values(rounds))
+      for (const [a, b, won] of r.matches) {
+        if (b === null || won === 0) continue
+        for (const p of mons(won === 1 ? a : b)) if (pokemon[p]) pokemon[p][4]!++
+        for (const p of mons(won === 1 ? b : a)) if (pokemon[p]) pokemon[p][5]!++
+      }
     usage[id] = { teams, pokemon }
+  }
+  // Each regulation's builds (`tournaments/builds/<regulation>.json`, `mc`), every event's teams of it added up: for
+  // each Pokémon its sets from team lists and its most common whole builds (item, ability, nature and moves together),
+  // each with its share of those sets, for its meta page whatever data it shows, without loading every standings.
+  const builds = new Map<string, Map<string, { sets: number; builds: Map<string, number> }>>()
+  const addBuilds = (r: string, standings: Record<string, Pick<Standing, 'team'>>) => {
+    let byMon = builds.get(r)
+    if (!byMon) builds.set(r, (byMon = new Map()))
+    for (const s of Object.values(standings)) {
+      for (const [mon, item, ability, nature, moves] of s.team) {
+        if (!item && !ability && !nature && !moves.length) continue
+        let c = byMon.get(mon)
+        if (!c) byMon.set(mon, (c = { sets: 0, builds: new Map() }))
+        c.sets++
+        const key = JSON.stringify([item, ability, nature, [...moves].sort()])
+        c.builds.set(key, (c.builds.get(key) ?? 0) + 1)
+      }
+    }
   }
   const regulations = new Set([reg, ...Object.keys(sources.smogon), ...Object.keys(sources.limitlessvgc)])
   for (const r of regulations) {
@@ -867,7 +898,13 @@ async function main() {
         events[kept.event.id] = kept.event
         mkdirSync(tournamentsOut, { recursive: true })
         for (const [file, text] of Object.entries(kept.files)) writeFileSync(join(tournamentsOut, file), text)
-        addUsage(kept.event.id, JSON.parse(kept.files[`${kept.event.id}.json`]!) as Record<string, Standing>)
+        const standings = JSON.parse(kept.files[`${kept.event.id}.json`]!) as Record<string, Standing>
+        addUsage(
+          kept.event.id,
+          standings,
+          JSON.parse(kept.files[`${kept.event.id}.rounds.json`]!) as Record<string, Round>,
+        )
+        addBuilds(r, standings)
         continue
       }
       const found = await limitless.event(n, r, knownSets, r === reg)
@@ -881,11 +918,27 @@ async function main() {
         Object.fromEntries(standings.map(({ placing, ...s }) => [placing, s])),
       )
       await writeJson(`tournaments/${event.id}.rounds.json`, rounds)
-      addUsage(event.id, Object.fromEntries(standings.map((s) => [s.placing, s])))
+      addUsage(event.id, Object.fromEntries(standings.map((s) => [s.placing, s])), rounds)
+      addBuilds(r, Object.fromEntries(standings.map((s) => [s.placing, s])))
     }
   }
   await writeJson('tournaments/index.json', events)
   await writeJson('tournaments/usage.json', usage)
+  // Its most common builds, as many as a tournament snapshot keeps (`BUILDS` in `tournaments.ts`), those on under 1% of
+  // its sets left out: `[sets, [[item, ability, nature, moves, share], …]]`, the Pokémon by their sets.
+  for (const [r, byMon] of builds) {
+    const rows = [...byMon]
+      .sort((a, b) => b[1].sets - a[1].sets || a[0].localeCompare(b[0]))
+      .map(([mon, c]) => {
+        const top = [...c.builds]
+          .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+          .map(([key, n]) => [...(JSON.parse(key) as unknown[]), Math.round((n / c.sets) * 1e4) / 1e4])
+          .filter((b) => (b[4] as number) >= 0.01)
+          .slice(0, 10)
+        return [mon, [c.sets, top]]
+      })
+    await writeJson(`tournaments/builds/${r.toLowerCase().replace(/[^a-z0-9]/g, '')}.json`, Object.fromEntries(rows))
+  }
   // The official events still to come (`tournaments/upcoming.json`, by their number), those generated already left
   // out (over, though the list may not have caught up).
   const generated = new Set(Object.values(events).map((e) => e.n))

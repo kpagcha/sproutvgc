@@ -326,6 +326,18 @@ export const router = createRouter({
       },
     },
     {
+      // One of a Pokémon's builds (`?b=`, `buildParam`): the tournament teams that ran it.
+      path: '/meta/pokemon/:id/build',
+      name: 'metaBuild',
+      component: () => import('@/views/MetaBuildView.vue'),
+      meta: {
+        titleKey: 'title.metaBuild',
+        dexNames: true,
+        descriptions: ['ability', 'move', 'item'],
+        ...inArea('meta', 'rankings'),
+      },
+    },
+    {
       path: '/meta/pokemon/:id',
       name: 'metaPokemon',
       component: () => import('@/views/MetaPokemonView.vue'),

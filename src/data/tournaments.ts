@@ -8,7 +8,7 @@
 
 import { shallowReactive } from 'vue'
 import type { AbilityId, ItemId, MoveId, PokemonId } from '@/data/dex'
-import type { MetaData, MetaSnapshot, PokemonMeta, Share, TournamentPlayers } from '@/data/meta'
+import type { Build, MetaData, MetaSnapshot, PokemonMeta, Share, TournamentPlayers } from '@/data/meta'
 
 /** What kind of event: Limitless VGC's types. */
 export type EventType =
@@ -130,6 +130,77 @@ export const UPCOMING: readonly UpcomingEvent[] = (() => {
     .sort((a, b) => a.date.localeCompare(b.date) || a.n - b.n)
 })()
 
+/** A regulation's builds of a Pokémon, every official event of it added up: its sets from team lists, and its most
+ * common whole builds, each with its share of them. */
+export interface RegulationBuilds {
+  sets: number
+  builds: Build[]
+}
+
+const BUILDS_FILES = import.meta.glob<
+  Record<string, [sets: number, builds: [ItemId | null, AbilityId | null, string | null, MoveId[], number][]]>
+>('./generated/tournaments/builds/*.json', { import: 'default' })
+
+/** Each regulation's builds, by Pokémon, loaded once (`tournaments/builds/<regulation>.json`, generated from every
+ * event's teams): for a Pokémon's meta page to show them whatever data it shows, without loading the standings. Empty
+ * for a regulation with no events. */
+const regulationBuilds = new Map<string, Promise<Partial<Record<PokemonId, RegulationBuilds>>>>()
+export function loadRegulationBuilds(regulation: string): Promise<Partial<Record<PokemonId, RegulationBuilds>>> {
+  let p = regulationBuilds.get(regulation)
+  if (!p) {
+    const file = BUILDS_FILES[`./generated/tournaments/builds/${regulationKey(regulation)}.json`]
+    p = file
+      ? file().then((f) =>
+          Object.fromEntries(
+            Object.entries(f).map(([id, [sets, builds]]) => [
+              id,
+              {
+                sets,
+                builds: builds.map(([item, ability, nature, moves, share]) => ({
+                  item,
+                  ability,
+                  nature,
+                  moves,
+                  share,
+                })),
+              },
+            ]),
+          ),
+        )
+      : Promise.resolve({})
+    regulationBuilds.set(regulation, p)
+  }
+  return p
+}
+
+/** A build in a link (its page's `?b=`): item, ability, nature and moves, by `~`, its moves by `.`, sorted, each
+ * empty when not said (`sitrusberry~intimidate~careful~fakeout.knockoff.partingshot.protect`). */
+export const buildParam = (b: Pick<Build, 'item' | 'ability' | 'nature' | 'moves'>) =>
+  [b.item ?? '', b.ability ?? '', b.nature ?? '', [...b.moves].sort().join('.')].join('~')
+
+/** The build a link names, if it names one. */
+export function buildOfParam(param: string): Omit<Build, 'share'> | undefined {
+  const parts = param.split('~')
+  if (parts.length !== 4) return undefined
+  const [it, ab, nature, moves] = parts as [string, string, string, string]
+  return {
+    item: (it || null) as ItemId | null,
+    ability: (ab || null) as AbilityId | null,
+    nature: nature || null,
+    moves: (moves ? moves.split('.') : []) as MoveId[],
+  }
+}
+
+/** Whether a set is a Pokémon's build: that Pokémon, with the same item, ability, nature and moves. */
+export const isSetOf = (slot: Slot, pokemon: PokemonId, b: Omit<Build, 'share'>) =>
+  slot[0] === pokemon &&
+  listed(slot) &&
+  slot[1] === b.item &&
+  slot[2] === b.ability &&
+  slot[3] === b.nature &&
+  buildParam({ item: null, ability: null, nature: null, moves: slot[4] }) ===
+    buildParam({ item: null, ability: null, nature: null, moves: b.moves })
+
 const ROUNDS = import.meta.glob<Record<number, Round>>('./generated/tournaments/*.rounds.json', {
   import: 'default',
 })
@@ -147,10 +218,13 @@ export function loadRounds(id: string): Promise<Record<number, Round>> {
 }
 
 /** An event's Pokémon in a few numbers, as `usage.json` has them: the teams (with a Pokémon known) of the whole field,
- * Day 2 and the top cut, and for each Pokémon how many of each had it, then its best placing. */
+ * Day 2 and the top cut, and for each Pokémon how many of each had it, then its best placing, then its teams' matches
+ * won and lost over the event (no byes, nor matches neither won). */
 export interface EventUsage {
   teams: [all: number, day2: number, topCut: number]
-  pokemon: Partial<Record<PokemonId, [all: number, day2: number, topCut: number, best: number]>>
+  pokemon: Partial<
+    Record<PokemonId, [all: number, day2: number, topCut: number, best: number, wins: number, losses: number]>
+  >
 }
 
 /** Every event's Pokémon in a few numbers, by event, loaded once: for an event's to be set against those before it
@@ -200,6 +274,19 @@ export function loadStandings(id: string): Promise<(Standing & { placing: number
 /** A regulation's events of a category, the latest first. */
 export const eventsOf = (regulation: string, category: TournamentCategory = 'official') =>
   EVENTS.filter((e) => e.regulation === regulation && e.category === category)
+
+/** The regulation whose events give a regulation's builds: its own once it has any; until then the one before it (the
+ * latest event's before `since`, the day it started, when known), named as a fallback. None without events before. */
+export function buildsRegulation(
+  regulation: string,
+  since?: string,
+): { regulation: string; fallback: boolean } | undefined {
+  if (eventsOf(regulation).length) return { regulation, fallback: false }
+  const before = EVENTS.find(
+    (e) => e.category === 'official' && e.regulation !== regulation && (!since || e.date < since),
+  )
+  return before && { regulation: before.regulation, fallback: true }
+}
 
 const PREFIX = 'tournaments-'
 const regulationKey = (regulation: string) => regulation.toLowerCase().replace(/[^a-z0-9]/g, '')
