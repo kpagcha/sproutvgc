@@ -426,6 +426,11 @@ mark {
 [data-tippy-root]:has(> .tippy-box[data-state='visible']) {
   pointer-events: auto !important;
 }
+/* One that follows the pointer along what it's of (`SpeedSpread`'s marks) lets it through, so it doesn't take the
+   pointer from what it follows. */
+[data-tippy-root].tip-through:has(> .tippy-box) {
+  pointer-events: none !important;
+}
 /* On a screen with no hover, a tooltip opens and closes on taps: two in a row on its text would select a word. */
 @media (any-hover: none) {
   [data-tip] {

@@ -105,6 +105,11 @@ function point(e: PointerEvent) {
     // Pointing at the mark shown, read each time: setting it anew would remake its placing, the tooltip then gliding in
     // from the screen's top left corner.
     getReferenceClientRect: () => (pointed ?? plot.value!).getBoundingClientRect(),
+    // With a mouse, it lets the pointer through to the chart: shown over the marks, it'd otherwise take the pointer
+    // from the chart as it moves above a short one, the chart hiding it and showing it again, over and over.
+    onCreate: (instance) => {
+      if (canHover) instance.popper.classList.add('tip-through')
+    },
     onHidden: () => {
       active.value = null
     },
