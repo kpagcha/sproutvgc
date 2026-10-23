@@ -100,12 +100,11 @@ import StageStepper from '@/components/StageStepper.vue'
 import SpeedRanges, { type RangeRow } from '@/components/SpeedRanges.vue'
 import SpeedOdds, { type OddsRow } from '@/components/SpeedOdds.vue'
 import PokemonIcon from '@/components/PokemonIcon'
-import SpeedKeptMenu from '@/components/SpeedKeptMenu.vue'
 import TypeIcon from '@/components/TypeIcon'
 import PokemonPicker from '@/components/PokemonPicker.vue'
 import ScrollRow from '@/components/ScrollRow.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
-import VersusCard from '@/components/VersusCard.vue'
+import VersusPanel, { type VersusItem } from '@/components/VersusPanel.vue'
 import SetupStar from '@/components/SetupStar.vue'
 import PageHistory from '@/components/PageHistory.vue'
 import { RECENT_ON } from '@/composables/useRecent'
@@ -424,17 +423,20 @@ function clearMine() {
   for (const k of ['mine', 'mynat', 'mypts', 'mymods', 'mystage', 'vs']) delete q[k]
   void router.replace({ query: q })
 }
+/** The one found yours can swap with: its one opponent found. */
+const swapWith = computed(() => (mine.value !== null && opponentIds.value.length === 1 ? opponentIds.value[0]! : null))
 /** Yours and the one found swapped: the one found yours, at its build as picked (keeping your modifiers, as picking
  * one does), and yours found. */
 function swapMine() {
-  if (mine.value === null || found.value === null) return
+  const id = swapWith.value
+  if (mine.value === null || id === null) return
   void router.replace({
     query: {
       ...query.value,
-      mine: found.value,
-      ...buildOf(found.value),
+      mine: id,
+      ...buildOf(id),
       mymods: keptMods(),
-      find: mine.value,
+      ...findQuery([mine.value]),
       vs: undefined,
     },
   })
@@ -486,17 +488,15 @@ async function toggleMine(k: MyToggle) {
     })
     if (!ok) return
   }
-  const vs = field !== inPlay.value ? remapVs(field) : query.value.vs
+  const vs = field !== inPlay.value ? vsQuery(vsKeys.value.flatMap((k) => remapVs(k, field) ?? [])) : query.value.vs
   void router.replace({ query: { ...query.value, mymods: next.length ? next.join(',') : undefined, vs } })
 }
 /**
- * The chip yours is measured against, once `field` is in play (or none is): the same set as it then plays. A build
+ * A chip yours is measured against, once `field` is in play (or none is): the same set as it then plays. A build
  * the field's ability now boosts, if its plain chip leaves the ladder, is its boosted one; a boosted build the field no
  * longer boosts, its plain one; a boost the field rules out, the Pokémon at the build it was placed at.
  */
-function remapVs(field: Field | null) {
-  const vs = vsKey.value ?? undefined
-  if (vs === undefined) return vs
+function remapVs(vs: string, field: Field | null) {
   const parts = vs.split(':')
   const id = parts[0] as PokemonId
   const m = data.value?.[id]
@@ -526,13 +526,19 @@ function remapVs(field: Field | null) {
   return top ? `${id}:${top.points}:${top.effect}` : m ? undefined : `${id}:${boostBench.value}`
 }
 /**
- * The chip yours is measured against, by its key (`?vs=`). Builds go by nature effect: a key from before, with an
- * exact nature in its place (a plain build's last, a live boost's), has it turned into its effect. A boost's from
- * before, with no build, when boosts were each at the most common one, is at that build.
+ * The chips yours is measured against, by their keys (`?vs=`, comma-separated): one per Pokémon, the last of it.
+ * Builds go by nature effect: a key from before, with an exact nature in its place (a plain build's last, a live
+ * boost's), has it turned into its effect. A boost's from before, with no build, when boosts were each at the most
+ * common one, is at that build.
  */
-const vsKey = computed(() => {
+const vsKeys = computed<string[]>((was) => {
   const vs = query.value.vs
-  if (typeof vs !== 'string') return null
+  if (typeof vs !== 'string' || !vs) return keptValue([], was)
+  const byMon = new Map(vs.split(',').map((k) => [chipId(k), vsKey(k)]))
+  return keptValue([...byMon.values()], was)
+})
+const vsQuery = (keys: readonly string[]) => (keys.length ? keys.join(',') : undefined)
+function vsKey(vs: string) {
   const parts = vs.split(':')
   const top = buildsOf(parts[0] as PokemonId)[0]
   if ((parts[1] === 'ability' || parts[1] === 'item') && parts.length === 3 && top)
@@ -542,7 +548,7 @@ const vsKey = computed(() => {
   if (i < 0 || nat === undefined || isEffect(nat)) return vs
   parts[i] = natureEffect(nat)
   return parts.join(':')
-})
+}
 /** What brings the field in play, for where it's said: yours' ability, by name. */
 const fieldSource = computed(() => {
   const a = mine.value && inPlay.value ? doubling(mine.value, myBuild.value) : undefined
@@ -595,10 +601,9 @@ function metaChips(id: PokemonId, m: PokemonMeta, extra?: true): Entry[] {
   const base = POKEMON[id].stats[5]
   const rest = 1 - fieldShare(id)
   const builds = speedBuilds(m.speeds ?? [])
-  // What its sets run under the least share is left out, but for the Pokémon looked for (found, or kept on the
-  // ladder): every build its sets run on a chart's least share (`MARK_SHARE`; the data has every one, down to single
+  // What its sets run under the least share is left out, but for the Pokémon looked for (found): every build its sets run on a chart's least share (`MARK_SHARE`; the data has every one, down to single
   // sets), and every boost, the Speed abilities it can have too, however few run them.
-  const all = id === found.value || kept.value.includes(id)
+  const all = isFound(id)
   const shown = (share: number) => share >= (all ? MARK_SHARE : MIN_SHARE)
   // Those under it, shown only as it's looked for, are as a Pokémon beyond the top is: marked, and not counted in how
   // yours does against the others, so looking for one doesn't change it.
@@ -686,7 +691,7 @@ function benchBoosts(id: PokemonId, rank: number): Entry[] {
     return [{ ...at, speed, bench: boostBench.value, boost: { ref: ability(a), ...effect } }]
   })
 }
-/** A Pokémon with no sets in the snapshot, found or kept: at every benchmark, and its boosts. */
+/** A Pokémon with no sets in the snapshot, found: at every benchmark, and its boosts. */
 function benchChips(id: PokemonId): Entry[] {
   const base = POKEMON[id].stats[5]
   const at = { id, ...named(id), rank: Infinity, extra: true as const }
@@ -734,10 +739,9 @@ const pool = computed<Entry[]>(() => {
       if (bySets.value && view.value === 'max') list.push(...benchBoosts(id, e.rank))
     }
   }
-  // The Pokémon kept and the one found, when the view leaves them out: at their sets (with none in the snapshot, at
-  // every benchmark), or at the benchmark picked.
-  const extras = new Set([...kept.value, ...(found.value ? [found.value] : [])])
-  for (const id of extras) {
+  // The Pokémon found, when the view leaves them out: at their sets (with none in the snapshot, at every benchmark),
+  // or at the benchmark picked.
+  for (const id of foundIds.value) {
     if (!beyondTop(id) || !findable.value.has(id)) continue
     const m = data.value?.[id]
     if (!bySets.value) list.push(benchEntry(id, true))
@@ -816,18 +820,42 @@ const clearMods = () =>
 /** Usage ranks, for the pickers to list by, most used first: the meta's, when there is one. */
 const ranks = computed(() => (data.value ? usageRanks(data.value) : undefined))
 
-// Finding a Pokémon: one picked from those on the ladder (`?find=`), its chips marked and the rest dimmed.
-const found = computed(() => {
-  const id = query.value.find
-  return typeof id === 'string' && id in POKEMON ? (id as PokemonId) : null
+// Finding Pokémon: those picked from the ladder's (`?find=`, comma-separated, in the order found, as many as a team
+// has), their chips marked and the rest dimmed, or shown alone; on the ladder whether the view leaves them out or not,
+// to compare several of them. Links from before, with Pokémon kept on the ladder (`?keep=`), have them found.
+const MAX_FOUND = 6
+const foundIds = computed<PokemonId[]>((was) => {
+  const ids = [query.value.find, query.value.keep].flatMap((v) => (typeof v === 'string' ? v.split(',') : []))
+  return keptValue([...new Set(ids)].filter((id): id is PokemonId => id in POKEMON).slice(0, MAX_FOUND), was)
 })
-/** A row per Pokémon, the one found is the one yours is measured against too (its most common set), as tapping its
- * row does; a row per build, that's one of its rows, tapped. */
-function setFound(id: PokemonId | null) {
-  if (!perMon.value || mine.value === null) return set('find', id ?? undefined)
-  const e = id !== null && id !== mine.value ? topEntry(id) : undefined
-  void router.replace({ query: { ...query.value, find: id ?? undefined, vs: e ? chipKey(e) : undefined } })
+const foundSet = computed(() => new Set(foundIds.value))
+const isFound = (id: PokemonId) => foundSet.value.has(id)
+/** Those found but yours: its opponents, with yours. */
+const opponentIds = computed(() => foundIds.value.filter((id) => id !== mine.value))
+/** The find's part of the URL, for `ids`: the older `?keep=` gone, its Pokémon among them. */
+const findQuery = (ids: readonly PokemonId[]) => ({ find: ids.length ? ids.join(',') : undefined, keep: undefined })
+/** The Pokémon a chip's key is of. */
+const chipId = (key: string) => key.split(':')[0] as PokemonId
+/**
+ * Another Pokémon found, after the rest (the first found giving way past as many as a team has). A row per Pokémon,
+ * it's one yours is measured against too (its most common set), as tapping its row does; a row per build, that's one
+ * of its rows, tapped.
+ */
+function addFound(id: PokemonId | null) {
+  if (id === null || isFound(id)) return
+  const ids = [...foundIds.value, id].slice(-MAX_FOUND)
+  const e = perMon.value && mine.value !== null && id !== mine.value ? topEntry(id) : undefined
+  const vs = [...vsKeys.value, ...(e ? [chipKey(e)] : [])].filter((k) => ids.includes(chipId(k)))
+  void router.replace({ query: { ...query.value, ...findQuery(ids), vs: vsQuery(vs) } })
 }
+/** One found no longer, nor measured against. */
+function removeFound(id: PokemonId) {
+  const ids = foundIds.value.filter((x) => x !== id)
+  void router.replace({
+    query: { ...query.value, ...findQuery(ids), vs: vsQuery(vsKeys.value.filter((k) => chipId(k) !== id)) },
+  })
+}
+const clearFound = () => void router.replace({ query: { ...query.value, ...findQuery([]), vs: undefined } })
 /** Formes found though they battle as their base species does: Squawkabilly's plumages, which go together (two of
  * them have an ability of their own). */
 const FINDABLE_ALIKE: ReadonlySet<PokemonId> = new Set<PokemonId>(['squawkabillyblue'])
@@ -857,26 +885,23 @@ const findable = computed(() => new Set(findableIds.value))
 /** A Pokémon the view leaves out, showing the most used: below its top, or with no sets in the snapshot. */
 const beyondTop = (id: PokemonId) =>
   show.value !== 'all' && !!data.value && (data.value[id]?.rank ?? Infinity) > topN.value
-// Pokémon beyond the top kept on the ladder once found (`?keep=`, comma-separated), to compare several of them; in the
-// order kept.
-const kept = computed<PokemonId[]>((was) => {
-  const v = query.value.keep
-  return keptValue(typeof v === 'string' ? (v.split(',').filter((id) => id in POKEMON) as PokemonId[]) : [], was)
+/** Each Pokémon found with no sets in the snapshot, or not in its top: why, said under the find. */
+const foundNotes = computed(() => {
+  const m = needsData.value ? data.value : undefined
+  if (!m) return []
+  return foundIds.value.flatMap((id) => {
+    const d = m[id]
+    const text = !d
+      ? bySets.value
+        ? t('speed.findNoData')
+        : null
+      : d.rank > topN.value
+        ? t('speed.findBeyond', { n: topN.value })
+        : null
+    return text ? [{ id, text }] : []
+  })
 })
-const keptShown = computed(() => kept.value.filter((id) => beyondTop(id) && findable.value.has(id)))
-function toggleKept(id: PokemonId) {
-  const list = kept.value.includes(id) ? kept.value.filter((k) => k !== id) : [...kept.value, id]
-  set('keep', list.length ? list.join(',') : undefined)
-}
-/** The Pokémon found has no sets in the snapshot, or isn't in its top: why, said under the find. */
-const foundNote = computed(() => {
-  const id = found.value
-  if (!id || !needsData.value || !data.value) return null
-  const m = data.value[id]
-  if (!m) return bySets.value ? t('speed.findNoData') : null
-  return m.rank > topN.value ? t('speed.findBeyond', { n: topN.value }) : null
-})
-const isHit = (e: Entry) => !e.mine && e.id === found.value
+const isHit = (e: Entry) => !e.mine && isFound(e.id)
 // What finding does: mark its chips among the rest, or show only them (and yours, to compare): only them by default;
 // the URL says so (`?findmode=`) only when it differs.
 const FIND_MODES = ['mark', 'only'] as const
@@ -891,16 +916,25 @@ const findMode = computed<FindMode>({
 })
 // The find's dialog on phones says what it finds in: the ladder, or yours' opponents on it.
 const findTitle = computed(() => (mine.value ? t('compare.opponent') : t('title.speedTiers')))
+/** What the find can add: those found already left out. */
+const findIds = computed(() => findableIds.value.filter((id) => !isFound(id)))
 /// Only it on the ladder, among its builds and boosts; with every Pokémon at the benchmarks, a row per base Speed, it'd be
 // alone in its row, so there it's only marked.
 /** Whether the view can show only the Pokémon found: not the ranges at the benchmarks, a row per base Speed. */
 const onlyAllowed = computed(() => bySets.value)
-const onlyFound = computed(() => found.value !== null && onlyAllowed.value && findMode.value === 'only')
-// The toggle's label around the found Pokémon's icon, the same width whatever its name (which the search shows).
+const onlyFound = computed(() => foundIds.value.length > 0 && onlyAllowed.value && findMode.value === 'only')
+// The toggle's label around the found Pokémon's icons (the first few, then how many more), the same width whatever
+// their names (which their chips show).
+const ONLY_ICONS = 2
 const onlyLabel = computed(() => tSplit('speed.findOnly', 'name'))
+const onlyIcons = computed(() => foundIds.value.slice(0, ONLY_ICONS))
+const onlyMore = computed(() => Math.max(0, foundIds.value.length - ONLY_ICONS))
+const onlyAria = computed(() =>
+  t('speed.findOnly', { name: foundIds.value.map((id) => refName(pokemon(id))).join(', ') }),
+)
 // A boost's build, around its nature's effect (an arrow, as the chips have it).
 const boostAt = computed(() => tSplit('speed.boostAt', 'effect'))
-const finding = computed(() => found.value !== null)
+const finding = computed(() => foundIds.value.length > 0)
 
 /** A Pokémon's sets' Speeds in battle, with a boost's effect if any: merged by nature effect and points, and by Speed
  * once the modifiers apply (each keeping the builds reaching it), the most common first. */
@@ -924,7 +958,7 @@ const benchSpeeds = (id: PokemonId, m: SpeedMods) =>
     number
   >
 /** A row of the ladder, but for where it's placed and how it stands to the one yours is measured against. */
-type RowBase = Omit<OddsRow, 'speed' | 'own' | 'versus' | 'rival'>
+type RowBase = Omit<OddsRow, 'speed' | 'own' | 'versus' | 'versusAt' | 'rival'>
 /** What the rows of a Pokémon and one of its boosts (or none) have alike, by the two: its sets' Speeds and reach. */
 const groupKey = (e: Entry) => (e.boost ? `${e.id}:${e.boost.ref.kind}:${e.boost.ref.id}` : e.id)
 /** Where a row of a Pokémon goes: at its most common Speed, or the fastest it could be (Max+; Min− under Trick Room);
@@ -966,9 +1000,11 @@ const othersRows = computed(() => {
     }
     return { ...b, key, extra, hit: isHit(e) }
   }
-  const vs = vsChip.value
-  const vsGroup = vs ? groupKey(vs) : null
-  const shown = onlyFound.value ? entries.value.filter((e) => e.id === found.value) : entries.value
+  // The chips measured against, by the rows they're on (a row per Pokémon, its and its boost's), and their Pokémon.
+  const vsByGroup = new Map(vsChips.value.map((x) => [groupKey(x), x]))
+  const vsByKey = new Map(vsChips.value.map((x) => [chipKey(x), x]))
+  const vsIds = new Set(vsChips.value.map((x) => x.id))
+  const shown = onlyFound.value ? entries.value.filter((e) => isFound(e.id)) : entries.value
   const placed: { row: OddsRow; rank: number; share: number }[] = []
   if (perMon.value) {
     const groups = new Map<string, Entry[]>()
@@ -985,12 +1021,20 @@ const othersRows = computed(() => {
         list.every((x) => x.extra),
       )
       chips.set(k, e)
-      const isVs = k === vsGroup
+      const vs = vsByGroup.get(k)
+      const isVs = !!vs
       const speed = placeOf(b)
       // Placed at one of its sets' Speeds (not a benchmark: no sets, or the fastest possible), that one's mark solid.
       const own = b.builds.some((x) => x.speed === speed) ? speed : undefined
       placed.push({
-        row: { ...b, speed, own, versus: isVs, rival: !isVs && vs?.id === e.id },
+        row: {
+          ...b,
+          speed,
+          own,
+          versus: isVs,
+          versusAt: vs ? chipSpeed(vs) : null,
+          rival: !isVs && vsIds.has(e.id),
+        },
         rank: e.rank,
         share: e.boost ? 0 : 1,
       })
@@ -1000,9 +1044,16 @@ const othersRows = computed(() => {
       const k = chipKey(e)
       const speed = chipSpeed(e)
       chips.set(k, e)
-      const isVs = vsKey.value === k
+      const isVs = vsByKey.has(k)
       placed.push({
-        row: { ...rowBase(k, e, !!e.extra), speed, own: speed, versus: isVs, rival: !isVs && vs?.id === e.id },
+        row: {
+          ...rowBase(k, e, !!e.extra),
+          speed,
+          own: speed,
+          versus: isVs,
+          versusAt: isVs ? speed : null,
+          rival: !isVs && vsIds.has(e.id),
+        },
         rank: e.rank,
         share: e.share ?? 0,
       })
@@ -1049,6 +1100,7 @@ const ladderRows = computed(() => {
     hit: false,
     mine: true,
     versus: false,
+    versusAt: null,
     rival: false,
   }
   const dir = trickRoom.value ? 1 : -1
@@ -1114,7 +1166,7 @@ const rangeRows = computed<RangeRow[]>(() => {
           id: e.id,
           species: e.species,
           forme: e.forme,
-          hit: e.id === found.value,
+          hit: isFound(e.id),
           mine: e.id === mine.value,
         })),
     }))
@@ -1223,18 +1275,23 @@ const summary = computed(() => {
   return { first: tally.first / total, ties: tally.ties / total, after: tally.after / total }
 })
 
-// The chip yours is measured against (`?vs=`, picked by tapping it while yours is set), and what it takes to move
-// before it, for each nature effect.
-/** The chip yours is measured against: the same one as long as it is, so the ladder's rows aren't worked out again as
- * yours changes. */
-const vsChip = computed<Entry | null>((was) =>
-  mine.value === null || vsKey.value === null ? null : (keptValue(chipOf(vsKey.value), was ?? undefined) ?? null),
+// The chips yours is measured against (`?vs=`, picked by tapping them while yours is set), and what it takes to move
+// before each, for each nature effect.
+/** The chips yours is measured against: the same ones as long as they are, so the ladder's rows aren't worked out
+ * again as yours changes. */
+const vsChips = computed<Entry[]>((was) =>
+  mine.value === null
+    ? []
+    : keptValue(
+        vsKeys.value.flatMap((k) => chipOf(k) ?? []),
+        was,
+      ),
 )
-const versus = computed(() => {
-  const e = vsChip.value
-  if (mine.value === null || !e) return null
+/** Yours against each chip: its card. */
+const versus = computed(() => vsChips.value.map(versusOf))
+function versusOf(e: Entry) {
   const target = chipSpeed(e)
-  const base = POKEMON[mine.value].stats[5]
+  const base = POKEMON[mine.value!].stats[5]
   const at = (effect: NatureEffect) => pointsToMoveFirst(base, effect, myMods.value, target, trickRoom.value)
   // Yours' nature, and when no points do it with that one, the nature that would: raising Speed (lowering it, under
   // Trick Room).
@@ -1245,22 +1302,26 @@ const versus = computed(() => {
     !works(result) && myNature.value !== better && works(at(better)) ? { effect: better, result: at(better) } : null
   return {
     e,
+    key: chipKey(e),
     target,
-    card: {
+    item: {
+      key: chipKey(e),
       id: e.id,
       name: [e.species, e.forme].filter(Boolean).join(' '),
       speed: target,
-      mine: mine.value,
-      mineName: refName(pokemon(mine.value)),
-      mineSpeed: mySpeed.value!,
-      trickRoom: trickRoom.value,
-      points: myPoints.value,
       result,
       other,
-      compareTo: compareLink({ id: e.id, build: chipBuild(e), sets: perMon.value }),
-    },
+    } satisfies VersusItem,
   }
-})
+}
+/** The panel's lines, and the chips by their keys, for what it does to one. */
+const versusItems = computed(() => versus.value.map((v) => v.item))
+const versusChip = (key: string) => versus.value.find((v) => v.key === key)?.e
+function closeKey(key: string) {
+  const e = versusChip(key)
+  if (e) closeVersus(e)
+}
+const locateKey = (key: string) => locateVersus(chipId(key))
 /**
  * The chip a key stands for: one the ladder has, or, a mark tapped, a build its sets run that it leaves out (under the
  * least share), of a Pokémon and boost it has rows of.
@@ -1288,40 +1349,60 @@ function chipOf(key: string): Entry | undefined {
     ...(!boosted && { share: buildsOf(id).find((b) => b.effect === nat && String(b.points) === pts)?.share }),
   }
 }
-// The comparison from yours' card: yours alone, to add opponents to there; none until there's yours. Against the chip
-// tapped, the comparison's card has the way there instead. The one found, none of its chips tapped, is its opponent:
-// at its sets, no Speed of them picked.
+// The comparison from yours' card: yours alone, to add opponents to there; none until there's yours. With opponents
+// found, against them (the first two, as a team has room for): each at the chip measured against, else at its sets, no
+// Speed of them picked. Against one chip alone, the comparison's card has the way there instead.
 const compareTarget = computed(() => {
   if (mine.value === null) return null
-  const id = found.value !== mine.value ? found.value : null
-  if (id === null) return compareLink(null)
-  const e = topEntry(id)
-  return compareLink({ id, build: e ? chipBuild(e) : othersBuild(id, buildsOf(id)[0] ?? FASTEST), sets: true })
+  return compareLink(
+    opponentIds.value.map((id) => {
+      const vs = vsChips.value.find((x) => x.id === id)
+      if (vs) return { id, build: chipBuild(vs), sets: perMon.value }
+      const e = topEntry(id)
+      return { id, build: e ? chipBuild(e) : othersBuild(id, buildsOf(id)[0] ?? FASTEST), sets: true }
+    }),
+  )
 })
-// Its title, the Pokémon's name (with its icon) a link to its page.
 // Picking one finds it too, the find showing as its "Only" switch says; a row per Pokémon, letting it go lets the find
-// go too, the two being one there.
+// go too, the two being one there. Another of its chips picked takes the place of the one it had.
 /** Measured against, or no longer if it already was (unless `keep`). */
 function pickVersus(e: Entry, keep = false) {
-  if (keep && vsKey.value === chipKey(e)) return
-  const vs = vsKey.value === chipKey(e) ? undefined : chipKey(e)
-  if (!vs && perMon.value) return clearVersus()
-  void router.replace({ query: { ...query.value, vs, ...(vs && { find: e.id }) } })
+  const k = chipKey(e)
+  const on = vsKeys.value.includes(k)
+  if (keep && on) return
+  if (on) return closeVersus(e)
+  const ids = (isFound(e.id) ? foundIds.value : [...foundIds.value, e.id]).slice(-MAX_FOUND)
+  const vs = [...vsKeys.value.filter((x) => chipId(x) !== e.id), k].filter((x) => ids.includes(chipId(x)))
+  void router.replace({ query: { ...query.value, vs: vsQuery(vs), ...findQuery(ids) } })
 }
-// A row per Pokémon, one found with none measured against (found before yours was set, or a row per build) is
-// measured against, as finding it there does.
-watch([perMon, mine, found, vsKey, entries], () => {
-  if (!perMon.value || mine.value === null || found.value === null || found.value === mine.value) return
-  if (vsKey.value !== null) return
-  const e = topEntry(found.value)
-  if (e) set('vs', chipKey(e))
+// A row per Pokémon, those found with none measured against (found before yours was set, or a row per build) are
+// measured against, as finding them there does.
+watch([perMon, mine, foundIds, vsKeys, entries], () => {
+  if (!perMon.value || mine.value === null) return
+  const missing = opponentIds.value.filter((id) => !vsKeys.value.some((k) => chipId(k) === id))
+  const add = missing.flatMap((id) => {
+    const e = topEntry(id)
+    return e ? [chipKey(e)] : []
+  })
+  if (add.length) set('vs', vsQuery([...vsKeys.value, ...add]))
 })
-function clearVersus() {
-  void router.replace({ query: { ...query.value, vs: undefined, ...(perMon.value && { find: undefined }) } })
+// The comparisons' panel, folded until unfolded, then as last left; narrower, docked at the screen's foot.
+const { open: versusOpen, toggle: toggleVersus } = useOpenState('sproutvgc.speedTiers.versusOpen', false)
+const floatCards = computed(() => versus.value.length > 0 && !side.value)
+/** Measured against no longer: a row per Pokémon, not found either. */
+function closeVersus(e: Entry) {
+  if (perMon.value) return removeFound(e.id)
+  set('vs', vsQuery(vsKeys.value.filter((k) => k !== chipKey(e))))
 }
-// The comparison's Speed finds the row it's against: brought to the middle of the screen, flashing once.
-function locateVersus() {
-  const el = ladder.value?.querySelector<HTMLElement>('.row.versus')
+/** The ladder's rows of a Pokémon matching `sel`: by their key, or with every Pokémon at the benchmarks, holding it. */
+function rowsOf(id: PokemonId, sel: string) {
+  return [...(ladder.value?.querySelectorAll<HTMLElement>(sel) ?? [])].filter((el) => {
+    const k = el.dataset.key
+    return k ? k === id || k.startsWith(`${id}:`) : !!el.querySelector(`.mon[data-id="${id}"]`)
+  })
+}
+/** A row brought to the middle of the screen, flashing once. */
+function flashRow(el: HTMLElement | undefined) {
   if (!el) return
   center(el)
   el.classList.remove('flash')
@@ -1329,6 +1410,9 @@ function locateVersus() {
   el.classList.add('flash')
   el.addEventListener('animationend', () => el.classList.remove('flash'), { once: true })
 }
+// The comparison's Speed finds the row it's against; a chip of the ones found, its first row.
+const locateVersus = (id: PokemonId) => flashRow(rowsOf(id, '.row.versus')[0])
+const locateFound = (id: PokemonId) => flashRow(rowsOf(id, '.tier.hit')[0])
 function onChip(ev: MouseEvent, e: Entry) {
   if (mine.value === null || ev.ctrlKey || ev.metaKey || ev.shiftKey) return
   ev.preventDefault()
@@ -1367,17 +1451,22 @@ const chipBuild = (e: Entry) =>
     e.bench ? benchBuild(e.bench) : e.effect ? { effect: e.effect, points: e.points! } : FASTEST,
     e.boost,
   )
-/** The comparison of yours and `other`, at its build, or at its sets (`sets`, when the meta has them). */
-function compareLink(other: { id: PokemonId; build: SpeedBuild; sets: boolean } | null) {
-  return {
-    name: 'speedCompare',
-    query: {
-      ...(mine.value && { a: mine.value, ...buildQuery(myBuild.value, 'a') }),
-      ...(other && { b: other.id, ...buildQuery(other.build, 'b') }),
-      bsets: other?.sets && buildsOf(other.id).length ? '1' : undefined,
-      trickroom: trickRoom.value ? '1' : undefined,
-    },
+/** The comparison of yours and `others` (the first two, a team), each at its build, or at its sets (`sets`, when the
+ * meta has them). */
+function compareLink(others: { id: PokemonId; build: SpeedBuild; sets: boolean }[]) {
+  const query: Record<string, string | undefined> = {
+    ...(mine.value && { a: mine.value, ...buildQuery(myBuild.value, 'a') }),
+    trickroom: trickRoom.value ? '1' : undefined,
   }
+  others.slice(0, 2).forEach((o, i) => {
+    const s = i ? 'b2' : 'b'
+    Object.assign(query, {
+      [s]: o.id,
+      ...buildQuery(o.build, s),
+      [`${s}sets`]: o.sets && buildsOf(o.id).length ? '1' : undefined,
+    })
+  })
+  return { name: 'speedCompare', query }
 }
 function toMine() {
   if (!side.value) yoursOpen.value = false
@@ -1498,12 +1587,12 @@ watch(
   },
 )
 
-// Finding a Pokémon, a floating button goes to the Speed it's at nearest the screen while none of them is on it, an
-// arrow saying which way.
+// Finding one Pokémon, a floating button goes to the Speed it's at nearest the screen while none of them is on it, an
+// arrow saying which way; finding more, their chips under the find do.
 const match = shallowRef<{ el: Element; up: boolean; name: string } | null>(null)
 function checkMatch() {
   const el = ladder.value
-  const hits = finding.value && el ? [...el.querySelectorAll('.tier.hit')] : []
+  const hits = foundIds.value.length === 1 && el ? [...el.querySelectorAll('.tier.hit')] : []
   const vh = window.innerHeight
   let nearest: { el: Element; up: boolean; d: number } | null = null
   for (const hit of hits) {
@@ -1513,15 +1602,17 @@ function checkMatch() {
     const d = up ? -r.bottom : r.top - vh
     if (!nearest || d < nearest.d) nearest = { el: hit, up, d }
   }
-  // Named after the Pokémon found, whatever the view.
-  const who = found.value ? named(found.value) : null
+  // Named after its Pokémon found, whatever the view.
+  const k = nearest?.el instanceof HTMLElement ? nearest.el.dataset.key : undefined
+  const id = k ? chipId(k) : (nearest?.el.querySelector<HTMLElement>('.mon.hit')?.dataset.id as PokemonId | undefined)
+  const who = id && id in POKEMON ? named(id) : null
   match.value = nearest && {
     el: nearest.el,
     up: nearest.up,
     name: who ? [who.species, who.forme].filter(Boolean).join(' ') : '',
   }
 }
-watch([ladderRows, rangeRows, found, ladder], () => void nextTick(checkMatch), { flush: 'post' })
+watch([ladderRows, rangeRows, foundIds, ladder], () => void nextTick(checkMatch), { flush: 'post' })
 window.addEventListener('scroll', checkMatch, { passive: true })
 window.addEventListener('resize', checkMatch)
 onBeforeUnmount(() => {
@@ -1933,17 +2024,17 @@ const { start: startTour } = useTour(
             <PokemonPicker
               ref="findPicker"
               recent
-              :model-value="found"
-              :ids="findableIds"
-              :placeholder="t('speed.find')"
+              adds
+              :model-value="null"
+              :ids="findIds"
+              :placeholder="foundIds.length ? t('speed.findMore') : t('speed.find')"
               hotkey="/"
               :title="findTitle"
               :tone="mine ? 'opponent' : undefined"
               list-width-of=".find-row"
               speed
               :ranks
-              clearable
-              @update:model-value="setFound"
+              @update:model-value="addFound"
             />
             <!-- The filters' fold, beside the find. -->
             <button
@@ -1957,53 +2048,53 @@ const { start: startTour } = useTour(
             >
               <Funnel :size="16" aria-hidden="true" />
             </button>
-            <!-- Only it on the ladder, beside the find (not with every Pokémon once, where it shows once): its room kept
-                 there while it's not shown, so the row doesn't change. -->
+            <!-- Only them on the ladder, beside the find (not with every Pokémon once, where they show once): its room
+                 kept there while it's not shown, so the row doesn't change. -->
             <div class="find-modes">
               <button
                 type="button"
                 class="btn switch find-mode"
-                :class="{ on: onlyFound, unshown: !found || !onlyAllowed }"
-                :disabled="!found || !onlyAllowed"
-                :aria-hidden="!found || !onlyAllowed || undefined"
+                :class="{ on: onlyFound, unshown: !finding || !onlyAllowed }"
+                :disabled="!finding || !onlyAllowed"
+                :aria-hidden="!finding || !onlyAllowed || undefined"
                 :aria-pressed="onlyFound"
-                :aria-label="found ? t('speed.findOnly', { name: refName(pokemon(found)) }) : undefined"
+                :aria-label="finding ? onlyAria : undefined"
                 @click="findMode = onlyFound ? 'mark' : 'only'"
               >
-                {{ onlyLabel[0] }}<PokemonIcon :id="found ?? 'pikachu'" />{{ onlyLabel[1] }}
+                {{ onlyLabel[0]
+                }}<span class="only-icons"
+                  ><PokemonIcon v-for="id in onlyIcons" :id :key="id" /><PokemonIcon
+                    v-if="!finding"
+                    id="pikachu"
+                  /><span v-if="onlyMore" class="only-more">+{{ onlyMore }}</span></span
+                >{{ onlyLabel[1] }}
               </button>
             </div>
-            <!-- What to do with the one found, on a row under the filters (the field's own cross clears it): keep it on
-                 the ladder, joined to the ones kept. -->
-            <div v-if="(found && beyondTop(found)) || keptShown.length" class="find-actions">
-              <!-- Keeping the one found on the ladder (when it's not on it already: beyond the top), joined to the drop-down
-                   of the ones kept, saying how many. -->
-              <span v-if="(found && beyondTop(found)) || keptShown.length" class="keep-group">
-                <label
-                  v-if="found && beyondTop(found)"
-                  v-tip="canHover && t('speed.keep')"
-                  class="btn switch find-mode"
-                  :class="{ on: kept.includes(found) }"
+            <!-- The ones found, on a row under the filters: each its chip, which finds its row, and a cross letting it
+                 go; with more than one, a way to let them all go. -->
+            <ul v-if="finding" class="found-list" :aria-label="t('speed.foundLabel')">
+              <li v-for="id in foundIds" :key="id" class="found-chip" :class="{ mine: id === mine }">
+                <button type="button" class="found-name" :aria-label="t('speed.vsLocate')" @click="locateFound(id)">
+                  <PokemonIcon :id />{{ refName(pokemon(id)) }}
+                </button>
+                <button
+                  type="button"
+                  class="found-remove"
+                  :aria-label="t('speed.unfind', { name: refName(pokemon(id)) })"
+                  @click="removeFound(id)"
                 >
-                  <input
-                    type="checkbox"
-                    :checked="kept.includes(found)"
-                    :aria-label="t('speed.keep')"
-                    @change="toggleKept(found)"
-                  />
-                  {{ t('speed.keepShort') }}
-                </label>
-                <SpeedKeptMenu
-                  v-if="keptShown.length"
-                  :ids="keptShown"
-                  :found
-                  @find="setFound"
-                  @remove="toggleKept"
-                  @clear="set('keep', undefined)"
-                />
-              </span>
-            </div>
-            <p v-if="foundNote" class="find-note muted small">{{ foundNote }}</p>
+                  <X :size="14" aria-hidden="true" />
+                </button>
+              </li>
+              <li v-if="foundIds.length > 1">
+                <button type="button" class="btn small found-clear" @click="clearFound">
+                  {{ t('speed.unfindAll') }}
+                </button>
+              </li>
+            </ul>
+            <p v-for="n in foundNotes" :key="n.id" class="find-note muted small">
+              <PokemonIcon :id="n.id" />{{ n.text }}
+            </p>
             <!-- Filtering the ladder: by type, ability and item, each a choice of what the Pokémon shown have. -->
             <div
               id="speed-filters"
@@ -2027,7 +2118,7 @@ const { start: startTour } = useTour(
             <span v-if="inPlay" class="field-tag">{{ fieldLabel(inPlay) }}</span>
             <!-- Yours and the one found swapped, at the band's very end. -->
             <button
-              v-if="found"
+              v-if="swapWith"
               type="button"
               class="btn on-band inverted find-swap"
               :aria-label="t('compare.swap')"
@@ -2044,17 +2135,17 @@ const { start: startTour } = useTour(
                 <PokemonPicker
                   ref="pinnedFindPicker"
                   recent
-                  :model-value="found"
-                  :ids="findableIds"
-                  :placeholder="t('speed.findShort')"
+                  adds
+                  :model-value="null"
+                  :ids="findIds"
+                  :placeholder="foundIds.length ? t('speed.findMoreShort') : t('speed.findShort')"
                   hotkey="/"
                   :title="findTitle"
                   :tone="mine ? 'opponent' : undefined"
                   list-width-of=".pinned"
                   speed
                   :ranks
-                  clearable
-                  @update:model-value="setFound"
+                  @update:model-value="addFound"
                 />
                 <!-- The filters, as beside the toolbar's find: joined to its end, opening them in a dialog. -->
                 <button
@@ -2067,23 +2158,12 @@ const { start: startTour } = useTour(
                 >
                   <Funnel :size="16" aria-hidden="true" />
                 </button>
-                <button
-                  v-if="found && onlyAllowed"
-                  type="button"
-                  class="btn switch find-mode"
-                  :class="{ on: onlyFound }"
-                  :aria-pressed="onlyFound"
-                  :aria-label="t('speed.findOnly', { name: refName(pokemon(found)) })"
-                  @click="findMode = onlyFound ? 'mark' : 'only'"
-                >
-                  {{ onlyLabel[0] }}<PokemonIcon :id="found" />{{ onlyLabel[1] }}
-                </button>
               </div>
               <!-- The rest, a strip on one line, scrolling sideways when it doesn't fit (from its start each time the bar
                    pins): yours and the one found swapped, the switches, what's on (each a chip turning it off), the
                    view and who's shown, then the modifiers in a dialog. -->
               <ScrollRow class="pinned-chips">
-                <button v-if="mine && found" type="button" class="btn inverted" @click="swapMine">
+                <button v-if="swapWith" type="button" class="btn inverted" @click="swapMine">
                   <ArrowLeftRight :size="14" aria-hidden="true" />{{ t('compare.swap') }}
                 </button>
                 <button
@@ -2284,7 +2364,6 @@ const { start: startTour } = useTour(
               :mine="mySpeed"
               :trick-room="trickRoom"
               :finding="finding && !onlyFound"
-              :versus-speed="versus?.target ?? null"
               :picked-speed="at"
               :copied
               :row-href="rowHref"
@@ -2349,7 +2428,7 @@ const { start: startTour } = useTour(
               :mine="mySpeed"
               :trick-room="trickRoom"
               :finding
-              :versus="versus?.e.id ?? null"
+              :versus="vsChips.map((e) => e.id)"
               @chip="onRangeChip"
             />
           </div>
@@ -2357,31 +2436,41 @@ const { start: startTour } = useTour(
           <!-- Outside the page so the page transition's transform can't move it. -->
           <Teleport to="body">
             <AnimatePresence>
+              <!-- Docked at the screen's foot: the way to the Pokémon found (but over the comparisons unfolded), and the
+                   comparisons' panel. -->
               <motion.div
-                v-if="versus && !side"
-                key="versus"
-                class="versus-float"
+                v-if="match || floatCards"
+                key="dock"
+                class="float-dock"
                 :initial="{ opacity: 0, y: 8 }"
                 :animate="{ opacity: 1, y: 0 }"
                 :exit="{ opacity: 0, y: 8 }"
                 :transition="FADE"
               >
-                <VersusCard v-bind="versus.card" @close="clearVersus" @locate="locateVersus" />
+                <motion.button
+                  v-if="match && !(floatCards && versusOpen)"
+                  type="button"
+                  class="btn primary to-match"
+                  :while-press="PRESS"
+                  @click="toMatch"
+                >
+                  {{ match.name }} {{ match.up ? '↑' : '↓' }}
+                </motion.button>
+                <VersusPanel
+                  v-if="floatCards"
+                  :open="versusOpen"
+                  @update:open="toggleVersus"
+                  class="dock-panel"
+                  floating
+                  :items="versusItems"
+                  :mine-speed="mySpeed!"
+                  :points="myPoints"
+                  :trick-room
+                  :compare-to="compareTarget"
+                  @close="closeKey"
+                  @locate="locateKey"
+                />
               </motion.div>
-              <motion.button
-                v-else-if="match"
-                key="match"
-                type="button"
-                class="btn primary to-match"
-                :initial="{ opacity: 0, y: 8 }"
-                :animate="{ opacity: 1, y: 0 }"
-                :exit="{ opacity: 0, y: 8 }"
-                :transition="FADE"
-                :while-press="PRESS"
-                @click="toMatch"
-              >
-                {{ match.name }} {{ match.up ? '↑' : '↓' }}
-              </motion.button>
             </AnimatePresence>
           </Teleport>
 
@@ -2583,7 +2672,7 @@ const { start: startTour } = useTour(
             <!-- Yours on the comparison's page, to add opponents to there: greyed out until there's yours, saying why in
                  a tooltip, or under it where there's no hovering. Not with a chip tapped: the comparison's card goes
                  there with both. -->
-            <section v-if="!versus" class="yours-section yours-compare">
+            <section v-if="!versus.length" class="yours-section yours-compare">
               <AppLink v-if="compareTarget" :to="compareTarget" class="btn primary compare-go"
                 ><Columns2 :size="16" aria-hidden="true" />{{ t('compare.open')
                 }}<ArrowRight :size="16" aria-hidden="true"
@@ -2609,7 +2698,18 @@ const { start: startTour } = useTour(
             </div>
           </details>
         </Teleport>
-        <VersusCard v-if="versus && side" v-bind="versus.card" @close="clearVersus" @locate="locateVersus" />
+        <VersusPanel
+          v-if="side && versus.length"
+          :open="versusOpen"
+          @update:open="toggleVersus"
+          :items="versusItems"
+          :mine-speed="mySpeed!"
+          :points="myPoints"
+          :trick-room
+          :compare-to="compareTarget"
+          @close="closeKey"
+          @locate="locateKey"
+        />
       </div>
     </div>
   </div>
@@ -3080,8 +3180,15 @@ const { start: startTour } = useTour(
   max-width: none;
 }
 .find-note {
+  display: flex;
   flex-basis: 100%;
+  align-items: center;
+  gap: 4px;
   margin: 0;
+}
+.find-note :deep(.sheet-icon) {
+  flex: none;
+  margin-block: -6px;
 }
 /* The filters, on a line of their own under the find: what's searched, and the groups in the advanced mode. */
 .filters {
@@ -3131,38 +3238,63 @@ const { start: startTour } = useTour(
 .filters.folded {
   display: none;
 }
-/* Only it beside the find, as tall as the row; under them the filters, opened, then what to do with the one found and
-   the ones kept, and why the one found shows as it does. */
+/* Only them beside the find, as tall as the row; under them the filters, opened, then the ones found, and why any of
+   them shows as it does. */
 .find-modes {
   display: flex;
   align-self: stretch;
   order: 1;
 }
-.find-actions {
-  position: relative;
+.found-list {
   display: flex;
   flex-basis: 100%;
   flex-wrap: wrap;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
   order: 3;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 .find-note {
   order: 4;
 }
-/* Only it, while there's none found: its room kept, nothing shown. */
+/* Only them, while there's none found: its room kept, nothing shown. */
 .find-mode.unshown {
   visibility: hidden;
 }
-/* The keep and the ones kept, one pill: a single outline, a line between them. */
-.keep-group {
+/* One found: its name (finding its row) and its cross, one pill, a line between them. */
+.found-chip {
   display: flex;
 }
-.keep-group > :not(:first-child) :deep(.btn),
-.keep-group > .btn:not(:first-child) {
-  margin-left: -2px;
+.found-clear {
+  align-self: stretch;
 }
-:root:root .keep-group > .btn:not(:last-child) {
-  box-shadow: none;
+.found-name,
+.found-remove {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 8px 0 2px;
+  font: inherit;
+  font-size: 0.875em;
+  color: var(--text);
+  background: var(--panel);
+  border: 2px solid var(--border-strong);
+  cursor: pointer;
+}
+.found-remove {
+  margin-left: -2px;
+  padding: 0 6px;
+  color: var(--muted);
+}
+.found-name:hover,
+.found-remove:hover {
+  background: var(--sel);
+  color: var(--text);
+}
+.found-name :deep(.sheet-icon) {
+  margin-block: -4px;
 }
 /* Wider, the find no wider than a name needs. */
 @media (min-width: 721px) {
@@ -3186,16 +3318,53 @@ const { start: startTour } = useTour(
 .find-compare:hover {
   text-decoration: none;
 }
-/* The found Pokémon's icon over the toggle's padding, so the toggle takes the height around it: the search's in its
-   row, the switches' pinned. */
+/* The found Pokémon's icons over the toggle's padding, so the toggle takes the height around it: the search's in its
+   row, the switches' pinned. Overlapping a little, then how many more past the first few. */
 .find-mode :deep(.sheet-icon) {
   margin-block: -6px;
+}
+.only-icons {
+  display: inline-flex;
+  align-items: center;
+}
+.only-icons > :deep(.sheet-icon + .sheet-icon) {
+  margin-left: -12px;
+}
+.only-more {
+  margin-left: 2px;
+  font-size: 0.8em;
+  font-variant-numeric: tabular-nums;
 }
 /* The search takes what the toggles leave, but never less than room for a name: what doesn't fit beside it then goes
    to the next line. */
 .find.find-row > .picker {
   flex: 1 1 9em;
   min-width: 9em;
+}
+/* On phones, the search and the filters' fold take the whole first row; Only them starts the next, the ones found
+   after it, all wrapping as one row. */
+@media (max-width: 720px) {
+  .find.find-row > .picker {
+    flex-basis: calc(100% - 46px);
+  }
+  .find-row .find-modes {
+    order: 3;
+  }
+  .find-row .find-modes:has(.unshown) {
+    display: none;
+  }
+  .find-row .find-mode {
+    align-self: center;
+  }
+  .find-row .found-list {
+    display: contents;
+  }
+  /* Each as tall as Only, the row's tallest. */
+  .find-row .found-list > li {
+    display: flex;
+    order: 3;
+    align-self: stretch;
+  }
 }
 /* The skeleton's rows, while the ladder comes in. */
 .tier {
@@ -3380,12 +3549,28 @@ const { start: startTour } = useTour(
   font-variant-numeric: tabular-nums;
 }
 /* The button to the nearest match, floating at the bottom of the screen as the matchups page's to its results. */
-.to-match {
+/* What's docked at the foot of the screen: the way to the Pokémon found, then the comparisons' panel under it. */
+.float-dock {
   position: fixed;
-  left: 50%;
-  bottom: calc(16px + env(safe-area-inset-bottom));
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
   z-index: 10;
-  translate: -50% 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 32em;
+  margin: 0 auto;
+  pointer-events: none;
+}
+.float-dock > * {
+  pointer-events: auto;
+}
+.dock-panel {
+  align-self: stretch;
+}
+.to-match {
   min-height: 40px;
   padding: 6px 16px;
   font-weight: bold;
@@ -3417,16 +3602,6 @@ const { start: startTour } = useTour(
   .side-col > .yours {
     margin: 0;
   }
-}
-/* The comparison's card, at the bottom of the screen where yours isn't beside the ladder. */
-.versus-float {
-  position: fixed;
-  left: 12px;
-  right: 12px;
-  bottom: calc(12px + env(safe-area-inset-bottom));
-  z-index: 10;
-  max-width: 32em;
-  margin: 0 auto;
 }
 /* A nature effect, in the comparison: its arrows and "Spe" together, the effect's name read out in their place. */
 .effect {

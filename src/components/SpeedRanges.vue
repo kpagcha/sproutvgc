@@ -28,8 +28,8 @@ const props = defineProps<{
   trickRoom: boolean
   /** A Pokémon found: its row marked, the others faded. */
   finding: boolean
-  /** The Pokémon yours is measured against: its chip in the opponents' red. */
-  versus: PokemonId | null
+  /** The Pokémon yours is measured against: their chips in the opponents' red. */
+  versus: readonly PokemonId[]
 }>()
 const emit = defineEmits<{ chip: [event: MouseEvent, id: PokemonId] }>()
 
@@ -185,7 +185,8 @@ const name = (m: RangeRow['mons'][number]) => [m.species, m.forme].filter(Boolea
             v-tip="canHover && name(m)"
             :to="{ name: 'metaPokemon', params: { id: m.id } }"
             class="mon"
-            :class="{ hit: m.hit, mine: m.mine, versus: m.id === versus }"
+            :class="{ hit: m.hit, mine: m.mine, versus: versus.includes(m.id) }"
+            :data-id="m.id"
             :aria-label="name(m)"
             @click.capture="emit('chip', $event, m.id)"
           >

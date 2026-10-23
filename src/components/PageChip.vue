@@ -44,8 +44,8 @@ function view(visit: PageVisit) {
     /** Yours' build on the speed tiers, as the page reads it. */
     build: readBuild(q, 'my', name === 'speedTiers' ? mon(q.mine) : null),
     mine: name === 'speedTiers' ? mon(q.mine) : null,
-    /** The Pokémon found on the speed tiers. */
-    found: name === 'speedTiers' && q.find !== q.mine ? mon(q.find) : null,
+    /** The Pokémon found on the speed tiers, but yours. */
+    found: name === 'speedTiers' ? (q.find ?? '').split(',').flatMap((id) => (id !== q.mine && mon(id)) || []) : [],
     /** The Pokémon whose usage page it is. */
     usage: name === 'metaPokemon' ? mon(String(to.params.id)) : null,
     /** The ability, item or move whose meta page it is, if the regulation has it. */
@@ -108,7 +108,7 @@ const titled = computed(
     !v.value.usage &&
     !v.value.entry &&
     !v.value.event &&
-    (!props.untitled || (!v.value.mine && !v.value.found && !v.value.types.length)),
+    (!props.untitled || (!v.value.mine && !v.value.found.length && !v.value.types.length)),
 )
 /** A comparison's Pokémon by name, for what reads the chip out: its icons alone say nothing. */
 const label = computed(() => v.value.groups?.map((g) => g.map((id) => refName(pokemon(id))).join(', ')).join(' vs '))
@@ -148,7 +148,9 @@ const GROUP_MAX = 6
           />{{ v.build.points }}</span
         >
       </template>
-      <template v-if="v.found"><span v-if="v.mine" class="muted">vs</span><PokemonIcon :id="v.found" /></template>
+      <template v-if="v.found.length"
+        ><span v-if="v.mine" class="muted">vs</span><PokemonIcon v-for="id in v.found" :id :key="id"
+      /></template>
       <TypeIcon v-for="ty in v.types" :key="ty" :type="ty" />
       <template v-if="v.event">{{ v.event.name }}</template>
     </template>

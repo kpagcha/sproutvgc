@@ -428,14 +428,14 @@ export const router = createRouter({
         dexNames: true,
         keepScroll: true,
         recent: once('speedTiers'),
-        // Everything but what's found, the chip tapped, the Pokémon kept and the Speed picked, and the data shown (the
+        // Everything but what's found, the chips tapped, the Pokémon kept (from before) and the Speed picked, and the data shown (the
         // reader's choice on every page, not the setup's).
         setup: (query) => stringQuery(query, ['find', 'findmode', 'keep', 'vs', 'at', 'meta']),
-        // Its own recently viewed: a visit per Pokémon of yours (or, without one, per Pokémon found), what's found kept
-        // too.
+        // Its own recently viewed: a visit per Pokémon of yours (or, without one, per first Pokémon found), what's
+        // found kept too.
         history: (query) => {
-          const of =
-            typeof query.mine === 'string' && query.mine ? `mine:${query.mine}` : query.find && `find:${query.find}`
+          const find = typeof query.find === 'string' ? query.find.split(',')[0] : undefined
+          const of = typeof query.mine === 'string' && query.mine ? `mine:${query.mine}` : find && `find:${find}`
           return typeof of === 'string' ? { visit: of, query: stringQuery(query, ['vs', 'at', 'meta']) } : null
         },
         ...inArea('meta', 'speedTiers'),

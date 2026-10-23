@@ -43,6 +43,9 @@ const props = defineProps<{
   recent?: boolean
   /** On phones, its dialog has a button unpicking the one picked (wider, the field's clear button does). */
   clearable?: boolean
+  /** Adds to a list rather than picking one: the field empty again once one's picked, for the next (the page keeps
+   * what's picked, its model staying null). */
+  adds?: boolean
   /** The key the page focuses the field with, hinted at in it (`SearchBox`'s). */
   hotkey?: string
   /** Lists them by usage, by these ranks (the meta's), each with its rank, rather than by name. */
@@ -135,7 +138,7 @@ function pick(id: PokemonId) {
   if (props.recent) recordPick(id)
   keepTop = field.value?.getBoundingClientRect().top ?? null
   model.value = id
-  text.value = nameOf(id)
+  text.value = props.adds ? '' : nameOf(id)
   open.value = false
   sheet.value = false
   if (touch.matches) field.value?.querySelector('input')?.blur()

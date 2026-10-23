@@ -55,8 +55,9 @@ export interface OddsRow {
   hit: boolean
   /** Yours. */
   mine: boolean
-  /** The one yours is measured against, and the same Pokémon's other rows. */
+  /** One yours is measured against (at `versusAt`, marked on it), and the same Pokémon's other rows. */
   versus: boolean
+  versusAt: number | null
   rival: boolean
 }
 const props = defineProps<{
@@ -64,8 +65,6 @@ const props = defineProps<{
   mine: number | null
   trickRoom: boolean
   finding: boolean
-  /** The Speed yours is measured against, marked on the row it's on. */
-  versusSpeed: number | null
   /** The Speed picked (`?at=`), and the one whose link was just copied. */
   pickedSpeed: number | null
   copied: number | null
@@ -293,7 +292,7 @@ function onLeave(e: PointerEvent) {
 // The ladder drawn again with the tooltip shown: on the mark it points at as it is now, marked again, or hidden when
 // that mark's gone.
 watch(
-  () => [props.rows, props.versusSpeed, props.pickedSpeed],
+  () => [props.rows, props.pickedSpeed],
   () => {
     if (!tip?.state.isVisible || !pointedAt) return
     const { key, s, bench } = pointedAt
@@ -390,7 +389,7 @@ onBeforeUnmount(() => {
         :first="firsts[i]!"
         :href="firsts[i] ? rowHref(r.speed) : ''"
         :probe="pickedSpeed"
-        :versus-speed="r.versus ? versusSpeed : null"
+        :versus-speed="r.versusAt"
         :copied="firsts[i]! && copied === r.speed"
         @chip="(e: MouseEvent) => emit('chip', e, r.key)"
         @share="emit('share', r.speed)"
