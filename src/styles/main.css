@@ -549,7 +549,8 @@ details > summary {
 .dex-table .head {
   grid-template-columns: var(--cols);
   position: sticky;
-  top: 0;
+  /* Under what the page sticks over it, if anything (the rankings' tabs). */
+  top: var(--stuck-h, 0px);
   z-index: 1;
   color: var(--muted);
   background: var(--panel);

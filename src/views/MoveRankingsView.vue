@@ -216,8 +216,8 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 
 <template>
   <div>
-    <div class="panel banded">
-      <RankingsTabs current="moves" />
+    <RankingsTabs current="moves" />
+    <div class="panel">
       <div class="title-row">
         <h1>{{ t('title.moveRankings') }}</h1>
       </div>

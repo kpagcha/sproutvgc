@@ -46,6 +46,13 @@
   margin-bottom: calc(-1 * var(--panel-pad));
   border-bottom: none;
 }
+/* A panel under bare tabs (`BandTabs`), the one shown opening into it: its top outline theirs, and its top tucked under
+   their bottom edge (they're over it), so the seam where they meet, on screens that draw it between pixels, is over
+   the panel's own color rather than a faint line under the one shown. */
+:root:root .band-tabs.bare + .panel {
+  margin-top: -2px;
+  border-top: none;
+}
 :root:root .panel.tinted {
   background: color-mix(in srgb, var(--accent) 10%, var(--panel));
   border: none;

@@ -1,3 +1,8 @@
+<script lang="ts">
+/** How much of the tabs slides off the top of the screen as they stick, which they are the shorter by while stuck. */
+export const LIFT = 8
+</script>
+
 <script setup lang="ts" generic="T extends string">
 import { onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
@@ -6,18 +11,21 @@ import AppLink from '@/components/AppLink'
 
 // Pages of one thing, a link each, as the band of the page's first panel (`panel banded`, this its first child): a strip
 // of segments, the others in the band's accent, the one shown in the panel's own color, opening into the panel. On phones, they share the width by their names' lengths. The rankings' (`RankingsTabs`), a tournament's. With
-// `sticky`, stuck to the top as the page scrolls: on wide screens the band itself, shorter while stuck, easing into it;
-// on phones, where folder tabs over the page look heavy, once they reach the top a compact bar takes their
+// `sticky`, stuck to the top as the page scrolls: on wide screens the band itself, shorter while stuck, its top sliding
+// off the screen as the page scrolls on (`LIFT`) and its names down to the middle of what's left, with the scroll; on
+// phones, where folder tabs over the page look heavy, once they reach the top a compact bar takes their
 // place, across the screen: the tabs as a switch, and under it whatever the page puts in the `bar` slot (a tournament's
-// row of links to its panels, as one bar with the switch rather than a second strip). With `bare`, not a panel's
+// row of links to its panels, as one bar with the switch rather than a second strip). With `noBar`, on phones too the
+// band itself, as on wide screens (the rankings', heading one page rather than a tournament's). With `bare`, not a panel's
 // band but a strip of its own, outlined as a panel is, heading what the one shown opens into: a tournament's over its
-// Pokémon tab's row of links (`SectionNav`); its sticking the page's to place (they don't shrink).
+// Pokémon tab's row of links (`SectionNav`), the rankings'; its sticking the page's to place.
 const props = defineProps<{
   label: string
   current: T
   tabs: readonly { value: T; label: string; to: NamedLocation }[]
   sticky?: boolean
   bare?: boolean
+  noBar?: boolean
 }>()
 
 // Where they don't fit (a narrow phone, a long language), the band scrolls sideways: the one shown scrolled into view,
@@ -33,14 +41,18 @@ onMounted(() => {
   el.scrollLeft = on.offsetLeft - (el.clientWidth - on.offsetWidth) / 2
 })
 
-// Stuck: its top at the screen's, checked as the page scrolls.
+// Stuck: its top at the screen's, checked as the page scrolls; and how far its top has slid off it, from none to all of
+// `LIFT` (`--lifted`, 0 to 1), set on the band as is rather than drawn again.
 const phone = useMediaQuery('(max-width: 720px)')
 const stuck = shallowRef(false)
 let frame = 0
 function check() {
   frame = 0
-  const r = band.value?.getBoundingClientRect()
-  stuck.value = !!r && r.top <= 0.5 && window.scrollY > 0
+  const el = band.value
+  if (!el) return
+  const r = el.getBoundingClientRect()
+  stuck.value = r.top <= 0.5 && window.scrollY > 0
+  el.style.setProperty('--lifted', String(Math.min(Math.max(-r.top / LIFT, 0), 1)))
 }
 function onScroll() {
   if (!frame) frame = requestAnimationFrame(check)
@@ -78,7 +90,13 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <nav ref="band" class="band band-tabs" :class="{ sticky, stuck, bare }" :aria-label="label">
+  <nav
+    ref="band"
+    class="band band-tabs"
+    :class="{ sticky, stuck, bare, 'no-bar': noBar }"
+    :style="{ '--lift': `${LIFT}px` }"
+    :aria-label="label"
+  >
     <AppLink
       v-for="l in tabs"
       :key="l.value"
@@ -87,10 +105,10 @@ onBeforeUnmount(() => {
       :class="{ on: current === l.value }"
       :aria-current="current === l.value ? 'page' : undefined"
     >
-      {{ l.label }}
+      <span class="name">{{ l.label }}</span>
     </AppLink>
   </nav>
-  <Teleport v-if="sticky && phone" to="body">
+  <Teleport v-if="sticky && phone && !noBar" to="body">
     <div ref="bar" class="tab-bar" :class="{ shown, settled }" :inert="!stuck">
       <nav class="switch" :aria-label="label">
         <AppLink
@@ -124,11 +142,21 @@ onBeforeUnmount(() => {
   border-bottom: none;
   scrollbar-width: none;
 }
-/* Bare: the band of a panel, outlined and shadowed as one is, on its own. */
+/* Bare: the band of a panel, outlined and shadowed as one is, on its own: its shadow (`--hard`, 3px down and right)
+   cut to its right side, carrying on into the shadow of what it heads, which starts that much under its top, rather
+   than laid over it. */
 .band-tabs.bare {
   border: 2px solid var(--ink);
   border-bottom: none;
   box-shadow: var(--hard);
+  clip-path: polygon(
+    0 0,
+    calc(100% + 3px) 0,
+    calc(100% + 3px) calc(100% + 3px),
+    100% calc(100% + 3px),
+    100% 100%,
+    0 100%
+  );
 }
 .band-tabs::-webkit-scrollbar {
   display: none;
@@ -158,31 +186,40 @@ onBeforeUnmount(() => {
   background: var(--panel);
   border-bottom-color: transparent;
 }
-/* On wide screens, stuck to the top, over what scrolls under it; a panel's band shorter while stuck, taking less of the
-   screen: easing into it, the room it gives up added under it as it does, so what's under it doesn't move. */
+/* On wide screens (with `noBar`, on phones too), stuck to the top, over what scrolls under it, shorter while stuck: as
+   the page scrolls on, its top slides off the screen, `LIFT` of it, and its names slide down to the middle of what's
+   left (`--shift`: half of it, a bare band's top outline among what goes), the two with the scroll, nothing laid out
+   again. */
+.band-tabs.sticky {
+  --shift: calc(var(--lift) / 2);
+}
+.band-tabs.bare.sticky {
+  --shift: calc(var(--lift) / 2 - 1px);
+}
+.name {
+  display: inline-block;
+}
 @media (min-width: 721px) {
-  :root:root .panel.banded > .band.band-tabs.sticky,
-  .band-tabs.bare.sticky {
+  .band-tabs.sticky {
     position: sticky;
-    top: 0;
+    top: calc(-1 * var(--lift));
     z-index: 3;
   }
-  :root:root .panel.banded > .band.band-tabs.sticky {
-    transition: margin-bottom 0.2s ease-out;
-  }
-  :root:root .panel.banded > .band.band-tabs.sticky .tab {
-    transition: padding 0.2s ease-out;
-  }
-  :root:root .panel.banded > .band.band-tabs.stuck {
-    margin-bottom: calc(var(--panel-pad) + 12px);
-  }
-  :root:root .panel.banded > .band.band-tabs.stuck .tab {
-    padding-block: 2px;
+  .band-tabs.sticky .name {
+    transform: translateY(calc(var(--lifted, 0) * var(--shift)));
   }
 }
+.band-tabs.sticky.no-bar {
+  position: sticky;
+  top: calc(-1 * var(--lift));
+  z-index: 3;
+}
+.band-tabs.sticky.no-bar .name {
+  transform: translateY(calc(var(--lifted, 0) * var(--shift)));
+}
 /* The bar, on phones: across the top of the screen, there as soon as the tabs reach the top, at first at their size
-   over them, then settling into its own: in the page's color, a line under it, its switch shorter. Its switch the tabs
-   side by side, colored as the band: the others in the accent, the one shown in the panel's color. */
+   over them, then settling into its own: widening to the screen's edges, its switch shorter. Its switch the tabs side
+   by side, colored as the band: the others in the accent, the one shown in the panel's color. */
 .tab-bar {
   position: fixed;
   top: 0;
@@ -190,18 +227,11 @@ onBeforeUnmount(() => {
   left: 0;
   z-index: 40;
   padding: 0 16px;
-  background: transparent;
-  border-bottom: 2px solid transparent;
   visibility: hidden;
-  transition:
-    padding 0.2s ease-out,
-    background-color 0.2s ease-out,
-    border-color 0.2s ease-out;
+  transition: padding 0.2s ease-out;
 }
 .tab-bar.settled {
-  padding: 6px 16px;
-  background: var(--bg);
-  border-bottom-color: var(--ink);
+  padding: 0;
 }
 .tab-bar.shown {
   visibility: visible;

@@ -240,10 +240,10 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 </script>
 
 <template>
-  <!-- The controls, under the band of tabs to the other usage lists, and the table in panels of their own. -->
+  <!-- The tabs to the other usage lists, stuck to the top, then the controls and the table in panels of their own. -->
   <div>
-    <div class="panel banded">
-      <RankingsTabs current="pokemon" />
+    <RankingsTabs current="pokemon" />
+    <div class="panel">
       <div class="title-row">
         <h1>{{ t('title.pokemonRankings') }}</h1>
       </div>

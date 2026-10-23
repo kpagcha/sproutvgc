@@ -45,7 +45,7 @@ import {
 import { useSort } from '@/composables/useSort'
 import { useUrlFilters } from '@/composables/useUrlFilters'
 import AppLink from '@/components/AppLink'
-import BandTabs from '@/components/BandTabs.vue'
+import BandTabs, { LIFT } from '@/components/BandTabs.vue'
 import CopyPaste from '@/components/CopyPaste.vue'
 import FilterSearch from '@/components/FilterSearch.vue'
 import CountryFlag from '@/components/CountryFlag'
@@ -463,8 +463,10 @@ const box = { box: 'border-box' } as const
 const { height: tabsHeight } = useElementSize(() => shownTabs.value?.band, undefined, box)
 const { height: barHeight } = useElementSize(() => shownTabs.value?.bar, undefined, box)
 const { height: navHeight } = useElementSize(() => sectionNav.value?.$el, undefined, box)
+// On wide screens, the tabs' height less what slides off the screen as they stick (`LIFT`).
+const stuckTabs = computed(() => tabsHeight.value - LIFT)
 const bandHeight = computed(() =>
-  phone.value ? barHeight.value : tabsHeight.value + (tab.value === 'pokemon' ? navHeight.value : 0),
+  phone.value ? barHeight.value : stuckTabs.value + (tab.value === 'pokemon' ? navHeight.value : 0),
 )
 
 const num = (n: number) => n.toLocaleString(locale.value)
@@ -472,7 +474,7 @@ const ordinal = (n: number) => `#${n}`
 </script>
 
 <template>
-  <div v-if="event" :style="{ '--band-height': `${bandHeight}px`, '--tabs-h': `${tabsHeight}px` }">
+  <div v-if="event" :style="{ '--band-height': `${bandHeight}px`, '--tabs-h': `${stuckTabs}px` }">
     <div class="panel">
       <h1>{{ event.name }}</h1>
       <p class="facts">

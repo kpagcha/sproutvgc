@@ -225,8 +225,8 @@ const colVars = computed(() => ({
 
 <template>
   <div>
-    <div class="panel banded">
-      <RankingsTabs :current="list" />
+    <RankingsTabs :current="list" />
+    <div class="panel">
       <div class="title-row">
         <h1>{{ tx('title') }}</h1>
       </div>
