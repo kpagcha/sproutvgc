@@ -1356,7 +1356,6 @@ export const messages = {
   'usageMon.spreadsTip':
     "The exact spreads its sets run, a card each: how many of its sets run it, its nature, and each stat's points (the bar, out of 32) with the stat they give, in green the one its nature raises and in red the one it lowers.",
   'usageMon.speed': 'Speed',
-  'usageMon.speedChart': "{name}'s Speeds at its sets",
   'usageMon.field': 'The meta',
   'usageMon.fieldVsSets': 'Across its sets, against {field}',
   'usageMon.fieldVsCommon': 'At {speed}, its most common Speed, against {field}',

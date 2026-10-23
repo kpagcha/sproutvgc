@@ -673,7 +673,6 @@ const sections = computed(() =>
           </OptionsMenu>
         </div>
         <SpeedSpread
-          :title="t('usageMon.speedChart', { name: refName(ref_) })"
           :spread="spread"
           tone="yours"
           :other="metaSpeeds.length ? { name: t('usageMon.field'), spread: metaSpeeds, sets: true } : null"

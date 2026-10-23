@@ -18,7 +18,8 @@ import EffectTag from '@/components/EffectTag'
 // is a band of its side's color (`banded`). With its common Speeds folded under it (`pickable`), a mark clicked or
 // tapped says so (`pick`), unfolding them at it.
 const props = defineProps<{
-  title: string
+  /** Its heading; none where the panel's says what it is. */
+  title?: string
   spread: readonly SpreadPoint[]
   /** Its side, for its color; the other's is the other's. */
   tone: 'yours' | 'opponent'
@@ -138,7 +139,7 @@ onBeforeUnmount(() => markTip?.destroy())
 
 <template>
   <div class="spread-part" :class="tone">
-    <strong class="small title" :class="{ band: banded }">{{ title }}</strong>
+    <strong v-if="title" class="small title" :class="{ band: banded }">{{ title }}</strong>
     <div class="chart" :class="{ padded: banded }">
       <!-- Read out: every Speed and its share, and the other's Speed. -->
       <span class="visually-hidden">{{
