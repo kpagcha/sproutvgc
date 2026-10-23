@@ -24,9 +24,11 @@ import { useSort } from '@/composables/useSort'
 import AppLink from '@/components/AppLink'
 import CategoryIcon from '@/components/CategoryIcon'
 import DexText from '@/components/DexText'
+import BattleCount from '@/components/BattleCount.vue'
 import FilterSearch from '@/components/FilterSearch.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import RankingsHead from '@/components/RankingsHead.vue'
 import RankingsTabs from '@/components/RankingsTabs.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 import SortHeader from '@/components/SortHeader.vue'
@@ -218,17 +220,16 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   <div>
     <RankingsTabs current="moves" />
     <div class="panel">
-      <div class="title-row">
-        <h1>{{ t('title.moveRankings') }}</h1>
-      </div>
-      <p class="muted intro">{{ t('moveUsage.intro', { reg: snapshot?.regulation ?? REGULATION }) }}</p>
-      <template v-if="hasMoves && snapshot">
-        <div class="source">
-          <MetaDialog />
-          <span v-if="snapshot.battles" class="muted">
-            {{ t('usage.battles', { n: snapshot.battles.toLocaleString(locale) }) }}
-          </span>
+      <RankingsHead
+        :title="t('title.moveRankings')"
+        :intro="t('moveUsage.intro', { reg: snapshot?.regulation ?? REGULATION })"
+      >
+        <div v-if="hasMoves && snapshot" class="source">
+          <MetaDialog regulation />
+          <BattleCount v-if="snapshot.battles" :n="snapshot.battles" />
         </div>
+      </RankingsHead>
+      <template v-if="hasMoves && snapshot">
         <div class="find">
           <FilterSearch
             ref="termSearch"
@@ -531,9 +532,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   .wide-label {
     display: none;
   }
-  .intro {
-    display: none;
-  }
 }
 .usage {
   font-weight: bold;
@@ -579,7 +577,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 16px;
-  margin-bottom: 12px;
 }
 /* As the other rankings' usage: a bar along the bottom of the cell, against the most used one's. */
 .meter {

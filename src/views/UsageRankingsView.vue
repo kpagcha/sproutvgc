@@ -26,7 +26,9 @@ import DexText from '@/components/DexText'
 import ItemIcon from '@/components/ItemIcon.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import RankingsHead from '@/components/RankingsHead.vue'
 import RankingsTabs, { type RankingList } from '@/components/RankingsTabs.vue'
+import BattleCount from '@/components/BattleCount.vue'
 import FilterSearch from '@/components/FilterSearch.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 import SortHeader from '@/components/SortHeader.vue'
@@ -227,17 +229,13 @@ const colVars = computed(() => ({
   <div>
     <RankingsTabs :current="list" />
     <div class="panel">
-      <div class="title-row">
-        <h1>{{ tx('title') }}</h1>
-      </div>
-      <p class="muted intro">{{ tx('intro', { reg: snapshot?.regulation ?? REGULATION }) }}</p>
-      <template v-if="hasList && snapshot">
-        <div class="source">
-          <MetaDialog />
-          <span v-if="snapshot.battles" class="muted">
-            {{ t('usage.battles', { n: snapshot.battles.toLocaleString(locale) }) }}
-          </span>
+      <RankingsHead :title="tx('title')" :intro="tx('intro', { reg: snapshot?.regulation ?? REGULATION })">
+        <div v-if="hasList && snapshot" class="source">
+          <MetaDialog regulation />
+          <BattleCount v-if="snapshot.battles" :n="snapshot.battles" />
         </div>
+      </RankingsHead>
+      <template v-if="hasList && snapshot">
         <div class="find">
           <FilterSearch
             ref="termSearch"
@@ -423,9 +421,6 @@ const colVars = computed(() => ({
     padding-top: 0;
     padding-bottom: 6px;
   }
-  .intro {
-    display: none;
-  }
 }
 .usage {
   font-weight: bold;
@@ -473,7 +468,6 @@ const colVars = computed(() => ({
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 16px;
-  margin-bottom: 12px;
 }
 /* As the Pokémon rankings' usage: a bar along the bottom of the cell, against the most used one's. */
 .meter {

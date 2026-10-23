@@ -291,7 +291,7 @@ const listId = useId()
         >
       </button>
     </div>
-    <p v-if="!fits" class="hint muted small" aria-hidden="true">{{ placeholder }}</p>
+    <p v-if="!fits" class="hint muted" aria-hidden="true">{{ placeholder }}</p>
     <FilterGroups v-if="advanced" v-model="filters" class="groups" :kinds :meta :count :details />
   </div>
 </template>
@@ -415,8 +415,11 @@ const listId = useId()
     display: none;
   }
 }
+/* What it searches by, under it where the box is too narrow to say it: an aside, smaller, apart from the page's own
+   text. */
 .hint {
   margin: 4px 0 0;
+  font-size: 0.8125em;
 }
 .groups {
   margin: 10px 0 0;

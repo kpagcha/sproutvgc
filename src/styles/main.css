@@ -305,6 +305,13 @@ img.pixel {
 .btn.primary:hover {
   filter: brightness(1.08);
 }
+/* A small button, for what sits on a line of text rather than among controls (the meta's data shown, `MetaDialog`):
+   shorter and in smaller type, its icons as they are. */
+.btn.small {
+  min-height: 0;
+  padding: 1px 8px;
+  font-size: 0.875em;
+}
 /* A small action beside an entry in a list (filtering by it): tinted with the selection color, an icon before its
    label. */
 .btn.chip {

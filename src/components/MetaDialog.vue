@@ -7,12 +7,14 @@ import { metaLoading } from '@/composables/useMeta'
 import MetaCard from '@/components/MetaCard.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
 
-// The meta's data shown, as a button saying it (its dataset, "Showdown ladder · Sep 2026", and its subset in short,
+// The meta's data shown, as a small button saying it (its dataset, "Showdown ladder · Sep 2026", and its subset in short,
 // "1760+") that opens its card (`MetaCard`) to see what it is and pick another, in a dialog over the page, on any
 // screen (`ModalDialog`: closed by a press around it or Escape), its card scrolling when it's taller than the screen.
 // On phones, the button is its icon alone (what it shows read out, and in the card), as the favorites' is. Its icon
 // pulses while the data picked loads, and it's tinted in the accent while the data isn't the latest (another
-// regulation or period than the default's), the card then having the way back to it.
+// regulation or period than the default's), the card then having the way back to it. With `regulation`, it says its
+// regulation alone ("Regulation M-C", no subset), as on the rankings, whose heading it shares a line with.
+const props = defineProps<{ regulation?: boolean }>()
 const open = ref(false)
 
 const phoneQuery = window.matchMedia('(max-width: 720px)')
@@ -24,7 +26,11 @@ onBeforeUnmount(() => {
   phoneQuery.removeEventListener('change', onPhone)
 })
 
-const dataset = computed(() => (selectedSnapshot.value ? datasetParts(selectedSnapshot.value).join(' · ') : ''))
+const dataset = computed(() => {
+  const s = selectedSnapshot.value
+  if (!s) return ''
+  return props.regulation ? t('meta.regulation', { reg: s.regulation }) : datasetParts(s).join(' · ')
+})
 const subset = computed(() => (selectedSnapshot.value ? subsetShort(selectedSnapshot.value) : ''))
 </script>
 
@@ -32,7 +38,7 @@ const subset = computed(() => (selectedSnapshot.value ? subsetShort(selectedSnap
   <div v-if="selectedSnapshot" class="meta-dialog">
     <button
       type="button"
-      class="btn toggle"
+      class="btn small toggle"
       :class="{ off: offLatest }"
       :aria-expanded="open"
       aria-haspopup="dialog"
@@ -45,7 +51,7 @@ const subset = computed(() => (selectedSnapshot.value ? subsetShort(selectedSnap
       <Database :size="16" class="icon" :class="{ 'meta-pulse': metaLoading }" aria-hidden="true" />
       <template v-if="!phone">
         <span class="dataset">{{ dataset }}</span>
-        <span v-if="subset" class="subset">{{ subset }}</span>
+        <span v-if="subset && !regulation" class="subset">{{ subset }}</span>
       </template>
       <ChevronDown :size="14" class="chevron" :class="{ open }" aria-hidden="true" />
     </button>

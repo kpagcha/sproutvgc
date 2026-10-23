@@ -27,7 +27,9 @@ import MetaDialog from '@/components/MetaDialog.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
+import BattleCount from '@/components/BattleCount.vue'
 import FilterSearch from '@/components/FilterSearch.vue'
+import RankingsHead from '@/components/RankingsHead.vue'
 import RankingsTabs from '@/components/RankingsTabs.vue'
 
 // The regulation's Pokémon by usage, from the meta snapshot shown (`useMeta`: the one picked, on this page or another,
@@ -244,18 +246,14 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   <div>
     <RankingsTabs current="pokemon" />
     <div class="panel">
-      <div class="title-row">
-        <h1>{{ t('title.pokemonRankings') }}</h1>
-      </div>
-      <p class="muted intro">{{ t('usage.intro', { reg: snapshot?.regulation ?? REGULATION }) }}</p>
-      <template v-if="snapshot">
-        <!-- The data shown, and on its line, where the set columns don't fit (but on phones), the switch that shows
-             sets. -->
-        <div class="source">
-          <MetaDialog />
-          <span v-if="snapshot.battles" class="muted">
-            {{ t('usage.battles', { n: snapshot.battles.toLocaleString(locale) }) }}
-          </span>
+      <!-- The data shown, and on its line, where the set columns don't fit (but on phones), the switch that shows sets. -->
+      <RankingsHead
+        :title="t('title.pokemonRankings')"
+        :intro="t('usage.intro', { reg: snapshot?.regulation ?? REGULATION })"
+      >
+        <div v-if="snapshot" class="source">
+          <MetaDialog regulation />
+          <BattleCount v-if="snapshot.battles" :n="snapshot.battles" />
           <template v-if="hasSets && !phone">
             <label class="btn switch sets-switch" :class="{ on: showSets }">
               <input type="checkbox" :checked="showSets" @change="toggleSets" />
@@ -264,6 +262,8 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
             <span class="muted sets-desc">{{ t('usage.setsDesc') }}</span>
           </template>
         </div>
+      </RankingsHead>
+      <template v-if="snapshot">
         <div class="find-row">
           <div class="find">
             <FilterSearch
@@ -694,7 +694,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 16px;
-  margin-bottom: 12px;
 }
 .mon {
   display: flex;
@@ -779,14 +778,8 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
     display: none;
   }
 }
-/* Phones: no intro. */
+/* Phones: tighter. */
 @media (max-width: 720px) {
-  .intro {
-    display: none;
-  }
-  .source {
-    margin-bottom: 8px;
-  }
   .find-row {
     margin-bottom: 8px;
   }
