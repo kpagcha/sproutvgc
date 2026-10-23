@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, provide, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useElementSize, useMediaQuery } from '@vueuse/core'
 import { ChevronDown, ChevronUp } from '@lucide/vue'
-import { available, pokemon, type PokemonId } from '@/data/dex'
+import { available, pokemon, type AbilityId, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
 import { datasetDates, loadRanks, metaLabel, percent, regulationSnapshot } from '@/data/meta'
 import { splitForme } from '@/data/pokemon'
 import {
   baselineOf,
+  buildParam,
   eventOf,
+  listed,
   loadEventUsage,
   loadRounds,
   loadStandings,
@@ -19,10 +21,10 @@ import {
 } from '@/data/tournaments'
 import { locale, t, tSplit } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import { filterKey, passesGroups, positiveFilters } from '@/lib/filterGroups'
-import type { NamedLocation } from '@/lib/links'
+import { filterKey, isPlain, passesGroups, positiveFilters } from '@/lib/filterGroups'
+import { META_LINKS, type NamedLocation } from '@/lib/links'
 import { fold } from '@/lib/search'
-import type { Detail, TermFilters } from '@/lib/searchTerms'
+import { termName, type Detail, type TermFilters } from '@/lib/searchTerms'
 import { detailsIn, isBuild, teamHas, TEAM_KINDS } from '@/lib/teamFilters'
 import {
   cutAt,
@@ -46,6 +48,7 @@ import { useSort } from '@/composables/useSort'
 import { useUrlFilters } from '@/composables/useUrlFilters'
 import AppLink from '@/components/AppLink'
 import BandTabs, { LIFT } from '@/components/BandTabs.vue'
+import BuildCards from '@/components/BuildCards.vue'
 import FilterSearch from '@/components/FilterSearch.vue'
 import CountryFlag from '@/components/CountryFlag'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -54,6 +57,7 @@ import SegmentedControl from '@/components/SegmentedControl.vue'
 import OptionsMenu from '@/components/OptionsMenu.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import StandingRow from '@/components/StandingRow.vue'
+import TeammateList from '@/components/TeammateList.vue'
 import TournamentRounds from '@/components/TournamentRounds.vue'
 import UsageShift from '@/components/UsageShift.vue'
 import WinRateChart from '@/components/WinRateChart.vue'
@@ -62,7 +66,7 @@ import WinRateChart from '@/components/WinRateChart.vue'
 // regulation's meta, and three tabs, a page each: its standings (`/meta/tournaments/:id`: the whole field in three
 // parts, the top cut, the rest of Day 2 and Day 1, Day 1 folded away until asked for; searched by player and filtered
 // by a Pokémon, item, ability or move a team has, `?f=`, a Pokémon narrowed to a build too, every player found then
-// shown; the Pokémon filtered by with their numbers and the way to their meta page, on its regulation's data) and its
+// shown; the Pokémon filtered by with their numbers, each its name the way to its meta page, on its regulation's data) and its
 // Pokémon (`/meta/tournaments/:id/pokemon`: the whole event's, Day 2's or the top cut's, `?day=`, each one's share of
 // those teams and how they did in those rounds' matches, by usage, win rate or best placing, the top ones or all, each
 // leading to the standings filtered to the teams with it; under them, a panel each, those whose usage rose and fell the
@@ -331,6 +335,8 @@ const chartAbout = computed(() => {
 /** The way to its regulation's meta (its latest data; the default, for the current one, its URL left bare once it's
  * shown): the event's own Meta, and each Pokémon's meta page. */
 const metaOf = computed(() => event.value && regulationSnapshot(event.value.regulation)?.id)
+// Every link to a meta page here (its teams' entries, the filters' chips) opens on that data, the one they were played on.
+provide(META_LINKS, () => metaOf.value)
 const monName = (pid: Parameters<typeof pokemon>[0]) => splitForme(pid, refName(pokemon(pid)))
 
 // The rows unfolded, by placing, kept in the URL (`?open=3.12`), so a link opens on them.
@@ -388,6 +394,68 @@ const filteredStats = computed(() => {
     const s = pokemonStats(standings.value!, rounds.value!, 'all', (x) => isBuild(x, f)).find((x) => x.id === f.id)
     return s ? [{ key: filterKey(f), s, rank: null, with: [...f.with] }] : []
   })
+})
+/** How many of a Pokémon's builds, and of its teammates, its details show. */
+const DETAIL_TOP = 10
+/** The Pokémon filtered by, each with its builds here (from the team lists of the teams with it; one narrowed to a build,
+ * its sets that are) and its teammates on those teams, the most common first, as its meta page has them. */
+const filteredDetails = computed(() => {
+  const terms = positiveFilters(filters.value).filter((f) => f.kind === 'pokemon')
+  if (!terms.length || !standings.value) return []
+  return terms.flatMap((f) => {
+    const id = f.id as PokemonId
+    const teams = standings.value!.filter((s) => teamHas(s.team, f))
+    if (!teams.length) return []
+    const sets = teams.flatMap((s) => s.team.filter((x) => isBuild(x, f) && listed(x)))
+    // Its moves the most run first in each build, as its meta page orders them.
+    const moveCount = new Map<MoveId, number>()
+    for (const [, , , , moves] of sets) for (const m of moves) moveCount.set(m, (moveCount.get(m) ?? 0) + 1)
+    const tally = new Map<string, { slot: Slot; n: number }>()
+    for (const slot of sets) {
+      const [, item, ability, nature, moves] = slot
+      const key = buildParam({ item, ability, nature, moves })
+      const x = tally.get(key)
+      if (x) x.n++
+      else tally.set(key, { slot, n: 1 })
+    }
+    const builds = [...tally.values()]
+      .sort((a, b) => b.n - a.n)
+      .slice(0, DETAIL_TOP)
+      .map(({ slot: [, item, ability, nature, moves], n }) => ({
+        item: item as ItemId | null,
+        ability: ability as AbilityId | null,
+        nature,
+        moves: [...moves].sort((x, y) => (moveCount.get(y) ?? 0) - (moveCount.get(x) ?? 0)),
+        share: n / sets.length,
+        teams: n,
+      }))
+    const mateCount = new Map<PokemonId, number>()
+    for (const s of teams)
+      for (const p of new Set(s.team.map(([x]) => x))) if (p !== id) mateCount.set(p, (mateCount.get(p) ?? 0) + 1)
+    const mates = [...mateCount]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .slice(0, DETAIL_TOP)
+      .map(([mate, n]) => ({ id: mate, share: n / teams.length }))
+    const label = f.with?.length
+      ? `${refName(pokemon(id))} (${f.with.map((d) => refName(d)).join(', ')})`
+      : refName(pokemon(id))
+    return [{ key: filterKey(f), id, label, builds, mates }]
+  })
+})
+// With several, one at a time, picked from their names (the first until another is), so they don't stack down the page.
+const detailPicked = ref<string>()
+const detailShown = computed(
+  () => filteredDetails.value.find((d) => d.key === detailPicked.value) ?? filteredDetails.value[0],
+)
+/** The standings' title while they're plainly filtered (every filter to pass): the teams with what they're filtered by. */
+const teamsTitle = computed(() => {
+  if (!isPlain(filters.value)) return null
+  const terms = positiveFilters(filters.value)
+  if (!terms.length) return null
+  const names = terms.map((f) =>
+    f.with?.length ? `${termName(f)} (${f.with.map((d) => refName(d)).join(', ')})` : termName(f),
+  )
+  return t('tournaments.teamsWith', { names: new Intl.ListFormat(locale.value, { type: 'conjunction' }).format(names) })
 })
 /** Whether the standings are narrowed, by a filter or the text: then every player found shows, Day 1's too. */
 const narrowed = computed(() => !!query.value.trim() || filters.value.groups.length > 0 || !!preview.value)
@@ -514,13 +582,15 @@ const ordinal = (n: number) => `#${n}`
             }}</span></span
           >
           <span role="columnheader" class="r">{{ t('tournaments.col.record') }}</span>
-          <span role="columnheader" class="fs-meta" :aria-label="t('tournaments.toMeta')"></span>
         </div>
         <div v-for="{ key, s, rank, with: build } in filteredStats" :key class="fs-row" role="row">
           <span role="cell">
             <span class="mon">
               <PokemonIcon :id="s.id" /><span class="mon-name"
-                ><span>{{ monName(s.id).species }}</span
+                ><AppLink
+                  :to="{ name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }"
+                  class="mon-link"
+                  >{{ monName(s.id).species }}</AppLink
                 ><span v-if="monName(s.id).forme" class="forme">{{ monName(s.id).forme }}</span
                 ><span v-if="build.length" class="build">{{ build.map((d) => refName(d)).join(' · ') }}</span></span
               >
@@ -547,13 +617,29 @@ const ordinal = (n: number) => `#${n}`
             ><span :class="{ more: s.wins > s.losses }">{{ s.wins }}</span
             >–<span :class="{ more: s.losses > s.wins }">{{ s.losses }}</span></span
           >
-          <span role="cell" class="fs-meta">
-            <AppLink :to="{ name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }" class="to-meta"
-              >{{ t('tournaments.toMeta') }} ›</AppLink
-            >
-          </span>
         </div>
       </div>
+      <!-- A Pokémon filtered by: its builds here and its teammates on the teams with it; with several, the one picked
+           from their names. -->
+      <div v-if="detailShown" class="fs-detail">
+        <SegmentedControl
+          v-if="filteredDetails.length > 1"
+          :model-value="detailShown.key"
+          class="detail-pick"
+          :label="t('tournaments.detailsOf')"
+          :options="filteredDetails.map((d) => ({ value: d.key, label: d.label }))"
+          @update:model-value="detailPicked = $event"
+        />
+        <template v-if="detailShown.builds.length">
+          <h3>{{ t('tournaments.buildsHere', { name: refName(pokemon(detailShown.id)) }) }}</h3>
+          <BuildCards :pokemon="detailShown.id" :builds="detailShown.builds" />
+        </template>
+        <template v-if="detailShown.mates.length">
+          <h3>{{ t('tournaments.matesHere', { name: refName(pokemon(detailShown.id)) }) }}</h3>
+          <TeammateList :mates="detailShown.mates" />
+        </template>
+      </div>
+      <h3 v-if="teamsTitle && standings && shownParts.length" class="teams-title">{{ teamsTitle }}</h3>
       <p v-if="!standings" class="muted">{{ t('tournaments.loading') }}</p>
       <p v-else-if="!shownParts.length" class="muted">{{ t('tournaments.noPlayers') }}</p>
       <ol v-else class="standings" :class="{ previewing: preview }">
@@ -977,7 +1063,7 @@ h1 {
 /* The Pokémon filtered by, a row each under one head, their columns lined up as the Pokémon tab's table's are. */
 .filtered-stats {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 3rem 7rem 7rem 7rem 3.5rem;
+  grid-template-columns: minmax(0, 1fr) 3rem 7rem 7rem 7rem;
   column-gap: 12px;
   margin: 0 0 12px;
 }
@@ -993,6 +1079,25 @@ h1 {
   padding: 0 0 4px;
   font-size: 0.75rem;
   color: var(--muted);
+}
+/* A Pokémon filtered by's builds and teammates here, under its numbers, over the standings. */
+.fs-detail {
+  margin: 0 0 16px;
+}
+.fs-detail h3 {
+  margin: 12px 0 8px;
+  font-size: 1em;
+}
+.fs-detail h3:first-child {
+  margin-top: 0;
+}
+.detail-pick {
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.teams-title {
+  margin: 0 0 8px;
+  font-size: 1em;
 }
 .filtered-stats .r {
   text-align: right;
@@ -1015,35 +1120,38 @@ h1 {
   font-size: 0.8em;
   color: var(--muted);
 }
+/* The Pokémon filtered by: its name alone the way to its meta page, underlined, as a player's in the standings. */
+.mon-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.mon-link:hover {
+  color: var(--accent);
+}
 .filtered-stats .meter,
 .filtered-stats .wr {
   --inset: 0px;
 }
 @media (max-width: 720px) {
   .filtered-stats {
-    grid-template-columns: minmax(0, 1fr) 2rem 4.5rem 4.5rem 5.5rem 3rem;
+    grid-template-columns: minmax(0, 1fr) 2rem 4.5rem 4.5rem 5.5rem;
     column-gap: 8px;
   }
 }
-/* On phones, no room for the name beside the numbers: the Pokémon (and its build) across the row, the way to its meta
-   page at its end, its numbers under, from the start; the head the numbers' alone. */
+/* On phones, no room for the name beside the numbers: the Pokémon (and its build) across the row, its numbers under,
+   from the start; the head the numbers' alone. */
 @media (max-width: 480px) {
   .filtered-stats {
     grid-template-columns: 2rem minmax(0, 1fr) minmax(0, 1fr) auto;
     column-gap: 12px;
   }
-  .fs-head > :first-child,
-  .fs-head > .fs-meta {
+  .fs-head > :first-child {
     display: none;
   }
   .fs-row:not(.fs-head) > :first-child {
     grid-row: 1;
-    grid-column: 1 / -2;
-    padding-bottom: 0;
-  }
-  .fs-row:not(.fs-head) > .fs-meta {
-    grid-row: 1;
-    grid-column: -2 / -1;
+    grid-column: 1 / -1;
     padding-bottom: 0;
   }
 }
@@ -1510,11 +1618,6 @@ h1 {
 }
 .record-wl .more {
   color: var(--text);
-}
-.to-meta {
-  font-size: 0.85em;
-  font-weight: bold;
-  white-space: nowrap;
 }
 .links {
   margin: 8px 0 0;

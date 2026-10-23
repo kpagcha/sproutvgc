@@ -1,3 +1,4 @@
+import type { InjectionKey } from 'vue'
 import type { RouteLocationNamedRaw } from 'vue-router'
 import { PAGES, type Ref } from '@/data/dex'
 import { router } from '@/router'
@@ -11,10 +12,10 @@ const hrefs = new Map<string, string>()
 /** A named route with string params: what `hrefOf` and `AppLink` take. */
 export type NamedLocation = RouteLocationNamedRaw & { name: string; params?: Record<string, string> }
 
-/** The href of a named route with string params, resolved once; one with a query, each time, as the key leaves it out. */
+/** The href of a named route with string params, resolved once (its query part of what it's kept by). */
 export function hrefOf(to: NamedLocation): string {
-  if (to.query && Object.keys(to.query).length) return router.resolve(to).href
-  const key = `${to.name}/${Object.values(to.params ?? {}).join('/')}`
+  const query = to.query && Object.entries(to.query).filter(([, v]) => v != null)
+  const key = `${to.name}/${Object.values(to.params ?? {}).join('/')}${query?.length ? `?${JSON.stringify(query)}` : ''}`
   let href = hrefs.get(key)
   if (href === undefined) hrefs.set(key, (href = router.resolve(to).href))
   return href
@@ -34,11 +35,17 @@ const META_PAGES: Partial<Record<Ref['kind'], string>> = {
   move: 'metaMove',
 }
 
-/** The href of an entry's meta page, where links on the meta's pages lead; its dex entry's, for a category with none. */
-export function metaHref(ref: Ref): string | undefined {
+/** The href of an entry's meta page, where links on the meta's pages lead, on the data `meta` names (`?meta=`) if given;
+ * its dex entry's, for a category with none. */
+export function metaHref(ref: Ref, meta?: string): string | undefined {
   const route = META_PAGES[ref.kind]
-  return route ? hrefOf({ name: route, params: { id: ref.id } }) : refHref(ref)
+  return route ? hrefOf({ name: route, params: { id: ref.id }, query: meta ? { meta } : undefined }) : refHref(ref)
 }
+
+/** The data a page's links to meta pages open on (`DexRef`'s `meta`, and the pieces that lead there): a tournament's
+ * pages give their regulation's (`regulationSnapshot`), whatever the reader has picked, so its entries are seen on the
+ * data they were played on. Without it, the reader's own. */
+export const META_LINKS: InjectionKey<() => string | undefined> = Symbol('metaLinks')
 
 /**
  * A click handler that has the router follow a plain click on a link of the app's, the clicked one or one it's in (so

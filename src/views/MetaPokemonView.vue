@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { computed, h, ref, render, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { useMediaQuery } from '@vueuse/core'
 import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp, Info } from '@lucide/vue'
-import { ability, available, availableIds, item, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
+import { ability, available, availableIds, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { MOVES } from '@/data/moves'
 import {
   POKEMON,
@@ -14,14 +13,12 @@ import {
   loadLearnsets,
   movesOf,
   speciesOf,
-  splitForme,
   spriteUrl,
   statColor,
 } from '@/data/pokemon'
 import { datasetDates, GENERATED_SNAPSHOTS, loadHistory, pastRoster, percent, type MetaHistory } from '@/data/meta'
 import {
   baselineOf,
-  buildParam,
   buildsRegulation,
   EVENTS,
   eventsOf,
@@ -31,7 +28,7 @@ import {
   type RegulationBuilds,
   type TournamentEvent,
 } from '@/data/tournaments'
-import { natureEffectOn, natureEffects, natureName } from '@/data/natures'
+import { natureEffectOn, natureName } from '@/data/natures'
 import { locale, t, tSlots, typeName } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
@@ -45,26 +42,26 @@ import { useListOptions } from '@/composables/useListOptions'
 import { useMeta } from '@/composables/useMeta'
 import { useSpeedOptions } from '@/composables/useSpeedOptions'
 import AppLink from '@/components/AppLink'
+import BuildCards from '@/components/BuildCards.vue'
 import CountryFlag from '@/components/CountryFlag'
 import DefenseResults from '@/components/DefenseResults.vue'
-import ItemIcon from '@/components/ItemIcon.vue'
 import ItemList from '@/components/ItemList.vue'
 import MoveTable from '@/components/MoveTable.vue'
 import DexRef from '@/components/DexRef'
 import DexText from '@/components/DexText'
 import EntryTitle from '@/components/EntryTitle.vue'
-import EffectTag from '@/components/EffectTag'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonChips from '@/components/PokemonChips.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import ListOptions from '@/components/ListOptions.vue'
-import MoreToggle from '@/components/MoreToggle.vue'
 import OptionsMenu from '@/components/OptionsMenu.vue'
 import SectionNav from '@/components/SectionNav.vue'
 import ShareSplit from '@/components/ShareSplit.vue'
 import SpeedShare from '@/components/SpeedShare.vue'
 import SpeedSpread from '@/components/SpeedSpread.vue'
+import TeammateList from '@/components/TeammateList.vue'
 import TypeIcon from '@/components/TypeIcon'
+import { natureTip } from '@/components/natureTip'
 import UsageShift from '@/components/UsageShift.vue'
 
 // One Pokémon in the meta shown (`useMeta`, picked on the back row). Its heading has what matters most to a player: its
@@ -117,28 +114,6 @@ const natures = computed(() =>
     .map((n) => ({ key: n.id, share: n.share })),
 )
 const topNature = computed(() => natures.value[0]?.key)
-// A nature says what it does on hover, or tapped, as an item's, ability's or move's name gives its short description:
-// the stat it raises and the one it lowers, each with its chevron, as the speed pages show a nature's effect on Speed.
-// Drawn once per nature, the tooltips sharing it.
-const natureTips = new Map<string, Element>()
-function natureTip(id: string) {
-  const e = natureEffects(id)
-  if (!e) return t('usageMon.natureNeutral')
-  let el = natureTips.get(id)
-  if (!el) {
-    // Drawn once the render asking for it is done: `render` runs Vue's pending post-render work at once, a deferred
-    // Teleport among it, which would look for its target before the page is in the document.
-    const tip = (el = document.createElement('span'))
-    queueMicrotask(() =>
-      render(
-        h('span', [h(EffectTag, { effect: 'up', stat: e.plus }), ' ', h(EffectTag, { effect: 'down', stat: e.minus })]),
-        tip,
-      ),
-    )
-    natureTips.set(id, el)
-  }
-  return el
-}
 const field = computed(() =>
   data.value
     ? percentiles(
@@ -278,13 +253,6 @@ const buildsFrom = computed(() => {
       }
     : { builds: [], sets: undefined, events: undefined }
 })
-// Its first `BUILDS_TOP` (on phones `BUILDS_TOP_PHONE`) until unfolded (`MoreToggle`), then every one the data keeps.
-const BUILDS_TOP = 5
-const BUILDS_TOP_PHONE = 2
-const phone = useMediaQuery('(max-width: 720px)')
-const buildsTop = computed(() => (phone.value ? BUILDS_TOP_PHONE : BUILDS_TOP))
-const allBuilds = ref(false)
-watch(id, () => (allBuilds.value = false))
 const builds = computed(() =>
   buildsFrom.value.builds.map((b) => ({
     ...b,
@@ -474,11 +442,7 @@ const eventDate = (date: string) =>
 
 // Its teammates, the least of it, last: the data keeps the ten most common, those on at least this share of its teams.
 const TEAMMATE_MIN = LIST_MIN
-const teammates = computed(() =>
-  (m.value?.teammates ?? [])
-    .filter((x) => available(pokemon(x.id)))
-    .map((x) => ({ ...x, ...splitForme(x.id, refName(pokemon(x.id))) })),
-)
+const teammates = computed(() => (m.value?.teammates ?? []).filter((x) => available(pokemon(x.id))))
 
 // What its stats are and, when there's a meta, what they're set against: the tooltip of the icon by their total, drawn
 // hidden in the page and handed to it.
@@ -741,49 +705,7 @@ const sections = computed(() =>
         <p v-else-if="buildsFrom.sets" class="muted small builds-of">
           {{ t('usageMon.buildsOf', { n: buildsFrom.sets }) }}
         </p>
-        <ol class="builds">
-          <li
-            v-for="(b, i) in allBuilds ? builds : builds.slice(0, buildsTop)"
-            :key="i"
-            class="build"
-            :class="{ main: i === 0 }"
-          >
-            <span class="build-head meter" :style="{ '--share': b.share }"
-              ><strong>#{{ i + 1 }}</strong> · {{ percent(b.share) }}</span
-            >
-            <span class="build-item">
-              <template v-if="b.item"><ItemIcon :id="b.item" /><DexRef :to="item(b.item)" meta /></template>
-              <span v-else class="muted">{{ t('usageMon.noItem') }}</span>
-            </span>
-            <span class="build-traits">
-              <DexRef v-if="b.ability" :to="ability(b.ability)" meta />
-              <span v-if="b.nature" v-tip:group="natureTip(b.nature)" class="build-nature">{{
-                natureName(b.nature)
-              }}</span>
-            </span>
-            <ul class="build-moves">
-              <li v-for="mv in b.moves" :key="mv">
-                <TypeIcon v-if="MOVES[mv]" :type="MOVES[mv].type" /><DexRef :to="move(mv)" meta />
-              </li>
-            </ul>
-            <!-- The way to the teams that ran it. -->
-            <AppLink
-              :to="{
-                name: 'metaBuild',
-                params: { id },
-                query: { b: buildParam(b), reg: buildsFrom.regulation ?? snapshot?.regulation, meta: route.query.meta },
-              }"
-              class="build-teams"
-              >{{
-                b.teams === 1
-                  ? t('usageMon.buildTeam')
-                  : t('usageMon.buildTeams', { n: b.teams.toLocaleString(locale) })
-              }}
-              ›</AppLink
-            >
-          </li>
-        </ol>
-        <MoreToggle v-model:all="allBuilds" :n="builds.length" :top="buildsTop" />
+        <BuildCards :pokemon="id" :builds :regulation="buildsFrom.regulation ?? snapshot?.regulation" />
       </section>
 
       <!-- Its Speeds, as the speed tiers draw a row, and the ways to them. -->
@@ -912,25 +834,7 @@ const sections = computed(() =>
         <h2 v-tip="t('usageMon.teammatesTip', { share: percent(TEAMMATE_MIN) })" class="tipped-head">
           {{ t('usageMon.teammates') }}
         </h2>
-        <ul class="shares mates">
-          <li v-for="(x, i) in teammates" :key="x.id">
-            <span class="mate-rank muted">{{ i + 1 }}</span>
-            <AppLink :to="{ name: 'metaPokemon', params: { id: x.id } }" class="what mate">
-              <PokemonIcon :id="x.id" /><span class="mate-name"
-                ><span>{{ x.species }}</span
-                ><span v-if="x.forme" class="forme">{{ x.forme }}</span></span
-              >
-            </AppLink>
-            <span class="types">
-              <AppLink v-for="ty in POKEMON[x.id].types" :key="ty" :to="{ name: 'types', params: { type: ty } }">
-                <TypeIcon :type="ty" />
-              </AppLink>
-            </span>
-            <span class="num meter mate-share" :style="{ '--share': x.share ?? 0 }">{{
-              x.share === undefined ? '—' : percent(x.share)
-            }}</span>
-          </li>
-        </ul>
+        <TeammateList :mates="teammates" />
       </section>
     </template>
 
@@ -1356,63 +1260,6 @@ const sections = computed(() =>
 .builds-of {
   margin: -4px 0 8px;
 }
-.builds {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.build {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 8px;
-  background: var(--panel-alt);
-  border: 1px solid var(--border);
-}
-.build.main {
-  border-color: var(--accent);
-}
-.build-head {
-  font-size: 0.85em;
-}
-.build-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-weight: bold;
-}
-.build-traits {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px 10px;
-}
-.build-nature {
-  font-weight: bold;
-}
-.build-moves {
-  /* Type badges at their desktop size on phones too, as small as the text. */
-  --icon-scale: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.build-moves li {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-/* The way to its teams, at the card's foot. */
-.build-teams {
-  margin-top: auto;
-  font-size: 0.85em;
-  font-weight: bold;
-}
 /* A list's heading, its options at the right (`ListOptions`): whether the short descriptions show. */
 .panel-head {
   display: flex;
@@ -1460,93 +1307,6 @@ h2 {
   margin-top: 0;
 }
 /* A list of shares: what, its bar (out of all of its sets), its number. */
-.shares {
-  display: grid;
-  grid-template-columns: minmax(0, max-content) minmax(40px, 1fr) auto;
-  gap: 4px 10px;
-  align-items: center;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.shares li {
-  display: contents;
-}
-/* The teammates in columns filling the panel, as many as fit (one on phones), the most common first, down each; each a
-   row of its own: its name (its forme a tag, under it when it doesn't fit), its types, its share with its bar under it, its icons at
-   their desktop size, phones' bigger ones leaving its name no room. */
-.shares.mates {
-  --icon-scale: 1;
-  container-type: inline-size;
-  display: block;
-  columns: 360px;
-  column-gap: 32px;
-}
-/* A row: its place, its name (as wide as the longest fits, so the types line up after it down the column), its types
-   (as wide as two badges, so the shares line up too) and its share right after them: each column's rows held together,
-   what's left of it empty at its right, rather than its shares out at its edge, nearer the next column's names. */
-.shares.mates li {
-  display: grid;
-  break-inside: avoid;
-  margin-bottom: 8px;
-  grid-template-columns: 1.4em minmax(0, 14em) 58px 4.5em;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-.shares.mates .num {
-  grid-column: -2;
-}
-/* Its place among them, first, so they read in order down the columns. */
-.mate-rank {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-/* On phones, one column: the name taking what's left, the types and the share after it. */
-@media (max-width: 720px) {
-  .shares.mates li {
-    grid-template-columns: 1.4em minmax(0, 1fr) auto 4.5em;
-  }
-}
-/* Very narrow, no types: the name has their room, rather than running under them. */
-@container (max-width: 320px) {
-  .shares.mates li {
-    grid-template-columns: 1.4em minmax(0, 1fr) 4.5em;
-  }
-  .shares.mates .types {
-    display: none;
-  }
-}
-/* A name longer than its room breaks across lines rather than running into the share after it. */
-.mate-name {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0 4px;
-  min-width: 0;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-.mate-name > :first-child {
-  min-width: 0;
-}
-/* Its forme as the usage list and the speed tiers show it: a small tag after its species' name, under it when it
-   doesn't fit. */
-.forme {
-  padding: 0 5px;
-  font-size: 0.85em;
-  color: var(--muted);
-  white-space: nowrap;
-  border: 1px solid var(--border);
-  border-radius: 3px;
-}
-.what {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-  white-space: nowrap;
-}
 .bar {
   position: relative;
   height: 6px;

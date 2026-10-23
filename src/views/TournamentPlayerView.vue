@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, shallowRef, watch } from 'vue'
+import { computed, provide, shallowRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { datasetDates } from '@/data/meta'
+import { datasetDates, regulationSnapshot } from '@/data/meta'
 import { eventOf, loadRounds, loadStandings, type Round, type Standing } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
+import { META_LINKS } from '@/lib/links'
 import { cutMarks, medalOf, playerMatches, type CutMark, type PlayerMatch } from '@/lib/tournamentStats'
 import AppLink from '@/components/AppLink'
 import CopyPaste from '@/components/CopyPaste.vue'
@@ -22,6 +23,8 @@ const route = useRoute()
 const id = computed(() => String(route.params.id))
 const placing = computed(() => Number(route.params.placing))
 const event = computed(() => eventOf(id.value))
+// Its links to meta pages open on its regulation's data, the one its teams were played on.
+provide(META_LINKS, () => event.value && regulationSnapshot(event.value.regulation)?.id)
 
 type Placed = Standing & { placing: number }
 const standings = shallowRef<Placed[] | null>(null)

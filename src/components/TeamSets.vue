@@ -1,32 +1,3 @@
-<script lang="ts">
-import { h, render } from 'vue'
-import EffectTag from '@/components/EffectTag'
-import { natureEffects } from '@/data/natures'
-import { t } from '@/i18n'
-
-// A nature says what it does on hover, or tapped, as on a Pokémon's meta page: the stat it raises and the one it
-// lowers, each with its chevron. Drawn once per nature, the tooltips sharing it.
-const natureTips = new Map<string, Element>()
-function natureTip(id: string) {
-  const e = natureEffects(id)
-  if (!e) return t('usageMon.natureNeutral')
-  let el = natureTips.get(id)
-  if (!el) {
-    // Drawn once the render asking for it is done: `render` runs Vue's pending post-render work at once, a deferred
-    // Teleport among it, which would look for its target before the page is in the document.
-    const tip = (el = document.createElement('span'))
-    queueMicrotask(() =>
-      render(
-        h('span', [h(EffectTag, { effect: 'up', stat: e.plus }), ' ', h(EffectTag, { effect: 'down', stat: e.minus })]),
-        tip,
-      ),
-    )
-    natureTips.set(id, el)
-  }
-  return el
-}
-</script>
-
 <script setup lang="ts">
 import { ability, item, move, pokemon } from '@/data/dex'
 import { MOVES } from '@/data/moves'
@@ -37,6 +8,8 @@ import DexRef from '@/components/DexRef'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
+import { natureTip } from '@/components/natureTip'
+import { t } from '@/i18n'
 
 // A tournament team's whole sets, a card each, each entry leading to its meta page: its sprite and types in a band,
 // its item after the types, then its ability and nature (the stats it raises and lowers on hover) on a line, and its

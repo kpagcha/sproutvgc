@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed, shallowRef, watch } from 'vue'
+import { computed, provide, shallowRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { available, pokemon, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
-import { percent } from '@/data/meta'
+import { percent, regulationSnapshot } from '@/data/meta'
 import {
   buildOfParam,
   eventsOf,
@@ -16,6 +16,7 @@ import {
 } from '@/data/tournaments'
 import { locale, t, tSlots } from '@/i18n'
 import { refName } from '@/i18n/refName'
+import { META_LINKS } from '@/lib/links'
 import { useGradualRows } from '@/composables/useGradualRows'
 import { useMeta } from '@/composables/useMeta'
 import AppLink from '@/components/AppLink'
@@ -41,6 +42,9 @@ const { snapshot } = useMeta()
 const regulation = computed(() =>
   typeof route.query.reg === 'string' && route.query.reg ? route.query.reg : (snapshot.value?.regulation ?? REGULATION),
 )
+
+// Its links to meta pages open on the regulation's data, the one its teams were played on.
+provide(META_LINKS, () => regulationSnapshot(regulation.value)?.id)
 
 type Placed = Standing & { placing: number }
 /** Every event of the regulation with its standings, once they're all in. */
@@ -156,9 +160,11 @@ function toggle(key: string) {
         <span
           ><template v-for="(part, i) in tSlots('metaBuild.title')" :key="i"
             ><template v-if="typeof part === 'string'">{{ part }}</template
-            ><AppLink v-else :to="{ name: 'metaPokemon', params: { id }, query: { meta: route.query.meta } }">{{
-              refName(pokemon(id))
-            }}</AppLink></template
+            ><AppLink
+              v-else
+              :to="{ name: 'metaPokemon', params: { id }, query: { meta: regulationSnapshot(regulation)?.id } }"
+              >{{ refName(pokemon(id)) }}</AppLink
+            ></template
           ></span
         >
       </h1>
