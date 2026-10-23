@@ -324,7 +324,7 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
       <li
         v-for="m in drawn"
         :key="`${m[0]}-${m[1]}`"
-        v-memo="[m, round, query, filters, id, locale, lit === matchKey(m)]"
+        v-memo="[m, round, query, filters, id, locale, lit === matchKey(m), preview]"
         class="match swiss"
         :class="{ lit: lit === matchKey(m) }"
         :data-match="matchKey(m)"

@@ -645,11 +645,12 @@ const ordinal = (n: number) => `#${n}`
       <ol v-else class="standings" :class="{ previewing: preview }">
         <!-- Each part under its name, when there's more than one, then its players. Each drawn again only when what
              it shows changes, not with every change to the page (the search's text, its options): a Regional has a
-             thousand players. -->
+             thousand players. Never one drawn for a filter's preview kept past it, nor the reverse: Vue patched such a
+             row after it was gone (adding a second Pokémon from the search broke the page). -->
         <li
           v-for="{ key, head, s } in entries"
           :key
-          v-memo="[head, s, open.has(s.placing), builds, id, locale]"
+          v-memo="[head, s, open.has(s.placing), builds, id, locale, preview]"
           :data-placing="head ? undefined : s.placing"
           :class="head ? 'part-head' : ['standing', { open: open.has(s.placing), won: s.placing === 1 }]"
         >
