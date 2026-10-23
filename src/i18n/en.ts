@@ -1327,9 +1327,7 @@ export const messages = {
   'usageMon.secStats': 'Stats',
   'usageMon.secSpreads': 'Spreads',
   'usageMon.secBuilds': 'Builds',
-  'usageMon.builds': 'Most common builds',
-  'usageMon.buildsTip':
-    'Whole sets as players brought them, a card each: how many of its sets are that one, with its item, ability, nature and moves together.',
+  'usageMon.builds': 'Builds',
   'usageMon.buildsOf': 'Out of its {n} sets',
   'usageMon.noItem': 'No item',
   'usageMon.secHistory': 'By month',

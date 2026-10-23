@@ -612,7 +612,7 @@ const sections = computed(() =>
 
       <!-- Its most common whole builds, a card each, side by side, wrapping. -->
       <section v-if="builds.length" id="sec-builds" class="panel" :class="{ 'meta-stale': loading }">
-        <h2 v-tip="t('usageMon.buildsTip')" class="tipped-head">{{ t('usageMon.builds') }}</h2>
+        <h2>{{ t('usageMon.builds') }}</h2>
         <p v-if="m.teams" class="muted small builds-of">{{ t('usageMon.buildsOf', { n: m.teams }) }}</p>
         <ol class="builds">
           <li v-for="(b, i) in builds" :key="i" class="build" :class="{ main: i === 0 }">
