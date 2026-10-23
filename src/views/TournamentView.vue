@@ -46,7 +46,6 @@ import { useSort } from '@/composables/useSort'
 import { useUrlFilters } from '@/composables/useUrlFilters'
 import AppLink from '@/components/AppLink'
 import BandTabs, { LIFT } from '@/components/BandTabs.vue'
-import CopyPaste from '@/components/CopyPaste.vue'
 import FilterSearch from '@/components/FilterSearch.vue'
 import CountryFlag from '@/components/CountryFlag'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -54,7 +53,7 @@ import SectionNav from '@/components/SectionNav.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 import OptionsMenu from '@/components/OptionsMenu.vue'
 import SortHeader from '@/components/SortHeader.vue'
-import TeamSets from '@/components/TeamSets.vue'
+import StandingRow from '@/components/StandingRow.vue'
 import TournamentRounds from '@/components/TournamentRounds.vue'
 import UsageShift from '@/components/UsageShift.vue'
 import WinRateChart from '@/components/WinRateChart.vue'
@@ -69,9 +68,8 @@ import WinRateChart from '@/components/WinRateChart.vue'
 // leading to the standings filtered to the teams with it; under them, a panel each, those whose usage rose and fell the
 // most against the events before, and the Pokémon off the meta that shone) and its rounds
 // (`/meta/tournaments/:id/rounds`, `TournamentRounds`: the top cut's bracket, and each Swiss round's pairings).
-// Each player's placing, name and country, record (marked when they dropped), and the six they brought, as icons;
-// unfolded, their whole sets (`TeamSets`), to copy as a paste (`CopyPaste`); their name leads to their page, their
-// matches round by round.
+// Each player a row (`StandingRow`): placing, name and country, record, and the six they brought, as icons; unfolded,
+// their whole sets, to copy as a paste; their name leads to their page, their matches round by round.
 const route = useRoute()
 const router = useRouter()
 const id = computed(() => String(route.params.id))
@@ -346,9 +344,6 @@ const open = computed(
     ),
 )
 /** A click on a player's row unfolds it, but on their name, the way to their page. */
-function rowClick(e: MouseEvent, placing: number) {
-  if (!(e.target as Element).closest('a')) toggle(placing)
-}
 function toggle(placing: number) {
   const next = new Set(open.value)
   if (next.has(placing)) next.delete(placing)
@@ -574,50 +569,13 @@ const ordinal = (n: number) => `#${n}`
         >
           <template v-if="head">{{ t(`tournaments.part.${head}`) }}</template>
           <template v-else>
-            <!-- The row unfolds on a click anywhere but the player's name, the way to their page; the chevron its button,
-                 for the keyboard. -->
-            <div class="player-row" @click="rowClick($event, s.placing)">
-              <span class="placing num" :class="medalOf(s.placing)">{{ ordinal(s.placing) }}</span>
-              <span class="player"
-                ><span class="who"
-                  ><AppLink
-                    :to="{ name: 'tournamentPlayer', params: { id, placing: String(s.placing) } }"
-                    class="name"
-                    >{{ s.player }}</AppLink
-                  >
-                  <CountryFlag :code="s.country" /></span
-                ><span v-if="s.placing === 1" class="champion">{{ t('tournaments.champion') }}</span></span
-              >
-              <span
-                v-tip="s.dropped ? t('tournaments.droppedTip', { round: s.dropped }) : undefined"
-                class="record num"
-                :class="{ dropped: s.dropped }"
-                >{{ s.wins }}–{{ s.losses }}<span v-if="s.dropped" class="drop">{{ t('tournaments.drop') }}</span></span
-              >
-              <span v-if="s.team.length" class="team" aria-hidden="true">
-                <PokemonIcon v-for="(slot, i) in s.team" :id="slot[0]" :key="i" />
-              </span>
-              <!-- Neither a team list nor its Pokémon: the standings didn't say. -->
-              <span v-else class="team none muted small">{{ t('tournaments.noList') }}</span>
-              <button
-                type="button"
-                class="chevron"
-                :aria-expanded="open.has(s.placing)"
-                :aria-label="t('tournaments.rowLabel', { placing: s.placing, player: s.player })"
-                @click.stop="toggle(s.placing)"
-              >
-                <component :is="open.has(s.placing) ? ChevronUp : ChevronDown" :size="16" />
-              </button>
-            </div>
-            <!-- Its whole sets, a card each. -->
-            <p v-if="open.has(s.placing) && !s.team.length" class="muted small no-team">
-              {{ t('tournaments.noTeam') }}
-            </p>
-            <template v-else-if="open.has(s.placing)">
-              <TeamSets :team="s.team" :marked="builds.length ? marked : undefined" />
-              <!-- The way to copy the team as a paste, under its sets at their right. -->
-              <p class="team-tools"><CopyPaste :team="s.team" /></p>
-            </template>
+            <StandingRow
+              :s
+              :event="id"
+              :open="open.has(s.placing)"
+              :marked="builds.length ? marked : undefined"
+              @toggle="toggle(s.placing)"
+            />
           </template>
         </li>
       </ol>
@@ -1585,163 +1543,21 @@ h1 {
 .part-head:first-child {
   margin-top: 0;
 }
-/* A player, a row to unfold (`player-row`: not `row`, which the Pokémon's table rows are, as every dex table's):
-   placing, name and country, record, the six as icons, and the chevron. Every row laid out from the start, not when
-   it comes into view: laid out as the page scrolls into them, their heights guessed until then (a phone's rows two
-   lines, an unfolded one its sets), the page's length changed under the scroll, making it jump. */
+/* A player's row (`StandingRow`), ruled off from the one before. Room above it when a link scrolls to it, under the
+   tabs' band. */
 .standing {
-  /* Room above it when a link scrolls to it, under the tabs' band. */
   scroll-margin-top: calc(var(--band-height, 0px) + 12px);
-  /* Its width, for its team's icons to be laid out by (below). */
-  container: standing / inline-size;
 }
-.player-row {
-  display: grid;
-  grid-template-columns: 3.5em minmax(0, 1fr) auto auto auto;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 4px;
-  cursor: pointer;
-}
-/* The player's name, the way to their page: underlined, in the text's color; apart from their country by a margin, the
-   line break between the two in the template being no space. */
-.player .name {
-  margin-right: 0.35em;
-  color: inherit;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.player .name:hover {
-  color: var(--accent);
-}
-.player-row:hover {
-  background: var(--hover);
-}
-/* The winner's row lit from the left in gold, a tag by their name (the medals are `main.css`'s). */
-.standing.won .player-row {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 26%, transparent), transparent 70%);
-}
-.standing.won .player-row:hover {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 38%, transparent), var(--hover) 70%);
-}
-.standing.won .player {
-  font-weight: bold;
-}
-.champion {
-  flex: none;
-  margin-left: 8px;
-  padding: 0 5px;
-  font-size: 0.7em;
-  font-weight: bold;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #141414;
-  background: var(--gold);
-  border: 1px solid var(--ink);
-}
-/* Unfolded: its row in the color of what's picked, ruled off from its sets. */
-.standing.open .player-row {
-  background: var(--sel);
-  border-bottom: 1px solid var(--border-strong);
-}
+/* A placing, and a player's name cut short where it doesn't fit, as the rows have them: on the Pokémon's best placings
+   and the standouts. */
 .placing {
   font-weight: bold;
   text-align: right;
-}
-/* The name and country cut short where they don't fit; the winner's tag after them whole or not at all: one line high,
-   it wraps to a hidden second line when there's no room for it. */
-.player {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  min-width: 0;
-  height: 1lh;
-  overflow: hidden;
 }
 .who {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-/* Six icons wide, whatever the team (five, or none known), so the records line up down the column. */
-.team {
-  display: flex;
-  width: calc(6 * 40px);
-}
-.chevron {
-  display: flex;
-  padding: 2px;
-  color: var(--muted);
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-/* Its record, wins–losses; a player who dropped, marked so. */
-.record {
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.record.dropped {
-  color: var(--muted);
-}
-.drop {
-  margin-left: 4px;
-  padding: 0 3px;
-  font-size: 0.75em;
-  font-weight: bold;
-  border: 1px solid var(--border-strong);
-}
-.team-tools {
-  display: flex;
-  justify-content: flex-end;
-  margin: 0;
-  padding: 0 4px 12px;
-}
-.no-team {
-  margin: 0;
-  padding: 4px 4px 12px 3.5em;
-}
-/* On phones, the team under the name: across the whole row, indented to the name, so its six fit on one line however
-   wide the record is. */
-@media (max-width: 560px) {
-  .player-row {
-    grid-template-columns: 3em minmax(0, 1fr) auto auto;
-    grid-template-areas: 'placing player record chevron' 'team team team team';
-  }
-  .record {
-    grid-area: record;
-  }
-  .placing {
-    grid-area: placing;
-    align-self: start;
-  }
-  .player {
-    grid-area: player;
-  }
-  .team {
-    /* Its icons at their desktop size: six in a row where they fit, else three by two (below, by the row's width). */
-    --icon-scale: 1;
-    grid-area: team;
-    display: grid;
-    grid-template-columns: repeat(6, 40px);
-    width: auto;
-    padding-left: calc(3em + 8px);
-  }
-  .chevron {
-    grid-area: chevron;
-  }
-}
-/* No team, a line of text where its icons would be: not in their grid, where it'd wrap a word to an icon's column. */
-.team.none {
-  display: block;
-  white-space: nowrap;
-}
-/* A row too narrow for six icons after its padding and the name's indent (4px each side, 3em and a gap, 6 × 40px:
-   about 301px on a phone): three by two. */
-@container standing (max-width: 300px) {
-  .team {
-    grid-template-columns: repeat(3, 40px);
-  }
 }
 </style>
