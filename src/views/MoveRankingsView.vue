@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, shallowRef, useTemplateRef } from 'vue'
+import { computed, ref, onBeforeUnmount, shallowRef, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
 import { move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { has, percent, sinceLabel } from '@/data/meta'
-import { MOVES, priorityLabel, reachOf } from '@/data/moves'
+import { hasPriority, MOVES, priorityLabel, reachOf } from '@/data/moves'
 import { loadLearnsets, movesOf } from '@/data/pokemon'
 import { locale, t, typeName } from '@/i18n'
 import { description, shortText } from '@/i18n/descriptions'
@@ -29,6 +29,8 @@ import FilterSearch from '@/components/FilterSearch.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import RankingsHead from '@/components/RankingsHead.vue'
+import MoreToggle from '@/components/MoreToggle.vue'
+import RankingTrends from '@/components/RankingTrends.vue'
 import RankingsTabs from '@/components/RankingsTabs.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 import SortHeader from '@/components/SortHeader.vue'
@@ -51,9 +53,25 @@ const hasMoves = computed(() => !!snapshot.value && has(snapshot.value, 'moves')
 /** The Pokémon shown with each move, where there's room: those whose teams run it most. */
 const TOP = 2
 
-// Trends: against the dataset before the one shown (`previous`), each move's rank then, a mark by its rank.
+// Trends: against the dataset before the one shown (`previous`), each move's rank and usage then: a mark by its rank
+// (up, down or new), and the panel of the moves that rose and fell the most (`RankingTrends`).
 const { previous, prevData } = usePreviousMeta(snapshot)
 const before = computed(() => (prevData.value ? standings(prevData.value, 'moves') : null))
+/** The trends' panel, once the data before is in. */
+const trendsShown = computed(() => !!(hasMoves.value && previous.value && prevData.value && data.value))
+/** The page's panels, as the row of links under the tabs lists them. */
+const sections = computed(() => [
+  { id: 'sec-list', label: t('trends.list') },
+  ...(trendsShown.value ? [{ id: 'sec-trends', label: t('trends.title') }] : []),
+])
+const since = computed(() => (previous.value ? sinceLabel(previous.value, snapshot.value) : ''))
+/** The rank's mark's tooltip: the places gained or lost since the dataset before, or new to it. */
+const markTip = (r: { climb?: number; fresh: boolean }) =>
+  r.climb
+    ? t(r.climb > 0 ? 'usage.markUp' : 'usage.markDown', { n: Math.abs(r.climb), dates: since.value })
+    : r.fresh
+      ? t('usage.markNew', { dates: since.value })
+      : ''
 
 const rows = computed(() => {
   const d = data.value ?? {}
@@ -65,6 +83,8 @@ const rows = computed(() => {
     const id = key as MoveId
     const rank = ranks.get(id)!
     const prevRank = then?.ranks.get(id)
+    const prevUsage = then?.usage.get(id)
+    const usage = usageOf(users) / scale
     const m = MOVES[id]
     return {
       id,
@@ -74,10 +94,12 @@ const rows = computed(() => {
       reach: reachOf(m),
       priority: priorityLabel(m),
       rank,
-      usage: usageOf(users) / scale,
+      usage,
       users: users.sort((a, b) => b.usage - a.usage).slice(0, TOP),
-      // Places gained (up) or lost since the previous dataset, or whether it's new to it.
+      to: { name: 'metaMove', params: { id } } as const,
+      // Places and usage gained (up) or lost since the previous dataset, or whether it's new to it.
       climb: prevRank === undefined ? undefined : prevRank - rank,
+      change: prevUsage === undefined ? undefined : usage - prevUsage,
       fresh: !!then && prevRank === undefined,
     }
   })
@@ -102,12 +124,12 @@ const { key, desc, toggle, sorted } = useSort<Row, Key>({
 })
 
 // The search and filters (`FilterSearch`): the text finds moves by name or by what their short description says (whole
-// words: "rain" isn't "terrain"), and finds what to filter them by too: a type, a category, a tag, a reach, or a
+// words: "rain" isn't "terrain"), and finds what to filter them by too: a type, a category, a tag, a reach, a priority, or a
 // Pokémon (the moves it learns, its learnset loaded on demand), kept in the URL (`?f=`, `?fm=`). Each Pokémon filtered
 // by (not negated) adds a column of its sets' share running each move. While a term is highlighted in the search's
 // options (`preview`), the list shows it added, faded a little: what picking it would do.
-type MoveFilter = Extract<Term, { kind: 'type' | 'category' | 'flag' | 'reach' | 'pokemon' }>
-const FILTER_KINDS = ['type', 'category', 'flag', 'reach', 'pokemon'] as const
+type MoveFilter = Extract<Term, { kind: 'type' | 'category' | 'flag' | 'reach' | 'priority' | 'pokemon' }>
+const FILTER_KINDS = ['type', 'category', 'flag', 'reach', 'priority', 'pokemon'] as const
 const filters = computed<TermFilters>({
   get: () => parseTermFilters(query.value.f, query.value.fm, FILTER_KINDS),
   set: (f) => void router.replace({ query: { ...query.value, ...formatTermFilters(f) } }),
@@ -124,6 +146,7 @@ function matches(r: Row, f: Term): boolean | null {
   if (f.kind === 'category') return r.data.category === f.id
   if (f.kind === 'flag') return r.data.flags.includes(f.id)
   if (f.kind === 'reach') return r.reach === f.id
+  if (f.kind === 'priority') return hasPriority(r.data, f.id)
   if (f.kind === 'pokemon') return learnsets.value ? movesOf(learnsets.value, f.id).includes(r.id) : null
   return false
 }
@@ -174,16 +197,21 @@ phoneQuery.addEventListener('change', onPhone)
 onBeforeUnmount(() => phoneQuery.removeEventListener('change', onPhone))
 
 const { entered, restoring } = usePageEntered()
-const drawn = useGradualRows(shown)
+/** The list folded to its first rows, so what's after it (the trends) is there to be found; unfolded on asking. */
+const FOLDED = 20
+const allRows = ref(false)
+const listed = computed(() => (allRows.value ? shown.value : shown.value.slice(0, FOLDED)))
+const drawn = useGradualRows(listed)
 useRowColumns(useTemplateRef('head'))
 /** The rank's column: its digits, its mark (`.climb`'s width and margin) and the cell's padding, on wide screens and on
  * phones. */
 const rankRoom = computed(() => {
   const digits = `${String(rows.value.length).length}ch`
-  const room = (min: string) => `minmax(max(3em, ${min}), auto)`
+  // On phones as narrow as its numbers, as the Pokémon rankings' rank, for the move's room.
+  const room = (min: string, floor = '3em') => `minmax(max(${floor}, ${min}), auto)`
   return previous.value
-    ? { wide: room(`${digits} + 3px + 1.8em + 12px`), sm: room(`${digits} + 1px + 1.7em + 10px`) }
-    : { wide: room(`${digits} + 12px`), sm: room(`${digits} + 10px`) }
+    ? { wide: room(`${digits} + 3px + 0.75em + 12px`), sm: room(`${digits} + 1px + 0.65em + 10px`, '1.8em') }
+    : { wide: room(`${digits} + 12px`), sm: room(`${digits} + 10px`, '1.8em') }
 })
 // The columns, and their widths on wide screens, on narrower ones and on phones (null where they're left out): rank,
 // the move, its type, category, power, accuracy and PP (not on phones), its top Pokémon (only on wide screens), usage,
@@ -218,8 +246,8 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 
 <template>
   <div>
-    <RankingsTabs current="moves" />
-    <div class="panel">
+    <RankingsTabs current="moves" :sections />
+    <div id="sec-list" class="panel section">
       <RankingsHead
         :title="t('title.moveRankings')"
         :intro="t('moveUsage.intro', { reg: snapshot?.regulation ?? REGULATION })"
@@ -332,19 +360,19 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
               {{ r.rank
               }}<span
                 v-if="previous"
+                v-tip:group="markTip(r)"
                 class="climb"
                 :class="r.climb ? (r.climb > 0 ? 'up' : 'down') : r.fresh && 'fresh'"
-                ><template v-if="r.climb"
-                  ><span aria-hidden="true">{{ r.climb > 0 ? '▲' : '▼' }}</span
-                  ><span class="visually-hidden">{{ t(r.climb > 0 ? 'usage.up' : 'usage.down') }}</span
-                  >{{ Math.abs(r.climb) }}</template
-                ><template v-else-if="r.fresh">{{ t('usage.new') }}</template></span
+                ><template v-if="r.climb || r.fresh"
+                  ><span aria-hidden="true">{{ r.climb ? (r.climb > 0 ? '▲' : '▼') : '✦' }}</span
+                  ><span class="visually-hidden">{{ markTip(r) }}</span></template
+                ></span
               >
             </div>
             <!-- The move: its name, priority and reach. -->
             <div role="cell" class="grow">
               <div class="move-line">
-                <AppLink :to="{ name: 'metaMove', params: { id: r.id } }" class="name">{{ r.name }}</AppLink>
+                <AppLink :to="r.to" class="name">{{ r.name }}</AppLink>
                 <span v-if="r.priority" v-tip:group="t('move.priority')" class="priority num">{{ r.priority }}</span>
                 <span v-tip:group="t(`move.target.${r.data.target}`)" class="reach muted">{{
                   t(`move.reach.${r.reach}`)
@@ -398,14 +426,22 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         </template>
       </div>
       <p v-else class="muted">{{ t('moveUsage.noMatch') }}</p>
+      <MoreToggle v-if="data" v-model:all="allRows" :n="shown.length" :top="FOLDED" />
       <p class="muted note">
         {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
       </p>
     </div>
+    <RankingTrends v-if="trendsShown" id="sec-trends" class="section" :rows="shown" :since>
+      <template #entry="{ row }"> <TypeIcon :type="row.data.type" />{{ row.name }} </template>
+    </RankingTrends>
   </div>
 </template>
 
 <style scoped>
+/* A panel scrolled to from the row of links lands under what's stuck to the top. */
+.section {
+  scroll-margin-top: calc(var(--stuck-h, 0px) + 12px);
+}
 /* Rank, the move (its line over its short description), its type and category (a badge's room), power, accuracy, PP,
    its top two Pokémon (only on wide screens), its usage and each Pokémon term's share (`columns`). */
 .dex-table {
@@ -476,12 +512,14 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   .dex-table {
     --cols: var(--cols-sm);
   }
+  /* The rank in line with the panel's text: left-aligned, so a short one leaves no gap before it. */
   .dex-table .row > :first-child {
     padding-inline: 6px 4px;
+    text-align: left;
   }
   /* Every column on a phone's width: the badges smaller than the page's phone scale (1.5), the cells closer. */
   .dex-table {
-    --icon-scale: 1.2;
+    --icon-scale: 1.1;
     --badge: calc(32px * var(--icon-scale) + 6px);
     --num: minmax(2.6em, auto);
     --row-height: 4.4em;
@@ -522,12 +560,12 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   /* The rank's mark tighter, and the header's room for it with it (more specific than the rules after this block,
      which would win otherwise). */
   .rank .climb {
-    width: 2.6em;
+    width: 1em;
     margin-left: 1px;
     font-size: 0.65em;
   }
   .dex-table .with-climb :deep(.sort) {
-    margin-right: calc(1px + 1.7em);
+    margin-right: calc(1px + 0.65em);
   }
   .wide-label {
     display: none;
@@ -541,14 +579,14 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 }
 .climb {
   display: inline-block;
-  width: 2.4em;
+  width: 1em;
   margin-left: 3px;
   font-size: 0.75em;
   text-align: left;
   white-space: nowrap;
 }
 .with-climb :deep(.sort) {
-  margin-right: calc(3px + 1.8em);
+  margin-right: calc(3px + 0.75em);
 }
 .up {
   color: var(--good);

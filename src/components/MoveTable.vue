@@ -2,7 +2,7 @@
 import Marked from '@/components/Marked'
 import { computed, onUnmounted, ref, shallowRef, useTemplateRef, watch, watchEffect } from 'vue'
 import { move, type MoveId, type PokemonId } from '@/data/dex'
-import { CATEGORIES, MOVES, reachOf, type Move } from '@/data/moves'
+import { CATEGORIES, hasPriority, MOVES, reachOf, type Move } from '@/data/moves'
 import { loadLearnsets, movesOf } from '@/data/pokemon'
 import { TYPES } from '@/data/types'
 import type { MessageKey } from '@/i18n'
@@ -26,15 +26,15 @@ import FilterSearch from '@/components/FilterSearch.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 
 // A table of moves with their type, category, power, accuracy and PP, sortable by any of them, searched by name and
-// filtered by the terms of `kinds` (type, category and tag unless given; reach, and the Pokémon that learn them, its
+// filtered by the terms of `kinds` (type, category and tag unless given; reach, priority, and the Pokémon that learn them, its
 // learnsets loaded on demand), one box for both (`FilterSearch`); with `descriptions`, each move's short description
 // too. The filters are a model, for a page that keeps them in its URL; unbound, the table keeps them itself. With
 // `panels`, the
 // filters (after what's given in the slot: the page's heading) and the table go in panels of their own (for `.panels`);
 // without, both go in the caller's. A Pokémon's usage page gives each move's share of its sets (`shares`: a column of
 // its own, the table sorted by it at first, each move leading to its meta page rather than its dex entry), and leaves
-// out PP (`noPp`) and the filters (`noFilters`), the descriptions under the names, each a line of its own the whole
-// width of its row (`stacked`); its whole movepool shown, it keeps the search alone (`search`).
+// out PP (`noPp`) and the search and filters (`noFilters`) but for its whole movepool, the descriptions under the names,
+// each a line of its own the whole width of its row (`stacked`).
 const props = defineProps<{
   ids: readonly MoveId[]
   descriptions?: boolean
@@ -45,8 +45,6 @@ const props = defineProps<{
   under?: string
   noPp?: boolean
   noFilters?: boolean
-  /** With `noFilters`, the search box still shown. */
-  search?: boolean
   /** The descriptions under the names, as on phones, where the table is narrow. */
   stacked?: boolean
   query?: string
@@ -82,6 +80,7 @@ function matches(r: (typeof rows.value)[number], f: Term): boolean | null {
   if (f.kind === 'category') return r.data.category === f.id
   if (f.kind === 'flag') return r.data.flags.includes(f.id)
   if (f.kind === 'reach') return reachOf(r.data) === f.id
+  if (f.kind === 'priority') return hasPriority(r.data, f.id)
   if (f.kind === 'pokemon') return learnsets.value ? movesOf(learnsets.value, f.id).includes(r.id) : null
   return false
 }
@@ -172,7 +171,7 @@ const skeleton = computed(() => [
 </script>
 
 <template>
-  <div v-if="!noFilters || search" :class="{ panel: panels }">
+  <div v-if="!noFilters" :class="{ panel: panels }">
     <slot />
     <FilterSearch
       v-model:text="query"

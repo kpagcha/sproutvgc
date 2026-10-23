@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, shallowRef, useTemplateRef } from 'vue'
+import { computed, ref, shallowRef, useTemplateRef } from 'vue'
 import { ability, item, pokemon, type AbilityId, type ItemId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { sinceLabel, has, percent } from '@/data/meta'
@@ -27,6 +27,8 @@ import ItemIcon from '@/components/ItemIcon.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import RankingsHead from '@/components/RankingsHead.vue'
+import MoreToggle from '@/components/MoreToggle.vue'
+import RankingTrends from '@/components/RankingTrends.vue'
 import RankingsTabs, { type RankingList } from '@/components/RankingsTabs.vue'
 import BattleCount from '@/components/BattleCount.vue'
 import FilterSearch from '@/components/FilterSearch.vue'
@@ -95,9 +97,25 @@ const hasList = computed(() => !!snapshot.value && has(snapshot.value, cfg.value
 const TOP = 5
 
 // Trends, as the Pokémon rankings': against the dataset before the one shown (`previous`, the month before), each
-// entry's rank then, a mark by its rank: up or down so many places, or new to it, filling in once its data is in.
+// entry's rank and usage then, filling in once its data is in: a mark by its rank (up, down or new), and the panel of
+// those that rose and fell the most (`RankingTrends`).
 const { previous, prevData } = usePreviousMeta(snapshot)
 const before = computed(() => (prevData.value ? standings(prevData.value, cfg.value.field) : null))
+/** The trends' panel, once the data before is in. */
+const trendsShown = computed(() => !!(hasList.value && previous.value && prevData.value && data.value))
+/** The page's panels, as the row of links under the tabs lists them. */
+const sections = computed(() => [
+  { id: 'sec-list', label: t('trends.list') },
+  ...(trendsShown.value ? [{ id: 'sec-trends', label: t('trends.title') }] : []),
+])
+const since = computed(() => (previous.value ? sinceLabel(previous.value, snapshot.value) : ''))
+/** The rank's mark's tooltip: the places gained or lost since the dataset before, or new to it. */
+const markTip = (r: { climb?: number; fresh: boolean }) =>
+  r.climb
+    ? t(r.climb > 0 ? 'usage.markUp' : 'usage.markDown', { n: Math.abs(r.climb), dates: since.value })
+    : r.fresh
+      ? t('usage.markNew', { dates: since.value })
+      : ''
 
 const rows = computed(() => {
   const by = usersOf(data.value ?? {}, cfg.value.field)
@@ -108,6 +126,7 @@ const rows = computed(() => {
     const usage = usageOf(users)
     const rank = ranks.get(id)!
     const prevRank = then?.ranks.get(id)
+    const prevUsage = then?.usage.get(id)
     return {
       id,
       ref: cfg.value.ref(id),
@@ -116,8 +135,10 @@ const rows = computed(() => {
       usage,
       users: users.sort((a, b) => b.usage - a.usage).slice(0, TOP),
       count: users.length,
-      // Places gained (up) or lost since the previous dataset, or whether it's new to it.
+      to: { name: cfg.value.entry, params: { id } },
+      // Places and usage gained (up) or lost since the previous dataset, or whether it's new to it.
       climb: prevRank === undefined ? undefined : prevRank - rank,
+      change: prevUsage === undefined ? undefined : usage - prevUsage,
       fresh: !!then && prevRank === undefined,
     }
   })
@@ -193,7 +214,11 @@ const shown = computed(() => {
 const top = computed(() => Math.max(0, ...rows.value.map((r) => r.usage)))
 
 const { entered, restoring } = usePageEntered()
-const drawn = useGradualRows(shown)
+/** The list folded to its first rows, so what's after it (the trends) is there to be found; unfolded on asking. */
+const FOLDED = 20
+const allRows = ref(false)
+const listed = computed(() => (allRows.value ? shown.value : shown.value.slice(0, FOLDED)))
+const drawn = useGradualRows(listed)
 useRowColumns(useTemplateRef('head'))
 // The columns: rank, the entry, its Pokémon (not on phones, where they go under the row), usage, and each Pokémon
 // term's share.
@@ -201,7 +226,7 @@ useRowColumns(useTemplateRef('head'))
  * phones. */
 const rankRoom = computed(() => {
   const digits = `${String(rows.value.length).length}ch`
-  const mark = previous.value ? ' + 3px + 1.8em' : ''
+  const mark = previous.value ? ' + 3px + 0.75em' : ''
   return {
     wide: `minmax(max(3em, ${digits}${mark} + 12px), auto)`,
     sm: `minmax(max(1.8em, ${digits}${mark} + 10px), auto)`,
@@ -227,8 +252,8 @@ const colVars = computed(() => ({
 
 <template>
   <div>
-    <RankingsTabs :current="list" />
-    <div class="panel">
+    <RankingsTabs :current="list" :sections />
+    <div id="sec-list" class="panel section">
       <RankingsHead :title="tx('title')" :intro="tx('intro', { reg: snapshot?.regulation ?? REGULATION })">
         <div v-if="hasList && snapshot" class="source">
           <MetaDialog regulation />
@@ -307,17 +332,17 @@ const colVars = computed(() => ({
               {{ r.rank
               }}<span
                 v-if="previous"
+                v-tip:group="markTip(r)"
                 class="climb"
                 :class="r.climb ? (r.climb > 0 ? 'up' : 'down') : r.fresh && 'fresh'"
-                ><template v-if="r.climb"
-                  ><span aria-hidden="true">{{ r.climb > 0 ? '▲' : '▼' }}</span
-                  ><span class="visually-hidden">{{ t(r.climb > 0 ? 'usage.up' : 'usage.down') }}</span
-                  >{{ Math.abs(r.climb) }}</template
-                ><template v-else-if="r.fresh">{{ t('usage.new') }}</template></span
+                ><template v-if="r.climb || r.fresh"
+                  ><span aria-hidden="true">{{ r.climb ? (r.climb > 0 ? '▲' : '▼') : '✦' }}</span
+                  ><span class="visually-hidden">{{ markTip(r) }}</span></template
+                ></span
               >
             </div>
             <div role="cell" class="grow">
-              <AppLink :to="{ name: cfg.entry, params: { id: r.id } }" class="name"
+              <AppLink :to="r.to" class="name"
                 ><ItemIcon v-if="list === 'items'" :id="r.id as ItemId" />{{ r.name }}</AppLink
               >
               <p class="muted text"><DexText :text="description(cfg.kind, r.id)?.short ?? ''" /></p>
@@ -352,14 +377,22 @@ const colVars = computed(() => ({
         </template>
       </div>
       <p v-else class="muted">{{ tx('noMatch') }}</p>
+      <MoreToggle v-if="data" v-model:all="allRows" :n="shown.length" :top="FOLDED" />
       <p class="muted note">
         {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
       </p>
     </div>
+    <RankingTrends v-if="trendsShown" id="sec-trends" class="section" :rows="shown" :since>
+      <template #entry="{ row }"><ItemIcon v-if="list === 'items'" :id="row.id as ItemId" />{{ row.name }}</template>
+    </RankingTrends>
   </div>
 </template>
 
 <style scoped>
+/* A panel scrolled to from the row of links lands under what's stuck to the top. */
+.section {
+  scroll-margin-top: calc(var(--stuck-h, 0px) + 12px);
+}
 /* An item's icon before its name, lined up with it. */
 .name:has(.sheet-icon) {
   display: inline-flex;
@@ -432,14 +465,14 @@ const colVars = computed(() => ({
 }
 .climb {
   display: inline-block;
-  width: 2.4em;
+  width: 1em;
   margin-left: 3px;
   font-size: 0.75em;
   text-align: left;
   white-space: nowrap;
 }
 .with-climb :deep(.sort) {
-  margin-right: calc(3px + 1.8em);
+  margin-right: calc(3px + 0.75em);
 }
 .up {
   color: var(--good);

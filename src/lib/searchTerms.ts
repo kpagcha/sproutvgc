@@ -1,13 +1,23 @@
 // The terms a list is filtered by (`FilterSearch`): typed into its search box and picked from what the text finds, or
 // added in the advanced mode's groups: a type, an ability, a move, an item or a Pokémon, or what isn't a dex entry of
-// its own (a move's category, tag or reach, an item's category, a condition's kind). What passing one means is the
+// its own (a move's category, tag, reach or priority, an item's category, a condition's kind). What passing one means is the
 // list's. They're kept in the URL as filter groups (`filterGroups.ts`, `?f=`, `?fm=`). On a list of teams (`bound`), a
 // Pokémon can carry details, an item, ability and moves (`with`), that the one Pokémon has to have: a build.
 
 import { available, availableIds, type PokemonId, type Ref } from '@/data/dex'
 import { SUBKINDS, type Subkind } from '@/data/conditions'
 import { ITEM_CATEGORIES, type ItemCategory } from '@/data/itemCategories'
-import { CATEGORIES, FLAGS, REACHES, type Category, type Flag, type Reach } from '@/data/moves'
+import {
+  CATEGORIES,
+  FLAGS,
+  PRIORITIES,
+  priorityIdLabel,
+  REACHES,
+  type Category,
+  type Flag,
+  type Priority,
+  type Reach,
+} from '@/data/moves'
 import { POKEMON } from '@/data/pokemon'
 import { isType, TYPES } from '@/data/types'
 import { locale, t, typeName, type MessageKey } from '@/i18n'
@@ -21,6 +31,7 @@ export type ExtraTerm =
   | { kind: 'category'; id: Category }
   | { kind: 'flag'; id: Flag }
   | { kind: 'reach'; id: Reach }
+  | { kind: 'priority'; id: Priority }
   | { kind: 'itemCategory'; id: ItemCategory }
   | { kind: 'subkind'; id: Subkind }
 /** What narrows a Pokémon term to a build: an item, ability or move. */
@@ -36,6 +47,7 @@ export const EXTRA: Record<ExtraKind, readonly string[]> = {
   category: CATEGORIES,
   flag: FLAGS,
   reach: REACHES,
+  priority: PRIORITIES,
   itemCategory: ITEM_CATEGORIES,
   subkind: SUBKINDS,
 }
@@ -45,6 +57,7 @@ const EXTRA_NAME: Record<ExtraKind, (id: string) => MessageKey> = {
   category: (id) => `move.category.${id}` as MessageKey,
   flag: (id) => `move.flag.${id}` as MessageKey,
   reach: (id) => `move.reach.${id}` as MessageKey,
+  priority: (id) => (id === 'up' || id === 'down' ? `move.priority.${id}` : 'move.priority.n') as MessageKey,
   itemCategory: (id) => `itemCategory.${id}` as MessageKey,
   subkind: (id) => `conditions.sub1.${id}` as MessageKey,
 }
@@ -53,7 +66,7 @@ const EXTRA_NAME: Record<ExtraKind, (id: string) => MessageKey> = {
  * or kind. */
 export const termName = (term: Term): string =>
   isExtraKind(term.kind)
-    ? t(EXTRA_NAME[term.kind](term.id))
+    ? t(EXTRA_NAME[term.kind](term.id), { n: term.kind === 'priority' ? priorityIdLabel(term.id) : '' })
     : [refName(term as RefTerm), ...(term.with ?? []).map((w) => refName(w))].join(' · ')
 
 /** A kind's terms that aren't dex entries, by name. */

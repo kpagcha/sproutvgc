@@ -14,7 +14,7 @@ import {
 } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { sinceLabel, has, percent } from '@/data/meta'
-import { MOVES, priorityLabel, reachOf } from '@/data/moves'
+import { MOVES, priorityId, priorityLabel, reachOf } from '@/data/moves'
 import { loadLearnsets, movesOf, POKEMON, splitForme } from '@/data/pokemon'
 import { locale, t, typeName, type MessageKey } from '@/i18n'
 import { description } from '@/i18n/descriptions'
@@ -216,9 +216,13 @@ useRowColumns(useTemplateRef('head'))
             /></AppLink>
           </template>
           {{ refName(ref) }}
-          <span v-if="moveData && priorityLabel(moveData)" v-tip="t('move.priority')" class="priority num">{{
-            priorityLabel(moveData)
-          }}</span>
+          <AppLink
+            v-if="moveData && priorityId(moveData)"
+            v-tip="t('move.priority')"
+            :to="{ name: 'moveRankings', query: { f: `priority:${priorityId(moveData)}` } }"
+            class="priority num"
+            >{{ priorityLabel(moveData) }}</AppLink
+          >
         </h1>
       </div>
       <p v-if="text" class="muted desc"><DexText :text="text.short" /></p>

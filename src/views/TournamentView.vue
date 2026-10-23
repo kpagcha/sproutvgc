@@ -466,7 +466,8 @@ const { height: navHeight } = useElementSize(() => sectionNav.value?.$el, undefi
 // On wide screens, the tabs' height less what slides off the screen as they stick (`LIFT`).
 const stuckTabs = computed(() => tabsHeight.value - LIFT)
 const bandHeight = computed(() =>
-  phone.value ? barHeight.value : stuckTabs.value + (tab.value === 'pokemon' ? navHeight.value : 0),
+  // The row of links tucked 3px under the tabs (`SectionNav`).
+  phone.value ? barHeight.value : stuckTabs.value + (tab.value === 'pokemon' ? navHeight.value - 3 : 0),
 )
 
 const num = (n: number) => n.toLocaleString(locale.value)

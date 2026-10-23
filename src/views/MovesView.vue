@@ -16,7 +16,7 @@ const q = computed(() => (typeof route.value.q === 'string' ? route.value.q : un
 // The filters are kept in the URL (`?f=`, `?fm=`), so a move's page can link here with them. A link from before them
 // (`?category=`, `?flag=`) is read as theirs.
 const router = useRouter()
-const KINDS = ['type', 'category', 'flag', 'reach', 'pokemon'] as const
+const KINDS = ['type', 'category', 'flag', 'reach', 'priority', 'pokemon'] as const
 const filters = computed<TermFilters>({
   get: () => {
     const { f, category, flag } = route.value

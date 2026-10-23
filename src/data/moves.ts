@@ -95,5 +95,31 @@ export const reachOf = (m: Move): Reach => REACH[m.target]
 export const priorityLabel = (m: Move) =>
   m.priority > 0 ? `+${m.priority}` : m.priority < 0 ? `−${-m.priority}` : null
 
+/**
+ * A move's priority as a filter (`searchTerms.ts`): raised or lowered at all, or each value a move the regulation has
+ * runs at, the highest first (`p1` is +1, `m3` −3).
+ */
+export const PRIORITIES = [
+  'up',
+  'down',
+  ...[...new Set(Object.values(MOVES).map((m) => m.priority))]
+    .filter((p) => p)
+    .sort((a, b) => b - a)
+    .map((p) => (p > 0 ? `p${p}` : `m${-p}`)),
+]
+export type Priority = string
+const priorityValue = (id: Priority) => (id[0] === 'p' ? 1 : -1) * Number(id.slice(1))
+/** Whether a move has the priority a filter stands for. */
+export const hasPriority = (m: Move, id: Priority) =>
+  id === 'up' ? m.priority > 0 : id === 'down' ? m.priority < 0 : m.priority === priorityValue(id)
+/** A priority filter's ID for a move's priority, when it has one: what its badge leads to. */
+export const priorityId = (m: Move): Priority | null =>
+  m.priority > 0 ? `p${m.priority}` : m.priority < 0 ? `m${-m.priority}` : null
+/** A priority filter's label: "+1", "−3" (a minus sign). */
+export const priorityIdLabel = (id: Priority) => {
+  const v = priorityValue(id)
+  return v > 0 ? `+${v}` : `−${-v}`
+}
+
 /** Moves that hit more than one Pokémon: their damage is reduced to 0.75× when they do. */
 export const isSpread = (m: Move) => m.target === 'allAdjacentFoes' || m.target === 'allAdjacent'

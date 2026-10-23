@@ -142,21 +142,20 @@ onBeforeUnmount(() => {
   border-bottom: none;
   scrollbar-width: none;
 }
-/* Bare: the band of a panel, outlined and shadowed as one is, on its own: its shadow (`--hard`, 3px down and right)
-   cut to its right side, carrying on into the shadow of what it heads, which starts that much under its top, rather
-   than laid over it. */
+/* Bare: the band of a panel, outlined and shadowed as one is, on its own: its shadow (`--hard`'s, 3px down and right)
+   only down its right side, from 3px under its top to its bottom, where the shadow of what it heads (tucked 3px under
+   it) carries on. Two shadows shrunk by their spread so that none of either is under the band's bottom edge: a shadow
+   there (or a clip-path cutting one off at it) bleeds into that edge's pixels as a faint dark line wherever the edge
+   falls between pixels. */
 .band-tabs.bare {
+  /* Over what it heads, which tucks under its bottom edge (`.panel` in retro.css, `SectionNav` attached). */
+  position: relative;
+  z-index: 3;
   border: 2px solid var(--ink);
   border-bottom: none;
-  box-shadow: var(--hard);
-  clip-path: polygon(
-    0 0,
-    calc(100% + 3px) 0,
-    calc(100% + 3px) calc(100% + 3px),
-    100% calc(100% + 3px),
-    100% 100%,
-    0 100%
-  );
+  box-shadow:
+    6px 3px 0 -3px var(--ink),
+    6px 0 0 -3px var(--ink);
 }
 .band-tabs::-webkit-scrollbar {
   display: none;

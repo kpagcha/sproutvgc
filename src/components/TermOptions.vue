@@ -30,6 +30,7 @@ const KIND_LABEL: Record<TermKind, MessageKey> = {
   category: 'filter.kind.category',
   flag: 'filter.kind.flag',
   reach: 'filter.kind.reach',
+  priority: 'filter.kind.priority',
   itemCategory: 'filter.kind.itemCategory',
   subkind: 'filter.kind.subkind',
 }

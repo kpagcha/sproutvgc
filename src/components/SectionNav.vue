@@ -9,8 +9,14 @@ import { nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vu
 // (`--sticky-offset`).
 // `attached`, it's a bar under tabs (a tournament's, `BandTabs` bare) in the panel's color, outlined as panels are, which
 // the tab shown opens into; on wide screens stuck under them as they stick (`--tabs-h`, their height); on phones not
-// stuck at all, the tabs' bar taking over at the top with the row in it again (`inBar`, outlined the same, not stuck).
-const props = defineProps<{ sections: readonly { id: string; label: string }[]; attached?: boolean; inBar?: boolean }>()
+// stuck at all, the tabs' bar taking over at the top with the row in it again (`inBar`, outlined the same, not stuck);
+// under tabs stuck on phones too (`noBar`, the rankings'), stuck under them there as well.
+const props = defineProps<{
+  sections: readonly { id: string; label: string }[]
+  attached?: boolean
+  inBar?: boolean
+  noBar?: boolean
+}>()
 
 const active = shallowRef<string | null>(null)
 const row = useTemplateRef<HTMLElement>('row')
@@ -65,13 +71,19 @@ watch(active, async (id) => {
 })
 
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
+// Smooth only to a section within about a screen: what the page skips laying out until it's near the screen (a long
+// table's rows, `content-visibility`) takes its real height as a smooth scroll passes it, moving the section from where
+// the scroll was headed. Further, a jump, which lays out none of what it skips, so the section is where it was aimed.
 function go(id: string) {
-  document.getElementById(id)?.scrollIntoView({ behavior: reduced.matches ? 'auto' : 'smooth', block: 'start' })
+  const el = document.getElementById(id)
+  if (!el) return
+  const near = Math.abs(el.getBoundingClientRect().top) < window.innerHeight
+  el.scrollIntoView({ behavior: near && !reduced.matches ? 'smooth' : 'auto', block: 'start' })
 }
 </script>
 
 <template>
-  <nav class="section-nav" :class="{ attached, 'in-bar': inBar }">
+  <nav class="section-nav" :class="{ attached, 'in-bar': inBar, 'no-bar': noBar }">
     <div ref="row" class="row">
       <a
         v-for="s in sections"
@@ -104,6 +116,13 @@ function go(id: string) {
   background: none;
   border-bottom: none;
 }
+/* Right under bare tabs, its top tucked under their bottom edge (they're over it), as a panel's is (retro.css), so the
+   seam where they meet, on screens that draw it between pixels, is over the row's own color rather than a faint line;
+   3px, for its shadow to start where theirs ends; stuck, tucked as much. */
+.band-tabs.bare + .section-nav.attached {
+  z-index: 2;
+  margin-top: -3px;
+}
 .section-nav.attached .row {
   padding: 0 4px;
   background: var(--panel);
@@ -115,10 +134,17 @@ function go(id: string) {
   .section-nav.attached {
     top: var(--tabs-h, 0px);
   }
+  .band-tabs.bare + .section-nav.attached {
+    top: calc(var(--tabs-h, 0px) - 3px);
+  }
 }
 @media (max-width: 720px) {
   .section-nav.attached {
     position: static;
+  }
+  .section-nav.attached.no-bar {
+    position: sticky;
+    top: calc(var(--tabs-h, 0px) - 3px);
   }
 }
 .section-nav.in-bar {

@@ -165,6 +165,8 @@ const moveShares = computed(() => Object.fromEntries(moves.value.map((x) => [x.r
 // Or its whole movepool, as its dex entry has it, searchable (the link under the table): the moves its sets run with
 // their share, the rest on under `LIST_MIN` of them. Back to its sets' on another Pokémon.
 const movepool = ref(false)
+/** What its whole movepool is filtered by, as the move rankings are, but for the Pokémon: it's this one's. */
+const MOVE_KINDS = ['type', 'category', 'flag', 'reach', 'priority'] as const
 // Its sets' view, the most run, as Smogon's own moveset files show them; the data keeps every one over `LIST_MIN`.
 const SETS_MOVES = 10
 const learnset = shallowRef<MoveId[] | null>(null)
@@ -593,9 +595,9 @@ const sections = computed(() =>
             :shares="moveShares"
             :under="`<${percent(LIST_MIN)}`"
             :descriptions="showDescriptions"
-            :search="movepool"
+            :kinds="MOVE_KINDS"
+            :no-filters="!movepool"
             no-pp
-            no-filters
             stacked
           />
         </section>

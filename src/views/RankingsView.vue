@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onDeactivated, shallowRef, useTemplateRef } from 'vue'
+import { computed, ref, onBeforeUnmount, onDeactivated, shallowRef, useTemplateRef } from 'vue'
 import tippy, { type Instance } from 'tippy.js'
 import { useRouter } from 'vue-router'
 import { ability, item, move, pokemon, type PokemonId } from '@/data/dex'
@@ -30,6 +30,8 @@ import TypeIcon from '@/components/TypeIcon'
 import BattleCount from '@/components/BattleCount.vue'
 import FilterSearch from '@/components/FilterSearch.vue'
 import RankingsHead from '@/components/RankingsHead.vue'
+import MoreToggle from '@/components/MoreToggle.vue'
+import RankingTrends from '@/components/RankingTrends.vue'
 import RankingsTabs from '@/components/RankingsTabs.vue'
 
 // The regulation's Pokémon by usage, from the meta snapshot shown (`useMeta`: the one picked, on this page or another,
@@ -49,9 +51,25 @@ const broughtAll = computed(
   () => showBrought.value && snapshot.value?.unweighted?.includes('brought') && !!snapshot.value.cutoff,
 )
 
-// Trends: against the dataset before the one shown (`previous`, the month before), each Pokémon's rank then, a mark by
-// its rank: up or down so many places, or new to it. None for the first dataset there is.
+// Trends: against the dataset before the one shown (`previous`, the month before), each Pokémon's rank and usage then: a
+// mark by its rank (up, down or new), and the panel of those that rose and fell the most (`RankingTrends`). None for the
+// first dataset there is.
 const previous = computed(() => GENERATED_SNAPSHOTS.find((s) => s.id === snapshot.value?.previous))
+/** The trends' panel, once the data before is in. */
+const trendsShown = computed(() => !!(snapshot.value && previous.value && data.value))
+/** The page's panels, as the row of links under the tabs lists them. */
+const sections = computed(() => [
+  { id: 'sec-list', label: t('trends.list') },
+  ...(trendsShown.value ? [{ id: 'sec-trends', label: t('trends.title') }] : []),
+])
+const since = computed(() => (previous.value ? sinceLabel(previous.value, snapshot.value) : ''))
+/** The rank's mark's tooltip: the places gained or lost since the dataset before, or new to it. */
+const markTip = (r: { climb?: number; fresh: boolean }) =>
+  r.climb
+    ? t(r.climb > 0 ? 'usage.markUp' : 'usage.markDown', { n: Math.abs(r.climb), dates: since.value })
+    : r.fresh
+      ? t('usage.markNew', { dates: since.value })
+      : ''
 
 const rows = computed(() =>
   Object.entries(data.value ?? {}).map(([key, m]) => {
@@ -64,8 +82,10 @@ const rows = computed(() =>
       name: refName(pokemon(id)),
       rank: m!.rank,
       usage: m!.usage,
-      // Places gained (up) or lost since the previous dataset, or whether it's new to it.
+      to: { name: 'metaPokemon', params: { id } },
+      // Places and usage gained (up) or lost since the previous dataset, or whether it's new to it.
       climb: m!.prev ? m!.prev.rank - m!.rank : undefined,
+      change: m!.usage !== undefined && m!.prev?.usage !== undefined ? m!.usage - m!.prev.usage : undefined,
       fresh: !!previous.value && !m!.prev,
       brought: m!.brought,
       // Its most common set, at a glance: item, ability and moves, each with the share of its sets that run it (a bar
@@ -206,7 +226,11 @@ function toggleSets() {
 }
 
 const { entered, restoring } = usePageEntered()
-const drawn = useGradualRows(shown)
+/** The list folded to its first rows, so what's after it (the trends) is there to be found; unfolded on asking. */
+const FOLDED = 20
+const allRows = ref(false)
+const listed = computed(() => (allRows.value ? shown.value : shown.value.slice(0, FOLDED)))
+const drawn = useGradualRows(listed)
 useRowColumns(useTemplateRef('head'))
 // The columns, as the snapshot has them, and their widths on wide screens, on narrower ones and on phones (null where
 // they're left out). On wide screens each Pokémon's most common set fills the room, its moves taking what's left; on
@@ -244,8 +268,8 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 <template>
   <!-- The tabs to the other usage lists, stuck to the top, then the controls and the table in panels of their own. -->
   <div>
-    <RankingsTabs current="pokemon" />
-    <div class="panel">
+    <RankingsTabs current="pokemon" :sections />
+    <div id="sec-list" class="panel section">
       <!-- The data shown, and on its line, where the set columns don't fit (but on phones), the switch that shows sets. -->
       <RankingsHead
         :title="t('title.pokemonRankings')"
@@ -372,13 +396,13 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
               {{ r.rank
               }}<span
                 v-if="previous"
+                v-tip:group="markTip(r)"
                 class="climb"
                 :class="r.climb ? (r.climb > 0 ? 'up' : 'down') : r.fresh && 'fresh'"
-                ><template v-if="r.climb"
-                  ><span aria-hidden="true">{{ r.climb > 0 ? '▲' : '▼' }}</span
-                  ><span class="visually-hidden">{{ t(r.climb > 0 ? 'usage.up' : 'usage.down') }}</span
-                  >{{ Math.abs(r.climb) }}</template
-                ><template v-else-if="r.fresh">{{ t('usage.new') }}</template></span
+                ><template v-if="r.climb || r.fresh"
+                  ><span aria-hidden="true">{{ r.climb ? (r.climb > 0 ? '▲' : '▼') : '✦' }}</span
+                  ><span class="visually-hidden">{{ markTip(r) }}</span></template
+                ></span
               >
             </div>
             <div role="cell" class="grow">
@@ -505,6 +529,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         </template>
       </div>
       <p v-else class="muted">{{ t('usage.noMatch') }}</p>
+      <MoreToggle v-if="data" v-model:all="allRows" :n="shown.length" :top="FOLDED" />
       <p class="muted note phone-only-block">{{ t('usage.usage') }}: {{ t('usage.usageTip') }}.</p>
       <p v-if="anyRare" class="muted note">{{ t('usage.rare', { share: percent(RARE) }) }}</p>
       <p v-if="allFilters(filters).some((x) => x.kind === 'move' || x.kind === 'item')" class="muted note">
@@ -517,10 +542,20 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
       </p>
     </div>
+    <RankingTrends v-if="trendsShown" id="sec-trends" class="section" :rows="shown" :since>
+      <template #entry="{ row }"
+        ><PokemonIcon :id="row.id" /><span>{{ row.species }}</span
+        ><span v-if="row.forme" class="forme">{{ row.forme }}</span></template
+      >
+    </RankingTrends>
   </div>
 </template>
 
 <style scoped>
+/* A panel scrolled to from the row of links lands under what's stuck to the top. */
+.section {
+  scroll-margin-top: calc(var(--stuck-h, 0px) + 12px);
+}
 /* Rank, name, types (room for two badges), the most common set on wide screens (item, ability, moves), usage (its
    number, with its bar under it) and brought. Narrower, the set goes on a line under the row, and on phones brought joins it. The names don't size their column (the rows take the
    header's widths, see `.dex-table`), so it's as wide as most names, and the longest wrap their forme. */
@@ -728,7 +763,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
    wide for every rank. */
 .climb {
   display: inline-block;
-  width: 2.4em;
+  width: 1em;
   margin-left: 3px;
   font-size: 0.75em;
   text-align: left;
@@ -736,7 +771,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 }
 /* Every rank its mark's room after it, empty or not, so the ranks line up, and "#" over them rather than the marks. */
 .with-climb :deep(.sort) {
-  margin-right: calc(3px + 1.8em);
+  margin-right: calc(3px + 0.75em);
 }
 .up {
   color: var(--good);
