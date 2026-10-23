@@ -165,7 +165,6 @@ export function seoPages(): Plugin {
           const lead = en.types[type]!
           return { path: `dex/types/${type}`, title: 'title.types', desc: 'desc.type', lead, schema: 'WebPage' }
         }),
-        searched('dex/types/chart', 'chart', 'WebPage'),
         ...CATEGORIES.flatMap(({ kind, path, title, list, entry }): Page[] => {
           const ids =
             kind === 'condition'
@@ -263,6 +262,7 @@ export function seoPages(): Plugin {
         searched('meta/speed-tiers/compare', 'speedCompare'),
         { path: 'tools', title: 'title.tools', desc: 'desc.tools', schema: 'CollectionPage' },
         searched('tools/matchups', 'matchups'),
+        searched('tools/type-chart', 'chart', 'WebPage'),
         { path: 'quizzes', title: 'title.quizzes', desc: 'desc.quizzes', schema: 'CollectionPage' },
         searched('quizzes/types', 'quiz'),
         searched('quizzes/speed', 'speedQuiz'),

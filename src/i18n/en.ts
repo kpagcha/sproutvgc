@@ -96,15 +96,15 @@ export const messages = {
   'title.meta': 'Meta',
   'title.tools': 'Tools',
   'desc.dex': 'Everything in {game}, Regulation {reg}: Pokémon, moves, abilities, items, conditions and types.',
-  'desc.tools': 'Tools for {game} players: a damage calculator, a team builder and type matchups.',
-  'nav.rankings': 'Ladder',
+  'desc.tools': 'Tools for {game} players: a damage calculator, a team builder, type matchups and the type chart.',
+  'nav.rankings': 'Usage',
   'nav.tournaments': 'Tournaments',
   'nav.speedTiers': 'Speed tiers',
   'nav.speedCompare': 'Compare speeds',
   'nav.calc': 'Damage calc',
   'nav.teamBuilder': 'Team builder',
-  'title.rankings': 'Ladder',
-  'title.pokemonRankings': 'Ladder',
+  'title.rankings': 'Usage',
+  'title.pokemonRankings': 'Pokémon',
   'title.tournaments': 'Tournaments',
   'title.tournament': 'Tournament',
   'title.tournamentPlayer': 'Tournament player',
@@ -156,10 +156,11 @@ export const messages = {
   'head.metaAbility': 'Usage and Pokémon',
   'head.metaItem': 'Usage and Pokémon',
   'head.metaMove': 'Usage and Pokémon',
-  'head.pokemonRankings': 'Ladder: the most used Pokémon, their sets and speed tiers',
-  'head.moveRankings': 'Moves: the most used moves',
-  'head.itemRankings': 'Items: the most used items',
-  'head.abilityRankings': 'Abilities: the most used abilities',
+  'head.pokemonRankings':
+    'Pokémon ladder: usage rankings and tier list of the most used Pokémon, their sets and speed tiers',
+  'head.moveRankings': 'Move usage rankings: the most used moves',
+  'head.itemRankings': 'Item usage rankings: the most used items',
+  'head.abilityRankings': 'Ability usage rankings: the most used abilities',
   'head.quiz': 'Type quiz: learn the type chart',
   'keywords.home':
     '{game} dex, VGC, competitive Pokémon, Pokédex, speed tiers, speed calculator, type chart, usage stats, usage rankings, Regulation {reg}',
@@ -169,10 +170,13 @@ export const messages = {
   'keywords.matchups':
     'type calculator, weakness calculator, type matchups, type coverage, coverage calculator, dual types, VGC, {game}',
   'keywords.pokemonRankings':
-    'ladder, usage stats, usage rankings, most used Pokémon, VGC usage, metagame, tier list, speed tiers, {game}, Regulation {reg}',
-  'keywords.moveRankings': 'move usage, most used moves, VGC usage stats, metagame, {game}, Regulation {reg}',
-  'keywords.itemRankings': 'item usage, most used items, VGC usage stats, metagame, {game}, Regulation {reg}',
-  'keywords.abilityRankings': 'ability usage, most used abilities, VGC usage stats, metagame, {game}, Regulation {reg}',
+    'ladder, Pokémon ladder, usage stats, usage rankings, rankings, most used Pokémon, top Pokémon, VGC usage, meta, metagame, meta list, tier list, tiers, speed tiers, {game}, Regulation {reg}',
+  'keywords.moveRankings':
+    'move usage, most used moves, move rankings, VGC usage stats, meta, metagame, {game}, Regulation {reg}',
+  'keywords.itemRankings':
+    'item usage, most used items, item rankings, VGC usage stats, meta, metagame, {game}, Regulation {reg}',
+  'keywords.abilityRankings':
+    'ability usage, most used abilities, ability rankings, VGC usage stats, meta, metagame, {game}, Regulation {reg}',
   'keywords.metaMove': '{name} usage, {name} Pokémon, {name} VGC, VGC, {game}, Regulation {reg}',
   'keywords.metaItem': '{name} usage, {name} Pokémon, {name} VGC, VGC, {game}, Regulation {reg}',
   'keywords.metaAbility': '{name} usage, {name} Pokémon, {name} VGC, VGC, {game}, Regulation {reg}',

@@ -1,6 +1,6 @@
 // The site's areas, each a top-level link in the header with its sections as a sub-navigation, Meta first (what sets
 // the site apart): Meta (what players use and how it does: observations, labeled with their period and source), Tools
-// (what you interact with), the dex (what exists in the regulation) and Quizzes (what you learn with). Each route says in its meta which area and section it belongs to.
+// (what you interact with), Quizzes (what you learn with) and the dex (what exists in the regulation), last. Each route says in its meta which area and section it belongs to.
 
 import type { MessageKey } from '@/i18n'
 
@@ -58,6 +58,17 @@ export const AREAS: Area[] = [
       { key: 'calc', route: 'calc', label: 'nav.calc', title: 'title.calc', desc: 'desc.calc', soon: true },
       { key: 'teamBuilder', route: 'teamBuilder', label: 'nav.teamBuilder', desc: 'desc.teamBuilder', soon: true },
       { key: 'matchups', route: 'matchups', label: 'title.matchups', desc: 'desc.matchups' },
+      { key: 'chart', route: 'chart', label: 'title.chart', desc: 'desc.chart' },
+    ],
+  },
+  {
+    id: 'quizzes',
+    route: 'quizzes',
+    label: 'nav.quizzes',
+    title: 'title.quizzes',
+    sections: [
+      { key: 'typeQuiz', route: 'quiz', label: 'title.quiz', desc: 'desc.quiz' },
+      { key: 'speedQuiz', route: 'speedQuiz', label: 'title.speedQuiz', desc: 'desc.speedQuiz' },
     ],
   },
   {
@@ -72,17 +83,6 @@ export const AREAS: Area[] = [
       { key: 'items', route: 'items', label: 'nav.items', desc: 'home.itemsDesc' },
       { key: 'conditions', route: 'conditions', label: 'nav.conditions', desc: 'home.conditionsDesc' },
       { key: 'types', route: 'types', label: 'nav.types', desc: 'home.typesDesc' },
-      { key: 'chart', route: 'chart', label: 'title.chart', desc: 'desc.chart' },
-    ],
-  },
-  {
-    id: 'quizzes',
-    route: 'quizzes',
-    label: 'nav.quizzes',
-    title: 'title.quizzes',
-    sections: [
-      { key: 'typeQuiz', route: 'quiz', label: 'title.quiz', desc: 'desc.quiz' },
-      { key: 'speedQuiz', route: 'speedQuiz', label: 'title.speedQuiz', desc: 'desc.speedQuiz' },
     ],
   },
 ]

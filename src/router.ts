@@ -174,18 +174,6 @@ export const router = createRouter({
       },
     },
     {
-      path: '/dex/types/chart',
-      name: 'chart',
-      component: () => import('@/views/TypeChartView.vue'),
-      meta: {
-        titleKey: 'title.chart',
-        descKey: 'desc.chart',
-        headKey: 'head.chart',
-        keywordsKey: 'keywords.chart',
-        ...inArea('dex', 'chart'),
-      },
-    },
-    {
       path: '/dex/abilities',
       name: 'abilities',
       component: () => import('@/views/AbilitiesView.vue'),
@@ -499,6 +487,18 @@ export const router = createRouter({
         dexNames: true,
         recent: once('matchups'),
         ...inArea('tools', 'matchups'),
+      },
+    },
+    {
+      path: '/tools/type-chart',
+      name: 'chart',
+      component: () => import('@/views/TypeChartView.vue'),
+      meta: {
+        titleKey: 'title.chart',
+        descKey: 'desc.chart',
+        headKey: 'head.chart',
+        keywordsKey: 'keywords.chart',
+        ...inArea('tools', 'chart'),
       },
     },
     {

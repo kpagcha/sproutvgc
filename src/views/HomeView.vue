@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { t } from '@/i18n'
+import { t, type MessageKey } from '@/i18n'
 import { GAME_NAME, REGULATION } from '@/data/format'
 import { AREAS, type AreaId } from '@/lib/areas'
 import { preloadSearch, searchFocus, useSearch } from '@/composables/useSearch'
@@ -16,16 +16,26 @@ import SearchBox from '@/components/SearchBox.vue'
 import logoUrl from '@/assets/logo.png'
 
 // The front door to the whole site: the search (of the site's pages, the meta pages and the dex), and under it the
-// areas: Meta first and largest (what the site is most about), its sections buttons, Tools a column
-// beside it, a row per section, and the dex and the quizzes a band of links under them;
-// then the meta at a glance (`MetaHighlights`), the reader's favorites and recently viewed. While searching, the
+// areas: Meta first and largest (what the site is most about), its sections buttons (Usage across the top, a box
+// of its four lists' links, its name leading to the Pokémon's, so its moves, abilities and items aren't missed), Tools a
+// column beside it, a row per section, and the quizzes and the dex (its name alone, its lists not to be mistaken for
+// Usage's) a band under them; then the meta at a glance (`MetaHighlights`), the reader's favorites and recently viewed. While searching, the
 // results take the place of all but the search.
 
 const areaById = (id: AreaId) => AREAS.find((a) => a.id === id)!
 const metaArea = areaById('meta')
+const usage = metaArea.sections.find((s) => s.key === 'rankings')!
+const metaRest = metaArea.sections.filter((s) => s !== usage)
+/** Usage's lists, in its tabs' order (`RankingsTabs`). */
+const usageLists: { route: string; label: MessageKey }[] = [
+  { route: 'rankings', label: 'nav.pokemon' },
+  { route: 'moveRankings', label: 'nav.moves' },
+  { route: 'itemRankings', label: 'nav.items' },
+  { route: 'abilityRankings', label: 'nav.abilities' },
+]
 const toolsArea = areaById('tools')
 /** The rest, a row each of the band under them. */
-const bandAreas = [areaById('dex'), areaById('quizzes')]
+const bandAreas = [areaById('quizzes'), areaById('dex')]
 
 // The search is kept in the URL (`?q=`), so coming back from a result brings the results back.
 const route = useRoute()
@@ -99,8 +109,18 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
               >
               <span class="muted meta-blurb">{{ t('meta.regulation', params) }}</span>
             </div>
+            <div class="usage">
+              <RouterLink :to="{ name: usage.route }" class="sec-name usage-name"
+                >{{ t(usage.label) }} <span class="arrow">›</span></RouterLink
+              >
+              <ul class="usage-lists">
+                <li v-for="l in usageLists" :key="l.route">
+                  <RouterLink :to="{ name: l.route }">{{ t(l.label) }}</RouterLink>
+                </li>
+              </ul>
+            </div>
             <ul class="meta-sections">
-              <li v-for="sec in metaArea.sections" :key="sec.key">
+              <li v-for="sec in metaRest" :key="sec.key">
                 <RouterLink :to="{ name: sec.route }" class="meta-button">
                   <span class="sec-name">{{ t(sec.label) }} <span class="arrow">›</span></span>
                 </RouterLink>
@@ -129,7 +149,7 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
             <RouterLink :to="{ name: a.route }" class="band-name font-display"
               >{{ t(a.label) }} <span class="arrow">›</span></RouterLink
             >
-            <ul class="band-links">
+            <ul v-if="a.id !== 'dex'" class="band-links">
               <li v-for="sec in a.sections" :key="sec.key">
                 <RouterLink :to="{ name: sec.route }">{{ t(sec.label) }}</RouterLink>
               </li>
@@ -238,10 +258,11 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
 .meta-blurb {
   font-size: 0.9em;
 }
-/* Its sections raised buttons, two to a row, lifting on hover and pressed flat when clicked. */
+/* Its sections raised buttons, Usage's lists in a box across the top and the rest three to a row, lifting on hover and pressed
+   flat when clicked. */
 .meta-sections {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 .meta-sections li {
@@ -271,6 +292,40 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
 .meta-button:active {
   transform: translate(3px, 3px);
   box-shadow: none;
+}
+/* Usage: its name (a link to the Pokémon's) and its lists' links on one row (wrapping under it where they don't fit), in a box as the buttons
+   are, but not one itself. */
+.usage {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 12px 14px;
+  background: var(--panel);
+  border: 2px solid var(--ink);
+  box-shadow: var(--hard);
+}
+.usage .sec-name {
+  font-size: 1.1em;
+}
+/* Its name leads to the Pokémon's, the first of them. */
+.usage-name:hover {
+  color: var(--accent);
+}
+.usage-lists {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.usage-lists a {
+  display: block;
+  padding: 3px 11px;
+  font-weight: 600;
+  background: var(--panel-alt);
+  border: 1.5px solid var(--ink);
+}
+.usage-lists a:hover {
+  background: var(--hover);
 }
 /* Tools: its name over its sections, a row each. */
 :root:root .tools-area {
