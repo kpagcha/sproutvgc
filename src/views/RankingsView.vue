@@ -6,11 +6,13 @@ import { ability, item, move, pokemon, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { POKEMON, splitForme } from '@/data/pokemon'
 import { sinceLabel, GENERATED_SNAPSHOTS, has, percent, players } from '@/data/meta'
+import { baselineOf, eventsOf, loadEventUsage, type EventUsage } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
 import { passesGroups, positiveFilters, allFilters } from '@/lib/filterGroups'
 import { formatTermFilters, parseTermFilters, type Term, type TermFilters } from '@/lib/searchTerms'
+import { pooledUsage } from '@/lib/tournamentStats'
 import { isSetTerm, MIN_SHARE, monMatches, MON_TERM_KINDS, setShare, SET_LIST, type SetTerm } from '@/lib/monTerms'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useGradualRows } from '@/composables/useGradualRows'
@@ -57,10 +59,74 @@ const broughtAll = computed(
 const previous = computed(() => GENERATED_SNAPSHOTS.find((s) => s.id === snapshot.value?.previous))
 /** The trends' panel, once the data before is in. */
 const trendsShown = computed(() => !!(snapshot.value && previous.value && data.value))
+
+// The tournaments' trends: the latest weekend of the regulation's official events (its latest event and those within
+// `WEEKEND_DAYS` of it) against the events before it, pooled (the regulation's, or for its first weekend the one
+// before's, `baselineOf`), every player's teams: each Pokémon's share of them, from every event's few numbers
+// (`loadEventUsage`), so no standings load. Of the Pokémon the list's search and filters leave, as the trends' panel.
+const WEEKEND_DAYS = 3
+/** New to the events: on none of the teams before, and on at least this share now (fewer is a team or two). */
+const NEW_MIN = 0.005
+const eventUsage = shallowRef<Record<string, EventUsage> | null>(null)
+void loadEventUsage().then((u) => (eventUsage.value = u))
+const tournamentTrends = computed(() => {
+  const u = eventUsage.value
+  const reg = snapshot.value?.regulation
+  if (!u || !reg) return null
+  const events = eventsOf(reg)
+  const latest = events[0]
+  if (!latest) return null
+  const day = (d: string) => Date.parse(`${d}T00:00:00Z`) / 86400000
+  const weekend = events.filter((e) => day(latest.date) - day(e.date) <= WEEKEND_DAYS)
+  const base = baselineOf(weekend.at(-1)!)
+  if (!base.events.length) return null
+  const now = pooledUsage(
+    u,
+    weekend.map((e) => e.id),
+    'all',
+  )
+  const before = pooledUsage(
+    u,
+    base.events.map((e) => e.id),
+    'all',
+  )
+  if (!now.teams || !before.teams) return null
+  const q = fold(search.value.trim())
+  const rows = [...new Set([...now.share.keys(), ...before.share.keys()])].flatMap((id) => {
+    const name = refName(pokemon(id))
+    if (!POKEMON[id] || (q && !split(name, q)) || !passes(id)) return []
+    const usage = now.share.get(id) ?? 0
+    const was = before.share.get(id) ?? 0
+    return [
+      {
+        id,
+        ...splitForme(id, name),
+        to: { name: 'metaPokemon', params: { id } },
+        usage,
+        change: was ? usage - was : undefined,
+        fresh: !was && usage >= NEW_MIN,
+      },
+    ]
+  })
+  const named = (list: readonly { name: string }[]) =>
+    list.length === 1 ? list[0]!.name : t('trends.tournamentEvents', { n: list.length })
+  const against = base.regulation
+    ? t('tournaments.trendBeforeReg', { reg: base.regulation })
+    : base.events.length === 1
+      ? base.events[0]!.name
+      : t('tournaments.trendBefore', { n: base.events.length })
+  return { rows, about: t('trends.tournamentAbout', { now: named(weekend), before: against }) }
+})
+const tournamentTips = computed(() => ({
+  points: t('trends.tournamentPointsTip'),
+  new: t('trends.tournamentNewTip'),
+  none: t('trends.tournamentSteady'),
+}))
 /** The page's panels, as the row of links under the tabs lists them. */
 const sections = computed(() => [
   { id: 'sec-list', label: t('trends.list') },
   ...(trendsShown.value ? [{ id: 'sec-trends', label: t('trends.title') }] : []),
+  ...(tournamentTrends.value ? [{ id: 'sec-tournament-trends', label: t('trends.tournamentTitle') }] : []),
 ])
 const since = computed(() => (previous.value ? sinceLabel(previous.value, snapshot.value) : ''))
 /** The rank's mark's tooltip: the places gained or lost since the dataset before, or new to it. */
@@ -543,6 +609,21 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
       </p>
     </div>
     <RankingTrends v-if="trendsShown" id="sec-trends" class="section" :rows="shown" :since>
+      <template #entry="{ row }"
+        ><PokemonIcon :id="row.id" /><span>{{ row.species }}</span
+        ><span v-if="row.forme" class="forme">{{ row.forme }}</span></template
+      >
+    </RankingTrends>
+    <!-- The tournaments' trends: the latest weekend of official events against the events before it. -->
+    <RankingTrends
+      v-if="tournamentTrends"
+      id="sec-tournament-trends"
+      class="section"
+      :rows="tournamentTrends.rows"
+      :title="t('trends.tournamentTitle')"
+      :about="tournamentTrends.about"
+      :tips="tournamentTips"
+    >
       <template #entry="{ row }"
         ><PokemonIcon :id="row.id" /><span>{{ row.species }}</span
         ><span v-if="row.forme" class="forme">{{ row.forme }}</span></template

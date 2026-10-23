@@ -1436,6 +1436,13 @@ export const messages = {
   'usage.markDown': 'Down {n} since {dates}',
   'usage.markNew': 'New since {dates}',
   'trends.title': 'Trends',
+  'trends.tournamentTitle': 'Tournament trends',
+  'trends.tournamentAbout': '{now} against {before}',
+  'trends.tournamentEvents': 'the latest {n} events',
+  'trends.tournamentPointsTip':
+    'The biggest changes in the share of teams at the latest official events against the events before, in percentage points',
+  'trends.tournamentNewTip': 'On no team at the events before and on at least 0.5% of teams now, by their share',
+  'trends.tournamentSteady': 'Nothing changed much at the latest official events.',
   'trends.list': 'Rankings',
   'more.top': 'The top {n}',
   'more.all': 'All {n}',
