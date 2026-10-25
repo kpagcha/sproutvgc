@@ -8,6 +8,7 @@ import { META_LINKS } from '@/lib/links'
 import { cutMarks, medalOf, playerMatches, type CutMark, type PlayerMatch } from '@/lib/tournamentStats'
 import AppLink from '@/components/AppLink'
 import CopyPaste from '@/components/CopyPaste.vue'
+import OpenInBuilder from '@/components/OpenInBuilder.vue'
 import CountryFlag from '@/components/CountryFlag'
 import LiveTag from '@/components/LiveTag.vue'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -159,8 +160,14 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
     <section v-if="player" id="sec-team" class="panel">
       <h2>{{ t('tournaments.team') }}</h2>
       <TeamSets v-if="player.team.length" :team="player.team" />
-      <!-- The way to copy it as a paste, under its sets at their right. -->
-      <p v-if="player.team.length" class="team-tools"><CopyPaste :team="player.team" /></p>
+      <!-- The ways to copy it as a paste or open it in the team builder, under its sets at their right. -->
+      <p v-if="player.team.length" class="team-tools">
+        <OpenInBuilder
+          :team="player.team"
+          :name="t('builder.fromTournament', { player: player.player, event: event?.name ?? '' })"
+        />
+        <CopyPaste :team="player.team" />
+      </p>
       <p v-else class="muted">{{ t('tournaments.noTeam') }}</p>
     </section>
 
@@ -290,7 +297,9 @@ section {
 }
 .team-tools {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
+  gap: 8px;
   margin: 0;
   padding: 0 4px;
 }

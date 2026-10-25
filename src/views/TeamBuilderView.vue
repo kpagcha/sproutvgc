@@ -1,0 +1,632 @@
+<script setup lang="ts">
+import { computed, nextTick, onBeforeUnmount, onMounted, shallowRef, watch, type ComponentPublicInstance } from 'vue'
+import { useMediaQuery } from '@vueuse/core'
+import { ClipboardPaste, Copy, Plus, Star, Trash2 } from '@lucide/vue'
+import type { AbilityId, ItemId, MoveId, PokemonId } from '@/data/dex'
+import { POKEMON } from '@/data/pokemon'
+import { t } from '@/i18n'
+import { confirmDialog } from '@/composables/useConfirm'
+import { useMeta } from '@/composables/useMeta'
+import { useTeams } from '@/composables/useTeams'
+import { membersPaste, parsePaste, type PasteProblem } from '@/lib/pokepaste'
+import { emptyMember, pickedAs, shownAs, type Field, type Member } from '@/lib/team'
+import CopyPaste from '@/components/CopyPaste.vue'
+import MetaDialog from '@/components/MetaDialog.vue'
+import ModalDialog from '@/components/ModalDialog.vue'
+import PokemonIcon from '@/components/PokemonIcon'
+import TeamPicker from '@/components/TeamPicker.vue'
+import TeamSlot from '@/components/TeamSlot.vue'
+
+// The team builder: a team's six slots, laid out as a tournament team's sets (`TeamSlot`), each part a button opening
+// its picker (`TeamPicker`: the meta's searches, with the shares of the data shown): on wide screens a drawer from the
+// side away from the slot, over a backdrop dimming the page but for the slot, which stays as it is to pick on; on
+// phones a dialog over it. Picking one moves on to the next part the slot hasn't got yet. The team goes out as a
+// paste (Showdown's format, `membersPaste`) and comes in from one (`parsePaste`, what it couldn't read said). Every team
+// is saved in this browser as it's edited (`useTeams`), listed over the open one, the starred first.
+const { teams, current, open, create, touch, remove, duplicate, star } = useTeams()
+const { snapshot, data } = useMeta()
+const wide = useMediaQuery('(min-width: 900px)')
+
+const defaultName = () => t('builder.defaultName', { n: teams.value.length + 1 })
+onMounted(() => {
+  if (!current.value) {
+    const latest = teams.value[0]
+    if (latest) open(latest.id)
+    else create(defaultName())
+  }
+})
+const members = computed(() => current.value?.members ?? [])
+
+// The part being picked: its slot and field.
+const picking = shallowRef<{ slot: number; field: Field } | null>(null)
+watch(
+  () => current.value?.id,
+  () => (picking.value = null),
+)
+const pickerOpen = computed({
+  get: () => !!picking.value,
+  set: (on) => {
+    if (!on) picking.value = null
+  },
+})
+// The drawer's backdrop: the whole window dimmed, but for a hole where the slot being picked for is (`clip-path`, which
+// lets the pointer through there too), followed as the page scrolls or the slot changes size. The drawer comes from the
+// side the slot leaves free, chosen as it opens.
+const DRAWER = 480
+const PAD = 6
+const slotEls: (HTMLElement | null)[] = []
+const setSlotEl = (i: number, el: Element | ComponentPublicInstance | null) =>
+  (slotEls[i] = el && '$el' in el ? (el.$el as HTMLElement) : (el as HTMLElement | null))
+const hole = shallowRef<{ x: number; y: number; w: number; h: number } | null>(null)
+const side = shallowRef<'left' | 'right'>('right')
+const drawerOpen = computed(() => wide.value && !!picking.value)
+/** The drawer is in (its slide over): its list can be built. */
+const drawerReady = shallowRef(false)
+// Once a frame at most, however many scroll events come in it.
+let frame = 0
+function measureSoon() {
+  if (!frame) frame = requestAnimationFrame(() => ((frame = 0), measure()))
+}
+function measure() {
+  const el = picking.value ? slotEls[picking.value.slot] : null
+  if (!el || !drawerOpen.value) return void (hole.value = null)
+  const r = el.getBoundingClientRect()
+  hole.value = { x: r.left - PAD, y: r.top - PAD, w: r.width + 2 * PAD, h: r.height + 2 * PAD }
+}
+const backdropClip = computed(() => {
+  const h = hole.value
+  if (!h) return undefined
+  const W = window.innerWidth
+  const H = window.innerHeight
+  return `path(evenodd, "M0 0H${W}V${H}H0Z M${h.x} ${h.y}H${h.x + h.w}V${h.y + h.h}H${h.x}Z")`
+})
+let observer: ResizeObserver | undefined
+watch(
+  () => (drawerOpen.value ? picking.value!.slot : null),
+  async (slot) => {
+    observer?.disconnect()
+    if (slot === null) return void (hole.value = null)
+    await nextTick()
+    const el = slotEls[slot]
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    side.value = r.right > window.innerWidth - Math.min(DRAWER, window.innerWidth * 0.46) - 16 ? 'left' : 'right'
+    el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    measure()
+    observer = new ResizeObserver(measureSoon)
+    observer.observe(el)
+  },
+)
+const onKey = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && drawerOpen.value) picking.value = null
+}
+onMounted(() => {
+  window.addEventListener('scroll', measureSoon, { passive: true })
+  window.addEventListener('resize', measureSoon)
+  window.addEventListener('keydown', onKey)
+})
+onBeforeUnmount(() => {
+  observer?.disconnect()
+  cancelAnimationFrame(frame)
+  window.removeEventListener('scroll', measureSoon)
+  window.removeEventListener('resize', measureSoon)
+  window.removeEventListener('keydown', onKey)
+})
+
+// Each slot's points editor, folded at first.
+const editing = shallowRef<boolean[]>([])
+const setEditing = (i: number, on: boolean) => {
+  const next = [...editing.value]
+  next[i] = on
+  editing.value = next
+}
+
+/** The next part a slot hasn't got, in the order a set is put together; null once it has them all. */
+function nextField(m: Member, after: Field): Field | null {
+  const order: Field[] = ['pokemon', 'item', 'ability', 'nature', 0, 1, 2, 3]
+  for (const f of order.slice(order.indexOf(after) + 1)) {
+    if (typeof f === 'number' ? !m.moves[f] : !m[f]) return f
+  }
+  return null
+}
+
+function update(slot: number, patch: Partial<Member>) {
+  const team = current.value
+  if (!team) return
+  team.members[slot] = { ...team.members[slot]!, ...patch }
+  touch()
+}
+
+function pick(value: string) {
+  const p = picking.value
+  const team = current.value
+  if (!p || !team) return
+  const m = team.members[p.slot]!
+  if (p.field === 'pokemon') {
+    const { pokemon, item } = pickedAs(value as PokemonId)
+    if (pokemon !== m.pokemon) {
+      // Another Pokémon: a set of its own. One with a single ability has it already.
+      const abilities = POKEMON[pokemon].abilities
+      update(p.slot, {
+        ...emptyMember(),
+        pokemon,
+        item: item ?? null,
+        ability: abilities.length === 1 ? abilities[0]! : null,
+      })
+    } else if (item) update(p.slot, { item })
+  } else if (p.field === 'item') update(p.slot, { item: (value || null) as ItemId | null })
+  else if (p.field === 'ability') update(p.slot, { ability: value as AbilityId })
+  else if (p.field === 'nature') update(p.slot, { nature: value })
+  else {
+    // A move it has in another place trades places with the one it replaces.
+    const moves = [...m.moves]
+    const was = moves.indexOf(value as MoveId)
+    if (was >= 0) moves[was] = moves[p.field]!
+    moves[p.field] = value as MoveId
+    update(p.slot, { moves })
+  }
+  const next = nextField(team.members[p.slot]!, p.field)
+  picking.value = next === null ? null : { slot: p.slot, field: next }
+}
+
+const clearSlot = (i: number) => {
+  update(i, emptyMember())
+  if (picking.value?.slot === i) picking.value = null
+}
+
+// The team's name, edited in place.
+const name = computed({
+  get: () => current.value?.name ?? '',
+  set: (v: string) => {
+    if (!current.value) return
+    current.value.name = v
+    touch()
+  },
+})
+
+async function removeTeam(id: string, label: string) {
+  const ok = await confirmDialog({
+    message: t('builder.deleteConfirm', { name: label || t('builder.untitled') }),
+    confirm: t('builder.delete'),
+    danger: true,
+  })
+  if (!ok) return
+  remove(id)
+  if (!current.value) {
+    const latest = teams.value[0]
+    if (latest) open(latest.id)
+    else create(defaultName())
+  }
+}
+
+// Importing a paste: into the open team when it's empty, else as a new team.
+const importing = shallowRef(false)
+const pasted = shallowRef('')
+const problems = shallowRef<PasteProblem[]>([])
+function importPaste() {
+  const { members: read, problems: found } = parsePaste(pasted.value)
+  problems.value = found
+  if (!read.length) return
+  const team = current.value
+  if (team && team.members.every((m) => !m.pokemon)) {
+    read.forEach((m, i) => (team.members[i] = m))
+    touch()
+  } else create(t('builder.imported'), read)
+  pasted.value = ''
+  if (!found.length) importing.value = false
+}
+const problemText = (p: PasteProblem) =>
+  p.kind === 'tooMany' ? t('builder.problem.tooMany', { n: p.n }) : t(`builder.problem.${p.kind}`, { name: p.name })
+watch(importing, (on) => {
+  if (on) problems.value = []
+})
+
+const paste = computed(() => membersPaste(members.value))
+const hasAny = computed(() => members.value.some((m) => m.pokemon))
+const spreadsOf = (m: Member) => {
+  const id = shownAs(m)
+  return (id && data.value?.[id]?.spreads) || []
+}
+const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon ? [shownAs(m)!] : []))
+</script>
+
+<template>
+  <div class="builder">
+    <section class="panel">
+      <div class="head">
+        <h1>{{ t('title.teamBuilder') }}</h1>
+        <!-- Starting a team, or bringing one in, on the heading's line. -->
+        <span class="head-actions">
+          <button type="button" class="btn" @click="create(defaultName())">
+            <Plus :size="14" aria-hidden="true" />{{ t('builder.new') }}
+          </button>
+          <button type="button" class="btn" @click="importing = true">
+            <ClipboardPaste :size="14" aria-hidden="true" />{{ t('builder.import') }}
+          </button>
+        </span>
+        <MetaDialog v-if="snapshot" class="head-meta" />
+      </div>
+      <!-- The saved teams, the starred first, the open one marked. -->
+      <ul class="saved" :aria-label="t('builder.saved')">
+        <li v-for="team in teams" :key="team.id" class="saved-team" :class="{ on: team.id === current?.id }">
+          <button
+            v-tip="t(team.starred ? 'builder.unstar' : 'builder.star')"
+            type="button"
+            class="icon-btn star"
+            :class="{ starred: team.starred }"
+            :aria-pressed="!!team.starred"
+            :aria-label="t(team.starred ? 'builder.unstar' : 'builder.star')"
+            @click="star(team.id)"
+          >
+            <Star :size="14" aria-hidden="true" />
+          </button>
+          <button type="button" class="saved-open" @click="open(team.id)">
+            <span class="saved-name">{{ team.name || t('builder.untitled') }}</span>
+            <span class="saved-icons"><PokemonIcon v-for="(p, i) in icons(team.members)" :id="p" :key="i" /></span>
+          </button>
+          <button
+            v-tip="t('builder.duplicate')"
+            type="button"
+            class="icon-btn"
+            :aria-label="t('builder.duplicate')"
+            @click="duplicate(team.id, t('builder.copyOf', { name: team.name || t('builder.untitled') }))"
+          >
+            <Copy :size="14" aria-hidden="true" />
+          </button>
+          <button
+            v-tip="t('builder.delete')"
+            type="button"
+            class="icon-btn"
+            :aria-label="t('builder.delete')"
+            @click="removeTeam(team.id, team.name)"
+          >
+            <Trash2 :size="14" aria-hidden="true" />
+          </button>
+        </li>
+      </ul>
+    </section>
+
+    <div v-if="current" class="work">
+      <section class="panel team-panel">
+        <div class="team-head">
+          <input
+            v-model="name"
+            class="team-name"
+            :placeholder="t('builder.untitled')"
+            :aria-label="t('builder.name')"
+          />
+          <CopyPaste v-if="hasAny" :text="paste" />
+        </div>
+        <ul class="sets">
+          <TeamSlot
+            v-for="(m, i) in members"
+            :key="i"
+            :ref="(el) => setSlotEl(i, el)"
+            :member="m"
+            :active="picking?.slot === i ? picking.field : null"
+            :spreads="spreadsOf(m)"
+            :open="!!editing[i]"
+            @update:open="setEditing(i, $event)"
+            @field="picking = { slot: i, field: $event }"
+            @change="update(i, $event)"
+            @clear="clearSlot(i)"
+          />
+        </ul>
+      </section>
+    </div>
+
+    <!-- On wide screens, the picker as a drawer over the page, the slot left clear. -->
+    <Teleport to="body">
+      <Transition name="builder-fade">
+        <div
+          v-if="drawerOpen"
+          class="builder-backdrop"
+          :style="{ clipPath: backdropClip }"
+          aria-hidden="true"
+          @click="picking = null"
+        ></div>
+      </Transition>
+      <Transition :name="`drawer-${side}`" @after-enter="drawerReady = true" @after-leave="drawerReady = false">
+        <aside
+          v-if="drawerOpen && picking && current"
+          class="panel builder-drawer"
+          :class="side"
+          :aria-label="t('builder.picker')"
+        >
+          <!-- Its list built once it's in: hundreds of rows built as it slides would hold it up. -->
+          <div v-if="!drawerReady" class="drawer-skeleton" aria-hidden="true">
+            <span class="sk sk-title"></span>
+            <span class="sk sk-search"></span>
+            <span v-for="n in 12" :key="n" class="sk sk-row"></span>
+          </div>
+          <TeamPicker
+            v-else
+            :member="members[picking.slot]!"
+            :field="picking.field"
+            :data
+            :snapshot
+            @pick="pick"
+            @close="picking = null"
+          />
+        </aside>
+      </Transition>
+    </Teleport>
+
+    <!-- On phones, the picker over the page. -->
+    <ModalDialog v-if="!wide" v-model:open="pickerOpen" :label="t('builder.picker')" fill>
+      <div v-if="picking && current" class="panel picker-dialog">
+        <TeamPicker
+          :member="members[picking.slot]!"
+          :field="picking.field"
+          :data
+          :snapshot
+          @pick="pick"
+          @close="picking = null"
+        />
+      </div>
+    </ModalDialog>
+
+    <ModalDialog v-model:open="importing" :label="t('builder.import')">
+      <div class="panel import">
+        <h2>{{ t('builder.import') }}</h2>
+        <p class="muted">{{ t('builder.importHint') }}</p>
+        <textarea v-model="pasted" rows="12" spellcheck="false" :aria-label="t('builder.import')"></textarea>
+        <ul v-if="problems.length" class="problems">
+          <li v-for="(p, i) in problems" :key="i">{{ problemText(p) }}</li>
+        </ul>
+        <div class="actions">
+          <button type="button" class="btn" @click="importing = false">{{ t('builder.cancel') }}</button>
+          <button type="button" class="btn primary" :disabled="!pasted.trim()" @click="importPaste">
+            {{ t('builder.importGo') }}
+          </button>
+        </div>
+      </div>
+    </ModalDialog>
+  </div>
+</template>
+
+<style scoped>
+.builder {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.head h1 {
+  margin: 0;
+}
+.head-meta {
+  margin-left: auto;
+}
+.saved {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.saved-team {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 4px;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+}
+.saved-team.on {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.saved-open {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.saved-name {
+  font-weight: bold;
+}
+.saved-icons {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+}
+.icon-btn {
+  padding: 3px;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.icon-btn:hover {
+  color: inherit;
+}
+.star.starred {
+  color: var(--accent);
+}
+.star.starred :deep(svg) {
+  fill: currentColor;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.head-actions .btn,
+.actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.work {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+.team-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.team-name {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  font: inherit;
+  font-size: 1.15em;
+  font-weight: bold;
+}
+.sets {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* A card's editor unfolded leaves the others in its row as they were. */
+  align-items: start;
+  gap: 8px;
+  margin: 0;
+  padding: 4px 4px 12px;
+  list-style: none;
+}
+@media (max-width: 900px) {
+  .sets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 520px) {
+  .sets {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.picker-dialog {
+  width: min(560px, 100vw - 24px);
+  max-height: 100%;
+  overflow: auto;
+}
+.import {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(520px, 100vw - 24px);
+}
+.import h2,
+.import p {
+  margin: 0;
+}
+.import textarea {
+  width: 100%;
+  font-family: ui-monospace, monospace;
+  font-size: 0.9em;
+}
+.problems {
+  margin: 0;
+  padding-left: 1.2em;
+  color: var(--bad);
+  font-size: 0.9em;
+}
+.import .actions {
+  justify-content: flex-end;
+  margin-top: 0;
+}
+</style>
+
+<style>
+/* The drawer and its backdrop, in the body (out of the page's transform, so fixed to the window). Over the header. */
+.builder-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: color-mix(in srgb, #000 45%, transparent);
+}
+.builder-drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  z-index: 91;
+  width: min(480px, 46vw);
+  margin: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+/* Its slide on a layer of its own, so the page under it isn't painted again as it goes. */
+.builder-drawer {
+  will-change: transform;
+}
+.drawer-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.drawer-skeleton .sk {
+  display: block;
+  background: color-mix(in srgb, var(--border) 45%, transparent);
+}
+.sk-title {
+  width: 40%;
+  height: 1.4em;
+}
+.sk-search {
+  height: 34px;
+  margin-bottom: 6px;
+}
+.sk-row {
+  height: 2.6em;
+}
+.builder-drawer.right {
+  right: 0;
+  border-right: 0;
+}
+.builder-drawer.left {
+  left: 0;
+  border-left: 0;
+}
+.builder-fade-enter-active,
+.builder-fade-leave-active {
+  transition: opacity 0.18s ease;
+}
+.builder-fade-enter-from,
+.builder-fade-leave-to {
+  opacity: 0;
+}
+.drawer-right-enter-active,
+.drawer-right-leave-active,
+.drawer-left-enter-active,
+.drawer-left-leave-active {
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.drawer-right-enter-from,
+.drawer-right-leave-to {
+  transform: translateX(100%);
+}
+.drawer-left-enter-from,
+.drawer-left-leave-to {
+  transform: translateX(-100%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .drawer-right-enter-active,
+  .drawer-right-leave-active,
+  .drawer-left-enter-active,
+  .drawer-left-leave-active,
+  .builder-fade-enter-active,
+  .builder-fade-leave-active {
+    transition: none;
+  }
+}
+</style>

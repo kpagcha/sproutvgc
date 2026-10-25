@@ -6,13 +6,14 @@ import { medalOf } from '@/lib/tournamentStats'
 import AppLink from '@/components/AppLink'
 import CopyPaste from '@/components/CopyPaste.vue'
 import CountryFlag from '@/components/CountryFlag'
+import OpenInBuilder from '@/components/OpenInBuilder.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import TeamSets from '@/components/TeamSets.vue'
 
 // A player of an official tournament, a row to unfold: their placing (a medal in the top 8), name (the way to their
 // page) and country, record (marked when they dropped), and the six they brought, as icons; unfolded (`open`, the row
 // clicked anywhere but a link, or its chevron: `toggle`), their whole sets (`TeamSets`, those `marked` marked) and the
-// way to copy them as a paste (`CopyPaste`). One whose team isn't known at all (at an event under way, before its
+// way to copy them as a paste (`CopyPaste`) or open them in the team builder (`OpenInBuilder`). One whose team isn't known at all (at an event under way, before its
 // team lists are out) has nothing where it'd be, and nothing to unfold. On a tournament's standings, and on a build's page, where the event is
 // named under the player (`showEvent`), leading to its standings.
 const props = defineProps<{
@@ -79,8 +80,14 @@ const eventName = () => eventOf(props.event)?.name
     <!-- Their whole sets, a card each. -->
     <template v-if="open && s.team.length">
       <TeamSets :team="s.team" :marked />
-      <!-- The way to copy the team as a paste, under its sets at their right. -->
-      <p class="team-tools"><CopyPaste :team="s.team" /></p>
+      <!-- The ways to copy the team as a paste or open it in the team builder, under its sets at their right. -->
+      <p class="team-tools">
+        <OpenInBuilder
+          :team="s.team"
+          :name="t('builder.fromTournament', { player: s.player, event: eventName() ?? '' })"
+        />
+        <CopyPaste :team="s.team" />
+      </p>
     </template>
   </div>
 </template>
@@ -219,7 +226,9 @@ const eventName = () => eventOf(props.event)?.name
 }
 .team-tools {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
+  gap: 8px;
   margin: 0;
   padding: 0 4px 12px;
 }

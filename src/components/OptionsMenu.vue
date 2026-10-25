@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { onBeforeUnmount, ref, useTemplateRef, watch, type Component } from 'vue'
 import { Settings2 } from '@lucide/vue'
 
 // At the top right of a panel, a quiet button opening a drop-down of how the panel shows: the options are its slot.
-// Closed by a press outside it or Escape.
+// Closed by a press outside it or Escape, or by what's in it (its slot's `close`: a pick that's done with it). Its icon a gear unless given (`icon`).
 defineProps<{
   /** What the options are of, the button's tooltip and label. */
   title: string
+  icon?: Component
 }>()
 
 // Its tooltip only where there's hovering: a tap opens the drop-down, its label saying the same.
@@ -40,10 +41,10 @@ onBeforeUnmount(() => (open.value = false))
       :aria-label="title"
       @click="open = !open"
     >
-      <Settings2 :size="16" aria-hidden="true" />
+      <component :is="icon ?? Settings2" :size="16" aria-hidden="true" />
     </button>
     <div v-if="open" class="pop panel">
-      <slot />
+      <slot :close="() => (open = false)" />
     </div>
   </div>
 </template>

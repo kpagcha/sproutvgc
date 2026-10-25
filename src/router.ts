@@ -474,7 +474,20 @@ export const router = createRouter({
     // Tools: what you interact with.
     area('tools', 'title.tools', 'desc.tools'),
     soon('tools', 'calc', '/tools/calc', 'title.calc', 'desc.calc'),
-    soon('tools', 'teamBuilder', '/tools/team-builder', 'title.teamBuilder', 'desc.teamBuilder'),
+    {
+      path: '/tools/team-builder',
+      name: 'teamBuilder',
+      component: () => import('@/views/TeamBuilderView.vue'),
+      meta: {
+        titleKey: 'title.teamBuilder',
+        descKey: 'desc.teamBuilder',
+        headKey: 'head.teamBuilder',
+        keywordsKey: 'keywords.teamBuilder',
+        dexNames: true,
+        descriptions: ['ability', 'move', 'item'],
+        ...inArea('tools', 'teamBuilder'),
+      },
+    },
     {
       path: '/tools/matchups',
       name: 'matchups',

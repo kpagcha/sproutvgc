@@ -7,12 +7,12 @@ import { copy } from '@/lib/clipboard'
 import { teamPaste } from '@/lib/pokepaste'
 
 // A tournament team's button copying it as a paste (`teamPaste`: Showdown's format, which pokepast.es takes), saying
-// for a moment that it did, or that it couldn't.
-const props = defineProps<{ team: Slot[] }>()
+// for a moment that it did, or that it couldn't. Or a paste given whole (`text`: the team builder's).
+const props = defineProps<{ team?: Slot[]; text?: string }>()
 const state = ref<'idle' | 'copied' | 'failed'>('idle')
 let timer: ReturnType<typeof setTimeout> | undefined
 async function copyTeam() {
-  state.value = (await copy(teamPaste(props.team))) ? 'copied' : 'failed'
+  state.value = (await copy(props.text ?? teamPaste(props.team ?? []))) ? 'copied' : 'failed'
   clearTimeout(timer)
   timer = setTimeout(() => (state.value = 'idle'), 1500)
 }

@@ -35,7 +35,8 @@ import SkeletonRows from '@/components/SkeletonRows.vue'
 // without, both go in the caller's. A Pokémon's usage page gives each move's share of its sets (`shares`: a column of
 // its own, the table sorted by it at first, each move leading to its meta page rather than its dex entry), and leaves
 // out PP (`noPp`) and the search and filters (`noFilters`) but for its whole movepool, the descriptions under the names,
-// each a line of its own the whole width of its row (`stacked`).
+// each a line of its own the whole width of its row (`stacked`). In the team builder, a move is picked rather than
+// followed (`pick`): its name a button, its badges not links.
 const props = defineProps<{
   ids: readonly MoveId[]
   descriptions?: boolean
@@ -52,6 +53,9 @@ const props = defineProps<{
   /** Keep the sort under this name when the table is mounted again (`useSort`'s `remember`). */
   remember?: string
   panels?: boolean
+  pick?: (id: MoveId) => void
+  /** Moves already picked, marked. */
+  picked?: readonly MoveId[]
 }>()
 
 // Its links are `AppLink`s and its icons and descriptions functional components: RouterLinks and full components in
@@ -220,12 +224,17 @@ const skeleton = computed(() => [
         <div
           v-for="r in drawn"
           :key="r.id"
-          v-memo="[r.id, r.name, marksKey(r.parts), shares, under, below, stacked, descriptions, noPp, locale]"
+          v-memo="[r.id, r.name, marksKey(r.parts), shares, under, below, stacked, descriptions, noPp, locale, picked]"
           class="row"
+          :class="{ picked: picked?.includes(r.id) }"
           role="row"
         >
           <div role="cell" class="grow">
-            <AppLink :to="{ name: shares ? 'metaMove' : 'move', params: { id: r.id } }" class="name">
+            <button v-if="pick" type="button" class="name pick" @click="pick(r.id)">
+              <Marked v-if="r.parts" :p="r.parts" />
+              <template v-else>{{ r.name }}</template>
+            </button>
+            <AppLink v-else :to="{ name: shares ? 'metaMove' : 'move', params: { id: r.id } }" class="name">
               <Marked v-if="r.parts" :p="r.parts" />
               <template v-else>{{ r.name }}</template>
             </AppLink>
@@ -235,10 +244,14 @@ const skeleton = computed(() => [
             </div>
           </div>
           <div role="cell">
-            <AppLink :to="{ name: 'types', params: { type: r.data.type } }"><TypeIcon :type="r.data.type" /></AppLink>
+            <TypeIcon v-if="pick" :type="r.data.type" />
+            <AppLink v-else :to="{ name: 'types', params: { type: r.data.type } }"
+              ><TypeIcon :type="r.data.type"
+            /></AppLink>
           </div>
           <div role="cell" class="category">
-            <AppLink :to="{ name: 'moves', query: { f: `category:${r.data.category}` } }"
+            <CategoryIcon v-if="pick" :category="r.data.category" />
+            <AppLink v-else :to="{ name: 'moves', query: { f: `category:${r.data.category}` } }"
               ><CategoryIcon :category="r.data.category"
             /></AppLink>
           </div>
@@ -298,6 +311,27 @@ const skeleton = computed(() => [
     min-width: calc(26px + 6px);
     font-size: 0;
   }
+}
+/* Picked rather than followed (the team builder): its name a button that looks like a link. */
+.pick {
+  padding: 0;
+  font: inherit;
+  font-weight: bold;
+  text-align: left;
+  color: var(--link);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.pick:hover {
+  text-decoration: underline;
+}
+/* A move the set already has. */
+.row.picked {
+  background: var(--panel-alt);
+}
+.row.picked .pick {
+  color: var(--muted);
 }
 /* How few learn it: its tag after the name. */
 .tag {

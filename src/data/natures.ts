@@ -23,3 +23,6 @@ export function natureEffectOn(id: string, stat: StatId): NatureEffect {
   const n = NATURES[id]
   return n?.plus === stat && n.minus !== stat ? 'up' : n?.minus === stat && n.plus !== stat ? 'down' : 'neutral'
 }
+
+/** Every nature, by Showdown ID, in alphabetical order. */
+export const NATURE_IDS = Object.keys(NATURES)
