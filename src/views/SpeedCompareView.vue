@@ -806,7 +806,7 @@ function resetAll() {
           v-show="!phone || openKey === side.s"
           :key="side.s"
           class="side-col"
-          :class="{ folded: isFolded(side.s) }"
+          :class="{ folded: isFolded(side.s), empty: !sideOf(side.s).id }"
         >
           <section :id="`compare-${side.s}`" class="panel banded side" :class="{ opponent: side.s === 'b' }">
             <!-- Yours, and its opponent, red as on the speed tiers; on phones, its tab stands for it. Once picked, it
@@ -1074,8 +1074,10 @@ function resetAll() {
   .side-col > .col-add {
     align-self: start;
   }
-  /* Folded, its column off the shared rows: its panel as short as its Pokémon in short, what's under it right after. */
-  .side-col.folded {
+  /* Folded, or with no Pokémon picked yet, its column off the shared rows: its panel as short as what it has (its
+     Pokémon in short, or its picker), what's under it right after, rather than as tall as the other's editor. */
+  .side-col.folded,
+  .side-col.empty {
     display: block;
     align-self: start;
   }
