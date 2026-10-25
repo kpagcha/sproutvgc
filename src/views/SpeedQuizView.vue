@@ -2,6 +2,7 @@
 // The speed quiz: who moves first, or a tie, between two Pokémon (`lib/speedQuiz.ts`). Questions come from the
 // reader's level and build stage, saved pairs that are due coming first (`srs.ts`, a deck of its own).
 import { computed, reactive, ref, shallowRef, triggerRef, watch } from 'vue'
+import { ChevronDown, ChevronUp } from '@lucide/vue'
 import { availableIds, pokemon, type PokemonId } from '@/data/dex'
 import { has, pastRoster, snapshots } from '@/data/meta'
 import { locale, t, type MessageKey } from '@/i18n'
@@ -42,6 +43,8 @@ import {
   saveSettings,
   sidesAt,
   levelAt,
+  lately,
+  standingOf,
   type Question,
   type QuizEvent,
   type Stage,
@@ -196,19 +199,40 @@ const stats = computed(() => {
   return deckStats(deck.value)
 })
 const percent = (n: number, of: number) => (of ? Math.round((100 * n) / of) : 0)
-const missed = computed(() =>
-  (Object.entries(progress.misses) as [PokemonId, number][])
-    .filter(([id]) => idSet.value.has(id))
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 8),
+/** The Pokémon asked about with enough answers to tell, the least known first, each as its standing colors it. */
+const mons = computed(() =>
+  ids.value
+    .flatMap((id) => {
+      const r = progress.mons[id]
+      const standing = standingOf(r)
+      if (!r || standing === 'new') return []
+      const share = lately(r)
+      const name = refName(pokemon(id))
+      const right = Math.round(share * r.last.length)
+      const tip = t('speedQuiz.monTip', { name, r: right, n: r.last.length, all: r.right, seen: r.seen })
+      return [{ id, share, standing, seen: r.seen, tip }]
+    })
+    .sort((a, b) => a.share - b.share || b.seen - a.seen),
 )
+/** The rest of them, too few answers yet to tell, in the order asked about (by usage): shown when asked for. */
+const unrated = computed(() =>
+  ids.value
+    .filter((id) => standingOf(progress.mons[id]) === 'new')
+    .map((id) => ({
+      id,
+      tip: t('speedQuiz.monTipNew', { name: refName(pokemon(id)), seen: progress.mons[id]?.seen ?? 0 }),
+    })),
+)
+const showAll = ref(false)
+// Open until the reader closes it, then as they left it.
+const { open: monsOpen, onToggle: onMonsToggle } = useOpenState('sproutvgc.speedQuiz.monsOpen', true)
 
 async function resetLevel() {
   if (
     !(await confirmDialog({ message: t('speedQuiz.resetConfirm'), confirm: t('speedQuiz.resetLevel'), danger: true }))
   )
     return
-  Object.assign(progress, emptyProgress(progress.misses))
+  Object.assign(progress, emptyProgress(progress.misses, progress.mons))
   saveProgress(progress)
   next()
 }
@@ -387,17 +411,33 @@ const levelRows = computed(() =>
         <button type="button" class="btn" @click="restoreDefaults">{{ t('settings.restore') }}</button>
       </details>
 
-      <div class="panel">
-        <h2>{{ t('speedQuiz.missed') }}</h2>
-        <p v-if="!missed.length" class="muted">{{ t('speedQuiz.missedEmpty') }}</p>
-        <ol class="weak">
-          <li v-for="[id, n] in missed" :key="id">
-            <PokemonIcon :id="id" />
-            <span>{{ refName(pokemon(id)) }}</span>
-            <span class="muted">{{ '●'.repeat(Math.ceil(n)) }}</span>
+      <details class="panel mons" :open="monsOpen" @toggle="onMonsToggle">
+        <summary>{{ t('speedQuiz.mons') }}</summary>
+        <!-- How well each Pokémon is known: its share right of the latest answers about it. -->
+        <ul v-if="mons.length || showAll" class="icons">
+          <li v-for="m in mons" :key="m.id" v-tip:group="m.tip" :aria-label="m.tip" :class="m.standing">
+            <PokemonIcon :id="m.id" />
+            <span class="bar"><span :style="{ width: `${Math.round(m.share * 100)}%` }" /></span>
           </li>
-        </ol>
-      </div>
+          <template v-if="showAll">
+            <li v-for="m in unrated" :key="m.id" v-tip:group="m.tip" :aria-label="m.tip" class="new">
+              <PokemonIcon :id="m.id" />
+              <span class="bar" />
+            </li>
+          </template>
+        </ul>
+        <button
+          v-if="unrated.length"
+          type="button"
+          class="show-all"
+          :aria-pressed="showAll"
+          @click="showAll = !showAll"
+        >
+          <component :is="showAll ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />{{
+            showAll ? t('speedQuiz.showFewer') : t('speedQuiz.showAll', { n: unrated.length })
+          }}
+        </button>
+      </details>
 
       <details class="panel about">
         <summary>{{ t('quiz.howItWorks') }}</summary>
@@ -528,28 +568,70 @@ const levelRows = computed(() =>
   margin: 0 0 8px;
 }
 
-.weak {
-  margin: 0;
+.icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin: 0 0 10px;
   padding: 0;
   list-style: none;
 }
-.weak li {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.icons li {
+  display: grid;
+  justify-items: center;
+  gap: 1px;
 }
-.weak li span:last-child {
-  margin-left: auto;
-  letter-spacing: 1px;
+.icons .weak {
+  --tone: var(--bad);
+}
+.icons .fair {
+  --tone: var(--gold);
+}
+.icons .solid {
+  --tone: var(--good);
+}
+.icons .new {
+  opacity: 0.5;
+}
+.show-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px 2px 2px;
+  font: inherit;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.show-all:hover {
+  color: var(--text);
+  background: var(--hover);
+}
+/* The share right lately, under its icon. */
+.bar {
+  width: 32px;
+  height: 4px;
+  border: 1px solid var(--border-strong);
+  background: var(--panel-alt);
+}
+.bar span {
+  display: block;
+  height: 100%;
+  background: var(--tone);
 }
 
 .settings summary,
+.mons summary,
 .about summary {
   cursor: pointer;
   font-family: var(--font-display, inherit);
   font-weight: bold;
 }
 .settings[open] summary,
+.mons[open] summary,
 .about[open] summary {
   margin-bottom: 10px;
 }

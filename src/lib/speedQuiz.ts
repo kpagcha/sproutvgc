@@ -38,6 +38,13 @@ export const EASIER_EVERY = 5
 export const EARLIER_EVERY = 3
 /** A Pokémon missed comes up at most this many times as often. */
 export const MISS_MAX = 4
+/** The answers about a Pokémon its standing is of, the latest. */
+export const MON_WINDOW = 10
+/** The answers about a Pokémon it takes to have a standing. */
+export const MON_MIN = 3
+/** The least share right, of the latest, of a Pokémon getting there and of one known. */
+export const MON_FAIR = 0.6
+export const MON_SOLID = 0.85
 /** At the last level, one question in this many is a tie (if there's one to ask): left alone, uninvested Speeds tie so
  * often that most would be. */
 export const TIE_EVERY = 3
@@ -142,6 +149,27 @@ export interface Progress {
   stages: Partial<Record<Stage, StageProgress>>
   /** How much each Pokémon has been missed lately: 0 to `MISS_MAX` - 1, up one a miss, down a half a right answer. */
   misses: Partial<Record<PokemonId, number>>
+  /** The answers about each Pokémon: right of all, and the latest (`MON_WINDOW`), `1` right and `0` missed. */
+  mons: Partial<Record<PokemonId, MonRecord>>
+}
+
+export interface MonRecord {
+  right: number
+  seen: number
+  last: string
+}
+
+/** How well the reader knows a Pokémon's Speed, from the latest answers about it; `new` under `MON_MIN` of them. */
+export type Standing = 'new' | 'weak' | 'fair' | 'solid'
+
+/** The share right of the latest answers about a Pokémon. */
+export const lately = (r: MonRecord) =>
+  r.last.length ? [...r.last].filter((c) => c === '1').length / r.last.length : 0
+
+export function standingOf(r: MonRecord | undefined): Standing {
+  if (!r || r.last.length < MON_MIN) return 'new'
+  const share = lately(r)
+  return share >= MON_SOLID ? 'solid' : share >= MON_FAIR ? 'fair' : 'weak'
 }
 
 const PROGRESS_KEY = 'sproutvgc.speedQuiz.v1'
@@ -150,18 +178,23 @@ export const DECK_KEY = 'sproutvgc.speedQuiz.deck.v1'
 
 const freshStage = (level = 1): StageProgress => ({ level, at: level, window: [], streak: 0, quick: 0 })
 
-/** Back to the start, level 1 and uninvested, keeping which Pokémon are missed. */
-export const emptyProgress = (misses: Progress['misses'] = {}): Progress => ({
+/** Back to the start, level 1 and uninvested, keeping which Pokémon are missed and how each has gone. */
+export const emptyProgress = (misses: Progress['misses'] = {}, mons: Progress['mons'] = {}): Progress => ({
   v: 1,
   unlocked: 'base',
   stages: {},
   misses,
+  mons,
 })
 
 export function loadProgress(): Progress {
   try {
     const p = JSON.parse(localStorage.getItem(PROGRESS_KEY) ?? 'null') as Progress | null
-    if (p?.v === 1 && STAGES.includes(p.unlocked) && p.stages && p.misses) return p
+    if (p?.v === 1 && STAGES.includes(p.unlocked) && p.stages && p.misses) {
+      // Saved before each Pokémon's answers were kept.
+      p.mons ??= {}
+      return p
+    }
   } catch {
     // Storage unavailable or corrupt: start fresh in memory.
   }
@@ -185,7 +218,7 @@ export const levelAt = (p: Progress, stage: Stage) => p.stages[stage]?.level ?? 
 export type QuizEvent = { kind: 'up' | 'down'; level: number } | { kind: 'unlock'; stage: Stage; level: number }
 
 /**
- * Records an answer: the Pokémon missed lately, then, for a question that counts, its stage's level. Down a level at
+ * Records an answer: the Pokémon missed lately and each one's answers, then, for a question that counts, its stage's level. Down a level at
  * `DOWN_MISSES` misses among the latest `WINDOW` answers at it; up one at `STREAK_UP` right in a row (quick ones counting
  * double), two at `QUICK_RUN` quick ones in a row; progressive, the next build stage at `UNLOCK_RIGHT` right among the
  * latest `WINDOW` at the last level.
@@ -202,6 +235,10 @@ export function record(
     const m = right ? Math.max(0, (p.misses[id] ?? 0) - 0.5) : Math.min(MISS_MAX - 1, (p.misses[id] ?? 0) + 1)
     if (m) p.misses[id] = m
     else delete p.misses[id]
+    const r = (p.mons[id] ??= { right: 0, seen: 0, last: '' })
+    r.seen++
+    if (right) r.right++
+    r.last = (r.last + (right ? '1' : '0')).slice(-MON_WINDOW)
   }
   if (!q.counts) return null
 
