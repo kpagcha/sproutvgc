@@ -1126,7 +1126,7 @@ const sections = computed(() =>
 }
 /* Its natures, over its spreads. */
 .natures {
-  margin-bottom: 12px;
+  margin: 14px 0 20px;
 }
 .stats {
   width: 100%;
