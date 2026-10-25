@@ -7,7 +7,7 @@ import { availableIds, pokemon, type PokemonId } from '@/data/dex'
 import { has, pastRoster, snapshots } from '@/data/meta'
 import { locale, t, type MessageKey } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import { LEARN_STEPS, deckStats, grade, loadDeck, pickNext, saveDeck } from '@/lib/srs'
+import { LEARN_STEPS, deckStats, emptyDeck, grade, loadDeck, pickNext, saveDeck } from '@/lib/srs'
 import {
   DECK_KEY,
   DOWN_MISSES,
@@ -227,13 +227,12 @@ const showAll = ref(false)
 // Open until the reader closes it, then as they left it.
 const { open: monsOpen, onToggle: onMonsToggle } = useOpenState('sproutvgc.speedQuiz.monsOpen', true)
 
-async function resetLevel() {
-  if (
-    !(await confirmDialog({ message: t('speedQuiz.resetConfirm'), confirm: t('speedQuiz.resetLevel'), danger: true }))
-  )
-    return
-  Object.assign(progress, emptyProgress(progress.misses, progress.mons))
+async function reset() {
+  if (!(await confirmDialog({ message: t('speedQuiz.resetConfirm'), confirm: t('quiz.reset'), danger: true }))) return
+  Object.assign(progress, emptyProgress())
   saveProgress(progress)
+  deck.value = emptyDeck(deck.value.newLimit)
+  saveDeck(deck.value, DECK_KEY)
   next()
 }
 // ---- Settings: each a choice, with what each option means ----
@@ -383,7 +382,7 @@ const levelRows = computed(() =>
           <dt>{{ t('quiz.due') }}</dt>
           <dd class="num">{{ stats.due }}</dd>
         </dl>
-        <button type="button" class="btn" @click="resetLevel">{{ t('speedQuiz.resetLevel') }}</button>
+        <button type="button" class="btn" @click="reset">{{ t('quiz.reset') }}</button>
       </div>
 
       <details class="panel settings" :open="settingsOpen" @toggle="onSettingsToggle">

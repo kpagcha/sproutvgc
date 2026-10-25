@@ -178,14 +178,8 @@ export const DECK_KEY = 'sproutvgc.speedQuiz.deck.v1'
 
 const freshStage = (level = 1): StageProgress => ({ level, at: level, window: [], streak: 0, quick: 0 })
 
-/** Back to the start, level 1 and uninvested, keeping which Pokémon are missed and how each has gone. */
-export const emptyProgress = (misses: Progress['misses'] = {}, mons: Progress['mons'] = {}): Progress => ({
-  v: 1,
-  unlocked: 'base',
-  stages: {},
-  misses,
-  mons,
-})
+/** Back to the start: level 1 and uninvested, no Pokémon missed nor answered about. */
+export const emptyProgress = (): Progress => ({ v: 1, unlocked: 'base', stages: {}, misses: {}, mons: {} })
 
 export function loadProgress(): Progress {
   try {

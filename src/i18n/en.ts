@@ -516,8 +516,8 @@ export const messages = {
   'speedQuiz.closeOnly': 'Only close pairs',
   'speedQuiz.progressive': 'Progressive',
   'speedQuiz.saved': 'Saved pairs',
-  'speedQuiz.resetLevel': 'Reset level',
-  'speedQuiz.resetConfirm': 'Reset your level? Your saved pairs stay.',
+  'speedQuiz.resetConfirm':
+    'Reset all your speed quiz progress? Your level, your progress with each Pokémon and your saved pairs are cleared.',
   'speedQuiz.data': 'Data',
   'speedQuiz.noSets': 'The data shown has no sets: base only.',
   'speedQuiz.builds': 'Builds',
@@ -568,7 +568,8 @@ export const messages = {
   'speedQuiz.about.reviewTitle': 'Saved pairs',
   'speedQuiz.about.review':
     "Pairs you miss, and close pairs you get right, are saved for SM-2 spaced repetition: a miss is asked again after {a} and then {b} more questions; right answers come back after 1 day, 6 days, and then longer gaps. Saved pairs come first when due, and don't move your level.",
-  'speedQuiz.about.reset': 'Reset level takes you back to level 1 and base; your saved pairs stay.',
+  'speedQuiz.about.reset':
+    'Reset progress starts the quiz over: level 1 and base, no progress with any Pokémon and no saved pairs. Your settings stay.',
 
   'credits.copyright': 'Pokémon © Nintendo, Game Freak and Creatures',
 
