@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, provide, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useElementSize, useMediaQuery } from '@vueuse/core'
+import { createReusableTemplate, useElementSize, useMediaQuery } from '@vueuse/core'
 import { ChevronDown, ChevronUp } from '@lucide/vue'
 import { available, pokemon, type AbilityId, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
 import { datasetDates, loadRanks, metaLabel, percent, regulationSnapshot } from '@/data/meta'
@@ -444,6 +444,9 @@ const filteredDetails = computed(() => {
 })
 // With several, one at a time, picked from their names (the first until another is), so they don't stack down the page.
 const detailPicked = ref<string>()
+// The standings' list, drawn in the search's panel, or with a Pokémon's builds and teammates, in a panel of its own
+// under theirs.
+const [DefineList, ReuseList] = createReusableTemplate()
 const detailShown = computed(
   () => filteredDetails.value.find((d) => d.key === detailPicked.value) ?? filteredDetails.value[0],
 )
@@ -553,93 +556,8 @@ const ordinal = (n: number) => `#${n}`
       </p>
     </div>
 
-    <!-- Its standings and its Pokémon, a page each, as tabs on the panel's band. -->
-    <section v-if="tab === 'standings'" class="panel banded">
-      <BandTabs ref="bandTabs" sticky :label="t('tournaments.tabs')" :current="tab" :tabs />
-      <FilterSearch
-        v-model:text="query"
-        v-model:filters="filters"
-        v-model:preview="preview"
-        class="standings-search"
-        :subject="t('filter.subject.players')"
-        :name-count="nameCount"
-        :kinds="KINDS"
-        :count
-        :details="detailsOf"
-        meta
-      />
-      <!-- The Pokémon filtered by, with their numbers in the whole event, as the Pokémon tab's list has them. -->
-      <div v-if="filteredStats.length" class="filtered-stats" role="table" :aria-label="t('tournaments.pokemonStats')">
-        <div class="fs-row fs-head" role="row">
-          <span role="columnheader">{{ t('tournaments.col.pokemon') }}</span>
-          <span role="columnheader" class="r">#</span>
-          <span role="columnheader" class="r"
-            ><span v-tip="t('tournaments.col.usageTip')" class="tipped">{{ t('tournaments.col.usage') }}</span></span
-          >
-          <span role="columnheader" class="r"
-            ><span v-tip="t('tournaments.col.winRateTip')" class="tipped">{{
-              t('tournaments.col.winRate')
-            }}</span></span
-          >
-          <span role="columnheader" class="r">{{ t('tournaments.col.record') }}</span>
-        </div>
-        <div v-for="{ key, s, rank, with: build } in filteredStats" :key class="fs-row" role="row">
-          <span role="cell">
-            <span class="mon">
-              <PokemonIcon :id="s.id" /><span class="mon-name"
-                ><AppLink
-                  :to="{ name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }"
-                  class="mon-link"
-                  >{{ monName(s.id).species }}</AppLink
-                ><span v-if="monName(s.id).forme" class="forme">{{ monName(s.id).forme }}</span
-                ><span v-if="build.length" class="build">{{ build.map((d) => refName(d)).join(' · ') }}</span></span
-              >
-            </span>
-          </span>
-          <span role="cell" class="r num muted">{{ rank ?? '' }}</span>
-          <span role="cell" class="r num meter" :style="{ '--share': s.usage }">{{ percent(s.usage) }}</span>
-          <span
-            role="cell"
-            class="r num"
-            :class="
-              s.winRate === null
-                ? 'muted'
-                : ['wr', s.winRate >= 0.5 ? 'up' : 'down', { unsure: s.wins + s.losses < MIN_MATCHES.all }]
-            "
-            :style="
-              s.winRate === null
-                ? undefined
-                : { '--dev': Math.min(Math.abs(s.winRate - 0.5) / WR_RANGE, 1), '--strength': strength(s, 'all') }
-            "
-            >{{ s.winRate === null ? '—' : percent(s.winRate) }}</span
-          >
-          <span role="cell" class="r num record-wl"
-            ><span :class="{ more: s.wins > s.losses }">{{ s.wins }}</span
-            >–<span :class="{ more: s.losses > s.wins }">{{ s.losses }}</span></span
-          >
-        </div>
-      </div>
-      <!-- A Pokémon filtered by: its builds here and its teammates on the teams with it; with several, the one picked
-           from their names. -->
-      <div v-if="detailShown" class="fs-detail">
-        <SegmentedControl
-          v-if="filteredDetails.length > 1"
-          :model-value="detailShown.key"
-          class="detail-pick"
-          :label="t('tournaments.detailsOf')"
-          :options="filteredDetails.map((d) => ({ value: d.key, label: d.label }))"
-          @update:model-value="detailPicked = $event"
-        />
-        <template v-if="detailShown.builds.length">
-          <h3>{{ t('tournaments.buildsHere', { name: refName(pokemon(detailShown.id)) }) }}</h3>
-          <BuildCards :pokemon="detailShown.id" :builds="detailShown.builds" />
-        </template>
-        <template v-if="detailShown.mates.length">
-          <h3>{{ t('tournaments.matesHere', { name: refName(pokemon(detailShown.id)) }) }}</h3>
-          <TeammateList :mates="detailShown.mates" />
-        </template>
-      </div>
-      <h3 v-if="teamsTitle && standings && shownParts.length" class="teams-title">{{ teamsTitle }}</h3>
+    <!-- The standings' list, drawn in the search's panel, or in a panel of its own under a Pokémon filtered by's. -->
+    <DefineList>
       <p v-if="!standings" class="muted">{{ t('tournaments.loading') }}</p>
       <p v-else-if="!shownParts.length" class="muted">{{ t('tournaments.noPlayers') }}</p>
       <ol v-else class="standings" :class="{ previewing: preview }">
@@ -670,7 +588,110 @@ const ordinal = (n: number) => `#${n}`
       <button v-if="day1Folded" type="button" class="more-toggle" @click="day1Shown = true">
         <ChevronDown :size="14" aria-hidden="true" />{{ t('tournaments.showDay1', { n: num(day1Folded) }) }}
       </button>
-    </section>
+    </DefineList>
+
+    <!-- Its standings and its Pokémon, a page each, as tabs heading the page, stuck to the top. -->
+    <template v-if="tab === 'standings'">
+      <BandTabs ref="bandTabs" bare sticky :label="t('tournaments.tabs')" :current="tab" :tabs />
+      <section class="panel search-panel">
+        <FilterSearch
+          v-model:text="query"
+          v-model:filters="filters"
+          v-model:preview="preview"
+          class="standings-search"
+          :subject="t('filter.subject.players')"
+          :name-count="nameCount"
+          :kinds="KINDS"
+          :count
+          :details="detailsOf"
+          meta
+        />
+        <!-- The Pokémon filtered by, with their numbers in the whole event, as the Pokémon tab's list has them. -->
+        <div
+          v-if="filteredStats.length"
+          class="filtered-stats"
+          role="table"
+          :aria-label="t('tournaments.pokemonStats')"
+        >
+          <div class="fs-row fs-head" role="row">
+            <span role="columnheader">{{ t('tournaments.col.pokemon') }}</span>
+            <span role="columnheader" class="r">#</span>
+            <span role="columnheader" class="r"
+              ><span v-tip="t('tournaments.col.usageTip')" class="tipped">{{ t('tournaments.col.usage') }}</span></span
+            >
+            <span role="columnheader" class="r"
+              ><span v-tip="t('tournaments.col.winRateTip')" class="tipped">{{
+                t('tournaments.col.winRate')
+              }}</span></span
+            >
+            <span role="columnheader" class="r">{{ t('tournaments.col.record') }}</span>
+          </div>
+          <div v-for="{ key, s, rank, with: build } in filteredStats" :key class="fs-row" role="row">
+            <span role="cell">
+              <span class="mon">
+                <PokemonIcon :id="s.id" /><span class="mon-name"
+                  ><AppLink
+                    :to="{ name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }"
+                    class="mon-link"
+                    >{{ monName(s.id).species }}</AppLink
+                  ><span v-if="monName(s.id).forme" class="forme">{{ monName(s.id).forme }}</span
+                  ><span v-if="build.length" class="build">{{ build.map((d) => refName(d)).join(' · ') }}</span></span
+                >
+              </span>
+            </span>
+            <span role="cell" class="r num muted">{{ rank ?? '' }}</span>
+            <span role="cell" class="r num meter" :style="{ '--share': s.usage }">{{ percent(s.usage) }}</span>
+            <span
+              role="cell"
+              class="r num"
+              :class="
+                s.winRate === null
+                  ? 'muted'
+                  : ['wr', s.winRate >= 0.5 ? 'up' : 'down', { unsure: s.wins + s.losses < MIN_MATCHES.all }]
+              "
+              :style="
+                s.winRate === null
+                  ? undefined
+                  : { '--dev': Math.min(Math.abs(s.winRate - 0.5) / WR_RANGE, 1), '--strength': strength(s, 'all') }
+              "
+              >{{ s.winRate === null ? '—' : percent(s.winRate) }}</span
+            >
+            <span role="cell" class="r num record-wl"
+              ><span :class="{ more: s.wins > s.losses }">{{ s.wins }}</span
+              >–<span :class="{ more: s.losses > s.wins }">{{ s.losses }}</span></span
+            >
+          </div>
+        </div>
+        <SegmentedControl
+          v-if="filteredDetails.length > 1"
+          :model-value="detailShown!.key"
+          class="detail-pick"
+          :label="t('tournaments.detailsOf')"
+          :options="filteredDetails.map((d) => ({ value: d.key, label: d.label }))"
+          @update:model-value="detailPicked = $event"
+        />
+        <template v-if="!detailShown">
+          <h3 v-if="teamsTitle && standings && shownParts.length" class="teams-title">{{ teamsTitle }}</h3>
+          <ReuseList />
+        </template>
+      </section>
+      <!-- A Pokémon filtered by: its builds here, its teammates on the teams with it, and the standings, a panel each;
+           with several, the one picked from their names. -->
+      <template v-if="detailShown">
+        <section v-if="detailShown.builds.length" class="panel banded">
+          <h2 class="band">{{ t('tournaments.buildsHere', { name: refName(pokemon(detailShown.id)) }) }}</h2>
+          <BuildCards :pokemon="detailShown.id" :builds="detailShown.builds" />
+        </section>
+        <section v-if="detailShown.mates.length" class="panel banded">
+          <h2 class="band">{{ t('tournaments.matesHere', { name: refName(pokemon(detailShown.id)) }) }}</h2>
+          <TeammateList :mates="detailShown.mates" />
+        </section>
+        <section class="panel banded">
+          <h2 class="band">{{ teamsTitle ?? t('tournaments.standings') }}</h2>
+          <ReuseList />
+        </section>
+      </template>
+    </template>
 
     <!-- Its rounds: the top cut's bracket, and each Swiss round's pairings. -->
     <section v-else-if="tab === 'rounds'" class="panel banded">
@@ -1081,20 +1102,12 @@ h1 {
   font-size: 0.75rem;
   color: var(--muted);
 }
-/* A Pokémon filtered by's builds and teammates here, under its numbers, over the standings. */
-.fs-detail {
-  margin: 0 0 16px;
-}
-.fs-detail h3 {
-  margin: 12px 0 8px;
-  font-size: 1em;
-}
-.fs-detail h3:first-child {
-  margin-top: 0;
+/* The search's panel ending where what's last in it does. */
+.search-panel > :last-child {
+  margin-bottom: 0;
 }
 .detail-pick {
   flex-wrap: wrap;
-  margin-bottom: 4px;
 }
 .teams-title {
   margin: 0 0 8px;
