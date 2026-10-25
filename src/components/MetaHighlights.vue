@@ -93,7 +93,9 @@ const ready = computed(() => named.value && !!data.value)
                   ><span aria-hidden="true">{{ r.climb > 0 ? '▲' : '▼' }}</span
                   ><span class="visually-hidden">{{ t(r.climb > 0 ? 'usage.up' : 'usage.down') }}</span
                   >{{ Math.abs(r.climb) }}</template
-                ><template v-else-if="r.fresh">{{ t('usage.new') }}</template></span
+                ><template v-else-if="r.fresh"
+                  ><span aria-hidden="true">✦</span><span class="visually-hidden">{{ t('usage.new') }}</span></template
+                ></span
               >
             </div>
             <div role="cell" class="grow">
@@ -171,7 +173,9 @@ const ready = computed(() => named.value && !!data.value)
 /* As the rankings' table: rank, Pokémon, usage (its number, with its bar under it). A handful of rows, so laid out at
    once rather than skipped until seen, and no header, so the first row has no line over it. */
 .dex-table {
-  --cols: minmax(3em, auto) minmax(0, 1fr) 4.5em;
+  /* The rank's column as wide in every row (each row its own grid), so a two-digit rank or a longer mark doesn't push
+     its Pokémon over: room for "#10 ▲18". */
+  --cols: 5em minmax(0, 1fr) 4.5em;
 }
 .dex-table.moved {
   --cols: minmax(0, 1fr) minmax(3.5em, auto);
