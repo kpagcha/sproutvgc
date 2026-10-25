@@ -67,8 +67,8 @@ export const AREAS: Area[] = [
     label: 'nav.quizzes',
     title: 'title.quizzes',
     sections: [
-      { key: 'typeQuiz', route: 'quiz', label: 'title.quiz', desc: 'desc.quiz' },
       { key: 'speedQuiz', route: 'speedQuiz', label: 'title.speedQuiz', desc: 'desc.speedQuiz' },
+      { key: 'typeQuiz', route: 'quiz', label: 'title.quiz', desc: 'desc.quiz' },
     ],
   },
   {

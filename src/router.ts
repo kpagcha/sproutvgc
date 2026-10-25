@@ -518,18 +518,6 @@ export const router = createRouter({
     },
     area('quizzes', 'title.quizzes', 'desc.quizzes'),
     {
-      path: '/quizzes/types',
-      name: 'quiz',
-      component: () => import('@/views/TypeQuizView.vue'),
-      meta: {
-        titleKey: 'title.quiz',
-        descKey: 'desc.quiz',
-        headKey: 'head.quiz',
-        keywordsKey: 'keywords.quiz',
-        ...inArea('quizzes', 'typeQuiz'),
-      },
-    },
-    {
       path: '/quizzes/speed',
       name: 'speedQuiz',
       component: () => import('@/views/SpeedQuizView.vue'),
@@ -540,6 +528,18 @@ export const router = createRouter({
         keywordsKey: 'keywords.speedQuiz',
         dexNames: true,
         ...inArea('quizzes', 'speedQuiz'),
+      },
+    },
+    {
+      path: '/quizzes/types',
+      name: 'quiz',
+      component: () => import('@/views/TypeQuizView.vue'),
+      meta: {
+        titleKey: 'title.quiz',
+        descKey: 'desc.quiz',
+        headKey: 'head.quiz',
+        keywordsKey: 'keywords.quiz',
+        ...inArea('quizzes', 'typeQuiz'),
       },
     },
 

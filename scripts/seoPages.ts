@@ -264,8 +264,8 @@ export function seoPages(): Plugin {
         searched('tools/matchups', 'matchups'),
         searched('tools/type-chart', 'chart', 'WebPage'),
         { path: 'quizzes', title: 'title.quizzes', desc: 'desc.quizzes', schema: 'CollectionPage' },
-        searched('quizzes/types', 'quiz'),
         searched('quizzes/speed', 'speedQuiz'),
+        searched('quizzes/types', 'quiz'),
         { path: 'credits', title: 'title.credits', desc: 'desc.credits', schema: 'WebPage' },
       ]
 

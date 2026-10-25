@@ -65,7 +65,7 @@ export const messages = {
   'title.speedQuiz': 'Speed quiz',
   'head.speedQuiz': 'Speed quiz: learn the speed tiers',
   'keywords.speedQuiz': 'speed quiz, speed tiers quiz, who moves first, base Speed quiz, {game}',
-  'desc.quizzes': 'Learn the {game} type chart and speed tiers with spaced repetition.',
+  'desc.quizzes': 'Learn the {game} speed tiers and type chart with spaced repetition.',
   'desc.speedQuiz':
     'Learn the {game} speed tiers: who moves first, from base Speeds to the sets players run. It gets harder as you get better.',
   'theme.label': 'Theme',
@@ -193,7 +193,7 @@ export const messages = {
   'soon.tag': 'Soon',
 
   'desc.home':
-    'A competitive dex for {game}, up to date with Regulation {reg}: every Pokémon, move, ability and item, the type chart and type matchups, and type and speed quizzes.',
+    'A competitive dex for {game}, up to date with Regulation {reg}: every Pokémon, move, ability and item, the type chart and type matchups, and speed and type quizzes.',
   'desc.types':
     'Every {game} type with its weaknesses, resistances and immunities, and the interactions beyond the type chart.',
   'desc.type':
