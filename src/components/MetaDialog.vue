@@ -1,20 +1,18 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, shallowRef } from 'vue'
 import { ChevronDown, Database } from '@lucide/vue'
-import { datasetParts, metaLabel, offLatest, selectedSnapshot, subsetShort } from '@/data/meta'
+import { metaLabel, offLatest, selectedSnapshot } from '@/data/meta'
 import { t } from '@/i18n'
 import { metaLoading } from '@/composables/useMeta'
 import MetaCard from '@/components/MetaCard.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
 
-// The meta's data shown, as a small button saying it (its dataset, "Showdown ladder · Sep 2026", and its subset in short,
-// "1760+") that opens its card (`MetaCard`) to see what it is and pick another, in a dialog over the page, on any
+// The meta's data shown, as a small button saying its regulation alone ("Regulation M-C") that opens its card (`MetaCard`) to see what it is and pick another, in a dialog over the page, on any
 // screen (`ModalDialog`: closed by a press around it or Escape), its card scrolling when it's taller than the screen.
 // On phones, the button is its icon alone (what it shows read out, and in the card), as the favorites' is. Its icon
 // pulses while the data picked loads, and it's tinted in the accent while the data isn't the latest (another
-// regulation or period than the default's), the card then having the way back to it. With `regulation`, it says its
-// regulation alone ("Regulation M-C", no subset), as on the rankings, whose heading it shares a line with.
-const props = defineProps<{ regulation?: boolean }>()
+// regulation or period than the default's), the card then having the way back to it. Its dataset and subset ("Showdown
+// ladder · Sep 2026", "1760+") are in the card, and read out.
 const open = ref(false)
 
 const phoneQuery = window.matchMedia('(max-width: 720px)')
@@ -26,12 +24,9 @@ onBeforeUnmount(() => {
   phoneQuery.removeEventListener('change', onPhone)
 })
 
-const dataset = computed(() => {
-  const s = selectedSnapshot.value
-  if (!s) return ''
-  return props.regulation ? t('meta.regulation', { reg: s.regulation }) : datasetParts(s).join(' · ')
-})
-const subset = computed(() => (selectedSnapshot.value ? subsetShort(selectedSnapshot.value) : ''))
+const dataset = computed(() =>
+  selectedSnapshot.value ? t('meta.regulation', { reg: selectedSnapshot.value.regulation }) : '',
+)
 </script>
 
 <template>
@@ -51,7 +46,6 @@ const subset = computed(() => (selectedSnapshot.value ? subsetShort(selectedSnap
       <Database :size="16" class="icon" :class="{ 'meta-pulse': metaLoading }" aria-hidden="true" />
       <template v-if="!phone">
         <span class="dataset">{{ dataset }}</span>
-        <span v-if="subset && !regulation" class="subset">{{ subset }}</span>
       </template>
       <ChevronDown :size="14" class="chevron" :class="{ open }" aria-hidden="true" />
     </button>
@@ -67,7 +61,7 @@ const subset = computed(() => (selectedSnapshot.value ? subsetShort(selectedSnap
   display: flex;
   min-width: 0;
 }
-/* On one line: the icon, the dataset (cut short first when the row's tight), its subset, and the arrow. */
+/* On one line: the icon, the regulation (cut short when the row's tight), and the arrow. */
 .toggle {
   gap: 6px;
   min-width: 0;
@@ -82,10 +76,6 @@ const subset = computed(() => (selectedSnapshot.value ? subsetShort(selectedSnap
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.subset {
-  flex: none;
-  font-weight: bold;
 }
 .chevron {
   flex: none;

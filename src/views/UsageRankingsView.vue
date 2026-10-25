@@ -258,7 +258,7 @@ const colVars = computed(() => ({
     <div id="sec-list" class="panel section">
       <RankingsHead :title="tx('title')" :intro="tx('intro', { reg: snapshot?.regulation ?? REGULATION })">
         <div v-if="hasList && snapshot" class="source">
-          <MetaDialog regulation />
+          <MetaDialog />
           <BattleCount v-if="snapshot.battles" :n="snapshot.battles" />
         </div>
       </RankingsHead>

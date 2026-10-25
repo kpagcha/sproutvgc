@@ -255,7 +255,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         :intro="t('moveUsage.intro', { reg: snapshot?.regulation ?? REGULATION })"
       >
         <div v-if="hasMoves && snapshot" class="source">
-          <MetaDialog regulation />
+          <MetaDialog />
           <BattleCount v-if="snapshot.battles" :n="snapshot.battles" />
         </div>
       </RankingsHead>

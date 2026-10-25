@@ -344,7 +344,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         :intro="t('usage.intro', { reg: snapshot?.regulation ?? REGULATION })"
       >
         <div v-if="snapshot" class="source">
-          <MetaDialog regulation />
+          <MetaDialog />
           <BattleCount v-if="snapshot.battles" :n="snapshot.battles" />
           <template v-if="hasSets && !phone">
             <label class="btn switch sets-switch" :class="{ on: showSets }">
