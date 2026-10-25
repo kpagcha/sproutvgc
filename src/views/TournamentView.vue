@@ -23,7 +23,6 @@ import { locale, t, tSplit } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { filterKey, isPlain, passesGroups, positiveFilters } from '@/lib/filterGroups'
 import { META_LINKS, type NamedLocation } from '@/lib/links'
-import { holdScroll } from '@/lib/scroll'
 import { fold } from '@/lib/search'
 import { termName, type Detail, type TermFilters } from '@/lib/searchTerms'
 import { detailsIn, isBuild, teamHas, TEAM_KINDS } from '@/lib/teamFilters'
@@ -313,10 +312,6 @@ const unsure = (s: PokemonStat) => !enough(s)
 const topUsage = computed(() => stats.value[0]?.usage ?? 0)
 // Unfolded, remembered for the visit, per event (`useUnfolded`), as Day 1's players are.
 const allStats = useUnfolded(() => `tournamentStats:${id.value}`)
-function toggleAllStats() {
-  if (!allStats.value) holdScroll()
-  allStats.value = !allStats.value
-}
 const shownStats = computed(() => (allStats.value ? rankedStats.value : rankedStats.value.slice(0, TOP)))
 /** What the day's numbers are of: its players, and its matches with a winner. */
 const about = computed(() =>
@@ -472,11 +467,6 @@ const narrowed = computed(() => !!query.value.trim() || filters.value.groups.len
 
 /** Day 1's players, shown once asked for (or while narrowed): the top cut and Day 2 are what most come for. */
 const day1Shown = useUnfolded(() => `day1:${id.value}`)
-// Unfolded, the page kept where it is (`holdScroll`).
-function showDay1() {
-  holdScroll()
-  day1Shown.value = true
-}
 /** The standings shown, in their parts (the top cut, the rest of Day 2, and Day 1, those there are). */
 const parts = computed(() => {
   const q = preview.value ? '' : fold(query.value.trim())
@@ -596,7 +586,7 @@ const ordinal = (n: number) => `#${n}`
         </li>
       </ol>
       <!-- Day 1's players, folded away until asked for. -->
-      <button v-if="day1Folded" type="button" class="more-toggle" @click="showDay1">
+      <button v-if="day1Folded" type="button" class="more-toggle" @click="day1Shown = true">
         <ChevronDown :size="14" aria-hidden="true" />{{ t('tournaments.showDay1', { n: num(day1Folded) }) }}
       </button>
     </DefineList>
@@ -946,7 +936,7 @@ const ordinal = (n: number) => `#${n}`
           type="button"
           class="more-toggle"
           :aria-pressed="allStats"
-          @click="toggleAllStats"
+          @click="allStats = !allStats"
         >
           <component :is="allStats ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />{{
             allStats ? t('tournaments.showTop', { n: TOP }) : t('tournaments.showAllMons', { n: stats.length })

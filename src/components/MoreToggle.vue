@@ -2,21 +2,45 @@
 import { nextTick, useTemplateRef } from 'vue'
 import { ChevronDown, ChevronUp } from '@lucide/vue'
 import { t } from '@/i18n'
-import { holdScroll } from '@/lib/scroll'
 
 // The way to show a long list whole or only its first `top` (`all`, of `n`), as the tournament's Pokémon tab has it.
-// Unfolded, the page kept where it is, the rest under what's on screen (`holdScroll`); folded back, the page scrolled
-// so the toggle stays on screen, rather than left far below what's now there.
+// Unfolded, the page left where it is; folded back, scrolled to the top of the list's panel when that's gone above the
+// screen (or under what's stuck to its top), rather than left far below what's now there. Which one it was is decided
+// before setting `all`: the model reads the parent's prop, which keeps its old value until the parent renders again, so
+// reading it back would take an unfolding for a folding.
 const props = defineProps<{ n: number; top: number }>()
 const all = defineModel<boolean>('all', { required: true })
 
+/** How far down the screen what's stuck to its top reaches (tabs, a row of links, a table's header), stacked: each
+ * found under the one before, at the screen's middle. */
+function stuckBottom(): number {
+  let bottom = 0
+  for (let i = 0; i < 6; i++) {
+    const at = document.elementsFromPoint(innerWidth / 2, bottom + 1)
+    let next = bottom
+    for (const el of at) {
+      for (let e: Element | null = el; e && e !== document.body; e = e.parentElement) {
+        const pos = getComputedStyle(e).position
+        if (pos === 'sticky' || pos === 'fixed') next = Math.max(next, e.getBoundingClientRect().bottom)
+      }
+    }
+    if (next <= bottom) break
+    bottom = next
+  }
+  return bottom
+}
+
 const button = useTemplateRef('button')
 async function toggle() {
-  if (!all.value) holdScroll()
-  all.value = !all.value
-  if (all.value) return
+  const unfolding = !all.value
+  all.value = unfolding
+  if (unfolding) return
   await nextTick()
-  button.value?.scrollIntoView({ block: 'nearest' })
+  const panel = button.value?.closest('.panel') ?? button.value?.parentElement
+  if (!panel) return
+  const offset = stuckBottom() + 8
+  const top = panel.getBoundingClientRect().top
+  if (top < offset) window.scrollBy({ top: top - offset, behavior: 'instant' })
 }
 </script>
 

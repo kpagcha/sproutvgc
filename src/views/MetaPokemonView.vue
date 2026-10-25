@@ -36,7 +36,6 @@ import { refName } from '@/i18n/refName'
 import { MIN_SHARE, speedBuilds } from '@/lib/speed'
 import { FASTEST, type SpeedBuild } from '@/lib/speedBuild'
 import { commonSpeed, odds, reachOf, setSpread, type SpreadPoint } from '@/lib/speedLineup'
-import { holdScroll } from '@/lib/scroll'
 import { MAX_POINTS, statValue } from '@/lib/stats'
 import { percentiles } from '@/lib/statPercentiles'
 import { MIN_MATCHES, pooledUsage } from '@/lib/tournamentStats'
@@ -161,11 +160,6 @@ const moveShares = computed(() => Object.fromEntries(moves.value.map((x) => [x.r
 // Or its whole movepool, as its dex entry has it, searchable (the link under the table): the moves its sets run with
 // their share, the rest on under `LIST_MIN` of them. Remembered for the visit, per Pokémon (`useUnfolded`).
 const movepool = useUnfolded(() => `movepool:${id.value}`)
-// Unfolded, the page kept where it is (`holdScroll`).
-function toggleMovepool() {
-  if (!movepool.value) holdScroll()
-  movepool.value = !movepool.value
-}
 /** What its whole movepool is filtered by, as the move rankings are, but for the Pokémon: it's this one's. */
 const MOVE_KINDS = ['type', 'category', 'flag', 'reach', 'priority'] as const
 // Its sets' view, the most run, as Smogon's own moveset files show them; the data keeps every one over `LIST_MIN`.
@@ -670,7 +664,7 @@ const sections = computed(() =>
             <h2>{{ t('usageMon.moves') }}</h2>
             <!-- A toggle, not a way to another page: muted, with a chevron saying it unfolds here, as the pickers' "show
                  all"; cut short where the header has no room for it. -->
-            <button type="button" class="more-toggle" :aria-pressed="movepool" @click="toggleMovepool">
+            <button type="button" class="more-toggle" :aria-pressed="movepool" @click="movepool = !movepool">
               <component :is="movepool ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" /><span
                 class="more-label"
                 >{{ t(movepool ? 'usageMon.setsMoves' : 'usageMon.movepool') }}</span
