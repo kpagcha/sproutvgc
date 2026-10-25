@@ -225,6 +225,9 @@ const unrated = computed(() =>
     })),
 )
 const showAll = ref(false)
+/** How many of them show until Show all, the least known first: a few rows. */
+const MONS_TOP = 30
+const monsShown = computed(() => (showAll.value ? mons.value : mons.value.slice(0, MONS_TOP)))
 // Open until the reader closes it, then as they left it.
 const { open: monsOpen, onToggle: onMonsToggle } = useOpenState('sproutvgc.speedQuiz.monsOpen', true)
 
@@ -415,7 +418,7 @@ const levelRows = computed(() =>
         <summary>{{ t('speedQuiz.mons') }}</summary>
         <!-- How well each Pokémon is known: its share right of the latest answers about it. -->
         <ul v-if="mons.length || showAll" class="icons">
-          <li v-for="m in mons" :key="m.id" v-tip:group="m.tip" :aria-label="m.tip" :class="m.standing">
+          <li v-for="m in monsShown" :key="m.id" v-tip:group="m.tip" :aria-label="m.tip" :class="m.standing">
             <PokemonIcon :id="m.id" />
             <span class="bar"><span :style="{ width: `${Math.round(m.share * 100)}%` }" /></span>
           </li>
@@ -427,14 +430,14 @@ const levelRows = computed(() =>
           </template>
         </ul>
         <button
-          v-if="unrated.length"
+          v-if="unrated.length || mons.length > MONS_TOP"
           type="button"
           class="show-all"
           :aria-pressed="showAll"
           @click="showAll = !showAll"
         >
           <component :is="showAll ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />{{
-            showAll ? t('speedQuiz.showFewer') : t('speedQuiz.showAll', { n: unrated.length })
+            showAll ? t('speedQuiz.showFewer') : t('speedQuiz.showAll', { n: mons.length + unrated.length })
           }}
         </button>
       </details>
