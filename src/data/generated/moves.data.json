@@ -7,7 +7,9 @@
     "pp": 20,
     "priority": 1,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact"],
+    "learners": ["lycanroc"],
+    "signature": true
   },
   "acidarmor": {
     "type": "poison",
@@ -147,7 +149,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["sheerforce"]
+    "flags": ["sheerforce"],
+    "learners": ["appletun"],
+    "signature": true
   },
   "aquacutter": {
     "type": "water",
@@ -187,7 +191,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "sheerforce", "dance"]
+    "flags": ["contact", "sheerforce", "dance"],
+    "learners": ["quaquaval"],
+    "signature": true
   },
   "aquatail": {
     "type": "water",
@@ -207,7 +213,9 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": [],
+    "learners": ["armarouge"],
+    "signature": true
   },
   "aromaticmist": {
     "type": "fairy",
@@ -257,7 +265,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["sheerforce"]
+    "flags": ["sheerforce"],
+    "learners": ["morpeko"],
+    "signature": true
   },
   "auroraveil": {
     "type": "ice",
@@ -287,7 +297,8 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "sheerforce"]
+    "flags": ["contact", "sheerforce"],
+    "learners": ["medicham"]
   },
   "babydolleyes": {
     "type": "fairy",
@@ -307,7 +318,9 @@
     "pp": 8,
     "priority": 4,
     "target": "self",
-    "flags": []
+    "flags": [],
+    "learners": ["toxapex"],
+    "signature": true
   },
   "barbbarrage": {
     "type": "poison",
@@ -317,7 +330,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["sheerforce"]
+    "flags": ["sheerforce"],
+    "learners": ["qwilfish", "overqwil"],
+    "signature": true
   },
   "batonpass": {
     "type": "normal",
@@ -337,7 +352,9 @@
     "pp": 8,
     "priority": -3,
     "target": "normal",
-    "flags": ["bullet"]
+    "flags": ["bullet"],
+    "learners": ["toucannon"],
+    "signature": true
   },
   "beatup": {
     "type": "dark",
@@ -397,7 +414,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "slicing", "heal"]
+    "flags": ["contact", "slicing", "heal"],
+    "learners": ["ceruledge"],
+    "signature": true
   },
   "bittermalice": {
     "type": "ghost",
@@ -407,7 +426,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["sheerforce"]
+    "flags": ["sheerforce"],
+    "learners": ["zoroarkhisui"],
+    "signature": true
   },
   "blastburn": {
     "type": "fire",
@@ -477,7 +498,8 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": [],
+    "learners": ["lucario"]
   },
   "boomburst": {
     "type": "normal",
@@ -637,7 +659,9 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "slicing", "sheerforce"]
+    "flags": ["contact", "slicing", "sheerforce"],
+    "learners": ["samurotthisui"],
+    "signature": true
   },
   "charge": {
     "type": "electric",
@@ -687,7 +711,9 @@
     "pp": 12,
     "priority": 0,
     "target": "all",
-    "flags": []
+    "flags": [],
+    "learners": ["slowking"],
+    "signature": true
   },
   "circlethrow": {
     "type": "fighting",
@@ -707,7 +733,9 @@
     "pp": 8,
     "priority": 0,
     "target": "allAdjacentFoes",
-    "flags": ["sound", "bypasssub"]
+    "flags": ["sound", "bypasssub"],
+    "learners": ["kommoo"],
+    "signature": true
   },
   "clangoroussoul": {
     "type": "dragon",
@@ -717,7 +745,9 @@
     "pp": 8,
     "priority": 0,
     "target": "self",
-    "flags": ["sound", "dance"]
+    "flags": ["sound", "dance"],
+    "learners": ["kommoo"],
+    "signature": true
   },
   "clearsmog": {
     "type": "poison",
@@ -847,7 +877,9 @@
     "pp": 12,
     "priority": 0,
     "target": "all",
-    "flags": []
+    "flags": [],
+    "learners": ["cinderace"],
+    "signature": true
   },
   "covet": {
     "type": "normal",
@@ -867,7 +899,8 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact"],
+    "learners": ["gliscor", "clawitzer", "crabominable"]
   },
   "crosschop": {
     "type": "fighting",
@@ -927,7 +960,8 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact"],
+    "learners": ["machamp", "pangoro", "incineroar"]
   },
   "darkpulse": {
     "type": "dark",
@@ -957,7 +991,9 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": [],
+    "learners": ["alcremie"],
+    "signature": true
   },
   "defog": {
     "type": "flying",
@@ -1007,7 +1043,9 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "slicing", "sheerforce"]
+    "flags": ["contact", "slicing", "sheerforce"],
+    "learners": ["sneasler"],
+    "signature": true
   },
   "disable": {
     "type": "normal",
@@ -1067,7 +1105,9 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "punch"]
+    "flags": ["contact", "punch"],
+    "learners": ["pawmot"],
+    "signature": true
   },
   "doubleteam": {
     "type": "normal",
@@ -1127,7 +1167,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": [],
+    "learners": ["dragapult"],
+    "signature": true
   },
   "dragonpulse": {
     "type": "dragon",
@@ -1207,7 +1249,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["sheerforce"]
+    "flags": ["sheerforce"],
+    "learners": ["rillaboom"],
+    "signature": true
   },
   "dualwingbeat": {
     "type": "flying",
@@ -1267,7 +1311,9 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": ["sound", "sheerforce", "bypasssub"]
+    "flags": ["sound", "sheerforce", "bypasssub"],
+    "learners": ["slowkinggalar"],
+    "signature": true
   },
   "electricterrain": {
     "type": "electric",
@@ -1287,7 +1333,8 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": [],
+    "learners": ["heliolisk"]
   },
   "electroball": {
     "type": "electric",
@@ -1307,7 +1354,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["sheerforce", "charge"]
+    "flags": ["sheerforce", "charge"],
+    "learners": ["archaludon"],
+    "signature": true
   },
   "electroweb": {
     "type": "electric",
@@ -1377,7 +1426,8 @@
     "pp": 8,
     "priority": 0,
     "target": "allAdjacentFoes",
-    "flags": []
+    "flags": [],
+    "learners": ["typhlosion", "camerupt", "torkoal"]
   },
   "expandingforce": {
     "type": "psychic",
@@ -1417,7 +1467,8 @@
     "pp": 8,
     "priority": 2,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact"],
+    "learners": ["arcanine", "dragonite", "lucario"]
   },
   "facade": {
     "type": "normal",
@@ -1437,7 +1488,9 @@
     "pp": 12,
     "priority": 0,
     "target": "all",
-    "flags": ["bypasssub"]
+    "flags": ["bypasssub"],
+    "learners": ["klefki"],
+    "signature": true
   },
   "fakeout": {
     "type": "normal",
@@ -1497,7 +1550,9 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": [],
+    "learners": ["hydrapple"],
+    "signature": true
   },
   "fierydance": {
     "type": "fire",
@@ -1507,7 +1562,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["sheerforce", "dance"]
+    "flags": ["sheerforce", "dance"],
+    "learners": ["volcarona"],
+    "signature": true
   },
   "finalgambit": {
     "type": "fighting",
@@ -1547,7 +1604,8 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "sheerforce"]
+    "flags": ["contact", "sheerforce"],
+    "learners": ["salazzle"]
   },
   "firepunch": {
     "type": "fire",
@@ -1677,7 +1735,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": [],
+    "learners": ["meowscarada"],
+    "signature": true
   },
   "fly": {
     "type": "flying",
@@ -1697,7 +1757,8 @@
     "pp": 12,
     "priority": 0,
     "target": "any",
-    "flags": ["contact", "gravity"]
+    "flags": ["contact", "gravity"],
+    "learners": ["hawlucha"]
   },
   "focusblast": {
     "type": "fighting",
@@ -1737,7 +1798,8 @@
     "pp": 20,
     "priority": 2,
     "target": "self",
-    "flags": []
+    "flags": [],
+    "learners": ["clefable", "indeedeef", "maushold"]
   },
   "forestscurse": {
     "type": "grass",
@@ -1747,7 +1809,9 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": ["reflectable"]
+    "flags": ["reflectable"],
+    "learners": ["trevenant"],
+    "signature": true
   },
   "foulplay": {
     "type": "dark",
@@ -1837,7 +1901,9 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": ["cantusetwice"]
+    "flags": ["cantusetwice"],
+    "learners": ["tinkaton"],
+    "signature": true
   },
   "glaiverush": {
     "type": "dragon",
@@ -1847,7 +1913,9 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact"],
+    "learners": ["baxcalibur"],
+    "signature": true
   },
   "glare": {
     "type": "normal",
@@ -1897,7 +1965,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["sheerforce"]
+    "flags": ["sheerforce"],
+    "learners": ["flapple"],
+    "signature": true
   },
   "gravity": {
     "type": "psychic",
@@ -1947,7 +2017,8 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact"],
+    "learners": ["pinsir", "kingambit"]
   },
   "gunkshot": {
     "type": "poison",
@@ -2007,7 +2078,8 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "punch"]
+    "flags": ["contact", "punch"],
+    "learners": ["torterra", "golurk", "pangoro"]
   },
   "headsmash": {
     "type": "rock",
@@ -2027,7 +2099,8 @@
     "pp": 8,
     "priority": 0,
     "target": "allyTeam",
-    "flags": ["sound", "bypasssub"]
+    "flags": ["sound", "bypasssub"],
+    "learners": ["chimecho"]
   },
   "healingwish": {
     "type": "psychic",
@@ -2127,7 +2200,8 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact"],
+    "learners": ["rhyperior", "excadrill", "tyrantrum"]
   },
   "hornleech": {
     "type": "grass",
@@ -2137,7 +2211,8 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "heal"]
+    "flags": ["contact", "heal"],
+    "learners": ["gogoat", "trevenant"]
   },
   "howl": {
     "type": "normal",
@@ -2237,7 +2312,8 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "punch"]
+    "flags": ["contact", "punch"],
+    "learners": ["abomasnow", "crabominable", "tinkaton"]
   },
   "icepunch": {
     "type": "ice",
@@ -2317,7 +2393,9 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["sheerforce"]
+    "flags": ["sheerforce"],
+    "learners": ["typhlosionhisui"],
+    "signature": true
   },
   "inferno": {
     "type": "fire",
@@ -2357,7 +2435,9 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["bypasssub"]
+    "flags": ["bypasssub"],
+    "learners": ["oranguru"],
+    "signature": true
   },
   "irondefense": {
     "type": "steel",
@@ -2397,7 +2477,8 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "bite"]
+    "flags": ["contact", "bite"],
+    "learners": ["mabosstiff"]
   },
   "jetpunch": {
     "type": "water",
@@ -2407,7 +2488,9 @@
     "pp": 16,
     "priority": 1,
     "target": "normal",
-    "flags": ["contact", "punch"]
+    "flags": ["contact", "punch"],
+    "learners": ["palafin"],
+    "signature": true
   },
   "kingsshield": {
     "type": "steel",
@@ -2417,7 +2500,9 @@
     "pp": 8,
     "priority": 4,
     "target": "self",
-    "flags": []
+    "flags": [],
+    "learners": ["aegislash"],
+    "signature": true
   },
   "knockoff": {
     "type": "dark",
@@ -2437,7 +2522,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "slicing"]
+    "flags": ["contact", "slicing"],
+    "learners": ["kingambit"],
+    "signature": true
   },
   "lashout": {
     "type": "dark",
@@ -2467,7 +2554,8 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": [],
+    "learners": ["basculegion", "houndstone"]
   },
   "lavaplume": {
     "type": "fire",
@@ -2537,7 +2625,9 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": [],
+    "learners": ["floetteeternal"],
+    "signature": true
   },
   "lightscreen": {
     "type": "psychic",
@@ -2567,7 +2657,8 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": [],
+    "learners": ["dragapult"]
   },
   "lowkick": {
     "type": "fighting",
@@ -2597,7 +2688,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["sheerforce"]
+    "flags": ["sheerforce"],
+    "learners": ["espathra"],
+    "signature": true
   },
   "lunge": {
     "type": "bug",
@@ -2627,7 +2720,9 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": ["powder", "reflectable"]
+    "flags": ["powder", "reflectable"],
+    "learners": ["hatterene"],
+    "signature": true
   },
   "magicroom": {
     "type": "psychic",
@@ -2647,7 +2742,8 @@
     "pp": 20,
     "priority": 0,
     "target": "allySide",
-    "flags": ["bypasssub"]
+    "flags": ["bypasssub"],
+    "learners": ["ampharos", "toxtricitylowkey"]
   },
   "magnetrise": {
     "type": "electric",
@@ -2667,7 +2763,9 @@
     "pp": 8,
     "priority": 0,
     "target": "allAdjacentFoes",
-    "flags": []
+    "flags": [],
+    "learners": ["gholdengo"],
+    "signature": true
   },
   "matchagotcha": {
     "type": "grass",
@@ -2677,7 +2775,9 @@
     "pp": 16,
     "priority": 0,
     "target": "allAdjacentFoes",
-    "flags": ["sheerforce", "heal"]
+    "flags": ["sheerforce", "heal"],
+    "learners": ["sinistcha"],
+    "signature": true
   },
   "meanlook": {
     "type": "normal",
@@ -2747,7 +2847,9 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": [],
+    "learners": ["sirfetchd"],
+    "signature": true
   },
   "meteorbeam": {
     "type": "rock",
@@ -2767,7 +2869,8 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "punch", "sheerforce"]
+    "flags": ["contact", "punch", "sheerforce"],
+    "learners": ["clefable", "metagross", "lucario"]
   },
   "milkdrink": {
     "type": "normal",
@@ -2777,7 +2880,8 @@
     "pp": 8,
     "priority": 0,
     "target": "adjacentAllyOrSelf",
-    "flags": ["heal"]
+    "flags": ["heal"],
+    "learners": ["gogoat"]
   },
   "minimize": {
     "type": "normal",
@@ -2857,7 +2961,9 @@
     "pp": 16,
     "priority": 0,
     "target": "allAdjacentFoes",
-    "flags": ["contact", "sheerforce"]
+    "flags": ["contact", "sheerforce"],
+    "learners": ["glimmora"],
+    "signature": true
   },
   "mountaingale": {
     "type": "ice",
@@ -2867,7 +2973,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["sheerforce"]
+    "flags": ["sheerforce"],
+    "learners": ["avalugghisui"],
+    "signature": true
   },
   "muddywater": {
     "type": "water",
@@ -2927,7 +3035,8 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["sheerforce"]
+    "flags": ["sheerforce"],
+    "learners": ["zoroark"]
   },
   "nightshade": {
     "type": "ghost",
@@ -2967,7 +3076,9 @@
     "pp": 8,
     "priority": 0,
     "target": "self",
-    "flags": []
+    "flags": [],
+    "learners": ["falinks"],
+    "signature": true
   },
   "nuzzle": {
     "type": "electric",
@@ -2987,7 +3098,9 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": [],
+    "learners": ["grapploct"],
+    "signature": true
   },
   "outrage": {
     "type": "dragon",
@@ -3007,7 +3120,9 @@
     "pp": 12,
     "priority": 0,
     "target": "allAdjacentFoes",
-    "flags": ["sound", "bypasssub"]
+    "flags": ["sound", "bypasssub"],
+    "learners": ["toxtricity"],
+    "signature": true
   },
   "overheat": {
     "type": "fire",
@@ -3187,7 +3302,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "slicing"]
+    "flags": ["contact", "slicing"],
+    "learners": ["maushold"],
+    "signature": true
   },
   "pounce": {
     "type": "bug",
@@ -3237,7 +3354,8 @@
     "pp": 12,
     "priority": 0,
     "target": "self",
-    "flags": []
+    "flags": [],
+    "learners": ["forretress", "medicham", "aegislash"]
   },
   "powertrip": {
     "type": "dark",
@@ -3337,7 +3455,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "sheerforce"]
+    "flags": ["contact", "sheerforce"],
+    "learners": ["wyrdeer"],
+    "signature": true
   },
   "psyshock": {
     "type": "psychic",
@@ -3357,7 +3477,9 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": ["sheerforce", "bullet"]
+    "flags": ["sheerforce", "bullet"],
+    "learners": ["cinderace"],
+    "signature": true
   },
   "quash": {
     "type": "dark",
@@ -3397,7 +3519,8 @@
     "pp": 20,
     "priority": 0,
     "target": "self",
-    "flags": ["dance"]
+    "flags": ["dance"],
+    "learners": ["volcarona", "vivillon"]
   },
   "ragefist": {
     "type": "ghost",
@@ -3407,7 +3530,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "punch"]
+    "flags": ["contact", "punch"],
+    "learners": ["annihilape"],
+    "signature": true
   },
   "ragepowder": {
     "type": "bug",
@@ -3427,7 +3552,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact"],
+    "learners": ["tauros"],
+    "signature": true
   },
   "ragingfury": {
     "type": "fire",
@@ -3437,7 +3564,8 @@
     "pp": 12,
     "priority": 0,
     "target": "randomNormal",
-    "flags": []
+    "flags": [],
+    "learners": ["arcanine", "infernape"]
   },
   "raindance": {
     "type": "water",
@@ -3507,7 +3635,8 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["bypasssub"]
+    "flags": ["bypasssub"],
+    "learners": ["gengar", "stunfisk"]
   },
   "rest": {
     "type": "psychic",
@@ -3537,7 +3666,8 @@
     "pp": 1,
     "priority": 0,
     "target": "self",
-    "flags": ["heal"]
+    "flags": ["heal"],
+    "learners": ["pawmot"]
   },
   "risingvoltage": {
     "type": "electric",
@@ -3607,7 +3737,8 @@
     "pp": 8,
     "priority": 0,
     "target": "normal",
-    "flags": ["bullet"]
+    "flags": ["bullet"],
+    "learners": ["rhyperior"]
   },
   "roleplay": {
     "type": "psychic",
@@ -3647,7 +3778,8 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "slicing"]
+    "flags": ["contact", "slicing"],
+    "learners": ["gallade", "samurott", "aegislash"]
   },
   "safeguard": {
     "type": "normal",
@@ -3667,7 +3799,9 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["sheerforce"]
+    "flags": ["sheerforce"],
+    "learners": ["garganacl"],
+    "signature": true
   },
   "sandstorm": {
     "type": "rock",
@@ -3817,7 +3951,8 @@
     "pp": 12,
     "priority": 0,
     "target": "self",
-    "flags": []
+    "flags": [],
+    "learners": ["sceptile", "heliolisk", "orthworm"]
   },
   "sheercold": {
     "type": "ice",
@@ -3837,7 +3972,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["sheerforce"]
+    "flags": ["sheerforce"],
+    "learners": ["slowbrogalar"],
+    "signature": true
   },
   "shellsmash": {
     "type": "normal",
@@ -3857,7 +3994,9 @@
     "pp": 12,
     "priority": 0,
     "target": "self",
-    "flags": []
+    "flags": [],
+    "learners": ["goodrahisui"],
+    "signature": true
   },
   "shiftgear": {
     "type": "steel",
@@ -3867,7 +4006,8 @@
     "pp": 12,
     "priority": 0,
     "target": "self",
-    "flags": []
+    "flags": [],
+    "learners": ["toxtricity"]
   },
   "simplebeam": {
     "type": "normal",
@@ -3877,7 +4017,8 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["reflectable"]
+    "flags": ["reflectable"],
+    "learners": ["farfetchd", "audino", "sirfetchd"]
   },
   "sing": {
     "type": "normal",
@@ -4007,7 +4148,9 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact"],
+    "learners": ["stunfiskgalar"],
+    "signature": true
   },
   "snarl": {
     "type": "dark",
@@ -4027,7 +4170,9 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": [],
+    "learners": ["inteleon"],
+    "signature": true
   },
   "snore": {
     "type": "normal",
@@ -4087,7 +4232,8 @@
     "pp": 12,
     "priority": 0,
     "target": "allAdjacent",
-    "flags": ["sound", "sheerforce", "bypasssub"]
+    "flags": ["sound", "sheerforce", "bypasssub"],
+    "learners": ["primarina"]
   },
   "speedswap": {
     "type": "psychic",
@@ -4097,7 +4243,8 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["bypasssub"]
+    "flags": ["bypasssub"],
+    "learners": ["raichualola", "alakazam", "emolga"]
   },
   "spicyextract": {
     "type": "grass",
@@ -4107,7 +4254,9 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["reflectable"]
+    "flags": ["reflectable"],
+    "learners": ["scovillain"],
+    "signature": true
   },
   "spikes": {
     "type": "ground",
@@ -4127,7 +4276,8 @@
     "pp": 8,
     "priority": 4,
     "target": "self",
-    "flags": []
+    "flags": [],
+    "learners": ["chesnaught", "glimmora"]
   },
   "spiritbreak": {
     "type": "fairy",
@@ -4137,7 +4287,9 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "sheerforce"]
+    "flags": ["contact", "sheerforce"],
+    "learners": ["grimmsnarl"],
+    "signature": true
   },
   "spiritshackle": {
     "type": "ghost",
@@ -4147,7 +4299,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["sheerforce"]
+    "flags": ["sheerforce"],
+    "learners": ["decidueye"],
+    "signature": true
   },
   "spite": {
     "type": "ghost",
@@ -4217,7 +4371,8 @@
     "pp": 20,
     "priority": 0,
     "target": "foeSide",
-    "flags": ["reflectable"]
+    "flags": ["reflectable"],
+    "learners": ["ariados", "slurpuff", "araquanid"]
   },
   "stockpile": {
     "type": "normal",
@@ -4247,7 +4402,9 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "slicing", "sheerforce"]
+    "flags": ["contact", "slicing", "sheerforce"],
+    "learners": ["kleavor"],
+    "signature": true
   },
   "stoneedge": {
     "type": "rock",
@@ -4487,7 +4644,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["sheerforce", "bullet"]
+    "flags": ["sheerforce", "bullet"],
+    "learners": ["hydrapple"],
+    "signature": true
   },
   "tailslap": {
     "type": "normal",
@@ -4537,7 +4696,9 @@
     "pp": 12,
     "priority": 0,
     "target": "all",
-    "flags": ["bypasssub"]
+    "flags": ["bypasssub"],
+    "learners": ["polteageist"],
+    "signature": true
   },
   "teeterdance": {
     "type": "normal",
@@ -4667,7 +4828,8 @@
     "pp": 12,
     "priority": 0,
     "target": "self",
-    "flags": []
+    "flags": [],
+    "learners": ["maushold"]
   },
   "topsyturvy": {
     "type": "dark",
@@ -4677,7 +4839,8 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": ["reflectable"]
+    "flags": ["reflectable"],
+    "learners": ["malamar", "grapploct"]
   },
   "torchsong": {
     "type": "fire",
@@ -4687,7 +4850,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["sound", "sheerforce", "bypasssub"]
+    "flags": ["sound", "sheerforce", "bypasssub"],
+    "learners": ["skeledirge"],
+    "signature": true
   },
   "torment": {
     "type": "dark",
@@ -4727,7 +4892,9 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": ["reflectable"]
+    "flags": ["reflectable"],
+    "learners": ["ariados"],
+    "signature": true
   },
   "trailblaze": {
     "type": "grass",
@@ -4747,7 +4914,8 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": [],
+    "learners": ["ditto"]
   },
   "triattack": {
     "type": "normal",
@@ -4777,7 +4945,9 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": ["reflectable"]
+    "flags": ["reflectable"],
+    "learners": ["gourgeist"],
+    "signature": true
   },
   "trickroom": {
     "type": "psychic",
@@ -4797,7 +4967,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["sheerforce"]
+    "flags": ["sheerforce"],
+    "learners": ["decidueyehisui"],
+    "signature": true
   },
   "tripleaxel": {
     "type": "ice",
@@ -4817,7 +4989,9 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "sheerforce"]
+    "flags": ["contact", "sheerforce"],
+    "learners": ["tsareena"],
+    "signature": true
   },
   "twinbeam": {
     "type": "psychic",
@@ -4827,7 +5001,9 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": [],
+    "learners": ["farigiraf"],
+    "signature": true
   },
   "upperhand": {
     "type": "fighting",
@@ -4897,7 +5073,9 @@
     "pp": 16,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "sheerforce"]
+    "flags": ["contact", "sheerforce"],
+    "learners": ["pikachu", "raichu"],
+    "signature": true
   },
   "waterfall": {
     "type": "water",
@@ -4927,7 +5105,8 @@
     "pp": 20,
     "priority": 1,
     "target": "normal",
-    "flags": []
+    "flags": [],
+    "learners": ["greninja"]
   },
   "waterspout": {
     "type": "water",
@@ -4937,7 +5116,8 @@
     "pp": 8,
     "priority": 0,
     "target": "allAdjacentFoes",
-    "flags": []
+    "flags": [],
+    "learners": ["blastoise"]
   },
   "wavecrash": {
     "type": "water",
@@ -5107,6 +5287,7 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact", "sheerforce"]
+    "flags": ["contact", "sheerforce"],
+    "learners": ["pincurchin"]
   }
 }

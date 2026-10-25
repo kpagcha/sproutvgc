@@ -2,7 +2,7 @@
 import Marked from '@/components/Marked'
 import { computed, onUnmounted, ref, shallowRef, useTemplateRef, watch, watchEffect } from 'vue'
 import { move, type MoveId, type PokemonId } from '@/data/dex'
-import { CATEGORIES, hasPriority, MOVES, reachOf, type Move } from '@/data/moves'
+import { CATEGORIES, hasPriority, MOVES, moveTag, reachOf, type Move } from '@/data/moves'
 import { loadLearnsets, movesOf } from '@/data/pokemon'
 import { TYPES } from '@/data/types'
 import type { MessageKey } from '@/i18n'
@@ -20,6 +20,7 @@ import { useSort } from '@/composables/useSort'
 import AppLink from '@/components/AppLink'
 import CategoryIcon from '@/components/CategoryIcon'
 import DexText from '@/components/DexText'
+import MoveTag, { moveTagTip } from '@/components/MoveTag'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
 import FilterSearch from '@/components/FilterSearch.vue'
@@ -55,7 +56,9 @@ const props = defineProps<{
 
 // Its links are `AppLink`s and its icons and descriptions functional components: RouterLinks and full components in
 // each of hundreds of rows take a while to mount.
-const rows = computed(() => props.ids.map((id) => ({ id, name: refName(move(id)), data: MOVES[id] })))
+const rows = computed(() =>
+  props.ids.map((id) => ({ id, name: refName(move(id)), data: MOVES[id], tag: moveTag(MOVES[id]) })),
+)
 
 // The search starts from `query`, and takes it again whenever it changes (a search from the home page coming back to
 // the page kept alive).
@@ -226,6 +229,7 @@ const skeleton = computed(() => [
               <Marked v-if="r.parts" :p="r.parts" />
               <template v-else>{{ r.name }}</template>
             </AppLink>
+            <MoveTag v-if="r.tag" v-tip:group="moveTagTip(r.tag)" class="tag" :tag="r.tag" />
             <div v-if="descriptions && below && !stacked" class="muted below">
               <DexText :text="shortOf(r.id)" />
             </div>
@@ -294,6 +298,10 @@ const skeleton = computed(() => [
     min-width: calc(26px + 6px);
     font-size: 0;
   }
+}
+/* How few learn it: its tag after the name. */
+.tag {
+  margin-left: 6px;
 }
 /* Each description a line of its own under its row, the whole width, rather than under the name alone. */
 .dex-table .row > .span-desc {

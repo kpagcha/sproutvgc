@@ -525,6 +525,34 @@ details > summary {
   align-self: center;
 }
 
+/* How few learn a move (`MoveTag`): the Pokémon's icon and the word, small, on the text's baseline (the icon centered on
+   the line, as the nature tag's arrow). Exclusive outlined in the accent, Signature filled with it. */
+.move-tag {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  padding: 0 4px 0 1px;
+  font-size: 0.75rem;
+  font-weight: normal;
+  line-height: 1.4;
+  color: var(--accent);
+  white-space: nowrap;
+  vertical-align: baseline;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+}
+.move-tag > .sheet-icon {
+  align-self: center;
+}
+.move-tag.signature {
+  color: var(--accent-text);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.move-tag:not(:has(.sheet-icon)) {
+  padding-left: 4px;
+}
+
 /* A country's flag (`CountryFlag`), round as drawn: a little taller than a capital, on the text's middle. */
 .flag {
   display: inline-block;

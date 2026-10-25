@@ -3,7 +3,7 @@ import { computed, ref, shallowRef, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { available, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
-import { isSpread, MOVES } from '@/data/moves'
+import { isSpread, MOVES, moveTag } from '@/data/moves'
 import { POKEMON, loadLearnsets } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
@@ -14,6 +14,7 @@ import { fold, split } from '@/lib/search'
 import type { TermFilters } from '@/lib/searchTerms'
 import CategoryIcon from '@/components/CategoryIcon'
 import EntryTitle from '@/components/EntryTitle.vue'
+import MoveTag, { moveTagTip } from '@/components/MoveTag'
 import DexText from '@/components/DexText'
 import PokemonChips from '@/components/PokemonChips.vue'
 import RefInteractions from '@/components/RefInteractions.vue'
@@ -28,6 +29,7 @@ const ref_ = computed(() => move(id.value))
 const exists = computed(() => available(ref_.value))
 const data = computed(() => MOVES[id.value])
 const text = computed(() => description('move', id.value))
+const tag = computed(() => moveTag(data.value))
 
 const priority = computed(() => (data.value.priority > 0 ? `+${data.value.priority}` : String(data.value.priority)))
 
@@ -72,6 +74,10 @@ watchEffect(async () => {
         <RouterLink :to="{ name: 'moves', query: { f: `category:${data.category}` } }"
           ><CategoryIcon :category="data.category" :scale="2"
         /></RouterLink>
+        <RouterLink v-if="tag?.of" v-tip="moveTagTip(tag)" :to="{ name: 'pokemon', params: { id: tag.of } }" class="tag"
+          ><MoveTag :tag
+        /></RouterLink>
+        <MoveTag v-else-if="tag" v-tip="moveTagTip(tag)" class="tag" :tag />
       </div>
       <dl class="numbers">
         <div>
@@ -136,6 +142,10 @@ watchEffect(async () => {
   align-items: center;
   gap: 6px;
   margin-bottom: 12px;
+}
+/* How few learn it: its tag, a size up with the badges. */
+.tag {
+  font-size: 1.15em;
 }
 .numbers {
   display: flex;

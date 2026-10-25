@@ -2,7 +2,7 @@
 // here.
 
 import DATA from '@/data/generated/moves.data.json'
-import type { MoveId } from '@/data/dex'
+import type { MoveId, PokemonId } from '@/data/dex'
 import type { TypeId } from '@/data/types'
 
 export const CATEGORIES = ['physical', 'special', 'status'] as const
@@ -63,9 +63,28 @@ export interface Move {
   target: Target
   /** `protect` means it goes through Protect. */
   flags: Flag[]
+  /** The Pokémon that learn it, one per species, when they're 3 at most (`FEW_LEARNERS` in `scripts/gen-data.ts`). */
+  learners?: PokemonId[]
+  /** One of the series' signature moves: only one evolutionary family learns it, in any game (`scripts/signatures.ts`). */
+  signature?: true
 }
 
 export const MOVES = DATA as unknown as Record<MoveId, Move>
+
+/**
+ * A move's tag for how few learn it (`MoveTag`): Signature, one of the series' signature moves, else Exclusive, when only
+ * one Pokémon learns it in the regulation; each with the Pokémon it's of (a signature move's first learner here).
+ */
+export interface MoveTag {
+  kind: 'signature' | 'exclusive'
+  of?: PokemonId
+}
+export const moveTag = (m: Move): MoveTag | undefined =>
+  m.signature
+    ? { kind: 'signature', of: m.learners?.[0] }
+    : m.learners?.length === 1
+      ? { kind: 'exclusive', of: m.learners[0] }
+      : undefined
 
 /**
  * Whom a move reaches, in short, for the move rankings: Showdown's targets grouped by what they mean in a double

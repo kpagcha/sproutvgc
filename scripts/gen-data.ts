@@ -28,6 +28,7 @@ import { LANGUAGES, type Language } from './languages.ts'
 import { MOVES_EVERYONE_USES, NAMES, type CategoryKey } from './overrides.ts'
 import { ConditionScan } from './conditions.ts'
 import { itemCategorizer } from './itemCategories.ts'
+import { signatureMoves } from './signatures.ts'
 import { SPEED_ABILITIES, SPEED_ITEMS } from '../src/lib/speed.ts'
 import { histories, Smogon, withPrevious, type MetaEntry, type Snapshot } from './smogon.ts'
 import {
@@ -461,6 +462,34 @@ async function main() {
   if (uncategorized.length)
     throw new Error(`Items with no category; place them in scripts/itemCategories.ts:\n  ${uncategorized.join('\n  ')}`)
   const speciesId = (name: string) => dex.species.get(name).id
+  // The Pokémon that learn each move, one per species (a Mega learns what its base forme does, a cosmetic forme what
+  // its species does, and formes of one species count as one: Population Bomb is Maushold's whatever its family), kept
+  // when they're few (`FEW_LEARNERS`): the moves few Pokémon can bring, Rage Fist or Follow Me. A species stands for
+  // its forme that learns it when only one does (Bitter Malice, Hisuian Zoroark's), else for its base forme.
+  const FEW_LEARNERS = 3
+  const learnersOf = new Map<string, Map<string, string[]>>()
+  for (const s of roster) {
+    if (s.battleOnly || s.isCosmeticForme) continue
+    const species = speciesId(s.baseSpecies)
+    for (const m of learnset(s.id)) {
+      const bySpecies = learnersOf.get(m) ?? new Map<string, string[]>()
+      learnersOf.set(m, bySpecies)
+      bySpecies.set(species, [...(bySpecies.get(species) ?? []), s.id])
+    }
+  }
+  // The series' signature moves (`signatures.ts`), from every generation's learnsets.
+  const signatures = signatureMoves(
+    Dex,
+    ((await jiti.import(join(dir, 'data/learnsets.ts'))) as { Learnsets: Parameters<typeof signatureMoves>[1] })
+      .Learnsets,
+  )
+  const fewLearners = (move: string) => {
+    const bySpecies = learnersOf.get(move)
+    if (!bySpecies || bySpecies.size > FEW_LEARNERS) return undefined
+    return [...bySpecies].map(([species, formes]) =>
+      formes.length === 1 ? formes[0]! : legal.has(species) ? species : formes[0]!,
+    )
+  }
 
   // Each legal Pokémon's gen5 sprite. Showdown hasn't drawn some new Megas yet: their pages show their icon instead.
   const sprites = new SpriteSource(join(CACHE, 'sprites', sources.sprites), (url) => getBinary(url, true))
@@ -529,6 +558,8 @@ async function main() {
                 ? !!(m.secondaries || m.hasSheerForceBoost)
                 : m.flags[f],
           ),
+          ...(fewLearners(id) && { learners: fewLearners(id) }),
+          ...(signatures.has(id) && { signature: true }),
         }
       },
     },

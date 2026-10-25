@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { has, percent, sinceLabel } from '@/data/meta'
-import { hasPriority, MOVES, priorityLabel, reachOf } from '@/data/moves'
+import { hasPriority, MOVES, moveTag, priorityLabel, reachOf } from '@/data/moves'
 import { loadLearnsets, movesOf } from '@/data/pokemon'
 import { locale, t, typeName } from '@/i18n'
 import { description, shortText } from '@/i18n/descriptions'
@@ -25,6 +25,7 @@ import { useSort } from '@/composables/useSort'
 import AppLink from '@/components/AppLink'
 import CategoryIcon from '@/components/CategoryIcon'
 import DexText from '@/components/DexText'
+import MoveTag, { moveTagTip } from '@/components/MoveTag'
 import BattleCount from '@/components/BattleCount.vue'
 import FilterSearch from '@/components/FilterSearch.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
@@ -38,7 +39,7 @@ import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
 
 // The moves players run, by usage, from the meta snapshot shown (`useMeta`), as the ability and item rankings: each
-// its name with its priority (only when it has one) and whom it reaches (`reachOf`, its full target on hover), its
+// its name with its priority (only when it has one), whether it's a signature move or only one Pokémon learns it (`MoveTag`) and whom it reaches (`reachOf`, its full target on hover), its
 // short description under them; its type, category, power, accuracy and PP, a column each; where there's room, the two
 // Pokémon that run it most; and its usage: the share of all Pokémon on teams whose sets run it (`scaleOf`: four moves
 // a set, so not per team, as abilities and items are). Its description is a line of its own under the row, from the
@@ -64,6 +65,7 @@ const trendsShown = computed(() => !!(hasMoves.value && previous.value && prevDa
 const sections = computed(() => [
   { id: 'sec-list', label: t('trends.list') },
   ...(trendsShown.value ? [{ id: 'sec-trends', label: t('trends.title') }] : []),
+  ...(hasMoves.value && data.value ? [{ id: 'sec-niche', label: t('niche.title') }] : []),
 ])
 const since = computed(() => (previous.value ? sinceLabel(previous.value, snapshot.value) : ''))
 /** The rank's mark's tooltip: the places gained or lost since the dataset before, or new to it. */
@@ -94,6 +96,7 @@ const rows = computed(() => {
       data: m,
       reach: reachOf(m),
       priority: priorityLabel(m),
+      tag: moveTag(m),
       rank,
       usage,
       users: users.sort((a, b) => b.usage - a.usage).slice(0, TOP),
@@ -187,6 +190,13 @@ const shown = computed(() => {
   const found = finder.value
   return sorted.value.filter((r) => (!found || found(r)) && passes(r))
 })
+// The niche picks, a panel of their own after the trends: of the moves the list shows, those few Pokémon learn (3 at
+// most, `learners`), by usage, each with those Pokémon, its first few until unfolded.
+const NICHE = 10
+const allNiche = useUnfolded('niche:moves')
+const niche = computed(() => shown.value.filter((r) => r.data.learners).sort((a, b) => b.usage - a.usage))
+const nicheTop = computed(() => Math.max(0, ...niche.value.map((r) => r.usage)))
+
 /** The most used, the full length of the usage bars. */
 const top = computed(() => Math.max(0, ...rows.value.map((r) => r.usage)))
 
@@ -376,6 +386,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
               <div class="move-line">
                 <AppLink :to="r.to" class="name">{{ r.name }}</AppLink>
                 <span v-if="r.priority" v-tip:group="t('move.priority')" class="priority num">{{ r.priority }}</span>
+                <MoveTag v-if="r.tag" v-tip:group="moveTagTip(r.tag)" :tag="r.tag" />
                 <span v-tip:group="t(`move.target.${r.data.target}`)" class="reach muted">{{
                   t(`move.reach.${r.reach}`)
                 }}</span>
@@ -436,6 +447,33 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
     <RankingTrends v-if="trendsShown" id="sec-trends" class="section" :rows="shown" :since remember="trends:moves">
       <template #entry="{ row }"> <TypeIcon :type="row.data.type" />{{ row.name }} </template>
     </RankingTrends>
+    <section
+      v-if="hasMoves && data"
+      id="sec-niche"
+      class="panel banded grey section niche"
+      :class="{ 'meta-stale': loading, previewing: preview }"
+    >
+      <h2 class="band">
+        {{ t('niche.title') }}<span class="about">{{ t('niche.about', { n: 3, reg: REGULATION }) }}</span>
+      </h2>
+      <ol v-if="niche.length" class="niche-list">
+        <li v-for="r in allNiche ? niche : niche.slice(0, NICHE)" :key="r.id">
+          <AppLink :to="r.to" class="niche-move"><TypeIcon :type="r.data.type" />{{ r.name }}</AppLink>
+          <span v-tip="t('niche.learnersTip', { reg: REGULATION })" class="learners">
+            <AppLink
+              v-for="p in r.data.learners"
+              :key="p"
+              :to="{ name: 'metaPokemon', params: { id: p } }"
+              :aria-label="refName(pokemon(p))"
+              ><PokemonIcon :id="p"
+            /></AppLink>
+          </span>
+          <span class="num meter usage" :style="{ '--share': r.usage / (nicheTop || 1) }">{{ percent(r.usage) }}</span>
+        </li>
+      </ol>
+      <p v-else class="muted">{{ t('niche.none') }}</p>
+      <MoreToggle v-if="niche.length" v-model:all="allNiche" :n="niche.length" :top="NICHE" />
+    </section>
   </div>
 </template>
 
@@ -485,6 +523,51 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 .phone-reach {
   display: none;
 }
+/* The niche picks: a move a row, its name, the Pokémon that learn it and its usage, two columns where there's room. */
+.niche .band {
+  font-size: 1rem;
+}
+.niche .about {
+  margin-left: 8px;
+  font-size: 0.8em;
+  font-weight: normal;
+  opacity: 0.85;
+}
+.niche-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (max-width: 720px) {
+  .niche-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.niche-list > li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 4.6em;
+  gap: 8px;
+  align-items: center;
+}
+.niche-move {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+}
+.learners {
+  display: flex;
+  gap: 2px;
+}
+.niche-list .usage {
+  --inset: 0px;
+  padding-bottom: 6px;
+  text-align: right;
+}
+
 /* A move's priority: a small badge after its name, only for the moves that have one. */
 .priority {
   padding: 0 4px;

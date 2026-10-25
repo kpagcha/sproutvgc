@@ -14,7 +14,7 @@ import {
 } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { sinceLabel, has, percent } from '@/data/meta'
-import { MOVES, priorityId, priorityLabel, reachOf } from '@/data/moves'
+import { MOVES, moveTag, priorityId, priorityLabel, reachOf } from '@/data/moves'
 import { loadLearnsets, movesOf, POKEMON, splitForme } from '@/data/pokemon'
 import { locale, t, typeName, type MessageKey } from '@/i18n'
 import { description } from '@/i18n/descriptions'
@@ -32,6 +32,7 @@ import { useSort } from '@/composables/useSort'
 import AppLink from '@/components/AppLink'
 import CategoryIcon from '@/components/CategoryIcon'
 import DexText from '@/components/DexText'
+import MoveTag, { moveTagTip } from '@/components/MoveTag'
 import ItemIcon from '@/components/ItemIcon.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -168,6 +169,7 @@ const drawn = useGradualRows(shown)
 
 // A move's numbers and reach, for its heading.
 const moveData = computed(() => (props.kind === 'move' ? MOVES[id.value as MoveId] : undefined))
+const tag = computed(() => (moveData.value ? moveTag(moveData.value) : undefined))
 
 // The Pokémon in the data that could run it but whose sets don't, by usage: those that can have an ability, or learn
 // a move (the learnsets loaded for it).
@@ -223,6 +225,14 @@ useRowColumns(useTemplateRef('head'))
             class="priority num"
             >{{ priorityLabel(moveData) }}</AppLink
           >
+          <AppLink
+            v-if="tag?.of"
+            v-tip="moveTagTip(tag)"
+            :to="{ name: 'metaPokemon', params: { id: tag.of } }"
+            class="badge-link"
+            ><MoveTag :tag
+          /></AppLink>
+          <MoveTag v-else-if="tag" v-tip="moveTagTip(tag)" class="badge-link" :tag />
         </h1>
       </div>
       <p v-if="text" class="muted desc"><DexText :text="text.short" /></p>
