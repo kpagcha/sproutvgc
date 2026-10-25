@@ -1,8 +1,9 @@
 import { computed, ref, watch, type Ref } from 'vue'
 import { useSearch, type SectionKind } from '@/composables/useSearch'
+import { t, type MessageKey } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { fold, split, type Marks } from '@/lib/search'
-import { extraOptions, isExtraKind, type Term, type TermKind } from '@/lib/searchTerms'
+import { extraOptions, isExtraKind, termOptions, type Term, type TermKind } from '@/lib/searchTerms'
 
 export interface TermOption {
   term: Term
@@ -18,13 +19,17 @@ export interface TermGroup {
 
 /** A kind lists this many at most. */
 const PER_KIND = 5
+/** What's typed names a kind (its name's start) from this many characters, or the whole name if it's shorter. */
+const KIND_CHARS = 3
 /** The dex entries a term can be, as the dex's search finds them. */
 const SECTION_KINDS: readonly SectionKind[] = ['pokemon', 'ability', 'move', 'item']
 
 /**
  * The terms a search box's `text` finds, for a filter search (`FilterSearch`) and its groups' adders: of `kinds`, by
  * kind (types first, then what isn't a dex entry, then the dex's search, `useSearch`), a few of each, each with how many
- * of the list it'd leave (`count`), those leaving none and those `taken` left out. `lead` options come before them (a
+ * of the list it'd leave (`count`), those leaving none and those `taken` left out. Text naming a kind that isn't a dex
+ * entry ("reach", "prio": the start of its name) finds all of that kind whatever their names: what one can be needn't
+ * be known to search by it. Not types, whose names everyone knows. `lead` options come before them (a
  * search by name), highlighted at first; the arrow keys move through them all, Enter picks (`onPick`, the lead's index
  * for one of those), Escape closes them until the text changes.
  */
@@ -46,6 +51,14 @@ export function useTermPicker(opts: {
     if (!q) return []
     const kinds = opts.kinds()
     const taken = opts.taken()
+    /** Whether the text names a kind: the start of its name. */
+    const named = (kind: TermKind) => {
+      const name = fold(t(`filter.kind.${kind}` as MessageKey))
+      return q.length >= Math.min(KIND_CHARS, name.length) && name.startsWith(q)
+    }
+    /** All of a kind, the text naming it: none marked. */
+    const all = (kind: TermKind) =>
+      termOptions(kind).flatMap((o) => offer({ kind, id: o.id } as Term, o.name, [o.name]))
     const offer = (term: Term, name: string, parts: Marks): TermOption[] => {
       if (taken.some((x) => x.kind === term.kind && x.id === term.id)) return []
       const n = opts.count(term)
@@ -53,16 +66,20 @@ export function useTermPicker(opts: {
     }
     const r = results.value
     const types = kinds.includes('type')
-      ? (r?.types ?? []).flatMap((x) => offer({ kind: 'type', id: x.id }, refName({ kind: 'type', id: x.id }), x.parts))
+      ? (r?.types ?? [])
+          .flatMap((x) => offer({ kind: 'type', id: x.id }, refName({ kind: 'type', id: x.id }), x.parts))
+          .slice(0, PER_KIND)
       : []
     const extras = kinds.filter(isExtraKind).map((kind) => ({
       kind: kind as TermKind,
-      options: extraOptions(kind)
-        .flatMap((o) => {
-          const parts = split(o.name, q)
-          return parts ? offer({ kind, id: o.id } as Term, o.name, parts) : []
-        })
-        .slice(0, PER_KIND),
+      options: named(kind)
+        ? all(kind)
+        : extraOptions(kind)
+            .flatMap((o) => {
+              const parts = split(o.name, q)
+              return parts ? offer({ kind, id: o.id } as Term, o.name, parts) : []
+            })
+            .slice(0, PER_KIND),
     }))
     const sections = (r?.sections ?? [])
       .filter((s) => kinds.includes(s.kind as TermKind))
@@ -70,9 +87,7 @@ export function useTermPicker(opts: {
         kind: s.kind as TermKind,
         options: s.hits.flatMap((h) => offer({ kind: s.kind, id: h.id } as Term, h.name, h.parts)).slice(0, PER_KIND),
       }))
-    return [{ kind: 'type' as TermKind, options: types.slice(0, PER_KIND) }, ...extras, ...sections].filter(
-      (g) => g.options.length,
-    )
+    return [{ kind: 'type' as TermKind, options: types }, ...extras, ...sections].filter((g) => g.options.length)
   })
   const options = computed(() => groups.value.flatMap((g) => g.options))
   const lead = computed(() => opts.lead?.() ?? 0)
