@@ -104,3 +104,26 @@ function scrollToY(y: number) {
   window.addEventListener('wheel', stop, opts)
   window.addEventListener('touchstart', stop, opts)
 }
+
+let holding = 0
+let held = 0
+/**
+ * Keeps the page where it is while a list unfolds under what's on screen (`MoreToggle`): the browser's scroll anchoring
+ * off until the page stops growing (it may draw the rows a chunk a frame, `useGradualRows`). Otherwise, with the toggle
+ * the first thing on screen, the browser keeps the toggle where it was, scrolling the page down by all it unfolded.
+ */
+export function holdScroll() {
+  const root = document.documentElement
+  root.style.overflowAnchor = 'none'
+  cancelAnimationFrame(holding)
+  let height = -1
+  held = 0
+  const check = () => {
+    const now = root.scrollHeight
+    held = now === height ? held + 1 : 0
+    height = now
+    if (held < 3) holding = requestAnimationFrame(check)
+    else root.style.overflowAnchor = ''
+  }
+  holding = requestAnimationFrame(check)
+}
