@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp, Info } from '@lucide/vue'
+import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp, Info, Swords, Trophy } from '@lucide/vue'
 import { ability, available, availableIds, move, pokemon, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
 import { ITEMS } from '@/data/items'
 import { MOVES } from '@/data/moves'
@@ -550,9 +550,9 @@ const sections = computed(() =>
               }}</span></span
             >
           </p>
-          <p v-if="winRate || m.brought !== undefined" class="used-row">
+          <p v-if="winRate || m.brought !== undefined" class="used-row secondary">
             <span v-if="winRate" class="used-part"
-              ><strong>{{ percent(winRate.rate) }}</strong>
+              ><Trophy class="used-icon" :size="14" aria-hidden="true" /><strong>{{ percent(winRate.rate) }}</strong>
               <span
                 v-tip="
                   t('usageMon.winRateTip', {
@@ -566,7 +566,7 @@ const sections = computed(() =>
               ></span
             >
             <span v-if="m.brought !== undefined" class="used-part"
-              ><strong>{{ percent(m.brought) }}</strong>
+              ><Swords class="used-icon" :size="14" aria-hidden="true" /><strong>{{ percent(m.brought) }}</strong>
               <span v-tip="t('usage.broughtTip')" class="muted tipped">{{ t('usageMon.brought') }}</span></span
             >
           </p>
@@ -1030,7 +1030,7 @@ const sections = computed(() =>
 /* How much it's used: two lines of their own (rank and usage, then win rate and brought), smaller than the stats. */
 .used {
   display: grid;
-  gap: 2px;
+  gap: 6px;
 }
 .used-row {
   display: flex;
@@ -1046,6 +1046,20 @@ const sections = computed(() =>
 }
 .used strong {
   font-variant-numeric: tabular-nums;
+}
+/* Win rate and brought, under rank and usage: smaller, all of it (numbers too, not bold) in the muted color. */
+.used-row.secondary {
+  font-size: 0.9em;
+  color: var(--muted);
+}
+/* Each one's icon before its number: centered on the line, the part's baseline the text's. */
+.used-icon {
+  flex: none;
+  align-self: center;
+  color: var(--muted);
+}
+.used-row.secondary strong {
+  font-weight: normal;
 }
 .tipped,
 .tipped-head {
