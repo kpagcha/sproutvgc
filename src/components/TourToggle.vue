@@ -2,7 +2,8 @@
 import { Footprints } from '@lucide/vue'
 import { t } from '@/i18n'
 
-// Taking a page's tour again: its icon alone, beside the heading's "How to read this", its words its tooltip.
+// Taking a page's tour again, its guide to reading it: its icon alone, at the end of the heading's row, its words its
+// tooltip.
 const emit = defineEmits<{ start: [] }>()
 </script>
 

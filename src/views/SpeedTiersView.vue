@@ -108,7 +108,6 @@ import VersusPanel, { type VersusItem } from '@/components/VersusPanel.vue'
 import SetupStar from '@/components/SetupStar.vue'
 import PageHistory from '@/components/PageHistory.vue'
 import { RECENT_ON } from '@/composables/useRecent'
-import HelpToggle from '@/components/HelpToggle.vue'
 import TourToggle from '@/components/TourToggle.vue'
 
 // The regulation's Pokémon ordered by Speed, as a ladder of Speed values with the Pokémon at each. By default the
@@ -1649,9 +1648,6 @@ useSlashFocus(() => {
   picker.open()
 })
 
-// How to read the page, in a section closed unless the reader opens it (remembered), so the ladder starts close to the
-// top: what each option does, the chips' legend, and yours among them. Opened from the heading's row.
-const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.speedTiers.helpOpen', false)
 const isOpen = (e: Event) => (e.target as HTMLDetailsElement).open
 
 const stageLabel = (s: string) => (Number(s) > 0 ? `+${s}` : s.replace('-', '−'))
@@ -1739,15 +1735,23 @@ watch(query, (q) => route.name === 'speedTiers' && (lastTiersQuery.value = witho
 
 const { entered } = usePageEntered()
 
-// The first visit's tour of the page: what it shows, its choices and options, finding one, a row of the ladder, yours,
-// and where to read more (and take it again).
+// The first visit's tour of the page, its guide to reading it: what it shows and how a Speed is worked out, its choices
+// and options, finding one (and what's left out but for those found), the filters, a row of the ladder and a boost's,
+// yours and tapping a row (and the comparison), and taking it again.
 const { start: startTour } = useTour(
   'speedTiers',
   () => [
     { title: 'tour.tiers.introTitle', text: 'tour.tiers.intro' },
+    { title: 'tour.speedTitle', text: 'tour.speed' },
     { el: '.choices-band', title: 'tour.tiers.choicesTitle', text: 'tour.tiers.choices', side: 'bottom' },
     { el: '.options-line > .options', title: 'tour.tiers.optionsTitle', text: 'tour.tiers.options', side: 'bottom' },
-    { el: '.find-row > .picker', title: 'tour.tiers.findTitle', text: 'tour.tiers.find', side: 'bottom' },
+    {
+      el: '.find-row > .picker',
+      title: 'tour.tiers.findTitle',
+      text: bySets.value ? 'tour.tiers.findSets' : 'tour.tiers.find',
+      params: { pct: percent(MIN_SHARE) },
+      side: 'bottom',
+    },
     { el: '.filters-toggle', title: 'tour.tiers.filtersTitle', text: 'tour.tiers.filters', side: 'bottom' },
     {
       el: ['.ranges-wrap .row', '.ranges-wrap'],
@@ -1756,6 +1760,7 @@ const { start: startTour } = useTour(
       side: 'bottom',
     },
     { el: ['details.yours', '.bar-yours'], title: 'tour.tiers.yoursTitle', text: 'tour.tiers.yours', side: 'left' },
+    { title: 'tour.tiers.vsTitle', text: 'tour.tiers.vs' },
     { el: '.head-tour', title: 'tour.againTitle', text: 'tour.again', side: 'bottom' },
   ],
   () => entered.value && (!needsData.value || !!data.value),
@@ -1820,72 +1825,12 @@ const { start: startTour } = useTour(
       <div class="main-col">
         <!-- The page's heading, over the ladder (yours beside both): on one row, the title and its star, saving the setup
              to the favorites, the data shown (a button opening what it is, to pick another; on phones, its icon alone),
-             and how to read the page at the row's end (its icon alone on phones); under it, how to read the page,
-             opened. -->
+             and the way to take the tour again, the page's guide to reading it, at the row's end. -->
         <section class="panel page-head">
           <div class="head">
             <h1>{{ t('title.speedTiers') }}<SetupStar /></h1>
             <MetaDialog v-if="snapshot" class="head-meta" />
-            <HelpToggle class="head-help" :open="helpOpen" controls="speed-help" fit @toggle="toggleHelp" />
             <TourToggle class="head-tour" @start="startTour" />
-          </div>
-          <!-- How to read the ladder: what its options do; samples of a chip, each with what its parts mean; then yours
-               among them. -->
-          <div v-if="helpOpen" id="speed-help" class="help-body panel sunken">
-            <div class="help-intro small">
-              <dl class="help-options">
-                <template v-if="metaAvailable">
-                  <dt>{{ t('speed.show') }}</dt>
-                  <dd class="muted">{{ t('speed.showDesc') }}</dd>
-                  <dt>{{ t('speed.viewLabel') }}</dt>
-                  <dd class="muted">{{ t('speed.viewDesc') }}</dd>
-                </template>
-                <template v-if="bySets && boostsAvailable">
-                  <dt>{{ t('speed.boosts') }}</dt>
-                  <dd class="muted">{{ t('speed.boostsDesc') }}</dd>
-                </template>
-                <dt>{{ t('speed.megas') }}</dt>
-                <dd class="muted">{{ t('speed.megasDesc') }}</dd>
-                <dt>{{ t('speed.mod.trickroom') }}</dt>
-                <dd class="muted">{{ t('speed.modTip.trickroom') }}</dd>
-                <dt>{{ t('speed.modifiers') }}</dt>
-                <dd class="muted">{{ t('speed.modifiersTip') }}</dd>
-              </dl>
-            </div>
-            <p class="formula muted small">{{ t('speed.formula') }}</p>
-            <dl v-if="bySets && snapshot" class="legend small">
-              <dt>
-                <span class="chip sample"
-                  ><span class="tag"><EffectTag effect="up" /></span
-                  ><span class="tag">{{ t('speed.points', { n: 32 }) }}</span
-                  ><span class="tag">{{ percent(0.461) }}</span></span
-                >
-              </dt>
-              <dd class="muted">{{ t('speed.legendChip', { pct: percent(MIN_SHARE) }) }}</dd>
-              <template v-if="showBoosts">
-                <dt>
-                  <span class="chip sample boost"
-                    ><span class="tag boost-label"
-                      ><ItemIcon id="choicescarf" :scale="0.67" />{{ t('speed.legendBoostLabel') }}</span
-                    ></span
-                  >
-                </dt>
-                <dd class="muted">
-                  {{ t('speed.legendBoost') }}
-                </dd>
-              </template>
-            </dl>
-            <!-- Yours among them: what picking it does, tapping an opponent, and the comparison side by side. -->
-            <dl class="help-options help-yours small">
-              <dt>{{ t('speed.yours') }}</dt>
-              <dd class="muted">{{ t('speed.helpYours') }}</dd>
-              <dt>{{ t('compare.common') }}</dt>
-              <dd class="muted">{{ t('compare.helpCommon') }}</dd>
-              <dt>{{ t('speed.opponentsHead') }}</dt>
-              <dd class="muted">{{ t('speed.helpOpponents') }}</dd>
-              <dt>{{ t('compare.open') }}</dt>
-              <dd class="muted">{{ t('speed.helpCompare') }}</dd>
-            </dl>
           </div>
         </section>
         <div ref="listPanel" class="panel banded soft list">
@@ -1913,7 +1858,7 @@ const { start: startTour } = useTour(
             </div>
           </div>
           <!-- The list's toolbar, a band under what the list is: its options in a block (what each does in a tooltip,
-               the boosts', or in how to read the page; the modifiers for everyone opening under them), then finding a
+               the boosts', or in the tour; the modifiers for everyone opening under them), then finding a
                Pokémon on it. -->
           <div class="band find find-row" :class="{ flash: flashFind }" @animationend="flashFind = false">
             <!-- The options, one outlined block of cells: on phones two to a row (what's on the ladder, then the
@@ -2824,13 +2769,15 @@ const { start: startTour } = useTour(
   --dim: color-mix(in srgb, var(--ink) 40%, transparent);
 }
 /* The heading's row: the title and its star, the data shown (its dataset cut short first when the row's tight; on
-   phones, its icon alone), then how to read the page taking what's left, at its end (its words when they fit, else its
-   icon alone; on phones, always its icon alone). */
+   phones, its icon alone), then the way to take the tour again, at its end. */
 .head {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 12px;
+}
+.head-tour {
+  margin-left: auto;
 }
 .head h1 {
   display: flex;
@@ -3778,7 +3725,7 @@ const { start: startTour } = useTour(
   border: 1px solid var(--border);
   border-radius: 3px;
 }
-/* A row's tags, under its name, and the legend's. */
+/* A row's tags, under its name. */
 .tags {
   display: inline-flex;
   flex-wrap: wrap;
@@ -3792,69 +3739,9 @@ const { start: startTour } = useTour(
   align-items: center;
   white-space: nowrap;
 }
-/* How to read the page, in a well under the data shown. */
-.help-body {
-  margin: 12px 0 0;
-  padding: 8px 10px;
-}
-.help-body > :is(.legend, p) {
-  margin-top: 0;
-}
-.help-body > .formula {
-  margin-bottom: 8px;
-}
-.help-body .legend dd:last-child {
-  margin-bottom: 0;
-}
-/* What the options do, first in the well. */
-.help-intro {
-  margin-bottom: 10px;
-}
-.help-options {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 2px 10px;
-  margin: 8px 0 0;
-}
-.help-intro > .help-options {
-  margin-top: 0;
-}
-.help-options dt {
-  font-weight: bold;
-}
-.help-options dd {
-  margin: 0;
-}
-/* Yours among them, under a rule, apart from how to read the chips. */
-.help-yours {
-  margin-top: 10px;
-  padding-top: 8px;
-  border-top: 1px solid var(--border);
-}
 @media (max-width: 720px) {
   .wide-only {
     display: none;
-  }
-  /* Under the options. */
-  .help-body > .legend {
-    margin-top: 12px;
-  }
-  .help-body > p {
-    margin-top: 1em;
-  }
-  .help-options {
-    grid-template-columns: 1fr;
-  }
-  .help-options dd {
-    margin-bottom: 4px;
-  }
-  /* Each legend sample's description under it rather than squeezed beside it. */
-  .help-body .legend {
-    grid-template-columns: 1fr;
-    gap: 2px;
-  }
-  .help-body .legend dd {
-    margin-bottom: 8px;
   }
 }
 /* Quieter than the name: in a row, its line under the name is so already. On phones, a long one (an item's name)
@@ -3914,25 +3801,6 @@ const { start: startTour } = useTour(
 }
 .note {
   margin: 12px 0 0;
-}
-/* Nothing below the top panel's last line but its padding. */
-.help-body > :last-child {
-  margin-bottom: 0;
-}
-/* The legend: sample chips, each with what its parts mean. */
-.legend {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  align-items: center;
-  gap: 4px 10px;
-  margin: 12px 0 0;
-}
-.legend dt,
-.legend dd {
-  margin: 0;
-}
-.sample {
-  padding: 1px 6px;
 }
 .note + .note {
   margin-top: 4px;

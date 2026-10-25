@@ -25,7 +25,6 @@ import {
 import { TIERS_PICKS, lastCompareQuery, lastTiersQuery, withoutMeta } from '@/lib/tiersState'
 import { confirmDialog } from '@/composables/useConfirm'
 import { useMeta } from '@/composables/useMeta'
-import { useOpenState } from '@/composables/useOpenState'
 import { useTour } from '@/composables/useTour'
 import AppLink from '@/components/AppLink'
 import BuildSummary from '@/components/BuildSummary.vue'
@@ -42,7 +41,6 @@ import SpeedLineup, { type LineupEntry } from '@/components/SpeedLineup.vue'
 import SpeedMatchups from '@/components/SpeedMatchups.vue'
 import SpeedShare from '@/components/SpeedShare.vue'
 import SpeedVersus from '@/components/SpeedVersus.vue'
-import HelpToggle from '@/components/HelpToggle.vue'
 import TourToggle from '@/components/TourToggle.vue'
 
 // Pokémon's Speeds compared, each with a build of its own (its nature's effect, its stat points, its modifiers), in
@@ -519,20 +517,21 @@ watch(ladderOpen, (on) => {
 })
 onUnmounted(() => (ladderOpen.value = false))
 
-// How to read the page, in a section closed unless opened (remembered), toggled from the heading's row.
-const { open: helpOpen, toggle: toggleHelp } = useOpenState('sproutvgc.compare.helpOpen', false)
 const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 
-// The first visit's tour of the page: its two views, what applies to every one, yours and the opponent (or the list in
-// speed order), a second a side, and where to read more (and take it again).
+// The first visit's tour of the page, its guide to reading it: how a Speed is worked out, its two views, what applies to
+// every one, yours and the opponent (or the list in speed order), more a side and how each fares, the way to the
+// ladder, and taking it again.
 const { start: startTour } = useTour('compare', () => [
   { title: 'tour.compare.introTitle', text: 'tour.compare.intro' },
+  { title: 'tour.speedTitle', text: 'tour.speed' },
   { el: '.folder-tabs', title: 'tour.compare.viewsTitle', text: 'tour.compare.views', side: 'bottom' },
   { el: '.toolbar', title: 'tour.compare.toolbarTitle', text: 'tour.compare.toolbar', side: 'bottom' },
   { el: ['#compare-a', '.side-tabs'], title: 'tour.compare.yoursTitle', text: 'tour.compare.yours', side: 'bottom' },
   { el: '#compare-b', title: 'tour.compare.opponentTitle', text: 'tour.compare.opponent', side: 'bottom' },
   { el: ['.col-add', '.side-adds'], title: 'tour.compare.secondTitle', text: 'tour.compare.second', side: 'top' },
   { el: '.adder', title: 'tour.compare.orderTitle', text: 'tour.compare.order', side: 'bottom' },
+  { el: '.to-ladder', title: 'tour.compare.ladderTitle', text: 'tour.compare.ladder', side: 'top' },
   { el: '.head-tour', title: 'tour.againTitle', text: 'tour.again', side: 'bottom' },
 ])
 // Everything back as the page comes with nothing set, as the speed tiers' Reset all: its whole URL cleared (the
@@ -556,55 +555,13 @@ function resetAll() {
     <!-- The setups the page was left at lately, folded away. -->
     <PageHistory v-if="RECENT_ON" />
     <!-- The heading: the title and its star (saving the Pokémon and their builds to the favorites), the data the
-         common builds come from (a button opening what it is, to pick another; on phones, its icon alone), and how to
-         read the page at the row's end (its icon alone on phones); under it, how to read the page, opened: the formula
-         and what each part says. -->
+         common builds come from (a button opening what it is, to pick another; on phones, its icon alone), and the way
+         to take the tour again, the page's guide to reading it, at the row's end. -->
     <section class="panel page-head">
       <div class="head">
         <h1>{{ t('title.speedCompare') }}<SetupStar /></h1>
         <MetaDialog v-if="metaSpeeds" class="head-meta" />
-        <HelpToggle class="head-help" :open="helpOpen" controls="compare-help" fit @toggle="toggleHelp" />
         <TourToggle class="head-tour" @start="startTour" />
-      </div>
-      <div v-if="helpOpen" id="compare-help" class="help-body panel sunken small">
-        <p class="formula muted">{{ t('speed.formula') }}</p>
-        <!-- What the view shown has: yours against opponents, or the speed order. -->
-        <dl class="help-options">
-          <dt>{{ t('compare.mode') }}</dt>
-          <dd class="muted">{{ t('compare.helpMode') }}</dd>
-          <template v-if="mode === 'vs'">
-            <dt>{{ t('compare.helpTeamsLabel') }}</dt>
-            <dd class="muted">{{ t('compare.helpTeams') }}</dd>
-          </template>
-          <template v-else>
-            <dt>{{ t('compare.helpListLabel') }}</dt>
-            <dd class="muted">{{ t('compare.helpList') }}</dd>
-          </template>
-          <dt>{{ t('compare.helpPlacesLabel') }}</dt>
-          <dd class="muted">{{ t('compare.helpPlaces') }}</dd>
-          <dt>{{ t('compare.common') }}</dt>
-          <dd class="muted">{{ t('compare.helpCommon') }}</dd>
-          <template v-if="mode === 'vs'">
-            <template v-if="metaSpeeds">
-              <dt>{{ t('compare.helpSetsLabel') }}</dt>
-              <dd class="muted">{{ t('compare.helpSets') }}</dd>
-            </template>
-            <dt>{{ t('compare.helpAgainstLabel') }}</dt>
-            <dd class="muted">{{ t('compare.helpAgainst') }}</dd>
-            <dt>{{ t('compare.matchups') }}</dt>
-            <dd class="muted">{{ t('compare.helpMatchups') }}</dd>
-            <dt>{{ t('compare.both') }}</dt>
-            <dd class="muted">{{ t('compare.helpBoth') }}</dd>
-            <dt>{{ t('compare.toLadder') }}</dt>
-            <dd class="muted">{{ t('compare.helpLadder') }}</dd>
-          </template>
-          <template v-else>
-            <dt>{{ t('compare.ties') }}</dt>
-            <dd class="muted">{{ t('compare.tiesNote') }}</dd>
-          </template>
-          <dt>{{ t('speed.mod.trickroom') }}</dt>
-          <dd class="muted">{{ t('compare.trickroomTip') }}</dd>
-        </dl>
       </div>
     </section>
 
@@ -979,8 +936,7 @@ function resetAll() {
 
 <style scoped>
 /* The heading's row: the title and its star, the data shown (its dataset cut short first when the row's tight; on
-   phones, its icon alone), then how to read the page taking what's left, at its end (its words when they fit, else its
-   icon alone; on phones, always its icon alone). */
+   phones, its icon alone), then the way to take the tour again, at its end. */
 .head {
   display: flex;
   flex-wrap: wrap;
@@ -996,33 +952,9 @@ function resetAll() {
 .head-meta {
   flex: 0 1 auto;
 }
-/* How to read the page, in a well under the heading. */
-.help-body {
-  margin: 12px 0 0;
-  padding: 8px 10px;
-}
-.help-body > p {
-  margin: 0 0 8px;
-}
-.help-options {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 2px 10px;
-  margin: 0;
-}
-.help-options dt {
-  font-weight: bold;
-}
-.help-options dd {
-  margin: 0;
-}
-@media (max-width: 720px) {
-  .help-options {
-    grid-template-columns: 1fr;
-  }
-  .help-options dd {
-    margin-bottom: 4px;
-  }
+/* Taking the tour again, at the row's end. */
+.head-tour {
+  margin-left: auto;
 }
 /* The toolbar under the view's tabs: Trick Room, the teams' actions, and the clear at the row's end. */
 .toolbar {

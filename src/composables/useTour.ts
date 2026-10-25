@@ -4,8 +4,8 @@ import 'driver.js/dist/driver.css'
 import { t, type MessageKey } from '@/i18n'
 
 // A page's first-visit tour (driver.js): a few steps, each a popover over a part of the page, dismissable at any time,
-// and not shown again once dismissed or finished (saved under `sproutvgc.tour.<page>`). The page's help can start it
-// again (`start`).
+// and not shown again once dismissed or finished (saved under `sproutvgc.tour.<page>`): the page's guide to reading it,
+// taken again from the icon by its heading (`start`, `TourToggle`).
 
 export interface TourStep {
   // What the step points at: the first of these selectors with an element on screen (so a step can point at yours'
@@ -14,6 +14,8 @@ export interface TourStep {
   el?: string | string[]
   title: MessageKey
   text: MessageKey
+  /** The text's placeholders. */
+  params?: Record<string, string | number>
   side?: Side
 }
 
@@ -59,7 +61,7 @@ export function useTour(page: string, steps: () => TourStep[], ready: WatchSourc
       if (s.el && !element) continue
       list.push({
         element,
-        popover: { title: t(s.title), description: t(s.text), side: s.side, align: 'start' },
+        popover: { title: t(s.title), description: t(s.text, s.params), side: s.side, align: 'start' },
       })
     }
     if (!list.length) return

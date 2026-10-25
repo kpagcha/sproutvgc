@@ -983,17 +983,12 @@ export const messages = {
   'meta.cutoffsNote':
     "Teams weighted by their players' rating: each counts those rated above its cutoff most; All players counts every team the same.",
   'speed.intro': 'The Pokémon of Regulation {reg} by their Speed stat.',
-  'speed.formula':
-    'Speed is base Speed, plus its stat points (up to 32), plus 20, times 1.1 or 0.9 for a nature that raises or lowers it, rounded down.',
   'speed.show': 'Show',
   'speed.meta': 'Top {n} by usage',
   'speed.all': 'Every Pokémon',
   'speed.slice.top': 'the top {n}',
   'speed.slice.all': 'every Pokémon',
-  'speed.showDesc': 'The most used Pokémon, or every Pokémon of the regulation.',
   'speed.viewLabel': 'View',
-  'speed.viewDesc':
-    'By Pokémon: a row per Pokémon at its most common Speed, its builds marked on it. By build: a row per build its sets run, at its Speed, as a ladder. Fastest possible: at Max+ (Slowest possible, at Min−, under Trick Room), with every Speed ability it can have among the boosts.',
   'speed.view.ladder': 'By build',
   'speed.view.charts': 'By Pokémon',
   'speed.view.max': 'Fastest possible',
@@ -1020,7 +1015,6 @@ export const messages = {
   'speed.mod.trickroom': 'Trick Room',
   'speed.modTip.trickroom': 'The slowest move first: the ladder turns over.',
   'speed.modifiers': 'Modifiers',
-  'speed.modifiersTip': 'Speed as it would be for everyone shown under Tailwind, a Choice Scarf, a stat stage…',
   'speed.mod.tailwind': 'Tailwind ×2',
   'speed.mod.scarf': 'Choice Scarf ×1.5',
   'speed.mod.paralysis': 'Paralysis ×0.5',
@@ -1040,52 +1034,58 @@ export const messages = {
   'tour.done': 'Done',
   'tour.progress': '{current} of {total}',
   'tour.againTitle': 'Take it again',
-  'tour.again':
-    'This button takes the tour again. How to read this, beside it, explains every option and part of the page.',
+  'tour.again': 'This button takes the tour again, whenever you need a reminder of what the page shows.',
+  'tour.speedTitle': 'A Speed',
+  'tour.speed':
+    'Speed is base Speed, plus its stat points (up to 32), plus 20, times 1.1 or 0.9 for a nature that raises or lowers it, rounded down. The faster moves first; at the same Speed, either does, at random each turn.',
   'tour.tiers.introTitle': 'Speed tiers',
   'tour.tiers.intro':
     "Who moves first: the regulation's Pokémon in Speed order, at the Speeds players run. A quick look around; close it at any time.",
   'tour.tiers.choicesTitle': 'Who and how',
   'tour.tiers.choices':
-    "Who's shown (the most used, or every Pokémon) and the view: a row per Pokémon, a row per build, or each at the fastest it can be.",
+    "Who's shown: the most used, or every Pokémon of the regulation. The view: a row per Pokémon at its most common Speed, its builds marked on it; a row per build its sets run, at its Speed; or each at the fastest it can be (the slowest, under Trick Room).",
   'tour.tiers.optionsTitle': 'Options',
   'tour.tiers.options':
-    'Speed items and abilities as rows of their own, Trick Room turning the order over, and modifiers for everyone shown: Tailwind, a Choice Scarf, paralysis, stat stages.',
+    "Boosts: the items and abilities their sets run that change Speed (Choice Scarf, Unburden, Swift Swim…), a row of their own. Megas, at their Mega's Speed. Trick Room turning the order over, and modifiers for everyone shown: Tailwind, a Choice Scarf, paralysis, stat stages.",
   'tour.tiers.findTitle': 'Find a Pokémon',
-  'tour.tiers.find':
-    'Finds one on the ladder and shows every build and boost it has, however rare; up to six, to see them together. Press / to jump here.',
+  'tour.tiers.find': 'Finds one on the ladder; up to six, to see them together, alone with Only. Press / to jump here.',
+  'tour.tiers.findSets':
+    "Finds one on the ladder; up to six, to see them together, alone with Only. Builds and boosts under {pct} of a Pokémon's sets are left out, but for those you find: every one they have, and every Speed ability they can. Press / to jump here.",
   'tour.tiers.filtersTitle': 'Filters',
   'tour.tiers.filters': 'Only the Pokémon of a type, or running an ability or item.',
   'tour.tiers.rowTitle': 'A row',
   'tour.tiers.row':
-    'Its Speed at the left (tap it to pick it, and copy it), a mark at each Speed its sets run, taller the more common, over the stretch it could reach.',
+    "Its Speed at the left (tap it to pick it, and copy it); under its name, the nature's effect, its stat points and the share of its sets running them. A mark at each Speed its sets run, taller the more common, over the stretch it could reach; a boost's row, with the share of its sets running it.",
   'tour.tiers.rowRanges': 'A row per base Speed: its Pokémon, and a bar from the slowest they can be to the fastest.',
   'tour.tiers.yoursTitle': 'Your Pokémon',
   'tour.tiers.yours':
-    'Pick yours to place it on the ladder with its own build and see how often it moves first. Then tap any row for the points it needs to move before it.',
+    'Pick yours, then its nature and points, or in a tap one of the builds players run: it goes on the ladder with how often it moves first, by usage, and the rest become its opponents.',
+  'tour.tiers.vsTitle': 'Against one',
+  'tour.tiers.vs':
+    "Tap a row's Pokémon, or one of its marks, to see whether yours moves first and the points it needs to. Compare side by side, from yours' card, puts both on a page of their own: every nature, the builds players run, and modifiers for each.",
   'tour.compare.introTitle': 'Compare speeds',
   'tour.compare.intro':
     'Yours against opponents, or any Pokémon in the order they move. A quick look around; close it at any time.',
   'tour.compare.viewsTitle': 'Two views',
   'tour.compare.views': 'Yours against opponents, up to six a side, or a list of up to 20 Pokémon in speed order.',
   'tour.compare.toolbarTitle': 'For every one',
-  'tour.compare.toolbar': 'Trick Room turns the order over; swap the teams, or clear them.',
+  'tour.compare.toolbar': 'Trick Room turns the order over, the slower moving first; swap the teams, or clear them.',
   'tour.compare.yoursTitle': 'Yours',
   'tour.compare.yours':
-    'Pick yours and set its nature and points, or in a tap one of the builds players run, plus modifiers of its own.',
+    'Pick yours and set its nature and points, or in a tap one of the builds its sets run most, plus modifiers of its own. To move first: the points each side needs to move before the other with each kind of nature, the rest of its build as it is.',
   'tour.compare.opponentTitle': 'The opponent',
   'tour.compare.opponent':
-    "Its Speed isn't known, so it's at every set players run: how often yours moves first, and the points it needs to move before them.",
+    "Its Speed isn't known, so it's at every set players run, each counting as often as it's run: how often yours moves first, a chart of every Speed they reach, and the points yours needs to move before the most common and before them all. Tapping one of its builds, or setting its nature or points, puts it at that build.",
   'tour.compare.secondTitle': 'Up to six a side',
   'tour.compare.second':
-    'Add more to either team, up to six, and see how each fares against each, in the order they move.',
+    'Add more to either team, up to six, one of each species: they line up in the order they move, and each of yours against each opponent shows which moves first and by how much; tap one for the two alone. Against two, what each of yours takes to move before both.',
   'tour.compare.orderTitle': 'The list',
-  'tour.compare.order': 'Add Pokémon, up to 20, each at a build of its own: they line up in the order they move.',
+  'tour.compare.order':
+    'Add Pokémon, up to 20, each at a build of its own (the same one more than once, if you like): they line up in the order they move, numbered, those as fast sharing a number, marked =.',
+  'tour.compare.ladderTitle': 'On the ladder',
+  'tour.compare.ladder':
+    'Your Pokémon on the speed tiers as yours, with its build, and the opponent found there; with two on a team, you choose which.',
   'speed.help': 'How to read this',
-  'speed.helpYours':
-    'Placed on the ladder with its own build, with how often it moves first, by usage; the rest become its opponents.',
-  'speed.helpOpponents': 'Tap one to see whether yours moves first, and the points it needs to.',
-  'speed.helpCompare': 'Both on a page of their own: every nature, the builds players run, and modifiers for each.',
   'speed.count': '{n} Pokémon',
   'speed.yours': 'Your Pokémon',
   'speed.yoursPick': 'Pick a Pokémon',
@@ -1184,15 +1184,9 @@ export const messages = {
   'speed.megas': 'Megas',
   'speed.stageShort': 'Speed {stage}',
   'speed.active': 'Shown',
-  'speed.megasDesc': "Mega Evolutions, at their Mega's Speed.",
   'speed.boostsDesc': 'Items and abilities their sets run that change Speed: Choice Scarf, Unburden, Swift Swim…',
   'speed.leftOutNote':
     "Builds, items and abilities under {pct} of a Pokémon's sets are left out, but for the Pokémon you find: they show all of them, and every Speed ability they can have, however few run them.",
-  'speed.legendChip':
-    "The nature's effect on Speed, stat points in Speed and the share of its sets running them, whatever the nature; under {pct}, left out",
-  'speed.legendBoostLabel': 'Choice Scarf ×1.5',
-  'speed.legendBoost':
-    "An item or ability its sets run that changes Speed, with the share of its sets running it: a row of its own, at each of its Speed builds in By build, as the data doesn't say which builds go with it",
   'speed.whenShort.itemLost': 'Item gone',
   'speed.whenShort.status': 'Statused',
   'speed.build': '{points} points and {nature}{natures}',
@@ -1211,11 +1205,6 @@ export const messages = {
     "Mega Evolutions are at their Mega's Speed. On the turn one Mega Evolves, it still moves at its base form's.",
   'scroll.back': 'Scroll back',
   'scroll.more': 'Scroll for more',
-  'compare.helpCommon':
-    'The Speed builds its sets run most in the snapshot shown, by nature and points: a tap sets one.',
-  'compare.helpAgainstLabel': 'To move first',
-  'compare.helpAgainst':
-    'The Speed points each side needs to move before the other with each kind of nature, the rest of its build as it is.',
   'picker.close': 'Close',
   'picker.clear': 'Clear',
   'picker.byUsage': 'By usage',
@@ -1258,24 +1247,7 @@ export const messages = {
   'compare.mode.vs': 'Yours vs opponents',
   'compare.mode.vsShort': 'Versus',
   'compare.mode.order': 'Speed order',
-  'compare.helpMode':
-    'Yours against opponents, up to six a side, or any Pokémon at all (up to 20) in the order they move.',
-  'compare.helpPlacesLabel': 'Order',
-  'compare.helpPlaces':
-    'With more than two, they line up in the order they move, numbered, once none is open for changing. Those as fast share a number, marked =: either moves first, at random.',
-  'compare.helpTeamsLabel': 'Six a side',
-  'compare.helpTeams':
-    "Add more to either team under its panel, up to six. A team has one of each species, its formes and Megas included: one on it shows greyed out in its other slots' lists (the other team can still have it).",
-  'compare.helpListLabel': 'The list',
-  'compare.helpList':
-    'Up to 20 Pokémon, the same one more than once if you like (at different builds, say). Confirm, or tapping its band again, puts one away.',
-  'compare.helpBoth':
-    'Against two opponents, what each of yours takes to move before both: before the one of them that moves first.',
-  'compare.helpLadder':
-    'Your Pokémon there as yours, with its build, and the opponent found on the ladder; with two on a team, you choose which.',
   'compare.ladderYours': 'As yours',
-  'compare.helpMatchups':
-    'Each of yours against each opponent: which moves first, and by how much Speed. Tap one to see the two alone.',
   'compare.addYours': 'Add another of yours',
   'compare.addOpponent': 'Add another opponent',
   'compare.addSecondShort': 'Add another',
@@ -1301,9 +1273,6 @@ export const messages = {
   'compare.againstCommon': "To move first against {name}'s most common Speed, {speed}",
   'compare.againstAll': 'To move first against every set of {name}, at {speed}',
   'compare.setsTag': 'Sets',
-  'compare.helpSetsLabel': 'Every set',
-  'compare.helpSets':
-    "An opponent's Speed isn't known, so it's at every set the snapshot has, each counting as often as it's run: how often yours moves first against them, a chart of every Speed they reach and what yours takes to move before the most common and before them all. Tapping one of its builds, or changing its nature or points, sets it to one build.",
   'compare.spreadNote': 'Most common: {speed}, on {pct} of its sets.',
   'compare.commonSpeeds': "{name}'s common Speeds",
   'compare.colSpeed': 'Speed',
