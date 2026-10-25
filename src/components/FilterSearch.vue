@@ -30,7 +30,7 @@ import TypeIcon from '@/components/TypeIcon'
 // ability, a move's category… `searchTerms.ts`), listed under the box with how many of the list each would leave
 // (`count`; those leaving none left out); the placeholder says what it searches by. Picking one, by clicking it or with
 // the arrow keys and Enter, adds it to the filters (`filters`, kept in the URL by the page) and clears the text.
-// Plainly the filters are chips in the box before the text, all to pass, a chip's cross taking one off again, as
+// Plainly the filters are chips under the box, all to pass, a chip's cross taking one off again, as
 // Backspace in an empty box takes off the last. In the advanced mode (its button beside the box, one choice for every
 // list, `useAdvancedFilters`; on too while the filters need it) they're groups under the box (`FilterGroups`), joined
 // by AND or OR, any negated, each adding filters from the explicit choices of what to filter by and then the entry,
@@ -129,17 +129,16 @@ async function toggleAdvanced() {
   }
   setAdvanced(!advanced.value)
 }
-/** The chips in the box: the plain filters. */
+/** The chips under the box: the plain filters. */
 const chips = computed(() => (advanced.value ? [] : (filters.value.groups[0]?.terms ?? [])))
 
 const input = useTemplateRef('input')
-/** Whether the placeholder fits in the box, measured with no chips in it (they leave the text less room, and hide the
- * placeholder anyway); else it's under the box. */
+/** Whether the placeholder fits in the box; else it's under the box. */
 const fits = ref(true)
 let canvas: CanvasRenderingContext2D | null | undefined
 function measure() {
   const el = input.value
-  if (!el || chips.value.length) return
+  if (!el) return
   canvas ??= document.createElement('canvas').getContext('2d')
   if (!canvas) return
   const style = getComputedStyle(el)
@@ -154,7 +153,7 @@ onMounted(() => {
   document.fonts?.ready.then(measure)
 })
 onBeforeUnmount(() => resized?.disconnect())
-watch([placeholder, () => chips.value.length], measure, { flush: 'post' })
+watch(placeholder, measure, { flush: 'post' })
 defineExpose({ focus: (options?: FocusOptions) => input.value?.focus(options) })
 const picker = useTermPicker({
   text,
@@ -218,38 +217,15 @@ const listId = useId()
 <template>
   <div class="filter-search">
     <div class="search-row">
-      <!-- The box: the plain filters as chips, then the text. Clicking anywhere in it is typing in it. -->
+      <!-- The box: the text. Clicking anywhere in it is typing in it. -->
       <div class="box" @click="input?.focus()">
         <Search class="glass" :size="16" :stroke-width="2.5" aria-hidden="true" />
-        <span v-for="(term, i) in chips" :key="`${term.kind}:${term.id}:${i}`" class="chip">
-          <TypeIcon v-if="term.kind === 'type'" :type="term.id" />
-          <ItemIcon v-else-if="term.kind === 'item'" :id="term.id as ItemId" :scale="0.67" />
-          <PokemonIcon v-else-if="term.kind === 'pokemon'" :id="term.id as PokemonId" :scale="0.75" />
-          <DetailMenu
-            v-if="details && term.kind === 'pokemon'"
-            :term
-            :candidates="() => details!(term.id as PokemonId)"
-            :count="countWith(term)"
-            :label="t('filter.details.edit', { name: refName(term as RefTerm) })"
-            @change="change(term, $event)"
-            >{{ termName(term) }}</DetailMenu
-          >
-          <span v-else-if="term.kind !== 'type'">{{ termName(term) }}</span>
-          <button
-            type="button"
-            class="remove"
-            :aria-label="t('filter.remove', { name: termName(term) })"
-            @click.stop="remove(term)"
-          >
-            ×
-          </button>
-        </span>
         <input
           ref="input"
           v-model="typed"
           type="text"
           class="text"
-          :placeholder="chips.length || !fits ? '' : placeholder"
+          :placeholder="fits ? placeholder : ''"
           :aria-label="placeholder"
           :aria-keyshortcuts="hotkey"
           role="combobox"
@@ -292,6 +268,33 @@ const listId = useId()
       </button>
     </div>
     <p v-if="!fits" class="hint muted" aria-hidden="true">{{ placeholder }}</p>
+    <!-- The plain filters, as chips under the box. -->
+    <div v-if="chips.length" class="chips">
+      <span v-for="(term, i) in chips" :key="`${term.kind}:${term.id}:${i}`" class="chip">
+        <TypeIcon v-if="term.kind === 'type'" :type="term.id" />
+        <ItemIcon v-else-if="term.kind === 'item'" :id="term.id as ItemId" :scale="0.67" />
+        <PokemonIcon v-else-if="term.kind === 'pokemon'" :id="term.id as PokemonId" :scale="0.75" />
+        <DetailMenu
+          v-if="details && term.kind === 'pokemon'"
+          :term
+          :candidates="() => details!(term.id as PokemonId)"
+          :count="countWith(term)"
+          :label="t('filter.details.edit', { name: refName(term as RefTerm) })"
+          @change="change(term, $event)"
+          >{{ termName(term)
+          }}<span v-if="!term.with?.length" class="with-hint">{{ t('filter.details.add') }}</span></DetailMenu
+        >
+        <span v-else-if="term.kind !== 'type'">{{ termName(term) }}</span>
+        <button
+          type="button"
+          class="remove"
+          :aria-label="t('filter.remove', { name: termName(term) })"
+          @click.stop="remove(term)"
+        >
+          ×
+        </button>
+      </span>
+    </div>
     <FilterGroups v-if="advanced" v-model="filters" class="groups" :kinds :meta :count :details />
   </div>
 </template>
@@ -305,7 +308,7 @@ const listId = useId()
   align-items: center;
   gap: 8px;
 }
-/* The box, as the site's search fields are: the chips and the text in a row, wrapping. */
+/* The box, as the site's search fields are: the glass and the text. */
 .box {
   position: relative;
   display: flex;
@@ -366,6 +369,19 @@ const listId = useId()
   .hotkey {
     display: none;
   }
+}
+/* A Pokémon's chip not narrowed to a build yet: "with…" after its name, saying its name opens the menu that does. */
+.with-hint {
+  margin-left: 6px;
+  font-size: 0.9em;
+  color: var(--muted);
+}
+/* The plain filters, a row of chips under the box, wrapping. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 0;
 }
 .chip {
   display: inline-flex;
