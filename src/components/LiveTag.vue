@@ -35,9 +35,11 @@ const updated = computed(() => ago(props.live.updated, locale.value))
   margin-right: 0.5em;
   color: var(--muted);
 }
+/* On the line's baseline by its word, not its dot (which, first and with no text, would set it, dropping the word below
+   the rest): the dot centered on its own, out of the baseline's reckoning. */
 .live-mark {
   display: inline-flex;
-  align-items: center;
+  align-items: baseline;
   gap: 0.35em;
   font-weight: bold;
   text-transform: uppercase;
@@ -45,6 +47,7 @@ const updated = computed(() => ago(props.live.updated, locale.value))
   color: var(--bad);
 }
 .dot {
+  align-self: center;
   width: 0.55em;
   height: 0.55em;
   border-radius: 50%;
