@@ -1376,6 +1376,7 @@ export const messages = {
   'usageMon.movepool': 'Whole movepool',
   'usageMon.setsMoves': 'Only the moves its sets run',
   'usageMon.items': 'Items',
+  'usageMon.itemsMegas': "Its Megas' teams counted too, each holding its Mega Stone.",
   'usageMon.abilities': 'Abilities',
   'listOptions.title': 'List options',
   'listOptions.descriptions': 'Show descriptions',

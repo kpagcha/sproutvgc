@@ -2,7 +2,8 @@
 import { computed, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp, Info } from '@lucide/vue'
-import { ability, available, availableIds, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
+import { ability, available, availableIds, move, pokemon, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
+import { ITEMS } from '@/data/items'
 import { MOVES } from '@/data/moves'
 import {
   POKEMON,
@@ -187,8 +188,29 @@ const abilities = computed(() =>
     .map((a) => ({ key: a, ref: ability(a), share: m.value?.abilities?.find((x) => x.id === a)?.share }))
     .sort((a, b) => (b.share ?? 0) - (a.share ?? 0)),
 )
-const items = computed(() => (m.value?.items ?? []).map((x) => ({ id: x.id })))
-const itemShares = computed(() => Object.fromEntries((m.value?.items ?? []).map((x) => [x.id, x.share])))
+// Its items. The data counts a Mega apart from its base forme, its Mega Stone only on the Mega's sets, so a base forme's
+// items count its Megas' teams too, each holding its stone: every item's share out of both's (their usage added up, a
+// team having one of them at most).
+const megaStones = computed(() => {
+  const d = data.value
+  if (!d || !m.value?.usage) return []
+  return (Object.keys(ITEMS) as ItemId[]).flatMap((i) => {
+    const mega = ITEMS[i].megas?.[id.value]
+    const usage = mega ? d[mega]?.usage : undefined
+    return usage ? [{ id: i, usage }] : []
+  })
+})
+const itemShares = computed(() => {
+  const own = m.value?.items ?? []
+  const base = m.value?.usage ?? 0
+  const total = base + megaStones.value.reduce((sum, x) => sum + x.usage, 0)
+  if (!megaStones.value.length) return Object.fromEntries(own.map((x) => [x.id, x.share]))
+  return Object.fromEntries([
+    ...own.map((x) => [x.id, x.share === undefined ? undefined : (x.share * base) / total]),
+    ...megaStones.value.map((x) => [x.id, x.usage / total]),
+  ])
+})
+const items = computed(() => Object.keys(itemShares.value).map((x) => ({ id: x as ItemId })))
 
 // Its most common exact spreads, a row each: its share, its nature, and a bar per stat of the points put there (out of
 // `MAX_POINTS`), the one its nature raises in the good color, the one it lowers outlined in the bad; on hover, the stat
@@ -680,6 +702,7 @@ const sections = computed(() =>
             <h2>{{ t('usageMon.items') }}</h2>
             <ListOptions />
           </div>
+          <p v-if="megaStones.length" class="muted small builds-of">{{ t('usageMon.itemsMegas') }}</p>
           <ItemList :items="items" :shares="itemShares" :no-descriptions="!showDescriptions" />
         </section>
       </div>
