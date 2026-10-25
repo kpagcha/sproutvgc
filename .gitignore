@@ -41,3 +41,6 @@ __screenshots__/
 # Claude Code
 .claude/settings.local.json
 CLAUDE.local.md
+
+# The tournaments under way, read before each deploy (scripts/liveTournaments.ts), never committed
+src/data/generated/live/

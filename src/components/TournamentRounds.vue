@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import type { Round, Standing } from '@/data/tournaments'
+import { pending, type Round, type Standing } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
 import { passesGroups } from '@/lib/filterGroups'
 import { fold } from '@/lib/search'
 import type { TermFilters } from '@/lib/searchTerms'
 import { detailsIn, teamHas, TEAM_KINDS } from '@/lib/teamFilters'
-import { bracketOf, recordsBefore } from '@/lib/tournamentStats'
+import { bracketOf, recordsBefore, type Result } from '@/lib/tournamentStats'
 import { useGradualRows } from '@/composables/useGradualRows'
 import { useUrlFilters } from '@/composables/useUrlFilters'
 import AppLink from '@/components/AppLink'
@@ -194,6 +194,16 @@ const sides = (m: Match) =>
     won: m[2] === i + 1,
     lost: m[2] !== 0 && m[2] !== i + 1,
     record: p === null || typeof round.value !== 'number' ? undefined : records.value.get(p),
+    /** Its result's badge: still being played, at an event under way; a bye; won, lost or neither. */
+    result: (pending(m)
+      ? 'pending'
+      : m[2] === i + 1
+        ? m[1] === null
+          ? 'bye'
+          : 'win'
+        : m[2] !== 0
+          ? 'loss'
+          : 'tie') as Result,
   }))
 
 const num = (n: number) => n.toLocaleString(locale.value)
@@ -336,14 +346,9 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
           :class="{ won: side.won, lost: side.lost, hit: hit(side.s) }"
         >
           <template v-if="side.s">
-            <span
-              v-tip="t(`tournaments.resultTip.${side.won ? 'win' : side.lost ? 'loss' : 'tie'}`)"
-              class="result"
-              :class="side.won ? (m[1] === null ? 'bye' : 'win') : side.lost ? 'loss' : 'tie'"
-              >{{
-                t(`tournaments.result.${side.won ? (m[1] === null ? 'bye' : 'win') : side.lost ? 'loss' : 'tie'}`)
-              }}</span
-            >
+            <span v-tip="t(`tournaments.resultTip.${side.result}`)" class="result" :class="side.result">{{
+              t(`tournaments.result.${side.result}`)
+            }}</span>
             <span class="who"
               ><span class="placing num muted">#{{ side.s.placing }}</span>
               <AppLink
@@ -357,7 +362,7 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
             <span v-if="side.s.team.length" class="team" aria-hidden="true">
               <PokemonIcon v-for="(slot, i) in side.s.team" :id="slot[0]" :key="i" />
             </span>
-            <span v-else class="team none muted small">{{ t('tournaments.noList') }}</span>
+            <span v-else class="team" />
           </template>
           <span v-else class="who muted">{{
             side.p === null ? t('tournaments.byeOpponent') : t('tournaments.goneOpponent')
@@ -677,10 +682,6 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.team.none {
-  display: block;
-  white-space: nowrap;
-}
 /* The result as a square badge, as a player's matches have it: won in the good color, lost in the bad. */
 .result {
   grid-area: result;
@@ -699,6 +700,11 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
 .result.loss {
   color: #fff;
   background: var(--bad);
+}
+/* Still being played: dashed, not yet a result. */
+.result.pending {
+  color: var(--muted);
+  border-style: dashed;
 }
 .result.tie,
 .result.bye {

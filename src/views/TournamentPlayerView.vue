@@ -9,6 +9,7 @@ import { cutMarks, medalOf, playerMatches, type CutMark, type PlayerMatch } from
 import AppLink from '@/components/AppLink'
 import CopyPaste from '@/components/CopyPaste.vue'
 import CountryFlag from '@/components/CountryFlag'
+import LiveTag from '@/components/LiveTag.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import SectionNav from '@/components/SectionNav.vue'
 import TeamSets from '@/components/TeamSets.vue'
@@ -137,7 +138,10 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
         </div>
         <p class="facts">
           <span class="record num">{{ record(player.wins, player.losses) }}</span>
-          <span v-tip="t('tournaments.reachedTip')">{{ t(`tournaments.reached.${reached}`) }}</span>
+          <span
+            v-tip="t(event.live && !event.live.completed ? 'tournaments.reachedTipLive' : 'tournaments.reachedTip')"
+            >{{ t(`tournaments.reached.${reached}`) }}</span
+          >
           <span v-if="player.dropped" class="muted">{{
             t('tournaments.droppedAfter', { round: player.dropped })
           }}</span>
@@ -148,6 +152,7 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
           <span>{{ t('meta.regulation', { reg: event.regulation }) }}</span>
           <span>{{ t('tournaments.players', { n: num(event.players) }) }}</span>
         </p>
+        <p v-if="event.live" class="facts small"><LiveTag :live="event.live" /></p>
       </template>
     </div>
 
@@ -196,7 +201,7 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
                 <span v-if="m.opp.team.length" class="team" aria-hidden="true">
                   <PokemonIcon v-for="(slot, i) in m.opp.team" :id="slot[0]" :key="i" />
                 </span>
-                <span v-else class="team none muted small">{{ t('tournaments.noList') }}</span>
+                <span v-else class="team" />
               </template>
               <span v-else class="opponent muted">{{
                 m.result === 'bye' ? t('tournaments.byeOpponent') : t('tournaments.goneOpponent')
@@ -380,6 +385,11 @@ section {
   color: #fff;
   background: var(--bad);
 }
+/* Still being played: dashed, not yet a result. */
+.result.pending {
+  color: var(--muted);
+  border-style: dashed;
+}
 .result.tie,
 .result.bye {
   background: var(--panel-alt);
@@ -414,10 +424,6 @@ section {
 .team {
   display: flex;
   width: calc(6 * 40px);
-}
-.team.none {
-  display: block;
-  white-space: nowrap;
 }
 /* On phones, three lines: the match (the result, a smaller badge, and its round, a smaller label, after it), the
    opponent with their record at the end, then their six, the opponent having the row's width; three a row, in two,

@@ -69,6 +69,22 @@ export interface TournamentEvent {
   winner?: { player: string; country: string; team: string[] }
 }
 
+/** An event under way, or over but not generated yet (its team lists may still be coming): as `TournamentEvent`, read
+ * again on every run (`live`), its standings as they stand, with how far it's got. */
+export interface LiveEvent extends TournamentEvent {
+  live: {
+    /** The rounds played or being played, of all its rounds. */
+    round: number
+    rounds: number
+    /** When its standings last changed, as an ISO time. */
+    updated: string
+    /** Over: its standings final, though not all its team lists may be in. */
+    completed?: true
+    /** Under way, who's first so far, their record, and their Pokémon if known. */
+    leader?: { player: string; country: string; wins: number; losses: number; team: string[] }
+  }
+}
+
 /** An event still to come, as Limitless VGC's list of them has it: no players nor standings yet, its regulation only
  * once announced, and its type told by its name (the list has no type of its own). */
 export interface UpcomingEvent {
@@ -105,11 +121,13 @@ export interface Standing {
 }
 
 /** A round's matches, each its two players by placing (the second null for a bye) and who won: 1 the first, 2 the
- * second, 0 neither (a tie, or not played). Its phase: 1 Day 1's Swiss, 2 Day 2's, 3 the top cut. */
+ * second, 0 neither (a tie, or not played); a match of an event under way still being played has a 1 after them
+ * (neither won yet). Its phase: 1 Day 1's Swiss, 2 Day 2's, 3 the top cut. */
 export interface Round {
   phase: number
-  matches: [number, number | null, 0 | 1 | 2][]
+  matches: Match[]
 }
+export type Match = [number, number | null, 0 | 1 | 2] | [number, number | null, 0, 1]
 
 /** What the dex has, to check the site's names against: a Pokémon's ID by its Limitless ID, or whether an ID exists. */
 export interface Known {
@@ -124,9 +142,30 @@ export interface Known {
 
 type Get = (url: string) => Promise<Buffer | null>
 
+/** What's known of an event before its standings are read: from limitlessvgc.com's list of a regulation's events, or
+ * for one under way, its list of those to come and the standings site's. */
+export type EventInfo = Omit<TournamentEvent, 'teams' | 't' | 'format' | 'day2' | 'topCut' | 'rounds'>
+
 // The standings site's JSON, the little of it read.
 interface ApiTournament {
   round: number
+  completed: number
+  /** Its rounds, Swiss and top cut, all told; when its standings last changed, in UTC. */
+  rounds?: number
+  updated_at?: string
+  type?: string
+  city?: string
+  country?: string | null
+}
+/** An event as the standings site's list of them has it. */
+export interface ApiListed {
+  id: number
+  type: string
+  city: string
+  country: string | null
+  /** When it started, in UTC ("2026-10-24 14:30:00"). */
+  utc_start: string
+  started: number
   completed: number
 }
 interface ApiStanding {
@@ -157,6 +196,8 @@ interface ApiMatch {
   player1: number
   player2: number | null
   winner: number | null
+  /** Whether it's over: 0 for one still being played, at an event under way. */
+  completed?: number
 }
 
 /** Asked to fetch while it mustn't (`offline`): what the event would have needed. */
@@ -184,7 +225,7 @@ export class LimitlessVgc {
     if (this.offline) throw new Offline(url)
     const start = Math.max(Date.now(), this.next)
     this.next = start + GAP_MS
-    await new Promise((wait) => setTimeout(wait, start - Date.now()))
+    await new Promise((wait) => setTimeout(wait, Math.max(0, start - Date.now())))
     this.requests++
     const body = await this.get(url)
     if (!body) throw new Error(`Limitless VGC has no ${url}`)
@@ -272,13 +313,7 @@ export class LimitlessVgc {
     }
   }
 
-  private async read(
-    n: number,
-    info: Omit<TournamentEvent, 'teams' | 't' | 'format' | 'day2' | 'topCut' | 'rounds'>,
-    regulation: string,
-    known: Known,
-    strict: boolean,
-  ) {
+  private async read(n: number, info: EventInfo, regulation: string, known: Known, strict: boolean) {
     // Its page links its standings, by their number there.
     const page = await this.cached(`${SITE}/tournaments/${n}`, `events/${n}.html`)
     const t = Number(page.match(/standings\.limitlessvgc\.com\/(\d+)\/standings/)?.[1])
@@ -290,7 +325,6 @@ export class LimitlessVgc {
         existsSync(path) && (JSON.parse(readFileSync(path, 'utf8')) as { message: ApiTournament }).message.completed
       )
     })()
-    const q = `tournamentId=${t}&division=${DIVISION}`
     const tournament = await this.api<ApiTournament>(
       `tournament?id=${t}&division=${DIVISION}`,
       `${t}/tournament.json`,
@@ -300,7 +334,70 @@ export class LimitlessVgc {
       console.warn(`Limitless VGC's ${info.name} isn't over yet: left out until it is`)
       return null
     }
-    const all = await this.api<ApiStanding[]>(`standings?${q}`, `${t}/standings.json`, !cachedOver)
+    return this.field(t, tournament, info, regulation, known, strict, `${t}`, !cachedOver)
+  }
+
+  /** The events on the standings site under way, and those over within the last `days` days, but for those generated
+   * already (`skip`, by their number there): what `liveEvent` reads. */
+  async underWay(skip: ReadonlySet<number>, days: number): Promise<ApiListed[]> {
+    const listed = await this.api<ApiListed[]>('tournaments', 'live/tournaments.json', true)
+    const since = Date.now() - days * 24 * 60 * 60 * 1000
+    return listed.filter(
+      (l) => l.started && !skip.has(l.id) && (!l.completed || Date.parse(`${l.utc_start.replace(' ', 'T')}Z`) >= since),
+    )
+  }
+
+  /** An event under way (or just over, not generated yet), as it stands: its standings, its rounds so far (a match
+   * still being played marked so) and the team lists published so far, read again on every call but for the team lists,
+   * which don't change once published. Kept apart from the cache of the events generated (`api/live/`), so a final
+   * read of it once it's over isn't of these. Not strict: what the dex hasn't is left out, said so. */
+  async liveEvent(t: number, info: EventInfo, regulation: string, known: Known) {
+    const tournament = await this.api<ApiTournament>(
+      `tournament?id=${t}&division=${DIVISION}`,
+      `live/${t}/tournament.json`,
+      true,
+    )
+    const read = await this.field(t, tournament, info, regulation, known, false, `live/${t}`, true)
+    const updated = tournament.updated_at ? new Date(`${tournament.updated_at.replace(' ', 'T')}Z`) : new Date()
+    const first = read.standings.find((s) => s.placing === 1)
+    const event: LiveEvent = {
+      ...read.event,
+      live: {
+        round: tournament.round,
+        rounds: tournament.rounds ?? tournament.round,
+        updated: updated.toISOString(),
+        ...(tournament.completed ? { completed: true as const } : {}),
+        ...(!tournament.completed &&
+          first && {
+            leader: {
+              player: first.player,
+              country: first.country,
+              wins: first.wins,
+              losses: first.losses,
+              team: first.team.map(([p]) => p),
+            },
+          }),
+      },
+    }
+    // Under way, no one has won yet.
+    if (!tournament.completed) delete event.winner
+    return { ...read, event }
+  }
+
+  /** An event's standings, team lists and rounds, as read into `dir` of the cache (`fresh`, read again), its team lists
+   * always into its own. */
+  private async field(
+    t: number,
+    tournament: ApiTournament,
+    info: EventInfo,
+    regulation: string,
+    known: Known,
+    strict: boolean,
+    dir: string,
+    fresh: boolean,
+  ) {
+    const q = `tournamentId=${t}&division=${DIVISION}`
+    const all = await this.api<ApiStanding[]>(`standings?${q}`, `${dir}/standings.json`, fresh)
     // Its standings, those disqualified left out (they have no placing): their matches stay, their opponents' results
     // standing, against no one.
     const field = all.filter((p): p is ApiStanding & { placement: number } => p.placement !== null)
@@ -320,7 +417,7 @@ export class LimitlessVgc {
     // Its rounds' pairings, likewise.
     await inParallel(
       Array.from({ length: tournament.round }, (_, i) => i + 1),
-      (r) => this.api(`pairings?${q}&round=${r}`, `${t}/pairings/${r}.json`),
+      (r) => this.api(`pairings?${q}&round=${r}`, `${dir}/pairings/${r}.json`, fresh),
     )
 
     const unknown = new Set<string>()
@@ -386,13 +483,14 @@ export class LimitlessVgc {
     const rounds: Record<number, Round> = {}
     const byPlacing = new Map(standings.map((st) => [st.placing, st]))
     for (let r = 1; r <= tournament.round; r++) {
-      const matches = await this.api<ApiMatch[]>(`pairings?${q}&round=${r}`, `${t}/pairings/${r}.json`)
+      const matches = await this.api<ApiMatch[]>(`pairings?${q}&round=${r}`, `${dir}/pairings/${r}.json`)
       const at = (id: number | null) => (id === null ? null : (placingOf.get(id) ?? null))
-      const pairs = matches.flatMap(({ player1, player2, winner }) => {
+      const pairs = matches.flatMap(({ player1, player2, winner, completed }): Match[] => {
         const a = at(player1)
         if (a === null) return []
+        if (completed === 0) return [[a, at(player2), 0, 1]]
         const won = winner === player1 ? 1 : winner !== null && winner === player2 ? 2 : 0
-        return [[a, at(player2), won] as [number, number | null, 0 | 1 | 2]]
+        return [[a, at(player2), won]]
       })
       const playing = pairs.flatMap(([a, b]) => (b === null ? [a] : [a, b])).map((p) => byPlacing.get(p))
       const phase = !playing.length
@@ -433,10 +531,7 @@ export class LimitlessVgc {
 
   /** The regulation's events as its lists give them, one list per type of event (its format on the site is "m-c"),
    * read once a run: through the cache, unless updating. */
-  private lists = new Map<
-    string,
-    Map<number, Omit<TournamentEvent, 'teams' | 't' | 'format' | 'day2' | 'topCut' | 'rounds'>>
-  >()
+  private lists = new Map<string, Map<number, EventInfo>>()
   private async listed(regulation: string) {
     let byEvent = this.lists.get(regulation)
     if (!byEvent) {

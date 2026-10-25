@@ -8,6 +8,7 @@ import { preloadSearch, searchFocus, useSearch } from '@/composables/useSearch'
 import { useSlashFocus } from '@/composables/useSlashFocus'
 import { useMeta } from '@/composables/useMeta'
 import FavoritesPanel from '@/components/FavoritesPanel.vue'
+import LiveTournaments from '@/components/LiveTournaments.vue'
 import MetaHighlights from '@/components/MetaHighlights.vue'
 import RecentPanel from '@/components/RecentPanel.vue'
 import { RECENT_ON } from '@/composables/useRecent'
@@ -19,7 +20,8 @@ import logoUrl from '@/assets/logo.png'
 // areas: Meta first and largest (what the site is most about), its sections buttons (Usage across the top, a box
 // of its four lists' links, its name leading to the Pokémon's, so its moves, abilities and items aren't missed), Tools a
 // column beside it, a row per section, and the quizzes and the dex (its name alone, its lists not to be mistaken for
-// Usage's) a band under them; then the meta at a glance (`MetaHighlights`), the reader's favorites and recently viewed. While searching, the
+// Usage's) a band under them, the tournaments under way a slim line under the search (`LiveTournaments`), when there are some; then the
+// meta at a glance (`MetaHighlights`), the reader's favorites and recently viewed. While searching, the
 // results take the place of all but the search.
 
 const areaById = (id: AreaId) => AREAS.find((a) => a.id === id)!
@@ -98,6 +100,7 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
     </div>
     <SearchResults v-if="results" :query :results />
     <template v-else>
+      <LiveTournaments />
       <!-- Under them, the site's areas, a card each, one under another (where to go), then the meta at a glance (what it's
            about). -->
       <nav class="explore" :aria-label="t('home.explore')">

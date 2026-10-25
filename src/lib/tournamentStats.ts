@@ -4,7 +4,7 @@
 // teams did in those rounds' matches (byes and matches neither won left out: they say nothing of the teams).
 
 import type { PokemonId } from '@/data/dex'
-import type { EventUsage, Round, Slot, Standing } from '@/data/tournaments'
+import { pending, type EventUsage, type Round, type Slot, type Standing } from '@/data/tournaments'
 
 export type Day = 'all' | 'day2' | 'cut'
 /** The days, as their choice goes: the whole event, the default, then Day 2 and the top cut. */
@@ -209,8 +209,8 @@ export function chartReach(stats: readonly PokemonStat[], day: Day): number {
 export const pinned = (s: PokemonStat, reach: number) => Math.abs((s.winRate ?? 0.5) - 0.5) > reach + 1e-9
 
 /** How a player's match went: won, lost, neither (a tie, or both given a loss), or a bye, a round won with no one to
- * play. */
-export type Result = 'win' | 'loss' | 'tie' | 'bye'
+ * play; at an event under way, still being played. */
+export type Result = 'win' | 'loss' | 'tie' | 'bye' | 'pending'
 
 export interface PlayerMatch {
   round: number
@@ -239,8 +239,15 @@ export function playerMatches(rounds: Record<number, Round>, placing: number): P
       const [a, b, won] = m
       const first = a === placing
       const opponent = first ? b : a
-      const result: Result =
-        opponent === null && won === 1 ? 'bye' : won === 0 ? 'tie' : (won === 1) === first ? 'win' : 'loss'
+      const result: Result = pending(m)
+        ? 'pending'
+        : opponent === null && won === 1
+          ? 'bye'
+          : won === 0
+            ? 'tie'
+            : (won === 1) === first
+              ? 'win'
+              : 'loss'
       return [
         { round, phase: r.phase, opponent, result, key: `${a}-${b}`, ...(r.phase === 3 && { left: last - round }) },
       ]
@@ -285,7 +292,9 @@ export function cutMarks(rounds: Record<number, Round>, standings: readonly Plac
       played.set(p, [...(played.get(p) ?? []), i])
     }
     for (const [i, { r }] of stage.entries())
-      for (const [a, b, won] of r.matches) {
+      for (const m of r.matches) {
+        if (pending(m)) continue
+        const [a, b, won] = m
         add(a, won === 0 ? 1 : won === 1 ? 3 : 0, i)
         if (b !== null) add(b, won === 0 ? 1 : won === 2 ? 3 : 0, i)
       }
@@ -303,7 +312,8 @@ export function cutMarks(rounds: Record<number, Round>, standings: readonly Plac
     let holes = 0
     for (const [i, { round, r }] of stage.entries()) {
       const m = r.matches.find(([a, b]) => a === placing || b === placing)
-      if (!m) {
+      // A match still being played, as one the data hasn't: it could be a win.
+      if (!m || pending(m)) {
         holes++
         continue
       }
@@ -373,7 +383,9 @@ export function recordsBefore(rounds: Record<number, Round>, round: number): Map
   }
   for (const [n, r] of Object.entries(rounds)) {
     if (Number(n) >= round) continue
-    for (const [a, b, won] of r.matches) {
+    for (const m of r.matches) {
+      if (pending(m)) continue
+      const [a, b, won] = m
       if (won === 0) {
         add(a, 2)
         if (b !== null) add(b, 2)

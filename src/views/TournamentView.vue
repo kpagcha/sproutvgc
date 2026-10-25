@@ -52,6 +52,7 @@ import BandTabs, { LIFT } from '@/components/BandTabs.vue'
 import BuildCards from '@/components/BuildCards.vue'
 import FilterSearch from '@/components/FilterSearch.vue'
 import CountryFlag from '@/components/CountryFlag'
+import LiveTag from '@/components/LiveTag.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import SectionNav from '@/components/SectionNav.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
@@ -236,6 +237,14 @@ const fieldDay2 = computed(
   () => (standings.value ?? []).filter((s) => s.team.length && s.day2).length / (fieldTeams.value || 1),
 )
 const playerAt = (placing: number) => standings.value?.find((s) => s.placing === placing)
+/** At an event under way (or not generated for good yet), whether no team list is out yet, and, with some, that what's
+ * counted is partial. */
+const noTeams = computed(() => !!event.value?.live && !!standings.value && !fieldTeams.value)
+const partialTeams = computed(() =>
+  event.value?.live && standings.value && fieldTeams.value
+    ? t('tournaments.partialTeams', { n: num(fieldTeams.value), of: num(standings.value.length) })
+    : '',
+)
 
 const {
   sorted: sortedStats,
@@ -480,7 +489,10 @@ const parts = computed(() => {
 })
 /** Day 1's players, while they're folded away: how many, for the way to them. */
 const day1Folded = computed(() =>
-  narrowed.value || day1Shown.value ? 0 : (parts.value.find((p) => p.key === 'day1')?.rows.length ?? 0),
+  // Alone (Day 1 still being played, at an event under way), not folded.
+  narrowed.value || day1Shown.value || parts.value.length < 2
+    ? 0
+    : (parts.value.find((p) => p.key === 'day1')?.rows.length ?? 0),
 )
 const shownParts = computed(() => (day1Folded.value ? parts.value.filter((p) => p.key !== 'day1') : parts.value))
 /** The standings' list: each part's heading, when there's more than one (with its first player, for the rows' shape),
@@ -512,7 +524,7 @@ const teamsWith = (pid: PokemonStat['id']) =>
  * shown. */
 const sections = computed(() => [
   { id: 'sec-pokemon', label: t('tournaments.pokemonStatsHead') },
-  ...(standings.value && rounds.value ? [{ id: 'sec-movers', label: t('tournaments.movers') }] : []),
+  ...(standings.value && rounds.value && !noTeams.value ? [{ id: 'sec-movers', label: t('tournaments.movers') }] : []),
   ...(standoutList.value.length ? [{ id: 'sec-standouts', label: t('tournaments.standouts') }] : []),
 ])
 
@@ -552,6 +564,7 @@ const ordinal = (n: number) => `#${n}`
         <span>{{ t('meta.regulation', { reg: event.regulation }) }}</span>
         <span>{{ t('tournaments.players', { n: num(event.players) }) }}</span>
       </p>
+      <p v-if="event.live" class="live"><LiveTag :live="event.live" /></p>
       <p v-if="metaOf" class="links">
         <AppLink :to="{ name: 'rankings', query: { meta: metaOf } }">{{ t('tournaments.eventMeta') }} ›</AppLink>
       </p>
@@ -718,234 +731,245 @@ const ordinal = (n: number) => `#${n}`
           <span v-if="phone" v-tip="about" :class="{ tipped: about }">{{ t('tournaments.pokemonStatsHead') }}</span>
           <span v-else v-tip.right="about" :class="{ tipped: about }">{{ t('tournaments.pokemonStatsHead') }}</span>
         </h2>
-        <div class="stats-controls">
-          <SegmentedControl
-            v-model="day"
-            class="day-choice"
-            :label="t('tournaments.teamsOf')"
-            :options="DAYS.map((d) => ({ value: d, label: t(`tournaments.day.${d}`) }))"
-          />
-          <!-- How many the chart shows, in a drop-down beside the day's choice. -->
-          <OptionsMenu v-if="chartable.length > CHART_MIN" class="chart-options" :title="t('tournaments.chartOptions')">
-            <label class="chart-n">
-              <span class="muted">{{ t('tournaments.chartShown') }}</span>
-              <input
-                type="range"
-                :min="CHART_MIN"
-                :max="chartable.length"
-                :value="draggedN ?? chartN"
-                @input="draggedN = Number(($event.target as HTMLInputElement).value)"
-                @change="releaseN"
-              />
-              <span class="chart-n-value">
+        <!-- Under way: with no team list out yet, nothing to count; with some, what's counted is partial, said so. -->
+        <p v-if="noTeams" class="muted">{{ t('tournaments.noTeamsYet') }}</p>
+        <template v-else>
+          <p v-if="partialTeams" class="partial small">{{ partialTeams }}</p>
+          <div class="stats-controls">
+            <SegmentedControl
+              v-model="day"
+              class="day-choice"
+              :label="t('tournaments.teamsOf')"
+              :options="DAYS.map((d) => ({ value: d, label: t(`tournaments.day.${d}`) }))"
+            />
+            <!-- How many the chart shows, in a drop-down beside the day's choice. -->
+            <OptionsMenu
+              v-if="chartable.length > CHART_MIN"
+              class="chart-options"
+              :title="t('tournaments.chartOptions')"
+            >
+              <label class="chart-n">
+                <span class="muted">{{ t('tournaments.chartShown') }}</span>
                 <input
-                  type="number"
-                  class="chart-n-box"
+                  type="range"
                   :min="CHART_MIN"
                   :max="chartable.length"
                   :value="draggedN ?? chartN"
-                  :aria-label="t('tournaments.chartShown')"
-                  @change="typeN"
+                  @input="draggedN = Number(($event.target as HTMLInputElement).value)"
+                  @change="releaseN"
                 />
-                {{ t('tournaments.chartOf', { of: chartable.length }) }}
-              </span>
-            </label>
-          </OptionsMenu>
-        </div>
-        <p v-if="chartAbout" class="muted small about">{{ chartAbout }}</p>
-        <p v-if="!standings || !rounds" class="muted">{{ t('tournaments.loading') }}</p>
-        <WinRateChart
-          v-if="standings && rounds && charted.length"
-          :stats="charted"
-          :day
-          :to="(s) => teamsWith(s.id) ?? { name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }"
-        />
-        <div
-          v-if="standings && rounds && !phone"
-          class="dex-table stats"
-          role="table"
-          :aria-label="t('tournaments.pokemonStats')"
-        >
-          <div class="row head" role="row">
-            <div role="columnheader" class="r">#</div>
-            <div role="columnheader">
-              <span v-tip="t('tournaments.teamsWithTip')" class="tipped">{{ t('tournaments.col.pokemon') }}</span>
-            </div>
-            <SortHeader
-              :label="t('tournaments.col.usage')"
-              :tip="t('tournaments.col.usageTip')"
-              right
-              :active="statKey === 'usage'"
-              :desc="statDesc"
-              @sort="sortStats('usage')"
-            />
-            <SortHeader
-              :label="t('tournaments.col.winRate')"
-              :tip="t('tournaments.col.winRateTip')"
-              right
-              :active="statKey === 'winRate'"
-              :desc="statDesc"
-              @sort="sortStats('winRate')"
-            />
-            <div role="columnheader" class="r">{{ t('tournaments.col.record') }}</div>
-            <SortHeader
-              :label="t('tournaments.col.best')"
-              :tip="t('tournaments.col.bestTip')"
-              right
-              :active="statKey === 'best'"
-              :desc="statDesc"
-              @sort="sortStats('best')"
-            />
+                <span class="chart-n-value">
+                  <input
+                    type="number"
+                    class="chart-n-box"
+                    :min="CHART_MIN"
+                    :max="chartable.length"
+                    :value="draggedN ?? chartN"
+                    :aria-label="t('tournaments.chartShown')"
+                    @change="typeN"
+                  />
+                  {{ t('tournaments.chartOf', { of: chartable.length }) }}
+                </span>
+              </label>
+            </OptionsMenu>
           </div>
-          <template v-for="(s, i) in shownStats" :key="s.id">
-            <div v-if="i === fewFrom" class="few" role="row">
-              <div role="cell">{{ t('tournaments.fewMatches', { n: minMatches }) }}</div>
+          <p v-if="chartAbout" class="muted small about">{{ chartAbout }}</p>
+          <p v-if="!standings || !rounds" class="muted">{{ t('tournaments.loading') }}</p>
+          <WinRateChart
+            v-if="standings && rounds && charted.length"
+            :stats="charted"
+            :day
+            :to="(s) => teamsWith(s.id) ?? { name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }"
+          />
+          <div
+            v-if="standings && rounds && !phone"
+            class="dex-table stats"
+            role="table"
+            :aria-label="t('tournaments.pokemonStats')"
+          >
+            <div class="row head" role="row">
+              <div role="columnheader" class="r">#</div>
+              <div role="columnheader">
+                <span v-tip="t('tournaments.teamsWithTip')" class="tipped">{{ t('tournaments.col.pokemon') }}</span>
+              </div>
+              <SortHeader
+                :label="t('tournaments.col.usage')"
+                :tip="t('tournaments.col.usageTip')"
+                right
+                :active="statKey === 'usage'"
+                :desc="statDesc"
+                @sort="sortStats('usage')"
+              />
+              <SortHeader
+                :label="t('tournaments.col.winRate')"
+                :tip="t('tournaments.col.winRateTip')"
+                right
+                :active="statKey === 'winRate'"
+                :desc="statDesc"
+                @sort="sortStats('winRate')"
+              />
+              <div role="columnheader" class="r">{{ t('tournaments.col.record') }}</div>
+              <SortHeader
+                :label="t('tournaments.col.best')"
+                :tip="t('tournaments.col.bestTip')"
+                right
+                :active="statKey === 'best'"
+                :desc="statDesc"
+                @sort="sortStats('best')"
+              />
             </div>
-            <div class="row" role="row">
-              <div role="cell" class="r num muted">{{ i + 1 }}</div>
-              <div role="cell" class="mon-cell">
-                <!-- The teams with it, in the standings; its meta page when the dex hasn't it to filter them by. -->
-                <AppLink
-                  :to="teamsWith(s.id) ?? { name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }"
-                  class="mon"
-                >
-                  <PokemonIcon :id="s.id" /><span class="mon-name"
-                    ><span>{{ monName(s.id).species }}</span
-                    ><span v-if="monName(s.id).forme" class="forme">{{ monName(s.id).forme }}</span></span
-                  >
-                </AppLink>
-              </div>
-              <div role="cell" class="r num meter" :style="{ '--share': s.usage / (topUsage || 1) }">
-                {{ percent(s.usage) }}
-              </div>
-              <div
-                role="cell"
-                class="r num"
-                :class="s.winRate === null ? 'muted' : ['wr', s.winRate >= 0.5 ? 'up' : 'down', { unsure: unsure(s) }]"
-                :style="wrStyle(s)"
-              >
-                {{ s.winRate === null ? '—' : percent(s.winRate) }}
-              </div>
-              <div role="cell" class="r num record-wl">
-                <span :class="{ more: s.wins > s.losses }">{{ s.wins }}</span
-                >–<span :class="{ more: s.losses > s.wins }">{{ s.losses }}</span>
-              </div>
-              <div role="cell" class="r">
-                <AppLink
-                  v-tip="playerAt(s.best)?.player"
-                  :to="{ name: 'tournamentPlayer', params: { id, placing: String(s.best) } }"
-                  class="best num"
-                  :class="medalOf(s.best)"
-                  >{{ ordinal(s.best) }}</AppLink
-                >
-              </div>
-            </div>
-          </template>
-        </div>
-        <!-- On phones, a list rather than columns: what it's sorted by picked over it, and in each row that number at
-             its end with its bar under the name, the rest a line of small text under them. -->
-        <template v-else-if="standings && rounds">
-          <div class="stat-sort" role="group" :aria-label="t('tournaments.sortBy')">
-            <span class="muted">{{ t('tournaments.sortBy') }}</span>
-            <span class="segments">
-              <button
-                v-for="k in STAT_SORTS"
-                :key="k"
-                type="button"
-                :class="{ on: statKey === k }"
-                :aria-pressed="statKey === k"
-                @click="sortStats(k)"
-              >
-                {{ t(`tournaments.col.${k}`)
-                }}<span v-if="statKey === k" class="arrow" :class="{ up: !statDesc }" aria-hidden="true">▾</span>
-              </button>
-            </span>
-          </div>
-          <ol class="stat-list" :aria-label="t('tournaments.pokemonStats')">
             <template v-for="(s, i) in shownStats" :key="s.id">
-              <li v-if="i === fewFrom" class="few">{{ t('tournaments.fewMatches', { n: minMatches }) }}</li>
-              <li class="stat-item">
-                <span class="rank num muted">{{ i + 1 }}</span>
-                <AppLink
-                  :to="teamsWith(s.id) ?? { name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }"
-                  class="mon"
-                >
-                  <PokemonIcon :id="s.id" /><span class="mon-name"
-                    ><span>{{ monName(s.id).species }}</span
-                    ><span v-if="monName(s.id).forme" class="forme">{{ monName(s.id).forme }}</span></span
+              <div v-if="i === fewFrom" class="few" role="row">
+                <div role="cell">{{ t('tournaments.fewMatches', { n: minMatches }) }}</div>
+              </div>
+              <div class="row" role="row">
+                <div role="cell" class="r num muted">{{ i + 1 }}</div>
+                <div role="cell" class="mon-cell">
+                  <!-- The teams with it, in the standings; its meta page when the dex hasn't it to filter them by. -->
+                  <AppLink
+                    :to="teamsWith(s.id) ?? { name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }"
+                    class="mon"
                   >
-                </AppLink>
-                <AppLink
-                  v-if="statKey === 'best'"
-                  :to="{ name: 'tournamentPlayer', params: { id, placing: String(s.best) } }"
-                  class="lead best soft num"
-                  :class="medalOf(s.best)"
-                  >{{ ordinal(s.best) }}</AppLink
+                    <PokemonIcon :id="s.id" /><span class="mon-name"
+                      ><span>{{ monName(s.id).species }}</span
+                      ><span v-if="monName(s.id).forme" class="forme">{{ monName(s.id).forme }}</span></span
+                    >
+                  </AppLink>
+                </div>
+                <div role="cell" class="r num meter" :style="{ '--share': s.usage / (topUsage || 1) }">
+                  {{ percent(s.usage) }}
+                </div>
+                <div
+                  role="cell"
+                  class="r num"
+                  :class="
+                    s.winRate === null ? 'muted' : ['wr', s.winRate >= 0.5 ? 'up' : 'down', { unsure: unsure(s) }]
+                  "
+                  :style="wrStyle(s)"
                 >
-                <!-- A win rate with its record beside it, what it's of. -->
-                <span v-else-if="statKey === 'winRate'" class="lead num"
-                  ><span :class="wrHint(s)">{{ s.winRate === null ? '—' : percent(s.winRate) }}</span>
-                  <span class="record-wl"
-                    >(<span :class="{ more: s.wins > s.losses }">{{ s.wins }}</span
-                    >–<span :class="{ more: s.losses > s.wins }">{{ s.losses }}</span
-                    >)</span
-                  ></span
+                  {{ s.winRate === null ? '—' : percent(s.winRate) }}
+                </div>
+                <div role="cell" class="r num record-wl">
+                  <span :class="{ more: s.wins > s.losses }">{{ s.wins }}</span
+                  >–<span :class="{ more: s.losses > s.wins }">{{ s.losses }}</span>
+                </div>
+                <div role="cell" class="r">
+                  <AppLink
+                    v-tip="playerAt(s.best)?.player"
+                    :to="{ name: 'tournamentPlayer', params: { id, placing: String(s.best) } }"
+                    class="best num"
+                    :class="medalOf(s.best)"
+                    >{{ ordinal(s.best) }}</AppLink
+                  >
+                </div>
+              </div>
+            </template>
+          </div>
+          <!-- On phones, a list rather than columns: what it's sorted by picked over it, and in each row that number at
+             its end with its bar under the name, the rest a line of small text under them. -->
+          <template v-else-if="standings && rounds">
+            <div class="stat-sort" role="group" :aria-label="t('tournaments.sortBy')">
+              <span class="muted">{{ t('tournaments.sortBy') }}</span>
+              <span class="segments">
+                <button
+                  v-for="k in STAT_SORTS"
+                  :key="k"
+                  type="button"
+                  :class="{ on: statKey === k }"
+                  :aria-pressed="statKey === k"
+                  @click="sortStats(k)"
                 >
-                <span v-else class="lead num">{{ percent(s.usage) }}</span>
-                <span
-                  v-if="statKey === 'usage'"
-                  class="lead-bar meter"
-                  :style="{ '--share': s.usage / (topUsage || 1) }"
-                  aria-hidden="true"
-                ></span>
-                <p class="line muted num">
+                  {{ t(`tournaments.col.${k}`)
+                  }}<span v-if="statKey === k" class="arrow" :class="{ up: !statDesc }" aria-hidden="true">▾</span>
+                </button>
+              </span>
+            </div>
+            <ol class="stat-list" :aria-label="t('tournaments.pokemonStats')">
+              <template v-for="(s, i) in shownStats" :key="s.id">
+                <li v-if="i === fewFrom" class="few">{{ t('tournaments.fewMatches', { n: minMatches }) }}</li>
+                <li class="stat-item">
+                  <span class="rank num muted">{{ i + 1 }}</span>
+                  <AppLink
+                    :to="teamsWith(s.id) ?? { name: 'metaPokemon', params: { id: s.id }, query: { meta: metaOf } }"
+                    class="mon"
+                  >
+                    <PokemonIcon :id="s.id" /><span class="mon-name"
+                      ><span>{{ monName(s.id).species }}</span
+                      ><span v-if="monName(s.id).forme" class="forme">{{ monName(s.id).forme }}</span></span
+                    >
+                  </AppLink>
                   <AppLink
                     v-if="statKey === 'best'"
                     :to="{ name: 'tournamentPlayer', params: { id, placing: String(s.best) } }"
-                    class="who"
-                    >{{ playerAt(s.best)?.player }}</AppLink
+                    class="lead best soft num"
+                    :class="medalOf(s.best)"
+                    >{{ ordinal(s.best) }}</AppLink
                   >
-                  <span v-if="statKey !== 'usage'">{{ t('tournaments.line.usage', { n: percent(s.usage) }) }}</span>
-                  <span v-if="statKey !== 'winRate'"
-                    ><template v-if="s.winRate !== null"
-                      >{{ wonText[0] }}<span :class="wrHint(s)">{{ percent(s.winRate) }}</span
-                      >{{ `${wonText[1]} ` }}</template
-                    ><span class="record-wl"
+                  <!-- A win rate with its record beside it, what it's of. -->
+                  <span v-else-if="statKey === 'winRate'" class="lead num"
+                    ><span :class="wrHint(s)">{{ s.winRate === null ? '—' : percent(s.winRate) }}</span>
+                    <span class="record-wl"
                       >(<span :class="{ more: s.wins > s.losses }">{{ s.wins }}</span
                       >–<span :class="{ more: s.losses > s.wins }">{{ s.losses }}</span
                       >)</span
                     ></span
                   >
-                  <span v-if="statKey !== 'best'"
-                    >{{ bestText[0]
-                    }}<AppLink
-                      v-tip="playerAt(s.best)?.player"
+                  <span v-else class="lead num">{{ percent(s.usage) }}</span>
+                  <span
+                    v-if="statKey === 'usage'"
+                    class="lead-bar meter"
+                    :style="{ '--share': s.usage / (topUsage || 1) }"
+                    aria-hidden="true"
+                  ></span>
+                  <p class="line muted num">
+                    <AppLink
+                      v-if="statKey === 'best'"
                       :to="{ name: 'tournamentPlayer', params: { id, placing: String(s.best) } }"
-                      class="best soft num"
-                      :class="medalOf(s.best)"
-                      >{{ ordinal(s.best) }}</AppLink
-                    >{{ bestText[1] }}</span
-                  >
-                </p>
-              </li>
-            </template>
-          </ol>
+                      class="who"
+                      >{{ playerAt(s.best)?.player }}</AppLink
+                    >
+                    <span v-if="statKey !== 'usage'">{{ t('tournaments.line.usage', { n: percent(s.usage) }) }}</span>
+                    <span v-if="statKey !== 'winRate'"
+                      ><template v-if="s.winRate !== null"
+                        >{{ wonText[0] }}<span :class="wrHint(s)">{{ percent(s.winRate) }}</span
+                        >{{ `${wonText[1]} ` }}</template
+                      ><span class="record-wl"
+                        >(<span :class="{ more: s.wins > s.losses }">{{ s.wins }}</span
+                        >–<span :class="{ more: s.losses > s.wins }">{{ s.losses }}</span
+                        >)</span
+                      ></span
+                    >
+                    <span v-if="statKey !== 'best'"
+                      >{{ bestText[0]
+                      }}<AppLink
+                        v-tip="playerAt(s.best)?.player"
+                        :to="{ name: 'tournamentPlayer', params: { id, placing: String(s.best) } }"
+                        class="best soft num"
+                        :class="medalOf(s.best)"
+                        >{{ ordinal(s.best) }}</AppLink
+                      >{{ bestText[1] }}</span
+                    >
+                  </p>
+                </li>
+              </template>
+            </ol>
+          </template>
+          <button
+            v-if="stats.length > TOP"
+            type="button"
+            class="more-toggle"
+            :aria-pressed="allStats"
+            @click="allStats = !allStats"
+          >
+            <component :is="allStats ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />{{
+              allStats ? t('tournaments.showTop', { n: TOP }) : t('tournaments.showAllMons', { n: stats.length })
+            }}
+          </button>
         </template>
-        <button
-          v-if="stats.length > TOP"
-          type="button"
-          class="more-toggle"
-          :aria-pressed="allStats"
-          @click="allStats = !allStats"
-        >
-          <component :is="allStats ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />{{
-            allStats ? t('tournaments.showTop', { n: TOP }) : t('tournaments.showAllMons', { n: stats.length })
-          }}
-        </button>
       </section>
       <!-- The Pokémon whose usage rose and fell the most against the events before, the day's teams: a table each, side
            by side (one under the other on phones). -->
-      <section v-if="standings && rounds" id="sec-movers" class="panel banded section movers">
+      <section v-if="standings && rounds && !noTeams" id="sec-movers" class="panel banded section movers">
         <h2 class="band">
           <!-- What they're against, to the heading's right on wide screens, over it on phones; with nothing to compare
                with, said under it. -->
@@ -1058,6 +1082,15 @@ const ordinal = (n: number) => `#${n}`
 <style scoped>
 h1 {
   margin-bottom: 4px;
+}
+.live {
+  margin: 0 0 6px;
+}
+/* What's counted at an event under way: partial, said in the accent so it's not missed. */
+.partial {
+  margin: 0 0 10px;
+  padding: 6px 10px;
+  border: 1px dashed var(--accent);
 }
 /* The tabs' band stuck to the top as the page scrolls (its standings and Pokémon are long): the Pokémon's table's
    header stuck under it, and a player scrolled to under it too. */

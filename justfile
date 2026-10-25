@@ -26,6 +26,10 @@ preview: build
 gen-data *args:
     npm run gen-data -- {{args}}
 
+# Read the official tournaments under way from Limitless VGC into src/data/generated/live/ (not committed; the deploy does it on its own)
+live-tournaments:
+    npm run live-tournaments
+
 # Check the markers in the curated text ({type:flying}, {move:taunt}...) in every language: quicker than a build
 check-text:
     npm run check-text

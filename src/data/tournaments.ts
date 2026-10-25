@@ -42,6 +42,19 @@ export interface TournamentEvent {
   teams: number
   /** Who won, and the Pokémon they brought. */
   winner?: { player: string; country: string; team: PokemonId[] }
+  /** An event under way, or over but not generated for good yet (`LIVE_EVENTS`): how far it's got, as last read. */
+  live?: LiveState
+}
+
+/** How far an event under way has got: the rounds played or being played, of all its rounds; when its standings last
+ * changed, as an ISO time; and whether it's over, its team lists maybe still coming in. */
+export interface LiveState {
+  round: number
+  rounds: number
+  updated: string
+  completed?: true
+  /** Under way, who's first so far, their record, and their Pokémon once their team list is out. */
+  leader?: { player: string; country: string; wins: number; losses: number; team: PokemonId[] }
 }
 
 /** A Pokémon as brought: its ID (a Mega's when it holds its stone), item, ability, nature, moves; with no team list,
@@ -63,11 +76,15 @@ export interface Standing {
 }
 
 /** A round's matches, each its two players by placing (the second null for a bye) and who won: 1 the first, 2 the
- * second, 0 neither. Its phase: 1 Day 1's Swiss, 2 Day 2's, 3 the top cut. */
+ * second, 0 neither; at an event under way, one still being played has a 1 after them (`pending`). Its phase: 1 Day 1's
+ * Swiss, 2 Day 2's, 3 the top cut. */
 export interface Round {
   phase: number
-  matches: [number, number | null, 0 | 1 | 2][]
+  matches: Match[]
 }
+export type Match = [number, number | null, 0 | 1 | 2] | [number, number | null, 0, 1]
+/** Whether a match is still being played. */
+export const pending = (m: Match) => m[3] === 1
 
 /** Whether a slot is a whole set, from a team list, not the Pokémon alone. */
 export const listed = ([, item, ability, nature, moves]: Slot) => !!(item || ability || nature || moves.length)
@@ -83,6 +100,12 @@ const INDEX = import.meta.glob<Record<string, TournamentEvent>>('./generated/tou
   eager: true,
   import: 'default',
 })
+// The events under way, as read before the build (`scripts/liveTournaments.ts`, into `generated/live/`, never
+// committed): their files the same shape, under a name of their own.
+const LIVE_INDEX = import.meta.glob<Record<string, TournamentEvent>>('./generated/live/index.json', {
+  eager: true,
+  import: 'default',
+})
 const FILES = import.meta.glob<Record<string, Standing>>(
   [
     './generated/tournaments/*.json',
@@ -90,16 +113,30 @@ const FILES = import.meta.glob<Record<string, Standing>>(
     '!./generated/tournaments/usage.json',
     '!./generated/tournaments/upcoming.json',
     '!./generated/tournaments/*.rounds.json',
+    './generated/live/*.json',
+    '!./generated/live/index.json',
+    '!./generated/live/*.rounds.json',
   ],
   { import: 'default' },
 )
+/** An event's standings file, generated or live. */
+const fileOf = (id: string) => FILES[`./generated/tournaments/${id}.json`] ?? FILES[`./generated/live/${id}.json`]
 
-/** Every event generated, the latest first. */
+/** Every event generated, the latest first: what's added up, set against each other and trended. */
 export const EVENTS: readonly TournamentEvent[] = Object.values(Object.values(INDEX)[0] ?? {}).sort((a, b) =>
   b.date.localeCompare(a.date),
 )
-const BY_ID = new Map(EVENTS.map((e) => [e.id, e]))
 const BY_N = new Map(EVENTS.map((e) => [e.n, e]))
+const GENERATED_IDS = new Set(EVENTS.map((e) => e.id))
+/** The events under way, or over but not generated for good yet, the latest first: shown with the rest, each its
+ * pages, but kept out of all that adds events up (`EVENTS`), their fields and team lists not whole yet. One generated
+ * since left out. */
+export const LIVE_EVENTS: readonly (TournamentEvent & { live: LiveState })[] = Object.values(
+  Object.values(LIVE_INDEX)[0] ?? {},
+)
+  .filter((e): e is TournamentEvent & { live: LiveState } => !!e.live && !BY_N.has(e.n) && !GENERATED_IDS.has(e.id))
+  .sort((a, b) => b.date.localeCompare(a.date))
+const BY_ID = new Map([...EVENTS, ...LIVE_EVENTS].map((e) => [e.id, e]))
 
 /** An event still to come, as Limitless VGC lists it: its type told by its name, its regulation once announced, and
  * its page there and the official one (venue, registration) when listed. */
@@ -126,7 +163,7 @@ const UNDER_WAY_DAYS = 4
 export const UPCOMING: readonly UpcomingEvent[] = (() => {
   const since = new Date(Date.now() - UNDER_WAY_DAYS * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
   return Object.values(Object.values(UPCOMING_INDEX)[0] ?? {})
-    .filter((e) => e.date >= since && !BY_N.has(e.n))
+    .filter((e) => e.date >= since && !BY_N.has(e.n) && !LIVE_EVENTS.some((l) => l.n === e.n))
     .sort((a, b) => a.date.localeCompare(b.date) || a.n - b.n)
 })()
 
@@ -201,16 +238,17 @@ export const isSetOf = (slot: Slot, pokemon: PokemonId, b: Omit<Build, 'share'>)
   buildParam({ item: null, ability: null, nature: null, moves: slot[4] }) ===
     buildParam({ item: null, ability: null, nature: null, moves: b.moves })
 
-const ROUNDS = import.meta.glob<Record<number, Round>>('./generated/tournaments/*.rounds.json', {
-  import: 'default',
-})
+const ROUNDS = import.meta.glob<Record<number, Round>>(
+  ['./generated/tournaments/*.rounds.json', './generated/live/*.rounds.json'],
+  { import: 'default' },
+)
 
 /** An event's rounds, by number, loaded once. */
 const rounds = new Map<string, Promise<Record<number, Round>>>()
 export function loadRounds(id: string): Promise<Record<number, Round>> {
   let p = rounds.get(id)
   if (!p) {
-    const file = ROUNDS[`./generated/tournaments/${id}.rounds.json`]
+    const file = ROUNDS[`./generated/tournaments/${id}.rounds.json`] ?? ROUNDS[`./generated/live/${id}.rounds.json`]
     if (!file) return Promise.reject(new Error(`No rounds for the event "${id}"`))
     rounds.set(id, (p = file()))
   }
@@ -257,7 +295,7 @@ const standings = new Map<string, Promise<(Standing & { placing: number })[]>>()
 export function loadStandings(id: string): Promise<(Standing & { placing: number })[]> {
   let p = standings.get(id)
   if (!p) {
-    const file = FILES[`./generated/tournaments/${id}.json`]
+    const file = fileOf(id)
     if (!file) return Promise.reject(new Error(`No data for the event "${id}"`))
     p = file().then((f) => {
       const all = Object.entries(f)
@@ -378,8 +416,9 @@ export function loadTournaments(s: MetaSnapshot): Promise<MetaData> {
     ).then((files) =>
       addUp(
         files.flatMap((f) =>
+          // Those with a Pokémon known, as `usage.json` counts them: a team no one knows anything of says nothing.
           Object.values(f)
-            .filter((st) => among(st, s.players ?? 'all'))
+            .filter((st) => st.team.length && among(st, s.players ?? 'all'))
             .map((st) => st.team),
         ),
       ),

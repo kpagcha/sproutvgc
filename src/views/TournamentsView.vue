@@ -2,10 +2,18 @@
 import { computed, ref } from 'vue'
 import { Eye } from '@lucide/vue'
 import { regulationSnapshot } from '@/data/meta'
-import { EVENTS, UPCOMING, type EventType, type TournamentEvent, type UpcomingEvent } from '@/data/tournaments'
+import {
+  EVENTS,
+  LIVE_EVENTS,
+  UPCOMING,
+  type EventType,
+  type TournamentEvent,
+  type UpcomingEvent,
+} from '@/data/tournaments'
 import { locale, t } from '@/i18n'
 import AppLink from '@/components/AppLink'
 import CountryFlag from '@/components/CountryFlag'
+import LiveTag from '@/components/LiveTag.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 
 // The official tournaments, as one timeline, the latest first: down a line by month and then by day (the events of one
@@ -15,7 +23,8 @@ import PokemonIcon from '@/components/PokemonIcon'
 // winner (`SPOILER_DAYS`) is blurred, so the list doesn't spoil it, until revealed, one event at a time, remembered.
 // With `upcoming`, the events still to come instead (its own page, `/meta/tournaments/upcoming`), on the same timeline
 // but the soonest first, each card leading to its official page (else its page on Limitless VGC), those whose
-// regulation isn't announced yet a run of their own.
+// regulation isn't announced yet a run of their own. An event under way (`LIVE_EVENTS`) is among the rest, marked live,
+// with who leads it for now in place of who won.
 const props = defineProps<{ upcoming?: boolean }>()
 
 type Listed = TournamentEvent | UpcomingEvent
@@ -40,7 +49,9 @@ function months(events: Listed[]) {
 // The events by date, cut into each regulation's runs.
 const runs = computed(() => {
   const out: { regulation: string | undefined; events: Listed[] }[] = []
-  const events: Listed[] = props.upcoming ? [...UPCOMING] : [...EVENTS].sort((a, b) => b.date.localeCompare(a.date))
+  const events: Listed[] = props.upcoming
+    ? [...UPCOMING]
+    : [...LIVE_EVENTS, ...EVENTS].sort((a, b) => b.date.localeCompare(a.date))
   for (const e of events) {
     const last = out.at(-1)
     if (last && last.regulation === e.regulation) last.events.push(e)
@@ -69,7 +80,9 @@ function readRevealed(): string[] {
     return []
   }
 }
-const revealed = ref(new Set(readRevealed().filter((id) => EVENTS.some((e) => e.id === id && recent(e)))))
+const revealed = ref(
+  new Set(readRevealed().filter((id) => [...LIVE_EVENTS, ...EVENTS].some((e) => e.id === id && recent(e)))),
+)
 /** Whether an event's winner is hidden: recent, and not revealed. */
 const hidden = (e: TournamentEvent) => recent(e) && !revealed.value.has(e.id)
 function reveal(e: TournamentEvent) {
@@ -155,10 +168,21 @@ const count = (n: number) => n.toLocaleString(locale.value)
                             >{{ t(`tournaments.type.${e.type}`) }} · <CountryFlag :code="e.country" /> ·
                             {{ t('tournaments.players', { n: count(e.players) }) }}</span
                           >
+                          <LiveTag v-if="e.live" :live="e.live" short class="small" />
+                        </span>
+                        <!-- Under way, who leads it for now. -->
+                        <span v-if="e.live?.leader" class="winner">
+                          <span v-if="e.live.leader.team.length" class="team">
+                            <PokemonIcon v-for="(p, i) in e.live.leader.team" :id="p" :key="i" />
+                          </span>
+                          <span class="small"
+                            ><span class="muted">{{ t('tournaments.leader') }}</span> {{ e.live.leader.player }}
+                            <span class="muted num">{{ e.live.leader.wins }}–{{ e.live.leader.losses }}</span></span
+                          >
                         </span>
                         <!-- A recent event's winner blurred, a tap on it revealing it rather than following the card. -->
                         <span
-                          v-if="e.winner && hidden(e)"
+                          v-else-if="e.winner && hidden(e)"
                           class="winner hidden"
                           role="button"
                           tabindex="0"

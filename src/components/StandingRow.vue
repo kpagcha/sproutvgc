@@ -12,7 +12,8 @@ import TeamSets from '@/components/TeamSets.vue'
 // A player of an official tournament, a row to unfold: their placing (a medal in the top 8), name (the way to their
 // page) and country, record (marked when they dropped), and the six they brought, as icons; unfolded (`open`, the row
 // clicked anywhere but a link, or its chevron: `toggle`), their whole sets (`TeamSets`, those `marked` marked) and the
-// way to copy them as a paste (`CopyPaste`). On a tournament's standings, and on a build's page, where the event is
+// way to copy them as a paste (`CopyPaste`). One whose team isn't known at all (at an event under way, before its
+// team lists are out) has nothing where it'd be, and nothing to unfold. On a tournament's standings, and on a build's page, where the event is
 // named under the player (`showEvent`), leading to its standings.
 const props = defineProps<{
   s: Standing & { placing: number }
@@ -25,7 +26,7 @@ const props = defineProps<{
 const emit = defineEmits<{ toggle: [] }>()
 
 function rowClick(e: MouseEvent) {
-  if (!(e.target as Element).closest('a')) emit('toggle')
+  if (props.s.team.length && !(e.target as Element).closest('a')) emit('toggle')
 }
 const ordinal = (n: number) => `#${n}`
 const eventName = () => eventOf(props.event)?.name
@@ -34,7 +35,7 @@ const eventName = () => eventOf(props.event)?.name
 <template>
   <div class="standing-row" :class="{ open, won: s.placing === 1 }">
     <!-- The row unfolds on a click anywhere but a link; the chevron its button, for the keyboard. -->
-    <div class="player-row" @click="rowClick">
+    <div class="player-row" :class="{ bare: !s.team.length }" @click="rowClick">
       <span class="placing num" :class="medalOf(s.placing)">{{ ordinal(s.placing) }}</span>
       <span class="player-col">
         <span class="player"
@@ -60,9 +61,11 @@ const eventName = () => eventOf(props.event)?.name
       <span v-if="s.team.length" class="team" aria-hidden="true">
         <PokemonIcon v-for="(slot, i) in s.team" :id="slot[0]" :key="i" />
       </span>
-      <!-- Neither a team list nor its Pokémon: the standings didn't say. -->
-      <span v-else class="team none muted small">{{ t('tournaments.noList') }}</span>
+      <!-- Neither a team list nor its Pokémon (the standings didn't say, or an event under way hasn't yet): nothing to
+           show, nor to unfold, their places kept. -->
+      <span v-else class="team" />
       <button
+        v-if="s.team.length"
         type="button"
         class="chevron"
         :aria-expanded="open"
@@ -71,12 +74,10 @@ const eventName = () => eventOf(props.event)?.name
       >
         <component :is="open ? ChevronUp : ChevronDown" :size="16" />
       </button>
+      <span v-else class="chevron" aria-hidden="true"><span class="chevron-room" /></span>
     </div>
     <!-- Their whole sets, a card each. -->
-    <p v-if="open && !s.team.length" class="muted small no-team">
-      {{ t('tournaments.noTeam') }}
-    </p>
-    <template v-else-if="open">
+    <template v-if="open && s.team.length">
       <TeamSets :team="s.team" :marked />
       <!-- The way to copy the team as a paste, under its sets at their right. -->
       <p class="team-tools"><CopyPaste :team="s.team" /></p>
@@ -115,7 +116,7 @@ const eventName = () => eventOf(props.event)?.name
 .player .name:hover {
   color: var(--accent);
 }
-.player-row:hover {
+.player-row:not(.bare):hover {
   background: var(--hover);
 }
 /* The winner's row lit from the left in gold, a tag by their name (the medals are `main.css`'s). */
@@ -193,6 +194,14 @@ const eventName = () => eventOf(props.event)?.name
   border: none;
   cursor: pointer;
 }
+/* A row with nothing to unfold: not a button, its chevron's room kept for the columns to line up. */
+.player-row.bare {
+  cursor: default;
+}
+.chevron-room {
+  width: 16px;
+  height: 16px;
+}
 /* Its record, wins–losses; a player who dropped, marked so. */
 .record {
   font-variant-numeric: tabular-nums;
@@ -213,10 +222,6 @@ const eventName = () => eventOf(props.event)?.name
   justify-content: flex-end;
   margin: 0;
   padding: 0 4px 12px;
-}
-.no-team {
-  margin: 0;
-  padding: 4px 4px 12px 3.5em;
 }
 /* On phones, the team under the name: across the whole row, indented to the name, so its six fit on one line however
    wide the record is. */
@@ -247,11 +252,6 @@ const eventName = () => eventOf(props.event)?.name
   .chevron {
     grid-area: chevron;
   }
-}
-/* No team, a line of text where its icons would be: not in their grid, where it'd wrap a word to an icon's column. */
-.team.none {
-  display: block;
-  white-space: nowrap;
 }
 /* A row too narrow for six icons after its padding and the name's indent (4px each side, 3em and a gap, 6 × 40px:
    about 301px on a phone): three by two. */
