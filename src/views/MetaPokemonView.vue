@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp, Info } from '@lucide/vue'
 import { ability, available, availableIds, move, pokemon, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
@@ -41,6 +41,7 @@ import { percentiles } from '@/lib/statPercentiles'
 import { MIN_MATCHES, pooledUsage } from '@/lib/tournamentStats'
 import { useListOptions } from '@/composables/useListOptions'
 import { useMeta } from '@/composables/useMeta'
+import { useUnfolded } from '@/composables/useUnfolded'
 import { useSpeedOptions } from '@/composables/useSpeedOptions'
 import AppLink from '@/components/AppLink'
 import BuildCards from '@/components/BuildCards.vue'
@@ -157,17 +158,14 @@ const moves = computed(() =>
 )
 const moveShares = computed(() => Object.fromEntries(moves.value.map((x) => [x.ref.id, x.share])))
 // Or its whole movepool, as its dex entry has it, searchable (the link under the table): the moves its sets run with
-// their share, the rest on under `LIST_MIN` of them. Back to its sets' on another Pokémon.
-const movepool = ref(false)
+// their share, the rest on under `LIST_MIN` of them. Remembered for the visit, per Pokémon (`useUnfolded`).
+const movepool = useUnfolded(() => `movepool:${id.value}`)
 /** What its whole movepool is filtered by, as the move rankings are, but for the Pokémon: it's this one's. */
 const MOVE_KINDS = ['type', 'category', 'flag', 'reach', 'priority'] as const
 // Its sets' view, the most run, as Smogon's own moveset files show them; the data keeps every one over `LIST_MIN`.
 const SETS_MOVES = 10
 const learnset = shallowRef<MoveId[] | null>(null)
-watch(id, () => {
-  movepool.value = false
-  learnset.value = null
-})
+watch(id, () => (learnset.value = null))
 watch(movepool, async (on) => {
   if (!on || learnset.value) return
   const current = id.value
@@ -722,7 +720,12 @@ const sections = computed(() =>
         <p v-else-if="buildsFrom.sets" class="muted small builds-of">
           {{ t('usageMon.buildsOf', { n: buildsFrom.sets }) }}
         </p>
-        <BuildCards :pokemon="id" :builds :regulation="buildsFrom.regulation ?? snapshot?.regulation" />
+        <BuildCards
+          :pokemon="id"
+          :builds
+          :regulation="buildsFrom.regulation ?? snapshot?.regulation"
+          :remember="`builds:${id}`"
+        />
       </section>
 
       <!-- Its Speeds, as the speed tiers draw a row, and the ways to them. -->

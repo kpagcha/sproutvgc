@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onBeforeUnmount, onDeactivated, shallowRef, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, onDeactivated, shallowRef, useTemplateRef } from 'vue'
 import tippy, { type Instance } from 'tippy.js'
 import { useRouter } from 'vue-router'
 import { ability, item, move, pokemon, type PokemonId } from '@/data/dex'
@@ -14,6 +14,7 @@ import { passesGroups, positiveFilters, allFilters } from '@/lib/filterGroups'
 import { formatTermFilters, parseTermFilters, type Term, type TermFilters } from '@/lib/searchTerms'
 import { pooledUsage } from '@/lib/tournamentStats'
 import { isSetTerm, MIN_SHARE, monMatches, MON_TERM_KINDS, setShare, SET_LIST, type SetTerm } from '@/lib/monTerms'
+import { useUnfolded } from '@/composables/useUnfolded'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useGradualRows } from '@/composables/useGradualRows'
 import { useMeta } from '@/composables/useMeta'
@@ -294,7 +295,8 @@ function toggleSets() {
 const { entered, restoring } = usePageEntered()
 /** The list folded to its first rows, so what's after it (the trends) is there to be found; unfolded on asking. */
 const FOLDED = 20
-const allRows = ref(false)
+// Unfolded, remembered for the visit (`useUnfolded`).
+const allRows = useUnfolded('rankings:pokemon')
 const listed = computed(() => (allRows.value ? shown.value : shown.value.slice(0, FOLDED)))
 const drawn = useGradualRows(listed)
 useRowColumns(useTemplateRef('head'))
@@ -608,7 +610,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
       </p>
     </div>
-    <RankingTrends v-if="trendsShown" id="sec-trends" class="section" :rows="shown" :since>
+    <RankingTrends v-if="trendsShown" id="sec-trends" class="section" :rows="shown" :since remember="trends:pokemon">
       <template #entry="{ row }"
         ><PokemonIcon :id="row.id" /><span>{{ row.species }}</span
         ><span v-if="row.forme" class="forme">{{ row.forme }}</span></template
@@ -623,6 +625,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
       :title="t('trends.tournamentTitle')"
       :about="tournamentTrends.about"
       :tips="tournamentTips"
+      remember="trends:tournaments"
     >
       <template #entry="{ row }"
         ><PokemonIcon :id="row.id" /><span>{{ row.species }}</span

@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, ref, shallowRef, useTemplateRef } from 'vue'
+import { computed, shallowRef, useTemplateRef } from 'vue'
 import { ability, item, pokemon, type AbilityId, type ItemId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { sinceLabel, has, percent } from '@/data/meta'
 import { ranksOf, standings, usageOf, usersOf } from '@/lib/entryUsage'
+import { useUnfolded } from '@/composables/useUnfolded'
 import { usePreviousMeta } from '@/composables/usePreviousMeta'
 import { locale, t, type MessageKey } from '@/i18n'
 import { description, shortText } from '@/i18n/descriptions'
@@ -216,7 +217,8 @@ const top = computed(() => Math.max(0, ...rows.value.map((r) => r.usage)))
 const { entered, restoring } = usePageEntered()
 /** The list folded to its first rows, so what's after it (the trends) is there to be found; unfolded on asking. */
 const FOLDED = 20
-const allRows = ref(false)
+// Unfolded, remembered for the visit, per list (`useUnfolded`).
+const allRows = useUnfolded(() => `rankings:${props.list}`)
 const listed = computed(() => (allRows.value ? shown.value : shown.value.slice(0, FOLDED)))
 const drawn = useGradualRows(listed)
 useRowColumns(useTemplateRef('head'))
@@ -382,7 +384,7 @@ const colVars = computed(() => ({
         {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
       </p>
     </div>
-    <RankingTrends v-if="trendsShown" id="sec-trends" class="section" :rows="shown" :since>
+    <RankingTrends v-if="trendsShown" id="sec-trends" class="section" :rows="shown" :since :remember="`trends:${list}`">
       <template #entry="{ row }"><ItemIcon v-if="list === 'items'" :id="row.id as ItemId" />{{ row.name }}</template>
     </RankingTrends>
   </div>

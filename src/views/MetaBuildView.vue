@@ -17,6 +17,7 @@ import {
 import { locale, t, tSlots } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { META_LINKS } from '@/lib/links'
+import { useUnfolded } from '@/composables/useUnfolded'
 import { useGradualRows } from '@/composables/useGradualRows'
 import { useMeta } from '@/composables/useMeta'
 import AppLink from '@/components/AppLink'
@@ -140,8 +141,7 @@ const slot = computed<Slot | null>(() =>
 
 // The teams, the first `TOP` until unfolded; unfolded, drawn a chunk a frame. A team unfolded to its sets by its key.
 const TOP = 20
-const showAll = shallowRef(false)
-watch([id, build], () => (showAll.value = false))
+const showAll = useUnfolded(() => `buildTeams:${id.value}:${String(route.query.b ?? '')}`)
 const shown = computed(() => (showAll.value ? teams.value.ran : teams.value.ran.slice(0, TOP)))
 const drawn = useGradualRows(shown)
 const open = shallowRef(new Set<string>())

@@ -45,6 +45,7 @@ import {
   medalOf,
 } from '@/lib/tournamentStats'
 import { useSort } from '@/composables/useSort'
+import { useUnfolded } from '@/composables/useUnfolded'
 import { useUrlFilters } from '@/composables/useUrlFilters'
 import AppLink from '@/components/AppLink'
 import BandTabs, { LIFT } from '@/components/BandTabs.vue'
@@ -309,7 +310,8 @@ const wrStyle = (s: PokemonStat) =>
 const unsure = (s: PokemonStat) => !enough(s)
 /** The most used Pokémon's usage, the one its bars are against. */
 const topUsage = computed(() => stats.value[0]?.usage ?? 0)
-const allStats = ref(false)
+// Unfolded, remembered for the visit, per event (`useUnfolded`), as Day 1's players are.
+const allStats = useUnfolded(() => `tournamentStats:${id.value}`)
 const shownStats = computed(() => (allStats.value ? rankedStats.value : rankedStats.value.slice(0, TOP)))
 /** What the day's numbers are of: its players, and its matches with a winner. */
 const about = computed(() =>
@@ -464,8 +466,7 @@ const teamsTitle = computed(() => {
 const narrowed = computed(() => !!query.value.trim() || filters.value.groups.length > 0 || !!preview.value)
 
 /** Day 1's players, shown once asked for (or while narrowed): the top cut and Day 2 are what most come for. */
-const day1Shown = ref(false)
-watch(id, () => (day1Shown.value = false))
+const day1Shown = useUnfolded(() => `day1:${id.value}`)
 /** The standings shown, in their parts (the top cut, the rest of Day 2, and Day 1, those there are). */
 const parts = computed(() => {
   const q = preview.value ? '' : fold(query.value.trim())
@@ -680,7 +681,11 @@ const ordinal = (n: number) => `#${n}`
       <template v-if="detailShown">
         <section v-if="detailShown.builds.length" class="panel banded">
           <h2 class="band">{{ t('tournaments.buildsHere', { name: refName(pokemon(detailShown.id)) }) }}</h2>
-          <BuildCards :pokemon="detailShown.id" :builds="detailShown.builds" />
+          <BuildCards
+            :pokemon="detailShown.id"
+            :builds="detailShown.builds"
+            :remember="`builds:${id}:${detailShown.key}`"
+          />
         </section>
         <section v-if="detailShown.mates.length" class="panel banded">
           <h2 class="band">{{ t('tournaments.matesHere', { name: refName(pokemon(detailShown.id)) }) }}</h2>

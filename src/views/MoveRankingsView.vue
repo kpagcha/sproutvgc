@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onBeforeUnmount, shallowRef, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, shallowRef, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
 import { move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
@@ -13,6 +13,7 @@ import { ranksOf, scaleOf, standings, usageOf, usersOf } from '@/lib/entryUsage'
 import { fold, split } from '@/lib/search'
 import { passesGroups, positiveFilters } from '@/lib/filterGroups'
 import { formatTermFilters, parseTermFilters, type Term, type TermFilters } from '@/lib/searchTerms'
+import { useUnfolded } from '@/composables/useUnfolded'
 import { useActiveQuery } from '@/composables/useActiveQuery'
 import { useGradualRows } from '@/composables/useGradualRows'
 import { useMeta } from '@/composables/useMeta'
@@ -199,7 +200,8 @@ onBeforeUnmount(() => phoneQuery.removeEventListener('change', onPhone))
 const { entered, restoring } = usePageEntered()
 /** The list folded to its first rows, so what's after it (the trends) is there to be found; unfolded on asking. */
 const FOLDED = 20
-const allRows = ref(false)
+// Unfolded, remembered for the visit (`useUnfolded`).
+const allRows = useUnfolded('rankings:moves')
 const listed = computed(() => (allRows.value ? shown.value : shown.value.slice(0, FOLDED)))
 const drawn = useGradualRows(listed)
 useRowColumns(useTemplateRef('head'))
@@ -431,7 +433,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
       </p>
     </div>
-    <RankingTrends v-if="trendsShown" id="sec-trends" class="section" :rows="shown" :since>
+    <RankingTrends v-if="trendsShown" id="sec-trends" class="section" :rows="shown" :since remember="trends:moves">
       <template #entry="{ row }"> <TypeIcon :type="row.data.type" />{{ row.name }} </template>
     </RankingTrends>
   </div>

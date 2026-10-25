@@ -1,11 +1,12 @@
 <script setup lang="ts" generic="R extends TrendRow">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { percent } from '@/data/meta'
 import { t } from '@/i18n'
 import { points, STEADY } from '@/lib/entryUsage'
 import type { NamedLocation } from '@/lib/links'
 import AppLink from '@/components/AppLink'
 import MoreToggle from '@/components/MoreToggle.vue'
+import { useUnfolded } from '@/composables/useUnfolded'
 
 // The rankings' trends, a panel of their own after the list (the list's rank keeps only a mark of them: up, down or
 // new): of the entries the list shows (its search and filters), those whose usage rose and fell the most since the
@@ -29,13 +30,15 @@ const props = defineProps<{
   title?: string
   about?: string
   tips?: { points: string; new: string; none: string }
+  /** What its unfolding is remembered under, for the visit (`useUnfolded`). */
+  remember: string
 }>()
 defineSlots<{ entry(p: { row: R }): unknown }>()
 
-/** How many each column shows, and unfolded (`MoreToggle`, one for them all). */
+/** How many each column shows, and unfolded (`MoreToggle`, one for them all), remembered for the visit. */
 const MOVERS = 5
 const MOVERS_ALL = 20
-const all = ref(false)
+const all = useUnfolded(() => props.remember)
 
 /** Usage's change where the snapshot has it, else the places'. */
 const byUsage = computed(() => props.rows.some((r) => r.change !== undefined))

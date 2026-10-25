@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, ref, watch } from 'vue'
+import { computed, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMediaQuery } from '@vueuse/core'
 import { ability, item, move, type PokemonId } from '@/data/dex'
@@ -9,6 +9,7 @@ import { natureName } from '@/data/natures'
 import { buildParam } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
 import { META_LINKS } from '@/lib/links'
+import { useUnfolded } from '@/composables/useUnfolded'
 import AppLink from '@/components/AppLink'
 import DexRef from '@/components/DexRef'
 import ItemIcon from '@/components/ItemIcon.vue'
@@ -19,19 +20,20 @@ import { natureTip } from '@/components/natureTip'
 // A Pokémon's most common builds (the same item, ability, nature and moves), a card each: its rank and share of the
 // sets, its item, ability and nature (what it does on hover), its moves in the order given, each with its type's badge,
 // and the way to its page (`MetaBuildView`: every team that ran it at `regulation`'s official tournaments), how many
-// teams it was. Its first `TOP` (on phones `TOP_PHONE`) until unfolded (`MoreToggle`), folded again for another
-// Pokémon. On a Pokémon's meta page, and on a tournament's standings filtered by one.
-const props = defineProps<{ pokemon: PokemonId; builds: readonly (Build & { teams: number })[]; regulation?: string }>()
+// teams it was. Its first `TOP` (on phones `TOP_PHONE`) until unfolded (`MoreToggle`), remembered for the visit under
+// `remember` (`useUnfolded`). On a Pokémon's meta page, and on a tournament's standings filtered by one.
+const props = defineProps<{
+  pokemon: PokemonId
+  builds: readonly (Build & { teams: number })[]
+  regulation?: string
+  remember: string
+}>()
 
 const TOP = 5
 const TOP_PHONE = 2
 const phone = useMediaQuery('(max-width: 720px)')
 const top = computed(() => (phone.value ? TOP_PHONE : TOP))
-const all = ref(false)
-watch(
-  () => props.pokemon,
-  () => (all.value = false),
-)
+const all = useUnfolded(() => props.remember)
 const shown = computed(() => (all.value ? props.builds : props.builds.slice(0, top.value)))
 
 // Its pages open on the data the page's links do (a tournament's regulation's), else the page's own.
