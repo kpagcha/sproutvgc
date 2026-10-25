@@ -115,8 +115,9 @@ function dueReview(): Question | null {
   return fromCard(id, stages.value, idSet.value, data.value, settings.value.topShare)
 }
 
-/** A new pair: at an earlier stage one time in `EARLIER_EVERY`, at an easier level one in `EASIER_EVERY` (neither
- * counting), else at the stage's level; at the nearest level with any when that one has none. */
+/** A new pair: at an earlier stage one time in `EARLIER_EVERY` (counting toward that stage's level), at an easier
+ * level one in `EASIER_EVERY` (not counting), else at the stage's level; at the nearest level with any when that one
+ * has none. */
 function newQuestion(): Question | null {
   const list = stages.value
   const at =

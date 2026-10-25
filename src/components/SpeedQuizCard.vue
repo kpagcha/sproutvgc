@@ -199,7 +199,6 @@ onBeforeUnmount(() => {
             t(question.stage === 'base' ? 'speedQuiz.prompt.base' : 'speedQuiz.prompt.sets')
           }}</span>
           <span v-if="question.review" class="tag">{{ t('speedQuiz.review') }}</span>
-          <span v-else-if="!question.counts" class="tag">{{ t('speedQuiz.easier') }}</span>
         </p>
         <div class="answers">
           <template v-for="(side, i) in [question.a, question.b]" :key="side.id">

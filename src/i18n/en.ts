@@ -499,7 +499,6 @@ export const messages = {
   'speedQuiz.prompt.sets': 'Who moves first?',
   'speedQuiz.tie': 'Tie',
   'speedQuiz.review': 'Review',
-  'speedQuiz.easier': "Easier: doesn't count",
   'speedQuiz.faster': '{name} is faster: {a} to {b}.',
   'speedQuiz.tied': 'A speed tie: both at {n}.',
   'speedQuiz.levelUp': 'Level up: {n}',
