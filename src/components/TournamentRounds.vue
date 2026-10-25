@@ -330,7 +330,8 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
       {{ t('tournaments.roundAbout', { n: num(swiss.length) }) }}
     </p>
     <p v-if="!shownPairings.length" class="muted">{{ t('tournaments.noMatches') }}</p>
-    <ol v-else class="pairings" :class="{ previewing: preview }">
+    <!-- Hidden while it's empty, not taken out: its rows' memo (`v-memo`) outlives it, and taken out and put back, they'd be drawn from rows already gone. -->
+    <ol v-show="shownPairings.length" class="pairings" :class="{ previewing: preview }">
       <li
         v-for="m in drawn"
         :key="`${m[0]}-${m[1]}`"

@@ -193,7 +193,7 @@ const skeleton = computed(() => [
   </div>
   <div :class="{ panel: panels, 'table-box': stacked }">
     <div
-      v-if="sorted.length"
+      v-show="sorted.length"
       class="dex-table"
       :class="{ restoring, tight: stacked, previewing: preview }"
       :style="cols"
@@ -270,7 +270,9 @@ const skeleton = computed(() => [
         </div>
       </template>
     </div>
-    <p v-else class="muted">{{ t('moves.none') }}</p>
+    <!-- The table hidden while it's empty, not taken out: its rows' memo (`v-memo`) outlives it, and taken out and put
+         back, they'd be drawn from rows already gone. -->
+    <p v-if="!sorted.length" class="muted">{{ t('moves.none') }}</p>
   </div>
 </template>
 

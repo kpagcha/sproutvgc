@@ -71,7 +71,8 @@ const drawn = useGradualRows(shown)
       />
     </div>
     <div class="panel" :class="{ previewing: preview }">
-      <dl v-if="shown.length" class="entries">
+      <!-- Hidden while it's empty, not taken out: its rows' memo (`v-memo`) outlives it, and taken out and put back, they'd be drawn from rows already gone. -->
+      <dl v-show="shown.length" class="entries">
         <!-- Each entry drawn again only when what it shows changes, not with every change to the page (the search's text,
              its options, the count it shows). -->
         <div v-for="a in drawn" :key="a.id" class="entry" v-memo="[a.id, a.name, a.text, marksKey(a.parts)]">
@@ -84,7 +85,7 @@ const drawn = useGradualRows(shown)
           <dd class="muted"><DexText :text="a.text" /></dd>
         </div>
       </dl>
-      <p v-else class="muted">{{ t('abilities.none') }}</p>
+      <p v-if="!shown.length" class="muted">{{ t('abilities.none') }}</p>
     </div>
   </div>
 </template>

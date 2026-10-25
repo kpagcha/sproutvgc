@@ -574,7 +574,8 @@ const ordinal = (n: number) => `#${n}`
     <DefineList>
       <p v-if="!standings" class="muted">{{ t('tournaments.loading') }}</p>
       <p v-else-if="!shownParts.length" class="muted">{{ t('tournaments.noPlayers') }}</p>
-      <ol v-else class="standings" :class="{ previewing: preview }">
+      <!-- Hidden while it's empty, not taken out: its rows' memo (`v-memo`) outlives it, and taken out and put back, they'd be drawn from rows already gone. -->
+      <ol v-if="standings" v-show="shownParts.length" class="standings" :class="{ previewing: preview }">
         <!-- Each part under its name, when there's more than one, then its players. Each drawn again only when what
              it shows changes, not with every change to the page (the search's text, its options): a Regional has a
              thousand players. Never one drawn for a filter's preview kept past it, nor the reverse: Vue patched such a
