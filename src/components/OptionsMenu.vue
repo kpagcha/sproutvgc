@@ -8,6 +8,10 @@ defineProps<{
   /** What the options are of, the button's tooltip and label. */
   title: string
   icon?: Component
+  /** Shown beside the icon: a small quiet button rather than the icon alone (`btn quiet small`). */
+  label?: string
+  /** The drop-down from the button's left edge rather than its right. */
+  align?: 'left' | 'right'
 }>()
 
 // Its tooltip only where there's hovering: a tap opens the drop-down, its label saying the same.
@@ -33,17 +37,17 @@ onBeforeUnmount(() => (open.value = false))
 <template>
   <div ref="root" class="options-menu">
     <button
-      v-tip="canHover && title"
+      v-tip="canHover && !label && title"
       type="button"
-      class="toggle"
-      :class="{ open }"
+      :class="label ? ['btn', 'quiet', 'small', { on: open }] : ['toggle', { open }]"
       :aria-expanded="open"
       :aria-label="title"
       @click="open = !open"
     >
-      <component :is="icon ?? Settings2" :size="16" aria-hidden="true" />
+      <component :is="icon ?? Settings2" :size="label ? 14 : 16" aria-hidden="true" />
+      <span v-if="label">{{ label }}</span>
     </button>
-    <div v-if="open" class="pop panel">
+    <div v-if="open" class="pop panel" :class="{ left: align === 'left' }">
       <slot :close="() => (open = false)" />
     </div>
   </div>
@@ -80,6 +84,11 @@ onBeforeUnmount(() => (open.value = false))
   gap: 6px;
   width: max-content;
   font-weight: normal;
+}
+/* From the button's left edge. */
+.pop.left {
+  right: auto;
+  left: 0;
 }
 /* A checkbox or radio with its label, and a group of them under a heading of its own. */
 .pop :slotted(label) {

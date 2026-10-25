@@ -984,6 +984,7 @@ export const messages = {
   'builder.pointOver': '1 point over',
   'builder.pointsOver': '{n} points over',
   'builder.pointsClear': 'Clear',
+  'builder.pointsConfirm': 'Confirm',
   'builder.pointsIn': 'Stat points in {stat}',
   'builder.valueText': '{n} points, {value}',
   'builder.less': 'One point less in {stat}',

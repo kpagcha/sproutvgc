@@ -15,10 +15,11 @@ import { ChartColumn } from '@lucide/vue'
 // A slot's stats and stat points, set by hand: the meta page's spread card made to be played with, a row per stat (its
 // name and its bar, `PointsBar`: its points, the stat they give, the nature's marks), and how many of the
 // `TOTAL_POINTS` are left to spend. Each stat takes no more than are left. Its most common spreads (`spreads`, the
-// meta's) in a drop-down beside the points left, each setting the points and the nature and closing it.
+// meta's) in a drop-down at its foot, each setting the points and the nature and closing it, on one row with Clear and
+// Confirm (which folds it).
 const props = defineProps<{ pokemon: PokemonId; nature: string | null; spreads: readonly Spread[] }>()
 const points = defineModel<Points>('points', { required: true })
-const emit = defineEmits<{ preset: [spread: Spread] }>()
+const emit = defineEmits<{ preset: [spread: Spread]; confirm: [] }>()
 
 const spent = computed(() => points.value.reduce((a, b) => a + b, 0))
 const left = computed(() => TOTAL_POINTS - spent.value)
@@ -60,26 +61,6 @@ const isPreset = (s: Spread) => s.nature === props.nature && s.points.every((p, 
               : t('builder.pointsLeft', { n: left })
             : ''
       }}</span>
-      <button v-if="spent" type="button" class="link-btn" @click="points = [0, 0, 0, 0, 0, 0]">
-        {{ t('builder.pointsClear') }}
-      </button>
-      <OptionsMenu v-if="presets.length" class="presets-menu" :title="t('builder.presets')" :icon="ChartColumn">
-        <template #default="{ close }">
-          <span class="muted small">{{ t('builder.presets') }}</span>
-          <button
-            v-for="(sp, i) in presets"
-            :key="i"
-            type="button"
-            class="preset"
-            :class="{ on: isPreset(sp) }"
-            @click="choose(sp, close)"
-          >
-            <span v-tip="natureTip(sp.nature)" class="preset-nature">{{ natureName(sp.nature) }}</span>
-            <span class="preset-points">{{ sp.points.join('/') }}</span>
-            <span v-if="sp.share" class="muted">{{ percent(sp.share) }}</span>
-          </button>
-        </template>
-      </OptionsMenu>
     </div>
     <div class="rows">
       <template v-for="r in rows" :key="r.stat">
@@ -94,6 +75,38 @@ const isPreset = (s: Spread) => s.nature === props.nature && s.points.every((p, 
           @update:model-value="set(r.i, $event)"
         />
       </template>
+    </div>
+    <!-- Its common spreads to pick from, and clearing or confirming the points (which folds it), on one row. -->
+    <div class="actions">
+      <OptionsMenu
+        v-if="presets.length"
+        class="presets-menu"
+        :title="t('builder.presets')"
+        :label="t('builder.presets')"
+        :icon="ChartColumn"
+        align="left"
+      >
+        <template #default="{ close }">
+          <button
+            v-for="(sp, i) in presets"
+            :key="i"
+            type="button"
+            class="preset"
+            :class="{ on: isPreset(sp) }"
+            @click="choose(sp, close)"
+          >
+            <span v-tip="natureTip(sp.nature)" class="preset-nature">{{ natureName(sp.nature) }}</span>
+            <span class="preset-points">{{ sp.points.join('/') }}</span>
+            <span v-if="sp.share" class="muted">{{ percent(sp.share) }}</span>
+          </button>
+        </template>
+      </OptionsMenu>
+      <button type="button" class="btn quiet small clear" :disabled="!spent" @click="points = [0, 0, 0, 0, 0, 0]">
+        {{ t('builder.pointsClear') }}
+      </button>
+      <button type="button" class="btn quiet small confirm" @click="emit('confirm')">
+        {{ t('builder.pointsConfirm') }}
+      </button>
     </div>
   </div>
 </template>
@@ -122,15 +135,36 @@ const isPreset = (s: Spread) => s.nature === props.nature && s.points.every((p, 
 .left.over {
   color: var(--bad);
 }
-.link-btn {
+/* The spreads' drop-down at the left, Clear and Confirm at the right; one row, the buttons as tight as they read. */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.actions :deep(.btn) {
+  padding-inline: 6px;
+}
+.clear {
   margin-left: auto;
-  padding: 0;
-  font: inherit;
-  font-weight: normal;
-  color: var(--link);
-  background: none;
-  border: 0;
-  cursor: pointer;
+}
+/* Clear and Confirm quiet, with the faintest tint of the bad and the good, a little more pointed at. */
+.actions .btn.quiet.clear:not(:disabled) {
+  color: color-mix(in srgb, var(--bad) 30%, var(--muted));
+  border-color: color-mix(in srgb, var(--bad) 12%, var(--border));
+}
+.actions .btn.quiet.confirm {
+  color: color-mix(in srgb, var(--good) 30%, var(--muted));
+  border-color: color-mix(in srgb, var(--good) 12%, var(--border));
+}
+.actions .btn.quiet.clear:hover:not(:disabled) {
+  color: color-mix(in srgb, var(--bad) 65%, var(--text));
+  background: color-mix(in srgb, var(--bad) 5%, transparent);
+  border-color: color-mix(in srgb, var(--bad) 40%, var(--border));
+}
+.actions .btn.quiet.confirm:hover {
+  color: color-mix(in srgb, var(--good) 65%, var(--text));
+  background: color-mix(in srgb, var(--good) 5%, transparent);
+  border-color: color-mix(in srgb, var(--good) 40%, var(--border));
 }
 .rows {
   display: grid;
@@ -142,15 +176,6 @@ const isPreset = (s: Spread) => s.nature === props.nature && s.points.every((p, 
 .name {
   font-size: 0.85em;
   color: var(--muted);
-}
-/* The common spreads' drop-down at the line's end, after Clear when it's there; in the text's color, not the line's. */
-.presets-menu {
-  margin-left: auto;
-  color: var(--text);
-  font-weight: normal;
-}
-.link-btn + .presets-menu {
-  margin-left: 0;
 }
 .preset {
   display: flex;

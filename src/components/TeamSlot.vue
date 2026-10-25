@@ -154,6 +154,7 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
         :nature="member.nature"
         :spreads
         @preset="preset"
+        @confirm="open = false"
       />
     </div>
     <div v-else class="stats-box stats-blank" aria-hidden="true">
