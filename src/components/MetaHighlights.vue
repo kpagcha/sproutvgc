@@ -78,34 +78,41 @@ const ready = computed(() => named.value && !!data.value)
     <p class="muted label">{{ metaLabel(snapshot) }}</p>
     <!-- The most used, and beside them on wide screens (under them on narrower ones) the movers. -->
     <div v-if="ready" class="body">
-      <div class="dex-table" role="table" :aria-label="t('home.metaTop')">
-        <div v-for="r in top" :key="r.id" class="row" role="row">
-          <div role="cell" class="r num muted rank">
-            #{{ r.rank
-            }}<span v-if="previous" class="climb" :class="r.climb ? (r.climb > 0 ? 'up' : 'down') : r.fresh && 'fresh'"
-              ><template v-if="r.climb"
-                ><span aria-hidden="true">{{ r.climb > 0 ? '▲' : '▼' }}</span
-                ><span class="visually-hidden">{{ t(r.climb > 0 ? 'usage.up' : 'usage.down') }}</span
-                >{{ Math.abs(r.climb) }}</template
-              ><template v-else-if="r.fresh">{{ t('usage.new') }}</template></span
+      <!-- Each column under a heading, so their tops line up. -->
+      <div>
+        <h3 v-if="movers">{{ t('home.metaTop') }}</h3>
+        <div class="dex-table" role="table" :aria-label="t('home.metaTop')">
+          <div v-for="r in top" :key="r.id" class="row" role="row">
+            <div role="cell" class="r num muted rank">
+              #{{ r.rank
+              }}<span
+                v-if="previous"
+                class="climb"
+                :class="r.climb ? (r.climb > 0 ? 'up' : 'down') : r.fresh && 'fresh'"
+                ><template v-if="r.climb"
+                  ><span aria-hidden="true">{{ r.climb > 0 ? '▲' : '▼' }}</span
+                  ><span class="visually-hidden">{{ t(r.climb > 0 ? 'usage.up' : 'usage.down') }}</span
+                  >{{ Math.abs(r.climb) }}</template
+                ><template v-else-if="r.fresh">{{ t('usage.new') }}</template></span
+              >
+            </div>
+            <div role="cell" class="grow">
+              <AppLink :to="{ name: 'metaPokemon', params: { id: r.id } }" class="mon">
+                <PokemonIcon :id="r.id" />
+                <span class="mon-label">
+                  <span class="name">{{ r.species }}</span>
+                  <span v-if="r.forme" class="forme">{{ r.forme }}</span>
+                </span>
+              </AppLink>
+            </div>
+            <div
+              v-if="withUsage"
+              role="cell"
+              class="r num meter usage"
+              :style="{ '--share': (r.usage ?? 0) / (most || 1) }"
             >
-          </div>
-          <div role="cell" class="grow">
-            <AppLink :to="{ name: 'metaPokemon', params: { id: r.id } }" class="mon">
-              <PokemonIcon :id="r.id" />
-              <span class="mon-label">
-                <span class="name">{{ r.species }}</span>
-                <span v-if="r.forme" class="forme">{{ r.forme }}</span>
-              </span>
-            </AppLink>
-          </div>
-          <div
-            v-if="withUsage"
-            role="cell"
-            class="r num meter usage"
-            :style="{ '--share': (r.usage ?? 0) / (most || 1) }"
-          >
-            {{ r.usage === undefined ? '—' : percent(r.usage) }}
+              {{ r.usage === undefined ? '—' : percent(r.usage) }}
+            </div>
           </div>
         </div>
       </div>

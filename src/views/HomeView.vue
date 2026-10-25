@@ -333,8 +333,9 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
   flex-direction: column;
   padding: 0;
 }
+/* Its name level with Meta's, at the same padding from the top. */
 .tools-head {
-  padding: 14px 16px 10px;
+  padding: 16px 16px 10px;
   border-bottom: 2px solid var(--ink);
 }
 .tool-row {
