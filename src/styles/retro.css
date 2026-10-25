@@ -558,6 +558,40 @@
 }
 :root:root .driver-popover.tour .driver-popover-description {
   font-size: 0.9375rem;
+  line-height: 1.45;
+}
+/* A step's text (`useTour`): short paragraphs, the page's labels bold, a choice's options in italics (a list of them
+   where there are several to tell apart), keys as keys, a formula set apart. */
+:root:root .driver-popover.tour .driver-popover-description p {
+  margin: 0;
+}
+:root:root .driver-popover.tour .driver-popover-description p + p {
+  margin-top: 8px;
+}
+/* A choice's options, under the paragraph naming it. */
+:root:root .driver-popover.tour .driver-popover-description ul {
+  display: grid;
+  gap: 2px;
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+:root:root .driver-popover.tour .driver-popover-description strong {
+  font-weight: bold;
+}
+:root:root .driver-popover.tour .driver-popover-description kbd {
+  padding: 0 5px;
+  font:
+    0.85em/1.4 Verdana,
+    sans-serif;
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+}
+:root:root .driver-popover.tour .tour-formula {
+  padding: 6px 10px;
+  font-weight: bold;
+  text-align: center;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
 }
 :root:root .driver-popover.tour .driver-popover-close-btn {
   color: var(--muted);

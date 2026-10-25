@@ -13,6 +13,8 @@ export interface TourStep {
   // Given but none on screen: the step is left out.
   el?: string | string[]
   title: MessageKey
+  /** Its text, HTML (ours, so not escaped): paragraphs, the page's labels in `<strong>`, a choice's options in `<em>` (a `<ul>` of them where there are several to tell apart),
+   * keys in `<kbd>`, a formula in `<p class="tour-formula">`. */
   text: MessageKey
   /** The text's placeholders. */
   params?: Record<string, string | number>
