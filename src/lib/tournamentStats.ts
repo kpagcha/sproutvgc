@@ -224,12 +224,28 @@ export interface PlayerMatch {
   key: string
 }
 
-/** A player's matches, round by round, the first first. */
-export function playerMatches(rounds: Record<number, Round>, placing: number): PlayerMatch[] {
+/** Each top cut round's rounds left after it (0 the final, 1 the semifinals, 2 the quarterfinals…), by its own matches,
+ * byes counted (a round of 2^n matches has n left), not by the rounds after it there are so far: at an event under way,
+ * the last one played isn't the final. One that isn't a whole round of a bracket (a play-in) is one more than the
+ * round after it. */
+export function cutRoundsLeft(rounds: Record<number, Round>): Map<number, number> {
   const cut = Object.entries(rounds)
     .filter(([, r]) => r.phase === 3)
-    .map(([n]) => Number(n))
-  const last = Math.max(...cut)
+    .map(([n, r]) => ({ round: Number(n), n: r.matches.length }))
+    .sort((a, b) => b.round - a.round)
+  const left = new Map<number, number>()
+  let after: number | undefined
+  for (const { round, n } of cut) {
+    const whole = n > 0 && (n & (n - 1)) === 0
+    after = whole || after === undefined ? Math.ceil(Math.log2(Math.max(n, 1))) : after + 1
+    left.set(round, after)
+  }
+  return left
+}
+
+/** A player's matches, round by round, the first first. */
+export function playerMatches(rounds: Record<number, Round>, placing: number): PlayerMatch[] {
+  const lefts = cutRoundsLeft(rounds)
   return Object.entries(rounds)
     .map(([n, r]) => ({ round: Number(n), r }))
     .sort((x, y) => x.round - y.round)
@@ -249,7 +265,7 @@ export function playerMatches(rounds: Record<number, Round>, placing: number): P
               ? 'win'
               : 'loss'
       return [
-        { round, phase: r.phase, opponent, result, key: `${a}-${b}`, ...(r.phase === 3 && { left: last - round }) },
+        { round, phase: r.phase, opponent, result, key: `${a}-${b}`, ...(r.phase === 3 && { left: lefts.get(round) }) },
       ]
     })
 }
@@ -334,20 +350,22 @@ export function cutMarks(rounds: Record<number, Round>, standings: readonly Plac
 }
 
 /** The top 8's placings as medals (`main.css`'s `.medal`): gold, silver, bronze for the semifinals, and a plain one for
- * the quarterfinals. */
-export const medalOf = (placing: number) =>
-  placing === 1
-    ? 'medal gold'
-    : placing === 2
-      ? 'medal silver'
-      : placing <= 4
-        ? 'medal bronze'
-        : placing <= 8
-          ? 'medal'
-          : ''
+ * the quarterfinals. Not `over` (an event under way), plain all: no medal has been won yet. */
+export const medalOf = (placing: number, over = true) =>
+  !over && placing <= 8
+    ? 'medal'
+    : placing === 1
+      ? 'medal gold'
+      : placing === 2
+        ? 'medal silver'
+        : placing <= 4
+          ? 'medal bronze'
+          : placing <= 8
+            ? 'medal'
+            : ''
 
-/** The top cut as a bracket: its rounds, the first first, each with how many were left after it, as `PlayerMatch`'s
- * `left`, and its matches ordered so that each two side by side lead to the next round's match at their place (worked
+/** The top cut as a bracket: its rounds, the first first, each with how many were left after it (`cutRoundsLeft`, as
+ * `PlayerMatch`'s `left`), and its matches ordered so that each two side by side lead to the next round's match at their place (worked
  * back from the final, each match's players found in the round before). */
 export function bracketOf(rounds: Record<number, Round>): { round: number; left: number; matches: Round['matches'] }[] {
   const cut = Object.entries(rounds)
@@ -368,8 +386,8 @@ export function bracketOf(rounds: Record<number, Round>): { round: number; left:
       }
     cut[i]!.matches = [...ordered, ...left]
   }
-  const last = cut.length - 1
-  return cut.map((r, i) => ({ ...r, left: last - i }))
+  const lefts = cutRoundsLeft(rounds)
+  return cut.map((r) => ({ ...r, left: lefts.get(r.round)! }))
 }
 
 /** Each player's record going into a round: their wins, losses and matches neither won in the rounds before it (a bye

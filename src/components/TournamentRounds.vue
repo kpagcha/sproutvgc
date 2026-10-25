@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { pending, type Round, type Standing } from '@/data/tournaments'
+import { pending, underWay, type Round, type Standing } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
 import { passesGroups } from '@/lib/filterGroups'
 import { fold } from '@/lib/search'
@@ -18,7 +18,8 @@ import PokemonIcon from '@/components/PokemonIcon'
 
 // A tournament's rounds (`TournamentView`'s Rounds tab, `/meta/tournaments/:id/rounds`): picked from a row of them by
 // day (`?round=`), the top cut, the default, as a bracket (each round a column, its matches lined up with the next
-// round's they lead to, `BracketMatch`; a first round with byes a play-in, a stage of its own, its matches alone), a Swiss round as its pairings, the players' records going into it, the most wins first,
+// round's they lead to, `BracketMatch`; a first round with byes that isn't a whole bracket round a play-in, a stage
+// of its own, its matches alone), a Swiss round as its pairings, the players' records going into it, the most wins first,
 // searched by player and filtered by what a team has as the standings are (`?f=`; a match found when either team is,
 // its side marked). Each match its two players, their placing, name (the way to their page), country and six as icons,
 // the winner's in bold, a bye's second side saying so ("Bye" in the bracket).
@@ -47,11 +48,15 @@ const bracket = computed(() => bracketOf(props.rounds))
 type Match = Round['matches'][number]
 const matchKey = (m: Match) => `${m[0]}-${m[1]}`
 const winnerOf = (m: Match) => (m[2] === 1 ? m[0] : m[2] === 2 ? m[1] : null)
-/** The top cut's first round, when it has byes (the cut not a power of two, the top seeds skipping it): a play-in, its
- * matches played alone, each with whom its winner faced in the round after, over the bracket, which starts there. */
+/** The top cut's first round, when it has byes and isn't a whole round of a bracket (its matches, byes counted, not a
+ * power of two): a play-in, its matches played alone, each with whom its winner faced in the round after, over the
+ * bracket, which starts there. A whole one (a Top 16 with the top seeds' byes) is the bracket's first round, byes and
+ * all. */
 const playIn = computed(() => {
   const [first, next] = bracket.value
   if (!first || !next || !first.matches.some((m) => m[1] === null)) return null
+  const n = first.matches.length
+  if ((n & (n - 1)) === 0) return null
   return first.matches
     .filter((m) => m[1] !== null)
     .map((m) => {
@@ -128,15 +133,17 @@ onBeforeUnmount(() => {
 // to the next; again, untraced.
 const traced = ref<number | null>(null)
 const trace = (p: number) => (traced.value = traced.value === p ? null : p)
-/** Its color: the medal's of a top 4 placing, else the accent. */
+/** Its color: the medal's of a top 4 placing, else the accent (always, while the event is under way: no medal won yet). */
 const traceColor = computed(() =>
-  traced.value === 1
-    ? 'var(--gold)'
-    : traced.value === 2
-      ? 'var(--silver)'
-      : traced.value !== null && traced.value <= 4
-        ? 'var(--bronze)'
-        : 'var(--accent)',
+  underWay(props.id)
+    ? 'var(--accent)'
+    : traced.value === 1
+      ? 'var(--gold)'
+      : traced.value === 2
+        ? 'var(--silver)'
+        : traced.value !== null && traced.value <= 4
+          ? 'var(--bronze)'
+          : 'var(--accent)',
 )
 const onPath = (m: Match) => traced.value !== null && (m[0] === traced.value || m[1] === traced.value)
 const advanced = (m: Match, ci: number) => ci < columns.value.length - 1 && winnerOf(m) === traced.value && onPath(m)

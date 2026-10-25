@@ -49,8 +49,11 @@ export interface TournamentEvent {
 /** How far an event under way has got: the rounds played or being played, of all its rounds; when its standings last
  * changed, as an ISO time; and whether it's over, its team lists maybe still coming in. */
 export interface LiveState {
+  /** The round played or being played, counting on into the top cut, and its Swiss rounds. */
   round: number
   rounds: number
+  /** In the top cut, its round's matches (1 the final, 2 the semifinals, …; not a power of two, a play-in). */
+  cut?: number
   updated: string
   completed?: true
   /** Under way, who's first so far, their record, and their Pokémon once their team list is out. */
@@ -95,6 +98,12 @@ const among = (s: Standing, players: TournamentPlayers) =>
 
 /** An event by its ID. */
 export const eventOf = (id: string): TournamentEvent | undefined => BY_ID.get(id)
+
+/** Whether an event is under way: its first placing only leads it, no one has won it yet. */
+export const underWay = (id: string) => {
+  const live = eventOf(id)?.live
+  return !!live && !live.completed
+}
 
 const INDEX = import.meta.glob<Record<string, TournamentEvent>>('./generated/tournaments/index.json', {
   eager: true,

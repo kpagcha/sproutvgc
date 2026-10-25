@@ -10,6 +10,7 @@ import {
   baselineOf,
   buildParam,
   eventOf,
+  underWay,
   listed,
   loadEventUsage,
   loadRounds,
@@ -585,7 +586,9 @@ const ordinal = (n: number) => `#${n}`
           :key
           v-memo="[head, s, open.has(s.placing), builds, id, locale, preview]"
           :data-placing="head ? undefined : s.placing"
-          :class="head ? 'part-head' : ['standing', { open: open.has(s.placing), won: s.placing === 1 }]"
+          :class="
+            head ? 'part-head' : ['standing', { open: open.has(s.placing), won: s.placing === 1 && !underWay(id) }]
+          "
         >
           <template v-if="head">{{ t(`tournaments.part.${head}`) }}</template>
           <template v-else>
@@ -859,7 +862,7 @@ const ordinal = (n: number) => `#${n}`
                     v-tip="playerAt(s.best)?.player"
                     :to="{ name: 'tournamentPlayer', params: { id, placing: String(s.best) } }"
                     class="best num"
-                    :class="medalOf(s.best)"
+                    :class="medalOf(s.best, !underWay(id))"
                     >{{ ordinal(s.best) }}</AppLink
                   >
                 </div>
@@ -903,7 +906,7 @@ const ordinal = (n: number) => `#${n}`
                     v-if="statKey === 'best'"
                     :to="{ name: 'tournamentPlayer', params: { id, placing: String(s.best) } }"
                     class="lead best soft num"
-                    :class="medalOf(s.best)"
+                    :class="medalOf(s.best, !underWay(id))"
                     >{{ ordinal(s.best) }}</AppLink
                   >
                   <!-- A win rate with its record beside it, what it's of. -->
@@ -946,7 +949,7 @@ const ordinal = (n: number) => `#${n}`
                         v-tip="playerAt(s.best)?.player"
                         :to="{ name: 'tournamentPlayer', params: { id, placing: String(s.best) } }"
                         class="best soft num"
-                        :class="medalOf(s.best)"
+                        :class="medalOf(s.best, !underWay(id))"
                         >{{ ordinal(s.best) }}</AppLink
                       >{{ bestText[1] }}</span
                     >
@@ -1050,7 +1053,7 @@ const ordinal = (n: number) => `#${n}`
               >
             </div>
             <p v-if="o.cut" class="feat">
-              <span class="placing num" :class="medalOf(o.best)">{{ ordinal(o.best) }}</span>
+              <span class="placing num" :class="medalOf(o.best, !underWay(id))">{{ ordinal(o.best) }}</span>
               <AppLink :to="{ name: 'tournamentPlayer', params: { id, placing: String(o.best) } }" class="who">{{
                 playerAt(o.best)?.player
               }}</AppLink>

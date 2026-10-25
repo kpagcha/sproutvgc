@@ -73,9 +73,12 @@ export interface TournamentEvent {
  * again on every run (`live`), its standings as they stand, with how far it's got. */
 export interface LiveEvent extends TournamentEvent {
   live: {
-    /** The rounds played or being played, of all its rounds. */
+    /** The round played or being played, counting on into the top cut, and its Swiss rounds (the standings site's
+     * `rounds`, which leaves the top cut out). */
     round: number
     rounds: number
+    /** In the top cut, its round's matches (1 the final, 2 the semifinals, …; not a power of two, a play-in). */
+    cut?: number
     /** When its standings last changed, as an ISO time. */
     updated: string
     /** Over: its standings final, though not all its team lists may be in. */
@@ -150,7 +153,7 @@ export type EventInfo = Omit<TournamentEvent, 'teams' | 't' | 'format' | 'day2' 
 interface ApiTournament {
   round: number
   completed: number
-  /** Its rounds, Swiss and top cut, all told; when its standings last changed, in UTC. */
+  /** Its Swiss rounds (not the top cut's, which `round` counts on into); when its standings last changed, in UTC. */
   rounds?: number
   updated_at?: string
   type?: string
@@ -360,11 +363,13 @@ export class LimitlessVgc {
     const read = await this.field(t, tournament, info, regulation, known, false, `live/${t}`, true)
     const updated = tournament.updated_at ? new Date(`${tournament.updated_at.replace(' ', 'T')}Z`) : new Date()
     const first = read.standings.find((s) => s.placing === 1)
+    const current = read.rounds[tournament.round]
     const event: LiveEvent = {
       ...read.event,
       live: {
         round: tournament.round,
         rounds: tournament.rounds ?? tournament.round,
+        ...(current?.phase === 3 ? { cut: current.matches.length } : {}),
         updated: updated.toISOString(),
         ...(tournament.completed ? { completed: true as const } : {}),
         ...(!tournament.completed &&

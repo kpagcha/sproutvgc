@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Round, Standing } from '@/data/tournaments'
+import { underWay, type Round, type Standing } from '@/data/tournaments'
 import { t } from '@/i18n'
 import { medalOf } from '@/lib/tournamentStats'
 import AppLink from '@/components/AppLink'
@@ -10,7 +10,8 @@ import PokemonIcon from '@/components/PokemonIcon'
 // A top cut match, a box of its two sides (`TournamentRounds`' bracket and play-in): each its player's name (the way to
 // their page) and country across the box, under it their six as icons from the left, three a row where six don't fit,
 // and their placing at the row's end, marked when they came through the play-in; the winner's name in bold, the loser's
-// side faded; a bye's second side saying so.
+// side faded; a bye's second side saying so. Without their team (an event under way, its lists not out), their placing
+// on their name's line. Its medals plain until the event is over (`medalOf`).
 type Placed = Standing & { placing: number }
 const props = defineProps<{
   id: string
@@ -23,6 +24,8 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ trace: [placing: number] }>()
 
+/** Over: its medals won. */
+const over = computed(() => !underWay(props.id))
 const sides = computed(() =>
   ([props.match[0], props.match[1]] as const).map((p, i) => ({
     p,
@@ -39,7 +42,12 @@ const sides = computed(() =>
       v-for="side in sides"
       :key="side.p ?? 'bye'"
       class="side"
-      :class="{ won: side.won, lost: side.lost, traced: traced != null && side.p === traced }"
+      :class="{
+        won: side.won,
+        lost: side.lost,
+        traced: traced != null && side.p === traced,
+        bare: side.s && !side.s.team.length,
+      }"
     >
       <template v-if="side.s">
         <span class="who"
@@ -57,13 +65,13 @@ const sides = computed(() =>
             v-tip="t('tournaments.traceTip')"
             type="button"
             class="placing num"
-            :class="medalOf(side.s.placing)"
+            :class="medalOf(side.s.placing, over)"
             :aria-pressed="traced === side.s.placing"
             @click="emit('trace', side.s.placing)"
           >
             #{{ side.s.placing }}
           </button>
-          <span v-else class="placing num" :class="medalOf(side.s.placing)">#{{ side.s.placing }}</span>
+          <span v-else class="placing num" :class="medalOf(side.s.placing, over)">#{{ side.s.placing }}</span>
           <span v-if="playedIn?.has(side.s.placing)" v-tip="t('tournaments.playedInTip')" class="played-in">{{
             t('tournaments.playIn')
           }}</span>
@@ -119,6 +127,14 @@ const sides = computed(() =>
 }
 .name:hover {
   color: var(--accent);
+}
+/* No team to show: the placing on the name's line, at its end. */
+.side.bare {
+  grid-template-areas: 'who seed';
+  align-items: center;
+}
+.side.bare .seed {
+  padding-top: 0;
 }
 /* Three a row, from the left; six where they fit beside the placing (its padding, six icons, the gap and a placing's
    medal: about 300px). */

@@ -2,7 +2,7 @@
 import { computed, provide, shallowRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { datasetDates, regulationSnapshot } from '@/data/meta'
-import { eventOf, loadRounds, loadStandings, type Round, type Standing } from '@/data/tournaments'
+import { eventOf, loadRounds, loadStandings, underWay, type Round, type Standing } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
 import { META_LINKS } from '@/lib/links'
 import { cutMarks, medalOf, playerMatches, type CutMark, type PlayerMatch } from '@/lib/tournamentStats'
@@ -132,10 +132,10 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
       <p v-if="!player" class="muted">{{ t('tournaments.loading') }}</p>
       <template v-else>
         <div class="title">
-          <span class="placing num" :class="medalOf(player.placing)">#{{ player.placing }}</span>
+          <span class="placing num" :class="medalOf(player.placing, !underWay(id))">#{{ player.placing }}</span>
           <h1>{{ player.player }}</h1>
           <CountryFlag :code="player.country" />
-          <span v-if="player.placing === 1" class="champion">{{ t('tournaments.champion') }}</span>
+          <span v-if="player.placing === 1 && !underWay(id)" class="champion">{{ t('tournaments.champion') }}</span>
         </div>
         <p class="facts">
           <span class="record num">{{ record(player.wins, player.losses) }}</span>

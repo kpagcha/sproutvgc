@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ChevronDown, ChevronUp } from '@lucide/vue'
-import { eventOf, type Slot, type Standing } from '@/data/tournaments'
+import { eventOf, underWay, type Slot, type Standing } from '@/data/tournaments'
 import { t } from '@/i18n'
 import { medalOf } from '@/lib/tournamentStats'
 import AppLink from '@/components/AppLink'
@@ -31,13 +31,15 @@ function rowClick(e: MouseEvent) {
 }
 const ordinal = (n: number) => `#${n}`
 const eventName = () => eventOf(props.event)?.name
+/** Its first placing has won it: not while it's under way, when they only lead. */
+const champion = () => props.s.placing === 1 && !underWay(props.event)
 </script>
 
 <template>
-  <div class="standing-row" :class="{ open, won: s.placing === 1 }">
+  <div class="standing-row" :class="{ open, won: champion() }">
     <!-- The row unfolds on a click anywhere but a link; the chevron its button, for the keyboard. -->
     <div class="player-row" :class="{ bare: !s.team.length }" @click="rowClick">
-      <span class="placing num" :class="medalOf(s.placing)">{{ ordinal(s.placing) }}</span>
+      <span class="placing num" :class="medalOf(s.placing, !underWay(event))">{{ ordinal(s.placing) }}</span>
       <span class="player-col">
         <span class="player"
           ><span class="who"
@@ -47,7 +49,7 @@ const eventName = () => eventOf(props.event)?.name
               >{{ s.player }}</AppLink
             >
             <CountryFlag :code="s.country" /></span
-          ><span v-if="s.placing === 1" class="champion">{{ t('tournaments.champion') }}</span></span
+          ><span v-if="champion()" class="champion">{{ t('tournaments.champion') }}</span></span
         >
         <AppLink v-if="showEvent" :to="{ name: 'tournament', params: { id: event } }" class="event-name small">{{
           eventName()

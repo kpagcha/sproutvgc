@@ -133,7 +133,7 @@ async function main() {
     writeFileSync(join(OUT, `${event.id}.json`), JSON.stringify(byPlacing))
     writeFileSync(join(OUT, `${event.id}.rounds.json`), JSON.stringify(rounds))
     console.log(
-      `${event.name}: ${event.live.completed ? 'over' : `round ${event.live.round} of ${event.live.rounds}`}, ${event.players} players, ${event.teams} team lists`,
+      `${event.name}: ${event.live.completed ? 'over' : event.live.cut ? `top cut, ${event.live.cut} matches` : `round ${event.live.round} of ${event.live.rounds}`}, ${event.players} players, ${event.teams} team lists`,
     )
   }
   const n = Object.keys(index).length
