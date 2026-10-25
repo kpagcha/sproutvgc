@@ -67,8 +67,8 @@ import UsageShift from '@/components/UsageShift.vue'
 
 // One Pokémon in the meta shown (`useMeta`, picked on the back row). Its heading has what matters most to a player: its
 // stats as the game shows them, set against the Pokémon it'll face, each marked when its most common nature raises or
-// lowers it, and its natures; then, smaller, its rank, usage and how often it's brought. Then what its sets run (moves,
-// items, abilities, each with its share of them), its most common exact spreads (each a row of bars: the points in each
+// lowers it; then, smaller, its rank, usage and how often it's brought. Then what its sets run (moves, items,
+// abilities, each with its share of them), its natures and most common exact spreads (each a row of bars: the points in each
 // stat, and the stat they give), its Speeds as the speed tiers draw them, its usage over the months of the dataset's
 // series, and last its teammates. After its moves and items, its whole builds (the same item, ability, nature and moves
 // together), from tournaments' team lists: the data shown's own when it has them, else every official event of its
@@ -479,7 +479,7 @@ const sections = computed(() =>
     { id: 'sec-items', label: t('usageMon.items'), shown: items.value.length > 0 },
     { id: 'sec-builds', label: t('usageMon.secBuilds'), shown: builds.value.length > 0 },
     { id: 'sec-speed', label: t('usageMon.speed'), shown: spread.value.length > 0 },
-    { id: 'sec-spreads', label: t('usageMon.secSpreads'), shown: spreads.value.length > 0 },
+    { id: 'sec-spreads', label: t('usageMon.secSpreads'), shown: spreads.value.length > 0 || natures.value.length > 0 },
     { id: 'sec-history', label: t('usageMon.secHistory'), shown: months.value.length > 1 },
     { id: 'sec-teammates', label: t('usageMon.teammates'), shown: teammates.value.length > 0 },
     { id: 'sec-tournaments', label: t('usageMon.secTournaments'), shown: tournaments.value.length > 0 },
@@ -632,17 +632,6 @@ const sections = computed(() =>
             </tr>
           </tbody>
         </table>
-        <!-- Its natures, each with the share of its sets running it, what it does on hover or tapped. -->
-        <ShareSplit
-          v-if="natures.length"
-          class="natures"
-          :label="t('usageMon.natures')"
-          :parts="natures"
-          :min="LIST_MIN"
-          :tip="(n) => natureTip(n.key)"
-        >
-          <template #part="{ part }">{{ natureName(part.key) }}</template>
-        </ShareSplit>
       </div>
     </div>
 
@@ -792,9 +781,25 @@ const sections = computed(() =>
       <!-- Its most common exact spreads, a card each, side by side: its rank and share of its sets on top, then its
            nature, then a bar per stat of the points put there; the stats named down the left, staying there as the
            cards scroll sideways on phones. -->
-      <section v-if="spreads.length" id="sec-spreads" class="panel" :class="{ 'meta-stale': loading }">
+      <section
+        v-if="spreads.length || natures.length"
+        id="sec-spreads"
+        class="panel"
+        :class="{ 'meta-stale': loading }"
+      >
         <h2 v-tip="t('usageMon.spreadsTip')" class="tipped-head">{{ t('usageMon.spreads') }}</h2>
-        <div class="spreads-scroll">
+        <!-- Its natures, each with the share of its sets running it, what it does on hover or tapped. -->
+        <ShareSplit
+          v-if="natures.length"
+          class="natures"
+          :label="t('usageMon.natures')"
+          :parts="natures"
+          :min="LIST_MIN"
+          :tip="(n) => natureTip(n.key)"
+        >
+          <template #part="{ part }">{{ natureName(part.key) }}</template>
+        </ShareSplit>
+        <div v-if="spreads.length" class="spreads-scroll">
           <div class="spreads" role="table">
             <div class="spread-labels" aria-hidden="true">
               <span></span>
@@ -1062,7 +1067,6 @@ const sections = computed(() =>
   max-width: 520px;
   margin-left: auto;
 }
-/* Its natures after their label, those that don't fit on its line going on under the first. */
 /* Its abilities: a card each, side by side as there's room, its name and share over a bar, what it does under them;
    the one its sets run most outlined. */
 .abilities {
@@ -1097,9 +1101,9 @@ const sections = computed(() =>
 .ability-desc {
   margin: 0;
 }
-/* Its natures, under its stats. */
+/* Its natures, over its spreads. */
 .natures {
-  margin-top: 10px;
+  margin-bottom: 12px;
 }
 .stats {
   width: 100%;
