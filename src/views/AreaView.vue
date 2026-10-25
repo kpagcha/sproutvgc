@@ -9,8 +9,9 @@ import SearchBox from '@/components/SearchBox.vue'
 import SearchResults from '@/components/SearchResults.vue'
 import SectionDecor from '@/components/SectionDecor.vue'
 
-// An area's own page (`/dex`, `/meta`, `/tools`): a card per section, what it is, and whether it's coming. The
-// dex's has the home page's search too (kept in `?q=`), its results in place of the cards.
+// An area's own page (`/dex`, `/tools`, `/quizzes`): a card per section, what it is, and whether it's coming. The
+// dex's has the home page's search too (kept in `?q=`), its results in place of the cards, and its cards their names
+// alone (each with its Pokémon), what's in a list of Pokémon or moves going without saying.
 const route = useRoute()
 const router = useRouter()
 const area = computed(() => areaOf(route.meta.area)!)
@@ -50,7 +51,7 @@ onMounted(() => searchable.value && preloadSearch())
           <SectionDecor v-if="area.id === 'dex'" :section="s.key" class="decor" />
           <span v-if="s.soon" class="soon">{{ t('soon.tag') }}</span>
         </span>
-        <span class="muted">{{ t(s.desc, params) }}</span>
+        <span v-if="area.id !== 'dex'" class="muted">{{ t(s.desc, params) }}</span>
       </RouterLink>
     </div>
   </div>
