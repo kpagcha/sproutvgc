@@ -506,40 +506,45 @@ const sections = computed(() =>
           <span class="muted">{{ t('pokemon.formes') }}</span>
           <PokemonChips :ids="formes" :current="id" formes meta />
         </div>
-        <!-- How much it's used, smaller: its rank, usage and how often it's brought, with their changes. -->
-        <p v-if="m" class="used">
-          <span class="used-part"
-            ><strong>#{{ m.rank }}</strong>
-            <span v-if="climb" class="climb" :class="climb > 0 ? 'up' : 'down'"
-              >{{ climb > 0 ? '▲' : '▼' }}{{ Math.abs(climb) }}</span
-            ><span v-else-if="previous && !m.prev" class="climb fresh">{{ t('usage.new') }}</span></span
-          >
-          <span v-if="m.usage !== undefined" class="used-part"
-            ><strong>{{ percent(m.usage) }}</strong>
-            <span v-tip="t('usage.usageTip')" class="muted tipped">{{ t('usageMon.usage') }}</span>
-            <span v-if="change !== undefined" class="climb" :class="change > 0 ? 'up' : change < 0 && 'down'">{{
-              points(change)
-            }}</span></span
-          >
-          <span v-if="m.brought !== undefined" class="used-part"
-            ><strong>{{ percent(m.brought) }}</strong>
-            <span v-tip="t('usage.broughtTip')" class="muted tipped">{{ t('usageMon.brought') }}</span></span
-          >
-          <span v-if="winRate" class="used-part"
-            ><strong>{{ percent(winRate.rate) }}</strong>
-            <span
-              v-tip="
-                t('usageMon.winRateTip', {
-                  wins: winRate.wins.toLocaleString(locale),
-                  games: winRate.games.toLocaleString(locale),
-                  regulation: winRate.regulation,
-                })
-              "
-              class="muted tipped"
-              >{{ t('usageMon.winRate') }}</span
-            ></span
-          >
-        </p>
+        <!-- How much it's used, smaller: its rank and usage, with their changes, and under them its teams' win rate and how
+             often it's brought. -->
+        <div v-if="m" class="used">
+          <p class="used-row">
+            <span class="used-part"
+              ><strong>#{{ m.rank }}</strong>
+              <span v-if="climb" class="climb" :class="climb > 0 ? 'up' : 'down'"
+                >{{ climb > 0 ? '▲' : '▼' }}{{ Math.abs(climb) }}</span
+              ><span v-else-if="previous && !m.prev" class="climb fresh">{{ t('usage.new') }}</span></span
+            >
+            <span v-if="m.usage !== undefined" class="used-part"
+              ><strong>{{ percent(m.usage) }}</strong>
+              <span v-tip="t('usage.usageTip')" class="muted tipped">{{ t('usageMon.usage') }}</span>
+              <span v-if="change !== undefined" class="climb" :class="change > 0 ? 'up' : change < 0 && 'down'">{{
+                points(change)
+              }}</span></span
+            >
+          </p>
+          <p v-if="winRate || m.brought !== undefined" class="used-row">
+            <span v-if="winRate" class="used-part"
+              ><strong>{{ percent(winRate.rate) }}</strong>
+              <span
+                v-tip="
+                  t('usageMon.winRateTip', {
+                    wins: winRate.wins.toLocaleString(locale),
+                    games: winRate.games.toLocaleString(locale),
+                    regulation: winRate.regulation,
+                  })
+                "
+                class="muted tipped"
+                >{{ t('usageMon.winRate') }}</span
+              ></span
+            >
+            <span v-if="m.brought !== undefined" class="used-part"
+              ><strong>{{ percent(m.brought) }}</strong>
+              <span v-tip="t('usage.broughtTip')" class="muted tipped">{{ t('usageMon.brought') }}</span></span
+            >
+          </p>
+        </div>
       </div>
       <!-- Its stats as the dex has them, each with its sets' most common nature's mark. -->
       <div class="stats-col">
@@ -985,8 +990,12 @@ const sections = computed(() =>
   align-items: center;
   gap: 4px 8px;
 }
-/* How much it's used: a line of its own, smaller than the stats. */
+/* How much it's used: two lines of their own (rank and usage, then win rate and brought), smaller than the stats. */
 .used {
+  display: grid;
+  gap: 2px;
+}
+.used-row {
   display: flex;
   flex-wrap: wrap;
   gap: 2px 16px;
