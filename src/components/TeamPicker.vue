@@ -104,7 +104,10 @@ const monShown = computed(() =>
     return !q.value || preview.value || parts ? [{ ...r, parts, usage: props.data?.[r.id]?.usage }] : []
   }),
 )
-const monNamed = computed(() => (q.value ? monShown.value.length : 0))
+/** How many the text finds by name, with the filters picked: not the preview's, which the options show over it. */
+const monNamed = computed(() =>
+  q.value ? monRows.value.filter((r) => split(r.name, q.value) && monPasses(r.id, filters.value)).length : 0,
+)
 
 // Moves: its sets' first, then the rest of its movepool.
 const MOVE_KINDS = ['type', 'category', 'flag', 'reach', 'priority'] as const
@@ -174,7 +177,10 @@ const itemShown = computed(() =>
     return !q.value || preview.value || parts ? [{ ...r, parts }] : []
   }),
 )
-const itemNamed = computed(() => (q.value ? itemShown.value.length : 0))
+/** How many the text finds by name, with the filters picked (as the Pokémon's). */
+const itemNamed = computed(() =>
+  q.value ? itemRows.value.filter((r) => split(r.name, q.value) && itemPasses(r.id, filters.value)).length : 0,
+)
 
 // Abilities: those it can have, by share: the Pokémon's own sets', its Mega's having its Mega's ability.
 const abilityRows = computed(() => {
