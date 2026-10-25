@@ -442,7 +442,12 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
   min-height: 30px;
   align-items: center;
 }
+/* Its icon centered in it, not on a line of text's baseline, so it sits level with the name and the Pokémon. */
 .icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
   padding: 3px;
   color: var(--muted);
   background: none;
