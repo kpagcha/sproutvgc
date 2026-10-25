@@ -106,6 +106,8 @@ const meta = computed(() => metaLinks?.() ?? route.query.meta)
   list-style: none;
 }
 .build {
+  /* Its width, for its moves to go two to a row when it's wide (`@container`). */
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -147,6 +149,15 @@ const meta = computed(() => metaLinks?.() ?? route.query.meta)
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
+}
+/* A card as wide as the panel (on phones, one to a row): its moves two to a row, so it isn't as tall. */
+@container (min-width: 280px) {
+  .build-moves {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px 10px;
+  }
 }
 /* The way to its teams, at the card's foot. */
 .build-teams {
