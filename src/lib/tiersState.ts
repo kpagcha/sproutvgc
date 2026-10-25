@@ -5,7 +5,7 @@ import { customRef, type Ref } from 'vue'
 import type { LocationQuery } from 'vue-router'
 
 /** How long a speed page's state is remembered since last changed: past it, the page opens bare. */
-const TTL = 2 * 24 * 60 * 60 * 1000
+const TTL = 6 * 60 * 60 * 1000
 
 // A speed page as the reader last left it (its URL's query), saved in the browser with when it was left: the page
 // opened bare (from the menu, nothing in its URL) comes back so, and the comparison's way back finds the speed tiers
