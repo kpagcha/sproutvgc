@@ -129,20 +129,22 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
         </button>
       </li>
     </ul>
-    <!-- Its stats and stat points, folded under a line saying how many are left. -->
+    <!-- Its stats and stat points, folded under a line saying how many are left (unfolded, beside its name). -->
     <div v-if="shown" class="stats-box">
       <button type="button" class="stats-toggle" :aria-expanded="open" @click="open = !open">
         <span class="toggle-line">
-          <span v-if="left !== 0 && !open" class="warn" :class="{ over: left < 0 }">{{
-            left > 0
-              ? left === 1
-                ? t('builder.pointLeft')
-                : t('builder.pointsLeft', { n: left })
-              : left === -1
-                ? t('builder.pointOver')
-                : t('builder.pointsOver', { n: -left })
-          }}</span>
-          <span v-else class="muted">{{ t('builder.points') }}</span>
+          <span class="toggle-label">
+            <span v-if="open || left === 0" class="muted">{{ t('builder.points') }}</span>
+            <span v-if="left !== 0" class="warn" :class="{ over: left < 0 }" aria-live="polite">{{
+              left > 0
+                ? left === 1
+                  ? t('builder.pointLeft')
+                  : t('builder.pointsLeft', { n: left })
+                : left === -1
+                  ? t('builder.pointOver')
+                  : t('builder.pointsOver', { n: -left })
+            }}</span>
+          </span>
           <component :is="open ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />
         </span>
       </button>
@@ -348,6 +350,12 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
   justify-content: space-between;
   gap: 6px;
   font-size: 0.85em;
+}
+.toggle-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
 }
 .warn {
   display: inline-flex;

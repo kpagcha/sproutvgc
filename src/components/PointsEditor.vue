@@ -13,9 +13,9 @@ import OptionsMenu from '@/components/OptionsMenu.vue'
 import { ChartColumn } from '@lucide/vue'
 
 // A slot's stats and stat points, set by hand: the meta page's spread card made to be played with, a row per stat (its
-// name and its bar, `PointsBar`: its points, the stat they give, the nature's marks), and how many of the
-// `TOTAL_POINTS` are left to spend. Each stat takes no more than are left. Its most common spreads (`spreads`, the
-// meta's) in a drop-down at its foot, each setting the points and the nature and closing it, on one row with Clear and
+// name and its bar, `PointsBar`: its points, the stat they give, the nature's marks); how many of the `TOTAL_POINTS`
+// are left to spend is on `TeamSlot`'s line it unfolds from. Each stat takes no more than are left. Its most common
+// spreads (`spreads`, the meta's) in a drop-down at its foot, each setting the points and the nature and closing it, on one row with Clear and
 // Confirm (which folds it).
 const props = defineProps<{ pokemon: PokemonId; nature: string | null; spreads: readonly Spread[] }>()
 const points = defineModel<Points>('points', { required: true })
@@ -49,19 +49,6 @@ const isPreset = (s: Spread) => s.nature === props.nature && s.points.every((p, 
 
 <template>
   <div class="points-editor">
-    <div class="left" :class="{ over: left < 0, open: left > 0 }">
-      <span aria-live="polite">{{
-        left < 0
-          ? left === -1
-            ? t('builder.pointOver')
-            : t('builder.pointsOver', { n: -left })
-          : left
-            ? left === 1
-              ? t('builder.pointLeft')
-              : t('builder.pointsLeft', { n: left })
-            : ''
-      }}</span>
-    </div>
     <div class="rows">
       <template v-for="r in rows" :key="r.stat">
         <span class="name" :class="r.effect" aria-hidden="true">{{ t(`stat.${r.stat}`) }}</span>
@@ -121,21 +108,6 @@ const isPreset = (s: Spread) => s.nature === props.nature && s.points.every((p, 
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-.left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  font-size: 0.9em;
-  font-weight: bold;
-  color: var(--good);
-}
-.left.open {
-  color: var(--accent);
-}
-.left.over {
-  color: var(--bad);
 }
 /* The spreads' drop-down at the left, Clear and Confirm at the right; one row, the buttons as tight as they read. */
 .actions {
