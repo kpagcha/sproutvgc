@@ -156,7 +156,8 @@ const offense = computed<Chart>(() => {
 const charts = computed(() => [props.side === 'def' ? defense.value : offense.value])
 
 // The column opened out: the one hovered with a mouse, or tapped on a touch screen (where it stays open as its blocks
-// are tapped for their tooltips, until it's tapped elsewhere, or another column, or anywhere but a column).
+// are tapped for their tooltips, until its type or the rest of it is tapped, or another column, or anywhere but a
+// column).
 // The rest of the panel dims while one is, so it stands out.
 const opened = shallowRef<string | null>(null)
 // On wide screens with a mouse, a block's tooltips go to their left, clear of the bar opened out, one tooltip
@@ -174,7 +175,7 @@ const leave = (e: PointerEvent, key: string) => {
 }
 const tap = (e: MouseEvent, key: string) => {
   if (!touch) return
-  const onPart = (e.target as Element).closest('.block, .axis')
+  const onPart = (e.target as Element).closest('.block')
   opened.value = opened.value === key && !onPart ? null : key
 }
 useEventListener(document, 'pointerdown', (e: PointerEvent) => {

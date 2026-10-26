@@ -531,6 +531,47 @@ section {
 }
 .saved-count {
   font-size: 0.85em;
+  white-space: nowrap;
+}
+/* On phones, the open one's name and how many teams over its Pokémon, so the button keeps to the screen. */
+@media (max-width: 720px) {
+  .saved-toggle {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas: 'name count chevron' 'icons icons icons';
+    align-items: center;
+    width: 100%;
+    text-align: left;
+  }
+  .saved-toggle > .saved-name {
+    grid-area: name;
+  }
+  .saved-toggle > .saved-icons {
+    grid-area: icons;
+  }
+  .saved-toggle > .saved-count {
+    grid-area: count;
+  }
+  .saved-toggle > :last-child {
+    grid-area: chevron;
+  }
+  /* In the drop-down, a team's duplicate and delete one over the other, leaving its Pokémon the room. */
+  .saved-list .saved-team {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+  }
+  .saved-list .saved-team > * {
+    grid-row: span 2;
+  }
+  .saved-list .saved-team > .icon-btn:not(.star) {
+    grid-row: auto;
+    grid-column: 3;
+  }
+  /* Its Pokémon closer together, into their icons' empty edges, so the six fit a phone. */
+  .saved-list .saved-icons > :deep(.sheet-icon + .sheet-icon) {
+    margin-left: -6px;
+  }
 }
 .saved-list {
   position: absolute;
@@ -541,7 +582,8 @@ section {
   flex-direction: column;
   gap: 4px;
   width: max-content;
-  max-width: calc(100vw - 32px);
+  /* No wider than the box it drops from: each team's Pokémon go under its name where they don't fit beside it. */
+  max-width: 100%;
   max-height: 60vh;
   margin: 0;
   padding: 8px;
@@ -560,6 +602,15 @@ section {
   border-color: var(--accent);
   box-shadow: 0 0 0 1px var(--accent);
 }
+.saved-list .saved-team {
+  min-width: 0;
+}
+.saved-list .saved-open {
+  flex: 1;
+  flex-wrap: wrap;
+  min-width: 0;
+  text-align: left;
+}
 .saved-open {
   display: flex;
   align-items: center;
@@ -572,7 +623,11 @@ section {
   cursor: pointer;
 }
 .saved-name {
+  min-width: 0;
+  overflow: hidden;
   font-weight: bold;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .saved-icons {
   display: inline-flex;

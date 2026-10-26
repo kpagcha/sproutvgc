@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, shallowRef, useTemplateRef, watch } from 'vue'
-import { Lightbulb } from '@lucide/vue'
+import { useMediaQuery } from '@vueuse/core'
+import { ChevronDown, Lightbulb } from '@lucide/vue'
 import { ability, move, pokemon, type AbilityId, type MoveId, type PokemonId } from '@/data/dex'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
@@ -44,6 +45,9 @@ const { open, onToggle } = useOpenState(
   `sproutvgc.builder.${props.side}Open`,
   !window.matchMedia('(max-width: 720px)').matches,
 )
+// Its types' card, on phones, folded until unfolded, then as last left.
+const narrow = useMediaQuery('(max-width: 720px)')
+const { open: typesOpen, toggle: toggleTypes } = useOpenState(`sproutvgc.builder.${props.side}TypesOpen`, false)
 const defending = props.side === 'defense'
 const meta = computed(() => props.meta ?? null)
 const pending = computed(() => props.meta === undefined)
@@ -266,13 +270,27 @@ const supportTip = (s: Support) => `${supportName(s)}: ${s.pokemon.map(name).joi
           </div>
         </section>
 
-        <!-- Its types. -->
-        <section class="card types-card">
+        <!-- Its types; on phones folded until unfolded, then as last left. -->
+        <section class="card types-card" :class="{ folded: narrow && !typesOpen }">
           <header class="card-head">
-            <h3>{{ t('builder.balance.types') }}</h3>
-            <span class="card-sub">{{ t(defending ? 'builder.balance.typesDef' : 'builder.balance.typesAtk') }}</span>
+            <button
+              v-if="narrow"
+              type="button"
+              class="fold"
+              :aria-expanded="typesOpen"
+              :aria-controls="`${side}-types`"
+              @click="toggleTypes"
+            >
+              <span class="title">{{ t('builder.balance.types') }}</span>
+              <span class="card-sub">{{ t(defending ? 'builder.balance.typesDef' : 'builder.balance.typesAtk') }}</span>
+              <ChevronDown class="fold-chevron" :size="16" aria-hidden="true" />
+            </button>
+            <template v-else>
+              <h3>{{ t('builder.balance.types') }}</h3>
+              <span class="card-sub">{{ t(defending ? 'builder.balance.typesDef' : 'builder.balance.typesAtk') }}</span>
+            </template>
           </header>
-          <TeamCoverage :side="defending ? 'def' : 'atk'" :members />
+          <TeamCoverage v-if="!narrow || typesOpen" :id="`${side}-types`" :side="defending ? 'def' : 'atk'" :members />
         </section>
       </div>
     </div>
@@ -360,9 +378,41 @@ const supportTip = (s: Support) => `${supportName(s)}: ${s.pokemon.map(name).joi
 .how p + p {
   margin-top: 6px;
 }
-.card-head h3 {
+.types-card.folded .card-head {
+  margin-bottom: 0;
+}
+/* The types' header on phones, the way to fold them: across the card, its chevron at the end. */
+.fold {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.fold-chevron {
+  margin-left: auto;
+  color: var(--muted);
+  transition: transform 0.18s ease;
+}
+.folded .fold-chevron {
+  transform: rotate(-90deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .fold-chevron {
+    transition: none;
+  }
+}
+.card-head :is(h3, .title) {
   margin: 0;
   font-size: 0.78em;
+  font-weight: bold;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
