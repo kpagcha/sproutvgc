@@ -952,6 +952,7 @@ export const messages = {
   'builder.copyOf': '{name} (copy)',
   'builder.name': 'Team name',
   'builder.saved': 'Saved teams',
+  'builder.teamsCount': '{n} teams',
   'builder.new': 'New team',
   'builder.import': 'Import paste',
   'builder.importHint': "Paste a team in Showdown's format, as pokepast.es shows it. Stat points go on its EVs line.",

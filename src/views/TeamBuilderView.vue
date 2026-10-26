@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, shallowRef, watch, type ComponentPublicInstance } from 'vue'
-import { useMediaQuery } from '@vueuse/core'
-import { ClipboardPaste, Copy, Plus, Star, Trash2 } from '@lucide/vue'
+import { computed, nextTick, onMounted, shallowRef, useTemplateRef, watch, type ComponentPublicInstance } from 'vue'
+import { createReusableTemplate, useElementSize, useEventListener, useMediaQuery } from '@vueuse/core'
+import { ChevronDown, ClipboardPaste, Copy, Plus, Star, Trash2 } from '@lucide/vue'
 import { ability, item, move, pokemon, type AbilityId, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
 import { loadLearnsets, POKEMON, splitForme } from '@/data/pokemon'
 import { RULES } from '@/data/rules'
@@ -12,7 +12,16 @@ import { useMeta } from '@/composables/useMeta'
 import { useTeams } from '@/composables/useTeams'
 import { membersPaste, parsePaste, type PasteProblem } from '@/lib/pokepaste'
 import { loadMetaBalance, type MetaBalance } from '@/lib/teamBalance'
-import { emptyMember, pickedAs, shownAs, teamIssues, type Field, type Member, type TeamIssue } from '@/lib/team'
+import {
+  emptyMember,
+  pickedAs,
+  shownAs,
+  teamIssues,
+  type Field,
+  type Member,
+  type Team,
+  type TeamIssue,
+} from '@/lib/team'
 import CopyPaste from '@/components/CopyPaste.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
@@ -261,6 +270,25 @@ watch(
   },
   { immediate: true },
 )
+// The saved teams on one row while they fit; past it, a drop-down showing the open one, every team in it. The row is
+// kept laid out (hidden) while folded, measured to know when it fits again; a team's chip drawn once for both.
+const [DefineTeam, ReuseTeam] = createReusableTemplate<{ team: Team }>()
+const savedBox = useTemplateRef<HTMLElement>('savedBox')
+const savedRow = useTemplateRef<HTMLElement>('savedRow')
+const { width: boxWidth } = useElementSize(savedBox)
+const { width: rowWidth } = useElementSize(savedRow)
+const folded = computed(() => rowWidth.value > boxWidth.value + 0.5)
+const menuOpen = shallowRef(false)
+watch(
+  () => current.value?.id,
+  () => (menuOpen.value = false),
+)
+useEventListener(document, 'pointerdown', (e: PointerEvent) => {
+  if (menuOpen.value && !savedBox.value?.contains(e.target as Node)) menuOpen.value = false
+})
+useEventListener(document, 'keydown', (e: KeyboardEvent) => {
+  if (e.key === 'Escape') menuOpen.value = false
+})
 const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon ? [shownAs(m)!] : []))
 </script>
 
@@ -282,9 +310,9 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
         </span>
         <MetaDialog v-if="snapshot" class="head-meta" />
       </div>
-      <!-- The saved teams, the starred first, the open one marked. -->
-      <ul class="saved" :aria-label="t('builder.saved')">
-        <li v-for="team in teams" :key="team.id" class="saved-team" :class="{ on: team.id === current?.id }">
+      <!-- A saved team's chip: its star, its name and Pokémon opening it, duplicating and deleting it. -->
+      <DefineTeam v-slot="{ team }">
+        <li class="saved-team" :class="{ on: team.id === current?.id }">
           <button
             v-tip="t(team.starred ? 'builder.unstar' : 'builder.star')"
             type="button"
@@ -319,7 +347,24 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
             <Trash2 :size="14" aria-hidden="true" />
           </button>
         </li>
-      </ul>
+      </DefineTeam>
+      <!-- The saved teams, the starred first, the open one marked: a row while they fit, else a drop-down. -->
+      <div ref="savedBox" class="saved-box" :class="{ folded }">
+        <ul ref="savedRow" class="saved" :aria-label="t('builder.saved')" :inert="folded">
+          <ReuseTeam v-for="team in teams" :key="team.id" :team />
+        </ul>
+        <div v-if="folded" class="saved-menu">
+          <button type="button" class="saved-toggle" :aria-expanded="menuOpen" @click="menuOpen = !menuOpen">
+            <span class="saved-name">{{ current?.name || t('builder.untitled') }}</span>
+            <span class="saved-icons"><PokemonIcon v-for="(p, i) in icons(members)" :id="p" :key="i" /></span>
+            <span class="muted saved-count">{{ t('builder.teamsCount', { n: teams.length }) }}</span>
+            <ChevronDown :size="16" aria-hidden="true" />
+          </button>
+          <ul v-if="menuOpen" class="saved-list panel" :aria-label="t('builder.saved')">
+            <ReuseTeam v-for="team in teams" :key="team.id" :team />
+          </ul>
+        </div>
+      </div>
     </section>
 
     <div v-if="current" class="work">
@@ -436,12 +481,57 @@ section {
 .head-meta {
   margin-left: auto;
 }
+/* The saved teams: one row, as wide as they are (measured against the box to fold them away). */
+.saved-box {
+  position: relative;
+  margin-top: 12px;
+}
 .saved {
   display: flex;
-  flex-wrap: wrap;
   gap: 6px;
-  margin: 12px 0 0;
+  width: max-content;
+  margin: 0;
   padding: 0;
+  list-style: none;
+}
+/* Folded: the row kept laid out but unseen, for measuring; the drop-down in its place. */
+.saved-box.folded > .saved {
+  position: absolute;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.saved-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 2px 8px;
+  font: inherit;
+  color: inherit;
+  background: var(--panel-alt);
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+  cursor: pointer;
+}
+.saved-count {
+  font-size: 0.85em;
+}
+.saved-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  max-height: 60vh;
+  margin: 0;
+  padding: 8px;
+  overflow: auto;
   list-style: none;
 }
 .saved-team {
