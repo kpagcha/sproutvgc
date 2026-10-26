@@ -495,10 +495,14 @@ section {
 .head-meta {
   margin-left: auto;
 }
-/* The saved teams: one row, as wide as they are (measured against the box to fold them away). */
+/* The saved teams: one row, as wide as they are (measured against the box to fold them away). The row kept laid out
+   while folded clipped to the box, so it doesn't widen the page (on phones, the page laid out as wide as it, which
+   unsticks what sticks to the top); the drop-down's shadow let through. */
 .saved-box {
   position: relative;
   margin-top: 12px;
+  overflow-x: clip;
+  overflow-clip-margin: 8px;
 }
 .saved {
   display: flex;
