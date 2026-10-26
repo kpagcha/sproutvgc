@@ -87,18 +87,20 @@ const isPreset = (s: Spread) => s.nature === props.nature && s.points.every((p, 
         align="left"
       >
         <template #default="{ close }">
-          <button
-            v-for="(sp, i) in presets"
-            :key="i"
-            type="button"
-            class="preset"
-            :class="{ on: isPreset(sp) }"
-            @click="choose(sp, close)"
-          >
-            <span v-tip="natureTip(sp.nature)" class="preset-nature">{{ natureName(sp.nature) }}</span>
-            <span class="preset-points">{{ sp.points.join('/') }}</span>
-            <span v-if="sp.share" class="muted">{{ percent(sp.share) }}</span>
-          </button>
+          <div class="presets">
+            <button
+              v-for="(sp, i) in presets"
+              :key="i"
+              type="button"
+              class="preset"
+              :class="{ on: isPreset(sp) }"
+              @click="choose(sp, close)"
+            >
+              <span v-tip="natureTip(sp.nature)" class="preset-nature">{{ natureName(sp.nature) }}</span>
+              <span class="preset-points">{{ sp.points.join('/') }}</span>
+              <span class="preset-share muted">{{ sp.share ? percent(sp.share) : '' }}</span>
+            </button>
+          </div>
         </template>
       </OptionsMenu>
       <button type="button" class="btn quiet small clear" :disabled="!spent" @click="points = [0, 0, 0, 0, 0, 0]">
@@ -177,11 +179,19 @@ const isPreset = (s: Spread) => s.nature === props.nature && s.points.every((p, 
   font-size: 0.85em;
   color: var(--muted);
 }
+/* The spreads one grid, so their nature, points and share line up in columns from one to the next. */
+.presets {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  gap: 4px;
+}
 .preset {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  align-items: baseline;
   text-align: left;
-  gap: 6px;
+  column-gap: 10px;
   padding: 2px 6px;
   font: inherit;
   font-size: 0.85em;
@@ -196,7 +206,11 @@ const isPreset = (s: Spread) => s.nature === props.nature && s.points.every((p, 
 .preset-nature {
   font-weight: bold;
 }
-.preset-points {
+.preset-points,
+.preset-share {
   font-variant-numeric: tabular-nums;
+}
+.preset-share {
+  text-align: right;
 }
 </style>
