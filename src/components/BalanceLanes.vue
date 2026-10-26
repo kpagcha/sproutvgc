@@ -7,21 +7,21 @@ import type { Plotted, Shape, Side } from '@/lib/teamBalance'
 import CategoryIcon from '@/components/CategoryIcon'
 import PokemonIcon from '@/components/PokemonIcon'
 
-// The team builder's Defense or Offense grid (`TeamBalance`): three columns, a row's label, its chart, and what the
-// team has for it; the same in both panels, so they look alike. A lane per side, physical and special, each headed by
-// its category's badge and drawn in its color, along one axis of the value they share (an attacking stat, or bulk),
-// weaker to the left: the meta's values as a soft ridge (how many of the meta are at each value), the middle half of
-// it a band and its median a line, and over them the team's Pokémon at their own values, stacked a row up where
-// they'd overlap (up to `ROWS`, the plots' height fixed), a diamond on the line at their average; at its end what the
-// team has for that side (`#aside`, a dash with none). A choice of the panel's over the plots (`#head`). Rows of the panel's own come after (`#after`: a label cell and
-// a cell across the other two, `.row-label` and `.row-wide`). Narrow, the cells one under another, each lane's label
-// over its plot. What each mark is in a tooltip (`tip`, `meanTip`); the legend an icon's tooltip at the
-// first plot's top right (tapped on phones). While the meta's side is
-// worked out (`state` 'pending') the plots are placeholders, and with no meta (`state` 'none') they say so.
+// The team builder's Defense or Offense chart (`TeamBalance`'s chart card): a lane per side, physical and special,
+// each labeled by its category's badge and drawn in its color, along one axis of the value they share (an attacking
+// stat, or bulk), weaker to the left. In each, the meta's values as a soft ridge (how many of the meta are at each
+// value), the middle half of it a band and its median a line, and over them the team's Pokémon at their own values,
+// stacked a row up where they'd overlap (up to `ROWS`, the plots' height fixed, so every panel's look alike), a
+// diamond on the line at their average. Narrow, each lane's label over its plot. What each mark is in a tooltip
+// (`tip`, `meanTip`); the legend an icon's tooltip at the first plot's top right (tapped on phones). While the meta's
+// side is worked out (`state` 'pending') the plots are placeholders, and with no meta (`state` 'none') they say so.
 export interface LaneView {
   side: Side
   label: string
-  sub: string
+  /** A caption under its name, if any. */
+  sub?: string
+  /** What its name says on hover, if anything (its name then underlined, dotted). */
+  tip?: string
   shape: Shape | null
   points: Plotted[]
   mean: number | null
@@ -30,14 +30,10 @@ const props = defineProps<{
   lanes: LaneView[]
   /** The axis' ends: the weaker side's, then the stronger's. */
   ends: [string, string]
-  asideTitle: string
-  /** Whether a lane has anything at its end. */
-  hasAside: (side: Side) => boolean
   tip: (p: Plotted, side: Side) => string
   meanTip: (lane: LaneView) => string
   state?: 'pending' | 'none'
 }>()
-defineSlots<{ aside(props: { side: Side }): unknown; after(): unknown; head(): unknown }>()
 
 // One axis for both lanes: the meta's range on either (its rare extremes left out) and the team's values, a little
 // room each side.
@@ -87,20 +83,20 @@ const placed = computed(() =>
 
 <template>
   <div class="lanes" :style="{ '--rows': ROWS }">
-    <div v-if="$slots.head" class="head"><slot name="head" /></div>
-    <p class="aside-head" aria-hidden="true">{{ asideTitle }}</p>
     <template v-for="(l, i) in lanes" :key="l.side">
-      <div class="lane-label" :data-side="l.side" :style="{ '--o': i * 10 + 1 }">
+      <div class="lane-label" :data-side="l.side">
         <CategoryIcon :category="l.side" :tip="false" />
         <span class="lane-text">
-          <span class="lane-name">{{ l.label }}</span>
-          <span class="lane-sub">{{ l.sub }}</span>
+          <span v-tip="l.tip" class="lane-name" :class="{ tipped: l.tip }" :tabindex="l.tip ? 0 : undefined">{{
+            l.label
+          }}</span>
+          <span v-if="l.sub" class="lane-sub">{{ l.sub }}</span>
         </span>
       </div>
-      <div v-if="state" class="plot" :class="state" :data-side="l.side" :style="{ '--o': i * 10 + 2 }">
+      <div v-if="state" class="plot" :class="state" :data-side="l.side">
         <span v-if="state === 'none' && !i" class="plot-note muted">{{ t('builder.balance.noMeta') }}</span>
       </div>
-      <div v-else ref="plots" class="plot" :data-side="l.side" :style="{ '--o': i * 10 + 2 }">
+      <div v-else ref="plots" class="plot" :data-side="l.side">
         <svg v-if="l.shape" class="meta" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true">
           <rect
             class="band"
@@ -140,11 +136,6 @@ const placed = computed(() =>
           <Info :size="14" aria-hidden="true" />
         </span>
       </div>
-      <div class="aside" :style="{ '--o': i * 10 + 4 }">
-        <span class="aside-inline muted">{{ asideTitle }}</span>
-        <slot v-if="hasAside(l.side)" name="aside" :side="l.side" />
-        <span v-else class="muted" :aria-label="t('builder.balance.none')">—</span>
-      </div>
     </template>
     <div v-if="!state" class="axis" aria-hidden="true">
       <span>← {{ ends[0] }}</span>
@@ -162,32 +153,18 @@ const placed = computed(() =>
         <span><span class="key key-mean"></span>{{ t('builder.balance.legendMean') }}</span>
       </div>
     </div>
-    <slot name="after" />
   </div>
 </template>
 
 <style scoped>
-/* One grid for the panel: label, chart, what helps. */
+/* Label, plot. */
 .lanes {
   --row-h: 30px;
+  container-type: inline-size;
   display: grid;
-  grid-template-columns: 11rem minmax(0, 1fr) 12rem;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
   align-items: end;
-  gap: 10px 16px;
-}
-/* What the chart's head holds (a choice of how it measures), over the plots. */
-.head {
-  grid-column: 2;
-  align-self: end;
-  font-size: 0.9em;
-}
-.aside-head {
-  grid-column: 3;
-  margin: 0 0 -4px;
-  font-size: 0.75em;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
+  gap: 10px 14px;
 }
 [data-side='physical'] {
   --c: var(--physical);
@@ -196,6 +173,7 @@ const placed = computed(() =>
   --c: var(--special);
 }
 .lane-label {
+  --icon-scale: 1.2;
   grid-column: 1;
   display: flex;
   align-items: center;
@@ -203,36 +181,20 @@ const placed = computed(() =>
   min-width: 0;
   padding-bottom: 6px;
 }
-/* A row of the panel's own: its label as a lane's text (a name over a caption, `.row-name`, `.row-sub`). */
-.lanes > :slotted(.row-label) {
-  grid-column: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  min-width: 0;
-}
-.lanes :slotted(.row-name) {
-  font-weight: bold;
-}
-.lanes :slotted(.row-sub) {
-  font-size: 0.78em;
-  color: var(--muted);
-  overflow-wrap: anywhere;
-}
-.lane-label {
-  --icon-scale: 1.2;
-}
-.lane-text,
-.lanes > :slotted(.row-label) {
-  line-height: 1.25;
-}
 .lane-text {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  line-height: 1.25;
 }
 .lane-name {
   font-weight: bold;
+}
+/* A name with more to it on hover. */
+.lane-name.tipped {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: help;
 }
 /* Its caption wraps within the cell: it never runs under the plot. */
 .lane-sub {
@@ -327,26 +289,6 @@ const placed = computed(() =>
   border: 2px solid var(--panel);
   transform: rotate(45deg);
 }
-/* What the team has for the lane's side, at its end. */
-.aside {
-  grid-column: 3;
-  display: flex;
-  flex-wrap: wrap;
-  align-content: flex-end;
-  gap: 4px;
-  padding-bottom: 4px;
-}
-.aside-inline {
-  display: none;
-}
-.axis {
-  grid-column: 2;
-  display: flex;
-  justify-content: space-between;
-  margin-top: -4px;
-  font-size: 0.8em;
-  color: var(--muted);
-}
 /* The legend's icon, at the first plot's top right, over the ridge. */
 .info {
   position: absolute;
@@ -360,6 +302,14 @@ const placed = computed(() =>
 .info:hover,
 .info:focus-visible {
   color: var(--text);
+}
+.axis {
+  grid-column: 2;
+  display: flex;
+  justify-content: space-between;
+  margin-top: -4px;
+  font-size: 0.8em;
+  color: var(--muted);
 }
 /* The legend, in the icon's tooltip: a key per line, two columns, each figure centered in the first and its text
    lined up in the second. */
@@ -375,20 +325,6 @@ const placed = computed(() =>
 .legend .key {
   justify-self: center;
 }
-/* A row of the panel's own: its content across the chart's and the aside's columns, from the plots' left edge. */
-.lanes > :slotted(.row-wide) {
-  grid-column: 2 / -1;
-  min-width: 0;
-  margin-top: 14px;
-}
-.lanes > :slotted(.row-label) {
-  align-self: center;
-  margin-top: 14px;
-}
-.lanes > :slotted(.row-label.small) {
-  font-size: 0.85em;
-}
-/* The legend's keys neutral: each lane's color is its side's, named by its badge. */
 .key {
   display: inline-block;
   width: 14px;
@@ -419,33 +355,16 @@ const placed = computed(() =>
   background: var(--text);
   transform: rotate(45deg);
 }
-/* Narrow (the panel's body is the container): the cells one under another, each lane's label over its plot, the
-   axis right under the last plot, what helps each side under that. */
-@container (max-width: 640px) {
+/* Narrow: each lane's label over its plot. */
+@container (max-width: 480px) {
   .lanes {
     grid-template-columns: minmax(0, 1fr);
     gap: 6px;
   }
-  .lanes > * {
-    grid-column: 1;
-  }
   .lane-label,
   .plot,
-  .aside {
-    order: var(--o);
-  }
   .axis {
-    order: 13;
-  }
-  .lanes > :slotted(*) {
-    order: 20;
-  }
-  .lanes > :slotted(.row-wide) {
     grid-column: 1;
-    margin-top: 0;
-  }
-  .aside-head {
-    display: none;
   }
   .lane-label {
     padding: 8px 0 0;
@@ -455,14 +374,6 @@ const placed = computed(() =>
     flex-wrap: wrap;
     align-items: baseline;
     column-gap: 8px;
-  }
-  .aside {
-    align-items: center;
-  }
-  .aside-inline {
-    display: inline;
-    margin-right: 4px;
-    font-size: 0.85em;
   }
 }
 </style>
