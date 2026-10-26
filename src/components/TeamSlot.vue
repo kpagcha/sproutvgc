@@ -21,12 +21,12 @@ import { natureTip } from '@/components/natureTip'
 // (`active`). Under them its stats and stat points (`PointsEditor`), folded at first; folded, a line saying how many
 // points are left to spend, while any are. An empty slot is the same card, all
 // placeholders, each opening the Pokémon's picker: the rest needs a Pokémon first. A part that breaks the team's rules
-// (`clashes`: its Pokémon, item or a move, with why) is marked, its tooltip saying why.
+// (`clashes`: its Pokémon, item, ability or a move, with why) is marked, its tooltip saying why.
 const props = defineProps<{
   member: Member
   active: Field | null
   spreads: readonly Spread[]
-  clashes?: { pokemon?: string; item?: string; moves: Partial<Record<MoveId, string>> }
+  clashes?: { pokemon?: string; item?: string; ability?: string; moves: Partial<Record<MoveId, string>> }
 }>()
 const emit = defineEmits<{ field: [field: Field]; clear: []; change: [patch: Partial<Member>] }>()
 const open = defineModel<boolean>('open', { default: false })
@@ -102,9 +102,10 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
     </div>
     <div class="set-facts">
       <button
+        v-tip="clashes?.ability"
         type="button"
         class="slot-btn"
-        :class="{ active: active === 'ability', placeholder: !member.ability }"
+        :class="{ active: active === 'ability', placeholder: !member.ability, clash: clashes?.ability }"
         @click="go('ability')"
       >
         {{ member.ability ? refName(ability(member.ability)) : t('builder.ability') }}

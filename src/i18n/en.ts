@@ -1014,6 +1014,8 @@ export const messages = {
   'builder.issue.item': '{n} holding {item}: Item Clause allows {max} per team',
   'builder.issue.megas': '{n} Megas: a team takes {max} at most',
   'builder.issue.move': '{name} has {move} twice',
+  'builder.issue.ability': "{name} can't have {ability}",
+  'builder.issue.learn': "{move} isn't in {name}'s learnset",
   'builder.taken': 'On the team',
   'builder.heldBy': 'Held by {name}',
   'builder.megasFull': 'The team has {max} Megas already',

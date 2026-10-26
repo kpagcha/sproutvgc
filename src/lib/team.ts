@@ -4,7 +4,7 @@
 
 import type { AbilityId, ItemId, MoveId, PokemonId } from '@/data/dex'
 import { ITEMS } from '@/data/items'
-import { POKEMON, speciesOf } from '@/data/pokemon'
+import { movesOf, POKEMON, speciesOf } from '@/data/pokemon'
 import { RULES } from '@/data/rules'
 import type { Slot } from '@/data/tournaments'
 import { TOTAL_POINTS } from '@/lib/stats'
@@ -87,12 +87,16 @@ export const isEmpty = (m: Member) => !m.pokemon
 
 /** What a team breaks of the regulation's rules (`RULES`), each with the slots it's in and the part of them that
  * clashes: two of one species (Species Clause, its formes and Megas counting as it), more of one item than Item Clause
- * allows, more Megas than the regulation takes, and a set with a move twice (a paste can bring one in). */
+ * allows, more Megas than the regulation takes; and what a paste can bring in that the pickers don't offer: a set with
+ * a move twice, an ability its Pokémon can't have, a move not in its learnset (once the learnsets are in, `learnsets`:
+ * Showdown's, which can lag the game's). */
 export type TeamIssue =
   | { kind: 'species'; part: 'pokemon'; slots: number[]; pokemon: PokemonId }
   | { kind: 'item'; part: 'item'; slots: number[]; item: ItemId }
   | { kind: 'megas'; part: 'pokemon'; slots: number[] }
   | { kind: 'move'; part: 'move'; slots: number[]; pokemon: PokemonId; move: MoveId }
+  | { kind: 'ability'; part: 'ability'; slots: number[]; pokemon: PokemonId; ability: AbilityId }
+  | { kind: 'learn'; part: 'move'; slots: number[]; pokemon: PokemonId; move: MoveId }
 
 /** The Mega a slot battles as, if it's one. */
 const megaOf = (m: Member) => {
@@ -110,7 +114,7 @@ function bySlots<K>(members: readonly Member[], key: (m: Member) => K | null): M
   return by
 }
 
-export function teamIssues(members: readonly Member[]): TeamIssue[] {
+export function teamIssues(members: readonly Member[], learnsets?: Record<PokemonId, MoveId[]> | null): TeamIssue[] {
   const issues: TeamIssue[] = []
   if (RULES.speciesClause)
     for (const slots of bySlots(members, (m) => speciesOf(m.pokemon!)).values())
@@ -123,10 +127,24 @@ export function teamIssues(members: readonly Member[]): TeamIssue[] {
   const megas = members.flatMap((m, i) => (megaOf(m) ? [i] : []))
   if (megas.length > RULES.megas) issues.push({ kind: 'megas', part: 'pokemon', slots: megas })
   members.forEach((m, i) => {
+    const id = m.pokemon
+    if (!id) return
+    // A Mega's set is the Pokémon's it changes from: its moves those it learns, its ability one it can have, or the
+    // Mega's (as team lists often give it).
+    const mega = megaOf(m)
+    if (
+      m.ability &&
+      !POKEMON[id]?.abilities.includes(m.ability) &&
+      !(mega && POKEMON[mega]?.abilities.includes(m.ability))
+    )
+      issues.push({ kind: 'ability', part: 'ability', slots: [i], pokemon: id, ability: m.ability })
+    const learns = learnsets && new Set(movesOf(learnsets, id))
     const seen = new Set<MoveId>()
     for (const mv of m.moves) {
       if (!mv) continue
       if (seen.has(mv)) issues.push({ kind: 'move', part: 'move', slots: [i], pokemon: shownAs(m)!, move: mv })
+      else if (learns && !learns.has(mv))
+        issues.push({ kind: 'learn', part: 'move', slots: [i], pokemon: id, move: mv })
       seen.add(mv)
     }
   })

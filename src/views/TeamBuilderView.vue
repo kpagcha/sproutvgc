@@ -2,8 +2,8 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, shallowRef, watch, type ComponentPublicInstance } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 import { ClipboardPaste, Copy, Plus, Star, Trash2 } from '@lucide/vue'
-import { item, move, pokemon, type AbilityId, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
-import { POKEMON, splitForme } from '@/data/pokemon'
+import { ability, item, move, pokemon, type AbilityId, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
+import { loadLearnsets, POKEMON, splitForme } from '@/data/pokemon'
 import { RULES } from '@/data/rules'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
@@ -27,7 +27,7 @@ import TeamSlot from '@/components/TeamSlot.vue'
 // phones a dialog over it. Picking one moves on to the next part the slot hasn't got yet. The team goes out as a
 // paste (Showdown's format, `membersPaste`) and comes in from one (`parsePaste`, what it couldn't read said); under it,
 // its type coverage, defending and attacking (`TeamCoverage`). What it breaks of the rules (`teamIssues`: Species and
-// Item Clause, more than two Megas, a move twice) is listed under its name, each part that clashes marked on its slot,
+// Item Clause, more than two Megas; a move twice, an ability it can't have, a move not in its learnset) is listed under its name, each part that clashes marked on its slot,
 // and the pickers mark what the other slots have taken already; nothing's stopped, a paste bringing in what it may.
 // Every team
 // is saved in this browser as it's edited (`useTeams`), listed over the open one, the starred first.
@@ -249,7 +249,10 @@ const sections = computed(() => [
   ...(hasAny.value ? [{ id: 'sec-coverage', label: t('builder.section.coverage') }] : []),
 ])
 // What the team breaks of the rules, under its name, and each slot's parts that clash, saying why.
-const issues = computed(() => teamIssues(members.value))
+// The learnsets, to tell a move its Pokémon can't learn: loaded once, the moves unchecked until they're in.
+const learnsets = shallowRef<Record<PokemonId, MoveId[]> | null>(null)
+onMounted(async () => (learnsets.value = await loadLearnsets()))
+const issues = computed(() => teamIssues(members.value, learnsets.value))
 const speciesName = (id: PokemonId) => splitForme(id, refName(pokemon(id))).species
 function issueText(i: TeamIssue): string {
   switch (i.kind) {
@@ -261,6 +264,10 @@ function issueText(i: TeamIssue): string {
       return t('builder.issue.megas', { n: i.slots.length, max: RULES.megas })
     case 'move':
       return t('builder.issue.move', { name: refName(pokemon(i.pokemon)), move: refName(move(i.move)) })
+    case 'ability':
+      return t('builder.issue.ability', { name: refName(pokemon(i.pokemon)), ability: refName(ability(i.ability)) })
+    case 'learn':
+      return t('builder.issue.learn', { name: refName(pokemon(i.pokemon)), move: refName(move(i.move)) })
   }
 }
 const clashes = computed(() =>
@@ -274,9 +281,16 @@ const clashes = computed(() =>
     return {
       pokemon: tip('pokemon'),
       item: tip('item'),
-      moves: Object.fromEntries(of.flatMap((i) => (i.kind === 'move' ? [[i.move, issueText(i)]] : []))) as Partial<
-        Record<MoveId, string>
-      >,
+      ability: tip('ability'),
+      moves: Object.fromEntries(
+        [...new Set(of.flatMap((i) => ('move' in i ? [i.move] : [])))].map((mv) => [
+          mv,
+          of
+            .filter((i) => 'move' in i && i.move === mv)
+            .map(issueText)
+            .join(' · '),
+        ]),
+      ) as Partial<Record<MoveId, string>>,
     }
   }),
 )
