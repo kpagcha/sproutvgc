@@ -6,6 +6,7 @@ import { POKEMON } from '@/data/pokemon'
 import { TYPES, type TypeId } from '@/data/types'
 import { t, typeName } from '@/i18n'
 import { refName } from '@/i18n/refName'
+import { useOpenState } from '@/composables/useOpenState'
 import { defenseOf, offenseOf } from '@/lib/teamCoverage'
 import type { Member } from '@/lib/team'
 import { formatMult, multClass } from '@/lib/typecalc'
@@ -160,6 +161,11 @@ const charts = computed(() => [defense.value, offense.value])
 // are tapped for their tooltips, until it's tapped elsewhere, or another column, or anywhere but a column).
 // The rest of the panel dims while one is, so it stands out.
 const opened = shallowRef<string | null>(null)
+// The panel folds, folded by default on phones (where it's long, the line standing up), then as last left.
+const { open: coverageOpen, onToggle } = useOpenState(
+  'sproutvgc.builder.coverageOpen',
+  !window.matchMedia('(max-width: 720px)').matches,
+)
 // On wide screens with a mouse, a block's tooltips go to their left, clear of the bar opened out, one tooltip
 // gliding between them; elsewhere each has its own, so tapping another in the column opened shows its tooltip
 // at once (a shared one would only hide on that tap). A directive's placement and group are fixed when it's set up:
@@ -191,63 +197,71 @@ const colLabel = (c: Chart, col: Column) =>
 </script>
 
 <template>
-  <section class="panel coverage" :class="{ focused: !!opened }">
-    <div v-for="c in charts" :key="c.id" class="chart" :style="{ '--most': Math.max(c.most, 1) }">
-      <h2>{{ c.title }}</h2>
-      <p v-if="!c.most" class="muted empty">{{ t('builder.coverage.noMoves') }}</p>
-      <template v-else>
-        <div class="cols">
-          <div
-            v-for="col in c.cols"
-            :key="col.type"
-            class="col"
-            :class="{ open: opened === `${c.id}:${col.type}` }"
-            role="img"
-            :aria-label="colLabel(c, col)"
-            @pointerdown="down"
-            @pointerenter="enter($event, `${c.id}:${col.type}`)"
-            @pointerleave="leave($event, `${c.id}:${col.type}`)"
-            @click="tap($event, `${c.id}:${col.type}`)"
-          >
-            <span class="side up" :style="{ '--n': col.up.length }" aria-hidden="true"
-              ><template v-for="b in col.up" :key="b.key"
-                ><span v-if="wide" v-tip:group.left="b.tip" class="block" :class="[b.cls, { stab: b.stab }]"
-                  ><PokemonIcon :id="b.pokemon" :scale="0.75" /></span
-                ><span v-else v-tip="b.tip" class="block" :class="[b.cls, { stab: b.stab }]"
-                  ><PokemonIcon :id="b.pokemon" :scale="0.75" /></span></template
-            ></span>
-            <span class="axis" aria-hidden="true"><TypeIcon :type="col.type" /></span>
-            <span class="side down" :style="{ '--n': col.down.length }" aria-hidden="true"
-              ><template v-for="b in col.down" :key="b.key"
-                ><span v-if="wide" v-tip:group.left="b.tip" class="block" :class="b.cls"
-                  ><PokemonIcon :id="b.pokemon" :scale="0.75" /></span
-                ><span v-else v-tip="b.tip" class="block" :class="b.cls"
-                  ><PokemonIcon :id="b.pokemon" :scale="0.75" /></span></template
-            ></span>
+  <details class="panel banded coverage" :open="coverageOpen" @toggle="onToggle">
+    <summary>{{ t('builder.section.coverage') }}</summary>
+    <div class="charts" :class="{ focused: !!opened }">
+      <div v-for="c in charts" :key="c.id" class="chart" :style="{ '--most': Math.max(c.most, 1) }">
+        <h2>{{ c.title }}</h2>
+        <p v-if="!c.most" class="muted empty">{{ t('builder.coverage.noMoves') }}</p>
+        <template v-else>
+          <div class="cols">
+            <div
+              v-for="col in c.cols"
+              :key="col.type"
+              class="col"
+              :class="{ open: opened === `${c.id}:${col.type}` }"
+              role="img"
+              :aria-label="colLabel(c, col)"
+              @pointerdown="down"
+              @pointerenter="enter($event, `${c.id}:${col.type}`)"
+              @pointerleave="leave($event, `${c.id}:${col.type}`)"
+              @click="tap($event, `${c.id}:${col.type}`)"
+            >
+              <span class="side up" :style="{ '--n': col.up.length }" aria-hidden="true"
+                ><template v-for="b in col.up" :key="b.key"
+                  ><span v-if="wide" v-tip:group.left="b.tip" class="block" :class="[b.cls, { stab: b.stab }]"
+                    ><PokemonIcon :id="b.pokemon" :scale="0.75" /></span
+                  ><span v-else v-tip="b.tip" class="block" :class="[b.cls, { stab: b.stab }]"
+                    ><PokemonIcon :id="b.pokemon" :scale="0.75" /></span></template
+              ></span>
+              <span class="axis" aria-hidden="true"><TypeIcon :type="col.type" /></span>
+              <span class="side down" :style="{ '--n': col.down.length }" aria-hidden="true"
+                ><template v-for="b in col.down" :key="b.key"
+                  ><span v-if="wide" v-tip:group.left="b.tip" class="block" :class="b.cls"
+                    ><PokemonIcon :id="b.pokemon" :scale="0.75" /></span
+                  ><span v-else v-tip="b.tip" class="block" :class="b.cls"
+                    ><PokemonIcon :id="b.pokemon" :scale="0.75" /></span></template
+              ></span>
+            </div>
           </div>
-        </div>
-        <p class="legend muted">
-          <span v-for="(side, s) in [c.legend.up, c.legend.down]" :key="s" class="legend-side">
-            <span class="arrow across" aria-hidden="true">{{ s ? '▼' : '▲' }}</span
-            ><span class="arrow down-the-side" aria-hidden="true">{{ s ? '◀' : '▶' }}</span>
-            <template v-for="l in side" :key="l.m">
-              <span v-if="l.m >= 0" class="mult-tag" :class="c.id === 'def' ? defClass(l.m) : multClass(l.m)">{{
-                formatMult(l.m)
-              }}</span>
-              <span v-if="l.label">{{ l.label }}</span>
-            </template>
-          </span>
-          <span v-if="c.id === 'atk'" class="legend-side"
-            ><span class="swatch stab m-2" aria-hidden="true"></span>{{ t('builder.coverage.stab') }}</span
-          >
-        </p>
-      </template>
+          <p class="legend muted">
+            <span v-for="(side, s) in [c.legend.up, c.legend.down]" :key="s" class="legend-side">
+              <span class="arrow across" aria-hidden="true">{{ s ? '▼' : '▲' }}</span
+              ><span class="arrow down-the-side" aria-hidden="true">{{ s ? '◀' : '▶' }}</span>
+              <template v-for="l in side" :key="l.m">
+                <span v-if="l.m >= 0" class="mult-tag" :class="c.id === 'def' ? defClass(l.m) : multClass(l.m)">{{
+                  formatMult(l.m)
+                }}</span>
+                <span v-if="l.label">{{ l.label }}</span>
+              </template>
+            </span>
+            <span v-if="c.id === 'atk'" class="legend-side"
+              ><span class="swatch stab m-2" aria-hidden="true"></span>{{ t('builder.coverage.stab') }}</span
+            >
+          </p>
+        </template>
+      </div>
     </div>
-  </section>
+  </details>
 </template>
 
 <style scoped>
-.coverage {
+.coverage > summary {
+  cursor: pointer;
+  font-family: var(--font-display, inherit);
+  font-weight: bold;
+}
+.charts {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 560px), 1fr));
   gap: 16px 24px;
