@@ -45,6 +45,33 @@ const groups = computed(() =>
   })).filter((g) => g.rounds.length),
 )
 const bracket = computed(() => bracketOf(props.rounds))
+
+// The bracket dragged sideways with the mouse, from anywhere on it but a match (its links and buttons), when it's wider
+// than it's shown; touch scrolls it as it would anyway.
+const scrollable = shallowRef(false)
+const dragging = shallowRef(false)
+let drag: { x: number; left: number } | null = null
+function checkScrollable(e: PointerEvent) {
+  const el = e.currentTarget as HTMLElement
+  scrollable.value = el.scrollWidth > el.clientWidth
+}
+function dragStart(e: PointerEvent) {
+  const el = e.currentTarget as HTMLElement
+  if (e.pointerType !== 'mouse' || e.button !== 0 || !scrollable.value) return
+  if ((e.target as Element).closest('.match')) return
+  drag = { x: e.clientX, left: el.scrollLeft }
+  el.setPointerCapture(e.pointerId)
+  e.preventDefault()
+}
+function dragMove(e: PointerEvent) {
+  if (!drag) return
+  dragging.value = true
+  ;(e.currentTarget as HTMLElement).scrollLeft = drag.left - (e.clientX - drag.x)
+}
+function dragEnd() {
+  drag = null
+  dragging.value = false
+}
 type Match = Round['matches'][number]
 const matchKey = (m: Match) => `${m[0]}-${m[1]}`
 const winnerOf = (m: Match) => (m[2] === 1 ? m[0] : m[2] === 2 ? m[1] : null)
@@ -284,7 +311,16 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
 
   <template v-else-if="round === 'cut'">
     <!-- The bracket: a column per round, each two matches side by side joined to the one they lead to. -->
-    <div class="bracket" :style="{ '--cols': columns.length, '--trace': traceColor }">
+    <div
+      class="bracket"
+      :class="{ scrollable, dragging }"
+      :style="{ '--cols': columns.length, '--trace': traceColor }"
+      @pointerenter="checkScrollable"
+      @pointerdown="dragStart"
+      @pointermove="dragMove"
+      @pointerup="dragEnd"
+      @pointercancel="dragEnd"
+    >
       <div v-for="(r, ci) in columns" :key="r.round" class="col">
         <h3 class="col-head">{{ cutName(r.left) }}</h3>
         <div class="col-body">
@@ -432,12 +468,28 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
   background: var(--sel);
 }
 /* The bracket: a column per round, each the same height, its matches spread down it so each pair's middle is where the
-   next round's match is; each pair joined by a line to it. */
+   next round's match is; each pair joined by a line to it. Each column no narrower than a match's three icons a row
+   and its placing take, the bracket scrolling sideways when they don't fit (padded for the matches' shadows and the
+   outline of one lit, which the scrolling would clip). */
 .bracket {
   --gap: 2rem;
   display: grid;
-  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  grid-template-columns: repeat(var(--cols), minmax(14rem, 1fr));
   column-gap: var(--gap);
+  overflow-x: auto;
+  margin: -4px -6px -8px -4px;
+  padding: 4px 6px 8px 4px;
+}
+/* Dragged from anywhere but a match, which keeps its own pointer. */
+.bracket.scrollable {
+  cursor: grab;
+}
+.bracket.dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+.bracket.scrollable :deep(.match) {
+  cursor: auto;
 }
 .col {
   display: flex;
@@ -638,7 +690,7 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
 /* On phones, the rounds one under the other, each under its name, their matches stacked, with no lines. */
 @media (max-width: 720px) {
   .bracket {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(14rem, 1fr);
     row-gap: 16px;
   }
   /* The rounds' names spaced from the matches over them; the play-in's rule left to its name's ground. */
