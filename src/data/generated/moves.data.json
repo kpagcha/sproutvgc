@@ -499,6 +499,7 @@
     "priority": 0,
     "target": "normal",
     "flags": [],
+    "hits": 5,
     "learners": ["lucario"]
   },
   "boomburst": {
@@ -619,7 +620,8 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": ["bullet"]
+    "flags": ["bullet"],
+    "hits": 5
   },
   "burningjealousy": {
     "type": "fire",
@@ -1095,7 +1097,8 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact"],
+    "hits": 2
   },
   "doubleshock": {
     "type": "electric",
@@ -1168,6 +1171,7 @@
     "priority": 0,
     "target": "normal",
     "flags": [],
+    "hits": 2,
     "learners": ["dragapult"],
     "signature": true
   },
@@ -1261,7 +1265,8 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact"],
+    "hits": 2
   },
   "dynamicpunch": {
     "type": "fighting",
@@ -2363,7 +2368,8 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": [],
+    "hits": 5
   },
   "icywind": {
     "type": "ice",
@@ -3222,7 +3228,8 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": [],
+    "hits": 5
   },
   "playrough": {
     "type": "fairy",
@@ -3303,6 +3310,7 @@
     "priority": 0,
     "target": "normal",
     "flags": ["contact", "slicing"],
+    "hits": 10,
     "learners": ["maushold"],
     "signature": true
   },
@@ -3697,7 +3705,8 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["bullet"]
+    "flags": ["bullet"],
+    "hits": 5
   },
   "rockpolish": {
     "type": "rock",
@@ -3841,7 +3850,8 @@
     "pp": 20,
     "priority": 0,
     "target": "normal",
-    "flags": []
+    "flags": [],
+    "hits": 5
   },
   "scaryface": {
     "type": "normal",
@@ -4656,7 +4666,8 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact"],
+    "hits": 5
   },
   "tailwind": {
     "type": "flying",
@@ -4979,7 +4990,8 @@
     "pp": 12,
     "priority": 0,
     "target": "normal",
-    "flags": ["contact"]
+    "flags": ["contact"],
+    "hits": 3
   },
   "tropkick": {
     "type": "grass",
@@ -5002,6 +5014,7 @@
     "priority": 0,
     "target": "normal",
     "flags": [],
+    "hits": 2,
     "learners": ["farigiraf"],
     "signature": true
   },
@@ -5106,6 +5119,7 @@
     "priority": 1,
     "target": "normal",
     "flags": [],
+    "hits": 5,
     "learners": ["greninja"]
   },
   "waterspout": {

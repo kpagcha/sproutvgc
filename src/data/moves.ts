@@ -63,6 +63,8 @@ export interface Move {
   target: Target
   /** `protect` means it goes through Protect. */
   flags: Flag[]
+  /** The most times it hits, when more than once (Bullet Seed 5, Dragon Darts 2). */
+  hits?: number
   /** The Pokémon that learn it, one per species, when they're 3 at most (`FEW_LEARNERS` in `scripts/gen-data.ts`). */
   learners?: PokemonId[]
   /** One of the series' signature moves: only one evolutionary family learns it, in any game (`scripts/signatures.ts`). */

@@ -16,6 +16,10 @@
   --link: #1f4fd0;
   --accent: #2d5bd8;
   --accent-text: #ffffff;
+  /* Physical and special, on charts: the move category badges' hues (physical's as is, special's more saturated to read
+     as a color, not a gray), the same in both themes. */
+  --physical: #f75231;
+  --special: #4a7fe0;
   /* The logo's words, in Bellsprout's own colors (from its sprite), darkened in light mode to read on --bg. */
   --logo-sprout: #526229;
   --logo-vgc: #9c7320;

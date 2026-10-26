@@ -127,6 +127,8 @@ interface Move extends Entry {
   secondaries: unknown[] | null
   /** Boosted by Sheer Force with no side effects to lose. */
   hasSheerForceBoost?: boolean
+  /** How many times it hits: a number, or the least and the most. */
+  multihit?: number | number[]
 }
 interface Item extends Entry {
   /** Its cell on Showdown's item sheet. */
@@ -174,6 +176,9 @@ type TextTable = 'Abilities' | 'Moves' | 'Items'
  * damaging moves that go through Protect, and `sheerforce`, not a flag of Showdown's: moves Sheer Force boosts, as its
  * code decides them (side effects, or `hasSheerForceBoost`).
  */
+/** The most times a move hits. */
+const maxHits = (m: Move) => (Array.isArray(m.multihit) ? Math.max(...m.multihit) : (m.multihit ?? 1))
+
 const MOVE_FLAGS = [
   'contact',
   'sound',
@@ -565,6 +570,8 @@ async function main() {
                 ? !!(m.secondaries || m.hasSheerForceBoost)
                 : m.flags[f],
           ),
+          // The most times it hits, when more than once (Bullet Seed 5, Dragon Darts 2).
+          ...(maxHits(m) > 1 && { hits: maxHits(m) }),
           ...(fewLearners(id) && { learners: fewLearners(id) }),
           ...(signatures.has(id) && { signature: true }),
         }

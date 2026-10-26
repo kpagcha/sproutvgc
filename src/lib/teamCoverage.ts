@@ -37,8 +37,8 @@ const ATE: Partial<Record<AbilityId, TypeId>> = {
 }
 // Normal and Fighting moves hit Ghost.
 const SCRAPPY = new Set<AbilityId>(['scrappy', 'mindseye'])
-// Moves whose damage is fixed, the type chart aside.
-const FIXED = new Set<string>([
+// Moves whose damage is fixed, the type chart aside (and the stats).
+export const FIXED = new Set<string>([
   'seismictoss',
   'nightshade',
   'superfang',
@@ -53,7 +53,7 @@ const FIXED = new Set<string>([
 ])
 
 /** The ability a slot battles with: a Mega's own, else the one picked. */
-function abilityOf(m: Member, id: PokemonId): AbilityId | null {
+export function abilityOf(m: Member, id: PokemonId): AbilityId | null {
   if (id !== m.pokemon) return POKEMON[id].abilities[0] ?? null
   return m.ability
 }

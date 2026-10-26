@@ -6,14 +6,14 @@ import { POKEMON } from '@/data/pokemon'
 import { TYPES, type TypeId } from '@/data/types'
 import { t, typeName } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import { useOpenState } from '@/composables/useOpenState'
 import { defenseOf, offenseOf } from '@/lib/teamCoverage'
 import type { Member } from '@/lib/team'
 import { formatMult, multClass } from '@/lib/typecalc'
 import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
 
-// The team builder's type coverage, two charts over the 18 types on a line: defending, a block per Pokémon above the
+// The team builder's type coverage, one side of it (`side`: in its Defense or Offense panel, `TeamBalance`), a chart
+// over the 18 types on a line: defending, a block per Pokémon above the
 // line for each type it resists (½×, ¼×, immune) and below it for each it's weak to (2×, 4×), colored as the type
 // chart's cells but from the defender's side (resisting green, weak red); attacking, a block above for each Pokémon
 // with a super effective move against the type, marked when it's STAB, and below for each whose every move it resists
@@ -21,7 +21,7 @@ import TypeIcon from '@/components/TypeIcon'
 // bar still grows with its count, until its column is hovered (tapped, where nothing hovers), when they open out
 // whole, an accordion. Narrow, the line stands up: the types down the side, what's good to their right. A block's
 // tooltip names its Pokémon with its types, defending, or its moves with theirs, attacking.
-const props = defineProps<{ members: readonly Member[] }>()
+const props = defineProps<{ members: readonly Member[]; side: 'def' | 'atk' }>()
 
 interface Block {
   key: string
@@ -37,7 +37,6 @@ interface Column {
 }
 interface Chart {
   id: 'def' | 'atk'
-  title: string
   cols: Column[]
   /** The most blocks a side can have: the line stays put as the team's sets change. */
   most: number
@@ -110,7 +109,6 @@ const defense = computed<Chart>(() => {
   })
   return {
     id: 'def',
-    title: t('builder.coverage.defense'),
     cols,
     most: props.members.filter((m) => m.pokemon).length,
     legend: {
@@ -145,7 +143,6 @@ const offense = computed<Chart>(() => {
   })
   return {
     id: 'atk',
-    title: t('builder.coverage.offense'),
     cols,
     most: Object.values(by)[0]!.length,
     legend: {
@@ -155,17 +152,13 @@ const offense = computed<Chart>(() => {
   }
 })
 
-const charts = computed(() => [defense.value, offense.value])
+// The side shown, the other not worked out.
+const charts = computed(() => [props.side === 'def' ? defense.value : offense.value])
 
 // The column opened out: the one hovered with a mouse, or tapped on a touch screen (where it stays open as its blocks
 // are tapped for their tooltips, until it's tapped elsewhere, or another column, or anywhere but a column).
 // The rest of the panel dims while one is, so it stands out.
 const opened = shallowRef<string | null>(null)
-// The panel folds, folded by default on phones (where it's long, the line standing up), then as last left.
-const { open: coverageOpen, onToggle } = useOpenState(
-  'sproutvgc.builder.coverageOpen',
-  !window.matchMedia('(max-width: 720px)').matches,
-)
 // On wide screens with a mouse, a block's tooltips go to their left, clear of the bar opened out, one tooltip
 // gliding between them; elsewhere each has its own, so tapping another in the column opened shows its tooltip
 // at once (a shared one would only hide on that tap). A directive's placement and group are fixed when it's set up:
@@ -197,11 +190,9 @@ const colLabel = (c: Chart, col: Column) =>
 </script>
 
 <template>
-  <details class="panel banded coverage" :open="coverageOpen" @toggle="onToggle">
-    <summary>{{ t('builder.section.coverage') }}</summary>
+  <div class="coverage">
     <div class="charts" :class="{ focused: !!opened }">
       <div v-for="c in charts" :key="c.id" class="chart" :style="{ '--most': Math.max(c.most, 1) }">
-        <h2>{{ c.title }}</h2>
         <p v-if="!c.most" class="muted empty">{{ t('builder.coverage.noMoves') }}</p>
         <template v-else>
           <div class="cols">
@@ -252,7 +243,7 @@ const colLabel = (c: Chart, col: Column) =>
         </template>
       </div>
     </div>
-  </details>
+  </div>
 </template>
 
 <style scoped>
@@ -262,9 +253,7 @@ const colLabel = (c: Chart, col: Column) =>
   font-weight: bold;
 }
 .charts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 560px), 1fr));
-  gap: 16px 24px;
+  min-width: 0;
 }
 .chart {
   /* A block whole (an icon's size, at three quarters), and the sliver of each behind it. */
@@ -275,9 +264,6 @@ const colLabel = (c: Chart, col: Column) =>
   --axis: 24px;
   container-type: inline-size;
   min-width: 0;
-}
-.chart h2 {
-  margin: 0 0 10px;
 }
 .empty {
   margin: 0;
@@ -296,10 +282,10 @@ const colLabel = (c: Chart, col: Column) =>
   position: relative;
 }
 /* The rest of the panel dimmed while a column is opened out, to set it apart. */
-.coverage :is(h2, .legend, .col) {
+.coverage :is(.legend, .col) {
   transition: opacity 0.18s ease;
 }
-.focused :is(h2, .legend, .col:not(.open)) {
+.focused :is(.legend, .col:not(.open)) {
   opacity: 0.3;
 }
 /* Opened out over what's around it. */
@@ -383,7 +369,7 @@ const colLabel = (c: Chart, col: Column) =>
 @media (prefers-reduced-motion: reduce) {
   .block,
   .block :deep(.sheet-icon),
-  .coverage :is(h2, .legend, .col) {
+  .coverage :is(.legend, .col) {
     transition: none;
   }
 }
@@ -417,7 +403,17 @@ const colLabel = (c: Chart, col: Column) =>
 }
 
 /* Narrow, the line stands up: a row per type, what's good (the upper side) to the right. */
-@container (max-width: 520px) {
+/* Lying down but tight (a half of its panel): the columns narrower than an icon (each cropped to its middle), the type
+   badges a little smaller so each keeps to its column. */
+@container (max-width: 640px) {
+  .col {
+    min-width: 0;
+  }
+  .axis {
+    --icon-scale: 0.85;
+  }
+}
+@container (max-width: 480px) {
   .chart {
     --peek: 8px;
   }

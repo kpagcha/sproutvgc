@@ -11,6 +11,7 @@ import { confirmDialog } from '@/composables/useConfirm'
 import { useMeta } from '@/composables/useMeta'
 import { useTeams } from '@/composables/useTeams'
 import { membersPaste, parsePaste, type PasteProblem } from '@/lib/pokepaste'
+import { loadMetaBalance, type MetaBalance } from '@/lib/teamBalance'
 import { emptyMember, pickedAs, shownAs, teamIssues, type Field, type Member, type TeamIssue } from '@/lib/team'
 import CopyPaste from '@/components/CopyPaste.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
@@ -18,7 +19,7 @@ import ModalDialog from '@/components/ModalDialog.vue'
 import SectionNav from '@/components/SectionNav.vue'
 import SideDrawer from '@/components/SideDrawer.vue'
 import PokemonIcon from '@/components/PokemonIcon'
-import TeamCoverage from '@/components/TeamCoverage.vue'
+import TeamBalance from '@/components/TeamBalance.vue'
 import TeamPicker from '@/components/TeamPicker.vue'
 import TeamSlot from '@/components/TeamSlot.vue'
 
@@ -27,7 +28,8 @@ import TeamSlot from '@/components/TeamSlot.vue'
 // side away from the slot, over a backdrop dimming the page but for the slot, which stays as it is to pick on; on
 // phones a dialog over it. Picking one moves on to the next part the slot hasn't got yet. The team goes out as a
 // paste (Showdown's format, `membersPaste`) and comes in from one (`parsePaste`, what it couldn't read said); under it,
-// its type coverage, defending and attacking (`TeamCoverage`). What it breaks of the rules (`teamIssues`: Species and
+// its Defense and Offense, each how it stands against the meta on the physical and special sides and its type coverage
+// (`TeamBalance`, the meta's numbers worked out once the page is in, `loadMetaBalance`). What it breaks of the rules (`teamIssues`: Species and
 // Item Clause, more than two Megas; a move twice, another Pokémon's Mega Stone or mask, an ability it can't have, a move not in its learnset) is listed under its name, each part that clashes marked on its slot,
 // and the pickers mark what the other slots have taken already; nothing's stopped, a paste bringing in what it may.
 // Every team
@@ -192,7 +194,12 @@ const spreadsOf = (m: Member) => {
 const sections = computed(() => [
   { id: 'sec-teams', label: t('builder.section.teams') },
   { id: 'sec-team', label: t('builder.section.team') },
-  ...(hasAny.value ? [{ id: 'sec-coverage', label: t('builder.section.coverage') }] : []),
+  ...(hasAny.value
+    ? [
+        { id: 'sec-defense', label: t('builder.section.defense') },
+        { id: 'sec-offense', label: t('builder.section.offense') },
+      ]
+    : []),
 ])
 // What the team breaks of the rules, under its name, and each slot's parts that clash, saying why.
 // The learnsets, to tell a move its Pokémon can't learn: loaded once, the moves unchecked until they're in.
@@ -243,6 +250,17 @@ const clashes = computed(() =>
   }),
 )
 const othersOf = (slot: number) => members.value.filter((_, i) => i !== slot)
+// The meta's side of the team's Defense and Offense, worked out once per dataset when the browser is idle, so the page
+// isn't held up: undefined until then, null with no meta.
+const balance = shallowRef<MetaBalance | null | undefined>(undefined)
+watch(
+  [snapshot, data],
+  ([s, d]) => {
+    balance.value = s ? undefined : null
+    if (d) loadMetaBalance(d).then((b) => data.value === d && (balance.value = b))
+  },
+  { immediate: true },
+)
 const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon ? [shownAs(m)!] : []))
 </script>
 
@@ -335,7 +353,10 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
           />
         </ul>
       </section>
-      <TeamCoverage v-if="hasAny" id="sec-coverage" :members />
+      <template v-if="hasAny">
+        <TeamBalance id="sec-defense" side="defense" :members :meta="balance" />
+        <TeamBalance id="sec-offense" side="offense" :members :meta="balance" />
+      </template>
     </div>
 
     <!-- On wide screens, the picker as a drawer over the page, the slot left clear. -->
