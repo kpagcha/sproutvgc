@@ -7,7 +7,7 @@ import { MOVES } from '@/data/moves'
 import { POKEMON } from '@/data/pokemon'
 import { TYPES, chart, type Multiplier, type TypeId } from '@/data/types'
 import { effectiveness } from '@/lib/typecalc'
-import { shownAs, type Member } from '@/lib/team'
+import type { Battler } from '@/lib/team'
 
 // What a defending ability does to an attacking type's multiplier.
 const TAKES: Partial<Record<AbilityId, Partial<Record<TypeId, number>>>> = {
@@ -53,7 +53,7 @@ export const FIXED = new Set<string>([
 ])
 
 /** The ability a slot battles with: a Mega's own, else the one picked. */
-export function abilityOf(m: Member, id: PokemonId): AbilityId | null {
+export function abilityOf(m: Battler, id: PokemonId): AbilityId | null {
   if (id !== m.pokemon) return POKEMON[id].abilities[0] ?? null
   return m.ability
 }
@@ -64,10 +64,10 @@ export interface Taken {
 }
 
 /** Per attacking type, how each of the team's Pokémon takes it, its ability counted. */
-export function defenseOf(members: readonly Member[]): Record<TypeId, Taken[]> {
+export function defenseOf(members: readonly Battler[]): Record<TypeId, Taken[]> {
   const out = Object.fromEntries(TYPES.map((t) => [t, [] as Taken[]])) as Record<TypeId, Taken[]>
   for (const m of members) {
-    const id = shownAs(m)
+    const id = m.as
     if (!id) continue
     const ability = abilityOf(m, id)
     const types = POKEMON[id].types
@@ -95,10 +95,10 @@ export interface Hit {
 }
 
 /** Per defending type, how well each of the team's Pokémon with damaging moves hits it. */
-export function offenseOf(members: readonly Member[]): Record<TypeId, Hit[]> {
+export function offenseOf(members: readonly Battler[]): Record<TypeId, Hit[]> {
   const out = Object.fromEntries(TYPES.map((t) => [t, [] as Hit[]])) as Record<TypeId, Hit[]>
   for (const m of members) {
-    const id = shownAs(m)
+    const id = m.as
     if (!id) continue
     const ability = abilityOf(m, id)
     const types = POKEMON[id].types

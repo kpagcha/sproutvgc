@@ -7,7 +7,7 @@ import { TYPES, type TypeId } from '@/data/types'
 import { t, typeName } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { defenseOf, offenseOf } from '@/lib/teamCoverage'
-import type { Member } from '@/lib/team'
+import type { Battler } from '@/lib/team'
 import { formatMult, multClass } from '@/lib/typecalc'
 import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
@@ -21,7 +21,7 @@ import TypeIcon from '@/components/TypeIcon'
 // bar still grows with its count, until its column is hovered (tapped, where nothing hovers), when they open out
 // whole, an accordion. Narrow, the line stands up: the types down the side, what's good to their right. A block's
 // tooltip names its Pokémon with its types, defending, or its moves with theirs, attacking.
-const props = defineProps<{ members: readonly Member[]; side: 'def' | 'atk' }>()
+const props = defineProps<{ members: readonly Battler[]; side: 'def' | 'atk' }>()
 
 interface Block {
   key: string

@@ -15,7 +15,9 @@ import { loadMetaBalance, type MetaBalance } from '@/lib/teamBalance'
 import {
   emptyMember,
   pickedAs,
-  shownAs,
+  battlers,
+  evolvingSlot,
+  setsAs,
   teamIssues,
   type Field,
   type Member,
@@ -195,8 +197,18 @@ watch(importing, (on) => {
 
 const paste = computed(() => membersPaste(members.value))
 const hasAny = computed(() => members.value.some((m) => m.pokemon))
+// Which slot Mega Evolves in the insights (one at most, as in a battle), and the slots as they battle for them;
+// toggling a slot's Mega makes it the one, or none when it was.
+const evolving = computed(() => (current.value ? evolvingSlot(current.value) : null))
+const battling = computed(() => battlers(members.value, evolving.value))
+function toggleMega(slot: number) {
+  const team = current.value
+  if (!team) return
+  team.mega = evolving.value === slot ? null : slot
+  touch()
+}
 const spreadsOf = (m: Member) => {
-  const id = shownAs(m)
+  const id = setsAs(m)
   return (id && data.value?.[id]?.spreads) || []
 }
 // Its sections, as the row of links at its top lists them: the coverage once there's a Pokémon to cover.
@@ -289,7 +301,7 @@ useEventListener(document, 'pointerdown', (e: PointerEvent) => {
 useEventListener(document, 'keydown', (e: KeyboardEvent) => {
   if (e.key === 'Escape') menuOpen.value = false
 })
-const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon ? [shownAs(m)!] : []))
+const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon ? [m.pokemon] : []))
 </script>
 
 <template>
@@ -390,6 +402,8 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
             :active="picking?.slot === i ? picking.field : null"
             :spreads="spreadsOf(m)"
             :clashes="clashes[i]"
+            :evolved="evolving === i"
+            @mega="toggleMega(i)"
             :open="!!editing[i]"
             @update:open="setEditing(i, $event)"
             @field="picking = { slot: i, field: $event }"
@@ -399,8 +413,8 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
         </ul>
       </section>
       <template v-if="hasAny">
-        <TeamBalance id="sec-defense" side="defense" :members :meta="balance" />
-        <TeamBalance id="sec-offense" side="offense" :members :meta="balance" />
+        <TeamBalance id="sec-defense" side="defense" :members="battling" :meta="balance" />
+        <TeamBalance id="sec-offense" side="offense" :members="battling" :meta="balance" />
       </template>
     </div>
 

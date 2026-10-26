@@ -1,6 +1,8 @@
 // A team in the team builder: six slots, each a Pokémon and its set (item, ability, nature, four moves and its stat
-// points), any part still unpicked. A Mega is kept as the Pokémon it changes from holding its stone, as a paste writes
-// it (`shownAs` gives the Mega it battles as). Its paste, Showdown's format, both ways (`pokepaste.ts`).
+// points), any part still unpicked. A slot is the Pokémon as its team sheet has it: a Mega is the Pokémon it changes
+// from holding its stone (`stoneMega`), and only one can Mega Evolve a battle, so the team says which does in its
+// insights (`Team.mega`, `evolvingSlot`; `battlers`, the slots as they battle). Its paste, Showdown's format, both ways
+// (`pokepaste.ts`).
 
 import type { AbilityId, ItemId, MoveId, PokemonId } from '@/data/dex'
 import { ITEMS } from '@/data/items'
@@ -34,6 +36,8 @@ export interface Team {
   members: Member[]
   /** Pinned to the top of the saved teams. */
   starred?: boolean
+  /** The slot that Mega Evolves in its insights, null for none; unset, the first holding its stone. */
+  mega?: number | null
   /** When last changed, in milliseconds. */
   updated: number
 }
@@ -54,11 +58,28 @@ export const newTeam = (name: string): Team => ({
   updated: Date.now(),
 })
 
-/** The Pokémon a slot battles as: the Mega its held stone makes it, else itself. */
-export function shownAs(m: Member): PokemonId | null {
-  if (!m.pokemon) return null
-  return (m.item && ITEMS[m.item]?.megas?.[m.pokemon]) || m.pokemon
+/** The Mega a slot's held stone makes it, when it holds its own. */
+export function stoneMega(m: Member): PokemonId | null {
+  if (!m.pokemon || !m.item) return null
+  return ITEMS[m.item]?.megas?.[m.pokemon] ?? null
 }
+
+/** The meta's entry for a slot's sets: its Mega's when it holds its stone (the meta counts a Mega apart), else its own. */
+export const setsAs = (m: Member): PokemonId | null => stoneMega(m) ?? m.pokemon
+
+/** The slot that Mega Evolves in a team's insights: the one picked (none if so), else the first holding its stone. */
+export function evolvingSlot(team: Pick<Team, 'members' | 'mega'>): number | null {
+  const { members, mega } = team
+  if (mega === null) return null
+  if (mega !== undefined && members[mega] && stoneMega(members[mega])) return mega
+  const first = members.findIndex((m) => stoneMega(m))
+  return first < 0 ? null : first
+}
+
+/** A slot as it battles, for the insights: `as`, its Mega when it's the one that Mega Evolves, else itself. */
+export type Battler = Member & { as: PokemonId | null }
+export const battlers = (members: readonly Member[], evolving: number | null): Battler[] =>
+  members.map((m, i) => ({ ...m, as: (i === evolving && stoneMega(m)) || m.pokemon }))
 
 /** A Pokémon picked from a list as a slot takes it: a Mega as the Pokémon it changes from, holding its stone. */
 export function pickedAs(id: PokemonId): { pokemon: PokemonId; item?: ItemId } {
@@ -99,12 +120,6 @@ export type TeamIssue =
   | { kind: 'learn'; part: 'move'; slots: number[]; pokemon: PokemonId; move: MoveId }
   | { kind: 'holder'; part: 'item'; slots: number[]; pokemon: PokemonId; item: ItemId }
 
-/** The Mega a slot battles as, if it's one. */
-const megaOf = (m: Member) => {
-  const id = shownAs(m)
-  return id && id !== m.pokemon && POKEMON[id]?.mega ? id : null
-}
-
 /** The slots with a Pokémon, by a key of each (none for a null key). */
 function bySlots<K>(members: readonly Member[], key: (m: Member) => K | null): Map<K, number[]> {
   const by = new Map<K, number[]>()
@@ -125,14 +140,14 @@ export function teamIssues(members: readonly Member[], learnsets?: Record<Pokemo
   if (itemClause !== null)
     for (const [item, slots] of bySlots(members, (m) => m.item))
       if (slots.length > itemClause) issues.push({ kind: 'item', part: 'item', slots, item })
-  const megas = members.flatMap((m, i) => (megaOf(m) ? [i] : []))
+  const megas = members.flatMap((m, i) => (stoneMega(m) ? [i] : []))
   if (megas.length > RULES.megas) issues.push({ kind: 'megas', part: 'pokemon', slots: megas })
   members.forEach((m, i) => {
     const id = m.pokemon
     if (!id) return
     // A Mega's set is the Pokémon's it changes from: its moves those it learns, its ability one it can have, or the
     // Mega's (as team lists often give it).
-    const mega = megaOf(m)
+    const mega = stoneMega(m)
     if (
       m.ability &&
       !POKEMON[id]?.abilities.includes(m.ability) &&
@@ -146,7 +161,7 @@ export function teamIssues(members: readonly Member[], learnsets?: Record<Pokemo
     const seen = new Set<MoveId>()
     for (const mv of m.moves) {
       if (!mv) continue
-      if (seen.has(mv)) issues.push({ kind: 'move', part: 'move', slots: [i], pokemon: shownAs(m)!, move: mv })
+      if (seen.has(mv)) issues.push({ kind: 'move', part: 'move', slots: [i], pokemon: id, move: mv })
       else if (learns && !learns.has(mv))
         issues.push({ kind: 'learn', part: 'move', slots: [i], pokemon: id, move: mv })
       seen.add(mv)
@@ -160,20 +175,20 @@ export function teamIssues(members: readonly Member[], learnsets?: Record<Pokemo
 export function clashesOf(others: readonly Member[]) {
   const species = bySlots(others, (m) => speciesOf(m.pokemon!))
   const items = bySlots(others, (m) => m.item)
-  const megas = others.filter(megaOf).length
+  const megas = others.filter(stoneMega).length
   const { itemClause } = RULES
   return {
     /** The team's Pokémon of its species, if Species Clause rules it out. */
     species: (id: PokemonId) => {
       const slots = RULES.speciesClause && species.get(speciesOf(pickedAs(id).pokemon))
-      return slots ? shownAs(others[slots[0]!]!) : null
+      return slots ? others[slots[0]!]!.pokemon : null
     },
     /** Whether another Mega would be one too many. */
     megasFull: megas >= RULES.megas,
     /** A Pokémon holding an item, if Item Clause rules out another. */
     item: (id: ItemId) => {
       const slots = items.get(id)
-      return itemClause !== null && slots && slots.length >= itemClause ? shownAs(others[slots[0]!]!) : null
+      return itemClause !== null && slots && slots.length >= itemClause ? others[slots[0]!]!.pokemon : null
     },
   }
 }

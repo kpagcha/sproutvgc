@@ -952,6 +952,8 @@ export const messages = {
   'builder.copyOf': '{name} (copy)',
   'builder.name': 'Team name',
   'builder.saved': 'Saved teams',
+  'builder.mega': 'Mega',
+  'builder.megaAbility': 'Its ability once it Mega Evolves',
   'builder.teamsCount': '{n} teams',
   'builder.new': 'New team',
   'builder.import': 'Import paste',

@@ -5,7 +5,7 @@ import { ability, move, pokemon, type AbilityId, type MoveId, type PokemonId } f
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { useOpenState } from '@/composables/useOpenState'
-import type { Member } from '@/lib/team'
+import type { Battler } from '@/lib/team'
 import {
   defenseVerdict,
   LANE_KEYS,
@@ -36,7 +36,7 @@ import TeamCoverage from '@/components/TeamCoverage.vue'
 // on phones, then as last left.
 const props = defineProps<{
   side: 'defense' | 'offense'
-  members: readonly Member[]
+  members: readonly Battler[]
   meta: MetaBalance | null | undefined
 }>()
 

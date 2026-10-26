@@ -8,7 +8,7 @@ import { natureName } from '@/data/natures'
 import { POKEMON, spriteUrl } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import { pointsLeft, shownAs, type Field, type Member, type Points } from '@/lib/team'
+import { pointsLeft, stoneMega, type Field, type Member, type Points } from '@/lib/team'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PointsEditor from '@/components/PointsEditor.vue'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -20,18 +20,27 @@ import { natureTip } from '@/components/natureTip'
 // picker (`field`), a part not picked yet a placeholder saying what goes there; the one being picked marked
 // (`active`). Under them its stats and stat points (`PointsEditor`), folded at first; folded, a line saying how many
 // points are left to spend, while any are. An empty slot is the same card, all
-// placeholders, each opening the Pokémon's picker: the rest needs a Pokémon first. A part that breaks the team's rules
-// (`clashes`: its Pokémon, item, ability or a move, with why) is marked, its tooltip saying why.
+// placeholders, each opening the Pokémon's picker: the rest needs a Pokémon first. Holding its Mega Stone, a switch at
+// the stat points line's end says whether it's the one that Mega Evolves in the team's insights (`evolved`, `mega`);
+// while it is, the card shows the Mega (its name, sprite, types and stats, and its ability after the one its sheet
+// registers). A part that breaks the team's rules (`clashes`: its Pokémon, item, ability or a move, with why) is
+// marked, its tooltip saying why.
 const props = defineProps<{
   member: Member
   active: Field | null
   spreads: readonly Spread[]
   clashes?: { pokemon?: string; item?: string; ability?: string; moves: Partial<Record<MoveId, string>> }
+  /** It's the one that Mega Evolves in the team's insights. */
+  evolved?: boolean
 }>()
-const emit = defineEmits<{ field: [field: Field]; clear: []; change: [patch: Partial<Member>] }>()
+const emit = defineEmits<{ field: [field: Field]; clear: []; change: [patch: Partial<Member>]; mega: [] }>()
 const open = defineModel<boolean>('open', { default: false })
 
-const shown = computed(() => shownAs(props.member))
+const mega = computed(() => stoneMega(props.member))
+/** The Pokémon the card shows: its Mega while it's the one that Mega Evolves, else itself. */
+const shown = computed(() => (props.evolved && mega.value) || props.member.pokemon)
+/** Its Mega's ability, shown after its sheet's while it Mega Evolves. */
+const megaAbility = computed(() => (props.evolved && mega.value ? (POKEMON[mega.value]?.abilities[0] ?? null) : null))
 /** Opens a part's picker: the Pokémon's, until there's one. */
 const go = (f: Field) => emit('field', shown.value ? f : 'pokemon')
 const left = computed(() => pointsLeft(props.member))
@@ -110,6 +119,9 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
       >
         {{ member.ability ? refName(ability(member.ability)) : t('builder.ability') }}
       </button>
+      <span v-if="megaAbility" v-tip="t('builder.megaAbility')" class="mega-ability muted"
+        >→ {{ refName(ability(megaAbility)) }}</span
+      >
       <span class="muted" aria-hidden="true">·</span>
       <button
         v-tip="member.nature ? natureTip(member.nature) : undefined"
@@ -141,23 +153,39 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
     </ul>
     <!-- Its stats and stat points, folded under a line saying how many are left (unfolded, beside its name). -->
     <div v-if="shown" class="stats-box">
-      <button type="button" class="stats-toggle" :aria-expanded="open" @click="open = !open">
-        <span class="toggle-line">
-          <span class="toggle-label">
-            <span v-if="open || left === 0" class="muted">{{ t('builder.points') }}</span>
-            <span v-if="left !== 0" class="warn" :class="{ over: left < 0 }" aria-live="polite">{{
-              left > 0
-                ? left === 1
-                  ? t('builder.pointLeft')
-                  : t('builder.pointsLeft', { n: left })
-                : left === -1
-                  ? t('builder.pointOver')
-                  : t('builder.pointsOver', { n: -left })
-            }}</span>
+      <!-- Folding the stats, and beside it, holding its Mega Stone, whether it Mega Evolves: a switch at the line's end,
+           where there's always room. -->
+      <div class="stats-line">
+        <button type="button" class="stats-toggle" :aria-expanded="open" @click="open = !open">
+          <span class="toggle-line">
+            <span class="toggle-label">
+              <span v-if="open || left === 0" class="muted">{{ t('builder.points') }}</span>
+              <span v-if="left !== 0" class="warn" :class="{ over: left < 0 }" aria-live="polite">{{
+                left > 0
+                  ? left === 1
+                    ? t('builder.pointLeft')
+                    : t('builder.pointsLeft', { n: left })
+                  : left === -1
+                    ? t('builder.pointOver')
+                    : t('builder.pointsOver', { n: -left })
+              }}</span>
+            </span>
+            <component :is="open ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />
           </span>
-          <component :is="open ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />
-        </span>
-      </button>
+        </button>
+        <button
+          v-if="mega"
+          type="button"
+          role="switch"
+          class="mega-switch"
+          :class="{ on: evolved }"
+          :aria-checked="!!evolved"
+          @click="emit('mega')"
+        >
+          <span class="switch-label">{{ t('builder.mega') }}</span>
+          <span class="track" aria-hidden="true"><span class="knob"></span></span>
+        </button>
+      </div>
       <PointsEditor
         v-if="open"
         v-model:points="points"
@@ -312,6 +340,61 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
 .nature {
   color: var(--muted);
 }
+/* Holding its Mega Stone: whether it's the one that Mega Evolves, a switch (a track and its knob, the knob right and
+   the track filled when on), quiet until it is. */
+.mega-switch {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+  font: inherit;
+  font-size: 0.78em;
+  font-weight: bold;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-left: 1px solid var(--border);
+  cursor: pointer;
+}
+.mega-switch:hover,
+.mega-switch.on {
+  color: var(--text);
+}
+.track {
+  position: relative;
+  width: 24px;
+  height: 12px;
+  background: var(--panel);
+  border: 1px solid var(--muted);
+  transition: background-color 0.15s ease;
+}
+.knob {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 8px;
+  height: 8px;
+  background: var(--muted);
+  transition: transform 0.15s ease;
+}
+.mega-switch.on .track {
+  background: var(--accent);
+  border-color: var(--ink);
+}
+.mega-switch.on .knob {
+  background: var(--accent-text);
+  transform: translateX(12px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .track,
+  .knob {
+    transition: none;
+  }
+}
+.mega-ability {
+  font-size: 0.9em;
+}
 .set-moves {
   --icon-scale: 1;
   display: grid;
@@ -347,7 +430,13 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
   margin-top: auto;
   border-top: 1px solid var(--border);
 }
+.stats-line {
+  display: flex;
+  align-items: stretch;
+}
 .stats-toggle {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 4px;

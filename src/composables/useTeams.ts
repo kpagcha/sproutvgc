@@ -37,6 +37,8 @@ function read(): Stored {
               name: typeof t.name === 'string' ? t.name : '',
               members: Array.from({ length: TEAM_SIZE }, (_, i) => member(t.members?.[i])),
               starred: !!t.starred,
+              // Which slot Mega Evolves in its insights: a slot, none (null), or unset (the first with its stone).
+              ...((t.mega === null || Number.isInteger(t.mega)) && { mega: t.mega }),
               updated: Number(t.updated) || 0,
             },
           ]
@@ -99,7 +101,9 @@ export function useTeams() {
   }
   function duplicate(id: string, name: string) {
     const t = state.value.teams.find((x) => x.id === id)
-    if (t) create(name, JSON.parse(JSON.stringify(t.members)) as Member[])
+    if (!t) return
+    const copy = create(name, JSON.parse(JSON.stringify(t.members)) as Member[])
+    if (t.mega !== undefined) copy.mega = t.mega
   }
   function star(id: string) {
     const t = state.value.teams.find((x) => x.id === id)

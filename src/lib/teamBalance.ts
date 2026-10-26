@@ -17,7 +17,7 @@ import { natureEffectOn } from '@/data/natures'
 import { POKEMON, STATS } from '@/data/pokemon'
 import { statValue } from '@/lib/stats'
 import { distribution, type Distribution } from '@/lib/statPercentiles'
-import { shownAs, type Member } from '@/lib/team'
+import type { Battler } from '@/lib/team'
 import { bestMove, fieldOf, type User } from '@/lib/movePower'
 import { abilityOf, FIXED } from '@/lib/teamCoverage'
 
@@ -217,7 +217,7 @@ export function loadMetaBalance(data: MetaData): Promise<MetaBalance> {
 // The team's side.
 
 /** A slot's strength: the Pokémon it battles as (a Mega's stats), its points and nature, its ability and item. */
-function strengthOf(m: Member, id: PokemonId): Strength {
+function strengthOf(m: Battler, id: PokemonId): Strength {
   const at = strengthAt(id, m.points, m.nature)
   const ability = abilityOf(m, id)
   const a = (ability && ABILITY_MODS[ability]) || {}
@@ -294,7 +294,7 @@ const GUARDS: SupportList = {
   abilities: { intimidate: 'physical', friendguard: 'both' },
 }
 
-function supportOf(members: readonly Member[], list: SupportList): Support[] {
+function supportOf(members: readonly Battler[], list: SupportList): Support[] {
   const found = new Map<string, Support>()
   const add = (kind: Support['kind'], id: MoveId | AbilityId, side: Support['side'] | undefined, p: PokemonId) => {
     if (!side) return
@@ -304,7 +304,7 @@ function supportOf(members: readonly Member[], list: SupportList): Support[] {
     found.set(key, s)
   }
   for (const m of members) {
-    const id = shownAs(m)
+    const id = m.as
     if (!id) continue
     const ability = abilityOf(m, id)
     if (ability) add('ability', ability, list.abilities[ability], id)
@@ -360,13 +360,13 @@ export interface Offense {
   boosts: Support[]
 }
 
-export function teamOffense(members: readonly Member[], meta: MetaBalance | null, mode: OffenseMode): Offense {
+export function teamOffense(members: readonly Battler[], meta: MetaBalance | null, mode: OffenseMode): Offense {
   // With moves, the weather and terrain the team sets itself, from any of its Pokémon's abilities and moves.
   const field =
     mode === 'moves'
       ? fieldOf(
           members.flatMap((m) => {
-            const id = shownAs(m)
+            const id = m.as
             const ability = id && abilityOf(m, id)
             return [...(ability ? [ability] : []), ...m.moves.filter((x): x is MoveId => !!x)]
           }),
@@ -377,7 +377,7 @@ export function teamOffense(members: readonly Member[], meta: MetaBalance | null
   const unset: PokemonId[] = []
   const points: Record<Side, Plotted[]> = { physical: [], special: [] }
   for (const m of members) {
-    const id = shownAs(m)
+    const id = m.as
     if (!id) continue
     const moves = m.moves.filter((x): x is MoveId => !!x)
     if (!moves.length) {
@@ -417,10 +417,10 @@ export interface Defense {
   guards: Support[]
 }
 
-export function teamDefense(members: readonly Member[], meta: MetaBalance | null): Defense {
+export function teamDefense(members: readonly Battler[], meta: MetaBalance | null): Defense {
   const points: Record<Side, Plotted[]> = { physical: [], special: [] }
   for (const m of members) {
-    const id = shownAs(m)
+    const id = m.as
     if (!id) continue
     const s = strengthOf(m, id)
     for (const side of ['physical', 'special'] as const) {
