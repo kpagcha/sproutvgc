@@ -13,7 +13,9 @@ import { emptyMember, pickedAs, shownAs, type Field, type Member } from '@/lib/t
 import CopyPaste from '@/components/CopyPaste.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
+import SectionNav from '@/components/SectionNav.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import TeamCoverage from '@/components/TeamCoverage.vue'
 import TeamPicker from '@/components/TeamPicker.vue'
 import TeamSlot from '@/components/TeamSlot.vue'
 
@@ -21,7 +23,8 @@ import TeamSlot from '@/components/TeamSlot.vue'
 // its picker (`TeamPicker`: the meta's searches, with the shares of the data shown): on wide screens a drawer from the
 // side away from the slot, over a backdrop dimming the page but for the slot, which stays as it is to pick on; on
 // phones a dialog over it. Picking one moves on to the next part the slot hasn't got yet. The team goes out as a
-// paste (Showdown's format, `membersPaste`) and comes in from one (`parsePaste`, what it couldn't read said). Every team
+// paste (Showdown's format, `membersPaste`) and comes in from one (`parsePaste`, what it couldn't read said); under it,
+// its type coverage, defending and attacking (`TeamCoverage`). Every team
 // is saved in this browser as it's edited (`useTeams`), listed over the open one, the starred first.
 const { teams, current, open, create, touch, remove, duplicate, star } = useTeams()
 const { snapshot, data } = useMeta()
@@ -234,12 +237,20 @@ const spreadsOf = (m: Member) => {
   const id = shownAs(m)
   return (id && data.value?.[id]?.spreads) || []
 }
+// Its sections, as the row of links at its top lists them: the coverage once there's a Pokémon to cover.
+const sections = computed(() => [
+  { id: 'sec-teams', label: t('builder.section.teams') },
+  { id: 'sec-team', label: t('builder.section.team') },
+  ...(hasAny.value ? [{ id: 'sec-coverage', label: t('builder.section.coverage') }] : []),
+])
 const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon ? [shownAs(m)!] : []))
 </script>
 
 <template>
   <div class="builder">
-    <section class="panel">
+    <!-- Its sections, a row of links stuck to the top, the one being read marked. -->
+    <SectionNav :sections />
+    <section id="sec-teams" class="panel">
       <div class="head">
         <h1>{{ t('title.teamBuilder') }}</h1>
         <!-- Starting a team, or bringing one in, on the heading's line. -->
@@ -294,7 +305,7 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
     </section>
 
     <div v-if="current" class="work">
-      <section class="panel team-panel">
+      <section id="sec-team" class="panel team-panel">
         <div class="team-head">
           <input
             v-model="name"
@@ -320,6 +331,7 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
           />
         </ul>
       </section>
+      <TeamCoverage v-if="hasAny" id="sec-coverage" :members />
     </div>
 
     <!-- On wide screens, the picker as a drawer over the page, the slot left clear. -->
@@ -398,6 +410,10 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+/* Room above a section scrolled to for the row of links stuck to the top. */
+section {
+  scroll-margin-top: 48px;
 }
 .head {
   display: flex;
