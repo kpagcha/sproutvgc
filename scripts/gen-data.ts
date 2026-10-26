@@ -29,6 +29,7 @@ import { MOVES_EVERYONE_USES, NAMES, type CategoryKey } from './overrides.ts'
 import { ConditionScan } from './conditions.ts'
 import { itemCategorizer } from './itemCategories.ts'
 import { signatureMoves } from './signatures.ts'
+import { MEGAS } from './teamRules.ts'
 import { SPEED_ABILITIES, SPEED_ITEMS } from '../src/lib/speed.ts'
 import { histories, Smogon, withPrevious, type MetaEntry, type Snapshot } from './smogon.ts'
 import {
@@ -139,6 +140,12 @@ interface Item extends Entry {
 interface RuleTable {
   isBannedSpecies(species: Species): boolean
   isBanned(thing: string): boolean
+  /** Whether the format has a rule, by ID ("speciesclause"). */
+  has(rule: string): boolean
+  /** The rules that take a value ("Item Clause = 1"), by ID. */
+  valueRules: Map<string, string>
+  maxTeamSize: number
+  maxMoveCount: number
 }
 interface Format {
   name: string
@@ -741,6 +748,18 @@ async function main() {
   // The IDs the regulation has, per category: all the app needs to know at run time to hide the rest (the files
   // above give it the types, and the category pages their data).
   await writeJson('available.json', availableIds)
+
+  // The team rules, for the team builder: the format's (its size, its moves a set, Species Clause, how many of each item
+  // Item Clause allows, none without it) and the regulation's we keep by hand (`teamRules.ts`).
+  const megas = MEGAS[reg]
+  if (megas === undefined) throw new Error(`No Mega limit for Regulation ${reg}: add it to scripts/teamRules.ts`)
+  await writeJson('rules.json', {
+    teamSize: rules.maxTeamSize,
+    moves: rules.maxMoveCount,
+    speciesClause: rules.has('speciesclause'),
+    itemClause: rules.has('itemclause') ? Number(rules.valueRules.get('itemclause')) || 1 : null,
+    megas,
+  })
 
   // The natures, by Showdown ID: the stat each raises and lowers (none for the neutral ones), and their names, every
   // locale's (English Showdown's, the others PokéAPI's). Few enough for one small file.

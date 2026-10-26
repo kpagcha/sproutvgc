@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { ChevronDown, ChevronUp, X } from '@lucide/vue'
-import { ability, item, move, pokemon } from '@/data/dex'
+import { ability, item, move, pokemon, type MoveId } from '@/data/dex'
 import type { Spread } from '@/data/meta'
 import { MOVES } from '@/data/moves'
 import { natureName } from '@/data/natures'
@@ -20,8 +20,14 @@ import { natureTip } from '@/components/natureTip'
 // picker (`field`), a part not picked yet a placeholder saying what goes there; the one being picked marked
 // (`active`). Under them its stats and stat points (`PointsEditor`), folded at first; folded, a line saying how many
 // points are left to spend, while any are. An empty slot is the same card, all
-// placeholders, each opening the Pokémon's picker: the rest needs a Pokémon first.
-const props = defineProps<{ member: Member; active: Field | null; spreads: readonly Spread[] }>()
+// placeholders, each opening the Pokémon's picker: the rest needs a Pokémon first. A part that breaks the team's rules
+// (`clashes`: its Pokémon, item or a move, with why) is marked, its tooltip saying why.
+const props = defineProps<{
+  member: Member
+  active: Field | null
+  spreads: readonly Spread[]
+  clashes?: { pokemon?: string; item?: string; moves: Partial<Record<MoveId, string>> }
+}>()
 const emit = defineEmits<{ field: [field: Field]; clear: []; change: [patch: Partial<Member>] }>()
 const open = defineModel<boolean>('open', { default: false })
 
@@ -60,9 +66,10 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
       </button>
       <span class="set-who">
         <button
+          v-tip="clashes?.pokemon"
           type="button"
           class="slot-btn set-name"
-          :class="{ active: active === 'pokemon', placeholder: !shown }"
+          :class="{ active: active === 'pokemon', placeholder: !shown, clash: clashes?.pokemon }"
           @click="emit('field', 'pokemon')"
         >
           {{ shown ? refName(pokemon(shown)) : t('builder.pokemon') }}
@@ -71,9 +78,10 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
           <template v-if="shown"><TypeIcon v-for="ty in POKEMON[shown]?.types ?? []" :key="ty" :type="ty" /></template>
           <span v-else class="type-blank" aria-hidden="true"></span>
           <button
+            v-tip="clashes?.item"
             type="button"
             class="slot-btn set-item"
-            :class="{ active: active === 'item', placeholder: !member.item }"
+            :class="{ active: active === 'item', placeholder: !member.item, clash: clashes?.item }"
             @click="go('item')"
           >
             <template v-if="member.item"><ItemIcon :id="member.item" />{{ refName(item(member.item)) }}</template>
@@ -115,9 +123,10 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
     <ul class="set-moves">
       <li v-for="(mv, i) in member.moves" :key="i">
         <button
+          v-tip="mv ? clashes?.moves[mv] : undefined"
           type="button"
           class="slot-btn set-move"
-          :class="{ active: active === i, placeholder: !mv }"
+          :class="{ active: active === i, placeholder: !mv, clash: mv && clashes?.moves[mv] }"
           @click="go(i as Field)"
         >
           <template v-if="mv"
@@ -226,6 +235,12 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
   font-weight: normal;
   color: var(--muted);
   border: 1px dashed var(--border);
+}
+/* A part breaking the team's rules: in red, a wavy underline under it, its tooltip saying why. */
+.slot-btn.clash {
+  color: var(--bad);
+  text-decoration: underline wavy var(--bad);
+  text-underline-offset: 3px;
 }
 /* The part being picked. */
 .slot-btn.active {

@@ -4,15 +4,16 @@
 
 import type { AbilityId, ItemId, MoveId, PokemonId } from '@/data/dex'
 import { ITEMS } from '@/data/items'
-import { POKEMON } from '@/data/pokemon'
+import { POKEMON, speciesOf } from '@/data/pokemon'
+import { RULES } from '@/data/rules'
 import type { Slot } from '@/data/tournaments'
 import { TOTAL_POINTS } from '@/lib/stats'
 
 /** A part of a slot to pick: its Pokémon, item, ability, nature, or one of its moves (by its place). */
 export type Field = 'pokemon' | 'item' | 'ability' | 'nature' | 0 | 1 | 2 | 3
 
-export const TEAM_SIZE = 6
-export const MOVE_SLOTS = 4
+export const TEAM_SIZE = RULES.teamSize
+export const MOVE_SLOTS = RULES.moves
 
 export type Points = [number, number, number, number, number, number]
 
@@ -83,3 +84,74 @@ export const pointsLeft = (m: Member) => TOTAL_POINTS - m.points.reduce((a, b) =
 
 /** Whether a slot has nothing picked. */
 export const isEmpty = (m: Member) => !m.pokemon
+
+/** What a team breaks of the regulation's rules (`RULES`), each with the slots it's in and the part of them that
+ * clashes: two of one species (Species Clause, its formes and Megas counting as it), more of one item than Item Clause
+ * allows, more Megas than the regulation takes, and a set with a move twice (a paste can bring one in). */
+export type TeamIssue =
+  | { kind: 'species'; part: 'pokemon'; slots: number[]; pokemon: PokemonId }
+  | { kind: 'item'; part: 'item'; slots: number[]; item: ItemId }
+  | { kind: 'megas'; part: 'pokemon'; slots: number[] }
+  | { kind: 'move'; part: 'move'; slots: number[]; pokemon: PokemonId; move: MoveId }
+
+/** The Mega a slot battles as, if it's one. */
+const megaOf = (m: Member) => {
+  const id = shownAs(m)
+  return id && id !== m.pokemon && POKEMON[id]?.mega ? id : null
+}
+
+/** The slots with a Pokémon, by a key of each (none for a null key). */
+function bySlots<K>(members: readonly Member[], key: (m: Member) => K | null): Map<K, number[]> {
+  const by = new Map<K, number[]>()
+  members.forEach((m, i) => {
+    const k = m.pokemon ? key(m) : null
+    if (k !== null) by.set(k, [...(by.get(k) ?? []), i])
+  })
+  return by
+}
+
+export function teamIssues(members: readonly Member[]): TeamIssue[] {
+  const issues: TeamIssue[] = []
+  if (RULES.speciesClause)
+    for (const slots of bySlots(members, (m) => speciesOf(m.pokemon!)).values())
+      if (slots.length > 1)
+        issues.push({ kind: 'species', part: 'pokemon', slots, pokemon: members[slots[0]!]!.pokemon! })
+  const { itemClause } = RULES
+  if (itemClause !== null)
+    for (const [item, slots] of bySlots(members, (m) => m.item))
+      if (slots.length > itemClause) issues.push({ kind: 'item', part: 'item', slots, item })
+  const megas = members.flatMap((m, i) => (megaOf(m) ? [i] : []))
+  if (megas.length > RULES.megas) issues.push({ kind: 'megas', part: 'pokemon', slots: megas })
+  members.forEach((m, i) => {
+    const seen = new Set<MoveId>()
+    for (const mv of m.moves) {
+      if (!mv) continue
+      if (seen.has(mv)) issues.push({ kind: 'move', part: 'move', slots: [i], pokemon: shownAs(m)!, move: mv })
+      seen.add(mv)
+    }
+  })
+  return issues
+}
+
+/** What picking into a slot would break of the rules with the others (`others`, the slot itself left out): a Pokémon
+ * of a species already there, a Mega past the most the team takes, an item held as many times as Item Clause allows. */
+export function clashesOf(others: readonly Member[]) {
+  const species = bySlots(others, (m) => speciesOf(m.pokemon!))
+  const items = bySlots(others, (m) => m.item)
+  const megas = others.filter(megaOf).length
+  const { itemClause } = RULES
+  return {
+    /** The team's Pokémon of its species, if Species Clause rules it out. */
+    species: (id: PokemonId) => {
+      const slots = RULES.speciesClause && species.get(speciesOf(pickedAs(id).pokemon))
+      return slots ? shownAs(others[slots[0]!]!) : null
+    },
+    /** Whether another Mega would be one too many. */
+    megasFull: megas >= RULES.megas,
+    /** A Pokémon holding an item, if Item Clause rules out another. */
+    item: (id: ItemId) => {
+      const slots = items.get(id)
+      return itemClause !== null && slots && slots.length >= itemClause ? shownAs(others[slots[0]!]!) : null
+    },
+  }
+}

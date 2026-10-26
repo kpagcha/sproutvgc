@@ -16,6 +16,7 @@ import { has, percent, type MetaData, type MetaSnapshot, type PokemonMeta } from
 import { MOVES } from '@/data/moves'
 import { NATURE_IDS, natureEffects, natureName } from '@/data/natures'
 import { loadLearnsets, movesOf, POKEMON } from '@/data/pokemon'
+import { RULES } from '@/data/rules'
 import { t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
@@ -24,7 +25,7 @@ import { monMatches, MON_TERM_KINDS, SET_LIST } from '@/lib/monTerms'
 import { parseDexText } from '@/lib/dexText'
 import { fold, split } from '@/lib/search'
 import type { TermFilters } from '@/lib/searchTerms'
-import { shownAs, type Field, type Member } from '@/lib/team'
+import { clashesOf, shownAs, type Field, type Member } from '@/lib/team'
 import FilterSearch from '@/components/FilterSearch.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import Marked from '@/components/Marked'
@@ -37,9 +38,11 @@ import TypeIcon from '@/components/TypeIcon'
 // searched by name and filtered by type, ability, move or item, `monTerms.ts`), then every other one the regulation has;
 // a move from its whole movepool (`MoveTable`, its sets' moves first); an item, searched by name and filtered by
 // category, its sets' first; an ability it can have; a nature, each with what it raises and lowers. Picking one hands
-// it on (`pick`).
+// it on (`pick`). What would break the team's rules with the other slots (`others`): a Pokémon whose species is on the
+// team, a Mega past the most it takes, an item another holds, faded with a note saying so, still there to pick.
 const props = defineProps<{
   member: Member
+  others: readonly Member[]
   field: Field
   data: MetaData | null
   snapshot: MetaSnapshot | undefined
@@ -58,6 +61,22 @@ const plain = (text: string | undefined) =>
     .join('')
 const shareMap = <T extends string>(list: readonly { id: T; share?: number }[] | undefined) =>
   Object.fromEntries((list ?? []).map((x) => [x.id, x.share])) as Partial<Record<T, number>>
+
+const clash = computed(() => clashesOf(props.others))
+/** Why a Pokémon would clash with the team, if it would. */
+const monClash = (id: PokemonId): string | undefined => {
+  const on = clash.value.species(id)
+  if (on) return t('builder.taken')
+  if (clash.value.megasFull && POKEMON[id].mega && POKEMON[id].battleOnly)
+    return t('builder.megasFull', { max: RULES.megas })
+}
+/** Why an item would clash with the team, if it would: another holds it, or it's a Mega Stone past the most Megas. */
+const itemClash = (id: ItemId): string | undefined => {
+  const by = clash.value.item(id)
+  if (by) return t('builder.heldBy', { name: refName(pokemon(by)) })
+  if (clash.value.megasFull && ITEMS[id].megas && props.member.pokemon && ITEMS[id].megas[props.member.pokemon])
+    return t('builder.megasFull', { max: RULES.megas })
+}
 
 const title = computed(() => {
   const f = props.field
@@ -101,7 +120,9 @@ const monShown = computed(() =>
   monRows.value.flatMap((r) => {
     if (!monPasses(r.id, preview.value ?? filters.value)) return []
     const parts = q.value && !preview.value ? split(r.name, q.value) : null
-    return !q.value || preview.value || parts ? [{ ...r, parts, usage: props.data?.[r.id]?.usage }] : []
+    return !q.value || preview.value || parts
+      ? [{ ...r, parts, usage: props.data?.[r.id]?.usage, clash: monClash(r.id) }]
+      : []
   }),
 )
 /** How many the text finds by name, with the filters picked: not the preview's, which the options show over it. */
@@ -174,7 +195,7 @@ const itemShown = computed(() =>
   itemRows.value.flatMap((r) => {
     if (!itemPasses(r.id, preview.value ?? filters.value)) return []
     const parts = q.value && !preview.value ? split(r.name, q.value) : null
-    return !q.value || preview.value || parts ? [{ ...r, parts }] : []
+    return !q.value || preview.value || parts ? [{ ...r, parts, clash: itemClash(r.id) }] : []
   }),
 )
 /** How many the text finds by name, with the filters picked (as the Pokémon's). */
@@ -220,11 +241,12 @@ const natureRows = computed(() => {
         :count="monCount"
       />
       <ul class="rows" :class="{ previewing: preview }">
-        <li v-for="r in monShown" :key="r.id" v-memo="[r.id, r.name, r.parts?.join(' '), r.usage]">
-          <button type="button" class="row" @click="emit('pick', r.id)">
+        <li v-for="r in monShown" :key="r.id" v-memo="[r.id, r.name, r.parts?.join(' '), r.usage, r.clash]">
+          <button type="button" class="row" :class="{ clash: r.clash }" @click="emit('pick', r.id)">
             <PokemonIcon :id="r.id" />
             <span class="row-name"
-              ><Marked v-if="r.parts" :p="r.parts" /><template v-else>{{ r.name }}</template></span
+              ><Marked v-if="r.parts" :p="r.parts" /><template v-else>{{ r.name }}</template
+              ><span v-if="r.clash" class="clash-note">{{ r.clash }}</span></span
             >
             <span class="types"><TypeIcon v-for="ty in POKEMON[r.id].types" :key="ty" :type="ty" /></span>
             <span class="share">{{ r.usage === undefined ? '' : percent(r.usage) }}</span>
@@ -262,11 +284,21 @@ const natureRows = computed(() => {
             <span class="row-name muted">{{ t('builder.noItem') }}</span>
           </button>
         </li>
-        <li v-for="r in itemShown" :key="r.id" v-memo="[r.id, r.name, r.parts?.join(' '), itemShares[r.id]]">
-          <button type="button" class="row stacked" :class="{ on: member.item === r.id }" @click="emit('pick', r.id)">
+        <li
+          v-for="r in itemShown"
+          :key="r.id"
+          v-memo="[r.id, r.name, r.parts?.join(' '), itemShares[r.id], r.clash, member.item === r.id]"
+        >
+          <button
+            type="button"
+            class="row stacked"
+            :class="{ on: member.item === r.id, clash: r.clash }"
+            @click="emit('pick', r.id)"
+          >
             <ItemIcon :id="r.id" />
             <span class="row-name"
-              ><Marked v-if="r.parts" :p="r.parts" /><template v-else>{{ r.name }}</template></span
+              ><Marked v-if="r.parts" :p="r.parts" /><template v-else>{{ r.name }}</template
+              ><span v-if="r.clash" class="clash-note">{{ r.clash }}</span></span
             >
             <span class="share">{{ itemShares[r.id] === undefined ? '' : percent(itemShares[r.id]!) }}</span>
             <span class="desc muted">{{ plain(description('item', r.id)?.short) }}</span>
@@ -367,6 +399,19 @@ const natureRows = computed(() => {
   font-weight: bold;
   color: var(--link);
   overflow-wrap: anywhere;
+}
+/* What would break the team's rules: faded, a note under its name saying why. */
+.row.clash > :not(.row-name) {
+  opacity: 0.45;
+}
+.row.clash .row-name {
+  color: var(--muted);
+}
+.clash-note {
+  display: block;
+  font-size: 0.8em;
+  font-weight: normal;
+  color: var(--bad);
 }
 .types {
   display: inline-flex;

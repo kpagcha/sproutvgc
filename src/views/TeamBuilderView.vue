@@ -2,14 +2,16 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, shallowRef, watch, type ComponentPublicInstance } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 import { ClipboardPaste, Copy, Plus, Star, Trash2 } from '@lucide/vue'
-import type { AbilityId, ItemId, MoveId, PokemonId } from '@/data/dex'
-import { POKEMON } from '@/data/pokemon'
+import { item, move, pokemon, type AbilityId, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
+import { POKEMON, splitForme } from '@/data/pokemon'
+import { RULES } from '@/data/rules'
 import { t } from '@/i18n'
+import { refName } from '@/i18n/refName'
 import { confirmDialog } from '@/composables/useConfirm'
 import { useMeta } from '@/composables/useMeta'
 import { useTeams } from '@/composables/useTeams'
 import { membersPaste, parsePaste, type PasteProblem } from '@/lib/pokepaste'
-import { emptyMember, pickedAs, shownAs, type Field, type Member } from '@/lib/team'
+import { emptyMember, pickedAs, shownAs, teamIssues, type Field, type Member, type TeamIssue } from '@/lib/team'
 import CopyPaste from '@/components/CopyPaste.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
@@ -24,7 +26,10 @@ import TeamSlot from '@/components/TeamSlot.vue'
 // side away from the slot, over a backdrop dimming the page but for the slot, which stays as it is to pick on; on
 // phones a dialog over it. Picking one moves on to the next part the slot hasn't got yet. The team goes out as a
 // paste (Showdown's format, `membersPaste`) and comes in from one (`parsePaste`, what it couldn't read said); under it,
-// its type coverage, defending and attacking (`TeamCoverage`). Every team
+// its type coverage, defending and attacking (`TeamCoverage`). What it breaks of the rules (`teamIssues`: Species and
+// Item Clause, more than two Megas, a move twice) is listed under its name, each part that clashes marked on its slot,
+// and the pickers mark what the other slots have taken already; nothing's stopped, a paste bringing in what it may.
+// Every team
 // is saved in this browser as it's edited (`useTeams`), listed over the open one, the starred first.
 const { teams, current, open, create, touch, remove, duplicate, star } = useTeams()
 const { snapshot, data } = useMeta()
@@ -243,6 +248,39 @@ const sections = computed(() => [
   { id: 'sec-team', label: t('builder.section.team') },
   ...(hasAny.value ? [{ id: 'sec-coverage', label: t('builder.section.coverage') }] : []),
 ])
+// What the team breaks of the rules, under its name, and each slot's parts that clash, saying why.
+const issues = computed(() => teamIssues(members.value))
+const speciesName = (id: PokemonId) => splitForme(id, refName(pokemon(id))).species
+function issueText(i: TeamIssue): string {
+  switch (i.kind) {
+    case 'species':
+      return t('builder.issue.species', { n: i.slots.length, name: speciesName(i.pokemon) })
+    case 'item':
+      return t('builder.issue.item', { n: i.slots.length, item: refName(item(i.item)), max: RULES.itemClause ?? 0 })
+    case 'megas':
+      return t('builder.issue.megas', { n: i.slots.length, max: RULES.megas })
+    case 'move':
+      return t('builder.issue.move', { name: refName(pokemon(i.pokemon)), move: refName(move(i.move)) })
+  }
+}
+const clashes = computed(() =>
+  members.value.map((_, s) => {
+    const of = issues.value.filter((i) => i.slots.includes(s))
+    const tip = (part: TeamIssue['part']) =>
+      of
+        .filter((i) => i.part === part)
+        .map(issueText)
+        .join(' · ') || undefined
+    return {
+      pokemon: tip('pokemon'),
+      item: tip('item'),
+      moves: Object.fromEntries(of.flatMap((i) => (i.kind === 'move' ? [[i.move, issueText(i)]] : []))) as Partial<
+        Record<MoveId, string>
+      >,
+    }
+  }),
+)
+const othersOf = (slot: number) => members.value.filter((_, i) => i !== slot)
 const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon ? [shownAs(m)!] : []))
 </script>
 
@@ -315,6 +353,9 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
           />
           <CopyPaste v-if="hasAny" :text="paste" />
         </div>
+        <ul v-if="issues.length" class="issues" aria-live="polite">
+          <li v-for="(i, n) in issues" :key="n">{{ issueText(i) }}</li>
+        </ul>
         <ul class="sets">
           <TeamSlot
             v-for="(m, i) in members"
@@ -323,6 +364,7 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
             :member="m"
             :active="picking?.slot === i ? picking.field : null"
             :spreads="spreadsOf(m)"
+            :clashes="clashes[i]"
             :open="!!editing[i]"
             @update:open="setEditing(i, $event)"
             @field="picking = { slot: i, field: $event }"
@@ -362,6 +404,7 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
           <TeamPicker
             v-else
             :member="members[picking.slot]!"
+            :others="othersOf(picking.slot)"
             :field="picking.field"
             :data
             :snapshot
@@ -377,6 +420,7 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
       <div v-if="picking && current" ref="pickerBox" class="panel picker-dialog">
         <TeamPicker
           :member="members[picking.slot]!"
+          :others="othersOf(picking.slot)"
           :field="picking.field"
           :data
           :snapshot
@@ -523,6 +567,13 @@ section {
   font: inherit;
   font-size: 1.15em;
   font-weight: bold;
+}
+.issues {
+  margin: -4px 0 10px;
+  padding: 0;
+  list-style: none;
+  font-weight: bold;
+  color: var(--bad);
 }
 .sets {
   display: grid;

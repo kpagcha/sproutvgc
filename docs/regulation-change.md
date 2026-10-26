@@ -8,6 +8,8 @@ one). Most of the dex follows the data; what's below is what doesn't, or what ne
 - [ ] `.env`: `VITE_REGULATION` to the new one; update the dates in its comment.
 - [ ] `npm run gen-data -- --update` (Showdown, PokéAPI, client, sprites, Smogon month).
 - [ ] Stops on "no VGC format for Regulation X": Showdown hasn't added it yet. Wait, or repin later.
+- [ ] Stops on "No Mega limit for Regulation X": add the most Megas a team takes to `scripts/teamRules.ts` (the
+      format's other team rules, Species and Item Clause, come from Showdown on their own).
 - [ ] Stops on "Names missing": add them to `scripts/overrides.ts` (official names; Bulbapedia only to check).
 - [ ] Warns "sources agree with overrides": delete those overrides.
 - [ ] Read every other warning; each one is a task below.
