@@ -157,11 +157,11 @@ const offense = computed<Chart>(() => {
 const charts = computed(() => [defense.value, offense.value])
 
 // The column opened out: the one hovered with a mouse, or tapped on a touch screen (where it stays open as its blocks
-// and type are tapped for their tooltips, until it's tapped elsewhere, or another column, or anywhere but a column).
+// are tapped for their tooltips, until it's tapped elsewhere, or another column, or anywhere but a column).
 // The rest of the panel dims while one is, so it stands out.
 const opened = shallowRef<string | null>(null)
-// On wide screens with a mouse, a block's and a type's tooltips go to their left, clear of the bar opened out, one
-// tooltip gliding between them; elsewhere each has its own, so tapping another in the column opened shows its tooltip
+// On wide screens with a mouse, a block's tooltips go to their left, clear of the bar opened out, one tooltip
+// gliding between them; elsewhere each has its own, so tapping another in the column opened shows its tooltip
 // at once (a shared one would only hide on that tap). A directive's placement and group are fixed when it's set up:
 // each drawn either way.
 const wide = useMediaQuery('(min-width: 721px) and (any-hover: hover)')
@@ -216,10 +216,7 @@ const colLabel = (c: Chart, col: Column) =>
                 ><span v-else v-tip="b.tip" class="block" :class="[b.cls, { stab: b.stab }]"
                   ><PokemonIcon :id="b.pokemon" :scale="0.75" /></span></template
             ></span>
-            <span v-if="wide" v-tip:group.left="typeName(col.type)" class="axis" aria-hidden="true"
-              ><TypeIcon :type="col.type"
-            /></span>
-            <span v-else v-tip="typeName(col.type)" class="axis" aria-hidden="true"><TypeIcon :type="col.type" /></span>
+            <span class="axis" aria-hidden="true"><TypeIcon :type="col.type" /></span>
             <span class="side down" :style="{ '--n': col.down.length }" aria-hidden="true"
               ><template v-for="b in col.down" :key="b.key"
                 ><span v-if="wide" v-tip:group.left="b.tip" class="block" :class="b.cls"
