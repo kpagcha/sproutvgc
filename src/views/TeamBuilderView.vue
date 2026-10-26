@@ -169,6 +169,13 @@ function pick(value: string) {
   picking.value = next === null ? null : { slot: p.slot, field: next }
 }
 
+// The drawer or dialog the picker scrolls in, back at its top for each part picked.
+const pickerBox = shallowRef<HTMLElement | null>(null)
+watch(picking, async () => {
+  await nextTick()
+  pickerBox.value?.scrollTo({ top: 0 })
+})
+
 const clearSlot = (i: number) => {
   update(i, emptyMember())
   if (picking.value?.slot === i) picking.value = null
@@ -329,6 +336,7 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
       <Transition :name="`drawer-${side}`" @after-enter="drawerReady = true" @after-leave="drawerReady = false">
         <aside
           v-if="drawerOpen && picking && current"
+          ref="pickerBox"
           class="panel builder-drawer"
           :class="side"
           :aria-label="t('builder.picker')"
@@ -354,7 +362,7 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
 
     <!-- On phones, the picker over the page. -->
     <ModalDialog v-if="!wide" v-model:open="pickerOpen" :label="t('builder.picker')" fill>
-      <div v-if="picking && current" class="panel picker-dialog">
+      <div v-if="picking && current" ref="pickerBox" class="panel picker-dialog">
         <TeamPicker
           :member="members[picking.slot]!"
           :field="picking.field"
