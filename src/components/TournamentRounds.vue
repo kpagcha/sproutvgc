@@ -694,8 +694,18 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
     row-gap: 16px;
   }
   /* The rounds' names spaced from the matches over them; the play-in's rule left to its name's ground. */
+  /* Each round's name a band of its own, in the accent, to tell the rounds apart as they scroll by. */
   .col-head {
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    padding: 6px 10px;
+    font-size: 0.95em;
+    color: var(--accent-text);
+    background: var(--accent);
+    border: 2px solid var(--ink);
+    box-shadow: var(--hard-sm);
+  }
+  .col + .col {
+    margin-top: 12px;
   }
   .col:not(:last-child) .slot::after,
   .pair.joined .slot::before,
