@@ -24,7 +24,7 @@ import { listed, type Slot } from '@/data/tournaments'
 import { refName } from '@/i18n/refName'
 import { fold } from '@/lib/search'
 import { MAX_POINTS, TOTAL_POINTS } from '@/lib/stats'
-import { emptyMember, MOVE_SLOTS, TEAM_SIZE, type Member, type Points } from '@/lib/team'
+import { emptyMember, MOVE_SLOTS, pickedAs, TEAM_SIZE, type Member, type Points } from '@/lib/team'
 
 /** A Pokémon's name as Showdown writes it: a battle-only forme (a Mega) as the one it changes from, a forme after its
  * species' name and a hyphen. The species from the forme's own name, "Floette (Eternal)": the dex names only what the
@@ -89,8 +89,15 @@ function names(): Lookups {
     new Map(ids.map((id) => [fold(name(id)), id]))
   const mons = availableIds('pokemon').filter((p) => !POKEMON[p].cosmetic)
   const pokemonNames = of(mons, (p) => refName(pokemon(p)))
-  // As a paste writes it, the forme after a hyphen; a battle-only forme's is its base's, which keeps it.
-  for (const p of mons) if (!POKEMON[p].battleOnly) pokemonNames.set(fold(species(p)), p)
+  // As a paste writes it, the forme after a hyphen; a battle-only forme's is its base's, which keeps it, though other
+  // pastes write a Mega as one too ("Salamence-Mega"), read as the Pokémon holding its stone.
+  for (const p of mons) {
+    if (!POKEMON[p].battleOnly) pokemonNames.set(fold(species(p)), p)
+    else {
+      const { species: name, forme } = splitForme(p, refName(pokemon(p)))
+      if (forme && !pokemonNames.has(fold(`${name}-${forme}`))) pokemonNames.set(fold(`${name}-${forme}`), p)
+    }
+  }
   lookups = {
     pokemon: pokemonNames,
     item: of(availableIds('item'), (i) => refName(item(i))),
@@ -148,10 +155,13 @@ export function parsePaste(text: string): { members: Member[]; problems: PastePr
       continue
     }
     const m = emptyMember()
-    m.pokemon = id
+    // A Mega as the Pokémon it changes from, holding its stone (the one the paste gives, else its own).
+    const { pokemon: base, item: stone } = pickedAs(id)
+    m.pokemon = base
+    m.item = stone ?? null
     if (held) {
-      m.item = known.item.get(fold(held.trim())) ?? null
-      if (!m.item) problems.push({ kind: 'item', name: held.trim() })
+      m.item = known.item.get(fold(held.trim())) ?? m.item
+      if (!known.item.has(fold(held.trim()))) problems.push({ kind: 'item', name: held.trim() })
     }
     const moves: MoveId[] = []
     for (const line of rest) {
