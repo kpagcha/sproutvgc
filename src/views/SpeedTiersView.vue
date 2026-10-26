@@ -101,6 +101,7 @@ import SpeedRanges, { type RangeRow } from '@/components/SpeedRanges.vue'
 import SpeedOdds, { type OddsRow } from '@/components/SpeedOdds.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
+import PointsBar from '@/components/PointsBar.vue'
 import PokemonPicker from '@/components/PokemonPicker.vue'
 import ScrollRow from '@/components/ScrollRow.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
@@ -2518,27 +2519,20 @@ const { start: startTour } = useTour(
                 <p class="muted small">{{ naturesOf(myNature) }}</p>
               </section>
               <section class="yours-section">
-                <label class="yours-field">
+                <!-- The team builder's bar: the Speed its points give, and where its nature's rounding makes a point
+                     add 2 or nothing; dragged, a draft, the URL taking it once let go. -->
+                <div class="yours-field">
                   <span class="muted small">{{ t('speed.pointsLabel') }}</span>
-                  <span class="yours-points">
-                    <input
-                      type="range"
-                      min="0"
-                      :max="MAX_POINTS"
-                      :value="myPoints"
-                      @input="dragMyPoints(($event.target as HTMLInputElement).value)"
-                      @change="setMyPoints(($event.target as HTMLInputElement).value)"
-                    />
-                    <input
-                      type="number"
-                      class="points-box"
-                      min="0"
-                      :max="MAX_POINTS"
-                      :value="myPoints"
-                      @change="setMyPoints(($event.target as HTMLInputElement).value)"
-                    />
-                  </span>
-                </label>
+                  <PointsBar
+                    :model-value="myPoints"
+                    :base="POKEMON[mine].stats[5]"
+                    :effect="myNature"
+                    :limit="MAX_POINTS"
+                    :label="t('speed.pointsLabel')"
+                    @update:model-value="(p: number) => dragMyPoints(String(p))"
+                    @change="(p: number) => setMyPoints(String(p))"
+                  />
+                </div>
               </section>
               <section class="yours-section">
                 <!-- The modifiers' disclosure; the modifiers, opened, in a tray under it. -->
@@ -3670,15 +3664,6 @@ const { start: startTour } = useTour(
   gap: 4px;
   align-self: stretch;
 }
-.yours-points {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.yours-points input[type='range'] {
-  flex: 1;
-  min-width: 0;
-}
 /* The nature's choice under its label, its options each on one line. */
 .yours .stacked {
   flex-direction: column;
@@ -3700,11 +3685,6 @@ const { start: startTour } = useTour(
 .yours .mod {
   padding: 3px 8px;
 }
-.points-box {
-  width: 4em;
-  font: inherit;
-}
-
 .link-button {
   padding: 0;
   font: inherit;

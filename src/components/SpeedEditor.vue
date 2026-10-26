@@ -11,6 +11,7 @@ import { NATURE_EFFECTS, NATURES_BY_EFFECT } from '@/lib/speed'
 import { benchmark, MAX_POINTS, type NatureEffect } from '@/lib/stats'
 import { modButtons, toggled, type BuildToggle, type SpeedBuild } from '@/lib/speedBuild'
 import ItemIcon from '@/components/ItemIcon.vue'
+import PointsBar from '@/components/PointsBar.vue'
 import PokemonPicker from '@/components/PokemonPicker.vue'
 import ScrollRow from '@/components/ScrollRow.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
@@ -59,10 +60,6 @@ const picker = useTemplateRef<InstanceType<typeof PokemonPicker>>('picker')
 // A page can open the picking straight away (a slot just added, or tapped with none picked).
 defineExpose({ openPicker: () => picker.value?.open() })
 
-function setPoints(v: string) {
-  const n = Math.round(Number(v))
-  if (Number.isFinite(n)) emit('build', { points: Math.min(MAX_POINTS, Math.max(0, n)) })
-}
 const toggle = (k: BuildToggle) => emit('build', { toggles: toggled(props.build.toggles, k) })
 
 /** The Speed stages its stepper goes through. */
@@ -174,26 +171,19 @@ const canHover = window.matchMedia('(hover: hover)').matches
       </section>
 
       <section v-if="!sets" class="part">
-        <label class="field">
+        <!-- The team builder's bar: the Speed its points give, and where its nature's rounding makes a point add 2 or
+             nothing. -->
+        <div class="field">
           <span class="muted small">{{ t('speed.pointsLabel') }}</span>
-          <span class="points">
-            <input
-              type="range"
-              min="0"
-              :max="MAX_POINTS"
-              :value="props.build.points"
-              @input="setPoints(($event.target as HTMLInputElement).value)"
-            />
-            <input
-              type="number"
-              class="points-box"
-              min="0"
-              :max="MAX_POINTS"
-              :value="props.build.points"
-              @change="setPoints(($event.target as HTMLInputElement).value)"
-            />
-          </span>
-        </label>
+          <PointsBar
+            :model-value="props.build.points"
+            :base="POKEMON[props.id].stats[5]"
+            :effect="props.build.effect"
+            :limit="MAX_POINTS"
+            :label="t('speed.pointsLabel')"
+            @update:model-value="(p: number) => emit('build', { points: p })"
+          />
+        </div>
       </section>
 
       <section class="part">
@@ -322,18 +312,5 @@ const canHover = window.matchMedia('(hover: hover)').matches
   flex-direction: column;
   gap: 4px;
   align-self: stretch;
-}
-.points {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.points input[type='range'] {
-  flex: 1;
-  min-width: 0;
-}
-.points-box {
-  width: 4em;
-  font: inherit;
 }
 </style>

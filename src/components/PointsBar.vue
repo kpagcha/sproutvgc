@@ -12,9 +12,11 @@ import { MAX_POINTS, pointGains, statValue, type NatureEffect } from '@/lib/stat
 // points left allow (`limit`), hatched: out of reach. Under a mouse, where it would go shows faded before it's pressed.
 // A nature's rounding marked on it (`pointGains`): a point that adds 2 (the raised stat's every tenth) a notch on its
 // top edge, one that adds nothing (the lowered stat's) a notch in the bad color; points ending on one that adds
-// nothing say so, the one under it giving the same stat.
+// nothing say so, the one under it giving the same stat. Its points settled (let go, stepped or keyed) also come out as
+// `change`, as a native slider's, for a page that follows a drag only as a draft.
 const props = defineProps<{ base: number; effect: NatureEffect; hp?: boolean; limit: number; label: string }>()
 const points = defineModel<number>({ required: true })
+const emit = defineEmits<{ change: [points: number] }>()
 
 const gains = computed(() => pointGains(props.base, props.effect, props.hp))
 const value = (p: number) => statValue(props.base, p, props.effect, props.hp)
@@ -28,7 +30,14 @@ const marks = computed(() =>
 const wasted = computed(() => points.value > 0 && gains.value[points.value - 1] === 0)
 const next = computed(() => (points.value < props.limit ? gains.value[points.value] : undefined))
 
-const set = (p: number) => (points.value = Math.max(0, Math.min(props.limit, Math.round(p))))
+const clamp = (p: number) => Math.max(0, Math.min(props.limit, Math.round(p)))
+const set = (p: number) => (points.value = clamp(p))
+/** Set and settled: stepped or keyed. Its new points, not `points`, which a parent's prop doesn't change until it's
+ * drawn again. */
+function settle(p: number) {
+  set(p)
+  emit('change', clamp(p))
+}
 
 const bar = useTemplateRef<HTMLElement>('bar')
 const dragging = shallowRef(false)
@@ -38,18 +47,21 @@ function at(e: PointerEvent): number {
   const r = bar.value!.getBoundingClientRect()
   return Math.max(0, Math.min(props.limit, Math.round(((e.clientX - r.left) / r.width) * MAX_POINTS)))
 }
+/** Where the drag last set it, settled when let go. */
+let dragged = 0
 function down(e: PointerEvent) {
   if (e.button !== 0) return
   bar.value!.setPointerCapture(e.pointerId)
   dragging.value = true
   hover.value = null
-  set(at(e))
+  set((dragged = at(e)))
 }
 function move(e: PointerEvent) {
-  if (dragging.value) set(at(e))
+  if (dragging.value) set((dragged = at(e)))
   else if (e.pointerType === 'mouse') hover.value = at(e)
 }
 function up() {
+  if (dragging.value) emit('change', dragged)
   dragging.value = false
 }
 function key(e: KeyboardEvent) {
@@ -62,9 +74,9 @@ function key(e: KeyboardEvent) {
     PageUp: 4,
     PageDown: -4,
   }
-  if (e.key in by) set(points.value + by[e.key]!)
-  else if (e.key === 'Home') set(0)
-  else if (e.key === 'End') set(props.limit)
+  if (e.key in by) settle(points.value + by[e.key]!)
+  else if (e.key === 'Home') settle(0)
+  else if (e.key === 'End') settle(props.limit)
   else return
   e.preventDefault()
 }
@@ -139,7 +151,7 @@ const tip = computed(() =>
       tabindex="-1"
       :disabled="points <= 0"
       :aria-label="t('builder.less', { stat: label })"
-      @click="set(points - 1)"
+      @click="settle(points - 1)"
     >
       −
     </button>
@@ -149,7 +161,7 @@ const tip = computed(() =>
       tabindex="-1"
       :disabled="points >= limit"
       :aria-label="t('builder.more', { stat: label })"
-      @click="set(points + 1)"
+      @click="settle(points + 1)"
     >
       +
     </button>
