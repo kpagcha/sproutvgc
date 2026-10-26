@@ -94,11 +94,14 @@ watch(
   async (slot) => {
     observer?.disconnect()
     if (slot === null) return void (hole.value = null)
+    // Its side chosen before the drawer's drawn (the watcher runs before the render), so it slides in from that edge,
+    // not from the last one's.
+    const at = slotEls[slot]?.getBoundingClientRect()
+    if (at)
+      side.value = at.right > window.innerWidth - Math.min(DRAWER, window.innerWidth * 0.46) - 16 ? 'left' : 'right'
     await nextTick()
     const el = slotEls[slot]
     if (!el) return
-    const r = el.getBoundingClientRect()
-    side.value = r.right > window.innerWidth - Math.min(DRAWER, window.innerWidth * 0.46) - 16 ? 'left' : 'right'
     el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
     measure()
     observer = new ResizeObserver(measureSoon)
@@ -403,7 +406,7 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
           @click="picking = null"
         ></div>
       </Transition>
-      <Transition :name="`drawer-${side}`" @after-enter="drawerReady = true" @after-leave="drawerReady = false">
+      <Transition name="drawer" @after-enter="drawerReady = true" @after-leave="drawerReady = false">
         <aside
           v-if="drawerOpen && picking && current"
           ref="pickerBox"
@@ -701,25 +704,21 @@ section {
 .builder-fade-leave-to {
   opacity: 0;
 }
-.drawer-right-enter-active,
-.drawer-right-leave-active,
-.drawer-left-enter-active,
-.drawer-left-leave-active {
+/* In from its own edge and back out to it, by its side's class (not the transition's name, which the next drawer's
+   side would change under one leaving). */
+.drawer-enter-active,
+.drawer-leave-active {
   transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.drawer-right-enter-from,
-.drawer-right-leave-to {
+.builder-drawer.right:is(.drawer-enter-from, .drawer-leave-to) {
   transform: translateX(100%);
 }
-.drawer-left-enter-from,
-.drawer-left-leave-to {
+.builder-drawer.left:is(.drawer-enter-from, .drawer-leave-to) {
   transform: translateX(-100%);
 }
 @media (prefers-reduced-motion: reduce) {
-  .drawer-right-enter-active,
-  .drawer-right-leave-active,
-  .drawer-left-enter-active,
-  .drawer-left-leave-active,
+  .drawer-enter-active,
+  .drawer-leave-active,
   .builder-fade-enter-active,
   .builder-fade-leave-active {
     transition: none;
