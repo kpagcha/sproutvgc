@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, h, render, type VNodeChild } from 'vue'
+import { computed, h, render, shallowRef, type VNodeChild } from 'vue'
+import { useEventListener, useMediaQuery } from '@vueuse/core'
 import { move, pokemon, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
 import { TYPES, type TypeId } from '@/data/types'
@@ -8,18 +9,22 @@ import { refName } from '@/i18n/refName'
 import { defenseOf, offenseOf } from '@/lib/teamCoverage'
 import type { Member } from '@/lib/team'
 import { formatMult, multClass } from '@/lib/typecalc'
+import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
 
 // The team builder's type coverage, two charts over the 18 types on a line: defending, a block per Pokémon above the
 // line for each type it resists (½×, ¼×, immune) and below it for each it's weak to (2×, 4×), colored as the type
 // chart's cells but from the defender's side (resisting green, weak red); attacking, a block above for each Pokémon
 // with a super effective move against the type, marked when it's STAB, and below for each whose every move it resists
-// or is immune to. Narrow, the line stands up: the types down the side, what's good to their right. A block's tooltip
-// names its Pokémon with its types, defending, or its moves with theirs, attacking.
+// or is immune to. Each block holds its Pokémon's icon: the one by the line whole, the rest slivers behind it, so a
+// bar still grows with its count, until its column is hovered (tapped, where nothing hovers), when they open out
+// whole, an accordion. Narrow, the line stands up: the types down the side, what's good to their right. A block's
+// tooltip names its Pokémon with its types, defending, or its moves with theirs, attacking.
 const props = defineProps<{ members: readonly Member[] }>()
 
 interface Block {
   key: string
+  pokemon: PokemonId
   cls: string
   tip: Element
   stab?: boolean
@@ -32,7 +37,6 @@ interface Column {
 interface Chart {
   id: 'def' | 'atk'
   title: string
-  about: string
   cols: Column[]
   /** The most blocks a side can have: the line stays put as the team's sets change. */
   most: number
@@ -85,6 +89,7 @@ const defense = computed<Chart>(() => {
       const { pokemon: p, mult } = all[i]!
       return {
         key: `${i}`,
+        pokemon: p,
         cls: defClass(mult),
         tip: defTip(p, mult),
       }
@@ -105,7 +110,6 @@ const defense = computed<Chart>(() => {
   return {
     id: 'def',
     title: t('builder.coverage.defense'),
-    about: t('builder.coverage.defenseAbout'),
     cols,
     most: props.members.filter((m) => m.pokemon).length,
     legend: {
@@ -122,7 +126,7 @@ const offense = computed<Chart>(() => {
     const block = (i: number) => {
       const { pokemon: p, mult, moves, stab } = all[i]!
       const shown = mult > 1 && stab
-      return { key: `${i}`, cls: multClass(mult), tip: atkTip(p, mult, moves, shown), stab: shown }
+      return { key: `${i}`, pokemon: p, cls: multClass(mult), tip: atkTip(p, mult, moves, shown), stab: shown }
     }
     const idx = all.map((_, i) => i)
     return {
@@ -141,7 +145,6 @@ const offense = computed<Chart>(() => {
   return {
     id: 'atk',
     title: t('builder.coverage.offense'),
-    about: t('builder.coverage.offenseAbout'),
     cols,
     most: Object.values(by)[0]!.length,
     legend: {
@@ -152,6 +155,33 @@ const offense = computed<Chart>(() => {
 })
 
 const charts = computed(() => [defense.value, offense.value])
+
+// The column opened out: the one hovered with a mouse, or tapped on a touch screen (where it stays open as its blocks
+// and type are tapped for their tooltips, until it's tapped elsewhere, or another column, or anywhere but a column).
+// The rest of the panel dims while one is, so it stands out.
+const opened = shallowRef<string | null>(null)
+// On wide screens with a mouse, a block's and a type's tooltips go to their left, clear of the bar opened out, one
+// tooltip gliding between them; elsewhere each has its own, so tapping another in the column opened shows its tooltip
+// at once (a shared one would only hide on that tap). A directive's placement and group are fixed when it's set up:
+// each drawn either way.
+const wide = useMediaQuery('(min-width: 721px) and (any-hover: hover)')
+let touch = false
+const down = (e: PointerEvent) => (touch = e.pointerType !== 'mouse')
+const enter = (e: PointerEvent, key: string) => {
+  if (e.pointerType === 'mouse') opened.value = key
+}
+const leave = (e: PointerEvent, key: string) => {
+  if (e.pointerType === 'mouse' && opened.value === key) opened.value = null
+}
+const tap = (e: MouseEvent, key: string) => {
+  if (!touch) return
+  const onPart = (e.target as Element).closest('.block, .axis')
+  opened.value = opened.value === key && !onPart ? null : key
+}
+useEventListener(document, 'pointerdown', (e: PointerEvent) => {
+  if (e.pointerType !== 'mouse' && !(e.target as Element | null)?.closest?.('.coverage .col, [data-tippy-root]'))
+    opened.value = null
+})
 const colLabel = (c: Chart, col: Column) =>
   t(c.id === 'def' ? 'builder.coverage.colDef' : 'builder.coverage.colAtk', {
     type: typeName(col.type),
@@ -161,26 +191,41 @@ const colLabel = (c: Chart, col: Column) =>
 </script>
 
 <template>
-  <section class="panel coverage">
+  <section class="panel coverage" :class="{ focused: !!opened }">
     <div v-for="c in charts" :key="c.id" class="chart" :style="{ '--most': Math.max(c.most, 1) }">
       <h2>{{ c.title }}</h2>
-      <p class="muted about">{{ c.about }}</p>
       <p v-if="!c.most" class="muted empty">{{ t('builder.coverage.noMoves') }}</p>
       <template v-else>
         <div class="cols">
-          <div v-for="col in c.cols" :key="col.type" class="col" role="img" :aria-label="colLabel(c, col)">
-            <span class="side up" aria-hidden="true"
-              ><span
-                v-for="b in col.up"
-                :key="b.key"
-                v-tip:group="b.tip"
-                class="block"
-                :class="[b.cls, { stab: b.stab }]"
-              ></span
+          <div
+            v-for="col in c.cols"
+            :key="col.type"
+            class="col"
+            :class="{ open: opened === `${c.id}:${col.type}` }"
+            role="img"
+            :aria-label="colLabel(c, col)"
+            @pointerdown="down"
+            @pointerenter="enter($event, `${c.id}:${col.type}`)"
+            @pointerleave="leave($event, `${c.id}:${col.type}`)"
+            @click="tap($event, `${c.id}:${col.type}`)"
+          >
+            <span class="side up" :style="{ '--n': col.up.length }" aria-hidden="true"
+              ><template v-for="b in col.up" :key="b.key"
+                ><span v-if="wide" v-tip:group.left="b.tip" class="block" :class="[b.cls, { stab: b.stab }]"
+                  ><PokemonIcon :id="b.pokemon" :scale="0.75" /></span
+                ><span v-else v-tip="b.tip" class="block" :class="[b.cls, { stab: b.stab }]"
+                  ><PokemonIcon :id="b.pokemon" :scale="0.75" /></span></template
             ></span>
-            <span v-tip:group="typeName(col.type)" class="axis" aria-hidden="true"><TypeIcon :type="col.type" /></span>
-            <span class="side down" aria-hidden="true"
-              ><span v-for="b in col.down" :key="b.key" v-tip:group="b.tip" class="block" :class="b.cls"></span
+            <span v-if="wide" v-tip:group.left="typeName(col.type)" class="axis" aria-hidden="true"
+              ><TypeIcon :type="col.type"
+            /></span>
+            <span v-else v-tip="typeName(col.type)" class="axis" aria-hidden="true"><TypeIcon :type="col.type" /></span>
+            <span class="side down" :style="{ '--n': col.down.length }" aria-hidden="true"
+              ><template v-for="b in col.down" :key="b.key"
+                ><span v-if="wide" v-tip:group.left="b.tip" class="block" :class="b.cls"
+                  ><PokemonIcon :id="b.pokemon" :scale="0.75" /></span
+                ><span v-else v-tip="b.tip" class="block" :class="b.cls"
+                  ><PokemonIcon :id="b.pokemon" :scale="0.75" /></span></template
             ></span>
           </div>
         </div>
@@ -196,7 +241,7 @@ const colLabel = (c: Chart, col: Column) =>
             </template>
           </span>
           <span v-if="c.id === 'atk'" class="legend-side"
-            ><span class="block stab m-2 swatch" aria-hidden="true"></span>{{ t('builder.coverage.stab') }}</span
+            ><span class="swatch stab m-2" aria-hidden="true"></span>{{ t('builder.coverage.stab') }}</span
           >
         </p>
       </template>
@@ -211,17 +256,17 @@ const colLabel = (c: Chart, col: Column) =>
   gap: 16px 24px;
 }
 .chart {
-  --u: 13px;
+  /* A block whole (an icon's size, at three quarters), and the sliver of each behind it. */
+  --icon-w: 30px;
+  --whole: 23px;
+  --peek: 7px;
+  --side: calc(var(--whole) + (var(--most) - 1) * var(--peek));
   --axis: 24px;
   container-type: inline-size;
   min-width: 0;
 }
 .chart h2 {
-  margin: 0;
-}
-.about {
-  margin: 4px 0 10px;
-  font-size: 0.9em;
+  margin: 0 0 10px;
 }
 .empty {
   margin: 0;
@@ -231,37 +276,30 @@ const colLabel = (c: Chart, col: Column) =>
   display: flex;
   gap: 3px;
 }
-/* The line the bars stand on, through the types' badges. */
-.cols::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(var(--most) * var(--u) + var(--axis) / 2 - 1px);
-  height: 2px;
-  background: var(--ink);
-}
 .col {
   flex: 1;
   display: grid;
-  grid-template-rows: calc(var(--most) * var(--u)) var(--axis) calc(var(--most) * var(--u));
+  grid-template-rows: var(--side) var(--axis) var(--side);
   grid-template-areas: 'up' 'axis' 'down';
   justify-items: center;
   position: relative;
-  /* Faint lines a block apart on either side, to count them by. */
-  --grid: color-mix(in srgb, var(--border) 45%, transparent);
-  background:
-    repeating-linear-gradient(to top, var(--grid) 0 1px, transparent 1px var(--u)) 0 0 / 100%
-      calc(var(--most) * var(--u)) no-repeat,
-    repeating-linear-gradient(to bottom, var(--grid) 0 1px, transparent 1px var(--u)) 0 100% / 100%
-      calc(var(--most) * var(--u)) no-repeat;
 }
-.col:hover {
+/* The rest of the panel dimmed while a column is opened out, to set it apart. */
+.coverage :is(h2, .legend, .col) {
+  transition: opacity 0.18s ease;
+}
+.focused :is(h2, .legend, .col:not(.open)) {
+  opacity: 0.3;
+}
+/* Opened out over what's around it. */
+.col.open {
+  z-index: 2;
   background-color: color-mix(in srgb, var(--accent) 8%, transparent);
 }
 .side {
   display: flex;
-  width: 18px;
+  /* As wide as an icon, or the column where it's narrower (the icon cropped to its middle). */
+  width: min(var(--icon-w), 100%);
 }
 .up {
   grid-area: up;
@@ -273,16 +311,50 @@ const colLabel = (c: Chart, col: Column) =>
 }
 .axis {
   grid-area: axis;
+  justify-self: stretch;
+  justify-content: center;
   /* Small badges whatever the screen, so the 18 fit across. */
   --icon-scale: 1;
   position: relative;
   display: flex;
   align-items: center;
 }
+/* The line the bars stand on, a stretch per column behind its badge (and across the gap to the next), so a column
+   dimmed dims its stretch with it, and its badge, though faint, still hides it. */
+.axis::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  top: calc(50% - 1px);
+  height: 2px;
+  background: var(--ink);
+}
+.axis :deep(.type-icon) {
+  position: relative;
+}
 .block {
   flex: none;
-  height: var(--u);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  height: var(--peek);
   border: 1px solid var(--ink);
+  transition:
+    height 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+    width 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.block:first-child,
+.open .block {
+  height: var(--whole);
+}
+.block :deep(.sheet-icon) {
+  transition: opacity 0.18s ease;
+}
+/* The slivers' icons shown only opened out. */
+.col:not(.open) .block:not(:first-child) :deep(.sheet-icon) {
+  opacity: 0;
 }
 .up .block + .block {
   margin-bottom: -1px;
@@ -290,9 +362,19 @@ const colLabel = (c: Chart, col: Column) =>
 .down .block + .block {
   margin-top: -1px;
 }
-/* STAB: a dot of ink in the block. */
-.block.stab {
-  background-image: radial-gradient(circle, var(--m2-fg) 0 2px, transparent 2.5px);
+.open .side {
+  filter: drop-shadow(2px 2px 0 var(--ink));
+}
+/* STAB: a dot in the block's corner, clear of its icon. */
+:is(.block, .swatch).stab {
+  background-image: radial-gradient(circle at right 4px top 3px, var(--m2-fg) 0 2px, transparent 2.5px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .block,
+  .block :deep(.sheet-icon),
+  .coverage :is(h2, .legend, .col) {
+    transition: none;
+  }
 }
 .legend {
   display: flex;
@@ -312,6 +394,8 @@ const colLabel = (c: Chart, col: Column) =>
 .legend .swatch {
   display: inline-block;
   width: 18px;
+  height: 14px;
+  border: 1px solid var(--ink);
 }
 .arrow {
   font-size: 0.8em;
@@ -323,31 +407,22 @@ const colLabel = (c: Chart, col: Column) =>
 
 /* Narrow, the line stands up: a row per type, what's good (the upper side) to the right. */
 @container (max-width: 520px) {
+  .chart {
+    --peek: 8px;
+  }
   .cols {
     flex-direction: column;
     gap: 3px;
-    /* The badge as large as the page's elsewhere, the blocks as wide as fills the rest, up to a square-ish cap. */
+    /* The badge as large as the page's elsewhere. */
     --badge: calc(26px * var(--icon-scale, 1));
-    --u: clamp(12px, (100cqi - var(--badge) - 8px) / (2 * var(--most)), 28px);
-  }
-  /* The line drawn row by row, through each badge (the rows centered, so no one offset places it). */
-  .cols::before {
-    content: none;
+    /* The room each side has: a bar opened out shares it. */
+    --room: calc((100cqi - var(--badge) - 8px) / 2);
   }
   .col {
     grid-template-rows: none;
-    grid-template-columns: calc(var(--most) * var(--u)) calc(var(--badge) + 8px) calc(var(--most) * var(--u));
+    grid-template-columns: minmax(0, 1fr) calc(var(--badge) + 8px) minmax(0, 1fr);
     grid-template-areas: 'down axis up';
-    justify-content: center;
     align-items: center;
-    /* The rows as wide as the container (100cqi), its three columns centered in it. */
-    --side: calc(var(--most) * var(--u));
-    --start: calc((100cqi - 2 * var(--side) - var(--badge) - 8px) / 2);
-    background:
-      repeating-linear-gradient(to left, var(--grid) 0 1px, transparent 1px var(--u)) var(--start) 0 / var(--side) 100%
-        no-repeat,
-      repeating-linear-gradient(to right, var(--grid) 0 1px, transparent 1px var(--u))
-        calc(var(--start) + var(--side) + var(--badge) + 8px) 0 / var(--side) 100% no-repeat;
   }
   .axis {
     align-self: stretch;
@@ -355,21 +430,19 @@ const colLabel = (c: Chart, col: Column) =>
     /* A badge's own scale: the axis' is pinned to 1 when the line lies down. */
     --icon-scale: inherit;
   }
+  /* The line standing up, row by row. */
   .axis::before {
-    content: '';
-    position: absolute;
     top: -2px;
     bottom: -2px;
     left: calc(50% - 1px);
+    right: auto;
     width: 2px;
-    background: var(--ink);
-  }
-  .axis :deep(.type-icon) {
-    position: relative;
+    height: auto;
   }
   .side {
     width: auto;
-    height: 20px;
+    /* As tall as the type badge beside it. */
+    height: calc(20px * var(--icon-scale, 1));
   }
   .up {
     flex-direction: row;
@@ -379,21 +452,32 @@ const colLabel = (c: Chart, col: Column) =>
     flex-direction: row-reverse;
     justify-self: end;
   }
-  .block {
-    width: var(--u);
+  .block,
+  .block:first-child,
+  .open .block {
     height: auto;
   }
-  .across {
-    display: none;
+  .block {
+    width: var(--peek);
   }
-  .down-the-side {
-    display: inline;
+  .block:first-child {
+    width: var(--icon-w);
+  }
+  /* Opened out, the icons whole while they fit the side's room, else sharing it (cropped to their middles). */
+  .open .block {
+    width: min(var(--icon-w), var(--room) / var(--n));
   }
   .up .block + .block {
     margin: 0 0 0 -1px;
   }
   .down .block + .block {
     margin: 0 -1px 0 0;
+  }
+  .across {
+    display: none;
+  }
+  .down-the-side {
+    display: inline;
   }
 }
 </style>

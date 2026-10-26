@@ -997,11 +997,7 @@ export const messages = {
   'builder.section.team': 'Team',
   'builder.section.coverage': 'Coverage',
   'builder.coverage.defense': 'Defensive coverage',
-  'builder.coverage.defenseAbout':
-    'Each attacking type: a block above the line for each Pokémon that resists it, below for each weak to it. Abilities that change it count.',
   'builder.coverage.offense': 'Offensive coverage',
-  'builder.coverage.offenseAbout':
-    'Each defending type: a block above the line for each Pokémon with a super effective move against it, below for each whose every attack it resists or is immune to.',
   'builder.coverage.resists': 'Resists',
   'builder.coverage.weak': 'Weak',
   'builder.coverage.superEffective': 'Super effective',
