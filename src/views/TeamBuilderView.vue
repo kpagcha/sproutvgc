@@ -696,6 +696,15 @@ section {
   font-size: 1.15em;
   font-weight: bold;
 }
+/* On phones the name the row's width, the way to copy the team under it. */
+@media (max-width: 720px) {
+  .team-head {
+    flex-wrap: wrap;
+  }
+  .team-name {
+    flex-basis: 100%;
+  }
+}
 .issues {
   margin: -4px 0 10px;
   padding: 0;

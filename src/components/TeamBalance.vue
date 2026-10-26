@@ -360,7 +360,7 @@ const supportTip = (s: Support) => `${supportName(s)}: ${s.pokemon.map(name).joi
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px 12px;
+  gap: 10px 12px;
   margin-bottom: 12px;
 }
 /* A heading with more to it on hover: how the card's numbers come about. */
@@ -471,6 +471,8 @@ const supportTip = (s: Support) => `${supportName(s)}: ${s.pokemon.map(name).joi
 }
 /* What helps: a group per side, its badge (both for both) by its chips. */
 .help-group {
+  /* A row of chips as tall as the badge or a chip, whichever is taller, the badge level with the first. */
+  --row: max(26px, calc(20px * var(--icon-scale, 1)));
   display: flex;
   align-items: flex-start;
   gap: 8px;
@@ -481,8 +483,9 @@ const supportTip = (s: Support) => `${supportName(s)}: ${s.pokemon.map(name).joi
 .help-side {
   display: inline-flex;
   flex: none;
+  align-items: center;
   gap: 2px;
-  padding-top: 2px;
+  min-height: var(--row);
 }
 .help-items {
   display: flex;
@@ -498,6 +501,7 @@ const supportTip = (s: Support) => `${supportName(s)}: ${s.pokemon.map(name).joi
   display: inline-flex;
   align-items: center;
   gap: 2px;
+  min-height: var(--row);
   padding: 1px 4px 1px 8px;
   font-size: 0.85em;
   background: var(--panel);

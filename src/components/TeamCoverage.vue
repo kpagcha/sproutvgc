@@ -377,9 +377,9 @@ const colLabel = (c: Chart, col: Column) =>
 .legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 16px;
-  margin: 10px 0 0;
-  font-size: 0.85em;
+  gap: 4px 14px;
+  margin: 16px 0 0;
+  font-size: 0.78em;
 }
 .legend-side {
   display: inline-flex;
