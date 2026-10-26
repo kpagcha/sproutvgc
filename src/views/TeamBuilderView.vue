@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, shallowRef, watch, type ComponentPublicInstance } from 'vue'
+import { computed, nextTick, onMounted, shallowRef, watch, type ComponentPublicInstance } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 import { ClipboardPaste, Copy, Plus, Star, Trash2 } from '@lucide/vue'
 import { ability, item, move, pokemon, type AbilityId, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
@@ -16,6 +16,7 @@ import CopyPaste from '@/components/CopyPaste.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
 import SectionNav from '@/components/SectionNav.vue'
+import SideDrawer from '@/components/SideDrawer.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import TeamCoverage from '@/components/TeamCoverage.vue'
 import TeamPicker from '@/components/TeamPicker.vue'
@@ -57,72 +58,13 @@ const pickerOpen = computed({
     if (!on) picking.value = null
   },
 })
-// The drawer's backdrop: the whole window dimmed, but for a hole where the slot being picked for is (`clip-path`, which
-// lets the pointer through there too), followed as the page scrolls or the slot changes size. The drawer comes from the
-// side the slot leaves free, chosen as it opens.
-const DRAWER = 480
-const PAD = 6
+// On wide screens the picker is a drawer (`SideDrawer`), the slot being picked for left clear beside it.
 const slotEls: (HTMLElement | null)[] = []
 const setSlotEl = (i: number, el: Element | ComponentPublicInstance | null) =>
   (slotEls[i] = el && '$el' in el ? (el.$el as HTMLElement) : (el as HTMLElement | null))
-const hole = shallowRef<{ x: number; y: number; w: number; h: number } | null>(null)
-const side = shallowRef<'left' | 'right'>('right')
 const drawerOpen = computed(() => wide.value && !!picking.value)
-/** The drawer is in (its slide over): its list can be built. */
-const drawerReady = shallowRef(false)
-// Once a frame at most, however many scroll events come in it.
-let frame = 0
-function measureSoon() {
-  if (!frame) frame = requestAnimationFrame(() => ((frame = 0), measure()))
-}
-function measure() {
-  const el = picking.value ? slotEls[picking.value.slot] : null
-  if (!el || !drawerOpen.value) return void (hole.value = null)
-  const r = el.getBoundingClientRect()
-  hole.value = { x: r.left - PAD, y: r.top - PAD, w: r.width + 2 * PAD, h: r.height + 2 * PAD }
-}
-const backdropClip = computed(() => {
-  const h = hole.value
-  if (!h) return undefined
-  const W = window.innerWidth
-  const H = window.innerHeight
-  return `path(evenodd, "M0 0H${W}V${H}H0Z M${h.x} ${h.y}H${h.x + h.w}V${h.y + h.h}H${h.x}Z")`
-})
-let observer: ResizeObserver | undefined
-watch(
-  () => (drawerOpen.value ? picking.value!.slot : null),
-  async (slot) => {
-    observer?.disconnect()
-    if (slot === null) return void (hole.value = null)
-    // Its side chosen before the drawer's drawn (the watcher runs before the render), so it slides in from that edge,
-    // not from the last one's.
-    const at = slotEls[slot]?.getBoundingClientRect()
-    if (at)
-      side.value = at.right > window.innerWidth - Math.min(DRAWER, window.innerWidth * 0.46) - 16 ? 'left' : 'right'
-    await nextTick()
-    const el = slotEls[slot]
-    if (!el) return
-    el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-    measure()
-    observer = new ResizeObserver(measureSoon)
-    observer.observe(el)
-  },
-)
-const onKey = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && drawerOpen.value) picking.value = null
-}
-onMounted(() => {
-  window.addEventListener('scroll', measureSoon, { passive: true })
-  window.addEventListener('resize', measureSoon)
-  window.addEventListener('keydown', onKey)
-})
-onBeforeUnmount(() => {
-  observer?.disconnect()
-  cancelAnimationFrame(frame)
-  window.removeEventListener('scroll', measureSoon)
-  window.removeEventListener('resize', measureSoon)
-  window.removeEventListener('keydown', onKey)
-})
+const drawerAnchor = computed(() => (picking.value ? slotEls[picking.value.slot] : null))
+const drawer = shallowRef<InstanceType<typeof SideDrawer> | null>(null)
 
 // Each slot's points editor, folded at first.
 const editing = shallowRef<boolean[]>([])
@@ -184,7 +126,8 @@ function pick(value: string) {
 const pickerBox = shallowRef<HTMLElement | null>(null)
 watch(picking, async () => {
   await nextTick()
-  pickerBox.value?.scrollTo({ top: 0 })
+  const box = drawer.value?.el ?? pickerBox.value
+  box?.scrollTo({ top: 0 })
 })
 
 const clearSlot = (i: number) => {
@@ -396,43 +339,25 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
     </div>
 
     <!-- On wide screens, the picker as a drawer over the page, the slot left clear. -->
-    <Teleport to="body">
-      <Transition name="builder-fade">
-        <div
-          v-if="drawerOpen"
-          class="builder-backdrop"
-          :style="{ clipPath: backdropClip }"
-          aria-hidden="true"
-          @click="picking = null"
-        ></div>
-      </Transition>
-      <Transition name="drawer" @after-enter="drawerReady = true" @after-leave="drawerReady = false">
-        <aside
-          v-if="drawerOpen && picking && current"
-          ref="pickerBox"
-          class="panel builder-drawer"
-          :class="side"
-          :aria-label="t('builder.picker')"
-        >
-          <!-- Its list built once it's in: hundreds of rows built as it slides would hold it up. -->
-          <div v-if="!drawerReady" class="drawer-skeleton" aria-hidden="true">
-            <span class="sk sk-title"></span>
-            <span class="sk sk-search"></span>
-            <span v-for="n in 12" :key="n" class="sk sk-row"></span>
-          </div>
-          <TeamPicker
-            v-else
-            :member="members[picking.slot]!"
-            :others="othersOf(picking.slot)"
-            :field="picking.field"
-            :data
-            :snapshot
-            @pick="pick"
-            @close="picking = null"
-          />
-        </aside>
-      </Transition>
-    </Teleport>
+    <SideDrawer
+      ref="drawer"
+      :open="drawerOpen && !!picking && !!current"
+      :anchor="drawerAnchor"
+      :label="t('builder.picker')"
+      defer
+      @close="picking = null"
+    >
+      <TeamPicker
+        v-if="picking"
+        :member="members[picking.slot]!"
+        :others="othersOf(picking.slot)"
+        :field="picking.field"
+        :data
+        :snapshot
+        @pick="pick"
+        @close="picking = null"
+      />
+    </SideDrawer>
 
     <!-- On phones, the picker over the page. -->
     <ModalDialog v-if="!wide" v-model:open="pickerOpen" :label="t('builder.picker')" fill>
@@ -643,85 +568,5 @@ section {
 .import .actions {
   justify-content: flex-end;
   margin-top: 0;
-}
-</style>
-
-<style>
-/* The drawer and its backdrop, in the body (out of the page's transform, so fixed to the window). Over the header. */
-.builder-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 90;
-  background: color-mix(in srgb, #000 45%, transparent);
-}
-.builder-drawer {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  z-index: 91;
-  width: min(480px, 46vw);
-  margin: 0;
-  overflow: auto;
-  overscroll-behavior: contain;
-}
-/* Its slide on a layer of its own, so the page under it isn't painted again as it goes. */
-.builder-drawer {
-  will-change: transform;
-}
-.drawer-skeleton {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.drawer-skeleton .sk {
-  display: block;
-  background: color-mix(in srgb, var(--border) 45%, transparent);
-}
-.sk-title {
-  width: 40%;
-  height: 1.4em;
-}
-.sk-search {
-  height: 34px;
-  margin-bottom: 6px;
-}
-.sk-row {
-  height: 2.6em;
-}
-.builder-drawer.right {
-  right: 0;
-  border-right: 0;
-}
-.builder-drawer.left {
-  left: 0;
-  border-left: 0;
-}
-.builder-fade-enter-active,
-.builder-fade-leave-active {
-  transition: opacity 0.18s ease;
-}
-.builder-fade-enter-from,
-.builder-fade-leave-to {
-  opacity: 0;
-}
-/* In from its own edge and back out to it, by its side's class (not the transition's name, which the next drawer's
-   side would change under one leaving). */
-.drawer-enter-active,
-.drawer-leave-active {
-  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-.builder-drawer.right:is(.drawer-enter-from, .drawer-leave-to) {
-  transform: translateX(100%);
-}
-.builder-drawer.left:is(.drawer-enter-from, .drawer-leave-to) {
-  transform: translateX(-100%);
-}
-@media (prefers-reduced-motion: reduce) {
-  .drawer-enter-active,
-  .drawer-leave-active,
-  .builder-fade-enter-active,
-  .builder-fade-leave-active {
-    transition: none;
-  }
 }
 </style>
