@@ -181,6 +181,7 @@ const canHover = window.matchMedia('(hover: hover)').matches
             :effect="props.build.effect"
             :limit="MAX_POINTS"
             :label="t('speed.pointsLabel')"
+            raised
             @update:model-value="(p: number) => emit('build', { points: p })"
           />
         </div>

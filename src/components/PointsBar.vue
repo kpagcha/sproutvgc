@@ -13,8 +13,16 @@ import { MAX_POINTS, pointGains, statValue, type NatureEffect } from '@/lib/stat
 // A nature's rounding marked on it (`pointGains`): a point that adds 2 (the raised stat's every tenth) a notch on its
 // top edge, one that adds nothing (the lowered stat's) a notch in the bad color; points ending on one that adds
 // nothing say so, the one under it giving the same stat. Its points settled (let go, stepped or keyed) also come out as
-// `change`, as a native slider's, for a page that follows a drag only as a draft.
-const props = defineProps<{ base: number; effect: NatureEffect; hp?: boolean; limit: number; label: string }>()
+// `change`, as a native slider's, for a page that follows a drag only as a draft. Alone (`raised`, the speed pages'),
+// ink-outlined on a hard shadow, as the controls around it; the team builder's six stacked flat.
+const props = defineProps<{
+  base: number
+  effect: NatureEffect
+  hp?: boolean
+  limit: number
+  label: string
+  raised?: boolean
+}>()
 const points = defineModel<number>({ required: true })
 const emit = defineEmits<{ change: [points: number] }>()
 
@@ -94,7 +102,7 @@ const tip = computed(() =>
 </script>
 
 <template>
-  <div class="points-bar">
+  <div class="points-bar" :class="{ raised }">
     <div
       ref="bar"
       v-tip="tip"
@@ -324,6 +332,25 @@ const tip = computed(() =>
 .step:disabled {
   opacity: 0.35;
   cursor: default;
+}
+/* Raised: the bar and its steps ink-outlined on a hard shadow, spaced for it; a nature lowering it still outlined
+   in the bad within. */
+.raised {
+  gap: 6px;
+}
+.raised .invest,
+.raised .step {
+  border: 2px solid var(--ink);
+  box-shadow: var(--hard-sm);
+}
+.raised .invest.down {
+  box-shadow:
+    inset 0 0 0 1px var(--bad),
+    var(--hard-sm);
+}
+.raised .step:disabled {
+  opacity: 1;
+  color: color-mix(in srgb, var(--text) 35%, transparent);
 }
 /* Fingers: taller, easier to hold. */
 @media (pointer: coarse) {

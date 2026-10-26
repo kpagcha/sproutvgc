@@ -2529,6 +2529,7 @@ const { start: startTour } = useTour(
                     :effect="myNature"
                     :limit="MAX_POINTS"
                     :label="t('speed.pointsLabel')"
+                    raised
                     @update:model-value="(p: number) => dragMyPoints(String(p))"
                     @change="(p: number) => setMyPoints(String(p))"
                   />
