@@ -88,7 +88,7 @@ export const isEmpty = (m: Member) => !m.pokemon
 /** What a team breaks of the regulation's rules (`RULES`), each with the slots it's in and the part of them that
  * clashes: two of one species (Species Clause, its formes and Megas counting as it), more of one item than Item Clause
  * allows, more Megas than the regulation takes; and what a paste can bring in that the pickers don't offer: a set with
- * a move twice, an ability its Pokémon can't have, a move not in its learnset (once the learnsets are in, `learnsets`:
+ * a move twice, an item only other Pokémon can use (another's Mega Stone or mask), an ability its Pokémon can't have, a move not in its learnset (once the learnsets are in, `learnsets`:
  * Showdown's, which can lag the game's). */
 export type TeamIssue =
   | { kind: 'species'; part: 'pokemon'; slots: number[]; pokemon: PokemonId }
@@ -97,6 +97,7 @@ export type TeamIssue =
   | { kind: 'move'; part: 'move'; slots: number[]; pokemon: PokemonId; move: MoveId }
   | { kind: 'ability'; part: 'ability'; slots: number[]; pokemon: PokemonId; ability: AbilityId }
   | { kind: 'learn'; part: 'move'; slots: number[]; pokemon: PokemonId; move: MoveId }
+  | { kind: 'holder'; part: 'item'; slots: number[]; pokemon: PokemonId; item: ItemId }
 
 /** The Mega a slot battles as, if it's one. */
 const megaOf = (m: Member) => {
@@ -138,6 +139,9 @@ export function teamIssues(members: readonly Member[], learnsets?: Record<Pokemo
       !(mega && POKEMON[mega]?.abilities.includes(m.ability))
     )
       issues.push({ kind: 'ability', part: 'ability', slots: [i], pokemon: id, ability: m.ability })
+    const held = m.item && ITEMS[m.item]
+    if (held && (held.megas ? !held.megas[id] : held.users && !held.users.includes(id)))
+      issues.push({ kind: 'holder', part: 'item', slots: [i], pokemon: id, item: m.item! })
     const learns = learnsets && new Set(movesOf(learnsets, id))
     const seen = new Set<MoveId>()
     for (const mv of m.moves) {

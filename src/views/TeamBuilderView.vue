@@ -27,7 +27,7 @@ import TeamSlot from '@/components/TeamSlot.vue'
 // phones a dialog over it. Picking one moves on to the next part the slot hasn't got yet. The team goes out as a
 // paste (Showdown's format, `membersPaste`) and comes in from one (`parsePaste`, what it couldn't read said); under it,
 // its type coverage, defending and attacking (`TeamCoverage`). What it breaks of the rules (`teamIssues`: Species and
-// Item Clause, more than two Megas; a move twice, an ability it can't have, a move not in its learnset) is listed under its name, each part that clashes marked on its slot,
+// Item Clause, more than two Megas; a move twice, another Pokémon's Mega Stone or mask, an ability it can't have, a move not in its learnset) is listed under its name, each part that clashes marked on its slot,
 // and the pickers mark what the other slots have taken already; nothing's stopped, a paste bringing in what it may.
 // Every team
 // is saved in this browser as it's edited (`useTeams`), listed over the open one, the starred first.
@@ -268,6 +268,8 @@ function issueText(i: TeamIssue): string {
       return t('builder.issue.ability', { name: refName(pokemon(i.pokemon)), ability: refName(ability(i.ability)) })
     case 'learn':
       return t('builder.issue.learn', { name: refName(pokemon(i.pokemon)), move: refName(move(i.move)) })
+    case 'holder':
+      return t('builder.issue.holder', { name: refName(pokemon(i.pokemon)), item: refName(item(i.item)) })
   }
 }
 const clashes = computed(() =>
