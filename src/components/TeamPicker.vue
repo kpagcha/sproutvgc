@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, shallowRef, watch } from 'vue'
+import { computed, nextTick, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
 import { ChevronsDown, ChevronsUp, X } from '@lucide/vue'
 import {
   ability,
@@ -77,6 +77,18 @@ const itemClash = (id: ItemId): string | undefined => {
   if (clash.value.megasFull && ITEMS[id].megas && props.member.pokemon && ITEMS[id].megas[props.member.pokemon])
     return t('builder.megasFull', { max: RULES.megas })
 }
+
+// Its search box focused as it opens and as it moves on to the next part, to type in at once; where there's a mouse
+// only, so a phone's keyboard doesn't come up over the list.
+const root = useTemplateRef<HTMLElement>('root')
+const typing = window.matchMedia('(any-hover: hover) and (any-pointer: fine)').matches
+async function focusSearch() {
+  if (!typing) return
+  await nextTick()
+  root.value?.querySelector<HTMLInputElement>('input')?.focus({ preventScroll: true })
+}
+onMounted(focusSearch)
+watch(() => props.field, focusSearch)
 
 const title = computed(() => {
   const f = props.field
@@ -222,7 +234,7 @@ const natureRows = computed(() => {
 </script>
 
 <template>
-  <div class="picker">
+  <div ref="root" class="picker">
     <div class="picker-head">
       <h2>{{ title }}</h2>
       <button type="button" class="close" :aria-label="t('builder.closePicker')" @click="emit('close')">
