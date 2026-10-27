@@ -18,6 +18,7 @@ import {
   battlers,
   evolvingSlot,
   setsAs,
+  stoneMega,
   teamIssues,
   type Field,
   type Member,
@@ -201,6 +202,13 @@ const hasAny = computed(() => members.value.some((m) => m.pokemon))
 // toggling a slot's Mega makes it the one, or none when it was.
 const evolving = computed(() => (current.value ? evolvingSlot(current.value) : null))
 const battling = computed(() => battlers(members.value, evolving.value))
+// The slots holding their Mega Stone, each with its Mega: at hand in the row of section links, stuck to the top.
+const stoneHolders = computed(() =>
+  members.value.flatMap((m, slot) => {
+    const mega = stoneMega(m)
+    return mega ? [{ slot, mega }] : []
+  }),
+)
 function toggleMega(slot: number) {
   const team = current.value
   if (!team) return
@@ -298,7 +306,25 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
 <template>
   <div class="builder">
     <!-- Its sections, a row of links stuck to the top, the one being read marked. -->
-    <SectionNav :sections />
+    <SectionNav :sections>
+      <!-- The team's Megas, at hand as the page scrolls: the one that Mega Evolves in the insights pressed. -->
+      <span v-if="stoneHolders.length" class="megas" role="group" :aria-label="t('builder.mega')">
+        <span class="megas-label muted" aria-hidden="true">{{ t('builder.mega') }}</span>
+        <button
+          v-for="h in stoneHolders"
+          :key="h.slot"
+          v-tip.brief="refName(pokemon(h.mega))"
+          type="button"
+          class="mega-pick"
+          :class="{ on: evolving === h.slot }"
+          :aria-pressed="evolving === h.slot"
+          :aria-label="refName(pokemon(h.mega))"
+          @click="toggleMega(h.slot)"
+        >
+          <PokemonIcon :id="h.mega" />
+        </button>
+      </span>
+    </SectionNav>
     <section id="sec-teams" class="panel">
       <div class="head">
         <h1>{{ t('title.teamBuilder') }}</h1>
@@ -752,5 +778,36 @@ section {
 .import .actions {
   justify-content: flex-end;
   margin-top: 0;
+}
+/* The team's Megas in the row of section links: each its icon, faint until it's the one that Mega Evolves. */
+.megas {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 8px;
+  border-left: 1px solid var(--border);
+}
+.megas-label {
+  font-size: 0.78em;
+  font-weight: bold;
+}
+.mega-pick {
+  display: flex;
+  padding: 0 2px;
+  line-height: 0;
+  background: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.mega-pick:not(.on) :deep(.sheet-icon) {
+  opacity: 0.4;
+  filter: grayscale(1);
+}
+.mega-pick:hover :deep(.sheet-icon) {
+  opacity: 1;
+}
+.mega-pick.on {
+  background: var(--sel);
+  border-color: var(--border);
 }
 </style>

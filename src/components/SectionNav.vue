@@ -10,7 +10,8 @@ import { nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vu
 // `attached`, it's a bar under tabs (a tournament's, `BandTabs` bare) in the panel's color, outlined as panels are, which
 // the tab shown opens into; on wide screens stuck under them as they stick (`--tabs-h`, their height); on phones not
 // stuck at all, the tabs' bar taking over at the top with the row in it again (`inBar`, outlined the same, not stuck);
-// under tabs stuck on phones too (`noBar`, the rankings'), stuck under them there as well.
+// under tabs stuck on phones too (`noBar`, the rankings'), stuck under them there as well. Its slot, at the row's
+// end, holds what the page keeps at hand as it scrolls (the team builder's Megas), never scrolled away with the links.
 const props = defineProps<{
   sections: readonly { id: string; label: string }[]
   attached?: boolean
@@ -97,12 +98,16 @@ function go(id: string) {
         >{{ s.label }}</a
       >
     </div>
+    <div v-if="$slots.default" class="end"><slot /></div>
   </nav>
 </template>
 
 <style scoped>
-/* Stuck to the top on the page's color, a line under it, over what scrolls under it. */
+/* Stuck to the top on the page's color, a line under it, over what scrolls under it; the links, then what's at its end. */
 .section-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   position: sticky;
   top: 0;
   z-index: 5;
@@ -161,10 +166,17 @@ function go(id: string) {
   border-top: none;
 }
 .row {
+  flex: 1;
+  min-width: 0;
   display: flex;
   gap: 4px;
   overflow-x: auto;
   scrollbar-width: none;
+}
+.end {
+  flex: none;
+  display: flex;
+  align-items: center;
 }
 .row::-webkit-scrollbar {
   display: none;

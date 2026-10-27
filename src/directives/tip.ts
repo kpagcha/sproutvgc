@@ -74,6 +74,7 @@ type TipEl = HTMLElement & {
   _tipContent?: TipContent
   _tipGroup?: string
   _tipPlacement?: Placement
+  _tipBrief?: boolean
 }
 type TipValue = TipContent | false | null | undefined
 
@@ -113,8 +114,33 @@ function sync(name: string, group: Group) {
   })
 }
 
+// A brief tip (a name alone, on a button tapped to toggle something) hides on its own a moment after showing, as touch
+// tooltips do, rather than staying over the page until the next tap; and as soon as anything scrolls, its button being
+// stuck to the top (the team builder's row of section links), the tooltip otherwise juddering as it's placed again.
+const BRIEF_MS = 1500
+function briefProps() {
+  let timer = 0
+  let onScroll: (() => void) | null = null
+  return {
+    onShow(instance: Instance) {
+      timer = window.setTimeout(() => instance.hide(), BRIEF_MS)
+      onScroll = () => instance.hide()
+      document.addEventListener('scroll', onScroll, { capture: true, passive: true })
+    },
+    onHide() {
+      clearTimeout(timer)
+      if (onScroll) document.removeEventListener('scroll', onScroll, { capture: true })
+      onScroll = null
+    },
+  }
+}
+
 function create(el: TipEl, content: TipContent, groupName?: string, now = false) {
-  el._tip = tippy(el, { content, ...(el._tipPlacement && { placement: el._tipPlacement }) })
+  el._tip = tippy(el, {
+    content,
+    ...(el._tipPlacement && { placement: el._tipPlacement }),
+    ...(el._tipBrief && briefProps()),
+  })
   if (!groupName) return
   let group = groups.get(groupName)
   if (!group) groups.set(groupName, (group = { members: new Set(), queued: false }))
@@ -163,10 +189,12 @@ function wake(this: TipEl, e: Event) {
 // across renders, as a new one each time would set it again). A falsy value shows none.
 // v-tip:group="text": joins a named group sharing one moving tooltip.
 // v-tip.right="text" (or .left, .bottom): placed there rather than above.
+// v-tip.brief="text": hidden on its own a moment after it shows (`BRIEF_MS`).
 const PLACEMENTS = ['right', 'left', 'bottom'] as const
 export const vTip: Directive<TipEl, TipValue> = {
   mounted(el, { value, arg, modifiers }) {
     el._tipPlacement = PLACEMENTS.find((p) => modifiers[p])
+    el._tipBrief = !!modifiers.brief
     if (value) arm(el, value, arg)
   },
   updated(el, { value, oldValue, arg }) {
