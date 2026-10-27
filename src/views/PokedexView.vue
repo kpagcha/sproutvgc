@@ -25,6 +25,7 @@ import { usePageEntered } from '@/composables/usePageEntered'
 import { useRowColumns } from '@/composables/useRowColumns'
 import { useSort } from '@/composables/useSort'
 import SortHeader from '@/components/SortHeader.vue'
+import StatPickHeader, { type StatKey } from '@/components/StatPickHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 import AppLink from '@/components/AppLink'
@@ -153,15 +154,12 @@ const phone = ref(phoneQuery.matches)
 const onPhone = (e: MediaQueryListEvent) => (phone.value = e.matches)
 phoneQuery.addEventListener('change', onPhone)
 onUnmounted(() => phoneQuery.removeEventListener('change', onPhone))
-type StatKey = Exclude<Key, 'name'>
-const STAT_KEYS: StatKey[] = [...STATS, 'total']
 const picked = ref<StatKey>(key.value === 'name' ? 'total' : key.value)
 const column = computed(() => (key.value === 'name' ? picked.value : key.value))
 function pick(k: StatKey) {
   picked.value = k
   if (key.value !== k) toggle(k)
 }
-const statLabel = (k: StatKey) => t(k === 'total' ? 'stat.bst' : `stat.${k}`)
 const statIndex = computed(() => (column.value === 'total' ? -1 : STATS.indexOf(column.value)))
 
 interface Line {
@@ -307,31 +305,7 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
             :desc="desc"
             @sort="toggle('total')"
           />
-          <div
-            v-else
-            role="columnheader"
-            class="r stat-pick"
-            :aria-sort="key === column ? (desc ? 'descending' : 'ascending') : undefined"
-          >
-            <button
-              type="button"
-              class="sort"
-              :class="{ active: key === column }"
-              :aria-label="t('pokedex.sortBy', { stat: statLabel(column) })"
-              @click="toggle(column)"
-            >
-              <span class="arrow" :class="{ shown: key === column, up: !desc }" aria-hidden="true">▾</span>
-            </button>
-            <select
-              class="stat-select"
-              :class="{ active: key === column }"
-              :value="column"
-              :aria-label="t('pokedex.statColumn')"
-              @change="pick(($event.target as HTMLSelectElement).value as StatKey)"
-            >
-              <option v-for="k in STAT_KEYS" :key="k" :value="k">{{ statLabel(k) }}</option>
-            </select>
-          </div>
+          <StatPickHeader v-else :column :active="key === column" :desc @sort="toggle(column)" @pick="pick" />
         </div>
         <SkeletonRows v-if="!entered" :cells="SKELETON" height="2.3em" />
         <template v-else>
@@ -503,34 +477,6 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
   gap: 2px;
 }
 .total {
-  font-weight: bold;
-}
-/* On phones, the stat column's header picks the stat, with the arrow before it sorting by it, or reversing it. */
-.stat-pick {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.15em;
-}
-.stat-pick .arrow {
-  font-size: 0.8em;
-}
-.stat-pick .arrow.up {
-  transform: scaleY(-1);
-}
-.stat-pick .arrow:not(.shown) {
-  visibility: hidden;
-}
-.stat-select {
-  padding: 0;
-  font: inherit;
-  color: inherit;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-.stat-select.active {
-  color: var(--text);
   font-weight: bold;
 }
 

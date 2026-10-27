@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onDeactivated, shallowRef, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, onDeactivated, shallowRef, useTemplateRef, watch } from 'vue'
 import tippy, { type Instance } from 'tippy.js'
 import { useRouter } from 'vue-router'
 import { ability, item, move, pokemon, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
-import { POKEMON, splitForme } from '@/data/pokemon'
+import { gameStats, gameTotal, POKEMON, splitForme, STATS, type StatId } from '@/data/pokemon'
 import { sinceLabel, GENERATED_SNAPSHOTS, has, percent, players } from '@/data/meta'
 import { baselineOf, eventsOf, loadEventUsage, type EventUsage } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
@@ -28,7 +28,9 @@ import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import MetaDialog from '@/components/MetaDialog.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
+import SegmentedControl from '@/components/SegmentedControl.vue'
 import SortHeader from '@/components/SortHeader.vue'
+import StatPickHeader, { type StatKey } from '@/components/StatPickHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
 import FilterSearch from '@/components/FilterSearch.vue'
 import RankingsHead from '@/components/RankingsHead.vue'
@@ -46,9 +48,28 @@ const { snapshot, data, loading } = useMeta()
 const can = (c: Parameters<typeof has>[1]) => computed(() => !!snapshot.value && has(snapshot.value, c))
 const showUsage = can('usage')
 const showBrought = can('brought')
-const showItem = can('items')
-const showAbility = can('abilities')
-const showMoves = can('moves')
+// What the columns after the types are (`Columns`, remembered): each Pokémon's most common set, its item, ability and
+// moves (where the snapshot has them; the default), or its stats, each sorted by as in the dex's list.
+type View = 'sets' | 'stats'
+const VIEW_KEY = 'sproutvgc.usage.columns'
+function savedView(): View {
+  try {
+    return localStorage.getItem(VIEW_KEY) === 'stats' ? 'stats' : 'sets'
+  } catch {
+    return 'sets'
+  }
+}
+const view = shallowRef<View>(savedView())
+const views = computed(() => [
+  { value: 'sets' as const, label: t('usage.viewSets') },
+  { value: 'stats' as const, label: t('usage.viewStats') },
+])
+const stats = computed(() => view.value === 'stats')
+const setCan = (c: Parameters<typeof has>[1]) =>
+  computed(() => !stats.value && !!snapshot.value && has(snapshot.value, c))
+const showItem = setCan('items')
+const showAbility = setCan('abilities')
+const showMoves = setCan('moves')
 /** Brought covers every player, whatever the snapshot's cutoff: said under the table. */
 const broughtAll = computed(
   () => showBrought.value && snapshot.value?.unweighted?.includes('brought') && !!snapshot.value.cutoff,
@@ -165,16 +186,53 @@ const rows = computed(() =>
   }),
 )
 type Row = (typeof rows.value)[number]
-type Key = 'rank' | 'name' | 'usage' | 'brought'
+type Key = 'rank' | 'name' | 'usage' | 'brought' | StatKey
 
+// Its stats as the game shows them (`gameStats`), worked out once a Pokémon.
+const statsOf = computed(() => new Map(rows.value.map((r) => [r.id, gameStats(POKEMON[r.id])])))
+const isStat = (k: Key): k is StatKey => k === 'total' || (STATS as readonly string[]).includes(k)
 const { key, desc, toggle, sorted } = useSort<Row, Key>({
   rows,
-  value: (r, k) => (k === 'name' ? r.name : k === 'rank' ? r.rank : (r[k] ?? -Infinity)),
+  value: (r, k) =>
+    k === 'name'
+      ? r.name
+      : k === 'rank'
+        ? r.rank
+        : k === 'total'
+          ? gameTotal(POKEMON[r.id])
+          : isStat(k)
+            ? statsOf.value.get(r.id)![STATS.indexOf(k as StatId)]!
+            : (r[k] ?? -Infinity),
   initial: 'rank',
-  startsDesc: (k) => k === 'usage' || k === 'brought',
+  startsDesc: (k) => k !== 'rank' && k !== 'name',
   locale,
   remember: 'usage',
 })
+// Back to the sets, a sort by a stat goes with its column: by rank again.
+function resetStatSort() {
+  if (!stats.value && isStat(key.value)) {
+    key.value = 'rank'
+    desc.value = false
+  }
+}
+resetStatSort()
+watch(view, (v) => {
+  resetStatSort()
+  try {
+    localStorage.setItem(VIEW_KEY, v)
+  } catch {
+    // Storage unavailable: the choice lasts until the page reloads.
+  }
+})
+// Phones have room for one stat column: the one sorted by, or, sorted otherwise, the one last picked (the total at
+// first), picked in its header (`StatPickHeader`), as in the dex's list.
+const pickedStat = shallowRef<StatKey>('total')
+const statColumn = computed(() => (isStat(key.value) ? key.value : pickedStat.value))
+const statIndex = computed(() => (statColumn.value === 'total' ? -1 : STATS.indexOf(statColumn.value)))
+function pickStat(k: StatKey) {
+  pickedStat.value = k
+  if (key.value !== k) toggle(k)
+}
 
 // The search and filters (`FilterSearch`): its text finds the list's Pokémon by name, and its filters (`?f=`, `?fm=`)
 // narrow it to those of a type, that can have an ability, or whose sets run a move or item, on at least `MIN_SHARE` of
@@ -303,7 +361,8 @@ const drawn = useGradualRows(listed)
 useRowColumns(useTemplateRef('head'))
 // The columns, as the snapshot has them, and their widths on wide screens, on narrower ones and on phones (null where
 // they're left out). On wide screens each Pokémon's most common set fills the room, its moves taking what's left; on
-// narrower ones the names do.
+// narrower ones the names do. With the stats, on wide screens they share it, the names as wide as with the set (a
+// forme's tag wrapping alike, so the rows keep their height from one to the other).
 const columns = computed(() => {
   const set = showItem.value || showAbility.value || showMoves.value
   const list: { cell: string; xl: string | null; md: string | null; sm: string | null }[] = [
@@ -311,13 +370,17 @@ const columns = computed(() => {
     { cell: 'grow', xl: 'var(--name)', md: 'minmax(var(--name), 1fr)', sm: 'minmax(0, 1fr)' },
     { cell: 'wide-only', xl: 'var(--types)', md: 'var(--types)', sm: null },
   ]
+  if (stats.value) {
+    list.push(...STATS.map(() => ({ cell: 'wide-only r', xl: 'var(--stat)', md: 'var(--num)', sm: null })))
+    list.push({ cell: 'r', xl: 'var(--stat)', md: 'var(--num)', sm: 'var(--num)' })
+  }
   if (showItem.value) list.push({ cell: 'xl-only', xl: 'auto', md: null, sm: null })
   if (showAbility.value) list.push({ cell: 'xl-only', xl: 'var(--ability)', md: null, sm: null })
   if (showMoves.value) list.push({ cell: 'xl-only', xl: 'minmax(0, 1fr)', md: null, sm: null })
   if (showUsage.value)
     list.push({
       cell: 'r',
-      xl: set ? 'var(--usage)' : 'minmax(var(--usage), 1fr)',
+      xl: set || stats.value ? 'var(--usage)' : 'minmax(var(--usage), 1fr)',
       md: 'var(--usage)',
       sm: 'var(--usage)',
     })
@@ -346,6 +409,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
       >
         <div v-if="snapshot" class="source">
           <MetaDialog />
+          <SegmentedControl v-model="view" class="soft view-pick" :label="t('usage.columns')" :options="views" />
           <template v-if="hasSets && !phone">
             <label class="btn switch sets-switch" :class="{ on: showSets }">
               <input type="checkbox" :checked="showSets" @change="toggleSets" />
@@ -396,6 +460,35 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
           />
           <SortHeader :label="t('usage.pokemon')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />
           <div role="columnheader" class="wide-only">{{ t('pokedex.types') }}</div>
+          <template v-if="stats">
+            <SortHeader
+              v-for="s in STATS"
+              :key="s"
+              class="wide-only"
+              :label="t(`stat.${s}`)"
+              right
+              :active="key === s"
+              :desc="desc"
+              @sort="toggle(s)"
+            />
+            <SortHeader
+              v-if="!phone"
+              :label="t('stat.bst')"
+              :tip="t('stat.bstFull')"
+              right
+              :active="key === 'total'"
+              :desc="desc"
+              @sort="toggle('total')"
+            />
+            <StatPickHeader
+              v-else
+              :column="statColumn"
+              :active="key === statColumn"
+              :desc
+              @sort="toggle(statColumn)"
+              @pick="pickStat"
+            />
+          </template>
           <div v-if="showItem" role="columnheader" class="xl-only">
             <span v-tip="t('usage.itemTip')" class="tipped">{{ t('usage.item') }}</span>
           </div>
@@ -452,6 +545,9 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
               showUsage,
               showBrought,
               setsShown,
+              stats,
+              phone,
+              statIndex,
               shareTerms,
               top,
               locale,
@@ -489,6 +585,11 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
                 </AppLink>
               </span>
             </div>
+            <template v-if="stats">
+              <div v-for="(v, i) in statsOf.get(r.id)" :key="i" role="cell" class="wide-only r num">{{ v }}</div>
+              <div v-if="!phone || statIndex < 0" role="cell" class="r num total">{{ gameTotal(POKEMON[r.id]) }}</div>
+              <div v-else role="cell" class="r num">{{ statsOf.get(r.id)![statIndex] }}</div>
+            </template>
             <div v-if="showItem" role="cell" class="xl-only">
               <AppLink
                 v-if="r.item"
@@ -648,6 +749,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
 .dex-table {
   --types: calc(64px * var(--icon-scale, 1) + 14px);
   --num: minmax(3em, auto);
+  --stat: minmax(3em, 1fr);
   --name: 13em;
   --ability: 9em;
   --usage: 4.5em;
@@ -815,6 +917,15 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 16px;
+}
+/* Every row as tall as one with its item (its icon and the bar under it, the tallest of a row's cells), so the rows keep
+   their height from the set's columns to the stats'. */
+.dex-table .row:not(.head) {
+  min-height: 34px;
+}
+/* The stats' total, as in the dex's list. */
+.total {
+  font-weight: bold;
 }
 .mon {
   display: flex;
