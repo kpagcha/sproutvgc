@@ -261,6 +261,7 @@ export function seoPages(): Plugin {
         searched('meta/speed-tiers', 'speedTiers'),
         searched('meta/speed-tiers/compare', 'speedCompare'),
         { path: 'tools', title: 'title.tools', desc: 'desc.tools', schema: 'CollectionPage' },
+        searched('tools/calc', 'calc'),
         searched('tools/team-builder', 'teamBuilder'),
         searched('tools/matchups', 'matchups'),
         searched('tools/type-chart', 'chart', 'WebPage'),

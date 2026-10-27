@@ -87,14 +87,6 @@ function compareVisit(query: LocationQuery) {
 // The meta of a page in an area's section.
 const inArea = (area: AreaId, section?: string) => ({ area, section })
 
-// A page of the area's not built yet, which says so.
-const soon = (area: AreaId, section: string, path: string, titleKey: MessageKey, descKey: MessageKey) => ({
-  path,
-  name: section,
-  component: () => import('@/views/ComingSoonView.vue'),
-  meta: { titleKey, descKey, ...inArea(area, section) },
-})
-
 // The abilities' or items' rankings: one view, the list its prop.
 const usageRankings = (
   list: 'abilities' | 'items',
@@ -473,7 +465,20 @@ export const router = createRouter({
 
     // Tools: what you interact with.
     area('tools', 'title.tools', 'desc.tools'),
-    soon('tools', 'calc', '/tools/calc', 'title.calc', 'desc.calc'),
+    {
+      path: '/tools/calc',
+      name: 'calc',
+      component: () => import('@/views/CalcView.vue'),
+      meta: {
+        titleKey: 'title.calc',
+        descKey: 'desc.calc',
+        headKey: 'head.calc',
+        keywordsKey: 'keywords.calc',
+        dexNames: true,
+        descriptions: ['ability', 'move', 'item'],
+        ...inArea('tools', 'calc'),
+      },
+    },
     {
       path: '/tools/team-builder',
       name: 'teamBuilder',

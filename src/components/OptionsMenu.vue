@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref, useTemplateRef, watch, type Component } from 'vue'
+import { nextTick, onBeforeUnmount, ref, useTemplateRef, watch, type Component } from 'vue'
 import { Settings2 } from '@lucide/vue'
 
 // At the top right of a panel, a quiet button opening a drop-down of how the panel shows: the options are its slot.
@@ -12,18 +12,30 @@ defineProps<{
   label?: string
   /** The drop-down from the button's left edge rather than its right. */
   align?: 'left' | 'right'
+  /** On a panel's band: its button as the band's are (`btn on-band`). */
+  onBand?: boolean
 }>()
 
 // Its tooltip only where there's hovering: a tap opens the drop-down, its label saying the same.
 const canHover = window.matchMedia('(hover: hover)').matches
 const open = ref(false)
 const root = useTemplateRef<HTMLElement>('root')
+const pop = useTemplateRef<HTMLElement>('pop')
+// No taller than the screen leaves under it: a long one scrolls within itself rather than the page.
+const maxHeight = ref<string | undefined>()
+const GAP = 12
+async function fitPop() {
+  await nextTick()
+  const el = pop.value
+  if (el) maxHeight.value = `${Math.max(160, window.innerHeight - el.getBoundingClientRect().top - GAP)}px`
+}
 function onPointerDown(e: PointerEvent) {
   if (!root.value?.contains(e.target as Node)) open.value = false
 }
 const onKey = (e: KeyboardEvent) => e.key === 'Escape' && (open.value = false)
 watch(open, (on) => {
   if (on) {
+    void fitPop()
     document.addEventListener('pointerdown', onPointerDown)
     document.addEventListener('keydown', onKey)
   } else {
@@ -39,7 +51,13 @@ onBeforeUnmount(() => (open.value = false))
     <button
       v-tip="canHover && !label && title"
       type="button"
-      :class="label ? ['btn', 'quiet', 'small', { on: open }] : ['toggle', { open }]"
+      :class="
+        onBand
+          ? ['btn', 'on-band', { on: open }]
+          : label
+            ? ['btn', 'quiet', 'small', { on: open }]
+            : ['toggle', { open }]
+      "
       :aria-expanded="open"
       :aria-label="title"
       @click="open = !open"
@@ -47,7 +65,7 @@ onBeforeUnmount(() => (open.value = false))
       <component :is="icon ?? Settings2" :size="label ? 14 : 16" aria-hidden="true" />
       <span v-if="label">{{ label }}</span>
     </button>
-    <div v-if="open" class="pop panel" :class="{ left: align === 'left' }">
+    <div v-if="open" ref="pop" class="pop panel" :class="{ left: align === 'left' }" :style="{ maxHeight }">
       <slot :close="() => (open = false)" />
     </div>
   </div>
@@ -83,6 +101,8 @@ onBeforeUnmount(() => (open.value = false))
   flex-direction: column;
   gap: 6px;
   width: max-content;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   font-weight: normal;
 }
 /* From the button's left edge. */

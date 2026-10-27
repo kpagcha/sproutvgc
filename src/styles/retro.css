@@ -437,6 +437,11 @@
 :root:root :is(a, button:not(:disabled)):hover :is(.type-badge, .category-badge).s2 {
   box-shadow: 3px 3px 0 var(--ink);
 }
+/* But not in a button that's about something else (a row unfolding, a chip toggling): its badges stay put. */
+:root:root :is(a, button).no-lift:hover :is(.type-badge, .category-badge) {
+  transform: none;
+  box-shadow: 1px 1px 0 var(--ink);
+}
 @media (prefers-reduced-motion: reduce) {
   :root:root :is(a, button) :is(.type-badge, .category-badge) {
     transition: none;

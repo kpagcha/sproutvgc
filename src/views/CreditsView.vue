@@ -26,6 +26,13 @@ const tournaments = EVENTS[0]?.provider
           <span class="note">{{ names[0] }}<a href="https://pokeapi.co/" rel="noopener">PokéAPI</a>{{ names[1] }}</span>
         </dd>
       </div>
+      <div>
+        <dt>{{ t('credits.calcTitle') }}</dt>
+        <dd>
+          <a href="https://github.com/smogon/damage-calc" rel="noopener">Smogon's damage calculator</a>
+          <span class="note">{{ t('credits.license', { license: 'MIT' }) }}</span>
+        </dd>
+      </div>
       <div v-if="providers.length">
         <dt>{{ t('credits.metaTitle') }}</dt>
         <dd>

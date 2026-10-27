@@ -515,6 +515,34 @@ details > summary {
   display: inline-block;
   vertical-align: middle;
 }
+/* A type's glyph alone (`TypeGlyph`), as big as a Lucide icon beside it and in the text's color, as they are. */
+.type-glyph {
+  display: inline-block;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  background: currentColor;
+  mask: var(--glyph) center / contain no-repeat;
+}
+/* Fairy Aura's icon: the Fairy glyph, two small faint sparks by it, at its top right and bottom left. */
+.aura-icon {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+.aura-icon .spark {
+  position: absolute;
+  opacity: 0.7;
+}
+.aura-icon .spark.top {
+  top: -3px;
+  right: -4px;
+}
+.aura-icon .spark.bottom {
+  bottom: -2px;
+  left: -4px;
+}
 
 /* A nature's effect on Speed in short (`EffectTag`): its arrow tight against "Spe". It sits on the text's baseline,
    "Spe"'s: centering the items would make the arrow's bottom edge, the first item's, the tag's baseline, lifting it

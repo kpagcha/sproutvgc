@@ -261,6 +261,7 @@ const natureRows = computed(() => {
         <X :size="18" aria-hidden="true" />
       </button>
     </div>
+    <slot />
 
     <template v-if="field === 'pokemon'">
       <FilterSearch

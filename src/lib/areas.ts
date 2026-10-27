@@ -55,7 +55,7 @@ export const AREAS: Area[] = [
     label: 'nav.tools',
     title: 'title.tools',
     sections: [
-      { key: 'calc', route: 'calc', label: 'nav.calc', title: 'title.calc', desc: 'desc.calc', soon: true },
+      { key: 'calc', route: 'calc', label: 'nav.calc', title: 'title.calc', desc: 'desc.calc' },
       { key: 'teamBuilder', route: 'teamBuilder', label: 'nav.teamBuilder', desc: 'desc.teamBuilder' },
       { key: 'matchups', route: 'matchups', label: 'title.matchups', desc: 'desc.matchups' },
       { key: 'chart', route: 'chart', label: 'title.chart', desc: 'desc.chart' },
