@@ -143,6 +143,30 @@
       "team": ["raichumegax", "golisopodmega", "archaludon", "pelipper", "basculegionf", "sneasler"]
     }
   },
+  "regional-puebla-2026": {
+    "id": "regional-puebla-2026",
+    "n": 447,
+    "name": "Regional Puebla",
+    "date": "2026-10-24",
+    "country": "MX",
+    "players": 333,
+    "type": "regional",
+    "category": "official",
+    "regulation": "M-C",
+    "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
+    "url": "https://standings.limitlessvgc.com/43/standings",
+    "t": 43,
+    "format": 3,
+    "day2": 48,
+    "topCut": 11,
+    "rounds": 15,
+    "teams": 333,
+    "winner": {
+      "player": "Kyle Livinghouse",
+      "country": "US",
+      "team": ["sneasler", "whimsicott", "charizardmegay", "kingambit", "garchomp", "froslassmega"]
+    }
+  },
   "worlds-2026": {
     "id": "worlds-2026",
     "n": 437,
