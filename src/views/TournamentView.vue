@@ -883,8 +883,8 @@ const ordinal = (n: number) => `#${n}`
                   :aria-pressed="statKey === k"
                   @click="sortStats(k)"
                 >
-                  {{ t(`tournaments.col.${k}`)
-                  }}<span v-if="statKey === k" class="arrow" :class="{ up: !statDesc }" aria-hidden="true">▾</span>
+                  <span class="label" :data-label="t(`tournaments.col.${k}`)">{{ t(`tournaments.col.${k}`) }}</span
+                  ><span class="arrow" :class="{ shown: statKey === k, up: !statDesc }" aria-hidden="true">▾</span>
                 </button>
               </span>
             </div>
@@ -1300,7 +1300,9 @@ h1 {
   --cols: 2.5rem minmax(0, 1fr) 5rem 5.5rem 6rem 3.75rem;
 }
 /* On phones, what the list is sorted by, its options joined in one outlined strip as `SegmentedControl`'s, tapped again
-   to reverse it; a rule over it setting the list apart from the chart. */
+   to reverse it; a rule over it setting the list apart from the chart. Each option takes the same room picked or not,
+   as `SortHeader` does, so picking one doesn't resize the strip: its label as wide as in bold, and room for the
+   arrow. */
 .stat-sort {
   display: flex;
   align-items: center;
@@ -1334,6 +1336,22 @@ h1 {
 }
 .stat-sort .arrow {
   font-size: 0.8em;
+  font-weight: normal;
+}
+.stat-sort .arrow:not(.shown) {
+  visibility: hidden;
+}
+/* A bold copy of the label, out of sight, keeps it as wide as when it's bold. */
+.stat-sort .label {
+  display: inline-flex;
+  flex-direction: column;
+}
+.stat-sort .label::after {
+  content: attr(data-label);
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  font-weight: bold;
 }
 .stat-sort .arrow.up {
   transform: scaleY(-1);
