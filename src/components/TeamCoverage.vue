@@ -19,8 +19,8 @@ import TypeIcon from '@/components/TypeIcon'
 // with a super effective move against the type, marked when it's STAB, and below for each whose every move it resists
 // or is immune to. Each block holds its Pokémon's icon: the one by the line whole, the rest slivers behind it, so a
 // bar still grows with its count, until its column is hovered (tapped, where nothing hovers), when they open out
-// whole, an accordion. Narrow, the line stands up: the types down the side, what's good to their right. A block's
-// tooltip names its Pokémon with its types, defending, or its moves with theirs, attacking.
+// whole, an accordion. Narrow, the columns keep an icon's width, the chart scrolling sideways. A block's tooltip
+// names its Pokémon with its types, defending, or its moves with theirs, attacking.
 const props = defineProps<{ members: readonly Battler[]; side: 'def' | 'atk' }>()
 
 interface Block {
@@ -209,7 +209,7 @@ const colLabel = (c: Chart, col: Column) =>
               @pointerleave="leave($event, `${c.id}:${col.type}`)"
               @click="tap($event, `${c.id}:${col.type}`)"
             >
-              <span class="side up" :style="{ '--n': col.up.length }" aria-hidden="true"
+              <span class="side up" aria-hidden="true"
                 ><template v-for="b in col.up" :key="b.key"
                   ><span v-if="wide" v-tip:group.left="b.tip" class="block" :class="[b.cls, { stab: b.stab }]"
                     ><PokemonIcon :id="b.pokemon" :scale="0.75" /></span
@@ -217,7 +217,7 @@ const colLabel = (c: Chart, col: Column) =>
                     ><PokemonIcon :id="b.pokemon" :scale="0.75" /></span></template
               ></span>
               <span class="axis" aria-hidden="true"><TypeIcon :type="col.type" /></span>
-              <span class="side down" :style="{ '--n': col.down.length }" aria-hidden="true"
+              <span class="side down" aria-hidden="true"
                 ><template v-for="b in col.down" :key="b.key"
                   ><span v-if="wide" v-tip:group.left="b.tip" class="block" :class="b.cls"
                     ><PokemonIcon :id="b.pokemon" :scale="0.75" /></span
@@ -228,8 +228,7 @@ const colLabel = (c: Chart, col: Column) =>
           </div>
           <p class="legend muted">
             <span v-for="(side, s) in [c.legend.up, c.legend.down]" :key="s" class="legend-side">
-              <span class="arrow across" aria-hidden="true">{{ s ? '▼' : '▲' }}</span
-              ><span class="arrow down-the-side" aria-hidden="true">{{ s ? '◀' : '▶' }}</span>
+              <span class="arrow" aria-hidden="true">{{ s ? '▼' : '▲' }}</span>
               <template v-for="l in side" :key="l.m">
                 <span v-if="l.m >= 0" class="mult-tag" :class="c.id === 'def' ? defClass(l.m) : multClass(l.m)">{{
                   formatMult(l.m)
@@ -398,12 +397,7 @@ const colLabel = (c: Chart, col: Column) =>
 .arrow {
   font-size: 0.8em;
 }
-/* Which way each side lies: up and down, or, the line standing up, right and left. */
-.down-the-side {
-  display: none;
-}
 
-/* Narrow, the line stands up: a row per type, what's good (the upper side) to the right. */
 /* Lying down but tight (a half of its panel): the columns narrower than an icon (each cropped to its middle), the type
    badges a little smaller so each keeps to its column. */
 @container (max-width: 640px) {
@@ -414,78 +408,17 @@ const colLabel = (c: Chart, col: Column) =>
     --icon-scale: 0.85;
   }
 }
+/* Narrow (a phone), the columns an icon's width whole, the chart scrolling sideways, room under it for the shadow of
+   a bar opened out. */
 @container (max-width: 480px) {
-  .chart {
-    --peek: 8px;
-  }
   .cols {
-    flex-direction: column;
-    gap: 3px;
-    /* The badge as large as the page's elsewhere. */
-    --badge: calc(26px * var(--icon-scale, 1));
-    /* The room each side has: a bar opened out shares it. */
-    --room: calc((100cqi - var(--badge) - 8px) / 2);
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
   }
   .col {
-    grid-template-rows: none;
-    grid-template-columns: minmax(0, 1fr) calc(var(--badge) + 8px) minmax(0, 1fr);
-    grid-template-areas: 'down axis up';
-    align-items: center;
-  }
-  .axis {
-    align-self: stretch;
-    justify-content: center;
-    /* A badge's own scale: the axis' is pinned to 1 when the line lies down. */
-    --icon-scale: inherit;
-  }
-  /* The line standing up, row by row. */
-  .axis::before {
-    top: -2px;
-    bottom: -2px;
-    left: calc(50% - 1px);
-    right: auto;
-    width: 2px;
-    height: auto;
-  }
-  .side {
-    width: auto;
-    /* As tall as the type badge beside it. */
-    height: calc(20px * var(--icon-scale, 1));
-  }
-  .up {
-    flex-direction: row;
-    justify-self: start;
-  }
-  .down {
-    flex-direction: row-reverse;
-    justify-self: end;
-  }
-  .block,
-  .block:first-child,
-  .open .block {
-    height: auto;
-  }
-  .block {
-    width: var(--peek);
-  }
-  .block:first-child {
+    flex: none;
     width: var(--icon-w);
-  }
-  /* Opened out, the icons whole while they fit the side's room, else sharing it (cropped to their middles). */
-  .open .block {
-    width: min(var(--icon-w), var(--room) / var(--n));
-  }
-  .up .block + .block {
-    margin: 0 0 0 -1px;
-  }
-  .down .block + .block {
-    margin: 0 -1px 0 0;
-  }
-  .across {
-    display: none;
-  }
-  .down-the-side {
-    display: inline;
   }
 }
 </style>
