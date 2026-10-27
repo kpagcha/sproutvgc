@@ -321,7 +321,7 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
           :aria-label="refName(pokemon(h.mega))"
           @click="toggleMega(h.slot)"
         >
-          <PokemonIcon :id="h.mega" />
+          <PokemonIcon :id="h.mega" :scale="0.75" />
         </button>
       </span>
     </SectionNav>
@@ -779,7 +779,8 @@ section {
   justify-content: flex-end;
   margin-top: 0;
 }
-/* The team's Megas in the row of section links: each its icon, faint until it's the one that Mega Evolves. */
+/* The team's Megas in the row of section links, as quiet as the links: each a small icon, faint until it's the one
+   that Mega Evolves, which is underlined as the section being read is. */
 .megas {
   display: flex;
   align-items: center;
@@ -793,10 +794,11 @@ section {
 }
 .mega-pick {
   display: flex;
-  padding: 0 2px;
+  padding: 2px 2px 0;
   line-height: 0;
   background: none;
-  border: 1px solid transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
   cursor: pointer;
 }
 .mega-pick:not(.on) :deep(.sheet-icon) {
@@ -807,7 +809,6 @@ section {
   opacity: 1;
 }
 .mega-pick.on {
-  background: var(--sel);
-  border-color: var(--border);
+  border-bottom-color: var(--accent);
 }
 </style>
