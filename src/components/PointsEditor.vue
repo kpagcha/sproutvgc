@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import type { PokemonId } from '@/data/dex'
 import { percent, type Spread } from '@/data/meta'
 import { natureEffectOn, natureName } from '@/data/natures'
@@ -9,13 +9,14 @@ import { MAX_POINTS, TOTAL_POINTS } from '@/lib/stats'
 import type { Points } from '@/lib/team'
 import { natureTip } from '@/components/natureTip'
 import PointsBar from '@/components/PointsBar.vue'
-import OptionsMenu from '@/components/OptionsMenu.vue'
-import { ChartColumn } from '@lucide/vue'
+import ModalDialog from '@/components/ModalDialog.vue'
+import { ChartColumn, X } from '@lucide/vue'
 
 // A slot's stats and stat points, set by hand: the meta page's spread card made to be played with, a row per stat (its
 // name and its bar, `PointsBar`: its points, the stat they give, the nature's marks); how many of the `TOTAL_POINTS`
 // are left to spend is on `TeamSlot`'s line it unfolds from. Each stat takes no more than are left. Its most common
-// spreads (`spreads`, the meta's) in a drop-down at its foot, each setting the points and the nature and closing it, on one row with Clear and
+// spreads (`spreads`, the meta's) in a dialog over the page (`ModalDialog`) from a button at its foot, each setting the
+// points and the nature and closing it, those of the nature it has already tinted; the button on one row with Clear and
 // Confirm (which folds it).
 const props = defineProps<{ pokemon: PokemonId; nature: string | null; spreads: readonly Spread[] }>()
 const points = defineModel<Points>('points', { required: true })
@@ -39,10 +40,11 @@ function set(i: number, p: number) {
 }
 const PRESETS = 4
 const presets = computed(() => props.spreads.slice(0, PRESETS))
-/** Sets a common spread, closing the drop-down it's picked from. */
-function choose(s: Spread, close: () => void) {
+const open = ref(false)
+/** Sets a common spread, closing the dialog it's picked from. */
+function choose(s: Spread) {
   emit('preset', s)
-  close()
+  open.value = false
 }
 const isPreset = (s: Spread) => s.nature === props.nature && s.points.every((p, i) => p === points.value[i])
 </script>
@@ -65,31 +67,41 @@ const isPreset = (s: Spread) => s.nature === props.nature && s.points.every((p, 
     </div>
     <!-- Its common spreads to pick from, and clearing or confirming the points (which folds it), on one row. -->
     <div class="actions">
-      <OptionsMenu
+      <button
         v-if="presets.length"
-        class="presets-menu"
-        :title="t('builder.presets')"
-        :label="t('builder.presets')"
-        :icon="ChartColumn"
-        align="left"
+        type="button"
+        class="btn quiet small presets-button"
+        :class="{ on: open }"
+        aria-haspopup="dialog"
+        @click="open = true"
       >
-        <template #default="{ close }">
+        <ChartColumn :size="14" aria-hidden="true" />
+        <span>{{ t('builder.presets') }}</span>
+      </button>
+      <ModalDialog v-if="presets.length" v-model:open="open" :label="t('builder.presets')">
+        <div class="panel banded presets-card">
+          <div class="band">
+            <span>{{ t('builder.presets') }}</span>
+            <button type="button" class="btn on-band close" :aria-label="t('picker.close')" @click="open = false">
+              <X :size="16" aria-hidden="true" />
+            </button>
+          </div>
           <div class="presets">
             <button
               v-for="(sp, i) in presets"
               :key="i"
               type="button"
               class="preset"
-              :class="{ on: isPreset(sp) }"
-              @click="choose(sp, close)"
+              :class="{ on: isPreset(sp), same: sp.nature === nature }"
+              @click="choose(sp)"
             >
               <span v-tip="natureTip(sp.nature)" class="preset-nature">{{ natureName(sp.nature) }}</span>
               <span class="preset-points">{{ sp.points.join('/') }}</span>
               <span class="preset-share muted">{{ sp.share ? percent(sp.share) : '' }}</span>
             </button>
           </div>
-        </template>
-      </OptionsMenu>
+        </div>
+      </ModalDialog>
       <button type="button" class="btn quiet small clear" :disabled="!spent" @click="points = [0, 0, 0, 0, 0, 0]">
         {{ t('builder.pointsClear') }}
       </button>
@@ -109,7 +121,7 @@ const isPreset = (s: Spread) => s.nature === props.nature && s.points.every((p, 
   flex-direction: column;
   gap: 8px;
 }
-/* The spreads' drop-down at the left, Clear and Confirm at the right; one row, the buttons as tight as they read. */
+/* The spreads' button at the left, Clear and Confirm at the right; one row, the buttons as tight as they read. */
 .actions {
   display: flex;
   align-items: center;
@@ -151,11 +163,28 @@ const isPreset = (s: Spread) => s.nature === props.nature && s.points.every((p, 
   font-size: 0.85em;
   color: var(--muted);
 }
+/* Its card no wider than its spreads read; its band what it is, its close at the end. */
+:global(.modal-dialog) > .presets-card {
+  max-width: 360px;
+}
+:root:root .presets-card.banded > .band {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 0;
+  font-weight: bold;
+}
+.close {
+  min-height: 0;
+  padding: 2px 4px;
+}
 /* The spreads one grid, so their nature, points and share line up in columns from one to the next. */
 .presets {
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: auto 1fr auto;
   gap: 4px;
+  padding-top: 10px;
 }
 .preset {
   display: grid;
@@ -164,13 +193,24 @@ const isPreset = (s: Spread) => s.nature === props.nature && s.points.every((p, 
   align-items: baseline;
   text-align: left;
   column-gap: 10px;
-  padding: 2px 6px;
+  padding: 6px 8px;
   font: inherit;
-  font-size: 0.85em;
   color: inherit;
   background: var(--panel-alt);
   border: 1px solid var(--border);
   cursor: pointer;
+}
+.preset:hover {
+  background: var(--hover);
+}
+/* Of the nature it has already: the faintest tint of the accent, an edge of it down its left; the one it's at
+   outlined too. */
+.preset.same {
+  background: color-mix(in srgb, var(--accent) 8%, var(--panel-alt));
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.preset.same:hover {
+  background: color-mix(in srgb, var(--accent) 14%, var(--panel-alt));
 }
 .preset.on {
   border-color: var(--accent);
