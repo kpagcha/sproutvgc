@@ -1,6 +1,20 @@
 <script setup lang="ts">
-import { computed, onMounted, useTemplateRef, watch } from 'vue'
+import { computed, onMounted, useTemplateRef, watch, type Component } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import {
+  BookOpen,
+  Calculator,
+  ChartColumn,
+  ChartColumnBig,
+  Scale,
+  GraduationCap,
+  Grid3x3,
+  Swords,
+  TrendingUp,
+  Trophy,
+  Users,
+  Wrench,
+} from '@lucide/vue'
 import { t, type MessageKey } from '@/i18n'
 import { GAME_NAME, REGULATION } from '@/data/format'
 import { AREAS, type AreaId } from '@/lib/areas'
@@ -16,18 +30,14 @@ import SearchResults from '@/components/SearchResults.vue'
 import SearchBox from '@/components/SearchBox.vue'
 import logoUrl from '@/assets/logo.png'
 
-// The front door to the whole site: the search (of the site's pages, the meta pages and the dex), and under it the
-// areas: Meta first and largest (what the site is most about), its sections buttons (Usage across the top, a box
-// of its four lists' links, its name leading to the Pokémon's, so its moves, abilities and items aren't missed), Tools a
-// column beside it, a row per section, and the quizzes and the dex (its name alone, its lists not to be mistaken for
-// Usage's) a band under them, the tournaments under way a slim line under the search (`LiveTournaments`), when there are some; then the
-// meta at a glance (`MetaHighlights`), the reader's favorites and recently viewed. While searching, the
-// results take the place of all but the search.
+// The front door to the whole site: the search (of the site's pages, the meta pages and the dex), the tournaments under
+// way a slim line under it (`LiveTournaments`), when there are some, and under them the areas, a card each, all alike:
+// its name over its sections, a row each (Usage's row with its four lists' links as chips, its name leading to the
+// Pokémon's, so its moves, abilities and items aren't missed); Meta and Tools first, on the accent's shadow, the
+// quizzes and the dex under them, their names alone; then the meta at a glance (`MetaHighlights`), the reader's favorites and recently viewed.
+// While searching, the results take the place of all but the search.
 
 const areaById = (id: AreaId) => AREAS.find((a) => a.id === id)!
-const metaArea = areaById('meta')
-const usage = metaArea.sections.find((s) => s.key === 'rankings')!
-const metaRest = metaArea.sections.filter((s) => s !== usage)
 /** Usage's lists, in its tabs' order (`RankingsTabs`). */
 const usageLists: { route: string; label: MessageKey }[] = [
   { route: 'rankings', label: 'nav.pokemon' },
@@ -35,9 +45,34 @@ const usageLists: { route: string; label: MessageKey }[] = [
   { route: 'itemRankings', label: 'nav.items' },
   { route: 'abilityRankings', label: 'nav.abilities' },
 ]
-const toolsArea = areaById('tools')
-/** The rest, a row each of the band under them. */
-const bandAreas = [areaById('quizzes'), areaById('dex')]
+/** Each area's icon, and each of its sections' on the card, by its key. */
+const AREA_ICONS: Record<AreaId, Component> = {
+  meta: TrendingUp,
+  tools: Wrench,
+  quizzes: GraduationCap,
+  dex: BookOpen,
+}
+const SECTION_ICONS: Record<string, Component> = {
+  rankings: ChartColumn,
+  tournaments: Trophy,
+  speedTiers: ChartColumnBig,
+  speedCompare: Scale,
+  calc: Calculator,
+  teamBuilder: Users,
+  matchups: Swords,
+  chart: Grid3x3,
+}
+/** The areas' cards, in reading order: Meta's and Tools' with their sections, those not built yet last, so the first
+ * row leads somewhere; the quizzes' and the dex's their name alone (the dex's lists not to be mistaken for Usage's). */
+const cards = (['meta', 'tools', 'quizzes', 'dex'] as const).map((id) => {
+  const area = areaById(id)
+  const featured = id === 'meta' || id === 'tools'
+  return {
+    area,
+    featured,
+    sections: featured ? [...area.sections].sort((a, b) => Number(!!a.soon) - Number(!!b.soon)) : [],
+  }
+})
 
 // The search is kept in the URL (`?q=`), so coming back from a result brings the results back.
 const route = useRoute()
@@ -67,14 +102,18 @@ useSlashFocus(() => box.value?.focus({ preventScroll: true }))
 
 // The site's search: its pages, the meta pages of the Pokémon in the meta shown (first, as the site leads with it),
 // and the dex.
-const { data: meta } = useMeta()
+const { data: meta, snapshot } = useMeta()
 const { results, only } = useSearch(() => query.value, undefined, { pages: true, meta: () => meta.value })
 function openOnly() {
   if (only.value) void router.push(only.value)
 }
 
 // The regulation's hyphens don't break ("M-C" stays on one line): U+2011, the non-breaking hyphen.
-const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharCode(0x2011)) }
+const unbroken = (reg: string) => reg.replace(/-/g, String.fromCharCode(0x2011))
+const params = { game: GAME_NAME, reg: unbroken(REGULATION) }
+// Meta's names the regulation of the data its pages show, as the meta at a glance under it does, not always the
+// current one.
+const shownReg = computed(() => ({ reg: unbroken(snapshot.value?.regulation ?? REGULATION) }))
 </script>
 
 <template>
@@ -101,64 +140,47 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
     <SearchResults v-if="results" :query :results />
     <template v-else>
       <LiveTournaments />
-      <!-- Under them, the site's areas, a card each, one under another (where to go), then the meta at a glance (what it's
-           about). -->
+      <!-- Under them, the site's areas (where to go), then the meta at a glance (what it's about). -->
       <nav class="explore" :aria-label="t('home.explore')">
-        <div class="explore-top">
-          <section class="panel featured meta-area">
-            <div class="meta-head">
-              <RouterLink :to="{ name: metaArea.route }" class="area-name font-display"
-                >{{ t(metaArea.label) }} <span class="arrow">›</span></RouterLink
-              >
-              <span class="muted meta-blurb">{{ t('meta.regulation', params) }}</span>
-            </div>
-            <div class="usage">
-              <RouterLink :to="{ name: usage.route }" class="sec-name usage-name"
-                >{{ t(usage.label) }} <span class="arrow">›</span></RouterLink
-              >
-              <ul class="usage-lists">
-                <li v-for="l in usageLists" :key="l.route">
-                  <RouterLink :to="{ name: l.route }">{{ t(l.label) }}</RouterLink>
-                </li>
-              </ul>
-            </div>
-            <ul class="meta-sections">
-              <li v-for="sec in metaRest" :key="sec.key">
-                <RouterLink :to="{ name: sec.route }" class="meta-button">
-                  <span class="sec-name">{{ t(sec.label) }} <span class="arrow">›</span></span>
-                </RouterLink>
-              </li>
-            </ul>
-          </section>
-          <section class="panel featured tools-area">
-            <RouterLink :to="{ name: toolsArea.route }" class="area-name tools-head font-display"
-              >{{ t(toolsArea.label) }} <span class="arrow">›</span></RouterLink
+        <section
+          v-for="c in cards"
+          :key="c.area.id"
+          class="panel area"
+          :class="[`area-${c.area.id}`, { featured: c.featured }]"
+        >
+          <div class="area-head">
+            <RouterLink :to="{ name: c.area.route }" class="area-name font-display"
+              ><component :is="AREA_ICONS[c.area.id]" class="area-icon" :size="22" aria-hidden="true" />{{
+                t(c.area.label)
+              }}
+              <span class="arrow">›</span></RouterLink
             >
-            <ul>
-              <li v-for="sec in toolsArea.sections" :key="sec.key">
-                <RouterLink :to="{ name: sec.route }" class="tool-row" :class="{ soon: sec.soon }">
-                  <span class="sec-name"
-                    >{{ t(sec.label) }}
-                    <span v-if="sec.soon" class="soon-tag">{{ t('soon.tag') }}</span>
-                    <span v-else class="arrow">›</span></span
-                  >
-                </RouterLink>
-              </li>
-            </ul>
-          </section>
-        </div>
-        <div class="panel band">
-          <div v-for="a in bandAreas" :key="a.id" class="band-row">
-            <RouterLink :to="{ name: a.route }" class="band-name font-display"
-              >{{ t(a.label) }} <span class="arrow">›</span></RouterLink
-            >
-            <ul v-if="a.id !== 'dex'" class="band-links">
-              <li v-for="sec in a.sections" :key="sec.key">
-                <RouterLink :to="{ name: sec.route }">{{ t(sec.label) }}</RouterLink>
-              </li>
-            </ul>
+            <span v-if="c.area.id === 'meta'" class="muted area-reg">{{ t('meta.regulation', shownReg) }}</span>
           </div>
-        </div>
+          <ul v-if="c.sections.length" class="rows">
+            <li v-for="sec in c.sections" :key="sec.key">
+              <!-- Usage: its name a row's, its lists' links chips beside it (a link can't hold links). -->
+              <div v-if="sec.key === 'rankings'" class="row usage">
+                <RouterLink :to="{ name: sec.route }" class="row-label usage-name"
+                  ><component :is="SECTION_ICONS[sec.key]" :size="16" aria-hidden="true" />{{
+                    t(sec.label)
+                  }}</RouterLink
+                >
+                <ul class="chips">
+                  <li v-for="l in usageLists" :key="l.route">
+                    <RouterLink :to="{ name: l.route }">{{ t(l.label) }}</RouterLink>
+                  </li>
+                </ul>
+              </div>
+              <RouterLink v-else :to="{ name: sec.route }" class="row" :class="{ soon: sec.soon }"
+                ><span class="row-label"
+                  ><component :is="SECTION_ICONS[sec.key]" :size="16" aria-hidden="true" />{{ t(sec.label) }}</span
+                >
+                <span v-if="sec.soon" class="soon-tag">{{ t('soon.tag') }}</span></RouterLink
+              >
+            </li>
+          </ul>
+        </section>
       </nav>
       <MetaHighlights class="highlights" />
       <FavoritesPanel />
@@ -201,11 +223,17 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
   margin: 16px 0 0;
 }
 
-/* The areas: Meta and Tools side by side (Meta twice as wide), on an accent shadow; the dex and the quizzes a band of
-   links under them. */
+/* The areas, a card each, all alike: Meta and Tools side by side (Meta twice as wide), on the accent's shadow, their
+   rows sharing each card's height, so the two end level; the quizzes and the dex under them, their names alone. */
 .explore {
+  /* Its links' hover a tint of the accent the featured areas stand on. */
+  --explore-hover: color-mix(in srgb, var(--accent) 16%, var(--panel));
   display: grid;
-  gap: 20px;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  grid-template-areas:
+    'meta tools'
+    'quizzes dex';
+  gap: 22px;
   margin-bottom: 20px;
 }
 .explore ul {
@@ -219,143 +247,98 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
 .explore a:hover {
   text-decoration: none;
 }
-.explore-top {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-  gap: 22px;
+.area-meta {
+  grid-area: meta;
 }
-.explore .panel {
-  margin: 0;
+.area-tools {
+  grid-area: tools;
 }
-.area-name {
-  font-weight: bold;
-  font-size: calc(24px * var(--display-scale, 1) * var(--text-scale));
+.area-quizzes {
+  grid-area: quizzes;
 }
-.arrow {
-  color: var(--accent);
+.area-dex {
+  grid-area: dex;
 }
-.sec-name {
+:root:root .area {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  font-weight: bold;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
 }
-/* Meta and Tools: a hard shadow in the accent; Meta's on a faint dotted ground. */
 :root:root .featured {
   box-shadow: 6px 6px 0 var(--accent);
 }
-:root:root .meta-area {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 16px 18px 20px;
-}
-.meta-head {
+/* Its name, and Meta's regulation across from it. */
+.area-head {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: baseline;
   gap: 4px 12px;
-}
-.meta-blurb {
-  font-size: 0.9em;
-}
-/* Its sections raised buttons, Usage's lists in a box across the top and the rest three to a row, lifting on hover and pressed
-   flat when clicked. */
-.meta-sections {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-.meta-sections li {
-  display: flex;
-}
-.meta-button {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 12px 14px;
-  background: var(--panel);
-  border: 2px solid var(--ink);
-  box-shadow: var(--hard);
-  transition:
-    transform 0.08s ease-out,
-    box-shadow 0.08s ease-out;
-}
-.meta-button .sec-name {
-  font-size: 1.1em;
-}
-.meta-button:hover {
-  background: var(--hover);
-  transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0 var(--ink);
-}
-.meta-button:active {
-  transform: translate(3px, 3px);
-  box-shadow: none;
-}
-/* Usage: its name (a link to the Pokémon's) and its lists' links on one row (wrapping under it where they don't fit), in a box as the buttons
-   are, but not one itself. */
-.usage {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 16px;
-  padding: 12px 14px;
-  background: var(--panel);
-  border: 2px solid var(--ink);
-  box-shadow: var(--hard);
-}
-.usage .sec-name {
-  font-size: 1.1em;
-}
-/* Its name leads to the Pokémon's, the first of them. */
-.usage-name:hover {
-  color: var(--accent);
-}
-.usage-lists {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.usage-lists a {
-  display: block;
-  padding: 3px 11px;
-  font-weight: 600;
-  background: var(--panel-alt);
-  border: 1.5px solid var(--ink);
-}
-.usage-lists a:hover {
-  background: var(--hover);
-}
-/* Tools: its name over its sections, a row each. */
-:root:root .tools-area {
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-}
-/* Its name level with Meta's, at the same padding from the top. */
-.tools-head {
-  padding: 16px 16px 10px;
+  padding: 14px 16px 10px;
   border-bottom: 2px solid var(--ink);
 }
-.tool-row {
+/* A card of its name alone. */
+.area-head:only-child {
+  border-bottom: none;
+  padding-bottom: 14px;
+}
+.area-name {
+  white-space: nowrap;
+  font-weight: bold;
+  font-size: calc(24px * var(--display-scale, 1) * var(--text-scale));
+}
+/* Its icon before it, in the accent, as its arrow after it. */
+.area-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.area-icon {
+  color: var(--accent);
+}
+/* A section's name with its icon before it, muted, so the names lead. */
+.row-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+.row-label .lucide {
+  color: var(--muted);
+}
+.area-reg {
+  font-size: 0.9em;
+}
+.arrow {
+  color: var(--accent);
+}
+/* Its sections: a row each, the whole row the link. */
+.rows {
+  flex: 1;
+  display: grid;
+  grid-auto-rows: 1fr;
+}
+.rows > li {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 12px 16px;
+}
+.row {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 16px;
+  font-weight: bold;
   border-bottom: 1px dashed var(--border);
 }
-.tools-area li:last-child .tool-row {
+.rows > li:last-child .row {
   border-bottom: none;
 }
-.tool-row:hover {
-  background: var(--hover);
+a.row:hover {
+  background: var(--explore-hover);
 }
 /* Not built yet: fainter, tagged. */
-.explore .tool-row.soon {
+.explore .row.soon {
   color: var(--muted);
 }
 .soon-tag {
@@ -365,59 +348,65 @@ const params = { game: GAME_NAME, reg: REGULATION.replace(/-/g, String.fromCharC
   padding: 1px 6px;
   border: 1px dashed var(--muted);
 }
-/* The dex and the quizzes: a row each, its name then its sections. */
-:root:root .band {
-  padding: 0;
+/* Usage: its name (a link to the Pokémon's) and its lists' links as chips, wrapping under it where they don't fit. */
+.usage {
+  flex-wrap: wrap;
+  justify-content: start;
+  gap: 6px 16px;
 }
-.band-row {
-  display: flex;
-  align-items: center;
-  gap: 8px 16px;
-  padding: 12px 16px;
+.usage-name:hover {
+  color: var(--accent);
 }
-.band-row + .band-row {
-  border-top: 1px solid var(--border);
-}
-.band-name {
-  flex: none;
-  width: 6em;
-  font-weight: bold;
-  font-size: calc(17px * var(--display-scale, 1) * var(--text-scale));
-}
-.band-links {
+.chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
-.band-links a {
+.chips a {
   display: block;
-  padding: 3px 11px;
+  padding: 1px 10px;
   font-size: 0.9em;
   font-weight: 600;
+  text-align: center;
   background: var(--panel-alt);
   border: 1.5px solid var(--ink);
 }
-.band-links a:hover {
-  background: var(--hover);
+.chips a:hover {
+  background: var(--explore-hover);
 }
 .highlights {
   margin: 0 0 16px;
 }
 
-/* Narrower, Tools under Meta; on phones, Meta's buttons one to a row and the band's names over their links. */
+/* Narrower, Meta and Tools one under another and the quizzes and the dex side by side under them, the accent shadows smaller and the cards as far from the
+   right edge (their shadow's end) as from the left; on phones, Usage's lists two to a row under its name. */
 @media (max-width: 760px) {
-  .explore-top {
-    grid-template-columns: minmax(0, 1fr);
+  .explore {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      'meta meta'
+      'tools tools'
+      'quizzes dex';
+    gap: 18px;
+    padding-right: 4px;
+  }
+  /* No card beside it to end level with: each row its own height (Usage's, with its chips under it, taller). */
+  .rows {
+    grid-auto-rows: auto;
+  }
+  :root:root .featured {
+    box-shadow: 4px 4px 0 var(--accent);
+  }
+  /* The quizzes and the dex, half as wide: their names smaller. */
+  .area-head:only-child .area-name {
+    font-size: calc(20px * var(--display-scale, 1) * var(--text-scale));
   }
 }
 @media (max-width: 560px) {
-  .meta-sections {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 10px;
-  }
-  .band-row {
-    flex-direction: column;
-    align-items: start;
+  .usage .chips {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
   }
 }
 @media (max-width: 560px) {
