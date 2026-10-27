@@ -226,7 +226,7 @@ const supportTip = (s: Support) => `${supportName(s)}: ${s.pokemon.map(name).joi
             <SegmentedControl
               v-if="!defending"
               v-model="mode"
-              class="mode"
+              class="mode soft"
               :label="t('builder.balance.modeLabel')"
               :tip="t('builder.balance.modeTip')"
               :options="modes"
@@ -424,6 +424,17 @@ const supportTip = (s: Support) => `${supportName(s)}: ${s.pokemon.map(name).joi
 .mode {
   margin-left: auto;
   font-size: 0.9em;
+  /* Its label and choices each on one line, squeezed under the heading, and the choices under the label where the
+     two don't fit on one. */
+  flex-wrap: wrap;
+  row-gap: 4px;
+  white-space: nowrap;
+}
+/* On phones, under the heading at the left. */
+@media (max-width: 720px) {
+  .mode {
+    margin-left: 0;
+  }
 }
 /* The insights, in the lightbulb's popover: a side per line, its badge and name, its percentile and what it means. */
 .insights {

@@ -4,7 +4,7 @@ import { useId, type Component } from 'vue'
 // A choice of how something is shown, rather than of what is (a filter): a label and its options joined in one
 // outlined strip, the picked one highlighted. Radio buttons underneath, so arrow keys move between them. An option
 // can show an icon in place of its label, with a short text beside it, the label then naming it to screen readers and,
-// unless `noTips`, in a tooltip.
+// unless `noTips`, in a tooltip. With the `soft` class, quieter: a thin outline and no shadow, for a card's header.
 defineProps<{
   label: string
   /** Explains the choice, on the label's hover. */
@@ -73,6 +73,13 @@ const id = useId()
 .segments label:has(:focus-visible) {
   outline: 2px solid var(--accent);
   outline-offset: -4px;
+}
+.soft .segments {
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+.soft .segments label + label {
+  border-left: 1px solid var(--border);
 }
 .segments input {
   position: absolute;

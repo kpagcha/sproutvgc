@@ -82,77 +82,80 @@ const placed = computed(() =>
 </script>
 
 <template>
-  <div class="lanes" :style="{ '--rows': ROWS }">
-    <template v-for="(l, i) in lanes" :key="l.side">
-      <div class="lane-label" :data-side="l.side">
-        <CategoryIcon :category="l.side" :tip="false" />
-        <span class="lane-text">
-          <span v-tip="l.tip" class="lane-name" :class="{ tipped: l.tip }" :tabindex="l.tip ? 0 : undefined">{{
-            l.label
-          }}</span>
-          <span v-if="l.sub" class="lane-sub">{{ l.sub }}</span>
-        </span>
+  <!-- The size container the narrow layout asks: a container query never matches its own element. -->
+  <div class="lanes-box">
+    <div class="lanes" :style="{ '--rows': ROWS }">
+      <template v-for="(l, i) in lanes" :key="l.side">
+        <div class="lane-label" :data-side="l.side">
+          <CategoryIcon :category="l.side" :tip="false" />
+          <span class="lane-text">
+            <span v-tip="l.tip" class="lane-name" :class="{ tipped: l.tip }" :tabindex="l.tip ? 0 : undefined">{{
+              l.label
+            }}</span>
+            <span v-if="l.sub" class="lane-sub">{{ l.sub }}</span>
+          </span>
+        </div>
+        <div v-if="state" class="plot" :class="state" :data-side="l.side">
+          <span v-if="state === 'none' && !i" class="plot-note muted">{{ t('builder.balance.noMeta') }}</span>
+        </div>
+        <div v-else ref="plots" class="plot" :data-side="l.side">
+          <svg v-if="l.shape" class="meta" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true">
+            <rect
+              class="band"
+              :x="at(l.shape.q1) * 1000"
+              y="0"
+              :width="(at(l.shape.q3) - at(l.shape.q1)) * 1000"
+              height="100"
+            />
+            <path class="ridge" :d="ridge(l.shape)" />
+          </svg>
+          <span v-if="l.shape" class="median" :style="{ left: pct(at(l.shape.median)) }" aria-hidden="true"></span>
+          <span
+            v-for="{ p, row } in placed[i]"
+            :key="p.pokemon"
+            v-tip:group="tip(p, l.side)"
+            class="mon"
+            :class="{ mixed: p.mixed }"
+            :style="{ left: `clamp(20px, ${pct(at(p.value))}, calc(100% - 20px))`, '--row': row }"
+            :aria-label="tip(p, l.side)"
+            ><PokemonIcon :id="p.pokemon"
+          /></span>
+          <span
+            v-if="l.mean !== null"
+            v-tip:group="meanTip(l)"
+            class="mean"
+            :style="{ left: pct(at(l.mean)) }"
+            :aria-label="meanTip(l)"
+          ></span>
+          <span
+            v-if="!i"
+            v-tip="legendBody"
+            class="info"
+            tabindex="0"
+            role="img"
+            :aria-label="legendBody?.textContent ?? undefined"
+          >
+            <Info :size="14" aria-hidden="true" />
+          </span>
+        </div>
+      </template>
+      <div v-if="!state" class="axis" aria-hidden="true">
+        <span>← {{ ends[0] }}</span>
+        <span>{{ ends[1] }} →</span>
       </div>
-      <div v-if="state" class="plot" :class="state" :data-side="l.side">
-        <span v-if="state === 'none' && !i" class="plot-note muted">{{ t('builder.balance.noMeta') }}</span>
-      </div>
-      <div v-else ref="plots" class="plot" :data-side="l.side">
-        <svg v-if="l.shape" class="meta" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true">
-          <rect
-            class="band"
-            :x="at(l.shape.q1) * 1000"
-            y="0"
-            :width="(at(l.shape.q3) - at(l.shape.q1)) * 1000"
-            height="100"
-          />
-          <path class="ridge" :d="ridge(l.shape)" />
-        </svg>
-        <span v-if="l.shape" class="median" :style="{ left: pct(at(l.shape.median)) }" aria-hidden="true"></span>
-        <span
-          v-for="{ p, row } in placed[i]"
-          :key="p.pokemon"
-          v-tip:group="tip(p, l.side)"
-          class="mon"
-          :class="{ mixed: p.mixed }"
-          :style="{ left: `clamp(20px, ${pct(at(p.value))}, calc(100% - 20px))`, '--row': row }"
-          :aria-label="tip(p, l.side)"
-          ><PokemonIcon :id="p.pokemon"
-        /></span>
-        <span
-          v-if="l.mean !== null"
-          v-tip:group="meanTip(l)"
-          class="mean"
-          :style="{ left: pct(at(l.mean)) }"
-          :aria-label="meanTip(l)"
-        ></span>
-        <span
-          v-if="!i"
-          v-tip="legendBody"
-          class="info"
-          tabindex="0"
-          role="img"
-          :aria-label="legendBody?.textContent ?? undefined"
-        >
-          <Info :size="14" aria-hidden="true" />
-        </span>
-      </div>
-    </template>
-    <div v-if="!state" class="axis" aria-hidden="true">
-      <span>← {{ ends[0] }}</span>
-      <span>{{ ends[1] }} →</span>
-    </div>
-    <div hidden>
-      <div ref="legendBody" class="legend">
-        <span
-          ><svg class="key key-ridge" viewBox="0 0 20 12" aria-hidden="true">
-            <path d="M0 12C4 12 6 2 10 2S16 12 20 12Z" /></svg
-          >{{ t('builder.balance.legendMeta') }}</span
-        >
-        <span><span class="key key-band"></span>{{ t('builder.balance.legendBand') }}</span>
-        <span><span class="key key-median"></span>{{ t('builder.balance.legendMedian') }}</span>
-        <span v-if="lanes.some((l) => l.mean !== null)"
-          ><span class="key key-mean"></span>{{ t('builder.balance.legendMean') }}</span
-        >
+      <div hidden>
+        <div ref="legendBody" class="legend">
+          <span
+            ><svg class="key key-ridge" viewBox="0 0 20 12" aria-hidden="true">
+              <path d="M0 12C4 12 6 2 10 2S16 12 20 12Z" /></svg
+            >{{ t('builder.balance.legendMeta') }}</span
+          >
+          <span><span class="key key-band"></span>{{ t('builder.balance.legendBand') }}</span>
+          <span><span class="key key-median"></span>{{ t('builder.balance.legendMedian') }}</span>
+          <span v-if="lanes.some((l) => l.mean !== null)"
+            ><span class="key key-mean"></span>{{ t('builder.balance.legendMean') }}</span
+          >
+        </div>
       </div>
     </div>
   </div>
@@ -160,9 +163,11 @@ const placed = computed(() =>
 
 <style scoped>
 /* Label, plot. */
+.lanes-box {
+  container-type: inline-size;
+}
 .lanes {
   --row-h: 30px;
-  container-type: inline-size;
   display: grid;
   grid-template-columns: 7.5rem minmax(0, 1fr);
   align-items: end;
