@@ -34,13 +34,14 @@ import PokemonIcon from '@/components/PokemonIcon'
 import TeamBalance from '@/components/TeamBalance.vue'
 import TeamPicker from '@/components/TeamPicker.vue'
 import TeamSlot from '@/components/TeamSlot.vue'
+import TeamSpeed from '@/components/TeamSpeed.vue'
 
 // The team builder: a team's six slots, laid out as a tournament team's sets (`TeamSlot`), each part a button opening
 // its picker (`TeamPicker`: the meta's searches, with the shares of the data shown): on wide screens a drawer from the
 // side away from the slot, over a backdrop dimming the page but for the slot, which stays as it is to pick on; on
 // phones a dialog over it. Picking one moves on to the next part the slot hasn't got yet. The team goes out as a
 // paste (Showdown's format, `membersPaste`) and comes in from one (`parsePaste`, what it couldn't read said); under it,
-// its Defense and Offense, each how it stands against the meta on the physical and special sides and its type coverage
+// its Speed against the meta's, with the ways to the speed pages (`TeamSpeed`), then its Defense and Offense, each how it stands against the meta on the physical and special sides and its type coverage
 // (`TeamBalance`, the meta's numbers worked out once the page is in, `loadMetaBalance`). What it breaks of the rules (`teamIssues`: Species and
 // Item Clause, more than two Megas; a move twice, another Pokémon's Mega Stone or mask, an ability it can't have, a move not in its learnset) is listed under its name, each part that clashes marked on its slot,
 // and the pickers mark what the other slots have taken already; nothing's stopped, a paste bringing in what it may.
@@ -225,6 +226,7 @@ const sections = computed(() => [
   { id: 'sec-team', label: t('builder.section.team') },
   ...(hasAny.value
     ? [
+        { id: 'sec-speed', label: t('builder.section.speed') },
         { id: 'sec-defense', label: t('builder.section.defense') },
         { id: 'sec-offense', label: t('builder.section.offense') },
       ]
@@ -430,6 +432,7 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
         </ul>
       </section>
       <template v-if="hasAny">
+        <TeamSpeed id="sec-speed" :members="battling" :meta="balance" />
         <TeamBalance id="sec-defense" side="defense" :members="battling" :meta="balance" />
         <TeamBalance id="sec-offense" side="offense" :members="battling" :meta="balance" />
       </template>

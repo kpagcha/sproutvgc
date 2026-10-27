@@ -20,6 +20,7 @@ import { distribution, type Distribution } from '@/lib/statPercentiles'
 import type { Battler } from '@/lib/team'
 import { bestMove, fieldOf, type User } from '@/lib/movePower'
 import { abilityOf, FIXED } from '@/lib/teamCoverage'
+import { metaSpeedPoints } from '@/lib/teamSpeed'
 
 export type Side = 'physical' | 'special'
 
@@ -100,6 +101,8 @@ export interface MetaBalance {
   spa: MetaLane
   physBulk: MetaLane
   specBulk: MetaLane
+  /** Its Speeds, for the Speed panel (`teamSpeed.ts`): every build its sets run, with their Speed items. */
+  speed: MetaLane
 }
 
 function laneOf(points: [number, number][]): MetaLane {
@@ -209,6 +212,7 @@ function metaBalance(data: MetaData): MetaBalance {
     specBulk: laneOf(points.specBulk),
     atkMoves: laneOf(points.atkMoves),
     spaMoves: laneOf(points.spaMoves),
+    speed: laneOf(metaSpeedPoints(data)),
   }
 }
 

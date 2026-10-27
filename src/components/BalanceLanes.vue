@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="S extends Side | 'speed' = Side">
 import { computed, useTemplateRef } from 'vue'
 import { useElementSize } from '@vueuse/core'
 import { Info } from '@lucide/vue'
@@ -15,8 +15,10 @@ import PokemonIcon from '@/components/PokemonIcon'
 // diamond on the line at their average. Narrow, each lane's label over its plot. What each mark is in a tooltip
 // (`tip`, `meanTip`); the legend an icon's tooltip at the first plot's top right (tapped on phones). While the meta's
 // side is worked out (`state` 'pending') the plots are placeholders, and with no meta (`state` 'none') they say so.
-export interface LaneView {
-  side: Side
+// The Speed panel's lane is `speed`, with no badge, in the accent's color.
+export type Lane = Side | 'speed'
+export interface LaneView<S extends Lane = Side> {
+  side: S
   label: string
   /** A caption under its name, if any. */
   sub?: string
@@ -27,11 +29,11 @@ export interface LaneView {
   mean: number | null
 }
 const props = defineProps<{
-  lanes: LaneView[]
+  lanes: LaneView<S>[]
   /** The axis' ends: the weaker side's, then the stronger's. */
   ends: [string, string]
-  tip: (p: Plotted, side: Side) => string
-  meanTip: (lane: LaneView) => string
+  tip: (p: Plotted, side: S) => string
+  meanTip: (lane: LaneView<S>) => string
   state?: 'pending' | 'none'
 }>()
 
@@ -87,7 +89,7 @@ const placed = computed(() =>
     <div class="lanes" :style="{ '--rows': ROWS }">
       <template v-for="(l, i) in lanes" :key="l.side">
         <div class="lane-label" :data-side="l.side">
-          <CategoryIcon :category="l.side" :tip="false" />
+          <CategoryIcon v-if="l.side !== 'speed'" :category="l.side as Side" :tip="false" />
           <span class="lane-text">
             <span v-tip="l.tip" class="lane-name" :class="{ tipped: l.tip }" :tabindex="l.tip ? 0 : undefined">{{
               l.label
@@ -178,6 +180,9 @@ const placed = computed(() =>
 }
 [data-side='special'] {
   --c: var(--special);
+}
+[data-side='speed'] {
+  --c: var(--accent);
 }
 .lane-label {
   --icon-scale: 1.2;

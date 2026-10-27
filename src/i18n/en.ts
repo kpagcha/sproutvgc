@@ -1000,6 +1000,7 @@ export const messages = {
   'builder.section.team': 'Team',
   'builder.section.defense': 'Defense',
   'builder.section.offense': 'Offense',
+  'builder.section.speed': 'Speed',
   'builder.balance.physical': 'Physical',
   'builder.balance.special': 'Special',
   'builder.balance.types': 'Types',
@@ -1068,6 +1069,42 @@ export const messages = {
   'builder.balance.hits.even': 'hitting about as hard as the meta',
   'builder.balance.guards': 'Guards',
   'builder.balance.boosts': 'Boosts',
+  'builder.speed.chart': 'Speed against the meta',
+  'builder.speed.how':
+    "Each Pokémon's Speed is worked out at its stat points and nature, with the Choice Scarf or Iron Ball it holds.",
+  'builder.speed.howMeta':
+    "The meta's is every Speed its sets run, by how often each is used, with the Choice Scarfs and Iron Balls they hold.",
+  'builder.speed.modeLabel': 'Your side',
+  'builder.speed.modeTip':
+    "Your team as it is, in Tailwind (its Speed doubled), or under Trick Room, where the slower moves first. The meta's Speeds stay as they are.",
+  'builder.speed.mode.none': 'As is',
+  'builder.speed.mode.tailwind': 'Tailwind',
+  'builder.speed.mode.trickroom': 'Trick Room',
+  'builder.speed.lane': 'Speed',
+  'builder.speed.slower': 'Slower',
+  'builder.speed.faster': 'Faster',
+  'builder.speed.first': 'moves first against {pct} of the meta',
+  'builder.speed.verdict.none.good': 'Faster than most of the meta: on average, each moves first against {pct} of it.',
+  'builder.speed.verdict.none.bad': 'Slower than most of the meta: on average, each moves first against {pct} of it.',
+  'builder.speed.verdict.none.even': 'About as fast as the meta: on average, each moves first against {pct} of it.',
+  'builder.speed.verdict.tailwind.good':
+    'In Tailwind, faster than most of the meta: on average, each moves first against {pct} of it.',
+  'builder.speed.verdict.tailwind.bad':
+    'Even in Tailwind, slower than most of the meta: on average, each moves first against {pct} of it.',
+  'builder.speed.verdict.tailwind.even':
+    'In Tailwind, about as fast as the meta: on average, each moves first against {pct} of it.',
+  'builder.speed.verdict.trickroom.good':
+    'Made for Trick Room: under it, on average, each moves first against {pct} of the meta.',
+  'builder.speed.verdict.trickroom.bad':
+    'Too fast for Trick Room: under it, on average, each moves first against only {pct} of the meta.',
+  'builder.speed.verdict.trickroom.even': 'Under Trick Room, on average, each moves first against {pct} of the meta.',
+  'builder.speed.control': 'Speed control',
+  'builder.speed.control.ours': 'Speeds yours up',
+  'builder.speed.control.theirs': 'Slows theirs down',
+  'builder.speed.control.room': 'Turns the order around',
+  'builder.speed.noControl': 'Nothing on the team controls Speed yet.',
+  'builder.speed.tiersTip': 'Your team found on the speed tiers',
+  'builder.speed.compareTip': 'Your team at its builds, to compare against opponents',
   'builder.coverage.resists': 'Resists',
   'builder.coverage.weak': 'Weak',
   'builder.coverage.superEffective': 'Super effective',
