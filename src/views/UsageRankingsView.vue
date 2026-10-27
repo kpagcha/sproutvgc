@@ -31,7 +31,6 @@ import RankingsHead from '@/components/RankingsHead.vue'
 import MoreToggle from '@/components/MoreToggle.vue'
 import RankingTrends from '@/components/RankingTrends.vue'
 import RankingsTabs, { type RankingList } from '@/components/RankingsTabs.vue'
-import BattleCount from '@/components/BattleCount.vue'
 import FilterSearch from '@/components/FilterSearch.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 import SortHeader from '@/components/SortHeader.vue'
@@ -259,7 +258,6 @@ const colVars = computed(() => ({
       <RankingsHead :title="tx('title')" :intro="tx('intro', { reg: snapshot?.regulation ?? REGULATION })">
         <div v-if="hasList && snapshot" class="source">
           <MetaDialog />
-          <BattleCount v-if="snapshot.battles" :n="snapshot.battles" />
         </div>
       </RankingsHead>
       <template v-if="hasList && snapshot">

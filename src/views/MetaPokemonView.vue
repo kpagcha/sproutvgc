@@ -943,11 +943,6 @@ const sections = computed(() =>
       <h2>{{ t('pokemon.defense') }}</h2>
       <DefenseResults :types="mon.types" bare />
     </section>
-
-    <!-- How many battles the data shown covers, at the page's end. -->
-    <p v-if="snapshot?.battles" class="muted battles">
-      {{ t('usage.battles', { n: snapshot.battles.toLocaleString(locale) }) }}
-    </p>
   </template>
   <div v-else class="panel">
     <p>{{ t('usageMon.notFound', { id }) }}</p>
@@ -976,11 +971,6 @@ const sections = computed(() =>
 }
 :deep(.dex-table .head) {
   top: 37px;
-}
-.battles {
-  margin: 0;
-  font-size: 0.85em;
-  text-align: right;
 }
 /* The heading, as the dex's: the sprite, the facts, the stats at the right. */
 .head {

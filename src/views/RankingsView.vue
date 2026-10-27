@@ -30,7 +30,6 @@ import MetaDialog from '@/components/MetaDialog.vue'
 import SkeletonRows from '@/components/SkeletonRows.vue'
 import SortHeader from '@/components/SortHeader.vue'
 import TypeIcon from '@/components/TypeIcon'
-import BattleCount from '@/components/BattleCount.vue'
 import FilterSearch from '@/components/FilterSearch.vue'
 import RankingsHead from '@/components/RankingsHead.vue'
 import MoreToggle from '@/components/MoreToggle.vue'
@@ -347,7 +346,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
       >
         <div v-if="snapshot" class="source">
           <MetaDialog />
-          <BattleCount v-if="snapshot.battles" :n="snapshot.battles" />
           <template v-if="hasSets && !phone">
             <label class="btn switch sets-switch" :class="{ on: showSets }">
               <input type="checkbox" :checked="showSets" @change="toggleSets" />

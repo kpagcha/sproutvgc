@@ -1569,7 +1569,6 @@ export const messages = {
   'usage.intro':
     'How often each Pokémon is used in Regulation {reg}, and how often it plays when it is. Each one leads to its sets, spreads and speed tier.',
   'usage.source': 'Usage data',
-  'usage.battles': '{n} battles',
   'usage.from': 'Data from',
   'usage.rank': '#',
   'usage.rankFull': 'Rank by usage',

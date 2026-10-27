@@ -26,7 +26,6 @@ import AppLink from '@/components/AppLink'
 import CategoryIcon from '@/components/CategoryIcon'
 import DexText from '@/components/DexText'
 import MoveTag, { moveTagTip } from '@/components/MoveTag'
-import BattleCount from '@/components/BattleCount.vue'
 import FilterSearch from '@/components/FilterSearch.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -266,7 +265,6 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
       >
         <div v-if="hasMoves && snapshot" class="source">
           <MetaDialog />
-          <BattleCount v-if="snapshot.battles" :n="snapshot.battles" />
         </div>
       </RankingsHead>
       <template v-if="hasMoves && snapshot">
