@@ -136,6 +136,30 @@ function factors(key: Key, abilities?: Share<AbilityId>[], items?: Share<ItemId>
   )
 }
 
+/** The most common of a meta Pokémon's list (its abilities, its items). */
+const topOf = <T extends string>(list: Share<T>[] | undefined): T | null =>
+  [...(list ?? [])].sort((a, b) => (b.share ?? 0) - (a.share ?? 0))[0]?.id ?? null
+
+/** What the meta's side needs of each of its Pokémon: how much it attacks on each side (its moves' shares of its sets,
+ * by side: four a set, so up to 4 in all), and its best common move on each at its peak, with its most common ability,
+ * on the field it sets itself. */
+function metaMon(id: PokemonId, d: PokemonMeta) {
+  const attacks: Record<Side, number> = { physical: 0, special: 0 }
+  for (const mv of d.moves ?? []) {
+    const side = sideOf(mv.id)
+    if (side) attacks[side] += mv.share ?? 0
+  }
+  const ability = topOf(d.abilities)
+  const common = (d.moves ?? []).filter((mv) => (mv.share ?? 0) >= COMMON).map((mv) => mv.id)
+  const user: User = { types: POKEMON[id].types, ability }
+  const field = fieldOf([...(ability ? [ability] : []), ...common])
+  return {
+    attacks,
+    ability,
+    best: { physical: bestMove(common, 'physical', user, field), special: bestMove(common, 'special', user, field) },
+  }
+}
+
 function metaBalance(data: MetaData): MetaBalance {
   const points: Record<MetaKey, [number, number][]> = {
     atk: [],
@@ -150,12 +174,8 @@ function metaBalance(data: MetaData): MetaBalance {
   for (const [id, d] of Object.entries(data) as [PokemonId, PokemonMeta][]) {
     const usage = d.usage
     if (!usage || !POKEMON[id]) continue
-    // How much it attacks on each side: its moves' shares of its sets, by side (four a set, so up to 4 in all).
-    const attacks = { physical: 0, special: 0 }
-    for (const mv of d.moves ?? []) {
-      const side = sideOf(mv.id)
-      if (side) attacks[side] += mv.share ?? 0
-    }
+    const mon = metaMon(id, d)
+    const { attacks } = mon
     physical += usage * attacks.physical
     special += usage * attacks.special
     const weight: Record<Key, number> = {
@@ -168,15 +188,7 @@ function metaBalance(data: MetaData): MetaBalance {
     const spreads = d.spreads?.length ? d.spreads : [{ nature: '', points: [0, 0, 0, 0, 0, 0], share: 1 }]
     const total = spreads.reduce((a, s) => a + (s.share ?? 1), 0)
     const mods = KEYS.map((k) => factors(k, d.abilities, d.items))
-    // Its best common move on each side at its peak: with its most common ability, on the field it sets itself.
-    const ability = [...(d.abilities ?? [])].sort((a, b) => (b.share ?? 0) - (a.share ?? 0))[0]?.id ?? null
-    const common = (d.moves ?? []).filter((mv) => (mv.share ?? 0) >= COMMON).map((mv) => mv.id)
-    const user: User = { types: POKEMON[id].types, ability }
-    const field = fieldOf([...(ability ? [ability] : []), ...common])
-    const best = {
-      atk: bestMove(common, 'physical', user, field)?.power ?? 0,
-      spa: bestMove(common, 'special', user, field)?.power ?? 0,
-    }
+    const best = { atk: mon.best.physical?.power ?? 0, spa: mon.best.special?.power ?? 0 }
     for (const s of spreads) {
       const at = strengthAt(id, s.points, s.nature || null)
       const w = (s.share ?? 1) / total
@@ -470,4 +482,47 @@ export function offenseVerdict(o: Offense): OffenseVerdict | null {
     lean: share >= 2 / 3 ? 'physical' : share <= 1 / 3 ? 'special' : 'balanced',
     hits: rank === null ? null : rank >= 0.6 ? 'harder' : rank <= 0.4 ? 'softer' : 'even',
   }
+}
+
+// The meta at a glance (the rankings' overview): its most used Pokémon on the lanes, each at its most common spread,
+// with its most common ability and item; attacking, on each side it attacks on (a move's worth of its sets at least).
+
+/** How many of the meta's most used Pokémon the overview places. */
+export const OVERVIEW = 12
+
+export function metaOverview(
+  data: MetaData,
+  meta: MetaBalance,
+  mode: 'defense' | OffenseMode,
+): Record<Side, Plotted[]> {
+  const points: Record<Side, Plotted[]> = { physical: [], special: [] }
+  const top = (Object.entries(data) as [PokemonId, PokemonMeta][])
+    .filter(([id, d]) => d.usage && POKEMON[id])
+    .sort((a, b) => b[1].usage! - a[1].usage!)
+    .slice(0, OVERVIEW)
+  for (const [id, d] of top) {
+    const mon = metaMon(id, d)
+    const spread = d.spreads?.[0]
+    const at = strengthAt(id, spread?.points ?? [0, 0, 0, 0, 0, 0], spread?.nature || null)
+    const a = (mon.ability && ABILITY_MODS[mon.ability]) || {}
+    const item = topOf(d.items)
+    const i = (item && ITEM_MODS[item]) || {}
+    const value = (k: Key) => at[k] * (a[k] ?? 1) * (i[k] ?? 1)
+    if (mode === 'defense') {
+      for (const side of ['physical', 'special'] as const) {
+        const key = LANE_KEYS.defense[side]
+        points[side].push({ pokemon: id, value: value(key), rank: meta[key].dist.rank(value(key)) })
+      }
+      continue
+    }
+    const sides = (['physical', 'special'] as const).filter((side) => mon.attacks[side] >= 1)
+    for (const side of sides) {
+      const best = mode === 'moves' ? mon.best[side] : null
+      if (mode === 'moves' && !best) continue
+      const v = value(LANE_KEYS.stats[side]) * (best?.power ?? 1)
+      const rank = meta[LANE_KEYS[mode][side]].dist.rank(v)
+      points[side].push({ pokemon: id, value: v, rank, mixed: sides.length === 2, ...(best && { move: best.move }) })
+    }
+  }
+  return points
 }

@@ -150,7 +150,9 @@ const placed = computed(() =>
         >
         <span><span class="key key-band"></span>{{ t('builder.balance.legendBand') }}</span>
         <span><span class="key key-median"></span>{{ t('builder.balance.legendMedian') }}</span>
-        <span><span class="key key-mean"></span>{{ t('builder.balance.legendMean') }}</span>
+        <span v-if="lanes.some((l) => l.mean !== null)"
+          ><span class="key key-mean"></span>{{ t('builder.balance.legendMean') }}</span
+        >
       </div>
     </div>
   </div>

@@ -9,9 +9,9 @@ import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { confirmDialog } from '@/composables/useConfirm'
 import { useMeta } from '@/composables/useMeta'
+import { useMetaBalance } from '@/composables/useMetaBalance'
 import { useTeams } from '@/composables/useTeams'
 import { membersPaste, parsePaste, type PasteProblem } from '@/lib/pokepaste'
-import { loadMetaBalance, type MetaBalance } from '@/lib/teamBalance'
 import {
   emptyMember,
   pickedAs,
@@ -271,17 +271,8 @@ const clashes = computed(() =>
   }),
 )
 const othersOf = (slot: number) => members.value.filter((_, i) => i !== slot)
-// The meta's side of the team's Defense and Offense, worked out once per dataset when the browser is idle, so the page
-// isn't held up: undefined until then, null with no meta.
-const balance = shallowRef<MetaBalance | null | undefined>(undefined)
-watch(
-  [snapshot, data],
-  ([s, d]) => {
-    balance.value = s ? undefined : null
-    if (d) loadMetaBalance(d).then((b) => data.value === d && (balance.value = b))
-  },
-  { immediate: true },
-)
+// The meta's side of the team's Defense and Offense, worked out once per dataset when the browser is idle.
+const balance = useMetaBalance(snapshot, data)
 // The saved teams on one row while they fit; past it, a drop-down showing the open one, every team in it. The row is
 // kept laid out (hidden) while folded, measured to know when it fits again; a team's chip drawn once for both.
 const [DefineTeam, ReuseTeam] = createReusableTemplate<{ team: Team }>()

@@ -34,6 +34,7 @@ import BattleCount from '@/components/BattleCount.vue'
 import FilterSearch from '@/components/FilterSearch.vue'
 import RankingsHead from '@/components/RankingsHead.vue'
 import MoreToggle from '@/components/MoreToggle.vue'
+import MetaOverview from '@/components/MetaOverview.vue'
 import RankingTrends from '@/components/RankingTrends.vue'
 import RankingsTabs from '@/components/RankingsTabs.vue'
 
@@ -128,6 +129,7 @@ const sections = computed(() => [
   { id: 'sec-list', label: t('trends.list') },
   ...(trendsShown.value ? [{ id: 'sec-trends', label: t('trends.title') }] : []),
   ...(tournamentTrends.value ? [{ id: 'sec-tournament-trends', label: t('trends.tournamentTitle') }] : []),
+  ...(snapshot.value ? [{ id: 'sec-overview', label: t('overview.section') }] : []),
 ])
 const since = computed(() => (previous.value ? sinceLabel(previous.value, snapshot.value) : ''))
 /** The rank's mark's tooltip: the places gained or lost since the dataset before, or new to it. */
@@ -632,6 +634,8 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         ><span v-if="row.forme" class="forme">{{ row.forme }}</span></template
       >
     </RankingTrends>
+    <!-- The meta's physical and special side at a glance: its bulk and attack, its most used Pokémon on them. -->
+    <MetaOverview v-if="snapshot" id="sec-overview" class="section" :snapshot :data />
   </div>
 </template>
 
