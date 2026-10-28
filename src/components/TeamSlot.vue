@@ -24,7 +24,8 @@ import { natureTip } from '@/components/natureTip'
 // the stat points line's end says whether it's the one that Mega Evolves in the team's insights (`evolved`, `mega`);
 // while it is, the card shows the Mega (its name, sprite, types and stats, and its ability after the one its sheet
 // registers). A part that breaks the team's rules (`clashes`: its Pokémon, item, ability or a move, with why) is
-// marked, its tooltip saying why.
+// marked, its tooltip saying why. The first step (`hint`: the team has no Pokémon yet), its Pokémon's placeholders
+// glowing in the accent and back, in a loop, until its picker opens.
 const props = defineProps<{
   member: Member
   active: Field | null
@@ -32,6 +33,8 @@ const props = defineProps<{
   clashes?: { pokemon?: string; item?: string; ability?: string; moves: Partial<Record<MoveId, string>> }
   /** It's the one that Mega Evolves in the team's insights. */
   evolved?: boolean
+  /** The first step: its Pokémon's placeholders glow in a loop. */
+  hint?: boolean
 }>()
 const emit = defineEmits<{ field: [field: Field]; clear: []; change: [patch: Partial<Member>]; mega: [] }>()
 const open = defineModel<boolean>('open', { default: false })
@@ -52,7 +55,7 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
 </script>
 
 <template>
-  <li class="set" :class="{ empty: !shown }">
+  <li class="set" :class="{ empty: !shown, hint: hint && !active }">
     <div class="set-head">
       <button
         type="button"
@@ -278,6 +281,30 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
 }
 .sprite-btn {
   flex: none;
+}
+/* The first step: the Pokémon's placeholders glowing in the accent and back, slowly; held lit with reduced motion. */
+.hint .blank,
+.hint .set-name.placeholder {
+  animation: hint 2.4s ease-in-out infinite;
+}
+@keyframes hint {
+  0%,
+  100% {
+    color: var(--muted);
+    border-color: var(--border);
+  }
+  50% {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hint .blank,
+  .hint .set-name.placeholder {
+    animation: none;
+    color: var(--accent);
+    border-color: var(--accent);
+  }
 }
 .set-sprite {
   flex: none;

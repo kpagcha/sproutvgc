@@ -1,13 +1,17 @@
 name: Deploy to GitHub Pages
 
-# On every push to main, and every half hour from Friday to Monday (UTC), when the official tournaments are played: each
-# build reads the tournaments under way from Limitless VGC first (`npm run live-tournaments`, never committed), so the
-# site shows them live. A scheduled run deploys only when what it read changed since the last deploy.
+# On every push to main, every half hour from Friday to Monday (UTC), when the official tournaments are played, and every
+# three hours from Tuesday to Thursday, for the team lists Limitless VGC publishes in the days after: each build reads
+# the tournaments under way (or just over, not generated yet) from it first (`npm run live-tournaments`, never
+# committed), so the site shows them live. A scheduled run deploys only when what it read changed since the last deploy,
+# and fails rather than deploy when it couldn't read them (which would take the live events off the site); a push
+# deploys anyway, the run warning that it couldn't.
 on:
   push:
     branches: [main]
   schedule:
     - cron: '*/30 * * * 5,6,0,1'
+    - cron: '0 */3 * * 2,3,4'
   workflow_dispatch:
 
 permissions:
@@ -39,10 +43,15 @@ jobs:
           path: node_modules/.cache/limitlessvgc
           key: limitless-live-${{ github.run_id }}
           restore-keys: limitless-live-
-      - run: npm run live-tournaments
+      - id: live
+        run: npm run live-tournaments
       - name: Whether to deploy
         id: changed
         run: |
+          if [ "${{ steps.live.outputs.failed }}" = true ] && [ "${{ github.event_name }}" = schedule ]; then
+            echo '::error title=Live tournaments::Limitless VGC could not be read: not deploying, so the site keeps the live events it has.'
+            exit 1
+          fi
           hash=$(cat src/data/generated/live/* 2>/dev/null | sha256sum | cut -d' ' -f1)
           last=$(cat node_modules/.cache/limitlessvgc/live-deployed 2>/dev/null || true)
           if [ "${{ github.event_name }}" != schedule ] || [ "$hash" != "$last" ]; then

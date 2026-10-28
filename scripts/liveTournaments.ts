@@ -1,13 +1,14 @@
 // The official tournaments under way, read from Limitless VGC as they stand (`LimitlessVgc.liveEvent`: standings,
 // rounds so far, the team lists published so far) into `src/data/generated/live/`, which isn't committed: the deploy
-// runs it before building, on a schedule over the weekends, so the site shows them live (`.github/workflows/deploy.yml`).
+// runs it before building, on a schedule over the weekends (and less often over the week, for the team lists published
+// after), so the site shows them live (`.github/workflows/deploy.yml`).
 // An event over but not generated yet stays here, its team lists still coming in, until the weekly refresh generates it
 // for good (`gen-data --update-tournaments`). Nothing here counts towards what adds events up (trends, builds): the app
 // keeps them apart (`LIVE_EVENTS` in `src/data/tournaments.ts`).
 //
 // Quick, and needing no Showdown: what the dex has comes from the generated data. Run with `npm run live-tournaments`.
-// A failure leaves no event live rather than failing the build. Says how many it wrote as `events=` in
-// `$GITHUB_OUTPUT`, when run by a workflow.
+// A failure leaves no event live rather than failing the build, said as a warning on the workflow's run and as
+// `failed=true` in `$GITHUB_OUTPUT`, beside how many it wrote as `events=`, when run by a workflow.
 
 import { appendFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
@@ -144,11 +145,14 @@ async function main() {
 }
 
 let n = 0
+let failed = false
 try {
   n = await main()
 } catch (error) {
-  // The site builds without them rather than not at all.
-  console.warn(`No live tournaments: ${error instanceof Error ? error.message : String(error)}`)
+  // The site builds without them rather than not at all, but not silently: the workflow's run says so.
+  const message = `No live tournaments: ${error instanceof Error ? error.message : String(error)}`
+  console.warn(process.env.GITHUB_ACTIONS ? `::warning title=Live tournaments::${message}` : message)
   rmSync(OUT, { recursive: true, force: true })
+  failed = true
 }
-if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `events=${n}\n`)
+if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `events=${n}\nfailed=${failed}\n`)
