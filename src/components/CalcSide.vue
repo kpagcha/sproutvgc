@@ -32,7 +32,7 @@ import TeamSlot from '@/components/TeamSlot.vue'
 // One side of the damage calculator, a panel in five parts, each on a row the other side's shares on wide screens (so
 // both sides' parts line up whatever each holds): its heading (whose it is, by its color, opening its Pokémon's picker;
 // what loads a set), its set as a team builder's slot (`TeamSlot`, every part a button opening its picker, its
-// Pokémon's glowing while it has none), its moves' damage against the other side (`DamageRow`, a row each, a status move's dimmed), and what the
+// Pokémon's glowing while yours has none), its moves' damage against the other side (`DamageRow`, a row each, a status move's dimmed), and what the
 // battle adds to it: its HP left, its status, its stat stages, whether its ability's condition is met (for one that
 // waits on it), Supreme Overlord's fainted allies; and last, what's on its side, a box of its own folding (`sideOpen`,
 // both sides' together): folded, what's on; open, its conditions to set (`CalcConditions`).
@@ -146,7 +146,7 @@ function setHpPoints(e: Event) {
           :active
           :spreads
           :evolved="fighter.mega"
-          :hint="!fighter.member.pokemon"
+          :hint="!theirs && !fighter.member.pokemon"
           @mega="set({ mega: !fighter.mega })"
           @field="emit('field', $event)"
           @change="change"
