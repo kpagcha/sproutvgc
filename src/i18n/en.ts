@@ -219,7 +219,6 @@ export const messages = {
   'calc.sideGroup.hazards': 'Hazards it came in on',
   'calc.sideGroup.on': 'On it',
   'calc.fieldOn': 'On the field',
-  'calc.fieldClear': 'Nothing on the field',
   'calc.moreConditions': 'More ({n})',
   'calc.pickShort': 'Pick one',
   'calc.verdict': 'Who moves first',

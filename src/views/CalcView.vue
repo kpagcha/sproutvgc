@@ -365,7 +365,6 @@ function face(f: Fighter) {
             <component :is="c!.icon" v-if="c!.icon" :size="14" aria-hidden="true" />{{ conditionName(c!) }}
           </li>
         </ul>
-        <span v-else-if="!fieldOpen" class="muted field-none">{{ t('calc.fieldClear') }}</span>
       </div>
       <div v-if="fieldOpen" id="calc-field" class="field-conditions">
         <CalcConditions :field :data @field="field = $event" />
@@ -589,9 +588,6 @@ function face(f: Fighter) {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-}
-.field-none {
-  font-size: 0.9em;
 }
 .fold-chev {
   transition: transform 0.15s;
