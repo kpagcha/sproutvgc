@@ -423,8 +423,8 @@ const moveName = (id: MoveId) => refName(move(id))
   .controls {
     margin-left: 0;
   }
-  /* Narrow, each Pokémon's usage under its name and each cell's range under its verdict, the Pokémon kept in view
-  as the moves scroll sideways. */
+  /* Narrow, each Pokémon its icon with its usage under it and each cell's range under its verdict, the Pokémon kept
+  in view as the moves scroll sideways. */
   .grid .who-col {
     width: auto;
     position: sticky;
@@ -432,20 +432,18 @@ const moveName = (id: MoveId) => refName(move(id))
     z-index: 1;
     background: var(--panel);
   }
+  /* Its icon alone with its usage under it, its name read out but not shown. */
   .who {
-    display: grid;
-    grid-template-columns: auto auto;
-    column-gap: 6px;
-    justify-content: start;
-    align-items: center;
+    flex-direction: column;
+    gap: 2px;
   }
   .who-name {
-    max-width: 8em;
+    position: absolute;
+    width: 1px;
+    height: 1px;
     overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .who > :first-child {
-    grid-row: span 2;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
   .usage {
     margin: 0;
