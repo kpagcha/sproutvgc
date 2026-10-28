@@ -1076,6 +1076,8 @@ export const messages = {
   'builder.move': 'Move',
   'builder.pickPokemon': 'Pick a Pokémon',
   'builder.clearSlot': 'Clear this slot',
+  'builder.clear': 'Remove',
+  'builder.clearConfirm': 'Remove {name} from the team?',
   'builder.picker': 'Pick',
   'builder.loadCommon': 'Load its most common set',
   'builder.orPickYourself': 'or pick each part yourself',

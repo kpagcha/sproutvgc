@@ -160,7 +160,16 @@ watch(picking, async () => {
   box?.scrollTo({ top: 0 })
 })
 
-const clearSlot = (i: number) => {
+/** Empties a slot, once confirmed. */
+async function clearSlot(i: number) {
+  const id = members.value[i]?.pokemon
+  if (!id) return
+  const ok = await confirmDialog({
+    message: t('builder.clearConfirm', { name: refName(pokemon(id)) }),
+    confirm: t('builder.clear'),
+    danger: true,
+  })
+  if (!ok) return
   update(i, emptyMember())
   if (picking.value?.slot === i) picking.value = null
 }
