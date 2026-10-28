@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { shallowRef } from 'vue'
 import { Minus, Plus } from '@lucide/vue'
 import { t } from '@/i18n'
 
@@ -6,7 +7,9 @@ import { t } from '@/i18n'
 // either side of it, each greyed out at its end of the range. Marked as the modifiers on are while it's not 0. Speed's
 // unless given another stat (`label`, its name, and `stat`, its name in full for the steps' labels).
 // A count rather than a stage (`unsigned`: Spikes' layers) has no sign.
-// Compact (`compact`), its label over its stage and steps, narrow enough for a row of five.
+// Compact (`compact`), its label over its stage and steps, narrow enough for a row of five. A step's stage pops in,
+// a little larger and back (`steps`, so a stage only ever set elsewhere, or the page's first look, stays still), its
+// marking fading in and out with it.
 const props = defineProps<{
   min: number
   max: number
@@ -16,6 +19,11 @@ const props = defineProps<{
   compact?: boolean
 }>()
 const model = defineModel<number>({ required: true })
+const steps = shallowRef(0)
+function step(by: number) {
+  model.value += by
+  steps.value++
+}
 const text = (n: number) => (props.unsigned ? String(n) : n > 0 ? `+${n}` : n < 0 ? `−${-n}` : '0')
 </script>
 
@@ -32,17 +40,17 @@ const text = (n: number) => (props.unsigned ? String(n) : n > 0 ? `+${n}` : n < 
       class="step down"
       :disabled="model <= props.min"
       :aria-label="stat ? t('calc.stageDown', { stat }) : t('speed.stageDown')"
-      @click="model = model - 1"
+      @click="step(-1)"
     >
       <Minus :size="14" aria-hidden="true" />
     </button>
-    <output class="value" aria-live="polite">{{ text(model) }}</output>
+    <output :key="steps" class="value" :class="{ pop: steps }" aria-live="polite">{{ text(model) }}</output>
     <button
       type="button"
       class="step up"
       :disabled="model >= props.max"
       :aria-label="stat ? t('calc.stageUp', { stat }) : t('speed.stageUp')"
-      @click="model = model + 1"
+      @click="step(1)"
     >
       <Plus :size="14" aria-hidden="true" />
     </button>
@@ -52,6 +60,9 @@ const text = (n: number) => (props.unsigned ? String(n) : n > 0 ? `+${n}` : n < 
 <style scoped>
 /* Outlined as the modifiers' chips are, as tall as they are on their row, the label then the stage between its steps. */
 .stepper {
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
   display: inline-flex;
   align-self: stretch;
   align-items: stretch;
@@ -85,6 +96,27 @@ const text = (n: number) => (props.unsigned ? String(n) : n > 0 ? `+${n}` : n < 
   opacity: 0.35;
   cursor: default;
 }
+/* A step's stage popping in. */
+.value.pop {
+  animation: pop 0.16s ease-out;
+}
+@keyframes pop {
+  from {
+    transform: scale(1.12);
+  }
+  to {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stepper,
+  .compact .label {
+    transition: none;
+  }
+  .value.pop {
+    animation: none;
+  }
+}
 .value {
   display: flex;
   align-items: center;
@@ -109,6 +141,7 @@ const text = (n: number) => (props.unsigned ? String(n) : n > 0 ? `+${n}` : n < 
   border-color: var(--ink);
 }
 .compact .label {
+  transition: color 0.15s ease;
   grid-area: label;
   justify-content: center;
   padding: 2px 0 0;
