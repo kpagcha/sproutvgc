@@ -540,8 +540,8 @@ details > summary {
   right: -4px;
 }
 .aura-icon .spark.bottom {
-  bottom: -2px;
-  left: -4px;
+  bottom: -1px;
+  left: -2px;
 }
 
 /* A nature's effect on Speed in short (`EffectTag`): its arrow tight against "Spe". It sits on the text's baseline,
