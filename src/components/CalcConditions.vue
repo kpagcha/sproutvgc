@@ -167,9 +167,7 @@ const [DefineMore, More] = createReusableTemplate()
   <!-- The whole field's. -->
   <div v-else class="conditions">
     <section v-for="kind in ['weather', 'terrain'] as const" :key="kind" class="group">
-      <h3>
-        {{ t(`calc.${kind}`) }}<span class="rule muted">{{ t('calc.pickOne') }}</span>
-      </h3>
+      <h3>{{ t(`calc.${kind}`) }}</h3>
       <div class="choices" role="radiogroup" :aria-label="t(`calc.${kind}`)">
         <button
           v-for="c in kind === 'weather' ? weathers : terrains"
@@ -218,15 +216,8 @@ const [DefineMore, More] = createReusableTemplate()
   gap: 16px;
 }
 .group h3 {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
   margin: 0 0 8px;
   font-size: 0.95em;
-}
-.rule {
-  font-size: 0.8em;
-  font-weight: normal;
 }
 /* The less common ones, under More: set apart by a rule. */
 .rare {
