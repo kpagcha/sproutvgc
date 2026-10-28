@@ -56,6 +56,9 @@ const props = defineProps<{
   pick?: (id: MoveId) => void
   /** Moves already picked, marked. */
   picked?: readonly MoveId[]
+  /** The move being replaced (the slot the picker opened from has it): marked apart, and scrolled to once its row is
+   * drawn. */
+  current?: MoveId | null
 }>()
 
 // Its links are `AppLink`s and its icons and descriptions functional components: RouterLinks and full components in
@@ -169,6 +172,21 @@ const below = computed(() => phone.value || props.stacked)
 // The rows render once the page is in, with a skeleton until then: all of them can take over 100ms.
 const { entered, restoring } = usePageEntered()
 const drawn = useGradualRows(sorted)
+// The move being replaced brought into view, once, as soon as its row is drawn (the rows come in a chunk a frame), in
+// whatever scrolls the table (the picker's drawer or dialog), after it's put back at its top for the part picked.
+const tableEl = useTemplateRef<HTMLElement>('tableEl')
+let scrolledTo: MoveId | null = null
+watch(
+  [() => props.current, drawn],
+  ([id]) => {
+    if (!id || scrolledTo === id || !drawn.value.some((r) => r.id === id)) return
+    scrolledTo = id
+    requestAnimationFrame(() =>
+      tableEl.value?.querySelector(`[data-move="${id}"]`)?.scrollIntoView({ block: 'center' }),
+    )
+  },
+  { flush: 'post', immediate: true },
+)
 useRowColumns(useTemplateRef('head'))
 const skeleton = computed(() => [
   'grow',
@@ -194,6 +212,7 @@ const skeleton = computed(() => [
   <div :class="{ panel: panels, 'table-box': stacked }">
     <div
       v-show="sorted.length"
+      ref="tableEl"
       class="dex-table"
       :class="{ restoring, tight: stacked, previewing: preview }"
       :style="cols"
@@ -224,9 +243,23 @@ const skeleton = computed(() => [
         <div
           v-for="r in drawn"
           :key="r.id"
-          v-memo="[r.id, r.name, marksKey(r.parts), shares, under, below, stacked, descriptions, noPp, locale, picked]"
+          v-memo="[
+            r.id,
+            r.name,
+            marksKey(r.parts),
+            shares,
+            under,
+            below,
+            stacked,
+            descriptions,
+            noPp,
+            locale,
+            picked,
+            current,
+          ]"
           class="row"
-          :class="{ picked: picked?.includes(r.id) }"
+          :class="{ picked: picked?.includes(r.id), current: current === r.id }"
+          :data-move="r.id"
           role="row"
         >
           <div role="cell" class="grow">
@@ -334,6 +367,13 @@ const skeleton = computed(() => [
 }
 .row.picked .pick {
   color: var(--muted);
+}
+/* The move being replaced: tinted with the accent. */
+.row.current {
+  background: color-mix(in srgb, var(--accent) 12%, var(--panel-alt));
+}
+.row.current .pick {
+  color: var(--text);
 }
 /* How few learn it: its tag after the name. */
 .tag {

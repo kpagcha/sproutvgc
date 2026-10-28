@@ -296,6 +296,7 @@ const natureRows = computed(() => {
       :kinds="MOVE_KINDS"
       :pick="(id) => emit('pick', id)"
       :picked="pickedMoves"
+      :current="member.moves[field]"
       under="—"
       descriptions
       stacked
