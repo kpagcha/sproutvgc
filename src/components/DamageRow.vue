@@ -15,7 +15,7 @@ import TypeIcon from '@/components/TypeIcon'
 // side's color (what it deals for sure, solid; what it may deal past that, striped; what it had lost already, dark,
 // first). Its verdict colored for whose it is (`theirs`: the opponent's moves
 // hitting yours, a knockout bad news). Unfolded, its HP numbers, every roll, and the calc's line to share, copied in a
-// tap; a critical hit, for a move whose hits vary how many, and for a spread move whether it hits one target alone
+// tap (off for now, `DESC_ON`); a critical hit, for a move whose hits vary how many, and for a spread move whether it hits one target alone
 // (no spread reduction), set from its row and marked on its name. What the order does to it (a priority move's
 // priority, Payback's power) a tag at the end of the verdict's line, so every row is as tall and the two sides' rows line up; a status
 // move a row laid out as the rest, dimmed, its bar empty and nothing to unfold.
@@ -46,6 +46,8 @@ const bar = computed(() => {
   return { lost, sure, maybe }
 })
 
+// The calc's line, to share, is off for now (`DESC_ON`); the code is kept to bring it back.
+const DESC_ON = false
 const copied = ref(false)
 async function share() {
   if (!props.hit?.desc) return
@@ -161,7 +163,7 @@ const blockedText = tSplit('calc.blockedBy', 'what')
           <span class="roll-list">{{ hit.rolls.join(', ') }}</span>
         </p>
         <p v-if="hit.extra" class="extra muted">{{ hit.extra }}</p>
-        <div class="desc-row">
+        <div v-if="DESC_ON" class="desc-row">
           <code class="desc">{{ hit.desc }}</code>
           <button
             v-tip.brief="copied ? t('calc.copied') : t('calc.copy')"
