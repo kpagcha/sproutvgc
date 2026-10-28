@@ -155,9 +155,12 @@ const blockedText = tSplit('calc.blockedBy', 'what')
             {{ n }}
           </button>
         </span>
+        <!-- Its HP numbers at the row's end, on a row of their own where they don't fit. -->
+        <span v-if="hit && !hit.none" class="hp muted">{{
+          t('calc.hpRange', { min: hit.min, max: hit.max, of: hit.maxHp })
+        }}</span>
       </div>
       <template v-if="hit && !hit.none">
-        <p class="hp muted">{{ t('calc.hpRange', { min: hit.min, max: hit.max, of: hit.maxHp }) }}</p>
         <p class="rolls">
           <span class="muted">{{ t('calc.rolls') }}</span>
           <span class="roll-list">{{ hit.rolls.join(', ') }}</span>
@@ -311,6 +314,7 @@ const blockedText = tSplit('calc.blockedBy', 'what')
   border: 1px solid var(--border);
 }
 .hp {
+  margin-left: auto;
   font-variant-numeric: tabular-nums;
 }
 /* The verdict colored for whose it is: yours knocking out good news, theirs bad. */
