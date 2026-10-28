@@ -525,6 +525,27 @@ details > summary {
   background: currentColor;
   mask: var(--glyph) center / contain no-repeat;
 }
+/* How many of what a folding toggle holds are on (the calc's conditions): a small count in the accent; none, its room
+   kept, so the toggle's size doesn't change. */
+.on-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5em;
+  height: 1.5em;
+  margin-left: 6px;
+  padding: 0 4px;
+  font-size: 0.75em;
+  font-weight: bold;
+  line-height: 1;
+  color: var(--accent-text);
+  background: var(--accent);
+  border: 1px solid var(--ink);
+}
+.on-count.none {
+  visibility: hidden;
+}
+
 /* Fairy Aura's icon: the Fairy glyph, two small faint sparks by it, at its top right and bottom left. */
 .aura-icon {
   position: relative;

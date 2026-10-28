@@ -352,6 +352,7 @@ function face(f: Fighter) {
           >
             <SlidersHorizontal :size="16" aria-hidden="true" /><span class="long">{{ t('calc.conditions') }}</span
             ><span class="short">{{ t('calc.conditionsShort') }}</span
+            ><span class="on-count" :class="{ none: !fieldOn.length }">{{ fieldOn.length }}</span
             ><ChevronDown :size="14" class="fold-chev" :class="{ open: fieldOpen }" aria-hidden="true" />
           </button>
           <button

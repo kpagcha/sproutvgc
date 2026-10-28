@@ -287,7 +287,10 @@ function setHpPoints(e: Event) {
       <template v-if="shown && stats">
         <div class="side-box" :class="{ empty: !onSide.length }">
           <button type="button" class="side-box-head" :aria-expanded="sideOpen" @click="emit('sideOpen', !sideOpen)">
-            <span class="side-box-title">{{ t('calc.sideLabel') }}</span>
+            <span class="side-box-title">
+              {{ t('calc.sideLabel')
+              }}<span class="on-count" :class="{ none: !onSide.length }">{{ onSide.length }}</span>
+            </span>
             <ChevronDown :size="16" class="fold-chev" :class="{ open: sideOpen }" aria-hidden="true" />
           </button>
           <CalcConditions
