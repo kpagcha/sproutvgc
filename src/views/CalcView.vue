@@ -12,6 +12,7 @@ import {
   RotateCcw,
   SlidersHorizontal,
   Sparkles,
+  Undo2,
   Users,
 } from '@lucide/vue'
 import { pokemon, type AbilityId, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
@@ -136,11 +137,13 @@ const patchMember = (k: SideKey, patch: Partial<Member>) =>
 function swap() {
   sides.value = { a: sides.value.b, b: sides.value.a }
   picking.value = null
+  previous.value = []
 }
 function resetAll() {
   sides.value = { a: emptyFighter(), b: emptyFighter() }
   field.value = emptyField()
   picking.value = null
+  previous.value = []
 }
 
 // The part being picked: its side and field, as in the team builder (a drawer on wide screens, a dialog on phones);
@@ -330,7 +333,22 @@ const hasAny = computed(() => !!(battlerOf(sides.value.a) || battlerOf(sides.val
 const hasBoth = computed(() => !!(battlerOf(sides.value.a) && battlerOf(sides.value.b)))
 
 /** A meta row tapped: the opponent, the page scrolled back to it. */
+// The opponents a row of the meta's list took the place of, the latest last (up to `PREVIOUS_MAX`): the way back to
+// each in turn, a button before the opponent's Load. Swapping or resetting the sides forgets them.
+const previous = shallowRef<Fighter[]>([])
+const PREVIOUS_MAX = 20
+const previousId = computed(() => {
+  const f = previous.value.at(-1)
+  return f ? battlerOf(f) : null
+})
+function back() {
+  const f = previous.value.at(-1)
+  if (!f) return
+  previous.value = previous.value.slice(0, -1)
+  setSide('b', { ...f, side: sides.value.b.side })
+}
 function face(f: Fighter) {
+  if (battlerOf(sides.value.b)) previous.value = [...previous.value, sides.value.b].slice(-PREVIOUS_MAX)
   setSide('b', { ...f, side: sides.value.b.side })
   openSide.value = 'b'
   void nextTick(() => document.getElementById('calc-b')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
@@ -424,6 +442,16 @@ function face(f: Fighter) {
           @side-open="sideOpen = $event"
         >
           <template #actions>
+            <button
+              v-if="k === 'b' && previousId"
+              v-tip="t('calc.back', { name: refName(pokemon(previousId)) })"
+              type="button"
+              class="btn quiet small back-to"
+              :aria-label="t('calc.back', { name: refName(pokemon(previousId)) })"
+              @click="back"
+            >
+              <Undo2 :size="14" aria-hidden="true" /><PokemonIcon :id="previousId" :scale="0.75" />
+            </button>
             <OptionsMenu :title="t('calc.load')" :label="t('calc.load')" :icon="Users">
               <template #default="{ close }">
                 <div class="load">
@@ -726,6 +754,10 @@ function face(f: Fighter) {
 .duel.stacked > .band + .band,
 .duel.stacked > section + .band {
   margin-top: -2px;
+}
+/* The way back to the opponent before, its icon after the arrow. */
+.back-to {
+  gap: 2px;
 }
 .load {
   display: flex;

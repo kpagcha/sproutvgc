@@ -200,6 +200,7 @@ export const messages = {
   'calc.reset': 'Reset',
   'calc.swap': 'Swap the two sides',
   'calc.swapShort': 'Swap',
+  'calc.back': 'Back to {name}',
   'calc.load': 'Load',
   'calc.copySet': 'Copy',
   'calc.copySetTip': 'Copy its set as a paste, for Showdown or pokepast.es',
