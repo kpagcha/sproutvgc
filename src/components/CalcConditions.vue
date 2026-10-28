@@ -103,7 +103,7 @@ const [DefineMore, More] = createReusableTemplate()
   <!-- A condition that can be on with others: a chip with a checkbox's square. -->
   <DefineChip v-slot="{ c, on, toggle }">
     <button type="button" class="chip no-lift" :class="{ on }" :aria-pressed="on" @click="toggle">
-      <Square :size="14" :fill="on ? 'currentColor' : 'none'" class="mark" aria-hidden="true" />
+      <span class="mark" aria-hidden="true"><Square :size="14" /></span>
       <component :is="c.icon" v-if="c.icon" :size="16" aria-hidden="true" />{{ conditionName(c) }}
     </button>
   </DefineChip>
@@ -181,7 +181,7 @@ const [DefineMore, More] = createReusableTemplate()
           :aria-checked="field[kind] === c.key"
           @click="setField({ [kind]: c.key })"
         >
-          <Circle :size="14" :fill="field[kind] === c.key ? 'currentColor' : 'none'" class="mark" aria-hidden="true" />
+          <span class="mark round" aria-hidden="true"><Circle :size="14" /></span>
           <component :is="c.icon" v-if="c.icon" :size="16" aria-hidden="true" />{{ conditionName(c) }}
         </button>
       </div>
@@ -243,11 +243,23 @@ const [DefineMore, More] = createReusableTemplate()
   font-size: 0.8em;
 }
 .mark {
+  position: relative;
+  display: inline-flex;
   flex: none;
   color: var(--muted);
 }
 .on .mark {
   color: var(--text);
+}
+/* On, filled inside its outline, a gap between them, as a checkbox's or a radio's. */
+.on .mark::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  background: currentColor;
+}
+.on .mark.round::after {
+  border-radius: 50%;
 }
 /* One at a time: joined cells in one outline, wrapping as one block (each cell's outline overlapping its neighbors'). */
 .choices {
