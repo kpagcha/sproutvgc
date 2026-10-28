@@ -428,6 +428,7 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
             :spreads="spreadsOf(m)"
             :clashes="clashes[i]"
             :evolved="evolving === i"
+            :hint="i === 0 && !hasAny"
             @mega="toggleMega(i)"
             :open="!!editing[i]"
             @update:open="setEditing(i, $event)"
