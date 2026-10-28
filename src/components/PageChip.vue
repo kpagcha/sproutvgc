@@ -1,6 +1,7 @@
 <script lang="ts">
 import type { PageVisit } from '@/composables/useRecent'
 import { router } from '@/router'
+import { ITEMS } from '@/data/items'
 import { POKEMON } from '@/data/pokemon'
 import { available, type ItemId, type PokemonId, type Ref } from '@/data/dex'
 import { isType, type TypeId } from '@/data/types'
@@ -10,6 +11,15 @@ import { eventOf } from '@/data/tournaments'
 
 /** The Pokémon a query names, if the regulation has it. */
 const mon = (id: string | undefined) => (id && id in POKEMON ? (id as PokemonId) : null)
+/** A damage calc's side, as its URL has it (`calcState.ts`): its Pokémon, its Mega while it holds its stone and Mega
+ * Evolves (unless its flags say it doesn't). */
+function calcSide(v: string | undefined): PokemonId | null {
+  const [id, item, , , , , flags] = (v ?? '').split('~')
+  const p = mon(id)
+  if (!p) return null
+  const mega = item ? ITEMS[item as ItemId]?.megas?.[p] : undefined
+  return mega && !(flags ?? '').split('.').includes('n') ? mega : p
+}
 /** The entry whose meta page a route is, if it's an ability's, item's or move's. */
 const META_ENTRIES: Partial<Record<string, 'ability' | 'item' | 'move'>> = {
   metaAbility: 'ability',
@@ -31,12 +41,15 @@ function view(visit: PageVisit) {
   const name = String(to.name ?? '')
   const compare = name === 'speedCompare'
   const team = (keys: string[]) => keys.flatMap((k) => mon(q[k]) ?? [])
-  // A comparison's icons: each team's, or the speed order's list.
-  const groups = !compare
-    ? null
-    : q.mode === 'order'
-      ? [readList(q.list).map((e) => e.id)]
-      : ['a', 'b'].map((s) => team([s, ...[2, 3, 4, 5, 6].map((n) => `${s}${n}`)]))
+  // A comparison's icons: each team's, or the speed order's list; a damage calc's, each side's Pokémon.
+  const groups =
+    name === 'calc'
+      ? ['a', 'b'].flatMap((s) => [calcSide(q[s])].filter((id): id is PokemonId => !!id)).map((id) => [id])
+      : !compare
+        ? null
+        : q.mode === 'order'
+          ? [readList(q.list).map((e) => e.id)]
+          : ['a', 'b'].map((s) => team([s, ...[2, 3, 4, 5, 6].map((n) => `${s}${n}`)]))
   return {
     to,
     titleKey: to.meta.titleKey,
@@ -72,7 +85,7 @@ export function shownVisit(visit: PageVisit) {
   const v = view(visit)
   return (
     !!v.titleKey &&
-    (!v.groups || v.groups.every((g) => g.length > 0)) &&
+    (!v.groups || (v.groups.length > 0 && v.groups.every((g) => g.length > 0))) &&
     (v.to.name !== 'metaPokemon' || !!v.usage) &&
     (!META_ENTRIES[String(v.to.name)] || !!v.entry) &&
     (v.to.name !== 'tournament' || !!v.event)
@@ -97,7 +110,7 @@ import { moveType } from '@/components/EntryChip.vue'
 // Pokémon's icons, each team's (or the speed order's list), their names read out; any other page its name, with the
 // Pokémon picked on it (a usage page's; the speed tiers' yours, with its build, the Pokémon found and the type it's
 // filtered by), the entry it's of (an ability's, item's or move's meta page's, by name) or its types (the type
-// matchups'); Trick Room, on, said in short. A meta page is its Pokémon or entry alone, unnamed: beside them, the dex
+// matchups'); a damage calc its name and each side's Pokémon; Trick Room, on, said in short. A meta page is its Pokémon or entry alone, unnamed: beside them, the dex
 // entries' chips say they're the dex's. A tournament's is its name.
 // `untitled` (on the page itself, which needs no naming): its name left out but when there's nothing else to show.
 const props = defineProps<{ visit: PageVisit; untitled?: boolean }>()
@@ -111,7 +124,10 @@ const titled = computed(
     (!props.untitled || (!v.value.mine && !v.value.found.length && !v.value.types.length)),
 )
 /** A comparison's Pokémon by name, for what reads the chip out: its icons alone say nothing. */
-const label = computed(() => v.value.groups?.map((g) => g.map((id) => refName(pokemon(id))).join(', ')).join(' vs '))
+const label = computed(() => {
+  const names = v.value.groups?.map((g) => g.map((id) => refName(pokemon(id))).join(', ')).join(' vs ')
+  return names && v.value.to.name === 'calc' ? `${t(v.value.titleKey!)}: ${names}` : names
+})
 /** The most icons a group shows, the rest counted. */
 const GROUP_MAX = 6
 </script>
@@ -119,6 +135,8 @@ const GROUP_MAX = 6
 <template>
   <a :href="v.to.href" class="page-chip" :aria-label="label" @click="follow">
     <template v-if="v.groups">
+      <!-- A damage calc named, its Pokémon alone looking like a comparison's. -->
+      <template v-if="v.to.name === 'calc' && !untitled">{{ t(v.titleKey!) }}</template>
       <template v-for="(g, i) in v.groups" :key="i">
         <span v-if="i" class="muted">vs</span>
         <span class="group"

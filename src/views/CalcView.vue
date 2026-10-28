@@ -46,6 +46,7 @@ import MetaDialog from '@/components/MetaDialog.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
 import OptionsMenu from '@/components/OptionsMenu.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import SetupStar from '@/components/SetupStar.vue'
 import SideDrawer from '@/components/SideDrawer.vue'
 import TeamPicker from '@/components/TeamPicker.vue'
 
@@ -328,7 +329,7 @@ function face(f: Fighter) {
   <div class="calc">
     <section class="panel head-panel">
       <div class="head">
-        <h1>{{ t('title.calc') }}</h1>
+        <h1>{{ t('title.calc') }}<SetupStar /></h1>
         <MetaDialog v-if="snapshot" class="head-meta" />
         <button v-if="hasAny" type="button" class="btn small" @click="resetAll">
           <RotateCcw :size="14" aria-hidden="true" />{{ t('calc.reset') }}

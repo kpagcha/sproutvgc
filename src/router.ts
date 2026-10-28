@@ -476,6 +476,8 @@ export const router = createRouter({
         keywordsKey: 'keywords.calc',
         dexNames: true,
         descriptions: ['ability', 'move', 'item', 'condition'],
+        // Its two sides and the field, once a side has a Pokémon, but for the data shown.
+        setup: (query) => (query.a || query.b ? stringQuery(query, ['meta']) : null),
         ...inArea('tools', 'calc'),
       },
     },

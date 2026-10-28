@@ -25,7 +25,7 @@ const KINDS: Partial<Record<string, Kind>> = {
   condition: 'condition',
 }
 /** The pages whose setups can be starred. */
-const SETUP_PAGES = ['speedTiers', 'speedCompare']
+const SETUP_PAGES = ['speedTiers', 'speedCompare', 'calc']
 
 const { favorites, metaEntries, setups } = useFavorites()
 const kind = computed(() => KINDS[props.page])
