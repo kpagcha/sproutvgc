@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, shallowRef } from 'vue'
 import { createReusableTemplate } from '@vueuse/core'
-import { ChevronDown, Circle, Square } from '@lucide/vue'
+import { ChevronDown, Circle, Eraser, Square } from '@lucide/vue'
 import type { MetaData } from '@/data/meta'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
@@ -25,7 +25,8 @@ import { hoverTip } from '@/components/DexText'
 // to None; then what's on the field, any together, separate chips, each a checkbox's square), or one side's (`side`:
 // its chips), each filled when on, its dex entry's short description on hover. Of the chips, the common ones in the
 // meta shown (`isCommon`) first; the rest under More (a side's grouped: its ally's help, the hazards it came in on,
-// what's on the Pokémon itself), as last left, unfolded anyway when one is on.
+// what's on the Pokémon itself), as last left, unfolded anyway when one is on. A Clear takes off everything there is
+// on (the field's, at its top right; the side's, at its first row's end), greyed out while nothing is.
 const props = defineProps<{
   field: Battlefield
   side?: { key: 'a' | 'b'; fighter: Fighter }
@@ -41,6 +42,16 @@ const toggleField = (e: FieldEffect) =>
   setField({
     effects: props.field.effects.includes(e) ? props.field.effects.filter((x) => x !== e) : [...props.field.effects, e],
   })
+const anyOn = computed(() => {
+  const f = props.side?.fighter
+  return f
+    ? f.side.length > 0 || f.spikes > 0
+    : !!(props.field.weather || props.field.terrain || props.field.effects.length)
+})
+function clearAll() {
+  if (props.side) emit('side', props.side.key, { ...props.side.fighter, side: [], spikes: 0 })
+  else setField({ weather: '', terrain: '', effects: [] })
+}
 const toggleSide = (s: SideEffect) => {
   const f = props.side!.fighter
   emit('side', props.side!.key, { ...f, side: f.side.includes(s) ? f.side.filter((x) => x !== s) : [...f.side, s] })
@@ -99,6 +110,7 @@ function toggleMore() {
 
 const [DefineChip, Chip] = createReusableTemplate<{ c: Condition<string>; on: boolean; toggle: () => void }>()
 const [DefineMore, More] = createReusableTemplate()
+const [DefineClear, Clear] = createReusableTemplate()
 </script>
 
 <template>
@@ -116,6 +128,11 @@ const [DefineMore, More] = createReusableTemplate()
       <component :is="c.icon" v-if="c.icon" :size="16" aria-hidden="true" />{{ conditionName(c) }}
     </button>
   </DefineChip>
+  <DefineClear>
+    <button type="button" class="btn quiet small clear-all" :disabled="!anyOn" @click="clearAll">
+      <Eraser :size="14" aria-hidden="true" />{{ t('calc.clearConditions') }}
+    </button>
+  </DefineClear>
   <DefineMore>
     <button v-if="rareCount" type="button" class="more" :aria-expanded="moreOpen" @click="toggleMore">
       {{ t('calc.moreConditions', { n: rareCount })
@@ -146,6 +163,7 @@ const [DefineMore, More] = createReusableTemplate()
         @update:model-value="emit('side', side.key, { ...side.fighter, spikes: $event })"
       />
       <More />
+      <Clear />
     </div>
     <div v-if="moreOpen" class="rare">
       <div v-for="g in sideRare" :key="g.group" class="sub">
@@ -177,6 +195,7 @@ const [DefineMore, More] = createReusableTemplate()
 
   <!-- The whole field's. -->
   <div v-else class="conditions">
+    <Clear />
     <section v-for="kind in ['weather', 'terrain'] as const" :key="kind" class="group">
       <h3>{{ t(`calc.${kind}`) }}</h3>
       <div class="choices" role="radiogroup" :aria-label="t(`calc.${kind}`)">
@@ -223,9 +242,20 @@ const [DefineMore, More] = createReusableTemplate()
 
 <style scoped>
 .conditions {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+/* Clearing them all: the field's at the top right, by the weather's heading; a side's at the end of its first row. */
+.clear-all {
+  margin-left: auto;
+}
+.conditions > .clear-all {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
 }
 .group h3 {
   margin: 0 0 8px;

@@ -209,6 +209,7 @@ export const messages = {
   'calc.pasteHint': "One Pokémon's set in Showdown's format, as pokepast.es shows it. Stat points go on its EVs line.",
   'calc.pasteFailed': "Couldn't read a Pokémon in it.",
   'calc.fromTeams': 'From your teams',
+  'calc.clearConditions': 'Clear',
   'calc.weather': 'Weather',
   'calc.terrain': 'Terrain',
   'calc.fieldLabel': 'Field',
