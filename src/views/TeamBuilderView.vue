@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, shallowRef, useTemplateRef, watch, type ComponentPublicInstance } from 'vue'
 import { createReusableTemplate, useElementSize, useEventListener, useMediaQuery } from '@vueuse/core'
-import { ChevronDown, ClipboardPaste, Copy, PinOff, Plus, Star, Trash2 } from '@lucide/vue'
+import { ChevronDown, ClipboardPaste, Copy, PinOff, Plus, Sparkles, Star, Trash2 } from '@lucide/vue'
 import { ability, item, move, pokemon, type AbilityId, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
 import { natureName } from '@/data/natures'
 import { loadLearnsets, POKEMON, splitForme } from '@/data/pokemon'
@@ -207,6 +207,43 @@ function loadCommon() {
   picking.value = null
 }
 const [DefineCommon, ReuseCommon] = createReusableTemplate()
+
+// Every slot's most common set at once, each as picking its Pokémon would offer it (its Mega's when that's what most
+// run; one holding its Mega Stone, the Mega's): those the meta has sets of, the rest left as they are.
+const commonSets = computed(() =>
+  members.value.flatMap((m, slot) => {
+    if (!m.pokemon) return []
+    const forme = stoneMega(m) ?? commonForme(m.pokemon, data.value)
+    return forme && data.value?.[forme]?.moves?.length ? [{ slot, set: commonMember(forme, data.value) }] : []
+  }),
+)
+/** Whether a slot has anything of its own past its Pokémon (an ability it had a choice of, an item, a nature, a move,
+ * a point) that a set put in its place would lose. */
+function hasOwn(m: Member, set: Member): boolean {
+  const same = JSON.stringify(m) === JSON.stringify(set)
+  const chosen =
+    !!m.item ||
+    !!m.nature ||
+    m.moves.some(Boolean) ||
+    m.points.some(Boolean) ||
+    (!!m.ability && POKEMON[m.pokemon!]!.abilities.length > 1)
+  return chosen && !same
+}
+/** Puts every slot's most common set in it, once confirmed where that replaces what's there. */
+async function applyCommonSets() {
+  const sets = commonSets.value
+  const replaced = sets.filter(({ slot, set }) => hasOwn(members.value[slot]!, set)).length
+  if (replaced) {
+    const ok = await confirmDialog({
+      message: t(replaced === 1 ? 'builder.commonAllConfirmOne' : 'builder.commonAllConfirm', { n: replaced }),
+      confirm: t('builder.commonAllGo'),
+      danger: true,
+    })
+    if (!ok) return
+  }
+  for (const { slot, set } of sets) update(slot, set)
+  picking.value = null
+}
 const [DefinePinned, ReusePinned] = createReusableTemplate<{ open: boolean }>()
 const commonPreview = computed(() => (picking.value?.common ? commonMember(picking.value.common, data.value) : null))
 
@@ -496,6 +533,16 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
             :aria-label="t('builder.name')"
           />
           <CopyPaste v-if="hasAny" :text="paste" />
+          <button
+            v-if="hasAny"
+            v-tip="t('builder.commonAllTip')"
+            type="button"
+            class="btn common-all"
+            :disabled="!commonSets.length"
+            @click="applyCommonSets"
+          >
+            <Sparkles :size="14" aria-hidden="true" />{{ t('builder.commonAll') }}
+          </button>
         </div>
         <ul v-if="issues.length" class="issues" aria-live="polite">
           <li v-for="(i, n) in issues" :key="n">{{ issueText(i) }}</li>
@@ -1028,6 +1075,11 @@ section {
   align-items: center;
   gap: 8px;
   margin-bottom: 10px;
+}
+/* As the paste's copy beside it. */
+.common-all {
+  font-size: 0.875em;
+  font-weight: bold;
 }
 .team-name {
   flex: 1;
