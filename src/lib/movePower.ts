@@ -1,12 +1,16 @@
-// A move's power at its peak, for the team builder's Offense chart: what it hits for when everything it's built around
-// is in place, against a neutral target (the Types row has the matchups). Its power, at its best where it varies (Low
-// Kick at 120, Facade at 140, Weather Ball at 100), times its hits at most, STAB (2 with Adaptability), hitting both
-// foes for a spread move (2 × 0.75), the power abilities by what the move is (Technician, Tough Claws, Iron Fist,
-// Strong Jaw, Mega Launcher, Sharpness, Punk Rock, Sheer Force, the -ate abilities), and the weather and terrain the
-// side sets itself (`fieldOf`): sun and rain, the terrains. Charge and recharge turns, and accuracy, left out: the peak
-// is the representative case. Damage that isn't the move's power (Seismic Toss, OHKO moves) has none.
+// A move's power, for the team builder's Offense chart, against a neutral target (the Types row has the matchups), two
+// ways (`PowerMode`). At its peak, what it hits for when everything it's built around is in place: its power at its
+// best where it varies (Low Kick at 120, Facade at 140, Last Respects at 150), its hits at most. Typically, what it
+// hits for most of the time: its power where it varies as it usually is (Low Kick at 80, Last Respects and Rage Fist at
+// 100, Acrobatics at 110 only with no item), the hits a 2-to-5 move lands on average (3, all 5 with Skill Link), and
+// times its accuracy (Compound Eyes, Hustle, Wide Lens and the weather counted). Both with STAB (2 with Adaptability),
+// hitting both foes for a spread move (2 × 0.75), the power abilities by what the move is (Technician, Tough Claws,
+// Iron Fist, Strong Jaw, Mega Launcher, Sharpness, Punk Rock, Sheer Force, the -ate abilities), the items that power
+// it up (Life Orb, the type-boosting items, Muscle Band, Wise Glasses), and the weather and terrain the side sets
+// itself (`fieldOf`): sun and rain, the terrains. Charge and recharge turns left out. Damage that isn't the move's
+// power (Seismic Toss, OHKO moves) has none.
 
-import type { AbilityId, MoveId } from '@/data/dex'
+import type { AbilityId, ItemId, MoveId } from '@/data/dex'
 import { MOVES } from '@/data/moves'
 import type { TypeId } from '@/data/types'
 
@@ -81,8 +85,38 @@ const PEAK: Partial<Record<MoveId, number>> = {
   ragefist: 150,
   weatherball: 100,
 }
+// The same moves as they usually hit for.
+const TYPICAL: Partial<Record<MoveId, number>> = {
+  lowkick: 80,
+  grassknot: 80,
+  heavyslam: 80,
+  heatcrash: 80,
+  gyroball: 100,
+  electroball: 80,
+  hardpress: 60,
+  flail: 80,
+  reversal: 80,
+  facade: 70,
+  hex: 65,
+  acrobatics: 110,
+  venoshock: 65,
+  brine: 65,
+  knockoff: 97.5,
+  boltbeak: 85,
+  fishiousrend: 85,
+  payback: 75,
+  avalanche: 60,
+  revenge: 60,
+  storedpower: 40,
+  powertrip: 40,
+  lastrespects: 100,
+  ragefist: 100,
+  weatherball: 50,
+}
 // Moves whose hits grow: their total, its hits counted in.
 const TOTAL: Partial<Record<MoveId, number>> = { tripleaxel: 120, triplekick: 60 }
+// Typically, each hit landing only if the one before did: their expected total, their accuracy counted in.
+const TYPICAL_TOTAL: Partial<Record<MoveId, number>> = { tripleaxel: 94, triplekick: 47, populationbomb: 117 }
 
 // What each weather and terrain does to a type's power.
 const WEATHER_TYPES: Record<Weather, Partial<Record<TypeId, number>>> = {
@@ -130,19 +164,60 @@ const ATE: Partial<Record<AbilityId, TypeId>> = {
   galvanize: 'electric',
 }
 
-/** Who uses the move: their types (for STAB) and their ability. */
+// Items that power moves up: by the move's type, and by its category.
+const TYPE_ITEMS: Partial<Record<ItemId, TypeId>> = {
+  blackbelt: 'fighting',
+  blackglasses: 'dark',
+  charcoal: 'fire',
+  dragonfang: 'dragon',
+  fairyfeather: 'fairy',
+  hardstone: 'rock',
+  magnet: 'electric',
+  metalcoat: 'steel',
+  miracleseed: 'grass',
+  mysticwater: 'water',
+  nevermeltice: 'ice',
+  poisonbarb: 'poison',
+  sharpbeak: 'flying',
+  silkscarf: 'normal',
+  silverpowder: 'bug',
+  softsand: 'ground',
+  spelltag: 'ghost',
+  twistedspoon: 'psychic',
+}
+const CATEGORY_ITEMS: Partial<Record<ItemId, ['physical' | 'special', number]>> = {
+  muscleband: ['physical', 1.1],
+  wiseglasses: ['special', 1.1],
+}
+
+/** Whether an item changes what a move hits for here, so the meta's sets holding it are told apart. */
+export const powersUp = (it: ItemId | null) =>
+  !!it && (it === 'lifeorb' || it === 'widelens' || it === 'normalgem' || !!TYPE_ITEMS[it] || !!CATEGORY_ITEMS[it])
+
+/** How a move's power is taken: at its peak, or as it usually is. */
+export type PowerMode = 'peak' | 'typical'
+
+/** Who uses the move: their types (for STAB), their ability and their item. */
 export interface User {
   types: readonly TypeId[]
   ability: AbilityId | null
+  item: ItemId | null
 }
 
-/** A move's peak power for a user on a field; null for one without power of its own, or a status move. */
-export function peakPower(mv: MoveId, user: User, field: Field): number | null {
+/** A move's power for a user on a field, at its peak or typically; null for one without power of its own, or a status
+ * move. */
+export function movePower(mv: MoveId, user: User, field: Field, mode: PowerMode): number | null {
   const m = MOVES[mv]
   if (!m || m.category === 'status') return null
-  const base = TOTAL[mv] ?? PEAK[mv] ?? m.power
+  const typical = mode === 'typical'
+  const ab = user.ability
+  const total = typical ? (TYPICAL_TOTAL[mv] ?? TOTAL[mv]) : TOTAL[mv]
+  let base = total ?? (typical ? TYPICAL[mv] : PEAK[mv]) ?? m.power
   if (!base) return null
-  const hits = TOTAL[mv] ? 1 : (m.hits ?? 1)
+  if (typical && mv === 'facade' && ab === 'guts') base = 140
+  if (typical && mv === 'acrobatics' && user.item) base = 55
+  // Typically, a 2-to-5 move lands 3, all 5 with Skill Link.
+  const hits = total ? 1 : typical && m.hits === 5 && ab !== 'skilllink' ? 3 : (m.hits ?? 1)
   const flags = m.flags as readonly string[]
   // Each way the field can be (each weather or terrain it sets, or none), the best of them.
   const fields: { weather?: Weather; terrain?: Terrain }[] = [
@@ -155,11 +230,10 @@ export function peakPower(mv: MoveId, user: User, field: Field): number | null {
     let power = base
     let type: TypeId = m.type
     let spread = m.target === 'allAdjacentFoes' || m.target === 'allAdjacent'
-    if (mv === 'weatherball' && f.weather) type = WEATHER_BALL[f.weather]
+    if (mv === 'weatherball' && f.weather) [power, type] = [100, WEATHER_BALL[f.weather]]
     if (mv === 'terrainpulse' && f.terrain) [power, type] = [100, TERRAIN_PULSE[f.terrain]]
     if (mv === 'expandingforce' && f.terrain === 'psychic') [power, spread] = [120, true]
     if (mv === 'risingvoltage' && f.terrain === 'electric') power = 140
-    const ab = user.ability
     let mult = 1
     if (ab && ATE[ab] && type === 'normal') [type, mult] = [ATE[ab]!, 1.2]
     if (ab === 'normalize') [type, mult] = ['normal', 1.2]
@@ -173,22 +247,44 @@ export function peakPower(mv: MoveId, user: User, field: Field): number | null {
     if (spread) mult *= 1.5
     if (f.weather) mult *= WEATHER_TYPES[f.weather][type] ?? 1
     if (f.terrain) mult *= TERRAIN_TYPES[f.terrain][type] ?? 1
+    const it = user.item
+    if (it === 'lifeorb') mult *= 1.3
+    if (it && TYPE_ITEMS[it] === type) mult *= 1.2
+    if (it === 'normalgem' && type === 'normal') mult *= 1.3
+    const byCategory = it && CATEGORY_ITEMS[it]
+    if (byCategory && byCategory[0] === m.category) mult *= byCategory[1]
+    if (typical && !TYPICAL_TOTAL[mv]) mult *= accuracy(mv, user, f.weather)
     best = Math.max(best, power * hits * mult)
   }
   return best
 }
 
-/** Of some moves, the strongest at its peak on a side (physical or special), with its power; null with none. */
+/** How often a move hits, from 0 to 1: its accuracy, with what raises or lowers it. */
+function accuracy(mv: MoveId, user: User, weather: Weather | undefined): number {
+  const m = MOVES[mv]!
+  if (m.accuracy === true || user.ability === 'noguard') return 1
+  let acc = m.accuracy / 100
+  if ((mv === 'thunder' || mv === 'hurricane') && weather === 'rain') return 1
+  if ((mv === 'thunder' || mv === 'hurricane') && weather === 'sun') acc = 0.5
+  if (mv === 'blizzard' && weather === 'snow') return 1
+  if (user.ability === 'compoundeyes') acc *= 1.3
+  if (user.ability === 'hustle' && m.category === 'physical') acc *= 0.8
+  if (user.item === 'widelens') acc *= 1.1
+  return Math.min(1, acc)
+}
+
+/** Of some moves, the strongest on a side (physical or special), with its power; null with none. */
 export function bestMove(
   moves: Iterable<MoveId>,
   side: 'physical' | 'special',
   user: User,
   field: Field,
+  mode: PowerMode,
 ): { move: MoveId; power: number } | null {
   let best: { move: MoveId; power: number } | null = null
   for (const mv of moves) {
     if (MOVES[mv]?.category !== side) continue
-    const power = peakPower(mv, user, field)
+    const power = movePower(mv, user, field, mode)
     if (power !== null && (!best || power > best.power)) best = { move: mv, power }
   }
   return best

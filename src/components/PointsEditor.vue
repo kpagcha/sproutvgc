@@ -18,7 +18,13 @@ import { ChartColumn, X } from '@lucide/vue'
 // spreads (`spreads`, the meta's) in a dialog over the page (`ModalDialog`) from a button at its foot, each setting the
 // points and the nature and closing it, those of the nature it has already tinted; the button on one row with Clear and
 // Confirm (which folds it).
-const props = defineProps<{ pokemon: PokemonId; nature: string | null; spreads: readonly Spread[] }>()
+const props = defineProps<{
+  pokemon: PokemonId
+  nature: string | null
+  spreads: readonly Spread[]
+  /** Nothing to fold it into: no Confirm. */
+  noConfirm?: boolean
+}>()
 const points = defineModel<Points>('points', { required: true })
 const emit = defineEmits<{ preset: [spread: Spread]; confirm: [] }>()
 
@@ -105,7 +111,7 @@ const isPreset = (s: Spread) => s.nature === props.nature && s.points.every((p, 
       <button type="button" class="btn quiet small clear" :disabled="!spent" @click="points = [0, 0, 0, 0, 0, 0]">
         {{ t('builder.pointsClear') }}
       </button>
-      <button type="button" class="btn quiet small confirm" @click="emit('confirm')">
+      <button v-if="!noConfirm" type="button" class="btn quiet small confirm" @click="emit('confirm')">
         {{ t('builder.pointsConfirm') }}
       </button>
     </div>

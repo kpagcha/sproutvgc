@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, useTemplateRef } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 import { ChevronDown, Lightbulb } from '@lucide/vue'
 import { ability, move, pokemon, type AbilityId, type MoveId, type PokemonId } from '@/data/dex'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
+import { useChartModes } from '@/composables/useChartModes'
 import { useOpenState } from '@/composables/useOpenState'
 import type { Battler } from '@/lib/team'
 import {
@@ -14,7 +15,6 @@ import {
   teamDefense,
   teamOffense,
   type MetaBalance,
-  type OffenseMode,
   type Plotted,
   type Side,
   type Support,
@@ -34,11 +34,13 @@ import TeamCoverage from '@/components/TeamCoverage.vue'
 // off the lanes under it), what helps each side (guards defending, boosts attacking), and its types (`TeamCoverage`).
 // Wide, the chart and what helps side by side; narrow, every card under the last. The meta's side comes in after the
 // page (`meta`: undefined until then, placeholders meanwhile; null with no meta, said so). Folds, folded by default
-// on phones, then as last left.
+// on phones, then as last left. Bare (`bare`), its chart alone with its choice over it, for the pinned slot's dock on
+// phones, the choice shared with the panel (`useChartModes`).
 const props = defineProps<{
   side: 'defense' | 'offense'
   members: readonly Battler[]
   meta: MetaBalance | null | undefined
+  bare?: boolean
 }>()
 
 const { open, onToggle } = useOpenState(
@@ -59,21 +61,8 @@ const SIDES = ['physical', 'special'] as const
 const split = computed(() => meta.value?.physicalShare ?? null)
 
 const defense = computed(() => (defending ? teamDefense(props.members, meta.value) : null))
-// Attacking, by stats alone or with each attacker's best move at its peak, as last picked.
-const MODE_KEY = 'sproutvgc.builder.offenseMode'
-const mode = shallowRef<OffenseMode>('stats')
-try {
-  if (localStorage.getItem(MODE_KEY) === 'moves') mode.value = 'moves'
-} catch {
-  // Storage unavailable: by stats.
-}
-watch(mode, (m) => {
-  try {
-    localStorage.setItem(MODE_KEY, m)
-  } catch {
-    // Storage unavailable: the choice lasts for this page load.
-  }
-})
+// Attacking, by stats alone or with each attacker's best move, as it typically hits or at its peak, as last picked.
+const { offenseMode: mode } = useChartModes()
 const modes = computed(() => [
   { value: 'stats' as const, label: t('builder.balance.modeStats') },
   { value: 'moves' as const, label: t('builder.balance.modeMoves') },
@@ -99,6 +88,7 @@ const lanes = computed((): LaneView[] =>
           ? t(`builder.balance.share.${side}`, { pct: pct(side === 'physical' ? split.value : 1 - split.value) })
           : undefined,
       shape: meta.value?.[LANE_KEYS[defending ? 'defense' : mode.value][side]].shape ?? null,
+      peakShape: !defending && mode.value === 'moves' ? (meta.value?.[LANE_KEYS.peak[side]].shape ?? null) : null,
       points: lane.points,
       mean: lane.mean,
     }
@@ -185,7 +175,24 @@ const supportTip = (s: Support) => `${supportName(s)}: ${s.pokemon.map(name).joi
 </script>
 
 <template>
-  <details class="panel banded balance" :open @toggle="onToggle">
+  <div v-if="bare" class="bare">
+    <SegmentedControl
+      v-if="!defending"
+      v-model="mode"
+      class="mode soft"
+      :label="t('builder.balance.modeLabel')"
+      :options="modes"
+    />
+    <BalanceLanes
+      :lanes
+      :ends
+      :tip
+      :mean-tip
+      :rows="2"
+      :state="pending ? 'pending' : meta === null ? 'none' : undefined"
+    />
+  </div>
+  <details v-else class="panel banded balance" :open @toggle="onToggle">
     <summary>{{ t(`builder.section.${side}`) }}</summary>
     <!-- Its verdict, a line, and the numbers behind it in its lightbulb's popover; a placeholder until the meta's
          side is in. -->
@@ -298,6 +305,12 @@ const supportTip = (s: Support) => `${supportName(s)}: ${s.pokemon.map(name).joi
 </template>
 
 <style scoped>
+/* Bare: its choice over its chart. */
+.bare {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 .balance > summary {
   cursor: pointer;
   font-family: var(--font-display, inherit);

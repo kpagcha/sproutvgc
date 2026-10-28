@@ -2,7 +2,9 @@
 import { computed, useTemplateRef } from 'vue'
 import { useElementSize } from '@vueuse/core'
 import { Info } from '@lucide/vue'
+import { move } from '@/data/dex'
 import { t } from '@/i18n'
+import { refName } from '@/i18n/refName'
 import type { Plotted, Shape, Side } from '@/lib/teamBalance'
 import CategoryIcon from '@/components/CategoryIcon'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -12,7 +14,8 @@ import PokemonIcon from '@/components/PokemonIcon'
 // stat, or bulk), weaker to the left. In each, the meta's values as a soft ridge (how many of the meta are at each
 // value), the middle half of it a band and its median a line, and over them the team's Pokémon at their own values,
 // stacked a row up where they'd overlap (up to `ROWS`, the plots' height fixed, so every panel's look alike), a
-// diamond on the line at their average. Narrow, each lane's label over its plot. What each mark is in a tooltip
+// diamond on the line at their average; attacking with moves, a line from each to what it hits for at its peak, and
+// the meta's at theirs a dashed curve (`peakShape`). Narrow, each lane's label over its plot. What each mark is in a tooltip
 // (`tip`, `meanTip`); the legend an icon's tooltip at the first plot's top right (tapped on phones). While the meta's
 // side is worked out (`state` 'pending') the plots are placeholders, and with no meta (`state` 'none') they say so.
 // The Speed panel's lane is `speed`, with no badge, in the accent's color.
@@ -25,6 +28,8 @@ export interface LaneView<S extends Lane = Side> {
   /** What its name says on hover, if anything (its name then underlined, dotted). */
   tip?: string
   shape: Shape | null
+  /** Attacking with moves, the meta's values at their peak, a second curve. */
+  peakShape?: Shape | null
   points: Plotted[]
   mean: number | null
 }
@@ -35,6 +40,8 @@ const props = defineProps<{
   tip: (p: Plotted, side: S) => string
   meanTip: (lane: LaneView<S>) => string
   state?: 'pending' | 'none'
+  /** The rows of icons a plot has room for, `ROWS` unless fewer (a compact chart). */
+  rows?: number
 }>()
 
 // One axis for both lanes: the meta's range on either (its rare extremes left out) and the team's values, a little
@@ -42,7 +49,8 @@ const props = defineProps<{
 const domain = computed(() => {
   const values = props.lanes.flatMap((l) => [
     ...(l.shape ? [l.shape.lo, l.shape.hi] : []),
-    ...l.points.map((p) => p.value),
+    ...(l.peakShape ? [l.peakShape.lo, l.peakShape.hi] : []),
+    ...l.points.flatMap((p) => [p.value, p.peak ?? p.value]),
   ])
   if (!values.length) return { lo: 0, hi: 1 }
   const lo = Math.min(...values)
@@ -53,11 +61,33 @@ const domain = computed(() => {
 const at = (v: number) => (v - domain.value.lo) / (domain.value.hi - domain.value.lo)
 const pct = (x: number) => `${(x * 100).toFixed(2)}%`
 
-/** A lane's ridge, as an area path in a 1000 × 100 box (stretched to the plot): its height the share at each value. */
-function ridge(s: Shape): string {
+/** A mark's tooltip: what the page says of it, and, where it hits harder at its peak, how it stands among the meta's
+ * at theirs (or, with no meta, how much more it hits for). */
+function tipOf(p: Plotted, side: S): string {
+  if (!p.peak) return props.tip(p, side)
+  const mv = p.peakMove && refName(move(p.peakMove))
+  let peak: string
+  if (p.peakRank != null && side !== 'speed') {
+    const pct = `${Math.round(p.peakRank * 100)}%`
+    const phys = side === 'physical'
+    peak = mv
+      ? t(phys ? 'builder.balance.peakPhysMove' : 'builder.balance.peakSpecMove', { pct, move: mv })
+      : t(phys ? 'builder.balance.peakPhys' : 'builder.balance.peakSpec', { pct })
+  } else {
+    const more = `${Math.round((p.peak / p.value - 1) * 100)}%`
+    peak = mv ? t('builder.balance.peakTipMove', { pct: more, move: mv }) : t('builder.balance.peakTip', { pct: more })
+  }
+  return `${props.tip(p, side)} · ${peak}`
+}
+const hasPeaks = computed(() => props.lanes.some((l) => l.points.some((p) => p.peak)))
+const hasPeakShapes = computed(() => props.lanes.some((l) => l.peakShape))
+
+/** A lane's ridge, as an area path in a 1000 × 100 box (stretched to the plot): its height the share at each value;
+ * open, its outline alone (the peak's). */
+function ridge(s: Shape, open = false): string {
   const step = (s.hi - s.lo) / s.bins.length
   const pts = s.bins.map((b, i) => `L${(at(s.lo + (i + 0.5) * step) * 1000).toFixed(1)} ${(100 - b * 88).toFixed(1)}`)
-  return `M${(at(s.lo) * 1000).toFixed(1)} 100${pts.join('')}L${(at(s.hi) * 1000).toFixed(1)} 100Z`
+  return `M${(at(s.lo) * 1000).toFixed(1)} 100${pts.join('')}L${(at(s.hi) * 1000).toFixed(1)} 100${open ? '' : 'Z'}`
 }
 
 // The plot's width, to stack the icons that would overlap: each a row up from the first that has room, up to `ROWS`
@@ -66,6 +96,7 @@ const plots = useTemplateRef<HTMLElement[]>('plots')
 const { width } = useElementSize(() => plots.value?.[0])
 const ROOM = 28
 const ROWS = 3
+const rows = computed(() => props.rows ?? ROWS)
 const legendBody = useTemplateRef<HTMLElement>('legendBody')
 const placed = computed(() =>
   props.lanes.map((l) => {
@@ -75,7 +106,7 @@ const placed = computed(() =>
       .map((p) => {
         const x = at(p.value) * (width.value || 1)
         let row = ends.findIndex((end) => x - end >= ROOM)
-        if (row < 0) row = ends.length < ROWS ? ends.length : ends.indexOf(Math.min(...ends))
+        if (row < 0) row = ends.length < rows.value ? ends.length : ends.indexOf(Math.min(...ends))
         ends[row] = x
         return { p, row }
       })
@@ -86,7 +117,7 @@ const placed = computed(() =>
 <template>
   <!-- The size container the narrow layout asks: a container query never matches its own element. -->
   <div class="lanes-box">
-    <div class="lanes" :style="{ '--rows': ROWS }">
+    <div class="lanes" :style="{ '--rows': rows }">
       <template v-for="(l, i) in lanes" :key="l.side">
         <div class="lane-label" :data-side="l.side">
           <CategoryIcon v-if="l.side !== 'speed'" :category="l.side as Side" :tip="false" />
@@ -110,16 +141,25 @@ const placed = computed(() =>
               height="100"
             />
             <path class="ridge" :d="ridge(l.shape)" />
+            <path v-if="l.peakShape" class="ridge-peak" :d="ridge(l.peakShape, true)" />
           </svg>
           <span v-if="l.shape" class="median" :style="{ left: pct(at(l.shape.median)) }" aria-hidden="true"></span>
+          <template v-for="{ p, row } in placed[i]" :key="`peak:${p.pokemon}`">
+            <span
+              v-if="p.peak"
+              class="peak"
+              :style="{ left: pct(at(p.value)), width: pct(at(p.peak) - at(p.value)), '--row': row }"
+              aria-hidden="true"
+            ></span>
+          </template>
           <span
             v-for="{ p, row } in placed[i]"
             :key="p.pokemon"
-            v-tip:group="tip(p, l.side)"
+            v-tip:group="tipOf(p, l.side)"
             class="mon"
             :class="{ mixed: p.mixed }"
             :style="{ left: `clamp(20px, ${pct(at(p.value))}, calc(100% - 20px))`, '--row': row }"
-            :aria-label="tip(p, l.side)"
+            :aria-label="tipOf(p, l.side)"
             ><PokemonIcon :id="p.pokemon"
           /></span>
           <span
@@ -152,8 +192,14 @@ const placed = computed(() =>
               <path d="M0 12C4 12 6 2 10 2S16 12 20 12Z" /></svg
             >{{ t('builder.balance.legendMeta') }}</span
           >
+          <span v-if="hasPeakShapes"
+            ><svg class="key key-ridge key-ridge-peak" viewBox="0 0 20 12" aria-hidden="true">
+              <path d="M0 12C4 12 6 2 10 2S16 12 20 12" /></svg
+            >{{ t('builder.balance.legendPeakMeta') }}</span
+          >
           <span><span class="key key-band"></span>{{ t('builder.balance.legendBand') }}</span>
           <span><span class="key key-median"></span>{{ t('builder.balance.legendMedian') }}</span>
+          <span v-if="hasPeaks"><span class="key key-peak"></span>{{ t('builder.balance.legendPeak') }}</span>
           <span v-if="lanes.some((l) => l.mean !== null)"
             ><span class="key key-mean"></span>{{ t('builder.balance.legendMean') }}</span
           >
@@ -254,6 +300,14 @@ const placed = computed(() =>
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
 }
+.ridge-peak {
+  fill: none;
+  stroke: var(--c);
+  stroke-width: 1.5px;
+  stroke-dasharray: 5 4;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
 .band {
   fill: color-mix(in srgb, var(--ink) 9%, transparent);
 }
@@ -275,6 +329,22 @@ const placed = computed(() =>
 .mon:hover {
   z-index: 2;
   transform: translateX(-50%) translateY(-2px);
+}
+/* Attacking with moves, a line from it to its peak, at its middle's height behind it, a tick at its end. */
+.peak {
+  position: absolute;
+  bottom: calc(var(--row) * var(--row-h) + 14px);
+  height: 2px;
+  background: color-mix(in srgb, var(--text) 55%, transparent);
+}
+.peak::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: -4px;
+  width: 2px;
+  height: 10px;
+  background: inherit;
 }
 /* An attacker on both sides: a dot under it, on both lanes. */
 .mon.mixed::after {
@@ -361,11 +431,20 @@ const placed = computed(() =>
   height: 12px;
   background: var(--muted);
 }
+.key-peak {
+  height: 2px;
+  background: color-mix(in srgb, var(--text) 55%, transparent);
+  box-shadow: inset -2px 0 0 var(--text);
+}
 .key-mean {
   width: 8px;
   height: 8px;
   background: var(--text);
   transform: rotate(45deg);
+}
+.key-ridge-peak path {
+  fill: none;
+  stroke-dasharray: 3 2;
 }
 /* Narrow: each lane's label over its plot. */
 @container (max-width: 480px) {

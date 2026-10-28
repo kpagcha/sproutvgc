@@ -1078,6 +1078,12 @@ export const messages = {
   'builder.clearSlot': 'Clear this slot',
   'builder.clear': 'Remove',
   'builder.clearConfirm': 'Remove {name} from the team?',
+  'builder.pin': 'Pin beside the charts, to edit it as they follow',
+  'builder.unpin': 'Unpin',
+  'builder.pinned': 'Pinned',
+  'builder.pinChart': 'Chart',
+  'builder.pinEdit': 'Edit',
+  'builder.pinSet': 'Set',
   'builder.picker': 'Pick',
   'builder.loadCommon': 'Load its most common set',
   'builder.orPickYourself': 'or pick each part yourself',
@@ -1116,7 +1122,7 @@ export const messages = {
     "Each Pokémon's bulk is its HP times its Defense (or Sp. Def), at its stat points and nature.",
   'builder.balance.howAtk': 'Each attacker is measured by its Attack (or Sp. Atk), at its stat points and nature.',
   'builder.balance.howMoves':
-    'With moves, that stat times its best move at its peak: hitting both foes if it can, with STAB, its ability, and the weather or terrain its team sets.',
+    'With moves, that stat times its best move as it usually hits: hitting both foes if it can, times its accuracy, with STAB, its ability, its item, and the weather or terrain its team sets. The line from it runs to its peak, as Low Kick on the heaviest foe or Last Respects late in the game, its every hit landing; the dashed curve is the meta at its peak.',
   'builder.balance.howMeta':
     "The meta's curve pools every Pokémon in the data at every spread its players run, each counted by how often it's used and how often that spread is, so a Pokémon on half the teams weighs far more than a rare one.",
   'builder.balance.howMetaAtk':
@@ -1139,7 +1145,7 @@ export const messages = {
   'builder.balance.modeStats': 'Stats',
   'builder.balance.modeMoves': 'Stats and moves',
   'builder.balance.modeTip':
-    "Stats and moves: each attacker's stat times its best move at its peak, as when a spread move hits both foes or your team's weather is up",
+    "Stats and moves: each attacker's stat times its best move as it usually hits, accuracy counted, a line to what it hits for at its peak",
   'builder.balance.typesDef': 'How each type hits them',
   'builder.balance.typesAtk': 'What their moves hit',
   'builder.balance.attacker': '{n} attacker',
@@ -1157,6 +1163,16 @@ export const messages = {
   'builder.balance.legendBand': "The meta's middle half",
   'builder.balance.legendMedian': "The meta's median",
   'builder.balance.legendMean': "Your team's average",
+  'builder.balance.legendPeak': 'Up to what it hits for at its peak',
+  'builder.balance.legendPeakMeta': 'The meta at its peak',
+  'builder.balance.peakTip': 'up to {pct} more at its peak',
+  'builder.balance.peakTipMove': 'up to {pct} more at its peak, with {move}',
+  'builder.balance.peakPhys': "at its peak, harder than {pct} of the meta's physical attackers at theirs",
+  'builder.balance.peakSpec': "at its peak, harder than {pct} of the meta's special attackers at theirs",
+  'builder.balance.peakPhysMove':
+    "at its peak, with {move}, harder than {pct} of the meta's physical attackers at theirs",
+  'builder.balance.peakSpecMove':
+    "at its peak, with {move}, harder than {pct} of the meta's special attackers at theirs",
   'builder.balance.noMeta': 'No meta data to set the team against.',
   'builder.balance.supportOnly': 'Support',
   'builder.balance.noMoves': 'No moves yet',

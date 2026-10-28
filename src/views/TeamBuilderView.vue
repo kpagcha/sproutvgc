@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, shallowRef, useTemplateRef, watch, type ComponentPublicInstance } from 'vue'
 import { createReusableTemplate, useElementSize, useEventListener, useMediaQuery } from '@vueuse/core'
-import { ChevronDown, ClipboardPaste, Copy, Plus, Star, Trash2 } from '@lucide/vue'
+import { ChevronDown, ClipboardPaste, Copy, PinOff, Plus, Star, Trash2 } from '@lucide/vue'
 import { ability, item, move, pokemon, type AbilityId, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
+import { natureName } from '@/data/natures'
 import { loadLearnsets, POKEMON, splitForme } from '@/data/pokemon'
 import { RULES } from '@/data/rules'
 import { t } from '@/i18n'
@@ -18,6 +19,7 @@ import {
   pickedAs,
   battlers,
   evolvingSlot,
+  pointsLeft,
   setsAs,
   stoneMega,
   teamIssues,
@@ -30,7 +32,9 @@ import CommonSetOffer from '@/components/CommonSetOffer.vue'
 import CopyPaste from '@/components/CopyPaste.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
+import PointsEditor from '@/components/PointsEditor.vue'
 import SectionNav from '@/components/SectionNav.vue'
+import SegmentedControl from '@/components/SegmentedControl.vue'
 import SideDrawer from '@/components/SideDrawer.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import TeamBalance from '@/components/TeamBalance.vue'
@@ -63,12 +67,56 @@ onMounted(() => {
 })
 const members = computed(() => current.value?.members ?? [])
 
-// The part being picked: its slot and field; right after a Pokémon's picked, the meta's entry whose most common set can
-// be loaded instead of going on (`common`), as the damage calculator's sides can.
-const picking = shallowRef<{ slot: number; field: Field; common?: PokemonId } | null>(null)
+// The part being picked: its slot and field, and whether from the slot pinned beside the insights (`pin`, its card the
+// one the drawer leaves clear); right after a Pokémon's picked, the meta's entry whose most common set can be loaded
+// instead of going on (`common`), as the damage calculator's sides can.
+const picking = shallowRef<{ slot: number; field: Field; pin?: boolean; common?: PokemonId } | null>(null)
+// The slot pinned beside the insights, to edit it there as they follow; none once it's emptied or another team opens.
+// On wide screens a column stuck beside them. Narrower, in a dialog over the page (`ModalDialog`, closing it unpinning
+// it), all there is on screen: one of the charts on top, picked from a row of them (`dockChart`, remembered), and
+// under it what's edited, its stat points and nature or the whole set (`dockEdit`), each change showing on the chart.
+const pinnedAt = shallowRef<number | null>(null)
+const pinned = computed(() =>
+  pinnedAt.value !== null && members.value[pinnedAt.value]?.pokemon ? pinnedAt.value : null,
+)
+const togglePin = (i: number) => (pinnedAt.value = pinnedAt.value === i ? null : i)
+const pinSide = useMediaQuery('(min-width: 1100px)')
+const pinEditing = shallowRef(true)
+type DockChart = 'speed' | 'defense' | 'offense'
+const DOCK_CHARTS: readonly DockChart[] = ['speed', 'defense', 'offense']
+const DOCK_KEY = 'sproutvgc.builder.pinChart'
+const dockChart = shallowRef<DockChart>('offense')
+try {
+  dockChart.value = DOCK_CHARTS.find((c) => c === localStorage.getItem(DOCK_KEY)) ?? 'offense'
+} catch {
+  // Storage unavailable: the offense.
+}
+watch(dockChart, (c) => {
+  try {
+    localStorage.setItem(DOCK_KEY, c)
+  } catch {
+    // Storage unavailable: the choice lasts for this page load.
+  }
+})
+const dockCharts = computed(() => DOCK_CHARTS.map((value) => ({ value, label: t(`builder.section.${value}`) })))
+/** The pinned slot's points left to spend (or over), as its card's line says them; none when all are spent. */
+const dockLeft = computed(() => {
+  const n = pinned.value === null ? 0 : pointsLeft(members.value[pinned.value]!)
+  if (!n) return ''
+  if (n > 0) return n === 1 ? t('builder.pointLeft') : t('builder.pointsLeft', { n })
+  return n === -1 ? t('builder.pointOver') : t('builder.pointsOver', { n: -n })
+})
+const dockEdit = shallowRef<'points' | 'set'>('points')
+const dockEdits = computed(() => [
+  { value: 'points' as const, label: t('builder.points') },
+  { value: 'set' as const, label: t('builder.pinSet') },
+])
 watch(
   () => current.value?.id,
-  () => (picking.value = null),
+  () => {
+    picking.value = null
+    pinnedAt.value = null
+  },
 )
 const pickerOpen = computed({
   get: () => !!picking.value,
@@ -80,8 +128,16 @@ const pickerOpen = computed({
 const slotEls: (HTMLElement | null)[] = []
 const setSlotEl = (i: number, el: Element | ComponentPublicInstance | null) =>
   (slotEls[i] = el && '$el' in el ? (el.$el as HTMLElement) : (el as HTMLElement | null))
-const drawerOpen = computed(() => wide.value && !!picking.value)
-const drawerAnchor = computed(() => (picking.value ? slotEls[picking.value.slot] : null))
+// The picker as a dialog where the drawer would be under the pinned slot's dialog (wide, but not wide enough for the
+// pinned column).
+const pickerDialog = computed(() => !wide.value || (pinned.value !== null && !pinSide.value))
+const drawerOpen = computed(() => !pickerDialog.value && !!picking.value)
+let pinEl: HTMLElement | null = null
+const setPinEl = (el: Element | ComponentPublicInstance | null) =>
+  (pinEl = el && '$el' in el ? (el.$el as HTMLElement) : (el as HTMLElement | null))
+const drawerAnchor = computed(() =>
+  picking.value ? ((picking.value.pin ? pinEl : null) ?? slotEls[picking.value.slot]) : null,
+)
 const drawer = shallowRef<InstanceType<typeof SideDrawer> | null>(null)
 
 // Each slot's points editor, folded at first.
@@ -139,7 +195,8 @@ function pick(value: string) {
     update(p.slot, { moves })
   }
   const next = nextField(team.members[p.slot]!, p.field)
-  picking.value = next === null ? null : { slot: p.slot, field: next, ...(common && { common }) }
+  picking.value =
+    next === null ? null : { slot: p.slot, field: next, ...(p.pin && { pin: true }), ...(common && { common }) }
 }
 
 /** The set being put together skipped: the most common set loaded, the picker closed. */
@@ -150,6 +207,7 @@ function loadCommon() {
   picking.value = null
 }
 const [DefineCommon, ReuseCommon] = createReusableTemplate()
+const [DefinePinned, ReusePinned] = createReusableTemplate<{ open: boolean }>()
 const commonPreview = computed(() => (picking.value?.common ? commonMember(picking.value.common, data.value) : null))
 
 // The drawer or dialog the picker scrolls in, back at its top for each part picked.
@@ -453,7 +511,9 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
             :clashes="clashes[i]"
             :evolved="evolving === i"
             :hint="i === 0 && !hasAny"
+            :pinned="pinned === i"
             @mega="toggleMega(i)"
+            @pin="togglePin(i)"
             :open="!!editing[i]"
             @update:open="setEditing(i, $event)"
             @field="picking = { slot: i, field: $event }"
@@ -462,11 +522,102 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
           />
         </ul>
       </section>
-      <template v-if="hasAny">
-        <TeamSpeed id="sec-speed" :members="battling" :meta="balance" />
-        <TeamBalance id="sec-defense" side="defense" :members="battling" :meta="balance" />
-        <TeamBalance id="sec-offense" side="offense" :members="battling" :meta="balance" />
-      </template>
+      <div v-if="hasAny" class="insights" :class="{ pinning: pinned !== null && pinSide }">
+        <!-- The slot pinned: beside the insights, stuck as they scroll. -->
+        <DefinePinned v-slot="{ open: editorOpen }">
+          <ul class="pin-slot">
+            <TeamSlot
+              v-if="pinned !== null"
+              :ref="setPinEl"
+              :member="members[pinned]!"
+              :active="picking?.slot === pinned && picking.pin ? picking.field : null"
+              :spreads="spreadsOf(members[pinned]!)"
+              :clashes="clashes[pinned]"
+              :evolved="evolving === pinned"
+              pinned
+              :open="editorOpen"
+              @update:open="pinSide ? (pinEditing = $event) : (dockEdit = 'points')"
+              @mega="toggleMega(pinned)"
+              @pin="togglePin(pinned)"
+              @field="picking = { slot: pinned, field: $event, pin: true }"
+              @change="update(pinned, $event)"
+              @clear="clearSlot(pinned)"
+            />
+          </ul>
+        </DefinePinned>
+        <aside v-if="pinned !== null && pinSide" class="pin-col side" :aria-label="t('builder.pinned')">
+          <ReusePinned :open="pinEditing" />
+        </aside>
+        <!-- Narrower, in a dialog over the page, the page dimmed and still behind it: a bar naming it, unpinning it;
+             a chart, and what's edited. Closing it unpins it. -->
+        <ModalDialog
+          v-if="!pinSide"
+          :open="pinned !== null"
+          :label="t('builder.pinned')"
+          fill
+          @update:open="!$event && (pinnedAt = null)"
+        >
+          <div v-if="pinned !== null" class="panel pin-dialog">
+            <div class="pin-bar">
+              <span class="pin-title">
+                <PokemonIcon :id="battling[pinned]!.as!" />
+                <span class="pin-name">{{ refName(pokemon(battling[pinned]!.as!)) }}</span>
+              </span>
+              <button type="button" class="pin-off" :aria-label="t('builder.unpin')" @click="togglePin(pinned)">
+                <PinOff :size="16" aria-hidden="true" />
+              </button>
+            </div>
+            <div class="dock-body">
+              <section class="dock-chart">
+                <SegmentedControl
+                  v-model="dockChart"
+                  class="soft dock-tabs"
+                  :label="t('builder.pinChart')"
+                  :options="dockCharts"
+                />
+                <TeamSpeed v-if="dockChart === 'speed'" bare :members="battling" :meta="balance" />
+                <TeamBalance v-else bare :side="dockChart" :members="battling" :meta="balance" />
+              </section>
+              <section class="dock-edit">
+                <SegmentedControl
+                  v-model="dockEdit"
+                  class="soft dock-tabs"
+                  :label="t('builder.pinEdit')"
+                  :options="dockEdits"
+                />
+                <template v-if="dockEdit === 'points'">
+                  <p class="dock-line">
+                    <button
+                      type="button"
+                      class="dock-nature"
+                      :class="{ placeholder: !members[pinned]!.nature }"
+                      @click="picking = { slot: pinned, field: 'nature', pin: true }"
+                    >
+                      {{ members[pinned]!.nature ? natureName(members[pinned]!.nature!) : t('builder.nature') }}
+                    </button>
+                    <span v-if="dockLeft" class="dock-left">{{ dockLeft }}</span>
+                  </p>
+                  <PointsEditor
+                    no-confirm
+                    :points="members[pinned]!.points"
+                    :pokemon="battling[pinned]!.as!"
+                    :nature="members[pinned]!.nature"
+                    :spreads="spreadsOf(members[pinned]!)"
+                    @update:points="update(pinned, { points: $event })"
+                    @preset="update(pinned, { points: [...$event.points], nature: $event.nature })"
+                  />
+                </template>
+                <ReusePinned v-else :open="false" />
+              </section>
+            </div>
+          </div>
+        </ModalDialog>
+        <div class="insight-panels">
+          <TeamSpeed id="sec-speed" :members="battling" :meta="balance" />
+          <TeamBalance id="sec-defense" side="defense" :members="battling" :meta="balance" />
+          <TeamBalance id="sec-offense" side="offense" :members="battling" :meta="balance" />
+        </div>
+      </div>
     </div>
 
     <!-- Right after a Pokémon's picked, its most common set, to load rather than put the set together. -->
@@ -497,7 +648,7 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
     </SideDrawer>
 
     <!-- On phones, the picker over the page. -->
-    <ModalDialog v-if="!wide" v-model:open="pickerOpen" :label="t('builder.picker')" fill>
+    <ModalDialog v-if="pickerDialog" v-model:open="pickerOpen" :label="t('builder.picker')" fill>
       <div v-if="picking && current" ref="pickerBox" class="panel picker-dialog">
         <TeamPicker
           :member="members[picking.slot]!"
@@ -754,6 +905,123 @@ section {
   grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   align-items: start;
+}
+/* The insights, and with a slot pinned on wide screens, a column of it beside them. */
+.insights,
+.insight-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.insights.pinning {
+  display: grid;
+  grid-template-columns: 21em minmax(0, 1fr);
+  align-items: start;
+}
+.pin-slot {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* Beside them, stuck under the row of section links as they scroll; scrolling when taller than the screen. */
+.pin-col.side {
+  position: sticky;
+  top: 52px;
+  max-height: calc(100dvh - 64px);
+  padding: 0 4px 4px 0;
+  overflow-y: auto;
+}
+/* Narrower, its dialog's card: as tall as the screen leaves, a bar naming it, then a chart and what's edited,
+   scrolling. */
+.pin-dialog {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+.pin-bar {
+  display: flex;
+  align-items: stretch;
+  background: var(--panel-alt);
+  border-bottom: 1px solid var(--ink);
+}
+.pin-title {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 2px 10px;
+  font-weight: bold;
+}
+.pin-off {
+  padding: 0 12px;
+  color: var(--accent);
+  background: none;
+  border: 0;
+  border-left: 1px solid var(--border);
+  cursor: pointer;
+}
+.pin-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dock-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  padding: 8px 10px 10px;
+  overflow-y: auto;
+}
+.dock-chart,
+.dock-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+/* What's edited at the card's foot, the chart over it at the top. */
+.dock-edit {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.dock-tabs {
+  align-self: flex-start;
+}
+.dock-line {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
+  font-size: 0.9em;
+}
+.dock-left {
+  font-weight: bold;
+  color: var(--accent);
+}
+.dock-nature {
+  padding: 0;
+  font: inherit;
+  font-weight: bold;
+  color: var(--link);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.dock-nature.placeholder {
+  padding: 0 6px;
+  font-weight: normal;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+}
+.dock-edit .pin-slot :deep(.set) {
+  box-shadow: none;
 }
 .team-head {
   display: flex;

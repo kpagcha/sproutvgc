@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ChevronDown, ChevronUp, X } from '@lucide/vue'
+import { ChevronDown, ChevronUp, Pin, PinOff, X } from '@lucide/vue'
 import { ability, item, move, pokemon, type MoveId } from '@/data/dex'
 import type { Spread } from '@/data/meta'
 import { MOVES } from '@/data/moves'
@@ -25,7 +25,8 @@ import { natureTip } from '@/components/natureTip'
 // while it is, the card shows the Mega (its name, sprite, types and stats, and its ability after the one its sheet
 // registers). A part that breaks the team's rules (`clashes`: its Pokémon, item, ability or a move, with why) is
 // marked, its tooltip saying why. The first step (`hint`: the team has no Pokémon yet), its Pokémon's placeholders
-// glowing in the accent and back, in a loop, until its picker opens.
+// glowing in the accent and back, in a loop, until its picker opens. A pin by its clearing pins it beside the team's
+// insights (`pinned`, `pin`), to edit it there as they follow.
 const props = defineProps<{
   member: Member
   active: Field | null
@@ -35,10 +36,14 @@ const props = defineProps<{
   evolved?: boolean
   /** The first step: its Pokémon's placeholders glow in a loop. */
   hint?: boolean
+  /** It's pinned beside the team's insights (`pin` toggling it). */
+  pinned?: boolean
 }>()
-const emit = defineEmits<{ field: [field: Field]; clear: []; change: [patch: Partial<Member>]; mega: [] }>()
+const emit = defineEmits<{ field: [field: Field]; clear: []; change: [patch: Partial<Member>]; mega: []; pin: [] }>()
 const open = defineModel<boolean>('open', { default: false })
 
+// The pin's tooltip only where there's hover: tapped, it'd stay behind as the slot's pinned or unpinned.
+const canHover = window.matchMedia('(hover: hover)').matches
 const mega = computed(() => stoneMega(props.member))
 /** The Pokémon the card shows: its Mega while it's the one that Mega Evolves, else itself. */
 const shown = computed(() => (props.evolved && mega.value) || props.member.pokemon)
@@ -101,6 +106,18 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
           </button>
         </span>
       </span>
+      <button
+        v-if="shown"
+        v-tip="canHover ? t(pinned ? 'builder.unpin' : 'builder.pin') : undefined"
+        type="button"
+        class="clear pin"
+        :class="{ on: pinned }"
+        :aria-pressed="!!pinned"
+        :aria-label="t(pinned ? 'builder.unpin' : 'builder.pin')"
+        @click="emit('pin')"
+      >
+        <component :is="pinned ? PinOff : Pin" :size="14" aria-hidden="true" />
+      </button>
       <button
         v-if="shown"
         v-tip="t('builder.clearSlot')"
@@ -356,6 +373,18 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
   background: none;
   border: 0;
   cursor: pointer;
+}
+/* The pin, beside the clearing; in the accent while pinned. */
+.pin + .clear {
+  margin-left: -6px;
+}
+.pin.on,
+.pin:hover,
+.clear:hover {
+  color: var(--text);
+}
+.pin.on {
+  color: var(--accent);
 }
 .set-facts {
   display: flex;

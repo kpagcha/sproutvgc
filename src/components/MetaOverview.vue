@@ -5,14 +5,14 @@ import type { MetaData, MetaSnapshot } from '@/data/meta'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { useMetaBalance } from '@/composables/useMetaBalance'
-import { LANE_KEYS, metaOverview, type OffenseMode, type Plotted, type Side } from '@/lib/teamBalance'
+import { LANE_KEYS, metaOverview, offenseModeOf, type OffenseMode, type Plotted, type Side } from '@/lib/teamBalance'
 import BalanceLanes, { type LaneView } from '@/components/BalanceLanes.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 
 // The rankings' overview of the meta's physical and special side, after its trends: two cards, its bulk and its
 // attack, each the team builder's chart (`BalanceLanes`): the meta's spread of values on each side, and its most used
 // Pokémon (`OVERVIEW`) placed on it at their most common spread (`metaOverview`); attacking, measured by stats alone or
-// with each one's best move at its peak, as the team builder can (remembered apart from it). The meta's side is worked
+// with each one's best move, typically or at its peak, as the team builder can (remembered apart from it). The meta's side is worked
 // out once per dataset when the browser is idle (`useMetaBalance`), placeholders until then.
 const props = defineProps<{ snapshot: MetaSnapshot | undefined; data: MetaData | null | undefined }>()
 const balance = useMetaBalance(
@@ -24,7 +24,7 @@ const state = computed(() => (balance.value === undefined ? 'pending' : balance.
 const MODE_KEY = 'sproutvgc.metaOverview.mode'
 const mode = shallowRef<OffenseMode>('stats')
 try {
-  if (localStorage.getItem(MODE_KEY) === 'moves') mode.value = 'moves'
+  mode.value = offenseModeOf(localStorage.getItem(MODE_KEY)) ?? 'stats'
 } catch {
   // Storage unavailable: by stats.
 }
@@ -58,6 +58,7 @@ function lanesOf(kind: 'defense' | 'offense'): LaneView[] {
         ? t(`builder.balance.share.${side}`, { pct: pct(side === 'physical' ? split : 1 - split) })
         : undefined,
     shape: b?.[LANE_KEYS[kind === 'defense' ? 'defense' : mode.value][side]].shape ?? null,
+    peakShape: kind !== 'defense' && mode.value === 'moves' ? (b?.[LANE_KEYS.peak[side]].shape ?? null) : null,
     points: points?.[side] ?? [],
     mean: null,
   }))

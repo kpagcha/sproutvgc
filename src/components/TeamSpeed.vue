@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { computed, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, useTemplateRef } from 'vue'
 import { move, pokemon, type PokemonId } from '@/data/dex'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
+import { useChartModes } from '@/composables/useChartModes'
 import { useOpenState } from '@/composables/useOpenState'
 import { buildQuery } from '@/lib/speedBuild'
 import type { Battler } from '@/lib/team'
 import type { MetaBalance, Plotted } from '@/lib/teamBalance'
-import { teamSpeed, type ControlKind, type SpeedControl, type SpeedMode } from '@/lib/teamSpeed'
+import { teamSpeed, type ControlKind, type SpeedControl } from '@/lib/teamSpeed'
 import AppLink from '@/components/AppLink'
 import BalanceLanes, { type LaneView } from '@/components/BalanceLanes.vue'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -17,10 +18,12 @@ import SegmentedControl from '@/components/SegmentedControl.vue'
 // chart against the meta's Speeds (`BalanceLanes`, one lane; the team's side as it is, in Tailwind or under Trick Room,
 // its choice in the card's header, remembered), with the ways to the speed tiers (the team found there) and the
 // comparison (the team as yours, at its builds) under it, and what controls Speed on the team. The meta's side comes in after the page (`meta`: undefined until
-// then, null with no meta). Folds, folded by default on phones, then as last left.
+// then, null with no meta). Folds, folded by default on phones, then as last left. Bare (`bare`), its chart alone with
+// its choice over it, for the pinned slot's dock on phones, the choice shared with the panel (`useChartModes`).
 const props = defineProps<{
   members: readonly Battler[]
   meta: MetaBalance | null | undefined
+  bare?: boolean
 }>()
 
 const { open, onToggle } = useOpenState('sproutvgc.builder.speedOpen', !window.matchMedia('(max-width: 720px)').matches)
@@ -28,22 +31,8 @@ const pending = computed(() => props.meta === undefined)
 const pct = (x: number) => `${Math.round(x * 100)}%`
 const name = (id: PokemonId) => refName(pokemon(id))
 
-const MODE_KEY = 'sproutvgc.builder.speedMode'
 const MODES = ['none', 'tailwind', 'trickroom'] as const
-const mode = shallowRef<SpeedMode>('none')
-try {
-  const saved = localStorage.getItem(MODE_KEY)
-  if ((MODES as readonly (string | null)[]).includes(saved)) mode.value = saved as SpeedMode
-} catch {
-  // Storage unavailable: as it is.
-}
-watch(mode, (m) => {
-  try {
-    localStorage.setItem(MODE_KEY, m)
-  } catch {
-    // Storage unavailable: the choice lasts for this page load.
-  }
-})
+const { speedMode: mode } = useChartModes()
 const modes = computed(() => MODES.map((value) => ({ value, label: t(`builder.speed.mode.${value}`) })))
 
 const speed = computed(() => teamSpeed(props.members, props.meta?.speed ?? null, mode.value))
@@ -100,7 +89,18 @@ const howBody = useTemplateRef<HTMLElement>('howBody')
 </script>
 
 <template>
-  <details class="panel banded balance" :open @toggle="onToggle">
+  <div v-if="bare" class="bare">
+    <SegmentedControl v-model="mode" class="mode soft" :label="t('builder.speed.modeLabel')" :options="modes" />
+    <BalanceLanes
+      :lanes
+      :ends
+      :tip
+      :mean-tip
+      :rows="2"
+      :state="pending ? 'pending' : meta === null ? 'none' : undefined"
+    />
+  </div>
+  <details v-else class="panel banded balance" :open @toggle="onToggle">
     <summary>{{ t('builder.section.speed') }}</summary>
     <p v-if="pending" class="verdict bone" aria-hidden="true"></p>
     <p v-else-if="verdict" class="verdict">{{ verdict }}</p>
@@ -158,6 +158,12 @@ const howBody = useTemplateRef<HTMLElement>('howBody')
 </template>
 
 <style scoped>
+/* Bare: its choice over its chart. */
+.bare {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 .balance > summary {
   cursor: pointer;
   font-family: var(--font-display, inherit);
