@@ -644,8 +644,9 @@ function face(f: Fighter) {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   column-gap: 16px;
 }
+/* Scrolled to (a row of the meta's list making it the opponent), clear of the row of links stuck to the top. */
 .duel > :deep(section) {
-  scroll-margin-top: 12px;
+  scroll-margin-top: calc(var(--nav-h, 0px) + 12px);
 }
 @media (min-width: 900px) {
   .duel {
