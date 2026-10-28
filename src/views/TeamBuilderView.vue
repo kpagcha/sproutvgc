@@ -387,7 +387,13 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
         <div v-if="folded" class="saved-menu">
           <button type="button" class="saved-toggle" :aria-expanded="menuOpen" @click="menuOpen = !menuOpen">
             <span class="saved-name">{{ current?.name || t('builder.untitled') }}</span>
-            <span class="saved-icons"><PokemonIcon v-for="(p, i) in icons(members)" :id="p" :key="i" /></span>
+            <!-- Its six slots, an empty one a placeholder, so on phones the row under its name is never blank. -->
+            <span class="saved-icons">
+              <template v-for="(m, i) in members" :key="i">
+                <PokemonIcon v-if="m.pokemon" :id="m.pokemon" />
+                <span v-else class="icon-blank" aria-hidden="true"></span>
+              </template>
+            </span>
             <span class="muted saved-count">{{ t('builder.teamsCount', { n: teams.length }) }}</span>
             <ChevronDown :size="16" aria-hidden="true" />
           </button>
@@ -657,6 +663,21 @@ section {
   display: inline-flex;
   min-height: 30px;
   align-items: center;
+}
+/* An empty slot, as big as a Pokémon's icon: a small dashed box in its middle. */
+.icon-blank {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 30px;
+}
+.icon-blank::before {
+  content: '';
+  width: 18px;
+  height: 18px;
+  border: 1px dashed var(--border);
 }
 /* Its icon centered in it, not on a line of text's baseline, so it sits level with the name and the Pokémon. */
 .icon-btn {
