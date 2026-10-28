@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { createReusableTemplate, useElementSize, useMediaQuery, watchDebounced } from '@vueuse/core'
+import { createReusableTemplate, useElementSize, useEventListener, useMediaQuery, watchDebounced } from '@vueuse/core'
 import {
   ArrowLeftRight,
   Check,
@@ -47,6 +47,7 @@ import MetaDialog from '@/components/MetaDialog.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
 import OptionsMenu from '@/components/OptionsMenu.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import ScrollRow from '@/components/ScrollRow.vue'
 import SectionNav from '@/components/SectionNav.vue'
 import SetupStar from '@/components/SetupStar.vue'
 import SideDrawer from '@/components/SideDrawer.vue'
@@ -77,6 +78,22 @@ const sections = computed(() => [
   ...(battlerOf(sides.value.a) ? [{ id: 'calc-meta', label: t('calc.meta.title') }] : []),
 ])
 const nav = useTemplateRef<InstanceType<typeof SectionNav>>('nav')
+// The field's bar, stuck under the row of links; on phones the sides' bands stick under it (`--bar-h`, its height).
+const bar = useTemplateRef<HTMLElement>('bar')
+const { height: barH } = useElementSize(bar, undefined, { box: 'border-box' })
+// Stuck: its top at the row of links' foot, checked as the page scrolls; toned down then (`stuck`).
+const barStuck = shallowRef(false)
+let barFrame = 0
+function checkBar() {
+  barFrame = 0
+  const el = bar.value
+  barStuck.value = !!el && window.scrollY > 0 && el.getBoundingClientRect().top <= navH.value + 0.5
+}
+const onBarScroll = () => {
+  if (!barFrame) barFrame = requestAnimationFrame(checkBar)
+}
+useEventListener(window, 'scroll', onBarScroll, { passive: true })
+useEventListener(window, 'resize', onBarScroll)
 const { height: navH } = useElementSize(() => nav.value?.$el as HTMLElement | undefined, undefined, {
   box: 'border-box',
 })
@@ -297,8 +314,8 @@ const fieldOn = computed(() =>
   [
     field.value.weather ? weatherOf(field.value.weather) : undefined,
     field.value.terrain ? terrainOf(field.value.terrain) : undefined,
-    // Trick Room's toggle beside them says it.
-    ...field.value.effects.filter((e) => e !== 'trickRoom').map(fieldOf),
+    // Trick Room's toggle beside them says it, but while the bar's stuck, without it.
+    ...field.value.effects.filter((e) => barStuck.value || e !== 'trickRoom').map(fieldOf),
   ].filter((c) => !!c),
 )
 const trickRoom = computed(() => field.value.effects.includes('trickRoom'))
@@ -356,7 +373,7 @@ function face(f: Fighter) {
 </script>
 
 <template>
-  <div class="calc" :style="{ '--nav-h': `${navH}px` }">
+  <div class="calc" :style="{ '--nav-h': `${navH}px`, '--bar-h': `${barH}px` }">
     <SectionNav ref="nav" :sections />
     <section id="calc-top" class="panel head-panel">
       <div class="head">
@@ -366,42 +383,46 @@ function face(f: Fighter) {
           <RotateCcw :size="14" aria-hidden="true" />{{ t('calc.reset') }}
         </button>
       </div>
-      <!-- The field's conditions: folding under the toggle, Trick Room at hand, and those on named while folded. -->
-      <div class="toolbar">
-        <div class="options">
-          <button
-            type="button"
-            class="btn"
-            :class="{ on: fieldOpen }"
-            :aria-expanded="fieldOpen"
-            aria-controls="calc-field"
-            @click="fieldOpen = !fieldOpen"
-          >
-            <SlidersHorizontal :size="16" aria-hidden="true" /><span class="long">{{ t('calc.conditions') }}</span
-            ><span class="short">{{ t('calc.conditionsShort') }}</span
-            ><span class="on-count" :class="{ none: !fieldOn.length }">{{ fieldOn.length }}</span
-            ><ChevronDown :size="14" class="fold-chev" :class="{ open: fieldOpen }" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            class="btn switch"
-            :class="{ on: trickRoom }"
-            :aria-pressed="trickRoom"
-            @click="toggleTrickRoom"
-          >
-            <Box :size="16" aria-hidden="true" />{{ t('speed.mod.trickroom') }}
-          </button>
-        </div>
-        <ul v-if="fieldOn.length && !fieldOpen" class="field-on" :aria-label="t('calc.fieldOn')">
-          <li v-for="c in fieldOn" :key="c!.key">
+    </section>
+    <!-- The field's conditions, a panel of its own stuck under the row of links as the page scrolls, so they're at hand
+         beside the sides. -->
+    <div ref="bar" class="panel field-bar" :class="{ stuck: barStuck }">
+      <!-- One row, sliding sideways where it doesn't fit: the toggle, Trick Room at hand (while stuck, among the
+           conditions inside, the bar kept to one row), and those on named while folded. -->
+      <ScrollRow class="toolbar">
+        <button
+          type="button"
+          class="btn"
+          :class="{ on: fieldOpen }"
+          :aria-expanded="fieldOpen"
+          aria-controls="calc-field"
+          @click="fieldOpen = !fieldOpen"
+        >
+          <SlidersHorizontal :size="16" aria-hidden="true" /><span class="long">{{ t('calc.conditions') }}</span
+          ><span class="short">{{ t('calc.conditionsShort') }}</span
+          ><span class="on-count" :class="{ none: !fieldOn.length }">{{ fieldOn.length }}</span
+          ><ChevronDown :size="14" class="fold-chev" :class="{ open: fieldOpen }" aria-hidden="true" />
+        </button>
+        <button
+          v-if="!barStuck"
+          type="button"
+          class="btn switch"
+          :class="{ on: trickRoom }"
+          :aria-pressed="trickRoom"
+          @click="toggleTrickRoom"
+        >
+          <Box :size="16" aria-hidden="true" />{{ t('speed.mod.trickroom') }}
+        </button>
+        <template v-if="!fieldOpen">
+          <span v-for="c in fieldOn" :key="c!.key" class="field-on">
             <component :is="c!.icon" v-if="c!.icon" :size="14" aria-hidden="true" />{{ conditionName(c!) }}
-          </li>
-        </ul>
-      </div>
+          </span>
+        </template>
+      </ScrollRow>
       <div v-if="fieldOpen" id="calc-field" class="field-conditions">
         <CalcConditions :field :data @field="field = $event" />
       </div>
-    </section>
+    </div>
 
     <div id="calc-duel" class="duel" :class="{ aligned: hasBoth, stacked: !wide }">
       <template v-for="k in ['a', 'b'] as const" :key="k">
@@ -591,10 +612,12 @@ function face(f: Fighter) {
   margin-bottom: -4px;
 }
 /* Room above a section scrolled to for the row of links stuck to the top. */
-#calc-top,
+#calc-top {
+  scroll-margin-top: calc(var(--nav-h, 0px) + 8px);
+}
 #calc-duel,
 #calc-meta {
-  scroll-margin-top: calc(var(--nav-h, 0px) + 8px);
+  scroll-margin-top: calc(var(--nav-h, 0px) + var(--bar-h, 0px) + 8px);
 }
 .head-panel {
   margin: 0;
@@ -611,35 +634,51 @@ function face(f: Fighter) {
 .head-meta {
   margin-left: auto;
 }
-.toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 16px;
-  margin-top: 14px;
+/* The field's bar: stuck under the row of links, over the sides as they scroll under it; unfolded, scrolling when
+   taller than the screen leaves it. */
+.field-bar {
+  position: sticky;
+  top: var(--nav-h, 0px);
+  z-index: 41;
+  max-height: calc(100dvh - var(--nav-h, 0px) - 12px);
+  margin: -6px 0 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
-.options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+/* Stuck, toned down as the speed tiers' bar pinned over their ladder: on the panel's color, no outline nor shadow, a
+   strong rule under it, slimmer. */
+:root:root .field-bar.stuck {
+  padding-block: 6px;
+  border-color: transparent;
+  border-bottom: 1px solid var(--border-strong);
+  box-shadow: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .field-bar {
+    transition: none;
+  }
+}
+.toolbar {
+  --gap: 10px;
+}
+.toolbar .btn {
+  flex: none;
 }
 .btn.switch.on {
   background: var(--sel);
 }
+/* The conditions on, named while folded. */
 .field-on {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 14px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  font-size: 0.9em;
-  font-weight: bold;
-}
-.field-on li {
   display: inline-flex;
+  flex: none;
   align-items: center;
   gap: 5px;
+  font-size: 0.9em;
+  font-weight: bold;
+  white-space: nowrap;
 }
 .fold-chev {
   transition: transform 0.15s;
@@ -674,7 +713,7 @@ function face(f: Fighter) {
 }
 /* Scrolled to (a row of the meta's list making it the opponent), clear of the row of links stuck to the top. */
 .duel > :deep(section) {
-  scroll-margin-top: calc(var(--nav-h, 0px) + 12px);
+  scroll-margin-top: calc(var(--nav-h, 0px) + var(--bar-h, 0px) + 12px);
 }
 @media (min-width: 900px) {
   .duel {
@@ -702,7 +741,7 @@ function face(f: Fighter) {
 .band {
   --band-h: 44px;
   position: sticky;
-  top: calc(var(--nav-h, 0px) + var(--i) * (var(--band-h) - 2px));
+  top: calc(var(--nav-h, 0px) + var(--bar-h, 0px) + var(--i) * (var(--band-h) - 2px));
   z-index: calc(40 - var(--i));
   display: flex;
   align-items: center;
@@ -749,7 +788,7 @@ function face(f: Fighter) {
   padding-left: calc(var(--panel-pad, 12px) + 4px);
   border: 2px solid var(--ink);
   box-shadow: inset 6px 0 var(--side);
-  scroll-margin-top: calc(var(--nav-h, 0px) + 2 * 42px);
+  scroll-margin-top: calc(var(--nav-h, 0px) + var(--bar-h, 0px) + 2 * 42px);
 }
 .duel.stacked > .band + .band,
 .duel.stacked > section + .band {

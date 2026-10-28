@@ -220,7 +220,6 @@ export const messages = {
   'calc.sideGroup.ally': 'Its ally',
   'calc.sideGroup.hazards': 'Hazards it came in on',
   'calc.sideGroup.on': 'On it',
-  'calc.fieldOn': 'On the field',
   'calc.section.field': 'Field',
   'calc.section.damage': 'Damage',
   'calc.moreConditions': 'More ({n})',
