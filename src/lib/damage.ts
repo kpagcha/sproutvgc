@@ -214,6 +214,32 @@ export function leadOf(a: number, b: number, field: Battlefield): Lead {
   return a > b !== field.effects.includes('trickRoom') ? 'a' : 'b'
 }
 
+/** Whether a side's on the ground, as Showdown's `Pokemon.isGrounded` has it: under Gravity or holding an Iron Ball it is;
+ * else not when Flying-type, with Levitate or holding an Air Balloon (items doing nothing in Magic Room). */
+function grounded(f: Fighter, field: Battlefield): boolean {
+  const item = field.effects.includes('magicRoom') ? null : f.member.item
+  if (field.effects.includes('gravity') || item === 'ironball') return true
+  const id = battlerOf(f)
+  if (id && POKEMON[id]?.types.includes('flying')) return false
+  if (abilityOf(f) === 'levitate') return false
+  return item !== 'airballoon'
+}
+
+/** A move's priority in the battle, as Showdown's `onModifyPriority` handlers change it: Grassy Glide +1 in Grassy
+ * Terrain from a grounded user, Gale Wings +1 to Flying moves at full HP, Prankster +1 to status moves, Triage +3 to
+ * healing moves. */
+export function priorityOf(f: Fighter, move: MoveId, field: Battlefield): number {
+  const m = MOVES[move]
+  if (!m) return 0
+  let p = m.priority
+  if (move === 'grassyglide' && field.terrain === 'Grassy' && grounded(f, field)) p += 1
+  const ability = abilityOf(f)
+  if (ability === 'galewings' && m.type === 'flying' && f.hp === 100) p += 1
+  if (ability === 'prankster' && m.category === 'status') p += 1
+  if (ability === 'triage' && m.flags.includes('heal')) p += 3
+  return p
+}
+
 /** Whether a move goes before the other side's move (one at no priority) or after: by its priority, else by Speed. */
 export function orderOf(
   attacker: Fighter,
@@ -221,7 +247,7 @@ export function orderOf(
   move: MoveId,
   field: Battlefield,
 ): 'first' | 'last' | 'tie' | null {
-  const prio = MOVES[move]?.priority ?? 0
+  const prio = priorityOf(attacker, move, field)
   if (prio) return prio > 0 ? 'first' : 'last'
   const a = speedOf(attacker, field)
   const d = speedOf(defender, field)
@@ -265,6 +291,8 @@ export interface Hit {
   /** For a move whose power hangs on the order (Payback, Analytic), the order it was worked out at; a Speed tie as
    * moving last. */
   order: 'first' | 'last' | null
+  /** Its priority in the battle (`priorityOf`): Grassy Glide's in Grassy Terrain, Prankster's and the like. */
+  priority: number
 }
 
 export interface HitOptions {
@@ -306,7 +334,11 @@ export function hit(
   const a = pokemonOf(attacker)
   const d = pokemonOf(defender)
   if (!a || !d) return null
-  return { ...hitOf(a, d, move, field, sideOf(attacker), sideOf(defender), opts), order }
+  return {
+    ...hitOf(a, d, move, field, sideOf(attacker), sideOf(defender), opts),
+    order,
+    priority: priorityOf(attacker, move, field),
+  }
 }
 
 function hitOf(
@@ -317,7 +349,7 @@ function hitOf(
   atkSide: ReturnType<typeof sideOf>,
   defSide: ReturnType<typeof sideOf>,
   opts: HitOptions,
-): Omit<Hit, 'order'> {
+): Omit<Hit, 'order' | 'priority'> {
   const mv = new Move(
     GEN,
     named((x) => GEN.moves.get(x), move),
@@ -433,8 +465,8 @@ export function oneOnOne(a: Fighter, b: Fighter, field: Battlefield): OneOnOne |
     bestHit(x.member.moves.filter((m): m is MoveId => !!m).map((m) => hit(x, y, m, field)))
   const ha = best(a, b)
   const hb = best(b, a)
-  const pa = ha ? (MOVES[ha.move]?.priority ?? 0) : 0
-  const pb = hb ? (MOVES[hb.move]?.priority ?? 0) : 0
+  const pa = ha ? priorityOf(a, ha.move, field) : 0
+  const pb = hb ? priorityOf(b, hb.move, field) : 0
   const first: Lead = pa !== pb ? (pa > pb ? 'a' : 'b') : leadOf(sa, sb, field)
   const na = ha ? hitsToKo(ha) : Infinity
   const nb = hb ? hitsToKo(hb) : Infinity

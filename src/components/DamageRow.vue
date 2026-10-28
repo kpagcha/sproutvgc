@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { Check, ChevronDown, ChevronUp, Copy, Crosshair, Zap } from '@lucide/vue'
 import { move, type MoveId } from '@/data/dex'
-import { isSpread, MOVES, priorityLabel } from '@/data/moves'
+import { isSpread, MOVES } from '@/data/moves'
 import { t, tSplit, typeName } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { copy } from '@/lib/clipboard'
@@ -55,14 +55,15 @@ async function share() {
   setTimeout(() => (copied.value = false), 1500)
 }
 const HITS = [2, 3, 4, 5]
-/** What the order does to it: a priority move's priority; one whose power hangs on the order (Payback,
+/** What the order does to it: a priority move's priority, as the battle has it; one whose power hangs on the order (Payback,
  * Bolt Beak, Analytic's user) at the order the battle has. */
 const note = computed(() => {
   const h = props.hit
   const mv = m.value
   if (!mv || mv.category === 'status' || h?.none) return ''
-  const prio = priorityLabel(mv)
-  if (prio) return t('calc.priority', { n: prio })
+  // Its priority in the battle (Grassy Glide's in Grassy Terrain), else its own.
+  const p = h ? h.priority : mv.priority
+  if (p) return t('calc.priority', { n: p > 0 ? `+${p}` : `−${-p}` })
   if (!h?.order || h.none) return ''
   const kind =
     props.id === 'payback'

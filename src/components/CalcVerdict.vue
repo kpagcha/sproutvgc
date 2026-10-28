@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { move, pokemon } from '@/data/dex'
-import { MOVES, priorityLabel } from '@/data/moves'
 import { natureEffectOn } from '@/data/natures'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
@@ -41,12 +40,13 @@ const verdict = computed(() => {
 const rows = computed(() =>
   (['a', 'b'] as const).map((k) => {
     const h = duel.value?.[k] ?? null
-    const m = h ? MOVES[h.move] : null
+    // Its priority in the battle (Grassy Glide's in Grassy Terrain).
+    const p = h?.priority ?? 0
     return {
       k,
       id: ids.value[k]!,
       move: h ? refName(move(h.move)) : null,
-      prio: m ? priorityLabel(m) : null,
+      prio: p > 0 ? `+${p}` : p < 0 ? `−${-p}` : null,
       ko: koText(h),
     }
   }),
