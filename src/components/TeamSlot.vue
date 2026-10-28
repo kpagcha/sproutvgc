@@ -55,7 +55,7 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
 </script>
 
 <template>
-  <li class="set" :class="{ empty: !shown, hint: hint && !active }">
+  <li class="set" :class="{ empty: !shown, beckon: hint && !active }">
     <div class="set-head">
       <button
         type="button"
@@ -283,8 +283,8 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
   flex: none;
 }
 /* The first step: the Pokémon's placeholders glowing in the accent and back, slowly; held lit with reduced motion. */
-.hint .blank,
-.hint .set-name.placeholder {
+.beckon .blank,
+.beckon .set-name.placeholder {
   animation: hint 2.4s ease-in-out infinite;
 }
 @keyframes hint {
@@ -299,8 +299,8 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hint .blank,
-  .hint .set-name.placeholder {
+  .beckon .blank,
+  .beckon .set-name.placeholder {
     animation: none;
     color: var(--accent);
     border-color: var(--accent);
