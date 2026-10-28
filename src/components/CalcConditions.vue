@@ -20,10 +20,11 @@ import {
 import StageStepper from '@/components/StageStepper.vue'
 
 // The damage calculator's battle conditions, in place where they apply: the whole field's (without `side`: the weather
-// and the terrain, one of each at a time, a bar of joined choices, each a radio's circle; then what's on the field,
-// any together, separate chips, each a checkbox's square), or one side's (`side`: its chips), each filled when on. Of
-// the chips, the common ones in the meta shown (`isCommon`) first; the rest under More (a side's grouped: its ally's
-// help, the hazards it came in on, what's on the Pokémon itself), as last left, unfolded anyway when one is on.
+// and the terrain, one of each at a time, a bar of joined choices, each a radio's circle, the one on tapped going back
+// to None; then what's on the field, any together, separate chips, each a checkbox's square), or one side's (`side`:
+// its chips), each filled when on. Of the chips, the common ones in the meta shown (`isCommon`) first; the rest under
+// More (a side's grouped: its ally's help, the hazards it came in on, what's on the Pokémon itself), as last left,
+// unfolded anyway when one is on.
 const props = defineProps<{
   field: Battlefield
   side?: { key: 'a' | 'b'; fighter: Fighter }
@@ -177,7 +178,7 @@ const [DefineMore, More] = createReusableTemplate()
           class="choice no-lift"
           :class="{ on: field[kind] === c.key }"
           :aria-checked="field[kind] === c.key"
-          @click="setField({ [kind]: c.key })"
+          @click="setField({ [kind]: field[kind] === c.key ? '' : c.key })"
         >
           <span class="mark round" aria-hidden="true"><Circle :size="14" /></span>
           <component :is="c.icon" v-if="c.icon" :size="16" aria-hidden="true" />{{ conditionName(c) }}
