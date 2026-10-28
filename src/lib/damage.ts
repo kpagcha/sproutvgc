@@ -20,12 +20,12 @@ import {
   type PokemonId,
   type Ref,
 } from '@/data/dex'
-import { ITEMS } from '@/data/items'
 import type { MetaData } from '@/data/meta'
 import { MOVES } from '@/data/moves'
 import { POKEMON, STATS } from '@/data/pokemon'
 import { chart, TYPES, type TypeId } from '@/data/types'
-import { emptyMember, MOVE_SLOTS, stoneMega, type Member, type Points } from '@/lib/team'
+import { commonMember, isMega, mostUsedForme } from '@/lib/commonSet'
+import { emptyMember, stoneMega, type Member } from '@/lib/team'
 
 const GEN = Generations.get(0)
 
@@ -456,47 +456,13 @@ export function statsOf(f: Fighter): Record<(typeof STATS)[number], number> | nu
 /** A move's hits as it can be told to hit: those whose hits vary (2 to 5) take a number. */
 export const variableHits = (move: MoveId) => MOVES[move]?.hits === 5
 
-const isMega = (id: PokemonId) => !!POKEMON[id]?.mega && !!POKEMON[id]?.battleOnly
+/** A Pokémon's most common set in the meta (`commonMember`), a Mega Mega Evolving. */
+export const commonSet = (id: PokemonId, data: MetaData | null | undefined): Fighter => ({
+  ...emptyFighter(commonMember(id, data)),
+  mega: isMega(id),
+})
 
-/** A Pokémon's most common set in the meta: its most used item, ability, spread (nature and points), and moves (its
- * four most used, damaging or not). A Mega is the Pokémon it changes from holding its stone, Mega Evolving. With no
- * meta, or none of it, the Pokémon alone, with its only ability if it has one. */
-export function commonSet(id: PokemonId, data: MetaData | null | undefined): Fighter {
-  const mega = isMega(id)
-  const base = mega ? POKEMON[id].battleOnly! : id
-  const entry = data?.[id]
-  const baseEntry = data?.[base]
-  const m: Member = { ...emptyMember(), pokemon: base }
-  const abilities = POKEMON[base].abilities
-  m.ability = baseEntry?.abilities?.[0]?.id ?? (abilities.length === 1 ? abilities[0]! : (abilities[0] ?? null))
-  if (mega) m.item = POKEMON[id].item ?? null
-  else m.item = entry?.items?.find((x) => ITEMS[x.id])?.id ?? null
-  const spread = entry?.spreads?.[0]
-  if (spread) {
-    m.nature = spread.nature
-    m.points = [...spread.points] as Points
-  } else m.nature = entry?.natures?.[0]?.id ?? null
-  const moves = (entry?.moves ?? []).map((x) => x.id).filter((x) => MOVES[x])
-  m.moves = Array.from({ length: MOVE_SLOTS }, (_, i) => moves[i] ?? null)
-  return { ...emptyFighter(m), mega }
-}
-
-/** The meta's entry most players run of a Pokémon picked from a list (as a team sheet has it, no Megas): itself or one
- * of its Megas, whichever is used most. */
-export function mostUsedForme(id: PokemonId, data: MetaData | null | undefined): PokemonId {
-  if (!data) return id
-  let best = id
-  let usage = data[id]?.usage ?? -1
-  for (const it of Object.values(ITEMS)) {
-    const mega = it.megas?.[id]
-    const u = mega ? (data[mega]?.usage ?? -1) : -1
-    if (mega && u > usage) {
-      best = mega
-      usage = u
-    }
-  }
-  return best
-}
+export { mostUsedForme }
 
 /** The meta's most used Pokémon, at their most common sets, up to `n`, each with its usage. */
 export function metaFoes(

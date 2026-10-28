@@ -11,6 +11,7 @@ import { confirmDialog } from '@/composables/useConfirm'
 import { useMeta } from '@/composables/useMeta'
 import { useMetaBalance } from '@/composables/useMetaBalance'
 import { useTeams } from '@/composables/useTeams'
+import { commonForme, commonMember } from '@/lib/commonSet'
 import { membersPaste, parsePaste, type PasteProblem } from '@/lib/pokepaste'
 import {
   emptyMember,
@@ -25,6 +26,7 @@ import {
   type Team,
   type TeamIssue,
 } from '@/lib/team'
+import CommonSetOffer from '@/components/CommonSetOffer.vue'
 import CopyPaste from '@/components/CopyPaste.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
@@ -61,8 +63,9 @@ onMounted(() => {
 })
 const members = computed(() => current.value?.members ?? [])
 
-// The part being picked: its slot and field.
-const picking = shallowRef<{ slot: number; field: Field } | null>(null)
+// The part being picked: its slot and field; right after a Pokémon's picked, the meta's entry whose most common set can
+// be loaded instead of going on (`common`), as the damage calculator's sides can.
+const picking = shallowRef<{ slot: number; field: Field; common?: PokemonId } | null>(null)
 watch(
   () => current.value?.id,
   () => (picking.value = null),
@@ -110,9 +113,11 @@ function pick(value: string) {
   const team = current.value
   if (!p || !team) return
   const m = team.members[p.slot]!
+  let common: PokemonId | undefined
   if (p.field === 'pokemon') {
     const { pokemon, item } = pickedAs(value as PokemonId)
     if (pokemon !== m.pokemon) {
+      common = commonForme(value as PokemonId, data.value)
       // Another Pokémon: a set of its own. One with a single ability has it already.
       const abilities = POKEMON[pokemon].abilities
       update(p.slot, {
@@ -134,8 +139,18 @@ function pick(value: string) {
     update(p.slot, { moves })
   }
   const next = nextField(team.members[p.slot]!, p.field)
-  picking.value = next === null ? null : { slot: p.slot, field: next }
+  picking.value = next === null ? null : { slot: p.slot, field: next, ...(common && { common }) }
 }
+
+/** The set being put together skipped: the most common set loaded, the picker closed. */
+function loadCommon() {
+  const p = picking.value
+  if (!p?.common) return
+  update(p.slot, commonMember(p.common, data.value))
+  picking.value = null
+}
+const [DefineCommon, ReuseCommon] = createReusableTemplate()
+const commonPreview = computed(() => (picking.value?.common ? commonMember(picking.value.common, data.value) : null))
 
 // The drawer or dialog the picker scrolls in, back at its top for each part picked.
 const pickerBox = shallowRef<HTMLElement | null>(null)
@@ -445,6 +460,11 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
       </template>
     </div>
 
+    <!-- Right after a Pokémon's picked, its most common set, to load rather than put the set together. -->
+    <DefineCommon>
+      <CommonSetOffer v-if="commonPreview" :id="picking!.common!" :set="commonPreview" @load="loadCommon" />
+    </DefineCommon>
+
     <!-- On wide screens, the picker as a drawer over the page, the slot left clear. -->
     <SideDrawer
       ref="drawer"
@@ -463,7 +483,8 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
         :snapshot
         @pick="pick"
         @close="picking = null"
-      />
+        ><ReuseCommon
+      /></TeamPicker>
     </SideDrawer>
 
     <!-- On phones, the picker over the page. -->
@@ -477,7 +498,8 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
           :snapshot
           @pick="pick"
           @close="picking = null"
-        />
+          ><ReuseCommon
+        /></TeamPicker>
       </div>
     </ModalDialog>
 

@@ -14,8 +14,7 @@ import {
   Sparkles,
   Users,
 } from '@lucide/vue'
-import { ability, item, move, pokemon, type AbilityId, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
-import { natureName } from '@/data/natures'
+import { pokemon, type AbilityId, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
@@ -28,13 +27,13 @@ import {
   commonSet,
   emptyField,
   emptyFighter,
-  mostUsedForme,
   SETS_FIELD,
   type Battlefield,
   type Fighter,
 } from '@/lib/damage'
 import { membersPaste, parsePaste } from '@/lib/pokepaste'
 import { copy } from '@/lib/clipboard'
+import { commonForme } from '@/lib/commonSet'
 import { emptyMember, pickedAs, setsAs, stoneMega, type Field, type Member } from '@/lib/team'
 import { conditionName, fieldOf, terrainOf, weatherOf } from '@/components/calcConditions'
 import CalcConditions from '@/components/CalcConditions.vue'
@@ -42,6 +41,7 @@ import CalcMeta from '@/components/CalcMeta.vue'
 import CalcSide from '@/components/CalcSide.vue'
 import CalcSummary from '@/components/CalcSummary.vue'
 import CalcVerdict from '@/components/CalcVerdict.vue'
+import CommonSetOffer from '@/components/CommonSetOffer.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
 import OptionsMenu from '@/components/OptionsMenu.vue'
@@ -172,11 +172,6 @@ function choose(k: SideKey, id: PokemonId) {
   }
   setSide(k, { ...emptyFighter(member), side: sides.value[k].side })
 }
-/** The meta's entry for a Pokémon just picked whose most common set there is: its Mega's when that's what most run. */
-function commonOf(id: PokemonId): PokemonId | undefined {
-  const forme = POKEMON[id].mega ? id : mostUsedForme(id, data.value)
-  return data.value?.[forme]?.moves?.length ? forme : undefined
-}
 /** The set being put together skipped: the most common set loaded, the picker closed. */
 function loadCommon() {
   const p = picking.value
@@ -195,7 +190,7 @@ function pick(value: string) {
   if (p.field === 'pokemon') {
     if (pickedAs(value as PokemonId).pokemon !== m.pokemon) {
       choose(p.side, value as PokemonId)
-      common = commonOf(value as PokemonId)
+      common = commonForme(value as PokemonId, data.value)
     } else {
       const { item } = pickedAs(value as PokemonId)
       if (item) patchMember(p.side, { item })
@@ -486,27 +481,7 @@ function face(f: Fighter) {
 
     <!-- Right after a Pokémon's picked, its most common set, to load rather than put the set together. -->
     <DefineCommon>
-      <button v-if="commonPreview" type="button" class="common-set" @click="loadCommon">
-        <PokemonIcon :id="picking!.common!" />
-        <span class="common-text">
-          <span class="common-title"><Sparkles :size="14" aria-hidden="true" />{{ t('calc.loadCommon') }}</span>
-          <span class="muted">{{
-            [
-              commonPreview.member.item && refName(item(commonPreview.member.item)),
-              commonPreview.member.ability && refName(ability(commonPreview.member.ability)),
-              commonPreview.member.nature && natureName(commonPreview.member.nature),
-            ]
-              .filter(Boolean)
-              .join(' · ')
-          }}</span>
-          <span class="muted">{{
-            commonPreview.member.moves
-              .filter((x) => x)
-              .map((x) => refName(move(x!)))
-              .join(' · ')
-          }}</span>
-        </span>
-      </button>
+      <CommonSetOffer v-if="commonPreview" :id="picking!.common!" :set="commonPreview.member" @load="loadCommon" />
     </DefineCommon>
 
     <!-- On wide screens, the picker as a drawer over the page, the side's card left clear. -->
@@ -789,36 +764,6 @@ function face(f: Fighter) {
 .load-mon:hover {
   background: var(--hover);
   border-color: var(--border);
-}
-.common-set {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 8px 10px;
-  font: inherit;
-  color: inherit;
-  text-align: left;
-  background: var(--panel-alt);
-  border: 1px solid var(--accent);
-  cursor: pointer;
-}
-.common-set:hover {
-  background: var(--sel);
-}
-.common-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-  font-size: 0.875em;
-}
-.common-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 1.1em;
-  font-weight: bold;
 }
 .picker-dialog {
   width: min(560px, 100vw - 24px);
