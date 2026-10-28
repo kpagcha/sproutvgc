@@ -248,7 +248,6 @@ export const messages = {
   'calc.pickMoves': 'Pick its moves to see what they do.',
   'calc.status': 'Status move',
   'calc.noEffect': 'No effect',
-  'calc.statusMoves': 'Status moves:',
   'calc.blockedBy': 'Blocked by {what}',
   'calc.immuneType': '{type}-type Pokémon are immune',
   'calc.noKo': 'Not a KO in 4 hits',

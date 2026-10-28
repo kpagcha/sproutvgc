@@ -16,7 +16,9 @@ import TypeIcon from '@/components/TypeIcon'
 // first). Its verdict colored for whose it is (`theirs`: the opponent's moves
 // hitting yours, a knockout bad news). Unfolded, its HP numbers, every roll, and the calc's line to share, copied in a
 // tap; a critical hit, for a move whose hits vary how many, and for a spread move whether it hits one target alone
-// (no spread reduction), set from its row and marked on its name.
+// (no spread reduction), set from its row and marked on its name. What the order does to it (a priority move's
+// priority, Payback's power) a tag at the end of the verdict's line, so every row is as tall and the two sides' rows line up; a status
+// move a row laid out as the rest, dimmed, its bar empty and nothing to unfold.
 const props = defineProps<{
   id: MoveId
   hit: Hit | null
@@ -30,6 +32,7 @@ const open = defineModel<boolean>('open', { default: false })
 
 const m = computed(() => MOVES[props.id])
 const kind = computed(() => koKind(props.hit))
+const status = computed(() => m.value?.category === 'status')
 // Past its HP as it is, overkill and all (as Showdown's calc says it), whole from 100: "212 – 250%".
 const fmt = (x: number) => (x >= 100 ? String(Math.floor(x)) : x.toFixed(1))
 /** The bar's parts, in percent of the defender's whole HP, from the left: lost before, dealt for sure, may be dealt
@@ -71,8 +74,14 @@ const blockedText = tSplit('calc.blockedBy', 'what')
 </script>
 
 <template>
-  <li class="damage" :class="[kind, { theirs, open, none: hit?.none }]">
-    <button type="button" class="head no-lift" :aria-expanded="open" @click="open = !open">
+  <li class="damage" :class="[kind, { theirs, open: open && !status, none: hit?.none, 'status-move': status }]">
+    <button
+      type="button"
+      class="head no-lift"
+      :disabled="status"
+      :aria-expanded="status ? undefined : open"
+      @click="open = !open"
+    >
       <span class="name">
         <TypeIcon v-if="m" :type="m.type" />
         <span class="move-name">{{ refName(move(id)) }}</span>
@@ -80,19 +89,27 @@ const blockedText = tSplit('calc.blockedBy', 'what')
         <Zap v-if="crit" :size="13" class="crit-mark" :aria-label="t('calc.crit')" />
         <Crosshair v-if="single" :size="13" class="crit-mark" :aria-label="t('calc.single')" />
       </span>
-      <span v-if="!hit || hit.none" class="range muted">{{
-        m?.category === 'status' ? t('calc.status') : t('calc.noEffect')
-      }}</span>
+      <span v-if="status" class="range"></span>
+      <span v-else-if="!hit || hit.none" class="range muted">{{ t('calc.noEffect') }}</span>
       <span v-else class="range"
         ><span class="pct">{{ fmt(hit.minPct) }} – {{ fmt(hit.maxPct) }}%</span></span
       >
-      <component :is="open ? ChevronUp : ChevronDown" :size="14" class="chev" aria-hidden="true" />
-      <span v-if="bar && !hit!.none" class="bar" aria-hidden="true">
-        <span class="lost" :style="{ width: `${bar.lost}%` }"></span>
-        <span class="sure" :style="{ width: `${bar.sure}%` }"></span>
-        <span class="maybe" :style="{ width: `${bar.maybe}%` }"></span>
+      <component
+        :is="open ? ChevronUp : ChevronDown"
+        :size="14"
+        class="chev"
+        :class="{ gone: status }"
+        aria-hidden="true"
+      />
+      <span class="bar" aria-hidden="true">
+        <template v-if="bar && !hit!.none">
+          <span class="lost" :style="{ width: `${bar.lost}%` }"></span>
+          <span class="sure" :style="{ width: `${bar.sure}%` }"></span>
+          <span class="maybe" :style="{ width: `${bar.maybe}%` }"></span>
+        </template>
       </span>
-      <span v-if="hit && !hit.none" class="verdict"
+      <span v-if="status" class="verdict muted">{{ t('calc.status') }}</span>
+      <span v-else-if="hit && !hit.none" class="verdict"
         ><span class="ko">{{ hit.ko || t('calc.noKo') }}</span></span
       >
       <span v-else-if="hit?.blocked" class="verdict muted">
@@ -102,9 +119,11 @@ const blockedText = tSplit('calc.blockedBy', 'what')
         >
         <span v-else>{{ t('calc.immuneType', { type: typeName(hit.blocked.type) }) }}</span>
       </span>
+      <!-- Every row a verdict's line, so they're all as tall. -->
+      <span v-else class="verdict" aria-hidden="true">&nbsp;</span>
       <span v-if="note" class="note">{{ note }}</span>
     </button>
-    <div v-if="open" class="details">
+    <div v-if="open && !status" class="details">
       <div class="toggles">
         <button type="button" class="btn mod" :class="{ on: crit }" :aria-pressed="crit" @click="emit('crit', !crit)">
           <Zap :size="14" aria-hidden="true" />{{ t('calc.crit') }}
@@ -170,7 +189,7 @@ const blockedText = tSplit('calc.blockedBy', 'what')
   --icon-scale: 1;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
-  grid-template-areas: 'name range chev' 'bar bar bar' 'verdict verdict verdict' 'note note note';
+  grid-template-areas: 'name range chev' 'bar bar bar' 'verdict note note';
   align-items: center;
   gap: 6px 10px;
   width: 100%;
@@ -182,8 +201,19 @@ const blockedText = tSplit('calc.blockedBy', 'what')
   border: 0;
   cursor: pointer;
 }
-.head:hover {
+.head:hover:not(:disabled) {
   background: var(--panel-alt);
+}
+/* A status move: as the rest, dimmed, nothing to unfold (its chevron's room kept). */
+.head:disabled {
+  color: inherit;
+  cursor: default;
+}
+.damage.status-move .head {
+  opacity: 0.5;
+}
+.chev.gone {
+  visibility: hidden;
 }
 .name {
   grid-area: name;
@@ -268,10 +298,10 @@ const blockedText = tSplit('calc.blockedBy', 'what')
 .ko {
   font-weight: bold;
 }
-/* What the order does to it, as a tag under the verdict. */
+/* What the order does to it, a tag at the end of the verdict's line (beside it, not of it). */
 .note {
   grid-area: note;
-  justify-self: start;
+  justify-self: end;
   padding: 0 6px;
   font-size: 0.8em;
   font-weight: bold;

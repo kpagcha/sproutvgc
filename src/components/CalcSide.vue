@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, shallowRef, useId, watch, type ComponentPublicInstance } from 'vue'
 import { ChevronDown, Minus, Plus } from '@lucide/vue'
-import { ability, condition, move, pokemon, type MoveId } from '@/data/dex'
+import { ability, condition, pokemon, type MoveId } from '@/data/dex'
 import { MOVES } from '@/data/moves'
 import type { MetaData, Spread } from '@/data/meta'
 import { t } from '@/i18n'
@@ -32,7 +32,7 @@ import TeamSlot from '@/components/TeamSlot.vue'
 // One side of the damage calculator, a panel in five parts, each on a row the other side's shares on wide screens (so
 // both sides' parts line up whatever each holds): its heading (whose it is, by its color, opening its Pokémon's picker;
 // what loads a set), its set as a team builder's slot (`TeamSlot`, every part a button opening its picker, its
-// Pokémon's glowing while it has none), its moves' damage against the other side (`DamageRow`, a row each; its status moves named on a line), and what the
+// Pokémon's glowing while it has none), its moves' damage against the other side (`DamageRow`, a row each, a status move's dimmed), and what the
 // battle adds to it: its HP left, its status, its stat stages, whether its ability's condition is met (for one that
 // waits on it), Supreme Overlord's fainted allies; and last, what's on its side, a box of its own folding (`sideOpen`,
 // both sides' together): folded, what's on; open, its conditions to set (`CalcConditions`).
@@ -80,17 +80,12 @@ watch(
 )
 
 const moves = computed(() => props.fighter.member.moves.filter((x): x is MoveId => !!x))
+// Each move a row, in its place; a status move's as the rest's, dimmed, with no damage.
 const hits = computed(() =>
-  moves.value
-    .filter((mv) => MOVES[mv]?.category !== 'status')
-    .map((mv) => ({ mv, hit: hit(props.fighter, props.other, mv, props.field, opts.value[mv]) })),
-)
-/** Its status moves, named on one line under the damaging ones. */
-const statusMoves = computed(() =>
-  moves.value
-    .filter((mv) => MOVES[mv]?.category === 'status')
-    .map((mv) => refName(move(mv)))
-    .join(' · '),
+  moves.value.map((mv) => ({
+    mv,
+    hit: MOVES[mv]?.category === 'status' ? null : hit(props.fighter, props.other, mv, props.field, opts.value[mv]),
+  })),
 )
 const otherName = computed(() => {
   const id = battlerOf(props.other)
@@ -184,9 +179,6 @@ function setHpPoints(e: Event) {
             @hits="setOpt(h.mv, { hits: $event })"
             @single="setOpt(h.mv, { single: $event })"
           />
-          <li v-if="statusMoves" class="status-moves">
-            <span class="muted">{{ t('calc.statusMoves') }}</span> {{ statusMoves }}
-          </li>
         </ul>
       </template>
     </div>
@@ -389,10 +381,6 @@ function setHpPoints(e: Event) {
   padding: 0;
   list-style: none;
   border-top: 1px solid var(--border);
-}
-.status-moves {
-  padding: 10px 4px;
-  font-size: 0.875em;
 }
 /* The rows' rules between them, not under the last: the battle's part has its own over it. */
 .damages > :last-child {
