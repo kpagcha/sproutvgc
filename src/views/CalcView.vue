@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, nextTick, shallowRef, watch } from 'vue'
+import { computed, nextTick, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { createReusableTemplate, useMediaQuery, watchDebounced } from '@vueuse/core'
+import { createReusableTemplate, useElementSize, useMediaQuery, watchDebounced } from '@vueuse/core'
 import {
   ArrowLeftRight,
   Check,
@@ -46,6 +46,7 @@ import MetaDialog from '@/components/MetaDialog.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
 import OptionsMenu from '@/components/OptionsMenu.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import SectionNav from '@/components/SectionNav.vue'
 import SetupStar from '@/components/SetupStar.vue'
 import SideDrawer from '@/components/SideDrawer.vue'
 import TeamPicker from '@/components/TeamPicker.vue'
@@ -67,6 +68,17 @@ const router = useRouter()
 const { snapshot, data } = useMeta()
 const { teams } = useTeams()
 const wide = useMediaQuery('(min-width: 900px)')
+// Its sections, a row of links stuck to the top, the one being read marked: the field, the two sides' damage, and
+// yours against the meta once there's yours. On phones the sides' bands stick under it (`--nav-h`, its height).
+const sections = computed(() => [
+  { id: 'calc-top', label: t('calc.section.field') },
+  { id: 'calc-duel', label: t('calc.section.damage') },
+  ...(battlerOf(sides.value.a) ? [{ id: 'calc-meta', label: t('calc.meta.title') }] : []),
+])
+const nav = useTemplateRef<InstanceType<typeof SectionNav>>('nav')
+const { height: navH } = useElementSize(() => nav.value?.$el as HTMLElement | undefined, undefined, {
+  box: 'border-box',
+})
 
 type SideKey = 'a' | 'b'
 const sides = shallowRef<Record<SideKey, Fighter>>({ a: emptyFighter(), b: emptyFighter() })
@@ -326,8 +338,9 @@ function face(f: Fighter) {
 </script>
 
 <template>
-  <div class="calc">
-    <section class="panel head-panel">
+  <div class="calc" :style="{ '--nav-h': `${navH}px` }">
+    <SectionNav ref="nav" :sections />
+    <section id="calc-top" class="panel head-panel">
       <div class="head">
         <h1>{{ t('title.calc') }}<SetupStar /></h1>
         <MetaDialog v-if="snapshot" class="head-meta" />
@@ -372,7 +385,7 @@ function face(f: Fighter) {
       </div>
     </section>
 
-    <div class="duel" :class="{ aligned: hasBoth, stacked: !wide }">
+    <div id="calc-duel" class="duel" :class="{ aligned: hasBoth, stacked: !wide }">
       <template v-for="k in ['a', 'b'] as const" :key="k">
         <!-- On phones, its band: its side's color, its Pokémon in short, stuck to the top under the one before it;
            tapping it opens its panel under it, tapping it again folds it. -->
@@ -545,6 +558,16 @@ function face(f: Fighter) {
   flex-direction: column;
   gap: 16px;
 }
+/* The row of links' own gap under it is the page's. */
+.calc > .section-nav {
+  margin-bottom: -4px;
+}
+/* Room above a section scrolled to for the row of links stuck to the top. */
+#calc-top,
+#calc-duel,
+#calc-meta {
+  scroll-margin-top: calc(var(--nav-h, 0px) + 8px);
+}
 .head-panel {
   margin: 0;
 }
@@ -650,7 +673,7 @@ function face(f: Fighter) {
 .band {
   --band-h: 44px;
   position: sticky;
-  top: calc(var(--i) * (var(--band-h) - 2px));
+  top: calc(var(--nav-h, 0px) + var(--i) * (var(--band-h) - 2px));
   z-index: calc(40 - var(--i));
   display: flex;
   align-items: center;
@@ -697,7 +720,7 @@ function face(f: Fighter) {
   padding-left: calc(var(--panel-pad, 12px) + 4px);
   border: 2px solid var(--ink);
   box-shadow: inset 6px 0 var(--side);
-  scroll-margin-top: calc(2 * 42px);
+  scroll-margin-top: calc(var(--nav-h, 0px) + 2 * 42px);
 }
 .duel.stacked > .band + .band,
 .duel.stacked > section + .band {
