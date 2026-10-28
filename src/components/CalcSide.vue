@@ -30,9 +30,9 @@ import StageStepper from '@/components/StageStepper.vue'
 import TeamSlot from '@/components/TeamSlot.vue'
 
 // One side of the damage calculator, a panel in five parts, each on a row the other side's shares on wide screens (so
-// both sides' parts line up whatever each holds): its heading (whose it is, by its color; what loads a set), its set as
-// a team builder's slot (`TeamSlot`, every part a button opening its picker, its Pokémon's glowing while it has none),
-// its moves' damage against the other side (`DamageRow`, a row each; its status moves named on a line), and what the
+// both sides' parts line up whatever each holds): its heading (whose it is, by its color, opening its Pokémon's picker;
+// what loads a set), its set as a team builder's slot (`TeamSlot`, every part a button opening its picker, its
+// Pokémon's glowing while it has none), its moves' damage against the other side (`DamageRow`, a row each; its status moves named on a line), and what the
 // battle adds to it: its HP left, its status, its stat stages, whether its ability's condition is met (for one that
 // waits on it), Supreme Overlord's fainted allies; and last, what's on its side, a box of its own folding (`sideOpen`,
 // both sides' together): folded, what's on; open, its conditions to set (`CalcConditions`).
@@ -137,7 +137,9 @@ function setHpPoints(e: Event) {
 <template>
   <section class="side panel" :class="{ theirs }">
     <div class="side-head">
-      <h2>{{ label }}</h2>
+      <h2>
+        <button type="button" class="side-title" @click="emit('field', 'pokemon')">{{ label }}</button>
+      </h2>
       <span class="side-actions"><slot name="actions" /></span>
     </div>
 
@@ -328,6 +330,18 @@ function setHpPoints(e: Event) {
 .side-head h2 {
   margin: 0;
   font-size: 1.1em;
+}
+/* Whose it is, a button opening its Pokémon's picker, as the slot's name does. */
+.side-title {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.side-title:hover {
+  color: var(--accent);
 }
 /* Whose it is, by its side's color along its heading. */
 .side-head h2::before {
