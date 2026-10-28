@@ -475,7 +475,7 @@ export const router = createRouter({
         headKey: 'head.calc',
         keywordsKey: 'keywords.calc',
         dexNames: true,
-        descriptions: ['ability', 'move', 'item'],
+        descriptions: ['ability', 'move', 'item', 'condition'],
         ...inArea('tools', 'calc'),
       },
     },
