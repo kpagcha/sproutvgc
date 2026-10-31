@@ -32,10 +32,11 @@ import HpBar from '@/components/HpBar.vue'
 import StageStepper from '@/components/StageStepper.vue'
 import TeamSlot from '@/components/TeamSlot.vue'
 
-// One side of the damage calculator, a panel in five parts, each on a row the other side's shares on wide screens (so
+// One side of the damage calculator (with no Pokémon yet, one button picking it), a panel in five parts, each on a row the other side's shares on wide screens (so
 // both sides' parts line up whatever each holds): its heading (whose it is, by its color, opening its Pokémon's picker;
-// what loads a set), its set as a team builder's slot (`TeamSlot`, every part a button opening its picker, its
-// Pokémon's glowing while yours has none), its moves' damage against the other side (`DamageRow`, a row each, a status move's dimmed), and what the
+// what loads a set), its set as a team builder's slot (`TeamSlot`, every part a button opening its picker) but its
+// moves, which are its rows of damage against the other side (`DamageRow`, a row each, a status move's dimmed, its name
+// picking another), and what the
 // battle adds to it: its HP left, its status, its stat stages, whether its ability's condition is met (for one that
 // waits on it), its allies fainted (Supreme Overlord, Last Respects), the times it's been hit (Rage Fist); and last, what's on its side, a box of its own folding (`sideOpen`,
 // both sides' together): folded, what's on; open, its conditions to set (`CalcConditions`).
@@ -82,18 +83,22 @@ watch(
   },
 )
 
-const moves = computed(() => props.fighter.member.moves.filter((x): x is MoveId => !!x))
-// Each move a row, in its place; a status move's as the rest's, dimmed, with no damage.
-const hits = computed(() =>
-  moves.value.map((mv) => ({
-    mv,
-    hit: MOVES[mv]?.category === 'status' ? null : hit(props.fighter, props.other, mv, props.field, opts.value[mv]),
-  })),
-)
 const otherName = computed(() => {
   const id = battlerOf(props.other)
   return id ? refName(pokemon(id)) : null
 })
+// Each of its four moves a row, in its place (the set's card leaving them out): a status move's as the rest's, dimmed,
+// with no damage; one not picked yet a placeholder picking it; with no other side, their names alone.
+const hits = computed(() =>
+  props.fighter.member.moves.map((mv, i) => ({
+    i: i as Field,
+    mv,
+    hit:
+      !mv || !otherName.value || MOVES[mv]?.category === 'status'
+        ? null
+        : hit(props.fighter, props.other, mv, props.field, opts.value[mv]),
+  })),
+)
 
 const shown = computed(() => battlerOf(props.fighter))
 
@@ -145,20 +150,31 @@ function setHpPoints(e: Event) {
     </div>
 
     <div class="body">
-      <ul class="slot">
+      <ul v-if="fighter.member.pokemon" class="slot">
         <TeamSlot
           :ref="setCard"
           :member="fighter.member"
           :active
           :spreads
           :evolved="fighter.mega"
-          :hint="!theirs && !fighter.member.pokemon"
+          no-moves
           @mega="set({ mega: !fighter.mega })"
           @field="emit('field', $event)"
           @change="change"
           @clear="emit('clear')"
         />
       </ul>
+      <!-- With none yet, one button picking it, glowing for yours until its picker opens. -->
+      <button
+        v-else
+        :ref="setCard"
+        type="button"
+        class="pick-mon"
+        :class="{ active: active === 'pokemon', beckon: !theirs && !active }"
+        @click="emit('field', 'pokemon')"
+      >
+        <Plus :size="18" aria-hidden="true" />{{ t(theirs ? 'compare.pickOpponent' : 'compare.pickYours') }}
+      </button>
     </div>
 
     <!-- Its moves against the other side. -->
@@ -168,26 +184,28 @@ function setHpPoints(e: Event) {
           {{ otherName ? t('calc.against', { name: otherName }) : t('calc.movesHead') }}
         </h3>
         <p v-if="!otherName" class="muted hint">{{ t('calc.pickOther') }}</p>
-        <p v-else-if="!moves.length" class="muted hint">{{ t('calc.pickMoves') }}</p>
-        <ul v-else class="damages">
+        <ul class="damages">
           <DamageRow
             v-for="h in hits"
-            :key="h.mv"
+            :key="h.i"
             :id="h.mv"
             :hit="h.hit"
+            :idle="!otherName"
+            :active="active === h.i"
             :theirs
-            :crit="!!opts[h.mv]?.crit"
-            :hits="opts[h.mv]?.hits"
-            :single="!!opts[h.mv]?.single"
-            :doubled="!!opts[h.mv]?.doubled"
-            :stockpile="opts[h.mv]?.stockpile"
-            :open="!!unfolded[h.mv]"
-            @update:open="unfolded = { ...unfolded, [h.mv]: $event }"
-            @crit="setOpt(h.mv, { crit: $event })"
-            @hits="setOpt(h.mv, { hits: $event })"
-            @single="setOpt(h.mv, { single: $event })"
-            @doubled="setOpt(h.mv, { doubled: $event })"
-            @stockpile="setOpt(h.mv, { stockpile: $event })"
+            :crit="!!(h.mv && opts[h.mv]?.crit)"
+            :hits="h.mv ? opts[h.mv]?.hits : undefined"
+            :single="!!(h.mv && opts[h.mv]?.single)"
+            :doubled="!!(h.mv && opts[h.mv]?.doubled)"
+            :stockpile="h.mv ? opts[h.mv]?.stockpile : undefined"
+            :open="!!h.mv && !!unfolded[h.mv]"
+            @update:open="h.mv && (unfolded = { ...unfolded, [h.mv]: $event })"
+            @pick="emit('field', h.i)"
+            @crit="h.mv && setOpt(h.mv, { crit: $event })"
+            @hits="h.mv && setOpt(h.mv, { hits: $event })"
+            @single="h.mv && setOpt(h.mv, { single: $event })"
+            @doubled="h.mv && setOpt(h.mv, { doubled: $event })"
+            @stockpile="h.mv && setOpt(h.mv, { stockpile: $event })"
           />
         </ul>
       </template>
@@ -198,8 +216,8 @@ function setHpPoints(e: Event) {
       <template v-if="shown && stats">
         <h3 class="sub">{{ t('calc.battle') }}</h3>
         <!-- Its HP left: the bar, and its HP exactly, typed. -->
-        <div class="row hp-row">
-          <span class="muted row-label">{{ t('stat.hp') }}</span>
+        <div class="hp-row">
+          <span class="muted row-label hp-label">{{ t('stat.hp') }}</span>
           <HpBar
             :model-value="fighter.hp"
             :label="t('calc.hpPercent')"
@@ -338,7 +356,7 @@ function setHpPoints(e: Event) {
   --side: var(--accent);
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 28px;
   min-width: 0;
   margin: 0;
 }
@@ -378,10 +396,24 @@ function setHpPoints(e: Event) {
   background: var(--side);
   border: 1px solid var(--ink);
 }
-/* On phones, its tab over it names it. */
+/* On phones, its tab over it names it: its menu beside its set, rather than on a row of its own. */
 @media (max-width: 899px) {
-  .side-head {
-    justify-content: flex-end;
+  .side {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 8px;
+  }
+  .side > * {
+    grid-column: 1 / -1;
+  }
+  .side > .side-head {
+    grid-row: 1;
+    grid-column: 2;
+    align-self: start;
+  }
+  .side > .body {
+    grid-row: 1;
+    grid-column: 1;
   }
   .side-head h2 {
     display: none;
@@ -398,38 +430,86 @@ function setHpPoints(e: Event) {
   padding: 0;
   list-style: none;
 }
+/* With no Pokémon yet, one button picking it, as a picker's box; for yours, glowing in the accent and back until it's
+   tapped (the team builder's first step's). */
+.pick-mon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 14px;
+  font: inherit;
+  font-weight: bold;
+  color: var(--muted);
+  text-align: left;
+  background: var(--panel);
+  border: 2px dashed var(--border);
+  cursor: pointer;
+}
+.pick-mon:hover {
+  color: var(--link);
+  border-color: var(--link);
+}
+.pick-mon.active {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.pick-mon.beckon {
+  animation: beckon 2.4s ease-in-out infinite;
+}
+@keyframes beckon {
+  0%,
+  100% {
+    color: var(--muted);
+    border-color: var(--border);
+  }
+  50% {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pick-mon.beckon {
+    animation: none;
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+}
+/* Each part's heading, quiet: the room around it, not a rule, sets the parts apart. */
 .sub {
-  margin: 0 0 8px;
-  font-size: 0.95em;
+  margin: 0 0 4px;
+  font-size: 0.8em;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 .hint {
   margin: 0;
   font-size: 0.9em;
 }
 .damages {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   margin: 0;
   padding: 0;
   list-style: none;
-  border-top: 1px solid var(--border);
 }
-/* The rows' rules between them, not under the last: the battle's part has its own over it. */
-.damages > :last-child {
-  border-bottom: none;
+.hint + .damages {
+  margin-top: 8px;
 }
 .battle {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 /* With no Pokémon, its moves' and battle's parts have nothing: no room kept for them. */
 .results:empty,
 .battle:empty,
 .side-row:empty {
   display: none;
-}
-.battle:not(:empty) {
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
 }
 .row {
   display: flex;
@@ -441,11 +521,24 @@ function setHpPoints(e: Event) {
 .row-label {
   min-width: 3.4em;
 }
+/* Its HP: what it is on a line, the bar under it across the side, so there's room to drag it. */
 .hp-row {
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-areas: 'label nums' 'bar bar';
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px 12px;
+  font-size: 0.9em;
+}
+.hp-label {
+  grid-area: label;
 }
 .hp-bar {
-  flex: 1;
+  grid-area: bar;
+}
+.hp-nums {
+  grid-area: nums;
 }
 .hp-nums {
   display: inline-flex;
@@ -514,20 +607,11 @@ function setHpPoints(e: Event) {
   opacity: 0.35;
   cursor: default;
 }
-/* What's on its side: a box of its own, outlined in its side's color once there's something, dashed while there's
-   nothing, so it's seen either way. */
+/* What's on its side: a part as the others, its heading folding it. */
 .side-box {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 10px 12px;
-  background: var(--panel-alt);
-  border: 2px solid var(--ink);
-  border-left: 6px solid var(--side);
-}
-.side-box.empty {
-  border: 2px dashed var(--border);
-  border-left: 6px solid color-mix(in srgb, var(--side) 45%, var(--border));
+  gap: 10px;
 }
 .side-box-head {
   display: flex;
@@ -551,7 +635,20 @@ function setHpPoints(e: Event) {
   transform: rotate(180deg);
 }
 .side-box-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8em;
   font-weight: bold;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.side-box-head:hover .side-box-title {
+  color: var(--text);
+}
+.side-box-head .fold-chev {
+  color: var(--muted);
 }
 .side-list {
   display: flex;

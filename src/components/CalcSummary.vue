@@ -29,8 +29,10 @@ const id = computed(() => battlerOf(props.fighter))
   overflow: hidden;
 }
 .name {
-  flex: none;
+  min-width: 0;
+  overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .item {
   flex: none;

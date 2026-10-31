@@ -26,7 +26,8 @@ import { natureTip } from '@/components/natureTip'
 // registers). A part that breaks the team's rules (`clashes`: its Pokémon, item, ability or a move, with why) is
 // marked, its tooltip saying why. The first step (`hint`: the team has no Pokémon yet), its Pokémon's placeholders
 // glowing in the accent and back, in a loop, until its picker opens. In the team builder (`pinnable`), a pin by its
-// clearing pins it beside the team's insights (`pinned`, `pin`), to edit it there as they follow.
+// clearing pins it beside the team's insights (`pinned`, `pin`), to edit it there as they follow. In the damage
+// calculator its moves are left out (`noMoves`): its rows of damage are its moves, each picked from there.
 const props = defineProps<{
   member: Member
   active: Field | null
@@ -40,6 +41,8 @@ const props = defineProps<{
   pinnable?: boolean
   /** It's pinned beside the team's insights (`pin` toggling it). */
   pinned?: boolean
+  /** Its moves left out, shown where they're used instead (the damage calculator's rows of damage). */
+  noMoves?: boolean
 }>()
 const emit = defineEmits<{ field: [field: Field]; clear: []; change: [patch: Partial<Member>]; mega: []; pin: [] }>()
 const open = defineModel<boolean>('open', { default: false })
@@ -155,7 +158,7 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
         {{ member.nature ? natureName(member.nature) : t('builder.nature') }}
       </button>
     </div>
-    <ul class="set-moves">
+    <ul v-if="!noMoves" class="set-moves">
       <li v-for="(mv, i) in member.moves" :key="i">
         <button
           v-tip="mv ? clashes?.moves[mv] : undefined"

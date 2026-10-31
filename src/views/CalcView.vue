@@ -8,6 +8,8 @@ import {
   ClipboardCopy,
   ChevronDown,
   ClipboardPaste,
+  Ellipsis,
+  Plus,
   RotateCcw,
   SlidersHorizontal,
   Sparkles,
@@ -57,11 +59,11 @@ import TeamPicker from '@/components/TeamPicker.vue'
 // against the other under it, both ways at once, and what the battle adds to each (HP, status, stages); the battle's
 // conditions (weather, terrain, what's on the field and on each side) in a dialog, those on the field named across the
 // top; under the two, who moves first and how a one-on-one between them goes (`CalcVerdict`),
-// with the ways to the speed pages. On phones, one under the other as the speed comparison's list: each a band of its
-// side's color with its Pokémon in short (`CalcSummary`), stuck to the top under the one before it, its panel opening
-// under it when tapped, folding when tapped again. The numbers are Smogon's calc's (`@smogon/calc`, its Champions mechanics, doubles), `damage.ts`. A Pokémon picked comes with its most common
-// set in the meta shown (its Mega's, when most players run that), so there's a calc to read at once; a side can be
-// loaded from the reader's teams, from a paste, or back to its common set. Under them, yours against the meta's most
+// with the ways to the speed pages. On phones, as the speed comparison's pair: two tabs side by side, each its side's
+// color over its Pokémon in short (`CalcSummary`), stuck to the top, the one tapped opening its panel under them,
+// folding when tapped again. The numbers are Smogon's calc's (`@smogon/calc`, its Champions mechanics, doubles), `damage.ts`. A Pokémon picked comes with its most common
+// set in the meta shown (its Mega's, when most players run that), so there's a calc to read at once; a side's menu loads
+// it from the reader's teams, from a paste, or back to its common set, copies it, or swaps the two. Under them, yours against the meta's most
 // used (`CalcMeta`), a row tapped making it the opponent. Everything is in the URL, a calc a link to share
 // (`calcState.ts`), and the page opened bare comes back as last left; the first time, the meta's two most used.
 const route = useRoute()
@@ -70,14 +72,14 @@ const { snapshot, data } = useMeta()
 const { teams } = useTeams()
 const wide = useMediaQuery('(min-width: 900px)')
 // Its sections, a row of links stuck to the top, the one being read marked: the field, the two sides' damage, and
-// yours against the meta once there's yours. On phones the sides' bands stick under it (`--nav-h`, its height).
+// yours against the meta once there's yours. On phones the sides' tabs stick under it (`--nav-h`, its height).
 const sections = computed(() => [
   { id: 'calc-top', label: t('calc.section.field') },
   { id: 'calc-duel', label: t('calc.section.damage') },
   ...(battlerOf(sides.value.a) ? [{ id: 'calc-meta', label: t('calc.meta.title') }] : []),
 ])
 const nav = useTemplateRef<InstanceType<typeof SectionNav>>('nav')
-// The field's bar, stuck under the row of links; on phones the sides' bands stick under it (`--bar-h`, its height).
+// The field's bar, stuck under the row of links; on phones the sides' tabs stick under it (`--bar-h`, its height).
 const bar = useTemplateRef<HTMLElement>('bar')
 const { height: barH } = useElementSize(bar, undefined, { box: 'border-box' })
 // Stuck: its top at the row of links' foot, checked as the page scrolls; toned down then (`stuck`).
@@ -112,7 +114,15 @@ field.value = decodeField(start.f)
 let seeded = !!(start.a || start.b)
 // On phones, the side shown under the tabs: yours at first, none once the open one is folded.
 const openSide = shallowRef<SideKey | null>('a')
-const toggleSide = (k: SideKey) => {
+const tabs = useTemplateRef<HTMLElement>('tabs')
+const { height: tabsH } = useElementSize(tabs, undefined, { box: 'border-box' })
+/** A tab tapped: its side opened, or folded if it was; with no Pokémon yet, its picker straight away. */
+function tapTab(k: SideKey) {
+  if (!battlerOf(sides.value[k])) {
+    openSide.value = k
+    picking.value = { side: k, field: 'pokemon' }
+    return
+  }
   openSide.value = openSide.value === k ? null : k
   if (openSide.value) void nextTick(() => document.getElementById(`calc-${k}`)?.scrollIntoView({ block: 'nearest' }))
 }
@@ -377,7 +387,7 @@ function face(f: Fighter) {
 </script>
 
 <template>
-  <div class="calc" :style="{ '--nav-h': `${navH}px`, '--bar-h': `${barH}px` }">
+  <div class="calc" :style="{ '--nav-h': `${navH}px`, '--bar-h': `${barH}px`, '--tabs-h': `${tabsH}px` }">
     <!-- Reset all, on the row of the way back to Tools, as on the speed pages (the app's frame has a place for it there). -->
     <Teleport to="#back-actions-calc" defer>
       <button v-if="hasAny" type="button" class="btn inverted" @click="resetAll">
@@ -420,24 +430,29 @@ function face(f: Fighter) {
     </div>
 
     <div id="calc-duel" class="duel" :class="{ aligned: hasBoth, stacked: !wide }">
-      <template v-for="k in ['a', 'b'] as const" :key="k">
-        <!-- On phones, its band: its side's color, its Pokémon in short, stuck to the top under the one before it;
-           tapping it opens its panel under it, tapping it again folds it. -->
+      <!-- On phones, the two side by side as tabs, as the speed comparison's: each its side's color over its Pokémon in
+           short, stuck to the top under the field's bar; tapping one opens its panel under them, tapping it again folds
+           it, and one with no Pokémon picks it. -->
+      <div v-if="!wide" ref="tabs" class="side-tabs">
         <button
-          v-if="!wide"
+          v-for="k in ['a', 'b'] as const"
+          :key="k"
           type="button"
-          class="band"
+          class="tab"
           :class="{ open: openSide === k, theirs: k === 'b' }"
-          :style="{ '--i': k === 'a' ? 0 : 1 }"
-          :aria-expanded="openSide === k"
+          :aria-expanded="battlerOf(sides[k]) ? openSide === k : undefined"
           :aria-controls="`calc-${k}`"
-          @click="toggleSide(k)"
+          @click="tapTab(k)"
         >
-          <span class="visually-hidden">{{ labels[k] }}</span>
-          <CalcSummary v-if="battlerOf(sides[k])" :fighter="sides[k]" />
-          <span v-else class="band-empty">{{ t(k === 'a' ? 'compare.pickYours' : 'compare.pickOpponent') }}</span>
-          <ChevronDown :size="16" class="band-chevron" aria-hidden="true" />
+          <span class="tab-label"
+            >{{ labels[k]
+            }}<ChevronDown :size="16" class="tab-chevron" :class="{ unset: !battlerOf(sides[k]) }" aria-hidden="true"
+          /></span>
+          <CalcSummary v-if="battlerOf(sides[k])" :fighter="sides[k]" class="tab-summary" />
+          <span v-else class="tab-empty"><Plus :size="16" aria-hidden="true" />{{ t('compare.pick') }}</span>
         </button>
+      </div>
+      <template v-for="k in ['a', 'b'] as const" :key="k">
         <CalcSide
           :id="`calc-${k}`"
           :ref="(el) => setSideEl(k, el)"
@@ -468,7 +483,9 @@ function face(f: Fighter) {
             >
               <Undo2 :size="14" aria-hidden="true" /><PokemonIcon :id="previousId" :scale="0.75" />
             </button>
-            <OptionsMenu :title="t('calc.load')" :label="t('calc.load')" :icon="Users">
+            <!-- What a side can do with its set, in one menu: load one (its common set, a paste, a Pokémon of the
+                 reader's teams), copy it, swap the two sides. -->
+            <OptionsMenu :title="t('calc.setMenu')" :icon="Ellipsis">
               <template #default="{ close }">
                 <div class="load">
                   <button
@@ -482,6 +499,20 @@ function face(f: Fighter) {
                   <button type="button" class="load-row" @click="((pasting = k), close())">
                     <ClipboardPaste :size="14" aria-hidden="true" />{{ t('calc.paste') }}
                   </button>
+                  <button
+                    type="button"
+                    class="load-row"
+                    :class="{ copied: copiedSide === k }"
+                    :disabled="!sides[k].member.pokemon"
+                    @click="copySet(k)"
+                  >
+                    <component :is="copiedSide === k ? Check : ClipboardCopy" :size="14" aria-hidden="true" />{{
+                      copiedSide === k ? t('tournaments.pasteCopied') : t('calc.copySet')
+                    }}
+                  </button>
+                  <button type="button" class="load-row" :disabled="!hasAny" @click="(swap(), close())">
+                    <ArrowLeftRight :size="14" aria-hidden="true" />{{ t('calc.swap') }}
+                  </button>
                   <template v-if="savedTeams.length">
                     <span class="muted load-label">{{ t('calc.fromTeams') }}</span>
                     <ReuseTeams :side="k" :done="close" />
@@ -489,28 +520,6 @@ function face(f: Fighter) {
                 </div>
               </template>
             </OptionsMenu>
-            <button
-              v-if="sides[k].member.pokemon"
-              v-tip="t('calc.copySetTip')"
-              type="button"
-              class="btn quiet small"
-              :aria-label="t('calc.copySetTip')"
-              @click="copySet(k)"
-            >
-              <component :is="copiedSide === k ? Check : ClipboardCopy" :size="14" aria-hidden="true" />{{
-                copiedSide === k ? t('tournaments.pasteCopied') : t('calc.copySet')
-              }}
-            </button>
-            <button
-              v-if="k === 'a'"
-              v-tip="t('calc.swap')"
-              type="button"
-              class="btn quiet small"
-              :aria-label="t('calc.swap')"
-              @click="swap"
-            >
-              <ArrowLeftRight :size="14" aria-hidden="true" />{{ t('calc.swapShort') }}
-            </button>
           </template>
         </CalcSide>
       </template>
@@ -745,64 +754,78 @@ function face(f: Fighter) {
     grid-template-columns: minmax(0, 1fr);
   }
 }
-/* On phones, the two one under the other, as the speed comparison's list: each a band of its side's color, stuck to the
-   top under the one before it (their shared lines overlapping), its panel under it lined up with it, its side's color a
-   stripe inside its left edge. */
-.band {
-  --band-h: 44px;
+/* On phones, the two tabs, as the speed comparison's: each a band of its side's color over its Pokémon in short, side
+   by side, stuck under the field's bar on a strip of the page's background. The open one flat, its arrow turned. */
+.side-tabs {
   position: sticky;
-  top: calc(var(--nav-h, 0px) + var(--bar-h, 0px) + var(--i) * (var(--band-h) - 2px));
-  z-index: calc(40 - var(--i));
-  display: flex;
-  align-items: center;
+  top: calc(var(--nav-h, 0px) + var(--bar-h, 0px));
+  z-index: 40;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  height: var(--band-h);
+  margin-bottom: 6px;
+  padding: 6px 0 8px;
+  background: var(--bg);
+}
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   min-width: 0;
-  padding: 0 10px;
+  padding: 0;
   font: inherit;
   font-weight: bold;
   text-align: left;
-  color: var(--accent-text);
-  background: var(--accent);
+  color: var(--text);
+  background: var(--panel);
   border: 2px solid var(--ink);
+  box-shadow: var(--hard);
   cursor: pointer;
   touch-action: manipulation;
 }
-.band.theirs {
+.tab.open {
+  box-shadow: none;
+}
+.tab-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 3px 8px;
+  font-size: 0.875em;
+  color: var(--accent-text);
+  background: var(--accent);
+  border-bottom: 2px solid var(--ink);
+}
+.tab.theirs .tab-label {
   color: var(--opponent-text);
   background: var(--opponent);
 }
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-.band-empty {
-  flex: 1;
-  font-weight: normal;
-  opacity: 0.85;
-}
-.band-chevron {
+.tab-chevron {
   flex: none;
-  margin-left: auto;
   transition: transform 0.15s;
 }
-.band.open .band-chevron {
+.tab.open .tab-chevron {
   transform: rotate(180deg);
 }
-:root:root .duel.stacked > :deep(section) {
-  margin-top: -2px;
-  padding-left: calc(var(--panel-pad, 12px) + 4px);
-  border: 2px solid var(--ink);
-  box-shadow: inset 6px 0 var(--side);
-  scroll-margin-top: calc(var(--nav-h, 0px) + var(--bar-h, 0px) + 2 * 42px);
+/* With none picked there's nothing to fold: the tab picks one. Hidden, its room kept, so both tabs stay as tall. */
+.tab-chevron.unset {
+  visibility: hidden;
 }
-.duel.stacked > .band + .band,
-.duel.stacked > section + .band {
-  margin-top: -2px;
+.tab-summary,
+.tab-empty {
+  min-height: 40px;
+  padding: 4px 8px;
+}
+.tab-empty {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: normal;
+  color: var(--muted);
+}
+:root:root .duel.stacked > :deep(section) {
+  scroll-margin-top: calc(var(--nav-h, 0px) + var(--bar-h, 0px) + var(--tabs-h, 0px) + 8px);
 }
 /* The way back to the opponent before, its icon after the arrow. */
 .back-to {
@@ -833,6 +856,9 @@ function face(f: Fighter) {
 .load-row:disabled {
   opacity: 0.5;
   cursor: default;
+}
+.load-row.copied {
+  color: var(--good);
 }
 .load-label {
   margin-top: 6px;

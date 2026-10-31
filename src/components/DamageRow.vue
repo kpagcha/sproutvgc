@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { Check, ChevronDown, ChevronUp, Copy, Crosshair, Zap } from '@lucide/vue'
+import { Check, ChevronDown, ChevronUp, Copy, Crosshair, Pencil, Plus, Zap } from '@lucide/vue'
 import { move, type MoveId } from '@/data/dex'
 import { isSpread, MOVES } from '@/data/moves'
 import { t, tSplit, typeName } from '@/i18n'
@@ -19,10 +19,14 @@ import TypeIcon from '@/components/TypeIcon'
 // (no spread reduction), and for a move doubled on what came before it (`DOUBLING`: Stomping Tantrum's last move failing,
 // Avalanche hit first, Round after an ally's, Fickle Beam's all-out attack) whether it is, Spit Up's Stockpile layers, set from its row and marked on its name. What the order does to it (a priority move's
 // priority, Payback's power) a tag at the end of the verdict's line, so every row is as tall and the two sides' rows line up; a status
-// move a row laid out as the rest, dimmed, its bar empty and nothing to unfold.
+// move a row laid out as the rest, dimmed, its bar empty and nothing to unfold. The rows are the side's moves, the set's
+// card leaving them out: its name a button picking another in its place (`pick`, `active` while it's being picked), and
+// a move not picked yet a placeholder picking one. With no other side yet (`idle`), its name alone.
 const props = defineProps<{
-  id: MoveId
+  id: MoveId | null
   hit: Hit | null
+  idle?: boolean
+  active?: boolean
   theirs?: boolean
   crit: boolean
   hits: number | undefined
@@ -31,20 +35,23 @@ const props = defineProps<{
   stockpile: number | undefined
 }>()
 const emit = defineEmits<{
+  pick: []
   crit: [on: boolean]
   hits: [n: number]
   single: [on: boolean]
   doubled: [on: boolean]
   stockpile: [n: number]
 }>()
-const doubling = computed(() => DOUBLING[props.id])
+const doubling = computed(() => (props.id ? DOUBLING[props.id] : undefined))
 // It hits both foes in this battle (Expanding Force in Psychic Terrain too), so it can hit one alone.
 const spread = computed(() => props.hit?.spread ?? (!!m.value && isSpread(m.value)))
 const open = defineModel<boolean>('open', { default: false })
 
-const m = computed(() => MOVES[props.id])
+const m = computed(() => (props.id ? MOVES[props.id] : undefined))
 const kind = computed(() => koKind(props.hit))
 const status = computed(() => m.value?.category === 'status')
+/** Its rolls and the rest to unfold: a damaging move's, against the other side. */
+const foldable = computed(() => !status.value && !props.idle)
 // Past its HP as it is, overkill and all (as Showdown's calc says it), whole from 100: "212 – 250%".
 const fmt = (x: number) => (x >= 100 ? String(Math.floor(x)) : x.toFixed(1))
 /** The bar's parts, in percent of the defender's whole HP, from the left: lost before, dealt for sure, may be dealt
@@ -66,7 +73,7 @@ async function share() {
   copied.value = await copy(props.hit.desc)
   setTimeout(() => (copied.value = false), 1500)
 }
-const choices = computed(() => hitChoices(props.id))
+const choices = computed(() => (props.id ? hitChoices(props.id) : null))
 // The hits picked, else those the calc hit (its default for the move).
 const hitsOn = computed(() => props.hits ?? props.hit?.hits)
 const STOCKPILE = Array.from({ length: MAX_STOCKPILE }, (_, i) => i + 1)
@@ -92,57 +99,79 @@ const blockedText = tSplit('calc.blockedBy', 'what')
 </script>
 
 <template>
-  <li class="damage" :class="[kind, { theirs, open: open && !status, none: hit?.none, 'status-move': status }]">
-    <button
-      type="button"
-      class="head no-lift"
-      :disabled="status"
-      :aria-expanded="status ? undefined : open"
-      @click="open = !open"
-    >
+  <!-- No move in its place yet: a placeholder picking one. -->
+  <li v-if="!id" class="damage empty">
+    <button type="button" class="pick-move placeholder" :class="{ active }" @click="emit('pick')">
+      <Plus :size="14" aria-hidden="true" />{{ t('calc.pickMove') }}
+    </button>
+  </li>
+  <li
+    v-else
+    class="damage"
+    :class="[kind, { theirs, open: open && foldable, none: hit?.none, 'status-move': status, idle }]"
+  >
+    <!-- The row tapped anywhere but its name unfolds it; its name picks another move in its place. -->
+    <div class="head" @click="foldable && (open = !open)">
       <span class="name">
-        <TypeIcon v-if="m" :type="m.type" />
-        <span class="move-name">{{ refName(move(id)) }}</span>
+        <button
+          v-tip="t('calc.changeMove')"
+          type="button"
+          class="move-btn"
+          :class="{ active }"
+          :aria-label="`${refName(move(id))}: ${t('calc.changeMove')}`"
+          @click.stop="emit('pick')"
+        >
+          <TypeIcon v-if="m" :type="m.type" />
+          <span class="move-name">{{ refName(move(id)) }}</span>
+          <Pencil :size="12" class="edit" aria-hidden="true" />
+        </button>
         <CategoryIcon v-if="m" :category="m.category" class="cat" />
         <Zap v-if="crit" :size="13" class="crit-mark" :aria-label="t('calc.crit')" />
         <Crosshair v-if="single && spread" :size="13" class="crit-mark" :aria-label="t('calc.single')" />
         <span v-if="doubling && doubled" class="crit-mark doubled-mark" :aria-label="t('calc.doubled')">×2</span>
       </span>
-      <span v-if="status" class="range"></span>
+      <span v-if="status || idle" class="range"></span>
       <span v-else-if="!hit || hit.none" class="range muted">{{ t('calc.noEffect') }}</span>
       <span v-else class="range"
         ><span class="pct">{{ fmt(hit.minPct) }} – {{ fmt(hit.maxPct) }}%</span></span
       >
-      <component
-        :is="open ? ChevronUp : ChevronDown"
-        :size="14"
-        class="chev"
-        :class="{ gone: status }"
-        aria-hidden="true"
-      />
-      <span class="bar" aria-hidden="true">
-        <template v-if="bar && !hit!.none">
-          <span class="lost" :style="{ width: `${bar.lost}%` }"></span>
-          <span class="sure" :style="{ width: `${bar.sure}%` }"></span>
-          <span class="maybe" :style="{ width: `${bar.maybe}%` }"></span>
-        </template>
-      </span>
-      <span v-if="status" class="verdict muted">{{ t('calc.status') }}</span>
-      <span v-else-if="hit && !hit.none" class="verdict"
-        ><span class="ko">{{ hit.ko || t('calc.noKo') }}</span></span
+      <!-- Unfolding it: its rolls, and the rest. -->
+      <button
+        type="button"
+        class="fold"
+        :class="{ gone: !foldable }"
+        :disabled="!foldable"
+        :aria-expanded="foldable ? open : undefined"
+        :aria-label="t('calc.rolls')"
+        @click.stop="open = !open"
       >
-      <span v-else-if="hit?.blocked" class="verdict muted">
-        <span v-if="'ref' in hit.blocked"
-          >{{ blockedText[0] }}<b>{{ refName(hit.blocked.ref) }}</b
-          >{{ blockedText[1] }}</span
+        <component :is="open ? ChevronUp : ChevronDown" :size="16" aria-hidden="true" />
+      </button>
+      <template v-if="!idle">
+        <span class="bar" aria-hidden="true">
+          <template v-if="bar && !hit!.none">
+            <span class="lost" :style="{ width: `${bar.lost}%` }"></span>
+            <span class="sure" :style="{ width: `${bar.sure}%` }"></span>
+            <span class="maybe" :style="{ width: `${bar.maybe}%` }"></span>
+          </template>
+        </span>
+        <span v-if="status" class="verdict muted">{{ t('calc.status') }}</span>
+        <span v-else-if="hit && !hit.none" class="verdict"
+          ><span class="ko">{{ hit.ko || t('calc.noKo') }}</span></span
         >
-        <span v-else>{{ t('calc.immuneType', { type: typeName(hit.blocked.type) }) }}</span>
-      </span>
-      <!-- Every row a verdict's line, so they're all as tall. -->
-      <span v-else class="verdict" aria-hidden="true">&nbsp;</span>
-      <span v-if="note" class="note">{{ note }}</span>
-    </button>
-    <div v-if="open && !status" class="details">
+        <span v-else-if="hit?.blocked" class="verdict muted">
+          <span v-if="'ref' in hit.blocked"
+            >{{ blockedText[0] }}<b>{{ refName(hit.blocked.ref) }}</b
+            >{{ blockedText[1] }}</span
+          >
+          <span v-else>{{ t('calc.immuneType', { type: typeName(hit.blocked.type) }) }}</span>
+        </span>
+        <!-- Every row a verdict's line, so they're all as tall. -->
+        <span v-else class="verdict" aria-hidden="true">&nbsp;</span>
+        <span v-if="note" class="note">{{ note }}</span>
+      </template>
+    </div>
+    <div v-if="open && foldable" class="details">
       <div class="toggles">
         <button type="button" class="btn mod" :class="{ on: crit }" :aria-pressed="crit" @click="emit('crit', !crit)">
           <Zap :size="14" aria-hidden="true" />{{ t('calc.crit') }}
@@ -231,37 +260,96 @@ const blockedText = tSplit('calc.blockedBy', 'what')
 .damage {
   /* The damage in the attacker's side's color: yours the accent, the opponent's its red. */
   --dmg: var(--accent);
-  border-bottom: 1px solid var(--border);
 }
 .head {
   --icon-scale: 1;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
-  grid-template-areas: 'name range chev' 'bar bar bar' 'verdict note note';
+  grid-template-areas: 'name range fold' 'bar bar bar' 'verdict note note';
   align-items: center;
-  gap: 6px 10px;
-  width: 100%;
-  padding: 10px 6px 12px;
+  gap: 8px 10px;
+  padding: 10px 0;
+  cursor: pointer;
+}
+/* A status move: as the rest, dimmed, nothing to unfold (its fold's room kept). */
+.damage.status-move .head,
+.damage.idle .head {
+  cursor: default;
+}
+.damage.status-move .head > :not(.name),
+.damage.status-move .cat {
+  opacity: 0.5;
+}
+/* Unfolding it: its arrow alone. */
+.fold {
+  grid-area: fold;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 0 2px 4px;
   font: inherit;
-  color: inherit;
-  text-align: left;
+  color: var(--muted);
   background: none;
   border: 0;
   cursor: pointer;
 }
-.head:hover:not(:disabled) {
-  background: var(--panel-alt);
+.head:hover .fold:not(:disabled),
+.fold:focus-visible {
+  color: var(--text);
 }
-/* A status move: as the rest, dimmed, nothing to unfold (its chevron's room kept). */
-.head:disabled {
-  color: inherit;
-  cursor: default;
-}
-.damage.status-move .head {
-  opacity: 0.5;
-}
-.chev.gone {
+.fold.gone {
   visibility: hidden;
+}
+/* Its name, picking another in its place: a link's color, a pencil after it saying so. */
+.move-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--link);
+  text-align: left;
+  background: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.move-btn:hover .move-name {
+  text-decoration: underline;
+}
+.move-btn .edit {
+  flex: none;
+  color: var(--muted);
+}
+.move-btn:hover .edit {
+  color: var(--link);
+}
+.move-btn.active,
+.pick-move.active {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+/* No move there yet: a dashed box picking one. */
+.damage.empty {
+  padding: 6px 0;
+}
+.pick-move {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 32px;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 0.9em;
+  color: var(--muted);
+  text-align: left;
+  background: none;
+  border: 1px dashed var(--border);
+  cursor: pointer;
+}
+.pick-move:hover {
+  color: var(--link);
+  border-color: var(--link);
 }
 .name {
   grid-area: name;
@@ -298,19 +386,6 @@ const blockedText = tSplit('calc.blockedBy', 'what')
 .pct {
   font-size: 1.1em;
   font-weight: bold;
-}
-/* Narrow, the range no bigger than the name, so the name isn't cut short. */
-@media (max-width: 480px) {
-  .pct {
-    font-size: 1em;
-  }
-  .head {
-    gap: 4px 6px;
-  }
-}
-.chev {
-  grid-area: chev;
-  color: var(--muted);
 }
 /* The defender's HP: left for sure, may be left (striped), taken for sure (empty), lost before (dark). */
 .bar {
@@ -386,8 +461,8 @@ const blockedText = tSplit('calc.blockedBy', 'what')
 .details {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 6px 6px 14px;
+  gap: 10px;
+  padding: 2px 0 14px;
   font-size: 0.875em;
 }
 .details p {
@@ -451,5 +526,23 @@ const blockedText = tSplit('calc.blockedBy', 'what')
   background: var(--panel-alt);
   border: 1px solid var(--border);
   overflow-wrap: anywhere;
+}
+/* Narrow, its name across the top, the range at the verdict's end, and what the order does to it under them, so the
+   name isn't cut short. */
+@media (max-width: 480px) {
+  .head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'name fold' 'bar bar' 'verdict range';
+    gap: 6px 8px;
+  }
+  .note {
+    grid-area: auto;
+    grid-row: 4;
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+  .move-name {
+    white-space: normal;
+  }
 }
 </style>
