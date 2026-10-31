@@ -341,6 +341,12 @@ const remembered = (key: string) => {
 }
 const fieldOpen = remembered('sproutvgc.calc.fieldOpen')
 const sideOpen = remembered('sproutvgc.calc.sideOpen')
+// Each side's moves folded or not, apart (the opponent's folded when only yours hitting it matters), as last left;
+// either folded, the two sides' parts no longer on shared rows, so the folded one closes up.
+const movesFolded = {
+  a: remembered('sproutvgc.calc.movesFolded.a'),
+  b: remembered('sproutvgc.calc.movesFolded.b'),
+}
 const fieldOn = computed(() =>
   [
     field.value.weather ? weatherOf(field.value.weather) : undefined,
@@ -479,7 +485,15 @@ function face(f: Fighter) {
         </button>
       </div>
     </div>
-    <div id="calc-duel" class="duel" :class="{ aligned: hasBoth, stacked: !wide, folded: !wide && !shownSide }">
+    <div
+      id="calc-duel"
+      class="duel"
+      :class="{
+        aligned: hasBoth && !movesFolded.a.value && !movesFolded.b.value,
+        stacked: !wide,
+        folded: !wide && !shownSide,
+      }"
+    >
       <!-- On phones, the one opened slides in a touch from its tab's side; the one leaving goes at once. -->
       <template v-for="k in ['a', 'b'] as const" :key="k">
         <Transition :name="k === 'a' ? 'from-left' : 'from-right'">
@@ -500,7 +514,9 @@ function face(f: Fighter) {
             @clear="setSide(k, { ...emptyFighter(), side: sides[k].side })"
             :data
             :side-open="sideOpen"
+            :moves-folded="movesFolded[k].value"
             @side-open="sideOpen = $event"
+            @moves-folded="movesFolded[k].value = $event"
           >
             <template #actions>
               <button

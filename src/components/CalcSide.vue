@@ -28,6 +28,7 @@ import type { Field, Member } from '@/lib/team'
 import { conditionName, sideOf, SPIKES } from '@/components/calcConditions'
 import CalcConditions from '@/components/CalcConditions.vue'
 import DamageRow from '@/components/DamageRow.vue'
+import PokemonIcon from '@/components/PokemonIcon'
 import HpBar from '@/components/HpBar.vue'
 import StageStepper from '@/components/StageStepper.vue'
 import TeamSlot from '@/components/TeamSlot.vue'
@@ -51,12 +52,15 @@ const props = defineProps<{
   spreads: readonly Spread[]
   data: MetaData | null | undefined
   sideOpen: boolean
+  /** Its moves folded away, its heading alone. */
+  movesFolded: boolean
 }>()
 const emit = defineEmits<{
   'update:fighter': [f: Fighter]
   field: [f: Field]
   clear: []
   sideOpen: [open: boolean]
+  movesFolded: [folded: boolean]
 }>()
 defineSlots<{ actions(): unknown }>()
 
@@ -83,10 +87,8 @@ watch(
   },
 )
 
-const otherName = computed(() => {
-  const id = battlerOf(props.other)
-  return id ? refName(pokemon(id)) : null
-})
+const otherId = computed(() => battlerOf(props.other))
+const otherName = computed(() => (otherId.value ? refName(pokemon(otherId.value)) : null))
 // Each of its four moves a row, in its place (the set's card leaving them out): a status move's as the rest's, dimmed,
 // with no damage; one not picked yet a placeholder picking it; with no other side, their names alone.
 const hits = computed(() =>
@@ -181,11 +183,29 @@ function setHpPoints(e: Event) {
     <!-- Its moves against the other side. -->
     <div class="results">
       <template v-if="shown">
-        <h3 class="sub">
-          {{ otherName ? t('calc.against', { name: otherName }) : t('calc.movesHead') }}
-        </h3>
-        <p v-if="!otherName" class="muted hint">{{ t('calc.pickOther') }}</p>
-        <ul class="damages">
+        <!-- Its heading, "Moves against" and the other's icon (its name read out), and an arrow folding them. -->
+        <div class="moves-head">
+          <h3 class="sub">
+            <template v-if="otherId"
+              >{{ t('calc.against') }}<PokemonIcon :id="otherId" class="against-icon" /><span class="sr-only">{{
+                otherName
+              }}</span></template
+            >
+            <template v-else>{{ t('calc.movesHead') }}</template>
+          </h3>
+          <button
+            v-tip="t(movesFolded ? 'calc.showMoves' : 'calc.hideMoves')"
+            type="button"
+            class="fold-moves"
+            :aria-expanded="!movesFolded"
+            :aria-label="t(movesFolded ? 'calc.showMoves' : 'calc.hideMoves')"
+            @click="emit('movesFolded', !movesFolded)"
+          >
+            <ChevronDown :size="16" class="fold-chev" :class="{ open: !movesFolded }" aria-hidden="true" />
+          </button>
+        </div>
+        <p v-if="!otherName && !movesFolded" class="muted hint">{{ t('calc.pickOther') }}</p>
+        <ul v-show="!movesFolded" class="damages">
           <DamageRow
             v-for="h in hits"
             :key="h.i"
@@ -493,6 +513,46 @@ function setHpPoints(e: Event) {
   }
 }
 /* Each part's heading, quiet: the room around it, not a rule, sets the parts apart. */
+.moves-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.moves-head .sub {
+  display: flex;
+  align-items: center;
+  min-height: 30px;
+  margin: 0;
+}
+/* The other side's icon in the heading, standing for its name. */
+.against-icon {
+  margin: -6px 0 -6px 2px;
+}
+/* Its arrow bare, as the move rows' own, in line with theirs at the end. */
+.fold-moves {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  padding: 4px 0 4px 8px;
+  font: inherit;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.fold-moves:hover,
+.fold-moves:focus-visible {
+  color: var(--text);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
 .sub {
   margin: 0 0 4px;
   font-size: 0.8em;
