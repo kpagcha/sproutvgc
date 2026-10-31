@@ -21,7 +21,7 @@ import {
   type Ref,
 } from '@/data/dex'
 import type { MetaData } from '@/data/meta'
-import { MOVES } from '@/data/moves'
+import { isSpread, MOVES } from '@/data/moves'
 import { POKEMON, STATS } from '@/data/pokemon'
 import { chart, TYPES, type TypeId } from '@/data/types'
 import { commonMember, isMega, mostUsedForme } from '@/lib/commonSet'
@@ -298,6 +298,8 @@ export interface Hit {
   priority: number
   /** How many times it hit, as the calc had it. */
   hits: number
+  /** It hits both foes in this battle (`spreadIn`), so it can be told to hit one alone (`single`). */
+  spread: boolean
 }
 
 export interface HitOptions {
@@ -357,6 +359,26 @@ function patchOf(f: Fighter, move: MoveId, opts: HitOptions): { basePower?: numb
   return null
 }
 
+/** Whether a move hits both foes in the battle: a spread move (Earthquake, Heat Wave…), or Expanding Force in Psychic
+ * Terrain from a grounded user (its target `allAdjacentFoes` there, as Showdown's `onModifyMove` and the calc have it). */
+export function spreadIn(f: Fighter, move: MoveId, field: Battlefield): boolean {
+  const m = MOVES[move]
+  if (!m) return false
+  return isSpread(m) || (move === 'expandingforce' && field.terrain === 'Psychic' && grounded(f, field))
+}
+
+/** A move whose target stays one Pokémon's, whatever the calc sets it to: for `single`, no spread reduction (×0.75),
+ * which the calc reads off the target, and Expanding Force's ×1.5 in Psychic Terrain kept, which its branch pushes as
+ * it sets the target to both foes. The calc works on a copy (`calculate` calls `clone`, which rebuilds the move from its
+ * name), so the copy is pinned, and its own copies in turn. Leans on the calc's internals (0.12.0); checked by hand
+ * once: Expanding Force in Psychic Terrain hitting one foe is 80 × 1.5 × 1.3, with no ×0.75. */
+function pinnedSingle(mv: Move): Move {
+  Object.defineProperty(mv, 'target', { get: () => 'normal', set() {}, configurable: true })
+  const clone = Move.prototype.clone
+  mv.clone = () => pinnedSingle(clone.call(mv))
+  return mv
+}
+
 /** What one side's move does to the other, on this field. */
 export function hit(
   attacker: Fighter,
@@ -391,6 +413,7 @@ export function hit(
     ...hitOf(a, d, move, field, sideOf(attacker), sideOf(defender), opts, patchOf(attacker, move, opts)),
     order,
     priority: priorityOf(attacker, move, field),
+    spread: spreadIn(attacker, move, field),
   }
 }
 
@@ -403,25 +426,20 @@ function hitOf(
   defSide: ReturnType<typeof sideOf>,
   opts: HitOptions,
   patch: ReturnType<typeof patchOf>,
-): Omit<Hit, 'order' | 'priority'> {
-  const overrides = {
-    // Its target as one Pokémon's, which the calc's spread check reads (its copy of the move keeps overrides).
-    ...(opts.single && { target: 'normal' as const }),
-    ...patch,
-  }
+): Omit<Hit, 'order' | 'priority' | 'spread'> {
   const mv = new Move(
     GEN,
     named((x) => GEN.moves.get(x), move),
     {
       isCrit: !!opts.crit,
       ...(opts.hits && { hits: opts.hits }),
-      ...(Object.keys(overrides).length && { overrides }),
+      ...(patch && { overrides: patch }),
       ability: a.ability,
       item: a.item,
       species: a.name,
     },
   )
-  const r = calculate(GEN, a, d, mv, calcField(field, atkSide, defSide))
+  const r = calculate(GEN, a, d, opts.single ? pinnedSingle(mv) : mv, calcField(field, atkSide, defSide))
   const maxHp = r.defender.maxHP()
   const hp = r.defender.curHP()
   const dmg = r.damage

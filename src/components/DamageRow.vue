@@ -38,6 +38,8 @@ const emit = defineEmits<{
   stockpile: [n: number]
 }>()
 const doubling = computed(() => DOUBLING[props.id])
+// It hits both foes in this battle (Expanding Force in Psychic Terrain too), so it can hit one alone.
+const spread = computed(() => props.hit?.spread ?? (!!m.value && isSpread(m.value)))
 const open = defineModel<boolean>('open', { default: false })
 
 const m = computed(() => MOVES[props.id])
@@ -103,7 +105,7 @@ const blockedText = tSplit('calc.blockedBy', 'what')
         <span class="move-name">{{ refName(move(id)) }}</span>
         <CategoryIcon v-if="m" :category="m.category" class="cat" />
         <Zap v-if="crit" :size="13" class="crit-mark" :aria-label="t('calc.crit')" />
-        <Crosshair v-if="single" :size="13" class="crit-mark" :aria-label="t('calc.single')" />
+        <Crosshair v-if="single && spread" :size="13" class="crit-mark" :aria-label="t('calc.single')" />
         <span v-if="doubling && doubled" class="crit-mark doubled-mark" :aria-label="t('calc.doubled')">×2</span>
       </span>
       <span v-if="status" class="range"></span>
@@ -146,7 +148,7 @@ const blockedText = tSplit('calc.blockedBy', 'what')
           <Zap :size="14" aria-hidden="true" />{{ t('calc.crit') }}
         </button>
         <button
-          v-if="m && isSpread(m)"
+          v-if="spread"
           v-tip="t('calc.singleTip')"
           type="button"
           class="btn mod"
