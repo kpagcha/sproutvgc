@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, watchEffect } from 'vue'
+import { computed, ref, shallowRef, watch, watchEffect } from 'vue'
 import { useRoute, type RouteLocationNormalizedLoaded, type RouteLocationRaw } from 'vue-router'
 import { AnimatePresence, MotionConfig, motion } from 'motion-v'
 import { FADE, PAGE } from '@/lib/motion'
@@ -10,15 +10,16 @@ import { generatedName, refName } from '@/i18n/refName'
 import type { GeneratedKind } from '@/i18n'
 import type { Ref } from '@/data/dex'
 import { GAME_NAME, REGULATION } from '@/data/format'
-import { Moon, Search, Settings, Sun } from '@lucide/vue'
+import { ChevronDown, Moon, Search, Settings, Sun } from '@lucide/vue'
 import { useTheme } from '@/composables/useTheme'
 import FavoritesMenu from '@/components/FavoritesMenu.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import NavPill from '@/components/NavPill.vue'
 import { KeptPage, Page } from '@/components/PageFrame'
-import SectionMenu from '@/components/SectionMenu.vue'
+import NavDrawer from '@/components/NavDrawer.vue'
+import AreaMenu from '@/components/AreaMenu.vue'
 import AreaNav from '@/components/AreaNav.vue'
-import { AREAS } from '@/lib/areas'
+import { AREAS, type AreaId } from '@/lib/areas'
 import { lastTiersQuery } from '@/lib/tiersState'
 import { eventOf, playerOf } from '@/data/tournaments'
 import logoUrl from '@/assets/logo.png'
@@ -167,12 +168,43 @@ const section = computed(() =>
   route.name === 'home' ? 'search' : route.name === 'settings' ? 'settings' : (route.meta.area ?? null),
 )
 
-/** The header's links: Search (the home page, with its search box focused), one per area, and Settings. */
-const NAV: { to: string; section: string; label: MessageKey }[] = AREAS.map((a) => ({
+/** The header's links: Search (the home page, with its search box focused), one per area, and Settings. Each area's
+ * sections drop down from its link on hover. */
+const NAV: { to: string; section: AreaId; label: MessageKey }[] = AREAS.map((a) => ({
   to: `/${a.id}`,
   section: a.id,
   label: a.label,
 }))
+
+// The area whose sections drop down (`AreaMenu`), and its link: opened by a mouse over the link (a touch goes to the
+// area's page) or the keyboard's focus on it, closed a moment after the pointer leaves both it and the menu, so it can
+// cross from one to the other, and at once by going anywhere or Escape.
+const menuArea = shallowRef<AreaId | null>(null)
+const menuAnchor = shallowRef<HTMLElement | null>(null)
+let closing = 0
+function openMenu(id: AreaId, el: HTMLElement) {
+  clearTimeout(closing)
+  menuAnchor.value = el
+  menuArea.value = id
+}
+function closeMenu(now = false) {
+  clearTimeout(closing)
+  if (now) menuArea.value = null
+  else closing = window.setTimeout(() => (menuArea.value = null), 160)
+}
+const keepMenu = () => clearTimeout(closing)
+function onAreaPointer(e: PointerEvent, id: AreaId) {
+  if (e.pointerType !== 'touch') openMenu(id, e.currentTarget as HTMLElement)
+}
+function onAreaFocus(e: FocusEvent, id: AreaId) {
+  const el = e.currentTarget as HTMLElement
+  if (el.matches(':focus-visible')) openMenu(id, el)
+}
+watch(
+  () => route.fullPath,
+  () => closeMenu(true),
+)
+window.addEventListener('keydown', (e) => e.key === 'Escape' && closeMenu(true))
 
 // The bar switches the language and the theme too, beside Settings: the language to the next one (while there's more
 // than one: English only for now), the theme to the other of light and dark (from what shows, the device's when on auto).
@@ -182,7 +214,7 @@ const multilingual = CODES.length > 1
 const nextLocale = () => setLocale(CODES[(CODES.indexOf(locale.value) + 1) % CODES.length]!)
 const toggleTheme = () => setMode(theme.value === 'dark' ? 'light' : 'dark')
 
-// Narrow screens fold the areas into a dropdown, and show Settings as just its icon.
+// Narrow screens fold the areas, the theme and Settings into a drawer (`NavDrawer`), the bar left the logo and Search.
 const compactQuery = window.matchMedia('(max-width: 560px)')
 const compact = ref(compactQuery.matches)
 compactQuery.addEventListener('change', (e) => (compact.value = e.matches))
@@ -240,46 +272,60 @@ const fadeVariants = {
             <Search class="label" :size="16" :stroke-width="2.5" aria-hidden="true" />
             <span class="label">{{ t('nav.search') }}</span>
           </RouterLink>
-          <SectionMenu v-if="compact" :items="NAV" :section />
+          <NavDrawer v-if="compact" />
           <template v-else>
-            <RouterLink v-for="n in NAV" :key="n.to" :to="n.to" :class="{ active: section === n.section }">
-              <span class="label">{{ t(n.label) }}</span>
+            <div v-for="n in NAV" :key="n.to" class="area-link">
+              <RouterLink
+                :to="n.to"
+                :class="{ active: section === n.section }"
+                aria-haspopup="true"
+                :aria-expanded="menuArea === n.section"
+                @pointerenter="onAreaPointer($event, n.section)"
+                @pointerleave="closeMenu()"
+                @focus="onAreaFocus($event, n.section)"
+                @blur="closeMenu()"
+              >
+                <span class="label">{{ t(n.label) }}</span>
+                <ChevronDown
+                  class="label caret"
+                  :class="{ open: menuArea === n.section }"
+                  :size="12"
+                  :stroke-width="2.5"
+                  aria-hidden="true"
+                />
+              </RouterLink>
+            </div>
+            <AreaMenu :current="menuArea" :anchor="menuAnchor" @enter="keepMenu" @leave="closeMenu()" />
+            <!-- The language while there's more than one. -->
+            <button
+              v-if="multilingual"
+              type="button"
+              class="quick first"
+              :aria-label="`${t('lang.label')}: ${LOCALES[locale]}`"
+              @click="nextLocale"
+            >
+              <span class="label">{{ locale.toUpperCase() }}</span>
+            </button>
+            <button
+              type="button"
+              class="quick"
+              :class="{ first: !multilingual }"
+              :aria-label="t('theme.label')"
+              @click="toggleTheme"
+            >
+              <component
+                :is="theme === 'dark' ? Moon : Sun"
+                class="label"
+                :size="16"
+                :stroke-width="2.5"
+                aria-hidden="true"
+              />
+            </button>
+            <RouterLink to="/settings" class="end" :class="{ active: section === 'settings' }">
+              <Settings class="label" :size="16" :stroke-width="2.5" aria-hidden="true" />
+              <span class="label">{{ t('nav.settings') }}</span>
             </RouterLink>
           </template>
-          <!-- The language on wider screens only: narrow, there's room for the theme alone. -->
-          <button
-            v-if="multilingual && !compact"
-            type="button"
-            class="quick first"
-            :aria-label="`${t('lang.label')}: ${LOCALES[locale]}`"
-            @click="nextLocale"
-          >
-            <span class="label">{{ locale.toUpperCase() }}</span>
-          </button>
-          <button
-            type="button"
-            class="quick"
-            :class="{ first: compact || !multilingual }"
-            :aria-label="t('theme.label')"
-            @click="toggleTheme"
-          >
-            <component
-              :is="theme === 'dark' ? Moon : Sun"
-              class="label"
-              :size="16"
-              :stroke-width="2.5"
-              aria-hidden="true"
-            />
-          </button>
-          <RouterLink
-            to="/settings"
-            class="end"
-            :class="{ active: section === 'settings' }"
-            :aria-label="compact ? t('nav.settings') : undefined"
-          >
-            <Settings class="label" :size="16" :stroke-width="2.5" aria-hidden="true" />
-            <span v-if="!compact" class="label">{{ t('nav.settings') }}</span>
-          </RouterLink>
         </nav>
       </div>
       <div v-if="route.meta.area" class="wrap sub">
@@ -452,17 +498,40 @@ const fadeVariants = {
 .nav .quick + .end {
   margin-left: 0;
 }
-/* The dropdown's menu hangs below the bar, so nothing may clip it (and the three links never need scrolling). */
-.nav.compact {
+/* The areas' menus hang below the bar, so nothing may clip them: the links fit without scrolling. */
+.nav:not(.compact) {
   overflow: visible;
+}
+.nav .area-link {
+  position: relative;
+  display: flex;
+}
+/* The caret saying an area's sections drop down from it, turned while they do; not where nothing hovers. */
+.nav .caret {
+  margin-left: -2px;
+  opacity: 0.6;
+  transition: transform 0.16s ease-out;
+}
+.nav .caret.open {
+  transform: rotate(180deg);
+}
+@media (hover: none) {
+  .nav .caret {
+    display: none;
+  }
 }
 .nav .label {
   position: relative;
 }
 
-/* The area's sections, a row of their own under the bar, apart from it by a faint line. */
+/* The area's sections, a row of their own under the bar, apart from it by a faint line; on phones, in the drawer. */
 .sub {
   border-top: 1px solid var(--border);
+}
+@media (max-width: 560px) {
+  .sub {
+    display: none;
+  }
 }
 
 /* Its parts as tall as each other, the tallest's height: the way back, the favorites and the page's own actions. */
@@ -496,7 +565,7 @@ const fadeVariants = {
   text-decoration: none;
 }
 
-/* Narrow screens: one row, the logo's picture alone (its name kept for screen readers), then the links. */
+/* Narrow screens: one row, the logo's picture alone (its name kept for screen readers), Search and the drawer's toggle. */
 @media (max-width: 560px) {
   .bar {
     flex-wrap: nowrap;
@@ -509,12 +578,9 @@ const fadeVariants = {
     clip-path: inset(50%);
     white-space: nowrap;
   }
-  /* Search and the page's menu right after the logo, wherever its label ends; the theme and Settings at the end. */
+  /* Search right after the logo, the drawer's toggle at the end. */
   .nav {
     flex: 1 1 auto;
-  }
-  .nav .end {
-    margin-left: 0;
   }
 }
 

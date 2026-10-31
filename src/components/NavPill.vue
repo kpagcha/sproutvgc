@@ -5,7 +5,7 @@ import { SPRING_WAAPI } from '@/lib/motion'
 // The header's active highlight: one element, behind the links, that slides from the link it was on to the new one.
 // Not a motion `layout-id`, whose animation runs on the main thread and stalls while the next page renders: this one
 // animates a transform with the Web Animations API, which the browser runs on its own. It finds the active link itself
-// (`.active`, among the nav's links and the section dropdown's button) whenever `section` changes, and keeps to it as
+// (`.active`, among the nav's links and the areas' links) whenever `section` changes, and keeps to it as
 // the nav's layout changes (resizing, folding up, the language, fonts loading).
 const props = defineProps<{ section: string | null; compact: boolean }>()
 
@@ -13,7 +13,7 @@ const pill = useTemplateRef('pill')
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
 
 type Box = { left: number; top: number; width: number; height: number }
-const LINKS = ':scope > a.active, :scope > .section-menu > .toggle.active'
+const LINKS = ':scope > a.active, :scope > .area-link > a.active'
 
 // An element's box in the nav's coordinates (the nav scrolls sideways when the links don't fit).
 function boxOf(el: Element, nav: HTMLElement): Box {
@@ -60,7 +60,7 @@ function observe() {
   observer?.disconnect()
   observer = new ResizeObserver(() => place(false))
   observer.observe(nav)
-  for (const child of nav.querySelectorAll(':scope > a, :scope > .section-menu')) observer.observe(child)
+  for (const child of nav.querySelectorAll(':scope > a, :scope > .area-link > a')) observer.observe(child)
 }
 
 watch(
