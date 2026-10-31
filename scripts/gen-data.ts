@@ -31,6 +31,13 @@ import { itemCategorizer } from './itemCategories.ts'
 import { signatureMoves } from './signatures.ts'
 import { MEGAS } from './teamRules.ts'
 import { SPEED_ABILITIES, SPEED_ITEMS } from '../src/lib/speed.ts'
+import {
+  POWER_HANDLED,
+  POWER_UNAFFECTED,
+  PRIORITY_HANDLED,
+  PRIORITY_UNMODELLED,
+  TARGET_HANDLED,
+} from '../src/lib/battleRules.ts'
 import { histories, Smogon, withPrevious, type MetaEntry, type Snapshot } from './smogon.ts'
 import {
   FORMAT as TOURNAMENT_FORMAT,
@@ -749,6 +756,51 @@ async function main() {
   ]
   if (speedGaps.length)
     console.warn(`What changes Speed in the regulation, missing from src/lib/speed.ts: ${speedGaps.join(', ')}`)
+
+  // The same for what the damage calculator adds by hand to Smogon's calc (`src/lib/battleRules.ts`): what changes a
+  // move's priority or target, and the damaging moves whose power or type hangs on the battle that the calc's own code
+  // doesn't name (its Champions mechanics, where it works them out).
+  const handlers = (e: object) =>
+    Object.entries(e).flatMap(([k, v]) => (typeof v === 'function' ? [[k, String(v)] as const] : []))
+  const has = (e: object, ...keys: string[]) => handlers(e).some(([k]) => keys.includes(k))
+  const battleSources = [
+    ...availableIds.moves!.map((id) => ['move', id, movesById.get(id)!] as const),
+    ...availableIds.abilities!.map((id) => ['ability', id, abilitiesById.get(id)!] as const),
+    ...availableIds.items!.map((id) => ['item', id, dex.items.get(id)] as const),
+  ]
+  const priorityKnown = new Set([...PRIORITY_HANDLED, ...PRIORITY_UNMODELLED])
+  const priorityGaps = battleSources
+    .filter(([, id, e]) => has(e, 'onModifyPriority', 'onFractionalPriority') && !priorityKnown.has(id))
+    .map(([kind, id]) => `${kind} ${id}`)
+  if (priorityGaps.length)
+    console.warn(
+      `What changes priority in the regulation, missing from src/lib/battleRules.ts: ${priorityGaps.join(', ')}`,
+    )
+  const targetGaps = battleSources
+    .filter(
+      ([, id, e]) =>
+        handlers(e).some(([, code]) => /\bmove\.target\s*=[^=]/.test(code)) && !TARGET_HANDLED.includes(id),
+    )
+    .map(([kind, id]) => `${kind} ${id}`)
+  if (targetGaps.length)
+    console.warn(
+      `What changes a move's target in the regulation, missing from src/lib/battleRules.ts: ${targetGaps.join(', ')}`,
+    )
+  const calcCode = readFileSync(join(ROOT, 'node_modules/@smogon/calc/dist/mechanics/champions.js'), 'utf8')
+  const powerGaps = availableIds.moves!.filter((id) => {
+    const m = movesById.get(id)!
+    return (
+      m.category !== 'Status' &&
+      has(m, 'basePowerCallback', 'onBasePower', 'onModifyType') &&
+      !calcCode.includes(`'${m.name}'`) &&
+      !POWER_HANDLED.includes(id) &&
+      !POWER_UNAFFECTED.includes(id)
+    )
+  })
+  if (powerGaps.length)
+    console.warn(
+      `Moves whose power or type hangs on the battle, worked out neither by the calc nor in src/lib/battleRules.ts: ${powerGaps.join(', ')}`,
+    )
   availableIds.conditions = Object.keys(conditions)
   console.log(`${availableIds.conditions.length} conditions caused by what the regulation has`)
 
