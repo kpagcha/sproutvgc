@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, shallowRef } from 'vue'
 import { ChevronDown, Database } from '@lucide/vue'
-import { metaLabel, selectedSnapshot } from '@/data/meta'
+import { datasetKey, defaultSnapshot, metaLabel, selectedSnapshot } from '@/data/meta'
 import { t } from '@/i18n'
 import { metaLoading } from '@/composables/useMeta'
 import MetaCard from '@/components/MetaCard.vue'
@@ -11,7 +11,8 @@ import ModalDialog from '@/components/ModalDialog.vue'
 // screen (`ModalDialog`: closed by a press around it or Escape), its card scrolling when it's taller than the screen.
 // On phones, the button is its icon alone (what it shows read out, and in the card), as the favorites' is. Its icon
 // pulses while the data picked loads. Quiet, whatever's shown: it's beside the page's point. What the data is in full
-// ("Showdown ladder · Sep 2026 · 1760+") is read out.
+// ("Showdown ladder · Sep 2026 · 1760+") is read out. Showing other data than the latest (an earlier month, another
+// regulation's), a dot at its corner says so, as a notification's would.
 const open = ref(false)
 
 const phoneQuery = window.matchMedia('(max-width: 720px)')
@@ -23,6 +24,12 @@ onBeforeUnmount(() => {
   phoneQuery.removeEventListener('change', onPhone)
 })
 
+const notLatest = computed(
+  () =>
+    !!selectedSnapshot.value &&
+    !!defaultSnapshot.value &&
+    datasetKey(selectedSnapshot.value) !== datasetKey(defaultSnapshot.value),
+)
 const dataset = computed(() =>
   selectedSnapshot.value ? t('meta.regulation', { reg: selectedSnapshot.value.regulation }) : '',
 )
@@ -35,7 +42,9 @@ const dataset = computed(() =>
       class="btn small quiet toggle"
       :aria-expanded="open"
       aria-haspopup="dialog"
-      :aria-label="t('meta.pick', { label: metaLabel(selectedSnapshot) })"
+      :aria-label="
+        t('meta.pick', { label: metaLabel(selectedSnapshot) }) + (notLatest ? ` (${t('meta.notLatest')})` : '')
+      "
       :aria-busy="metaLoading"
       @click="open = !open"
     >
@@ -44,6 +53,7 @@ const dataset = computed(() =>
         <span class="dataset">{{ dataset }}</span>
       </template>
       <ChevronDown :size="14" class="chevron" :class="{ open }" aria-hidden="true" />
+      <span v-if="notLatest" class="dot" aria-hidden="true"></span>
     </button>
     <ModalDialog v-model:open="open" :label="t('meta.data')">
       <MetaCard class="meta-dialog-card" @close="open = false" />
@@ -59,6 +69,7 @@ const dataset = computed(() =>
 }
 /* On one line: the icon, the regulation (cut short when the row's tight), and the arrow. */
 .toggle {
+  position: relative;
   gap: 6px;
   min-width: 0;
   max-width: 100%;
@@ -78,6 +89,17 @@ const dataset = computed(() =>
 }
 .chevron.open {
   transform: rotate(180deg);
+}
+/* Not the latest data: a dot on its top right corner, as a notification's. */
+.dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 9px;
+  height: 9px;
+  background: var(--accent);
+  border: 1.5px solid var(--bg);
+  border-radius: 50%;
 }
 /* On phones, its icon alone: as compact as the favorites' star. */
 @media (max-width: 720px) {

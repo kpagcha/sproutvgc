@@ -1340,6 +1340,7 @@ export const messages = {
   'meta.source.smogon': "Smogon's Showdown ladder stats",
   'meta.regulation': 'Regulation {reg}',
   'meta.pick': 'Data shown: {label}',
+  'meta.notLatest': 'not the latest data',
   'meta.cutoffsNote':
     "Teams weighted by their players' rating: each counts those rated above its cutoff most; All players counts every team the same.",
   'speed.intro': 'The Pokémon of Regulation {reg} by their Speed stat.',
