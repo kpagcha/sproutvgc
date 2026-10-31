@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, shallowRef, watch } from 'vue'
 import { move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
-import { percent, type MetaData } from '@/data/meta'
+import type { MetaData } from '@/data/meta'
 import { MOVES } from '@/data/moves'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
@@ -181,7 +181,6 @@ const moveName = (id: MoveId) => refName(move(id))
                   <button type="button" class="who" @click="emit('pick', r.set)">
                     <PokemonIcon :id="r.id" />
                     <span class="who-name">{{ name(r.id) }}</span>
-                    <span class="usage muted">{{ percent(r.usage) }}</span>
                   </button>
                 </th>
                 <td v-for="(h, j) in r.hits" :key="j" class="cell" :class="kindOf(h)">
@@ -219,7 +218,6 @@ const moveName = (id: MoveId) => refName(move(id))
                   <button type="button" class="who" @click="emit('pick', r.set)">
                     <PokemonIcon :id="r.id" />
                     <span class="who-name">{{ name(r.id) }}</span>
-                    <span class="usage muted">{{ percent(r.usage) }}</span>
                   </button>
                 </th>
                 <td class="cell best" :class="kindOf(r.best)">
@@ -325,12 +323,6 @@ const moveName = (id: MoveId) => refName(move(id))
 .who-name {
   font-weight: bold;
 }
-.usage {
-  margin-left: auto;
-  padding-left: 8px;
-  font-size: 0.85em;
-  font-variant-numeric: tabular-nums;
-}
 .move-col {
   min-width: 9em;
 }
@@ -432,7 +424,7 @@ const moveName = (id: MoveId) => refName(move(id))
   .controls {
     margin-left: 0;
   }
-  /* Narrow, each Pokémon its icon with its usage under it and each cell's range under its verdict, the Pokémon kept
+  /* Narrow, each Pokémon its icon and each cell's range under its verdict, the Pokémon kept
   in view as the moves scroll sideways. */
   .grid .who-col {
     width: auto;
@@ -441,7 +433,7 @@ const moveName = (id: MoveId) => refName(move(id))
     z-index: 1;
     background: var(--panel);
   }
-  /* Its icon alone with its usage under it, its name read out but not shown. */
+  /* Its icon alone, its name read out but not shown. */
   .who {
     flex-direction: column;
     gap: 2px;
@@ -453,10 +445,6 @@ const moveName = (id: MoveId) => refName(move(id))
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
-  }
-  .usage {
-    margin: 0;
-    padding: 0;
   }
   .move-col {
     min-width: 6.5em;
