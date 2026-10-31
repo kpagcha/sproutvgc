@@ -115,6 +115,8 @@ field.value = decodeField(start.f)
 let seeded = !!(start.a || start.b)
 // On phones, the side shown under the tabs: yours at first, none once the open one is folded.
 const openSide = shallowRef<SideKey | null>('a')
+/** The side shown under the tabs: the open one, once it has a Pokémon (with none, its tab already picks one). */
+const shownSide = computed(() => (openSide.value && battlerOf(sides.value[openSide.value]) ? openSide.value : null))
 const tabs = useTemplateRef<HTMLElement>('tabs')
 const { height: tabsH } = useElementSize(tabs, undefined, { box: 'border-box' })
 /** A tab's band tapped: its side opened under the tabs, its top brought into view, or folded if it was. */
@@ -456,7 +458,7 @@ function face(f: Fighter) {
         </button>
       </div>
     </div>
-    <div id="calc-duel" class="duel" :class="{ aligned: hasBoth, stacked: !wide, folded: !wide && !openSide }">
+    <div id="calc-duel" class="duel" :class="{ aligned: hasBoth, stacked: !wide, folded: !wide && !shownSide }">
       <!-- On phones, the one opened slides in a touch from its tab's side; the one leaving goes at once. -->
       <template v-for="k in ['a', 'b'] as const" :key="k">
         <Transition :name="k === 'a' ? 'from-left' : 'from-right'">
@@ -470,7 +472,7 @@ function face(f: Fighter) {
             :label="labels[k]"
             :active="picking?.side === k ? picking.field : null"
             :spreads="spreadsOf(sides[k])"
-            v-show="wide || openSide === k"
+            v-show="wide || shownSide === k"
             :class="`side-${k}`"
             @update:fighter="setSide(k, $event)"
             @field="picking = { side: k, field: $event }"
