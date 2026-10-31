@@ -256,11 +256,12 @@ const moveName = (id: MoveId) => refName(move(id))
 .meta {
   margin: 0;
 }
+/* Its heading and controls on one row where they fit; wrapped, set apart from the heading. */
 .meta-head {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 16px;
+  gap: 14px 16px;
 }
 .meta-head h2 {
   margin: 0;
