@@ -374,14 +374,17 @@ function face(f: Fighter) {
 
 <template>
   <div class="calc" :style="{ '--nav-h': `${navH}px`, '--bar-h': `${barH}px` }">
+    <!-- Reset all, on the row of the way back to Tools, as on the speed pages (the app's frame has a place for it there). -->
+    <Teleport to="#back-actions-calc" defer>
+      <button v-if="hasAny" type="button" class="btn inverted" @click="resetAll">
+        <RotateCcw :size="16" aria-hidden="true" />{{ t('speed.resetAll') }}
+      </button>
+    </Teleport>
     <SectionNav ref="nav" :sections />
     <section id="calc-top" class="panel head-panel">
       <div class="head">
         <h1>{{ t('title.calc') }}<SetupStar /></h1>
         <MetaDialog v-if="snapshot" class="head-meta" />
-        <button v-if="hasAny" type="button" class="btn small" @click="resetAll">
-          <RotateCcw :size="14" aria-hidden="true" />{{ t('calc.reset') }}
-        </button>
       </div>
     </section>
     <!-- The field's conditions, a panel of its own stuck under the row of links as the page scrolls, so they're at hand

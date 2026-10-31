@@ -198,7 +198,6 @@ export const messages = {
     'damage calculator, damage calc, calc, VGC calc, Showdown calc, KO calculator, OHKO, 2HKO, damage rolls, VGC, {game}, Regulation {reg}',
   'calc.yours': 'Your Pokémon',
   'calc.theirs': 'Opponent',
-  'calc.reset': 'Reset',
   'calc.swap': 'Swap the two sides',
   'calc.swapShort': 'Swap',
   'calc.back': 'Back to {name}',
