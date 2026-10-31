@@ -174,6 +174,24 @@
   transform: none;
   background: color-mix(in srgb, var(--text) 16%, transparent);
 }
+/* A quiet primary, for a way on that shouldn't stand out as the page's main one (the speed tiers' Compare under a
+   row): flat as the quiet one, in the accent, outlined in it, its wash on hover and pressed. */
+:root:root .btn.quiet.primary {
+  color: var(--accent);
+  background: transparent;
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  font-weight: bold;
+}
+:root:root .btn.quiet.primary:hover:not(:disabled),
+:root:root .btn.quiet.primary.on {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: var(--accent);
+  filter: none;
+}
+:root:root .btn.quiet.primary:active:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
 /* An inverted button, for what undoes on a page where it matters (resets, clears): the regular button's colors
    flipped, the page's text color behind its panel color, so it stands as strongly as the primary but apart from it. */
 :root:root .btn.inverted {

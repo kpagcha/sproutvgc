@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { createReusableTemplate } from '@vueuse/core'
 import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch, type Component } from 'vue'
 import { AnimatePresence, motion } from 'motion-v'
 import { useRoute, useRouter } from 'vue-router'
@@ -106,6 +107,7 @@ import PokemonPicker from '@/components/PokemonPicker.vue'
 import ScrollRow from '@/components/ScrollRow.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 import VersusPanel, { type VersusItem } from '@/components/VersusPanel.vue'
+import VersusLine from '@/components/VersusLine.vue'
 import SetupStar from '@/components/SetupStar.vue'
 import PageHistory from '@/components/PageHistory.vue'
 import { RECENT_ON } from '@/composables/useRecent'
@@ -1376,9 +1378,13 @@ watch([perMon, mine, foundIds, vsKeys, entries], () => {
   })
   if (add.length) set('vs', vsQuery([...vsKeys.value, ...add]))
 })
-// The comparisons' panel, folded until unfolded, then as last left; narrower, docked at the screen's foot.
+// The comparisons' panel beside the ladder, folded until unfolded, then as last left; narrower, each its line under
+// the row it's of, out of the way of the ladder (`VersusLine`), with the way to the comparison of yours and it alone.
 const { open: versusOpen, toggle: toggleVersus } = useOpenState('sproutvgc.speedTiers.versusOpen', false)
-const floatCards = computed(() => versus.value.length > 0 && !side.value)
+/** Yours against a Pokémon, as a list of it or none, for a line under its row. */
+const versusOn = (id: PokemonId) => versus.value.filter((v) => v.e.id === id)
+const versusCompare = (e: Entry) => compareLink([{ id: e.id, build: chipBuild(e), sets: perMon.value }])
+const [DefineVersusLine, VersusLineOf] = createReusableTemplate<{ id: PokemonId }>()
 /** Measured against no longer: a row per Pokémon, not found either. */
 function closeVersus(e: Entry) {
   if (perMon.value) return removeFound(e.id)
@@ -1761,6 +1767,27 @@ const { start: startTour } = useTour(
 <template>
   <!-- The controls and the ladder in panels of their own, under yours' bar. -->
   <div :style="{ '--bar-h': `${barHeight}px` }">
+    <!-- Yours against a Pokémon, under its row where there's no room beside the ladder: yours' Speed against its, the
+         verdict and what it takes, the way to the comparison of the two, and the cross letting it go. -->
+    <DefineVersusLine v-slot="{ id }">
+      <VersusLine
+        v-for="v in versusOn(id)"
+        :key="v.key"
+        :item="v.item"
+        :mine-speed="mySpeed!"
+        :points="myPoints"
+        :trick-room
+        stacked
+        @close="closeVersus(v.e)"
+      >
+        <span class="num versus-who">{{ t('speed.vsHead', { speed: mySpeed! }) }} {{ v.target }}</span>
+        <template #foot>
+          <AppLink :to="versusCompare(v.e)" class="btn quiet primary small versus-compare"
+            >{{ t('speed.vsCompare') }}<ArrowRight :size="14" aria-hidden="true"
+          /></AppLink>
+        </template>
+      </VersusLine>
+    </DefineVersusLine>
     <!-- Reset all, on the row of the way back to Meta (the app's frame has a place for it there). -->
     <Teleport to="#back-actions-speedTiers" defer>
       <button v-if="allChanged" type="button" class="btn inverted reset-all" @click="resetAll">
@@ -2357,6 +2384,7 @@ const { start: startTour } = useTour(
                   </template>
                 </template>
               </template>
+              <template v-if="!side" #versus="{ row }"><VersusLineOf :id="row.id" /></template>
             </SpeedOdds>
             <SpeedRanges
               v-else
@@ -2366,16 +2394,17 @@ const { start: startTour } = useTour(
               :finding
               :versus="vsChips.map((e) => e.id)"
               @chip="onRangeChip"
-            />
+            >
+              <template v-if="!side" #versus="{ id }"><VersusLineOf :id /></template>
+            </SpeedRanges>
           </div>
 
           <!-- Outside the page so the page transition's transform can't move it. -->
           <Teleport to="body">
             <AnimatePresence>
-              <!-- Docked at the screen's foot: the way to the Pokémon found (but over the comparisons unfolded), and the
-                   comparisons' panel. -->
+              <!-- Docked at the screen's foot: the way to the Pokémon found. -->
               <motion.div
-                v-if="match || floatCards"
+                v-if="match"
                 key="dock"
                 class="float-dock"
                 :initial="{ opacity: 0, y: 8 }"
@@ -2384,7 +2413,7 @@ const { start: startTour } = useTour(
                 :transition="FADE"
               >
                 <motion.button
-                  v-if="match && !(floatCards && versusOpen)"
+                  v-if="match"
                   type="button"
                   class="btn primary to-match"
                   :while-press="PRESS"
@@ -2392,20 +2421,6 @@ const { start: startTour } = useTour(
                 >
                   {{ match.name }} {{ match.up ? '↑' : '↓' }}
                 </motion.button>
-                <VersusPanel
-                  v-if="floatCards"
-                  :open="versusOpen"
-                  @update:open="toggleVersus"
-                  class="dock-panel"
-                  floating
-                  :items="versusItems"
-                  :mine-speed="mySpeed!"
-                  :points="myPoints"
-                  :trick-room
-                  :compare-to="compareTarget"
-                  @close="closeKey"
-                  @locate="locateKey"
-                />
               </motion.div>
             </AnimatePresence>
           </Teleport>
@@ -2600,9 +2615,9 @@ const { start: startTour } = useTour(
               </section>
             </template>
             <!-- Yours on the comparison's page, to add opponents to there: greyed out until there's yours, saying why in
-                 a tooltip, or under it where there's no hovering. Not with a chip tapped: the comparison's card goes
-                 there with both. -->
-            <section v-if="!versus.length" class="yours-section yours-compare">
+                 a tooltip, or under it where there's no hovering. Not with a chip tapped beside the ladder: the
+                 comparisons' panel goes there with them. -->
+            <section v-if="!(side && versus.length)" class="yours-section yours-compare">
               <AppLink v-if="compareTarget" :to="compareTarget" class="btn primary compare-go"
                 ><Columns2 :size="16" aria-hidden="true" />{{ t('compare.open')
                 }}<ArrowRight :size="16" aria-hidden="true"
@@ -3481,7 +3496,7 @@ const { start: startTour } = useTour(
   font-variant-numeric: tabular-nums;
 }
 /* The button to the nearest match, floating at the bottom of the screen as the matchups page's to its results. */
-/* What's docked at the foot of the screen: the way to the Pokémon found, then the comparisons' panel under it. */
+/* What's docked at the foot of the screen: the way to the Pokémon found. */
 .float-dock {
   position: fixed;
   left: 12px;
@@ -3499,8 +3514,18 @@ const { start: startTour } = useTour(
 .float-dock > * {
   pointer-events: auto;
 }
-.dock-panel {
-  align-self: stretch;
+/* Under the row measured against, told apart from it by the room around it: yours' Speed against its, bold, and the way
+   to the comparison of the two. */
+.versus-who {
+  font-weight: bold;
+  white-space: nowrap;
+}
+.versus-compare {
+  gap: 4px;
+  font-weight: bold;
+}
+.versus-compare:hover {
+  text-decoration: none;
 }
 .to-match {
   min-height: 40px;

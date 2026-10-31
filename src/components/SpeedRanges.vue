@@ -32,6 +32,10 @@ const props = defineProps<{
   versus: readonly PokemonId[]
 }>()
 const emit = defineEmits<{ chip: [event: MouseEvent, id: PokemonId] }>()
+defineSlots<{
+  /** Under the row of a Pokémon yours is measured against: how yours does against it. */
+  versus?: (props: { id: PokemonId }) => unknown
+}>()
 
 /** The benchmarks as the bars run, slowest first. */
 const ALONG = [...BENCHMARKS].reverse()
@@ -170,47 +174,57 @@ const name = (m: RangeRow['mons'][number]) => [m.species, m.forme].filter(Boolea
       </span>
     </div>
     <ol class="rows">
-      <li
-        v-for="r in rows"
-        :key="r.key"
-        class="row tier"
-        :class="{ hit: r.mons.some((m) => m.hit), 'has-mine': r.mons.some((m) => m.mine) }"
-        :data-base="r.base"
-      >
-        <span class="base num">{{ r.base }}</span>
-        <span class="mons">
-          <AppLink
-            v-for="m in r.mons"
-            :key="m.id"
-            v-tip="canHover && name(m)"
-            :to="{ name: 'metaPokemon', params: { id: m.id } }"
-            class="mon"
-            :class="{ hit: m.hit, mine: m.mine, versus: versus.includes(m.id) }"
-            :data-id="m.id"
-            :aria-label="name(m)"
-            @click.capture="emit('chip', $event, m.id)"
-          >
-            <PokemonIcon :id="m.id" />
-          </AppLink>
-        </span>
-        <span class="track">
-          <span class="visually-hidden">{{ spoken(r) }}</span>
-          <span class="bar" :class="bar(r).kind" :style="bar(r).style" aria-hidden="true"></span>
-          <template v-for="b in ALONG" :key="b">
-            <span class="tick" :style="{ left: at(r.speeds[b]) }" aria-hidden="true"></span>
-            <span
-              class="value num"
-              :class="verdict(r.speeds[b])"
-              :style="{ left: valueLeft(r, b, spots[r.key]!) }"
-              aria-hidden="true"
-              >{{ r.speeds[b] }}</span
+      <template v-for="r in rows" :key="r.key">
+        <li
+          class="row tier"
+          :class="{ hit: r.mons.some((m) => m.hit), 'has-mine': r.mons.some((m) => m.mine) }"
+          :data-base="r.base"
+        >
+          <span class="base num">{{ r.base }}</span>
+          <span class="mons">
+            <AppLink
+              v-for="m in r.mons"
+              :key="m.id"
+              v-tip="canHover && name(m)"
+              :to="{ name: 'metaPokemon', params: { id: m.id } }"
+              class="mon"
+              :class="{ hit: m.hit, mine: m.mine, versus: versus.includes(m.id) }"
+              :data-id="m.id"
+              :aria-label="name(m)"
+              @click.capture="emit('chip', $event, m.id)"
             >
-          </template>
-          <span v-if="mine !== null" class="line" :style="{ left: at(mine) }" aria-hidden="true"></span>
-        </span>
-        <!-- On phones, where the bar's under the rest of the row and as wide as it: yours' line down the whole row. -->
-        <span v-if="mine !== null" class="line row-line" :style="{ left: at(mine) }" aria-hidden="true"></span>
-      </li>
+              <PokemonIcon :id="m.id" />
+            </AppLink>
+          </span>
+          <span class="track">
+            <span class="visually-hidden">{{ spoken(r) }}</span>
+            <span class="bar" :class="bar(r).kind" :style="bar(r).style" aria-hidden="true"></span>
+            <template v-for="b in ALONG" :key="b">
+              <span class="tick" :style="{ left: at(r.speeds[b]) }" aria-hidden="true"></span>
+              <span
+                class="value num"
+                :class="verdict(r.speeds[b])"
+                :style="{ left: valueLeft(r, b, spots[r.key]!) }"
+                aria-hidden="true"
+                >{{ r.speeds[b] }}</span
+              >
+            </template>
+            <span v-if="mine !== null" class="line" :style="{ left: at(mine) }" aria-hidden="true"></span>
+          </span>
+          <!-- On phones, where the bar's under the rest of the row and as wide as it: yours' line down the whole row. -->
+          <span v-if="mine !== null" class="line row-line" :style="{ left: at(mine) }" aria-hidden="true"></span>
+        </li>
+        <li
+          v-for="id in $slots.versus ? r.mons.filter((m) => versus.includes(m.id)).map((m) => m.id) : []"
+          :key="id"
+          class="versus-row"
+        >
+          <span v-if="mine !== null" class="versus-track" aria-hidden="true"
+            ><span class="versus-mine" :style="{ left: at(mine) }"></span
+          ></span>
+          <div class="versus-body"><slot name="versus" :id="id" /></div>
+        </li>
+      </template>
     </ol>
   </div>
 </template>
@@ -294,6 +308,51 @@ const name = (m: RangeRow['mons'][number]) => [m.species, m.forme].filter(Boolea
   margin: 0;
   padding: 0;
   list-style: none;
+}
+/* How yours does against the row over it: in its tint, joined to it, set apart from it by the room around it; on the
+   rows' columns, its text from the Pokémon's, and yours' line through it from the divider,
+   fainter than through the rows, behind its text. */
+.versus-row {
+  display: grid;
+  grid-template-columns: var(--cols);
+  column-gap: 10px;
+  position: relative;
+  z-index: 1;
+  padding: 12px 0 14px;
+  background: color-mix(in srgb, var(--opponent) 14%, var(--panel));
+}
+.versus-body {
+  grid-row: 1;
+  grid-column: 2 / -1;
+  position: relative;
+  min-width: 0;
+  padding-right: 8px;
+}
+.versus-track {
+  grid-row: 1;
+  grid-column: 3;
+  position: relative;
+  /* From the divider (4px down) to the row's foot. */
+  margin-block: -8px -14px;
+  pointer-events: none;
+}
+.versus-mine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  translate: -50% 0;
+  background: var(--accent);
+  opacity: 0.55;
+}
+/* A faint line between it and the row, from where its text starts. */
+.versus-row::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: calc(2.2em + 8px);
+  right: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
 }
 .row {
   position: relative;
@@ -441,6 +500,10 @@ const name = (m: RangeRow['mons'][number]) => [m.species, m.forme].filter(Boolea
   }
   .ranges {
     --cols: 2.2em minmax(0, 1fr);
+  }
+  /* As the bar on phones: the row's whole width. */
+  .versus-track {
+    grid-column: 1 / -1;
   }
   .head,
   .row {

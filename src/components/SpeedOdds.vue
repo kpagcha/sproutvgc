@@ -80,7 +80,11 @@ const emit = defineEmits<{
   mark: [key: string, speed: number, slid: boolean]
   share: [speed: number]
 }>()
-defineSlots<{ tags?: (props: { row: OddsRow }) => unknown }>()
+defineSlots<{
+  tags?: (props: { row: OddsRow }) => unknown
+  /** Under the row yours is measured against: how yours does against it. */
+  versus?: (props: { row: OddsRow }) => unknown
+}>()
 
 /** The axis: what the rows could reach and every Speed drawn, and yours; but for the boosts' rows (unless sorting by
  * what they could reach, or the ladder is the Pokémon found alone, with yours: there are no others to squeeze), so a
@@ -377,25 +381,31 @@ onBeforeUnmount(() => {
       @focusin="onOver"
       @focusout="onOut"
     >
-      <SpeedOddsRow
-        v-for="(r, i) in rows"
-        :key="r.key"
-        :row="r"
-        :lo="axis.lo"
-        :span="axis.span"
-        :mine
-        :trick-room
-        :possible
-        :first="firsts[i]!"
-        :href="firsts[i] ? rowHref(r.speed) : ''"
-        :probe="pickedSpeed"
-        :versus-speed="r.versusAt"
-        :copied="firsts[i]! && copied === r.speed"
-        @chip="(e: MouseEvent) => emit('chip', e, r.key)"
-        @share="emit('share', r.speed)"
-      >
-        <template #tags="p"><slot name="tags" v-bind="p" /></template>
-      </SpeedOddsRow>
+      <template v-for="(r, i) in rows" :key="r.key">
+        <SpeedOddsRow
+          :row="r"
+          :lo="axis.lo"
+          :span="axis.span"
+          :mine
+          :trick-room
+          :possible
+          :first="firsts[i]!"
+          :href="firsts[i] ? rowHref(r.speed) : ''"
+          :probe="pickedSpeed"
+          :versus-speed="r.versusAt"
+          :copied="firsts[i]! && copied === r.speed"
+          @chip="(e: MouseEvent) => emit('chip', e, r.key)"
+          @share="emit('share', r.speed)"
+        >
+          <template #tags="p"><slot name="tags" v-bind="p" /></template>
+        </SpeedOddsRow>
+        <li v-if="r.versus && $slots.versus" class="versus-row">
+          <span v-if="mine !== null" class="versus-track" aria-hidden="true"
+            ><span class="versus-mine" :style="{ left: at(mine) }"></span
+          ></span>
+          <div class="versus-body"><slot name="versus" :row="r" /></div>
+        </li>
+      </template>
     </ol>
     <!-- A Speed of the column hovered: a line down the rows at it. -->
     <span ref="probeLine" class="probe-line" hidden aria-hidden="true"></span>
@@ -486,6 +496,51 @@ onBeforeUnmount(() => {
 .finding .row:not(.hit, .has-mine) {
   opacity: 0.45;
 }
+/* How yours does against the row over it: in its tint, joined to it, set apart from it by the room around it; on the
+   rows' columns, its text from the Pokémon's, and yours' line through it from the divider,
+   fainter than through the rows, behind its text. */
+.versus-row {
+  display: grid;
+  grid-template-columns: var(--cols);
+  column-gap: 10px;
+  position: relative;
+  z-index: 1;
+  padding: 12px 0 14px;
+  background: color-mix(in srgb, var(--opponent) 14%, var(--panel));
+}
+.versus-body {
+  grid-row: 1;
+  grid-column: 2 / -1;
+  position: relative;
+  min-width: 0;
+  padding-right: 8px;
+}
+.versus-track {
+  grid-row: 1;
+  grid-column: 3;
+  position: relative;
+  /* From the divider (4px down) to the row's foot. */
+  margin-block: -8px -14px;
+  pointer-events: none;
+}
+.versus-mine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  translate: -50% 0;
+  background: var(--accent);
+  opacity: 0.55;
+}
+/* A faint line between it and the row, from where its text starts. */
+.versus-row::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: calc(2.2em + 8px);
+  right: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+}
 /* A Speed of the column hovered: a dashed line in ink down the rows, as the one picked has on each row. */
 .probe-line {
   position: absolute;
@@ -507,6 +562,12 @@ onBeforeUnmount(() => {
   .odds,
   .odds.mined {
     --cols: 2.2em minmax(0, 1fr) auto;
+  }
+  .versus-row {
+    column-gap: 8px;
+  }
+  .versus-track {
+    grid-column: 2 / -1;
   }
   .head {
     gap: 2px 8px;
