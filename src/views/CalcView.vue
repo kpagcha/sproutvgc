@@ -394,7 +394,10 @@ function face(f: Fighter) {
 </script>
 
 <template>
-  <div class="calc" :style="{ '--nav-h': `${navH}px`, '--bar-h': `${barH}px`, '--tabs-h': `${tabsH}px` }">
+  <div
+    class="calc"
+    :style="{ '--nav-h': `${navH}px`, '--bar-h': `${fieldOpen ? 0 : barH}px`, '--tabs-h': `${tabsH}px` }"
+  >
     <!-- Reset all, on the row of the way back to Tools, as on the speed pages (the app's frame has a place for it there). -->
     <Teleport to="#back-actions-calc" defer>
       <button v-if="hasAny" type="button" class="btn inverted" @click="resetAll">
@@ -410,7 +413,7 @@ function face(f: Fighter) {
     </section>
     <!-- The field's conditions, a bar on the page (no panel) stuck under the row of links as the page scrolls, so
          they're at hand beside the sides. -->
-    <div ref="bar" class="field-bar" :class="{ stuck: barStuck }">
+    <div ref="bar" class="field-bar" :class="{ stuck: barStuck && !fieldOpen, open: fieldOpen }">
       <!-- One row, sliding sideways where it doesn't fit: the toggle, and those on named while folded. -->
       <ScrollRow class="toolbar">
         <button
@@ -708,8 +711,7 @@ function face(f: Fighter) {
 .head-meta {
   margin-left: auto;
 }
-/* The field's bar: stuck under the row of links, over the sides as they scroll under it; unfolded, scrolling when
-   taller than the screen leaves it. */
+/* The field's bar: folded, stuck under the row of links, over the sides as they scroll under it. */
 .field-bar {
   position: sticky;
   top: var(--nav-h, 0px);
@@ -722,6 +724,13 @@ function face(f: Fighter) {
   background: var(--bg);
   border-bottom: 1px solid transparent;
   transition: border-color 0.15s ease;
+}
+/* Unfolded, on the page as the rest is, scrolling away with it: stuck, taller than the room it'd leave, it took the
+   scrolling and the page under it couldn't be scrolled. */
+.field-bar.open {
+  position: relative;
+  max-height: none;
+  overflow: visible;
 }
 /* Stuck, a rule under it setting it apart from the sides scrolling under it. */
 .field-bar.stuck {
