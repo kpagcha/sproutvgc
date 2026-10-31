@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ChartBar, ChevronDown, ChevronUp, Pin, PinOff, X } from '@lucide/vue'
+import { ChartBar, ChevronDown, ChevronUp, CircleAlert, Pin, PinOff, X } from '@lucide/vue'
 import { ability, item, move, pokemon, type MoveId } from '@/data/dex'
 import type { Spread } from '@/data/meta'
 import { MOVES } from '@/data/moves'
@@ -187,7 +187,7 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
         <button type="button" class="stats-toggle" :aria-expanded="open" @click="open = !open">
           <span class="toggle-line" :class="{ callout: left !== 0, over: left < 0 }">
             <span class="toggle-label">
-              <ChartBar :size="14" class="points-icon" aria-hidden="true" />
+              <component :is="left !== 0 ? CircleAlert : ChartBar" :size="14" class="points-icon" aria-hidden="true" />
               <span v-if="open || left === 0" class="muted">{{ t('builder.points') }}</span>
               <span v-if="left !== 0" class="warn" :class="{ over: left < 0 }" aria-live="polite">{{
                 left > 0
@@ -546,19 +546,19 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
 .warn.over {
   color: var(--bad);
 }
-/* Points left to spend (or over): the line a callout, tinted in the accent (in red, over), so a set not finished
-   shows; all spent, the quiet line. */
+/* Points left to spend (or over): the line loud by its color and an alert's icon in place of the chart's, in a warm
+   warning (in red, over), so a set not finished shows; all spent, the quiet line. */
 .toggle-line.callout {
-  align-self: flex-start;
-  padding: 3px 8px;
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  border: 1px solid var(--accent);
+  color: var(--warn);
 }
 .toggle-line.callout.over {
-  background: color-mix(in srgb, var(--bad) 12%, transparent);
-  border-color: var(--bad);
+  color: var(--bad);
+}
+.toggle-line.callout .warn {
+  color: inherit;
 }
 .toggle-line.callout .points-icon {
+  margin-right: -2px;
   color: inherit;
 }
 .editor {
