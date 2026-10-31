@@ -9,6 +9,7 @@ import {
   ChevronDown,
   ClipboardPaste,
   Ellipsis,
+  Eraser,
   Plus,
   RotateCcw,
   SlidersHorizontal,
@@ -412,7 +413,7 @@ function face(f: Fighter) {
       </div>
     </section>
     <!-- The field's conditions, a bar on the page (no panel) stuck under the row of links as the page scrolls, so
-         they're at hand beside the sides. -->
+         they're at hand beside the sides; unfolded, a soft box holding them, scrolling away with the page. -->
     <div ref="bar" class="field-bar" :class="{ stuck: barStuck && !fieldOpen, open: fieldOpen }">
       <!-- One row, sliding sideways where it doesn't fit: the toggle, and those on named while folded. -->
       <ScrollRow class="toolbar">
@@ -434,8 +435,18 @@ function face(f: Fighter) {
           </span>
         </template>
       </ScrollRow>
+      <!-- Unfolded, its Clear at the row's end, on the toggle's row where they fit. -->
+      <button
+        v-if="fieldOpen"
+        type="button"
+        class="btn quiet small field-clear"
+        :disabled="!fieldOn.length"
+        @click="field = { ...field, weather: '', terrain: '', effects: [] }"
+      >
+        <Eraser :size="14" aria-hidden="true" />{{ t('calc.clearConditions') }}
+      </button>
       <div v-if="fieldOpen" id="calc-field" class="field-conditions">
-        <CalcConditions :field :data @field="field = $event" />
+        <CalcConditions :field :data no-clear @field="field = $event" />
       </div>
     </div>
 
@@ -729,8 +740,31 @@ function face(f: Fighter) {
    scrolling and the page under it couldn't be scrolled. */
 .field-bar.open {
   position: relative;
+  top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
   max-height: none;
+  margin: -8px 0 0;
+  padding: 10px;
   overflow: visible;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+}
+.field-bar.open > .toolbar {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.field-clear {
+  flex: none;
+  margin-left: auto;
+}
+.field-bar.open > .field-conditions {
+  flex-basis: 100%;
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
 }
 /* Stuck, a rule under it setting it apart from the sides scrolling under it. */
 .field-bar.stuck {

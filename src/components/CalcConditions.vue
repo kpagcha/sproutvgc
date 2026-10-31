@@ -26,11 +26,13 @@ import { hoverTip } from '@/components/DexText'
 // its chips), each filled when on, its dex entry's short description on hover. Of the chips, the common ones in the
 // meta shown (`isCommon`) first; the rest under More (a side's grouped: its ally's help, the hazards it came in on,
 // what's on the Pokémon itself), as last left, unfolded anyway when one is on. A Clear takes off everything there is
-// on (the field's, at its top right; the side's, at its first row's end), greyed out while nothing is.
+// on (the field's, at its top right unless the page has it, `noClear`; the side's, at its first row's end), greyed out while nothing is.
 const props = defineProps<{
   field: Battlefield
   side?: { key: 'a' | 'b'; fighter: Fighter }
   data: MetaData | null | undefined
+  /** The field's Clear left out: the page has it, beside the toggle unfolding these. */
+  noClear?: boolean
 }>()
 const emit = defineEmits<{
   field: [f: Battlefield]
@@ -202,7 +204,7 @@ const [DefineClear, Clear] = createReusableTemplate()
 
   <!-- The whole field's. -->
   <div v-else class="conditions">
-    <Clear />
+    <Clear v-if="!noClear" />
     <section v-for="kind in ['weather', 'terrain'] as const" :key="kind" class="group">
       <h3>{{ t(`calc.${kind}`) }}</h3>
       <div class="choices" role="radiogroup" :aria-label="t(`calc.${kind}`)">
