@@ -31,23 +31,27 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
       </li>
     </ul>
   </section>
-  <!-- The meta pages of the Pokémon found, in the meta shown (the home page's), each with its usage rank. -->
-  <section v-if="results.meta.hits.length" class="panel section">
-    <RouterLink :to="{ name: 'rankings', query: { q: query } }" class="section-head">
-      <span class="section-title font-display">{{ t('search.meta') }} <span class="arrow">›</span></span>
+  <!-- The meta pages found, in the meta shown (the home page's), a panel per category (Pokémon, moves, abilities,
+       items), each entry with its usage rank. -->
+  <section v-for="s in results.meta" :key="`meta.${s.kind}`" class="panel section">
+    <RouterLink :to="{ name: s.list, query: { q: query } }" class="section-head">
+      <span class="section-title font-display"
+        >{{ t('search.meta') }} <span class="muted sub">› {{ t(s.title) }}</span> <span class="arrow">›</span></span
+      >
     </RouterLink>
     <ul class="chip-hits">
-      <li v-for="h in results.meta.hits" :key="h.id">
+      <li v-for="h in s.hits" :key="h.id">
         <RouterLink :to="h.to" class="chip-hit">
-          <PokemonIcon :id="h.id as PokemonId" />
+          <PokemonIcon v-if="s.kind === 'pokemon'" :id="h.id as PokemonId" />
+          <ItemIcon v-else-if="s.kind === 'item'" :id="h.id as ItemId" />
           <span><Marked :p="h.parts" /></span
           ><Star v-if="h.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" />
           <span class="muted">#{{ h.rank }}</span>
         </RouterLink>
       </li>
     </ul>
-    <RouterLink v-if="results.meta.more" :to="{ name: 'rankings', query: { q: query } }" class="more">
-      {{ t('home.more', { n: results.meta.more }) }}
+    <RouterLink v-if="s.more" :to="{ name: s.list, query: { q: query } }" class="more">
+      {{ t('home.more', { n: s.more }) }}
     </RouterLink>
   </section>
   <section v-for="s in results.sections" :key="s.kind" class="panel section">
@@ -93,7 +97,7 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
     </ul>
   </section>
   <p
-    v-if="!results.pages.length && !results.meta.hits.length && !results.types.length && !results.sections.length"
+    v-if="!results.pages.length && !results.meta.length && !results.types.length && !results.sections.length"
     class="muted none"
   >
     {{ t('home.none') }}
@@ -126,6 +130,10 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
 }
 .arrow {
   color: var(--accent);
+}
+/* A meta panel's category, after "Meta entries". */
+.sub {
+  font-weight: normal;
 }
 
 .chip-hits {
