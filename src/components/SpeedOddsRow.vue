@@ -309,6 +309,8 @@ const v = computed(() => {
   align-self: stretch;
   /* Dragging along it moves the tooltip; up and down still scroll the page. */
   touch-action: pan-y pinch-zoom;
+  /* Its marks raised over each other within it alone, not over the bar pinned over the ladder. */
+  isolation: isolate;
 }
 .odds-cell {
   grid-area: odds;
@@ -334,10 +336,9 @@ const v = computed(() => {
 .row.hit {
   background: var(--found);
 }
-/* The Speed picked by its link. */
+/* The Speed picked by its link (the line down the rows at it marking it too). */
 .row.at {
   background: var(--sel);
-  box-shadow: inset 3px 0 var(--accent);
 }
 /* The one yours is measured against: tinted the opponents' red, as yours is its color, rather than marked found too;
    the same Pokémon's other rows in a faint wash of it. */
@@ -425,9 +426,10 @@ const v = computed(() => {
   font-weight: bold;
   font-variant-numeric: tabular-nums;
 }
+/* From the Speed's left edge, so it grows into the row rather than off the screen's edge (the Speed is its first column). */
 .copied {
   position: absolute;
-  right: 0;
+  left: 0;
   top: 100%;
   z-index: 3;
   padding: 1px 6px;
