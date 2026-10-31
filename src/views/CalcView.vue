@@ -453,7 +453,14 @@ function face(f: Fighter) {
           }}<ChevronDown :size="16" class="tab-chevron" :class="{ unset: !battlerOf(sides[k]) }" aria-hidden="true" />
         </button>
         <button type="button" class="tab-body" :aria-controls="`calc-${k}`" @click="goTab(k)">
-          <CalcSummary v-if="battlerOf(sides[k])" :fighter="sides[k]" class="tab-summary" />
+          <CalcSummary
+            v-if="battlerOf(sides[k])"
+            :fighter="sides[k]"
+            :other="sides[k === 'a' ? 'b' : 'a']"
+            :field
+            :theirs="k === 'b'"
+            class="tab-summary"
+          />
           <span v-else class="tab-empty"><Plus :size="16" aria-hidden="true" />{{ t('compare.pick') }}</span>
         </button>
       </div>
