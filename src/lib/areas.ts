@@ -40,13 +40,6 @@ export const AREAS: Area[] = [
       { key: 'rankings', route: 'rankings', label: 'nav.rankings', title: 'title.rankings', desc: 'desc.rankings' },
       { key: 'tournaments', route: 'tournaments', label: 'nav.tournaments', desc: 'desc.tournaments' },
       { key: 'speedTiers', route: 'speedTiers', label: 'nav.speedTiers', desc: 'desc.speedTiers' },
-      {
-        key: 'speedCompare',
-        route: 'speedCompare',
-        label: 'nav.speedCompare',
-        title: 'title.speedCompare',
-        desc: 'desc.speedCompare',
-      },
     ],
   },
   {
@@ -56,6 +49,13 @@ export const AREAS: Area[] = [
     title: 'title.tools',
     sections: [
       { key: 'calc', route: 'calc', label: 'nav.calc', title: 'title.calc', desc: 'desc.calc' },
+      {
+        key: 'speedCompare',
+        route: 'speedCompare',
+        label: 'nav.speedCompare',
+        title: 'title.speedCompare',
+        desc: 'desc.speedCompare',
+      },
       { key: 'teamBuilder', route: 'teamBuilder', label: 'nav.teamBuilder', desc: 'desc.teamBuilder' },
       { key: 'matchups', route: 'matchups', label: 'title.matchups', desc: 'desc.matchups' },
       { key: 'chart', route: 'chart', label: 'title.chart', desc: 'desc.chart' },

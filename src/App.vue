@@ -20,7 +20,6 @@ import NavDrawer from '@/components/NavDrawer.vue'
 import AreaMenu from '@/components/AreaMenu.vue'
 import AreaNav from '@/components/AreaNav.vue'
 import { AREAS, type AreaId } from '@/lib/areas'
-import { lastTiersQuery } from '@/lib/tiersState'
 import { eventOf, playerOf } from '@/data/tournaments'
 import logoUrl from '@/assets/logo.png'
 import { searchFocus } from '@/composables/useSearch'
@@ -124,10 +123,11 @@ watchEffect(() => {
   setMeta('meta[property="og:description"]', desc)
 })
 
-/** Entry pages lead back to their category's list (a Pokémon's, ability's, item's or move's meta page, to its rankings); the speed tiers, to Meta. */
+/** Entry pages lead back to their category's list (a Pokémon's, ability's, item's or move's meta page, to its rankings); the speed tiers, to Meta; the damage calculator and the speed comparison, to Tools. */
 const LISTS: Partial<Record<string, { to: RouteLocationRaw; label: MessageKey }>> = {
   speedTiers: { to: { name: 'meta' }, label: 'nav.meta' },
   calc: { to: { name: 'tools' }, label: 'nav.tools' },
+  speedCompare: { to: { name: 'tools' }, label: 'nav.tools' },
   metaPokemon: { to: { name: 'rankings' }, label: 'title.pokemonRankings' },
   metaAbility: { to: { name: 'abilityRankings' }, label: 'title.abilityRankings' },
   metaItem: { to: { name: 'itemRankings' }, label: 'title.itemRankings' },
@@ -147,7 +147,6 @@ function backLink(r: RouteLocationNormalizedLoaded): { to: RouteLocationRaw; lab
     const query = { ...r.query, mode: r.params.side === 'atk' ? 'atk' : undefined }
     return { to: { name: 'matchups', query }, label: 'nav.matchups' }
   }
-  // The speed comparison leads back to the speed tiers as they were left.
   // A tournament's player leads back to its standings.
   if (r.name === 'tournamentPlayer')
     return { to: { name: 'tournament', params: { id: r.params.id } }, label: 'tournaments.standings' }
@@ -157,8 +156,6 @@ function backLink(r: RouteLocationNormalizedLoaded): { to: RouteLocationRaw; lab
       to: { name: 'metaPokemon', params: { id: r.params.id }, query: { meta: r.query.meta } },
       label: 'metaBuild.back',
     }
-  if (r.name === 'speedCompare')
-    return { to: { name: 'speedTiers', query: lastTiersQuery.value }, label: 'nav.speedTiers' }
   return (typeof r.name === 'string' ? LISTS[r.name] : undefined) ?? null
 }
 

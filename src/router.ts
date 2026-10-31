@@ -443,9 +443,28 @@ export const router = createRouter({
         ...inArea('meta', 'speedTiers'),
       },
     },
+
+    // Tools: what you interact with.
+    area('tools', 'title.tools', 'desc.tools'),
+    {
+      path: '/tools/calc',
+      name: 'calc',
+      component: () => import('@/views/CalcView.vue'),
+      meta: {
+        titleKey: 'title.calc',
+        descKey: 'desc.calc',
+        headKey: 'head.calc',
+        keywordsKey: 'keywords.calc',
+        dexNames: true,
+        descriptions: ['ability', 'move', 'item', 'condition'],
+        // Its two sides and the field, once a side has a Pokémon, but for the data shown.
+        setup: (query) => (query.a || query.b ? stringQuery(query, ['meta']) : null),
+        ...inArea('tools', 'calc'),
+      },
+    },
     {
       // Pokémon's Speeds compared, yours against opponents or in speed order, linked to and from the speed tiers.
-      path: '/meta/speed-tiers/compare',
+      path: '/tools/compare-speeds',
       name: 'speedCompare',
       component: () => import('@/views/SpeedCompareView.vue'),
       meta: {
@@ -465,26 +484,7 @@ export const router = createRouter({
           const visit = compareVisit(query)
           return visit ? { visit, query: stringQuery(query, ['pair', 'meta']) } : null
         },
-        ...inArea('meta', 'speedCompare'),
-      },
-    },
-
-    // Tools: what you interact with.
-    area('tools', 'title.tools', 'desc.tools'),
-    {
-      path: '/tools/calc',
-      name: 'calc',
-      component: () => import('@/views/CalcView.vue'),
-      meta: {
-        titleKey: 'title.calc',
-        descKey: 'desc.calc',
-        headKey: 'head.calc',
-        keywordsKey: 'keywords.calc',
-        dexNames: true,
-        descriptions: ['ability', 'move', 'item', 'condition'],
-        // Its two sides and the field, once a side has a Pokémon, but for the data shown.
-        setup: (query) => (query.a || query.b ? stringQuery(query, ['meta']) : null),
-        ...inArea('tools', 'calc'),
+        ...inArea('tools', 'speedCompare'),
       },
     },
     {
