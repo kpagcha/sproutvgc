@@ -25,8 +25,8 @@ import { natureTip } from '@/components/natureTip'
 // while it is, the card shows the Mega (its name, sprite, types and stats, and its ability after the one its sheet
 // registers). A part that breaks the team's rules (`clashes`: its Pokémon, item, ability or a move, with why) is
 // marked, its tooltip saying why. The first step (`hint`: the team has no Pokémon yet), its Pokémon's placeholders
-// glowing in the accent and back, in a loop, until its picker opens. A pin by its clearing pins it beside the team's
-// insights (`pinned`, `pin`), to edit it there as they follow.
+// glowing in the accent and back, in a loop, until its picker opens. In the team builder (`pinnable`), a pin by its
+// clearing pins it beside the team's insights (`pinned`, `pin`), to edit it there as they follow.
 const props = defineProps<{
   member: Member
   active: Field | null
@@ -36,6 +36,8 @@ const props = defineProps<{
   evolved?: boolean
   /** The first step: its Pokémon's placeholders glow in a loop. */
   hint?: boolean
+  /** It has a pin, there being the team's insights to pin it beside (the team builder's, not the damage calculator's). */
+  pinnable?: boolean
   /** It's pinned beside the team's insights (`pin` toggling it). */
   pinned?: boolean
 }>()
@@ -107,7 +109,7 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
         </span>
       </span>
       <button
-        v-if="shown"
+        v-if="shown && pinnable"
         v-tip="canHover ? t(pinned ? 'builder.unpin' : 'builder.pin') : undefined"
         type="button"
         class="clear pin"

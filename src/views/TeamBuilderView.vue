@@ -558,6 +558,7 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
             :clashes="clashes[i]"
             :evolved="evolving === i"
             :hint="i === 0 && !hasAny"
+            pinnable
             :pinned="pinned === i"
             @mega="toggleMega(i)"
             @pin="togglePin(i)"
@@ -581,6 +582,7 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
               :spreads="spreadsOf(members[pinned]!)"
               :clashes="clashes[pinned]"
               :evolved="evolving === pinned"
+              pinnable
               pinned
               :open="editorOpen"
               @update:open="pinSide ? (pinEditing = $event) : (dockEdit = 'points')"
