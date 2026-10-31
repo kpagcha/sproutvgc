@@ -28,7 +28,8 @@ import TypeIcon from '@/components/TypeIcon'
 // A list's search and filters, one box for both, as every list on the site has them. What's typed searches the list
 // (by name, or by what its entries do too: `match`), and finds the terms of `kinds` to filter it by (a type, an
 // ability, a move's category… `searchTerms.ts`), listed under the box with how many of the list each would leave
-// (`count`; those leaving none left out); the placeholder says what it searches by. Picking one, by clicking it or with
+// (`count`; those leaving none left out), in the page's flow so the list stays in sight (`floating`, a card over it,
+// `TermOptions`); the placeholder says what it searches by. Picking one, by clicking it or with
 // the arrow keys and Enter, adds it to the filters (`filters`, kept in the URL by the page) and clears the text.
 // Plainly the filters are chips under the box, all to pass, a chip's cross taking one off again, as
 // Backspace in an empty box takes off the last. In the advanced mode (its button beside the box, one choice for every
@@ -65,6 +66,8 @@ const props = withDefaults(
     meta?: boolean
     /** On a list of teams, what a Pokémon's sets run, the most first, to narrow its filter to a build by. */
     details?: (id: PokemonId) => readonly Detail[]
+    /** The options a card over what's under the box, rather than a panel pushing it down. */
+    floating?: boolean
   }>(),
   { match: () => ['name'], subject: undefined, nameCount: 0, hotkey: undefined, details: undefined },
 )
@@ -242,8 +245,10 @@ const listId = useId()
         </button>
         <kbd v-else-if="hotkey" class="hotkey" aria-hidden="true">{{ hotkey }}</kbd>
         <TermOptions
+          v-if="floating"
           v-show="open"
           :id="listId"
+          floating
           :groups
           :active
           :index-of="indexOf"
@@ -267,6 +272,17 @@ const listId = useId()
         >
       </button>
     </div>
+    <TermOptions
+      v-if="!floating"
+      v-show="open"
+      :id="listId"
+      :groups
+      :active
+      :index-of="indexOf"
+      :lead
+      @pick="pick"
+      @hover="active = $event"
+    />
     <p v-if="!fits" class="hint muted" aria-hidden="true">{{ placeholder }}</p>
     <!-- The plain filters, as chips under the box. -->
     <div v-if="chips.length" class="chips">

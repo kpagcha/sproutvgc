@@ -9,9 +9,12 @@ import Marked from '@/components/Marked'
 import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
 
-// The terms a filter search's text finds (`useTermPicker`), a card under its box: by kind, each with how many of the
-// list it'd leave, after the `lead` options (a search by name). Picking one, by clicking it, is the box's to do.
+// The terms a filter search's text finds (`useTermPicker`), under its box: by kind, each with how many of the list it'd
+// leave, after the `lead` options (a search by name). Picking one, by clicking it, is the box's to do. A panel in the
+// page's flow, pushing the list down rather than covering it, so the list it previews stays in sight; `floating`, a
+// card over what's under the box.
 defineProps<{
+  floating?: boolean
   id: string
   groups: TermGroup[]
   active: number
@@ -37,7 +40,7 @@ const KIND_LABEL: Record<TermKind, MessageKey> = {
 </script>
 
 <template>
-  <ul :id class="term-options" role="listbox">
+  <ul :id class="term-options" :class="{ floating }" role="listbox">
     <li
       v-for="(l, i) in lead"
       :id="optionId(id, i)"
@@ -76,22 +79,29 @@ const KIND_LABEL: Record<TermKind, MessageKey> = {
 </template>
 
 <style scoped>
-/* A card under the box, as the Pokémon pickers' lists are. */
+/* A panel under the box, as wide, short enough to leave the list it previews in sight. */
 .term-options {
+  max-width: 480px;
+  max-height: 200px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 4px 0 0;
+  padding: 2px;
+  list-style: none;
+  background: var(--panel);
+  border: 2px solid var(--ink);
+}
+/* A card over what's under the box, as the Pokémon pickers' lists are. */
+.term-options.floating {
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
   right: 0;
   z-index: 20;
   min-width: 220px;
+  max-width: none;
   max-height: 320px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
   margin: 0;
-  padding: 2px;
-  list-style: none;
-  background: var(--panel);
-  border: 2px solid var(--ink);
   box-shadow: var(--hard);
 }
 .group {
