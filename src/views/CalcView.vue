@@ -655,6 +655,17 @@ function face(f: Fighter) {
   flex-direction: column;
   gap: 16px;
 }
+/* The sides, who moves first and yours against the meta set well apart, more on phones, where they'd run together. */
+.calc > .verdict,
+.calc > #calc-meta {
+  margin-top: 16px;
+}
+@media (max-width: 899px) {
+  .calc > .verdict,
+  .calc > #calc-meta {
+    margin-top: 28px;
+  }
+}
 /* The row of links' own gap under it is the page's. */
 .calc > .section-nav {
   margin-bottom: -4px;
