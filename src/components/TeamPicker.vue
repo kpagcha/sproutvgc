@@ -145,8 +145,9 @@ const monRows = computed(() => {
     .sort((a, b) => a.name.localeCompare(b.name))
   return [...ranked.map(row), ...rest]
 })
-// A Mega searched by its own name ("Mega Sceptile"), which no Pokémon's name has: a row of its own, under the Pokémon
-// it changes from, picking that Pokémon holding its stone (`pickedAs`).
+// A Mega found where the Pokémon it changes from isn't, by its own name ("Mega Sceptile"), which no Pokémon's name has,
+// or by a filter only it passes (Mega Sceptile's Dragon type): a row of its own, under that Pokémon, picking it holding
+// its stone (`pickedAs`).
 const megasOf = computed(() => {
   const by = new Map<PokemonId, PokemonId[]>()
   for (const id of availableIds('pokemon')) {
@@ -154,23 +155,29 @@ const megasOf = computed(() => {
   }
   return by
 })
-const megaRows = (base: PokemonId, f: TermFilters) =>
+/** A Pokémon's Megas passing the filters (`f`) and, when `named`, found by the text. */
+const megaRows = (base: PokemonId, f: TermFilters, named: boolean) =>
   (megasOf.value.get(base) ?? []).flatMap((id) => {
     const name = refName(pokemon(id))
-    const parts = split(name, q.value)
-    return parts && monPasses(id, f) ? [{ id, name, usage: props.data?.[id]?.usage, megas: '', parts }] : []
+    const parts = named ? split(name, q.value) : null
+    if (named && !parts) return []
+    return monPasses(id, f) ? [{ id, name, usage: props.data?.[id]?.usage, megas: '', parts }] : []
   })
 const monKinds = computed(() =>
   MON_TERM_KINDS.filter((k) => k === 'type' || k === 'ability' || (props.snapshot && has(props.snapshot, SET_LIST[k]))),
 )
 const monPasses = (id: PokemonId, f: TermFilters) => passesGroups(f, (x) => monMatches(props.data, id, x))
-const monCount = (f: TermFilters) => monRows.value.filter((r) => monPasses(r.id, f)).length
+const monCount = (f: TermFilters) =>
+  monRows.value.reduce((n, r) => n + (monPasses(r.id, f) ? 1 : megaRows(r.id, f, false).length), 0)
 const monShown = computed(() =>
   monRows.value.flatMap((r) => {
-    if (!monPasses(r.id, preview.value ?? filters.value)) return []
-    const parts = q.value && !preview.value ? split(r.name, q.value) : null
-    if (!q.value || preview.value || parts) return [{ ...r, parts, clash: monClash(r.id) }]
-    return megaRows(r.id, filters.value).map((m) => ({ ...m, clash: monClash(m.id) }))
+    const f = preview.value ?? filters.value
+    const named = !!q.value && !preview.value
+    if (monPasses(r.id, f)) {
+      const parts = named ? split(r.name, q.value) : null
+      if (!named || parts) return [{ ...r, parts, clash: monClash(r.id) }]
+    }
+    return megaRows(r.id, f, named).map((m) => ({ ...m, clash: monClash(m.id) }))
   }),
 )
 /** How many the text finds by name, with the filters picked: not the preview's, which the options show over it. */
@@ -178,7 +185,8 @@ const monNamed = computed(() =>
   q.value
     ? monRows.value.reduce(
         (n, r) =>
-          n + (split(r.name, q.value) && monPasses(r.id, filters.value) ? 1 : megaRows(r.id, filters.value).length),
+          n +
+          (split(r.name, q.value) && monPasses(r.id, filters.value) ? 1 : megaRows(r.id, filters.value, true).length),
         0,
       )
     : 0,
