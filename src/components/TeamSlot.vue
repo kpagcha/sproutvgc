@@ -560,6 +560,8 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
 .toggle-line.callout .points-icon {
   margin-right: -2px;
   color: inherit;
+  /* Centered on the bold text's capitals and figures, not its line box (which leaves room for descenders). */
+  transform: translateY(-1px);
 }
 .editor {
   padding: 0 8px 8px;
