@@ -152,8 +152,9 @@
 :root:root .btn.switch.on {
   background: var(--sel);
 }
-/* A quiet button, for what undoes (clears, resets): no fill or shadow, muted, so it's pressed only on purpose; a
-   regular button on hover. Not red, which the speed tiers keep for opponents. */
+/* A quiet button, for what undoes (clears, resets) or is beside the point: no fill or shadow, muted, so it's pressed
+   only on purpose. Flat whatever it's doing: on hover, or holding its drop-down open (`on`), in the text's color and
+   outlined in ink over a wash of it; more when pressed. Not red, which the speed tiers keep for opponents. */
 :root:root .btn.quiet {
   color: var(--muted);
   background: transparent;
@@ -161,11 +162,17 @@
   box-shadow: none;
   font-weight: normal;
 }
-:root:root .btn.quiet:hover:not(:disabled) {
+:root:root .btn.quiet:hover:not(:disabled),
+:root:root .btn.quiet.on {
+  transform: none;
   color: var(--text);
-  background: var(--panel-alt);
+  background: color-mix(in srgb, var(--text) 8%, transparent);
   border-color: var(--ink);
-  box-shadow: var(--hard-sm);
+  box-shadow: none;
+}
+:root:root .btn.quiet:active:not(:disabled) {
+  transform: none;
+  background: color-mix(in srgb, var(--text) 16%, transparent);
 }
 /* An inverted button, for what undoes on a page where it matters (resets, clears): the regular button's colors
    flipped, the page's text color behind its panel color, so it stands as strongly as the primary but apart from it. */
