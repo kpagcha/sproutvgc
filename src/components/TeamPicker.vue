@@ -145,6 +145,21 @@ const monRows = computed(() => {
     .sort((a, b) => a.name.localeCompare(b.name))
   return [...ranked.map(row), ...rest]
 })
+// A Mega searched by its own name ("Mega Sceptile"), which no Pokémon's name has: a row of its own, under the Pokémon
+// it changes from, picking that Pokémon holding its stone (`pickedAs`).
+const megasOf = computed(() => {
+  const by = new Map<PokemonId, PokemonId[]>()
+  for (const id of availableIds('pokemon')) {
+    if (isMega(id)) by.set(POKEMON[id].battleOnly!, [...(by.get(POKEMON[id].battleOnly!) ?? []), id])
+  }
+  return by
+})
+const megaRows = (base: PokemonId, f: TermFilters) =>
+  (megasOf.value.get(base) ?? []).flatMap((id) => {
+    const name = refName(pokemon(id))
+    const parts = split(name, q.value)
+    return parts && monPasses(id, f) ? [{ id, name, usage: props.data?.[id]?.usage, megas: '', parts }] : []
+  })
 const monKinds = computed(() =>
   MON_TERM_KINDS.filter((k) => k === 'type' || k === 'ability' || (props.snapshot && has(props.snapshot, SET_LIST[k]))),
 )
@@ -154,12 +169,19 @@ const monShown = computed(() =>
   monRows.value.flatMap((r) => {
     if (!monPasses(r.id, preview.value ?? filters.value)) return []
     const parts = q.value && !preview.value ? split(r.name, q.value) : null
-    return !q.value || preview.value || parts ? [{ ...r, parts, clash: monClash(r.id) }] : []
+    if (!q.value || preview.value || parts) return [{ ...r, parts, clash: monClash(r.id) }]
+    return megaRows(r.id, filters.value).map((m) => ({ ...m, clash: monClash(m.id) }))
   }),
 )
 /** How many the text finds by name, with the filters picked: not the preview's, which the options show over it. */
 const monNamed = computed(() =>
-  q.value ? monRows.value.filter((r) => split(r.name, q.value) && monPasses(r.id, filters.value)).length : 0,
+  q.value
+    ? monRows.value.reduce(
+        (n, r) =>
+          n + (split(r.name, q.value) && monPasses(r.id, filters.value) ? 1 : megaRows(r.id, filters.value).length),
+        0,
+      )
+    : 0,
 )
 
 // Moves: its sets' first, then the rest of its movepool.
