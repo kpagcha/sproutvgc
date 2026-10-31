@@ -117,22 +117,19 @@ let seeded = !!(start.a || start.b)
 const openSide = shallowRef<SideKey | null>('a')
 const tabs = useTemplateRef<HTMLElement>('tabs')
 const { height: tabsH } = useElementSize(tabs, undefined, { box: 'border-box' })
-/** A tab tapped: its side opened, or folded if it was; with no Pokémon yet, its picker straight away. */
-function tapTab(k: SideKey) {
+/** A tab's band tapped: its side opened under the tabs, its top brought into view, or folded if it was. */
+function foldTab(k: SideKey) {
+  openSide.value = openSide.value === k ? null : k
+  if (openSide.value) void nextTick(() => document.getElementById(`calc-${k}`)?.scrollIntoView({ block: 'start' }))
+}
+/** A tab's Pokémon tapped: its side opened and its top brought into view; with none yet, its picker straight away. */
+function goTab(k: SideKey) {
+  openSide.value = k
   if (!battlerOf(sides.value[k])) {
-    openSide.value = k
     picking.value = { side: k, field: 'pokemon' }
     return
   }
-  // Scrolled past the panels (their top over the tabs' foot): back to its panel, opened, rather than folded.
-  const top = document.getElementById('calc-duel')?.getBoundingClientRect().top ?? 0
-  const past = top < (tabs.value?.getBoundingClientRect().bottom ?? 0) - 1
-  if (openSide.value === k && !past) {
-    openSide.value = null
-    return
-  }
-  openSide.value = k
-  void nextTick(() => document.getElementById(`calc-${k}`)?.scrollIntoView({ block: past ? 'start' : 'nearest' }))
+  void nextTick(() => document.getElementById(`calc-${k}`)?.scrollIntoView({ block: 'start' }))
 }
 watch(
   data,
@@ -438,26 +435,26 @@ function face(f: Fighter) {
     </div>
 
     <!-- On phones, the two side by side as tabs, as the speed comparison's: each its side's color over its Pokémon in
-         short, stuck to the top under the field's bar the whole page down; tapping one opens its panel under them,
-         tapping it again folds it (scrolled past it, brings it back into view), and one with no Pokémon picks it. -->
+         short, stuck to the top under the field's bar the whole page down. Its band, with its arrow, opens its panel
+         under them or folds it; its Pokémon opens it and goes to its top (one with none picks it). -->
     <div v-if="!wide" ref="tabs" class="side-tabs">
-      <button
-        v-for="k in ['a', 'b'] as const"
-        :key="k"
-        type="button"
-        class="tab"
-        :class="{ open: openSide === k, theirs: k === 'b' }"
-        :aria-expanded="battlerOf(sides[k]) ? openSide === k : undefined"
-        :aria-controls="`calc-${k}`"
-        @click="tapTab(k)"
-      >
-        <span class="tab-label"
-          >{{ labels[k]
-          }}<ChevronDown :size="16" class="tab-chevron" :class="{ unset: !battlerOf(sides[k]) }" aria-hidden="true"
-        /></span>
-        <CalcSummary v-if="battlerOf(sides[k])" :fighter="sides[k]" class="tab-summary" />
-        <span v-else class="tab-empty"><Plus :size="16" aria-hidden="true" />{{ t('compare.pick') }}</span>
-      </button>
+      <div v-for="k in ['a', 'b'] as const" :key="k" class="tab" :class="{ open: openSide === k, theirs: k === 'b' }">
+        <button
+          type="button"
+          class="tab-label"
+          :disabled="!battlerOf(sides[k])"
+          :aria-expanded="battlerOf(sides[k]) ? openSide === k : undefined"
+          :aria-controls="`calc-${k}`"
+          @click="foldTab(k)"
+        >
+          {{ labels[k]
+          }}<ChevronDown :size="16" class="tab-chevron" :class="{ unset: !battlerOf(sides[k]) }" aria-hidden="true" />
+        </button>
+        <button type="button" class="tab-body" :aria-controls="`calc-${k}`" @click="goTab(k)">
+          <CalcSummary v-if="battlerOf(sides[k])" :fighter="sides[k]" class="tab-summary" />
+          <span v-else class="tab-empty"><Plus :size="16" aria-hidden="true" />{{ t('compare.pick') }}</span>
+        </button>
+      </div>
     </div>
     <div id="calc-duel" class="duel" :class="{ aligned: hasBoth, stacked: !wide }">
       <!-- On phones, the one opened slides in a touch from its tab's side; the one leaving goes at once. -->
@@ -779,6 +776,12 @@ function face(f: Fighter) {
     opacity 0.22s ease-out,
     transform 0.22s ease-out;
 }
+/* The one leaving hidden from the start of its leaving, not a frame later, so the one coming in is where it stays
+   when the page goes to its top. */
+.from-left-leave-active,
+.from-right-leave-active {
+  display: none;
+}
 .from-left-enter-from {
   opacity: 0;
   transform: translateX(-10px);
@@ -788,7 +791,6 @@ function face(f: Fighter) {
   transform: translateX(10px);
 }
 @media (prefers-reduced-motion: reduce) {
-  .tab,
   .from-left-enter-active,
   .from-right-enter-active {
     transition: none;
@@ -813,25 +815,29 @@ function face(f: Fighter) {
   flex-direction: column;
   align-items: stretch;
   min-width: 0;
-  padding: 0;
-  font: inherit;
   font-weight: bold;
-  text-align: left;
   color: var(--text);
   background: var(--panel);
   border: 2px solid var(--ink);
   box-shadow: var(--hard);
+  transition: opacity 0.15s ease;
+}
+/* Its two parts, buttons: the band folding it, its Pokémon going to it. */
+.tab-label,
+.tab-body {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
   cursor: pointer;
   touch-action: manipulation;
 }
-/* Closed, faded and raised, to be tapped; open, in full and pressed in (no shadow, moved by its offset), its label's
-   color strong. */
-.tab {
-  transition:
-    opacity 0.15s ease,
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
-}
+/* Closed, faded, its band's color paler; open, in full. Both raised, with the hard shadow. */
 .tab:not(.open) {
   opacity: 0.6;
 }
@@ -841,18 +847,17 @@ function face(f: Fighter) {
 .tab.theirs:not(.open) .tab-label {
   background: color-mix(in srgb, var(--opponent) 55%, var(--panel));
 }
-.tab.open {
-  box-shadow: none;
-  transform: translate(3px, 3px);
-}
 @media (hover: hover) {
   .tab:not(.open):hover {
     opacity: 0.85;
   }
 }
+@media (prefers-reduced-motion: reduce) {
+  .tab {
+    transition: none;
+  }
+}
 .tab-label {
-  display: flex;
-  align-items: center;
   justify-content: space-between;
   gap: 4px;
   padding: 3px 8px;
@@ -860,6 +865,9 @@ function face(f: Fighter) {
   color: var(--accent-text);
   background: var(--accent);
   border-bottom: 2px solid var(--ink);
+}
+.tab-label:disabled {
+  cursor: default;
 }
 .tab.theirs .tab-label {
   color: var(--opponent-text);
@@ -875,6 +883,10 @@ function face(f: Fighter) {
 /* With none picked there's nothing to fold: the tab picks one. Hidden, its room kept, so both tabs stay as tall. */
 .tab-chevron.unset {
   visibility: hidden;
+}
+.tab-body > * {
+  flex: 1;
+  min-width: 0;
 }
 .tab-summary,
 .tab-empty {
