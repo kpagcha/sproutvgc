@@ -689,7 +689,10 @@ function face(f: Fighter) {
   align-items: center;
   gap: 8px 12px;
 }
+/* A row, so its star sits centered on the title's line. */
 .head h1 {
+  display: flex;
+  align-items: center;
   margin: 0;
 }
 .head-meta {

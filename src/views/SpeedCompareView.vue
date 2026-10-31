@@ -554,14 +554,15 @@ function resetAll() {
     </Teleport>
     <!-- The setups the page was left at lately, folded away. -->
     <PageHistory v-if="RECENT_ON" />
-    <!-- The heading: the title and its star (saving the Pokémon and their builds to the favorites), the data the
-         common builds come from (a button opening what it is, to pick another; on phones, its icon alone), and the way
-         to take the tour again, the page's guide to reading it, at the row's end. -->
-    <section class="panel page-head">
+    <!-- The heading on the page, no panel, as the damage calc's: the title and its star (saving the Pokémon and their
+         builds to the favorites), the way to take the tour again, the page's guide to reading it, and at the row's end
+         the data the common builds come from (a button opening what it is, to pick another; on phones, its icon
+         alone). -->
+    <section class="page-head">
       <div class="head">
         <h1>{{ t('title.speedCompare') }}<SetupStar /></h1>
-        <MetaDialog v-if="metaSpeeds" class="head-meta" />
         <TourToggle class="head-tour" @start="startTour" />
+        <MetaDialog v-if="metaSpeeds" class="head-meta" />
       </div>
     </section>
 
@@ -935,8 +936,13 @@ function resetAll() {
 </template>
 
 <style scoped>
-/* The heading's row: the title and its star, the data shown (its dataset cut short first when the row's tight; on
-   phones, its icon alone), then the way to take the tour again, at its end. */
+/* The heading on the page, no panel: a title's line needs no box. Its row: the title and its star, the way to take
+   the tour again, then the data shown at its end (its dataset cut short first when the row's tight; on phones, its
+   icon alone). */
+.page-head {
+  margin: 0 0 12px;
+  padding-top: 4px;
+}
 .head {
   display: flex;
   flex-wrap: wrap;
@@ -951,9 +957,6 @@ function resetAll() {
 }
 .head-meta {
   flex: 0 1 auto;
-}
-/* Taking the tour again, at the row's end. */
-.head-tour {
   margin-left: auto;
 }
 /* The toolbar under the view's tabs: Trick Room, the teams' actions, and the clear at the row's end. */
