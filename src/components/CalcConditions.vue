@@ -108,14 +108,19 @@ function toggleMore() {
   }
 }
 
-const [DefineChip, Chip] = createReusableTemplate<{ c: Condition<string>; on: boolean; toggle: () => void }>()
+const [DefineChip, Chip] = createReusableTemplate<{
+  c: Condition<string>
+  on: boolean
+  toggle: () => void
+  plain?: boolean
+}>()
 const [DefineMore, More] = createReusableTemplate()
 const [DefineClear, Clear] = createReusableTemplate()
 </script>
 
 <template>
   <!-- A condition that can be on with others: a chip with a checkbox's square. -->
-  <DefineChip v-slot="{ c, on, toggle }">
+  <DefineChip v-slot="{ c, on, toggle, plain }">
     <button
       v-tip="c.ref && hoverTip(c.ref)"
       type="button"
@@ -125,7 +130,7 @@ const [DefineClear, Clear] = createReusableTemplate()
       @click="toggle"
     >
       <span class="mark" aria-hidden="true"><Square :size="14" /></span>
-      <component :is="c.icon" v-if="c.icon" :size="16" aria-hidden="true" />{{ conditionName(c) }}
+      <component :is="c.icon" v-if="c.icon && !plain" :size="16" aria-hidden="true" />{{ conditionName(c) }}
     </button>
   </DefineChip>
   <DefineClear>
@@ -149,6 +154,7 @@ const [DefineClear, Clear] = createReusableTemplate()
         :c
         :on="side.fighter.side.includes(c.key)"
         :toggle="() => toggleSide(c.key)"
+        plain
       />
       <StageStepper
         v-if="spikesCommon"
@@ -175,6 +181,7 @@ const [DefineClear, Clear] = createReusableTemplate()
             :c
             :on="side.fighter.side.includes(c.key)"
             :toggle="() => toggleSide(c.key)"
+            plain
           />
           <StageStepper
             v-if="g.spikes"

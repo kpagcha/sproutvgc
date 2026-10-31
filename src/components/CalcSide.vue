@@ -116,10 +116,10 @@ const rageFist = computed(() => props.fighter.member.moves.some(usesAttacked))
 const onSide = computed(() => [
   ...props.fighter.side.flatMap((s) => {
     const c = sideOf(s)
-    return c ? [{ key: s, icon: c.icon, name: conditionName(c) }] : []
+    return c ? [{ key: s, name: conditionName(c) }] : []
   }),
   ...(props.fighter.spikes && SPIKES.ref
-    ? [{ key: 'spikes', icon: SPIKES.icon, name: `${refName(SPIKES.ref)} ×${props.fighter.spikes}` }]
+    ? [{ key: 'spikes', name: `${refName(SPIKES.ref)} ×${props.fighter.spikes}` }]
     : []),
 ])
 const statusName = (s: Status) => (s ? refName(condition(s)) : t('calc.healthy'))
@@ -327,13 +327,23 @@ function setHpPoints(e: Event) {
     <div class="side-row">
       <template v-if="shown && stats">
         <div class="side-box" :class="{ empty: !onSide.length }">
-          <button type="button" class="side-box-head" :aria-expanded="sideOpen" @click="emit('sideOpen', !sideOpen)">
-            <span class="side-box-title">
+          <!-- Its toggle, as the field's Battle conditions; folded, those on named after it on its row. -->
+          <div class="side-box-row">
+            <button
+              type="button"
+              class="btn side-box-head"
+              :class="{ on: sideOpen }"
+              :aria-expanded="sideOpen"
+              @click="emit('sideOpen', !sideOpen)"
+            >
               {{ t('calc.sideLabel')
-              }}<span class="on-count" :class="{ none: !onSide.length }">{{ onSide.length }}</span>
-            </span>
-            <ChevronDown :size="16" class="fold-chev" :class="{ open: sideOpen }" aria-hidden="true" />
-          </button>
+              }}<span class="on-count" :class="{ none: !onSide.length }">{{ onSide.length }}</span
+              ><ChevronDown :size="14" class="fold-chev" :class="{ open: sideOpen }" aria-hidden="true" />
+            </button>
+            <template v-if="!sideOpen">
+              <span v-for="c in onSide" :key="c.key" class="side-item">{{ c.name }}</span>
+            </template>
+          </div>
           <CalcConditions
             v-if="sideOpen"
             :field
@@ -341,11 +351,6 @@ function setHpPoints(e: Event) {
             :data
             @side="(_k, f) => emit('update:fighter', f)"
           />
-          <ul v-else-if="onSide.length" class="side-list">
-            <li v-for="c in onSide" :key="c.key" class="side-item">
-              <component :is="c.icon" v-if="c.icon" :size="14" aria-hidden="true" />{{ c.name }}
-            </li>
-          </ul>
         </div>
       </template>
     </div>
@@ -625,19 +630,15 @@ function setHpPoints(e: Event) {
   flex-direction: column;
   gap: 10px;
 }
-.side-box-head {
+/* Its toggle and, folded, those on after it, a row wrapping where they don't fit. */
+.side-box-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  width: 100%;
-  padding: 0;
-  font: inherit;
-  color: inherit;
-  text-align: left;
-  background: none;
-  border: 0;
-  cursor: pointer;
+  gap: 6px 10px;
+}
+.side-box-head {
+  flex: none;
 }
 .fold-chev {
   flex: none;
@@ -646,38 +647,10 @@ function setHpPoints(e: Event) {
 .fold-chev.open {
   transform: rotate(180deg);
 }
-.side-box-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.8em;
-  font-weight: bold;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.side-box-head:hover .side-box-title {
-  color: var(--text);
-}
-.side-box-head .fold-chev {
-  color: var(--muted);
-}
-.side-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
+/* What's on, named: bold, as the field's are beside Battle conditions. */
 .side-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 2px 8px;
   font-size: 0.9em;
   font-weight: bold;
-  background: var(--sel);
-  border: 1px solid var(--ink);
+  white-space: nowrap;
 }
 </style>
