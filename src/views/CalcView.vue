@@ -6,7 +6,6 @@ import {
   ArrowLeftRight,
   Check,
   ClipboardCopy,
-  Box,
   ChevronDown,
   ClipboardPaste,
   RotateCcw,
@@ -57,7 +56,7 @@ import TeamPicker from '@/components/TeamPicker.vue'
 // every part a button opening its picker, `TeamPicker`, the meta's searches with their shares) with its moves' damage
 // against the other under it, both ways at once, and what the battle adds to each (HP, status, stages); the battle's
 // conditions (weather, terrain, what's on the field and on each side) in a dialog, those on the field named across the
-// top, with Trick Room at hand; under the two, who moves first and how a one-on-one between them goes (`CalcVerdict`),
+// top; under the two, who moves first and how a one-on-one between them goes (`CalcVerdict`),
 // with the ways to the speed pages. On phones, one under the other as the speed comparison's list: each a band of its
 // side's color with its Pokémon in short (`CalcSummary`), stuck to the top under the one before it, its panel opening
 // under it when tapped, folding when tapped again. The numbers are Smogon's calc's (`@smogon/calc`, its Champions mechanics, doubles), `damage.ts`. A Pokémon picked comes with its most common
@@ -328,18 +327,9 @@ const fieldOn = computed(() =>
   [
     field.value.weather ? weatherOf(field.value.weather) : undefined,
     field.value.terrain ? terrainOf(field.value.terrain) : undefined,
-    // Trick Room's toggle beside them says it, but while the bar's stuck, without it.
-    ...field.value.effects.filter((e) => barStuck.value || e !== 'trickRoom').map(fieldOf),
+    ...field.value.effects.map(fieldOf),
   ].filter((c) => !!c),
 )
-const trickRoom = computed(() => field.value.effects.includes('trickRoom'))
-const toggleTrickRoom = () =>
-  (field.value = {
-    ...field.value,
-    effects: trickRoom.value
-      ? field.value.effects.filter((e) => e !== 'trickRoom')
-      : [...field.value.effects, 'trickRoom'],
-  })
 // A Pokémon coming in with an ability that sets the weather or terrain sets it, as it would in battle (not a setup
 // opened from a link, whose field is as it was left, nor the two swapping places).
 watch(
@@ -404,8 +394,7 @@ function face(f: Fighter) {
     <!-- The field's conditions, a panel of its own stuck under the row of links as the page scrolls, so they're at hand
          beside the sides. -->
     <div ref="bar" class="panel field-bar" :class="{ stuck: barStuck }">
-      <!-- One row, sliding sideways where it doesn't fit: the toggle, Trick Room at hand (while stuck, among the
-           conditions inside, the bar kept to one row), and those on named while folded. -->
+      <!-- One row, sliding sideways where it doesn't fit: the toggle, and those on named while folded. -->
       <ScrollRow class="toolbar">
         <button
           type="button"
@@ -415,20 +404,9 @@ function face(f: Fighter) {
           aria-controls="calc-field"
           @click="fieldOpen = !fieldOpen"
         >
-          <SlidersHorizontal :size="16" aria-hidden="true" /><span class="long">{{ t('calc.conditions') }}</span
-          ><span class="short">{{ t('calc.conditionsShort') }}</span
-          ><span class="on-count" :class="{ none: !fieldOn.length }">{{ fieldOn.length }}</span
+          <SlidersHorizontal :size="16" aria-hidden="true" />{{ t('calc.conditions')
+          }}<span class="on-count" :class="{ none: !fieldOn.length }">{{ fieldOn.length }}</span
           ><ChevronDown :size="14" class="fold-chev" :class="{ open: fieldOpen }" aria-hidden="true" />
-        </button>
-        <button
-          v-if="!barStuck"
-          type="button"
-          class="btn switch"
-          :class="{ on: trickRoom }"
-          :aria-pressed="trickRoom"
-          @click="toggleTrickRoom"
-        >
-          <Box :size="16" aria-hidden="true" />{{ t('speed.mod.trickroom') }}
         </button>
         <template v-if="!fieldOpen">
           <span v-for="c in fieldOn" :key="c!.key" class="field-on">
@@ -734,18 +712,6 @@ function face(f: Fighter) {
   margin-top: 16px;
   padding-top: 14px;
   border-top: 1px solid var(--border);
-}
-/* On phones, the conditions' button in a word, so it and Trick Room share a row. */
-.short {
-  display: none;
-}
-@media (max-width: 480px) {
-  .long {
-    display: none;
-  }
-  .short {
-    display: inline;
-  }
 }
 /* The two sides beside each other, once both have a Pokémon each one's five parts (heading, set, moves, battle, its
    side) on rows the two share, so each part starts level with the other's whatever they hold (before, each as short as

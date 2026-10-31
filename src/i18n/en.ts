@@ -216,7 +216,6 @@ export const messages = {
   'calc.fieldLabel': 'Field',
   'calc.none': 'None',
   'calc.conditions': 'Battle conditions',
-  'calc.conditionsShort': 'Conditions',
   'calc.sideGroup.side': 'Its side',
   'calc.sideGroup.ally': 'Its ally',
   'calc.sideGroup.hazards': 'Hazards it came in on',
