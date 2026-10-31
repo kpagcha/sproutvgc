@@ -8,7 +8,8 @@ import type { PageVisit } from '@/composables/useRecent'
 
 // The star by a page's heading that adds its setup as it is now to the reader's favorites (what its route's
 // `meta.setup` keeps of the URL), or takes it out when it's already there: lit while the page shows a setup starred.
-// Nothing while the page has no setup to star (a comparison with one Pokémon picked). As `EntryTitle`'s, in a heading
+// Hidden while the page has no setup to star (a comparison with one Pokémon picked), its place kept so the heading
+// doesn't shift as it comes and goes. As `EntryTitle`'s, in a heading
 // that folds the page's controls, so its click is its own.
 const route = useRoute()
 const { isSetupFavorite, toggleSetup } = useFavorites()
@@ -22,14 +23,15 @@ const on = computed(() => !!setup.value && isSetupFavorite(setup.value))
 
 <template>
   <button
-    v-if="setup"
     v-tip="t(on ? 'favorites.removeSetup' : 'favorites.addSetup')"
     type="button"
     class="star"
-    :class="{ on }"
+    :class="{ on, none: !setup }"
+    :disabled="!setup"
+    :aria-hidden="!setup"
     :aria-label="t('favorites.addSetup')"
     :aria-pressed="on"
-    @click.stop.prevent="toggleSetup(setup)"
+    @click.stop.prevent="setup && toggleSetup(setup)"
     @keydown.enter.stop
     @keydown.space.stop
   >
@@ -51,6 +53,9 @@ const on = computed(() => !!setup.value && isSetupFavorite(setup.value))
   border: none;
   color: var(--muted);
   cursor: pointer;
+}
+.star.none {
+  visibility: hidden;
 }
 .star:hover {
   color: var(--text);
