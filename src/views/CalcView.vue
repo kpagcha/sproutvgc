@@ -456,7 +456,7 @@ function face(f: Fighter) {
         </button>
       </div>
     </div>
-    <div id="calc-duel" class="duel" :class="{ aligned: hasBoth, stacked: !wide }">
+    <div id="calc-duel" class="duel" :class="{ aligned: hasBoth, stacked: !wide, folded: !wide && !openSide }">
       <!-- On phones, the one opened slides in a touch from its tab's side; the one leaving goes at once. -->
       <template v-for="k in ['a', 'b'] as const" :key="k">
         <Transition :name="k === 'a' ? 'from-left' : 'from-right'">
@@ -655,7 +655,8 @@ function face(f: Fighter) {
   flex-direction: column;
   gap: 16px;
 }
-/* The sides, who moves first and yours against the meta set well apart, more on phones, where they'd run together. */
+/* The sides, who moves first and yours against the meta set apart, a touch less on phones, where the page is short
+   of room. */
 .calc > .verdict,
 .calc > #calc-meta {
   margin-top: 16px;
@@ -663,7 +664,7 @@ function face(f: Fighter) {
 @media (max-width: 899px) {
   .calc > .verdict,
   .calc > #calc-meta {
-    margin-top: 28px;
+    margin-top: 8px;
   }
 }
 /* The row of links' own gap under it is the page's. */
@@ -780,6 +781,10 @@ function face(f: Fighter) {
 @media (max-width: 899px) {
   .duel {
     grid-template-columns: minmax(0, 1fr);
+  }
+  /* Both sides folded, nothing there: no gap of its own between the tabs and what follows. */
+  .duel.folded {
+    display: none;
   }
 }
 /* On phones, the side opened sliding in a touch from its tab's side, faded in; the one leaving gone at once. Only
