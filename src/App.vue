@@ -387,7 +387,10 @@ const fadeVariants = {
         </AnimatePresence>
       </RouterView>
     </main>
+    <!-- The bare minimum: the copyright, and the way to the credits (the rest of the notices there). -->
     <footer class="wrap footer muted">
+      <span>{{ t('credits.copyright') }}</span>
+      <span aria-hidden="true">·</span>
       <RouterLink to="/credits">{{ t('title.credits') }}</RouterLink>
     </footer>
     <ConfirmDialog />
@@ -589,11 +592,12 @@ main {
 }
 
 .footer {
-  padding-top: 8px;
-  padding-bottom: 24px;
+  padding-top: 32px;
+  padding-bottom: 40px;
   font-size: calc(11px * var(--text-scale));
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 4px 8px;
 }
 </style>
