@@ -2457,7 +2457,7 @@ const { start: startTour } = useTour(
             <!-- A heading that closes the card dropped from the bar; beside the ladder it's always open. -->
             <summary class="yours-title" @click.prevent="!side && toggleYours()">
               <span class="marker yours-marker" aria-hidden="true">{{ yoursOpen ? '▾' : '▸' }}</span>
-              {{ t('speed.yours') }}
+              <span v-tip="t('speed.yoursIntro')" class="tipped">{{ t('speed.yours') }}</span>
               <!-- Unpicking yours, at the band's end: its own click, not the heading's. -->
               <button v-if="mine" type="button" class="btn on-band inverted band-clear" @click.stop.prevent="clearMine">
                 <Trash2 :size="14" aria-hidden="true" />{{ t('speed.clear') }}
@@ -2480,8 +2480,7 @@ const { start: startTour } = useTour(
                 @update:model-value="pickMine"
               />
             </div>
-            <p v-if="!mine" class="muted small wide-only yours-intro">{{ t('speed.yoursIntro') }}</p>
-            <template v-else>
+            <template v-if="mine">
               <!-- Its build and modifiers, then what they come to: each a section of its own, labeled above. -->
               <!-- The meta's builds of it, to pick one in a tap, as the comparison has them. -->
               <section v-if="myCommon.length" class="yours-section">
@@ -3587,6 +3586,11 @@ const { start: startTour } = useTour(
 .yours-pick :deep(.search-box) {
   max-width: none;
 }
+/* Its name, telling what the card is for on hover. */
+.tipped {
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+}
 /* Its heading, with an arrow drawn as the modifiers' is, rather than the browser's marker. */
 .yours-title {
   display: flex;
@@ -3670,9 +3674,6 @@ const { start: startTour } = useTour(
 .yours-section > p,
 .yours p.small {
   margin: 0;
-}
-.yours p.yours-intro {
-  margin-top: 10px;
 }
 .yours-field {
   display: flex;
