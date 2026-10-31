@@ -6,7 +6,7 @@ import { isSpread, MOVES } from '@/data/moves'
 import { t, tSplit, typeName } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { copy } from '@/lib/clipboard'
-import { koKind, variableHits, type Hit } from '@/lib/damage'
+import { DOUBLING, hitChoices, koKind, MAX_STOCKPILE, type Hit } from '@/lib/damage'
 import CategoryIcon from '@/components/CategoryIcon'
 import TypeIcon from '@/components/TypeIcon'
 
@@ -16,7 +16,8 @@ import TypeIcon from '@/components/TypeIcon'
 // first). Its verdict colored for whose it is (`theirs`: the opponent's moves
 // hitting yours, a knockout bad news). Unfolded, its HP numbers, every roll, and the calc's line to share, copied in a
 // tap (off for now, `DESC_ON`); a critical hit, for a move whose hits vary how many, and for a spread move whether it hits one target alone
-// (no spread reduction), set from its row and marked on its name. What the order does to it (a priority move's
+// (no spread reduction), and for a move doubled on what came before it (`DOUBLING`: Stomping Tantrum's last move failing,
+// Avalanche hit first, Round after an ally's, Fickle Beam's all-out attack) whether it is, Spit Up's Stockpile layers, set from its row and marked on its name. What the order does to it (a priority move's
 // priority, Payback's power) a tag at the end of the verdict's line, so every row is as tall and the two sides' rows line up; a status
 // move a row laid out as the rest, dimmed, its bar empty and nothing to unfold.
 const props = defineProps<{
@@ -26,8 +27,17 @@ const props = defineProps<{
   crit: boolean
   hits: number | undefined
   single: boolean
+  doubled: boolean
+  stockpile: number | undefined
 }>()
-const emit = defineEmits<{ crit: [on: boolean]; hits: [n: number]; single: [on: boolean] }>()
+const emit = defineEmits<{
+  crit: [on: boolean]
+  hits: [n: number]
+  single: [on: boolean]
+  doubled: [on: boolean]
+  stockpile: [n: number]
+}>()
+const doubling = computed(() => DOUBLING[props.id])
 const open = defineModel<boolean>('open', { default: false })
 
 const m = computed(() => MOVES[props.id])
@@ -54,7 +64,10 @@ async function share() {
   copied.value = await copy(props.hit.desc)
   setTimeout(() => (copied.value = false), 1500)
 }
-const HITS = [2, 3, 4, 5]
+const choices = computed(() => hitChoices(props.id))
+// The hits picked, else those the calc hit (its default for the move).
+const hitsOn = computed(() => props.hits ?? props.hit?.hits)
+const STOCKPILE = Array.from({ length: MAX_STOCKPILE }, (_, i) => i + 1)
 /** What the order does to it: a priority move's priority, as the battle has it; one whose power hangs on the order (Payback,
  * Bolt Beak, Analytic's user) at the order the battle has. */
 const note = computed(() => {
@@ -91,6 +104,7 @@ const blockedText = tSplit('calc.blockedBy', 'what')
         <CategoryIcon v-if="m" :category="m.category" class="cat" />
         <Zap v-if="crit" :size="13" class="crit-mark" :aria-label="t('calc.crit')" />
         <Crosshair v-if="single" :size="13" class="crit-mark" :aria-label="t('calc.single')" />
+        <span v-if="doubling && doubled" class="crit-mark doubled-mark" :aria-label="t('calc.doubled')">×2</span>
       </span>
       <span v-if="status" class="range"></span>
       <span v-else-if="!hit || hit.none" class="range muted">{{ t('calc.noEffect') }}</span>
@@ -142,16 +156,42 @@ const blockedText = tSplit('calc.blockedBy', 'what')
         >
           <Crosshair :size="14" aria-hidden="true" />{{ t('calc.single') }}
         </button>
-        <span v-if="variableHits(id)" class="hits" role="group" :aria-label="t('calc.hits')">
-          <span class="muted">{{ t('calc.hits') }}</span>
+        <button
+          v-if="doubling"
+          v-tip="t(`calc.doubledTip.${doubling}`)"
+          type="button"
+          class="btn mod"
+          :class="{ on: doubled }"
+          :aria-pressed="doubled"
+          @click="emit('doubled', !doubled)"
+        >
+          {{ t(`calc.doubled.${doubling}`) }}
+        </button>
+        <span v-if="choices" class="hits" role="group" :aria-label="t('calc.hits')">
+          <span v-if="id === 'beatup'" v-tip="t('calc.beatUpTip')" class="muted estimate">{{ t('calc.hits') }}</span>
+          <span v-else class="muted">{{ t('calc.hits') }}</span>
           <button
-            v-for="n in HITS"
+            v-for="n in choices"
             :key="n"
             type="button"
             class="btn mod"
-            :class="{ on: (hits ?? 0) === n }"
-            :aria-pressed="(hits ?? 0) === n"
+            :class="{ on: hitsOn === n }"
+            :aria-pressed="hitsOn === n"
             @click="emit('hits', n)"
+          >
+            {{ n }}
+          </button>
+        </span>
+        <span v-if="id === 'spitup'" class="hits" role="group" :aria-label="t('calc.stockpile')">
+          <span class="muted">{{ t('calc.stockpile') }}</span>
+          <button
+            v-for="n in STOCKPILE"
+            :key="n"
+            type="button"
+            class="btn mod"
+            :class="{ on: (stockpile ?? 1) === n }"
+            :aria-pressed="(stockpile ?? 1) === n"
+            @click="emit('stockpile', n)"
           >
             {{ n }}
           </button>
@@ -240,6 +280,13 @@ const blockedText = tSplit('calc.blockedBy', 'what')
 .crit-mark {
   flex: none;
   color: var(--accent);
+}
+.estimate {
+  text-decoration: underline dotted;
+}
+.doubled-mark {
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 .range {
   grid-area: range;

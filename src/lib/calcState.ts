@@ -12,6 +12,7 @@ import {
   emptyField,
   emptyFighter,
   FIELD_EFFECTS,
+  MAX_ATTACKED,
   MAX_SPIKES,
   SIDE_EFFECTS,
   STAGE_MAX,
@@ -61,6 +62,7 @@ export function encodeFighter(f: Fighter): string {
   if (f.boosts.some((b) => b)) flags.push(`b${f.boosts.join('_')}`)
   if (f.abilityOn) flags.push('a')
   if (f.fainted) flags.push(`f${f.fainted}`)
+  if (f.attacked) flags.push(`r${f.attacked}`)
   if (f.spikes) flags.push(`k${f.spikes}`)
   for (const s of SIDE_EFFECTS) if (f.side.includes(s)) flags.push(SIDE_CODES[s])
   return [
@@ -97,6 +99,7 @@ export function decodeFighter(s: unknown): Fighter | null {
     else if (tok === 'a') f.abilityOn = true
     else if (/^h\d+$/.test(tok)) f.hp = clamp(Number(tok.slice(1)), 1, 100)
     else if (/^f\d$/.test(tok)) f.fainted = clamp(Number(tok.slice(1)), 0, 5)
+    else if (/^r\d$/.test(tok)) f.attacked = clamp(Number(tok.slice(1)), 0, MAX_ATTACKED)
     else if (/^k\d$/.test(tok)) f.spikes = clamp(Number(tok.slice(1)), 0, MAX_SPIKES)
     else if (tok[0] === 's' && (STATUSES as readonly string[]).includes(tok.slice(1))) f.status = tok.slice(1) as Status
     else if (tok[0] === 'b') {

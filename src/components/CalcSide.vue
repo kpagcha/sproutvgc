@@ -12,6 +12,7 @@ import {
   BOOSTED,
   CONDITIONAL_ABILITIES,
   hit,
+  MAX_ATTACKED,
   STAGE_MAX,
   STAGE_MIN,
   statsOf,
@@ -20,6 +21,8 @@ import {
   type Fighter,
   type HitOptions,
   type Status,
+  usesAttacked,
+  usesFainted,
 } from '@/lib/damage'
 import type { Field, Member } from '@/lib/team'
 import { conditionName, sideOf, SPIKES } from '@/components/calcConditions'
@@ -34,7 +37,7 @@ import TeamSlot from '@/components/TeamSlot.vue'
 // what loads a set), its set as a team builder's slot (`TeamSlot`, every part a button opening its picker, its
 // Pokémon's glowing while yours has none), its moves' damage against the other side (`DamageRow`, a row each, a status move's dimmed), and what the
 // battle adds to it: its HP left, its status, its stat stages, whether its ability's condition is met (for one that
-// waits on it), Supreme Overlord's fainted allies; and last, what's on its side, a box of its own folding (`sideOpen`,
+// waits on it), its allies fainted (Supreme Overlord, Last Respects), the times it's been hit (Rage Fist); and last, what's on its side, a box of its own folding (`sideOpen`,
 // both sides' together): folded, what's on; open, its conditions to set (`CalcConditions`).
 // `theirs`: the opponent's side, its knockouts bad news.
 const props = defineProps<{
@@ -100,7 +103,10 @@ const conditional = computed(() => {
   const a = abilityOf(props.fighter)
   return a && CONDITIONAL_ABILITIES.includes(a) ? a : null
 })
-const overlord = computed(() => abilityOf(props.fighter) === 'supremeoverlord')
+const overlord = computed(
+  () => abilityOf(props.fighter) === 'supremeoverlord' || props.fighter.member.moves.some(usesFainted),
+)
+const rageFist = computed(() => props.fighter.member.moves.some(usesAttacked))
 /** What's on its side, named on a line while its box is folded. */
 const onSide = computed(() => [
   ...props.fighter.side.flatMap((s) => {
@@ -173,11 +179,15 @@ function setHpPoints(e: Event) {
             :crit="!!opts[h.mv]?.crit"
             :hits="opts[h.mv]?.hits"
             :single="!!opts[h.mv]?.single"
+            :doubled="!!opts[h.mv]?.doubled"
+            :stockpile="opts[h.mv]?.stockpile"
             :open="!!unfolded[h.mv]"
             @update:open="unfolded = { ...unfolded, [h.mv]: $event }"
             @crit="setOpt(h.mv, { crit: $event })"
             @hits="setOpt(h.mv, { hits: $event })"
             @single="setOpt(h.mv, { single: $event })"
+            @doubled="setOpt(h.mv, { doubled: $event })"
+            @stockpile="setOpt(h.mv, { stockpile: $event })"
           />
         </ul>
       </template>
@@ -239,7 +249,7 @@ function setHpPoints(e: Event) {
             />
           </span>
         </div>
-        <div v-if="conditional || overlord" class="mods">
+        <div v-if="conditional || overlord || rageFist" class="mods">
           <button
             v-if="conditional"
             type="button"
@@ -250,7 +260,7 @@ function setHpPoints(e: Event) {
           >
             {{ t('calc.abilityOn', { ability: refName(ability(conditional)) }) }}
           </button>
-          <span v-if="overlord" class="btn mod fainted" :class="{ on: fighter.fainted }">
+          <span v-if="overlord" class="btn mod counter" :class="{ on: fighter.fainted }">
             {{ t('calc.fainted') }}
             <button
               type="button"
@@ -266,6 +276,26 @@ function setHpPoints(e: Event) {
               :disabled="fighter.fainted >= 5"
               :aria-label="t('calc.faintedUp')"
               @click="set({ fainted: fighter.fainted + 1 })"
+            >
+              <Plus :size="12" aria-hidden="true" />
+            </button>
+          </span>
+          <span v-if="rageFist" class="btn mod counter" :class="{ on: fighter.attacked }">
+            {{ t('calc.attacked') }}
+            <button
+              type="button"
+              :disabled="fighter.attacked <= 0"
+              :aria-label="t('calc.attackedDown')"
+              @click="set({ attacked: fighter.attacked - 1 })"
+            >
+              <Minus :size="12" aria-hidden="true" />
+            </button>
+            <output>{{ fighter.attacked }}</output>
+            <button
+              type="button"
+              :disabled="fighter.attacked >= MAX_ATTACKED"
+              :aria-label="t('calc.attackedUp')"
+              @click="set({ attacked: fighter.attacked + 1 })"
             >
               <Plus :size="12" aria-hidden="true" />
             </button>
@@ -469,10 +499,10 @@ function setHpPoints(e: Event) {
 .mod.on {
   background: var(--sel);
 }
-.fainted {
+.counter {
   cursor: default;
 }
-.fainted button {
+.counter button {
   display: flex;
   padding: 1px 2px;
   color: inherit;
@@ -480,7 +510,7 @@ function setHpPoints(e: Event) {
   border: 0;
   cursor: pointer;
 }
-.fainted button:disabled {
+.counter button:disabled {
   opacity: 0.35;
   cursor: default;
 }

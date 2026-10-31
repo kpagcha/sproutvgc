@@ -65,8 +65,10 @@ export interface Fighter {
   boosts: Boosts
   /** Its ability's condition is met (Flash Fire triggered, Stakeout's target switching in, Intimidate on entry...). */
   abilityOn: boolean
-  /** Its allies fainted, for Supreme Overlord. */
+  /** Its allies fainted, for Supreme Overlord and Last Respects. */
   fainted: number
+  /** The times it's been hit, for Rage Fist. */
+  attacked: number
   side: SideEffect[]
   /** The layers of Spikes it switched in on. */
   spikes: number
@@ -95,6 +97,7 @@ export const emptyFighter = (member: Member = emptyMember()): Fighter => ({
   boosts: [0, 0, 0, 0, 0],
   abilityOn: false,
   fainted: 0,
+  attacked: 0,
   side: [],
   spikes: 0,
 })
@@ -293,15 +296,65 @@ export interface Hit {
   order: 'first' | 'last' | null
   /** Its priority in the battle (`priorityOf`): Grassy Glide's in Grassy Terrain, Prankster's and the like. */
   priority: number
+  /** How many times it hit, as the calc had it. */
+  hits: number
 }
 
 export interface HitOptions {
   crit?: boolean
-  /** How many times it hits, for a move whose hits vary. */
+  /** How many times it hits, for a move whose hits vary (Beat Up's, its party members able to fight). */
   hits?: number
   /** A spread move (Earthquake, Heat Wave…) hitting one target alone, the other gone or out of reach: no doubles'
    * spread reduction (×0.75), for this move alone, everything else still a double battle. */
   single?: boolean
+  /** A move whose power doubles on something before it (`DOUBLING`), doubled. */
+  doubled?: boolean
+  /** Spit Up's Stockpile layers, 1 unless said. */
+  stockpile?: number
+}
+
+/** The moves whose power hangs on what the calc doesn't know, by what they're doubled on: the user's last move
+ * failing (Stomping Tantrum, Temper Flare), the target hitting it first this turn (Avalanche), an ally's Round just
+ * before, Fickle Beam's all-out attack (a 30% chance). Their power ours, as Showdown's `basePowerCallback`s and
+ * `onBasePower`s have it (`patchOf`). */
+export const DOUBLING = {
+  stompingtantrum: 'failed',
+  temperflare: 'failed',
+  avalanche: 'hitFirst',
+  round: 'round',
+  ficklebeam: 'allOut',
+} as Partial<Record<MoveId, 'failed' | 'hitFirst' | 'round' | 'allOut'>>
+export const MAX_STOCKPILE = 3
+/** The most times Rage Fist counts, its power capped at 350. */
+export const MAX_ATTACKED = 6
+/** The moves whose power the side's battle state sets (`Fighter.fainted`, `Fighter.attacked`). */
+export const usesFainted = (move: MoveId | null) => move === 'lastrespects'
+export const usesAttacked = (move: MoveId | null) => move === 'ragefist'
+
+/** The hits a move can be told to hit: those whose hits vary, 2 to 5; Beat Up's, a hit per party member able to
+ * fight, 1 to the four brought. */
+export function hitChoices(move: MoveId): readonly number[] | null {
+  if (move === 'beatup') return [1, 2, 3, 4]
+  return MOVES[move]?.hits === 5 ? [2, 3, 4, 5] : null
+}
+
+/** A move as it battles where it hangs on what the calc doesn't know (the calc's own otherwise): Last Respects' 50
+ * more per ally fainted, Rage Fist's per time hit (to 350), a doubling move's doubled, Spit Up's 100 per Stockpile
+ * layer, and Beat Up, which Showdown gives no power of its own: a hit per party member able to fight (the four brought
+ * but those fainted, unless said), each at 5 + that member's base Attack / 10, every one here counted as the user's
+ * (the calc knows no other), so exact for its own hit alone. */
+function patchOf(f: Fighter, move: MoveId, opts: HitOptions): { basePower?: number; multihit?: number } | null {
+  const bp = MOVES[move]?.power ?? 0
+  if (move === 'lastrespects') return { basePower: 50 + 50 * f.fainted }
+  if (move === 'ragefist') return { basePower: Math.min(350, 50 + 50 * f.attacked) }
+  if (move === 'spitup') return { basePower: 100 * (opts.stockpile ?? 1) }
+  if (move === 'beatup') {
+    const id = battlerOf(f)
+    const atk = id ? POKEMON[id]!.stats[1]! : 0
+    return { basePower: 5 + Math.floor(atk / 10), multihit: opts.hits ?? Math.max(1, 4 - f.fainted) }
+  }
+  if (DOUBLING[move] && opts.doubled) return { basePower: bp * 2 }
+  return null
 }
 
 /** What one side's move does to the other, on this field. */
@@ -335,7 +388,7 @@ export function hit(
   const d = pokemonOf(defender)
   if (!a || !d) return null
   return {
-    ...hitOf(a, d, move, field, sideOf(attacker), sideOf(defender), opts),
+    ...hitOf(a, d, move, field, sideOf(attacker), sideOf(defender), opts, patchOf(attacker, move, opts)),
     order,
     priority: priorityOf(attacker, move, field),
   }
@@ -349,15 +402,20 @@ function hitOf(
   atkSide: ReturnType<typeof sideOf>,
   defSide: ReturnType<typeof sideOf>,
   opts: HitOptions,
+  patch: ReturnType<typeof patchOf>,
 ): Omit<Hit, 'order' | 'priority'> {
+  const overrides = {
+    // Its target as one Pokémon's, which the calc's spread check reads (its copy of the move keeps overrides).
+    ...(opts.single && { target: 'normal' as const }),
+    ...patch,
+  }
   const mv = new Move(
     GEN,
     named((x) => GEN.moves.get(x), move),
     {
       isCrit: !!opts.crit,
       ...(opts.hits && { hits: opts.hits }),
-      // Its target as one Pokémon's, which the calc's spread check reads (its copy of the move keeps overrides).
-      ...(opts.single && { overrides: { target: 'normal' } }),
+      ...(Object.keys(overrides).length && { overrides }),
       ability: a.ability,
       item: a.item,
       species: a.name,
@@ -408,6 +466,7 @@ function hitOf(
     rolls,
     maxHp,
     hp,
+    hits: r.move.hits,
     ko,
     koHits,
     koChance,
@@ -484,9 +543,6 @@ export function statsOf(f: Fighter): Record<(typeof STATS)[number], number> | nu
   if (!p) return null
   return { ...p.stats, hp: p.maxHP() } as Record<(typeof STATS)[number], number>
 }
-
-/** A move's hits as it can be told to hit: those whose hits vary (2 to 5) take a number. */
-export const variableHits = (move: MoveId) => MOVES[move]?.hits === 5
 
 /** A Pokémon's most common set in the meta (`commonMember`), a Mega Mega Evolving. */
 export const commonSet = (id: PokemonId, data: MetaData | null | undefined): Fighter => ({
