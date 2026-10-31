@@ -213,6 +213,8 @@ function loadCommon() {
   picking.value = null
 }
 const [DefineCommon, ReuseCommon] = createReusableTemplate()
+// The reader's teams, a side loading one of their Pokémon: in the side's Load menu and in its picker's.
+const [DefineTeams, ReuseTeams] = createReusableTemplate<{ side: SideKey; done: () => void }>()
 const commonPreview = computed(() => (picking.value?.common ? commonSet(picking.value.common, data.value) : null))
 
 function pick(value: string) {
@@ -275,15 +277,27 @@ const pasteOpen = computed({
     if (!on) pasting.value = null
   },
 })
-watch(pasting, () => {
+// From the picker, the paste in its place, and the picker back as it was if the paste's let go without one.
+let pasteFrom: typeof picking.value = null
+function pasteInstead() {
+  const p = picking.value
+  if (!p) return
+  pasteFrom = p
+  picking.value = null
+  pasting.value = p.side
+}
+watch(pasting, (k) => {
   pasted.value = ''
   pasteFailed.value = false
+  if (!k && pasteFrom) picking.value = pasteFrom
+  if (!k) pasteFrom = null
 })
 function importPaste() {
   const k = pasting.value
   const first = parsePaste(pasted.value).members[0]
   if (!k || !first) return void (pasteFailed.value = true)
   fromTeam(k, first)
+  pasteFrom = null
   pasting.value = null
 }
 
@@ -492,23 +506,7 @@ function face(f: Fighter) {
                   </button>
                   <template v-if="savedTeams.length">
                     <span class="muted load-label">{{ t('calc.fromTeams') }}</span>
-                    <div v-for="tm in savedTeams" :key="tm.id" class="load-team">
-                      <span class="load-team-name">{{ tm.name || t('builder.untitled') }}</span>
-                      <span class="load-team-mons">
-                        <template v-for="(m, i) in tm.members" :key="i">
-                          <button
-                            v-if="m.pokemon"
-                            v-tip="refName(pokemon(m.pokemon))"
-                            type="button"
-                            class="load-mon"
-                            :aria-label="refName(pokemon(m.pokemon))"
-                            @click="(fromTeam(k, m), close())"
-                          >
-                            <PokemonIcon :id="m.pokemon" />
-                          </button>
-                        </template>
-                      </span>
-                    </div>
+                    <ReuseTeams :side="k" :done="close" />
                   </template>
                 </div>
               </template>
@@ -544,9 +542,52 @@ function face(f: Fighter) {
 
     <CalcMeta v-if="battlerOf(sides.a)" id="calc-meta" :yours="sides.a" :field :data @pick="face" />
 
-    <!-- Right after a Pokémon's picked, its most common set, to load rather than put the set together. -->
+    <DefineTeams v-slot="{ side, done }">
+      <div v-for="tm in savedTeams" :key="tm.id" class="load-team">
+        <span class="load-team-name">{{ tm.name || t('builder.untitled') }}</span>
+        <span class="load-team-mons">
+          <template v-for="(m, i) in tm.members" :key="i">
+            <button
+              v-if="m.pokemon"
+              v-tip="refName(pokemon(m.pokemon))"
+              type="button"
+              class="load-mon"
+              :aria-label="refName(pokemon(m.pokemon))"
+              @click="(fromTeam(side, m), done())"
+            >
+              <PokemonIcon :id="m.pokemon" />
+            </button>
+          </template>
+        </span>
+      </div>
+    </DefineTeams>
+
+    <!-- Right after a Pokémon's picked, its most common set, to load rather than put the set together; picking the
+    Pokémon, the side's Load's other ways side by side over the list: a paste, and one of the reader's teams' Pokémon
+    from a drop-down, when they have a team. -->
     <DefineCommon>
       <CommonSetOffer v-if="commonPreview" :id="picking!.common!" :set="commonPreview.member" @load="loadCommon" />
+      <div v-else-if="picking?.field === 'pokemon'" class="quick">
+        <div class="quick-load">
+          <button type="button" class="btn quiet small" @click="pasteInstead">
+            <ClipboardPaste :size="14" aria-hidden="true" />{{ t('calc.paste') }}
+          </button>
+          <OptionsMenu
+            v-if="savedTeams.length"
+            :title="t('calc.fromTeams')"
+            :label="t('calc.fromTeams')"
+            :icon="Users"
+            align="left"
+          >
+            <template #default="{ close }">
+              <div class="load">
+                <ReuseTeams :side="picking.side" :done="() => (close(), (picking = null))" />
+              </div>
+            </template>
+          </OptionsMenu>
+        </div>
+        <p class="or muted">{{ t('calc.orPick') }}</p>
+      </div>
     </DefineCommon>
 
     <!-- On wide screens, the picker as a drawer over the page, the side's card left clear. -->
@@ -859,6 +900,31 @@ function face(f: Fighter) {
 .load-mon:hover {
   background: var(--hover);
   border-color: var(--border);
+}
+/* In the picker over its list, the Load menu's ways but the common set, side by side, then a rule either side of a
+word, as the common set's offer has. */
+.quick {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.or {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 0.875em;
+}
+.or::before,
+.or::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--border);
+}
+.quick-load {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 .picker-dialog {
   width: min(560px, 100vw - 24px);
