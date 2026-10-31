@@ -128,6 +128,15 @@ const pct = (x: number) => `${Math.round(x * 100)}%`
 const TOP = 10
 const all = shallowRef(false)
 const name = (id: PokemonId) => refName(pokemon(id))
+/** What it shows, said in its heading's tooltip. */
+const intro = computed(() =>
+  yourId.value
+    ? t(mode.value === 'attack' ? 'calc.meta.introAttack' : 'calc.meta.introDefend', {
+        name: name(yourId.value),
+        n: foes.value.length,
+      })
+    : undefined,
+)
 const kindOf = (h: Hit | null | undefined): KoKind => koKind(h)
 const moveName = (id: MoveId) => refName(move(id))
 </script>
@@ -135,22 +144,16 @@ const moveName = (id: MoveId) => refName(move(id))
 <template>
   <section class="panel meta">
     <div class="meta-head">
-      <h2>{{ t('calc.meta.title') }}</h2>
+      <!-- What it shows, a tooltip on its heading, underlined dotted. -->
+      <h2>
+        <span v-tip="intro" class="about" tabindex="0">{{ t('calc.meta.title') }}</span>
+      </h2>
       <span class="controls">
         <SegmentedControl v-model="mode" class="soft" :label="t('calc.meta.show')" :options="modes" />
         <SegmentedControl v-model="top" class="soft" :label="t('calc.meta.top')" :options="tops" />
       </span>
     </div>
-    <p class="muted intro">
-      {{
-        yourId
-          ? t(mode === 'attack' ? 'calc.meta.introAttack' : 'calc.meta.introDefend', {
-              name: name(yourId),
-              n: foes.length,
-            })
-          : t('calc.meta.pickYours')
-      }}
-    </p>
+    <p class="muted intro">{{ yourId ? t('calc.meta.tap') : t('calc.meta.pickYours') }}</p>
     <template v-if="yourId && foes.length">
       <!-- Your moves: a column each, headed by how much of the meta it knocks out. -->
       <template v-if="mode === 'attack'">
@@ -270,8 +273,14 @@ const moveName = (id: MoveId) => refName(move(id))
   gap: 8px 16px;
   margin-left: auto;
 }
+.about {
+  text-decoration: underline dotted;
+  text-underline-offset: 4px;
+  cursor: help;
+}
 .intro {
-  margin: 8px 0 10px;
+  margin: 6px 0 10px;
+  font-size: 0.85em;
 }
 .table-wrap {
   overflow-x: auto;

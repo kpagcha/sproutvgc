@@ -202,7 +202,8 @@ export const messages = {
   'calc.swap': 'Swap the two sides',
   'calc.back': 'Back to {name}',
   'calc.copySet': 'Copy its set',
-  'calc.setMenu': 'Load, copy or swap',
+  'calc.setMenu': 'Load, copy, swap or clear',
+  'calc.clearSide': 'Clear',
   'calc.commonSet': 'Its most common set',
   'calc.paste': 'Paste a set',
   'calc.pasteHint': "One Pokémon's set in Showdown's format, as pokepast.es shows it. Stat points go on its EVs line.",
@@ -298,10 +299,10 @@ export const messages = {
   'calc.meta.attack': 'Your hits',
   'calc.meta.defend': 'Their hits',
   'calc.meta.top': 'Top',
-  'calc.meta.introAttack':
-    "Your {name}'s moves against the {n} most used Pokémon, each at its most common set. Tap one to calc against it.",
+  'calc.meta.introAttack': "Your {name}'s moves against the {n} most used Pokémon, each at its most common set.",
   'calc.meta.introDefend':
-    'The hardest hits of the {n} most used Pokémon on your {name}, each from its most common set. Tap one to calc against it.',
+    'The hardest hits of the {n} most used Pokémon on your {name}, each from its most common set.',
+  'calc.meta.tap': 'Tap one to calc against it.',
   'calc.meta.pickYours': 'Pick your Pokémon to see how it fares against the most used.',
   'calc.meta.noMoves': 'Pick its attacking moves to see what they do to the meta.',
   'calc.meta.pokemon': 'Pokémon',

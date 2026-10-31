@@ -19,7 +19,7 @@ import TypeIcon from '@/components/TypeIcon'
 // (no spread reduction), and for a move doubled on what came before it (`DOUBLING`: Stomping Tantrum's last move failing,
 // Avalanche hit first, Round after an ally's, Fickle Beam's all-out attack) whether it is, Spit Up's Stockpile layers, set from its row and marked on its name. What the order does to it (a priority move's
 // priority, Payback's power) a tag at the end of the verdict's line, so every row is as tall and the two sides' rows line up; a status
-// move a row laid out as the rest, dimmed, its bar empty and nothing to unfold. The rows are the side's moves, the set's
+// move a row laid out as the rest, dimmed, its bar empty and nothing to unfold (on phones, its name's line alone). The rows are the side's moves, the set's
 // card leaving them out: its name a button picking another in its place (`pick`, `active` while it's being picked), and
 // a move not picked yet a placeholder picking one. With no other side yet (`idle`), its name alone.
 const props = defineProps<{
@@ -531,8 +531,8 @@ const blockedText = tSplit('calc.blockedBy', 'what')
    name isn't cut short. */
 @media (max-width: 480px) {
   .head {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: 'name fold' 'bar bar' 'verdict range';
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas: 'name name fold' 'bar bar bar' 'verdict range range';
     gap: 6px 8px;
   }
   .note {
@@ -543,6 +543,16 @@ const blockedText = tSplit('calc.blockedBy', 'what')
   }
   .move-name {
     white-space: normal;
+  }
+}
+/* On phones, where nothing sits beside it to line up with, a status move its name's line alone. */
+@media (max-width: 899px) {
+  .damage.status-move .bar,
+  .damage.status-move .verdict {
+    display: none;
+  }
+  .damage.status-move .head {
+    padding-block: 6px;
   }
 }
 </style>

@@ -158,6 +158,7 @@ function setHpPoints(e: Event) {
           :spreads
           :evolved="fighter.mega"
           no-moves
+          flat
           @mega="set({ mega: !fighter.mega })"
           @field="emit('field', $event)"
           @change="change"
@@ -271,14 +272,14 @@ function setHpPoints(e: Event) {
           <button
             v-if="conditional"
             type="button"
-            class="btn mod"
+            class="btn quiet mod"
             :class="{ on: fighter.abilityOn }"
             :aria-pressed="fighter.abilityOn"
             @click="set({ abilityOn: !fighter.abilityOn })"
           >
             {{ t('calc.abilityOn', { ability: refName(ability(conditional)) }) }}
           </button>
-          <span v-if="overlord" class="btn mod counter" :class="{ on: fighter.fainted }">
+          <span v-if="overlord" class="btn quiet mod counter" :class="{ on: fighter.fainted }">
             {{ t('calc.fainted') }}
             <button
               type="button"
@@ -298,7 +299,7 @@ function setHpPoints(e: Event) {
               <Plus :size="12" aria-hidden="true" />
             </button>
           </span>
-          <span v-if="rageFist" class="btn mod counter" :class="{ on: fighter.attacked }">
+          <span v-if="rageFist" class="btn quiet mod counter" :class="{ on: fighter.attacked }">
             {{ t('calc.attacked') }}
             <button
               type="button"
@@ -363,16 +364,25 @@ function setHpPoints(e: Event) {
 .side.theirs {
   --side: var(--opponent);
 }
+/* Whose it is, a band of its side's color across the panel's top, as the phones' tabs are. */
 .side-head {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 6px 8px;
+  margin: calc(-1 * var(--panel-pad)) calc(-1 * var(--panel-pad)) 0;
+  padding: 6px var(--panel-pad);
+  color: var(--accent-text);
+  background: var(--side);
+  border-bottom: 2px solid var(--ink);
+}
+.side.theirs .side-head {
+  color: var(--opponent-text);
 }
 .side-head h2 {
   margin: 0;
-  font-size: 1.1em;
+  font-size: 1em;
 }
 /* Whose it is, a button opening its Pokémon's picker, as the slot's name does. */
 .side-title {
@@ -384,39 +394,40 @@ function setHpPoints(e: Event) {
   cursor: pointer;
 }
 .side-title:hover {
-  color: var(--accent);
+  text-decoration: underline;
 }
-/* Whose it is, by its side's color along its heading. */
-.side-head h2::before {
-  content: '';
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  margin-right: 8px;
-  background: var(--side);
-  border: 1px solid var(--ink);
+/* Its set, set apart from what follows: on the panel's grey across it, right under the band, a rule under it. */
+.body {
+  margin: -28px calc(-1 * var(--panel-pad)) 0;
+  padding: 14px var(--panel-pad);
+  background: var(--panel-alt);
+  border-bottom: 1px solid var(--border);
 }
-/* On phones, its tab over it names it: its menu beside its set, rather than on a row of its own. */
+/* On phones, its tab over it names it: no band, its menu at the top right of its set (kept clear of it). */
 @media (max-width: 899px) {
   .side {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    column-gap: 8px;
+    position: relative;
   }
-  .side > * {
-    grid-column: 1 / -1;
+  .side-head {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 1;
+    margin: 0;
+    padding: 0;
+    color: inherit;
+    background: none;
+    border: 0;
   }
-  .side > .side-head {
-    grid-row: 1;
-    grid-column: 2;
-    align-self: start;
-  }
-  .side > .body {
-    grid-row: 1;
-    grid-column: 1;
+  .side.theirs .side-head {
+    color: inherit;
   }
   .side-head h2 {
     display: none;
+  }
+  .body {
+    margin-top: calc(-1 * var(--panel-pad));
+    padding-right: 48px;
   }
 }
 .side-actions {
@@ -589,8 +600,9 @@ function setHpPoints(e: Event) {
   font-size: 0.875em;
   line-height: inherit;
 }
+/* Quiet, flat and muted until it's on: then in full, a wash under it (the quiet button's). */
 .mod.on {
-  background: var(--sel);
+  font-weight: bold;
 }
 .counter {
   cursor: default;

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ChevronDown, ChevronUp, Pin, PinOff, X } from '@lucide/vue'
+import { ChartBar, ChevronDown, ChevronUp, Pin, PinOff, X } from '@lucide/vue'
 import { ability, item, move, pokemon, type MoveId } from '@/data/dex'
 import type { Spread } from '@/data/meta'
 import { MOVES } from '@/data/moves'
@@ -27,7 +27,8 @@ import { natureTip } from '@/components/natureTip'
 // marked, its tooltip saying why. The first step (`hint`: the team has no Pokémon yet), its Pokémon's placeholders
 // glowing in the accent and back, in a loop, until its picker opens. In the team builder (`pinnable`), a pin by its
 // clearing pins it beside the team's insights (`pinned`, `pin`), to edit it there as they follow. In the damage
-// calculator its moves are left out (`noMoves`): its rows of damage are its moves, each picked from there.
+// calculator its moves are left out (`noMoves`): its rows of damage are its moves, each picked from there; and it's
+// flat (`flat`): no card of its own, the side's panel being its box, and no clearing, the side's menu clearing it.
 const props = defineProps<{
   member: Member
   active: Field | null
@@ -43,6 +44,8 @@ const props = defineProps<{
   pinned?: boolean
   /** Its moves left out, shown where they're used instead (the damage calculator's rows of damage). */
   noMoves?: boolean
+  /** No card of its own nor clearing: the top of a panel that's its box (the damage calculator's side). */
+  flat?: boolean
 }>()
 const emit = defineEmits<{ field: [field: Field]; clear: []; change: [patch: Partial<Member>]; mega: []; pin: [] }>()
 const open = defineModel<boolean>('open', { default: false })
@@ -65,7 +68,7 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
 </script>
 
 <template>
-  <li class="set" :class="{ empty: !shown, beckon: hint && !active }">
+  <li class="set" :class="{ empty: !shown, beckon: hint && !active, flat }">
     <div class="set-head">
       <button
         type="button"
@@ -124,7 +127,7 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
         <component :is="pinned ? PinOff : Pin" :size="14" aria-hidden="true" />
       </button>
       <button
-        v-if="shown"
+        v-if="shown && !flat"
         v-tip="t('builder.clearSlot')"
         type="button"
         class="clear"
@@ -184,6 +187,7 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
         <button type="button" class="stats-toggle" :aria-expanded="open" @click="open = !open">
           <span class="toggle-line">
             <span class="toggle-label">
+              <ChartBar :size="14" class="points-icon" aria-hidden="true" />
               <span v-if="open || left === 0" class="muted">{{ t('builder.points') }}</span>
               <span v-if="left !== 0" class="warn" :class="{ over: left < 0 }" aria-live="polite">{{
                 left > 0
@@ -223,7 +227,10 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
       />
     </div>
     <div v-else class="stats-box stats-blank" aria-hidden="true">
-      <span class="toggle-line">{{ t('builder.points') }}<ChevronDown :size="14" /></span>
+      <span class="toggle-line"
+        ><span class="toggle-label"><ChartBar :size="14" class="points-icon" />{{ t('builder.points') }}</span
+        ><ChevronDown :size="14"
+      /></span>
     </div>
   </li>
 </template>
@@ -510,18 +517,24 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
   border: 0;
   cursor: pointer;
 }
+/* The arrow right after what it says, not at the line's far end. */
 .toggle-line {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 6px;
+  gap: 4px;
   font-size: 0.85em;
 }
 .toggle-label {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: 2px 10px;
+}
+/* The stat points' icon, before what the line says of them. */
+.points-icon {
+  flex: none;
+  margin-right: -4px;
+  color: var(--muted);
 }
 .warn {
   display: inline-flex;
@@ -535,6 +548,35 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
 }
 .editor {
   padding: 0 8px 8px;
+}
+/* Flat, the top of the panel it's in: no card, no band, its parts lined up with the panel's other parts. */
+.set.flat {
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+.set.flat .set-head {
+  gap: 12px;
+  padding: 0;
+  background: none;
+  border: 0;
+}
+.set.flat .set-sprite {
+  width: 64px;
+  height: 64px;
+}
+.set.flat .set-facts {
+  padding: 10px 0 2px;
+}
+.set.flat .stats-box {
+  margin-top: 6px;
+  border: 0;
+}
+.set.flat .stats-toggle {
+  padding-inline: 0;
+}
+.set.flat .editor {
+  padding-inline: 0;
 }
 /* Two cards to a row (narrow, `TeamBuilderView`'s), their moves one under another; one to a row, two by two again. */
 @media (max-width: 900px) and (min-width: 521px) {
