@@ -430,8 +430,10 @@ function setHpPoints(e: Event) {
 }
 /* On phones, its tab over it names it: no band, its menu at the top right of its set (kept clear of it). */
 @media (max-width: 899px) {
+  /* Its parts closer on phones, where the page is short of room. */
   .side {
     position: relative;
+    gap: 16px;
   }
   .side-head {
     position: absolute;
@@ -451,7 +453,7 @@ function setHpPoints(e: Event) {
     display: none;
   }
   .body {
-    margin-top: calc(-1 * var(--panel-pad));
+    margin: calc(-1 * var(--panel-pad)) calc(-1 * var(--panel-pad)) 0;
     padding-right: 48px;
   }
 }

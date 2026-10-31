@@ -555,27 +555,42 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
   border: 0;
   box-shadow: none;
 }
-.set.flat .set-head {
-  gap: 12px;
-  padding: 0;
-  background: none;
-  border: 0;
+/* Its sprite beside the whole set, not its name alone: the name, types and item, the ability and nature, and the stat
+   points' line in a column to its right (the head and the stats' box laid out as the slot's own grid, `contents`), so
+   it takes no height of its own; the stat points' editor, unfolded, across both under them. */
+.set.flat {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 12px;
+  row-gap: 6px;
+  align-items: center;
+}
+.set.flat .set-head,
+.set.flat .stats-box {
+  display: contents;
+}
+.set.flat .sprite-btn {
+  grid-row: 1 / span 3;
+  grid-column: 1;
+}
+.set.flat .set-who,
+.set.flat .set-facts,
+.set.flat .stats-line,
+.set.flat .stats-blank {
+  grid-column: 2;
 }
 .set.flat .set-sprite {
   width: 64px;
   height: 64px;
 }
 .set.flat .set-facts {
-  padding: 10px 0 2px;
-}
-.set.flat .stats-box {
-  margin-top: 6px;
-  border: 0;
+  padding: 0;
 }
 .set.flat .stats-toggle {
-  padding-inline: 0;
+  padding: 0;
 }
 .set.flat .editor {
+  grid-column: 1 / -1;
   padding-inline: 0;
 }
 /* Two cards to a row (narrow, `TeamBuilderView`'s), their moves one under another; one to a row, two by two again. */
