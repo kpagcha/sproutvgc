@@ -1510,9 +1510,7 @@ export const messages = {
   'speed.resetYours': 'Reset',
   'speed.resetAll': 'Reset all',
   'speed.findOnly': 'Only {name}',
-  'speed.findBeyond': 'Outside the top {n}: shown at its sets, and left out of how often yours moves first.',
-  'speed.findNoData':
-    'No sets of it in these stats: shown at the standard builds, and left out of how often yours moves first.',
+  'speed.findNoData': 'No sets of it in these stats: shown at the standard builds.',
   'speed.rangesNote':
     'One row per base Speed, its bar from Min− to Max+, its Speeds under it (Min−, 0, Max, Max+). Your Pokémon is the line: accent, you move first; red, they do.',
   'speed.base': 'Base',

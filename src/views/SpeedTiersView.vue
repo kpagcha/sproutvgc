@@ -885,21 +885,11 @@ const findable = computed(() => new Set(findableIds.value))
 /** A Pokémon the view leaves out, showing the most used: below its top, or with no sets in the snapshot. */
 const beyondTop = (id: PokemonId) =>
   show.value !== 'all' && !!data.value && (data.value[id]?.rank ?? Infinity) > topN.value
-/** Each Pokémon found with no sets in the snapshot, or not in its top: why, said under the find. */
+/** Each Pokémon found with no sets in the snapshot: why it's at the standard builds, said under the find. */
 const foundNotes = computed(() => {
   const m = needsData.value ? data.value : undefined
-  if (!m) return []
-  return foundIds.value.flatMap((id) => {
-    const d = m[id]
-    const text = !d
-      ? bySets.value
-        ? t('speed.findNoData')
-        : null
-      : d.rank > topN.value
-        ? t('speed.findBeyond', { n: topN.value })
-        : null
-    return text ? [{ id, text }] : []
-  })
+  if (!m || !bySets.value) return []
+  return foundIds.value.flatMap((id) => (m[id] ? [] : [{ id, text: t('speed.findNoData') }]))
 })
 const isHit = (e: Entry) => !e.mine && isFound(e.id)
 // What finding does: mark its chips among the rest, or show only them (and yours, to compare): only them by default;
