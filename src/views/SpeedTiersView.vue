@@ -2459,8 +2459,15 @@ const { start: startTour } = useTour(
               <span class="marker yours-marker" aria-hidden="true">{{ yoursOpen ? '▾' : '▸' }}</span>
               <span v-tip="t('speed.yoursIntro')" class="tipped">{{ t('speed.yours') }}</span>
               <!-- Unpicking yours, at the band's end: its own click, not the heading's. -->
-              <button v-if="mine" type="button" class="btn on-band inverted band-clear" @click.stop.prevent="clearMine">
-                <Trash2 :size="14" aria-hidden="true" />{{ t('speed.clear') }}
+              <button
+                v-if="mine"
+                v-tip="t('speed.clear')"
+                type="button"
+                class="btn on-band band-clear"
+                :aria-label="t('speed.clear')"
+                @click.stop.prevent="clearMine"
+              >
+                <Trash2 :size="16" aria-hidden="true" />
               </button>
             </summary>
             <div class="yours-pick">
@@ -3601,9 +3608,12 @@ const { start: startTour } = useTour(
   cursor: pointer;
 }
 /* Clear, at the band's end. */
-.band-clear {
+/* Its clearing, the icon alone, flat on the band: a wash of it on hover. */
+:root:root .band-clear {
   margin-block: -2px;
   margin-left: auto;
+  padding: 2px 4px;
+  border-color: transparent;
 }
 /* Yours' search as a button holding it: its icon, its name and the cross, raised and bold as the buttons are. */
 .yours-picker :deep(.search) {
