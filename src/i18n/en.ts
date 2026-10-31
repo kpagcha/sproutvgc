@@ -1648,7 +1648,6 @@ export const messages = {
   'usageMon.statsTip.base': 'At no stat points and a neutral nature: each base stat + 20, HP + 75',
   'usageMon.statsTip.points': 'Each stat point: +1, up to 32 in a stat',
   'usageMon.statsTip.nature': 'A nature: +10% to one stat, −10% to another',
-  'usageMon.statsTip.marked': 'Raised and lowered by its most common nature',
   'usageMon.statsTip.vsHead': "Against the Pokémon you'll face",
   'usageMon.statsTip.vs':
     "Every Pokémon in this dataset, weighted by usage: those you'll face most count most, the rarely used barely at all.",

@@ -103,8 +103,7 @@ const points = (x: number) =>
     maximumFractionDigits: 1,
   })
 
-// Its stats as the game shows them (`gameStats`), each a bar colored by its base stat (`statColor`), marked when its
-// sets' most common nature raises or lowers it, and set against the Pokémon it'll face: every Pokémon in the snapshot,
+// Its stats as the game shows them (`gameStats`), each a bar colored by its base stat (`statColor`), set against the Pokémon it'll face: every Pokémon in the snapshot,
 // each counting as much as it's used (its usage, the share of teams with it), so the long tail barely counts. Their
 // middle half is a band behind the bar, their median a tick through it, and the share of them it's above is said on
 // the bar's hover (its base stat on its number's). Base stats go in (Megas as their own, as the meta has them): a stat's place among theirs is the same as the
@@ -115,7 +114,6 @@ const natures = computed(() =>
     .slice(0, 3)
     .map((n) => ({ key: n.id, share: n.share })),
 )
-const topNature = computed(() => natures.value[0]?.key)
 const field = computed(() =>
   data.value
     ? percentiles(
@@ -143,7 +141,6 @@ const stats = computed(() => {
       width: `${barAt(values[i]!)}%`,
       base,
       color: statColor(base),
-      effect: topNature.value ? natureEffectOn(topNature.value, s) : 'neutral',
       tip: rank === null ? undefined : t('usageMon.statRank', { pct: Math.round(rank * 100) }),
       median: median === null ? null : `${at(median, i)}%`,
       band: low === null || high === null ? null : { left: `${at(low, i)}%`, width: `${at(high, i) - at(low, i)}%` },
@@ -566,22 +563,12 @@ const sections = computed(() =>
           </p>
         </div>
       </div>
-      <!-- Its stats as the dex has them, each with its sets' most common nature's mark. -->
+      <!-- Its stats as the dex has them. -->
       <div class="stats-col">
         <table class="stats">
           <tbody>
             <tr v-for="st in stats" :key="st.s">
-              <th class="muted" :class="st.effect">
-                {{ t(`stat.${st.s}`)
-                }}<component
-                  :is="st.effect === 'up' ? ChevronsUp : ChevronsDown"
-                  v-if="st.effect !== 'neutral'"
-                  class="nature-mark"
-                  :size="14"
-                  :stroke-width="3"
-                  aria-hidden="true"
-                />
-              </th>
+              <th class="muted">{{ t(`stat.${st.s}`) }}</th>
               <td v-tip="t('stats.base', { base: st.base })" class="r num">{{ st.v }}</td>
               <td v-tip="st.tip" class="bar-cell">
                 <span class="track" :class="{ compared: st.band }">
@@ -613,11 +600,6 @@ const sections = computed(() =>
                       <li>{{ t('usageMon.statsTip.points') }}</li>
                       <li>{{ t('usageMon.statsTip.nature') }}</li>
                     </ul>
-                    <p v-if="stats.some((st) => st.effect !== 'neutral')" class="tip-key">
-                      <span class="up"><ChevronsUp :size="12" :stroke-width="3" aria-hidden="true" /></span
-                      ><span class="down"><ChevronsDown :size="12" :stroke-width="3" aria-hidden="true" /></span>
-                      {{ t('usageMon.statsTip.marked') }}
-                    </p>
                     <template v-if="field">
                       <p class="tip-title">{{ t('usageMon.statsTip.vsHead') }}</p>
                       <p>{{ t('usageMon.statsTip.vs') }}</p>
@@ -791,14 +773,14 @@ const sections = computed(() =>
         :class="{ 'meta-stale': loading }"
       >
         <h2 v-tip="t('usageMon.spreadsTip')" class="tipped-head">{{ t('usageMon.spreads') }}</h2>
-        <!-- Its natures, each with the share of its sets running it, what it does on hover or tapped. -->
+        <!-- Its natures, each its segment of the share of its sets running it, named under it; its share and what it does on
+             hover or tapped. -->
         <ShareSplit
           v-if="natures.length"
           class="natures"
           :label="t('usageMon.natures')"
           :parts="natures"
-          :min="LIST_MIN"
-          :tip="(n) => natureTip(n.key)"
+          :tip="(n) => natureTip(n.key, percent(n.share ?? 0))"
         >
           <template #part="{ part }">{{ natureName(part.key) }}</template>
         </ShareSplit>
@@ -1123,15 +1105,6 @@ const sections = computed(() =>
   font-weight: normal;
   white-space: nowrap;
 }
-/* The stat its most common nature raises or lowers: its label in that color, marked. */
-.stats th.up,
-.stats th.down {
-  font-weight: bold;
-}
-.nature-mark {
-  margin-left: 1px;
-  vertical-align: -2px;
-}
 .stats td.r {
   width: 1%;
   padding: 2px 8px 2px 0;
@@ -1216,13 +1189,6 @@ const sections = computed(() =>
   align-items: center;
   gap: 6px;
   margin-top: 4px;
-}
-.stats-tip .tip-key > .up,
-.stats-tip .tip-key > .down {
-  display: inline-flex;
-}
-.stats-tip .tip-key > .down {
-  margin-left: -6px;
 }
 .key-band {
   flex: none;
