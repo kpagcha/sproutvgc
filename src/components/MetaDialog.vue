@@ -90,16 +90,17 @@ const dataset = computed(() =>
 .chevron.open {
   transform: rotate(180deg);
 }
-/* Not the latest data: a dot on its top right corner, as a notification's. */
+/* Not the latest data: a dot on its top right corner, round and red as a notification's (round by its clip, as the
+   look squares off every corner). */
 .dot {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  width: 9px;
-  height: 9px;
-  background: var(--accent);
-  border: 1.5px solid var(--bg);
-  border-radius: 50%;
+  top: -5px;
+  right: -5px;
+  width: 11px;
+  height: 11px;
+  /* The red ringed with the page's background, setting it apart from the button's outline. */
+  background: radial-gradient(circle closest-side, var(--bad) 66%, var(--bg) 70%);
+  clip-path: circle(50%);
 }
 /* On phones, its icon alone: as compact as the favorites' star. */
 @media (max-width: 720px) {
