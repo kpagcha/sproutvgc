@@ -1122,6 +1122,8 @@ export const messages = {
   'builder.points': 'Stat points',
   'builder.pointsLeft': '{n} points left',
   'builder.pointLeft': '1 point left',
+  'builder.pointsToSpend': '{n} points left to spend',
+  'builder.pointToSpend': '1 point left to spend',
   'builder.pointOver': '1 point over',
   'builder.pointsOver': '{n} points over',
   'builder.pointsClear': 'Clear',

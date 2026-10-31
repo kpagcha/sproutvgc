@@ -185,15 +185,15 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
            where there's always room. -->
       <div class="stats-line">
         <button type="button" class="stats-toggle" :aria-expanded="open" @click="open = !open">
-          <span class="toggle-line">
+          <span class="toggle-line" :class="{ callout: left !== 0, over: left < 0 }">
             <span class="toggle-label">
               <ChartBar :size="14" class="points-icon" aria-hidden="true" />
               <span v-if="open || left === 0" class="muted">{{ t('builder.points') }}</span>
               <span v-if="left !== 0" class="warn" :class="{ over: left < 0 }" aria-live="polite">{{
                 left > 0
                   ? left === 1
-                    ? t('builder.pointLeft')
-                    : t('builder.pointsLeft', { n: left })
+                    ? t('builder.pointToSpend')
+                    : t('builder.pointsToSpend', { n: left })
                   : left === -1
                     ? t('builder.pointOver')
                     : t('builder.pointsOver', { n: -left })
@@ -546,6 +546,21 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
 .warn.over {
   color: var(--bad);
 }
+/* Points left to spend (or over): the line a callout, tinted in the accent (in red, over), so a set not finished
+   shows; all spent, the quiet line. */
+.toggle-line.callout {
+  align-self: flex-start;
+  padding: 3px 8px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid var(--accent);
+}
+.toggle-line.callout.over {
+  background: color-mix(in srgb, var(--bad) 12%, transparent);
+  border-color: var(--bad);
+}
+.toggle-line.callout .points-icon {
+  color: inherit;
+}
 .editor {
   padding: 0 8px 8px;
 }
@@ -555,9 +570,9 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
   border: 0;
   box-shadow: none;
 }
-/* Its sprite beside the whole set, not its name alone: the name, types and item, the ability and nature, and the stat
-   points' line in a column to its right (the head and the stats' box laid out as the slot's own grid, `contents`), so
-   it takes no height of its own; the stat points' editor, unfolded, across both under them. */
+/* Its sprite beside the set's three lines (the name, its types and item, the ability and nature: as tall as it), so it
+   takes no height of its own; the stat points' line under them, across, at the panel's edge as the editor it unfolds
+   (the head and the stats' box laid out as the slot's own grid, `contents`). */
 .set.flat {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -570,14 +585,17 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
   display: contents;
 }
 .set.flat .sprite-btn {
-  grid-row: 1 / span 3;
+  grid-row: 1 / span 2;
   grid-column: 1;
 }
 .set.flat .set-who,
-.set.flat .set-facts,
+.set.flat .set-facts {
+  grid-column: 2;
+}
 .set.flat .stats-line,
 .set.flat .stats-blank {
-  grid-column: 2;
+  grid-column: 1 / -1;
+  margin-top: 4px;
 }
 .set.flat .set-sprite {
   width: 64px;
