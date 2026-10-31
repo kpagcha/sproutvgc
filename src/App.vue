@@ -311,7 +311,7 @@ const fadeVariants = {
             >
               <div v-if="backLink(r)" class="back-row">
                 <RouterLink :to="backLink(r)!.to" class="back font-display">
-                  <span class="chevron" aria-hidden="true">‹</span> {{ t(backLink(r)!.label) }}
+                  {{ t(backLink(r)!.label) }}
                 </RouterLink>
                 <FavoritesMenu :page="String(r.name)" />
                 <div :id="`back-actions-${String(r.name)}`" class="back-actions"></div>
@@ -334,7 +334,7 @@ const fadeVariants = {
                  at its end (the speed tiers' Reset all). -->
             <div v-if="backLink(r)" class="back-row">
               <RouterLink :to="backLink(r)!.to" class="back font-display">
-                <span class="chevron" aria-hidden="true">‹</span> {{ t(backLink(r)!.label) }}
+                {{ t(backLink(r)!.label) }}
               </RouterLink>
               <FavoritesMenu :page="String(r.name)" />
               <div :id="`back-actions-${String(r.name)}`" class="back-actions"></div>
@@ -483,17 +483,12 @@ const fadeVariants = {
   align-items: center;
   gap: 5px;
   width: fit-content;
-  padding: 3px 10px 3px 7px;
+  padding: 3px 10px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--panel);
   box-shadow: var(--shadow);
   color: var(--muted);
-}
-.back .chevron {
-  font-weight: bold;
-  font-size: 1.25em;
-  line-height: 1;
 }
 .back:hover {
   background: var(--panel-alt);
