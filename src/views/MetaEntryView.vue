@@ -235,7 +235,8 @@ useRowColumns(useTemplateRef('head'))
           <MoveTag v-else-if="tag" v-tip="moveTagTip(tag)" class="badge-link" :tag />
         </h1>
       </div>
-      <p v-if="text" class="muted desc"><DexText :text="text.short" /></p>
+      <!-- What it does: a move in full, as its dex entry says it; an ability or item in short. -->
+      <p v-if="text" class="muted desc"><DexText :text="kind === 'move' ? (text.long ?? text.short) : text.short" /></p>
       <!-- A move's numbers, whom it reaches (the move rankings narrowed to it) and its tags (likewise). -->
       <p v-if="moveData" class="move-facts">
         <span
