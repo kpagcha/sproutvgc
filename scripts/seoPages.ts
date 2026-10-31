@@ -161,6 +161,7 @@ export function seoPages(): Plugin {
         { path: '', desc: 'desc.home', keywords: 'keywords.home', schema: 'WebSite' },
         { path: 'dex', title: 'title.dex', desc: 'desc.dex', schema: 'CollectionPage' },
         { path: 'dex/types', title: 'title.types', desc: 'desc.types', schema: 'CollectionPage' },
+        { path: 'dex/natures', title: 'title.natures', desc: 'desc.natures', schema: 'WebPage' },
         ...TYPES.map((type): Page => {
           const lead = en.types[type]!
           return { path: `dex/types/${type}`, title: 'title.types', desc: 'desc.type', lead, schema: 'WebPage' }

@@ -95,7 +95,8 @@ export const messages = {
   'title.dex': 'Dex',
   'title.meta': 'Meta',
   'title.tools': 'Tools',
-  'desc.dex': 'Everything in {game}, Regulation {reg}: Pokémon, moves, abilities, items, conditions and types.',
+  'desc.dex':
+    'Everything in {game}, Regulation {reg}: Pokémon, moves, abilities, items, conditions, types and natures.',
   'desc.tools': 'Tools for {game} players: a damage calculator, a team builder, type matchups and the type chart.',
   'nav.rankings': 'Usage',
   'nav.tournaments': 'Tournaments',
@@ -1862,6 +1863,11 @@ export const messages = {
     'Every condition in {game}, Regulation {reg}: statuses, weather, terrains and side and field effects, and what causes them.',
   'desc.condition': "{name} in {game}: what it does, who's immune, and the moves, abilities and items that cause it.",
   'home.conditionsDesc': 'Statuses, weather, terrains, screens, hazards and everything else moves leave behind.',
+  'nav.natures': 'Natures',
+  'title.natures': 'Natures',
+  'desc.natures': 'Every nature in {game}: the stat each raises by 10% and the one it lowers by 10%.',
+  'home.naturesDesc': 'The stat each nature raises and the one it lowers.',
+  'natures.intro': 'A nature raises one stat by 10% and lowers another by 10%.',
   'conditions.intro':
     'What moves, abilities and items leave behind on a Pokémon, its side or the field, in Regulation {reg}.',
   'conditions.none': 'No condition matches.',

@@ -83,6 +83,7 @@ export const AREAS: Area[] = [
       { key: 'items', route: 'items', label: 'nav.items', desc: 'home.itemsDesc' },
       { key: 'conditions', route: 'conditions', label: 'nav.conditions', desc: 'home.conditionsDesc' },
       { key: 'types', route: 'types', label: 'nav.types', desc: 'home.typesDesc' },
+      { key: 'natures', route: 'natures', label: 'nav.natures', desc: 'home.naturesDesc' },
     ],
   },
 ]

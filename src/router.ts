@@ -287,6 +287,12 @@ export const router = createRouter({
         ...inArea('dex', 'conditions'),
       },
     },
+    {
+      path: '/dex/natures',
+      name: 'natures',
+      component: () => import('@/views/NaturesView.vue'),
+      meta: { titleKey: 'title.natures', descKey: 'desc.natures', ...inArea('dex', 'natures') },
+    },
 
     // Meta: what players use, and how it does.
     // Its rankings are what most come for, so the area opens on them: the sections are in the bar under the header.
