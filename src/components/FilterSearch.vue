@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { Search, SlidersHorizontal } from '@lucide/vue'
 import type { ItemId, PokemonId } from '@/data/dex'
 import { locale, t } from '@/i18n'
@@ -28,7 +28,8 @@ import TypeIcon from '@/components/TypeIcon'
 // A list's search and filters, one box for both, as every list on the site has them. What's typed searches the list
 // (by name, or by what its entries do too: `match`), and finds the terms of `kinds` to filter it by (a type, an
 // ability, a move's category… `searchTerms.ts`), listed under the box with how many of the list each would leave
-// (`count`; those leaving none left out), in the page's flow so the list stays in sight (`floating`, a card over it,
+// (`count`; those leaving none left out): as the list's first rows, where the page gives it a spot for them (`rowsAt`,
+// `TermRowsAt`), else in the page's flow under the box so the list stays in sight (`floating`, a card over it;
 // `TermOptions`); the placeholder says what it searches by. Picking one, by clicking it or with
 // the arrow keys and Enter, adds it to the filters (`filters`, kept in the URL by the page) and clears the text.
 // Plainly the filters are chips under the box, all to pass, a chip's cross taking one off again, as
@@ -68,8 +69,12 @@ const props = withDefaults(
     details?: (id: PokemonId) => readonly Detail[]
     /** The options a card over what's under the box, rather than a panel pushing it down. */
     floating?: boolean
+    /** The id of the list's spot for its first rows (`TermRowsAt`, after its heading row): the options there, as the
+     * list's first rows, rather than a panel under the box; while the list has no such spot (none of it shown), the
+     * panel. */
+    rowsAt?: string
   }>(),
-  { match: () => ['name'], subject: undefined, nameCount: 0, hotkey: undefined, details: undefined },
+  { match: () => ['name'], subject: undefined, nameCount: 0, hotkey: undefined, details: undefined, rowsAt: undefined },
 )
 const text = defineModel<string>('text', { default: '' })
 const filters = defineModel<TermFilters>('filters', { required: true })
@@ -215,6 +220,17 @@ function clear() {
   input.value?.focus()
 }
 const listId = useId()
+/** The list's spot for the options, while it has one: looked for again as the list follows the box (it can go, with
+ * none of the list shown, and come back). */
+const rowsEl = shallowRef<HTMLElement | null>(null)
+watch(
+  [open, text, groups, () => props.rowsAt],
+  async () => {
+    await nextTick()
+    rowsEl.value = props.rowsAt ? document.getElementById(props.rowsAt) : null
+  },
+  { flush: 'post', immediate: true },
+)
 </script>
 
 <template>
@@ -272,17 +288,20 @@ const listId = useId()
         >
       </button>
     </div>
-    <TermOptions
-      v-if="!floating"
-      v-show="open"
-      :id="listId"
-      :groups
-      :active
-      :index-of="indexOf"
-      :lead
-      @pick="pick"
-      @hover="active = $event"
-    />
+    <!-- Under the box, or the list's first rows where it has a spot for them. -->
+    <Teleport v-if="!floating" :to="rowsEl ?? 'body'" :disabled="!rowsEl">
+      <TermOptions
+        v-show="open"
+        :id="listId"
+        :inline="!!rowsEl"
+        :groups
+        :active
+        :index-of="indexOf"
+        :lead
+        @pick="pick"
+        @hover="active = $event"
+      />
+    </Teleport>
     <p v-if="!fits" class="hint muted" aria-hidden="true">{{ placeholder }}</p>
     <!-- The plain filters, as chips under the box. -->
     <div v-if="chips.length" class="chips">

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Marked from '@/components/Marked'
-import { computed, ref, shallowRef } from 'vue'
+import { computed, ref, shallowRef, useId } from 'vue'
 import { useRoute } from 'vue-router'
 import { ability, availableIds, type AbilityId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
@@ -47,6 +47,9 @@ const shown = computed(() => {
   })
 })
 const drawn = useGradualRows(shown)
+
+// The spot in the list for its search's options, as its first rows (`FilterSearch`'s `rowsAt`).
+const termRows = useId()
 </script>
 
 <template>
@@ -60,6 +63,7 @@ const drawn = useGradualRows(shown)
       </div>
       <p class="muted">{{ t('abilities.intro', { reg: REGULATION }) }}</p>
       <FilterSearch
+        :rows-at="termRows"
         v-model:text="query"
         v-model:filters="filters"
         v-model:preview="preview"
@@ -71,6 +75,7 @@ const drawn = useGradualRows(shown)
       />
     </div>
     <div class="panel" :class="{ previewing: preview }">
+      <div :id="termRows" class="term-rows bleed"></div>
       <!-- Hidden while it's empty, not taken out: its rows' memo (`v-memo`) outlives it, and taken out and put back, they'd be drawn from rows already gone. -->
       <dl v-show="shown.length" class="entries">
         <!-- Each entry drawn again only when what it shows changes, not with every change to the page (the search's text,

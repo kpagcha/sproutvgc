@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onDeactivated, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onDeactivated, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import tippy, { type Instance } from 'tippy.js'
 import { useRouter } from 'vue-router'
 import { ability, item, move, pokemon, type PokemonId } from '@/data/dex'
@@ -395,6 +395,9 @@ const widths = (size: 'xl' | 'md' | 'sm') =>
     .filter(Boolean)
     .join(' ')
 const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths('md'), '--cols-sm': widths('sm') }))
+
+// The spot in the list for its search's options, as its first rows (`FilterSearch`'s `rowsAt`).
+const termRows = useId()
 </script>
 
 <template>
@@ -423,6 +426,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
         <div class="find-row">
           <div class="find">
             <FilterSearch
+              :rows-at="termRows"
               ref="termSearch"
               v-model:text="search"
               v-model:filters="filters"
@@ -439,6 +443,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
       <p v-else class="muted">{{ t('usage.none', { reg: REGULATION }) }}</p>
     </div>
     <div v-if="snapshot" class="panel" :class="{ 'meta-stale': loading, previewing: preview }" :aria-busy="loading">
+      <div :id="termRows" class="term-rows bleed"></div>
       <div
         v-if="!data || shown.length"
         class="dex-table"

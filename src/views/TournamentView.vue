@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, provide, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, provide, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createReusableTemplate, useElementSize, useMediaQuery } from '@vueuse/core'
 import { ChevronDown, ChevronUp } from '@lucide/vue'
@@ -552,6 +552,9 @@ const bandHeight = computed(() =>
 
 const num = (n: number) => n.toLocaleString(locale.value)
 const ordinal = (n: number) => `#${n}`
+
+// The spot in the list for its search's options, as its first rows (`FilterSearch`'s `rowsAt`).
+const termRows = useId()
 </script>
 
 <template>
@@ -576,6 +579,7 @@ const ordinal = (n: number) => `#${n}`
       <p v-if="!standings" class="muted">{{ t('tournaments.loading') }}</p>
       <p v-else-if="!shownParts.length" class="muted">{{ t('tournaments.noPlayers') }}</p>
       <!-- Hidden while it's empty, not taken out: its rows' memo (`v-memo`) outlives it, and taken out and put back, they'd be drawn from rows already gone. -->
+      <div :id="termRows" class="term-rows bleed"></div>
       <ol v-if="standings" v-show="shownParts.length" class="standings" :class="{ previewing: preview }">
         <!-- Each part under its name, when there's more than one, then its players. Each drawn again only when what
              it shows changes, not with every change to the page (the search's text, its options): a Regional has a
@@ -613,6 +617,7 @@ const ordinal = (n: number) => `#${n}`
       <BandTabs ref="bandTabs" bare sticky :label="t('tournaments.tabs')" :current="tab" :tabs />
       <section class="panel search-panel">
         <FilterSearch
+          :rows-at="termRows"
           v-model:text="query"
           v-model:filters="filters"
           v-model:preview="preview"

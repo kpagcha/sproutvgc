@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, shallowRef, useTemplateRef } from 'vue'
+import { computed, shallowRef, useId, useTemplateRef } from 'vue'
 import { ability, item, pokemon, type AbilityId, type ItemId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { sinceLabel, has, percent } from '@/data/meta'
@@ -249,6 +249,9 @@ const colVars = computed(() => ({
   '--cols-wide': columns.value.map((c) => c.wide).join(' '),
   '--cols-sm': columns.value.flatMap((c) => c.sm ?? []).join(' '),
 }))
+
+// The spot in the list for its search's options, as its first rows (`FilterSearch`'s `rowsAt`).
+const termRows = useId()
 </script>
 
 <template>
@@ -263,6 +266,7 @@ const colVars = computed(() => ({
       <template v-if="hasList && snapshot">
         <div class="find">
           <FilterSearch
+            :rows-at="termRows"
             ref="termSearch"
             v-model:text="search"
             v-model:filters="filters"
@@ -284,6 +288,7 @@ const colVars = computed(() => ({
       :class="{ 'meta-stale': loading, previewing: preview }"
       :aria-busy="loading"
     >
+      <div :id="termRows" class="term-rows bleed"></div>
       <div v-if="!data || shown.length" class="dex-table" :class="{ restoring }" :style="colVars" role="table">
         <div ref="head" class="row head" role="row">
           <SortHeader

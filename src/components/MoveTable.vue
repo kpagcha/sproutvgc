@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Marked from '@/components/Marked'
-import { computed, onUnmounted, ref, shallowRef, useTemplateRef, watch, watchEffect } from 'vue'
+import { computed, onUnmounted, ref, shallowRef, useId, useTemplateRef, watch, watchEffect } from 'vue'
 import { move, type MoveId, type PokemonId } from '@/data/dex'
 import { CATEGORIES, hasPriority, MOVES, moveTag, reachOf, type Move } from '@/data/moves'
 import { loadLearnsets, movesOf } from '@/data/pokemon'
@@ -193,6 +193,9 @@ const skeleton = computed(() => [
   ...COLUMNS.value.map((c) => (c.right ? 'r' : '') + (c.wideOnly ? ' wide-only' : '')),
   ...(props.descriptions && !below.value ? ['grow'] : []),
 ])
+
+// The spot in the list for its search's options, as its first rows (`FilterSearch`'s `rowsAt`).
+const termRows = useId()
 </script>
 
 <template>
@@ -203,6 +206,7 @@ const skeleton = computed(() => [
       v-model:filters="filters"
       v-model:preview="preview"
       class="filters"
+      :rows-at="termRows"
       :subject="t('filter.subject.moves')"
       :name-count="named"
       :kinds
@@ -210,6 +214,7 @@ const skeleton = computed(() => [
     />
   </div>
   <div :class="{ panel: panels, 'table-box': stacked }">
+    <div :id="termRows" class="term-rows" :class="{ bleed: panels }"></div>
     <div
       v-show="sorted.length"
       ref="tableEl"

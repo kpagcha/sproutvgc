@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Marked from '@/components/Marked'
-import { computed, ref, shallowRef } from 'vue'
+import { computed, ref, shallowRef, useId } from 'vue'
 import { useRoute } from 'vue-router'
 import { availableIds, condition } from '@/data/dex'
 import { CONDITIONS, SUBKINDS, type Subkind } from '@/data/conditions'
@@ -49,6 +49,9 @@ const groups = computed(() => {
   })
   return SUBKINDS.map((sub) => ({ sub, items: shown.filter((c) => c.sub === sub) })).filter((g) => g.items.length)
 })
+
+// The spot in the list for its search's options, as its first rows (`FilterSearch`'s `rowsAt`).
+const termRows = useId()
 </script>
 
 <template>
@@ -58,6 +61,7 @@ const groups = computed(() => {
       <h1>{{ t('title.conditions') }}</h1>
       <p class="muted">{{ t('conditions.intro', { reg: REGULATION }) }}</p>
       <FilterSearch
+        :rows-at="termRows"
         v-model:text="query"
         v-model:filters="filters"
         v-model:preview="preview"
@@ -69,6 +73,7 @@ const groups = computed(() => {
       />
     </div>
     <div class="panel" :class="{ previewing: preview }">
+      <div :id="termRows" class="term-rows bleed"></div>
       <section v-for="g in groups" :key="g.sub">
         <h2>{{ t(`conditions.sub.${g.sub}`) }}</h2>
         <dl class="entries">

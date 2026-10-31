@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   ability,
@@ -195,6 +195,9 @@ const idle = computed(() =>
 const IDLE_MAX = 30
 
 useRowColumns(useTemplateRef('head'))
+
+// The spot in the list for its search's options, as its first rows (`FilterSearch`'s `rowsAt`).
+const termRows = useId()
 </script>
 
 <template>
@@ -299,6 +302,7 @@ useRowColumns(useTemplateRef('head'))
         <h2>{{ tx('pokemon') }}</h2>
         <div v-if="rows.length > 8" class="table-search">
           <FilterSearch
+            :rows-at="termRows"
             v-model:text="search"
             v-model:filters="filters"
             v-model:preview="preview"
@@ -310,6 +314,7 @@ useRowColumns(useTemplateRef('head'))
           />
         </div>
       </div>
+      <div :id="termRows" class="term-rows bleed"></div>
       <div v-if="shown.length" class="dex-table" :class="{ previewing: preview }" role="table">
         <div ref="head" class="row head" role="row">
           <SortHeader :label="t('usage.pokemon')" :active="key === 'name'" :desc="desc" @sort="toggle('name')" />

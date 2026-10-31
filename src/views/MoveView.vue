@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, shallowRef, watchEffect } from 'vue'
+import { computed, ref, shallowRef, useId, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { available, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
@@ -57,6 +57,9 @@ watchEffect(async () => {
     (p) => !POKEMON[p].battleOnly && !POKEMON[p].cosmetic && sets[p].includes(current),
   )
 })
+
+// The spot in the list for its search's options, as its first rows (`FilterSearch`'s `rowsAt`).
+const termRows = useId()
 </script>
 
 <template>
@@ -114,6 +117,7 @@ watchEffect(async () => {
       <section v-if="learners.length">
         <h2>{{ t('move.pokemon', { n: learners.length }) }}</h2>
         <FilterSearch
+          :rows-at="termRows"
           v-model:text="query"
           v-model:filters="filters"
           v-model:preview="preview"
@@ -123,6 +127,7 @@ watchEffect(async () => {
           :kinds="KINDS"
           :count
         />
+        <div :id="termRows" class="term-rows"></div>
         <PokemonChips :ids="shownLearners" :query="preview ? '' : query" :class="{ previewing: preview }" />
       </section>
     </template>

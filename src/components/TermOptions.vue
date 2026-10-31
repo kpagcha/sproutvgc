@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Plus } from '@lucide/vue'
 import type { ItemId, PokemonId } from '@/data/dex'
 import type { TypeId } from '@/data/types'
 import { t, type MessageKey } from '@/i18n'
@@ -12,9 +13,11 @@ import TypeIcon from '@/components/TypeIcon'
 // The terms a filter search's text finds (`useTermPicker`), under its box: by kind, each with how many of the list it'd
 // leave, after the `lead` options (a search by name). Picking one, by clicking it, is the box's to do. A panel in the
 // page's flow, pushing the list down rather than covering it, so the list it previews stays in sight; `floating`, a
-// card over what's under the box.
+// card over what's under the box; `inline`, the list's own first rows (in its spot, `TermRowsAt`), set apart from its
+// entries by a wash of the accent and a rule under them, each picked with a plus at its end.
 defineProps<{
   floating?: boolean
+  inline?: boolean
   id: string
   groups: TermGroup[]
   active: number
@@ -40,7 +43,7 @@ const KIND_LABEL: Record<TermKind, MessageKey> = {
 </script>
 
 <template>
-  <ul :id class="term-options" :class="{ floating }" role="listbox">
+  <ul :id class="term-options" :class="{ floating, inline }" role="listbox">
     <li
       v-for="(l, i) in lead"
       :id="optionId(id, i)"
@@ -73,6 +76,7 @@ const KIND_LABEL: Record<TermKind, MessageKey> = {
         <PokemonIcon v-else-if="o.term.kind === 'pokemon'" :id="o.term.id as PokemonId" />
         <span v-if="o.term.kind !== 'type'" class="option-name"><Marked :p="o.parts" /></span>
         <span class="option-count">{{ o.n }}</span>
+        <Plus v-if="inline" :size="14" class="option-add" aria-hidden="true" />
       </li>
     </template>
   </ul>
@@ -133,5 +137,33 @@ const KIND_LABEL: Record<TermKind, MessageKey> = {
   font-size: 0.85em;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
+}
+/* The list's own first rows: as wide as it, rows as tall as its, a wash of the accent and a strong rule under them
+   setting them apart from its entries; scrolling within past a few, so the entries stay in sight. */
+.term-options.inline {
+  max-width: none;
+  max-height: 280px;
+  margin: 0;
+  padding: 4px 0 6px;
+  background: color-mix(in srgb, var(--accent) 7%, var(--panel));
+  border: 0;
+  border-bottom: 2px solid var(--border-strong);
+}
+.inline .group {
+  padding: 8px 10px 2px;
+}
+.inline .option {
+  min-height: 36px;
+  padding: 0 10px;
+}
+.inline .option.active {
+  background: color-mix(in srgb, var(--accent) 20%, var(--panel));
+}
+.option-add {
+  flex: none;
+  color: var(--muted);
+}
+.option.active .option-add {
+  color: var(--text);
 }
 </style>

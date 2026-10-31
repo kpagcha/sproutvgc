@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onMounted, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { ChevronsDown, ChevronsUp, X } from '@lucide/vue'
 import {
   ability,
@@ -281,6 +281,9 @@ const natureRows = computed(() => {
     .sort((a, b) => (shares[b] ?? -1) - (shares[a] ?? -1) || natureName(a).localeCompare(natureName(b)))
     .map((id) => ({ id, share: shares[id], effects: natureEffects(id) }))
 })
+
+// The spot in the list for its search's options, as its first rows (`FilterSearch`'s `rowsAt`).
+const termRows = useId()
 </script>
 
 <template>
@@ -295,6 +298,7 @@ const natureRows = computed(() => {
 
     <template v-if="field === 'pokemon'">
       <FilterSearch
+        :rows-at="termRows"
         v-model:text="text"
         v-model:filters="filters"
         v-model:preview="preview"
@@ -303,6 +307,7 @@ const natureRows = computed(() => {
         :kinds="monKinds"
         :count="monCount"
       />
+      <div :id="termRows" class="term-rows"></div>
       <ul class="rows" :class="{ previewing: preview }">
         <li v-for="r in monShown" :key="r.id" v-memo="[r.id, r.name, r.parts?.join(' '), r.usage, r.clash, r.megas]">
           <button type="button" class="row" :class="{ clash: r.clash }" @click="emit('pick', r.id)">
@@ -335,6 +340,7 @@ const natureRows = computed(() => {
 
     <template v-else-if="field === 'item'">
       <FilterSearch
+        :rows-at="termRows"
         v-model:text="text"
         v-model:filters="filters"
         v-model:preview="preview"
@@ -343,6 +349,7 @@ const natureRows = computed(() => {
         :kinds="ITEM_KINDS"
         :count="itemCount"
       />
+      <div :id="termRows" class="term-rows"></div>
       <ul class="rows" :class="{ previewing: preview }">
         <li v-if="member.item">
           <button type="button" class="row" @click="emit('pick', '')">

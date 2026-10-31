@@ -702,6 +702,18 @@ details > summary {
   margin-bottom: calc(-1 * var(--panel-bleed));
 }
 
+/* A list's spot for its search's options, as its first rows (`FilterSearch`'s `rowsAt`): with `bleed`, at the top of
+   its panel, across it edge to edge. */
+:root .term-rows.bleed > .term-options {
+  margin-inline: calc(-1 * var(--panel-pad));
+}
+:root .term-rows.bleed:first-child > .term-options {
+  margin-top: calc(-1 * var(--panel-pad));
+}
+:root .term-rows > .term-options:not([style*='none']) {
+  margin-bottom: 8px;
+}
+
 /* What shows another meta snapshot's data than the one just picked, while that one's on its way (`useMeta`'s
    `loading`): faded, after a moment, so a pick already loaded doesn't flicker. */
 .meta-stale {

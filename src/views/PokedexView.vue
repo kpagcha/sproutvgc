@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref, shallowRef, useTemplateRef, watchEffect } from 'vue'
+import { computed, onUnmounted, ref, shallowRef, useId, useTemplateRef, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   ability,
@@ -238,6 +238,9 @@ const { entered, restoring } = usePageEntered()
 const drawn = useGradualRows(lines)
 useRowColumns(useTemplateRef('head'))
 const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r']
+
+// The spot in the list for its search's options, as its first rows (`FilterSearch`'s `rowsAt`).
+const termRows = useId()
 </script>
 
 <template>
@@ -251,6 +254,7 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
       </div>
       <p class="muted">{{ t('pokedex.intro', { reg: REGULATION, ...counts }) }}</p>
       <FilterSearch
+        :rows-at="termRows"
         ref="search"
         v-model:text="query"
         v-model:filters="filters"
@@ -264,6 +268,7 @@ const SKELETON = ['grow', '', 'wide-only', ...STATS.map(() => 'wide-only r'), 'r
       />
     </div>
     <div class="panel" :class="{ previewing: preview }">
+      <div :id="termRows" class="term-rows bleed"></div>
       <div v-if="sorted.length" class="dex-table" :class="{ restoring }" role="table">
         <div ref="head" class="row head" role="row">
           <SortHeader

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, shallowRef, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, shallowRef, useId, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
 import { move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
@@ -253,6 +253,9 @@ const widths = (size: 'xl' | 'md' | 'sm') =>
     .filter(Boolean)
     .join(' ')
 const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths('md'), '--cols-sm': widths('sm') }))
+
+// The spot in the list for its search's options, as its first rows (`FilterSearch`'s `rowsAt`).
+const termRows = useId()
 </script>
 
 <template>
@@ -270,6 +273,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
       <template v-if="hasMoves && snapshot">
         <div class="find">
           <FilterSearch
+            :rows-at="termRows"
             ref="termSearch"
             v-model:text="search"
             v-model:filters="filters"
@@ -292,6 +296,7 @@ const colVars = computed(() => ({ '--cols-xl': widths('xl'), '--cols-md': widths
       :class="{ 'meta-stale': loading, previewing: preview }"
       :aria-busy="loading"
     >
+      <div :id="termRows" class="term-rows bleed"></div>
       <div v-if="!data || shown.length" class="dex-table" :class="{ restoring }" :style="colVars" role="table">
         <div ref="head" class="row head" role="row">
           <SortHeader

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { pending, underWay, type Round, type Standing } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
@@ -242,6 +242,9 @@ const sides = (m: Match) =>
 
 const num = (n: number) => n.toLocaleString(locale.value)
 const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–${r[1]}${r[2] ? `–${r[2]}` : ''}` : '0–0')
+
+// The spot in the list for its search's options, as its first rows (`FilterSearch`'s `rowsAt`).
+const termRows = useId()
 </script>
 
 <template>
@@ -358,6 +361,7 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
   <!-- A Swiss round: its pairings, searched and filtered. -->
   <template v-else>
     <FilterSearch
+      :rows-at="termRows"
       v-model:text="query"
       v-model:filters="filters"
       v-model:preview="preview"
@@ -374,6 +378,7 @@ const recordText = (r: [number, number, number] | undefined) => (r ? `${r[0]}–
     </p>
     <p v-if="!shownPairings.length" class="muted">{{ t('tournaments.noMatches') }}</p>
     <!-- Hidden while it's empty, not taken out: its rows' memo (`v-memo`) outlives it, and taken out and put back, they'd be drawn from rows already gone. -->
+    <div :id="termRows" class="term-rows bleed"></div>
     <ol v-show="shownPairings.length" class="pairings" :class="{ previewing: preview }">
       <li
         v-for="m in drawn"
