@@ -413,7 +413,7 @@ function face(f: Fighter) {
       </div>
     </section>
     <!-- The field's conditions, a bar on the page (no panel) stuck under the row of links as the page scrolls, so
-         they're at hand beside the sides; unfolded, a soft box holding them, scrolling away with the page. -->
+         they're at hand beside the sides; unfolded, scrolling away with the page, what's unfolded in a soft box. -->
     <div ref="bar" class="field-bar" :class="{ stuck: barStuck && !fieldOpen, open: fieldOpen }">
       <!-- One row, sliding sideways where it doesn't fit: the toggle, and those on named while folded. -->
       <ScrollRow class="toolbar">
@@ -435,7 +435,7 @@ function face(f: Fighter) {
           </span>
         </template>
       </ScrollRow>
-      <!-- Unfolded, its Clear at the row's end, on the toggle's row where they fit. -->
+      <!-- Unfolded, its Clear on the toggle's row, beside it (on phones at the row's end). -->
       <button
         v-if="fieldOpen"
         type="button"
@@ -744,27 +744,31 @@ function face(f: Fighter) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 8px 12px;
   max-height: none;
-  margin: -8px 0 0;
-  padding: 10px;
   overflow: visible;
-  background: var(--panel-alt);
-  border: 1px solid var(--border);
 }
 .field-bar.open > .toolbar {
   flex: 0 1 auto;
   min-width: 0;
 }
+/* Its Clear beside the toggle; on phones at the row's end. */
 .field-clear {
   flex: none;
-  margin-left: auto;
 }
+@media (max-width: 899px) {
+  .field-clear {
+    margin-left: auto;
+  }
+}
+/* What's unfolded, in a soft box of its own under the toggle (no panel's ink nor shadow): the toggle stays on the
+   page. */
 .field-bar.open > .field-conditions {
   flex-basis: 100%;
-  margin-top: 6px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
+  margin-top: 4px;
+  padding: 12px;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
 }
 /* Stuck, a rule under it setting it apart from the sides scrolling under it. */
 .field-bar.stuck {
