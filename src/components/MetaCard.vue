@@ -1,32 +1,23 @@
 <script setup lang="ts">
 import { computed, useId } from 'vue'
-import { RotateCcw, X } from '@lucide/vue'
+import { X } from '@lucide/vue'
 import {
-  datasetDates,
+  atCutoff,
   datasetKey,
   metaDatasets,
-  offLatest,
+  periodLabel,
   selectSnapshot,
   selectedSnapshot,
-  showLatest,
   snapshots,
-  sourceParts,
-  subsetParts,
   type MetaDataset,
-  type MetaSnapshot,
 } from '@/data/meta'
-import { locale, t } from '@/i18n'
+import { t } from '@/i18n'
 import { metaLoading } from '@/composables/useMeta'
 
-// The meta's data, to see and pick (`MetaDialog`'s card), in steps, each shown when there's a choice: the regulation
-// (the current one first), then its datasets, a plain list of them, the latest first (what one source observed over
-// one period, whatever the period: Smogon's are months), what the one shown is (its battles, regulation, days,
-// source), and its subsets (whose teams count most), what they mean said once over them. Picking a subset shows it on every page and closes the card; another regulation
-// or dataset shows its latest, keeping the subset when it has it, and leaves the card open for the next step. While
-// it isn't the latest dataset, its band has the way back to it (Latest), at the same players, which closes it. Under
-// the steps, Confirm closes it too, as the speed editor's does: what's picked is shown already. Tournaments aren't part
-// of it (their own pages lead to them, `TournamentsView`): while one is shown, its regulation's datasets are listed,
-// none picked, and picking one leaves it.
+// The meta's data, to pick (`MetaDialog`'s card): the regulation (the current one first), then its months, the latest
+// first, each shown when there's a choice. Another regulation shows its latest month. Whose teams count most is the
+// settings' (`metaCutoff`), and what the data is said there too, not here. Tournaments aren't part of it (their own
+// pages lead to them): while one is shown, its regulation's months are listed, none picked, and picking one leaves it.
 const emit = defineEmits<{ close: [] }>()
 const id = useId()
 
@@ -40,113 +31,48 @@ const current = computed<MetaDataset | undefined>(() => {
 const regulations = computed(() => [...new Set(datasets.value.map((d) => d.regulation))])
 /** The regulation shown: its dataset's, or the tournament's shown. */
 const regulation = computed(() => current.value?.regulation ?? selectedSnapshot.value?.regulation)
-/** The current regulation's datasets. */
+/** The regulation's datasets, the latest first. */
 const inRegulation = computed(() => datasets.value.filter((d) => d.regulation === regulation.value))
-/** A dataset's name among its regulation's: its source and period ("Showdown ladder · Sep 2026"). */
-const datasetName = (d: MetaDataset) => sourceParts(d.snapshots[0]!).join(' · ')
 
+/** Another regulation, at its latest month. */
 function pickRegulation(r: string) {
   const d = datasets.value.find((x) => x.regulation === r)
   if (d) show(d)
 }
-
-/** Shows a dataset, at the subset shown when it has it; the card stays open. */
+/** Shows a dataset, at the players the settings pick. */
 function show(d: MetaDataset) {
-  const now = selectedSnapshot.value
-  const same = d.snapshots.find((s) => s.cutoff === now?.cutoff && s.bestOf === now?.bestOf) ?? d.snapshots[0]
-  if (same) selectSnapshot(same.id)
+  const s = atCutoff(d.snapshots)
+  if (s) selectSnapshot(s.id)
 }
-/** Shows it on every page, and closes the card: the choice is made. */
-function pick(snapshot: string) {
-  selectSnapshot(snapshot)
-  emit('close')
-}
-function latest() {
-  showLatest()
-  emit('close')
-}
-const subsetLabel = (s: MetaSnapshot) => subsetParts(s).join(' · ')
-
-/** What its subsets mean, said once over them: Smogon's cutoffs, when they're what tells them apart. */
-const cutoffs = computed(() => !!current.value?.snapshots.some((s) => s.cutoff !== undefined))
-const about = (d: MetaDataset) =>
-  [
-    d.battles !== undefined && t('meta.battles', { n: d.battles.toLocaleString(locale.value) }),
-    t('meta.regulation', { reg: d.regulation }),
-    datasetDates(d),
-  ]
-    .filter(Boolean)
-    .join(' · ')
 </script>
 
 <template>
   <div class="panel banded meta-card" :class="{ loading: metaLoading }" :aria-busy="metaLoading">
     <div class="band">
       <span>{{ t('meta.data') }}</span>
-      <div class="band-end">
-        <button
-          v-if="offLatest"
-          v-tip="t('meta.toLatest')"
-          type="button"
-          class="btn on-band latest"
-          :aria-label="t('meta.toLatest')"
-          @click="latest"
-        >
-          <RotateCcw :size="14" aria-hidden="true" />{{ t('meta.latest') }}
-        </button>
-        <button type="button" class="btn on-band close" :aria-label="t('picker.close')" @click="emit('close')">
-          <X :size="16" aria-hidden="true" />
-        </button>
-      </div>
+      <button type="button" class="btn on-band close" :aria-label="t('picker.close')" @click="emit('close')">
+        <X :size="16" aria-hidden="true" />
+      </button>
     </div>
     <div class="body">
-      <!-- The regulations, when there's a choice of them. -->
       <section v-if="regulations.length > 1" class="section">
         <h3 :id="`${id}-regulations`" class="heading">{{ t('meta.regulations') }}</h3>
-        <div class="options inline" role="radiogroup" :aria-labelledby="`${id}-regulations`">
+        <div class="options" role="radiogroup" :aria-labelledby="`${id}-regulations`">
           <label v-for="r in regulations" :key="r" class="option" :class="{ on: r === regulation }">
             <input type="radio" :name="`${id}-regulation`" :checked="r === regulation" @change="pickRegulation(r)" />
             <span class="name">{{ r }}</span>
           </label>
         </div>
       </section>
-      <!-- Its datasets, when there's a choice of them. -->
       <section v-if="inRegulation.length > 1" class="section">
-        <h3 :id="`${id}-datasets`" class="heading">{{ t('meta.dataset') }}</h3>
-        <div class="options" role="radiogroup" :aria-labelledby="`${id}-datasets`">
+        <h3 :id="`${id}-months`" class="heading">{{ t('meta.month') }}</h3>
+        <div class="options" role="radiogroup" :aria-labelledby="`${id}-months`">
           <label v-for="d in inRegulation" :key="d.key" class="option" :class="{ on: d === current }">
-            <input type="radio" :name="`${id}-dataset`" :checked="d === current" @change="show(d)" />
-            <span class="name">{{ datasetName(d) }}</span>
+            <input type="radio" :name="`${id}-month`" :checked="d === current" @change="show(d)" />
+            <span class="name">{{ periodLabel(d.snapshots[0]!) }}</span>
           </label>
         </div>
       </section>
-      <!-- What the one shown is. -->
-      <section v-if="current" class="section about">
-        <p class="name">{{ current.label }}</p>
-        <p class="muted small">
-          {{ about(current) }} · {{ t('usage.from') }}
-          <a :href="current.provider.url" target="_blank" rel="noopener">{{ current.provider.name }}</a>
-        </p>
-      </section>
-      <!-- Its subsets, what they mean said once over them. -->
-      <section v-if="current && current.snapshots.length > 1" class="section">
-        <h3 :id="`${id}-subsets`" class="heading">{{ t('meta.subset') }}</h3>
-        <p v-if="cutoffs" class="muted small note">{{ t('meta.cutoffsNote') }}</p>
-        <div class="options" role="radiogroup" :aria-labelledby="`${id}-subsets`">
-          <label
-            v-for="s in current.snapshots"
-            :key="s.id"
-            class="option"
-            :class="{ on: s.id === selectedSnapshot?.id }"
-          >
-            <input type="radio" :name="`${id}-subset`" :checked="s.id === selectedSnapshot?.id" @change="pick(s.id)" />
-            <span class="name">{{ subsetLabel(s) }}</span>
-          </label>
-        </div>
-      </section>
-    </div>
-    <div class="confirm-row">
-      <button type="button" class="btn primary" @click="emit('close')">{{ t('meta.confirm') }}</button>
     </div>
   </div>
 </template>
@@ -167,28 +93,14 @@ const about = (d: MetaDataset) =>
   margin-bottom: 0;
   font-weight: bold;
 }
-/* Its end: the way back to the latest, when it's not, then the close. */
-.band-end {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
 /* Under the band, what scrolls when the card's too tall for the screen (its dialog fits it to the screen), the band
-   and Confirm staying put; it reaches the card's right edge, so its scrollbar runs along it. */
+   staying put; it reaches the card's right edge, so its scrollbar runs along it. */
 .body {
   min-height: 0;
   margin: 0 calc(-1 * var(--panel-pad)) 0 0;
   padding: 0 var(--panel-pad) 0 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-}
-.confirm-row {
-  display: flex;
-  flex: none;
-  justify-content: flex-end;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
 }
 .close {
   min-height: 0;
@@ -210,35 +122,22 @@ const about = (d: MetaDataset) =>
   text-transform: uppercase;
   color: var(--muted);
 }
-.about p {
-  margin: 0;
-}
-.about .name {
-  font-weight: bold;
-}
+/* Side by side, wrapping. */
 .options {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 4px;
 }
-/* Each a row to pick: its radio, its name, and what it means under it; the one shown marked. */
+/* Each a choice: its radio and its name, the one shown marked. */
 .option {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
   padding: 6px 8px;
   border: 1px solid transparent;
   cursor: pointer;
 }
-/* The regulations, short: side by side, wrapping. */
-.options.inline {
-  flex-direction: row;
-  flex-wrap: wrap;
-}
-.options.inline .option {
-  align-items: center;
-}
-.options.inline .option input {
+.option input {
   margin: 0;
 }
 .option:hover {
@@ -247,12 +146,6 @@ const about = (d: MetaDataset) =>
 .option.on {
   background: var(--sel);
   border-color: var(--border-strong);
-}
-.option input {
-  margin: 3px 0 0;
-}
-.note {
-  margin: 0 0 8px;
 }
 .option .name {
   font-weight: bold;
@@ -265,8 +158,5 @@ const about = (d: MetaDataset) =>
   .loading .option.on .name {
     animation: none;
   }
-}
-.small {
-  font-size: 0.875em;
 }
 </style>

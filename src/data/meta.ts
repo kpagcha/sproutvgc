@@ -278,6 +278,50 @@ const picked = ref<string | null>(savedPick())
 
 const subsetKey = (s: MetaSnapshot) => `${s.cutoff ?? ''}|${s.bestOf ?? ''}|${s.players ?? ''}`
 
+const PLAYERS_KEY = 'sproutvgc.metaPlayers'
+/** Whose teams count most by default, Smogon's strong players: what any dataset picked is shown at when it has it. */
+const DEFAULT_CUTOFF: Cutoff = 1760
+
+function savedCutoff(): Cutoff {
+  try {
+    const c = Number(localStorage.getItem(PLAYERS_KEY) ?? DEFAULT_CUTOFF)
+    return ([0, 1500, 1630, 1760] as number[]).includes(c) ? (c as Cutoff) : DEFAULT_CUTOFF
+  } catch {
+    return DEFAULT_CUTOFF
+  }
+}
+
+/** The players the settings pick (Smogon's cutoffs), for every dataset that has them. */
+export const metaCutoff = ref<Cutoff>(savedCutoff())
+
+/** The cutoffs there are to pick from, in the order shown. */
+export const cutoffs = computed<Cutoff[]>(() =>
+  [...new Set(snapshots.value.flatMap((s) => (s.cutoff === undefined ? [] : [s.cutoff])))].sort((a, b) => b - a),
+)
+
+/** A dataset's snapshot at the players the settings pick, else at those shown, else its first. */
+export const atCutoff = (list: readonly MetaSnapshot[]): MetaSnapshot | undefined => {
+  const now = selectedSnapshot.value
+  return (
+    list.find((s) => s.cutoff === metaCutoff.value) ??
+    list.find((s) => now && subsetKey(s) === subsetKey(now)) ??
+    list[0]
+  )
+}
+
+/** Picks the players (the settings'), remembered, and shows the data shown at them. */
+export function setMetaCutoff(c: Cutoff) {
+  metaCutoff.value = c
+  try {
+    localStorage.setItem(PLAYERS_KEY, String(c))
+  } catch {
+    // Storage unavailable: the choice lasts until the page reloads.
+  }
+  const now = selectedSnapshot.value
+  const s = now && snapshots.value.find((x) => x.cutoff === c && datasetKey(x) === datasetKey(now))
+  if (s) selectSnapshot(s.id)
+}
+
 /** The snapshot every page shows: the one the reader picked, while it's still shown, or else the latest's first. */
 export const selectedSnapshot = computed<MetaSnapshot | undefined>(() => {
   const latest = latestSnapshots.value
@@ -286,22 +330,8 @@ export const selectedSnapshot = computed<MetaSnapshot | undefined>(() => {
     const subset = p.slice(LATEST.length)
     return latest.find((s) => subsetKey(s) === subset || String(s.cutoff) === subset) ?? latest[0]
   }
-  return findSnapshot(p) ?? latest[0]
+  return findSnapshot(p) ?? latest.find((s) => s.cutoff === metaCutoff.value) ?? latest[0]
 })
-
-/** Whether the snapshot shown is of another dataset than the latest (another regulation or period), whatever its
- * players: what the data button marks, tinted. */
-export const offLatest = computed(() => {
-  const s = selectedSnapshot.value
-  return !!s && !latestSnapshots.value.includes(s)
-})
-
-/** Back to the latest dataset, at the players shown when it has them (its card's Latest). */
-export function showLatest() {
-  const now = selectedSnapshot.value
-  const s = latestSnapshots.value.find((x) => now && subsetKey(x) === subsetKey(now)) ?? latestSnapshots.value[0]
-  if (s) selectSnapshot(s.id)
-}
 
 /** Shows `id`'s snapshot on every page, remembered in this browser. */
 export function selectSnapshot(id: string) {
@@ -412,7 +442,7 @@ function eventsLabel(s: MetaSnapshot): string {
 const severalRegulations = computed(() => new Set(snapshots.value.map((s) => s.regulation)).size > 1)
 
 /** The period a snapshot covers: its month ("Sep 2026"), or the day it ends. */
-const periodLabel = (s: MetaSnapshot): string =>
+export const periodLabel = (s: MetaSnapshot): string =>
   s.period === 'month'
     ? date(s.from, { month: 'short', year: 'numeric' })
     : date(s.to, { day: 'numeric', month: 'short', year: 'numeric' })

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, shallowRef } from 'vue'
 import { ChevronDown, Database } from '@lucide/vue'
-import { metaLabel, offLatest, selectedSnapshot } from '@/data/meta'
+import { metaLabel, selectedSnapshot } from '@/data/meta'
 import { t } from '@/i18n'
 import { metaLoading } from '@/composables/useMeta'
 import MetaCard from '@/components/MetaCard.vue'
@@ -10,9 +10,8 @@ import ModalDialog from '@/components/ModalDialog.vue'
 // The meta's data shown, as a small button saying its regulation alone ("Regulation M-C") that opens its card (`MetaCard`) to see what it is and pick another, in a dialog over the page, on any
 // screen (`ModalDialog`: closed by a press around it or Escape), its card scrolling when it's taller than the screen.
 // On phones, the button is its icon alone (what it shows read out, and in the card), as the favorites' is. Its icon
-// pulses while the data picked loads, and it's tinted in the accent while the data isn't the latest (another
-// regulation or period than the default's), the card then having the way back to it. Its dataset and subset ("Showdown
-// ladder · Sep 2026", "1760+") are in the card, and read out.
+// pulses while the data picked loads. Quiet, whatever's shown: it's beside the page's point. What the data is in full
+// ("Showdown ladder · Sep 2026 · 1760+") is read out.
 const open = ref(false)
 
 const phoneQuery = window.matchMedia('(max-width: 720px)')
@@ -33,13 +32,10 @@ const dataset = computed(() =>
   <div v-if="selectedSnapshot" class="meta-dialog">
     <button
       type="button"
-      class="btn small toggle"
-      :class="{ off: offLatest }"
+      class="btn small quiet toggle"
       :aria-expanded="open"
       aria-haspopup="dialog"
-      :aria-label="
-        t('meta.pick', { label: metaLabel(selectedSnapshot) }) + (offLatest ? ` (${t('meta.notLatest')})` : '')
-      "
+      :aria-label="t('meta.pick', { label: metaLabel(selectedSnapshot) })"
       :aria-busy="metaLoading"
       @click="open = !open"
     >
@@ -70,7 +66,6 @@ const dataset = computed(() =>
 }
 .icon {
   flex: none;
-  color: var(--muted);
 }
 .dataset {
   min-width: 0;
@@ -83,17 +78,6 @@ const dataset = computed(() =>
 }
 .chevron.open {
   transform: rotate(180deg);
-}
-/* The data isn't the latest: outlined in the accent, over a wash of it, its icon in it. */
-:root:root .toggle.off {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 14%, var(--panel));
-}
-:root:root .toggle.off:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 24%, var(--panel));
-}
-.toggle.off .icon {
-  color: var(--accent);
 }
 /* On phones, its icon alone: as compact as the favorites' star. */
 @media (max-width: 720px) {

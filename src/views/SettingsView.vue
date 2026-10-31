@@ -3,6 +3,7 @@ import { defineAsyncComponent } from 'vue'
 import { THEME_MODES, useTheme } from '@/composables/useTheme'
 import { LOCALES, locale, setLocale, t, type Locale } from '@/i18n'
 import { confirmDialog } from '@/composables/useConfirm'
+import { cutoffs, metaCutoff, players, setMetaCutoff } from '@/data/meta'
 
 const { mode, setMode } = useTheme()
 // The language is a choice only while there's more than one (English only for now).
@@ -61,6 +62,31 @@ async function clearAll() {
     </div>
   </div>
 
+  <!-- The meta's data: its source (Smogon's alone for now), then whose teams count most. -->
+  <div v-if="cutoffs.length" class="panel">
+    <h2>{{ t('meta.settings') }}</h2>
+    <p class="muted">{{ t('meta.settingsIntro') }}</p>
+    <h3 class="sub">{{ t('meta.source') }}</h3>
+    <div class="opts">
+      <label class="opt on">
+        <input type="radio" name="meta-source" checked />
+        <span class="opt-text">
+          <span class="opt-name font-display">{{ t('meta.source.smogon') }}</span>
+        </span>
+      </label>
+    </div>
+    <h3 class="sub">{{ t('meta.subset') }}</h3>
+    <p class="muted small">{{ t('meta.cutoffsNote') }}</p>
+    <div class="opts">
+      <label v-for="c in cutoffs" :key="c" class="opt" :class="{ on: metaCutoff === c }">
+        <input type="radio" name="meta-players" :checked="metaCutoff === c" @change="setMetaCutoff(c)" />
+        <span class="opt-text">
+          <span class="opt-name font-display">{{ players(c) }}</span>
+        </span>
+      </label>
+    </div>
+  </div>
+
   <component :is="MetaDevTools" v-if="MetaDevTools" />
 
   <div class="panel">
@@ -76,6 +102,16 @@ async function clearAll() {
 <style scoped>
 .small {
   font-size: calc(11px * var(--text-scale));
+}
+.sub {
+  margin: 12px 0 6px;
+  font-size: 0.85em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sub + .muted {
+  margin: 0 0 8px;
 }
 .opts {
   display: grid;
