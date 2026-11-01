@@ -27,6 +27,7 @@ import { useTeams } from '@/composables/useTeams'
 import { decodeField, decodeFighter, encodeField, encodeFighter, readLast, saveLast } from '@/lib/calcState'
 import {
   abilityOf,
+  atSets,
   battlerOf,
   commonSet,
   emptyField,
@@ -166,7 +167,10 @@ watchDebounced(
   { debounce: 250, immediate: true },
 )
 
-const setSide = (k: SideKey, f: Fighter) => (sides.value = { ...sides.value, [k]: f })
+// The pooled stats a side at every set battles with are the page's, from the meta shown (`fought`), never kept.
+const setSide = (k: SideKey, f: Fighter) => (sides.value = { ...sides.value, [k]: { ...f, pooled: undefined } })
+/** The sides as they battle: at every set, at their sets pooled in the meta shown. */
+const fought = computed(() => ({ a: atSets(sides.value.a, data.value), b: atSets(sides.value.b, data.value) }))
 const patchMember = (k: SideKey, patch: Partial<Member>) =>
   setSide(k, { ...sides.value[k], member: { ...sides.value[k].member, ...patch } })
 function swap() {
@@ -221,13 +225,17 @@ function choose(k: SideKey, id: PokemonId) {
     item: item ?? null,
     ability: abilities.length === 1 ? abilities[0]! : null,
   }
-  setSide(k, { ...emptyFighter(member), side: sides.value[k].side })
+  setSide(k, { ...emptyFighter(member), side: sides.value[k].side, sets: sides.value[k].sets })
 }
 /** The set being put together skipped: the most common set loaded, the picker closed. */
 function loadCommon() {
   const p = picking.value
   if (!p?.common) return
-  setSide(p.side, { ...commonSet(p.common, data.value), side: sides.value[p.side].side })
+  setSide(p.side, {
+    ...commonSet(p.common, data.value),
+    side: sides.value[p.side].side,
+    sets: sides.value[p.side].sets,
+  })
   picking.value = null
 }
 const [DefineCommon, ReuseCommon] = createReusableTemplate()
@@ -253,7 +261,9 @@ function pick(value: string) {
     const member = { ...m, item: (value || null) as ItemId | null }
     setSide(p.side, { ...sides.value[p.side], member, mega: !!stoneMega(member) })
   } else if (p.field === 'ability') patchMember(p.side, { ability: value as AbilityId })
-  else if (p.field === 'nature') patchMember(p.side, { nature: value })
+  // A nature picked, it's at its own rather than at every set.
+  else if (p.field === 'nature')
+    setSide(p.side, { ...sides.value[p.side], member: { ...m, nature: value }, sets: false })
   else {
     const moves = [...m.moves]
     const was = moves.indexOf(value as MoveId)
@@ -292,11 +302,11 @@ async function common(k: SideKey) {
   const id = sides.value[k].member.pokemon
   if (!id || !(await mayReplace(k, true))) return
   const forme = sides.value[k].mega ? setsAs(sides.value[k].member)! : id
-  setSide(k, { ...commonSet(forme, data.value), side: sides.value[k].side })
+  setSide(k, { ...commonSet(forme, data.value), side: sides.value[k].side, sets: sides.value[k].sets })
 }
 function clearSide(k: SideKey) {
   menuSide.value = null
-  setSide(k, { ...emptyFighter(), side: sides.value[k].side })
+  setSide(k, { ...emptyFighter(), side: sides.value[k].side, sets: sides.value[k].sets })
 }
 const savedTeams = computed(() => teams.value.filter((tm) => tm.members.some((m) => m.pokemon)))
 function fromTeam(k: SideKey, m: Member) {
@@ -432,7 +442,7 @@ function back() {
 }
 function face(f: Fighter) {
   if (battlerOf(sides.value.b)) previous.value = [...previous.value, sides.value.b].slice(-PREVIOUS_MAX)
-  setSide('b', { ...f, side: sides.value.b.side })
+  setSide('b', { ...f, side: sides.value.b.side, sets: sides.value.b.sets })
   openSide.value = 'b'
   void nextTick(() => document.getElementById('calc-b')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
 }
@@ -525,8 +535,8 @@ function face(f: Fighter) {
         <button type="button" class="tab-body" :aria-controls="`calc-${k}`" @click="goTab(k)">
           <CalcSummary
             v-if="battlerOf(sides[k])"
-            :fighter="sides[k]"
-            :other="sides[k === 'a' ? 'b' : 'a']"
+            :fighter="fought[k]"
+            :other="fought[k === 'a' ? 'b' : 'a']"
             :field
             :theirs="k === 'b'"
             class="tab-summary"
@@ -550,8 +560,8 @@ function face(f: Fighter) {
           <CalcSide
             :id="`calc-${k}`"
             :ref="(el) => setSideEl(k, el)"
-            :fighter="sides[k]"
-            :other="sides[k === 'a' ? 'b' : 'a']"
+            :fighter="fought[k]"
+            :other="fought[k === 'a' ? 'b' : 'a']"
             :field
             :theirs="k === 'b'"
             :label="labels[k]"
@@ -561,7 +571,7 @@ function face(f: Fighter) {
             :class="`side-${k}`"
             @update:fighter="setSide(k, $event)"
             @field="picking = { side: k, field: $event }"
-            @clear="setSide(k, { ...emptyFighter(), side: sides[k].side })"
+            @clear="setSide(k, { ...emptyFighter(), side: sides[k].side, sets: sides[k].sets })"
             :data
             :side-open="sideOpen"
             :moves-folded="movesFolded[k].value"
@@ -599,9 +609,9 @@ function face(f: Fighter) {
       </template>
     </div>
 
-    <CalcVerdict :a="sides.a" :b="sides.b" :field />
+    <CalcVerdict :a="fought.a" :b="fought.b" :field />
 
-    <CalcMeta v-if="battlerOf(sides.a)" id="calc-meta" :yours="sides.a" :field :data @pick="face" />
+    <CalcMeta v-if="battlerOf(sides.a)" id="calc-meta" :yours="fought.a" :field :data @pick="face" />
 
     <DefineTeams v-slot="{ side, done }">
       <div v-for="tm in savedTeams" :key="tm.id" class="load-team">

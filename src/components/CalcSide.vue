@@ -10,6 +10,7 @@ import {
   abilityOf,
   battlerOf,
   BOOSTED,
+  canPool,
   CONDITIONAL_ABILITIES,
   hit,
   MAX_ATTACKED,
@@ -66,7 +67,12 @@ defineSlots<{ actions(): unknown }>()
 
 const uid = useId()
 const set = (patch: Partial<Fighter>) => emit('update:fighter', { ...props.fighter, ...patch })
-const change = (patch: Partial<Member>) => set({ member: { ...props.fighter.member, ...patch } })
+// Its nature or points set, it's at its own rather than at every set.
+const change = (patch: Partial<Member>) =>
+  set({
+    member: { ...props.fighter.member, ...patch },
+    ...(('nature' in patch || 'points' in patch) && { sets: false }),
+  })
 
 /** The slot's card, which the picker's drawer leaves clear. */
 const card = shallowRef<HTMLElement | null>(null)
@@ -161,6 +167,10 @@ function setHpPoints(e: Event) {
           :evolved="fighter.mega"
           no-moves
           flat
+          stat-picks
+          :at-sets="fighter.sets && !!fighter.pooled"
+          :can-pool="canPool(fighter, data)"
+          @sets="set({ sets: $event })"
           @mega="set({ mega: !fighter.mega })"
           @field="emit('field', $event)"
           @change="change"

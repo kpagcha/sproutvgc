@@ -259,6 +259,9 @@ export const messages = {
   'calc.blockedBy': 'Blocked by {what}',
   'calc.immuneType': '{type}-type Pokémon are immune',
   'calc.noKo': 'Not a KO in 4 hits',
+  'calc.sets.toggle': 'Every set',
+  'calc.sets.tip':
+    'Its nature and stat points unknown: its stats those of every set the snapshot has of it, pooled by how often each is run.',
   'calc.hpRange': '{min}–{max} of {of} HP',
   'calc.crit': 'Critical hit',
   'calc.single': 'Single target',
@@ -1138,7 +1141,7 @@ export const messages = {
   'builder.nextBonus': 'The next point adds 2: the nature rounds up',
   'builder.nextWasted': 'The next point adds nothing: the nature rounds down',
   'builder.lastWasted': 'The last point adds nothing: {n} gives the same stat',
-  'builder.presets': 'Common spreads',
+  'builder.presets': 'Common sets',
   'builder.section.teams': 'Teams',
   'builder.section.team': 'Team',
   'builder.section.defense': 'Defense',

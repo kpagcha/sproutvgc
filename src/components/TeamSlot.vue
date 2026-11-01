@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { ChartBar, ChevronDown, ChevronUp, CircleAlert, Pin, PinOff, X } from '@lucide/vue'
+import { computed, shallowRef } from 'vue'
+import { ChartBar, ChartColumn, ChevronDown, ChevronUp, CircleAlert, Pin, PinOff, X } from '@lucide/vue'
 import { ability, item, move, pokemon, type MoveId } from '@/data/dex'
 import type { Spread } from '@/data/meta'
 import { MOVES } from '@/data/moves'
@@ -11,6 +11,7 @@ import { refName } from '@/i18n/refName'
 import { pointsLeft, stoneMega, type Field, type Member, type Points } from '@/lib/team'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PointsEditor from '@/components/PointsEditor.vue'
+import SpreadPresets from '@/components/SpreadPresets.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
 import { natureTip } from '@/components/natureTip'
@@ -28,7 +29,10 @@ import { natureTip } from '@/components/natureTip'
 // glowing in the accent and back, in a loop, until its picker opens. In the team builder (`pinnable`), a pin by its
 // clearing pins it beside the team's insights (`pinned`, `pin`), to edit it there as they follow. In the damage
 // calculator its moves are left out (`noMoves`): its rows of damage are its moves, each picked from there; and it's
-// flat (`flat`): no card of its own, the side's panel being its box, and no clearing, the side's menu clearing it.
+// flat (`flat`): no card of its own, the side's panel being its box, and no clearing, the side's menu clearing it; and
+// its stats are three picks (`statPicks`), two groups: its own, its stat points set by hand or one of its common spreads
+// (the dialog the editor has at its foot, `SpreadPresets`), or at every set (`atSets`, `sets`: its sets pooled by usage,
+// where the meta has them, `canPool`), its nature crossed out then, as it isn't what it battles with.
 const props = defineProps<{
   member: Member
   active: Field | null
@@ -46,8 +50,20 @@ const props = defineProps<{
   noMoves?: boolean
   /** No card of its own nor clearing: the top of a panel that's its box (the damage calculator's side). */
   flat?: boolean
+  /** Its stats as three picks: its stat points, a common spread, or every set (the damage calculator's). */
+  statPicks?: boolean
+  /** At every set, its sets pooled; and whether the meta has them to be. */
+  atSets?: boolean
+  canPool?: boolean
 }>()
-const emit = defineEmits<{ field: [field: Field]; clear: []; change: [patch: Partial<Member>]; mega: []; pin: [] }>()
+const emit = defineEmits<{
+  field: [field: Field]
+  clear: []
+  change: [patch: Partial<Member>]
+  mega: []
+  pin: []
+  sets: [on: boolean]
+}>()
 const open = defineModel<boolean>('open', { default: false })
 
 // The pin's tooltip only where there's hover: tapped, it'd stay behind as the slot's pinned or unpinned.
@@ -65,6 +81,22 @@ const points = computed({
   set: (p: Points) => emit('change', { points: p }),
 })
 const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.nature })
+
+// The picks: at every set, or at its own stat points, however they were set (by hand or from a common set, which is
+// a way to set them rather than a pick of its own, so never marked).
+const presetsOpen = shallowRef(false)
+const pick = computed(() => (props.atSets ? 'sets' : 'points'))
+/** Its stat points: from every set, back to its own and their editor open; else the editor folded or unfolded. */
+function pickPoints() {
+  if (props.atSets) {
+    emit('sets', false)
+    open.value = true
+  } else open.value = !open.value
+}
+function pickSets() {
+  open.value = false
+  emit('sets', !props.atSets)
+}
 </script>
 
 <template>
@@ -155,7 +187,7 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
         v-tip="member.nature ? natureTip(member.nature) : undefined"
         type="button"
         class="slot-btn nature"
-        :class="{ active: active === 'nature', placeholder: !member.nature }"
+        :class="{ active: active === 'nature', placeholder: !member.nature, struck: atSets }"
         @click="go('nature')"
       >
         {{ member.nature ? natureName(member.nature) : t('builder.nature') }}
@@ -183,7 +215,74 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
     <div v-if="shown" class="stats-box">
       <!-- Folding the stats, and beside it, holding its Mega Stone, whether it Mega Evolves: a switch at the line's end,
            where there's always room. -->
-      <div class="stats-line">
+      <!-- The damage calculator's three picks, two groups: its own stat points (unfolding their editor) or a common
+           set (opening their dialog), or every set. -->
+      <div v-if="statPicks" class="stats-line picks">
+        <span class="pick-group">
+          <button
+            type="button"
+            class="btn quiet small"
+            :class="{ on: pick === 'points', callout: !atSets && left !== 0, over: left < 0 }"
+            :aria-expanded="open"
+            @click="pickPoints"
+          >
+            <component :is="!atSets && left !== 0 ? CircleAlert : ChartBar" :size="14" aria-hidden="true" />
+            <span v-if="atSets || left === 0">{{ t('builder.points') }}</span>
+            <span v-else aria-live="polite">{{
+              left > 0
+                ? left === 1
+                  ? t('builder.pointToSpend')
+                  : t('builder.pointsToSpend', { n: left })
+                : left === -1
+                  ? t('builder.pointOver')
+                  : t('builder.pointsOver', { n: -left })
+            }}</span>
+            <ChevronDown :size="14" class="pick-chev" :class="{ open: open && !atSets }" aria-hidden="true" />
+          </button>
+          <button
+            v-if="spreads.length"
+            type="button"
+            class="btn quiet small"
+            aria-haspopup="dialog"
+            @click="presetsOpen = true"
+          >
+            <ChartColumn :size="14" aria-hidden="true" />{{ t('builder.presets')
+            }}<ChevronDown :size="14" class="pick-chev" :class="{ open: presetsOpen }" aria-hidden="true" />
+          </button>
+        </span>
+        <span v-if="canPool" class="pick-sep" aria-hidden="true"></span>
+        <button
+          v-if="canPool"
+          v-tip="canHover ? t('calc.sets.tip') : undefined"
+          type="button"
+          class="btn quiet small"
+          :class="{ on: atSets }"
+          :aria-pressed="!!atSets"
+          @click="pickSets"
+        >
+          {{ t('calc.sets.toggle') }}
+        </button>
+        <button
+          v-if="mega"
+          type="button"
+          role="switch"
+          class="mega-switch"
+          :class="{ on: evolved }"
+          :aria-checked="!!evolved"
+          @click="emit('mega')"
+        >
+          <span class="switch-label">{{ t('builder.mega') }}</span>
+          <span class="track" aria-hidden="true"><span class="knob"></span></span>
+        </button>
+        <SpreadPresets
+          v-model:open="presetsOpen"
+          :spreads
+          :nature="member.nature"
+          :points="member.points"
+          @pick="preset"
+        />
+      </div>
+      <div v-else class="stats-line">
         <button type="button" class="stats-toggle" :aria-expanded="open" @click="open = !open">
           <span class="toggle-line" :class="{ callout: left !== 0, over: left < 0 }">
             <span class="toggle-label">
@@ -222,6 +321,7 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
         :pokemon="shown"
         :nature="member.nature"
         :spreads
+        :no-presets="statPicks"
         @preset="preset"
         @confirm="open = false"
       />
@@ -612,6 +712,53 @@ const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.
 .set.flat .editor {
   grid-column: 1 / -1;
   padding-inline: 0;
+}
+/* The damage calculator's three picks: the first two together, every set apart after a rule; the Mega's switch at the
+   line's end. The one it's at marked as a picked quiet button is. */
+.picks {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.picks .btn {
+  gap: 4px;
+  padding-inline: 6px;
+}
+.pick-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+/* What each does when tapped: Stat points unfolds its editor, Common sets opens its dialog; the arrow after the
+   label, flipped while unfolded or open, as the page's other folding and dialog buttons have it. */
+.pick-chev {
+  flex: none;
+  transition: transform 0.15s;
+}
+.pick-chev.open {
+  transform: rotate(180deg);
+}
+.pick-sep {
+  align-self: stretch;
+  width: 1px;
+  margin-inline: 2px;
+  background: var(--border);
+}
+/* Points left to spend or over, loud as the builder's line is (over the quiet button's muted ink). */
+:root:root .picks .btn.callout {
+  color: var(--warn);
+  font-weight: bold;
+}
+:root:root .picks .btn.callout.over {
+  color: var(--bad);
+}
+.picks .mega-switch {
+  align-self: stretch;
+  margin-left: auto;
+}
+/* At every set, its nature isn't what it battles with. */
+.nature.struck {
+  text-decoration: line-through;
 }
 /* Two cards to a row (narrow, `TeamBuilderView`'s), their moves one under another; one to a row, two by two again. */
 @media (max-width: 900px) and (min-width: 521px) {

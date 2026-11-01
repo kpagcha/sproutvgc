@@ -52,6 +52,7 @@ export interface MetaEntry {
   spreads: { nature: string; points: number[]; share: number }[]
   speeds: { points: number; nature: string; share: number }[]
   natures: Share[]
+  pooled: { points: number[]; mult: number[] }
   prev?: { rank: number; usage?: number }
 }
 
@@ -173,6 +174,30 @@ export class Smogon {
           })
           .filter((s) => s.share > 0)
       }
+      /** Its sets pooled into one, every spread counting by its weight: per stat, the mean of the nature's multiplier
+       * and the points' mean under it (the mean of points × multiplier, over the multiplier's mean), so its mean stat is
+       * (base + 20 + points) × multiplier, HP's base + 75 + points: what the damage calculator's Every set is at. */
+      const pooled = (spreads: Record<string, number>) => {
+        let total = 0
+        const mult = [0, 0, 0, 0, 0, 0]
+        const pm = [0, 0, 0, 0, 0, 0]
+        for (const [spread, w] of Object.entries(spreads)) {
+          const [nature, points] = spread.split(':') as [string, string]
+          const effect = NATURE_EFFECTS[nature.toLowerCase()]
+          const p = points.split('/').map(Number)
+          total += w
+          STAT_KEYS.forEach((stat, i) => {
+            const m = effect?.[0] === stat ? 1.1 : effect?.[1] === stat ? 0.9 : 1
+            mult[i]! += w * m
+            pm[i]! += w * m * (p[i] ?? 0)
+          })
+        }
+        if (!total) return { points: [0, 0, 0, 0, 0, 0], mult: [1, 1, 1, 1, 1, 1] }
+        return {
+          points: pm.map((x, i) => Math.round((x / mult[i]!) * 100) / 100),
+          mult: mult.map((x) => round(x / total)),
+        }
+      }
       /** Its natures, from every spread, as shares, the rare ones left out. */
       const natures = (spreads: Record<string, number>, total: number) => {
         const weights = new Map<string, number>()
@@ -216,6 +241,7 @@ export class Smogon {
           // Its natures from every spread: the long tail of spreads is most of the sets, so its top spreads, a few
           // percent each, don't say what its natures are.
           natures: natures(d.Spreads, total),
+          pooled: pooled(d.Spreads),
         }
       })
       result.push({
@@ -332,3 +358,29 @@ export function histories(index: Record<string, Snapshot>, data: Record<string, 
 
 /** Shares to 4 decimals (0.01%): finer is noise, and it keeps the files small. */
 const round = (x: number) => Math.round(x * 1e4) / 1e4
+
+/** The stats in a spread's order, as Smogon writes them (HP/Atk/Def/SpA/SpD/Spe). */
+const STAT_KEYS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as const
+/** The stat each nature raises and the one it lowers (the neutral five left out): the games', fixed since Gen 3. */
+const NATURE_EFFECTS: Record<string, readonly [string, string]> = {
+  lonely: ['atk', 'def'],
+  adamant: ['atk', 'spa'],
+  naughty: ['atk', 'spd'],
+  brave: ['atk', 'spe'],
+  bold: ['def', 'atk'],
+  impish: ['def', 'spa'],
+  lax: ['def', 'spd'],
+  relaxed: ['def', 'spe'],
+  modest: ['spa', 'atk'],
+  mild: ['spa', 'def'],
+  rash: ['spa', 'spd'],
+  quiet: ['spa', 'spe'],
+  calm: ['spd', 'atk'],
+  gentle: ['spd', 'def'],
+  careful: ['spd', 'spa'],
+  sassy: ['spd', 'spe'],
+  timid: ['spe', 'atk'],
+  hasty: ['spe', 'def'],
+  jolly: ['spe', 'spa'],
+  naive: ['spe', 'spd'],
+}

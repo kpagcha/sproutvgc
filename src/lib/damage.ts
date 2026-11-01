@@ -25,7 +25,7 @@ import { isSpread, MOVES } from '@/data/moves'
 import { POKEMON, STATS } from '@/data/pokemon'
 import { chart, TYPES, type TypeId } from '@/data/types'
 import { commonMember, isMega, mostUsedForme } from '@/lib/commonSet'
-import { emptyMember, stoneMega, type Member } from '@/lib/team'
+import { emptyMember, setsAs, stoneMega, type Member } from '@/lib/team'
 
 const GEN = Generations.get(0)
 
@@ -72,6 +72,10 @@ export interface Fighter {
   side: SideEffect[]
   /** The layers of Spikes it switched in on. */
   spikes: number
+  /** At every set: its stats the meta's sets of it pooled by usage (`pooledStats`), not its own nature and points. */
+  sets: boolean
+  /** Those stats, in `STATS` order, as the page works them out from the meta shown (`atSets`); never kept. */
+  pooled?: readonly number[]
 }
 
 export const WEATHERS = ['', 'Sun', 'Rain', 'Sand', 'Snow'] as const
@@ -100,6 +104,7 @@ export const emptyFighter = (member: Member = emptyMember()): Fighter => ({
   attacked: 0,
   side: [],
   spikes: 0,
+  sets: false,
 })
 
 export const emptyField = (): Battlefield => ({ weather: '', terrain: '', effects: [] })
@@ -152,6 +157,8 @@ function pokemonOf(f: Fighter): Pokemon | null {
   if (!id) return null
   const m = f.member
   const p = POKEMON[id]
+  // At every set, its pooled stats: a neutral nature, and the points that give each (the calc takes any number).
+  const pooled = f.sets ? f.pooled : undefined
   const mon = new Pokemon(GEN, speciesName(id), {
     // Our data's types and stats, from the same Champions mod, so the two never disagree.
     overrides: {
@@ -164,8 +171,8 @@ function pokemonOf(f: Fighter): Pokemon | null {
     })(),
     abilityOn: f.abilityOn,
     item: m.item ? named((x) => GEN.items.get(x), m.item) : undefined,
-    nature: m.nature ? named((x) => GEN.natures.get(x), m.nature) : undefined,
-    evs: Object.fromEntries(STATS.map((s, i) => [s, m.points[i]!])),
+    nature: pooled ? undefined : m.nature ? named((x) => GEN.natures.get(x), m.nature) : undefined,
+    evs: Object.fromEntries(STATS.map((s, i) => [s, pooled ? pooled[i]! - p.stats[i]! - (i ? 20 : 75) : m.points[i]!])),
     boosts: Object.fromEntries(BOOSTED.map((s, i) => [s, f.boosts[i]!])),
     status: f.status,
     alliesFainted: f.fainted,
@@ -560,6 +567,30 @@ export function statsOf(f: Fighter): Record<(typeof STATS)[number], number> | nu
   const p = pokemonOf(f)
   if (!p) return null
   return { ...p.stats, hp: p.maxHP() } as Record<(typeof STATS)[number], number>
+}
+
+/** Whether the meta shown has a side's sets pooled, so it can be at every set: its battler's entry's (a stone
+ * holder's, its Mega's). */
+const pooledOf = (f: Fighter, data: MetaData | null | undefined) => {
+  const id = setsAs(f.member)
+  return (id && data?.[id]?.pooled) || null
+}
+export const canPool = (f: Fighter, data: MetaData | null | undefined) => !!pooledOf(f, data)
+
+/** A side's stats at every set (`PokemonMeta.pooled`), for the Pokémon it battles as, rounded to whole stats. */
+export function pooledStats(f: Fighter, data: MetaData | null | undefined): number[] | null {
+  const pool = pooledOf(f, data)
+  const id = battlerOf(f)
+  if (!pool || !id) return null
+  return POKEMON[id].stats.map((base, i) =>
+    i ? Math.round((base + 20 + pool.points[i]!) * pool.mult[i]!) : Math.round(base + 75 + pool.points[0]!),
+  )
+}
+
+/** A side as it battles in the meta shown: at every set, its pooled stats on it (`pooled`); else as it is. */
+export function atSets(f: Fighter, data: MetaData | null | undefined): Fighter {
+  if (!f.sets) return f.pooled ? { ...f, pooled: undefined } : f
+  return { ...f, pooled: pooledStats(f, data) ?? undefined }
 }
 
 /** A Pokémon's most common set in the meta (`commonMember`), a Mega Mega Evolving. */

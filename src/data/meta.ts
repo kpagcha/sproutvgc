@@ -115,6 +115,10 @@ export interface PokemonMeta {
   /** What its sets put into Speed, from all of them: stat points and nature (by Showdown ID), most common first.
    * Its Speed stat follows from its base Speed (`speedStat`, with `natureEffect`). */
   speeds?: { points: number; nature: string; share: number }[]
+  /** Its sets pooled into one, every spread counting by how often it's run: per stat (`STATS` order), the nature's
+   * mean multiplier and the points' mean under it, its mean stat (base + 20 + points) × multiplier (HP's base + 75 +
+   * points). What the damage calculator's Every set is at. */
+  pooled?: { points: number[]; mult: number[] }
   /** Its sets' natures (by Showdown ID), from all of them, most common first. */
   natures?: Share<string>[]
   /** Its sets the shares of its lists are of, where the source counts them (tournaments' team lists). */

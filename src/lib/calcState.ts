@@ -64,6 +64,7 @@ export function encodeFighter(f: Fighter): string {
   if (f.fainted) flags.push(`f${f.fainted}`)
   if (f.attacked) flags.push(`r${f.attacked}`)
   if (f.spikes) flags.push(`k${f.spikes}`)
+  if (f.sets) flags.push('e')
   for (const s of SIDE_EFFECTS) if (f.side.includes(s)) flags.push(SIDE_CODES[s])
   return [
     m.pokemon,
@@ -97,6 +98,7 @@ export function decodeFighter(s: unknown): Fighter | null {
   for (const tok of (flags ?? '').split('.')) {
     if (tok === 'n') f.mega = false
     else if (tok === 'a') f.abilityOn = true
+    else if (tok === 'e') f.sets = true
     else if (/^h\d+$/.test(tok)) f.hp = clamp(Number(tok.slice(1)), 1, 100)
     else if (/^f\d$/.test(tok)) f.fainted = clamp(Number(tok.slice(1)), 0, 5)
     else if (/^r\d$/.test(tok)) f.attacked = clamp(Number(tok.slice(1)), 0, MAX_ATTACKED)
