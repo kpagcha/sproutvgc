@@ -16,7 +16,8 @@ import { ChartColumn } from '@lucide/vue'
 // are left to spend is on `TeamSlot`'s line it unfolds from. Each stat takes no more than are left. Its most common
 // spreads (`spreads`, the meta's) in a dialog over the page (`SpreadPresets`) from a button at its foot, each setting the
 // points and the nature and closing it, those of the nature it has already tinted; the button on one row with Clear and
-// Confirm (which folds it).
+// Confirm (which folds it). Locked (`locked`, the damage calculator's Every set): its points and stats those given, the
+// sets' pooled, dimmed and taking no input, as they're derived rather than set; no Clear.
 const props = defineProps<{
   pokemon: PokemonId
   nature: string | null
@@ -25,6 +26,8 @@ const props = defineProps<{
   noConfirm?: boolean
   /** Its common spreads' button left out, the page having its own (the damage calculator's). */
   noPresets?: boolean
+  /** Its points and stats derived, not set: shown as given (in `STATS` order), dimmed and taking no input. */
+  locked?: { points: readonly number[]; stats: readonly number[] }
 }>()
 const points = defineModel<Points>('points', { required: true })
 const emit = defineEmits<{ preset: [spread: Spread]; confirm: [] }>()
@@ -33,11 +36,16 @@ const spent = computed(() => points.value.reduce((a, b) => a + b, 0))
 const left = computed(() => TOTAL_POINTS - spent.value)
 const rows = computed(() =>
   STATS.map((stat, i) => {
-    const effect = props.nature ? natureEffectOn(props.nature, stat) : 'neutral'
     const base = POKEMON[props.pokemon].stats[i]!
+    const lock = props.locked
+    if (lock) {
+      const p = Math.round(lock.points[i]!)
+      return { stat, i, effect: 'neutral' as const, base, points: p, limit: MAX_POINTS, value: lock.stats[i] }
+    }
+    const effect = props.nature ? natureEffectOn(props.nature, stat) : 'neutral'
     const p = points.value[i]!
     const limit = Math.max(p, Math.min(MAX_POINTS, p + left.value))
-    return { stat, i, effect, base, points: p, limit }
+    return { stat, i, effect, base, points: p, limit, value: undefined }
   }),
 )
 function set(i: number, p: number) {
@@ -61,6 +69,8 @@ const open = ref(false)
           :hp="r.i === 0"
           :limit="r.limit"
           :label="t('builder.pointsIn', { stat: t(`stat.${r.stat}`) })"
+          :disabled="!!locked"
+          :stat="r.value"
           @update:model-value="set(r.i, $event)"
         />
       </template>
@@ -79,10 +89,22 @@ const open = ref(false)
         <span>{{ t('builder.presets') }}</span>
       </button>
       <SpreadPresets v-model:open="open" :spreads :nature :points @pick="emit('preset', $event)" />
-      <button type="button" class="btn quiet small clear" :disabled="!spent" @click="points = [0, 0, 0, 0, 0, 0]">
+      <button
+        v-if="!locked"
+        type="button"
+        class="btn quiet small clear"
+        :disabled="!spent"
+        @click="points = [0, 0, 0, 0, 0, 0]"
+      >
         {{ t('builder.pointsClear') }}
       </button>
-      <button v-if="!noConfirm" type="button" class="btn quiet small confirm" @click="emit('confirm')">
+      <button
+        v-if="!noConfirm"
+        type="button"
+        class="btn quiet small confirm"
+        :class="{ end: locked }"
+        @click="emit('confirm')"
+      >
         {{ t('builder.pointsConfirm') }}
       </button>
     </div>
@@ -107,7 +129,8 @@ const open = ref(false)
 .actions :deep(.btn) {
   padding-inline: 6px;
 }
-.clear {
+.clear,
+.confirm.end {
   margin-left: auto;
 }
 /* Clear and Confirm quiet, with the faintest tint of the bad and the good, a little more pointed at. */

@@ -591,7 +591,7 @@ export function statsOf(f: Fighter): Record<(typeof STATS)[number], number> | nu
 
 /** Whether the meta shown has a side's sets pooled, so it can be at every set: its battler's entry's (a stone
  * holder's, its Mega's). */
-const pooledOf = (f: Fighter, data: MetaData | null | undefined) => {
+export const pooledOf = (f: Fighter, data: MetaData | null | undefined) => {
   const id = setsAs(f.member)
   return (id && data?.[id]?.pooled) || null
 }

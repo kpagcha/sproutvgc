@@ -12,6 +12,7 @@ import {
   battlerOf,
   BOOSTED,
   canPool,
+  pooledOf,
   CONDITIONAL_ABILITIES,
   FIELD_MOVES,
   hit,
@@ -120,6 +121,11 @@ const hits = computed(() =>
 )
 
 const shown = computed(() => battlerOf(props.fighter))
+/** At every set, its pooled points and the stats they give, for its editor to show locked. */
+const pooled = computed(() => {
+  const pool = props.fighter.sets ? pooledOf(props.fighter, props.data) : null
+  return pool && props.fighter.pooled ? { points: pool.points, stats: props.fighter.pooled } : undefined
+})
 
 // The battle's part.
 const stats = computed(() => statsOf(props.fighter))
@@ -202,6 +208,7 @@ function setHpPoints(e: Event) {
           stat-picks
           :at-sets="fighter.sets && !!fighter.pooled"
           :can-pool="canPool(fighter, data)"
+          :pooled
           @sets="set({ sets: $event })"
           @mega="set({ mega: !fighter.mega })"
           @field="emit('field', $event)"

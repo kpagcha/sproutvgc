@@ -261,7 +261,9 @@ export const messages = {
   'calc.noKo': 'Not a KO in 4 hits',
   'calc.sets.toggle': 'Every set',
   'calc.sets.tip':
-    'Its nature and stat points unknown: its stats those of every set the snapshot has of it, pooled by how often each is run.',
+    "For when you don't know its spread: its stats averaged over every set players run on it, each weighted by how often it's used.",
+  'calc.sets.note': 'Averaged over every set players run, by usage: not editable. Turn Every set off to set your own.',
+  'calc.loadPresets': 'Load common sets',
   'calc.hpRange': '{min}–{max} of {of} HP',
   'calc.crit': 'Critical hit',
   'calc.single': 'Single target',

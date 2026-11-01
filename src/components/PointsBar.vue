@@ -22,12 +22,16 @@ const props = defineProps<{
   limit: number
   label: string
   raised?: boolean
+  /** Not to be set: shown dimmed, taking no input (the damage calculator's Every set, its points derived). */
+  disabled?: boolean
+  /** The stat shown in place of the one its points give (a derived one's, the pooled sets'). */
+  stat?: number
 }>()
 const points = defineModel<number>({ required: true })
 const emit = defineEmits<{ change: [points: number] }>()
 
 const gains = computed(() => pointGains(props.base, props.effect, props.hp))
-const value = (p: number) => statValue(props.base, p, props.effect, props.hp)
+const value = (p: number) => props.stat ?? statValue(props.base, p, props.effect, props.hp)
 /** The points that don't add 1, where each is along the bar. */
 const marks = computed(() =>
   gains.value.flatMap((g, i) =>
@@ -58,7 +62,7 @@ function at(e: PointerEvent): number {
 /** Where the drag last set it, settled when let go. */
 let dragged = 0
 function down(e: PointerEvent) {
-  if (e.button !== 0) return
+  if (e.button !== 0 || props.disabled) return
   bar.value!.setPointerCapture(e.pointerId)
   dragging.value = true
   hover.value = null
@@ -66,13 +70,14 @@ function down(e: PointerEvent) {
 }
 function move(e: PointerEvent) {
   if (dragging.value) set((dragged = at(e)))
-  else if (e.pointerType === 'mouse') hover.value = at(e)
+  else if (e.pointerType === 'mouse' && !props.disabled) hover.value = at(e)
 }
 function up() {
   if (dragging.value) emit('change', dragged)
   dragging.value = false
 }
 function key(e: KeyboardEvent) {
+  if (props.disabled) return
   const step = e.shiftKey ? 4 : 1
   const by: Record<string, number> = {
     ArrowRight: step,
@@ -91,25 +96,28 @@ function key(e: KeyboardEvent) {
 
 const preview = computed(() => (hover.value !== null && hover.value !== points.value ? hover.value : null))
 const tip = computed(() =>
-  wasted.value
-    ? t('builder.lastWasted', { n: points.value - 1 })
-    : next.value === 2
-      ? t('builder.nextBonus')
-      : next.value === 0
-        ? t('builder.nextWasted')
-        : undefined,
+  props.disabled
+    ? undefined
+    : wasted.value
+      ? t('builder.lastWasted', { n: points.value - 1 })
+      : next.value === 2
+        ? t('builder.nextBonus')
+        : next.value === 0
+          ? t('builder.nextWasted')
+          : undefined,
 )
 </script>
 
 <template>
-  <div class="points-bar" :class="{ raised }">
+  <div class="points-bar" :class="{ raised, disabled }">
     <div
       ref="bar"
       v-tip="tip"
       class="invest"
       :class="[effect, { dragging, wasted }]"
       role="slider"
-      tabindex="0"
+      :tabindex="disabled ? -1 : 0"
+      :aria-disabled="disabled || undefined"
       :aria-label="label"
       aria-valuemin="0"
       :aria-valuemax="MAX_POINTS"
@@ -157,7 +165,7 @@ const tip = computed(() =>
       type="button"
       class="step"
       tabindex="-1"
-      :disabled="points <= 0"
+      :disabled="disabled || points <= 0"
       :aria-label="t('builder.less', { stat: label })"
       @click="settle(points - 1)"
     >
@@ -167,7 +175,7 @@ const tip = computed(() =>
       type="button"
       class="step"
       tabindex="-1"
-      :disabled="points >= limit"
+      :disabled="disabled || points >= limit"
       :aria-label="t('builder.more', { stat: label })"
       @click="settle(points + 1)"
     >
@@ -177,6 +185,13 @@ const tip = computed(() =>
 </template>
 
 <style scoped>
+/* Not to be set (derived): dimmed, the pointer saying so. */
+.points-bar.disabled {
+  opacity: 0.55;
+}
+.points-bar.disabled .invest {
+  cursor: not-allowed;
+}
 .points-bar {
   display: flex;
   align-items: center;
