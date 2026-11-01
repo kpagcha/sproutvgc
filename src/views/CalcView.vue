@@ -692,7 +692,13 @@ function face(f: Fighter) {
     <!-- A side's set's actions, a dialog over the page; loading over a Pokémon there confirmed first. -->
     <ModalDialog v-model:open="menuOpen" :label="t('calc.setMenu')">
       <div v-if="menuSide" class="panel set-dialog">
-        <h2>{{ labels[menuSide] }}</h2>
+        <!-- Whose it is, and its close at the end, as the picker's heading. -->
+        <div class="set-dialog-head">
+          <h2>{{ labels[menuSide] }}</h2>
+          <button type="button" class="set-dialog-close" :aria-label="t('picker.close')" @click="menuSide = null">
+            <X :size="18" aria-hidden="true" />
+          </button>
+        </div>
         <div class="load">
           <button
             type="button"
@@ -1106,9 +1112,27 @@ function face(f: Fighter) {
   overflow-y: auto;
   overscroll-behavior: contain;
 }
+.set-dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
 .set-dialog h2 {
-  margin: 0 0 8px;
+  margin: 0;
   font-size: 1.05em;
+}
+.set-dialog-close {
+  display: inline-flex;
+  padding: 2px;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.set-dialog-close:hover {
+  color: var(--text);
 }
 .set-dialog .load {
   max-width: none;
