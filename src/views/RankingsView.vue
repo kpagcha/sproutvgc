@@ -384,7 +384,8 @@ const columns = computed(() => {
       md: 'var(--usage)',
       sm: 'var(--usage)',
     })
-  list.push(...shareTerms.value.map(() => ({ cell: 'r', xl: 'var(--usage)', md: 'var(--usage)', sm: 'var(--usage)' })))
+  // On phones, a line of their own under the row (`.term-line`): a column each leaves the names no room.
+  list.push(...shareTerms.value.map(() => ({ cell: 'wide-only r', xl: 'var(--usage)', md: 'var(--usage)', sm: null })))
   if (showBrought.value) list.push({ cell: 'wide-only r', xl: 'var(--num)', md: 'var(--num)', sm: null })
   return list
 })
@@ -447,7 +448,7 @@ const termRows = useId()
       <div
         v-if="!data || shown.length"
         class="dex-table"
-        :class="{ restoring, 'with-sets': setsShown }"
+        :class="{ restoring, 'with-sets': setsShown, 'with-terms': shareTerms.length }"
         :style="colVars"
         role="table"
         @pointermove="onBarMove"
@@ -517,7 +518,7 @@ const termRows = useId()
             :key="`${x.kind}:${x.id}`"
             v-tip="t('usage.termShareTip', { name: refName(x) })"
             role="columnheader"
-            class="r term-head"
+            class="wide-only r term-head"
           >
             <ItemIcon v-if="x.kind === 'item'" :id="x.id" :scale="0.67" /><span v-else class="term-name">{{
               refName(x)
@@ -650,7 +651,7 @@ const termRows = useId()
               v-for="x in shareTerms"
               :key="`${x.kind}:${x.id}`"
               role="cell"
-              class="r num meter term-share"
+              class="wide-only r num meter term-share"
               :style="{ '--share': shareOf(r.id, x) ?? 0 }"
             >
               {{ shareOf(r.id, x) === undefined ? '—' : percent(shareOf(r.id, x)!) }}
@@ -662,6 +663,20 @@ const termRows = useId()
               :style="{ '--share': r.brought ?? 0 }"
             >
               {{ r.brought === undefined ? '—' : percent(r.brought) }}
+            </div>
+            <!-- On phones, each filter's share of its sets, on a line of its own under the row: its name (an item's
+                 icon before it) and its share, its bar along its foot. -->
+            <div v-if="phone && shareTerms.length" role="cell" class="term-line">
+              <span
+                v-for="x in shareTerms"
+                :key="`${x.kind}:${x.id}`"
+                class="part shared"
+                :style="{ '--share': shareOf(r.id, x) ?? 0 }"
+                ><ItemIcon v-if="x.kind === 'item'" :id="x.id" :scale="0.67" />{{ refName(x) }}
+                <span class="term-pct">{{
+                  shareOf(r.id, x) === undefined ? '—' : percent(shareOf(r.id, x)!)
+                }}</span></span
+              >
             </div>
             <!-- Under xl, what the set columns hold, on a line of its own, as chips, when the reader shows sets: the
                  item (told by its icon) and the ability, then the moves. -->
@@ -802,6 +817,27 @@ const termRows = useId()
   font-size: 0.85em;
   white-space: normal;
 }
+/* On phones, the filters' shares: under the row, from the name's column on, as the set's line. */
+.dex-table .term-line {
+  display: flex;
+  grid-column: 2 / -1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding-top: 2px;
+  padding-bottom: 6px;
+  font-size: 0.85em;
+  white-space: normal;
+}
+.term-pct {
+  margin-left: 4px;
+  font-weight: bold;
+}
+@media (max-width: 720px) {
+  .dex-table.with-terms {
+    --row-height: 3.6em;
+  }
+}
 /* The moves together, a little apart from the item and the ability. */
 .set-line .moves {
   display: inline-flex;
@@ -811,7 +847,7 @@ const termRows = useId()
   margin-left: 8px;
 }
 /* Each part of the set a chip: the item (its icon before its name), the ability, each move. */
-.set-line .part {
+:is(.set-line, .term-line) .part {
   display: inline-flex;
   align-items: center;
   gap: 2px;
@@ -821,7 +857,7 @@ const termRows = useId()
   border: 1px solid var(--border);
   border-radius: 3px;
 }
-.set-line .part:has(.sheet-icon) {
+:is(.set-line, .term-line) .part:has(.sheet-icon) {
   padding-left: 2px;
 }
 .phone-only-block {
@@ -875,15 +911,15 @@ const termRows = useId()
   background: var(--muted);
 }
 /* A chip's along its inside foot, clear of its border. */
-.set-line .part.shared::before,
-.set-line .part.shared::after {
+:is(.set-line, .term-line) .part.shared::before,
+:is(.set-line, .term-line) .part.shared::after {
   left: 2px;
   bottom: 1px;
 }
-.set-line .part.shared::before {
+:is(.set-line, .term-line) .part.shared::before {
   right: 2px;
 }
-.set-line .part.shared::after {
+:is(.set-line, .term-line) .part.shared::after {
   width: calc((100% - 4px) * var(--share, 0));
 }
 .item {
