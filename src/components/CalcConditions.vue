@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, shallowRef } from 'vue'
+import { computed, nextTick, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
 import { createReusableTemplate } from '@vueuse/core'
 import { ChevronDown, Circle, Eraser, Square } from '@lucide/vue'
 import type { MetaData } from '@/data/meta'
@@ -17,6 +17,7 @@ import {
   weathers,
   type Condition,
 } from '@/components/calcConditions'
+import ScrollRow from '@/components/ScrollRow.vue'
 import StageStepper from '@/components/StageStepper.vue'
 import { hoverTip } from '@/components/DexText'
 
@@ -33,6 +34,9 @@ const props = defineProps<{
   data: MetaData | null | undefined
   /** The field's Clear left out: the page has it, beside the toggle unfolding these. */
   noClear?: boolean
+  /** The field's, compact: each kind one row sliding sideways, its name before it, scrolled to what's on in it (the
+   * page's bar unfolded while stuck to the top). */
+  rows?: boolean
 }>()
 const emit = defineEmits<{
   field: [f: Battlefield]
@@ -110,6 +114,21 @@ function toggleMore() {
   }
 }
 
+// In rows, each row scrolled so what's on in it is in its middle: as they're shown, and its More unfolded.
+const root = useTemplateRef<HTMLElement>('root')
+function centerOn() {
+  if (!props.rows || !root.value) return
+  for (const track of root.value.querySelectorAll<HTMLElement>('.track')) {
+    const on = track.querySelector<HTMLElement>('.on')
+    if (!on) continue
+    const tr = track.getBoundingClientRect()
+    const r = on.getBoundingClientRect()
+    track.scrollLeft += r.left - tr.left - (tr.width - r.width) / 2
+  }
+}
+onMounted(() => void nextTick(centerOn))
+watch([() => props.rows, moreOpen], () => void nextTick(centerOn))
+
 const [DefineChip, Chip] = createReusableTemplate<{
   c: Condition<string>
   on: boolean
@@ -118,6 +137,7 @@ const [DefineChip, Chip] = createReusableTemplate<{
 }>()
 const [DefineMore, More] = createReusableTemplate()
 const [DefineClear, Clear] = createReusableTemplate()
+const [DefineChoice, Choice] = createReusableTemplate<{ c: Condition<string>; kind: 'weather' | 'terrain' }>()
 </script>
 
 <template>
@@ -135,6 +155,21 @@ const [DefineClear, Clear] = createReusableTemplate()
       <component :is="c.icon" v-if="c.icon && !plain" :size="16" aria-hidden="true" />{{ conditionName(c) }}
     </button>
   </DefineChip>
+  <!-- One weather or terrain, one at a time: a cell of a bar of joined choices, with a radio's circle. -->
+  <DefineChoice v-slot="{ c, kind }">
+    <button
+      type="button"
+      v-tip="c.ref && hoverTip(c.ref)"
+      role="radio"
+      class="choice no-lift"
+      :class="{ on: field[kind] === c.key }"
+      :aria-checked="field[kind] === c.key"
+      @click="setField({ [kind]: field[kind] === c.key ? '' : c.key })"
+    >
+      <span class="mark round" aria-hidden="true"><Circle :size="14" /></span>
+      <component :is="c.icon" v-if="c.icon" :size="16" aria-hidden="true" />{{ conditionName(c) }}
+    </button>
+  </DefineChoice>
   <DefineClear>
     <button type="button" class="btn quiet small clear-all" :disabled="!anyOn" @click="clearAll">
       <Eraser :size="14" aria-hidden="true" />{{ t('calc.clearConditions') }}
@@ -202,43 +237,49 @@ const [DefineClear, Clear] = createReusableTemplate()
     </div>
   </div>
 
-  <!-- The whole field's. -->
-  <div v-else class="conditions">
-    <Clear v-if="!noClear" />
-    <section v-for="kind in ['weather', 'terrain'] as const" :key="kind" class="group">
-      <h3>{{ t(`calc.${kind}`) }}</h3>
-      <div class="choices" role="radiogroup" :aria-label="t(`calc.${kind}`)">
-        <button
-          v-for="c in kind === 'weather' ? weathers : terrains"
-          :key="c.key"
-          type="button"
-          v-tip="c.ref && hoverTip(c.ref)"
-          role="radio"
-          class="choice no-lift"
-          :class="{ on: field[kind] === c.key }"
-          :aria-checked="field[kind] === c.key"
-          @click="setField({ [kind]: field[kind] === c.key ? '' : c.key })"
-        >
-          <span class="mark round" aria-hidden="true"><Circle :size="14" /></span>
-          <component :is="c.icon" v-if="c.icon" :size="16" aria-hidden="true" />{{ conditionName(c) }}
-        </button>
-      </div>
-    </section>
-    <section v-if="fieldEffects.length" class="group">
-      <h3>{{ t('calc.fieldLabel') }}</h3>
-      <div class="chips" role="group" :aria-label="t('calc.fieldLabel')">
+  <!-- The whole field's: as groups, each its heading over what it has wrapping, or in rows, each its name before what it
+       has on one row sliding sideways. -->
+  <div v-else-if="rows" ref="root" class="conditions rows">
+    <div v-for="kind in ['weather', 'terrain'] as const" :key="kind" class="row">
+      <h3 class="row-label">{{ t(`calc.${kind}`) }}</h3>
+      <ScrollRow class="row-track">
+        <div class="choices" role="radiogroup" :aria-label="t(`calc.${kind}`)">
+          <Choice v-for="c in kind === 'weather' ? weathers : terrains" :key="c.key" :c :kind />
+        </div>
+      </ScrollRow>
+    </div>
+    <div v-if="fieldEffects.length" class="row">
+      <h3 class="row-label">{{ t('calc.fieldLabel') }}</h3>
+      <ScrollRow class="row-track">
         <Chip
-          v-for="c in fieldCommon"
+          v-for="c in moreOpen ? [...fieldCommon, ...fieldRare] : fieldCommon"
           :key="c.key"
           :c
           :on="field.effects.includes(c.key)"
           :toggle="() => toggleField(c.key)"
         />
+      </ScrollRow>
+      <More />
+    </div>
+  </div>
+  <div v-else class="conditions">
+    <Clear v-if="!noClear" />
+    <section v-for="kind in ['weather', 'terrain'] as const" :key="kind" class="group">
+      <h3>{{ t(`calc.${kind}`) }}</h3>
+      <div class="choices" role="radiogroup" :aria-label="t(`calc.${kind}`)">
+        <Choice v-for="c in kind === 'weather' ? weathers : terrains" :key="c.key" :c :kind />
+      </div>
+    </section>
+    <section v-if="fieldEffects.length" class="group">
+      <!-- Its heading, and its More beside it. -->
+      <div class="group-head">
+        <h3>{{ t('calc.fieldLabel') }}</h3>
         <More />
       </div>
-      <div v-if="moreOpen" class="chips rare">
+      <!-- The common ones, and the rest after them once unfolded. -->
+      <div class="chips" role="group" :aria-label="t('calc.fieldLabel')">
         <Chip
-          v-for="c in fieldRare"
+          v-for="c in moreOpen ? [...fieldCommon, ...fieldRare] : fieldCommon"
           :key="c.key"
           :c
           :on="field.effects.includes(c.key)"
@@ -269,6 +310,50 @@ const [DefineClear, Clear] = createReusableTemplate()
 .group h3 {
   margin: 0 0 8px;
   font-size: 0.95em;
+}
+/* A heading with its More beside it. */
+.group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.group-head h3 {
+  margin: 0;
+}
+.group-head .more {
+  padding-block: 0;
+}
+/* In rows: each kind's name, then its row sliding sideways (its More after it), the joined bar on one line. */
+.conditions.rows {
+  gap: 8px;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.row-label {
+  flex: none;
+  width: 4.6em;
+  margin: 0;
+  font-size: 0.85em;
+}
+.row-track {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.rows .choices {
+  flex-wrap: nowrap;
+}
+.rows .choice,
+.rows .chip {
+  flex: none;
+  white-space: nowrap;
+}
+.rows .more {
+  flex: none;
 }
 /* The less common ones, under More: set apart by a rule. */
 .rare {

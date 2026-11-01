@@ -347,6 +347,13 @@ const movesFolded = {
   a: remembered('sproutvgc.calc.movesFolded.a'),
   b: remembered('sproutvgc.calc.movesFolded.b'),
 }
+// Unfolded while stuck to the top, it stays stuck, its conditions in rows (`compact`), until folded; unfolded where
+// it is on the page, it scrolls away with it, its conditions in groups.
+const fieldCompact = shallowRef(false)
+function toggleField() {
+  fieldCompact.value = !fieldOpen.value && barStuck.value
+  fieldOpen.value = !fieldOpen.value
+}
 const fieldOn = computed(() =>
   [
     field.value.weather ? weatherOf(field.value.weather) : undefined,
@@ -403,7 +410,11 @@ function face(f: Fighter) {
 <template>
   <div
     class="calc"
-    :style="{ '--nav-h': `${navH}px`, '--bar-h': `${fieldOpen ? 0 : barH}px`, '--tabs-h': `${tabsH}px` }"
+    :style="{
+      '--nav-h': `${navH}px`,
+      '--bar-h': `${fieldOpen && !fieldCompact ? 0 : barH}px`,
+      '--tabs-h': `${tabsH}px`,
+    }"
   >
     <!-- Reset all, on the row of the way back to Tools, as on the speed pages (the app's frame has a place for it there). -->
     <Teleport to="#back-actions-calc" defer>
@@ -420,7 +431,15 @@ function face(f: Fighter) {
     </section>
     <!-- The field's conditions, a bar on the page (no panel) stuck under the row of links as the page scrolls, so
          they're at hand beside the sides; unfolded, scrolling away with the page, what's unfolded in a soft box. -->
-    <div ref="bar" class="field-bar" :class="{ stuck: barStuck && !fieldOpen, open: fieldOpen }">
+    <div
+      ref="bar"
+      class="field-bar"
+      :class="{
+        stuck: barStuck && (!fieldOpen || fieldCompact),
+        open: fieldOpen && !fieldCompact,
+        compact: fieldOpen && fieldCompact,
+      }"
+    >
       <!-- One row, sliding sideways where it doesn't fit: the toggle, and those on named while folded. -->
       <ScrollRow class="toolbar">
         <button
@@ -429,7 +448,7 @@ function face(f: Fighter) {
           :class="{ on: fieldOpen }"
           :aria-expanded="fieldOpen"
           aria-controls="calc-field"
-          @click="fieldOpen = !fieldOpen"
+          @click="toggleField"
         >
           <SlidersHorizontal :size="16" aria-hidden="true" />{{ t('calc.conditions')
           }}<span class="on-count" :class="{ none: !fieldOn.length }">{{ fieldOn.length }}</span
@@ -452,7 +471,7 @@ function face(f: Fighter) {
         <Eraser :size="14" aria-hidden="true" />{{ t('calc.clearConditions') }}
       </button>
       <div v-if="fieldOpen" id="calc-field" class="field-conditions">
-        <CalcConditions :field :data no-clear @field="field = $event" />
+        <CalcConditions :field :data no-clear :rows="fieldCompact" @field="field = $event" />
       </div>
     </div>
 
@@ -747,7 +766,6 @@ function face(f: Fighter) {
   margin: -8px -6px 0;
   padding: 8px 6px;
   overflow-y: auto;
-  overscroll-behavior: contain;
   background: var(--bg);
   border-bottom: 1px solid transparent;
   transition: border-color 0.15s ease;
@@ -764,7 +782,14 @@ function face(f: Fighter) {
   max-height: none;
   overflow: visible;
 }
-.field-bar.open > .toolbar {
+.field-bar.compact {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.field-bar.open > .toolbar,
+.field-bar.compact > .toolbar {
   flex: 0 1 auto;
   min-width: 0;
 }
@@ -779,6 +804,14 @@ function face(f: Fighter) {
 }
 /* What's unfolded, in a soft box of its own under the toggle (no panel's ink nor shadow): the toggle stays on the
    page. */
+.field-bar.compact > .field-conditions {
+  flex-basis: 100%;
+  min-width: 0;
+  margin-top: 0;
+  padding: 8px 10px;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+}
 .field-bar.open > .field-conditions {
   flex-basis: 100%;
   margin-top: 4px;
