@@ -21,7 +21,6 @@ import {
   ChevronsUp,
   Columns2,
   Funnel,
-  Box,
   Plus,
   Rocket,
   RotateCcw,
@@ -30,6 +29,7 @@ import {
   X,
   Zap,
 } from '@lucide/vue'
+import FlatIcon from '@/components/FlatIcon'
 import {
   ability,
   availableIds,
@@ -1932,7 +1932,7 @@ const { start: startTour } = useTour(
                   :aria-pressed="trickRoom"
                   @click="toggleTrickRoom"
                 >
-                  <Box :size="16" aria-hidden="true" />{{ t('speed.mod.trickroom') }}
+                  <FlatIcon name="model-cube-space" :size="16" />{{ t('speed.mod.trickroom') }}
                 </button>
                 <button
                   type="button"
@@ -2138,7 +2138,7 @@ const { start: startTour } = useTour(
                   @click="toggleTrickRoom"
                 >
                   <!-- "TR" on phones, the usual shorthand. -->
-                  <Box :size="16" aria-hidden="true" />
+                  <FlatIcon name="model-cube-space" :size="16" />
                   <span class="long" aria-hidden="true">{{ t('speed.mod.trickroom') }}</span>
                   <span class="short" aria-hidden="true">{{ t('speed.trShort') }}</span>
                 </button>

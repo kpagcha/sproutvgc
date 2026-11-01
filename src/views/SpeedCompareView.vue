@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeftRight, Box, ChevronDown, Plus, RotateCcw, Trash2 } from '@lucide/vue'
+import { ArrowLeftRight, ChevronDown, Plus, RotateCcw, Trash2 } from '@lucide/vue'
+import FlatIcon from '@/components/FlatIcon'
 import { pokemon, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
 import { has, percent, usageRanks } from '@/data/meta'
@@ -589,7 +590,7 @@ function resetAll() {
           :aria-pressed="trickRoom"
           @click="toggleTrickRoom"
         >
-          <Box :size="16" aria-hidden="true" />{{ t('speed.mod.trickroom') }}
+          <FlatIcon name="model-cube-space" :size="16" />{{ t('speed.mod.trickroom') }}
         </button>
         <template v-if="mode === 'vs' && anyPicked">
           <button type="button" class="btn" @click="swap">

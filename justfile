@@ -26,6 +26,10 @@ preview: build
 gen-data *args:
     npm run gen-data -- {{args}}
 
+# Regenerate the Flaticon UIcons the app draws (src/components/flaticons.generated.ts) from the names in scripts/flaticons.ts
+flaticons *args:
+    npm run flaticons -- {{args}}
+
 # Read the official tournaments under way from Limitless VGC into src/data/generated/live/ (not committed; the deploy does it on its own)
 live-tournaments:
     npm run live-tournaments

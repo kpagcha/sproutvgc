@@ -1,18 +1,4 @@
 import { h, type Component, type FunctionalComponent } from 'vue'
-import {
-  Ban,
-  Box,
-  CloudRain,
-  HandHelping,
-  Shield,
-  ShieldHalf,
-  ShieldPlus,
-  Snowflake,
-  Sparkle,
-  Sun,
-  Tornado,
-  Wind,
-} from '@lucide/vue'
 import { ability, available, condition, move, type AbilityId, type MoveId, type Ref } from '@/data/dex'
 import { showdownId, type ConditionId } from '@/data/conditions'
 import SOURCES from '@/data/generated/conditions.json'
@@ -32,9 +18,11 @@ import {
   type Weather,
 } from '@/lib/damage'
 import TypeGlyph from '@/components/TypeGlyph'
+import { flaticon } from '@/components/FlatIcon'
 
 // The damage calculator's battle conditions as the page shows them: each one's dex entry (its name, and whether the
-// regulation has it) and, for the common ones, its icon. The weather and terrain one of each at a time, the rest any of
+// regulation has it) and, for the common ones, its icon (Flaticon's UIcons, one family, `FlatIcon`; a terrain's its
+// type's glyph). The weather and terrain one of each at a time, the rest any of
 // them together. Which of the rest are common isn't kept by hand: it's how many of the meta's teams run what causes
 // them (`presence`), common from `COMMON_MIN` of them (`isCommon`); with no meta, the ones common so far
 // (`COMMON_WITHOUT_META`).
@@ -51,19 +39,12 @@ const glyph = (type: TypeId): Component => {
   const icon: FunctionalComponent = () => h(TypeGlyph, { type })
   return icon
 }
-/** Fairy Aura's: the Fairy glyph with two small sparks by it. */
-const FairyAura: FunctionalComponent = () =>
-  h('span', { class: 'aura-icon' }, [
-    h(TypeGlyph, { type: 'fairy' }),
-    h(Sparkle, { size: 6, class: 'spark top' }),
-    h(Sparkle, { size: 5, class: 'spark bottom' }),
-  ])
 
 const WEATHER: Record<Exclude<Weather, ''>, [Ref, Component]> = {
-  Sun: [condition('sun'), Sun],
-  Rain: [condition('rain'), CloudRain],
-  Sand: [condition('sandstorm'), Tornado],
-  Snow: [condition('snow'), Snowflake],
+  Sun: [condition('sun'), flaticon('sun')],
+  Rain: [condition('rain'), flaticon('cloud-rain')],
+  Sand: [condition('sandstorm'), flaticon('tornado')],
+  Snow: [condition('snow'), flaticon('snowflake')],
 }
 const TERRAIN: Record<Exclude<Terrain, ''>, [Ref, Component]> = {
   Electric: [condition('electricterrain'), glyph('electric')],
@@ -76,15 +57,15 @@ const FIELD: Record<FieldEffect, [Ref, Component?]> = {
   gravity: [condition('gravity')],
   magicRoom: [condition('magicroom')],
   wonderRoom: [condition('wonderroom')],
-  trickRoom: [condition('trickroom'), Box],
-  fairyAura: [ability('fairyaura'), FairyAura],
+  trickRoom: [condition('trickroom'), flaticon('model-cube-space')],
+  fairyAura: [ability('fairyaura'), flaticon('story-fantasy')],
 }
 const SIDE: Record<SideEffect, [Ref, Component?]> = {
-  tailwind: [condition('tailwind'), Wind],
-  reflect: [condition('reflect'), Shield],
-  lightScreen: [condition('lightscreen'), ShieldHalf],
-  auroraVeil: [condition('auroraveil'), ShieldPlus],
-  helpingHand: [condition('helpinghand'), HandHelping],
+  tailwind: [condition('tailwind'), flaticon('wind')],
+  reflect: [condition('reflect'), flaticon('shield')],
+  lightScreen: [condition('lightscreen'), flaticon('shield-alt')],
+  auroraVeil: [condition('auroraveil'), flaticon('shield-plus')],
+  helpingHand: [condition('helpinghand'), flaticon('handshake-angle')],
   friendGuard: [ability('friendguard')],
   steelySpirit: [ability('steelyspirit')],
   stealthRock: [condition('stealthrock')],
@@ -97,7 +78,7 @@ export const spikesOn = available(condition('spikes'))
 
 const list = <K extends string>(keys: readonly K[], map: Record<K, [Ref, Component?]>): Condition<K>[] =>
   keys.filter((k) => available(map[k][0])).map((k) => ({ key: k, ref: map[k][0], icon: map[k][1] }))
-const none = { ref: null, icon: Ban }
+const none = { ref: null, icon: flaticon('ban') }
 
 /** Each kind's choices, only those the regulation has: the weather and terrain led by none. */
 export const weathers: Condition<Weather>[] = [

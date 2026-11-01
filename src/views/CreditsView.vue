@@ -61,6 +61,10 @@ const tournaments = EVENTS[0]?.provider
           <a href="https://lucide.dev/" rel="noopener">Lucide</a>
           <span class="note">{{ t('credits.license', { license: 'ISC' }) }}</span>
         </dd>
+        <dd>
+          <a href="https://www.flaticon.com/uicons" rel="noopener">Uicons by Flaticon</a>
+          <span class="note">{{ t('credits.license', { license: 'Flaticon' }) }}</span>
+        </dd>
       </div>
       <div>
         <dt>{{ t('credits.flagsTitle') }}</dt>

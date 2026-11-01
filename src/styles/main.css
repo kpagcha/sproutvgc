@@ -342,6 +342,10 @@ img.pixel {
   stroke-linecap: square;
   stroke-linejoin: miter;
 }
+/* Flaticon's UIcons (`FlatIcon`), the battle conditions' and Trick Room's, standing among Lucide's as one of them. */
+.flaticon {
+  flex: none;
+}
 
 /* A search box, and the part of each result's name that matches it. */
 .search {
@@ -549,25 +553,6 @@ details > summary {
 }
 .on-count.none {
   visibility: hidden;
-}
-
-/* Fairy Aura's icon: the Fairy glyph, two small faint sparks by it, at its top right and bottom left. */
-.aura-icon {
-  position: relative;
-  display: inline-flex;
-  flex: none;
-}
-.aura-icon .spark {
-  position: absolute;
-  opacity: 0.7;
-}
-.aura-icon .spark.top {
-  top: -3px;
-  right: -4px;
-}
-.aura-icon .spark.bottom {
-  bottom: -1px;
-  left: -2px;
 }
 
 /* A nature's effect on Speed in short (`EffectTag`): its arrow tight against "Spe". It sits on the text's baseline,
