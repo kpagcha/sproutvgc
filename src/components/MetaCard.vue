@@ -16,7 +16,7 @@ import { metaLoading } from '@/composables/useMeta'
 
 // The meta's data, to pick (`MetaDialog`'s card): the regulation (the current one first), then its months, the latest
 // first, each shown when there's a choice. Another regulation shows its latest month. Whose teams count most is the
-// settings' (`metaCutoff`), and what the data is said there too, not here. Tournaments aren't part of it (their own
+// settings' (`metaCutoff`), and what the data is said there too, not here: a small link at its foot leads there. Tournaments aren't part of it (their own
 // pages lead to them): while one is shown, its regulation's months are listed, none picked, and picking one leaves it.
 const emit = defineEmits<{ close: [] }>()
 const id = useId()
@@ -73,6 +73,10 @@ function show(d: MetaDataset) {
           </label>
         </div>
       </section>
+      <!-- Last, small, the way to the settings of the data (its source, whose teams count most), closing it. -->
+      <RouterLink :to="{ name: 'settings', hash: '#usage-data' }" class="to-settings" @click="emit('close')"
+        >{{ t('meta.toSettings') }} ›</RouterLink
+      >
     </div>
   </div>
 </template>
@@ -112,8 +116,16 @@ function show(d: MetaDataset) {
 .section + .section {
   border-top: 1px solid var(--border);
 }
-.section:last-child {
+.section:last-of-type {
   padding-bottom: 0;
+}
+/* The way to the data's settings: small, under a rule, at the foot. */
+.to-settings {
+  display: block;
+  margin-top: 10px;
+  padding-top: 8px;
+  font-size: 0.85em;
+  border-top: 1px solid var(--border);
 }
 .heading {
   margin: 0 0 6px;

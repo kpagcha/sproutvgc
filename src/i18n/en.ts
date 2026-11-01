@@ -1349,6 +1349,7 @@ export const messages = {
   'meta.source': 'Source',
   'meta.subset': 'Players',
   'meta.settings': 'Usage data',
+  'meta.toSettings': 'Usage data settings',
   'meta.settingsIntro': 'The usage data every meta page shows. Each page picks the regulation and month.',
   'meta.source.smogon': "Smogon's Showdown ladder stats",
   'meta.regulation': 'Regulation {reg}',

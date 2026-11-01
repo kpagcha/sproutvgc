@@ -63,7 +63,7 @@ async function clearAll() {
   </div>
 
   <!-- The meta's data: its source (Smogon's alone for now), then whose teams count most. -->
-  <div v-if="cutoffs.length" class="panel">
+  <div v-if="cutoffs.length" id="usage-data" class="panel">
     <h2>{{ t('meta.settings') }}</h2>
     <p class="muted">{{ t('meta.settingsIntro') }}</p>
     <h3 class="sub">{{ t('meta.source') }}</h3>

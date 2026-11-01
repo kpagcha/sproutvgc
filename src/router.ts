@@ -596,6 +596,8 @@ export const router = createRouter({
       await afterPageExit()
       await nextTick()
     }
+    // A part of the page led to (`#usage-data`, the data dialog's way to its settings): there, a little room over it.
+    if (!savedPosition && to.hash) return { el: to.hash, top: 12 }
     return toMatch ? false : (savedPosition ?? { top: 0 })
   },
 })
