@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, shallowRef, watch, watchEffect } from 'vue'
-import { useRoute, type RouteLocationNormalizedLoaded, type RouteLocationRaw } from 'vue-router'
+import { useRoute, useRouter, type RouteLocationNormalizedLoaded, type RouteLocationRaw } from 'vue-router'
 import { AnimatePresence, MotionConfig, motion } from 'motion-v'
 import { FADE, PAGE } from '@/lib/motion'
 import { pageEntered, pageEntering, pageExited, pageKey, setPageWaits } from '@/lib/pageExit'
@@ -23,8 +23,16 @@ import { AREAS, type AreaId } from '@/lib/areas'
 import { eventOf, playerOf } from '@/data/tournaments'
 import logoUrl from '@/assets/logo.png'
 import { searchFocus } from '@/composables/useSearch'
+import { useSlashSearch } from '@/composables/useSlashFocus'
 
 const route = useRoute()
+
+// "/" on a page with no search of its own: the site's, the home page's box focused, as the header's Search link does.
+const router = useRouter()
+useSlashSearch(() => {
+  searchFocus.value = true
+  if (route.name !== 'home') void router.push('/')
+})
 
 function setMeta(selector: string, content: string) {
   document.head.querySelector(selector)?.setAttribute('content', content)
@@ -265,9 +273,15 @@ const fadeVariants = {
         <nav class="nav font-display" :class="{ compact }">
           <!-- The active highlight is one element that slides between links. -->
           <NavPill :section :compact />
-          <RouterLink to="/" :class="{ active: section === 'search' }" @click="searchFocus = true">
+          <RouterLink
+            to="/"
+            :class="{ active: section === 'search' }"
+            aria-keyshortcuts="/"
+            @click="searchFocus = true"
+          >
             <Search class="label" :size="16" :stroke-width="2.5" aria-hidden="true" />
             <span class="label">{{ t('nav.search') }}</span>
+            <kbd v-if="!compact" class="label hotkey" aria-hidden="true">/</kbd>
           </RouterLink>
           <NavDrawer v-if="compact" />
           <template v-else>
@@ -522,6 +536,24 @@ const fadeVariants = {
 }
 .nav .label {
   position: relative;
+}
+/* The key that opens the search from anywhere, after its name, as the search boxes hint at it; not on touch screens,
+   which usually have no keyboard to press it on. */
+.nav .hotkey {
+  min-width: 18px;
+  padding: 2px 4px;
+  font:
+    11px/1 Verdana,
+    sans-serif;
+  text-align: center;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+}
+@media (hover: none) and (pointer: coarse) {
+  .nav .hotkey {
+    display: none;
+  }
 }
 
 /* The area's sections, a row of their own under the bar, apart from it by a faint line; on phones, in the drawer. */
