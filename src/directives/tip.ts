@@ -60,11 +60,21 @@ document.addEventListener(
 // nothing can hover (`any-hover`): a laptop with a touch screen and a mouse keeps hovering with its mouse, its taps
 // still toggling (`tapToggle`).
 const noHover = window.matchMedia('(any-hover: none)').matches
+/**
+ * Where there's hover, not shown on a focus that isn't the keyboard's with the pointer elsewhere: the focus a dialog
+ * gives back to the button that opened it as it closes (the calc's "…"), which would otherwise bring its tooltip back
+ * over the page. The keyboard's focus (`:focus-visible`) and hovering show it as ever.
+ */
+function quietFocus(instance: Instance): false | void {
+  const el = instance.reference as HTMLElement
+  if (!noHover && el.matches(':focus') && !el.matches(':focus-visible') && !el.matches(':hover')) return false
+}
 tippy.setDefaultProps({
   theme: 'sproutvgc',
   delay: [200, 0],
   duration: [120, 80],
   plugins: [tapToggle],
+  onShow: quietFocus,
   ...(noHover && { trigger: 'click', delay: 0 }),
 })
 
@@ -123,6 +133,7 @@ function briefProps() {
   let onScroll: (() => void) | null = null
   return {
     onShow(instance: Instance) {
+      if (quietFocus(instance) === false) return false
       timer = window.setTimeout(() => instance.hide(), BRIEF_MS)
       onScroll = () => instance.hide()
       document.addEventListener('scroll', onScroll, { capture: true, passive: true })
