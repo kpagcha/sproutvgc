@@ -413,6 +413,8 @@ watch(
 }
 /* The plain filters, a row of chips under the box, wrapping. */
 .chips {
+  /* Their icons at their desktop size on phones too, as other chips' are: the phones' bigger icons dwarf the names. */
+  --icon-scale: 1;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;

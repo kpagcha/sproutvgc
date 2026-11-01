@@ -152,6 +152,8 @@ async function clearAll() {
 
 <style scoped>
 .filter-groups {
+  /* Their icons at their desktop size on phones too, as the plain filters' chips are. */
+  --icon-scale: 1;
   display: flex;
   flex-wrap: wrap;
   align-items: center;

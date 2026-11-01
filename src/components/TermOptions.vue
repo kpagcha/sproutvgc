@@ -85,6 +85,8 @@ const KIND_LABEL: Record<TermKind, MessageKey> = {
 <style scoped>
 /* A panel under the box, as wide, short enough to leave the list it previews in sight. */
 .term-options {
+  /* Their type badges at their desktop size on phones too, as the filters' chips are. */
+  --icon-scale: 1;
   max-width: 480px;
   max-height: 200px;
   overflow-y: auto;
