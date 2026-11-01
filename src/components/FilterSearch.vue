@@ -208,10 +208,47 @@ async function onKey(e: KeyboardEvent) {
   }
   picker.onKey(e)
 }
-function leave() {
-  settle()
-  focused.value = false
+// Leaving the box closes the options, and with them the preview, which moves the list under the pointer: a press on
+// the list (a previewed row) closes them only once it's over, after its click, so the click lands on what was pressed
+// rather than closing them alone. A mouse's press blurs the box as it goes down, so it waits for the pointer's release;
+// a tap's blurs it after, its click in the same go, so the next task is enough.
+let pressed = false
+const press = () => (pressed = true)
+const release = () => {
+  pressed = false
+  if (leaving) after()
 }
+let leaving = false
+let closing: ReturnType<typeof setTimeout> | undefined
+function after() {
+  leaving = false
+  clearTimeout(closing)
+  closing = setTimeout(() => {
+    if (document.activeElement === input.value) return
+    settle()
+    focused.value = false
+  })
+}
+function leave() {
+  if (pressed) leaving = true
+  else after()
+}
+function enter() {
+  leaving = false
+  clearTimeout(closing)
+  focused.value = true
+}
+onMounted(() => {
+  document.addEventListener('pointerdown', press, true)
+  document.addEventListener('pointerup', release, true)
+  document.addEventListener('pointercancel', release, true)
+})
+onBeforeUnmount(() => {
+  clearTimeout(closing)
+  document.removeEventListener('pointerdown', press, true)
+  document.removeEventListener('pointerup', release, true)
+  document.removeEventListener('pointercancel', release, true)
+})
 /** The box's cross: the text, and plainly the chips too (the groups have a clearing of their own). */
 const clearable = computed(() => !!typed.value || chips.value.length > 0)
 function clear() {
@@ -252,7 +289,7 @@ watch(
           :aria-expanded="open"
           :aria-controls="listId"
           :aria-activedescendant="open ? `${listId}-${active}` : undefined"
-          @focus="focused = true"
+          @focus="enter"
           @blur="leave"
           @keydown="onKey"
         />
