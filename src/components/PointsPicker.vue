@@ -169,8 +169,9 @@ const points = computed({
   opacity: 0.4;
   cursor: default;
 }
-/* Closing the drawer, its points kept as they are: across its foot. */
+/* Closing the drawer, its points kept as they are: at its foot's end, as wide as its label. */
 .done {
+  align-self: flex-end;
   margin-top: 4px;
 }
 .part {
