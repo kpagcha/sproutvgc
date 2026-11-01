@@ -103,8 +103,8 @@ export function memberFromSlot([mon, item, ability, nature, moves]: Slot): Membe
 /** The stat points a slot has left to spread. */
 export const pointsLeft = (m: Member) => TOTAL_POINTS - m.points.reduce((a, b) => a + b, 0)
 
-/** The order a set is put together in, its stat points last. */
-const FIELD_ORDER: readonly Field[] = ['pokemon', 'item', 'ability', 'nature', 0, 1, 2, 3, 'points']
+/** The order a set is put together in: its moves before its nature, which goes with its stat points, last. */
+const FIELD_ORDER: readonly Field[] = ['pokemon', 'item', 'ability', 0, 1, 2, 3, 'nature', 'points']
 /** The next part a slot hasn't got after `after`, in the order a set is put together (its stat points while none are
  * spent); null once it has them all. */
 export function nextField(m: Member, after: Field): Field | null {

@@ -6,7 +6,7 @@ import { MAX_POINTS, pointGains, statValue, type NatureEffect } from '@/lib/stat
 
 // One stat's points as a slider drawn as the meta page's spread card draws them (`MetaPokemonView`'s `.invest`): a bar
 // filled by its points out of `MAX_POINTS`, its points at its left and the stat they give at its right, in the good
-// color when the nature raises it, outlined in the bad when it lowers it. Dragged or tapped along (sliding sideways on a
+// color and outlined in it when the nature raises it, outlined in the bad when it lowers it. Dragged or tapped along (sliding sideways on a
 // touch screen; up and down still scrolls the page), or with the keys (arrows by one, with Shift or Page Up/Down by
 // four, Home and End to none and as many as it can take), and stepped by one with the buttons beside it. Past what the
 // points left allow (`limit`), hatched: out of reach. Under a mouse, where it would go shows faded before it's pressed.
@@ -234,6 +234,10 @@ const tip = computed(() =>
 .invest.up .invest-bar {
   background: color-mix(in srgb, var(--good) 55%, transparent);
 }
+/* The nature's raised stat outlined in the good, its lowered one in the bad, whatever its points. */
+.invest.up {
+  box-shadow: inset 0 0 0 1px var(--good);
+}
 .invest.down {
   box-shadow: inset 0 0 0 1px var(--bad);
 }
@@ -357,6 +361,11 @@ const tip = computed(() =>
 .raised .step {
   border: 2px solid var(--ink);
   box-shadow: var(--hard-sm);
+}
+.raised .invest.up {
+  box-shadow:
+    inset 0 0 0 1px var(--good),
+    var(--hard-sm);
 }
 .raised .invest.down {
   box-shadow:
