@@ -1223,9 +1223,21 @@ word, as the common set's offer has. */
   border-top: 1px solid var(--border);
 }
 .quick-load {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+/* The teams' drop-down from the row's left edge, not its button's, and no wider than the row (the picker), so it never
+   runs past the screen: its menu laid out against the row, the drop-down capped at its width. */
+.quick-load :deep(.options-menu) {
+  position: static;
+}
+.quick-load :deep(.pop) {
+  max-width: 100%;
+}
+.quick-load :deep(.pop) .load {
+  max-width: none;
 }
 .picker-dialog {
   width: min(560px, 100vw - 24px);
