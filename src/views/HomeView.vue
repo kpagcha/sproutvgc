@@ -1,20 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted, useTemplateRef, watch, type Component } from 'vue'
+import { computed, onMounted, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import {
-  BookOpen,
-  Calculator,
-  ChartColumn,
-  ChartColumnBig,
-  Scale,
-  GraduationCap,
-  Grid3x3,
-  Swords,
-  TrendingUp,
-  Trophy,
-  Users,
-  Wrench,
-} from '@lucide/vue'
+import { AREA_ICONS, SECTION_ICONS } from '@/components/areaIcons'
 import { t, type MessageKey } from '@/i18n'
 import { GAME_NAME, REGULATION } from '@/data/format'
 import { AREAS, type AreaId } from '@/lib/areas'
@@ -45,23 +32,6 @@ const usageLists: { route: string; label: MessageKey }[] = [
   { route: 'itemRankings', label: 'nav.items' },
   { route: 'abilityRankings', label: 'nav.abilities' },
 ]
-/** Each area's icon, and each of its sections' on the card, by its key. */
-const AREA_ICONS: Record<AreaId, Component> = {
-  meta: TrendingUp,
-  tools: Wrench,
-  quizzes: GraduationCap,
-  dex: BookOpen,
-}
-const SECTION_ICONS: Record<string, Component> = {
-  rankings: ChartColumn,
-  tournaments: Trophy,
-  speedTiers: ChartColumnBig,
-  speedCompare: Scale,
-  calc: Calculator,
-  teamBuilder: Users,
-  matchups: Swords,
-  chart: Grid3x3,
-}
 /** The areas' cards, in reading order: Meta's and Tools' with their sections, those not built yet last, so the first
  * row leads somewhere; the quizzes' and the dex's their name alone (the dex's lists not to be mistaken for Usage's). */
 const cards = (['meta', 'tools', 'quizzes', 'dex'] as const).map((id) => {

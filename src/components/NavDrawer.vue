@@ -5,11 +5,12 @@ import { Menu, Moon, Settings, Sun, X } from '@lucide/vue'
 import { t } from '@/i18n'
 import { AREAS } from '@/lib/areas'
 import { useTheme } from '@/composables/useTheme'
+import { AREA_ICONS, SECTION_ICONS } from '@/components/areaIcons'
 
 // Narrow screens' header: the areas, their sections, then the theme and Settings folded into a drawer from the right,
 // its toggle at the bar's end. Meta's and Tools' sections are listed under them, the ones reached for most; the quizzes
 // and the dex lead to their own pages. Each link is marked only on its own page: an area's not on its sections'.
-// Going anywhere closes it, as do the backdrop and Escape.
+// Each with its icon, as the home page's cards have them (`areaIcons`). Going anywhere closes it, as do the backdrop and Escape.
 
 const EXPANDED = new Set(['meta', 'tools'])
 
@@ -58,6 +59,7 @@ const toggleTheme = () => setMode(theme.value === 'dark' ? 'light' : 'dark')
         <nav>
           <div v-for="a in AREAS" :key="a.id" class="area">
             <RouterLink :to="`/${a.id}`" class="area-link" :class="{ active: route.name === a.route }">
+              <component :is="AREA_ICONS[a.id]" class="area-icon" :size="18" aria-hidden="true" />
               {{ t(a.label) }}
             </RouterLink>
             <template v-if="EXPANDED.has(a.id)">
@@ -68,6 +70,7 @@ const toggleTheme = () => setMode(theme.value === 'dark' ? 'light' : 'dark')
                 class="section-link"
                 :class="{ active: route.meta.section === s.key, soon: s.soon }"
               >
+                <component :is="SECTION_ICONS[s.key]" v-if="SECTION_ICONS[s.key]" :size="16" aria-hidden="true" />
                 {{ t(s.label) }}
               </RouterLink>
             </template>
@@ -161,7 +164,14 @@ nav a.active {
   font-size: 1.1em;
   font-weight: bold;
 }
+.area-link {
+  gap: 8px;
+}
+.area-icon {
+  color: var(--accent);
+}
 .section-link {
+  gap: 9px;
   padding: 7px 10px 7px 22px;
   color: var(--muted);
 }
