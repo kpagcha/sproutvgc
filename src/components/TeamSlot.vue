@@ -226,7 +226,6 @@ const presetsOpen = shallowRef(false)
                 ? t('builder.pointOver')
                 : t('builder.pointsOver', { n: -left })
           }}</span>
-          <span v-if="atSets" class="pick-tag">· {{ t('calc.sets.toggle') }}</span>
           <ChevronDown :size="14" class="pick-chev" :class="{ open }" aria-hidden="true" />
         </button>
         <button
@@ -737,10 +736,6 @@ const presetsOpen = shallowRef(false)
 }
 .pick-chev.open {
   transform: rotate(180deg);
-}
-.pick-tag {
-  font-weight: normal;
-  color: var(--muted);
 }
 /* Points left to spend or over, loud as the builder's line is (over the quiet button's muted ink). */
 :root:root .picks .btn.callout {
