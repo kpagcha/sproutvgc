@@ -304,7 +304,12 @@ const presetsOpen = shallowRef(false)
             {{ t('calc.sets.toggle') }}
           </button>
         </div>
-        <p v-if="atSets && pooled" class="pooled-note">{{ t('calc.sets.note') }}</p>
+        <!-- What the sliders are at, both lines stacked in one cell, the one not said hidden: as tall either way, so
+             turning Every set on or off doesn't move the sliders. -->
+        <p v-if="canPool" class="pooled-note">
+          <span :class="{ hidden: atSets && pooled }">{{ t('calc.sets.own') }}</span>
+          <span :class="{ hidden: !(atSets && pooled) }">{{ t('calc.sets.note') }}</span>
+        </p>
         <PointsEditor
           v-model:points="points"
           :pokemon="shown"
@@ -763,9 +768,16 @@ const presetsOpen = shallowRef(false)
   gap: 6px;
 }
 .pooled-note {
+  display: grid;
   margin: 0;
   font-size: 0.8em;
   color: var(--muted);
+}
+.pooled-note > span {
+  grid-area: 1 / 1;
+}
+.pooled-note > .hidden {
+  visibility: hidden;
 }
 /* At every set, its nature isn't what it battles with. */
 .nature.struck {

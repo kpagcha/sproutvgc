@@ -262,6 +262,7 @@ export const messages = {
   'calc.sets.toggle': 'Every set',
   'calc.sets.tip':
     "For when you don't know its spread: its stats averaged over every set players run on it, each weighted by how often it's used.",
+  'calc.sets.own': 'Your own spread: drag the bars, or load a common set.',
   'calc.sets.note': 'Averaged over every set players run, by usage: not editable. Turn Every set off to set your own.',
   'calc.loadPresets': 'Load common sets',
   'calc.hpRange': '{min}–{max} of {of} HP',
