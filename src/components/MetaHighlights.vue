@@ -2,7 +2,7 @@
 import { computed, onMounted, shallowRef } from 'vue'
 import { pokemon, type PokemonId } from '@/data/dex'
 import { splitForme } from '@/data/pokemon'
-import { GENERATED_SNAPSHOTS, has, metaLabel, percent } from '@/data/meta'
+import { GENERATED_SNAPSHOTS, has, percent } from '@/data/meta'
 import { locale, t } from '@/i18n'
 import { loadDexNames, refName } from '@/i18n/refName'
 import { useMeta } from '@/composables/useMeta'
@@ -11,8 +11,8 @@ import PokemonIcon from '@/components/PokemonIcon'
 
 // The meta at a glance, on the home page under the areas, the page's width: the most used Pokémon as the rankings show
 // them (a `.dex-table` of their rank, name and usage with its bar, with no header), and beside them (under them on
-// narrower screens) those whose usage rose or fell the most since the dataset before (none for a series' first), each leading to its meta page, and the way to the whole
-// rankings. The data shown is every page's (`useMeta`), named under the band. The home page doesn't wait for the dex's
+// narrower screens) those whose usage rose or fell the most since the dataset before (none for a series' first), each leading to its meta page with a bar of its change (one scale for both lists), and the way to the whole
+// rankings. The data shown is every page's (`useMeta`), not named here. The home page doesn't wait for the dex's
 // names, so the panel holds its place until they're in, with the data.
 const { snapshot, data } = useMeta()
 const named = shallowRef(false)
@@ -56,6 +56,8 @@ const falling = computed(() =>
     .sort((a, b) => a.change - b.change)
     .slice(0, MOVERS),
 )
+/** The movers' bars' full length: the biggest change either way, one scale for both lists. */
+const moved = computed(() => Math.max(0, ...[...rising.value, ...falling.value].map((r) => Math.abs(r.change))))
 const movers = computed(() => withUsage.value && (rising.value.length > 0 || falling.value.length > 0))
 
 /** A change in usage, in percentage points: "+3.2", "−1.8". */
@@ -75,7 +77,6 @@ const ready = computed(() => named.value && !!data.value)
       <h2 class="title">{{ t('home.metaTitle') }}</h2>
       <AppLink :to="{ name: 'rankings' }" class="all">{{ t('home.metaAll') }} ›</AppLink>
     </div>
-    <p class="muted label">{{ metaLabel(snapshot) }}</p>
     <!-- The most used, and beside them on wide screens (under them on narrower ones) the movers. -->
     <div v-if="ready" class="body">
       <!-- Each column under a heading, so their tops line up. -->
@@ -139,7 +140,12 @@ const ready = computed(() => named.value && !!data.value)
                   </span>
                 </AppLink>
               </div>
-              <div role="cell" class="r num change" :class="r.change > 0 ? 'up' : 'down'">
+              <div
+                role="cell"
+                class="r num meter change"
+                :class="r.change > 0 ? 'up' : 'down'"
+                :style="{ '--share': Math.abs(r.change) / (moved || 1) }"
+              >
                 {{ points(r.change) }}
               </div>
             </div>
@@ -166,10 +172,6 @@ const ready = computed(() => named.value && !!data.value)
   font-weight: bold;
   white-space: nowrap;
 }
-.label {
-  margin: 0 0 8px;
-  font-size: 0.9em;
-}
 /* As the rankings' table: rank, Pokémon, usage (its number, with its bar under it). A handful of rows, so laid out at
    once rather than skipped until seen, and no header, so the first row has no line over it. */
 .dex-table {
@@ -178,7 +180,7 @@ const ready = computed(() => named.value && !!data.value)
   --cols: 5em minmax(0, 1fr) 4.5em;
 }
 .dex-table.moved {
-  --cols: minmax(0, 1fr) minmax(3.5em, auto);
+  --cols: minmax(0, 1fr) 4.5em;
 }
 .dex-table .row {
   content-visibility: visible;
@@ -253,8 +255,9 @@ const ready = computed(() => named.value && !!data.value)
   color: var(--accent);
   font-weight: bold;
 }
-.change {
-  font-size: 0.9em;
+/* A mover's bar in its change's color. */
+.change.meter::after {
+  background: currentColor;
 }
 .visually-hidden {
   position: absolute;
