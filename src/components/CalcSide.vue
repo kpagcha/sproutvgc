@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, shallowRef, useId, watch, type ComponentPublicInstance } from 'vue'
-import { ChevronDown, Minus, Plus } from '@lucide/vue'
+import { ChevronDown, Eraser, Minus, Plus, SlidersHorizontal } from '@lucide/vue'
 import { ability, condition, pokemon, type MoveId } from '@/data/dex'
 import { MOVES } from '@/data/moves'
 import type { MetaData, Spread } from '@/data/meta'
@@ -356,19 +356,30 @@ function setHpPoints(e: Event) {
               :aria-expanded="sideOpen"
               @click="emit('sideOpen', !sideOpen)"
             >
-              {{ t('calc.sideLabel')
+              <SlidersHorizontal :size="16" aria-hidden="true" />{{ t('calc.sideLabel')
               }}<span class="on-count" :class="{ none: !onSide.length }">{{ onSide.length }}</span
               ><ChevronDown :size="14" class="fold-chev" :class="{ open: sideOpen }" aria-hidden="true" />
             </button>
             <template v-if="!sideOpen">
               <span v-for="c in onSide" :key="c.key" class="side-item">{{ c.name }}</span>
             </template>
+            <!-- Unfolded, its Clear on its row, as the field's: beside it (on phones at the row's end). -->
+            <button
+              v-else
+              type="button"
+              class="btn quiet small side-clear"
+              :disabled="!onSide.length"
+              @click="emit('update:fighter', { ...fighter, side: [], spikes: 0 })"
+            >
+              <Eraser :size="14" aria-hidden="true" />{{ t('calc.clearConditions') }}
+            </button>
           </div>
           <CalcConditions
             v-if="sideOpen"
             :field
             :side="{ key: theirs ? 'b' : 'a', fighter }"
             :data
+            no-clear
             @side="(_k, f) => emit('update:fighter', f)"
           />
         </div>
@@ -701,6 +712,14 @@ function setHpPoints(e: Event) {
 }
 .side-box-head {
   flex: none;
+}
+.side-clear {
+  flex: none;
+}
+@media (max-width: 899px) {
+  .side-clear {
+    margin-left: auto;
+  }
 }
 .fold-chev {
   flex: none;

@@ -32,7 +32,7 @@ const props = defineProps<{
   field: Battlefield
   side?: { key: 'a' | 'b'; fighter: Fighter }
   data: MetaData | null | undefined
-  /** The field's Clear left out: the page has it, beside the toggle unfolding these. */
+  /** Its Clear left out: the page has it, beside the toggle unfolding these (the field's and a side's). */
   noClear?: boolean
   /** The field's, compact: each kind one row sliding sideways, its name before it, scrolled to what's on in it (the
    * page's bar unfolded while stuck to the top). */
@@ -211,7 +211,7 @@ const [DefineChoice, Choice] = createReusableTemplate<{ c: Condition<string>; ki
         @update:model-value="emit('side', side.key, { ...side.fighter, spikes: $event })"
       />
       <More />
-      <Clear />
+      <Clear v-if="!noClear" />
     </div>
     <div v-if="moreOpen" class="rare">
       <div v-for="g in sideRare" :key="g.group" class="sub">
