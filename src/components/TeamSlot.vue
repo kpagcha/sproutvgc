@@ -4,6 +4,7 @@ import { CircleAlert, Pencil, Pin, PinOff, X } from '@lucide/vue'
 import { ability, item, move, pokemon, type MoveId } from '@/data/dex'
 import { MOVES } from '@/data/moves'
 import { natureEffectOn, natureName } from '@/data/natures'
+import { statValue } from '@/lib/stats'
 import { POKEMON, spriteUrl, STATS } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
@@ -16,7 +17,7 @@ import { natureTip } from '@/components/natureTip'
 // One slot of a team in the builder, laid out as a tournament team's set (`TeamSets`): its sprite, name and types in a
 // band with its item, then its ability and nature, then its four moves two by two. Every part is a button opening its
 // picker (`field`), a part not picked yet a placeholder saying what goes there; the one being picked marked
-// (`active`). Under them its stat points in a compact row (each stat's shorthand over its points, the nature's colors,
+// (`active`). Under them its stat points in a compact row (each stat's shorthand over its stat, bold where it has points, the nature's colors,
 // what's left to spend), a button opening their step in the picker, the set's last (`points`). An empty slot is the
 // same card, all
 // placeholders, each opening the Pokémon's picker: the rest needs a Pokémon first. Holding its Mega Stone, a switch at
@@ -72,11 +73,14 @@ const left = computed(() => pointsLeft(props.member))
 
 /** Each stat's points as the compact row shows them: at every set, the pooled ones, rounded. */
 const cells = computed(() =>
-  STATS.map((stat, i) => ({
-    stat,
-    effect: props.member.nature && !props.atSets ? natureEffectOn(props.member.nature, stat) : 'neutral',
-    points: props.atSets && props.pooled ? Math.round(props.pooled.points[i]!) : props.member.points[i]!,
-  })),
+  STATS.map((stat, i) => {
+    const effect = props.member.nature && !props.atSets ? natureEffectOn(props.member.nature, stat) : 'neutral'
+    const pooled = props.atSets ? props.pooled : undefined
+    const points = pooled ? Math.round(pooled.points[i]!) : props.member.points[i]!
+    const base = shown.value ? POKEMON[shown.value]!.stats[i]! : 0
+    const value = pooled ? pooled.stats[i]! : statValue(base, points, effect, i === 0)
+    return { stat, effect, points, value }
+  }),
 )
 /** How many points are left to spend, or over, said in full; none when all are spent or at every set. */
 const leftText = computed(() => {
@@ -86,7 +90,9 @@ const leftText = computed(() => {
   return n === -1 ? t('builder.pointOver') : t('builder.pointsOver', { n: -n })
 })
 const chipText = computed(() =>
-  [cells.value.map((c) => `${t(`stat.${c.stat}`)} ${c.points}`).join(', '), leftText.value].filter(Boolean).join('. '),
+  [cells.value.map((c) => `${t(`stat.${c.stat}`)} ${c.value} (${c.points})`).join(', '), leftText.value]
+    .filter(Boolean)
+    .join('. '),
 )
 </script>
 
@@ -202,7 +208,7 @@ const chipText = computed(() =>
         </button>
       </li>
     </ul>
-    <!-- Its stat points in a compact row, a button opening their step in the picker: each stat's shorthand over its points, bold where it has any, in the good
+    <!-- Its stat points in a compact row, a button opening their step in the picker: each stat's shorthand over the stat it gives (its base, points and nature), bold where it has points, in the good
          color where its nature raises it and the bad where it lowers it; while any are left to spend (or over), an
          alert's icon and how many; and holding its Mega Stone, whether it Mega Evolves, a switch at the row's end. -->
     <div v-if="shown" class="stats-box">
@@ -223,7 +229,7 @@ const chipText = computed(() =>
               aria-hidden="true"
             >
               <span class="cell-label">{{ t(`stat.${c.stat}`) }}</span>
-              <span class="cell-num">{{ c.points }}</span>
+              <span class="cell-num">{{ c.value }}</span>
             </span>
           </span>
           <span v-if="leftText" v-tip="leftText" class="chip-left" :class="{ over: left < 0 }" aria-hidden="true"
@@ -522,19 +528,20 @@ const chipText = computed(() =>
 }
 .stats-line {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 6px 8px;
 }
 /* The compact row: a button, outlined as the page's quiet ones and lit on hover, so it reads as one to tap; each
-   stat's shorthand over its points, bold where it has any, the nature's raised stat in the good color and its lowered
+   stat's shorthand over its stat, bold where it has points, the nature's raised stat in the good color and its lowered
    one in the bad; what's left to spend after them, the pencil (or the arrow, unfolding in place) at its end. */
 .stats-chip {
   display: inline-flex;
   flex: none;
   align-items: center;
-  gap: 6px;
-  padding: 3px 6px;
+  gap: 5px;
+  padding: 3px 5px;
   font: inherit;
   color: inherit;
   text-align: left;
@@ -550,14 +557,15 @@ button.stats-chip:hover {
   border-color: var(--accent);
   box-shadow: 0 0 0 1px var(--accent);
 }
+/* The stats three figures wide, a gap between them so they never run together. */
 .cells {
   display: inline-flex;
+  gap: 5px;
 }
 .cell {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  min-width: 1.9em;
   line-height: 1.15;
   font-variant-numeric: tabular-nums;
 }
@@ -567,7 +575,7 @@ button.stats-chip:hover {
   color: var(--muted);
 }
 .cell-num {
-  font-size: 0.9em;
+  font-size: 0.85em;
   color: var(--muted);
 }
 .cell.spent .cell-num {
