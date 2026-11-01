@@ -17,7 +17,7 @@ import { natureTip } from '@/components/natureTip'
 // One slot of a team in the builder, laid out as a tournament team's set (`TeamSets`): its sprite, name and types in a
 // band with its item, then its ability and nature, then its four moves two by two. Every part is a button opening its
 // picker (`field`), a part not picked yet a placeholder saying what goes there; the one being picked marked
-// (`active`). Under them its stat points in a compact row (each stat's shorthand over its stat, darker where it has points, the nature's colors,
+// (`active`). Under them its stat points in a compact row (each stat's shorthand, faint, over its stat, all alike, unoutlined;
 // what's left to spend), a button opening their step in the picker, the set's last (`points`). An empty slot is the
 // same card, all
 // placeholders, each opening the Pokémon's picker: the rest needs a Pokémon first. Holding its Mega Stone, a switch at
@@ -208,9 +208,9 @@ const chipText = computed(() =>
         </button>
       </li>
     </ul>
-    <!-- Its stat points in a compact row, a button opening their step in the picker: each stat's shorthand over the stat it gives (its base, points and nature), darker where it has points, in the good
-         color where its nature raises it and the bad where it lowers it; while any are left to spend (or over), an
-         alert's icon and how many; and holding its Mega Stone, whether it Mega Evolves, a switch at the row's end. -->
+    <!-- Its stat points in a compact row, a button opening their step in the picker: each stat's shorthand over the stat it gives (its base, points and nature), all alike;
+         while any are left to spend (or over), an alert's icon and how many; and holding its Mega Stone, whether it Mega
+         Evolves, a switch at the row's end. -->
     <div v-if="shown" class="stats-box">
       <div class="stats-line">
         <button
@@ -221,13 +221,7 @@ const chipText = computed(() =>
           @click="go('points')"
         >
           <span class="cells">
-            <span
-              v-for="c in cells"
-              :key="c.stat"
-              class="cell"
-              :class="[c.effect, { spent: c.points > 0 }]"
-              aria-hidden="true"
-            >
+            <span v-for="c in cells" :key="c.stat" class="cell" aria-hidden="true">
               <span class="cell-label">{{ t(`stat.${c.stat}`) }}</span>
               <span class="cell-num">{{ c.value }}</span>
             </span>
@@ -533,9 +527,8 @@ const chipText = computed(() =>
   gap: 6px;
   padding: 6px 8px;
 }
-/* The compact row: a button, outlined as the page's quiet ones and lit on hover, so it reads as one to tap; each
-   stat's shorthand over its stat, darker where it has points, the nature's raised stat in the good color and its lowered
-   one in the bad; what's left to spend after them, the pencil (or the arrow, unfolding in place) at its end. */
+/* The compact row: a button, quiet (no outline, no tints) until hovered, when it's lit as the page's quiet ones are;
+   each stat's shorthand, faint, over its stat; what's left to spend after them, the pencil at its end. */
 .stats-chip {
   display: inline-flex;
   flex: none;
@@ -545,13 +538,13 @@ const chipText = computed(() =>
   font: inherit;
   color: inherit;
   text-align: left;
-  background: var(--panel-alt);
-  border: 1px solid var(--border-strong);
+  background: none;
+  border: 1px solid transparent;
   cursor: pointer;
 }
 button.stats-chip:hover {
   background: var(--hover);
-  border-color: var(--ink);
+  border-color: var(--border-strong);
 }
 .stats-chip.active {
   border-color: var(--accent);
@@ -570,36 +563,14 @@ button.stats-chip:hover {
   font-variant-numeric: tabular-nums;
 }
 .cell-label {
-  font-size: 0.68em;
+  font-size: 0.62em;
   letter-spacing: 0.02em;
   color: var(--muted);
+  opacity: 0.7;
 }
 .cell-num {
   font-size: 0.85em;
-  color: var(--muted);
-}
-/* A stat with points in it a little darker than one without, never bold; the nature's raised and lowered ones only
-   tinted with the good and the bad, its label more than its figure, so the row stays quiet. */
-.cell.spent .cell-num {
-  color: color-mix(in srgb, var(--text) 80%, var(--muted));
-}
-.cell.up .cell-label {
-  color: color-mix(in srgb, var(--good) 65%, var(--muted));
-}
-.cell.down .cell-label {
-  color: color-mix(in srgb, var(--bad) 65%, var(--muted));
-}
-.cell.up .cell-num {
-  color: color-mix(in srgb, var(--good) 35%, var(--muted));
-}
-.cell.down .cell-num {
-  color: color-mix(in srgb, var(--bad) 35%, var(--muted));
-}
-.cell.up.spent .cell-num {
-  color: color-mix(in srgb, var(--good) 35%, color-mix(in srgb, var(--text) 80%, var(--muted)));
-}
-.cell.down.spent .cell-num {
-  color: color-mix(in srgb, var(--bad) 35%, color-mix(in srgb, var(--text) 80%, var(--muted)));
+  color: color-mix(in srgb, var(--text) 75%, var(--muted));
 }
 /* At every set, its sets' pooled points: dimmed, as its locked sliders are. */
 .stats-chip.derived .cells {
@@ -662,10 +633,30 @@ button.stats-chip:hover .chip-edit {
 .set.flat .set-facts {
   grid-column: 2;
 }
+/* The stat points' row under the set's lines, lined up with them (the chip's padding pulled out past their edge). */
 .set.flat .stats-line {
-  grid-column: 1 / -1;
-  margin-top: 4px;
+  grid-column: 2;
   padding: 0;
+}
+.set.flat .stats-chip {
+  margin-left: -6px;
+}
+/* Narrow, the Mega's switch under the sprite, in the room the row leaves there. */
+@container slot (max-width: 520px) {
+  .set.flat .stats-line {
+    display: contents;
+  }
+  .set.flat .stats-chip {
+    grid-column: 2;
+    justify-self: start;
+  }
+  .set.flat .mega-switch {
+    grid-row: 3;
+    grid-column: 1;
+    justify-self: center;
+    margin: 0;
+    padding: 0;
+  }
 }
 .set.flat .set-sprite {
   width: 64px;
