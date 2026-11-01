@@ -5,7 +5,7 @@ import { t } from '@/i18n'
 
 // A row of buttons or chips on one line, scrolling sideways when they don't fit, with no scrollbar: the edge where
 // more is cut off fades out, and on screens with a mouse an arrow there brings in the next one cut off, the wheel
-// scrolling it too while over it. On touch screens, a swipe. Its children are laid out with a gap of `--gap` (6px).
+// scrolling it too while over it (no arrows on phones' widths). On touch screens, a swipe. Its children are laid out with a gap of `--gap` (6px).
 const props = defineProps<{
   /** On phones (as wide as 720px), its children wrap onto more lines instead. */
   wrapOnPhones?: boolean
@@ -146,8 +146,8 @@ function onWheel(e: WheelEvent) {
 .arrow.right {
   right: 0;
 }
-/* Touch screens swipe it: no arrows. */
-@media (hover: none) {
+/* Touch screens swipe it, and on phones' widths the faded edges say there's more: no arrows. */
+@media (hover: none), (max-width: 720px) {
   .arrow {
     display: none;
   }
