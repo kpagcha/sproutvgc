@@ -69,7 +69,7 @@ import TeamPicker from '@/components/TeamPicker.vue'
 // set in the meta shown (its Mega's, when most players run that), so there's a calc to read at once; a side's menu loads
 // it from the reader's teams, from a paste, or back to its common set, copies it, or swaps the two. Under them, yours against the meta's most
 // used (`CalcMeta`), a row tapped making it the opponent. Everything is in the URL, a calc a link to share
-// (`calcState.ts`), and the page opened bare comes back as last left; the first time, the meta's two most used.
+// (`calcState.ts`), and the page opened bare comes back as last left; the first time, empty.
 const route = useRoute()
 const router = useRouter()
 const { snapshot, data } = useMeta()
@@ -108,7 +108,7 @@ type SideKey = 'a' | 'b'
 const sides = shallowRef<Record<SideKey, Fighter>>({ a: emptyFighter(), b: emptyFighter() })
 const field = shallowRef<Battlefield>(emptyField())
 
-// Its setup: the URL's, else as last left; with neither, the meta's two most used once the meta is in.
+// Its setup: the URL's, else as last left; with neither, empty.
 const fromUrl = route.query.a || route.query.b || route.query.f ? route.query : null
 const start = fromUrl ?? readLast()
 sides.value = {
@@ -116,7 +116,6 @@ sides.value = {
   b: decodeFighter(start.b) ?? emptyFighter(),
 }
 field.value = decodeField(start.f)
-let seeded = !!(start.a || start.b)
 // On phones, the two one under the other, each a band of its side's color with its panel under it, opened or folded
 // apart, so both can be open at once: yours open at first.
 const open = shallowRef<Record<SideKey, boolean>>({ a: true, b: false })
@@ -139,20 +138,6 @@ function toggleBand(k: SideKey) {
   open.value = { ...open.value, [k]: on }
   if (on) reveal(k)
 }
-watch(
-  data,
-  (d) => {
-    if (seeded || !d) return
-    seeded = true
-    const top = (Object.keys(d) as PokemonId[])
-      .filter((id) => POKEMON[id] && d[id]?.usage)
-      .sort((x, y) => d[y]!.usage! - d[x]!.usage!)
-    if (top.length >= 2) {
-      sides.value = { a: commonSet(top[0]!, d), b: commonSet(top[1]!, d) }
-    }
-  },
-  { immediate: true },
-)
 // Into the URL and remembered, once the edits pause (a slider dragged writes it once).
 const query = computed(() => ({
   a: encodeFighter(sides.value.a) || undefined,
