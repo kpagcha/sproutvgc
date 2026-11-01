@@ -136,6 +136,9 @@ const [DefineChip, Chip] = createReusableTemplate<{
   plain?: boolean
   /** One of the less common, in rows shown on phones or once unfolded. */
   rare?: boolean
+  /** A cell of a bar of joined ones, as the weather's and terrain's are (the field's), its checkbox's square saying
+   * any can be on together. */
+  cell?: boolean
 }>()
 const [DefineMore, More] = createReusableTemplate()
 const [DefineClear, Clear] = createReusableTemplate()
@@ -144,12 +147,12 @@ const [DefineChoice, Choice] = createReusableTemplate<{ c: Condition<string>; ki
 
 <template>
   <!-- A condition that can be on with others: a chip with a checkbox's square. -->
-  <DefineChip v-slot="{ c, on, toggle, plain, rare }">
+  <DefineChip v-slot="{ c, on, toggle, plain, rare, cell }">
     <button
       v-tip="c.ref && hoverTip(c.ref)"
       type="button"
-      class="chip no-lift"
-      :class="{ on, rare }"
+      class="no-lift"
+      :class="[cell ? 'choice' : 'chip', { on, rare }]"
       :aria-pressed="on"
       @click="toggle"
     >
@@ -254,21 +257,25 @@ const [DefineChoice, Choice] = createReusableTemplate<{ c: Condition<string>; ki
       <h3 class="row-label">{{ t('calc.fieldLabel') }}</h3>
       <!-- Every one in the row on phones, which slide it anyway (no More there); wider, the rest once unfolded. -->
       <ScrollRow class="row-track" :class="{ 'more-open': moreOpen }">
-        <Chip
-          v-for="c in fieldCommon"
-          :key="c.key"
-          :c
-          :on="field.effects.includes(c.key)"
-          :toggle="() => toggleField(c.key)"
-        />
-        <Chip
-          v-for="c in fieldRare"
-          :key="c.key"
-          :c
-          :on="field.effects.includes(c.key)"
-          :toggle="() => toggleField(c.key)"
-          :rare="true"
-        />
+        <div class="choices" role="group" :aria-label="t('calc.fieldLabel')">
+          <Chip
+            v-for="c in fieldCommon"
+            :key="c.key"
+            :c
+            :on="field.effects.includes(c.key)"
+            :toggle="() => toggleField(c.key)"
+            :cell="true"
+          />
+          <Chip
+            v-for="c in fieldRare"
+            :key="c.key"
+            :c
+            :on="field.effects.includes(c.key)"
+            :toggle="() => toggleField(c.key)"
+            :rare="true"
+            :cell="true"
+          />
+        </div>
       </ScrollRow>
       <span class="rows-more"><More /></span>
     </div>
@@ -288,13 +295,14 @@ const [DefineChoice, Choice] = createReusableTemplate<{ c: Condition<string>; ki
         <More />
       </div>
       <!-- The common ones, and the rest after them once unfolded. -->
-      <div class="chips" role="group" :aria-label="t('calc.fieldLabel')">
+      <div class="choices" role="group" :aria-label="t('calc.fieldLabel')">
         <Chip
           v-for="c in moreOpen ? [...fieldCommon, ...fieldRare] : fieldCommon"
           :key="c.key"
           :c
           :on="field.effects.includes(c.key)"
           :toggle="() => toggleField(c.key)"
+          :cell="true"
         />
       </div>
     </section>
@@ -369,7 +377,7 @@ const [DefineChoice, Choice] = createReusableTemplate<{ c: Condition<string>; ki
 }
 /* Wider than phones, the less common ones in the row once its More is unfolded; on phones, always, no More. */
 @media (min-width: 721px) {
-  .row-track:not(.more-open) .chip.rare {
+  .row-track:not(.more-open) .rare {
     display: none;
   }
 }
@@ -411,7 +419,7 @@ const [DefineChoice, Choice] = createReusableTemplate<{ c: Condition<string>; ki
 .on .mark.round::after {
   border-radius: 50%;
 }
-/* One at a time: joined cells in one outline, wrapping as one block (each cell's outline overlapping its neighbors'). */
+/* One at a time (and the field's, any together, a checkbox's square in each): joined cells in one outline, wrapping as one block (each cell's outline overlapping its neighbors'). */
 .choices {
   display: flex;
   flex-wrap: wrap;
