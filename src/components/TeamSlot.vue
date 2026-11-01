@@ -17,7 +17,7 @@ import { natureTip } from '@/components/natureTip'
 // One slot of a team in the builder, laid out as a tournament team's set (`TeamSets`): its sprite, name and types in a
 // band with its item, then its ability and nature, then its four moves two by two. Every part is a button opening its
 // picker (`field`), a part not picked yet a placeholder saying what goes there; the one being picked marked
-// (`active`). Under them its stat points in a compact row (each stat's shorthand over its stat, bold where it has points, the nature's colors,
+// (`active`). Under them its stat points in a compact row (each stat's shorthand over its stat, darker where it has points, the nature's colors,
 // what's left to spend), a button opening their step in the picker, the set's last (`points`). An empty slot is the
 // same card, all
 // placeholders, each opening the Pokémon's picker: the rest needs a Pokémon first. Holding its Mega Stone, a switch at
@@ -208,7 +208,7 @@ const chipText = computed(() =>
         </button>
       </li>
     </ul>
-    <!-- Its stat points in a compact row, a button opening their step in the picker: each stat's shorthand over the stat it gives (its base, points and nature), bold where it has points, in the good
+    <!-- Its stat points in a compact row, a button opening their step in the picker: each stat's shorthand over the stat it gives (its base, points and nature), darker where it has points, in the good
          color where its nature raises it and the bad where it lowers it; while any are left to spend (or over), an
          alert's icon and how many; and holding its Mega Stone, whether it Mega Evolves, a switch at the row's end. -->
     <div v-if="shown" class="stats-box">
@@ -534,7 +534,7 @@ const chipText = computed(() =>
   padding: 6px 8px;
 }
 /* The compact row: a button, outlined as the page's quiet ones and lit on hover, so it reads as one to tap; each
-   stat's shorthand over its stat, bold where it has points, the nature's raised stat in the good color and its lowered
+   stat's shorthand over its stat, darker where it has points, the nature's raised stat in the good color and its lowered
    one in the bad; what's left to spend after them, the pencil (or the arrow, unfolding in place) at its end. */
 .stats-chip {
   display: inline-flex;
@@ -578,17 +578,28 @@ button.stats-chip:hover {
   font-size: 0.85em;
   color: var(--muted);
 }
+/* A stat with points in it a little darker than one without, never bold; the nature's raised and lowered ones only
+   tinted with the good and the bad, its label more than its figure, so the row stays quiet. */
 .cell.spent .cell-num {
-  font-weight: bold;
-  color: var(--text);
+  color: color-mix(in srgb, var(--text) 80%, var(--muted));
 }
-.cell.up .cell-label,
+.cell.up .cell-label {
+  color: color-mix(in srgb, var(--good) 65%, var(--muted));
+}
+.cell.down .cell-label {
+  color: color-mix(in srgb, var(--bad) 65%, var(--muted));
+}
 .cell.up .cell-num {
-  color: var(--good);
+  color: color-mix(in srgb, var(--good) 35%, var(--muted));
 }
-.cell.down .cell-label,
 .cell.down .cell-num {
-  color: var(--bad);
+  color: color-mix(in srgb, var(--bad) 35%, var(--muted));
+}
+.cell.up.spent .cell-num {
+  color: color-mix(in srgb, var(--good) 35%, color-mix(in srgb, var(--text) 80%, var(--muted)));
+}
+.cell.down.spent .cell-num {
+  color: color-mix(in srgb, var(--bad) 35%, color-mix(in srgb, var(--text) 80%, var(--muted)));
 }
 /* At every set, its sets' pooled points: dimmed, as its locked sliders are. */
 .stats-chip.derived .cells {
