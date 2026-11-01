@@ -283,6 +283,8 @@ export const messages = {
   'calc.copy': 'Copy',
   'calc.copied': 'Copied',
   'calc.battle': 'In battle',
+  'calc.onField.weather': 'Weather, on the whole field',
+  'calc.onField.terrain': 'Terrain, on the whole field',
   'calc.sideOn': '{n} on this side',
   'calc.hpPoints': 'HP left',
   'calc.hpPercent': 'HP left, in percent',

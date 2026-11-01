@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, shallowRef, useId, watch, type ComponentPublicInstance } from 'vue'
-import { ChevronDown, Eraser, Minus, Plus, SlidersHorizontal } from '@lucide/vue'
+import { createReusableTemplate } from '@vueuse/core'
+import { ChevronDown, Eraser, Plus, SlidersHorizontal } from '@lucide/vue'
 import { ability, condition, pokemon, type MoveId } from '@/data/dex'
 import { MOVES } from '@/data/moves'
 import type { MetaData, Spread } from '@/data/meta'
@@ -12,6 +13,7 @@ import {
   BOOSTED,
   canPool,
   CONDITIONAL_ABILITIES,
+  FIELD_MOVES,
   hit,
   MAX_ATTACKED,
   STAGE_MAX,
@@ -28,6 +30,7 @@ import {
 import type { Field, Member } from '@/lib/team'
 import { conditionName, sideOf, SPIKES } from '@/components/calcConditions'
 import CalcConditions from '@/components/CalcConditions.vue'
+import CalcCounter from '@/components/CalcCounter.vue'
 import DamageRow from '@/components/DamageRow.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import HpBar from '@/components/HpBar.vue'
@@ -64,12 +67,16 @@ const emit = defineEmits<{
   field: [f: Field]
   clear: []
   sideOpen: [open: boolean]
+  /** The whole field's weather or terrain set from a move's row. */
+  battlefield: [f: Battlefield]
   movesFolded: [folded: boolean]
   battleFolded: [folded: boolean]
 }>()
 defineSlots<{ actions(): unknown }>()
 
 const uid = useId()
+const [DefineFainted, ReuseFainted] = createReusableTemplate()
+const [DefineAttacked, ReuseAttacked] = createReusableTemplate()
 const set = (patch: Partial<Fighter>) => emit('update:fighter', { ...props.fighter, ...patch })
 // Its nature or points set, it's at its own rather than at every set.
 const change = (patch: Partial<Member>) =>
@@ -154,6 +161,27 @@ function setHpPoints(e: Event) {
 
 <template>
   <section class="side panel" :class="{ theirs }">
+    <!-- Its counts of the battle (allies fainted, times hit), in In battle and in the row of the move each changes. -->
+    <DefineFainted>
+      <CalcCounter
+        :model-value="fighter.fainted"
+        :label="t('calc.fainted')"
+        :max="5"
+        :down="t('calc.faintedDown')"
+        :up="t('calc.faintedUp')"
+        @update:model-value="set({ fainted: $event })"
+      />
+    </DefineFainted>
+    <DefineAttacked>
+      <CalcCounter
+        :model-value="fighter.attacked"
+        :label="t('calc.attacked')"
+        :max="MAX_ATTACKED"
+        :down="t('calc.attackedDown')"
+        :up="t('calc.attackedUp')"
+        @update:model-value="set({ attacked: $event })"
+      />
+    </DefineAttacked>
     <div class="side-head">
       <h2>
         <button type="button" class="side-title" @click="emit('field', 'pokemon')">{{ label }}</button>
@@ -240,7 +268,20 @@ function setHpPoints(e: Event) {
             @single="h.mv && setOpt(h.mv, { single: $event })"
             @doubled="h.mv && setOpt(h.mv, { doubled: $event })"
             @stockpile="h.mv && setOpt(h.mv, { stockpile: $event })"
-          />
+          >
+            <!-- The side's count or the field's weather or terrain its damage hangs on, the same as where it's kept. -->
+            <template v-if="h.mv && (usesFainted(h.mv) || usesAttacked(h.mv) || FIELD_MOVES[h.mv])" #extra>
+              <ReuseFainted v-if="usesFainted(h.mv)" />
+              <ReuseAttacked v-if="usesAttacked(h.mv)" />
+              <CalcConditions
+                v-if="FIELD_MOVES[h.mv]"
+                :field
+                :data
+                :only="FIELD_MOVES[h.mv]"
+                @field="emit('battlefield', $event)"
+              />
+            </template>
+          </DamageRow>
         </ul>
       </template>
     </div>
@@ -328,46 +369,8 @@ function setHpPoints(e: Event) {
             >
               {{ t('calc.abilityOn', { ability: refName(ability(conditional)) }) }}
             </button>
-            <span v-if="overlord" class="btn quiet mod counter" :class="{ on: fighter.fainted }">
-              {{ t('calc.fainted') }}
-              <button
-                type="button"
-                :disabled="fighter.fainted <= 0"
-                :aria-label="t('calc.faintedDown')"
-                @click="set({ fainted: fighter.fainted - 1 })"
-              >
-                <Minus :size="12" aria-hidden="true" />
-              </button>
-              <output>{{ fighter.fainted }}</output>
-              <button
-                type="button"
-                :disabled="fighter.fainted >= 5"
-                :aria-label="t('calc.faintedUp')"
-                @click="set({ fainted: fighter.fainted + 1 })"
-              >
-                <Plus :size="12" aria-hidden="true" />
-              </button>
-            </span>
-            <span v-if="rageFist" class="btn quiet mod counter" :class="{ on: fighter.attacked }">
-              {{ t('calc.attacked') }}
-              <button
-                type="button"
-                :disabled="fighter.attacked <= 0"
-                :aria-label="t('calc.attackedDown')"
-                @click="set({ attacked: fighter.attacked - 1 })"
-              >
-                <Minus :size="12" aria-hidden="true" />
-              </button>
-              <output>{{ fighter.attacked }}</output>
-              <button
-                type="button"
-                :disabled="fighter.attacked >= MAX_ATTACKED"
-                :aria-label="t('calc.attackedUp')"
-                @click="set({ attacked: fighter.attacked + 1 })"
-              >
-                <Plus :size="12" aria-hidden="true" />
-              </button>
-            </span>
+            <ReuseFainted v-if="overlord" />
+            <ReuseAttacked v-if="rageFist" />
           </div>
           <!-- What's on its side, last: its toggle, as the field's Battle conditions, folding its box; those on
                counted on the heading too. -->
@@ -710,21 +713,6 @@ function setHpPoints(e: Event) {
 /* Quiet, flat and muted until it's on: then in full, a wash under it (the quiet button's). */
 .mod.on {
   font-weight: bold;
-}
-.counter {
-  cursor: default;
-}
-.counter button {
-  display: flex;
-  padding: 1px 2px;
-  color: inherit;
-  background: none;
-  border: 0;
-  cursor: pointer;
-}
-.counter button:disabled {
-  opacity: 0.35;
-  cursor: default;
 }
 /* What's on its side: a part as the others, its heading folding it. */
 .side-box {

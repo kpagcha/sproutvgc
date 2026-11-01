@@ -18,7 +18,7 @@ import TypeIcon from '@/components/TypeIcon'
 // side's color (what it deals for sure, solid; what it may deal past that, striped; what it had lost already, dark,
 // first). Its verdict colored for whose it is (`theirs`: the opponent's moves
 // hitting yours, a knockout bad news). Unfolded, what it does in short with the way to its meta page (any move's,
-// a status move's too), then its HP numbers, every roll, and the calc's line to share, copied in a
+// a status move's too), what the page has of the side's or the field's that changes it (`extra`), then its HP numbers, every roll, and the calc's line to share, copied in a
 // tap (off for now, `DESC_ON`); a critical hit, for a move whose hits vary how many, and for a spread move whether it hits one target alone
 // (no spread reduction), and for a move doubled on what came before it (`DOUBLING`: Stomping Tantrum's last move failing,
 // Avalanche hit first, Round after an ally's, Fickle Beam's all-out attack) whether it is, Spit Up's Stockpile layers, set from its row and marked on its name. What the order does to it (a priority move's
@@ -172,6 +172,9 @@ const blockedText = tSplit('calc.blockedBy', 'what')
         <DexText v-if="about" :text="about" />
         <a :href="metaHref(move(id))" class="to-meta" @click="follow">{{ t('lists.toMeta') }} ›</a>
       </p>
+      <!-- What changes it that's the side's or the field's, the same as where it's kept (`extra`: a count of the side's
+           battle, the weather or terrain), so it's at hand where it's read. -->
+      <div v-if="$slots.extra" class="extra-controls"><slot name="extra" /></div>
       <div v-if="damage" class="toggles">
         <button type="button" class="btn mod" :class="{ on: crit }" :aria-pressed="crit" @click="emit('crit', !crit)">
           <Zap :size="14" aria-hidden="true" />{{ t('calc.crit') }}
@@ -457,6 +460,18 @@ const blockedText = tSplit('calc.blockedBy', 'what')
   gap: 10px;
   padding: 2px 0 14px;
   font-size: 0.875em;
+}
+.extra-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+/* The weather's or terrain's row across the row's width, sliding sideways where it doesn't fit. */
+.extra-controls > :deep(.conditions) {
+  align-self: stretch;
+  min-width: 0;
 }
 .about {
   line-height: 1.45;

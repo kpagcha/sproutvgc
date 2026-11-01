@@ -336,6 +336,26 @@ export const DOUBLING = {
 export const MAX_STOCKPILE = 3
 /** The most times Rage Fist counts, its power capped at 350. */
 export const MAX_ATTACKED = 6
+/** The moves whose damage hangs on the weather or the terrain, as the calc has them: their rows offer the whole
+ * field's weather or terrain to set, a shortcut to the field's bar. Weather Ball's type and power, Solar Beam's and
+ * Solar Blade's halved in any weather but sun; Terrain Pulse's type and power, Rising Voltage's doubled on a grounded
+ * target in Electric Terrain, Misty Explosion's raised in Misty Terrain, Expanding Force's in Psychic Terrain (and
+ * hitting both foes), Steel Roller failing with no terrain, Earthquake's and Bulldoze's halved in Grassy Terrain;
+ * Grassy Glide's priority there (`priorityOf`). Kept by hand. */
+export const FIELD_MOVES = {
+  weatherball: 'weather',
+  solarbeam: 'weather',
+  solarblade: 'weather',
+  terrainpulse: 'terrain',
+  risingvoltage: 'terrain',
+  mistyexplosion: 'terrain',
+  expandingforce: 'terrain',
+  steelroller: 'terrain',
+  earthquake: 'terrain',
+  bulldoze: 'terrain',
+  grassyglide: 'terrain',
+} as Partial<Record<MoveId, 'weather' | 'terrain'>>
+
 /** The moves whose power the side's battle state sets (`Fighter.fainted`, `Fighter.attacked`). */
 export const usesFainted = (move: MoveId | null) => move === 'lastrespects'
 export const usesAttacked = (move: MoveId | null) => move === 'ragefist'

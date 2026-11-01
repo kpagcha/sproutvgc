@@ -573,6 +573,7 @@ function face(f: Fighter) {
             :battle-folded="battleFolded[k].value"
             @battle-folded="battleFolded[k].value = $event"
             @side-open="sideOpen = $event"
+            @battlefield="field = $event"
             @moves-folded="movesFolded[k].value = $event"
           >
             <template #actions>

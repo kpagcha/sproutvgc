@@ -37,6 +37,9 @@ const props = defineProps<{
   /** The field's, compact: each kind one row sliding sideways, its name before it, scrolled to what's on in it (the
    * page's bar unfolded while stuck to the top). */
   rows?: boolean
+  /** The weather's or the terrain's alone, one row (in a move's row whose damage hangs on it, `FIELD_MOVES`), its name
+   * saying it's the whole field's. */
+  only?: 'weather' | 'terrain'
 }>()
 const emit = defineEmits<{
   field: [f: Battlefield]
@@ -242,6 +245,17 @@ const [DefineChoice, Choice] = createReusableTemplate<{ c: Condition<string>; ki
     </div>
   </div>
 
+  <!-- The weather's or the terrain's alone, from a move's row: its name over one row sliding sideways. -->
+  <div v-else-if="only" class="conditions only">
+    <div class="row">
+      <h3 class="row-label">{{ t(`calc.onField.${only}`) }}</h3>
+      <ScrollRow class="row-track">
+        <div class="choices" role="radiogroup" :aria-label="t(`calc.onField.${only}`)">
+          <Choice v-for="c in only === 'weather' ? weathers : terrains" :key="c.key" :c :kind="only" />
+        </div>
+      </ScrollRow>
+    </div>
+  </div>
   <!-- The whole field's: as groups, each its heading over what it has wrapping, or in rows, each its name before what it
        has on one row sliding sideways. -->
   <div v-else-if="rows" ref="root" class="conditions rows">
@@ -342,6 +356,24 @@ const [DefineChoice, Choice] = createReusableTemplate<{ c: Condition<string>; ki
 }
 .group-head .more {
   padding-block: 0;
+}
+/* Alone, from a move's row: its name over its row. */
+.only .row {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+.only .row-label {
+  width: auto;
+  font-weight: normal;
+  color: var(--muted);
+}
+.only .choices {
+  flex-wrap: nowrap;
+}
+.only .choice {
+  flex: none;
+  white-space: nowrap;
 }
 /* In rows: each kind's name, then its row sliding sideways (its More after it), the joined bar on one line. */
 .conditions.rows {
