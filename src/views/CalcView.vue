@@ -92,7 +92,8 @@ let barFrame = 0
 function checkBar() {
   barFrame = 0
   const el = bar.value
-  barStuck.value = !!el && window.scrollY > 0 && el.getBoundingClientRect().top <= navH.value + 0.5
+  // At the row of links' foot, not past it: on phones it scrolls away with the sides once they're past.
+  barStuck.value = !!el && window.scrollY > 0 && Math.abs(el.getBoundingClientRect().top - navH.value) <= 0.5
 }
 const onBarScroll = () => {
   if (!barFrame) barFrame = requestAnimationFrame(checkBar)
@@ -116,25 +117,27 @@ sides.value = {
 }
 field.value = decodeField(start.f)
 let seeded = !!(start.a || start.b)
-// On phones, the side shown under the tabs: yours at first, none once the open one is folded.
-const openSide = shallowRef<SideKey | null>('a')
-/** The side shown under the tabs: the open one, once it has a Pokémon (with none, its tab already picks one). */
-const shownSide = computed(() => (openSide.value && battlerOf(sides.value[openSide.value]) ? openSide.value : null))
-const tabs = useTemplateRef<HTMLElement>('tabs')
-const { height: tabsH } = useElementSize(tabs, undefined, { box: 'border-box' })
-/** A tab's band tapped: its side opened under the tabs, its top brought into view, or folded if it was. */
-function foldTab(k: SideKey) {
-  openSide.value = openSide.value === k ? null : k
-  if (openSide.value) void nextTick(() => document.getElementById(`calc-${k}`)?.scrollIntoView({ block: 'start' }))
+// On phones, the two one under the other, each a band of its side's color with its panel under it, opened or folded
+// apart, so both can be open at once: yours open at first.
+const open = shallowRef<Record<SideKey, boolean>>({ a: true, b: false })
+/** Whether a side's panel shows: on wide screens always; on phones while open, once it has a Pokémon (with none, its
+ * band picks one). */
+const shows = (k: SideKey) => wide.value || (open.value[k] && !!battlerOf(sides.value[k]))
+/** The room the bands take where they stick: each one row, their shared lines overlapping. */
+const BAND_H = 44
+/** A side's top brought into view under the bands stuck over it (the second's under the first's too). */
+function reveal(k: SideKey, behavior: ScrollBehavior = 'auto') {
+  void nextTick(() => document.getElementById(`calc-${k}`)?.scrollIntoView({ behavior, block: 'start' }))
 }
-/** A tab's Pokémon tapped: its side opened and its top brought into view; with none yet, its picker straight away. */
-function goTab(k: SideKey) {
-  openSide.value = k
+/** A band tapped: with no Pokémon yet, its picker; else its panel opened, its top brought into view, or folded. */
+function toggleBand(k: SideKey) {
   if (!battlerOf(sides.value[k])) {
     picking.value = { side: k, field: 'pokemon' }
     return
   }
-  void nextTick(() => document.getElementById(`calc-${k}`)?.scrollIntoView({ block: 'start' }))
+  const on = !open.value[k]
+  open.value = { ...open.value, [k]: on }
+  if (on) reveal(k)
 }
 watch(
   data,
@@ -449,8 +452,8 @@ function back() {
 function face(f: Fighter) {
   if (battlerOf(sides.value.b)) previous.value = [...previous.value, sides.value.b].slice(-PREVIOUS_MAX)
   setSide('b', { ...f, side: sides.value.b.side, sets: sides.value.b.sets })
-  openSide.value = 'b'
-  void nextTick(() => document.getElementById('calc-b')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  open.value = { ...open.value, b: true }
+  reveal('b', 'smooth')
 }
 </script>
 
@@ -460,7 +463,7 @@ function face(f: Fighter) {
     :style="{
       '--nav-h': `${navH}px`,
       '--bar-h': `${fieldOpen && !fieldCompact ? 0 : barH}px`,
-      '--tabs-h': `${tabsH}px`,
+      '--band-h': `${BAND_H}px`,
     }"
   >
     <!-- Reset all, on the row of the way back to Tools, as on the speed pages (the app's frame has a place for it there). -->
@@ -476,94 +479,94 @@ function face(f: Fighter) {
         <MetaDialog v-if="snapshot" class="head-meta" />
       </div>
     </section>
-    <!-- The field's conditions, a bar on the page (no panel) stuck under the row of links as the page scrolls, so
+    <!-- The field's bar and the sides, together: on phones what sticks of them (the bar, the sides' bands) scrolls away
+         with them once they're past; on wide screens the bar sticks the whole page down. -->
+    <div class="stick-scope">
+      <!-- The field's conditions, a bar on the page (no panel) stuck under the row of links as the page scrolls, so
          they're at hand beside the sides; unfolded, scrolling away with the page, what's unfolded in a soft box. -->
-    <div
-      ref="bar"
-      class="field-bar"
-      :class="{
-        stuck: barStuck && (!fieldOpen || fieldCompact),
-        open: fieldOpen && !fieldCompact,
-        compact: fieldOpen && fieldCompact,
-      }"
-    >
-      <!-- One row, sliding sideways where it doesn't fit: the toggle, and those on named while folded. -->
-      <ScrollRow class="toolbar">
-        <button
-          type="button"
-          class="btn"
-          :class="{ on: fieldOpen }"
-          :aria-expanded="fieldOpen"
-          aria-controls="calc-field"
-          @click="toggleField"
-        >
-          <SlidersHorizontal :size="16" aria-hidden="true" />{{ t('calc.conditions')
-          }}<span class="on-count" :class="{ none: !fieldOn.length }">{{ fieldOn.length }}</span
-          ><ChevronDown :size="14" class="fold-chev" :class="{ open: fieldOpen }" aria-hidden="true" />
-        </button>
-        <template v-if="!fieldOpen">
-          <span v-for="c in fieldOn" :key="c!.key" class="field-on">
-            <component :is="c!.icon" v-if="c!.icon" :size="14" aria-hidden="true" />{{ conditionName(c!) }}
-          </span>
-        </template>
-      </ScrollRow>
-      <!-- Unfolded, its Clear on the toggle's row, beside it (on phones at the row's end). -->
-      <button
-        v-if="fieldOpen"
-        type="button"
-        class="btn quiet small field-clear"
-        :disabled="!fieldOn.length"
-        @click="field = { ...field, weather: '', terrain: '', effects: [] }"
+      <div
+        ref="bar"
+        class="field-bar"
+        :class="{
+          stuck: barStuck && (!fieldOpen || fieldCompact),
+          open: fieldOpen && !fieldCompact,
+          compact: fieldOpen && fieldCompact,
+        }"
       >
-        <Eraser :size="14" aria-hidden="true" />{{ t('calc.clearConditions') }}
-      </button>
-      <div v-if="fieldOpen" id="calc-field" class="field-conditions">
-        <CalcConditions :field :data no-clear :rows="fieldCompact" @field="field = $event" />
-      </div>
-    </div>
-
-    <!-- On phones, the two side by side as tabs, as the speed comparison's: each its side's color over its Pokémon in
-         short, stuck to the top under the field's bar the whole page down. Its band, with its arrow, opens its panel
-         under them or folds it; its Pokémon opens it and goes to its top (one with none picks it). -->
-    <div v-if="!wide" ref="tabs" class="side-tabs">
-      <div v-for="k in ['a', 'b'] as const" :key="k" class="tab" :class="{ open: openSide === k, theirs: k === 'b' }">
+        <!-- One row, sliding sideways where it doesn't fit: the toggle, and those on named while folded. -->
+        <ScrollRow class="toolbar">
+          <button
+            type="button"
+            class="btn"
+            :class="{ on: fieldOpen }"
+            :aria-expanded="fieldOpen"
+            aria-controls="calc-field"
+            @click="toggleField"
+          >
+            <SlidersHorizontal :size="16" aria-hidden="true" />{{ t('calc.conditions')
+            }}<span class="on-count" :class="{ none: !fieldOn.length }">{{ fieldOn.length }}</span
+            ><ChevronDown :size="14" class="fold-chev" :class="{ open: fieldOpen }" aria-hidden="true" />
+          </button>
+          <template v-if="!fieldOpen">
+            <span v-for="c in fieldOn" :key="c!.key" class="field-on">
+              <component :is="c!.icon" v-if="c!.icon" :size="14" aria-hidden="true" />{{ conditionName(c!) }}
+            </span>
+          </template>
+        </ScrollRow>
+        <!-- Unfolded, its Clear on the toggle's row, beside it (on phones at the row's end). -->
         <button
+          v-if="fieldOpen"
           type="button"
-          class="tab-label"
-          :disabled="!battlerOf(sides[k])"
-          :aria-expanded="battlerOf(sides[k]) ? openSide === k : undefined"
-          :aria-controls="`calc-${k}`"
-          @click="foldTab(k)"
+          class="btn quiet small field-clear"
+          :disabled="!fieldOn.length"
+          @click="field = { ...field, weather: '', terrain: '', effects: [] }"
         >
-          {{ labels[k]
-          }}<ChevronDown :size="16" class="tab-chevron" :class="{ unset: !battlerOf(sides[k]) }" aria-hidden="true" />
+          <Eraser :size="14" aria-hidden="true" />{{ t('calc.clearConditions') }}
         </button>
-        <button type="button" class="tab-body" :aria-controls="`calc-${k}`" @click="goTab(k)">
-          <CalcSummary
-            v-if="battlerOf(sides[k])"
-            :fighter="fought[k]"
-            :other="fought[k === 'a' ? 'b' : 'a']"
-            :field
-            :theirs="k === 'b'"
-            class="tab-summary"
-          />
-          <span v-else class="tab-empty"><Plus :size="16" aria-hidden="true" />{{ t('compare.pick') }}</span>
-        </button>
+        <div v-if="fieldOpen" id="calc-field" class="field-conditions">
+          <CalcConditions :field :data no-clear :rows="fieldCompact" @field="field = $event" />
+        </div>
       </div>
-    </div>
-    <div
-      id="calc-duel"
-      class="duel"
-      :class="{
-        aligned:
-          hasBoth && movesFolded.a.value === movesFolded.b.value && battleFolded.a.value === battleFolded.b.value,
-        stacked: !wide,
-        folded: !wide && !shownSide,
-      }"
-    >
-      <!-- On phones, the one opened slides in a touch from its tab's side; the one leaving goes at once. -->
-      <template v-for="k in ['a', 'b'] as const" :key="k">
-        <Transition :name="k === 'a' ? 'from-left' : 'from-right'">
+
+      <div
+        id="calc-duel"
+        class="duel"
+        :class="{
+          aligned:
+            hasBoth && movesFolded.a.value === movesFolded.b.value && battleFolded.a.value === battleFolded.b.value,
+          stacked: !wide,
+        }"
+      >
+        <!-- On phones, as the speed comparison's list past a pair: each side a band of its color, its Pokémon in short,
+           stuck to the top under the field's bar, the second piling up under the first; tapping it opens its panel under
+           it, its top brought into view, or folds it (one with none picks it). -->
+        <template v-for="k in ['a', 'b'] as const" :key="k">
+          <button
+            v-if="!wide"
+            type="button"
+            class="side-band"
+            :class="[`band-${k}`, { open: open[k] && !!battlerOf(sides[k]), theirs: k === 'b' }]"
+            :aria-expanded="battlerOf(sides[k]) ? open[k] : undefined"
+            :aria-controls="`calc-${k}`"
+            @click="toggleBand(k)"
+          >
+            <span class="sr-only">{{ labels[k] }}</span>
+            <CalcSummary
+              v-if="battlerOf(sides[k])"
+              :fighter="fought[k]"
+              :other="fought[k === 'a' ? 'b' : 'a']"
+              :field
+              :theirs="k === 'b'"
+              named
+              class="band-summary"
+            />
+            <span v-else class="band-empty"
+              ><Plus :size="16" aria-hidden="true" />{{
+                t(k === 'a' ? 'compare.pickYours' : 'compare.pickOpponent')
+              }}</span
+            >
+            <ChevronDown :size="16" class="band-chevron" :class="{ unset: !battlerOf(sides[k]) }" aria-hidden="true" />
+          </button>
           <CalcSide
             :id="`calc-${k}`"
             :ref="(el) => setSideEl(k, el)"
@@ -574,7 +577,7 @@ function face(f: Fighter) {
             :label="labels[k]"
             :active="picking?.side === k ? picking.field : null"
             :spreads="spreadsOf(sides[k])"
-            v-show="wide || shownSide === k"
+            v-show="shows(k)"
             :class="`side-${k}`"
             @update:fighter="setSide(k, $event)"
             @field="picking = { side: k, field: $event }"
@@ -614,8 +617,8 @@ function face(f: Fighter) {
               </button>
             </template>
           </CalcSide>
-        </Transition>
-      </template>
+        </template>
+      </div>
     </div>
 
     <CalcVerdict :a="fought.a" :b="fought.b" :field />
@@ -792,6 +795,18 @@ function face(f: Fighter) {
 .calc > #calc-meta {
   margin-top: 16px;
 }
+/* The field's bar and the sides: their own column on phones, so what sticks of them sticks within it; on wide screens
+   no box of its own, the bar sticking within the whole page. */
+.stick-scope {
+  display: contents;
+}
+@media (max-width: 899px) {
+  .stick-scope {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+}
 @media (max-width: 899px) {
   .calc > .verdict,
   .calc > #calc-meta {
@@ -960,145 +975,84 @@ function face(f: Fighter) {
   .duel {
     grid-template-columns: minmax(0, 1fr);
   }
-  /* Both sides folded, nothing there: no gap of its own between the tabs and what follows. */
-  .duel.folded {
-    display: none;
-  }
 }
-/* On phones, the side opened sliding in a touch from its tab's side, faded in; the one leaving gone at once. Only
-   transform and opacity, off the main thread. */
-.from-left-enter-active,
-.from-right-enter-active {
-  transition:
-    opacity 0.22s ease-out,
-    transform 0.22s ease-out;
-}
-/* The one leaving hidden from the start of its leaving, not a frame later, so the one coming in is where it stays
-   when the page goes to its top. */
-.from-left-leave-active,
-.from-right-leave-active {
-  display: none;
-}
-.from-left-enter-from {
-  opacity: 0;
-  transform: translateX(-10px);
-}
-.from-right-enter-from {
-  opacity: 0;
-  transform: translateX(10px);
-}
-@media (prefers-reduced-motion: reduce) {
-  .from-left-enter-active,
-  .from-right-enter-active {
-    transition: none;
-  }
-}
-/* On phones, the two tabs, as the speed comparison's: each a band of its side's color over its Pokémon in short, side
-   by side, stuck under the field's bar on a strip of the page's background. The open one flat, its arrow turned. */
-.side-tabs {
+/* On phones, each side's band, as the speed comparison's list's: one row of its side's color, its Pokémon in short and
+   its arrow, stuck under the field's bar, the second piling up under the first (their shared lines overlapping), over
+   the panels scrolling under them. Its panel right under it, their lines shared too. */
+.side-band {
   position: sticky;
   top: calc(var(--nav-h, 0px) + var(--bar-h, 0px));
   z-index: 40;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  /* A few pixels past the column either way, over the outlines and shadows of the panels scrolling under it. */
-  margin: -8px -6px -10px;
-  padding: 6px 6px 8px;
-  background: var(--bg);
-}
-.tab {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  min-width: 0;
-  font-weight: bold;
-  color: var(--text);
-  background: var(--panel);
-  border: 2px solid var(--ink);
-  box-shadow: var(--hard);
-  transition: opacity 0.15s ease;
-}
-/* Its two parts, buttons: the band folding it, its Pokémon going to it. */
-.tab-label,
-.tab-body {
   display: flex;
   align-items: center;
+  gap: 8px;
+  height: var(--band-h);
   min-width: 0;
-  padding: 0;
+  padding: 0 10px 0 8px;
   font: inherit;
-  color: inherit;
+  font-weight: bold;
   text-align: left;
-  background: none;
-  border: 0;
+  color: var(--accent-text);
+  background: var(--accent);
+  border: 2px solid var(--ink);
   cursor: pointer;
   touch-action: manipulation;
 }
-/* Closed, faded, its band's color paler; open, in full. Both raised, with the hard shadow. */
-.tab:not(.open) {
-  opacity: 0.6;
-}
-.tab:not(.open) .tab-label {
-  background: color-mix(in srgb, var(--accent) 55%, var(--panel));
-}
-.tab.theirs:not(.open) .tab-label {
-  background: color-mix(in srgb, var(--opponent) 55%, var(--panel));
-}
-@media (hover: hover) {
-  .tab:not(.open):hover {
-    opacity: 0.85;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .tab {
-    transition: none;
-  }
-}
-.tab-label {
-  justify-content: space-between;
-  gap: 4px;
-  padding: 3px 8px;
-  font-size: 0.875em;
-  color: var(--accent-text);
-  background: var(--accent);
-  border-bottom: 2px solid var(--ink);
-}
-.tab-label:disabled {
-  cursor: default;
-}
-.tab.theirs .tab-label {
+.side-band.theirs {
+  top: calc(var(--nav-h, 0px) + var(--bar-h, 0px) + var(--band-h) - 2px);
+  z-index: 39;
   color: var(--opponent-text);
   background: var(--opponent);
 }
-.tab-chevron {
-  flex: none;
-  transition: transform 0.15s;
+/* Each one's top line shared with what's over it (yours' band, or its open panel), as the comparison's bands are: the
+   opponent's band whether yours' panel is open or folded (still there between them, hidden). */
+.duel.stacked > :deep(section),
+.duel.stacked > .side-band.theirs {
+  margin-top: -2px;
 }
-.tab.open .tab-chevron {
-  transform: rotate(180deg);
+.duel.stacked > :deep(section.side-a) {
+  scroll-margin-top: calc(var(--nav-h, 0px) + var(--bar-h, 0px) + var(--band-h) - 2px);
 }
-/* With none picked there's nothing to fold: the tab picks one. Hidden, its room kept, so both tabs stay as tall. */
-.tab-chevron.unset {
-  visibility: hidden;
+.duel.stacked > :deep(section.side-b) {
+  scroll-margin-top: calc(var(--nav-h, 0px) + var(--bar-h, 0px) + 2 * var(--band-h) - 4px);
 }
-.tab-body > * {
+/* Its Pokémon in short on the band's color: the verdict in it too, bold, rather than the panel's colors. */
+.band-summary {
   flex: 1;
   min-width: 0;
 }
-.tab-summary,
-.tab-empty {
-  min-height: 40px;
-  padding: 4px 8px;
+.side-band :deep(.ko) {
+  color: inherit !important;
+  font-weight: bold !important;
 }
-.tab-empty {
+.side-band :deep(.tag) {
+  border-color: currentColor;
+}
+.band-empty {
   display: flex;
+  flex: 1;
   align-items: center;
   gap: 6px;
   font-weight: normal;
-  color: var(--muted);
 }
-:root:root .duel.stacked > :deep(section) {
-  scroll-margin-top: calc(var(--nav-h, 0px) + var(--bar-h, 0px) + var(--tabs-h, 0px) + 8px);
+.band-chevron {
+  flex: none;
+  margin-left: auto;
+  transition: transform 0.15s;
+}
+.side-band.open .band-chevron {
+  transform: rotate(180deg);
+}
+.band-chevron.unset {
+  visibility: hidden;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 /* The buttons on the sides' bands with no outline: the band's color sets them apart enough, a wash on hover. */
 :root:root .duel :deep(.btn.on-band) {

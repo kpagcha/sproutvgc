@@ -7,11 +7,18 @@ import { BOOSTED, battlerOf, bestHit, hit, koKind, type Battlefield, type Fighte
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 
-// A damage calculator's side in short, on one line, for its tab on phones: the Pokémon's icon (its name read out, not
-// shown: it'd be cut), its item's icon, what the battle has changed of it (HP left, status, stat stages; nothing while
+// A damage calculator's side in short, on one line, for its band on phones: the Pokémon's icon and its name (`named`;
+// else read out alone), its item's icon, what the battle has changed of it (HP left, status, stat stages; nothing while
 // as it came in), and, at the end, its hardest hit's verdict against the other side ("OHKO", "62% 2HKO"), colored as
 // the damage rows' are: yours knocking out good news, theirs bad (`theirs`).
-const props = defineProps<{ fighter: Fighter; other: Fighter; field: Battlefield; theirs?: boolean }>()
+const props = defineProps<{
+  fighter: Fighter
+  other: Fighter
+  field: Battlefield
+  theirs?: boolean
+  /** Its name shown after its icon, where there's the room (a band across the page), cut short if need be. */
+  named?: boolean
+}>()
 
 const id = computed(() => battlerOf(props.fighter))
 const best = computed(() => {
@@ -38,7 +45,7 @@ const stages = computed(() =>
 <template>
   <span v-if="id" class="summary" :class="[kind, { theirs }]">
     <PokemonIcon :id class="mon" />
-    <span class="sr-only">{{ refName(pokemon(id)) }}</span>
+    <span :class="named ? 'name' : 'sr-only'">{{ refName(pokemon(id)) }}</span>
     <ItemIcon v-if="fighter.member.item" :id="fighter.member.item" class="item" />
     <span class="extras">
       <span v-if="fighter.hp < 100" class="tag">{{ fighter.hp }}%</span>
@@ -99,6 +106,13 @@ const stages = computed(() =>
 }
 .two.theirs .ko {
   color: color-mix(in srgb, var(--bad) 70%, var(--text));
+}
+.name {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .sr-only {
   position: absolute;
