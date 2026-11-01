@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router'
 import { ability, item, move, pokemon, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { gameStats, gameTotal, POKEMON, splitForme, STATS, type StatId } from '@/data/pokemon'
-import { sinceLabel, GENERATED_SNAPSHOTS, has, percent, players } from '@/data/meta'
+import { sinceLabel, GENERATED_SNAPSHOTS, has, percent } from '@/data/meta'
 import { baselineOf, eventsOf, loadEventUsage, type EventUsage } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
@@ -70,10 +70,8 @@ const setCan = (c: Parameters<typeof has>[1]) =>
 const showItem = setCan('items')
 const showAbility = setCan('abilities')
 const showMoves = setCan('moves')
-/** Brought covers every player, whatever the snapshot's cutoff: said under the table. */
-const broughtAll = computed(
-  () => showBrought.value && snapshot.value?.unweighted?.includes('brought') && !!snapshot.value.cutoff,
-)
+/** A move or item is filtered by: its share counts the sets running it from `MIN_SHARE`, said under the table. */
+const termSets = computed(() => allFilters(filters.value).some((x) => x.kind === 'move' || x.kind === 'item'))
 
 // Trends: against the dataset before the one shown (`previous`, the month before), each Pokémon's rank and usage then: a
 // mark by its rank (up, down or new), and the panel of those that rose and fell the most (`RankingTrends`). None for the
@@ -407,10 +405,7 @@ const termRows = useId()
     <RankingsTabs current="pokemon" :sections />
     <div id="sec-list" class="panel section">
       <!-- The data shown, and on its line, where the set columns don't fit (but on phones), the switch that shows sets. -->
-      <RankingsHead
-        :title="t('title.pokemonRankings')"
-        :intro="t('usage.intro', { reg: snapshot?.regulation ?? REGULATION })"
-      >
+      <RankingsHead :title="t('title.pokemonRankings')">
         <div v-if="snapshot" class="source">
           <MetaDialog />
           <SegmentedControl v-model="view" class="soft view-pick" :label="t('usage.columns')" :options="views" />
@@ -719,16 +714,11 @@ const termRows = useId()
       </div>
       <p v-else class="muted">{{ t('usage.noMatch') }}</p>
       <MoreToggle v-if="data" v-model:all="allRows" :n="shown.length" :top="FOLDED" />
-      <p class="muted note phone-only-block">{{ t('usage.usage') }}: {{ t('usage.usageTip') }}.</p>
-      <p v-if="anyRare" class="muted note">{{ t('usage.rare', { share: percent(RARE) }) }}</p>
-      <p v-if="allFilters(filters).some((x) => x.kind === 'move' || x.kind === 'item')" class="muted note">
-        {{ t('usage.termSets', { share: percent(MIN_SHARE) }) }}
-      </p>
-      <p v-if="broughtAll && snapshot.cutoff" class="muted note">
-        {{ t('usage.broughtAll', { players: players(snapshot.cutoff) }) }}
-      </p>
-      <p class="muted note">
-        {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
+      <!-- What the faded rows and the filters' shares mean, in one quiet line, when there are any. -->
+      <p v-if="anyRare || termSets" class="note">
+        <template v-if="anyRare">{{ t('usage.rare', { share: percent(RARE) }) }}</template>
+        <template v-if="anyRare && termSets">{{ ' ' }}</template>
+        <template v-if="termSets">{{ t('usage.termSets', { share: percent(MIN_SHARE) }) }}</template>
       </p>
     </div>
     <RankingTrends v-if="trendsShown" id="sec-trends" class="section" :rows="shown" :since remember="trends:pokemon">
@@ -860,9 +850,6 @@ const termRows = useId()
 :is(.set-line, .term-line) .part:has(.sheet-icon) {
   padding-left: 2px;
 }
-.phone-only-block {
-  display: none;
-}
 @media (max-width: 1099px) {
   .dex-table .set-line {
     display: flex;
@@ -870,11 +857,6 @@ const termRows = useId()
   /* Two lines a row: the size the skipped rows are laid out at until they're seen. */
   .dex-table.with-sets {
     --row-height: 3.6em;
-  }
-}
-@media (max-width: 720px) {
-  .phone-only-block {
-    display: block;
   }
 }
 /* The list with a term highlighted in the search's options: a preview, faded a little. */
@@ -1103,10 +1085,10 @@ const termRows = useId()
   height: 2px;
   background: var(--muted);
 }
+/* A footnote: smaller and quieter than the page's text. */
 .note {
-  margin: 12px 0 0;
-}
-.note + .note {
-  margin-top: 4px;
+  margin: 10px 0 0;
+  font-size: 0.8125em;
+  color: color-mix(in srgb, var(--muted) 75%, transparent);
 }
 </style>

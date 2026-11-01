@@ -55,7 +55,6 @@ const LISTS = {
     canHave: (mon: PokemonId, id: Id) => POKEMON[mon].abilities.includes(id as AbilityId),
     text: {
       title: 'title.abilityRankings',
-      intro: 'abilityUsage.intro',
       name: 'usage.ability',
       usersTip: 'abilityUsage.usersTip',
       userTip: 'abilityUsage.userTip',
@@ -74,7 +73,6 @@ const LISTS = {
     canHave: (mon: PokemonId, id: Id) => !!shareOf(mon, id),
     text: {
       title: 'title.itemRankings',
-      intro: 'itemUsage.intro',
       name: 'usage.item',
       usersTip: 'itemUsage.usersTip',
       userTip: 'itemUsage.userTip',
@@ -258,7 +256,7 @@ const termRows = useId()
   <div>
     <RankingsTabs :current="list" :sections />
     <div id="sec-list" class="panel section">
-      <RankingsHead :title="tx('title')" :intro="tx('intro', { reg: snapshot?.regulation ?? REGULATION })">
+      <RankingsHead :title="tx('title')">
         <div v-if="hasList && snapshot" class="source">
           <MetaDialog />
         </div>
@@ -383,9 +381,6 @@ const termRows = useId()
       </div>
       <p v-else class="muted">{{ tx('noMatch') }}</p>
       <MoreToggle v-if="data" v-model:all="allRows" :n="shown.length" :top="FOLDED" />
-      <p class="muted note">
-        {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
-      </p>
     </div>
     <RankingTrends v-if="trendsShown" id="sec-trends" class="section" :rows="shown" :since :remember="`trends:${list}`">
       <template #entry="{ row }"><ItemIcon v-if="list === 'items'" :id="row.id as ItemId" />{{ row.name }}</template>
@@ -529,11 +524,5 @@ const termRows = useId()
   width: calc((100% - 2 * var(--inset)) * var(--share, 0));
   height: 3px;
   background: var(--accent);
-}
-.note {
-  margin: 12px 0 0;
-}
-.note + .note {
-  margin-top: 4px;
 }
 </style>

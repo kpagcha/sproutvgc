@@ -262,10 +262,7 @@ const termRows = useId()
   <div>
     <RankingsTabs current="moves" :sections />
     <div id="sec-list" class="panel section">
-      <RankingsHead
-        :title="t('title.moveRankings')"
-        :intro="t('moveUsage.intro', { reg: snapshot?.regulation ?? REGULATION })"
-      >
+      <RankingsHead :title="t('title.moveRankings')">
         <div v-if="hasMoves && snapshot" class="source">
           <MetaDialog />
         </div>
@@ -443,9 +440,6 @@ const termRows = useId()
       </div>
       <p v-else class="muted">{{ t('moveUsage.noMatch') }}</p>
       <MoreToggle v-if="data" v-model:all="allRows" :n="shown.length" :top="FOLDED" />
-      <p class="muted note">
-        {{ t('usage.from') }} <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
-      </p>
     </div>
     <RankingTrends v-if="trendsShown" id="sec-trends" class="section" :rows="shown" :since remember="trends:moves">
       <template #entry="{ row }"> <TypeIcon :type="row.data.type" />{{ row.name }} </template>
@@ -731,8 +725,5 @@ const termRows = useId()
   bottom: 4px;
   height: 2px;
   background: var(--muted);
-}
-.note {
-  margin: 12px 0 0;
 }
 </style>
