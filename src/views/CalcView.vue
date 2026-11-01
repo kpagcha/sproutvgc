@@ -727,11 +727,14 @@ function face(f: Fighter) {
           >
             <X :size="14" aria-hidden="true" />{{ t('calc.clearSide') }}
           </button>
-          <template v-if="savedTeams.length">
-            <span class="muted load-label">{{ t('calc.fromTeams') }}</span>
-            <ReuseTeams :side="menuSide" :done="() => {}" />
-          </template>
         </div>
+        <!-- The reader's teams under them, scrolling in the card when they don't fit, the rest staying put. -->
+        <template v-if="savedTeams.length">
+          <span class="muted load-label">{{ t('calc.fromTeams') }}</span>
+          <div class="load load-teams">
+            <ReuseTeams :side="menuSide" :done="() => {}" />
+          </div>
+        </template>
       </div>
     </ModalDialog>
 
@@ -1093,6 +1096,15 @@ function face(f: Fighter) {
 .set-menu.open {
   color: var(--text);
   border-color: var(--border);
+}
+.set-dialog {
+  display: flex;
+  flex-direction: column;
+}
+.set-dialog .load-teams {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .set-dialog h2 {
   margin: 0 0 8px;
