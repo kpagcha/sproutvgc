@@ -799,7 +799,10 @@ function face(f: Fighter) {
   }
 }
 /* The row of links' own gap under it is the page's. */
+/* Over what sticks under it (the field's bar, the sides' bands on phones), which, scrolling away past the sides,
+   passes under it rather than over it. */
 .calc > .section-nav {
+  z-index: 50;
   margin-bottom: -4px;
 }
 /* Room above a section scrolled to for the row of links stuck to the top. */
