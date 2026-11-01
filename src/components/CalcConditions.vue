@@ -134,6 +134,8 @@ const [DefineChip, Chip] = createReusableTemplate<{
   on: boolean
   toggle: () => void
   plain?: boolean
+  /** One of the less common, in rows shown on phones or once unfolded. */
+  rare?: boolean
 }>()
 const [DefineMore, More] = createReusableTemplate()
 const [DefineClear, Clear] = createReusableTemplate()
@@ -142,12 +144,12 @@ const [DefineChoice, Choice] = createReusableTemplate<{ c: Condition<string>; ki
 
 <template>
   <!-- A condition that can be on with others: a chip with a checkbox's square. -->
-  <DefineChip v-slot="{ c, on, toggle, plain }">
+  <DefineChip v-slot="{ c, on, toggle, plain, rare }">
     <button
       v-tip="c.ref && hoverTip(c.ref)"
       type="button"
       class="chip no-lift"
-      :class="{ on }"
+      :class="{ on, rare }"
       :aria-pressed="on"
       @click="toggle"
     >
@@ -191,7 +193,7 @@ const [DefineChoice, Choice] = createReusableTemplate<{ c: Condition<string>; ki
         :c
         :on="side.fighter.side.includes(c.key)"
         :toggle="() => toggleSide(c.key)"
-        plain
+        :plain="true"
       />
       <StageStepper
         v-if="spikesCommon"
@@ -218,7 +220,7 @@ const [DefineChoice, Choice] = createReusableTemplate<{ c: Condition<string>; ki
             :c
             :on="side.fighter.side.includes(c.key)"
             :toggle="() => toggleSide(c.key)"
-            plain
+            :plain="true"
           />
           <StageStepper
             v-if="g.spikes"
@@ -250,16 +252,25 @@ const [DefineChoice, Choice] = createReusableTemplate<{ c: Condition<string>; ki
     </div>
     <div v-if="fieldEffects.length" class="row">
       <h3 class="row-label">{{ t('calc.fieldLabel') }}</h3>
-      <ScrollRow class="row-track">
+      <!-- Every one in the row on phones, which slide it anyway (no More there); wider, the rest once unfolded. -->
+      <ScrollRow class="row-track" :class="{ 'more-open': moreOpen }">
         <Chip
-          v-for="c in moreOpen ? [...fieldCommon, ...fieldRare] : fieldCommon"
+          v-for="c in fieldCommon"
           :key="c.key"
           :c
           :on="field.effects.includes(c.key)"
           :toggle="() => toggleField(c.key)"
         />
+        <Chip
+          v-for="c in fieldRare"
+          :key="c.key"
+          :c
+          :on="field.effects.includes(c.key)"
+          :toggle="() => toggleField(c.key)"
+          :rare="true"
+        />
       </ScrollRow>
-      <More />
+      <span class="rows-more"><More /></span>
     </div>
   </div>
   <div v-else class="conditions">
@@ -352,8 +363,20 @@ const [DefineChoice, Choice] = createReusableTemplate<{ c: Condition<string>; ki
   flex: none;
   white-space: nowrap;
 }
-.rows .more {
+.rows .more,
+.rows-more {
   flex: none;
+}
+/* Wider than phones, the less common ones in the row once its More is unfolded; on phones, always, no More. */
+@media (min-width: 721px) {
+  .row-track:not(.more-open) .chip.rare {
+    display: none;
+  }
+}
+@media (max-width: 720px) {
+  .rows-more {
+    display: none;
+  }
 }
 /* The less common ones, under More: set apart by a rule. */
 .rare {
