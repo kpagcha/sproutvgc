@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, shallowRef } from 'vue'
-import { ChevronsDown, ChevronsUp, CircleAlert } from '@lucide/vue'
+import { ChevronsDown, ChevronsUp, CircleAlert, Trash2 } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { percent, type Spread } from '@/data/meta'
 import { natureEffects, natureName } from '@/data/natures'
@@ -12,11 +12,12 @@ import { PRESETS } from '@/components/SpreadPresets.vue'
 import { natureTip } from '@/components/natureTip'
 
 // A slot's stat points in the picker's drawer, its set's last step (`TeamPicker`, `points`): its common spreads listed
-// (the meta's, the first `PRESETS` until unfolded), each setting its points and nature; then its own, its nature named
+// (the meta's, the first `PRESETS` until unfolded), each setting its points and nature; then, after a rule, its own, cleared
+// from a bin by its heading, its nature named
 // (tapped, the natures' picker, coming back here: `nature`) over its sliders (`PointsEditor`), what's left to spend
-// across from its heading; and where it can be (the damage calculator's, `canPool`), at every set, its sets pooled by
+// across from its heading; and, after a rule, where it can be (the damage calculator's, `canPool`), at every set, its sets pooled by
 // usage, said under it, its sliders then showing the pooled points and stats, dimmed and locked (`pooled`), its own
-// kept for when it's off again, and its nature crossed out.
+// kept for when it's off again, and its nature crossed out. At its foot, closing it (`done`), its points as they are.
 const props = defineProps<{
   member: Member
   /** The Pokémon its stats are of: its Mega while it Mega Evolves. */
@@ -61,10 +62,22 @@ const points = computed({
       </div>
       <MoreToggle v-model:all="all" :n="props.spreads.length" :top="PRESETS" />
     </section>
+    <p v-if="spreads.length" class="or muted">{{ t('builder.orOwn') }}</p>
 
     <section class="part">
       <h3 class="part-head">
-        <span>{{ t('builder.ownSpread') }}</span>
+        <span class="own-head"
+          >{{ t('builder.ownSpread')
+          }}<button
+            v-tip="t('builder.clearPoints')"
+            type="button"
+            class="trash"
+            :disabled="atSets || member.points.every((p) => !p)"
+            :aria-label="t('builder.clearPoints')"
+            @click="emit('change', { points: [0, 0, 0, 0, 0, 0] })"
+          >
+            <Trash2 :size="14" aria-hidden="true" /></button
+        ></span>
         <span v-if="!atSets && left !== 0" class="left" :class="{ over: left < 0 }" aria-live="polite"
           ><CircleAlert :size="14" aria-hidden="true" />{{
             left > 0
@@ -94,17 +107,10 @@ const points = computed({
           >
         </button>
       </p>
-      <PointsEditor
-        v-model:points="points"
-        :pokemon
-        :nature="member.nature"
-        :spreads
-        no-presets
-        :locked
-        @confirm="emit('done')"
-      />
+      <PointsEditor v-model:points="points" :pokemon :nature="member.nature" :spreads no-actions :locked />
     </section>
 
+    <p v-if="canPool" class="or muted">{{ t('builder.orSets') }}</p>
     <section v-if="canPool" class="part">
       <button
         type="button"
@@ -117,6 +123,8 @@ const points = computed({
       </button>
       <p class="sets-note muted">{{ t('calc.sets.tip') }}</p>
     </section>
+
+    <button type="button" class="btn done" @click="emit('done')">{{ t('picker.close') }}</button>
   </div>
 </template>
 
@@ -124,7 +132,46 @@ const points = computed({
 .points-picker {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
+}
+/* Between the three ways to set them, a rule each side of "or", as the Pokémon's step offers its common set. */
+.or {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 0.875em;
+}
+.or::before,
+.or::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--border);
+}
+.own-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+/* Clearing its points: an icon alone, no outline nor fill, by its heading. */
+.trash {
+  display: inline-flex;
+  padding: 2px;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.trash:hover:not(:disabled) {
+  color: var(--bad);
+}
+.trash:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+/* Closing the drawer, its points kept as they are: across its foot. */
+.done {
+  margin-top: 4px;
 }
 .part {
   display: flex;
@@ -182,7 +229,6 @@ const points = computed({
 }
 .spread.same {
   background: color-mix(in srgb, var(--accent) 8%, var(--panel-alt));
-  box-shadow: inset 3px 0 0 var(--accent);
 }
 .spread.same:hover {
   background: color-mix(in srgb, var(--accent) 14%, var(--panel-alt));

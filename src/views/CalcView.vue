@@ -579,7 +579,6 @@ function face(f: Fighter) {
             :theirs="k === 'b'"
             :label="labels[k]"
             :active="picking?.side === k ? picking.field : null"
-            :spreads="spreadsOf(sides[k])"
             v-show="shows(k)"
             :class="`side-${k}`"
             @update:fighter="setSide(k, $event)"

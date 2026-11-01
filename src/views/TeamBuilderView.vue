@@ -82,7 +82,6 @@ const pinned = computed(() =>
 )
 const togglePin = (i: number) => (pinnedAt.value = pinnedAt.value === i ? null : i)
 const pinSide = useMediaQuery('(min-width: 1100px)')
-const pinEditing = shallowRef(true)
 type DockChart = 'speed' | 'defense' | 'offense'
 const DOCK_CHARTS: readonly DockChart[] = ['speed', 'defense', 'offense']
 const DOCK_KEY = 'sproutvgc.builder.pinChart'
@@ -240,7 +239,7 @@ async function applyCommonSets() {
   for (const { slot, set } of sets) update(slot, set)
   picking.value = null
 }
-const [DefinePinned, ReusePinned] = createReusableTemplate<{ open: boolean }>()
+const [DefinePinned, ReusePinned] = createReusableTemplate()
 const commonPreview = computed(() => (picking.value?.common ? commonMember(picking.value.common, data.value) : null))
 
 // The drawer or dialog the picker scrolls in, back at its top for each part picked.
@@ -550,7 +549,6 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
             :ref="(el) => setSlotEl(i, el)"
             :member="m"
             :active="picking?.slot === i ? picking.field : null"
-            :spreads="spreadsOf(m)"
             :clashes="clashes[i]"
             :evolved="evolving === i"
             :hint="i === 0 && !hasAny"
@@ -566,21 +564,17 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
       </section>
       <div v-if="hasAny" class="insights" :class="{ pinning: pinned !== null && pinSide }">
         <!-- The slot pinned: beside the insights, stuck as they scroll. -->
-        <DefinePinned v-slot="{ open: editorOpen }">
+        <DefinePinned>
           <ul class="pin-slot">
             <TeamSlot
               v-if="pinned !== null"
               :ref="setPinEl"
               :member="members[pinned]!"
               :active="picking?.slot === pinned && picking.pin ? picking.field : null"
-              :spreads="spreadsOf(members[pinned]!)"
               :clashes="clashes[pinned]"
               :evolved="evolving === pinned"
               pinnable
               pinned
-              inline-points
-              :open="editorOpen"
-              @update:open="pinSide ? (pinEditing = $event) : (dockEdit = 'points')"
               @mega="toggleMega(pinned)"
               @pin="togglePin(pinned)"
               @field="picking = { slot: pinned, field: $event, pin: true }"
@@ -590,7 +584,7 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
           </ul>
         </DefinePinned>
         <aside v-if="pinned !== null && pinSide" class="pin-col side" :aria-label="t('builder.pinned')">
-          <ReusePinned :open="pinEditing" />
+          <ReusePinned />
         </aside>
         <!-- Narrower, in a dialog over the page, the page dimmed and still behind it: a bar naming it, unpinning it;
              a chart, and what's edited. Closing it unpins it. -->
@@ -651,7 +645,7 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
                     @preset="update(pinned, { points: [...$event.points], nature: $event.nature })"
                   />
                 </template>
-                <ReusePinned v-else :open="false" />
+                <ReusePinned v-else />
               </section>
             </div>
           </div>

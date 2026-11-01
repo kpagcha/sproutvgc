@@ -26,6 +26,8 @@ const props = defineProps<{
   noConfirm?: boolean
   /** Its common spreads' button left out, the page having its own (the damage calculator's). */
   noPresets?: boolean
+  /** No row of actions under it (its common spreads, Clear, Confirm): the page has its own (the picker's step). */
+  noActions?: boolean
   /** Its points and stats derived, not set: shown as given (in `STATS` order), dimmed and taking no input. */
   locked?: { points: readonly number[]; stats: readonly number[] }
 }>()
@@ -76,7 +78,7 @@ const open = ref(false)
       </template>
     </div>
     <!-- Its common spreads to pick from, and clearing or confirming the points (which folds it), on one row. -->
-    <div class="actions">
+    <div v-if="!noActions" class="actions">
       <button
         v-if="presets.length && !noPresets"
         type="button"

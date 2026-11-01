@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ChevronDown, ChevronUp, CircleAlert, Pencil, Pin, PinOff, X } from '@lucide/vue'
+import { CircleAlert, Pencil, Pin, PinOff, X } from '@lucide/vue'
 import { ability, item, move, pokemon, type MoveId } from '@/data/dex'
-import type { Spread } from '@/data/meta'
 import { MOVES } from '@/data/moves'
 import { natureEffectOn, natureName } from '@/data/natures'
 import { POKEMON, spriteUrl, STATS } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import { pointsLeft, stoneMega, type Field, type Member, type Points } from '@/lib/team'
+import { pointsLeft, stoneMega, type Field, type Member } from '@/lib/team'
 import ItemIcon from '@/components/ItemIcon.vue'
-import PointsEditor from '@/components/PointsEditor.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
 import { natureTip } from '@/components/natureTip'
@@ -19,8 +17,8 @@ import { natureTip } from '@/components/natureTip'
 // band with its item, then its ability and nature, then its four moves two by two. Every part is a button opening its
 // picker (`field`), a part not picked yet a placeholder saying what goes there; the one being picked marked
 // (`active`). Under them its stat points in a compact row (each stat's shorthand over its points, the nature's colors,
-// what's left to spend), a button opening their step in the picker, the set's last (`points`); pinned beside the
-// insights (`inlinePoints`), unfolding their editor (`PointsEditor`) under it instead. An empty slot is the same card, all
+// what's left to spend), a button opening their step in the picker, the set's last (`points`). An empty slot is the
+// same card, all
 // placeholders, each opening the Pokémon's picker: the rest needs a Pokémon first. Holding its Mega Stone, a switch at
 // the stat points line's end says whether it's the one that Mega Evolves in the team's insights (`evolved`, `mega`);
 // while it is, the card shows the Mega (its name, sprite, types and stats, and its ability after the one its sheet
@@ -35,7 +33,6 @@ import { natureTip } from '@/components/natureTip'
 const props = defineProps<{
   member: Member
   active: Field | null
-  spreads: readonly Spread[]
   clashes?: { pokemon?: string; item?: string; ability?: string; moves: Partial<Record<MoveId, string>> }
   /** It's the one that Mega Evolves in the team's insights. */
   evolved?: boolean
@@ -49,8 +46,6 @@ const props = defineProps<{
   noMoves?: boolean
   /** No card of its own nor clearing: the top of a panel that's its box (the damage calculator's side). */
   flat?: boolean
-  /** Its stat points' editor unfolding under its compact row (pinned beside the insights), not their picker's step. */
-  inlinePoints?: boolean
   /** At every set, its sets pooled (the damage calculator's). */
   atSets?: boolean
   /** At every set, its points and stats pooled, which its editor shows locked. */
@@ -63,7 +58,6 @@ const emit = defineEmits<{
   mega: []
   pin: []
 }>()
-const open = defineModel<boolean>('open', { default: false })
 
 // The pin's tooltip only where there's hover: tapped, it'd stay behind as the slot's pinned or unpinned.
 const canHover = window.matchMedia('(hover: hover)').matches
@@ -75,11 +69,6 @@ const megaAbility = computed(() => (props.evolved && mega.value ? (POKEMON[mega.
 /** Opens a part's picker: the Pokémon's, until there's one. */
 const go = (f: Field) => emit('field', shown.value ? f : 'pokemon')
 const left = computed(() => pointsLeft(props.member))
-const points = computed({
-  get: () => props.member.points,
-  set: (p: Points) => emit('change', { points: p }),
-})
-const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.nature })
 
 /** Each stat's points as the compact row shows them: at every set, the pooled ones, rounded. */
 const cells = computed(() =>
@@ -213,8 +202,7 @@ const chipText = computed(() =>
         </button>
       </li>
     </ul>
-    <!-- Its stat points in a compact row, a button opening their step in the picker (or, pinned beside the insights,
-         unfolding their editor under it): each stat's shorthand over its points, bold where it has any, in the good
+    <!-- Its stat points in a compact row, a button opening their step in the picker: each stat's shorthand over its points, bold where it has any, in the good
          color where its nature raises it and the bad where it lowers it; while any are left to spend (or over), an
          alert's icon and how many; and holding its Mega Stone, whether it Mega Evolves, a switch at the row's end. -->
     <div v-if="shown" class="stats-box">
@@ -224,8 +212,7 @@ const chipText = computed(() =>
           class="stats-chip"
           :class="{ active: active === 'points', derived: atSets && pooled }"
           :aria-label="`${t('builder.editPoints')}: ${chipText}`"
-          :aria-expanded="inlinePoints ? open : undefined"
-          @click="inlinePoints ? (open = !open) : go('points')"
+          @click="go('points')"
         >
           <span class="cells">
             <span
@@ -242,12 +229,7 @@ const chipText = computed(() =>
           <span v-if="leftText" v-tip="leftText" class="chip-left" :class="{ over: left < 0 }" aria-hidden="true"
             ><CircleAlert :size="14" />{{ Math.abs(left) }}</span
           >
-          <component
-            :is="inlinePoints ? (open ? ChevronUp : ChevronDown) : Pencil"
-            :size="14"
-            class="chip-edit"
-            aria-hidden="true"
-          />
+          <Pencil :size="14" class="chip-edit" aria-hidden="true" />
         </button>
         <button
           v-if="mega"
@@ -262,16 +244,6 @@ const chipText = computed(() =>
           <span class="track" aria-hidden="true"><span class="knob"></span></span>
         </button>
       </div>
-      <PointsEditor
-        v-if="inlinePoints && open"
-        v-model:points="points"
-        class="editor"
-        :pokemon="shown"
-        :nature="member.nature"
-        :spreads
-        @preset="preset"
-        @confirm="open = false"
-      />
     </div>
     <div v-else class="stats-box stats-blank" aria-hidden="true">
       <div class="stats-line">

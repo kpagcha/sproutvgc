@@ -4,7 +4,7 @@ import { createReusableTemplate } from '@vueuse/core'
 import { ChevronDown, Eraser, Plus, SlidersHorizontal } from '@lucide/vue'
 import { ability, condition, pokemon, type MoveId } from '@/data/dex'
 import { MOVES } from '@/data/moves'
-import type { MetaData, Spread } from '@/data/meta'
+import type { MetaData } from '@/data/meta'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import {
@@ -54,7 +54,6 @@ const props = defineProps<{
   theirs?: boolean
   label: string
   active: Field | null
-  spreads: readonly Spread[]
   data: MetaData | null | undefined
   sideOpen: boolean
   /** Its moves folded away, its heading alone. */
@@ -197,7 +196,6 @@ function setHpPoints(e: Event) {
           :ref="setCard"
           :member="fighter.member"
           :active
-          :spreads
           :evolved="fighter.mega"
           no-moves
           flat
