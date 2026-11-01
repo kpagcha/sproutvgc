@@ -632,6 +632,12 @@ function setHpPoints(e: Event) {
 .battle:empty {
   display: none;
 }
+/* No wider than the side's column, whatever's in them (a move's weather or terrain row slides sideways instead). */
+.results,
+.battle,
+.damages {
+  min-width: 0;
+}
 .row {
   display: flex;
   flex-wrap: wrap;

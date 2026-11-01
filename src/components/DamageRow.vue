@@ -263,6 +263,8 @@ const blockedText = tSplit('calc.blockedBy', 'what')
 .damage {
   /* The damage in the attacker's side's color: yours the accent, the opponent's its red. */
   --dmg: var(--accent);
+  /* No wider than the list it's in, whatever it unfolds to. */
+  min-width: 0;
 }
 .head {
   --icon-scale: 1;
@@ -455,6 +457,7 @@ const blockedText = tSplit('calc.blockedBy', 'what')
   color: var(--muted);
 }
 .details {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 10px;
