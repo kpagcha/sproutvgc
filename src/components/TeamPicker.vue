@@ -12,7 +12,7 @@ import {
   type PokemonId,
 } from '@/data/dex'
 import { ITEMS } from '@/data/items'
-import { has, percent, type MetaData, type MetaSnapshot, type PokemonMeta } from '@/data/meta'
+import { has, percent, type MetaData, type MetaSnapshot, type PokemonMeta, type Spread } from '@/data/meta'
 import { MOVES } from '@/data/moves'
 import { NATURE_IDS, natureEffects, natureName } from '@/data/natures'
 import { loadLearnsets, movesOf, POKEMON, splitForme } from '@/data/pokemon'
@@ -30,6 +30,7 @@ import FilterSearch from '@/components/FilterSearch.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import Marked from '@/components/Marked'
 import MoveTable from '@/components/MoveTable.vue'
+import PointsPicker from '@/components/PointsPicker.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
 
@@ -46,8 +47,22 @@ const props = defineProps<{
   field: Field
   data: MetaData | null
   snapshot: MetaSnapshot | undefined
+  /** For its stat points (`points`): the Pokémon its stats are of (its Mega while it Mega Evolves), its common
+   * spreads, and whether it can be at every set (the damage calculator's), is, and its pooled points and stats. */
+  battler?: PokemonId | null
+  spreads?: readonly Spread[]
+  canPool?: boolean
+  atSets?: boolean
+  pooled?: { points: readonly number[]; stats: readonly number[] }
 }>()
-const emit = defineEmits<{ pick: [value: string]; close: [] }>()
+const emit = defineEmits<{
+  pick: [value: string]
+  close: []
+  /** Its stat points' step: the set changed in place, at every set or not, its nature to be picked again. */
+  change: [patch: Partial<Member>]
+  sets: [on: boolean]
+  nature: []
+}>()
 
 const shown = computed(() => setsAs(props.member))
 /** Its sets in the meta: the Mega's when it holds its stone (the meta counts a Mega apart), else its own. */
@@ -296,7 +311,21 @@ const termRows = useId()
     </div>
     <slot />
 
-    <template v-if="field === 'pokemon'">
+    <PointsPicker
+      v-if="field === 'points'"
+      :member
+      :pokemon="battler ?? member.pokemon!"
+      :spreads="spreads ?? []"
+      :can-pool
+      :at-sets
+      :pooled
+      @change="emit('change', $event)"
+      @sets="emit('sets', $event)"
+      @nature="emit('nature')"
+      @done="emit('close')"
+    />
+
+    <template v-else-if="field === 'pokemon'">
       <FilterSearch
         :rows-at="termRows"
         v-model:text="text"

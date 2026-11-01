@@ -591,7 +591,7 @@ export function statsOf(f: Fighter): Record<(typeof STATS)[number], number> | nu
 
 /** Whether the meta shown has a side's sets pooled, so it can be at every set: its battler's entry's (a stone
  * holder's, its Mega's). */
-export const pooledOf = (f: Fighter, data: MetaData | null | undefined) => {
+const pooledOf = (f: Fighter, data: MetaData | null | undefined) => {
   const id = setsAs(f.member)
   return (id && data?.[id]?.pooled) || null
 }
@@ -605,6 +605,17 @@ export function pooledStats(f: Fighter, data: MetaData | null | undefined): numb
   return POKEMON[id].stats.map((base, i) =>
     i ? Math.round((base + 20 + pool.points[i]!) * pool.mult[i]!) : Math.round(base + 75 + pool.points[0]!),
   )
+}
+
+/** At every set, its pooled points (means, `STATS` order) and the stats they give, for its stat points to show locked;
+ * else none. */
+export function pooledView(
+  f: Fighter,
+  data: MetaData | null | undefined,
+): { points: readonly number[]; stats: readonly number[] } | undefined {
+  const pool = f.sets ? pooledOf(f, data) : null
+  const stats = pool && pooledStats(f, data)
+  return pool && stats ? { points: pool.points, stats } : undefined
 }
 
 /** A side as it battles in the meta shown: at every set, its pooled stats on it (`pooled`); else as it is. */

@@ -29,9 +29,11 @@ import {
   abilityOf,
   atSets,
   battlerOf,
+  canPool,
   commonSet,
   emptyField,
   emptyFighter,
+  pooledView,
   SETS_FIELD,
   type Battlefield,
   type Fighter,
@@ -39,7 +41,7 @@ import {
 import { membersPaste, parsePaste } from '@/lib/pokepaste'
 import { copy } from '@/lib/clipboard'
 import { commonForme } from '@/lib/commonSet'
-import { emptyMember, pickedAs, setsAs, stoneMega, type Field, type Member } from '@/lib/team'
+import { emptyMember, nextField, pickedAs, setsAs, stoneMega, type Field, type Member } from '@/lib/team'
 import { conditionName, fieldOf, terrainOf, weatherOf } from '@/components/calcConditions'
 import CalcConditions from '@/components/CalcConditions.vue'
 import CalcMeta from '@/components/CalcMeta.vue'
@@ -174,8 +176,9 @@ function resetAll() {
 }
 
 // The part being picked: its side and field, as in the team builder (a drawer on wide screens, a dialog on phones);
-// right after a Pokémon's picked, the meta's entry whose most common set can be loaded instead of going on (`common`).
-const picking = shallowRef<{ side: SideKey; field: Field; common?: PokemonId } | null>(null)
+// right after a Pokémon's picked, the meta's entry whose most common set can be loaded instead of going on (`common`);
+// its nature picked again from its stat points' step, the step to come back to once picked (`back`).
+const picking = shallowRef<{ side: SideKey; field: Field; common?: PokemonId; back?: Field } | null>(null)
 const pickerOpen = computed({
   get: () => !!picking.value,
   set: (on) => {
@@ -193,15 +196,6 @@ watch(picking, async () => {
   await nextTick()
   ;(drawer.value?.el ?? pickerBox.value)?.scrollTo({ top: 0 })
 })
-
-/** The next part a side hasn't got, in the order a set is put together; null once it has them all. */
-function nextField(m: Member, after: Field): Field | null {
-  const order: Field[] = ['pokemon', 'item', 'ability', 'nature', 0, 1, 2, 3]
-  for (const f of order.slice(order.indexOf(after) + 1)) {
-    if (typeof f === 'number' ? !m.moves[f] : !m[f]) return f
-  }
-  return null
-}
 
 /** A Pokémon picked: the rest of its set to be put together (its only ability given), the side's field effects kept. */
 function choose(k: SideKey, id: PokemonId) {
@@ -252,7 +246,7 @@ function pick(value: string) {
   // A nature picked, it's at its own rather than at every set.
   else if (p.field === 'nature')
     setSide(p.side, { ...sides.value[p.side], member: { ...m, nature: value }, sets: false })
-  else {
+  else if (typeof p.field === 'number') {
     const moves = [...m.moves]
     const was = moves.indexOf(value as MoveId)
     if (was >= 0) moves[was] = moves[p.field]!
@@ -260,7 +254,7 @@ function pick(value: string) {
     patchMember(p.side, { moves })
   }
   const now = sides.value[p.side].member
-  const next = nextField(now, p.field)
+  const next = p.back ?? nextField(now, p.field)
   picking.value = next === null ? null : { side: p.side, field: next, ...(common && { common }) }
 }
 
@@ -415,6 +409,30 @@ const spreadsOf = (f: Fighter) => {
 /** The calc's sides aren't a team: nothing clashes. */
 const otherMembers: Member[] = []
 const pickerMember = computed(() => (picking.value ? sides.value[picking.value.side].member : null))
+/** The side being picked for's stat points' step: the Pokémon its stats are of, its spreads, every set. */
+const pickerPoints = computed(() => {
+  const k = picking.value?.side
+  if (!k) return null
+  const f = sides.value[k]
+  return {
+    battler: battlerOf(f),
+    spreads: spreadsOf(f),
+    canPool: canPool(f, data.value),
+    atSets: !!f.sets && !!fought.value[k].pooled,
+    pooled: pooledView(f, data.value),
+  }
+})
+/** Its stat points or nature set from their step: at its own rather than at every set. */
+function pointsChange(patch: Partial<Member>) {
+  const k = picking.value?.side
+  if (k) setSide(k, { ...sides.value[k], member: { ...sides.value[k].member, ...patch }, sets: false })
+}
+function pointsSets(on: boolean) {
+  const k = picking.value?.side
+  if (k) setSide(k, { ...sides.value[k], sets: on })
+}
+const natureAgain = () =>
+  picking.value && (picking.value = { side: picking.value.side, field: 'nature', back: 'points' })
 const labels = computed(() => ({ a: t('calc.yours'), b: t('calc.theirs') }))
 const hasAny = computed(() => !!(battlerOf(sides.value.a) || battlerOf(sides.value.b)))
 const hasBoth = computed(() => !!(battlerOf(sides.value.a) && battlerOf(sides.value.b)))
@@ -675,8 +693,12 @@ function face(f: Fighter) {
         :field="picking.field"
         :data
         :snapshot
+        v-bind="pickerPoints"
         @pick="pick"
         @close="picking = null"
+        @change="pointsChange"
+        @sets="pointsSets"
+        @nature="natureAgain"
         ><ReuseCommon
       /></TeamPicker>
     </SideDrawer>
@@ -690,8 +712,12 @@ function face(f: Fighter) {
           :field="picking.field"
           :data
           :snapshot
+          v-bind="pickerPoints"
           @pick="pick"
           @close="picking = null"
+          @change="pointsChange"
+          @sets="pointsSets"
+          @nature="natureAgain"
           ><ReuseCommon
         /></TeamPicker>
       </div>

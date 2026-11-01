@@ -16,6 +16,7 @@ import { commonForme, commonMember } from '@/lib/commonSet'
 import { membersPaste, parsePaste, type PasteProblem } from '@/lib/pokepaste'
 import {
   emptyMember,
+  nextField,
   pickedAs,
   battlers,
   evolvingSlot,
@@ -70,7 +71,7 @@ const members = computed(() => current.value?.members ?? [])
 // The part being picked: its slot and field, and whether from the slot pinned beside the insights (`pin`, its card the
 // one the drawer leaves clear); right after a Pokémon's picked, the meta's entry whose most common set can be loaded
 // instead of going on (`common`), as the damage calculator's sides can.
-const picking = shallowRef<{ slot: number; field: Field; pin?: boolean; common?: PokemonId } | null>(null)
+const picking = shallowRef<{ slot: number; field: Field; pin?: boolean; common?: PokemonId; back?: Field } | null>(null)
 // The slot pinned beside the insights, to edit it there as they follow; none once it's emptied or another team opens.
 // On wide screens a column stuck beside them. Narrower, in a dialog over the page (`ModalDialog`, closing it unpinning
 // it), all there is on screen: one of the charts on top, picked from a row of them (`dockChart`, remembered), and
@@ -140,23 +141,6 @@ const drawerAnchor = computed(() =>
 )
 const drawer = shallowRef<InstanceType<typeof SideDrawer> | null>(null)
 
-// Each slot's points editor, folded at first.
-const editing = shallowRef<boolean[]>([])
-const setEditing = (i: number, on: boolean) => {
-  const next = [...editing.value]
-  next[i] = on
-  editing.value = next
-}
-
-/** The next part a slot hasn't got, in the order a set is put together; null once it has them all. */
-function nextField(m: Member, after: Field): Field | null {
-  const order: Field[] = ['pokemon', 'item', 'ability', 'nature', 0, 1, 2, 3]
-  for (const f of order.slice(order.indexOf(after) + 1)) {
-    if (typeof f === 'number' ? !m.moves[f] : !m[f]) return f
-  }
-  return null
-}
-
 function update(slot: number, patch: Partial<Member>) {
   const team = current.value
   if (!team) return
@@ -186,7 +170,7 @@ function pick(value: string) {
   } else if (p.field === 'item') update(p.slot, { item: (value || null) as ItemId | null })
   else if (p.field === 'ability') update(p.slot, { ability: value as AbilityId })
   else if (p.field === 'nature') update(p.slot, { nature: value })
-  else {
+  else if (typeof p.field === 'number') {
     // A move it has in another place trades places with the one it replaces.
     const moves = [...m.moves]
     const was = moves.indexOf(value as MoveId)
@@ -194,10 +178,22 @@ function pick(value: string) {
     moves[p.field] = value as MoveId
     update(p.slot, { moves })
   }
-  const next = nextField(team.members[p.slot]!, p.field)
+  // Its nature picked again from its stat points' step: back to that step.
+  const next = p.back ?? nextField(team.members[p.slot]!, p.field)
   picking.value =
     next === null ? null : { slot: p.slot, field: next, ...(p.pin && { pin: true }), ...(common && { common }) }
 }
+
+/** The slot being picked for's stat points' step: the Pokémon its stats are of (its Mega while it Mega Evolves), its
+ * common spreads. */
+const pickerPoints = computed(() => {
+  const p = picking.value
+  if (!p) return null
+  return { battler: battling.value[p.slot]?.as ?? null, spreads: spreadsOf(members.value[p.slot]!) }
+})
+const pointsChange = (patch: Partial<Member>) => picking.value && update(picking.value.slot, patch)
+const natureAgain = () =>
+  picking.value && (picking.value = { ...picking.value, field: 'nature', back: 'points', common: undefined })
 
 /** The set being put together skipped: the most common set loaded, the picker closed. */
 function loadCommon() {
@@ -562,8 +558,6 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
             :pinned="pinned === i"
             @mega="toggleMega(i)"
             @pin="togglePin(i)"
-            :open="!!editing[i]"
-            @update:open="setEditing(i, $event)"
             @field="picking = { slot: i, field: $event }"
             @change="update(i, $event)"
             @clear="clearSlot(i)"
@@ -584,6 +578,7 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
               :evolved="evolving === pinned"
               pinnable
               pinned
+              inline-points
               :open="editorOpen"
               @update:open="pinSide ? (pinEditing = $event) : (dockEdit = 'points')"
               @mega="toggleMega(pinned)"
@@ -690,8 +685,11 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
         :field="picking.field"
         :data
         :snapshot
+        v-bind="pickerPoints"
         @pick="pick"
         @close="picking = null"
+        @change="pointsChange"
+        @nature="natureAgain"
         ><ReuseCommon
       /></TeamPicker>
     </SideDrawer>
@@ -705,8 +703,11 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
           :field="picking.field"
           :data
           :snapshot
+          v-bind="pickerPoints"
           @pick="pick"
           @close="picking = null"
+          @change="pointsChange"
+          @nature="natureAgain"
           ><ReuseCommon
         /></TeamPicker>
       </div>

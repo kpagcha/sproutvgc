@@ -12,7 +12,7 @@ import type { Slot } from '@/data/tournaments'
 import { TOTAL_POINTS } from '@/lib/stats'
 
 /** A part of a slot to pick: its Pokémon, item, ability, nature, or one of its moves (by its place). */
-export type Field = 'pokemon' | 'item' | 'ability' | 'nature' | 0 | 1 | 2 | 3
+export type Field = 'pokemon' | 'item' | 'ability' | 'nature' | 0 | 1 | 2 | 3 | 'points'
 
 export const TEAM_SIZE = RULES.teamSize
 export const MOVE_SLOTS = RULES.moves
@@ -102,6 +102,17 @@ export function memberFromSlot([mon, item, ability, nature, moves]: Slot): Membe
 
 /** The stat points a slot has left to spread. */
 export const pointsLeft = (m: Member) => TOTAL_POINTS - m.points.reduce((a, b) => a + b, 0)
+
+/** The order a set is put together in, its stat points last. */
+const FIELD_ORDER: readonly Field[] = ['pokemon', 'item', 'ability', 'nature', 0, 1, 2, 3, 'points']
+/** The next part a slot hasn't got after `after`, in the order a set is put together (its stat points while none are
+ * spent); null once it has them all. */
+export function nextField(m: Member, after: Field): Field | null {
+  for (const f of FIELD_ORDER.slice(FIELD_ORDER.indexOf(after) + 1)) {
+    if (f === 'points' ? m.points.every((p) => !p) : typeof f === 'number' ? !m.moves[f] : !m[f]) return f
+  }
+  return null
+}
 
 /** Whether a slot has nothing picked. */
 export const isEmpty = (m: Member) => !m.pokemon

@@ -1,17 +1,16 @@
 <script setup lang="ts">
-import { computed, shallowRef } from 'vue'
-import { ChartBar, ChartColumn, ChevronDown, ChevronUp, CircleAlert, Pin, PinOff, X } from '@lucide/vue'
+import { computed } from 'vue'
+import { ChevronDown, ChevronUp, CircleAlert, Pencil, Pin, PinOff, X } from '@lucide/vue'
 import { ability, item, move, pokemon, type MoveId } from '@/data/dex'
 import type { Spread } from '@/data/meta'
 import { MOVES } from '@/data/moves'
-import { natureName } from '@/data/natures'
-import { POKEMON, spriteUrl } from '@/data/pokemon'
+import { natureEffectOn, natureName } from '@/data/natures'
+import { POKEMON, spriteUrl, STATS } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { pointsLeft, stoneMega, type Field, type Member, type Points } from '@/lib/team'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PointsEditor from '@/components/PointsEditor.vue'
-import SpreadPresets from '@/components/SpreadPresets.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
 import { natureTip } from '@/components/natureTip'
@@ -19,8 +18,9 @@ import { natureTip } from '@/components/natureTip'
 // One slot of a team in the builder, laid out as a tournament team's set (`TeamSets`): its sprite, name and types in a
 // band with its item, then its ability and nature, then its four moves two by two. Every part is a button opening its
 // picker (`field`), a part not picked yet a placeholder saying what goes there; the one being picked marked
-// (`active`). Under them its stats and stat points (`PointsEditor`), folded at first; folded, a line saying how many
-// points are left to spend, while any are. An empty slot is the same card, all
+// (`active`). Under them its stat points in a compact row (each stat's shorthand over its points, the nature's colors,
+// what's left to spend), a button opening their step in the picker, the set's last (`points`); pinned beside the
+// insights (`inlinePoints`), unfolding their editor (`PointsEditor`) under it instead. An empty slot is the same card, all
 // placeholders, each opening the Pokémon's picker: the rest needs a Pokémon first. Holding its Mega Stone, a switch at
 // the stat points line's end says whether it's the one that Mega Evolves in the team's insights (`evolved`, `mega`);
 // while it is, the card shows the Mega (its name, sprite, types and stats, and its ability after the one its sheet
@@ -29,11 +29,9 @@ import { natureTip } from '@/components/natureTip'
 // glowing in the accent and back, in a loop, until its picker opens. In the team builder (`pinnable`), a pin by its
 // clearing pins it beside the team's insights (`pinned`, `pin`), to edit it there as they follow. In the damage
 // calculator its moves are left out (`noMoves`): its rows of damage are its moves, each picked from there; and it's
-// flat (`flat`): no card of its own, the side's panel being its box, and no clearing, the side's menu clearing it; and
-// its stats (`statPicks`) a quiet button folding their editor on one row with the Mega's switch; unfolded, over the
-// editor, loading one of its common spreads (`SpreadPresets`) and being at every set (`atSets`, `sets`: its sets
-// pooled by usage, where the meta has them, `canPool`), the editor then showing the pooled points and stats locked
-// (`pooled`), its own kept for when it's off again, and its nature crossed out, as it isn't what it battles with.
+// flat (`flat`): no card of its own, the side's panel being its box, and no clearing, the side's menu clearing it; at
+// every set (`atSets`), its compact row showing its sets' pooled points (`pooled`), dimmed, and its nature crossed out,
+// as it isn't what it battles with.
 const props = defineProps<{
   member: Member
   active: Field | null
@@ -51,11 +49,10 @@ const props = defineProps<{
   noMoves?: boolean
   /** No card of its own nor clearing: the top of a panel that's its box (the damage calculator's side). */
   flat?: boolean
-  /** Its stats as three picks: its stat points, a common spread, or every set (the damage calculator's). */
-  statPicks?: boolean
-  /** At every set, its sets pooled; and whether the meta has them to be. */
+  /** Its stat points' editor unfolding under its compact row (pinned beside the insights), not their picker's step. */
+  inlinePoints?: boolean
+  /** At every set, its sets pooled (the damage calculator's). */
   atSets?: boolean
-  canPool?: boolean
   /** At every set, its points and stats pooled, which its editor shows locked. */
   pooled?: { points: readonly number[]; stats: readonly number[] }
 }>()
@@ -65,7 +62,6 @@ const emit = defineEmits<{
   change: [patch: Partial<Member>]
   mega: []
   pin: []
-  sets: [on: boolean]
 }>()
 const open = defineModel<boolean>('open', { default: false })
 
@@ -85,8 +81,24 @@ const points = computed({
 })
 const preset = (s: Spread) => emit('change', { points: [...s.points], nature: s.nature })
 
-// The common sets' dialog, opened from the stat points' editor.
-const presetsOpen = shallowRef(false)
+/** Each stat's points as the compact row shows them: at every set, the pooled ones, rounded. */
+const cells = computed(() =>
+  STATS.map((stat, i) => ({
+    stat,
+    effect: props.member.nature && !props.atSets ? natureEffectOn(props.member.nature, stat) : 'neutral',
+    points: props.atSets && props.pooled ? Math.round(props.pooled.points[i]!) : props.member.points[i]!,
+  })),
+)
+/** How many points are left to spend, or over, said in full; none when all are spent or at every set. */
+const leftText = computed(() => {
+  const n = left.value
+  if (!n || props.atSets) return ''
+  if (n > 0) return n === 1 ? t('builder.pointToSpend') : t('builder.pointsToSpend', { n })
+  return n === -1 ? t('builder.pointOver') : t('builder.pointsOver', { n: -n })
+})
+const chipText = computed(() =>
+  [cells.value.map((c) => `${t(`stat.${c.stat}`)} ${c.points}`).join(', '), leftText.value].filter(Boolean).join('. '),
+)
 </script>
 
 <template>
@@ -201,71 +213,41 @@ const presetsOpen = shallowRef(false)
         </button>
       </li>
     </ul>
-    <!-- Its stats and stat points, folded under a line saying how many are left (unfolded, beside its name). -->
+    <!-- Its stat points in a compact row, a button opening their step in the picker (or, pinned beside the insights,
+         unfolding their editor under it): each stat's shorthand over its points, bold where it has any, in the good
+         color where its nature raises it and the bad where it lowers it; while any are left to spend (or over), an
+         alert's icon and how many; and holding its Mega Stone, whether it Mega Evolves, a switch at the row's end. -->
     <div v-if="shown" class="stats-box">
-      <!-- Folding the stats, and beside it, holding its Mega Stone, whether it Mega Evolves: a switch at the line's end,
-           where there's always room. -->
-      <!-- The damage calculator's: its stat points folding their editor, and the Mega's switch, on one row; unfolded,
-           loading a common set or being at every set over the editor. -->
-      <div v-if="statPicks" class="stats-line picks">
+      <div class="stats-line">
         <button
           type="button"
-          class="btn quiet small"
-          :class="{ on: open, callout: !atSets && left !== 0, over: left < 0 }"
-          :aria-expanded="open"
-          @click="open = !open"
+          class="stats-chip"
+          :class="{ active: active === 'points', derived: atSets && pooled }"
+          :aria-label="`${t('builder.editPoints')}: ${chipText}`"
+          :aria-expanded="inlinePoints ? open : undefined"
+          @click="inlinePoints ? (open = !open) : go('points')"
         >
-          <component :is="!atSets && left !== 0 ? CircleAlert : ChartBar" :size="14" aria-hidden="true" />
-          <span v-if="atSets || left === 0">{{ t('builder.points') }}</span>
-          <span v-else aria-live="polite">{{
-            left > 0
-              ? left === 1
-                ? t('builder.pointToSpend')
-                : t('builder.pointsToSpend', { n: left })
-              : left === -1
-                ? t('builder.pointOver')
-                : t('builder.pointsOver', { n: -left })
-          }}</span>
-          <ChevronDown :size="14" class="pick-chev" :class="{ open }" aria-hidden="true" />
-        </button>
-        <button
-          v-if="mega"
-          type="button"
-          role="switch"
-          class="mega-switch"
-          :class="{ on: evolved }"
-          :aria-checked="!!evolved"
-          @click="emit('mega')"
-        >
-          <span class="switch-label">{{ t('builder.mega') }}</span>
-          <span class="track" aria-hidden="true"><span class="knob"></span></span>
-        </button>
-        <SpreadPresets
-          v-model:open="presetsOpen"
-          :spreads
-          :nature="member.nature"
-          :points="member.points"
-          @pick="preset"
-        />
-      </div>
-      <div v-else class="stats-line">
-        <button type="button" class="stats-toggle" :aria-expanded="open" @click="open = !open">
-          <span class="toggle-line" :class="{ callout: left !== 0, over: left < 0 }">
-            <span class="toggle-label">
-              <component :is="left !== 0 ? CircleAlert : ChartBar" :size="14" class="points-icon" aria-hidden="true" />
-              <span v-if="open || left === 0" class="muted">{{ t('builder.points') }}</span>
-              <span v-if="left !== 0" class="warn" :class="{ over: left < 0 }" aria-live="polite">{{
-                left > 0
-                  ? left === 1
-                    ? t('builder.pointToSpend')
-                    : t('builder.pointsToSpend', { n: left })
-                  : left === -1
-                    ? t('builder.pointOver')
-                    : t('builder.pointsOver', { n: -left })
-              }}</span>
+          <span class="cells">
+            <span
+              v-for="c in cells"
+              :key="c.stat"
+              class="cell"
+              :class="[c.effect, { spent: c.points > 0 }]"
+              aria-hidden="true"
+            >
+              <span class="cell-label">{{ t(`stat.${c.stat}`) }}</span>
+              <span class="cell-num">{{ c.points }}</span>
             </span>
-            <component :is="open ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />
           </span>
+          <span v-if="leftText" v-tip="leftText" class="chip-left" :class="{ over: left < 0 }" aria-hidden="true"
+            ><CircleAlert :size="14" />{{ Math.abs(left) }}</span
+          >
+          <component
+            :is="inlinePoints ? (open ? ChevronUp : ChevronDown) : Pencil"
+            :size="14"
+            class="chip-edit"
+            aria-hidden="true"
+          />
         </button>
         <button
           v-if="mega"
@@ -279,49 +261,9 @@ const presetsOpen = shallowRef(false)
           <span class="switch-label">{{ t('builder.mega') }}</span>
           <span class="track" aria-hidden="true"><span class="knob"></span></span>
         </button>
-      </div>
-      <div v-if="open && statPicks" class="editor picks-editor">
-        <div v-if="spreads.length || canPool" class="pick-row">
-          <button
-            v-if="spreads.length"
-            type="button"
-            class="btn quiet small"
-            aria-haspopup="dialog"
-            @click="presetsOpen = true"
-          >
-            <ChartColumn :size="14" aria-hidden="true" />{{ t('calc.loadPresets') }}
-          </button>
-          <button
-            v-if="canPool"
-            v-tip="canHover ? t('calc.sets.tip') : undefined"
-            type="button"
-            class="btn quiet small"
-            :class="{ on: atSets }"
-            :aria-pressed="!!atSets"
-            @click="emit('sets', !atSets)"
-          >
-            {{ t('calc.sets.toggle') }}
-          </button>
-        </div>
-        <!-- What the sliders are at, both lines stacked in one cell, the one not said hidden: as tall either way, so
-             turning Every set on or off doesn't move the sliders. -->
-        <p v-if="canPool" class="pooled-note">
-          <span :class="{ hidden: atSets && pooled }">{{ t('calc.sets.own') }}</span>
-          <span :class="{ hidden: !(atSets && pooled) }">{{ t('calc.sets.note') }}</span>
-        </p>
-        <PointsEditor
-          v-model:points="points"
-          :pokemon="shown"
-          :nature="member.nature"
-          :spreads
-          no-presets
-          :locked="atSets ? pooled : undefined"
-          @preset="preset"
-          @confirm="open = false"
-        />
       </div>
       <PointsEditor
-        v-else-if="open"
+        v-if="inlinePoints && open"
         v-model:points="points"
         class="editor"
         :pokemon="shown"
@@ -332,10 +274,17 @@ const presetsOpen = shallowRef(false)
       />
     </div>
     <div v-else class="stats-box stats-blank" aria-hidden="true">
-      <span class="toggle-line"
-        ><span class="toggle-label"><ChartBar :size="14" class="points-icon" />{{ t('builder.points') }}</span
-        ><ChevronDown :size="14"
-      /></span>
+      <div class="stats-line">
+        <span class="stats-chip">
+          <span class="cells">
+            <span v-for="stat in STATS" :key="stat" class="cell">
+              <span class="cell-label">{{ t(`stat.${stat}`) }}</span>
+              <span class="cell-num">–</span>
+            </span>
+          </span>
+          <Pencil :size="14" class="chip-edit" />
+        </span>
+      </div>
     </div>
   </li>
 </template>
@@ -373,10 +322,6 @@ const presetsOpen = shallowRef(false)
   width: 26px;
   height: 22px;
   border: 1px dashed var(--border);
-}
-.stats-blank {
-  padding: 6px 8px;
-  color: var(--muted);
 }
 .slot-btn {
   display: inline-flex;
@@ -598,75 +543,102 @@ const presetsOpen = shallowRef(false)
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* The line folding the stats and points under it. */
+/* The stat points' row at the card's foot. */
 .stats-box {
   margin-top: auto;
   border-top: 1px solid var(--border);
 }
 .stats-line {
   display: flex;
-  align-items: stretch;
-}
-.stats-toggle {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  width: 100%;
+  align-items: center;
+  gap: 8px;
   padding: 6px 8px;
+}
+/* The compact row: a button, outlined as the page's quiet ones and lit on hover, so it reads as one to tap; each
+   stat's shorthand over its points, bold where it has any, the nature's raised stat in the good color and its lowered
+   one in the bad; what's left to spend after them, the pencil (or the arrow, unfolding in place) at its end. */
+.stats-chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
   font: inherit;
   color: inherit;
   text-align: left;
-  background: none;
-  border: 0;
+  background: var(--panel-alt);
+  border: 1px solid var(--border-strong);
   cursor: pointer;
 }
-/* The arrow right after what it says, not at the line's far end. */
-.toggle-line {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.85em;
+button.stats-chip:hover {
+  background: var(--hover);
+  border-color: var(--ink);
 }
-.toggle-label {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2px 10px;
+.stats-chip.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
 }
-/* The stat points' icon, before what the line says of them. */
-.points-icon {
-  flex: none;
-  margin-right: -4px;
+.cells {
+  display: inline-flex;
+}
+.cell {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 1.9em;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+.cell-label {
+  font-size: 0.68em;
+  letter-spacing: 0.02em;
   color: var(--muted);
 }
-.warn {
+.cell-num {
+  font-size: 0.9em;
+  color: var(--muted);
+}
+.cell.spent .cell-num {
+  font-weight: bold;
+  color: var(--text);
+}
+.cell.up .cell-label,
+.cell.up .cell-num {
+  color: var(--good);
+}
+.cell.down .cell-label,
+.cell.down .cell-num {
+  color: var(--bad);
+}
+/* At every set, its sets' pooled points: dimmed, as its locked sliders are. */
+.stats-chip.derived .cells {
+  opacity: 0.55;
+}
+/* Points left to spend, or over: an alert's icon and how many, in the warm warning (red, over). */
+.chip-left {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
+  font-size: 0.85em;
   font-weight: bold;
-  color: var(--accent);
-}
-.warn.over {
-  color: var(--bad);
-}
-/* Points left to spend (or over): the line loud by its color and an alert's icon in place of the chart's, in a warm
-   warning (in red, over), so a set not finished shows; all spent, the quiet line. */
-.toggle-line.callout {
   color: var(--warn);
+  font-variant-numeric: tabular-nums;
 }
-.toggle-line.callout.over {
+.chip-left.over {
   color: var(--bad);
 }
-.toggle-line.callout .warn {
-  color: inherit;
+.chip-edit {
+  flex: none;
+  color: var(--muted);
 }
-.toggle-line.callout .points-icon {
-  margin-right: -2px;
-  color: inherit;
-  /* Centered on the bold text's capitals and figures, not its line box (which leaves room for descenders). */
-  transform: translateY(-1px);
+button.stats-chip:hover .chip-edit {
+  color: var(--text);
+}
+.stats-line .mega-switch {
+  align-self: center;
+  margin-left: auto;
+  padding-right: 0;
+  border-left: 0;
 }
 .editor {
   padding: 0 8px 8px;
@@ -679,8 +651,7 @@ const presetsOpen = shallowRef(false)
   box-shadow: none;
 }
 /* Its sprite beside the set's three lines (the name, its types and item, the ability and nature: as tall as it), so it
-   takes no height of its own; the stat points' line under them, across, at the panel's edge as the editor it unfolds
-   (the head and the stats' box laid out as the slot's own grid, `contents`). */
+   takes no height of its own; the stat points' row under them, across, at the panel's edge. */
 .set.flat {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -700,10 +671,10 @@ const presetsOpen = shallowRef(false)
 .set.flat .set-facts {
   grid-column: 2;
 }
-.set.flat .stats-line,
-.set.flat .stats-blank {
+.set.flat .stats-line {
   grid-column: 1 / -1;
   margin-top: 4px;
+  padding: 0;
 }
 .set.flat .set-sprite {
   width: 64px;
@@ -711,68 +682,6 @@ const presetsOpen = shallowRef(false)
 }
 .set.flat .set-facts {
   padding: 0;
-}
-.set.flat .stats-toggle {
-  padding: 0;
-}
-.set.flat .editor {
-  grid-column: 1 / -1;
-  padding-inline: 0;
-}
-/* The damage calculator's: the stat points' button and the Mega's switch at the line's end. */
-.picks {
-  align-items: center;
-  gap: 6px;
-}
-.picks .btn,
-.pick-row .btn {
-  gap: 4px;
-  padding-inline: 6px;
-}
-/* What it folds, the arrow after the label, flipped while unfolded, as the page's other folding buttons have it. */
-.pick-chev {
-  flex: none;
-  transition: transform 0.15s;
-}
-.pick-chev.open {
-  transform: rotate(180deg);
-}
-/* Points left to spend or over, loud as the builder's line is (over the quiet button's muted ink). */
-:root:root .picks .btn.callout {
-  color: var(--warn);
-  font-weight: bold;
-}
-:root:root .picks .btn.callout.over {
-  color: var(--bad);
-}
-.picks .mega-switch {
-  align-self: center;
-  margin-left: auto;
-  padding-right: 0;
-  border-left: 0;
-}
-/* Unfolded: loading a common set and every set over the editor. */
-.picks-editor {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.pick-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.pooled-note {
-  display: grid;
-  margin: 0;
-  font-size: 0.8em;
-  color: var(--muted);
-}
-.pooled-note > span {
-  grid-area: 1 / 1;
-}
-.pooled-note > .hidden {
-  visibility: hidden;
 }
 /* At every set, its nature isn't what it battles with. */
 .nature.struck {
