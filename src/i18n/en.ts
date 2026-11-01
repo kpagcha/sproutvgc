@@ -1590,8 +1590,6 @@ export const messages = {
   'picker.ability': 'With {name}',
   'picker.showAll': 'Show all ({n})',
   'picker.showFewer': 'Show fewer',
-  'compare.intro':
-    'Your Pokémon and an opponent, up to six a side, each with its build: who moves first, and what it takes.',
   'compare.pick': 'Pick a Pokémon',
   'compare.pickYours': 'Pick your Pokémon',
   'compare.pickOpponent': 'Pick an opponent',

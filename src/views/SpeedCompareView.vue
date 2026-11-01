@@ -896,12 +896,19 @@ function resetAll() {
     <!-- Yours against the opponents, once there's one picked: seeing the two on the speed tiers, at the page's end, as
          the speed tiers' card ends with the way here. -->
     <div v-if="mode === 'vs' && anyPicked" class="to-ladder">
-      <AppLink v-if="!ladderChoices.length" :to="ladderLink" class="btn">{{ t('compare.toLadder') }}</AppLink>
+      <AppLink v-if="!ladderChoices.length" :to="ladderLink" class="to-ladder-link"
+        >{{ t('title.speedTiers') }} ›</AppLink
+      >
       <!-- With a second on either team: which of yours goes there as yours, which opponent it finds. -->
       <div v-else ref="ladderMenu" class="ladder-menu">
-        <button type="button" class="btn" :aria-expanded="ladderOpen" @click="ladderOpen = !ladderOpen">
-          {{ t('compare.toLadder')
-          }}<ChevronDown :size="16" class="fold-chevron" :class="{ open: ladderOpen }" aria-hidden="true" />
+        <button
+          type="button"
+          class="to-ladder-link"
+          :aria-expanded="ladderOpen"
+          :aria-label="t('compare.toLadder')"
+          @click="ladderOpen = !ladderOpen"
+        >
+          {{ t('title.speedTiers') }} ›
         </button>
         <div v-if="ladderOpen" class="ladder-pop panel" :class="{ up: ladderUp }">
           <div
@@ -931,11 +938,25 @@ function resetAll() {
         </div>
       </div>
     </div>
-    <p class="muted small page-note">{{ t(mode === 'order' ? 'compare.introOrder' : 'compare.intro') }}</p>
+    <p v-if="mode === 'order'" class="muted small page-note">{{ t('compare.introOrder') }}</p>
   </div>
 </template>
 
 <style scoped>
+/* The way to the speed tiers: a bold link, "Speed tiers ›", as the damage calculator's (no button's box). */
+.to-ladder-link {
+  padding: 0;
+  font: inherit;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: var(--link);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.to-ladder-link:hover {
+  text-decoration: underline;
+}
 /* The heading on the page, no panel: a title's line needs no box. Its row: the title and its star, the way to take
    the tour again, then the data shown at its end (its dataset cut short first when the row's tight; on phones, its
    icon alone). */
