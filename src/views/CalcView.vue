@@ -950,7 +950,7 @@ function face(f: Fighter) {
   }
   .duel.aligned > :deep(section) {
     display: grid;
-    grid-row: span 5;
+    grid-row: span 4;
     grid-template-rows: subgrid;
     row-gap: 28px;
     align-content: start;

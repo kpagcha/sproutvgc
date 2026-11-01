@@ -40,8 +40,9 @@ import TeamSlot from '@/components/TeamSlot.vue'
 // moves, which are its rows of damage against the other side (`DamageRow`, a row each, a status move's dimmed, its name
 // picking another), and what the
 // battle adds to it: its HP left, its status, its stat stages, whether its ability's condition is met (for one that
-// waits on it), its allies fainted (Supreme Overlord, Last Respects), the times it's been hit (Rage Fist); and last, what's on its side, a box of its own folding (`sideOpen`,
-// both sides' together): folded, what's on; open, its conditions to set (`CalcConditions`).
+// waits on it), its allies fainted (Supreme Overlord, Last Respects), the times it's been hit (Rage Fist), and last
+// what's on its side, a box folding (`sideOpen`, both sides' together; how many are on counted on In battle's heading):
+// folded, what's on; open, its conditions to set (`CalcConditions`).
 // `theirs`: the opponent's side, its knockouts bad news.
 const props = defineProps<{
   fighter: Fighter
@@ -254,7 +255,12 @@ function setHpPoints(e: Event) {
             :aria-expanded="!battleFolded"
             @click="emit('battleFolded', !battleFolded)"
           >
-            <span class="part-title">{{ t('calc.battle') }}</span>
+            <span class="part-title"
+              >{{ t('calc.battle')
+              }}<span v-if="onSide.length" class="on-count" :aria-label="t('calc.sideOn', { n: onSide.length })">{{
+                onSide.length
+              }}</span></span
+            >
             <ChevronDown :size="16" class="fold-chev" :class="{ open: !battleFolded }" aria-hidden="true" />
           </button>
         </h3>
@@ -363,49 +369,45 @@ function setHpPoints(e: Event) {
               </button>
             </span>
           </div>
-        </div>
-      </template>
-    </div>
-
-    <!-- What's on its side, a box of its own on a row of its own (level with the other side's), folding. -->
-    <div class="side-row">
-      <template v-if="shown && stats">
-        <div class="side-box" :class="{ empty: !onSide.length }">
-          <!-- Its toggle, as the field's Battle conditions; folded, those on named after it on its row. -->
-          <div class="side-box-row">
-            <button
-              type="button"
-              class="btn side-box-head"
-              :class="{ on: sideOpen }"
-              :aria-expanded="sideOpen"
-              @click="emit('sideOpen', !sideOpen)"
-            >
-              <SlidersHorizontal :size="16" aria-hidden="true" />{{ t('calc.sideLabel')
-              }}<span class="on-count" :class="{ none: !onSide.length }">{{ onSide.length }}</span
-              ><ChevronDown :size="14" class="fold-chev" :class="{ open: sideOpen }" aria-hidden="true" />
-            </button>
-            <template v-if="!sideOpen">
-              <span v-for="c in onSide" :key="c.key" class="side-item">{{ c.name }}</span>
-            </template>
-            <!-- Unfolded, its Clear on its row, as the field's: beside it (on phones at the row's end). -->
-            <button
-              v-else
-              type="button"
-              class="btn quiet small side-clear"
-              :disabled="!onSide.length"
-              @click="emit('update:fighter', { ...fighter, side: [], spikes: 0 })"
-            >
-              <Eraser :size="14" aria-hidden="true" />{{ t('calc.clearConditions') }}
-            </button>
+          <!-- What's on its side, last: its toggle, as the field's Battle conditions, folding its box; those on
+               counted on the heading too. -->
+          <div class="side-box" :class="{ empty: !onSide.length }">
+            <!-- Its toggle, as the field's Battle conditions; folded, those on named after it on its row. -->
+            <div class="side-box-row">
+              <button
+                type="button"
+                class="btn side-box-head"
+                :class="{ on: sideOpen }"
+                :aria-expanded="sideOpen"
+                @click="emit('sideOpen', !sideOpen)"
+              >
+                <SlidersHorizontal :size="16" aria-hidden="true" />{{ t('calc.sideLabel')
+                }}<span class="on-count" :class="{ none: !onSide.length }">{{ onSide.length }}</span
+                ><ChevronDown :size="14" class="fold-chev" :class="{ open: sideOpen }" aria-hidden="true" />
+              </button>
+              <template v-if="!sideOpen">
+                <span v-for="c in onSide" :key="c.key" class="side-item">{{ c.name }}</span>
+              </template>
+              <!-- Unfolded, its Clear on its row, as the field's: beside it (on phones at the row's end). -->
+              <button
+                v-else
+                type="button"
+                class="btn quiet small side-clear"
+                :disabled="!onSide.length"
+                @click="emit('update:fighter', { ...fighter, side: [], spikes: 0 })"
+              >
+                <Eraser :size="14" aria-hidden="true" />{{ t('calc.clearConditions') }}
+              </button>
+            </div>
+            <CalcConditions
+              v-if="sideOpen"
+              :field
+              :side="{ key: theirs ? 'b' : 'a', fighter }"
+              :data
+              no-clear
+              @side="(_k, f) => emit('update:fighter', f)"
+            />
           </div>
-          <CalcConditions
-            v-if="sideOpen"
-            :field
-            :side="{ key: theirs ? 'b' : 'a', fighter }"
-            :data
-            no-clear
-            @side="(_k, f) => emit('update:fighter', f)"
-          />
         </div>
       </template>
     </div>
@@ -624,8 +626,7 @@ function setHpPoints(e: Event) {
 }
 /* With no Pokémon, its moves' and battle's parts have nothing: no room kept for them. */
 .results:empty,
-.battle:empty,
-.side-row:empty {
+.battle:empty {
   display: none;
 }
 .row {
