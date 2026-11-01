@@ -6,6 +6,9 @@ import { isSpread, MOVES } from '@/data/moves'
 import { t, tSplit, typeName } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { copy } from '@/lib/clipboard'
+import { follow, metaHref } from '@/lib/links'
+import { description } from '@/i18n/descriptions'
+import DexText from '@/components/DexText'
 import { DOUBLING, hitChoices, koKind, MAX_STOCKPILE, type Hit } from '@/lib/damage'
 import CategoryIcon from '@/components/CategoryIcon'
 import TypeIcon from '@/components/TypeIcon'
@@ -14,12 +17,13 @@ import TypeIcon from '@/components/TypeIcon'
 // defender's HP, and the calc's verdict, over a bar of the defender's HP filling with the damage, in the attacker's
 // side's color (what it deals for sure, solid; what it may deal past that, striped; what it had lost already, dark,
 // first). Its verdict colored for whose it is (`theirs`: the opponent's moves
-// hitting yours, a knockout bad news). Unfolded, its HP numbers, every roll, and the calc's line to share, copied in a
+// hitting yours, a knockout bad news). Unfolded, what it does in short with the way to its meta page (any move's,
+// a status move's too), then its HP numbers, every roll, and the calc's line to share, copied in a
 // tap (off for now, `DESC_ON`); a critical hit, for a move whose hits vary how many, and for a spread move whether it hits one target alone
 // (no spread reduction), and for a move doubled on what came before it (`DOUBLING`: Stomping Tantrum's last move failing,
 // Avalanche hit first, Round after an ally's, Fickle Beam's all-out attack) whether it is, Spit Up's Stockpile layers, set from its row and marked on its name. What the order does to it (a priority move's
 // priority, Payback's power) a tag at the end of the verdict's line, so every row is as tall and the two sides' rows line up; a status
-// move a row laid out as the rest, dimmed, its bar empty and nothing to unfold (on phones, its name's line alone). The rows are the side's moves, the set's
+// move a row laid out as the rest, dimmed, its bar empty, unfolding to what it does alone (on phones, its name's line alone). The rows are the side's moves, the set's
 // card leaving them out: its name a button picking another in its place (`pick`, `active` while it's being picked), and
 // a move not picked yet a placeholder picking one. With no other side yet (`idle`), its name alone.
 const props = defineProps<{
@@ -51,7 +55,10 @@ const m = computed(() => (props.id ? MOVES[props.id] : undefined))
 const kind = computed(() => koKind(props.hit))
 const status = computed(() => m.value?.category === 'status')
 /** Its rolls and the rest to unfold: a damaging move's, against the other side. */
-const foldable = computed(() => !status.value && !props.idle)
+/** Every move unfolds, to what it does and the way to its meta page; a damaging one's, against the other side, to its
+ * rolls and the rest too (`damage`). */
+const damage = computed(() => !status.value && !props.idle)
+const about = computed(() => (props.id ? (description('move', props.id)?.short ?? '') : ''))
 // Past its HP as it is, overkill and all (as Showdown's calc says it), whole from 100: "212 – 250%".
 const fmt = (x: number) => (x >= 100 ? String(Math.floor(x)) : x.toFixed(1))
 /** The bar's parts, in percent of the defender's whole HP, from the left: lost before, dealt for sure, may be dealt
@@ -105,13 +112,9 @@ const blockedText = tSplit('calc.blockedBy', 'what')
       <Plus :size="14" aria-hidden="true" />{{ t('calc.pickMove') }}
     </button>
   </li>
-  <li
-    v-else
-    class="damage"
-    :class="[kind, { theirs, open: open && foldable, none: hit?.none, 'status-move': status, idle }]"
-  >
+  <li v-else class="damage" :class="[kind, { theirs, open, none: hit?.none, 'status-move': status, idle }]">
     <!-- The row tapped anywhere but its name unfolds it; its name picks another move in its place. -->
-    <div class="head" @click="foldable && (open = !open)">
+    <div class="head" @click="open = !open">
       <span class="name">
         <button
           v-tip="t('calc.changeMove')"
@@ -136,15 +139,7 @@ const blockedText = tSplit('calc.blockedBy', 'what')
         ><span class="pct">{{ fmt(hit.minPct) }} – {{ fmt(hit.maxPct) }}%</span></span
       >
       <!-- Unfolding it: its rolls, and the rest. -->
-      <button
-        type="button"
-        class="fold"
-        :class="{ gone: !foldable }"
-        :disabled="!foldable"
-        :aria-expanded="foldable ? open : undefined"
-        :aria-label="t('calc.rolls')"
-        @click.stop="open = !open"
-      >
+      <button type="button" class="fold" :aria-expanded="open" :aria-label="t('calc.rolls')" @click.stop="open = !open">
         <component :is="open ? ChevronUp : ChevronDown" :size="16" aria-hidden="true" />
       </button>
       <template v-if="!idle">
@@ -171,8 +166,13 @@ const blockedText = tSplit('calc.blockedBy', 'what')
         <span v-if="note" class="note">{{ note }}</span>
       </template>
     </div>
-    <div v-if="open && foldable" class="details">
-      <div class="toggles">
+    <div v-if="open" class="details">
+      <!-- What it does, in short, and the way to its meta page. -->
+      <p class="about">
+        <DexText v-if="about" :text="about" />
+        <a :href="metaHref(move(id))" class="to-meta" @click="follow">{{ t('lists.toMeta') }} ›</a>
+      </p>
+      <div v-if="damage" class="toggles">
         <button type="button" class="btn mod" :class="{ on: crit }" :aria-pressed="crit" @click="emit('crit', !crit)">
           <Zap :size="14" aria-hidden="true" />{{ t('calc.crit') }}
         </button>
@@ -232,7 +232,7 @@ const blockedText = tSplit('calc.blockedBy', 'what')
           t('calc.hpRange', { min: hit.min, max: hit.max, of: hit.maxHp })
         }}</span>
       </div>
-      <template v-if="hit && !hit.none">
+      <template v-if="damage && hit && !hit.none">
         <p class="rolls">
           <span class="muted">{{ t('calc.rolls') }}</span>
           <span class="roll-list">{{ hit.rolls.join(', ') }}</span>
@@ -271,12 +271,8 @@ const blockedText = tSplit('calc.blockedBy', 'what')
   padding: 10px 0;
   cursor: pointer;
 }
-/* A status move: as the rest, dimmed, nothing to unfold (its fold's room kept). */
-.damage.status-move .head,
-.damage.idle .head {
-  cursor: default;
-}
-.damage.status-move .head > :not(.name),
+/* A status move: as the rest, dimmed (but its arrow), unfolding to what it does alone. */
+.damage.status-move .head > :not(.name, .fold),
 .damage.status-move .cat {
   opacity: 0.5;
 }
@@ -292,12 +288,9 @@ const blockedText = tSplit('calc.blockedBy', 'what')
   border: 0;
   cursor: pointer;
 }
-.head:hover .fold:not(:disabled),
+.head:hover .fold,
 .fold:focus-visible {
   color: var(--text);
-}
-.fold.gone {
-  visibility: hidden;
 }
 /* Its name, picking another in its place: a link's color, a pencil after it saying so. */
 .move-btn {
@@ -464,6 +457,13 @@ const blockedText = tSplit('calc.blockedBy', 'what')
   gap: 10px;
   padding: 2px 0 14px;
   font-size: 0.875em;
+}
+.about {
+  line-height: 1.45;
+}
+.to-meta {
+  margin-left: 8px;
+  white-space: nowrap;
 }
 .details p {
   margin: 0;
