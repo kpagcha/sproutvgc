@@ -49,6 +49,7 @@ import CommonSetOffer from '@/components/CommonSetOffer.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
 import OptionsMenu from '@/components/OptionsMenu.vue'
+import { confirmDialog } from '@/composables/useConfirm'
 import PokemonIcon from '@/components/PokemonIcon'
 import ScrollRow from '@/components/ScrollRow.vue'
 import SectionNav from '@/components/SectionNav.vue'
@@ -266,15 +267,45 @@ function pick(value: string) {
 }
 
 // Loading a side: its common set, one of the reader's teams' Pokémon, or a paste.
-function common(k: SideKey) {
+// A tooltip naming the set's actions' button only where there's hover (a tap opens the dialog).
+const canHover = window.matchMedia('(hover: hover)').matches
+// The side whose set's actions are open, in a dialog over the page.
+const menuSide = shallowRef<SideKey | null>(null)
+const menuOpen = computed({
+  get: () => !!menuSide.value,
+  set: (on) => {
+    if (!on) menuSide.value = null
+  },
+})
+/** Whether a side's set may be replaced: at once with no Pokémon there, else once confirmed (the actions' dialog closed
+ * first, the confirmation over the page). */
+async function mayReplace(k: SideKey, setOnly = false): Promise<boolean> {
+  menuSide.value = null
   const id = sides.value[k].member.pokemon
-  if (!id) return
+  if (!id) return true
+  return confirmDialog({
+    message: t(setOnly ? 'calc.replaceSetConfirm' : 'calc.replaceConfirm', { name: refName(pokemon(id)) }),
+    confirm: t('calc.replace'),
+  })
+}
+async function common(k: SideKey) {
+  const id = sides.value[k].member.pokemon
+  if (!id || !(await mayReplace(k, true))) return
   const forme = sides.value[k].mega ? setsAs(sides.value[k].member)! : id
   setSide(k, { ...commonSet(forme, data.value), side: sides.value[k].side })
+}
+function clearSide(k: SideKey) {
+  menuSide.value = null
+  setSide(k, { ...emptyFighter(), side: sides.value[k].side })
 }
 const savedTeams = computed(() => teams.value.filter((tm) => tm.members.some((m) => m.pokemon)))
 function fromTeam(k: SideKey, m: Member) {
   setSide(k, { ...emptyFighter(JSON.parse(JSON.stringify(m)) as Member), side: sides.value[k].side })
+}
+/** One of the reader's teams' Pokémon loaded into a side, once confirmed where it replaces one. */
+async function loadFromTeam(k: SideKey, m: Member, done: () => void) {
+  done()
+  if (await mayReplace(k)) fromTeam(k, m)
 }
 // A side's set copied as a paste (Showdown's format, which pokepast.es takes), stat points and all, saying so a moment.
 const copiedSide = shallowRef<SideKey | null>(null)
@@ -309,13 +340,13 @@ watch(pasting, (k) => {
   if (!k && pasteFrom) picking.value = pasteFrom
   if (!k) pasteFrom = null
 })
-function importPaste() {
+async function importPaste() {
   const k = pasting.value
   const first = parsePaste(pasted.value).members[0]
   if (!k || !first) return void (pasteFailed.value = true)
-  fromTeam(k, first)
   pasteFrom = null
   pasting.value = null
+  if (await mayReplace(k)) fromTeam(k, first)
 }
 
 // The battle's conditions where they apply, folded at first and then as last left: the whole field's in the heading's
@@ -549,51 +580,19 @@ function face(f: Fighter) {
               >
                 <Undo2 :size="14" aria-hidden="true" /><PokemonIcon :id="previousId" :scale="0.75" />
               </button>
-              <!-- What a side can do with its set, in one menu: load one (its common set, a paste, a Pokémon of the
-                 reader's teams), copy it, swap the two sides, clear it. -->
-              <OptionsMenu :title="t('calc.setMenu')" :icon="Ellipsis" :on-band="wide">
-                <template #default="{ close }">
-                  <div class="load">
-                    <button
-                      type="button"
-                      class="load-row"
-                      :disabled="!sides[k].member.pokemon || !data"
-                      @click="(common(k), close())"
-                    >
-                      <Sparkles :size="14" aria-hidden="true" />{{ t('calc.commonSet') }}
-                    </button>
-                    <button type="button" class="load-row" @click="((pasting = k), close())">
-                      <ClipboardPaste :size="14" aria-hidden="true" />{{ t('calc.paste') }}
-                    </button>
-                    <button
-                      type="button"
-                      class="load-row"
-                      :class="{ copied: copiedSide === k }"
-                      :disabled="!sides[k].member.pokemon"
-                      @click="copySet(k)"
-                    >
-                      <component :is="copiedSide === k ? Check : ClipboardCopy" :size="14" aria-hidden="true" />{{
-                        copiedSide === k ? t('tournaments.pasteCopied') : t('calc.copySet')
-                      }}
-                    </button>
-                    <button type="button" class="load-row" :disabled="!hasAny" @click="(swap(), close())">
-                      <ArrowLeftRight :size="14" aria-hidden="true" />{{ t('calc.swap') }}
-                    </button>
-                    <button
-                      type="button"
-                      class="load-row"
-                      :disabled="!sides[k].member.pokemon"
-                      @click="(setSide(k, { ...emptyFighter(), side: sides[k].side }), close())"
-                    >
-                      <X :size="14" aria-hidden="true" />{{ t('calc.clearSide') }}
-                    </button>
-                    <template v-if="savedTeams.length">
-                      <span class="muted load-label">{{ t('calc.fromTeams') }}</span>
-                      <ReuseTeams :side="k" :done="close" />
-                    </template>
-                  </div>
-                </template>
-              </OptionsMenu>
+              <!-- What a side can do with its set, in a dialog over the page: load one (its common set, a paste, a
+                 Pokémon of the reader's teams), copy it, swap the two sides, clear it. -->
+              <button
+                v-tip="canHover ? t('calc.setMenu') : undefined"
+                type="button"
+                :class="wide ? ['btn', 'on-band', { on: menuSide === k }] : ['set-menu', { open: menuSide === k }]"
+                aria-haspopup="dialog"
+                :aria-expanded="menuSide === k"
+                :aria-label="t('calc.setMenu')"
+                @click="menuSide = k"
+              >
+                <Ellipsis :size="16" aria-hidden="true" />
+              </button>
             </template>
           </CalcSide>
         </Transition>
@@ -615,7 +614,7 @@ function face(f: Fighter) {
               type="button"
               class="load-mon"
               :aria-label="refName(pokemon(m.pokemon))"
-              @click="(fromTeam(side, m), done())"
+              @click="loadFromTeam(side, m, done)"
             >
               <PokemonIcon :id="m.pokemon" />
             </button>
@@ -687,6 +686,52 @@ function face(f: Fighter) {
           @close="picking = null"
           ><ReuseCommon
         /></TeamPicker>
+      </div>
+    </ModalDialog>
+
+    <!-- A side's set's actions, a dialog over the page; loading over a Pokémon there confirmed first. -->
+    <ModalDialog v-model:open="menuOpen" :label="t('calc.setMenu')">
+      <div v-if="menuSide" class="panel set-dialog">
+        <h2>{{ labels[menuSide] }}</h2>
+        <div class="load">
+          <button
+            type="button"
+            class="load-row"
+            :disabled="!sides[menuSide].member.pokemon || !data"
+            @click="common(menuSide)"
+          >
+            <Sparkles :size="14" aria-hidden="true" />{{ t('calc.commonSet') }}
+          </button>
+          <button type="button" class="load-row" @click="((pasting = menuSide), (menuSide = null))">
+            <ClipboardPaste :size="14" aria-hidden="true" />{{ t('calc.paste') }}
+          </button>
+          <button
+            type="button"
+            class="load-row"
+            :class="{ copied: copiedSide === menuSide }"
+            :disabled="!sides[menuSide].member.pokemon"
+            @click="copySet(menuSide)"
+          >
+            <component :is="copiedSide === menuSide ? Check : ClipboardCopy" :size="14" aria-hidden="true" />{{
+              copiedSide === menuSide ? t('tournaments.pasteCopied') : t('calc.copySet')
+            }}
+          </button>
+          <button type="button" class="load-row" :disabled="!hasAny" @click="(swap(), (menuSide = null))">
+            <ArrowLeftRight :size="14" aria-hidden="true" />{{ t('calc.swap') }}
+          </button>
+          <button
+            type="button"
+            class="load-row"
+            :disabled="!sides[menuSide].member.pokemon"
+            @click="clearSide(menuSide)"
+          >
+            <X :size="14" aria-hidden="true" />{{ t('calc.clearSide') }}
+          </button>
+          <template v-if="savedTeams.length">
+            <span class="muted load-label">{{ t('calc.fromTeams') }}</span>
+            <ReuseTeams :side="menuSide" :done="() => {}" />
+          </template>
+        </div>
       </div>
     </ModalDialog>
 
@@ -1034,6 +1079,30 @@ function face(f: Fighter) {
 /* The way back to the opponent before, its icon after the arrow. */
 .back-to {
   gap: 2px;
+}
+/* A side's set's actions' trigger off the band (on phones): its icon alone, quiet. */
+.set-menu {
+  display: inline-flex;
+  padding: 2px;
+  color: var(--muted);
+  background: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.set-menu:hover,
+.set-menu.open {
+  color: var(--text);
+  border-color: var(--border);
+}
+.set-dialog h2 {
+  margin: 0 0 8px;
+  font-size: 1.05em;
+}
+.set-dialog .load {
+  max-width: none;
+}
+.set-dialog .load-row {
+  padding: 8px 6px;
 }
 .load {
   display: flex;
