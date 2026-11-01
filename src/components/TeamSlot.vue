@@ -668,6 +668,7 @@ function pickSets() {
 }
 /* Flat, the top of the panel it's in: no card, no band, its parts lined up with the panel's other parts. */
 .set.flat {
+  container: slot / inline-size;
   background: none;
   border: 0;
   box-shadow: none;
@@ -753,8 +754,34 @@ function pickSets() {
   color: var(--bad);
 }
 .picks .mega-switch {
-  align-self: stretch;
+  align-self: center;
   margin-left: auto;
+  padding-right: 0;
+  border-left: 0;
+}
+/* Where the three don't fit a row (the set narrower than they need, on the smallest phones): the first two together
+   on one, every set under them with the Mega's switch at that row's end; the rows set the groups apart, no rule
+   between them. */
+@container slot (max-width: 460px) {
+  .picks {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: 'own own own' 'sets . mega';
+    row-gap: 8px;
+  }
+  .pick-group {
+    grid-area: own;
+  }
+  .pick-sep {
+    display: none;
+  }
+  .picks > .btn {
+    grid-area: sets;
+    justify-self: start;
+  }
+  .picks .mega-switch {
+    grid-area: mega;
+  }
 }
 /* At every set, its nature isn't what it battles with. */
 .nature.struck {
