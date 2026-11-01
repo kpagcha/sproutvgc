@@ -55,6 +55,8 @@ const props = defineProps<{
   sideOpen: boolean
   /** Its moves folded away, its heading alone. */
   movesFolded: boolean
+  /** What the battle adds to it folded away, its heading alone. */
+  battleFolded: boolean
 }>()
 const emit = defineEmits<{
   'update:fighter': [f: Fighter]
@@ -62,6 +64,7 @@ const emit = defineEmits<{
   clear: []
   sideOpen: [open: boolean]
   movesFolded: [folded: boolean]
+  battleFolded: [folded: boolean]
 }>()
 defineSlots<{ actions(): unknown }>()
 
@@ -193,27 +196,26 @@ function setHpPoints(e: Event) {
     <!-- Its moves against the other side. -->
     <div class="results">
       <template v-if="shown">
-        <!-- Its heading, "Moves against" and the other's icon (its name read out), and an arrow folding them. -->
-        <div class="moves-head">
-          <h3 class="sub">
-            <template v-if="otherId"
-              >{{ t('calc.against') }}<PokemonIcon :id="otherId" class="against-icon" /><span class="sr-only">{{
-                otherName
-              }}</span></template
-            >
-            <template v-else>{{ t('calc.movesHead') }}</template>
-          </h3>
+        <!-- Its heading, "Moves against" and the other's icon (its name read out), a band across the panel, the whole
+             of it folding them, its arrow at the end. -->
+        <h3 class="part-head">
           <button
-            v-tip="t(movesFolded ? 'calc.showMoves' : 'calc.hideMoves')"
             type="button"
-            class="fold-moves"
+            class="part-toggle"
             :aria-expanded="!movesFolded"
-            :aria-label="t(movesFolded ? 'calc.showMoves' : 'calc.hideMoves')"
             @click="emit('movesFolded', !movesFolded)"
           >
+            <span class="part-title">
+              <template v-if="otherId"
+                >{{ t('calc.against') }}<PokemonIcon :id="otherId" class="against-icon" /><span class="sr-only">{{
+                  otherName
+                }}</span></template
+              >
+              <template v-else>{{ t('calc.movesHead') }}</template>
+            </span>
             <ChevronDown :size="16" class="fold-chev" :class="{ open: !movesFolded }" aria-hidden="true" />
           </button>
-        </div>
+        </h3>
         <p v-if="!otherName && !movesFolded" class="muted hint">{{ t('calc.pickOther') }}</p>
         <ul v-show="!movesFolded" class="damages">
           <DamageRow
@@ -245,110 +247,122 @@ function setHpPoints(e: Event) {
     <!-- What the battle adds to it. -->
     <div class="battle">
       <template v-if="shown && stats">
-        <h3 class="sub">{{ t('calc.battle') }}</h3>
-        <!-- Its HP left: the bar, and its HP exactly, typed. -->
-        <div class="hp-row">
-          <span class="muted row-label hp-label">{{ t('stat.hp') }}</span>
-          <HpBar
-            :model-value="fighter.hp"
-            :label="t('calc.hpPercent')"
-            class="hp-bar"
-            @update:model-value="set({ hp: $event })"
-          />
-          <span class="hp-nums">
-            <input
-              class="num-in"
-              type="number"
-              inputmode="numeric"
-              min="1"
-              :max="stats.hp"
-              :value="hpOf"
-              :aria-label="t('calc.hpPoints')"
-              @change="setHpPoints"
-            />
-            <span class="muted">/ {{ stats.hp }}</span>
-          </span>
-        </div>
-        <div class="row">
-          <label class="muted row-label" :for="`${uid}-status`">{{ t('calc.statusLabel') }}</label>
-          <select
-            :id="`${uid}-status`"
-            class="status"
-            :value="fighter.status"
-            @change="set({ status: ($event.target as HTMLSelectElement).value as Status })"
-          >
-            <option v-for="s in STATUSES" :key="s" :value="s">{{ statusName(s) }}</option>
-          </select>
-        </div>
-        <!-- Its stat stages, a stepper each, as the speed pages' Speed stage, the five on one row. -->
-        <div class="stages-row">
-          <span class="muted">{{ t('calc.stagesShort') }}</span>
-          <span class="stages" role="group" :aria-label="t('calc.stages')">
-            <StageStepper
-              v-for="(s, i) in BOOSTED"
-              :key="s"
-              :model-value="fighter.boosts[i]!"
-              :min="STAGE_MIN"
-              :max="STAGE_MAX"
-              :label="t(`stat.${s}`)"
-              :stat="t(`stat.${s}`)"
-              compact
-              class="stage"
-              @update:model-value="setStage(i, $event)"
-            />
-          </span>
-        </div>
-        <div v-if="conditional || overlord || rageFist" class="mods">
+        <h3 class="part-head">
           <button
-            v-if="conditional"
             type="button"
-            class="btn quiet mod"
-            :class="{ on: fighter.abilityOn }"
-            :aria-pressed="fighter.abilityOn"
-            @click="set({ abilityOn: !fighter.abilityOn })"
+            class="part-toggle"
+            :aria-expanded="!battleFolded"
+            @click="emit('battleFolded', !battleFolded)"
           >
-            {{ t('calc.abilityOn', { ability: refName(ability(conditional)) }) }}
+            <span class="part-title">{{ t('calc.battle') }}</span>
+            <ChevronDown :size="16" class="fold-chev" :class="{ open: !battleFolded }" aria-hidden="true" />
           </button>
-          <span v-if="overlord" class="btn quiet mod counter" :class="{ on: fighter.fainted }">
-            {{ t('calc.fainted') }}
-            <button
-              type="button"
-              :disabled="fighter.fainted <= 0"
-              :aria-label="t('calc.faintedDown')"
-              @click="set({ fainted: fighter.fainted - 1 })"
+        </h3>
+        <div v-show="!battleFolded" class="battle-body">
+          <!-- Its HP left: the bar, and its HP exactly, typed. -->
+          <div class="hp-row">
+            <span class="muted row-label hp-label">{{ t('stat.hp') }}</span>
+            <HpBar
+              :model-value="fighter.hp"
+              :label="t('calc.hpPercent')"
+              class="hp-bar"
+              @update:model-value="set({ hp: $event })"
+            />
+            <span class="hp-nums">
+              <input
+                class="num-in"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                :max="stats.hp"
+                :value="hpOf"
+                :aria-label="t('calc.hpPoints')"
+                @change="setHpPoints"
+              />
+              <span class="muted">/ {{ stats.hp }}</span>
+            </span>
+          </div>
+          <div class="row">
+            <label class="muted row-label" :for="`${uid}-status`">{{ t('calc.statusLabel') }}</label>
+            <select
+              :id="`${uid}-status`"
+              class="status"
+              :value="fighter.status"
+              @change="set({ status: ($event.target as HTMLSelectElement).value as Status })"
             >
-              <Minus :size="12" aria-hidden="true" />
-            </button>
-            <output>{{ fighter.fainted }}</output>
+              <option v-for="s in STATUSES" :key="s" :value="s">{{ statusName(s) }}</option>
+            </select>
+          </div>
+          <!-- Its stat stages, a stepper each, as the speed pages' Speed stage, the five on one row. -->
+          <div class="stages-row">
+            <span class="muted">{{ t('calc.stagesShort') }}</span>
+            <span class="stages" role="group" :aria-label="t('calc.stages')">
+              <StageStepper
+                v-for="(s, i) in BOOSTED"
+                :key="s"
+                :model-value="fighter.boosts[i]!"
+                :min="STAGE_MIN"
+                :max="STAGE_MAX"
+                :label="t(`stat.${s}`)"
+                :stat="t(`stat.${s}`)"
+                compact
+                class="stage"
+                @update:model-value="setStage(i, $event)"
+              />
+            </span>
+          </div>
+          <div v-if="conditional || overlord || rageFist" class="mods">
             <button
+              v-if="conditional"
               type="button"
-              :disabled="fighter.fainted >= 5"
-              :aria-label="t('calc.faintedUp')"
-              @click="set({ fainted: fighter.fainted + 1 })"
+              class="btn quiet mod"
+              :class="{ on: fighter.abilityOn }"
+              :aria-pressed="fighter.abilityOn"
+              @click="set({ abilityOn: !fighter.abilityOn })"
             >
-              <Plus :size="12" aria-hidden="true" />
+              {{ t('calc.abilityOn', { ability: refName(ability(conditional)) }) }}
             </button>
-          </span>
-          <span v-if="rageFist" class="btn quiet mod counter" :class="{ on: fighter.attacked }">
-            {{ t('calc.attacked') }}
-            <button
-              type="button"
-              :disabled="fighter.attacked <= 0"
-              :aria-label="t('calc.attackedDown')"
-              @click="set({ attacked: fighter.attacked - 1 })"
-            >
-              <Minus :size="12" aria-hidden="true" />
-            </button>
-            <output>{{ fighter.attacked }}</output>
-            <button
-              type="button"
-              :disabled="fighter.attacked >= MAX_ATTACKED"
-              :aria-label="t('calc.attackedUp')"
-              @click="set({ attacked: fighter.attacked + 1 })"
-            >
-              <Plus :size="12" aria-hidden="true" />
-            </button>
-          </span>
+            <span v-if="overlord" class="btn quiet mod counter" :class="{ on: fighter.fainted }">
+              {{ t('calc.fainted') }}
+              <button
+                type="button"
+                :disabled="fighter.fainted <= 0"
+                :aria-label="t('calc.faintedDown')"
+                @click="set({ fainted: fighter.fainted - 1 })"
+              >
+                <Minus :size="12" aria-hidden="true" />
+              </button>
+              <output>{{ fighter.fainted }}</output>
+              <button
+                type="button"
+                :disabled="fighter.fainted >= 5"
+                :aria-label="t('calc.faintedUp')"
+                @click="set({ fainted: fighter.fainted + 1 })"
+              >
+                <Plus :size="12" aria-hidden="true" />
+              </button>
+            </span>
+            <span v-if="rageFist" class="btn quiet mod counter" :class="{ on: fighter.attacked }">
+              {{ t('calc.attacked') }}
+              <button
+                type="button"
+                :disabled="fighter.attacked <= 0"
+                :aria-label="t('calc.attackedDown')"
+                @click="set({ attacked: fighter.attacked - 1 })"
+              >
+                <Minus :size="12" aria-hidden="true" />
+              </button>
+              <output>{{ fighter.attacked }}</output>
+              <button
+                type="button"
+                :disabled="fighter.attacked >= MAX_ATTACKED"
+                :aria-label="t('calc.attackedUp')"
+                @click="set({ attacked: fighter.attacked + 1 })"
+              >
+                <Plus :size="12" aria-hidden="true" />
+              </button>
+            </span>
+          </div>
         </div>
       </template>
     </div>
@@ -536,37 +550,48 @@ function setHpPoints(e: Event) {
   }
 }
 /* Each part's heading, quiet: the room around it, not a rule, sets the parts apart. */
-.moves-head {
+/* Its moves' and its battle's headings: a band across the panel on a flat grey (the set's), rules over and under it,
+   the whole of it folding its part, its arrow at the end. */
+.part-head {
+  margin: 0 calc(-1 * var(--panel-pad));
+  font-size: 1em;
+}
+.part-toggle {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  width: 100%;
+  min-height: 34px;
+  padding: 4px var(--panel-pad);
+  font: inherit;
+  font-size: 0.8em;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: left;
+  background: var(--panel-alt);
+  border: 0;
+  border-block: 1px solid var(--border);
+  cursor: pointer;
 }
-.moves-head .sub {
+.part-toggle:hover,
+.part-toggle:focus-visible {
+  color: var(--text);
+}
+.part-title {
   display: flex;
   align-items: center;
-  min-height: 30px;
-  margin: 0;
+  min-width: 0;
 }
 /* The other side's icon in the heading, standing for its name. */
 .against-icon {
   margin: -6px 0 -6px 2px;
 }
-/* Its arrow bare, as the move rows' own, in line with theirs at the end. */
-.fold-moves {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  padding: 4px 0 4px 8px;
-  font: inherit;
-  color: var(--muted);
-  background: none;
-  border: 0;
-  cursor: pointer;
-}
-.fold-moves:hover,
-.fold-moves:focus-visible {
-  color: var(--text);
+.part-head + .damages,
+.part-head + .hint {
+  margin-top: 4px;
 }
 .sr-only {
   position: absolute;
@@ -575,14 +600,6 @@ function setHpPoints(e: Event) {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
-}
-.sub {
-  margin: 0 0 4px;
-  font-size: 0.8em;
-  font-weight: bold;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--muted);
 }
 .hint {
   margin: 0;
@@ -599,7 +616,8 @@ function setHpPoints(e: Event) {
 .hint + .damages {
   margin-top: 8px;
 }
-.battle {
+.battle,
+.battle-body {
   display: flex;
   flex-direction: column;
   gap: 16px;

@@ -383,10 +383,16 @@ const remembered = (key: string) => {
 const fieldOpen = remembered('sproutvgc.calc.fieldOpen')
 const sideOpen = remembered('sproutvgc.calc.sideOpen')
 // Each side's moves folded or not, apart (the opponent's folded when only yours hitting it matters), as last left;
-// either folded, the two sides' parts no longer on shared rows, so the folded one closes up.
+// one folded and the other not, the two sides' parts no longer on shared rows, so the folded one closes up.
 const movesFolded = {
   a: remembered('sproutvgc.calc.movesFolded.a'),
   b: remembered('sproutvgc.calc.movesFolded.b'),
+}
+// What the battle adds to each, folded or not, apart, as last left; the two sides' parts on shared rows only while
+// both are folded alike, as their moves.
+const battleFolded = {
+  a: remembered('sproutvgc.calc.battleFolded.a'),
+  b: remembered('sproutvgc.calc.battleFolded.b'),
 }
 // Unfolded while stuck to the top, it stays stuck, its conditions in rows (`compact`), until folded; unfolded where
 // it is on the page, it scrolls away with it, its conditions in groups.
@@ -549,7 +555,8 @@ function face(f: Fighter) {
       id="calc-duel"
       class="duel"
       :class="{
-        aligned: hasBoth && !movesFolded.a.value && !movesFolded.b.value,
+        aligned:
+          hasBoth && movesFolded.a.value === movesFolded.b.value && battleFolded.a.value === battleFolded.b.value,
         stacked: !wide,
         folded: !wide && !shownSide,
       }"
@@ -575,6 +582,8 @@ function face(f: Fighter) {
             :data
             :side-open="sideOpen"
             :moves-folded="movesFolded[k].value"
+            :battle-folded="battleFolded[k].value"
+            @battle-folded="battleFolded[k].value = $event"
             @side-open="sideOpen = $event"
             @moves-folded="movesFolded[k].value = $event"
           >
