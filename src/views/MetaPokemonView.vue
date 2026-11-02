@@ -56,6 +56,7 @@ import MetaDialog from '@/components/MetaDialog.vue'
 import PokemonChips from '@/components/PokemonChips.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import ListOptions from '@/components/ListOptions.vue'
+import MonBalance from '@/components/MonBalance.vue'
 import OptionsMenu from '@/components/OptionsMenu.vue'
 import SectionNav from '@/components/SectionNav.vue'
 import ShareSplit from '@/components/ShareSplit.vue'
@@ -475,6 +476,7 @@ const sections = computed(() =>
     { id: 'sec-builds', label: t('usageMon.secBuilds'), shown: builds.value.length > 0 },
     { id: 'sec-speed', label: t('usageMon.speed'), shown: spread.value.length > 0 },
     { id: 'sec-spreads', label: t('usageMon.secSpreads'), shown: spreads.value.length > 0 || natures.value.length > 0 },
+    { id: 'sec-balance', label: t('overview.section'), shown: true },
     { id: 'sec-history', label: t('usageMon.secHistory'), shown: months.value.length > 1 },
     { id: 'sec-teammates', label: t('usageMon.teammates'), shown: teammates.value.length > 0 },
     { id: 'sec-tournaments', label: t('usageMon.secTournaments'), shown: tournaments.value.length > 0 },
@@ -824,6 +826,9 @@ const sections = computed(() =>
           </div>
         </div>
       </section>
+
+      <!-- Its bulk and power against the meta's, as a chart or a ladder of the meta's Pokémon. -->
+      <MonBalance id="sec-balance" :key="id" :mon="id" :snapshot :data :class="{ 'meta-stale': loading }" />
 
       <!-- Its usage over the months of the dataset's series. -->
       <section v-if="months.length > 1" id="sec-history" class="panel">

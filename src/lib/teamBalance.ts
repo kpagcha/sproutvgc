@@ -552,11 +552,74 @@ export function offenseVerdict(o: Offense): OffenseVerdict | null {
   }
 }
 
-// The meta at a glance (the rankings' overview): its most used Pokémon on the lanes, each at its most common spread,
-// with its most common ability and item; attacking, on each side it attacks on (a move's worth of its sets at least).
+// The meta at a glance (the rankings' overview, a Pokémon's meta page): its Pokémon on the lanes, each at its most
+// common spread, with its most common ability and item; attacking, on each side it attacks on (a move's worth of its
+// sets at least).
 
 /** How many of the meta's most used Pokémon the overview places. */
 export const OVERVIEW = 12
+
+/** A meta Pokémon placed on a lane at its most common set, with what it's placed by: its spread, its ability and item,
+ * and the stats that make its value (bulk: HP and the defending stat; attacking: the stat), as the game shows them,
+ * before what multiplies them. */
+export interface Placed extends Plotted {
+  usage: number
+  nature: string | null
+  points: readonly number[]
+  ability: AbilityId | null
+  item: ItemId | null
+  stats: number[]
+}
+
+/** A meta Pokémon on each lane, at its most common set; on an attacking lane only where it attacks on that side (and,
+ * with moves, has a move with power of its own there). */
+export function metaPlace(
+  id: PokemonId,
+  d: PokemonMeta,
+  meta: MetaBalance,
+  mode: 'defense' | OffenseMode,
+): Record<Side, Placed | null> {
+  const placed: Record<Side, Placed | null> = { physical: null, special: null }
+  const mon = metaMon(id, d)
+  const spread = d.spreads?.[0]
+  const points = spread?.points ?? [0, 0, 0, 0, 0, 0]
+  const nature = spread?.nature || null
+  const at = strengthAt(id, points, nature)
+  const a = (mon.ability && ABILITY_MODS[mon.ability]) || {}
+  const item = topOf(d.items)
+  const i = (item && ITEM_MODS[item]) || {}
+  const value = (k: Key) => at[k] * (a[k] ?? 1) * (i[k] ?? 1)
+  const base = { usage: d.usage ?? 0, nature, points, ability: mon.ability, item }
+  if (mode === 'defense') {
+    const b = POKEMON[id].stats
+    const stat = (k: number) =>
+      statValue(b[k]!, points[k]!, k && nature ? natureEffectOn(nature, STATS[k]!) : 'neutral', !k)
+    for (const side of ['physical', 'special'] as const) {
+      const key = LANE_KEYS.defense[side]
+      const stats = [stat(0), stat(side === 'physical' ? 2 : 4)]
+      placed[side] = { pokemon: id, value: value(key), rank: meta[key].dist.rank(value(key)), ...base, stats }
+    }
+    return placed
+  }
+  const sides = (['physical', 'special'] as const).filter((side) => mon.attacks[side] >= 1)
+  for (const side of sides) {
+    const key = LANE_KEYS.stats[side]
+    const stat = value(key)
+    const where =
+      mode === 'moves'
+        ? withPeak(stat, (how) => mon.best(side, how, item), meta[LANE_KEYS.peak[side]])
+        : { value: stat }
+    if (!where) continue
+    const rank = meta[LANE_KEYS[mode][side]].dist.rank(where.value)
+    placed[side] = { pokemon: id, ...where, rank, mixed: sides.length === 2, ...base, stats: [at[key]] }
+  }
+  return placed
+}
+
+const used = (data: MetaData) =>
+  (Object.entries(data) as [PokemonId, PokemonMeta][])
+    .filter(([id, d]) => d.usage && POKEMON[id])
+    .sort((a, b) => b[1].usage! - a[1].usage!)
 
 export function metaOverview(
   data: MetaData,
@@ -564,36 +627,30 @@ export function metaOverview(
   mode: 'defense' | OffenseMode,
 ): Record<Side, Plotted[]> {
   const points: Record<Side, Plotted[]> = { physical: [], special: [] }
-  const top = (Object.entries(data) as [PokemonId, PokemonMeta][])
-    .filter(([id, d]) => d.usage && POKEMON[id])
-    .sort((a, b) => b[1].usage! - a[1].usage!)
-    .slice(0, OVERVIEW)
-  for (const [id, d] of top) {
-    const mon = metaMon(id, d)
-    const spread = d.spreads?.[0]
-    const at = strengthAt(id, spread?.points ?? [0, 0, 0, 0, 0, 0], spread?.nature || null)
-    const a = (mon.ability && ABILITY_MODS[mon.ability]) || {}
-    const item = topOf(d.items)
-    const i = (item && ITEM_MODS[item]) || {}
-    const value = (k: Key) => at[k] * (a[k] ?? 1) * (i[k] ?? 1)
-    if (mode === 'defense') {
-      for (const side of ['physical', 'special'] as const) {
-        const key = LANE_KEYS.defense[side]
-        points[side].push({ pokemon: id, value: value(key), rank: meta[key].dist.rank(value(key)) })
-      }
-      continue
-    }
-    const sides = (['physical', 'special'] as const).filter((side) => mon.attacks[side] >= 1)
-    for (const side of sides) {
-      const stat = value(LANE_KEYS.stats[side])
-      const at =
-        mode === 'moves'
-          ? withPeak(stat, (how) => mon.best(side, how, item), meta[LANE_KEYS.peak[side]])
-          : { value: stat }
-      if (!at) continue
-      const rank = meta[LANE_KEYS[mode][side]].dist.rank(at.value)
-      points[side].push({ pokemon: id, ...at, rank, mixed: sides.length === 2 })
-    }
+  for (const [id, d] of used(data).slice(0, OVERVIEW)) {
+    const placed = metaPlace(id, d, meta, mode)
+    for (const side of ['physical', 'special'] as const) if (placed[side]) points[side].push(placed[side])
   }
   return points
+}
+
+/** The meta's Pokémon used on at least this share of teams make its ladder (a Pokémon's meta page's list view). */
+export const LADDER_MIN = 0.005
+
+/** The meta's ladder on each lane, strongest first: every Pokémon used on `LADDER_MIN` of teams or more (and `keep`
+ * whatever its usage), at its most common set. */
+export function metaLadder(
+  data: MetaData,
+  meta: MetaBalance,
+  mode: 'defense' | OffenseMode,
+  keep?: PokemonId,
+): Record<Side, Placed[]> {
+  const ladder: Record<Side, Placed[]> = { physical: [], special: [] }
+  for (const [id, d] of used(data)) {
+    if (d.usage! < LADDER_MIN && id !== keep) continue
+    const placed = metaPlace(id, d, meta, mode)
+    for (const side of ['physical', 'special'] as const) if (placed[side]) ladder[side].push(placed[side])
+  }
+  for (const side of ['physical', 'special'] as const) ladder[side].sort((a, b) => b.value - a.value)
+  return ladder
 }
