@@ -1842,6 +1842,7 @@ export const messages = {
   'tiers.summary.bulk': 'Bulkier than {above} of those shown, level with {level}, frailer than {under}, by usage.',
   'tiers.summary.power': 'Hits harder than {above} of those shown, level with {level}, softer than {under}, by usage.',
   'tiers.against': 'Against',
+  'tiers.chartShowing': 'Showing {n}',
   'tiers.yoursAt': 'Yours {value}',
   'tiers.show.common': '{pct}+ usage',
   'tiers.benchTip.min': 'No points, and a nature that lowers {stat}',

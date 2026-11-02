@@ -52,6 +52,7 @@ import EffectTag from '@/components/EffectTag'
 import FilterSearch from '@/components/FilterSearch.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
+import OptionsMenu from '@/components/OptionsMenu.vue'
 import PointsBar from '@/components/PointsBar.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import PokemonPicker from '@/components/PokemonPicker.vue'
@@ -522,15 +523,43 @@ const versus = computed(() => {
 const signed = (x: number) => `${x >= 0 ? '+' : '−'}${Math.round(Math.abs(x) * 100)}%`
 
 // The chart: the meta's spread on the side, its Pokémon shown on it at their most common build, yours its diamond.
-/** The chart's icons: its most used this many, and those found, so it stays readable. */
-const CHART_MAX = 30
+// Its icons: the most used of those shown (whatever order the list is in: every Pokémon's is the dex's), as many as
+// the drop-down by it says (`?chart=`, as the tournaments' chart: 30, 15 on phones, unless another's picked), and those
+// found besides.
+const chartable = computed(() =>
+  [...shown.value]
+    .filter((m) => m.builds.length && m.id !== mine.value)
+    .sort((a, b) => (b.d?.usage ?? 0) - (a.d?.usage ?? 0)),
+)
+const CHART_MIN = 5
+const phoneQuery = window.matchMedia('(max-width: 720px)')
+const chartDefault = phoneQuery.matches ? 15 : 30
+const chartN = computed<number>({
+  get: () => {
+    const n = Number(query.value.chart)
+    return Math.min(Number.isInteger(n) && n >= CHART_MIN ? n : chartDefault, chartable.value.length)
+  },
+  set: (n) => set({ chart: n === chartDefault ? undefined : String(n) }),
+})
+/** The slider's value while it's dragged, the chart following only once it's let go. */
+const draggedN = shallowRef<number | null>(null)
+function releaseN(e: Event) {
+  chartN.value = Number((e.target as HTMLInputElement).value)
+  draggedN.value = null
+}
+/** A number typed in its box, within the slider's range; one that isn't a number puts the box back. */
+function typeN(e: Event) {
+  const box = e.target as HTMLInputElement
+  const n = Math.round(Number(box.value))
+  if (box.value !== '' && Number.isFinite(n)) chartN.value = Math.min(Math.max(n, CHART_MIN), chartable.value.length)
+  box.value = String(chartN.value)
+}
 const chartLane = computed((): LaneView[] => {
   const points: [number, number][] = []
   for (const m of shown.value)
     for (const mark of marksOf(m)) points.push([mark.value, (m.d?.usage ?? 0.001) * mark.share])
-  const placed = shown.value
-    .filter((m) => m.builds.length && m.id !== mine.value)
-    .filter((m, i) => i < CHART_MAX || foundSet.value.has(m.id))
+  const placed = chartable.value
+    .filter((m, i) => i < chartN.value || foundSet.value.has(m.id))
     .map((m): Plotted => ({
       pokemon: m.id,
       value: tierValue(m.id, m.builds[0]!, props.measure, side.value, m.factor),
@@ -758,6 +787,39 @@ onBeforeUnmount(() => wideQuery.removeEventListener('change', onWide))
             <div v-for="i in 12" :key="i" class="tier skeleton"><span class="bone"></span></div>
           </div>
           <div v-else class="ranges-wrap" :class="{ 'meta-stale': loading }" :aria-busy="loading">
+            <!-- How many the chart shows, in a drop-down over it, as the tournaments' chart. -->
+            <div v-if="view === 'chart' && chartable.length > CHART_MIN" class="chart-head">
+              <OptionsMenu
+                class="chart-options"
+                :title="t('tournaments.chartOptions')"
+                :label="t('tiers.chartShowing', { n: draggedN ?? chartN })"
+                align="left"
+              >
+                <label class="chart-n">
+                  <span class="muted">{{ t('tournaments.chartShown') }}</span>
+                  <input
+                    type="range"
+                    :min="CHART_MIN"
+                    :max="chartable.length"
+                    :value="draggedN ?? chartN"
+                    @input="draggedN = Number(($event.target as HTMLInputElement).value)"
+                    @change="releaseN"
+                  />
+                  <span class="chart-n-value">
+                    <input
+                      type="number"
+                      class="chart-n-box"
+                      :min="CHART_MIN"
+                      :max="chartable.length"
+                      :value="draggedN ?? chartN"
+                      :aria-label="t('tournaments.chartShown')"
+                      @change="typeN"
+                    />
+                    {{ t('tournaments.chartOf', { of: chartable.length }) }}
+                  </span>
+                </label>
+              </OptionsMenu>
+            </div>
             <BalanceLanes
               v-if="view === 'chart'"
               class="chart"
@@ -2187,5 +2249,28 @@ onBeforeUnmount(() => wideQuery.removeEventListener('change', onWide))
 }
 .chart {
   padding: 8px 0;
+}
+/* How many the chart shows: its button over it, its drop-down a slider and a box, as the tournaments' chart. */
+.chart-head {
+  display: flex;
+  padding-top: 8px;
+}
+.chart-n {
+  display: grid;
+  grid-template-columns: minmax(0, auto) auto;
+  gap: 2px 8px;
+}
+.chart-n > .muted {
+  grid-column: 1 / -1;
+}
+.chart-n .chart-n-box {
+  width: 4em;
+  font: inherit;
+}
+@media (max-width: 720px) {
+  .chart-n input[type='range'] {
+    width: 100%;
+    min-width: 6rem;
+  }
 }
 </style>
