@@ -260,6 +260,8 @@ export function seoPages(): Plugin {
           },
         ]),
         searched('meta/speed-tiers', 'speedTiers'),
+        searched('meta/bulk-tiers', 'bulkTiers'),
+        searched('meta/power-tiers', 'powerTiers'),
         { path: 'tools', title: 'title.tools', desc: 'desc.tools', schema: 'CollectionPage' },
         searched('tools/calc', 'calc'),
         searched('tools/compare-speeds', 'speedCompare'),

@@ -40,6 +40,8 @@ export const AREAS: Area[] = [
       { key: 'rankings', route: 'rankings', label: 'nav.rankings', title: 'title.rankings', desc: 'desc.rankings' },
       { key: 'tournaments', route: 'tournaments', label: 'nav.tournaments', desc: 'desc.tournaments' },
       { key: 'speedTiers', route: 'speedTiers', label: 'nav.speedTiers', desc: 'desc.speedTiers' },
+      { key: 'bulkTiers', route: 'bulkTiers', label: 'nav.bulkTiers', desc: 'desc.bulkTiers' },
+      { key: 'powerTiers', route: 'powerTiers', label: 'nav.powerTiers', desc: 'desc.powerTiers' },
     ],
   },
   {

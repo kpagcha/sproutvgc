@@ -69,5 +69,11 @@ export const lastCompareQuery = remembered(
   'sproutvgc.compare.view',
 )
 
+/** The bulk and power tiers as last left (`BalanceTiersView`), each its own. */
+export const lastBalanceQuery = {
+  bulk: remembered('sproutvgc.bulkTiers.last', () => ({}), 'sproutvgc.bulkTiers.legacy'),
+  power: remembered('sproutvgc.powerTiers.last', () => ({}), 'sproutvgc.powerTiers.legacy'),
+}
+
 /** The speed tiers' query keys for yours, the Pokémon found and what's picked on the ladder. */
 export const TIERS_PICKS = ['mine', 'mynat', 'mypts', 'mymods', 'mystage', 'vs', 'find', 'at'] as const

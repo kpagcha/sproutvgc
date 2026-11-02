@@ -444,6 +444,43 @@ export const router = createRouter({
       },
     },
 
+    {
+      path: '/meta/bulk-tiers',
+      name: 'bulkTiers',
+      component: () => import('@/views/BalanceTiersView.vue'),
+      props: { measure: 'bulk' },
+      meta: {
+        titleKey: 'title.bulkTiers',
+        descKey: 'desc.bulkTiers',
+        headKey: 'head.bulkTiers',
+        keywordsKey: 'keywords.bulkTiers',
+        dexNames: true,
+        keepScroll: true,
+        recent: once('bulkTiers'),
+        // As the speed tiers': everything but what's found, the Pokémon tapped and the data shown.
+        setup: (query) => stringQuery(query, ['find', 'findmode', 'vs', 'meta']),
+        ...inArea('meta', 'bulkTiers'),
+      },
+    },
+    {
+      path: '/meta/power-tiers',
+      name: 'powerTiers',
+      component: () => import('@/views/BalanceTiersView.vue'),
+      props: { measure: 'power' },
+      meta: {
+        titleKey: 'title.powerTiers',
+        descKey: 'desc.powerTiers',
+        headKey: 'head.powerTiers',
+        keywordsKey: 'keywords.powerTiers',
+        dexNames: true,
+        keepScroll: true,
+        recent: once('powerTiers'),
+        // As the speed tiers': everything but what's found, the Pokémon tapped and the data shown.
+        setup: (query) => stringQuery(query, ['find', 'findmode', 'vs', 'meta']),
+        ...inArea('meta', 'powerTiers'),
+      },
+    },
+
     // Tools: what you interact with.
     area('tools', 'title.tools', 'desc.tools'),
     {

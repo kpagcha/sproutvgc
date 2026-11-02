@@ -42,6 +42,8 @@ const props = defineProps<{
   state?: 'pending' | 'none'
   /** The rows of icons a plot has room for, `ROWS` unless fewer (a compact chart). */
   rows?: number
+  /** No label before the plot: the plot alone, its lane said elsewhere (the bulk and power tiers' chart). */
+  noLabel?: boolean
   /** The reader's picks (the rankings' overview): placed first, on the lowest rows, outlined in their lane's color with
    * the rest faded. */
   found?: readonly PokemonId[]
@@ -137,9 +139,9 @@ const placed = computed(() =>
 <template>
   <!-- The size container the narrow layout asks: a container query never matches its own element. -->
   <div class="lanes-box">
-    <div class="lanes" :class="{ dimmed }" :style="{ '--rows': rows }">
+    <div class="lanes" :class="{ dimmed, 'no-label': noLabel }" :style="{ '--rows': rows }">
       <template v-for="(l, i) in lanes" :key="l.side">
-        <div class="lane-label" :data-side="l.side">
+        <div v-if="!noLabel" class="lane-label" :data-side="l.side">
           <CategoryIcon v-if="l.side !== 'speed'" :category="l.side as Side" :tip="false" />
           <span class="lane-text">
             <span v-tip="l.tip" class="lane-name" :class="{ tipped: l.tip }" :tabindex="l.tip ? 0 : undefined">{{
@@ -477,6 +479,13 @@ const placed = computed(() =>
 .key-ridge-peak path {
   fill: none;
   stroke-dasharray: 3 2;
+}
+/* No label: the plot and its axis alone, across. */
+.lanes.no-label {
+  grid-template-columns: minmax(0, 1fr);
+}
+.lanes.no-label > :is(.plot, .axis) {
+  grid-column: 1;
 }
 /* Narrow: each lane's label over its plot. */
 @container (max-width: 480px) {

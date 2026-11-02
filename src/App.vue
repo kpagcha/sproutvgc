@@ -134,6 +134,8 @@ watchEffect(() => {
 /** Entry pages lead back to their category's list (a Pokémon's, ability's, item's or move's meta page, to its rankings); the speed tiers, to Meta; the damage calculator and the speed comparison, to Tools. */
 const LISTS: Partial<Record<string, { to: RouteLocationRaw; label: MessageKey }>> = {
   speedTiers: { to: { name: 'meta' }, label: 'nav.meta' },
+  bulkTiers: { to: { name: 'meta' }, label: 'nav.meta' },
+  powerTiers: { to: { name: 'meta' }, label: 'nav.meta' },
   calc: { to: { name: 'tools' }, label: 'nav.tools' },
   speedCompare: { to: { name: 'tools' }, label: 'nav.tools' },
   metaPokemon: { to: { name: 'rankings' }, label: 'title.pokemonRankings' },

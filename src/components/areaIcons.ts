@@ -28,6 +28,9 @@ export const SECTION_ICONS: Record<string, Component> = {
   rankings: ChartColumn,
   tournaments: Trophy,
   speedTiers: ChartColumnBig,
+  // For now the speed tiers' own, until picked.
+  bulkTiers: ChartColumnBig,
+  powerTiers: ChartColumnBig,
   speedCompare: Scale,
   calc: Calculator,
   teamBuilder: Users,

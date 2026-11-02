@@ -31,7 +31,7 @@ interface Strength {
   physBulk: number
   specBulk: number
 }
-type Key = keyof Strength
+export type Key = keyof Strength
 type MetaKey = Key | 'atkMoves' | 'spaMoves' | 'atkPeak' | 'spaPeak'
 // The lanes attacking with moves: each side's, as its moves typically hit and at their peak.
 const MOVE_LANES = [
@@ -45,15 +45,15 @@ const COMMON = 0.2
 const KEYS: readonly Key[] = ['atk', 'spa', 'physBulk', 'specBulk']
 
 // What multiplies a stat outright, kept by hand.
-type Mods = Partial<Record<Key, number>>
-const ABILITY_MODS: Partial<Record<AbilityId, Mods>> = {
+export type Mods = Partial<Record<Key, number>>
+export const ABILITY_MODS: Partial<Record<AbilityId, Mods>> = {
   hugepower: { atk: 2 },
   purepower: { atk: 2 },
   gorillatactics: { atk: 1.5 },
   hustle: { atk: 1.5 },
   furcoat: { physBulk: 2 },
 }
-const ITEM_MODS: Partial<Record<ItemId, Mods>> = {
+export const ITEM_MODS: Partial<Record<ItemId, Mods>> = {
   choiceband: { atk: 1.5 },
   choicespecs: { spa: 1.5 },
   assaultvest: { specBulk: 1.5 },
@@ -552,12 +552,8 @@ export function offenseVerdict(o: Offense): OffenseVerdict | null {
   }
 }
 
-// The meta at a glance (the rankings' overview, a Pokémon's meta page's verdict): its Pokémon on the lanes, each at its
-// most common spread, with its most common ability and item; attacking, on each side it attacks on (a move's worth of its
-// sets at least).
-
-/** How many of the meta's most used Pokémon the overview places. */
-export const OVERVIEW = 12
+// A meta Pokémon on the lanes (a Pokémon's meta page's bulk and power), at its most common spread, with its most
+// common ability and item; attacking, on each side it attacks on (a move's worth of its sets at least).
 
 /** A meta Pokémon placed on a lane at its most common set, with what it's placed by: its nature, its ability and
  * item, and the stats that make its value (bulk: HP and the defending stat; attacking: the stat), as the game shows
@@ -616,52 +612,13 @@ export function metaPlace(
   return placed
 }
 
-const used = (data: MetaData) =>
-  (Object.entries(data) as [PokemonId, PokemonMeta][])
-    .filter(([id, d]) => d.usage && POKEMON[id])
-    .sort((a, b) => b[1].usage! - a[1].usage!)
-
-/** The overview's Pokémon on each lane: the meta's `OVERVIEW` most used, and any of `found` (the reader's picks, those
- * the meta has) besides. */
-export function metaOverview(
-  data: MetaData,
-  meta: MetaBalance,
-  mode: 'defense' | OffenseMode,
-  found: readonly PokemonId[] = [],
-): Record<Side, Placed[]> {
-  const points: Record<Side, Placed[]> = { physical: [], special: [] }
-  const ids = new Set([
-    ...used(data)
-      .slice(0, OVERVIEW)
-      .map(([id]) => id),
-    ...found.filter((id) => data[id]?.usage && POKEMON[id]),
-  ])
-  for (const id of ids) {
-    const placed = metaPlace(id, data[id]!, meta, mode)
-    for (const side of ['physical', 'special'] as const) if (placed[side]) points[side].push(placed[side])
-  }
-  return points
+/** How much a meta Pokémon attacks on a side (its moves' shares of its sets there: four a set, up to 4), and its best
+ * common move's power on it as it typically hits, with its most common ability and no item (the bulk and power tiers',
+ * whose items are boosts of their own); null with none. */
+export function attackOf(id: PokemonId, d: PokemonMeta, side: Side): { attacks: number; power: number | null } {
+  const mon = metaMon(id, d)
+  return { attacks: mon.attacks[side], power: mon.best(side, 'typical', null)?.power ?? null }
 }
 
-/** The usage the tier list can be cut off at (the rankings' overview's switch): Pokémon on fewer teams have sets from a
- * handful of them. */
-export const LADDER_CUT = 0.01
-
-/** The meta's tier list on each lane, strongest first: every Pokémon with usage (or on `min` of teams or more), and any
- * of `found` whatever its usage, at its most common set. */
-export function metaLadder(
-  data: MetaData,
-  meta: MetaBalance,
-  mode: 'defense' | OffenseMode,
-  found: readonly PokemonId[] = [],
-  min = 0,
-): Record<Side, Placed[]> {
-  const ladder: Record<Side, Placed[]> = { physical: [], special: [] }
-  for (const [id, d] of used(data)) {
-    if (d.usage! < min && !found.includes(id)) continue
-    const placed = metaPlace(id, d, meta, mode)
-    for (const side of ['physical', 'special'] as const) if (placed[side]) ladder[side].push(placed[side])
-  }
-  for (const side of ['physical', 'special'] as const) ladder[side].sort((a, b) => b.value - a.value)
-  return ladder
-}
+/** The meta's values' shape, for a chart's ridge (the bulk and power tiers' own, at their builds). */
+export const shapeOf = (points: [number, number][]) => laneOf(points).shape

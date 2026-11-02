@@ -6,7 +6,6 @@ import type { MetaData, MetaSnapshot } from '@/data/meta'
 import { natureName } from '@/data/natures'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import { filterKey } from '@/lib/filterGroups'
 import {
   LANE_KEYS,
   metaPlace,
@@ -23,9 +22,8 @@ import SegmentedControl from '@/components/SegmentedControl.vue'
 
 // A Pokémon's bulk and power against the meta, on its meta page after its spreads: two cards, each one chart of both
 // sides (`BalanceChart`): the meta's spread of values on each, overlapping, and this one where it falls on each, at its
-// most common set as the rankings' overview places every Pokémon (`metaPlace`), its place among the meta in its mark's
-// tooltip; power by stats alone or with its best move, the overview's choice, shared. The way to the overview has
-// it picked there (`?f=pokemon:…`), among the meta's most used.
+// most common set (`metaPlace`), its place among the meta in its mark's tooltip; power by stats alone or with its best
+// move (remembered, `sproutvgc.metaOverview.mode`). The ways to the bulk and power tiers have it found there (`?find=`).
 const props = defineProps<{
   mon: PokemonId
   snapshot: MetaSnapshot | undefined
@@ -109,7 +107,12 @@ const ends = {
   defense: computed((): [string, string] => [t('builder.balance.frailer'), t('builder.balance.bulkier')]),
   offense: computed((): [string, string] => [t('builder.balance.softer'), t('builder.balance.harder')]),
 }
-const to = computed(() => ({ name: 'rankings', query: { f: filterKey(pokemon(props.mon)) }, hash: '#sec-overview' }))
+// The ways to the bulk and power tiers with it found there, power measured as here.
+const toBulk = computed(() => ({ name: 'bulkTiers', query: { find: props.mon } }))
+const toPower = computed(() => ({
+  name: 'powerTiers',
+  query: { find: props.mon, ...(mode.value === 'moves' && { by: 'moves' }) },
+}))
 
 // Each card's heading explains, on hover, how it's measured.
 const defenseHow = useTemplateRef<HTMLElement>('defenseHow')
@@ -120,9 +123,10 @@ const offenseHow = useTemplateRef<HTMLElement>('offenseHow')
   <section class="panel mon-balance">
     <div class="head">
       <h2 v-tip="t('overview.monAbout')" class="tipped" tabindex="0">{{ t('overview.title') }}</h2>
-      <AppLink :to class="to-rankings"
-        >{{ t('overview.onRankings') }}<ChevronRight :size="14" aria-hidden="true"
-      /></AppLink>
+      <span class="to-tiers">
+        <AppLink :to="toBulk">{{ t('nav.bulkTiers') }}<ChevronRight :size="14" aria-hidden="true" /></AppLink>
+        <AppLink :to="toPower">{{ t('nav.powerTiers') }}<ChevronRight :size="14" aria-hidden="true" /></AppLink>
+      </span>
     </div>
     <div class="cards">
       <section class="card">
@@ -182,7 +186,12 @@ const offenseHow = useTemplateRef<HTMLElement>('offenseHow')
   text-underline-offset: 4px;
   cursor: help;
 }
-.to-rankings {
+.to-tiers {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+.to-tiers > a {
   display: inline-flex;
   align-items: center;
 }

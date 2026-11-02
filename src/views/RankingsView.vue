@@ -1,15 +1,5 @@
 <script setup lang="ts">
-import {
-  computed,
-  nextTick,
-  onActivated,
-  onBeforeUnmount,
-  onDeactivated,
-  shallowRef,
-  useId,
-  useTemplateRef,
-  watch,
-} from 'vue'
+import { computed, onBeforeUnmount, onDeactivated, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import tippy, { type Instance } from 'tippy.js'
 import { useRouter } from 'vue-router'
 import { ability, item, move, pokemon, type PokemonId } from '@/data/dex'
@@ -20,7 +10,7 @@ import { baselineOf, eventsOf, loadEventUsage, type EventUsage } from '@/data/to
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { fold, split } from '@/lib/search'
-import { passesGroups, positiveFilters, allFilters, withFilter, without } from '@/lib/filterGroups'
+import { passesGroups, positiveFilters, allFilters } from '@/lib/filterGroups'
 import { formatTermFilters, parseTermFilters, type Term, type TermFilters } from '@/lib/searchTerms'
 import { pooledUsage } from '@/lib/tournamentStats'
 import { isSetTerm, MIN_SHARE, monMatches, MON_TERM_KINDS, setShare, SET_LIST, type SetTerm } from '@/lib/monTerms'
@@ -45,7 +35,6 @@ import TypeIcon from '@/components/TypeIcon'
 import FilterSearch from '@/components/FilterSearch.vue'
 import RankingsHead from '@/components/RankingsHead.vue'
 import MoreToggle from '@/components/MoreToggle.vue'
-import MetaOverview from '@/components/MetaOverview.vue'
 import RankingTrends from '@/components/RankingTrends.vue'
 import RankingsTabs from '@/components/RankingsTabs.vue'
 
@@ -157,7 +146,6 @@ const sections = computed(() => [
   { id: 'sec-list', label: t('trends.list') },
   ...(trendsShown.value ? [{ id: 'sec-trends', label: t('trends.title') }] : []),
   ...(tournamentTrends.value ? [{ id: 'sec-tournament-trends', label: t('trends.tournamentTitle') }] : []),
-  ...(snapshot.value ? [{ id: 'sec-overview', label: t('overview.section') }] : []),
 ])
 const since = computed(() => (previous.value ? sinceLabel(previous.value, snapshot.value) : ''))
 /** The rank's mark's tooltip: the places gained or lost since the dataset before, or new to it. */
@@ -250,7 +238,7 @@ function pickStat(k: StatKey) {
 // search by name, faded a little: what picking it would do.
 const router = useRouter()
 /** The kinds the snapshot can search by: types and abilities always; moves and items with its sets; and Pokémon, which
- * pick the list's (and the overview's) by name. */
+ * pick the list's by name. */
 const termKinds = computed(() => [
   ...MON_TERM_KINDS.filter(
     (k) => k === 'type' || k === 'ability' || (snapshot.value && has(snapshot.value, SET_LIST[k])),
@@ -275,18 +263,6 @@ function passes(id: PokemonId, f: TermFilters = filters.value) {
   if (mons.some((x) => x.not && x.id === id)) return false
   const rest = { ...f, groups: f.groups.map((g) => ({ ...g, terms: g.terms.filter((x) => x.kind !== 'pokemon') })) }
   return passesGroups(rest, (x) => matches(id, x))
-}
-/** The Pokémon picked by the filters, added to the overview's charts and marked there. */
-const found = computed(() =>
-  positiveFilters(filters.value)
-    .filter((x) => x.kind === 'pokemon')
-    .map((x) => x.id as PokemonId),
-)
-function addFound(id: PokemonId) {
-  if (!found.value.includes(id)) filters.value = withFilter(filters.value, pokemon(id))
-}
-function removeFound(id: PokemonId) {
-  filters.value = without(filters.value, pokemon(id))
 }
 /** How many of the list these filters would leave: offered with each term. */
 const count = (f: TermFilters) => rows.value.filter((r) => passes(r.id, f)).length
@@ -385,18 +361,6 @@ function toggleSets() {
 }
 
 const { entered, restoring } = usePageEntered()
-// Led to the overview (`#sec-overview`, a Pokémon's meta page's verdict leading here with it picked): there once the
-// list is in, which the router's own scroll is too early for, the rows pushing it down as they come.
-function toOverview() {
-  if (router.currentRoute.value.hash !== '#sec-overview') return
-  void nextTick(() => document.getElementById('sec-overview')?.scrollIntoView({ block: 'start' }))
-}
-watch(
-  () => entered.value && !!data.value,
-  (ready) => ready && toOverview(),
-  { immediate: true },
-)
-onActivated(toOverview)
 /** The list folded to its first rows, so what's after it (the trends) is there to be found; unfolded on asking. */
 const FOLDED = 20
 // Unfolded, remembered for the visit (`useUnfolded`).
@@ -790,17 +754,6 @@ const termRows = useId()
         ><span v-if="row.forme" class="forme">{{ row.forme }}</span></template
       >
     </RankingTrends>
-    <!-- The meta's physical and special side at a glance: its bulk and attack, its most used Pokémon on them. -->
-    <MetaOverview
-      v-if="snapshot"
-      id="sec-overview"
-      class="section"
-      :snapshot
-      :data
-      :found
-      @add="addFound"
-      @remove="removeFound"
-    />
   </div>
 </template>
 
