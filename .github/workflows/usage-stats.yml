@@ -2,9 +2,9 @@ name: Refresh usage stats
 
 # Smogon publishes a month's usage stats early the next month (September's on 1 October). This pins every month each
 # regulation's format has (`gen-data --update-smogon`, the current regulation's and the past ones in `sources.json`)
-# and, when there's a new one, opens a pull request with the regenerated data. The second run of the month catches a
-# late publication; a month already proposed isn't
-# proposed again.
+# and, when there's a new one, opens a pull request with the regenerated data and merges it, deploying the site, when
+# it touches only the meta's data (else it stays open for review). The second run of the month catches a late
+# publication; a month already proposed isn't proposed again.
 on:
   schedule:
     - cron: '0 6 2,9 * *'
@@ -13,6 +13,8 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  # To start the deploy: a merge pushed with the workflow's own token doesn't trigger it on its own.
+  actions: write
 
 jobs:
   refresh:
@@ -51,3 +53,12 @@ jobs:
           gh pr create --base main --head "$branch" --title "data: Smogon's usage stats of $month" --body "The meta adds Smogon's usage stats of $month (\`gen-data --update-smogon\`), opened by the monthly refresh workflow. Lint and build passed on it.
 
           Check the diff touches only \`src/data/generated/meta/\`, \`source.json\` and \`sources.json\`: anything else means a regenerated file changed with the same pins (most likely Showdown's sprites, fetched again when the cache is empty)."
+          # Merged at once, and the site deployed, when the diff stays within the data it refreshes; anything else is left
+          # open for review.
+          other=$(git diff --name-only HEAD~1 HEAD | grep -vE '^(src/data/generated/meta/|src/data/generated/source\.json$|scripts/sources\.json$)' || true)
+          if [ -n "$other" ]; then
+            echo "::warning title=Left for review::The diff touches more than the stats, so the pull request stays open:%0A$other"
+            exit 0
+          fi
+          gh pr merge "$branch" --merge --delete-branch
+          gh workflow run deploy.yml --ref main

@@ -2,8 +2,9 @@ name: Refresh tournaments
 
 # Official events are mostly on weekends, and Limitless VGC publishes their teams over the days after. Every Tuesday
 # this pins every event each regulation has there (`gen-data --update-tournaments`), reads the recent ones' standings
-# again and the list of those to come, and, when anything changed, opens a pull request with the regenerated data. A week already proposed isn't
-# proposed again.
+# again and the list of those to come, and, when anything changed, opens a pull request with the regenerated data and
+# merges it, deploying the site, when it touches only the tournaments' data (else it stays open for review). A week
+# already proposed isn't proposed again.
 on:
   schedule:
     - cron: '0 6 * * 2'
@@ -12,6 +13,8 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  # To start the deploy: a merge pushed with the workflow's own token doesn't trigger it on its own.
+  actions: write
 
 jobs:
   refresh:
@@ -50,3 +53,12 @@ jobs:
           gh pr create --base main --head "$branch" --title "data: the official tournaments as of $week" --body "The tournaments from Limitless VGC as of $week (\`gen-data --update-tournaments\`), opened by the weekly refresh workflow. Lint and build passed on it.
 
           Check the diff touches only \`src/data/generated/tournaments/\`, \`source.json\` and \`sources.json\`: anything else means a regenerated file changed with the same pins (most likely Showdown's sprites, fetched again when the cache is empty)."
+          # Merged at once, and the site deployed, when the diff stays within the data it refreshes; anything else is left
+          # open for review.
+          other=$(git diff --name-only HEAD~1 HEAD | grep -vE '^(src/data/generated/tournaments/|src/data/generated/source\.json$|scripts/sources\.json$)' || true)
+          if [ -n "$other" ]; then
+            echo "::warning title=Left for review::The diff touches more than the tournaments, so the pull request stays open:%0A$other"
+            exit 0
+          fi
+          gh pr merge "$branch" --merge --delete-branch
+          gh workflow run deploy.yml --ref main
