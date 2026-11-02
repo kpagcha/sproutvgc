@@ -12,7 +12,7 @@ import ModalDialog from '@/components/ModalDialog.vue'
 // On phones, the button is its icon alone (what it shows read out, and in the card), as the favorites' is. Its icon
 // pulses while the data picked loads. Quiet, whatever's shown: it's beside the page's point. What the data is in full
 // ("Showdown ladder · Sep 2026 · 1760+") is read out. Showing other data than the latest (an earlier month, another
-// regulation's), a dot at its corner says so, as a notification's would.
+// regulation's), its border and icon in the warning's color say so.
 const open = ref(false)
 
 const phoneQuery = window.matchMedia('(max-width: 720px)')
@@ -40,6 +40,7 @@ const dataset = computed(() =>
     <button
       type="button"
       class="btn small quiet toggle"
+      :class="{ stale: notLatest }"
       :aria-expanded="open"
       aria-haspopup="dialog"
       :aria-label="
@@ -53,7 +54,6 @@ const dataset = computed(() =>
         <span class="dataset">{{ dataset }}</span>
       </template>
       <ChevronDown :size="14" class="chevron" :class="{ open }" aria-hidden="true" />
-      <span v-if="notLatest" class="dot" aria-hidden="true"></span>
     </button>
     <ModalDialog v-model:open="open" :label="t('meta.data')">
       <MetaCard class="meta-dialog-card" @close="open = false" />
@@ -90,17 +90,12 @@ const dataset = computed(() =>
 .chevron.open {
   transform: rotate(180deg);
 }
-/* Not the latest data: a dot on its top right corner, round and red as a notification's (round by its clip, as the
-   look squares off every corner). */
-.dot {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  width: 11px;
-  height: 11px;
-  /* The red ringed with the page's background, setting it apart from the button's outline. */
-  background: radial-gradient(circle closest-side, var(--bad) 66%, var(--bg) 70%);
-  clip-path: circle(50%);
+/* Not the latest data: its border and icon in the warning's color, outlined even while quiet. */
+.toggle.stale {
+  border-color: var(--warn);
+}
+.toggle.stale .icon {
+  color: var(--warn);
 }
 /* On phones, its icon alone: as compact as the favorites' star. */
 @media (max-width: 720px) {
