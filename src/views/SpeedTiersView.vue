@@ -825,6 +825,8 @@ const ranks = computed(() => (data.value ? usageRanks(data.value) : undefined))
 // has), their chips marked and the rest dimmed, or shown alone; on the ladder whether the view leaves them out or not,
 // to compare several of them. Links from before, with Pokémon kept on the ladder (`?keep=`), have them found.
 const MAX_FOUND = 6
+/** The found chips' sprites' scale: small enough to sit inside the chip, the sprite filling its cell. */
+const CHIP_ICON = 0.7
 const foundIds = computed<PokemonId[]>((was) => {
   const ids = [query.value.find, query.value.keep].flatMap((v) => (typeof v === 'string' ? v.split(',') : []))
   return keptValue([...new Set(ids)].filter((id): id is PokemonId => id in POKEMON).slice(0, MAX_FOUND), was)
@@ -2031,7 +2033,7 @@ const { start: startTour } = useTour(
             <ul v-if="finding" class="found-list" :aria-label="t('speed.foundLabel')">
               <li v-for="id in foundIds" :key="id" class="found-chip" :class="{ mine: id === mine }">
                 <button type="button" class="found-name" :aria-label="t('speed.vsLocate')" @click="locateFound(id)">
-                  <PokemonIcon :id />{{ refName(pokemon(id)) }}
+                  <PokemonIcon :id :scale="CHIP_ICON" />{{ refName(pokemon(id)) }}
                 </button>
                 <button
                   type="button"
@@ -2418,7 +2420,7 @@ const { start: startTour } = useTour(
             </AnimatePresence>
           </Teleport>
 
-          <p v-if="bySets && snapshot" class="muted small note">
+          <p v-if="bySets && snapshot" class="fine-print">
             {{ t('speed.leftOutNote', { pct: percent(MIN_SHARE) }) }}
           </p>
         </div>
@@ -3211,7 +3213,8 @@ const { start: startTour } = useTour(
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  padding: 0 8px 0 2px;
+  /* Room around the sprite, so it sits inside the chip rather than touching its edges. */
+  padding: 3px 8px 3px 2px;
   font: inherit;
   font-size: 0.875em;
   color: var(--text);
@@ -3229,10 +3232,7 @@ const { start: startTour } = useTour(
   background: var(--sel);
   color: var(--text);
 }
-/* Its sprite smaller, inside the chip rather than spilling over its edges. */
-.found-name {
-  --icon-scale: 0.8;
-}
+
 /* Wider, the find no wider than a name needs. */
 @media (min-width: 721px) {
   .find.find-row > .picker {
@@ -3789,11 +3789,5 @@ const { start: startTour } = useTour(
   background: var(--border);
   border-radius: 2px;
   opacity: 0.6;
-}
-.note {
-  margin: 12px 0 0;
-}
-.note + .note {
-  margin-top: 4px;
 }
 </style>

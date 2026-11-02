@@ -715,7 +715,7 @@ const termRows = useId()
       <p v-else class="muted">{{ t('usage.noMatch') }}</p>
       <MoreToggle v-if="data" v-model:all="allRows" :n="shown.length" :top="FOLDED" />
       <!-- What the faded rows and the filters' shares mean, in one quiet line, when there are any. -->
-      <p v-if="anyRare || termSets" class="note">
+      <p v-if="anyRare || termSets" class="fine-print">
         <template v-if="anyRare">{{ t('usage.rare', { share: percent(RARE) }) }}</template>
         <template v-if="anyRare && termSets">{{ ' ' }}</template>
         <template v-if="termSets">{{ t('usage.termSets', { share: percent(MIN_SHARE) }) }}</template>
@@ -1084,11 +1084,5 @@ const termRows = useId()
   bottom: 4px;
   height: 2px;
   background: var(--muted);
-}
-/* A footnote: smaller and quieter than the page's text. */
-.note {
-  margin: 10px 0 0;
-  font-size: 0.8125em;
-  color: color-mix(in srgb, var(--muted) 75%, transparent);
 }
 </style>
