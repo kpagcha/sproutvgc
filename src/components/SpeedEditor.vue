@@ -9,7 +9,7 @@ import { natureName } from '@/data/natures'
 import { t } from '@/i18n'
 import { NATURE_EFFECTS, NATURES_BY_EFFECT } from '@/lib/speed'
 import { benchmark, MAX_POINTS, type NatureEffect } from '@/lib/stats'
-import { modButtons, toggled, type BuildToggle, type SpeedBuild } from '@/lib/speedBuild'
+import { buildSpeed, modButtons, toggled, type BuildToggle, type SpeedBuild } from '@/lib/speedBuild'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PointsBar from '@/components/PointsBar.vue'
 import PokemonPicker from '@/components/PokemonPicker.vue'
@@ -44,6 +44,9 @@ const props = defineProps<{
   /** Whether it's at its sets, where it can be; and then, its Speeds from the slowest to the fastest. */
   atSets?: boolean
   range?: readonly [number, number] | null
+  /** Its points unknown, to be worked out ("Who moved first"): no points nor common builds, its Speed the range its
+   * nature and modifiers allow. */
+  noPoints?: boolean
 }>()
 const emit = defineEmits<{
   pick: [id: PokemonId]
@@ -54,6 +57,12 @@ const emit = defineEmits<{
 }>()
 const sets = computed(() => !!props.atSets && !!props.range)
 /** Its Speed with no stat points and a neutral nature: a stat, as the game has it, rather than its base. */
+/** With its points unknown, its Speed from none to all of them, at its nature and with its modifiers. */
+const span = computed(() =>
+  props.id
+    ? ([0, MAX_POINTS].map((points) => buildSpeed(props.id!, { ...props.build, points })) as [number, number])
+    : null,
+)
 const uninvested = computed(() => (props.id ? benchmark(POKEMON[props.id].stats[5], 'none') : 0))
 
 const picker = useTemplateRef<InstanceType<typeof PokemonPicker>>('picker')
@@ -100,7 +109,11 @@ const canHover = window.matchMedia('(hover: hover)').matches
     <template v-if="props.id">
       <!-- Its Speed, large, with its stat as built when modifiers change it, and its Speed uninvested (no points, a
            neutral nature: a stat, rather than its base). -->
-      <p v-if="sets" class="speed">
+      <p v-if="props.noPoints" class="speed">
+        <span class="speed-number">{{ span![0] }}–{{ span![1] }}</span>
+        <span class="muted small">{{ t('reverse.span') }}</span>
+      </p>
+      <p v-else-if="sets" class="speed">
         <span class="speed-number">{{
           props.range![0] === props.range![1] ? props.range![0] : `${props.range![0]}–${props.range![1]}`
         }}</span>
@@ -116,7 +129,7 @@ const canHover = window.matchMedia('(hover: hover)').matches
       </p>
 
       <!-- The meta's builds of it, to pick one in a tap. -->
-      <section v-if="props.common.length" class="part">
+      <section v-if="props.common.length && !props.noPoints" class="part">
         <span class="muted small">{{ t('compare.common') }}</span>
         <!-- On one line, scrolling sideways when they don't fit; on phones, wrapping. Each Pokémon's from its start,
              not where the last one's was left. -->
@@ -170,7 +183,7 @@ const canHover = window.matchMedia('(hover: hover)').matches
         <p class="muted small">{{ naturesOf(props.build.effect) }}</p>
       </section>
 
-      <section v-if="!sets" class="part">
+      <section v-if="!sets && !props.noPoints" class="part">
         <!-- The team builder's bar: the Speed its points give, and where its nature's rounding makes a point add 2 or
              nothing. -->
         <div class="field">

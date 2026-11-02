@@ -40,6 +40,7 @@ import SpeedAddSecond from '@/components/SpeedAddSecond.vue'
 import SpeedEditor from '@/components/SpeedEditor.vue'
 import SpeedLineup, { type LineupEntry } from '@/components/SpeedLineup.vue'
 import SpeedMatchups from '@/components/SpeedMatchups.vue'
+import SpeedReverse from '@/components/SpeedReverse.vue'
 import SpeedShare from '@/components/SpeedShare.vue'
 import SpeedVersus from '@/components/SpeedVersus.vue'
 import TourToggle from '@/components/TourToggle.vue'
@@ -53,7 +54,9 @@ import TourToggle from '@/components/TourToggle.vue'
 // `trickroom`; the speed tiers link here with yours and the Pokémon it's measured against, and back with either as
 // yours. Yours against opponents, one can be at its sets rather than at one build (`bsets=1`, an opponent's Speed not
 // being known): at every Speed its sets in the meta reach, each counting as often as it's run, with its own modifiers;
-// an opponent picked here starts so, when the meta has its sets.
+// an opponent picked here starts so, when the meta has its sets. Or read backwards (`mode=reverse`, "Who moved first"):
+// the two of `a` and `b` with their natures and modifiers, their points unknown, and which of them was seen moving first
+// (`first`): the points each could have then, and those most likely.
 const route = useRoute()
 const router = useRouter()
 const replace = (q: Record<string, string | undefined>) => router.replace({ query: { ...route.query, ...q } })
@@ -63,9 +66,11 @@ const metaSpeeds = computed(() => !!snapshot.value && has(snapshot.value, 'speed
 /** Usage ranks, for the pickers to list by, most used first. */
 const ranks = computed(() => (data.value ? usageRanks(data.value) : undefined))
 
-const MODES = ['vs', 'order'] as const
+const MODES = ['vs', 'order', 'reverse'] as const
 type Mode = (typeof MODES)[number]
-const mode = computed<Mode>(() => (route.query.mode === 'order' ? 'order' : 'vs'))
+const mode = computed<Mode>(() =>
+  route.query.mode === 'order' ? 'order' : route.query.mode === 'reverse' ? 'reverse' : 'vs',
+)
 // The page opened bare (from the menu, nothing in its URL) comes as it was left (`lastCompareQuery`), put in the URL,
 // so the URL always says what's shown and links (the speed tiers', with yours and an opponent) open as they were made.
 // Bare but for the data shown, which a link may carry: kept.
@@ -145,9 +150,24 @@ const entries = computed<Mon[]>(() =>
 const entryOf = (key: string) => entries.value.find((e) => e.key === key)
 
 /** A pair side by side, as the page always had; past a pair, and in speed order, one under the other. */
-const stacked = computed(() => mode.value === 'order' || vsSlots.value.length > 2)
+const stacked = computed(() => mode.value === 'order' || (mode.value === 'vs' && vsSlots.value.length > 2))
 
-const sides = computed(() => SIDES.map((s) => ({ s, ...mon(s, idOf(s), slotBuild(s), atSets(s)) })))
+const sides = computed(() =>
+  SIDES.map((s) => ({ s, ...mon(s, idOf(s), slotBuild(s), mode.value === 'vs' && atSets(s)) })),
+)
+
+// Read backwards: which of the two was seen moving first, and each one's builds in the meta to weigh its points by.
+const first = computed(() => (route.query.first === 'a' || route.query.first === 'b' ? route.query.first : null))
+const setFirst = (s: Side) => replace({ first: s })
+const reverseSides = computed(() =>
+  sides.value.map((x) => ({
+    s: x.s,
+    id: x.id,
+    name: x.name,
+    build: x.build,
+    builds: x.id ? speedBuilds(data.value?.[x.id]?.speeds ?? []) : [],
+  })),
+)
 const sideOf = (s: Side) => sides.value[SIDES.indexOf(s)]!
 
 /**
@@ -332,13 +352,13 @@ function clear(key: string) {
       return moveSlot(s, next && idOf(next) ? next : null)
     }),
   ) as Record<string, string | undefined>
-  replace({ ...q, pair: undefined })
+  replace({ ...q, pair: undefined, first: undefined })
 }
 /** Every one of the teams cleared, with their builds (and the two tapped among the matchups); the rest stays. */
 function clearTeams() {
   openKey.value = null
   folded.value = new Set()
-  replace({ ...Object.assign({}, ...SLOTS.map((s) => moveSlot(s, null))), pair: undefined })
+  replace({ ...Object.assign({}, ...SLOTS.map((s) => moveSlot(s, null))), pair: undefined, first: undefined })
 }
 /** The speed order's list emptied: asked first past a few, as it can take a while to make. */
 async function clearList() {
@@ -359,6 +379,7 @@ function swap() {
   replace({
     ...Object.assign({}, ...yours!.flatMap((s, i) => [moveSlot(s, theirs![i]!), moveSlot(theirs![i]!, s)])),
     pair: undefined,
+    first: first.value ? other(first.value) : undefined,
   })
   openKey.value = null
 }
@@ -452,7 +473,7 @@ function setMode(m: Mode) {
     m === 'order' && !list.value.length
       ? listQuery(picked.value.map((e) => ({ id: e.id, build: e.build })))
       : route.query.list
-  replace({ mode: m === 'order' ? 'order' : undefined, list: typeof carried === 'string' ? carried : undefined })
+  replace({ mode: m === 'vs' ? undefined : m, list: typeof carried === 'string' ? carried : undefined })
 }
 
 /**
@@ -572,7 +593,10 @@ function resetAll() {
       :model-value="mode"
       :label="t('compare.mode')"
       :options="
-        MODES.map((m) => ({ value: m, label: t(phone && m === 'vs' ? 'compare.mode.vsShort' : `compare.mode.${m}`) }))
+        MODES.map((m) => ({
+          value: m,
+          label: t(phone && m !== 'order' ? `compare.mode.${m}Short` : `compare.mode.${m}`),
+        }))
       "
       @update:model-value="(m: Mode) => setMode(m)"
     />
@@ -592,7 +616,7 @@ function resetAll() {
         >
           <FlatIcon name="model-cube-space" :size="16" />{{ t('speed.mod.trickroom') }}
         </button>
-        <template v-if="mode === 'vs' && anyPicked">
+        <template v-if="mode !== 'order' && anyPicked">
           <button type="button" class="btn" @click="swap">
             <ArrowLeftRight :size="16" aria-hidden="true" />{{ t('compare.swap') }}
           </button>
@@ -612,11 +636,13 @@ function resetAll() {
         v-else
         type="button"
         class="btn inverted clear-all"
-        :aria-label="t('compare.clearTeams')"
+        :aria-label="t(mode === 'reverse' ? 'compare.clearBoth' : 'compare.clearTeams')"
         :disabled="!anyPicked"
         @click="clearTeams"
       >
-        <Trash2 :size="16" aria-hidden="true" /><span class="clear-label">{{ t('compare.clearTeams') }}</span>
+        <Trash2 :size="16" aria-hidden="true" /><span class="clear-label">{{
+          t(mode === 'reverse' ? 'compare.clearBoth' : 'compare.clearTeams')
+        }}</span>
       </button>
     </div>
 
@@ -720,6 +746,40 @@ function resetAll() {
         </ul>
         <p class="muted small">{{ t('compare.tiesNote') }}</p>
       </section>
+    </template>
+
+    <!-- Read backwards: the two with their natures and modifiers (no points: those are what's worked out), and under
+         them which moved first, and what their points could be. -->
+    <template v-else-if="mode === 'reverse'">
+      <div class="reverse-sides">
+        <section
+          v-for="side in sides"
+          :id="`compare-${side.s}`"
+          :key="side.s"
+          class="panel banded side"
+          :class="{ opponent: side.s === 'b' }"
+        >
+          <div class="band">
+            <span>{{ t(side.s === 'a' ? 'reverse.sideA' : 'reverse.sideB') }}</span>
+          </div>
+          <SpeedEditor
+            :ranks
+            :ref="editorRef(side.s)"
+            :id="side.id"
+            :build="side.build"
+            :speed="side.speed"
+            :stat="side.stat"
+            :common="[]"
+            :title="t(side.s === 'a' ? 'reverse.sideA' : 'reverse.sideB')"
+            :tone="side.s === 'a' ? 'yours' : 'opponent'"
+            no-points
+            @pick="(id: PokemonId) => pick(side.s, id)"
+            @build="(b: Partial<SpeedBuild>) => setBuild(side.s, b)"
+            @clear="clear(side.s)"
+          />
+        </section>
+      </div>
+      <SpeedReverse :sides="reverseSides" :first="first" :trick-room="trickRoom" @first="setFirst" />
     </template>
 
     <template v-else>
@@ -1071,14 +1131,20 @@ function resetAll() {
   }
 }
 /* Side by side from tablets up; one under the other on phones. */
-.sides {
+.sides,
+.reverse-sides {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   align-items: start;
 }
+/* Read backwards, the two over what's worked out from them. */
+.reverse-sides {
+  margin-bottom: 12px;
+}
 @media (max-width: 720px) {
-  .sides {
+  .sides,
+  .reverse-sides {
     grid-template-columns: minmax(0, 1fr);
   }
 }

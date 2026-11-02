@@ -72,11 +72,14 @@ function prefetchEvent(to: RouteLocationNormalized) {
 const once = (page: string) => () => page
 
 // The comparison's visit: yours against the opponents, one per matchup (the two teams, up to six each), once each team
-// has one; the speed order, one whatever its list, once there's one in it.
+// has one; the speed order, one whatever its list, once there's one in it; read backwards (who moved first), one per
+// pair.
 const TEAM_KEYS = ['a', 'b'].flatMap((s) => [s, ...[2, 3, 4, 5, 6].map((n) => `${s}${n}`)])
 function compareVisit(query: LocationQuery) {
   const { a, b, mode, list } = query
   if (mode === 'order') return typeof list === 'string' && list ? 'speedCompare:order' : null
+  if (mode === 'reverse')
+    return typeof a === 'string' && typeof b === 'string' ? `speedCompare:reverse:${a}:${b}` : null
   return typeof a === 'string' && typeof b === 'string'
     ? `speedCompare:${TEAM_KEYS.map((k) => query[k])
         .filter((x) => typeof x === 'string')
