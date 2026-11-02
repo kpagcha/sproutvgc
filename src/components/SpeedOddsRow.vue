@@ -373,6 +373,9 @@ const v = computed(() => {
 }
 /* The Pokémon: its icon and name; yours outlined (the one yours is measured against is its row's tint). */
 .mon {
+  /* As wide as its icon and name alone, not the cell: a tap beside it, aiming for the bar, opens nothing. */
+  justify-self: start;
+  max-width: 100%;
   display: inline-flex;
   align-items: center;
   gap: 4px;

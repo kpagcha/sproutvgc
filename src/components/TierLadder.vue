@@ -506,6 +506,9 @@ onBeforeUnmount(() => {
   opacity: 0.4;
 }
 .mon {
+  /* As wide as its icon and name alone, not the cell: a tap beside it, aiming for the bar, opens nothing. */
+  justify-self: start;
+  max-width: 100%;
   display: inline-flex;
   align-items: center;
   gap: 4px;
