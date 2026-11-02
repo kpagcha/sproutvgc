@@ -7,7 +7,7 @@
 // reach spans no points and a nature against it to every point and a nature for it; a Pokémon with no sets is at the
 // benchmarks of that span. Yours is measured against each row: the share of its builds yours is stronger than.
 
-import { available, item as itemRef, type AbilityId, type ItemId, type PokemonId } from '@/data/dex'
+import { available, item as itemRef, type AbilityId, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
 import type { MetaData, PokemonMeta } from '@/data/meta'
 import { natureEffectOn } from '@/data/natures'
 import { POKEMON, STATS } from '@/data/pokemon'
@@ -109,6 +109,20 @@ export function sideFactor(
   const { attacks, power } = attackOf(id, d, side)
   if (attacks < 1) return null
   return by === 'moves' ? power : 1
+}
+
+/** The move power with moves is measured by: its best common move on the side as it typically hits, and that power
+ * (`sideFactor`'s). Null for bulk, by the stat alone, or with none. */
+export function sideMove(
+  id: PokemonId,
+  d: PokemonMeta | undefined,
+  measure: Measure,
+  side: Side,
+  by: PowerBy,
+): { id: MoveId; power: number } | null {
+  if (measure === 'bulk' || by !== 'moves' || !d) return null
+  const { move, power } = attackOf(id, d, side)
+  return move && power ? { id: move, power } : null
 }
 
 /** An item or ability that multiplies the measure outright, as the boost of a row of its own: what it is, its

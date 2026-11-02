@@ -3,12 +3,14 @@ import {
   computed,
   onBeforeUnmount,
   onDeactivated,
+  onMounted,
   shallowReactive,
   useTemplateRef,
+  watch,
   type ComponentPublicInstance,
 } from 'vue'
 import tippy, { type Instance } from 'tippy.js'
-import type { PokemonId } from '@/data/dex'
+import type { MoveId, PokemonId } from '@/data/dex'
 import { percent } from '@/data/meta'
 import type { StatId } from '@/data/pokemon'
 import { t } from '@/i18n'
@@ -45,6 +47,8 @@ export interface TierRow {
   /** Its sets' values, each with its share of them and the builds reaching it, the most common first. */
   marks: { value: number; share: number; sets: TierSet[] }[]
   reach: { min: number; max: number }
+  /** With moves, the move its power is measured by and that power (yours with none, a nominal one's, no move). */
+  move?: { id?: MoveId; power: number }
   /** No sets: its benchmarks alone. */
   bench?: number[]
   /** The value of its marks it's placed at: solid, the rest faint. */
@@ -111,14 +115,27 @@ const marksOf = (r: TierRow) => {
 const drawn = computed(() => props.rows.map((r) => ({ r, ...marksOf(r) })))
 
 // The marks' tooltip: one for the ladder, placed by hand on the mark nearest the pointer along the row's bar (within
-// reach, a finger's wider), what it says drawn by `TierMarkTip`.
+// reach, a finger's wider), what it says drawn by `TierMarkTip`; as the speed tiers' (`SpeedOdds`). With a mouse, it
+// shows after a moment over a bar (so sweeping across the list doesn't fire it), or at once on a click, then follows
+// the pointer from mark to mark; leaving the bars hides it. With a finger, a tap shows it and it stays, and dragging
+// along the bar moves it (the bars leave the browser only vertical pans, so scrolling the page still works); a tap
+// elsewhere or a scroll hides it.
 const BENCH = ['min', 'none', 'maxNeutral', 'max'] as const
+const SHOW_DELAY = 80
 const REACH = { mouse: 12, touch: 24 }
 const byKey = computed(() => new Map(props.rows.map((r) => [r.key, r])))
 const tipState = shallowReactive<{ pointed: TierPointed | null }>({ pointed: null })
 const tipBody = useTemplateRef<ComponentPublicInstance>('tipBody')
+const list = useTemplateRef<HTMLElement>('list')
 let tip: Instance | undefined
+let tipResize: ResizeObserver | undefined
+let pending: ReturnType<typeof setTimeout> | undefined
+/** The mark the tooltip is on, and which it is by its row and index: the ladder drawn again can put another element in
+ * its place, or move it. */
 let markEl: HTMLElement | undefined
+let pointedAt: { key: string; i: string } | undefined
+/** A finger down on a bar: dragging moves the tooltip along it. */
+let dragging = false
 function nearest(e: PointerEvent) {
   const track = (e.target as Element).closest<HTMLElement>('.row .track')
   const row = track && byKey.value.get(track.parentElement!.dataset.key!)
@@ -132,41 +149,111 @@ function nearest(e: PointerEvent) {
   }
   if (!best) return null
   const i = Number(best.dataset.i)
+  const move = row.move
   if (row.noSets) {
     const value = row.bench![i]!
-    return { el: best, pointed: { label: props.format(value), bench: BENCH[i]! } }
+    return { el: best, key: row.key, pointed: { label: props.format(value), bench: BENCH[i]!, move } }
   }
   const m = row.marks[i]!
-  return { el: best, pointed: { label: props.format(m.value), share: m.share, sets: m.sets } }
+  return { el: best, key: row.key, pointed: { label: props.format(m.value), share: m.share, sets: m.sets, move } }
 }
-function onMove(e: PointerEvent) {
-  const hit = nearest(e)
-  if (!hit) return hide()
+type Hit = NonNullable<ReturnType<typeof nearest>>
+function mark(el: HTMLElement) {
+  if (markEl === el) return
   markEl?.classList.remove('active')
-  markEl = hit.el
-  markEl.classList.add('active')
+  markEl = el
+  el.classList.add('active')
+}
+function point(hit: Hit) {
+  pointedAt = { key: hit.key, i: hit.el.dataset.i! }
+  if (markEl === hit.el) return
+  mark(hit.el)
   tipState.pointed = hit.pointed
-  if (!tip) {
-    const body = tipBody.value?.$el as HTMLElement | undefined
-    if (!body) return
-    tip = tippy(document.body, {
-      content: body,
-      trigger: 'manual',
-      placement: 'top',
-      appendTo: () => document.body,
-      getReferenceClientRect: () => (markEl ?? document.body).getBoundingClientRect(),
-    })
-  }
-  if (tip.state.isVisible) void tip.popperInstance?.update()
-  else tip.show()
+}
+function show(hit: Hit) {
+  clearTimeout(pending)
+  pending = undefined
+  point(hit)
+  if (tip?.state.isVisible) void tip.popperInstance?.update()
+  else tip?.show()
 }
 function hide() {
+  clearTimeout(pending)
+  pending = undefined
+  pointedAt = undefined
+  dragging = false
   markEl?.classList.remove('active')
   markEl = undefined
   tip?.hide()
 }
+function onMove(e: PointerEvent) {
+  const hit = nearest(e)
+  if (!hit) {
+    if (e.pointerType === 'mouse') hide()
+    return
+  }
+  if (tip?.state.isVisible) {
+    // A finger moves it only while dragging; a mouse, wherever it goes along the bars.
+    if (e.pointerType === 'mouse' || (dragging && e.buttons)) show(hit)
+  } else if (e.pointerType === 'mouse') {
+    point(hit)
+    if (pending === undefined) pending = setTimeout(() => show(nearest(e) ?? hit), SHOW_DELAY)
+  } else if (e.buttons) show(hit)
+}
+function onDown(e: PointerEvent) {
+  const hit = nearest(e)
+  dragging = e.pointerType !== 'mouse' && !!hit
+  if (hit) show(hit)
+  else hide()
+}
+function onUp() {
+  dragging = false
+}
+function onLeave(e: PointerEvent) {
+  if (e.pointerType === 'mouse') hide()
+}
+function onOutside(e: PointerEvent) {
+  if (!list.value?.contains(e.target as Node)) hide()
+}
+// The ladder drawn again with the tooltip shown: on the mark it points at as it is now, or hidden when that's gone.
+watch(
+  () => props.rows,
+  () => {
+    if (!tip?.state.isVisible || !pointedAt) return
+    const { key, i } = pointedAt
+    const row = [...(list.value?.querySelectorAll<HTMLElement>('.row') ?? [])].find((r) => r.dataset.key === key)
+    const el = row?.querySelector<HTMLElement>(`.track .mark[data-i="${i}"]`)
+    if (!el) return hide()
+    mark(el)
+    void tip.popperInstance?.update()
+  },
+  { flush: 'post' },
+)
+onMounted(() => {
+  const body = tipBody.value!.$el as HTMLElement
+  tip = tippy(list.value!, {
+    trigger: 'manual',
+    hideOnClick: false,
+    placement: 'top',
+    content: body,
+    getReferenceClientRect: () => (markEl ?? list.value!).getBoundingClientRect(),
+  })
+  // Placed again whenever its text changes size, so it's never drawn off its mark.
+  tipResize = new ResizeObserver(() => {
+    if (tip?.state.isVisible) void tip.popperInstance?.update()
+  })
+  tipResize.observe(body)
+  document.addEventListener('pointerdown', onOutside)
+  window.addEventListener('scroll', hide, { passive: true, capture: true })
+})
 onDeactivated(hide)
-onBeforeUnmount(() => tip?.destroy())
+onBeforeUnmount(() => {
+  clearTimeout(pending)
+  tipResize?.disconnect()
+  tip?.destroy()
+  document.removeEventListener('pointerdown', onOutside)
+  window.removeEventListener('scroll', hide, { capture: true })
+})
 </script>
 
 <template>
@@ -188,7 +275,15 @@ onBeforeUnmount(() => tip?.destroy())
       >
     </div>
     <div class="rows-box">
-      <ol class="rows" @pointermove="onMove" @pointerdown="onMove" @pointerleave="hide" @pointercancel="hide">
+      <ol
+        ref="list"
+        class="rows"
+        @pointermove="onMove"
+        @pointerdown="onDown"
+        @pointerup="onUp"
+        @pointerleave="onLeave"
+        @pointercancel="hide"
+      >
         <li
           v-for="({ r, marks, span }, i) in drawn"
           :key="r.key"
@@ -380,6 +475,8 @@ onBeforeUnmount(() => tip?.destroy())
   --mark-w: 5px;
   --mark-max: 19px;
   align-self: stretch;
+  /* Dragging along it moves the tooltip; up and down still scroll the page. */
+  touch-action: pan-y pinch-zoom;
   isolation: isolate;
 }
 .odds-cell {

@@ -1850,6 +1850,8 @@ export const messages = {
   'tiers.benchTip.maxNeutral': 'Every point, and a neutral nature',
   'tiers.benchTip.max': 'Every point, and a nature that raises {stat}',
   'tiers.noMoveNote': 'Its sets run no attack on this side: measured with a {power}-power move.',
+  'tiers.tipMove': 'With {move}: {power} power as it hits',
+  'tiers.tipNominal': 'With a {power}-power move',
   'tiers.noSideNote': 'Its sets barely attack on this side.',
   'tiers.powerNote':
     "With moves: its best common move's power as it typically hits, with STAB and its ability, no item.",

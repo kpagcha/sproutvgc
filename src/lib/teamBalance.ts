@@ -615,9 +615,14 @@ export function metaPlace(
 /** How much a meta Pokémon attacks on a side (its moves' shares of its sets there: four a set, up to 4), and its best
  * common move's power on it as it typically hits, with its most common ability and no item (the bulk and power tiers',
  * whose items are boosts of their own); null with none. */
-export function attackOf(id: PokemonId, d: PokemonMeta, side: Side): { attacks: number; power: number | null } {
+export function attackOf(
+  id: PokemonId,
+  d: PokemonMeta,
+  side: Side,
+): { attacks: number; power: number | null; move: MoveId | null } {
   const mon = metaMon(id, d)
-  return { attacks: mon.attacks[side], power: mon.best(side, 'typical', null)?.power ?? null }
+  const best = mon.best(side, 'typical', null)
+  return { attacks: mon.attacks[side], power: best?.power ?? null, move: best?.move ?? null }
 }
 
 /** The meta's values' shape, for a chart's ridge (the bulk and power tiers' own, at their builds). */

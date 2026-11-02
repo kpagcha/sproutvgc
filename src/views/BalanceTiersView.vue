@@ -27,6 +27,7 @@ import {
   byUsage,
   myBoostsOf,
   sideFactor,
+  sideMove,
   statIndex,
   tierBench,
   tierBuilds,
@@ -330,6 +331,8 @@ interface Mon {
   factor: number
   /** That ability, said on its rows. */
   ability: AbilityId | null
+  /** With moves, the move its power is measured by, said in its marks' tooltip. */
+  move: TierRow['move']
   builds: TierBuild[]
   extra: boolean
 }
@@ -359,6 +362,7 @@ const mons = computed<Mon[]>(() => {
         d: m,
         factor: factor * (ability?.factor ?? 1),
         ability: ability?.id ?? null,
+        move: sideMove(id, sets, props.measure, side.value, by.value) ?? undefined,
         builds: metaAvailable.value ? tierBuilds(m, props.measure, side.value) : [],
         extra: !inSlice.has(id),
       },
@@ -409,6 +413,7 @@ function rowOf(m: Mon, key: string, value: number, marks: TierRow['marks'], fact
     reach,
     bench: noSets ? tierBench(m.id, props.measure, side.value, m.factor * factor) : undefined,
     own: value,
+    move: m.move,
     noSets,
     extra,
     hit: foundSet.value.has(m.id) && !onlyFound.value,
@@ -463,6 +468,12 @@ const rows = computed<TierRow[]>(() => {
       marks: [{ value: myValue.value, share: 1, sets: [{ ...myBuild.value, share: 1 }] }],
       reach: tierReach(mine.value, props.measure, side.value, myFactor.value),
       own: myValue.value,
+      move:
+        by.value !== 'moves'
+          ? undefined
+          : (sideMove(mine.value, data.value?.[mine.value], props.measure, side.value, by.value) ?? {
+              power: NOMINAL_POWER,
+            }),
       noSets: false,
       extra: false,
       hit: false,

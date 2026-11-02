@@ -1,23 +1,27 @@
 <script setup lang="ts">
+import { move as moveRef, type MoveId } from '@/data/dex'
 import { percent } from '@/data/meta'
 import type { StatId } from '@/data/pokemon'
 import { t } from '@/i18n'
+import { refName } from '@/i18n/refName'
 import type { Benchmark, NatureEffect } from '@/lib/stats'
 import EffectTag from '@/components/EffectTag'
 
 /** What a mark is: its value as the ladder writes it, its share of the Pokémon's sets and the builds reaching it; or,
- * on a row with no sets, the benchmark it is. */
-export type TierPointed =
+ * on a row with no sets, the benchmark it is. With moves, the move its power is measured by. */
+export type TierPointed = { move?: { id?: MoveId; power: number } } & (
   | {
       label: string
       share: number
       sets: { effect: NatureEffect; points: number; hp: number; share: number }[]
     }
   | { label: string; bench: Benchmark }
+)
 
 // The bulk and power tiers' marks' tooltip, as the speed tiers' (`SpeedOddsTip`): the value and its share, then a line
 // per build reaching it, its nature's effect on the stat, its HP points (bulk) and the stat's points, and its share
-// where there are several; or the benchmark. Given a holder, so pointing from mark to mark draws it alone again.
+// where there are several; or the benchmark. With moves, last, the move its power is measured by and that power as it
+// typically hits (a nominal one's for yours with none). Given a holder, so pointing from mark to mark draws it alone again.
 defineProps<{ state: { pointed: TierPointed | null }; stat: StatId; hp: boolean }>()
 </script>
 
@@ -35,6 +39,16 @@ defineProps<{ state: { pointed: TierPointed | null }; stat: StatId; hp: boolean 
         ><span v-if="state.pointed.sets.length > 1" class="tip-share">{{ percent(b.share) }}</span>
       </div>
     </template>
+    <div v-if="state.pointed?.move" class="tip-move">
+      {{
+        state.pointed.move.id
+          ? t('tiers.tipMove', {
+              move: refName(moveRef(state.pointed.move.id)),
+              power: Math.round(state.pointed.move.power),
+            })
+          : t('tiers.tipNominal', { power: Math.round(state.pointed.move.power) })
+      }}
+    </div>
   </div>
 </template>
 
@@ -49,6 +63,10 @@ defineProps<{ state: { pointed: TierPointed | null }; stat: StatId; hp: boolean 
   align-items: center;
   gap: 6px;
   white-space: nowrap;
+}
+.tip-move {
+  margin-top: 2px;
+  opacity: 0.85;
 }
 .tip-share {
   margin-left: auto;
