@@ -40,7 +40,7 @@ const dataset = computed(() =>
     <button
       type="button"
       class="btn small quiet toggle"
-      :class="{ stale: notLatest }"
+      :class="{ 'data-stale': notLatest }"
       :aria-expanded="open"
       aria-haspopup="dialog"
       :aria-label="
@@ -90,11 +90,12 @@ const dataset = computed(() =>
 .chevron.open {
   transform: rotate(180deg);
 }
-/* Not the latest data: its border and icon in the warning's color, outlined even while quiet. */
-.toggle.stale {
+/* Not the latest data: its border and icon in the warning's color, outlined even while quiet (over the quiet
+   button's own border, `retro.css`'s, whose rules start with `:root:root`). */
+:global(:root:root .btn.quiet.data-stale) {
   border-color: var(--warn);
 }
-.toggle.stale .icon {
+.toggle.data-stale .icon {
   color: var(--warn);
 }
 /* On phones, its icon alone: as compact as the favorites' star. */
