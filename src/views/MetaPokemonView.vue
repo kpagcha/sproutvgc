@@ -53,6 +53,7 @@ import DexRef from '@/components/DexRef'
 import DexText from '@/components/DexText'
 import EntryTitle from '@/components/EntryTitle.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
+import MonBalance from '@/components/MonBalance.vue'
 import PokemonChips from '@/components/PokemonChips.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import ListOptions from '@/components/ListOptions.vue'
@@ -475,6 +476,7 @@ const sections = computed(() =>
     { id: 'sec-builds', label: t('usageMon.secBuilds'), shown: builds.value.length > 0 },
     { id: 'sec-speed', label: t('usageMon.speed'), shown: spread.value.length > 0 },
     { id: 'sec-spreads', label: t('usageMon.secSpreads'), shown: spreads.value.length > 0 || natures.value.length > 0 },
+    { id: 'sec-balance', label: t('overview.section'), shown: true },
     { id: 'sec-teammates', label: t('usageMon.teammates'), shown: teammates.value.length > 0 },
     { id: 'sec-tournaments', label: t('usageMon.secTournaments'), shown: tournaments.value.length > 0 },
     { id: 'sec-history', label: t('usageMon.secHistory'), shown: months.value.length > 1 },
@@ -824,6 +826,9 @@ const sections = computed(() =>
           </div>
         </div>
       </section>
+
+      <!-- Its bulk and power against the meta's, both sides on one chart each, it alone on them. -->
+      <MonBalance id="sec-balance" :key="id" :mon="id" :snapshot :data :class="{ 'meta-stale': loading }" />
 
       <!-- Its teammates, each a link to its own page here: the least of it, last. -->
       <section v-if="teammates.length" id="sec-teammates" class="panel" :class="{ 'meta-stale': loading }">

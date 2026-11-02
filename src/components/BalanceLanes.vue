@@ -2,7 +2,7 @@
 import { computed, useTemplateRef } from 'vue'
 import { useElementSize } from '@vueuse/core'
 import { Info } from '@lucide/vue'
-import { move } from '@/data/dex'
+import { move, type PokemonId } from '@/data/dex'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import type { Plotted, Shape, Side } from '@/lib/teamBalance'
@@ -42,6 +42,9 @@ const props = defineProps<{
   state?: 'pending' | 'none'
   /** The rows of icons a plot has room for, `ROWS` unless fewer (a compact chart). */
   rows?: number
+  /** The reader's picks (the rankings' overview): placed first, on the lowest rows, outlined in their lane's color with
+   * the rest faded. */
+  found?: readonly PokemonId[]
 }>()
 
 // One axis for both lanes: the meta's range on either (its rare extremes left out) and the team's values, a little
@@ -98,18 +101,35 @@ const ROOM = 28
 const ROWS = 3
 const rows = computed(() => props.rows ?? ROWS)
 const legendBody = useTemplateRef<HTMLElement>('legendBody')
+const foundSet = computed(() => new Set(props.found ?? []))
+const dimmed = computed(() => props.lanes.some((l) => l.points.some((p) => foundSet.value.has(p.pokemon))))
 const placed = computed(() =>
   props.lanes.map((l) => {
-    const ends: number[] = []
-    return [...l.points]
-      .sort((a, b) => a.value - b.value)
-      .map((p) => {
+    const byValue = [...l.points].sort((a, b) => a.value - b.value)
+    const isFound = (p: Plotted) => foundSet.value.has(p.pokemon)
+    if (!byValue.some(isFound)) {
+      const ends: number[] = []
+      return byValue.map((p) => {
         const x = at(p.value) * (width.value || 1)
         let row = ends.findIndex((end) => x - end >= ROOM)
         if (row < 0) row = ends.length < rows.value ? ends.length : ends.indexOf(Math.min(...ends))
         ends[row] = x
-        return { p, row }
+        return { p, row, found: false }
       })
+    }
+    // With picks, they go first, out of order: a row has room where every icon on it is far enough either way.
+    const taken: number[][] = []
+    return [...byValue.filter(isFound), ...byValue.filter((p) => !isFound(p))].map((p) => {
+      const x = at(p.value) * (width.value || 1)
+      let row = taken.findIndex((xs) => xs.every((o) => Math.abs(x - o) >= ROOM))
+      if (row < 0 && taken.length < rows.value) row = taken.push([]) - 1
+      if (row < 0) {
+        const gap = (xs: number[]) => Math.min(...xs.map((o) => Math.abs(x - o)))
+        row = taken.reduce((best, xs, r) => (gap(xs) > gap(taken[best]!) ? r : best), 0)
+      }
+      taken[row]!.push(x)
+      return { p, row, found: isFound(p) }
+    })
   }),
 )
 </script>
@@ -117,7 +137,7 @@ const placed = computed(() =>
 <template>
   <!-- The size container the narrow layout asks: a container query never matches its own element. -->
   <div class="lanes-box">
-    <div class="lanes" :style="{ '--rows': rows }">
+    <div class="lanes" :class="{ dimmed }" :style="{ '--rows': rows }">
       <template v-for="(l, i) in lanes" :key="l.side">
         <div class="lane-label" :data-side="l.side">
           <CategoryIcon v-if="l.side !== 'speed'" :category="l.side as Side" :tip="false" />
@@ -153,11 +173,11 @@ const placed = computed(() =>
             ></span>
           </template>
           <span
-            v-for="{ p, row } in placed[i]"
+            v-for="{ p, row, found } in placed[i]"
             :key="p.pokemon"
             v-tip:group="tipOf(p, l.side)"
             class="mon"
-            :class="{ mixed: p.mixed }"
+            :class="{ mixed: p.mixed, found }"
             :style="{ left: `clamp(20px, ${pct(at(p.value))}, calc(100% - 20px))`, '--row': row }"
             :aria-label="tipOf(p, l.side)"
             ><PokemonIcon :id="p.pokemon"
@@ -329,6 +349,18 @@ const placed = computed(() =>
 .mon:hover {
   z-index: 2;
   transform: translateX(-50%) translateY(-2px);
+}
+/* A pick: on a wash of its lane's color, outlined in it, over the rest; the rest faded while there are any. */
+.mon.found {
+  z-index: 2;
+  background: color-mix(in srgb, var(--c) 22%, var(--panel));
+  outline: 2px solid var(--c);
+}
+.dimmed .mon:not(.found) {
+  opacity: 0.45;
+}
+.dimmed .mon:not(.found):hover {
+  opacity: 1;
 }
 /* Attacking with moves, a line from it to its peak, at its middle's height behind it, a tick at its end. */
 .peak {
