@@ -41,9 +41,8 @@ import {
   type PokemonId,
   type Ref,
 } from '@/data/dex'
-import { REGULATION } from '@/data/format'
 import { POKEMON, itemBound, splitForme } from '@/data/pokemon'
-import { has, metaLabel, pastRoster, percent, type PokemonMeta, type Share, usageRanks } from '@/data/meta'
+import { has, pastRoster, percent, type PokemonMeta, type Share, usageRanks } from '@/data/meta'
 import { locale, t, tSplit } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { center, reveal } from '@/lib/scroll'
@@ -1212,12 +1211,6 @@ function onMark(key: string, speed: number, slid: boolean) {
     slid,
   )
 }
-/** How many Pokémon the ladder holds, each once however many rows it has. */
-const monCount = computed(() =>
-  bySets.value
-    ? new Set(ladderRows.value.rows.filter((r) => !r.mine).map((r) => r.id)).size
-    : rangeRows.value.reduce((n, r) => n + r.mons.length, 0),
-)
 const ladder = useTemplateRef<HTMLElement>('ladder')
 
 // How yours does against the others shown: the share of them it moves before, ties and moves after, weighted by usage
@@ -2425,18 +2418,8 @@ const { start: startTour } = useTour(
             </AnimatePresence>
           </Teleport>
 
-          <p v-if="entered && (!needsData || data)" class="muted small note">{{ t('speed.count', { n: monCount }) }}</p>
-          <p class="muted small note">{{ t('speed.intro', { reg: snapshot?.regulation ?? REGULATION }) }}</p>
-          <p v-if="entered && (!needsData || data) && filtering && !monCount" class="muted small note">
-            {{ t('speed.filteredNone') }}
-          </p>
-          <p v-if="showMegas" class="muted small note">{{ t('speed.megaNote') }}</p>
           <p v-if="bySets && snapshot" class="muted small note">
             {{ t('speed.leftOutNote', { pct: percent(MIN_SHARE) }) }}
-          </p>
-          <p v-if="needsData && snapshot" class="muted small note">
-            {{ metaLabel(snapshot) }} · {{ t('usage.from') }}
-            <a :href="snapshot.provider.url" rel="noopener">{{ snapshot.provider.name }}</a>
           </p>
         </div>
       </div>
@@ -3246,8 +3229,9 @@ const { start: startTour } = useTour(
   background: var(--sel);
   color: var(--text);
 }
-.found-name :deep(.sheet-icon) {
-  margin-block: -4px;
+/* Its sprite smaller, inside the chip rather than spilling over its edges. */
+.found-name {
+  --icon-scale: 0.8;
 }
 /* Wider, the find no wider than a name needs. */
 @media (min-width: 721px) {

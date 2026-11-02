@@ -1367,7 +1367,6 @@ export const messages = {
   'meta.notLatest': 'not the latest data',
   'meta.cutoffsNote':
     "Teams weighted by their players' rating: each counts those rated above its cutoff most; All players counts every team the same.",
-  'speed.intro': 'The Pokémon of Regulation {reg} by their Speed stat.',
   'speed.show': 'Show',
   'speed.meta': 'Top {n} by usage',
   'speed.all': 'Every Pokémon',
@@ -1475,7 +1474,6 @@ export const messages = {
   'tour.compare.ladder':
     '<p>Opens the speed tiers with yours there, its build kept, and the opponent found on the ladder. With two on a team, you choose which.</p>',
   'speed.help': 'How to read this',
-  'speed.count': '{n} Pokémon',
   'speed.yours': 'Your Pokémon',
   'speed.yoursPick': 'Pick a Pokémon',
   'speed.yoursIntro':
@@ -1573,7 +1571,7 @@ export const messages = {
   'speed.active': 'Shown',
   'speed.boostsDesc': 'Items and abilities their sets run that change Speed: Choice Scarf, Unburden, Swift Swim…',
   'speed.leftOutNote':
-    "Builds, items and abilities under {pct} of a Pokémon's sets are left out, but for the Pokémon you find: they show all of them, and every Speed ability they can have, however few run them.",
+    "Builds, items and abilities on under {pct} of a Pokémon's sets are left out, but for those you find.",
   'speed.whenShort.itemLost': 'Item gone',
   'speed.whenShort.status': 'Statused',
   'speed.build': '{points} points and {nature}{natures}',
@@ -1588,8 +1586,6 @@ export const messages = {
   'speed.benchTip.maxNeutral': '32 stat points, a neutral nature',
   'speed.benchTip.none': 'No stat points, a neutral nature',
   'speed.benchTip.min': 'No stat points, a nature that lowers Speed',
-  'speed.megaNote':
-    "Mega Evolutions are at their Mega's Speed. On the turn one Mega Evolves, it still moves at its base form's.",
   'scroll.back': 'Scroll back',
   'scroll.more': 'Scroll for more',
   'picker.close': 'Close',
@@ -1600,7 +1596,6 @@ export const messages = {
   'speed.turnOff': 'Turn off {name}',
   'speed.summaryFiltered': '(those filtered only)',
   'speed.summaryField': 'in {field}, with their sets boosted in it',
-  'speed.filteredNone': 'None of them pass the filters.',
   'picker.all': 'All Pokémon',
   'picker.taken': 'On the team',
   'picker.recent': 'Recent',
