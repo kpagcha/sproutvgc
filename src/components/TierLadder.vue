@@ -664,8 +664,13 @@ onBeforeUnmount(() => {
   .head .track {
     display: none;
   }
+  /* Tall enough that its tallest mark stays clear of the Pokémon's name over it (and its forme), with room between
+     them, so a tap on a bar's marks doesn't land on the link. */
   .track {
-    min-height: 30px;
+    min-height: 48px;
+  }
+  .row {
+    row-gap: 6px;
   }
 }
 </style>

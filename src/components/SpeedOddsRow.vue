@@ -672,9 +672,10 @@ const v = computed(() => {
     top: -1px;
     bottom: -1px;
   }
-  /* The marks taller, as the bar has the row's whole width. */
+  /* The marks taller, as the bar has the row's whole width; the bar tall enough that the tallest stays clear of the
+     Pokémon's name over it, so a tap on its marks doesn't land on the link. */
   .track {
-    min-height: 44px;
+    min-height: 52px;
     --mark-max: 24px;
   }
   /* Behind the Pokémon. */
