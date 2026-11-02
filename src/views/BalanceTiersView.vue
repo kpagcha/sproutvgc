@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, shallowRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ChevronsDown, ChevronsUp, Funnel, RotateCcw, Rocket, Trash2, X } from '@lucide/vue'
 import {
@@ -43,6 +43,7 @@ import { shapeOf, type Plotted, type Side } from '@/lib/teamBalance'
 import { center } from '@/lib/scroll'
 import { lastBalanceQuery, withoutMeta } from '@/lib/tiersState'
 import { useActiveQuery } from '@/composables/useActiveQuery'
+import { useSlashFocus } from '@/composables/useSlashFocus'
 import { useMeta } from '@/composables/useMeta'
 import { usePageEntered } from '@/composables/usePageEntered'
 import BalanceLanes, { type LaneView } from '@/components/BalanceLanes.vue'
@@ -200,6 +201,12 @@ function addFound(id: PokemonId | null) {
 const removeFound = (id: PokemonId) =>
   set({ find: findQuery(foundIds.value.filter((x) => x !== id)), vs: vsQuery(vsIds.value.filter((x) => x !== id)) })
 const clearFound = () => set({ find: undefined, vs: undefined })
+// "/" focuses the find, as on the speed tiers (its hint in the box; the page's own, before the site's search).
+const findPicker = useTemplateRef<InstanceType<typeof PokemonPicker>>('findPicker')
+useSlashFocus(() => {
+  if (!findPicker.value) return false
+  findPicker.value.open()
+})
 const onlyFound = computed(() => finding.value && query.value.findmode !== 'mark')
 const toggleOnly = () => set({ findmode: onlyFound.value ? 'mark' : undefined })
 const onlyLabel = computed(() => tSplit('speed.findOnly', 'name'))
@@ -709,6 +716,7 @@ onBeforeUnmount(() => wideQuery.removeEventListener('change', onWide))
               </div>
             </div>
             <PokemonPicker
+              ref="findPicker"
               recent
               adds
               :model-value="null"
