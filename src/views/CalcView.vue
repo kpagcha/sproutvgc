@@ -866,7 +866,8 @@ function face(f: Fighter) {
   z-index: 41;
   max-height: calc(100dvh - var(--nav-h, 0px) - 12px);
   margin: -8px -6px 0;
-  padding: 8px 6px;
+  /* Less under it than over it: the row in it already keeps 4px under its buttons for their shadows. */
+  padding: 8px 6px 4px;
   overflow-y: auto;
   background: var(--bg);
   border-bottom: 1px solid transparent;
