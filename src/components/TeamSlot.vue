@@ -181,7 +181,7 @@ const chipText = computed(() =>
       >
       <span class="muted" aria-hidden="true">·</span>
       <button
-        v-tip="member.nature ? natureTip(member.nature) : undefined"
+        v-tip="member.nature && !flat ? natureTip(member.nature) : undefined"
         type="button"
         class="slot-btn nature"
         :class="{ active: active === 'nature', placeholder: !member.nature, struck: atSets }"
