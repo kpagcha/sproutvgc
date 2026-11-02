@@ -475,9 +475,9 @@ const sections = computed(() =>
     { id: 'sec-builds', label: t('usageMon.secBuilds'), shown: builds.value.length > 0 },
     { id: 'sec-speed', label: t('usageMon.speed'), shown: spread.value.length > 0 },
     { id: 'sec-spreads', label: t('usageMon.secSpreads'), shown: spreads.value.length > 0 || natures.value.length > 0 },
-    { id: 'sec-history', label: t('usageMon.secHistory'), shown: months.value.length > 1 },
     { id: 'sec-teammates', label: t('usageMon.teammates'), shown: teammates.value.length > 0 },
     { id: 'sec-tournaments', label: t('usageMon.secTournaments'), shown: tournaments.value.length > 0 },
+    { id: 'sec-history', label: t('usageMon.secHistory'), shown: months.value.length > 1 },
     { id: 'sec-matchups', label: t('pokemon.defense'), shown: true },
   ].filter((x) => x.shown),
 )
@@ -825,28 +825,6 @@ const sections = computed(() =>
         </div>
       </section>
 
-      <!-- Its usage over the months of the dataset's series. -->
-      <section v-if="months.length > 1" id="sec-history" class="panel">
-        <h2>{{ t('usageMon.history') }}</h2>
-        <ol class="months" :aria-label="t('usageMon.history')">
-          <li
-            v-for="x in months"
-            :key="x.id"
-            v-tip="
-              x.usage === undefined
-                ? t('usageMon.monthNone', { dates: x.dates })
-                : t('usageMon.month', { dates: x.dates, usage: percent(x.usage), rank: x.rank ?? '' })
-            "
-            :class="{ current: x.current }"
-          >
-            <span class="month-value">{{ x.usage === undefined ? '—' : percent(x.usage) }}</span>
-            <span class="month-bar" :style="{ '--share': (x.usage ?? 0) / topMonth }"></span>
-            <span class="month-label">{{ x.label }}</span>
-            <span class="month-rank muted">{{ x.rank ? `#${x.rank}` : '' }}</span>
-          </li>
-        </ol>
-      </section>
-
       <!-- Its teammates, each a link to its own page here: the least of it, last. -->
       <section v-if="teammates.length" id="sec-teammates" class="panel" :class="{ 'meta-stale': loading }">
         <h2 v-tip="t('usageMon.teammatesTip', { share: percent(TEAMMATE_MIN) })" class="tipped-head">
@@ -918,6 +896,28 @@ const sections = computed(() =>
           </template>
         </template>
       </div>
+    </section>
+
+    <!-- Its usage over the months of the dataset's series. -->
+    <section v-if="months.length > 1" id="sec-history" class="panel">
+      <h2>{{ t('usageMon.history') }}</h2>
+      <ol class="months" :aria-label="t('usageMon.history')">
+        <li
+          v-for="x in months"
+          :key="x.id"
+          v-tip="
+            x.usage === undefined
+              ? t('usageMon.monthNone', { dates: x.dates })
+              : t('usageMon.month', { dates: x.dates, usage: percent(x.usage), rank: x.rank ?? '' })
+          "
+          :class="{ current: x.current }"
+        >
+          <span class="month-value">{{ x.usage === undefined ? '—' : percent(x.usage) }}</span>
+          <span class="month-bar" :style="{ '--share': (x.usage ?? 0) / topMonth }"></span>
+          <span class="month-label">{{ x.label }}</span>
+          <span class="month-rank muted">{{ x.rank ? `#${x.rank}` : '' }}</span>
+        </li>
+      </ol>
     </section>
 
     <!-- Its types' matchups defending, last: not of the meta, so shown with or without its data. -->
