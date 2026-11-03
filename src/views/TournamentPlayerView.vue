@@ -153,7 +153,9 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
           <span>{{ t('meta.regulation', { reg: event.regulation }) }}</span>
           <span>{{ t('tournaments.players', { n: num(event.players) }) }}</span>
         </p>
-        <p v-if="event.live" class="facts small"><LiveTag :live="event.live" /></p>
+        <p v-if="event.live" class="facts small">
+          <LiveTag :live="event.live" :teams-in="event.teams >= event.players" />
+        </p>
       </template>
     </div>
 

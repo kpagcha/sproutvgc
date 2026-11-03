@@ -168,7 +168,7 @@ const count = (n: number) => n.toLocaleString(locale.value)
                             >{{ t(`tournaments.type.${e.type}`) }} · <CountryFlag :code="e.country" /> ·
                             {{ t('tournaments.players', { n: count(e.players) }) }}</span
                           >
-                          <LiveTag v-if="e.live" :live="e.live" short class="small" />
+                          <LiveTag v-if="e.live" :live="e.live" :teams-in="e.teams >= e.players" short class="small" />
                         </span>
                         <!-- Under way, who leads it for now. -->
                         <span v-if="e.live?.leader" class="winner">

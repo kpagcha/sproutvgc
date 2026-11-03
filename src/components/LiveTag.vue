@@ -7,8 +7,9 @@ import { ago } from '@/lib/live'
 // A tournament under way, marked so (`LIVE_EVENTS`): "Live" with a pulsing dot, the Swiss round it's at of all of them
 // (in the top cut, its stage: Quarterfinals, Semifinals, Final, Top 16, or the play-in) and,
 // unless `short`, how long ago its standings last changed; one over but not generated for good yet, "Just finished".
-// One over has a tooltip saying it's left out of what adds events up until its team lists are in.
-const props = defineProps<{ live: LiveState; short?: boolean }>()
+// One over has a tooltip saying it's left out of what adds events up (the regulation's trends, builds, win rates)
+// until the weekly update generates it, and whether its team lists are all in (`teamsIn`: one per player).
+const props = defineProps<{ live: LiveState; teamsIn?: boolean; short?: boolean }>()
 const over = computed(() => !!props.live.completed)
 const updated = computed(() => ago(props.live.updated, locale.value))
 /** Where it's at: its stage in the top cut, by its round's matches (as the bracket names them), else its Swiss round. */
@@ -21,7 +22,11 @@ const at = computed(() => {
 </script>
 
 <template>
-  <span v-tip="over ? t('tournaments.liveOverTip') : undefined" class="live-tag" :class="{ over, tipped: over }">
+  <span
+    v-tip="over ? t(teamsIn ? 'tournaments.liveOverTipTeamsIn' : 'tournaments.liveOverTip') : undefined"
+    class="live-tag"
+    :class="{ over, tipped: over }"
+  >
     <template v-if="over">{{ t('tournaments.liveOver') }}</template>
     <template v-else>
       <span class="live-mark"><span class="dot" aria-hidden="true" />{{ t('tournaments.live') }}</span>

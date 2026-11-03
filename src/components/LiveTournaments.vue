@@ -11,7 +11,7 @@ import LiveTag from '@/components/LiveTag.vue'
   <ul v-if="LIVE_EVENTS.length" class="live-now">
     <li v-for="e in LIVE_EVENTS" :key="e.id">
       <AppLink :to="{ name: 'tournament', params: { id: e.id } }" class="live-line">
-        <LiveTag :live="e.live" short />
+        <LiveTag :live="e.live" :teams-in="e.teams >= e.players" short />
         <span class="name">{{ e.name }} <span class="arrow">›</span></span>
       </AppLink>
     </li>

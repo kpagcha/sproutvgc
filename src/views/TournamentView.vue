@@ -238,11 +238,11 @@ const fieldDay2 = computed(
   () => (standings.value ?? []).filter((s) => s.team.length && s.day2).length / (fieldTeams.value || 1),
 )
 const playerAt = (placing: number) => standings.value?.find((s) => s.placing === placing)
-/** At an event under way (or not generated for good yet), whether no team list is out yet, and, with some, that what's
- * counted is partial. */
+/** At an event under way (or not generated for good yet), whether no team list is out yet, and, with some but not all,
+ * that what's counted is partial. */
 const noTeams = computed(() => !!event.value?.live && !!standings.value && !fieldTeams.value)
 const partialTeams = computed(() =>
-  event.value?.live && standings.value && fieldTeams.value
+  event.value?.live && standings.value && fieldTeams.value && fieldTeams.value < standings.value.length
     ? t('tournaments.partialTeams', { n: num(fieldTeams.value), of: num(standings.value.length) })
     : '',
 )
@@ -568,7 +568,7 @@ const termRows = useId()
         <span>{{ t('meta.regulation', { reg: event.regulation }) }}</span>
         <span>{{ t('tournaments.players', { n: num(event.players) }) }}</span>
       </p>
-      <p v-if="event.live" class="live"><LiveTag :live="event.live" /></p>
+      <p v-if="event.live" class="live"><LiveTag :live="event.live" :teams-in="event.teams >= event.players" /></p>
       <p v-if="metaOf" class="links">
         <AppLink :to="{ name: 'rankings', query: { meta: metaOf } }">{{ t('tournaments.eventMeta') }} ›</AppLink>
       </p>
