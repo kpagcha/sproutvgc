@@ -167,6 +167,30 @@
       "team": ["sneasler", "whimsicott", "charizardmegay", "kingambit", "garchomp", "froslassmega"]
     }
   },
+  "regional-gdan-sk-2026": {
+    "id": "regional-gdan-sk-2026",
+    "n": 448,
+    "name": "Regional Gdańsk",
+    "date": "2026-10-31",
+    "country": "PL",
+    "players": 758,
+    "type": "regional",
+    "category": "official",
+    "regulation": "M-C",
+    "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
+    "url": "https://standings.limitlessvgc.com/44/standings",
+    "t": 44,
+    "format": 3,
+    "day2": 110,
+    "topCut": 14,
+    "rounds": 16,
+    "teams": 758,
+    "winner": {
+      "player": "Javier Varela",
+      "country": "ES",
+      "team": ["gholdengo", "excadrill", "tyranitarmega", "staraptormega", "sinistcha", "milotic"]
+    }
+  },
   "worlds-2026": {
     "id": "worlds-2026",
     "n": 437,
