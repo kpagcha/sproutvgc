@@ -1088,7 +1088,12 @@ async function main() {
     smogon: sources.smogon,
     limitlessvgc: sources.limitlessvgc,
   })
-  const pinned = JSON.stringify(sources, null, 2) + '\n'
+  // Written as Prettier has it, as the pre-commit hook would leave it: otherwise the file always differs from the
+  // committed one, and a refresh with nothing new would commit nothing but its formatting (an empty commit).
+  const pinned = await prettier.format(JSON.stringify(sources, null, 2), {
+    ...(await prettier.resolveConfig(SOURCES_FILE)),
+    filepath: SOURCES_FILE,
+  })
   if (pinned !== saved) {
     writeFileSync(SOURCES_FILE, pinned)
     console.log('Updated scripts/sources.json')

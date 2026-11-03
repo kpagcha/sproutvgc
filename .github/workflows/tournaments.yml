@@ -54,6 +54,7 @@ jobs:
           git config user.email '41898099+github-actions[bot]@users.noreply.github.com'
           git switch -c "$branch"
           git add -A scripts/sources.json src/data/generated
+          if git diff --cached --quiet; then echo 'No new tournament data.'; exit 0; fi
           git commit -m "data: the official tournaments as of $week"
           git push origin "$branch"
           gh pr create --base main --head "$branch" --title "data: the official tournaments as of $week" --body "The tournaments from Limitless VGC as of $week (\`gen-data --update-tournaments\`), opened by the weekly refresh workflow. Lint and build passed on it.
