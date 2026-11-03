@@ -1340,9 +1340,9 @@ export const messages = {
   'tournaments.liveUpdated': 'updated {when}',
   'tournaments.liveOver': 'Just finished',
   'tournaments.liveOverTip':
-    "Over, but its team lists may still be coming in. Its own pages count what's out so far; the regulation's trends, builds and win rates add it in once the weekly update takes it in for good.",
+    "Over, but its team lists may still be coming in. Its own pages count what's out so far; the regulation's trends, builds and win rates add it in once they're all in, or at the weekly update.",
   'tournaments.liveOverTipTeamsIn':
-    "Over, with every team list in. The regulation's trends, builds and win rates add it in once the weekly update takes it in for good.",
+    "Over, with every team list in. The regulation's trends, builds and win rates add it in shortly, with the next update of the tournaments.",
   'tournaments.leader': 'Leading',
   'tournaments.partialTeams':
     'Partial: {n} of {of} team lists published so far, so these numbers will change as more come in.',

@@ -2,13 +2,16 @@
 // rounds so far, the team lists published so far) into `src/data/generated/live/`, which isn't committed: the deploy
 // runs it before building, on a schedule over the weekends (and less often over the week, for the team lists published
 // after), so the site shows them live (`.github/workflows/deploy.yml`).
-// An event over but not generated yet stays here, its team lists still coming in, until the weekly refresh generates it
-// for good (`gen-data --update-tournaments`). Nothing here counts towards what adds events up (trends, builds): the app
-// keeps them apart (`LIVE_EVENTS` in `src/data/tournaments.ts`).
+// An event over but not generated yet stays here, its team lists still coming in, until the refresh generates it for
+// good (`gen-data --update-tournaments`): the weekly one, or the one the deploy starts as soon as it's over with every
+// team list in (its number on the standings site in `complete=`, comma-separated, in `$GITHUB_OUTPUT`). Nothing here
+// counts towards what adds events up (trends, builds): the app keeps them apart (`LIVE_EVENTS` in
+// `src/data/tournaments.ts`).
 //
 // Quick, and needing no Showdown: what the dex has comes from the generated data. Run with `npm run live-tournaments`.
 // A failure leaves no event live rather than failing the build, said as a warning on the workflow's run and as
-// `failed=true` in `$GITHUB_OUTPUT`, beside how many it wrote as `events=`, when run by a workflow.
+// `failed=true` in `$GITHUB_OUTPUT`, beside how many it wrote as `events=` and those over with every team list in as
+// `complete=`, when run by a workflow.
 
 import { appendFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
@@ -120,6 +123,7 @@ async function main() {
   })
   const ids = new Set(Object.keys(generated))
   const index: Record<string, LiveEvent> = {}
+  const complete: number[] = []
   const dex = known()
   for (const l of await limitless.underWay(new Set(Object.values(generated).map((e) => e.t)), DAYS)) {
     const info = infoOf(l, upcoming, regulation)
@@ -127,6 +131,7 @@ async function main() {
     ids.add(info.id)
     const { event, standings, rounds } = await limitless.liveEvent(l.id, info, info.regulation, dex)
     index[event.id] = event
+    if (event.live.completed && event.players && event.teams >= event.players) complete.push(l.id)
     mkdirSync(OUT, { recursive: true })
     const byPlacing = Object.fromEntries(
       standings.map(({ placing, ...s }): [number, Omit<Standing, 'placing'>] => [placing, s]),
@@ -141,13 +146,14 @@ async function main() {
   if (n) writeFileSync(join(OUT, 'index.json'), JSON.stringify(index))
   else console.log('No tournament under way')
   if (limitless.requests) console.log(`Made ${limitless.requests} requests to Limitless VGC`)
-  return n
+  return { n, complete }
 }
 
 let n = 0
+let complete: number[] = []
 let failed = false
 try {
-  n = await main()
+  ;({ n, complete } = await main())
 } catch (error) {
   // The site builds without them rather than not at all, but not silently: the workflow's run says so.
   const message = `No live tournaments: ${error instanceof Error ? error.message : String(error)}`
@@ -155,4 +161,5 @@ try {
   rmSync(OUT, { recursive: true, force: true })
   failed = true
 }
-if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `events=${n}\nfailed=${failed}\n`)
+if (process.env.GITHUB_OUTPUT)
+  appendFileSync(process.env.GITHUB_OUTPUT, `events=${n}\nfailed=${failed}\ncomplete=${complete.join(',')}\n`)

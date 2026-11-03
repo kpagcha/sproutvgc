@@ -5,7 +5,8 @@ name: Deploy to GitHub Pages
 # the tournaments under way (or just over, not generated yet) from it first (`npm run live-tournaments`, never
 # committed), so the site shows them live. A scheduled run deploys only when what it read changed since the last deploy,
 # and fails rather than deploy when it couldn't read them (which would take the live events off the site); a push
-# deploys anyway, the run warning that it couldn't.
+# deploys anyway, the run warning that it couldn't. An event it finds over with every team list in starts the
+# tournaments' refresh (`tournaments.yml`), which generates it for good, rather than leave it live until Tuesday's.
 on:
   push:
     branches: [main]
@@ -18,6 +19,8 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  # To start the tournaments' refresh.
+  actions: write
 
 # One deployment at a time; don't cancel a deployment that's already running.
 concurrency:
@@ -61,6 +64,26 @@ jobs:
           else
             echo 'The tournaments under way are as last deployed.'
           fi
+      # An event over with every team list in has nothing left to come: the refresh generates it for good, so the trends,
+      # builds and win rates count it. Asked once per event every six hours (kept in the cache beside the hash), so a
+      # refresh that failed, or found it not on Limitless VGC's lists yet, is asked again later, not on every run.
+      - name: Refresh the tournaments when one is over
+        if: steps.live.outputs.complete != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          asked=node_modules/.cache/limitlessvgc/refresh-asked
+          now=$(date +%s)
+          due=
+          for t in $(echo '${{ steps.live.outputs.complete }}' | tr , ' '); do
+            last=$(grep "^$t " "$asked" 2>/dev/null | tail -1 | cut -d' ' -f2)
+            if [ -z "$last" ] || [ $((now - last)) -ge 21600 ]; then due="$due $t"; fi
+          done
+          if [ -z "$due" ]; then echo 'The refresh was asked for already.'; exit 0; fi
+          echo "Over with every team list in:$due. Starting the tournaments' refresh."
+          gh workflow run tournaments.yml --ref main
+          mkdir -p "$(dirname "$asked")"
+          for t in $due; do echo "$t $now" >> "$asked"; done
       - if: steps.changed.outputs.deploy == 'true'
         run: npm run lint
       - if: steps.changed.outputs.deploy == 'true'

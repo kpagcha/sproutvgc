@@ -8,7 +8,7 @@ import { ago } from '@/lib/live'
 // (in the top cut, its stage: Quarterfinals, Semifinals, Final, Top 16, or the play-in) and,
 // unless `short`, how long ago its standings last changed; one over but not generated for good yet, "Just finished".
 // One over has a tooltip saying it's left out of what adds events up (the regulation's trends, builds, win rates)
-// until the weekly update generates it, and whether its team lists are all in (`teamsIn`: one per player).
+// until the refresh generates it (as soon as its team lists are all in, else weekly), and whether its team lists are all in (`teamsIn`: one per player).
 const props = defineProps<{ live: LiveState; teamsIn?: boolean; short?: boolean }>()
 const over = computed(() => !!props.live.completed)
 const updated = computed(() => ago(props.live.updated, locale.value))
