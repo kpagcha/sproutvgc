@@ -1,0 +1,316 @@
+/* EXPERIMENT: the "Champions" palette, a prototype of a 60/30/10 color system, opt-in with `?palette=champions` (and
+   off again with `?palette=off`; remembered under `sproutvgc.palette`, applied before first paint in index.html).
+   Nothing here changes the default look.
+
+   The split:
+   - 60, the neutrals: a cool off-white page (98%), pure white raised cards, a grey a step down for what's recessed.
+     All tinted toward the brand's hue (264, a navy-indigo) by OKLCH, lightness down and chroma up a touch per layer.
+   - 30, the structure: deep navy for what frames the page and names its parts (the header, panel bands, tabs).
+   - 10, the highlight: a Champions-like electric yellow for what's active or picked (primary buttons, the tab shown,
+     the selection, the header's underline), as the current theme's highlighter yellow already is.
+   Semantic colors (good, bad, warn) and charts (physical, special, `--chart-*`) sit apart from the brand: same OKLCH
+   lightness and chroma, hues apart, so none reads brighter than another.
+
+   The current theme's touch kept: square corners, the hard offset shadow (now a faint navy rather than black ink), the
+   flat type badges. What goes: 2px black outlines, replaced by ~85% lightness borders. */
+
+/* ---------- Scales ---------- */
+:root:root[data-palette='champions'] {
+  /* Brand navy-indigo, hue 264. */
+  --navy-300: oklch(0.78 0.08 264);
+  --navy-400: oklch(0.66 0.12 264);
+  --navy-500: oklch(0.55 0.15 264);
+  --navy-600: oklch(0.46 0.15 264);
+  --navy-700: oklch(0.38 0.13 264);
+  --navy-800: oklch(0.31 0.1 264);
+  --navy-900: oklch(0.25 0.07 264);
+  /* Highlight yellow, hue ~90. */
+  --volt-200: oklch(0.96 0.07 98);
+  --volt-300: oklch(0.93 0.13 96);
+  --volt-400: oklch(0.89 0.17 93);
+  --volt-500: oklch(0.85 0.17 88);
+  --volt-600: oklch(0.78 0.16 80);
+  --volt-700: oklch(0.68 0.14 72);
+  /* Charts: lightness and chroma locked, the hue stepped ~28 at a time. */
+  --chart-1: oklch(0.7 0.15 30);
+  --chart-2: oklch(0.7 0.15 58);
+  --chart-3: oklch(0.7 0.15 86);
+  --chart-4: oklch(0.7 0.15 142);
+  --chart-5: oklch(0.7 0.15 170);
+  --chart-6: oklch(0.7 0.15 198);
+  --chart-7: oklch(0.7 0.15 236);
+  --chart-8: oklch(0.7 0.15 264);
+  --chart-9: oklch(0.7 0.15 300);
+  --chart-10: oklch(0.7 0.15 330);
+}
+
+/* ---------- Light ---------- */
+:root:root[data-palette='champions'] {
+  /* Neutrals: four background layers, two strokes, three text weights. */
+  --bg: oklch(0.975 0.006 264);
+  --panel: oklch(1 0 0);
+  --panel-alt: oklch(0.955 0.01 264);
+  --sunk: oklch(0.935 0.013 264);
+  --anchor: var(--navy-900);
+  --anchor-text: oklch(0.97 0.01 264);
+  --border: oklch(0.89 0.012 264);
+  --border-strong: oklch(0.82 0.018 264);
+  --heading: oklch(0.2 0.03 264);
+  --text: oklch(0.28 0.03 264);
+  --muted: oklch(0.5 0.025 264);
+  /* The outlines the retro look draws in ink are borders now; its shadow a faint navy. */
+  --ink: var(--border-strong);
+  --shadow-ink: oklch(0.31 0.1 264 / 0.16);
+  --hard: 3px 3px 0 var(--shadow-ink);
+  --hard-sm: 2px 2px 0 var(--shadow-ink);
+  /* 30: the bands, tabs and primary structure. */
+  --accent: var(--navy-800);
+  --accent-text: oklch(0.98 0.01 264);
+  --link: var(--navy-500);
+  /* 10: the highlight. */
+  --brand: var(--volt-500);
+  --brand-hover: var(--volt-600);
+  --brand-text: var(--navy-900);
+  --hover: oklch(0.96 0.05 96);
+  --sel: var(--volt-300);
+  --found: oklch(0.94 0.02 264);
+  --logo-sprout: var(--navy-800);
+  --logo-vgc: var(--volt-700);
+  /* Semantic, apart from the brand. */
+  --good: oklch(0.52 0.14 150);
+  --bad: oklch(0.53 0.19 27);
+  --warn: oklch(0.58 0.15 58);
+  --opponent: oklch(0.53 0.19 27);
+  --physical: oklch(0.64 0.18 35);
+  --special: oklch(0.64 0.18 258);
+}
+
+/* ---------- Dark ---------- */
+/* Steps between layers twice light's (4–6%), surfaces lighter as they rise, the brand a shade or two lighter. */
+@media (prefers-color-scheme: dark) {
+  :root:root[data-palette='champions']:not([data-theme='light']) {
+    --bg: oklch(0.17 0.025 264);
+    --panel: oklch(0.215 0.03 264);
+    --panel-alt: oklch(0.26 0.032 264);
+    --sunk: oklch(0.15 0.022 264);
+    --anchor: oklch(0.13 0.03 264);
+    --anchor-text: oklch(0.95 0.01 264);
+    --border: oklch(0.31 0.03 264);
+    --border-strong: oklch(0.38 0.035 264);
+    --heading: oklch(0.97 0.008 264);
+    --text: oklch(0.9 0.012 264);
+    --muted: oklch(0.7 0.02 264);
+    --ink: var(--border-strong);
+    --shadow-ink: oklch(0.05 0.02 264 / 0.55);
+    --accent: var(--navy-600);
+    --accent-text: oklch(0.98 0.01 264);
+    --link: var(--navy-300);
+    --brand: var(--volt-400);
+    --brand-hover: var(--volt-300);
+    --brand-text: var(--navy-900);
+    --hover: oklch(0.29 0.04 264);
+    --sel: oklch(0.45 0.09 92);
+    --found: oklch(0.29 0.035 264);
+    --logo-sprout: var(--navy-300);
+    --logo-vgc: var(--volt-400);
+    --good: oklch(0.75 0.14 150);
+    --bad: oklch(0.72 0.15 27);
+    --warn: oklch(0.78 0.13 70);
+    --opponent: oklch(0.55 0.17 27);
+    --physical: oklch(0.7 0.16 35);
+    --special: oklch(0.7 0.16 258);
+  }
+}
+:root:root[data-palette='champions'][data-theme='dark'] {
+  --bg: oklch(0.17 0.025 264);
+  --panel: oklch(0.215 0.03 264);
+  --panel-alt: oklch(0.26 0.032 264);
+  --sunk: oklch(0.15 0.022 264);
+  --anchor: oklch(0.13 0.03 264);
+  --anchor-text: oklch(0.95 0.01 264);
+  --border: oklch(0.31 0.03 264);
+  --border-strong: oklch(0.38 0.035 264);
+  --heading: oklch(0.97 0.008 264);
+  --text: oklch(0.9 0.012 264);
+  --muted: oklch(0.7 0.02 264);
+  --ink: var(--border-strong);
+  --shadow-ink: oklch(0.05 0.02 264 / 0.55);
+  --accent: var(--navy-600);
+  --accent-text: oklch(0.98 0.01 264);
+  --link: var(--navy-300);
+  --brand: var(--volt-400);
+  --brand-hover: var(--volt-300);
+  --brand-text: var(--navy-900);
+  --hover: oklch(0.29 0.04 264);
+  --sel: oklch(0.45 0.09 92);
+  --found: oklch(0.29 0.035 264);
+  --logo-sprout: var(--navy-300);
+  --logo-vgc: var(--volt-400);
+  --good: oklch(0.75 0.14 150);
+  --bad: oklch(0.72 0.15 27);
+  --warn: oklch(0.78 0.13 70);
+  --opponent: oklch(0.55 0.17 27);
+  --physical: oklch(0.7 0.16 35);
+  --special: oklch(0.7 0.16 258);
+}
+
+/* ---------- Type ---------- */
+/* Champions' menus set their headings in a bold, condensed italic: Barlow Semi Condensed, loaded in index.html. */
+:root:root[data-palette='champions'] {
+  --font-display: 'Barlow Semi Condensed', 'Arial Narrow', sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+:root:root[data-palette='champions'] :is(h1, h2, h3, .entry-title) {
+  color: var(--heading);
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+/* On a band, the band's own text color. */
+:root:root[data-palette='champions'] :is(.band, summary, .site-header) :is(h1, h2, h3) {
+  color: inherit;
+}
+:root:root[data-palette='champions'] h1 {
+  font-size: calc(24px * var(--text-scale));
+  text-transform: uppercase;
+}
+
+/* ---------- Surfaces ---------- */
+/* Panels: white cards, a hairline border, the retro hard shadow kept, faint. */
+:root:root[data-palette='champions'] .panel {
+  border: 1px solid var(--border);
+  box-shadow: var(--hard);
+}
+:root:root[data-palette='champions'] .panel.sunken {
+  background: var(--sunk);
+  border: 1px solid var(--border);
+  box-shadow: inset 2px 2px 0 var(--shadow-ink);
+}
+/* A panel's band: navy, a yellow notch at its start, its name in the display face. */
+:root:root[data-palette='champions'] .panel.banded > :is(summary, .band) {
+  border-bottom: none;
+  box-shadow: inset 5px 0 0 var(--brand);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.08em;
+  letter-spacing: 0.02em;
+}
+:root:root[data-palette='champions'] .panel.banded.soft > :is(summary, .band) {
+  background: color-mix(in oklch, var(--accent) 9%, var(--panel));
+}
+:root:root[data-palette='champions'] .panel.banded.grey > :is(summary, .band) {
+  background: var(--panel-alt);
+  box-shadow: inset 5px 0 0 var(--border-strong);
+}
+
+/* The header: the page's anchor, navy whatever the theme, underlined in the highlight. */
+:root:root[data-palette='champions'] .site-header {
+  background: var(--anchor);
+  border-bottom: 3px solid var(--brand);
+  --text: var(--anchor-text);
+  --muted: oklch(0.78 0.03 264);
+  --link: var(--anchor-text);
+  --border: oklch(1 0 0 / 0.14);
+  --hover: oklch(1 0 0 / 0.08);
+  --logo-sprout: oklch(0.97 0.01 264);
+  --logo-vgc: var(--brand);
+}
+:root:root[data-palette='champions'] .site-header .pill {
+  background: var(--brand);
+  border: none;
+}
+:root:root[data-palette='champions'] .site-header .nav a.active,
+:root:root[data-palette='champions'] .site-header .nav a.router-link-active {
+  color: var(--brand-text);
+}
+
+/* ---------- Buttons ---------- */
+/* Champions' slanted plates: a corner cut off, flat, no outline; a darker fill on hover. */
+:root:root[data-palette='champions'] .btn:not(.quiet, .chip, .small) {
+  border: 1px solid transparent;
+  box-shadow: none;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  background: var(--sunk);
+}
+:root:root[data-palette='champions'] .btn:not(.quiet, .chip, .small):hover:not(:disabled) {
+  transform: none;
+  box-shadow: none;
+  background: color-mix(in oklch, var(--text) 10%, var(--sunk));
+}
+:root:root[data-palette='champions'] .btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+:root:root[data-palette='champions'] .btn.primary:not(.quiet) {
+  color: var(--brand-text);
+  background: var(--brand);
+  border-color: var(--brand);
+}
+:root:root[data-palette='champions'] .btn.primary:not(.quiet):hover:not(:disabled) {
+  background: var(--brand-hover);
+  filter: none;
+}
+:root:root[data-palette='champions'] .btn.danger:not(.quiet) {
+  color: oklch(0.98 0 0);
+  background: var(--bad);
+  border-color: var(--bad);
+}
+:root:root[data-palette='champions'] .btn.switch.on {
+  background: var(--sel);
+  border-color: var(--brand-hover);
+}
+:root:root[data-palette='champions'] .btn.quiet:hover:not(:disabled),
+:root:root[data-palette='champions'] .btn.quiet.on {
+  border-color: var(--border-strong);
+}
+
+/* ---------- Tabs ---------- */
+/* The band's tabs: navy, the one shown opening into the panel under a yellow bar. */
+:root:root[data-palette='champions'] .band-tabs.bare {
+  border: 1px solid var(--accent);
+  border-bottom: none;
+  box-shadow: none;
+}
+:root:root[data-palette='champions'] .band-tabs .tab {
+  border-right-color: color-mix(in oklch, var(--accent-text) 15%, transparent);
+  border-bottom-color: var(--accent);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.1em;
+  letter-spacing: 0.02em;
+}
+:root:root[data-palette='champions'] .band-tabs .tab.on {
+  box-shadow: inset 0 4px 0 var(--brand);
+}
+:root:root[data-palette='champions'] .band-tabs::after {
+  border-bottom-color: var(--accent);
+}
+:root:root[data-palette='champions'] .tabs a.active {
+  box-shadow: inset 0 -3px 0 var(--brand);
+}
+
+/* ---------- Controls ---------- */
+:root:root[data-palette='champions'] :is(select, input[type='number'], input[type='search'], input[type='text']) {
+  border: 1px solid var(--border-strong);
+  background: var(--panel);
+}
+:root:root[data-palette='champions'] :is(select, textarea, input:not([type='radio'], [type='checkbox'])):focus {
+  border-color: var(--navy-500);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--brand) 55%, transparent);
+}
+:root:root[data-palette='champions'] :focus-visible {
+  outline-color: var(--navy-500);
+}
+
+/* Tooltips and dialogs: raised, so a step lighter in the dark and bordered. */
+:root:root[data-palette='champions'] .tippy-box[data-theme~='sproutvgc'] {
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 6px 18px var(--shadow-ink);
+}
+:root:root[data-palette='champions'] .confirm .panel {
+  box-shadow: 0 12px 32px var(--shadow-ink);
+}
+
+/* Type and category badges keep the retro frame, in the border's tone rather than black ink. */
+:root:root[data-palette='champions'] :is(.type-badge, .category-badge) {
+  border-color: oklch(0.25 0.04 264 / 0.55);
+}

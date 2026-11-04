@@ -19,11 +19,24 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&display=swap" />
+    <!-- EXPERIMENT: the Champions palette's display and body faces. -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:ital,wght@1,600;1,700&family=Inter:wght@400;600;700&display=swap"
+    />
     <script>
       // Apply the saved theme before first paint to avoid a flash.
       try {
         var t = localStorage.getItem('sproutvgc.theme')
         if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t
+      } catch (e) {}
+      // EXPERIMENT: the Champions palette (src/styles/champions.css), on with ?palette=champions, off with ?palette=off.
+      try {
+        var q = new URLSearchParams(location.search).get('palette')
+        if (q === 'champions') localStorage.setItem('sproutvgc.palette', q)
+        else if (q === 'off') localStorage.removeItem('sproutvgc.palette')
+        var p = q === 'champions' ? q : q === 'off' ? null : localStorage.getItem('sproutvgc.palette')
+        if (p === 'champions') document.documentElement.dataset.palette = p
       } catch (e) {}
     </script>
     <!-- Umami analytics: only on the live site, and without the query, which the pages rewrite on every choice. -->

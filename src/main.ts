@@ -1,5 +1,6 @@
 import './styles/main.css'
 import './styles/retro.css'
+import './styles/champions.css'
 
 import { createApp } from 'vue'
 import App from './App.vue'
