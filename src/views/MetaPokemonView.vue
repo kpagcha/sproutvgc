@@ -66,6 +66,7 @@ import TeammateList from '@/components/TeammateList.vue'
 import TypeIcon from '@/components/TypeIcon'
 import { natureTip } from '@/components/natureTip'
 import UsageShift from '@/components/UsageShift.vue'
+import { champions } from '@/composables/usePalette'
 
 // One Pokémon in the meta shown (`useMeta`, picked on the back row). Its heading has what matters most to a player: its
 // stats as the game shows them, set against the Pokémon it'll face, each marked when its most common nature raises or
@@ -496,7 +497,12 @@ const sections = computed(() =>
     <!-- Its sections, a row of links stuck to the top, the one being read marked. -->
     <SectionNav v-if="m" :sections="sections" />
 
-    <div id="sec-stats" class="panel head" :class="{ 'meta-stale': loading }">
+    <div id="sec-stats" class="panel head" :class="{ 'meta-stale': loading, hero: champions }">
+      <!-- EXPERIMENT (Champions palette): a backdrop in its types' colors, behind the sprite on its platform. -->
+      <template v-if="champions">
+        <span class="hero-wash" :data-type="mon.types[0]" aria-hidden="true"></span>
+        <span class="hero-wash second" :data-type="mon.types[1] ?? mon.types[0]" aria-hidden="true"></span>
+      </template>
       <!-- The sprite, and its weight in the panel's bottom left corner (on phones, last, at the left). -->
       <div class="sprite-col">
         <img
@@ -937,6 +943,79 @@ const sections = computed(() =>
 </template>
 
 <style scoped>
+/* EXPERIMENT (Champions palette): the heading as a hero card. Its types' colors wash in from the left, under slanted
+   stripes; the sprite stands on a glowing platform; usage and win rate are tiles. */
+.head.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 24px;
+  border-radius: 24px !important;
+}
+.hero-wash {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(70% 120% at 0% 30%, color-mix(in oklch, var(--tc) 32%, transparent), transparent 70%);
+  pointer-events: none;
+}
+.hero-wash.second {
+  background:
+    radial-gradient(50% 90% at 38% 110%, color-mix(in oklch, var(--tc) 22%, transparent), transparent 70%),
+    repeating-linear-gradient(-60deg, transparent 0 18px, color-mix(in oklch, var(--tc) 5%, transparent) 18px 36px);
+  mask-image: linear-gradient(90deg, #000 0%, #000 45%, transparent 70%);
+}
+.hero .sprite-col {
+  position: relative;
+}
+.hero .sprite-col .sprite {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 10px 12px oklch(0 0 0 / 0.18));
+}
+.hero .sprite-col::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 70px);
+  width: 170px;
+  height: 34px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background:
+    radial-gradient(closest-side, color-mix(in oklch, var(--panel) 85%, transparent), transparent),
+    radial-gradient(closest-side, oklch(0 0 0 / 0.12), transparent);
+}
+.hero .used {
+  gap: 8px;
+}
+.hero .used-row {
+  gap: 8px;
+}
+.hero .used-part {
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: color-mix(in oklch, var(--panel) 80%, transparent);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+.hero .used-row:first-child strong {
+  font: italic 700 1.4em/1 var(--font-display);
+}
+.hero .stats-col {
+  flex-basis: 300px;
+  padding: 14px 16px;
+  background: color-mix(in oklch, var(--panel) 75%, transparent);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.hero :deep(.stat-bar),
+.hero :deep(.track) {
+  border-radius: 999px;
+}
 /* The sprite, centered in what's left over its weight, which sits at the bottom left. */
 .sprite-col {
   flex: none;

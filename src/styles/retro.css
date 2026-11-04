@@ -7,7 +7,8 @@
 
 /* ---------- Shape ---------- */
 /* Square corners everywhere. !important because the views' scoped styles set their own small radii. */
-:root:root *:not(.tippy-arrow) {
+/* (Not with the experimental Champions palette, champions.css, which rounds them.) */
+:root:root:not([data-palette='champions']) *:not(.tippy-arrow) {
   border-radius: 0 !important;
 }
 

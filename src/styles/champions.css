@@ -11,8 +11,11 @@
    Semantic colors (good, bad, warn) and charts (physical, special, `--chart-*`) sit apart from the brand: same OKLCH
    lightness and chroma, hues apart, so none reads brighter than another.
 
-   The current theme's touch kept: square corners, the hard offset shadow (now a faint navy rather than black ink), the
-   flat type badges. What goes: 2px black outlines, replaced by ~85% lightness borders. */
+   The shape: rounded throughout (`--r-*`, retro.css's square corners left off), soft layered shadows for elevation
+   (`--elev-*`) in place of the hard offset ones, pills for controls, hairline ~85% borders in place of black outlines.
+   Champions' touch: slanted two-tone plates and stripes on what heads things, a bold condensed italic display face.
+   A few layouts are redesigned under the palette alone (`champions` in usePalette.ts): the rankings' podium, the
+   Pokémon meta page's hero, the home page's bento. */
 
 /* ---------- Scales ---------- */
 :root:root[data-palette='champions'] {
@@ -42,6 +45,12 @@
   --chart-8: oklch(0.7 0.15 264);
   --chart-9: oklch(0.7 0.15 300);
   --chart-10: oklch(0.7 0.15 330);
+  /* Shape: rounded, by how big the thing is. */
+  --r-xs: 6px;
+  --r-sm: 10px;
+  --r: 16px;
+  --r-lg: 24px;
+  --r-pill: 999px;
 }
 
 /* ---------- Light ---------- */
@@ -61,8 +70,13 @@
   /* The outlines the retro look draws in ink are borders now; its shadow a faint navy. */
   --ink: var(--border-strong);
   --shadow-ink: oklch(0.31 0.1 264 / 0.16);
-  --hard: 3px 3px 0 var(--shadow-ink);
-  --hard-sm: 2px 2px 0 var(--shadow-ink);
+  /* Elevation: soft, layered, tinted navy; the retro look's hard shadows become the lowest steps. */
+  --elev-1: 0 1px 2px oklch(0.3 0.08 264 / 0.06), 0 2px 8px oklch(0.3 0.08 264 / 0.06);
+  --elev-2: 0 2px 4px oklch(0.3 0.08 264 / 0.06), 0 8px 24px oklch(0.3 0.08 264 / 0.1);
+  --elev-3: 0 4px 8px oklch(0.3 0.08 264 / 0.08), 0 18px 48px oklch(0.3 0.08 264 / 0.16);
+  --hard: var(--elev-1);
+  --hard-sm: none;
+  --glow: 0 6px 20px oklch(0.85 0.17 88 / 0.45);
   /* 30: the bands, tabs and primary structure. */
   --accent: var(--navy-800);
   --accent-text: oklch(0.98 0.01 264);
@@ -102,6 +116,10 @@
     --muted: oklch(0.7 0.02 264);
     --ink: var(--border-strong);
     --shadow-ink: oklch(0.05 0.02 264 / 0.55);
+    --elev-1: inset 0 1px 0 oklch(1 0 0 / 0.04), 0 1px 2px oklch(0 0 0 / 0.3);
+    --elev-2: inset 0 1px 0 oklch(1 0 0 / 0.05), 0 8px 24px oklch(0 0 0 / 0.35);
+    --elev-3: inset 0 1px 0 oklch(1 0 0 / 0.06), 0 18px 48px oklch(0 0 0 / 0.5);
+    --glow: 0 6px 22px oklch(0.89 0.17 93 / 0.25);
     --accent: var(--navy-600);
     --accent-text: oklch(0.98 0.01 264);
     --link: var(--navy-300);
@@ -135,6 +153,10 @@
   --muted: oklch(0.7 0.02 264);
   --ink: var(--border-strong);
   --shadow-ink: oklch(0.05 0.02 264 / 0.55);
+  --elev-1: inset 0 1px 0 oklch(1 0 0 / 0.04), 0 1px 2px oklch(0 0 0 / 0.3);
+  --elev-2: inset 0 1px 0 oklch(1 0 0 / 0.05), 0 8px 24px oklch(0 0 0 / 0.35);
+  --elev-3: inset 0 1px 0 oklch(1 0 0 / 0.06), 0 18px 48px oklch(0 0 0 / 0.5);
+  --glow: 0 6px 22px oklch(0.89 0.17 93 / 0.25);
   --accent: var(--navy-600);
   --accent-text: oklch(0.98 0.01 264);
   --link: var(--navy-300);
@@ -154,163 +176,412 @@
   --special: oklch(0.7 0.16 258);
 }
 
-/* ---------- Type ---------- */
-/* Champions' menus set their headings in a bold, condensed italic: Barlow Semi Condensed, loaded in index.html. */
-:root:root[data-palette='champions'] {
+/* Every rule below starts with `:root:root:root[data-palette]`, which outranks retro.css's `:root:root` and the
+   components' scoped `:root:root` rules for the same element. */
+
+/* ---------- Page ---------- */
+:root:root:root[data-palette='champions'] {
   --font-display: 'Barlow Semi Condensed', 'Arial Narrow', sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
-:root:root[data-palette='champions'] :is(h1, h2, h3, .entry-title) {
+/* A navy glow behind the top of the page, a faint diagonal grain over all of it. */
+:root:root:root[data-palette='champions'] body {
+  background:
+    radial-gradient(1200px 520px at 50% -160px, color-mix(in oklch, var(--navy-500) 14%, transparent), transparent 70%),
+    repeating-linear-gradient(
+      -60deg,
+      transparent 0 22px,
+      color-mix(in oklch, var(--navy-500) 2.5%, transparent) 22px 44px
+    ),
+    var(--bg);
+  background-attachment: fixed;
+}
+:root:root:root[data-palette='champions'] :is(h1, h2, h3, .entry-title) {
   color: var(--heading);
   font-style: italic;
   font-weight: 700;
   letter-spacing: 0.01em;
 }
-/* On a band, the band's own text color. */
-:root:root[data-palette='champions'] :is(.band, summary, .site-header) :is(h1, h2, h3) {
+:root:root:root[data-palette='champions'] h1 {
+  font-size: calc(26px * var(--text-scale));
+  text-transform: uppercase;
+}
+:root:root:root[data-palette='champions'] :is(.band, summary, .site-header) :is(h1, h2, h3) {
   color: inherit;
 }
-:root:root[data-palette='champions'] h1 {
-  font-size: calc(24px * var(--text-scale));
-  text-transform: uppercase;
+
+/* ---------- Header: a floating dock ---------- */
+/* Navy whatever the theme, rounded, off the page's edges, a slanted two-tone plate at its right end. */
+:root:root:root[data-palette='champions'] .site-header {
+  --text: var(--anchor-text);
+  --muted: oklch(0.8 0.03 264);
+  --link: var(--anchor-text);
+  --border: oklch(1 0 0 / 0.14);
+  --hover: oklch(1 0 0 / 0.1);
+  --logo-sprout: oklch(0.97 0.01 264);
+  --logo-vgc: var(--brand);
+  width: min(1120px, 100% - 24px);
+  margin: 12px auto 22px;
+  background:
+    linear-gradient(115deg, transparent 0 72%, oklch(1 0 0 / 0.05) 72% 80%, oklch(1 0 0 / 0.09) 80%),
+    linear-gradient(180deg, var(--navy-800), var(--anchor));
+  border: 1px solid oklch(1 0 0 / 0.08);
+  border-radius: var(--r-lg);
+  box-shadow: var(--elev-3);
+}
+@media (max-width: 720px) {
+  :root:root:root[data-palette='champions'] .site-header {
+    width: calc(100% - 16px);
+    margin: 8px auto 14px;
+    border-radius: var(--r);
+  }
+}
+:root:root:root[data-palette='champions'] .site-header .pill {
+  background: var(--brand);
+  border: none;
+  border-radius: var(--r-pill);
+  box-shadow: var(--glow);
+}
+:root:root:root[data-palette='champions'] .site-header :is(.nav a, .nav .quick) {
+  border-radius: var(--r-pill);
+}
+:root:root:root[data-palette='champions'] .site-header .nav a.router-link-active {
+  color: var(--brand-text);
 }
 
 /* ---------- Surfaces ---------- */
-/* Panels: white cards, a hairline border, the retro hard shadow kept, faint. */
-:root:root[data-palette='champions'] .panel {
+:root:root:root[data-palette='champions'] .panel {
   border: 1px solid var(--border);
-  box-shadow: var(--hard);
+  border-radius: var(--r);
+  box-shadow: var(--elev-1);
 }
-:root:root[data-palette='champions'] .panel.sunken {
+/* Panels joined into one (`panels`, wide screens): rounded only at the whole's ends. */
+@media (min-width: 721px) {
+  :root:root:root[data-palette='champions'] .panels > .panel:not(:last-child) {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  :root:root:root[data-palette='champions'] .panels > .panel:not(:first-child) {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+}
+:root:root:root[data-palette='champions'] .panel.sunken {
   background: var(--sunk);
-  border: 1px solid var(--border);
-  box-shadow: inset 2px 2px 0 var(--shadow-ink);
+  box-shadow: inset 0 1px 3px var(--shadow-ink);
 }
-/* A panel's band: navy, a yellow notch at its start, its name in the display face. */
-:root:root[data-palette='champions'] .panel.banded > :is(summary, .band) {
+:root:root:root[data-palette='champions'] .panel.tinted {
+  border: 1px solid color-mix(in oklch, var(--accent) 22%, var(--border));
+  border-left: 1px solid color-mix(in oklch, var(--accent) 22%, var(--border));
+  background: linear-gradient(100deg, color-mix(in oklch, var(--accent) 10%, var(--panel)), var(--panel) 60%);
+}
+/* A panel's band: a slanted two-tone navy plate, its top corners the panel's. */
+:root:root:root[data-palette='champions'] .panel.banded > :is(summary, .band) {
+  background: linear-gradient(115deg, var(--accent) 0 68%, color-mix(in oklch, var(--accent) 82%, white) 68%);
   border-bottom: none;
-  box-shadow: inset 5px 0 0 var(--brand);
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 1.08em;
-  letter-spacing: 0.02em;
-}
-:root:root[data-palette='champions'] .panel.banded.soft > :is(summary, .band) {
-  background: color-mix(in oklch, var(--accent) 9%, var(--panel));
-}
-:root:root[data-palette='champions'] .panel.banded.grey > :is(summary, .band) {
-  background: var(--panel-alt);
-  box-shadow: inset 5px 0 0 var(--border-strong);
-}
-
-/* The header: the page's anchor, navy whatever the theme, underlined in the highlight. */
-:root:root[data-palette='champions'] .site-header {
-  background: var(--anchor);
-  border-bottom: 3px solid var(--brand);
-  --text: var(--anchor-text);
-  --muted: oklch(0.78 0.03 264);
-  --link: var(--anchor-text);
-  --border: oklch(1 0 0 / 0.14);
-  --hover: oklch(1 0 0 / 0.08);
-  --logo-sprout: oklch(0.97 0.01 264);
-  --logo-vgc: var(--brand);
-}
-:root:root[data-palette='champions'] .site-header .pill {
-  background: var(--brand);
-  border: none;
-}
-:root:root[data-palette='champions'] .site-header .nav a.active,
-:root:root[data-palette='champions'] .site-header .nav a.router-link-active {
-  color: var(--brand-text);
-}
-
-/* ---------- Buttons ---------- */
-/* Champions' slanted plates: a corner cut off, flat, no outline; a darker fill on hover. */
-:root:root[data-palette='champions'] .btn:not(.quiet, .chip, .small) {
-  border: 1px solid transparent;
-  box-shadow: none;
-  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
-  background: var(--sunk);
-}
-:root:root[data-palette='champions'] .btn:not(.quiet, .chip, .small):hover:not(:disabled) {
-  transform: none;
-  box-shadow: none;
-  background: color-mix(in oklch, var(--text) 10%, var(--sunk));
-}
-:root:root[data-palette='champions'] .btn:active:not(:disabled) {
-  transform: translateY(1px);
-}
-:root:root[data-palette='champions'] .btn.primary:not(.quiet) {
-  color: var(--brand-text);
-  background: var(--brand);
-  border-color: var(--brand);
-}
-:root:root[data-palette='champions'] .btn.primary:not(.quiet):hover:not(:disabled) {
-  background: var(--brand-hover);
-  filter: none;
-}
-:root:root[data-palette='champions'] .btn.danger:not(.quiet) {
-  color: oklch(0.98 0 0);
-  background: var(--bad);
-  border-color: var(--bad);
-}
-:root:root[data-palette='champions'] .btn.switch.on {
-  background: var(--sel);
-  border-color: var(--brand-hover);
-}
-:root:root[data-palette='champions'] .btn.quiet:hover:not(:disabled),
-:root:root[data-palette='champions'] .btn.quiet.on {
-  border-color: var(--border-strong);
-}
-
-/* ---------- Tabs ---------- */
-/* The band's tabs: navy, the one shown opening into the panel under a yellow bar. */
-:root:root[data-palette='champions'] .band-tabs.bare {
-  border: 1px solid var(--accent);
-  border-bottom: none;
-  box-shadow: none;
-}
-:root:root[data-palette='champions'] .band-tabs .tab {
-  border-right-color: color-mix(in oklch, var(--accent-text) 15%, transparent);
-  border-bottom-color: var(--accent);
+  border-radius: calc(var(--r) - 1px) calc(var(--r) - 1px) 0 0;
   font-family: var(--font-display);
   font-style: italic;
   font-size: 1.1em;
   letter-spacing: 0.02em;
 }
-:root:root[data-palette='champions'] .band-tabs .tab.on {
-  box-shadow: inset 0 4px 0 var(--brand);
+:root:root:root[data-palette='champions'] .panel.banded:not([open]) > summary {
+  border-radius: calc(var(--r) - 1px);
 }
-:root:root[data-palette='champions'] .band-tabs::after {
-  border-bottom-color: var(--accent);
+:root:root:root[data-palette='champions'] .panel.banded.soft > :is(summary, .band) {
+  background: linear-gradient(
+    115deg,
+    color-mix(in oklch, var(--accent) 9%, var(--panel)) 0 68%,
+    color-mix(in oklch, var(--accent) 14%, var(--panel)) 68%
+  );
 }
-:root:root[data-palette='champions'] .tabs a.active {
+:root:root:root[data-palette='champions'] .panel.banded.grey > :is(summary, .band) {
+  background: linear-gradient(115deg, var(--panel-alt) 0 68%, var(--sunk) 68%);
+}
+
+/* ---------- Tabs ---------- */
+/* The band of tabs: a navy plate, rounded at the top; the one shown a raised white tab under a yellow cap. */
+:root:root:root[data-palette='champions'] .band-tabs.bare {
+  padding: 6px 6px 0;
+  gap: 4px;
+  background: linear-gradient(115deg, var(--accent) 0 70%, color-mix(in oklch, var(--accent) 82%, white) 70%);
+  border: none;
+  border-radius: var(--r) var(--r) 0 0;
+  box-shadow: none;
+}
+:root:root:root[data-palette='champions'] .band-tabs .tab {
+  border: none;
+  border-radius: var(--r-sm) var(--r-sm) 0 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.12em;
+  letter-spacing: 0.02em;
+}
+:root:root:root[data-palette='champions'] .band-tabs .tab.on {
+  box-shadow: inset 0 3px 0 var(--brand);
+}
+:root:root:root[data-palette='champions'] .band-tabs::after {
+  border-bottom: none;
+}
+:root:root:root[data-palette='champions'] .band-tabs.bare + .panel {
+  margin-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+/* The row of section links: a frosted bar, the one being read a pill. */
+:root:root:root[data-palette='champions'] .section-nav {
+  background: color-mix(in oklch, var(--bg) 82%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: none;
+}
+:root:root:root[data-palette='champions'] .section-nav .row {
+  padding: 5px 4px;
+}
+:root:root:root[data-palette='champions'] .section-nav.attached .row,
+:root:root:root[data-palette='champions'] .section-nav.in-bar .row {
+  padding: 5px 6px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--r) var(--r);
+  box-shadow: var(--elev-1);
+}
+:root:root:root[data-palette='champions'] .section-nav .link {
+  padding: 5px 12px;
+  border: none;
+  border-radius: var(--r-pill);
+}
+:root:root:root[data-palette='champions'] .section-nav .link:hover {
+  background: var(--panel-alt);
+}
+:root:root:root[data-palette='champions'] .section-nav .link.on {
+  color: var(--accent-text);
+  background: var(--accent);
+}
+:root:root:root[data-palette='champions'] .tabs {
+  border-bottom: 1px solid var(--border);
+}
+:root:root:root[data-palette='champions'] .tabs a {
+  border: none;
+  border-radius: var(--r-sm) var(--r-sm) 0 0;
+}
+:root:root:root[data-palette='champions'] .tabs a.active {
   box-shadow: inset 0 -3px 0 var(--brand);
 }
 
+/* ---------- Buttons ---------- */
+/* Pills, soft: a tinted fill, lifting a little on hover. */
+:root:root:root[data-palette='champions'] .btn {
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  box-shadow: var(--elev-1);
+  background: var(--panel);
+  padding-inline: 14px;
+  font-weight: 600;
+  transition:
+    transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.15s ease-out,
+    background-color 0.15s ease-out;
+}
+:root:root:root[data-palette='champions'] .btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: var(--panel-alt);
+  box-shadow: var(--elev-2);
+}
+:root:root:root[data-palette='champions'] .btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--elev-1);
+}
+:root:root:root[data-palette='champions'] .btn.small {
+  padding-inline: 10px;
+}
+:root:root:root[data-palette='champions'] .btn.primary {
+  color: var(--brand-text);
+  background: var(--brand);
+  border-color: transparent;
+  box-shadow: var(--glow);
+}
+:root:root:root[data-palette='champions'] .btn.primary:hover:not(:disabled) {
+  background: var(--brand-hover);
+  filter: none;
+}
+:root:root:root[data-palette='champions'] .btn.danger {
+  color: oklch(0.98 0 0);
+  background: var(--bad);
+  border-color: transparent;
+}
+:root:root:root[data-palette='champions'] .btn.inverted {
+  color: var(--panel);
+  background: var(--heading);
+  border-color: transparent;
+}
+:root:root:root[data-palette='champions'] .btn.switch.on {
+  color: var(--brand-text);
+  background: var(--sel);
+  border-color: color-mix(in oklch, var(--brand-hover) 60%, transparent);
+}
+:root:root:root[data-palette='champions'] .btn.quiet {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+:root:root:root[data-palette='champions'] .btn.quiet:hover:not(:disabled),
+:root:root:root[data-palette='champions'] .btn.quiet.on {
+  transform: none;
+  background: var(--panel-alt);
+  border-color: var(--border);
+  box-shadow: none;
+}
+:root:root:root[data-palette='champions'] .btn.quiet.primary {
+  color: var(--link);
+  border-color: color-mix(in oklch, var(--link) 35%, transparent);
+}
+:root:root:root[data-palette='champions'] .btn.on-band {
+  box-shadow: none;
+  background: oklch(1 0 0 / 0.1);
+  border-color: oklch(1 0 0 / 0.25);
+}
+:root:root:root[data-palette='champions'] .btn.chip {
+  border-radius: var(--r-pill);
+  box-shadow: none;
+  background: var(--panel-alt);
+  border-color: transparent;
+}
+:root:root:root[data-palette='champions'] .btn.chip:hover {
+  background: color-mix(in oklch, var(--accent) 12%, var(--panel));
+}
+/* Segmented controls: a pill track, the one picked a raised pill on it. */
+:root:root:root[data-palette='champions'] .segments {
+  padding: 3px;
+  gap: 2px;
+  background: var(--sunk);
+  border: none;
+  border-radius: var(--r-pill);
+}
+:root:root:root[data-palette='champions'] .segments label {
+  border: none !important;
+  border-radius: var(--r-pill);
+  padding-inline: 12px;
+}
+:root:root:root[data-palette='champions'] .segments label.on {
+  color: var(--brand-text);
+  background: var(--brand);
+  box-shadow: var(--elev-1);
+}
+
 /* ---------- Controls ---------- */
-:root:root[data-palette='champions'] :is(select, input[type='number'], input[type='search'], input[type='text']) {
+:root:root:root[data-palette='champions']
+  :is(select, input[type='number'], input[type='search'], input[type='text'], textarea) {
   border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
   background: var(--panel);
 }
-:root:root[data-palette='champions'] :is(select, textarea, input:not([type='radio'], [type='checkbox'])):focus {
+:root:root:root[data-palette='champions'] :is(select, textarea, input:not([type='radio'], [type='checkbox'])):focus {
   border-color: var(--navy-500);
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--brand) 55%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in oklch, var(--brand) 45%, transparent);
 }
-:root:root[data-palette='champions'] :focus-visible {
+:root:root:root[data-palette='champions'] :focus-visible {
   outline-color: var(--navy-500);
+  outline-offset: 3px;
 }
 
-/* Tooltips and dialogs: raised, so a step lighter in the dark and bordered. */
-:root:root[data-palette='champions'] .tippy-box[data-theme~='sproutvgc'] {
+/* The search boxes: a pill, the field inside them bare. */
+:root:root:root[data-palette='champions'] .search-box input.search {
+  min-height: 40px;
+  border-radius: var(--r-pill);
+  box-shadow: inset 0 1px 2px var(--shadow-ink);
+}
+:root:root:root[data-palette='champions'] .box {
+  padding-left: 8px;
+  background: var(--panel);
   border: 1px solid var(--border-strong);
-  box-shadow: 0 6px 18px var(--shadow-ink);
+  border-radius: var(--r-pill);
+  box-shadow: inset 0 1px 2px var(--shadow-ink);
 }
-:root:root[data-palette='champions'] .confirm .panel {
-  box-shadow: 0 12px 32px var(--shadow-ink);
+:root:root:root[data-palette='champions'] .box:focus-within {
+  border-color: var(--navy-500);
+  box-shadow: 0 0 0 4px color-mix(in oklch, var(--brand) 45%, transparent);
+}
+:root:root:root[data-palette='champions'] .box input {
+  border: none;
+  background: none;
+  box-shadow: none;
 }
 
-/* Type and category badges keep the retro frame, in the border's tone rather than black ink. */
-:root:root[data-palette='champions'] :is(.type-badge, .category-badge) {
-  border-color: oklch(0.25 0.04 264 / 0.55);
+/* ---------- Floating things ---------- */
+:root:root:root[data-palette='champions'] .tippy-box[data-theme~='sproutvgc'] {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  box-shadow: var(--elev-3);
+}
+:root:root:root[data-palette='champions'] :is(.confirm .panel, dialog, dialog .panel) {
+  border-radius: var(--r-lg);
+  box-shadow: var(--elev-3);
+}
+:root:root:root[data-palette='champions'] dialog::backdrop {
+  background: oklch(0.2 0.05 264 / 0.35);
+  backdrop-filter: blur(3px);
+}
+
+/* ---------- Badges ---------- */
+/* Type and category badges: no frame, rounded, a sheen across the top. */
+:root:root:root[data-palette='champions'] :is(.type-badge, .category-badge) {
+  border: none;
+  border-radius: var(--r-xs);
+  box-shadow: inset 0 -2px 0 oklch(0 0 0 / 0.15);
+  background-image: linear-gradient(180deg, oklch(1 0 0 / 0.22), transparent 55%);
+}
+:root:root:root[data-palette='champions'] .mult-tag {
+  border: none;
+  border-radius: var(--r-pill);
+}
+
+/* ---------- Home: a bento ---------- */
+/* Meta, the site's lead, a navy card with Champions' stripes; the rest white cards, lifting on hover. */
+:root:root:root[data-palette='champions'] .home .area {
+  overflow: hidden;
+  border-radius: var(--r-lg);
+  box-shadow: var(--elev-2);
+  transition:
+    transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.2s ease-out;
+}
+:root:root:root[data-palette='champions'] .home .area:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--elev-3);
+}
+:root:root:root[data-palette='champions'] .home .area-head {
+  border-bottom: 1px solid var(--border);
+}
+:root:root:root[data-palette='champions'] .home .area.area-meta {
+  --text: var(--anchor-text);
+  --muted: oklch(0.8 0.03 264);
+  --link: var(--anchor-text);
+  --border: oklch(1 0 0 / 0.12);
+  --heading: oklch(0.99 0 0);
+  --accent: var(--brand);
+  --panel-alt: oklch(1 0 0 / 0.08);
+  --hover: oklch(1 0 0 / 0.08);
+  color: var(--text);
+  background:
+    radial-gradient(90% 120% at 100% 0%, color-mix(in oklch, var(--brand) 18%, transparent), transparent 60%),
+    repeating-linear-gradient(-60deg, transparent 0 22px, oklch(1 0 0 / 0.035) 22px 44px),
+    linear-gradient(160deg, var(--navy-700), var(--navy-900));
+  border-color: transparent;
+}
+:root:root:root[data-palette='champions'] .home .area.area-meta .btn.chip {
+  color: var(--anchor-text);
+}
+:root:root:root[data-palette='champions'] .home .area.area-tools {
+  background: linear-gradient(160deg, var(--panel), color-mix(in oklch, var(--navy-500) 6%, var(--panel)));
+}
+:root:root:root[data-palette='champions'] .home .area.area-quizzes {
+  background: linear-gradient(120deg, color-mix(in oklch, var(--chart-9) 16%, var(--panel)), var(--panel) 70%);
+}
+:root:root:root[data-palette='champions'] .home .area.area-dex {
+  background: linear-gradient(120deg, color-mix(in oklch, var(--chart-4) 16%, var(--panel)), var(--panel) 70%);
+}
+:root:root:root[data-palette='champions'] .home .area .rows a.row:hover,
+:root:root:root[data-palette='champions'] .home .area .rows .row:hover {
+  background: var(--hover);
 }

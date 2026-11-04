@@ -37,6 +37,8 @@ import RankingsHead from '@/components/RankingsHead.vue'
 import MoreToggle from '@/components/MoreToggle.vue'
 import RankingTrends from '@/components/RankingTrends.vue'
 import RankingsTabs from '@/components/RankingsTabs.vue'
+import TopPodium from '@/components/experimental/TopPodium.vue'
+import { champions } from '@/composables/usePalette'
 
 // The regulation's Pokémon by usage, from the meta snapshot shown (`useMeta`: the one picked, on this page or another,
 // when there are several, of any regulation and month generated, `MetaDialog`). Columns come and go with what the snapshot has. Its links are `AppLink`s and its icons
@@ -449,6 +451,8 @@ const termRows = useId()
       </template>
       <p v-else class="muted">{{ t('usage.none', { reg: REGULATION }) }}</p>
     </div>
+    <!-- EXPERIMENT (Champions palette): the top three as a podium, while the list is whole. -->
+    <TopPodium v-if="champions && data && !search.trim() && shown.length === rows.length" :rows />
     <div v-if="snapshot" class="panel" :class="{ 'meta-stale': loading, previewing: preview }" :aria-busy="loading">
       <div :id="termRows" class="term-rows bleed"></div>
       <div
