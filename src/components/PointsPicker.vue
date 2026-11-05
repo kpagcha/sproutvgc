@@ -124,7 +124,7 @@ const points = computed({
       <p class="sets-note muted">{{ t('calc.sets.tip') }}</p>
     </section>
 
-    <button type="button" class="btn done" @click="emit('done')">{{ t('picker.close') }}</button>
+    <button type="button" class="btn done" @click="emit('done')">{{ t('picker.done') }}</button>
   </div>
 </template>
 

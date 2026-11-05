@@ -158,7 +158,17 @@ watchDebounced(
 )
 
 // The pooled stats a side at every set battles with are the page's, from the meta shown (`fought`), never kept.
-const setSide = (k: SideKey, f: Fighter) => (sides.value = { ...sides.value, [k]: { ...f, pooled: undefined } })
+// Another Pokémon, its moves' options (crit, single target…) start over.
+const setSide = (k: SideKey, f: Fighter) =>
+  (sides.value = {
+    ...sides.value,
+    [k]: {
+      ...f,
+      pooled: undefined,
+      ...(f.member.pokemon !== sides.value[k].member.pokemon &&
+        f.hitOpts === sides.value[k].hitOpts && { hitOpts: undefined }),
+    },
+  })
 /** The sides as they battle: at every set, at their sets pooled in the meta shown. */
 const fought = computed(() => ({ a: atSets(sides.value.a, data.value), b: atSets(sides.value.b, data.value) }))
 const patchMember = (k: SideKey, patch: Partial<Member>) =>

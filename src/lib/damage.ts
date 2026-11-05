@@ -74,6 +74,9 @@ export interface Fighter {
   spikes: number
   /** At every set: its stats the meta's sets of it pooled by usage (`pooledStats`), not its own nature and points. */
   sets: boolean
+  /** Its moves' options against the other (a critical hit, one target alone…), by the move: a move picked again finds
+   * them as left. */
+  hitOpts?: Partial<Record<MoveId, HitOptions>>
   /** Those stats, in `STATS` order, as the page works them out from the meta shown (`atSets`); never kept. */
   pooled?: readonly number[]
 }

@@ -24,11 +24,13 @@ import {
   type Boosts,
   type FieldEffect,
   type Fighter,
+  type HitOptions,
   type SideEffect,
   type Status,
 } from '@/lib/damage'
 import { emptyMember, MOVE_SLOTS, stoneMega, type Points } from '@/lib/team'
 import { MAX_POINTS } from '@/lib/stats'
+import { TTL } from '@/lib/tiersState'
 
 const SIDE_CODES: Record<SideEffect, string> = {
   reflect: 'R',
@@ -49,6 +51,49 @@ const FIELD_CODES: Record<FieldEffect, string> = {
   wonderRoom: 'WR',
   trickRoom: 'TR',
   fairyAura: 'FA',
+}
+
+const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n))
+
+// Each move's options, `heatwave-cs.beatup-h3`: its ID, then `c` a critical hit, `s` one target alone, `d` doubled,
+// `h<n>` its hits, `p<n>` Spit Up's Stockpile layers. Only its set's moves', and only what's set.
+function encodeHitOpts(f: Fighter): string {
+  return f.member.moves
+    .filter((mv, i, all): mv is MoveId => !!mv && all.indexOf(mv) === i)
+    .map((mv) => {
+      const o = f.hitOpts?.[mv]
+      if (!o) return ''
+      const code = [
+        o.crit && 'c',
+        o.single && 's',
+        o.doubled && 'd',
+        o.hits != null && `h${o.hits}`,
+        o.stockpile != null && `p${o.stockpile}`,
+      ]
+        .filter(Boolean)
+        .join('')
+      return code && `${mv}-${code}`
+    })
+    .filter(Boolean)
+    .join('.')
+}
+
+function decodeHitOpts(s: string | undefined, moves: readonly (MoveId | null)[]): Fighter['hitOpts'] {
+  const out: Partial<Record<MoveId, HitOptions>> = {}
+  for (const tok of (s ?? '').split('.')) {
+    const [mv, code] = tok.split('-') as [MoveId, string | undefined]
+    if (!code || !moves.includes(mv)) continue
+    const o: HitOptions = {}
+    for (const [, flag, key, n] of code.matchAll(/([csd])|([hp])(\d+)/g)) {
+      if (flag === 'c') o.crit = true
+      else if (flag === 's') o.single = true
+      else if (flag === 'd') o.doubled = true
+      else if (key === 'h') o.hits = clamp(Number(n), 1, 10)
+      else if (key === 'p') o.stockpile = clamp(Number(n), 1, 3)
+    }
+    out[mv] = o
+  }
+  return Object.keys(out).length ? out : undefined
 }
 
 export function encodeFighter(f: Fighter): string {
@@ -74,16 +119,15 @@ export function encodeFighter(f: Fighter): string {
     m.moves.map((x) => x ?? '').join('.'),
     m.points.join('.'),
     flags.join('.'),
+    encodeHitOpts(f),
   ]
     .join('~')
     .replace(/~+$/, '')
 }
 
-const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n))
-
 export function decodeFighter(s: unknown): Fighter | null {
   if (typeof s !== 'string' || !s) return null
-  const [mon, it, ab, nature, moves, points, flags] = s.split('~')
+  const [mon, it, ab, nature, moves, points, flags, opts] = s.split('~')
   if (!mon || !POKEMON[mon as PokemonId]) return null
   const m = emptyMember()
   m.pokemon = mon as PokemonId
@@ -95,6 +139,7 @@ export function decodeFighter(s: unknown): Fighter | null {
   const pts = (points ?? '').split('.').map(Number)
   if (pts.length === 6) m.points = pts.map((p) => clamp(Math.round(p) || 0, 0, MAX_POINTS)) as Points
   const f = emptyFighter(m)
+  f.hitOpts = decodeHitOpts(opts, m.moves)
   for (const tok of (flags ?? '').split('.')) {
     if (tok === 'n') f.mega = false
     else if (tok === 'a') f.abilityOn = true
@@ -142,7 +187,7 @@ export function decodeField(s: unknown): Battlefield {
   return f
 }
 
-/** The calc as last left, put back when it's opened bare. */
+/** The calc as last left, put back when it's opened bare, for `TTL` since it was last changed (as the speed pages). */
 const KEY = 'sproutvgc.calc.last'
 export interface CalcQuery {
   a?: string
@@ -151,16 +196,21 @@ export interface CalcQuery {
 }
 export function readLast(): CalcQuery {
   try {
-    const v: unknown = JSON.parse(localStorage.getItem(KEY) ?? 'null')
-    return v && typeof v === 'object' ? (v as CalcQuery) : {}
+    const v = JSON.parse(localStorage.getItem(KEY) ?? 'null') as { at?: unknown; q?: unknown } | null
+    // Saved before it said when (no `at`): long ago, so forgotten.
+    if (!v || typeof v.at !== 'number' || !v.q || typeof v.q !== 'object' || Date.now() - v.at > TTL) return {}
+    return v.q as CalcQuery
   } catch {
     return {}
   }
 }
 export function saveLast(q: CalcQuery) {
   try {
-    if (q.a || q.b || q.f) localStorage.setItem(KEY, JSON.stringify(q))
-    else localStorage.removeItem(KEY)
+    if (!(q.a || q.b || q.f)) return localStorage.removeItem(KEY)
+    // The same setup written again (the page opened on it) isn't a change: its time stays.
+    const now = readLast()
+    if (now.a === q.a && now.b === q.b && now.f === q.f) return
+    localStorage.setItem(KEY, JSON.stringify({ at: Date.now(), q }))
   } catch {
     // Storage unavailable: the URL has it.
   }

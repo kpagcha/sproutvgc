@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, shallowRef, watch } from 'vue'
+import { ChevronDown } from '@lucide/vue'
 import { move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import type { MetaData } from '@/data/meta'
 import { MOVES } from '@/data/moves'
@@ -32,6 +33,23 @@ import TypeIcon from '@/components/TypeIcon'
 // opponent. Its first 15 until unfolded.
 const props = defineProps<{ yours: Fighter; field: Battlefield; data: MetaData | null }>()
 const emit = defineEmits<{ pick: [f: Fighter] }>()
+
+// Folded at first, then as last left: its numbers worked out only while it's open.
+const OPEN_KEY = 'sproutvgc.calc.metaOpen'
+const open = shallowRef(false)
+try {
+  open.value = localStorage.getItem(OPEN_KEY) === '1'
+} catch {
+  // Storage unavailable: folded.
+}
+function toggle() {
+  open.value = !open.value
+  try {
+    localStorage.setItem(OPEN_KEY, open.value ? '1' : '0')
+  } catch {
+    // Storage unavailable: for this visit.
+  }
+}
 
 type Mode = 'attack' | 'defend'
 const MODE_KEY = 'sproutvgc.calc.metaMode'
@@ -148,105 +166,110 @@ const moveName = (id: MoveId) => refName(move(id))
       <h2>
         <span v-tip="intro" class="about" tabindex="0">{{ t('calc.meta.title') }}</span>
       </h2>
-      <span class="controls">
+      <span v-if="open" class="controls">
         <SegmentedControl v-model="mode" class="soft" :label="t('calc.meta.show')" :options="modes" />
         <SegmentedControl v-model="top" class="soft" :label="t('calc.meta.top')" :options="tops" />
       </span>
+      <button type="button" class="btn fold" :aria-expanded="open" :aria-label="t('calc.meta.toggle')" @click="toggle">
+        <ChevronDown :size="16" class="fold-chev" :class="{ open }" aria-hidden="true" />
+      </button>
     </div>
-    <p class="muted intro">{{ yourId ? t('calc.meta.tap') : t('calc.meta.pickYours') }}</p>
-    <template v-if="yourId && foes.length">
-      <!-- Your moves: a column each, headed by how much of the meta it knocks out. -->
-      <template v-if="mode === 'attack'">
-        <p v-if="!yourMoves.length" class="muted">{{ t('calc.meta.noMoves') }}</p>
-        <div v-else class="table-wrap">
-          <table class="grid">
-            <thead>
-              <tr>
-                <th class="who-col" scope="col">{{ t('calc.meta.pokemon') }}</th>
-                <th v-for="s in moveSummaries" :key="s.mv" scope="col" class="move-col">
-                  <span class="move-head"><TypeIcon :type="MOVES[s.mv].type" />{{ moveName(s.mv) }}</span>
-                  <span class="ko-share">
-                    <span class="share-bar" aria-hidden="true"
-                      ><span class="one" :style="{ width: pct(s.one) }"></span
-                      ><span class="two" :style="{ width: pct(Math.max(0, s.two - s.one)) }"></span
-                    ></span>
-                    <span class="share-text">{{ t('calc.meta.koShare', { one: pct(s.one), two: pct(s.two) }) }}</span>
-                  </span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="r in attackRows.slice(0, all ? undefined : TOP)" :key="r.id">
-                <th scope="row" class="who-col">
-                  <button type="button" class="who" @click="emit('pick', r.set)">
-                    <PokemonIcon :id="r.id" />
-                    <span class="who-name">{{ name(r.id) }}</span>
-                  </button>
-                </th>
-                <td v-for="(h, j) in r.hits" :key="j" class="cell" :class="kindOf(h)">
-                  <span class="cell-ko" :class="{ muted: !h || h.none }">{{ short(h) }}</span>
-                  <span class="cell-range muted">{{ range(h) }}</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <MoreToggle v-if="attackRows.length > TOP" v-model:all="all" :n="attackRows.length" :top="TOP" />
-      </template>
+    <template v-if="open">
+      <p class="muted intro">{{ yourId ? t('calc.meta.tap') : t('calc.meta.pickYours') }}</p>
+      <template v-if="yourId && foes.length">
+        <!-- Your moves: a column each, headed by how much of the meta it knocks out. -->
+        <template v-if="mode === 'attack'">
+          <p v-if="!yourMoves.length" class="muted">{{ t('calc.meta.noMoves') }}</p>
+          <div v-else class="table-wrap">
+            <table class="grid">
+              <thead>
+                <tr>
+                  <th class="who-col" scope="col">{{ t('calc.meta.pokemon') }}</th>
+                  <th v-for="s in moveSummaries" :key="s.mv" scope="col" class="move-col">
+                    <span class="move-head"><TypeIcon :type="MOVES[s.mv].type" />{{ moveName(s.mv) }}</span>
+                    <span class="ko-share">
+                      <span class="share-bar" aria-hidden="true"
+                        ><span class="one" :style="{ width: pct(s.one) }"></span
+                        ><span class="two" :style="{ width: pct(Math.max(0, s.two - s.one)) }"></span
+                      ></span>
+                      <span class="share-text">{{ t('calc.meta.koShare', { one: pct(s.one), two: pct(s.two) }) }}</span>
+                    </span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="r in attackRows.slice(0, all ? undefined : TOP)" :key="r.id">
+                  <th scope="row" class="who-col">
+                    <button type="button" class="who" @click="emit('pick', r.set)">
+                      <PokemonIcon :id="r.id" />
+                      <span class="who-name">{{ name(r.id) }}</span>
+                    </button>
+                  </th>
+                  <td v-for="(h, j) in r.hits" :key="j" class="cell" :class="kindOf(h)">
+                    <span class="cell-ko" :class="{ muted: !h || h.none }">{{ short(h) }}</span>
+                    <span class="cell-range muted">{{ range(h) }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <MoreToggle v-if="attackRows.length > TOP" v-model:all="all" :n="attackRows.length" :top="TOP" />
+        </template>
 
-      <!-- Their hardest hits on yours. -->
-      <template v-else>
-        <div class="defend-summary">
-          <span class="share-bar wide" aria-hidden="true"
-            ><span class="one" :style="{ width: pct(defendSummary.one) }"></span
-            ><span class="two" :style="{ width: pct(Math.max(0, defendSummary.two - defendSummary.one)) }"></span
-          ></span>
-          <span>{{ t('calc.meta.koYou', { one: pct(defendSummary.one), two: pct(defendSummary.two) }) }}</span>
-        </div>
-        <div class="table-wrap">
-          <table class="grid theirs">
-            <thead>
-              <tr>
-                <th class="who-col" scope="col">{{ t('calc.meta.pokemon') }}</th>
-                <th scope="col">{{ t('calc.meta.best') }}</th>
-                <th scope="col" class="next-col">{{ t('calc.meta.next') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="r in defendRows.slice(0, all ? undefined : TOP)" :key="r.id">
-                <th scope="row" class="who-col">
-                  <button type="button" class="who" @click="emit('pick', r.set)">
-                    <PokemonIcon :id="r.id" />
-                    <span class="who-name">{{ name(r.id) }}</span>
-                  </button>
-                </th>
-                <td class="cell best" :class="kindOf(r.best)">
-                  <template v-if="r.best">
-                    <span class="cell-move"
-                      ><TypeIcon :type="MOVES[r.best.move].type" />{{ moveName(r.best.move) }}</span
-                    >
-                    <span class="cell-ko" :class="{ muted: !r.best || r.best.none }">{{ short(r.best) }}</span>
-                    <span class="cell-range muted">{{ range(r.best) }}</span>
-                    <!-- On phones, its next hardest under it, in place of a column of its own. -->
-                    <span v-if="r.next" class="next-inline muted"
-                      >{{ t('calc.meta.next') }}: {{ moveName(r.next.move) }} {{ range(r.next) }}</span
-                    >
-                  </template>
-                  <span v-else class="muted">{{ t('calc.meta.nothing') }}</span>
-                </td>
-                <td class="cell next-col" :class="kindOf(r.next)">
-                  <template v-if="r.next">
-                    <span class="cell-move"
-                      ><TypeIcon :type="MOVES[r.next.move].type" />{{ moveName(r.next.move) }}</span
-                    >
-                    <span class="cell-range muted">{{ range(r.next) }}</span>
-                  </template>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <MoreToggle v-if="defendRows.length > TOP" v-model:all="all" :n="defendRows.length" :top="TOP" />
+        <!-- Their hardest hits on yours. -->
+        <template v-else>
+          <div class="defend-summary">
+            <span class="share-bar wide" aria-hidden="true"
+              ><span class="one" :style="{ width: pct(defendSummary.one) }"></span
+              ><span class="two" :style="{ width: pct(Math.max(0, defendSummary.two - defendSummary.one)) }"></span
+            ></span>
+            <span>{{ t('calc.meta.koYou', { one: pct(defendSummary.one), two: pct(defendSummary.two) }) }}</span>
+          </div>
+          <div class="table-wrap">
+            <table class="grid theirs">
+              <thead>
+                <tr>
+                  <th class="who-col" scope="col">{{ t('calc.meta.pokemon') }}</th>
+                  <th scope="col">{{ t('calc.meta.best') }}</th>
+                  <th scope="col" class="next-col">{{ t('calc.meta.next') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="r in defendRows.slice(0, all ? undefined : TOP)" :key="r.id">
+                  <th scope="row" class="who-col">
+                    <button type="button" class="who" @click="emit('pick', r.set)">
+                      <PokemonIcon :id="r.id" />
+                      <span class="who-name">{{ name(r.id) }}</span>
+                    </button>
+                  </th>
+                  <td class="cell best" :class="kindOf(r.best)">
+                    <template v-if="r.best">
+                      <span class="cell-move"
+                        ><TypeIcon :type="MOVES[r.best.move].type" />{{ moveName(r.best.move) }}</span
+                      >
+                      <span class="cell-ko" :class="{ muted: !r.best || r.best.none }">{{ short(r.best) }}</span>
+                      <span class="cell-range muted">{{ range(r.best) }}</span>
+                      <!-- On phones, its next hardest under it, in place of a column of its own. -->
+                      <span v-if="r.next" class="next-inline muted"
+                        >{{ t('calc.meta.next') }}: {{ moveName(r.next.move) }} {{ range(r.next) }}</span
+                      >
+                    </template>
+                    <span v-else class="muted">{{ t('calc.meta.nothing') }}</span>
+                  </td>
+                  <td class="cell next-col" :class="kindOf(r.next)">
+                    <template v-if="r.next">
+                      <span class="cell-move"
+                        ><TypeIcon :type="MOVES[r.next.move].type" />{{ moveName(r.next.move) }}</span
+                      >
+                      <span class="cell-range muted">{{ range(r.next) }}</span>
+                    </template>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <MoreToggle v-if="defendRows.length > TOP" v-model:all="all" :n="defendRows.length" :top="TOP" />
+        </template>
       </template>
     </template>
   </section>
@@ -265,6 +288,19 @@ const moveName = (id: MoveId) => refName(move(id))
 }
 .meta-head h2 {
   margin: 0;
+}
+.fold {
+  margin-left: auto;
+  padding: 4px 6px;
+}
+.controls + .fold {
+  margin-left: 0;
+}
+.fold-chev {
+  transition: transform 0.2s;
+}
+.fold-chev.open {
+  transform: rotate(180deg);
 }
 .controls {
   display: flex;

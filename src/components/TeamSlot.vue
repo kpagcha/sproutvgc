@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, shallowRef, useTemplateRef } from 'vue'
+import { useResizeObserver } from '@vueuse/core'
 import { CircleAlert, Pencil, Pin, PinOff, X } from '@lucide/vue'
 import { ability, item, move, pokemon, type MoveId } from '@/data/dex'
 import { MOVES } from '@/data/moves'
@@ -59,6 +60,17 @@ const emit = defineEmits<{
   mega: []
   pin: []
 }>()
+
+// The dot between the ability and the nature hidden once the nature wraps to a line of its own, rather than left
+// trailing at the line's end (hidden, not taken out, so the line breaks where it did).
+const facts = useTemplateRef<HTMLElement>('facts')
+const dot = useTemplateRef<HTMLElement>('dot')
+const natureBtn = useTemplateRef<HTMLElement>('natureBtn')
+const wrapped = shallowRef(false)
+const measure = () => {
+  if (dot.value && natureBtn.value) wrapped.value = natureBtn.value.offsetTop > dot.value.offsetTop + 4
+}
+useResizeObserver([facts, natureBtn], measure)
 
 // The pin's tooltip only where there's hover: tapped, it'd stay behind as the slot's pinned or unpinned.
 const canHover = window.matchMedia('(hover: hover)').matches
@@ -166,7 +178,7 @@ const chipText = computed(() =>
         <X :size="14" aria-hidden="true" />
       </button>
     </div>
-    <div class="set-facts">
+    <div ref="facts" class="set-facts">
       <button
         v-tip="clashes?.ability"
         type="button"
@@ -179,8 +191,9 @@ const chipText = computed(() =>
       <span v-if="megaAbility" v-tip="t('builder.megaAbility')" class="mega-ability muted"
         >→ {{ refName(ability(megaAbility)) }}</span
       >
-      <span class="muted" aria-hidden="true">·</span>
+      <span ref="dot" class="muted" :class="{ wrapped }" aria-hidden="true">·</span>
       <button
+        ref="natureBtn"
         v-tip="member.nature && !flat ? natureTip(member.nature) : undefined"
         type="button"
         class="slot-btn nature"
@@ -484,6 +497,9 @@ const chipText = computed(() =>
 }
 .mega-ability {
   font-size: 0.9em;
+}
+.wrapped {
+  visibility: hidden;
 }
 .set-moves {
   --icon-scale: 1;

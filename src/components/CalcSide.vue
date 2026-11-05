@@ -90,17 +90,15 @@ const setCard = (el: Element | ComponentPublicInstance | null) =>
   (card.value = el && '$el' in el ? (el.$el as HTMLElement) : (el as HTMLElement | null))
 defineExpose({ card })
 
-// Each move's crit and hits, and which rows are unfolded, by the move: a move picked again finds them as left.
-const opts = shallowRef<Partial<Record<MoveId, HitOptions>>>({})
+// Each move's crit and hits, kept with the side (and so in the URL), and which rows are unfolded, by the move: a move
+// picked again finds them as left.
+const opts = computed(() => props.fighter.hitOpts ?? {})
 const setOpt = (mv: MoveId, patch: HitOptions) =>
-  (opts.value = { ...opts.value, [mv]: { ...opts.value[mv], ...patch } })
+  set({ hitOpts: { ...opts.value, [mv]: { ...opts.value[mv], ...patch } } })
 const unfolded = shallowRef<Partial<Record<MoveId, boolean>>>({})
 watch(
   () => props.fighter.member.pokemon,
-  () => {
-    opts.value = {}
-    unfolded.value = {}
-  },
+  () => (unfolded.value = {}),
 )
 
 const otherId = computed(() => battlerOf(props.other))

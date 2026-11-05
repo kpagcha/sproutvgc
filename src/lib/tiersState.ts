@@ -5,7 +5,7 @@ import { customRef, type Ref } from 'vue'
 import type { LocationQuery } from 'vue-router'
 
 /** How long a speed page's state is remembered since last changed: past it, the page opens bare. */
-const TTL = 6 * 60 * 60 * 1000
+export const TTL = 6 * 60 * 60 * 1000
 
 // A speed page as the reader last left it (its URL's query), saved in the browser with when it was left: the page
 // opened bare (from the menu, nothing in its URL) comes back so, and the comparison's way back finds the speed tiers
@@ -21,10 +21,10 @@ function remembered(key: string, legacy: (saved: string) => LocationQuery, legac
       const v = localStorage.getItem(key)
       if (v) {
         const saved = JSON.parse(v) as Saved | LocationQuery
-        // Saved before it said when: as if left now.
+        // Saved before it said when: long ago, so forgotten.
         return typeof saved.at === 'number' && saved.q && typeof saved.q === 'object'
           ? (saved as Saved)
-          : { at: Date.now(), q: saved as LocationQuery }
+          : { at: 0, q: {} }
       }
       const old = localStorage.getItem(legacyKey)
       localStorage.removeItem(legacyKey)
@@ -40,6 +40,9 @@ function remembered(key: string, legacy: (saved: string) => LocationQuery, legac
       return Date.now() - saved.at > TTL ? {} : saved.q
     },
     set(q) {
+      // The same setup written again (the page opened on it) isn't a change: its time stays.
+      const fresh = Date.now() - saved.at <= TTL
+      if (fresh && JSON.stringify(q) === JSON.stringify(saved.q)) return
       saved = { at: Date.now(), q }
       try {
         if (Object.keys(q).length) localStorage.setItem(key, JSON.stringify(saved))
