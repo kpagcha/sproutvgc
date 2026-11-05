@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp, Info, Swords, Trophy } from '@lucide/vue'
+import { ChevronsDown, ChevronsUp, Info, Swords, Trophy } from '@lucide/vue'
 import { ability, available, availableIds, move, pokemon, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
 import { ITEMS } from '@/data/items'
 import { MOVES } from '@/data/moves'
@@ -46,6 +46,7 @@ import { useSpeedOptions } from '@/composables/useSpeedOptions'
 import AppLink from '@/components/AppLink'
 import BuildCards from '@/components/BuildCards.vue'
 import CountryFlag from '@/components/CountryFlag'
+import MoreToggle from '@/components/MoreToggle.vue'
 import DefenseResults from '@/components/DefenseResults.vue'
 import ItemList from '@/components/ItemList.vue'
 import MoveTable from '@/components/MoveTable.vue'
@@ -155,7 +156,7 @@ const moves = computed(() =>
   (m.value?.moves ?? []).flatMap((x) => (MOVES[x.id] ? [{ ref: move(x.id), share: x.share }] : [])),
 )
 const moveShares = computed(() => Object.fromEntries(moves.value.map((x) => [x.ref.id, x.share])))
-// Or its whole movepool, as its dex entry has it, searchable (the link under the table): the moves its sets run with
+// Or its whole movepool, as its dex entry has it, searchable (`MoreToggle` under the table, "All"): the moves its sets run with
 // their share, the rest on under `LIST_MIN` of them. Remembered for the visit, per Pokémon (`useUnfolded`).
 const movepool = useUnfolded(() => `movepool:${id.value}`)
 /** What its whole movepool is filtered by, as the move rankings are, but for the Pokémon: it's this one's. */
@@ -646,14 +647,6 @@ const sections = computed(() =>
         <section v-if="moves.length" id="sec-moves" class="panel card moves-card">
           <div class="panel-head">
             <h2>{{ t('usageMon.moves') }}</h2>
-            <!-- A toggle, not a way to another page: muted, with a chevron saying it unfolds here, as the pickers' "show
-                 all"; cut short where the header has no room for it. -->
-            <button type="button" class="more-toggle" :aria-pressed="movepool" @click="movepool = !movepool">
-              <component :is="movepool ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" /><span
-                class="more-label"
-                >{{ t(movepool ? 'usageMon.setsMoves' : 'usageMon.movepool') }}</span
-              >
-            </button>
             <ListOptions class="head-options" />
           </div>
           <MoveTable
@@ -667,6 +660,8 @@ const sections = computed(() =>
             no-pp
             stacked
           />
+          <!-- Its sets' top, or its whole movepool: under the list, as every folded list's. -->
+          <MoreToggle v-model:all="movepool" :top="SETS_MOVES" />
         </section>
         <section v-if="items.length" id="sec-items" class="panel card items-card">
           <div class="panel-head">
@@ -1285,37 +1280,12 @@ const sections = computed(() =>
 .panel-head h2 {
   margin-bottom: 0;
 }
-/* Beside the moves' heading, whether they're its sets' top or its whole movepool: as long as there's room for. */
-.more-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-  margin-right: auto;
-  padding: 2px 6px 2px 2px;
-  font: inherit;
-  font-size: 0.9em;
-  font-weight: bold;
-  color: var(--muted);
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-.more-toggle > svg {
-  flex: none;
-}
-.more-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 .panel-head h2,
 .head-options {
   flex: none;
 }
-.more-toggle:hover {
-  color: var(--text);
-  background: var(--hover);
+.head-options {
+  margin-left: auto;
 }
 h2 {
   margin-top: 0;

@@ -8,7 +8,8 @@ import { t } from '@/i18n'
 // screen (or under what's stuck to its top), rather than left far below what's now there. Which one it was is decided
 // before setting `all`: the model reads the parent's prop, which keeps its old value until the parent renders again, so
 // reading it back would take an unfolding for a folding.
-const props = defineProps<{ n: number; top: number }>()
+/** `n` left out where how many isn't known yet: "All" alone. */
+const props = defineProps<{ n?: number; top: number }>()
 const all = defineModel<boolean>('all', { required: true })
 
 /** How far down the screen what's stuck to its top reaches (tabs, a row of links, a table's header), stacked: each
@@ -45,9 +46,16 @@ async function toggle() {
 </script>
 
 <template>
-  <button v-if="props.n > props.top" ref="button" type="button" class="more-toggle" :aria-pressed="all" @click="toggle">
+  <button
+    v-if="props.n === undefined || props.n > props.top"
+    ref="button"
+    type="button"
+    class="more-toggle"
+    :aria-pressed="all"
+    @click="toggle"
+  >
     <component :is="all ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />{{
-      all ? t('more.top', { n: top }) : t('more.all', { n })
+      all ? t('more.top', { n: top }) : n === undefined ? t('more.allPlain') : t('more.all', { n })
     }}
   </button>
 </template>

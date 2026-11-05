@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, shallowRef, watch } from 'vue'
-import { ChevronDown } from '@lucide/vue'
 import { move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import type { MetaData } from '@/data/meta'
 import { MOVES } from '@/data/moves'
@@ -19,6 +18,7 @@ import {
   type Hit,
   type KoKind,
 } from '@/lib/damage'
+import { useOpenState } from '@/composables/useOpenState'
 import MoreToggle from '@/components/MoreToggle.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import SegmentedControl from '@/components/SegmentedControl.vue'
@@ -35,21 +35,7 @@ const props = defineProps<{ yours: Fighter; field: Battlefield; data: MetaData |
 const emit = defineEmits<{ pick: [f: Fighter] }>()
 
 // Folded at first, then as last left: its numbers worked out only while it's open.
-const OPEN_KEY = 'sproutvgc.calc.metaOpen'
-const open = shallowRef(false)
-try {
-  open.value = localStorage.getItem(OPEN_KEY) === '1'
-} catch {
-  // Storage unavailable: folded.
-}
-function toggle() {
-  open.value = !open.value
-  try {
-    localStorage.setItem(OPEN_KEY, open.value ? '1' : '0')
-  } catch {
-    // Storage unavailable: for this visit.
-  }
-}
+const { open, onToggle } = useOpenState('sproutvgc.calc.metaOpen', false)
 
 type Mode = 'attack' | 'defend'
 const MODE_KEY = 'sproutvgc.calc.metaMode'
@@ -160,22 +146,14 @@ const moveName = (id: MoveId) => refName(move(id))
 </script>
 
 <template>
-  <section class="panel meta">
-    <div class="meta-head">
-      <!-- What it shows, a tooltip on its heading, underlined dotted. -->
-      <h2>
-        <span v-tip="intro" class="about" tabindex="0">{{ t('calc.meta.title') }}</span>
-      </h2>
-      <span v-if="open" class="controls">
+  <details class="panel banded meta" :open @toggle="onToggle">
+    <summary>{{ t('calc.meta.title') }}</summary>
+    <template v-if="open">
+      <div class="meta-head">
         <SegmentedControl v-model="mode" class="soft" :label="t('calc.meta.show')" :options="modes" />
         <SegmentedControl v-model="top" class="soft" :label="t('calc.meta.top')" :options="tops" />
-      </span>
-      <button type="button" class="btn fold" :aria-expanded="open" :aria-label="t('calc.meta.toggle')" @click="toggle">
-        <ChevronDown :size="16" class="fold-chev" :class="{ open }" aria-hidden="true" />
-      </button>
-    </div>
-    <template v-if="open">
-      <p class="muted intro">{{ yourId ? t('calc.meta.tap') : t('calc.meta.pickYours') }}</p>
+      </div>
+      <p class="muted intro">{{ yourId ? `${intro} ${t('calc.meta.tap')}` : t('calc.meta.pickYours') }}</p>
       <template v-if="yourId && foes.length">
         <!-- Your moves: a column each, headed by how much of the meta it knocks out. -->
         <template v-if="mode === 'attack'">
@@ -272,46 +250,19 @@ const moveName = (id: MoveId) => refName(move(id))
         </template>
       </template>
     </template>
-  </section>
+  </details>
 </template>
 
 <style scoped>
 .meta {
   margin: 0;
 }
-/* Its heading and controls on one row where they fit; wrapped, set apart from the heading. */
+/* Its choices on one row where they fit. */
 .meta-head {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 14px 16px;
-}
-.meta-head h2 {
-  margin: 0;
-}
-.fold {
-  margin-left: auto;
-  padding: 4px 6px;
-}
-.controls + .fold {
-  margin-left: 0;
-}
-.fold-chev {
-  transition: transform 0.2s;
-}
-.fold-chev.open {
-  transform: rotate(180deg);
-}
-.controls {
-  display: flex;
-  flex-wrap: wrap;
   gap: 8px 16px;
-  margin-left: auto;
-}
-.about {
-  text-decoration: underline dotted;
-  text-underline-offset: 4px;
-  cursor: help;
 }
 .intro {
   margin: 6px 0 10px;
