@@ -24,6 +24,7 @@ import {
   battlerOf,
   hit,
   hpShown,
+  statsOf,
   leadOf,
   speedOf,
   type Battlefield,
@@ -45,6 +46,8 @@ export interface HitSeen {
   move: MoveId
   saw: Saw
   opts?: HitOptions
+  /** The defender's HP before it: the opponent's in percent (as the game shows it), yours' in HP; full unless said. */
+  before?: number
 }
 /** Which of the two was seen moving first, with moves of the same priority: its Speed against yours, as the calc has
  * them (stages, item, ability, Tailwind, paralysis; Trick Room turning it over), a tie fitting half the time. */
@@ -242,7 +245,21 @@ type Build = { nature: string | null; points: readonly number[]; item: ItemId | 
  * many steps, for the progress shown.
  */
 export function reverseDamage(input: ReverseInput): { total: number; steps: Generator<unknown, ReverseResult | null> } {
-  const { yours, theirs, field, entry, sheet, obs } = input
+  const { field, entry, sheet, obs } = input
+  // Each at full HP but as a hit seen says it was (`before`), the defender's.
+  const yours: Fighter = { ...input.yours, hp: 100 }
+  const theirs: Fighter = { ...input.theirs, hp: 100 }
+  const yourMaxHp = statsOf(yours)?.hp ?? 1
+  const yoursAt = new Map<number, Fighter>()
+  /** Yours with `points` HP left, made once per number. */
+  const yoursWith = (points: number | undefined) => {
+    if (points === undefined || points >= yourMaxHp) return yours
+    let f = yoursAt.get(points)
+    if (!f) yoursAt.set(points, (f = { ...yours, hp: (Math.max(1, points) / yourMaxHp) * 100 }))
+    return f
+  }
+  /** The opponent's HP before a hit, in percent. */
+  const theirHp = (o: Observation) => (o.by === 'a' ? Math.min(100, Math.max(0.01, o.before ?? 100)) : 100)
   const id = battlerOf(theirs)
   const m = theirs.member
   if (!id || !battlerOf(yours) || !obs.length)
@@ -321,14 +338,15 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
 
   // The opponent at a build, made once (so the calc's Pokémon for it is too, `lean`).
   const made = new Map<string, Fighter>()
-  const fighterAt = (b: Build): Fighter => {
-    const key = `${b.nature}|${b.points.join('.')}|${b.item}`
+  const fighterAt = (b: Build, hp = 100): Fighter => {
+    const key = `${b.nature}|${b.points.join('.')}|${b.item}|${hp}`
     let f = made.get(key)
     if (!f)
       made.set(
         key,
         (f = {
           ...theirs,
+          hp,
           sets: false,
           pooled: undefined,
           member: { ...m, nature: b.nature, points: [...b.points] as Points, item: b.item },
@@ -402,11 +420,12 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
         if (r === undefined) {
           const points = [...m.points]
           calc.forEach((s, k) => (points[s] = pts[k]!))
-          const cand = fighterAt({ nature: rep, points, item })
+          const cand = fighterAt({ nature: rep, points, item }, theirHp(o))
+          const def = o.by === 'b' ? yoursWith(o.before) : yours
           try {
             const opts = { ...o.opts, lean: true }
-            const h = o.by === 'a' ? hit(yours, cand, o.move, field, opts) : hit(cand, yours, o.move, field, opts)
-            r = h && { h, d: o.by === 'a' ? defendedOf(h, cand, yours, field) : defendedOf(h, yours, cand, field) }
+            const h = o.by === 'a' ? hit(yours, cand, o.move, field, opts) : hit(cand, def, o.move, field, opts)
+            r = h && { h, d: o.by === 'a' ? defendedOf(h, cand, yours, field) : defendedOf(h, def, cand, field) }
           } catch (e) {
             console.error(`Reverse: ${o.move} left out`, e)
             r = null
@@ -422,7 +441,7 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
             let d = r.d
             if (hpFree) {
               const maxHp = valueOf(0, hp, 'neutral')
-              const cur = Math.max(1, Math.round((maxHp * theirs.hp) / 100))
+              const cur = Math.max(1, Math.round((maxHp * theirHp(o)) / 100))
               d = { ...d, maxHp, hp: cur, saved: d.saved && cur === maxHp }
             }
             fit = fitOf(r.h.rolls, o.saw, d)

@@ -137,6 +137,7 @@ const LISTS: Partial<Record<string, { to: RouteLocationRaw; label: MessageKey }>
   bulkTiers: { to: { name: 'meta' }, label: 'nav.meta' },
   powerTiers: { to: { name: 'meta' }, label: 'nav.meta' },
   calc: { to: { name: 'tools' }, label: 'nav.tools' },
+  calcInverse: { to: { name: 'tools' }, label: 'nav.tools' },
   speedCompare: { to: { name: 'tools' }, label: 'nav.tools' },
   metaPokemon: { to: { name: 'rankings' }, label: 'title.pokemonRankings' },
   metaAbility: { to: { name: 'abilityRankings' }, label: 'title.abilityRankings' },

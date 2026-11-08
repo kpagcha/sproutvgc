@@ -2,13 +2,13 @@
 import { computed, onUnmounted, shallowRef, watch } from 'vue'
 import { watchDebounced } from '@vueuse/core'
 import { Check, X } from '@lucide/vue'
-import { item, type ItemId, type MoveId } from '@/data/dex'
+import { item, type ItemId } from '@/data/dex'
 import { percent, type MetaData } from '@/data/meta'
 import { natureEffectOn } from '@/data/natures'
 import { STATS } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import { battlerOf, damaging, type Battlefield, type Fighter } from '@/lib/damage'
+import { battlerOf, type Battlefield, type Fighter } from '@/lib/damage'
 import {
   reverseDamage,
   type Observation,
@@ -18,38 +18,29 @@ import {
 } from '@/lib/damageReverse'
 import { runSliced } from '@/lib/slices'
 import { MAX_POINTS } from '@/lib/stats'
-import { setsAs } from '@/lib/team'
+import { setsAs, type Points } from '@/lib/team'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 
-// The damage calculator read backwards ("What fits"): what its moves' rows say each was seen to do (the sides' `saw`),
-// and what the opponent's set could then be (`damageReverse.ts`): each stat in play's points where some build fits, how
+// The inverse damage calc's "What fits": from what was seen (`obs`: the hits and which moved first, `CalcHits`), what
+// the opponent's set could then be (`damageReverse.ts`): each stat in play's points where some build fits, how
 // likely what was seen was at its sets, and its common spreads against its common items, each pair marked as fitting
 // (on what share of the damage rolls) or ruled out; joined by the nearest that fits when none of them does. At its team
-// sheet (`sheet`, shared with the threats), its item and nature as set, only its points varying. Which of the two moved
-// first (`first`, the page's `?first=`) narrows its Speed in the same spread, within the same 66 points. Worked out a slice at
-// a time once the sides have settled, what it showed kept, faded, until the new one's in.
-const props = defineProps<{ yours: Fighter; theirs: Fighter; field: Battlefield; data: MetaData | null }>()
+// sheet (`sheet`, shared with the threats), its item and nature as set, only its points varying. A spread used (`use`)
+// sets the opponent to it, with the item likeliest to go with it. Worked out a slice at a time once the sides have
+// settled, what it showed kept, faded, until the new one's in.
+const props = defineProps<{
+  yours: Fighter
+  theirs: Fighter
+  field: Battlefield
+  data: MetaData | null
+  obs: readonly Observation[]
+}>()
 const sheet = defineModel<boolean>('sheet', { default: false })
-/** Which was seen moving first, with moves of the same priority; tapped again, not seen. */
-const first = defineModel<'a' | 'b' | null>('first', { default: null })
+const emit = defineEmits<{ use: [build: { nature: string | null; points: Points; item?: ItemId | null }] }>()
 
 const theirId = computed(() => battlerOf(props.theirs))
 const yourId = computed(() => battlerOf(props.yours))
-
-/** What was seen, from both sides' rows: yours' hitting the opponent, its hitting yours. */
-const obs = computed<Observation[]>(() => [
-  ...(first.value ? [{ by: 'speed' as const, first: first.value }] : []),
-  ...(['a', 'b'] as const).flatMap((by) => {
-    const f = by === 'a' ? props.yours : props.theirs
-    return f.member.moves
-      .filter((mv, i, all): mv is MoveId => damaging(mv) && all.indexOf(mv) === i)
-      .flatMap((mv) => {
-        const saw = f.saw?.[mv]
-        return saw ? [{ by, move: mv, saw, opts: f.hitOpts?.[mv] }] : []
-      })
-  }),
-])
 
 const result = shallowRef<ReverseResult | null>(null)
 const progress = shallowRef<number | null>(null)
@@ -66,7 +57,7 @@ function start() {
   stop?.()
   stop = null
   const id = theirId.value
-  if (!id || !yourId.value || !obs.value.length) {
+  if (!id || !yourId.value || !props.obs.length) {
     result.value = null
     progress.value = null
     return
@@ -77,7 +68,7 @@ function start() {
     field: props.field,
     entry: props.data?.[setsAs(props.theirs.member) ?? id] ?? undefined,
     sheet: sheet.value,
-    obs: obs.value,
+    obs: props.obs,
   })
   progress.value = 0
   clearTimeout(slowTimer)
@@ -95,7 +86,7 @@ function start() {
     },
   )
 }
-watch(() => [sheet.value, first.value, props.data] as const, start, { immediate: true })
+watch(() => [sheet.value, props.obs, props.data] as const, start, { immediate: true })
 watchDebounced(() => [props.yours, props.theirs, props.field] as const, start, { debounce: 150 })
 
 const statName = (s: number) => t(`stat.${STATS[s]!}`)
@@ -129,6 +120,19 @@ const rangeText = (r: StatRange) => {
 }
 const itemName = (id: ItemId | null) => (id ? refName(item(id)) : t('builder.noItem'))
 const fitTip = (f: number) => t('calc.reverse.fitTip', { pct: percent(f) })
+/** A spread used: its nature and points, and off its team sheet, the item likeliest to go with it (its fit by the
+ * item's share), else its most run. */
+function use(r: ReverseRow) {
+  const res = result.value
+  if (!res) return
+  let item: ItemId | null | undefined
+  if (res.itemsVary) {
+    const score = res.columns.map((c, ci) => r.fits[ci]! * (c.share ?? 0))
+    const best = score.indexOf(Math.max(...score))
+    item = res.columns[Math.max(0, best)]!.items[0]
+  }
+  emit('use', { nature: r.nature, points: r.points, ...(item !== undefined && { item }) })
+}
 </script>
 
 <template>
@@ -157,24 +161,7 @@ const fitTip = (f: number) => t('calc.reverse.fitTip', { pct: percent(f) })
       <span class="muted at">{{ sheet ? t('calc.threats.atSheet') : t('calc.reverse.atSets') }}</span>
     </div>
     <p v-if="!theirId || !yourId" class="muted intro">{{ t('calc.threats.pickBoth') }}</p>
-    <!-- Which moved first, the two as their icons: its Speed narrowed in the same spread. -->
-    <div v-else class="first" role="group" :aria-label="t('calc.reverse.first')">
-      <span v-tip="t('calc.reverse.firstTip')" class="muted about" tabindex="0">{{ t('calc.reverse.first') }}</span>
-      <button
-        v-for="k in ['a', 'b'] as const"
-        :key="k"
-        v-tip="k === 'a' ? t('calc.yours') : t('calc.theirs')"
-        type="button"
-        class="btn choice"
-        :class="[k === 'a' ? 'yours' : 'opponent', { on: first === k }]"
-        :aria-pressed="first === k"
-        :aria-label="k === 'a' ? t('calc.yours') : t('calc.theirs')"
-        @click="first = first === k ? null : k"
-      >
-        <PokemonIcon :id="k === 'a' ? yourId : theirId" />
-      </button>
-    </div>
-    <p v-if="theirId && yourId && !obs.length" class="muted intro">{{ t('calc.reverse.hint') }}</p>
+    <p v-else-if="!obs.length" class="muted intro">{{ t('calc.reverse.hint') }}</p>
     <template v-if="theirId && yourId && obs.length && result">
       <div class="body" :class="{ stale: slow }">
         <p v-if="!result.ranges.length" class="warn" role="status">{{ t('calc.reverse.impossible') }}</p>
@@ -225,11 +212,15 @@ const fitTip = (f: number) => t('calc.reverse.fitTip', { pct: percent(f) })
               <tr v-for="(r, ri) in result.rows" :key="ri">
                 <th scope="row">
                   <span class="spread">{{ spreadLabel(r, result.stats) }}</span>
-                  <span v-if="r.share" v-tip="t('calc.reverse.shareTip')" class="muted share">{{
-                    percent(r.share)
-                  }}</span>
-                  <span v-else-if="r.nearest" class="muted share">{{ t('calc.reverse.nearest') }}</span>
-                  <span v-else class="muted share">{{ t('calc.reverse.ownSet') }}</span>
+                  <!-- Its share, and the way to set the opponent to it. -->
+                  <span class="row-foot">
+                    <span v-if="r.share" v-tip="t('calc.reverse.shareTip')" class="muted">{{ percent(r.share) }}</span>
+                    <span v-else-if="r.nearest" class="muted">{{ t('calc.reverse.nearest') }}</span>
+                    <span v-else class="muted">{{ t('calc.reverse.ownSet') }}</span>
+                    <button v-tip="t('calc.reverse.useTip')" type="button" class="btn small use" @click="use(r)">
+                      {{ t('calc.reverse.use') }}
+                    </button>
+                  </span>
                 </th>
                 <td
                   v-for="(f, ci) in r.fits"
@@ -256,6 +247,26 @@ const fitTip = (f: number) => t('calc.reverse.fitTip', { pct: percent(f) })
 </template>
 
 <style scoped>
+/* Its buttons soft, as many as there are: a thin outline, no hard shadow nor lift; one on filled, outlined in ink. */
+:root:root .reverse .btn {
+  border-width: 1px;
+  border-color: var(--border);
+  box-shadow: none;
+  font-weight: normal;
+}
+:root:root .reverse .btn:hover:not(:disabled) {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--ink);
+}
+:root:root .reverse .btn:active:not(:disabled) {
+  transform: none;
+  background: color-mix(in srgb, var(--text) 10%, var(--panel));
+}
+:root:root .reverse .btn.on {
+  border-color: var(--ink);
+  font-weight: bold;
+}
 .reverse {
   margin: 0;
 }
@@ -269,29 +280,16 @@ const fitTip = (f: number) => t('calc.reverse.fitTip', { pct: percent(f) })
 .at {
   font-size: 0.85em;
 }
-/* Which moved first: the two's icons, the one picked in its side's color. */
-.first {
+.row-foot {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 12px;
+  justify-content: space-between;
+  gap: 8px;
   font-size: 0.875em;
 }
-.about {
-  margin-right: 4px;
-  text-decoration: underline dotted;
-  text-underline-offset: 4px;
-  cursor: help;
-}
-.choice {
+.use {
   min-height: 0;
-  padding: 0 6px;
-}
-.choice.on.yours {
-  background: var(--accent);
-}
-.choice.on.opponent {
-  background: var(--opponent);
+  padding: 0 8px;
 }
 .sheet.on {
   background: var(--sel);

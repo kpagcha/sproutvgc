@@ -31,7 +31,7 @@ import {
 import { emptyMember, MOVE_SLOTS, stoneMega, type Points } from '@/lib/team'
 import { MAX_POINTS } from '@/lib/stats'
 import { TTL } from '@/lib/tiersState'
-import type { Saw } from '@/lib/damageReverse'
+import type { HitSeen, Saw } from '@/lib/damageReverse'
 
 const SIDE_CODES: Record<SideEffect, string> = {
   reflect: 'R',
@@ -97,35 +97,6 @@ function decodeHitOpts(s: string | undefined, moves: readonly (MoveId | null)[])
   return Object.keys(out).length ? out : undefined
 }
 
-// What its moves were seen to do, `moonblast-p48.flareblitz-h112.knockoff-k`: its ID, then `p<n>` the percent lost,
-// `h<n>` the HP lost, `k` a knockout, `l` lived, `t` knocked out on the second hit. Only its set's moves'.
-const SAW_CODES = { ko: 'k', lived: 'l', two: 't' } as const
-function encodeSaw(f: Fighter): string {
-  return f.member.moves
-    .filter((mv, i, all): mv is MoveId => !!mv && all.indexOf(mv) === i)
-    .map((mv) => {
-      const w = f.saw?.[mv]
-      if (!w) return ''
-      return `${mv}-${'n' in w ? `${w.kind === 'pct' ? 'p' : 'h'}${w.n}` : SAW_CODES[w.kind]}`
-    })
-    .filter(Boolean)
-    .join('.')
-}
-function decodeSaw(s: string | undefined, moves: readonly (MoveId | null)[]): Fighter['saw'] {
-  const out: Partial<Record<MoveId, Saw>> = {}
-  for (const tok of (s ?? '').split('.')) {
-    const [mv, code] = tok.split('-') as [MoveId, string | undefined]
-    if (!code || !moves.includes(mv)) continue
-    const num = /^([ph])(\d+)$/.exec(code)
-    if (num) out[mv] = { kind: num[1] === 'p' ? 'pct' : 'hp', n: clamp(Number(num[2]), 0, num[1] === 'p' ? 100 : 9999) }
-    else {
-      const kind = (Object.keys(SAW_CODES) as (keyof typeof SAW_CODES)[]).find((k) => SAW_CODES[k] === code)
-      if (kind) out[mv] = { kind }
-    }
-  }
-  return Object.keys(out).length ? out : undefined
-}
-
 export function encodeFighter(f: Fighter): string {
   const m = f.member
   if (!m.pokemon) return ''
@@ -152,7 +123,6 @@ export function encodeFighter(f: Fighter): string {
     m.points.join('.'),
     flags.join('.'),
     encodeHitOpts(f),
-    encodeSaw(f),
   ]
     .join('~')
     .replace(/~+$/, '')
@@ -160,7 +130,7 @@ export function encodeFighter(f: Fighter): string {
 
 export function decodeFighter(s: unknown): Fighter | null {
   if (typeof s !== 'string' || !s) return null
-  const [mon, it, ab, nature, moves, points, flags, opts, saw] = s.split('~')
+  const [mon, it, ab, nature, moves, points, flags, opts] = s.split('~')
   if (!mon || !POKEMON[mon as PokemonId]) return null
   const m = emptyMember()
   m.pokemon = mon as PokemonId
@@ -173,7 +143,6 @@ export function decodeFighter(s: unknown): Fighter | null {
   if (pts.length === 6) m.points = pts.map((p) => clamp(Math.round(p) || 0, 0, MAX_POINTS)) as Points
   const f = emptyFighter(m)
   f.hitOpts = decodeHitOpts(opts, m.moves)
-  f.saw = decodeSaw(saw, m.moves)
   for (const tok of (flags ?? '').split('.')) {
     if (tok === 'n') f.mega = false
     else if (tok === 'a') f.abilityOn = true
@@ -221,6 +190,57 @@ export function decodeField(s: unknown): Battlefield {
   return f
 }
 
+// The inverse calc's hits seen (`?h=`), in the order entered: `adragonclaw-p42.bflareblitz-h51-b120-c`, each whose move
+// (`a` yours, `b` the opponent's) and its ID, then what it did (`p<n>` the opponent's HP lost in percent, `h<n>` yours'
+// in HP, `k` a knockout, `l` survived, `t` knocked out on the second hit), then `b<n>` the defender's HP before (the
+// opponent's in percent, yours' in HP; full unless given), `c` a critical hit, `s` one target alone.
+const SAW_CODES = { ko: 'k', lived: 'l', two: 't' } as const
+export function encodeHits(hits: readonly HitSeen[]): string {
+  return hits
+    .map((h) => {
+      const w = h.saw
+      const saw = 'n' in w ? `${w.kind === 'pct' ? 'p' : 'h'}${w.n}` : SAW_CODES[w.kind]
+      return [
+        `${h.by}${h.move}`,
+        saw,
+        h.before !== undefined && `b${h.before}`,
+        h.opts?.crit && 'c',
+        h.opts?.single && 's',
+      ]
+        .filter(Boolean)
+        .join('-')
+    })
+    .join('.')
+}
+export function decodeHits(s: unknown): HitSeen[] {
+  if (typeof s !== 'string' || !s) return []
+  return s.split('.').flatMap((tok): HitSeen[] => {
+    const [head, ...codes] = tok.split('-')
+    const by = head?.[0]
+    const move = head?.slice(1) as MoveId
+    if ((by !== 'a' && by !== 'b') || !MOVES[move]) return []
+    let saw: Saw | null = null
+    let before: number | undefined
+    let crit = false
+    let single = false
+    for (const c of codes) {
+      const num = /^([phb])(\d+)$/.exec(c)
+      if (num?.[1] === 'b') before = clamp(Number(num[2]), 1, by === 'a' ? 100 : 9999)
+      else if (num)
+        saw = { kind: num[1] === 'p' ? 'pct' : 'hp', n: clamp(Number(num[2]), 0, num[1] === 'p' ? 100 : 9999) }
+      else if (c === 'c') crit = true
+      else if (c === 's') single = true
+      else {
+        const kind = (Object.keys(SAW_CODES) as (keyof typeof SAW_CODES)[]).find((k) => SAW_CODES[k] === c)
+        if (kind) saw = { kind }
+      }
+    }
+    if (!saw) return []
+    const opts: HitOptions = { ...(crit && { crit }), ...(single && { single }) }
+    return [{ by, move, saw, ...(before !== undefined && { before }), ...(Object.keys(opts).length && { opts }) }]
+  })
+}
+
 /** The calc as last left, put back when it's opened bare, for `TTL` since it was last changed (as the speed pages). */
 const KEY = 'sproutvgc.calc.last'
 export interface CalcQuery {
@@ -229,8 +249,8 @@ export interface CalcQuery {
   f?: string
   /** The threats at the opponent's team sheet (`CalcThreats`), `1`. */
   sheet?: string
-  /** Read backwards, from what was seen (`CalcReverse`): `reverse`. */
-  mode?: string
+  /** The inverse calc's hits seen (`encodeHits`). */
+  h?: string
   /** Read backwards, which was seen moving first: `a` or `b`. */
   first?: string
 }
@@ -249,7 +269,7 @@ export function saveLast(q: CalcQuery) {
     if (!(q.a || q.b || q.f)) return localStorage.removeItem(KEY)
     // The same setup written again (the page opened on it) isn't a change: its time stays.
     const now = readLast()
-    if (now.a === q.a && now.b === q.b && now.f === q.f && now.mode === q.mode && now.first === q.first) return
+    if (now.a === q.a && now.b === q.b && now.f === q.f && now.h === q.h && now.first === q.first) return
     localStorage.setItem(KEY, JSON.stringify({ at: Date.now(), q }))
   } catch {
     // Storage unavailable: the URL has it.

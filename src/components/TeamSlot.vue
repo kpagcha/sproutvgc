@@ -58,6 +58,8 @@ const props = defineProps<{
   atSets?: boolean
   /** At every set, its points and stats pooled, which its editor shows locked. */
   pooled?: { points: readonly number[]; stats: readonly number[] }
+  /** Parts left out, being what's worked out (the inverse damage calc's opponent): its stat points, item, nature. */
+  hide?: readonly ('points' | 'item' | 'nature')[]
 }>()
 const emit = defineEmits<{
   field: [field: Field]
@@ -162,6 +164,7 @@ const chipText = computed(() =>
           <template v-if="shown"><TypeIcon v-for="ty in POKEMON[shown]?.types ?? []" :key="ty" :type="ty" /></template>
           <span v-else class="type-blank" aria-hidden="true"></span>
           <button
+            v-if="!hide?.includes('item')"
             v-tip="clashes?.item"
             type="button"
             class="slot-btn set-item"
@@ -211,8 +214,9 @@ const chipText = computed(() =>
       <span v-if="megaAbility" v-tip="t('builder.megaAbility')" class="mega-ability muted"
         >→ {{ refName(ability(megaAbility)) }}</span
       >
-      <span ref="dot" class="muted" :class="{ wrapped }" aria-hidden="true">·</span>
+      <span v-if="!hide?.includes('nature')" ref="dot" class="muted" :class="{ wrapped }" aria-hidden="true">·</span>
       <button
+        v-if="!hide?.includes('nature')"
         ref="natureBtn"
         v-tip="member.nature && !flat ? natureTip(member.nature) : undefined"
         type="button"
@@ -244,9 +248,10 @@ const chipText = computed(() =>
     <!-- Its stat points in a compact row, a button opening their step in the picker: each stat's shorthand over the stat it gives (its base, points and nature), all alike;
          while any are left to spend (or over), an alert's icon and how many; and holding its Mega Stone, whether it Mega
          Evolves, a switch at the row's end. -->
-    <div v-if="shown" class="stats-box">
+    <div v-if="shown && (!hide?.includes('points') || mega)" class="stats-box">
       <div class="stats-line">
         <button
+          v-if="!hide?.includes('points')"
           type="button"
           class="stats-chip"
           :class="{ active: active === 'points', derived: atSets && pooled }"
@@ -278,7 +283,7 @@ const chipText = computed(() =>
         </button>
       </div>
     </div>
-    <div v-else class="stats-box stats-blank" aria-hidden="true">
+    <div v-else-if="!shown" class="stats-box stats-blank" aria-hidden="true">
       <div class="stats-line">
         <span class="stats-chip">
           <span class="cells">

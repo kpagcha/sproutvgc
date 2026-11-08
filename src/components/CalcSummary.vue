@@ -18,15 +18,18 @@ const props = defineProps<{
   theirs?: boolean
   /** Its name shown after its icon, where there's the room (a band across the page), cut short if need be. */
   named?: boolean
+  /** No verdict at its end (the inverse calc's, where its damage isn't what's read). */
+  noVerdict?: boolean
 }>()
 
 const id = computed(() => battlerOf(props.fighter))
 const best = computed(() => {
-  if (!id.value || !battlerOf(props.other)) return null
+  if (props.noVerdict || !id.value || !battlerOf(props.other)) return null
   const moves = props.fighter.member.moves.filter((m) => !!m)
   return bestHit(moves.map((m) => hit(props.fighter, props.other, m!, props.field)))
 })
 const verdict = computed(() => {
+  if (props.noVerdict) return ''
   const h = best.value
   if (!h) return ''
   if (!h.koHits) return `${h.maxPct.toFixed(0)}%`

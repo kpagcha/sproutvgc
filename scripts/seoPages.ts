@@ -264,6 +264,7 @@ export function seoPages(): Plugin {
         searched('meta/power-tiers', 'powerTiers'),
         { path: 'tools', title: 'title.tools', desc: 'desc.tools', schema: 'CollectionPage' },
         searched('tools/calc', 'calc'),
+        searched('tools/calc/inverse', 'calcInverse'),
         searched('tools/compare-speeds', 'speedCompare'),
         searched('tools/team-builder', 'teamBuilder'),
         searched('tools/matchups', 'matchups'),
