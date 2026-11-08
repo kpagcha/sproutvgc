@@ -149,7 +149,7 @@ const counted = computed(() => {
   const side = (f: Fighter, attacking: boolean) => {
     const list = stagesOf(f)
     if (f.status) list.push(refName(condition(f.status)))
-    if (f.hp < 100) list.push(t('calc.threats.hp', { n: f.hp }))
+    if (f.hp < 100) list.push(t('calc.threats.hp', { n: Math.max(1, Math.min(99, Math.round(f.hp))) }))
     if (attacking && f.fainted) list.push(t('calc.threats.fainted', { n: f.fainted }))
     if (attacking && f.attacked) list.push(t('calc.threats.attacked', { n: f.attacked }))
     const a = abilityOf(f)
@@ -428,7 +428,9 @@ const all = shallowRef(false)
 .table-wrap {
   overflow-x: auto;
 }
+/* The type badges at their small size on phones too, as the calc's damage rows and Against the meta have them. */
 .grid {
+  --icon-scale: 1;
   width: 100%;
   border-collapse: collapse;
   font-size: 0.9em;

@@ -59,7 +59,7 @@ export interface Fighter {
   member: Member
   /** It Mega Evolves (when it holds its stone). */
   mega: boolean
-  /** Its HP left, in percent. */
+  /** Its HP left, in percent: not rounded, so a whole number of its HP points (typed, or stepped) comes back exactly. */
   hp: number
   status: Status
   boosts: Boosts
