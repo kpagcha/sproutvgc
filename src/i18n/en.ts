@@ -1791,7 +1791,7 @@ export const messages = {
   'usageMon.evAll': 'Show the events without it',
   'usageMon.evTeams': '{n} teams',
   'usageMon.evTeam': '1 team',
-  'usageMon.topTeams': 'Its best placings, the latest first',
+  'usageMon.topTeams': 'Best placings',
   'usageMon.evEvent': 'Event',
   'usageMon.evUsageTip': "The share of the event's teams with it",
   'usageMon.evCutTip': "The top cut's teams with it, of all of them",
