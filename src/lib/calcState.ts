@@ -148,6 +148,8 @@ export interface CalcQuery {
   a?: string
   b?: string
   f?: string
+  /** The threats at the opponent's team sheet (`CalcThreats`), `1`. */
+  sheet?: string
 }
 export function readLast(): CalcQuery {
   try {

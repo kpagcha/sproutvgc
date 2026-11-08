@@ -121,6 +121,8 @@ const field = shallowRef<Battlefield>(emptyField())
 // Its setup: the URL's, else as last left; with neither, empty.
 const fromUrl = route.query.a || route.query.b || route.query.f ? route.query : null
 const start = fromUrl ?? readLast()
+/** The threats at the opponent's team sheet (`?sheet=1`), kept with the rest. */
+const sheet = shallowRef(start.sheet === '1')
 sides.value = {
   a: decodeFighter(start.a) ?? emptyFighter(),
   b: decodeFighter(start.b) ?? emptyFighter(),
@@ -153,13 +155,14 @@ const query = computed(() => ({
   a: encodeFighter(sides.value.a) || undefined,
   b: encodeFighter(sides.value.b) || undefined,
   f: encodeField(field.value) || undefined,
+  sheet: sheet.value ? '1' : undefined,
 }))
 watchDebounced(
   query,
   (q) => {
     saveLast(q)
     const next = { ...route.query, ...q }
-    for (const k of ['a', 'b', 'f'] as const) if (!q[k]) delete next[k]
+    for (const k of ['a', 'b', 'f', 'sheet'] as const) if (!q[k]) delete next[k]
     void router.replace({ query: next })
   },
   { debounce: 250, immediate: true },
@@ -643,6 +646,7 @@ function face(f: Fighter) {
       :theirs="fought.b"
       :field
       :data
+      v-model:sheet="sheet"
       :move-opts="moveOpts.b"
     />
 

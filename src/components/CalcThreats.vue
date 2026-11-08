@@ -17,7 +17,7 @@ import TypeIcon from '@/components/TypeIcon'
 
 // The threats: every damaging move the opponent learns against yours, at its sets in the meta shown (`threats.ts`),
 // each with its damage, the chance it knocks yours out in one hit and in two, and how often its sets run it; sorted by
-// threat (the likeliest knockout first) or by usage. Or at its team sheet (`sheet`, remembered): its item, ability,
+// threat (the likeliest knockout first) or by usage. Or at its team sheet (`sheet`, the page's URL's): its item, ability,
 // nature and moves as its set on the calc has them, as an open team sheet shows them, its stat points what varies.
 // Everything the calc has set counts (both sides' stages, status, HP, allies fainted, times hit and what's on their side,
 // the field, and the options set on its moves' rows, `moveOpts`), named over the table. Worked out a slice at a time,
@@ -48,20 +48,8 @@ watch(sort, (s) => {
     // Storage unavailable: for this visit.
   }
 })
-const SHEET_KEY = 'sproutvgc.calc.threatSheet'
-const sheet = shallowRef(false)
-try {
-  sheet.value = localStorage.getItem(SHEET_KEY) === '1'
-} catch {
-  // Storage unavailable: as it is.
-}
-watch(sheet, (on) => {
-  try {
-    localStorage.setItem(SHEET_KEY, on ? '1' : '0')
-  } catch {
-    // Storage unavailable: for this visit.
-  }
-})
+/** At its team sheet: the page's, in its URL (`?sheet=1`). */
+const sheet = defineModel<boolean>('sheet', { default: false })
 const sorts = computed(() => [
   { value: 'threat' as const, label: t('calc.threats.byThreat') },
   { value: 'usage' as const, label: t('calc.threats.byUsage') },
