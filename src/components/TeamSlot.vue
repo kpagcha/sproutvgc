@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, shallowRef, useTemplateRef } from 'vue'
 import { useResizeObserver } from '@vueuse/core'
-import { CircleAlert, Pencil, Pin, PinOff, X } from '@lucide/vue'
+import { Calculator, ChartNoAxesColumn, CircleAlert, EllipsisVertical, Pencil, Pin, PinOff, X } from '@lucide/vue'
 import { ability, item, move, pokemon, type MoveId } from '@/data/dex'
 import { MOVES } from '@/data/moves'
 import { natureEffectOn, natureName } from '@/data/natures'
@@ -10,7 +10,12 @@ import { POKEMON, spriteUrl, STATS } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { pointsLeft, stoneMega, type Field, type Member } from '@/lib/team'
+import { emptyFighter } from '@/lib/damage'
+import { encodeFighter } from '@/lib/calcState'
+import { buildQuery } from '@/lib/speedBuild'
+import { speedBuildOf } from '@/lib/teamSpeed'
 import ItemIcon from '@/components/ItemIcon.vue'
+import OptionsMenu from '@/components/OptionsMenu.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
 import { natureTip } from '@/components/natureTip'
@@ -26,10 +31,11 @@ import { natureTip } from '@/components/natureTip'
 // while it is, the card shows the Mega (its name, sprite, types and stats, and its ability after the one its sheet
 // registers). A part that breaks the team's rules (`clashes`: its Pokémon, item, ability or a move, with why) is
 // marked, its tooltip saying why. The first step (`hint`: the team has no Pokémon yet), its Pokémon's placeholders
-// glowing in the accent and back, in a loop, until its picker opens. In the team builder (`pinnable`), a pin by its
-// clearing pins it beside the team's insights (`pinned`, `pin`), to edit it there as they follow. In the damage
+// glowing in the accent and back, in a loop, until its picker opens. A menu at its top right
+// (`OptionsMenu`) opens it in the damage calculator or the speed tiers, or clears it; in the team builder (`pinnable`)
+// it also pins it beside the team's insights (`pinned`, `pin`), to edit it there as they follow. In the damage
 // calculator its moves are left out (`noMoves`): its rows of damage are its moves, each picked from there; and it's
-// flat (`flat`): no card of its own, the side's panel being its box, and no clearing, the side's menu clearing it; at
+// flat (`flat`): no card of its own, the side's panel being its box, and no menu, the side's own doing that; at
 // every set (`atSets`), its compact row showing its sets' pooled points (`pooled`), dimmed, and its nature crossed out,
 // as it isn't what it battles with.
 const props = defineProps<{
@@ -72,8 +78,6 @@ const measure = () => {
 }
 useResizeObserver([facts, natureBtn], measure)
 
-// The pin's tooltip only where there's hover: tapped, it'd stay behind as the slot's pinned or unpinned.
-const canHover = window.matchMedia('(hover: hover)').matches
 const mega = computed(() => stoneMega(props.member))
 /** The Pokémon the card shows: its Mega while it's the one that Mega Evolves, else itself. */
 const shown = computed(() => (props.evolved && mega.value) || props.member.pokemon)
@@ -82,6 +86,20 @@ const megaAbility = computed(() => (props.evolved && mega.value ? (POKEMON[mega.
 /** Opens a part's picker: the Pokémon's, until there's one. */
 const go = (f: Field) => emit('field', shown.value ? f : 'pokemon')
 const left = computed(() => pointsLeft(props.member))
+
+// Its menu's ways to the damage calculator, as yours at its set (Mega Evolving as it does here), and to the speed tiers,
+// as yours at its Speed build (its nature's effect, its points, its Speed item).
+const calcLink = computed(() => ({
+  name: 'calc',
+  query: { a: encodeFighter({ ...emptyFighter(props.member), mega: !!props.evolved && !!mega.value }) },
+}))
+const tiersLink = computed(() => ({
+  name: 'speedTiers',
+  query: {
+    mine: shown.value ?? undefined,
+    ...buildQuery(speedBuildOf({ ...props.member, as: shown.value }, false), 'my'),
+  },
+}))
 
 /** Each stat's points as the compact row shows them: at every set, the pooled ones, rounded. */
 const cells = computed(() =>
@@ -155,28 +173,30 @@ const chipText = computed(() =>
           </button>
         </span>
       </span>
-      <button
-        v-if="shown && pinnable"
-        v-tip="canHover ? t(pinned ? 'builder.unpin' : 'builder.pin') : undefined"
-        type="button"
-        class="clear pin"
-        :class="{ on: pinned }"
-        :aria-pressed="!!pinned"
-        :aria-label="t(pinned ? 'builder.unpin' : 'builder.pin')"
-        @click="emit('pin')"
-      >
-        <component :is="pinned ? PinOff : Pin" :size="14" aria-hidden="true" />
-      </button>
-      <button
+      <!-- What can be done with it, a menu at its top right: pin it, open it in the damage calculator or the speed
+           tiers, clear it. -->
+      <OptionsMenu
         v-if="shown && !flat"
-        v-tip="t('builder.clearSlot')"
-        type="button"
-        class="clear"
-        :aria-label="t('builder.clearSlot')"
-        @click="emit('clear')"
+        v-slot="{ close }"
+        class="slot-menu"
+        :title="t('builder.slotMenu')"
+        :icon="EllipsisVertical"
       >
-        <X :size="14" aria-hidden="true" />
-      </button>
+        <button v-if="pinnable" type="button" class="menu-item" @click="(close(), emit('pin'))">
+          <component :is="pinned ? PinOff : Pin" :size="14" aria-hidden="true" />{{
+            t(pinned ? 'builder.unpin' : 'builder.pinShort')
+          }}
+        </button>
+        <RouterLink :to="calcLink" class="menu-item" @click="close()"
+          ><Calculator :size="14" aria-hidden="true" />{{ t('builder.openCalc') }}</RouterLink
+        >
+        <RouterLink :to="tiersLink" class="menu-item" @click="close()"
+          ><ChartNoAxesColumn :size="14" aria-hidden="true" />{{ t('builder.openSpeedTiers') }}</RouterLink
+        >
+        <button type="button" class="menu-item danger" @click="(close(), emit('clear'))">
+          <X :size="14" aria-hidden="true" />{{ t('builder.clearSlot') }}
+        </button>
+      </OptionsMenu>
     </div>
     <div ref="facts" class="set-facts">
       <button
@@ -412,26 +432,31 @@ const chipText = computed(() =>
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.clear {
+/* Its menu, at the head's top right. */
+.slot-menu {
   align-self: flex-start;
   margin-top: 4px;
-  padding: 2px;
-  color: var(--muted);
+  margin-left: auto;
+}
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+  font: inherit;
+  color: var(--text);
+  white-space: nowrap;
+  text-align: left;
   background: none;
   border: 0;
   cursor: pointer;
 }
-/* The pin, beside the clearing; in the accent while pinned. */
-.pin + .clear {
-  margin-left: -6px;
-}
-.pin.on,
-.pin:hover,
-.clear:hover {
-  color: var(--text);
-}
-.pin.on {
+.menu-item:hover {
   color: var(--accent);
+  text-decoration: none;
+}
+.menu-item.danger:hover {
+  color: var(--bad);
 }
 .set-facts {
   display: flex;
