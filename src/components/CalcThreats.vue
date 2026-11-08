@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onUnmounted, shallowRef, useTemplateRef, watch } from 'vue'
+import { ArrowRight } from '@lucide/vue'
 import { useIntersectionObserver, watchDebounced } from '@vueuse/core'
 import { ability as abilityRef, condition, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { percent, type MetaData } from '@/data/meta'
@@ -13,6 +14,7 @@ import { setsAs } from '@/lib/team'
 import { runThreats, threatMoves, threatSteps, type Threat } from '@/lib/threats'
 import { useOpenState } from '@/composables/useOpenState'
 import MoreToggle from '@/components/MoreToggle.vue'
+import PokemonIcon from '@/components/PokemonIcon'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 import TypeIcon from '@/components/TypeIcon'
 
@@ -172,10 +174,10 @@ const counted = computed(() => {
     .filter(([, o]) => o && (o.crit || o.doubled || o.single || o.hits || o.stockpile))
     .map(([mv]) => moveName(mv as MoveId))
   return [
-    { who: theirId.value ? name(theirId.value) : '', list: side(props.theirs, true) },
-    { who: yourId.value ? name(yourId.value) : '', list: side(props.yours, false) },
-    { who: t('calc.section.field'), list: field },
-    { who: t('calc.threats.moveOpts'), list: moves },
+    { who: theirId.value ? name(theirId.value) : '', tone: 'opponent', list: side(props.theirs, true) },
+    { who: yourId.value ? name(yourId.value) : '', tone: 'yours', list: side(props.yours, false) },
+    { who: t('calc.section.field'), tone: '', list: field },
+    { who: t('calc.threats.moveOpts'), tone: 'opponent', list: moves },
   ].filter((g) => g.list.length)
 })
 
@@ -193,6 +195,18 @@ const all = shallowRef(false)
     <summary>{{ t('calc.threats.title') }}</summary>
     <template v-if="open">
       <div class="threats-head">
+        <!-- Who attacks whom: the opponent's moves, against yours, each tagged with its side, in its side's color. -->
+        <p v-if="theirId && yourId" class="matchup">
+          <span class="who opponent"
+            ><span class="role">{{ t('compare.opponent') }}</span
+            ><PokemonIcon :id="theirId" /><span class="who-name">{{ name(theirId) }}</span></span
+          >
+          <span class="attacks"><ArrowRight :size="16" aria-hidden="true" />{{ t('calc.threats.attacks') }}</span>
+          <span class="who yours"
+            ><span class="role">{{ t('speed.yours') }}</span
+            ><PokemonIcon :id="yourId" /><span class="who-name">{{ name(yourId) }}</span></span
+          >
+        </p>
         <!-- Working it out, past a moment: how far it's got, a line over the row's top, moving nothing. -->
         <div
           v-if="slow && progress !== null"
@@ -224,8 +238,8 @@ const all = shallowRef(false)
           {{ shownSheet ? t('calc.threats.atSheet') : t('calc.threats.atSets') }}
         </p>
         <ul v-if="counted.length" class="counted">
-          <li v-for="g in counted" :key="g.who">
-            <span class="muted">{{ g.who }}</span>
+          <li v-for="g in counted" :key="g.who" :class="g.tone">
+            <span class="counted-who">{{ g.who }}</span>
             <span v-for="x in g.list" :key="x" class="chip">{{ x }}</span>
           </li>
         </ul>
@@ -317,6 +331,56 @@ const all = shallowRef(false)
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
+}
+.counted-who {
+  color: var(--muted);
+}
+/* A side's name in its side's color: the opponent's red, yours the accent, as the calc's bands. */
+.counted .opponent .counted-who {
+  color: var(--opponent);
+  font-weight: bold;
+}
+.counted .yours .counted-who {
+  color: var(--accent);
+  font-weight: bold;
+}
+.matchup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 0;
+}
+.who {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px 2px 2px;
+  font-weight: bold;
+  border: 1px solid var(--side);
+  border-left-width: 4px;
+}
+.who.opponent {
+  --side: var(--opponent);
+}
+.who.yours {
+  --side: var(--accent);
+}
+.role {
+  padding: 1px 6px;
+  font-size: 0.75em;
+  color: var(--opponent-text);
+  background: var(--side);
+}
+.who.yours .role {
+  color: var(--accent-text);
+}
+.attacks {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85em;
+  color: var(--muted);
 }
 .chip {
   padding: 0 6px;
@@ -413,6 +477,18 @@ tr.two {
 @media (max-width: 720px) {
   .controls {
     margin-left: 0;
+  }
+  /* Narrow, the two one under the other, the arrow pointing down from the opponent to yours. */
+  .matchup {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .attacks {
+    padding-left: 10px;
+  }
+  .attacks .lucide {
+    transform: rotate(90deg);
   }
   /* Narrow, the table scrolling sideways, each move kept in view at its left. */
   .grid .move,

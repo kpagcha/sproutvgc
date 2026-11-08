@@ -348,6 +348,7 @@ export const messages = {
   'calc.threats.runTip': 'How often its sets run it. Under 1%: rarer than the data counts, or never run.',
   'calc.threats.none': 'Nothing it learns can OHKO yours.',
   'calc.threats.noneSheet': 'None of its moves can OHKO yours.',
+  'calc.threats.attacks': 'attacks',
   'calc.threats.move': 'Move',
   'calc.threats.damage': 'Damage',
   'calc.threats.run': 'Run',
