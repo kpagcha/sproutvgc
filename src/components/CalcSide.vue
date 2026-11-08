@@ -70,6 +70,8 @@ const emit = defineEmits<{
   battlefield: [f: Battlefield]
   movesFolded: [folded: boolean]
   battleFolded: [folded: boolean]
+  /** Its moves' options as set on their rows, for what else counts them (the threats). */
+  opts: [opts: Partial<Record<MoveId, HitOptions>>]
 }>()
 defineSlots<{ actions(): unknown }>()
 
@@ -94,6 +96,7 @@ defineExpose({ card })
 const opts = shallowRef<Partial<Record<MoveId, HitOptions>>>({})
 const setOpt = (mv: MoveId, patch: HitOptions) =>
   (opts.value = { ...opts.value, [mv]: { ...opts.value[mv], ...patch } })
+watch(opts, (o) => emit('opts', o))
 const unfolded = shallowRef<Partial<Record<MoveId, boolean>>>({})
 watch(
   () => props.fighter.member.pokemon,

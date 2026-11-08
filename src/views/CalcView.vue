@@ -37,6 +37,7 @@ import {
   SETS_FIELD,
   type Battlefield,
   type Fighter,
+  type HitOptions,
 } from '@/lib/damage'
 import { membersPaste, parsePaste } from '@/lib/pokepaste'
 import { copy } from '@/lib/clipboard'
@@ -113,6 +114,8 @@ const { height: navH } = useElementSize(() => nav.value?.$el as HTMLElement | un
 
 type SideKey = 'a' | 'b'
 const sides = shallowRef<Record<SideKey, Fighter>>({ a: emptyFighter(), b: emptyFighter() })
+/** Each side's moves' options as set on their rows (a critical hit, its hits…), for the threats to count. */
+const moveOpts = shallowRef<Partial<Record<SideKey, Partial<Record<MoveId, HitOptions>>>>>({})
 const field = shallowRef<Battlefield>(emptyField())
 
 // Its setup: the URL's, else as last left; with neither, empty.
@@ -597,6 +600,7 @@ function face(f: Fighter) {
             @side-open="sideOpen = $event"
             @battlefield="field = $event"
             @moves-folded="movesFolded[k].value = $event"
+            @opts="moveOpts = { ...moveOpts, [k]: $event }"
           >
             <template #actions>
               <button
@@ -639,6 +643,7 @@ function face(f: Fighter) {
       :theirs="fought.b"
       :field
       :data
+      :move-opts="moveOpts.b"
     />
 
     <CalcMeta v-if="battlerOf(sides.a)" id="calc-meta" :yours="fought.a" :field :data @pick="face" />
