@@ -247,6 +247,26 @@ function use(r: ReverseRow) {
 </template>
 
 <style scoped>
+/* Its buttons soft, as many as there are: a thin outline, no hard shadow nor lift; one on filled, outlined in ink. */
+:root:root .reverse .btn {
+  border-width: 1px;
+  border-color: var(--border);
+  box-shadow: none;
+  font-weight: normal;
+}
+:root:root .reverse .btn:hover:not(:disabled) {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--ink);
+}
+:root:root .reverse .btn:active:not(:disabled) {
+  transform: none;
+  background: color-mix(in srgb, var(--text) 10%, var(--panel));
+}
+:root:root .reverse .btn.on {
+  border-color: var(--ink);
+  font-weight: bold;
+}
 .reverse {
   margin: 0;
 }

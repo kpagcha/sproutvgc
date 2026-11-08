@@ -211,6 +211,32 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
 </template>
 
 <style scoped>
+/* Its buttons soft, as many as there are: a thin outline, no hard shadow nor lift; one on filled, outlined in ink. */
+:root:root .hits .btn {
+  border-width: 1px;
+  border-color: var(--border);
+  box-shadow: none;
+  font-weight: normal;
+}
+:root:root .hits .btn:hover:not(:disabled) {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--ink);
+}
+:root:root .hits .btn:active:not(:disabled) {
+  transform: none;
+  background: color-mix(in srgb, var(--text) 10%, var(--panel));
+}
+:root:root .hits .btn.on {
+  border-color: var(--ink);
+  font-weight: bold;
+}
+:root:root .hits .add.yours {
+  border-left: 3px solid var(--accent);
+}
+:root:root .hits .add.opponent {
+  border-left: 3px solid var(--opponent);
+}
 .hits {
   margin: 0;
 }
@@ -316,12 +342,6 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
 }
 .add > span {
   margin-left: 4px;
-}
-.add.yours {
-  border-left: 4px solid var(--accent);
-}
-.add.opponent {
-  border-left: 4px solid var(--opponent);
 }
 .first {
   font-size: 0.875em;
