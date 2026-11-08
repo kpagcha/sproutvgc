@@ -45,7 +45,7 @@ export interface PointsRange {
  * Everything the two could be, with `first` the side that moved first: each one's Speed at every number of points, the
  * grid of how each pair fits (`grid[a][b]`), the points each could have, and, weighed by the meta's sets (each side
  * with none at its nature counting every number of points alike, `known` saying which have them): how likely what was
- * seen was beforehand (`chance`), each side's points as likely now (`likely`, the most first), and the pairs most likely.
+ * seen was beforehand (`chance`), each side's points as likely now (`likely`, the most first), and each one's common builds.
  */
 export function reverse(a: ReverseSide, b: ReverseSide, first: 'a' | 'b', trickRoom: boolean) {
   const speedsA = POINTS.map((p) => buildSpeed(a.id, { ...a.build, points: p }))
@@ -65,11 +65,6 @@ export function reverse(a: ReverseSide, b: ReverseSide, first: 'a' | 'b', trickR
   }
   const rangeA = range((pa) => grid[pa]!.some((f) => f !== 'no'), speedsA)
   const rangeB = range((pb) => grid.some((row) => row[pb] !== 'no'), speedsB)
-  /** The other side's points that fit with one side's at `points`: `a`'s given `b`'s, or `b`'s given `a`'s. */
-  const given = (side: 'a' | 'b', points: number) =>
-    side === 'a'
-      ? range((pb) => grid[points]![pb] !== 'no', speedsB)
-      : range((pa) => grid[pa]![points] !== 'no', speedsA)
 
   const priorA = priorOf(a)
   const priorB = priorOf(b)
@@ -78,14 +73,13 @@ export function reverse(a: ReverseSide, b: ReverseSide, first: 'a' | 'b', trickR
   const wB = priorB ?? flat
   const LIKELIHOOD: Record<Fit, number> = { fits: 1, tie: 0.5, no: 0 }
   let chance = 0
-  const pairs: { a: number; b: number; weight: number; fit: Fit }[] = []
+  const pairs: { a: number; b: number; weight: number }[] = []
   for (const pa of POINTS)
     for (const pb of POINTS) {
-      const fit = grid[pa]![pb]!
-      const weight = wA[pa]! * wB[pb]! * LIKELIHOOD[fit]
+      const weight = wA[pa]! * wB[pb]! * LIKELIHOOD[grid[pa]![pb]!]
       if (!weight) continue
       chance += weight
-      pairs.push({ a: pa, b: pb, weight, fit })
+      pairs.push({ a: pa, b: pb, weight })
     }
   const likelyOf = (pick: (p: (typeof pairs)[number]) => number, speeds: number[]) => {
     const by = new Map<number, number>()
@@ -94,26 +88,46 @@ export function reverse(a: ReverseSide, b: ReverseSide, first: 'a' | 'b', trickR
       .map(([points, share]) => ({ points, speed: speeds[points]!, share }))
       .sort((x, y) => y.share - x.share)
   }
+  const likelyA = chance ? likelyOf((p) => p.a, speedsA) : []
+  const likelyB = chance ? likelyOf((p) => p.b, speedsB) : []
   return {
     speedsA,
     speedsB,
     grid,
     rangeA,
     rangeB,
-    given,
     /** Which sides have sets at their nature to weigh their points by. */
     known: { a: !!priorA, b: !!priorB },
-    /** How the meta weighs each pair beforehand, what was seen aside: for the grid's marks. */
-    prior: priorA || priorB ? POINTS.map((pa) => POINTS.map((pb) => wA[pa]! * wB[pb]!)) : null,
+    /** Each side's builds to set against the other's, in the table. */
+    commonA: commonOf(priorA, speedsA, likelyA),
+    commonB: commonOf(priorB, speedsB, likelyB),
     chance,
-    likelyA: chance ? likelyOf((p) => p.a, speedsA) : [],
-    likelyB: chance ? likelyOf((p) => p.b, speedsB) : [],
-    top: chance
-      ? pairs
-          .sort((x, y) => y.weight - x.weight)
-          .slice(0, 5)
-          .map((p) => ({ ...p, share: p.weight / chance, speeds: [speedsA[p.a]!, speedsB[p.b]!] as const }))
-      : [],
+    likelyA,
+    likelyB,
   }
 }
-export type Reverse = ReturnType<typeof reverse>
+
+/** The least share of a side's sets at its nature a build needs to be in the table, and the most it takes of them. */
+const TABLE_MIN = 0.03
+const TABLE_MAX = 4
+/** The least share of what fits a build needs to join them, and the most that join. */
+const LIKELY_MIN = 0.1
+const LIKELY_MAX = 2
+/**
+ * A side's builds for the table, the most points first: those most run at its nature (on `TABLE_MIN` of those sets or
+ * more, up to `TABLE_MAX`), joined by those most likely once what was seen is counted (its most run may be ruled out);
+ * with no sets there, none and all of its points.
+ */
+function commonOf(prior: number[] | null, speeds: number[], likely: readonly { points: number; share: number }[]) {
+  const list = prior
+    ? POINTS.filter((p) => prior[p]! >= TABLE_MIN)
+        .sort((x, y) => prior[y]! - prior[x]!)
+        .slice(0, TABLE_MAX)
+    : [0, MAX_POINTS]
+  if (prior)
+    for (const l of likely.filter((x) => x.share >= LIKELY_MIN).slice(0, LIKELY_MAX))
+      if (!list.includes(l.points)) list.push(l.points)
+  return list
+    .sort((x, y) => y - x)
+    .map((points) => ({ points, speed: speeds[points]!, share: prior ? prior[points]! : null }))
+}
