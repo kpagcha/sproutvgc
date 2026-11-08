@@ -89,7 +89,7 @@ const buildLabel = (b: { points: number; speed: number }) => t('reverse.build', 
             </li>
           </ul>
           <p v-if="result.known.a || result.known.b" class="muted small">
-            {{ t('reverse.chance', { pct: percent(result.chance) }) }}
+            {{ result.chance ? t('reverse.chance', { pct: percent(result.chance) }) : t('reverse.noneRun') }}
           </p>
         </template>
 
@@ -104,9 +104,7 @@ const buildLabel = (b: { points: number; speed: number }) => t('reverse.build', 
                 </th>
                 <th v-for="cb in result.commonB" :key="cb.points" scope="col" class="opponent">
                   <span class="b-build">{{ buildLabel(cb) }}</span>
-                  <span v-if="cb.share !== null" v-tip="t('reverse.shareTip')" class="muted share">{{
-                    percent(cb.share)
-                  }}</span>
+                  <span v-if="cb.share" v-tip="t('reverse.shareTip')" class="muted share">{{ percent(cb.share) }}</span>
                 </th>
               </tr>
             </thead>
@@ -114,9 +112,7 @@ const buildLabel = (b: { points: number; speed: number }) => t('reverse.build', 
               <tr v-for="ca in result.commonA" :key="ca.points">
                 <th scope="row" class="yours">
                   <span class="b-build">{{ buildLabel(ca) }}</span>
-                  <span v-if="ca.share !== null" v-tip="t('reverse.shareTip')" class="muted share">{{
-                    percent(ca.share)
-                  }}</span>
+                  <span v-if="ca.share" v-tip="t('reverse.shareTip')" class="muted share">{{ percent(ca.share) }}</span>
                 </th>
                 <td
                   v-for="cb in result.commonB"

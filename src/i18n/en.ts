@@ -1649,6 +1649,7 @@ export const messages = {
   'reverse.between': '{from}–{to} pts (Speed {speed})',
   'reverse.noSets': 'No sets at this nature',
   'reverse.chance': 'Expected {pct} of the time at these natures.',
+  'reverse.noneRun': 'None of their sets at these natures do this: an unusual spread.',
   'reverse.impossible': "Can't happen at these natures and modifiers.",
   'reverse.build': '{n} pts · {speed}',
   'reverse.shareTip': 'Of its sets at this nature',

@@ -90,6 +90,19 @@ export function reverse(a: ReverseSide, b: ReverseSide, first: 'a' | 'b', trickR
   }
   const likelyA = chance ? likelyOf((p) => p.a, speedsA) : []
   const likelyB = chance ? likelyOf((p) => p.b, speedsB) : []
+  const commonA = commonOf(priorA, speedsA, likelyA)
+  const commonB = commonOf(priorB, speedsB, likelyB)
+  // None of the table's pairs fitting while some pair does (no set runs it), the nearest that does joins it: the first
+  // side's most run build brought into what it could have, and the other's nearest its own that fits with it.
+  if (rangeA && !commonA.some((ca) => commonB.some((cb) => grid[ca.points]![cb.points] !== 'no'))) {
+    const clamp = (p: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, p))
+    const pa = clamp(commonA.reduce(byShare).points, rangeA.from, rangeA.to)
+    const fitB = POINTS.filter((pb) => grid[pa]![pb] !== 'no')
+    const topB = commonB.reduce(byShare).points
+    const pb = fitB.reduce((x, y) => (Math.abs(y - topB) < Math.abs(x - topB) ? y : x))
+    addTo(commonA, pa, speedsA, priorA)
+    addTo(commonB, pb, speedsB, priorB)
+  }
   return {
     speedsA,
     speedsB,
@@ -99,12 +112,21 @@ export function reverse(a: ReverseSide, b: ReverseSide, first: 'a' | 'b', trickR
     /** Which sides have sets at their nature to weigh their points by. */
     known: { a: !!priorA, b: !!priorB },
     /** Each side's builds to set against the other's, in the table. */
-    commonA: commonOf(priorA, speedsA, likelyA),
-    commonB: commonOf(priorB, speedsB, likelyB),
+    commonA,
+    commonB,
     chance,
     likelyA,
     likelyB,
   }
+}
+
+type TableBuild = { points: number; speed: number; share: number | null }
+const byShare = (x: TableBuild, y: TableBuild) => ((y.share ?? 0) > (x.share ?? 0) ? y : x)
+/** A build put in a side's table, where it isn't already, the most points first. */
+function addTo(list: TableBuild[], points: number, speeds: number[], prior: number[] | null) {
+  if (list.some((b) => b.points === points)) return
+  list.push({ points, speed: speeds[points]!, share: prior ? prior[points]! : null })
+  list.sort((x, y) => y.points - x.points)
 }
 
 /** The least share of a side's sets at its nature a build needs to be in the table, and the most it takes of them. */
@@ -118,7 +140,11 @@ const LIKELY_MAX = 2
  * more, up to `TABLE_MAX`), joined by those most likely once what was seen is counted (its most run may be ruled out);
  * with no sets there, none and all of its points.
  */
-function commonOf(prior: number[] | null, speeds: number[], likely: readonly { points: number; share: number }[]) {
+function commonOf(
+  prior: number[] | null,
+  speeds: number[],
+  likely: readonly { points: number; share: number }[],
+): TableBuild[] {
   const list = prior
     ? POINTS.filter((p) => prior[p]! >= TABLE_MIN)
         .sort((x, y) => prior[y]! - prior[x]!)
