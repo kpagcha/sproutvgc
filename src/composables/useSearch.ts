@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 import { locale, t, typeName, type MessageKey } from '@/i18n'
-import { available, availableIds, type PokemonId, type Ref } from '@/data/dex'
+import { available, availableIds, type ItemId, type PokemonId, type Ref } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
 import { TYPES, type TypeId } from '@/data/types'
 import { loadDescriptions } from '@/i18n/descriptions'
@@ -11,6 +11,7 @@ import { useFavorites } from '@/composables/useFavorites'
 import { AREAS } from '@/lib/areas'
 import type { MetaData } from '@/data/meta'
 import { ranksOf, usersOf, type UsageField } from '@/lib/entryUsage'
+import type { RecentIcon, RecentResult } from '@/composables/useRecentSearches'
 
 export type SectionKind = 'pokemon' | 'move' | 'ability' | 'item' | 'condition'
 
@@ -96,6 +97,38 @@ export interface SearchResults {
   types: { id: TypeId; parts: Marks }[]
   sections: ((typeof SECTIONS)[number] & { hits: Hit[]; more: number })[]
 }
+
+/** A result as the recent searches keep it once opened (`useRecentSearches`), where it leads not yet a path. */
+export type Found = Omit<RecentResult, 'to'> & { to: RouteLocationRaw }
+const iconOf = (kind: string, id: string): RecentIcon | undefined =>
+  kind === 'pokemon'
+    ? { kind: 'pokemon', id: id as PokemonId }
+    : kind === 'item'
+      ? { kind: 'item', id: id as ItemId }
+      : undefined
+export const foundPage = (p: PageHit): Found => ({
+  to: p.to,
+  name: p.name,
+  sub: p.area ? t(p.area) : t('search.pages'),
+})
+export const foundMeta = (s: { kind: MetaKind; title: MessageKey }, h: Hit): Found => ({
+  to: h.to,
+  name: h.name,
+  sub: `${t('search.meta')} › ${t(s.title)}`,
+  icon: iconOf(s.kind, h.id),
+})
+export const foundDex = (s: { kind: SectionKind; title: MessageKey }, h: Hit): Found => ({
+  to: h.to,
+  name: h.name,
+  sub: t(s.title),
+  icon: iconOf(s.kind, h.id),
+})
+export const foundType = (id: TypeId): Found => ({
+  to: `/dex/types/${id}`,
+  name: typeName(id),
+  sub: t('title.types'),
+  icon: { kind: 'type', id },
+})
 
 /** Loads what searching needs, in the background: every category's names and descriptions. */
 export function preloadSearch() {
@@ -188,7 +221,7 @@ export function useSearch(
 
   /** The only result, if the search has exactly one: Enter opens it. An entry found as both its meta page and its
    * dex entry is one result, its meta page. */
-  const only = computed((): RouteLocationRaw | null => {
+  const only = computed((): Found | null => {
     const r = results.value
     if (!r) return null
     const hits = r.sections.flatMap((s) => s.hits)
@@ -198,12 +231,16 @@ export function useSearch(
       const m = found.hits[0]!
       const dex = r.sections.find((s) => s.kind === found.kind)
       const same = hits.length === 1 && dex?.hits[0]?.id === m.id && !dex.more
-      return hits.length && !same ? null : m.to
+      return hits.length && !same ? null : foundMeta(found, m)
     }
-    if (r.pages.length === 1 && !r.types.length && !hits.length) return r.pages[0]!.to
+    if (r.pages.length === 1 && !r.types.length && !hits.length) return foundPage(r.pages[0]!)
     if (r.pages.length) return null
-    if (r.types.length === 1 && !hits.length) return `/dex/types/${r.types[0]!.id}`
-    if (hits.length === 1 && !r.types.length && !r.sections[0]!.more) return hits[0]!.to
+    if (r.types.length === 1 && !hits.length) return foundType(r.types[0]!.id)
+    if (hits.length === 1 && !r.types.length && !r.sections[0]!.more)
+      return foundDex(
+        r.sections.find((s) => s.hits.length)!,
+        hits[0]!,
+      )
     return null
   })
 

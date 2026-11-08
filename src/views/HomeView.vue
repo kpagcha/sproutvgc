@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
-import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { AREA_ICONS, SECTION_ICONS } from '@/components/areaIcons'
 import { t, type MessageKey } from '@/i18n'
 import { GAME_NAME, REGULATION } from '@/data/format'
@@ -16,7 +16,7 @@ import { RECENT_ON } from '@/composables/useRecent'
 import SearchResults from '@/components/SearchResults.vue'
 import SearchBox from '@/components/SearchBox.vue'
 import RecentSearches from '@/components/RecentSearches.vue'
-import { useRecentSearches } from '@/composables/useRecentSearches'
+import { useRecentSearches, useRememberFound, type RecentResult } from '@/composables/useRecentSearches'
 import logoUrl from '@/assets/logo.png'
 
 // The front door to the whole site: the search (of the site's pages, the meta pages and the dex), the tournaments under
@@ -77,13 +77,15 @@ useSlashFocus(() => box.value?.focus({ preventScroll: true }))
 const { data: meta, snapshot } = useMeta()
 const { results, only } = useSearch(() => query.value, undefined, { pages: true, meta: () => meta.value })
 function openOnly() {
-  record(query.value)
-  if (only.value) void router.push(only.value)
+  if (!only.value) return
+  rememberFound(only.value)
+  void router.push(only.value.to)
 }
 
-// The last searches, under the box while it's focused and empty (`RecentSearches`), picked with the arrow keys too; a
-// search counts once followed, by Enter or a result opened from it.
+// The results opened from it lately, under the box while it's focused and empty (`RecentSearches`), picked with the
+// arrow keys too; a result counts once opened, from the results or by Enter.
 const { searches, record } = useRecentSearches()
+const rememberFound = useRememberFound()
 const focused = shallowRef(false)
 const dismissed = shallowRef(false)
 const active = shallowRef(-1)
@@ -93,9 +95,10 @@ function onFocus() {
   focused.value = true
   dismissed.value = false
 }
-function pickRecent(q: string) {
-  query.value = q
-  active.value = -1
+/** One opened again: to the front of the list. */
+function openRecent(r: RecentResult) {
+  record(r)
+  void router.push(r.to)
 }
 function onKeydown(e: KeyboardEvent) {
   if (!showRecent.value) {
@@ -108,12 +111,11 @@ function onKeydown(e: KeyboardEvent) {
     active.value = e.key === 'ArrowDown' ? (active.value + 1) % n : (active.value - 1 + n) % n
   } else if (e.key === 'Enter' && active.value >= 0) {
     e.preventDefault()
-    pickRecent(searches.value[active.value]!)
+    openRecent(searches.value[active.value]!)
   } else if (e.key === 'Escape') {
     dismissed.value = true
   }
 }
-onBeforeRouteLeave(() => record(query.value))
 
 // The regulation's hyphens don't break ("M-C" stays on one line): U+2011, the non-breaking hyphen.
 const unbroken = (reg: string) => reg.replace(/-/g, String.fromCharCode(0x2011))
@@ -146,10 +148,10 @@ const shownReg = computed(() => ({ reg: unbroken(snapshot.value?.regulation ?? R
           @blur="focused = false"
           @keydown="onKeydown"
         />
-        <RecentSearches v-if="showRecent" :active @pick="pickRecent" />
+        <RecentSearches v-if="showRecent" :active @open="record" />
       </div>
     </div>
-    <SearchResults v-if="results" :query :results />
+    <SearchResults v-if="results" :query :results remember />
     <template v-else>
       <LiveTournaments />
       <!-- Under them, the site's areas (where to go), then the meta at a glance (what it's about). -->

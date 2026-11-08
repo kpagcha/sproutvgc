@@ -24,7 +24,7 @@ const query = computed({
 })
 const { results, only } = useSearch(() => (searchable.value ? query.value : ''), undefined, { pages: true })
 function openOnly() {
-  if (only.value) void router.push(only.value)
+  if (only.value) void router.push(only.value.to)
 }
 onMounted(() => searchable.value && preloadSearch())
 </script>

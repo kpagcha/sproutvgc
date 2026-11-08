@@ -4,7 +4,16 @@ import { Star } from '@lucide/vue'
 import { t } from '@/i18n'
 import type { ItemId, PokemonId } from '@/data/dex'
 import { description, isDescribed } from '@/i18n/descriptions'
-import type { SearchResults, SectionKind } from '@/composables/useSearch'
+import {
+  foundDex,
+  foundMeta,
+  foundPage,
+  foundType,
+  type Found,
+  type SearchResults,
+  type SectionKind,
+} from '@/composables/useSearch'
+import { useRememberFound } from '@/composables/useRecentSearches'
 import TypeIcon from '@/components/TypeIcon'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -12,7 +21,10 @@ import DexText from '@/components/DexText'
 
 // The dex searched, grouped by category (`useSearch`), after the site's pages and the meta pages (on the home page), the
 // reader's favorites first and starred: the home page's results, and an area's.
-defineProps<{ query: string; results: SearchResults }>()
+// `remember`: each result opened is kept among the recent searches (the home page's, the site's search).
+const props = defineProps<{ query: string; results: SearchResults; remember?: boolean }>()
+const rememberFound = useRememberFound()
+const opened = (f: Found) => props.remember && rememberFound(f)
 
 const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (description(kind, id)?.short ?? '') : '')
 </script>
@@ -23,7 +35,7 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
     <span class="section-title font-display">{{ t('search.pages') }}</span>
     <ul class="chip-hits">
       <li v-for="p in results.pages" :key="p.key">
-        <RouterLink :to="p.to" class="chip-hit">
+        <RouterLink :to="p.to" class="chip-hit" @click="opened(foundPage(p))">
           <span v-if="p.area" class="muted">{{ t(p.area) }} ›</span>
           <span><Marked :p="p.parts" /></span>
           <span v-if="p.soon" class="soon">{{ t('soon.tag') }}</span>
@@ -41,7 +53,7 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
     </RouterLink>
     <ul class="chip-hits">
       <li v-for="h in s.hits" :key="h.id">
-        <RouterLink :to="h.to" class="chip-hit">
+        <RouterLink :to="h.to" class="chip-hit" @click="opened(foundMeta(s, h))">
           <PokemonIcon v-if="s.kind === 'pokemon'" :id="h.id as PokemonId" />
           <ItemIcon v-else-if="s.kind === 'item'" :id="h.id as ItemId" />
           <span><Marked :p="h.parts" /></span
@@ -60,7 +72,7 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
     </RouterLink>
     <ul v-if="s.kind === 'pokemon'" class="chip-hits">
       <li v-for="h in s.hits" :key="h.id">
-        <RouterLink :to="h.to" class="chip-hit">
+        <RouterLink :to="h.to" class="chip-hit" @click="opened(foundDex(s, h))">
           <PokemonIcon :id="h.id as PokemonId" />
           <span><Marked :p="h.parts" /></span
           ><Star v-if="h.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" />
@@ -70,7 +82,7 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
     <dl v-else class="entries">
       <template v-for="h in s.hits" :key="h.id">
         <dt>
-          <RouterLink :to="h.to" class="entry-name">
+          <RouterLink :to="h.to" class="entry-name" @click="opened(foundDex(s, h))">
             <ItemIcon v-if="s.kind === 'item'" :id="h.id as ItemId" />
             <span><Marked :p="h.parts" /></span
             ><Star v-if="h.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" />
@@ -89,7 +101,7 @@ const short = (kind: SectionKind, id: string) => (isDescribed(kind) ? (descripti
     </RouterLink>
     <ul class="chip-hits">
       <li v-for="ty in results.types" :key="ty.id">
-        <RouterLink :to="`/dex/types/${ty.id}`" class="chip-hit">
+        <RouterLink :to="`/dex/types/${ty.id}`" class="chip-hit" @click="opened(foundType(ty.id))">
           <TypeIcon :type="ty.id" />
           <span><Marked :p="ty.parts" /></span>
         </RouterLink>
