@@ -231,6 +231,8 @@ export interface CalcQuery {
   sheet?: string
   /** Read backwards, from what was seen (`CalcReverse`): `reverse`. */
   mode?: string
+  /** Read backwards, which was seen moving first: `a` or `b`. */
+  first?: string
 }
 export function readLast(): CalcQuery {
   try {
@@ -247,7 +249,7 @@ export function saveLast(q: CalcQuery) {
     if (!(q.a || q.b || q.f)) return localStorage.removeItem(KEY)
     // The same setup written again (the page opened on it) isn't a change: its time stays.
     const now = readLast()
-    if (now.a === q.a && now.b === q.b && now.f === q.f && now.mode === q.mode) return
+    if (now.a === q.a && now.b === q.b && now.f === q.f && now.mode === q.mode && now.first === q.first) return
     localStorage.setItem(KEY, JSON.stringify({ at: Date.now(), q }))
   } catch {
     // Storage unavailable: the URL has it.

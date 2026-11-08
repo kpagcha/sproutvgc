@@ -337,7 +337,10 @@ export const messages = {
   'calc.reverse.outcome.lived': 'Survived',
   'calc.reverse.outcome.two': '2 hits',
   'calc.reverse.hint':
-    "On each move's row, enter what it did: the opponent's HP lost in percent, the HP yours lost, or whether it knocked out.",
+    "On each move's row, enter what it did: the opponent's HP lost in percent, the HP yours lost, or whether it knocked out. Or which moved first.",
+  'calc.reverse.first': 'Moved first',
+  'calc.reverse.firstTip':
+    'With moves of the same priority. Narrows its Speed in the same spread, within its 66 points; stages, Tailwind, paralysis and Trick Room as set count.',
   'calc.reverse.atSets': 'Every nature and its common items tried, weighed by its sets; its ability as set above.',
   'calc.reverse.working': 'Working out what fits…',
   'calc.reverse.impossible':

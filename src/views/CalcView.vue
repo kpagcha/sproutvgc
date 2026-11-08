@@ -127,6 +127,8 @@ const start = fromUrl ?? readLast()
 const sheet = shallowRef(start.sheet === '1')
 /** Read backwards (`?mode=reverse`): its moves' rows take what each was seen to do, and what fits is worked out. */
 const reverse = shallowRef(start.mode === 'reverse')
+/** Read backwards, which was seen moving first (`?first=a|b`). */
+const first = shallowRef<'a' | 'b' | null>(start.first === 'a' || start.first === 'b' ? start.first : null)
 sides.value = {
   a: decodeFighter(start.a) ?? emptyFighter(),
   b: decodeFighter(start.b) ?? emptyFighter(),
@@ -161,13 +163,14 @@ const query = computed(() => ({
   f: encodeField(field.value) || undefined,
   sheet: sheet.value ? '1' : undefined,
   mode: reverse.value ? 'reverse' : undefined,
+  first: first.value ?? undefined,
 }))
 watchDebounced(
   query,
   (q) => {
     saveLast(q)
     const next = { ...route.query, ...q }
-    for (const k of ['a', 'b', 'f', 'sheet', 'mode'] as const) if (!q[k]) delete next[k]
+    for (const k of ['a', 'b', 'f', 'sheet', 'mode', 'first'] as const) if (!q[k]) delete next[k]
     void router.replace({ query: next })
   },
   { debounce: 250, immediate: true },
@@ -192,6 +195,7 @@ watch(
     if (a === wasA && b === wasB) return
     const { a: fa, b: fb } = sides.value
     if (fa.saw || fb.saw) sides.value = { a: { ...fa, saw: undefined }, b: { ...fb, saw: undefined } }
+    first.value = null
   },
 )
 /** The sides as they battle: at every set, at their sets pooled in the meta shown. */
@@ -679,6 +683,7 @@ function face(f: Fighter) {
       :field
       :data
       v-model:sheet="sheet"
+      v-model:first="first"
     />
     <CalcVerdict v-else :a="fought.a" :b="fought.b" :field />
 
