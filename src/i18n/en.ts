@@ -1647,7 +1647,6 @@ export const messages = {
   'reverse.atMost': 'Up to {n} pts (Speed ≤ {speed})',
   'reverse.atLeast': '{n}+ pts (Speed ≥ {speed})',
   'reverse.between': '{from}–{to} pts (Speed {speed})',
-  'reverse.likely': 'Likely',
   'reverse.noSets': 'No sets at this nature',
   'reverse.chance': 'Expected {pct} of the time at these natures.',
   'reverse.impossible': "Can't happen at these natures and modifiers.",

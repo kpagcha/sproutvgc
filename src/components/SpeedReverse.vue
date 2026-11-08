@@ -11,9 +11,8 @@ import { reverse, type PointsRange } from '@/lib/speedReverse'
 import PokemonIcon from '@/components/PokemonIcon'
 
 // The comparison read backwards ("Who moved first"): the two picked with their natures and modifiers, and which of
-// them was seen moving first; what their Speed points could then be. Each one's points as a range with the spreads it
-// most likely was (weighed by the meta's sets at those natures), and a table of their common builds, one's against the
-// other's, each pair marked as fitting, a tie or ruled out.
+// them was seen moving first; what their Speed points could then be. Each one's points as a range, and a table of their
+// common builds, one's against the other's, each pair marked as fitting, a tie or ruled out.
 type Side = 'a' | 'b'
 const props = defineProps<{
   sides: readonly { s: Side; id: PokemonId | null; name: string | null; build: SpeedBuild; builds: SpeedBuildShare[] }[]
@@ -51,7 +50,6 @@ const lines = computed(() => {
     s,
     id: s === 'a' ? sideA.value.id! : sideB.value.id!,
     range: s === 'a' ? r.rangeA : r.rangeB,
-    likely: (s === 'a' ? r.likelyA : r.likelyB).filter((x) => x.share >= 0.01).slice(0, 3),
     known: r.known[s],
   }))
 })
@@ -82,18 +80,12 @@ const buildLabel = (b: { points: number; speed: number }) => t('reverse.build', 
       <template v-if="props.first && result">
         <p v-if="!result.rangeA" class="warn" role="status">{{ t('reverse.impossible') }}</p>
         <template v-else>
-          <!-- What each one's points can be, and the spreads most likely at its nature. -->
+          <!-- What each one's points can be. -->
           <ul class="lines" role="status">
             <li v-for="l in lines" :key="l.s" class="line" :class="l.s === 'a' ? 'yours' : 'opponent'">
               <span class="who"><PokemonIcon :id="l.id" />{{ nameOf(l.s) }}</span>
               <span class="range">{{ rangeText(l.range!) }}</span>
-              <span v-if="l.known && l.likely.length" class="likely">
-                <span class="muted small">{{ t('reverse.likely') }}</span>
-                <span v-for="x in l.likely" :key="x.points" class="pill"
-                  >{{ t('speed.points', { n: x.points }) }} <span class="muted">{{ percent(x.share) }}</span></span
-                >
-              </span>
-              <span v-else-if="!l.known" class="muted small">{{ t('reverse.noSets') }}</span>
+              <span v-if="!l.known" class="muted small">{{ t('reverse.noSets') }}</span>
             </li>
           </ul>
           <p v-if="result.known.a || result.known.b" class="muted small">
@@ -212,17 +204,6 @@ const buildLabel = (b: { points: number; speed: number }) => t('reverse.build', 
 }
 .range {
   font-weight: bold;
-}
-.likely {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px;
-}
-.pill {
-  padding: 1px 6px;
-  font-size: 0.875em;
-  border: 1px solid var(--border);
 }
 /* Scrolling sideways where it doesn't fit, rather than the page. */
 .table-wrap {
