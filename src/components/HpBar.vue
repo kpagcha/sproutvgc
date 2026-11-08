@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, shallowRef, useTemplateRef } from 'vue'
 import { t } from '@/i18n'
+import { hpShown } from '@/lib/damage'
 
 // A Pokémon's HP left, kept in percent (`hp`, not rounded: a whole number of its HP points out of `max`), as a slider
 // drawn as the damage calculator's bars of HP are (`DamageRow`): what's left in the HP colors (green over half, yellow
@@ -14,8 +15,8 @@ const hp = defineModel<number>({ required: true })
 
 /** Its HP points left, from 1 to `max`. */
 const points = computed(() => Math.max(1, Math.min(props.max, Math.round((props.max * hp.value) / 100))))
-/** Its percent as the bar says it: whole, not full until it is (99% for its last point short). */
-const shown = (p: number) => (p >= 100 ? 100 : Math.max(1, Math.min(99, Math.round(p))))
+/** Its percent as the bar says it: whole, not full until it is (`hpShown`). */
+const shown = hpShown
 const clampPoints = (n: number) => Math.max(1, Math.min(props.max, Math.round(n)))
 /** Its HP set to `n` points: in percent, exactly (full as 100). */
 const setPoints = (n: number) => {

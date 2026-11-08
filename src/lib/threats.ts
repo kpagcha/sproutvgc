@@ -221,7 +221,8 @@ export function* threatSteps(
   }
   // An Analytic user's moves hang on the order, so on its Speed.
   const analytic = abilities.some((a) => a.value === 'analytic')
-  for (const move of moves) {
+  /** One move's threat, or null when it does nothing. */
+  const one = (move: MoveId): Threat | null => {
     const used = statsUsed(move, analytic)
     // The spreads by what the move uses of them, their weights added.
     const spreadGroups = new Map<string, { si: number; w: number }>()
@@ -295,7 +296,18 @@ export function* threatSteps(
         count(hit(f, def, move, fl, optsOf(move)), g.w * s.w, f, fl)
       }
     }
-    yield minPct === Infinity ? null : { move, run: runs.has(move) ? runs.get(move)! : null, ohko, two, minPct, maxPct }
+    return minPct === Infinity
+      ? null
+      : { move, run: runs.has(move) ? runs.get(move)! : null, ohko, two, minPct, maxPct }
+  }
+  // A move the calc throws on is left out, the rest still worked out.
+  for (const move of moves) {
+    try {
+      yield one(move)
+    } catch (e) {
+      console.error(`Threats: ${move} left out`, e)
+      yield null
+    }
   }
 }
 

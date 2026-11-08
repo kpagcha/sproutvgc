@@ -184,6 +184,10 @@ function pokemonOf(f: Fighter): Pokemon | null {
   return mon
 }
 
+/** HP left as a whole percent, as the calc shows it: not full until it is (99% for its last point short), and at
+ * least 1%. */
+export const hpShown = (hp: number) => (hp >= 100 ? 100 : Math.max(1, Math.min(99, Math.round(hp))))
+
 /** The calc's Pokémon for a side, made once per side object: for what works out thousands of hits with the same few
  * sides (`lean`), never changing a side in place. The calc works on copies of it (`calculate` clones). */
 const MADE = new WeakMap<Fighter, Pokemon | null>()

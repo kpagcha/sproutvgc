@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { computed, onUnmounted, shallowRef, useTemplateRef, watch } from 'vue'
-import { ArrowRight } from '@lucide/vue'
 import { useIntersectionObserver, watchDebounced } from '@vueuse/core'
 import { ability as abilityRef, condition, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { percent, type MetaData } from '@/data/meta'
 import { MOVES } from '@/data/moves'
 import { loadLearnsets, movesOf } from '@/data/pokemon'
-import { t } from '@/i18n'
+import { t, tSlots } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import { abilityOf, BOOSTED, battlerOf, type Battlefield, type Fighter } from '@/lib/damage'
+import { abilityOf, BOOSTED, battlerOf, hpShown, type Battlefield, type Fighter } from '@/lib/damage'
 import { conditionName, fieldOf, sideOf, terrainOf, weatherOf } from '@/components/calcConditions'
 import { setsAs } from '@/lib/team'
 import { runThreats, threatMoves, threatSteps, type Threat } from '@/lib/threats'
@@ -129,6 +128,18 @@ const sorted = computed(() =>
 )
 const ohkoCount = computed(() => (rows.value ?? []).filter((r) => r.ohko > 0))
 const ohkoRun = computed(() => ohkoCount.value.filter((r) => r.run !== null))
+/** The verdict over the table, split around the two Pokémon (and its numbers), to draw their icons in it. */
+const summaryParts = computed(() =>
+  tSlots(
+    !ohkoCount.value.length
+      ? shownSheet.value
+        ? 'calc.threats.noneSheet'
+        : 'calc.threats.none'
+      : shownSheet.value
+        ? 'calc.threats.summarySheet'
+        : 'calc.threats.summary',
+  ),
+)
 /** Whether the data shown has its sets' moves: a move missing from them is run on under 1% of its sets. */
 const hasMoves = computed(() => {
   const id = theirId.value
@@ -150,7 +161,7 @@ const counted = computed(() => {
   const side = (f: Fighter, attacking: boolean) => {
     const list = stagesOf(f)
     if (f.status) list.push(refName(condition(f.status)))
-    if (f.hp < 100) list.push(t('calc.threats.hp', { n: Math.max(1, Math.min(99, Math.round(f.hp))) }))
+    if (f.hp < 100) list.push(t('calc.threats.hp', { n: hpShown(f.hp) }))
     if (attacking && f.fainted) list.push(t('calc.threats.fainted', { n: f.fainted }))
     if (attacking && f.attacked) list.push(t('calc.threats.attacked', { n: f.attacked }))
     const a = abilityOf(f)
@@ -196,18 +207,6 @@ const all = shallowRef(false)
     <summary>{{ t('calc.threats.title') }}</summary>
     <template v-if="open">
       <div class="threats-head">
-        <!-- Who attacks whom: the opponent's moves, against yours, each tagged with its side, in its side's color. -->
-        <p v-if="theirId && yourId" class="matchup">
-          <span class="who opponent"
-            ><span class="role">{{ t('compare.opponent') }}</span
-            ><PokemonIcon :id="theirId" /><span class="who-name">{{ name(theirId) }}</span></span
-          >
-          <span class="attacks"><ArrowRight :size="16" aria-hidden="true" />{{ t('calc.threats.attacks') }}</span>
-          <span class="who yours"
-            ><span class="role">{{ t('speed.yours') }}</span
-            ><PokemonIcon :id="yourId" /><span class="who-name">{{ name(yourId) }}</span></span
-          >
-        </p>
         <!-- Working it out, past a moment: how far it's got, a line over the row's top, moving nothing. -->
         <div
           v-if="slow && progress !== null"
@@ -245,18 +244,28 @@ const all = shallowRef(false)
           </li>
         </ul>
         <p v-else class="muted small-note">{{ t('calc.threats.nothingSet') }}</p>
-        <p v-if="shownSheet && rows && !rows.length && progress === null" class="muted intro">
-          {{ t('calc.threats.noSheetMoves') }}
+        <!-- Until the first rows are in: working them out, rather than nothing. -->
+        <p v-if="!rows" class="muted intro">{{ t('calc.threats.working') }}</p>
+        <p v-else-if="!rows.length && progress === null" class="muted intro">
+          {{ t(shownSheet ? 'calc.threats.noSheetMoves' : 'calc.threats.noMoves') }}
         </p>
         <template v-if="rows && rows.length">
+          <!-- The verdict, the two as their icons in it (who attacks, and yours), their names on hover. -->
           <p class="summary" :class="{ stale: slow }">
-            {{
-              !ohkoCount.length
-                ? t(shownSheet ? 'calc.threats.noneSheet' : 'calc.threats.none')
-                : shownSheet
-                  ? t('calc.threats.summarySheet', { n: ohkoCount.length })
-                  : t('calc.threats.summary', { n: ohkoCount.length, run: ohkoRun.length })
-            }}
+            <template v-for="(part, i) in summaryParts" :key="i">
+              <template v-if="typeof part === 'string'">{{ part }}</template>
+              <span
+                v-else-if="part.slot === 'them' || part.slot === 'yours'"
+                v-tip="name(part.slot === 'them' ? theirId : yourId)"
+                class="in-text"
+                :class="part.slot === 'them' ? 'opponent' : 'yours'"
+                role="img"
+                :aria-label="name(part.slot === 'them' ? theirId : yourId)"
+                ><PokemonIcon :id="part.slot === 'them' ? theirId : yourId"
+              /></span>
+              <template v-else-if="part.slot === 'n'">{{ ohkoCount.length }}</template>
+              <template v-else-if="part.slot === 'run'">{{ ohkoRun.length }}</template>
+            </template>
           </p>
           <div class="table-wrap" :class="{ stale: slow }">
             <table class="grid">
@@ -315,7 +324,6 @@ const all = shallowRef(false)
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 12px;
-  margin-left: auto;
 }
 .sheet.on {
   background: var(--sel);
@@ -339,6 +347,20 @@ const all = shallowRef(false)
   color: var(--muted);
 }
 /* A side's name in its side's color: the opponent's red, yours the accent, as the calc's bands. */
+/* The two in the verdict: their icons in the sentence's line, underlined in their side's color. */
+.in-text {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0.15em;
+  vertical-align: middle;
+  border-bottom: 2px solid var(--side);
+}
+.in-text.opponent {
+  --side: var(--opponent);
+}
+.in-text.yours {
+  --side: var(--accent);
+}
 .counted .opponent .counted-who {
   color: var(--opponent);
   font-weight: bold;
@@ -346,44 +368,6 @@ const all = shallowRef(false)
 .counted .yours .counted-who {
   color: var(--accent);
   font-weight: bold;
-}
-.matchup {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 10px;
-  margin: 0;
-}
-.who {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 2px 8px 2px 2px;
-  font-weight: bold;
-  border: 1px solid var(--side);
-  border-left-width: 4px;
-}
-.who.opponent {
-  --side: var(--opponent);
-}
-.who.yours {
-  --side: var(--accent);
-}
-.role {
-  padding: 1px 6px;
-  font-size: 0.75em;
-  color: var(--opponent-text);
-  background: var(--side);
-}
-.who.yours .role {
-  color: var(--accent-text);
-}
-.attacks {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.85em;
-  color: var(--muted);
 }
 .chip {
   padding: 0 6px;
@@ -482,18 +466,6 @@ tr.two {
 @media (max-width: 720px) {
   .controls {
     margin-left: 0;
-  }
-  /* Narrow, the two one under the other, the arrow pointing down from the opponent to yours. */
-  .matchup {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-  .attacks {
-    padding-left: 10px;
-  }
-  .attacks .lucide {
-    transform: rotate(90deg);
   }
   /* Narrow, the table scrolling sideways, each move kept in view at its left. */
   .grid .move,

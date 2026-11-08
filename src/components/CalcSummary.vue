@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { pokemon } from '@/data/dex'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import { BOOSTED, battlerOf, bestHit, hit, koKind, type Battlefield, type Fighter } from '@/lib/damage'
+import { BOOSTED, battlerOf, bestHit, hit, hpShown, koKind, type Battlefield, type Fighter } from '@/lib/damage'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 
@@ -48,7 +48,7 @@ const stages = computed(() =>
     <span :class="named ? 'name' : 'sr-only'">{{ refName(pokemon(id)) }}</span>
     <ItemIcon v-if="fighter.member.item" :id="fighter.member.item" class="item" />
     <span class="extras">
-      <span v-if="fighter.hp < 100" class="tag">{{ fighter.hp }}%</span>
+      <span v-if="fighter.hp < 100" class="tag">{{ hpShown(fighter.hp) }}%</span>
       <span v-if="fighter.status" class="tag">{{ t(`status.${fighter.status}`) }}</span>
       <span v-for="s in stages" :key="s" class="tag">{{ s }}</span>
     </span>
