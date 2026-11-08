@@ -16,6 +16,7 @@ import { useOpenState } from '@/composables/useOpenState'
 import MoreToggle from '@/components/MoreToggle.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import SegmentedControl from '@/components/SegmentedControl.vue'
+import DexRef from '@/components/DexRef'
 import TypeIcon from '@/components/TypeIcon'
 
 // The threats: every damaging move the opponent learns against yours, at its sets in the meta shown (`threats.ts`),
@@ -277,7 +278,9 @@ const all = shallowRef(false)
               <tbody>
                 <tr v-for="r in sorted.slice(0, all ? undefined : TOP)" :key="r.move" :class="kind(r)">
                   <th scope="row" class="move">
-                    <span class="move-name"><TypeIcon :type="MOVES[r.move].type" />{{ moveName(r.move) }}</span>
+                    <span class="move-name"
+                      ><TypeIcon :type="MOVES[r.move].type" /><DexRef :to="move(r.move)" meta
+                    /></span>
                   </th>
                   <td class="num range">{{ r.minPct.toFixed(0) }}–{{ r.maxPct.toFixed(0) }}%</td>
                   <td class="num ko">{{ chance(r.ohko) }}</td>
