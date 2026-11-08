@@ -26,17 +26,21 @@ import PokemonIcon from '@/components/PokemonIcon'
 // and what the opponent's set could then be (`damageReverse.ts`): each stat in play's points where some build fits, how
 // likely what was seen was at its sets, and its common spreads against its common items, each pair marked as fitting
 // (on what share of the damage rolls) or ruled out; joined by the nearest that fits when none of them does. At its team
-// sheet (`sheet`, shared with the threats), its item and nature as set, only its points varying. Worked out a slice at
+// sheet (`sheet`, shared with the threats), its item and nature as set, only its points varying. Which of the two moved
+// first (`first`, the page's `?first=`) narrows its Speed in the same spread, within the same 66 points. Worked out a slice at
 // a time once the sides have settled, what it showed kept, faded, until the new one's in.
 const props = defineProps<{ yours: Fighter; theirs: Fighter; field: Battlefield; data: MetaData | null }>()
 const sheet = defineModel<boolean>('sheet', { default: false })
+/** Which was seen moving first, with moves of the same priority; tapped again, not seen. */
+const first = defineModel<'a' | 'b' | null>('first', { default: null })
 
 const theirId = computed(() => battlerOf(props.theirs))
 const yourId = computed(() => battlerOf(props.yours))
 
 /** What was seen, from both sides' rows: yours' hitting the opponent, its hitting yours. */
-const obs = computed<Observation[]>(() =>
-  (['a', 'b'] as const).flatMap((by) => {
+const obs = computed<Observation[]>(() => [
+  ...(first.value ? [{ by: 'speed' as const, first: first.value }] : []),
+  ...(['a', 'b'] as const).flatMap((by) => {
     const f = by === 'a' ? props.yours : props.theirs
     return f.member.moves
       .filter((mv, i, all): mv is MoveId => damaging(mv) && all.indexOf(mv) === i)
@@ -45,7 +49,7 @@ const obs = computed<Observation[]>(() =>
         return saw ? [{ by, move: mv, saw, opts: f.hitOpts?.[mv] }] : []
       })
   }),
-)
+])
 
 const result = shallowRef<ReverseResult | null>(null)
 const progress = shallowRef<number | null>(null)
@@ -91,7 +95,7 @@ function start() {
     },
   )
 }
-watch(() => [sheet.value, props.data] as const, start, { immediate: true })
+watch(() => [sheet.value, first.value, props.data] as const, start, { immediate: true })
 watchDebounced(() => [props.yours, props.theirs, props.field] as const, start, { debounce: 150 })
 
 const statName = (s: number) => t(`stat.${STATS[s]!}`)
@@ -153,8 +157,25 @@ const fitTip = (f: number) => t('calc.reverse.fitTip', { pct: percent(f) })
       <span class="muted at">{{ sheet ? t('calc.threats.atSheet') : t('calc.reverse.atSets') }}</span>
     </div>
     <p v-if="!theirId || !yourId" class="muted intro">{{ t('calc.threats.pickBoth') }}</p>
-    <p v-else-if="!obs.length" class="muted intro">{{ t('calc.reverse.hint') }}</p>
-    <template v-else-if="result">
+    <!-- Which moved first, the two as their icons: its Speed narrowed in the same spread. -->
+    <div v-else class="first" role="group" :aria-label="t('calc.reverse.first')">
+      <span v-tip="t('calc.reverse.firstTip')" class="muted about" tabindex="0">{{ t('calc.reverse.first') }}</span>
+      <button
+        v-for="k in ['a', 'b'] as const"
+        :key="k"
+        v-tip="k === 'a' ? t('calc.yours') : t('calc.theirs')"
+        type="button"
+        class="btn choice"
+        :class="[k === 'a' ? 'yours' : 'opponent', { on: first === k }]"
+        :aria-pressed="first === k"
+        :aria-label="k === 'a' ? t('calc.yours') : t('calc.theirs')"
+        @click="first = first === k ? null : k"
+      >
+        <PokemonIcon :id="k === 'a' ? yourId : theirId" />
+      </button>
+    </div>
+    <p v-if="theirId && yourId && !obs.length" class="muted intro">{{ t('calc.reverse.hint') }}</p>
+    <template v-if="theirId && yourId && obs.length && result">
       <div class="body" :class="{ stale: slow }">
         <p v-if="!result.ranges.length" class="warn" role="status">{{ t('calc.reverse.impossible') }}</p>
         <template v-else>
@@ -230,7 +251,7 @@ const fitTip = (f: number) => t('calc.reverse.fitTip', { pct: percent(f) })
         <p class="muted small">{{ t('calc.reverse.note') }}</p>
       </div>
     </template>
-    <p v-else class="muted intro">{{ t('calc.reverse.working') }}</p>
+    <p v-else-if="theirId && yourId && obs.length" class="muted intro">{{ t('calc.reverse.working') }}</p>
   </section>
 </template>
 
@@ -247,6 +268,30 @@ const fitTip = (f: number) => t('calc.reverse.fitTip', { pct: percent(f) })
 }
 .at {
   font-size: 0.85em;
+}
+/* Which moved first: the two's icons, the one picked in its side's color. */
+.first {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 0.875em;
+}
+.about {
+  margin-right: 4px;
+  text-decoration: underline dotted;
+  text-underline-offset: 4px;
+  cursor: help;
+}
+.choice {
+  min-height: 0;
+  padding: 0 6px;
+}
+.choice.on.yours {
+  background: var(--accent);
+}
+.choice.on.opponent {
+  background: var(--opponent);
 }
 .sheet.on {
   background: var(--sel);

@@ -24,6 +24,8 @@ import {
   battlerOf,
   hit,
   hpShown,
+  leadOf,
+  speedOf,
   type Battlefield,
   type Fighter,
   type Hit,
@@ -38,12 +40,19 @@ export type SawKind = Saw['kind']
 
 /** One hit seen: whose move (`a` yours, hitting the opponent; `b` the opponent's, hitting yours), what it did, and the
  * move's options as its row has them (a critical hit, its hits…). */
-export interface Observation {
+export interface HitSeen {
   by: 'a' | 'b'
   move: MoveId
   saw: Saw
   opts?: HitOptions
 }
+/** Which of the two was seen moving first, with moves of the same priority: its Speed against yours, as the calc has
+ * them (stages, item, ability, Tailwind, paralysis; Trick Room turning it over), a tie fitting half the time. */
+export interface SpeedSeen {
+  by: 'speed'
+  first: 'a' | 'b'
+}
+export type Observation = HitSeen | SpeedSeen
 
 const POINT_VALUES = [...Array(MAX_POINTS + 1).keys()]
 const BREAKERS = new Set(['moldbreaker', 'teravolt', 'turboblaze'])
@@ -245,8 +254,9 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
     }
   const base = POKEMON[id].stats
 
-  // What each hit hangs on of the opponent.
+  // What each hit hangs on of the opponent; the order seen, its Speed.
   const plans = obs.map((o) => {
+    if (o.by === 'speed') return { o, calc: [5], used: [5] }
     if (o.by === 'a') {
       const { calc, used } = takenStats(o.move, yours, field)
       return { o, calc, used }
@@ -288,7 +298,15 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
   const itemKey = (it: ItemId | null) =>
     plans
       .map((p) =>
-        (p.o.by === 'b' ? inert(it, p.o.move, analytic) : takenInert(it, p.o.move, p.calc)) ? '-' : (it ?? ''),
+        (
+          p.o.by === 'speed'
+            ? !it || ITEMS[it]?.category !== 'speed'
+            : p.o.by === 'b'
+              ? inert(it, p.o.move, analytic)
+              : takenInert(it, p.o.move, p.calc)
+        )
+          ? '-'
+          : (it ?? ''),
       )
       .join('|')
   const itemGroups = new Map<string, { rep: ItemId | null; items: Weighted<ItemId | null> }>()
@@ -349,12 +367,33 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
   }
   total = toHit.size + groupList.length * itemList.length
 
+  const yourSpeed = speedOf(yours, field)
+  const speedMemo = new Map<string, number>()
   function* steps(): Generator<unknown, ReverseResult | null> {
     for (const { pi, ii, gi } of jobs) {
       const { o, calc, used } = plans[pi]!
       const rep = groupList[gi]!.rep
       const item = itemList[ii]!.rep
       const table = new Float64Array(radix ** used.length)
+      // The order seen: at each of its Speed points, moving first fits, a tie half the time.
+      if (o.by === 'speed') {
+        for (const p of POINT_VALUES) {
+          const key = `${pi}|${ii}|${valueOf(5, p, effectOf(rep, 5))}`
+          let fit = speedMemo.get(key)
+          if (fit === undefined) {
+            const points = [...m.points]
+            points[5] = p
+            const theirSpeed = speedOf(fighterAt({ nature: rep, points, item }), field)
+            const lead = yourSpeed === null || theirSpeed === null ? null : leadOf(yourSpeed, theirSpeed, field)
+            fit = lead === null ? 1 : lead === 'tie' ? 0.5 : (lead === 'a') === (o.first === 'a') ? 1 : 0
+            speedMemo.set(key, fit)
+            yield
+          }
+          table[p] = fit
+        }
+        fitTables.set(tableKey(pi, ii, gi), table)
+        continue
+      }
       // Each value of what the calc reads, worked out once.
       for (const pts of assignments(calc.length)) {
         const vals = calc.map((s, k) => valueOf(s, pts[k]!, effectOf(rep, s)))
