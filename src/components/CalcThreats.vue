@@ -69,41 +69,53 @@ const learnsets = shallowRef<Awaited<ReturnType<typeof loadLearnsets>> | null>(n
 watch(near, (n) => n && void loadLearnsets().then((l) => (learnsets.value = l)), { immediate: true })
 
 const rows = shallowRef<Threat[] | null>(null)
+/** Whether the rows shown are at its team sheet: the switch as it was when they were worked out, so what's said of them
+ * changes with them, not before. */
+const shownSheet = shallowRef(sheet.value)
 /** How far the work in hand has got, 0 to 1; null when none is. */
 const progress = shallowRef<number | null>(null)
+/** The work in hand has run past `SLOW_MS`: only then its progress shown and what's there faded, so a quick one (most
+ * are) swaps the rows in one step. */
+const slow = shallowRef(false)
+const SLOW_MS = 300
+let slowTimer = 0
 let stop: (() => void) | null = null
-onUnmounted(() => stop?.())
+onUnmounted(() => {
+  stop?.()
+  clearTimeout(slowTimer)
+})
 
 function start() {
   stop?.()
   stop = null
   const id = theirId.value
   if (!open.value || !near.value || !learnsets.value || !id || !yourId.value) return
-  const moves = threatMoves(movesOf(learnsets.value, id), props.theirs, sheet.value)
+  const at = sheet.value
+  const moves = threatMoves(movesOf(learnsets.value, id), props.theirs, at)
   const entry = props.data?.[setsAs(props.theirs.member) ?? id] ?? undefined
   progress.value = 0
+  clearTimeout(slowTimer)
+  slowTimer = window.setTimeout(() => (slow.value = true), SLOW_MS)
   stop = runThreats(
-    threatSteps(props.theirs, props.yours, props.field, entry, moves, {
-      sheet: sheet.value,
-      moveOpts: props.theirs.hitOpts,
-    }),
+    threatSteps(props.theirs, props.yours, props.field, entry, moves, { sheet: at, moveOpts: props.theirs.hitOpts }),
     moves.length,
     (p) => (progress.value = p),
     (r) => {
       rows.value = r
+      shownSheet.value = at
       progress.value = null
+      clearTimeout(slowTimer)
+      slow.value = false
       stop = null
     },
   )
 }
-// Its inputs changed: worked out again once they've settled; another Pokémon, what it showed for the last one goes.
+// Its inputs changed: worked out again, at once for what's tapped (the switch, opening it, the data coming in), once
+// they've settled for the sides and the field (a slider dragged doesn't start it over at every step); another
+// Pokémon, what it showed for the last one goes.
 watch(theirId, () => (rows.value = null))
-watchDebounced(
-  () =>
-    [props.yours, props.theirs, props.field, props.data, sheet.value, open.value, near.value, learnsets.value] as const,
-  start,
-  { debounce: 150, immediate: true },
-)
+watch(() => [sheet.value, open.value, near.value, learnsets.value, props.data] as const, start, { immediate: true })
+watchDebounced(() => [props.yours, props.theirs, props.field] as const, start, { debounce: 150 })
 
 /** The likeliest knockout first: in one hit, then in two, then the most damage. */
 const byThreat = (x: Threat, y: Threat) => y.ohko - x.ohko || y.two - x.two || y.maxPct - x.maxPct
@@ -181,6 +193,15 @@ const all = shallowRef(false)
     <summary>{{ t('calc.threats.title') }}</summary>
     <template v-if="open">
       <div class="threats-head">
+        <!-- Working it out, past a moment: how far it's got, a line over the row's top, moving nothing. -->
+        <div
+          v-if="slow && progress !== null"
+          class="progress"
+          role="progressbar"
+          :aria-valuenow="Math.round(progress * 100)"
+        >
+          <span :style="{ width: `${progress * 100}%` }"></span>
+        </div>
         <span class="controls">
           <!-- At its team sheet: its item, ability, nature and moves as set on the calc. -->
           <button
@@ -198,13 +219,9 @@ const all = shallowRef(false)
       </div>
       <p v-if="!theirId || !yourId" class="muted intro">{{ t('calc.threats.pickBoth') }}</p>
       <template v-else>
-        <!-- Working it out: how far it's got, what it showed before faded under it. -->
-        <div v-if="progress !== null" class="progress" role="progressbar" :aria-valuenow="Math.round(progress * 100)">
-          <span :style="{ width: `${progress * 100}%` }"></span>
-        </div>
-        <!-- What it's at: its sets, or its team sheet; and what the calc has set that counts. -->
+        <!-- What it's at: its sets, or its team sheet (as the rows shown are); and what the calc has set that counts. -->
         <p class="muted intro">
-          {{ sheet ? t('calc.threats.atSheet') : t('calc.threats.atSets') }}
+          {{ shownSheet ? t('calc.threats.atSheet') : t('calc.threats.atSets') }}
         </p>
         <ul v-if="counted.length" class="counted">
           <li v-for="g in counted" :key="g.who">
@@ -213,20 +230,20 @@ const all = shallowRef(false)
           </li>
         </ul>
         <p v-else class="muted small-note">{{ t('calc.threats.nothingSet') }}</p>
-        <p v-if="sheet && rows && !rows.length && progress === null" class="muted intro">
+        <p v-if="shownSheet && rows && !rows.length && progress === null" class="muted intro">
           {{ t('calc.threats.noSheetMoves') }}
         </p>
         <template v-if="rows && rows.length">
-          <p class="summary" :class="{ stale: progress !== null }">
+          <p class="summary" :class="{ stale: slow }">
             {{
               !ohkoCount.length
-                ? t('calc.threats.none')
-                : sheet
+                ? t(shownSheet ? 'calc.threats.noneSheet' : 'calc.threats.none')
+                : shownSheet
                   ? t('calc.threats.summarySheet', { n: ohkoCount.length })
                   : t('calc.threats.summary', { n: ohkoCount.length, run: ohkoRun.length })
             }}
           </p>
-          <div class="table-wrap" :class="{ stale: progress !== null }">
+          <div class="table-wrap" :class="{ stale: slow }">
             <table class="grid">
               <thead>
                 <tr>
@@ -328,9 +345,15 @@ const all = shallowRef(false)
   opacity: 0.5;
   transition: opacity 0.15s;
 }
+.threats-head {
+  position: relative;
+}
 .progress {
+  position: absolute;
+  top: -8px;
+  left: 0;
+  right: 0;
   height: 3px;
-  margin-top: 8px;
   background: var(--panel-alt);
 }
 .progress > span {
