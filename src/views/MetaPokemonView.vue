@@ -925,7 +925,7 @@ const sections = computed(() =>
       <!-- Its top teams, the latest first: a line each, its placing, the player, the event and their six, leading to
            the player's page there. -->
       <div v-if="topTeams.length" class="top-teams">
-        <h3 class="top-teams-head muted small">{{ t('usageMon.topTeams') }}</h3>
+        <h3 class="top-teams-head">{{ t('usageMon.topTeams') }}</h3>
         <ol class="top-list">
           <li v-for="x in topTeams" :key="`${x.event.id}:${x.placing}`">
             <AppLink
@@ -1605,7 +1605,6 @@ h2 {
 }
 .top-teams-head {
   margin: 0 0 4px;
-  font-weight: normal;
 }
 .top-list {
   display: flex;
