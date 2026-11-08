@@ -184,6 +184,15 @@ function pokemonOf(f: Fighter): Pokemon | null {
   return mon
 }
 
+/** The calc's Pokémon for a side, made once per side object: for what works out thousands of hits with the same few
+ * sides (`lean`), never changing a side in place. The calc works on copies of it (`calculate` clones). */
+const MADE = new WeakMap<Fighter, Pokemon | null>()
+function cachedPokemon(f: Fighter): Pokemon | null {
+  let p = MADE.get(f)
+  if (p === undefined) MADE.set(f, (p = pokemonOf(f)))
+  return p
+}
+
 const sideOf = (f: Fighter) => ({
   isReflect: f.side.includes('reflect'),
   isLightScreen: f.side.includes('lightScreen'),
@@ -323,6 +332,10 @@ export interface HitOptions {
   doubled?: boolean
   /** Spit Up's Stockpile layers, 1 unless said. */
   stockpile?: number
+  /** Its numbers alone, without the calc's one-line account nor its recoil's (`desc`, `extra` empty), and the calc's
+   * Pokémon made once per side object (`cachedPokemon`): time saved for what works out thousands of hits with the same
+   * few sides (the threats, `threats.ts`). */
+  lean?: boolean
 }
 
 /** The moves whose power hangs on what the calc doesn't know, by what they're doubled on: the user's last move
@@ -436,8 +449,8 @@ export function hit(
       defender = atSpe(defender, -by)
     }
   }
-  const a = pokemonOf(attacker)
-  const d = pokemonOf(defender)
+  const a = opts.lean ? cachedPokemon(attacker) : pokemonOf(attacker)
+  const d = opts.lean ? cachedPokemon(defender) : pokemonOf(defender)
   if (!a || !d) return null
   return {
     ...hitOf(a, d, move, field, sideOf(attacker), sideOf(defender), opts, patchOf(attacker, move, opts)),
@@ -496,12 +509,13 @@ function hitOf(
     } catch {
       // A case the calc can't put a verdict on: the range alone.
     }
-    try {
-      desc = r.desc()
-      extra = [r.recoil().text, r.recovery().text].filter(Boolean).join(' · ')
-    } catch {
-      desc = ''
-    }
+    if (!opts.lean)
+      try {
+        desc = r.desc()
+        extra = [r.recoil().text, r.recovery().text].filter(Boolean).join(' · ')
+      } catch {
+        desc = ''
+      }
   }
   return {
     move,

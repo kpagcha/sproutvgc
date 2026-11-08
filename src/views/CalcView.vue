@@ -45,6 +45,7 @@ import { emptyMember, nextField, pickedAs, setsAs, stoneMega, type Field, type M
 import { conditionName, fieldOf, terrainOf, weatherOf } from '@/components/calcConditions'
 import CalcConditions from '@/components/CalcConditions.vue'
 import CalcMeta from '@/components/CalcMeta.vue'
+import CalcThreats from '@/components/CalcThreats.vue'
 import CalcSide from '@/components/CalcSide.vue'
 import CalcSummary from '@/components/CalcSummary.vue'
 import CalcVerdict from '@/components/CalcVerdict.vue'
@@ -70,7 +71,8 @@ import TeamPicker from '@/components/TeamPicker.vue'
 // folding when tapped again. The numbers are Smogon's calc's (`@smogon/calc`, its Champions mechanics, doubles), `damage.ts`. A Pokémon picked comes with its most common
 // set in the meta shown (its Mega's, when most players run that), so there's a calc to read at once; a side's menu loads
 // it from the reader's teams, from a paste, or back to its common set, copies it, or swaps the two. Under them, yours against the meta's most
-// used (`CalcMeta`), a row tapped making it the opponent. Everything is in the URL, a calc a link to share
+// used (`CalcMeta`), a row tapped making it the opponent; before it, once both are picked, what the opponent could knock
+// yours out with, every move it learns at its sets (`CalcThreats`). Everything is in the URL, a calc a link to share
 // (`calcState.ts`), and the page opened bare comes back as last left; the first time, empty.
 const route = useRoute()
 const router = useRouter()
@@ -82,6 +84,9 @@ const wide = useMediaQuery('(min-width: 900px)')
 const sections = computed(() => [
   { id: 'calc-top', label: t('calc.section.field') },
   { id: 'calc-duel', label: t('calc.section.damage') },
+  ...(battlerOf(sides.value.a) && battlerOf(sides.value.b)
+    ? [{ id: 'calc-threats', label: t('calc.threats.title') }]
+    : []),
   ...(battlerOf(sides.value.a) ? [{ id: 'calc-meta', label: t('calc.meta.title') }] : []),
 ])
 const nav = useTemplateRef<InstanceType<typeof SectionNav>>('nav')
@@ -113,6 +118,8 @@ const field = shallowRef<Battlefield>(emptyField())
 // Its setup: the URL's, else as last left; with neither, empty.
 const fromUrl = route.query.a || route.query.b || route.query.f ? route.query : null
 const start = fromUrl ?? readLast()
+/** The threats at the opponent's team sheet (`?sheet=1`), kept with the rest. */
+const sheet = shallowRef(start.sheet === '1')
 sides.value = {
   a: decodeFighter(start.a) ?? emptyFighter(),
   b: decodeFighter(start.b) ?? emptyFighter(),
@@ -145,13 +152,14 @@ const query = computed(() => ({
   a: encodeFighter(sides.value.a) || undefined,
   b: encodeFighter(sides.value.b) || undefined,
   f: encodeField(field.value) || undefined,
+  sheet: sheet.value ? '1' : undefined,
 }))
 watchDebounced(
   query,
   (q) => {
     saveLast(q)
     const next = { ...route.query, ...q }
-    for (const k of ['a', 'b', 'f'] as const) if (!q[k]) delete next[k]
+    for (const k of ['a', 'b', 'f', 'sheet'] as const) if (!q[k]) delete next[k]
     void router.replace({ query: next })
   },
   { debounce: 250, immediate: true },
@@ -635,6 +643,17 @@ function face(f: Fighter) {
     </div>
 
     <CalcVerdict :a="fought.a" :b="fought.b" :field />
+
+    <!-- What the opponent could knock yours out with: every move it learns, at its sets. -->
+    <CalcThreats
+      v-if="battlerOf(sides.a) && battlerOf(sides.b)"
+      id="calc-threats"
+      :yours="fought.a"
+      :theirs="fought.b"
+      :field
+      :data
+      v-model:sheet="sheet"
+    />
 
     <CalcMeta v-if="battlerOf(sides.a)" id="calc-meta" :yours="fought.a" :field :data @pick="face" />
 
