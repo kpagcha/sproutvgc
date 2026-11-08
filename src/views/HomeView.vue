@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, useTemplateRef, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, onMounted, shallowRef, useTemplateRef, watch } from 'vue'
+import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 import { AREA_ICONS, SECTION_ICONS } from '@/components/areaIcons'
 import { t, type MessageKey } from '@/i18n'
 import { GAME_NAME, REGULATION } from '@/data/format'
@@ -15,6 +15,8 @@ import RecentPanel from '@/components/RecentPanel.vue'
 import { RECENT_ON } from '@/composables/useRecent'
 import SearchResults from '@/components/SearchResults.vue'
 import SearchBox from '@/components/SearchBox.vue'
+import RecentSearches from '@/components/RecentSearches.vue'
+import { useRecentSearches } from '@/composables/useRecentSearches'
 import logoUrl from '@/assets/logo.png'
 
 // The front door to the whole site: the search (of the site's pages, the meta pages and the dex), the tournaments under
@@ -75,8 +77,43 @@ useSlashFocus(() => box.value?.focus({ preventScroll: true }))
 const { data: meta, snapshot } = useMeta()
 const { results, only } = useSearch(() => query.value, undefined, { pages: true, meta: () => meta.value })
 function openOnly() {
+  record(query.value)
   if (only.value) void router.push(only.value)
 }
+
+// The last searches, under the box while it's focused and empty (`RecentSearches`), picked with the arrow keys too; a
+// search counts once followed, by Enter or a result opened from it.
+const { searches, record } = useRecentSearches()
+const focused = shallowRef(false)
+const dismissed = shallowRef(false)
+const active = shallowRef(-1)
+const showRecent = computed(() => focused.value && !dismissed.value && !query.value && searches.value.length > 0)
+watch(showRecent, () => (active.value = -1))
+function onFocus() {
+  focused.value = true
+  dismissed.value = false
+}
+function pickRecent(q: string) {
+  query.value = q
+  active.value = -1
+}
+function onKeydown(e: KeyboardEvent) {
+  if (!showRecent.value) {
+    if (e.key === 'Enter') openOnly()
+    return
+  }
+  const n = searches.value.length
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault()
+    active.value = e.key === 'ArrowDown' ? (active.value + 1) % n : (active.value - 1 + n) % n
+  } else if (e.key === 'Enter' && active.value >= 0) {
+    e.preventDefault()
+    pickRecent(searches.value[active.value]!)
+  } else if (e.key === 'Escape') {
+    dismissed.value = true
+  }
+}
+onBeforeRouteLeave(() => record(query.value))
 
 // The regulation's hyphens don't break ("M-C" stays on one line): U+2011, the non-breaking hyphen.
 const unbroken = (reg: string) => reg.replace(/-/g, String.fromCharCode(0x2011))
@@ -96,16 +133,21 @@ const shownReg = computed(() => ({ reg: unbroken(snapshot.value?.regulation ?? R
           <p class="muted tagline">{{ t('home.intro', params) }}</p>
         </div>
       </div>
-      <SearchBox
-        ref="box"
-        v-model="query"
-        wide
-        icon
-        hotkey="/"
-        :placeholder="t('home.searchAll')"
-        :aria-label="t('home.searchAll')"
-        @keydown.enter="openOnly"
-      />
+      <div class="search-wrap">
+        <SearchBox
+          ref="box"
+          v-model="query"
+          wide
+          icon
+          hotkey="/"
+          :placeholder="t('home.searchAll')"
+          :aria-label="t('home.searchAll')"
+          @focus="onFocus"
+          @blur="focused = false"
+          @keydown="onKeydown"
+        />
+        <RecentSearches v-if="showRecent" :active @pick="pickRecent" />
+      </div>
     </div>
     <SearchResults v-if="results" :query :results />
     <template v-else>
@@ -189,8 +231,12 @@ const shownReg = computed(() => ({ reg: unbroken(snapshot.value?.regulation ?? R
 .tagline {
   margin: 4px 0 0;
 }
+.search-wrap {
+  position: relative;
+  margin-top: 16px;
+}
 .hero :deep(.search-box) {
-  margin: 16px 0 0;
+  margin: 0;
 }
 
 /* The areas, a card each, all alike: Meta and Tools side by side (Meta twice as wide), on the accent's shadow, their

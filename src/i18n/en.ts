@@ -372,6 +372,9 @@ export const messages = {
   'home.search': 'Search the dex',
   'home.searchAll': 'Search Pokémon, moves, items and more',
   'search.clear': 'Clear the search',
+  'search.recent': 'Recent searches',
+  'search.recentClear': 'Clear',
+  'search.recentRemove': 'Remove “{q}” from recent searches',
   'home.none': 'Nothing matches.',
 
   'types.intro': 'Pick a type.',
