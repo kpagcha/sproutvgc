@@ -10,7 +10,12 @@ import { hpShown } from '@/lib/damage'
 // dragged or tapped along (sliding sideways on a touch screen; up and down still scroll the page), or with the keys
 // (arrows by one point, with Shift or Page Up/Down by a tenth of its HP, Home and End to 1 and full), and stepped by
 // one point with the buttons beside it; under a mouse, where it would go shows faded before it's pressed.
-const props = defineProps<{ label: string; max: number }>()
+const props = defineProps<{
+  label: string
+  max: number
+  /** Smaller, for a row with more on it (the inverse calc's hits): lower, its steps narrower. */
+  compact?: boolean
+}>()
 const hp = defineModel<number>({ required: true })
 
 /** Its HP points left, from 1 to `max`. */
@@ -70,7 +75,7 @@ const color = (p: number) => (p > 50 ? 'var(--hp-high)' : p > 20 ? 'var(--hp-mid
 </script>
 
 <template>
-  <div class="hp-bar">
+  <div class="hp-bar" :class="{ compact }">
     <div
       ref="bar"
       class="track"
@@ -231,6 +236,26 @@ const color = (p: number) => (p > 50 ? 'var(--hp-high)' : p > 20 ? 'var(--hp-mid
   }
   .step {
     width: 28px;
+  }
+}
+.compact .track,
+.compact .step {
+  height: 18px;
+}
+.compact .step {
+  width: 18px;
+  font-size: 0.85em;
+}
+.compact .pct {
+  font-size: 0.75em;
+}
+@media (pointer: coarse) {
+  .compact .track,
+  .compact .step {
+    height: 24px;
+  }
+  .compact .step {
+    width: 24px;
   }
 }
 </style>

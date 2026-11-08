@@ -7,6 +7,7 @@ import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { battlerOf, damaging, statsOf, type Fighter, type HitOptions } from '@/lib/damage'
 import type { Saw } from '@/lib/damageReverse'
+import HpBar from '@/components/HpBar.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 
 // The inverse damage calc's "What you saw": the hits seen, in the order entered, each a row: who hit whom (yours the
@@ -61,10 +62,20 @@ function typedBefore(i: number, e: Event) {
   const max = h.by === 'a' ? 100 : yourMaxHp.value
   const v = Math.round(Number(el.value))
   if (el.value === '' || !Number.isFinite(v) || v >= max) {
-    el.value = ''
+    el.value = String(max)
     return patch(i, { before: undefined })
   }
   patch(i, { before: Math.max(1, v) })
+}
+/** The defender's HP out of: the opponent's in whole percent, so out of 100; yours' in HP. */
+const maxOf = (h: HitDraft) => (h.by === 'a' ? 100 : yourMaxHp.value || 1)
+/** Its HP before it, in percent, for the bar. */
+const beforePct = (h: HitDraft) => ((h.before ?? maxOf(h)) / maxOf(h)) * 100
+/** The bar moved: its HP points (whole percent, or yours' HP), full as none set. */
+function slid(i: number, pct: number) {
+  const max = maxOf(hits.value[i]!)
+  const pts = Math.max(1, Math.round((max * pct) / 100))
+  patch(i, { before: pts >= max ? undefined : pts })
 }
 const OUTCOMES = ['ko', 'lived', 'two'] as const
 const outcome = (i: number, k: (typeof OUTCOMES)[number]) =>
@@ -154,14 +165,22 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
         <!-- The defender's HP before it: full unless said. -->
         <span class="before">
           <span class="muted">{{ t('calc.hits.from') }}</span>
+          <!-- The calc's HP bar, compact: the opponent's by whole percent (as the game shows it), yours' by HP. -->
+          <HpBar
+            :model-value="beforePct(h)"
+            :max="maxOf(h)"
+            :label="t(h.by === 'a' ? 'calc.hits.beforePct' : 'calc.hits.beforeHp')"
+            compact
+            class="before-bar"
+            @update:model-value="slid(i, $event)"
+          />
           <input
             class="num-in"
             type="number"
             inputmode="numeric"
             min="1"
-            :max="h.by === 'a' ? 100 : yourMaxHp"
-            :value="h.before ?? ''"
-            :placeholder="String(h.by === 'a' ? 100 : yourMaxHp)"
+            :max="maxOf(h)"
+            :value="h.before ?? maxOf(h)"
             :aria-label="t(h.by === 'a' ? 'calc.hits.beforePct' : 'calc.hits.beforeHp')"
             @change="typedBefore(i, $event)"
           />
@@ -283,6 +302,15 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
   display: inline-flex;
   align-items: center;
   gap: 4px;
+}
+/* The HP before it: the bar taking the room the row has left. */
+.before {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+.before-bar {
+  flex: 1;
+  min-width: 90px;
 }
 .saw {
   gap: 8px;

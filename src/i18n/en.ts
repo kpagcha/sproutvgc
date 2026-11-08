@@ -361,6 +361,8 @@ export const messages = {
   'calc.tab.damage': 'Damage',
   'calc.tab.inverse': 'Inverse',
   'calc.section.pokemon': 'Pokémon',
+  'calc.band.fainted': '{n} fainted',
+  'calc.band.attacked': 'Hit {n}×',
   'calc.hits.title': 'What you saw',
   'calc.hits.hint':
     "Add each hit you saw: the move, the opponent's HP lost in percent (or yours in HP), or whether it knocked out. The opponent's stat points, nature and item are worked out from them.",

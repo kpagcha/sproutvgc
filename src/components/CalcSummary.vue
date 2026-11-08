@@ -1,15 +1,28 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { pokemon } from '@/data/dex'
+import { computed, nextTick, shallowRef, useTemplateRef, watch } from 'vue'
+import { useResizeObserver } from '@vueuse/core'
+import { ability, condition, pokemon } from '@/data/dex'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import { BOOSTED, battlerOf, bestHit, hit, hpShown, koKind, type Battlefield, type Fighter } from '@/lib/damage'
+import {
+  abilityOf,
+  BOOSTED,
+  battlerOf,
+  bestHit,
+  hit,
+  hpShown,
+  koKind,
+  type Battlefield,
+  type Fighter,
+} from '@/lib/damage'
+import { conditionName, sideOf } from '@/components/calcConditions'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 
 // A damage calculator's side in short, on one line, for its band on phones: the Pokémon's icon and its name (`named`;
-// else read out alone), its item's icon, what the battle has changed of it (HP left, status, stat stages; nothing while
-// as it came in), and, at the end, its hardest hit's verdict against the other side ("OHKO", "62% 2HKO"), colored as
+// else read out alone), its item's icon, what the battle has changed of it (HP left, status, stat stages, its allies
+// fainted, the times it's been hit, its ability's condition met, what's on its side; nothing while as it came in), a
+// row sliding sideways where they don't all fit, and, at the end, its hardest hit's verdict against the other side ("OHKO", "62% 2HKO"), colored as
 // the damage rows' are: yours knocking out good news, theirs bad (`theirs`).
 const props = defineProps<{
   fighter: Fighter
@@ -37,12 +50,37 @@ const verdict = computed(() => {
   return h.koChance >= 1 ? n : `${Math.round(h.koChance * 100)}% ${n}`
 })
 const kind = computed(() => koKind(best.value))
+/** The rest of what the battle has changed of it, after its stages: its allies fainted, the times it's been hit, its
+ * ability's condition met, and what's on its side. */
+const more = computed(() => {
+  const f = props.fighter
+  const list: string[] = []
+  if (f.fainted) list.push(t('calc.band.fainted', { n: f.fainted }))
+  if (f.attacked) list.push(t('calc.band.attacked', { n: f.attacked }))
+  const a = abilityOf(f)
+  if (f.abilityOn && a) list.push(refName(ability(a)))
+  for (const e of f.side) {
+    const c = sideOf(e)
+    if (c) list.push(conditionName(c))
+  }
+  if (f.spikes) list.push(`${refName(condition('spikes'))} ×${f.spikes}`)
+  return list
+})
+// Whether there's more of them past the row's end, to fade it out: as it's sized, scrolled or they change.
+const extras = useTemplateRef<HTMLElement>('extras')
+const overflows = shallowRef(false)
+function measure() {
+  const el = extras.value
+  overflows.value = !!el && el.scrollLeft + el.clientWidth < el.scrollWidth - 1
+}
+useResizeObserver(extras, measure)
 const stages = computed(() =>
   BOOSTED.flatMap((s, i) => {
     const n = props.fighter.boosts[i]!
     return n ? [`${n > 0 ? '+' : '−'}${Math.abs(n)} ${t(`stat.${s}`)}`] : []
   }),
 )
+watch([stages, more], () => void nextTick(measure))
 </script>
 
 <template>
@@ -50,10 +88,11 @@ const stages = computed(() =>
     <PokemonIcon :id class="mon" />
     <span :class="named ? 'name' : 'sr-only'">{{ refName(pokemon(id)) }}</span>
     <ItemIcon v-if="fighter.member.item" :id="fighter.member.item" class="item" />
-    <span class="extras">
+    <span ref="extras" class="extras" :class="{ overflows }" @scroll.passive="measure">
       <span v-if="fighter.hp < 100" class="tag">{{ hpShown(fighter.hp) }}%</span>
       <span v-if="fighter.status" class="tag">{{ t(`status.${fighter.status}`) }}</span>
       <span v-for="s in stages" :key="s" class="tag">{{ s }}</span>
+      <span v-for="m in more" :key="m" class="tag">{{ m }}</span>
     </span>
     <span v-if="verdict" class="ko">{{ verdict }}</span>
   </span>
@@ -72,13 +111,22 @@ const stages = computed(() =>
 .ko {
   flex: none;
 }
-/* What the battle changed, cut before the verdict is. */
+/* What the battle changed, before the verdict: a row sliding sideways where it doesn't fit, no scrollbar. */
 .extras {
   display: flex;
   flex: 1;
   gap: 4px;
   min-width: 0;
-  overflow: hidden;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.extras::-webkit-scrollbar {
+  display: none;
+}
+/* Sliding sideways, its end fading out, so what's past it reads as more. */
+.extras.overflows {
+  mask-image: linear-gradient(to right, #000 calc(100% - 16px), transparent);
 }
 .tag {
   flex: none;
