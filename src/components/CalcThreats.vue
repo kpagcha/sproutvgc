@@ -11,6 +11,7 @@ import { abilityOf, BOOSTED, battlerOf, type Battlefield, type Fighter } from '@
 import { conditionName, fieldOf, sideOf, terrainOf, weatherOf } from '@/components/calcConditions'
 import { setsAs } from '@/lib/team'
 import { runThreats, threatMoves, threatSteps, type Threat } from '@/lib/threats'
+import { useOpenState } from '@/composables/useOpenState'
 import MoreToggle from '@/components/MoreToggle.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 import TypeIcon from '@/components/TypeIcon'
@@ -57,6 +58,8 @@ const theirId = computed(() => battlerOf(props.theirs))
 const yourId = computed(() => battlerOf(props.yours))
 const name = (id: PokemonId) => refName(pokemon(id))
 
+// Open at first, then as last left: folded, nothing worked out.
+const { open, onToggle } = useOpenState('sproutvgc.calc.threatsOpen', true)
 // Worked out only once the section is near the screen: nothing spent on it while reading the sides.
 const root = useTemplateRef<HTMLElement>('root')
 const near = shallowRef(false)
@@ -75,7 +78,7 @@ function start() {
   stop?.()
   stop = null
   const id = theirId.value
-  if (!near.value || !learnsets.value || !id || !yourId.value) return
+  if (!open.value || !near.value || !learnsets.value || !id || !yourId.value) return
   const moves = threatMoves(movesOf(learnsets.value, id), props.theirs, sheet.value)
   const entry = props.data?.[setsAs(props.theirs.member) ?? id] ?? undefined
   progress.value = 0
@@ -96,7 +99,8 @@ function start() {
 // Its inputs changed: worked out again once they've settled; another Pokémon, what it showed for the last one goes.
 watch(theirId, () => (rows.value = null))
 watchDebounced(
-  () => [props.yours, props.theirs, props.field, props.data, sheet.value, near.value, learnsets.value] as const,
+  () =>
+    [props.yours, props.theirs, props.field, props.data, sheet.value, open.value, near.value, learnsets.value] as const,
   start,
   { debounce: 150, immediate: true },
 )
@@ -173,98 +177,93 @@ const all = shallowRef(false)
 </script>
 
 <template>
-  <section ref="root" class="panel threats">
-    <div class="threats-head">
-      <h2>
-        <span
-          v-tip="theirId && yourId ? t('calc.threats.about', { name: name(theirId), yours: name(yourId) }) : undefined"
-          class="about"
-          tabindex="0"
-          >{{ t('calc.threats.title') }}</span
-        >
-      </h2>
-      <span class="controls">
-        <!-- At its team sheet: its item, ability, nature and moves as set on the calc. -->
-        <button
-          v-tip="t('calc.threats.sheetTip')"
-          type="button"
-          class="btn switch sheet"
-          :class="{ on: sheet }"
-          :aria-pressed="sheet"
-          @click="sheet = !sheet"
-        >
-          {{ t('calc.threats.sheet') }}
-        </button>
-        <SegmentedControl v-model="sort" class="soft" :label="t('calc.threats.sort')" :options="sorts" />
-      </span>
-    </div>
-    <p v-if="!theirId || !yourId" class="muted intro">{{ t('calc.threats.pickBoth') }}</p>
-    <template v-else>
-      <!-- Working it out: how far it's got, what it showed before faded under it. -->
-      <div v-if="progress !== null" class="progress" role="progressbar" :aria-valuenow="Math.round(progress * 100)">
-        <span :style="{ width: `${progress * 100}%` }"></span>
+  <details ref="root" class="panel banded threats" :open @toggle="onToggle">
+    <summary>{{ t('calc.threats.title') }}</summary>
+    <template v-if="open">
+      <div class="threats-head">
+        <span class="controls">
+          <!-- At its team sheet: its item, ability, nature and moves as set on the calc. -->
+          <button
+            v-tip="t('calc.threats.sheetTip')"
+            type="button"
+            class="btn switch sheet"
+            :class="{ on: sheet }"
+            :aria-pressed="sheet"
+            @click="sheet = !sheet"
+          >
+            {{ t('calc.threats.sheet') }}
+          </button>
+          <SegmentedControl v-model="sort" class="soft" :label="t('calc.threats.sort')" :options="sorts" />
+        </span>
       </div>
-      <!-- What it's at: its sets, or its team sheet; and what the calc has set that counts. -->
-      <p class="muted intro">
-        {{ sheet ? t('calc.threats.atSheet') : t('calc.threats.atSets') }}
-      </p>
-      <ul v-if="counted.length" class="counted">
-        <li v-for="g in counted" :key="g.who">
-          <span class="muted">{{ g.who }}</span>
-          <span v-for="x in g.list" :key="x" class="chip">{{ x }}</span>
-        </li>
-      </ul>
-      <p v-else class="muted small-note">{{ t('calc.threats.nothingSet') }}</p>
-      <p v-if="sheet && rows && !rows.length && progress === null" class="muted intro">
-        {{ t('calc.threats.noSheetMoves') }}
-      </p>
-      <template v-if="rows && rows.length">
-        <p class="summary" :class="{ stale: progress !== null }">
-          {{
-            !ohkoCount.length
-              ? t('calc.threats.none')
-              : sheet
-                ? t('calc.threats.summarySheet', { n: ohkoCount.length })
-                : t('calc.threats.summary', { n: ohkoCount.length, run: ohkoRun.length })
-          }}
-        </p>
-        <div class="table-wrap" :class="{ stale: progress !== null }">
-          <table class="grid">
-            <thead>
-              <tr>
-                <th scope="col">{{ t('calc.threats.move') }}</th>
-                <th scope="col" class="num">{{ t('calc.threats.damage') }}</th>
-                <th scope="col" class="num">
-                  <span v-tip="t('calc.threats.ohkoTip')" class="about" tabindex="0">OHKO</span>
-                </th>
-                <th scope="col" class="num">
-                  <span v-tip="t('calc.threats.twoTip')" class="about" tabindex="0">2HKO</span>
-                </th>
-                <th scope="col" class="num">
-                  <span v-tip="t('calc.threats.runTip')" class="about" tabindex="0">{{ t('calc.threats.run') }}</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="r in sorted.slice(0, all ? undefined : TOP)" :key="r.move" :class="kind(r)">
-                <th scope="row" class="move">
-                  <span class="move-name"><TypeIcon :type="MOVES[r.move].type" />{{ moveName(r.move) }}</span>
-                </th>
-                <td class="num range">{{ r.minPct.toFixed(0) }}–{{ r.maxPct.toFixed(0) }}%</td>
-                <td class="num ko">{{ chance(r.ohko) }}</td>
-                <td class="num">{{ chance(r.two) }}</td>
-                <td class="num">
-                  <span v-if="r.run !== null">{{ percent(r.run) }}</span>
-                  <span v-else class="muted">{{ hasMoves ? '<1%' : '—' }}</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <p v-if="!theirId || !yourId" class="muted intro">{{ t('calc.threats.pickBoth') }}</p>
+      <template v-else>
+        <!-- Working it out: how far it's got, what it showed before faded under it. -->
+        <div v-if="progress !== null" class="progress" role="progressbar" :aria-valuenow="Math.round(progress * 100)">
+          <span :style="{ width: `${progress * 100}%` }"></span>
         </div>
-        <MoreToggle v-if="sorted.length > TOP" v-model:all="all" :n="sorted.length" :top="TOP" />
+        <!-- What it's at: its sets, or its team sheet; and what the calc has set that counts. -->
+        <p class="muted intro">
+          {{ sheet ? t('calc.threats.atSheet') : t('calc.threats.atSets') }}
+        </p>
+        <ul v-if="counted.length" class="counted">
+          <li v-for="g in counted" :key="g.who">
+            <span class="muted">{{ g.who }}</span>
+            <span v-for="x in g.list" :key="x" class="chip">{{ x }}</span>
+          </li>
+        </ul>
+        <p v-else class="muted small-note">{{ t('calc.threats.nothingSet') }}</p>
+        <p v-if="sheet && rows && !rows.length && progress === null" class="muted intro">
+          {{ t('calc.threats.noSheetMoves') }}
+        </p>
+        <template v-if="rows && rows.length">
+          <p class="summary" :class="{ stale: progress !== null }">
+            {{
+              !ohkoCount.length
+                ? t('calc.threats.none')
+                : sheet
+                  ? t('calc.threats.summarySheet', { n: ohkoCount.length })
+                  : t('calc.threats.summary', { n: ohkoCount.length, run: ohkoRun.length })
+            }}
+          </p>
+          <div class="table-wrap" :class="{ stale: progress !== null }">
+            <table class="grid">
+              <thead>
+                <tr>
+                  <th scope="col">{{ t('calc.threats.move') }}</th>
+                  <th scope="col" class="num">{{ t('calc.threats.damage') }}</th>
+                  <th scope="col" class="num">
+                    <span v-tip="t('calc.threats.ohkoTip')" class="about" tabindex="0">OHKO</span>
+                  </th>
+                  <th scope="col" class="num">
+                    <span v-tip="t('calc.threats.twoTip')" class="about" tabindex="0">2HKO</span>
+                  </th>
+                  <th scope="col" class="num">
+                    <span v-tip="t('calc.threats.runTip')" class="about" tabindex="0">{{ t('calc.threats.run') }}</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="r in sorted.slice(0, all ? undefined : TOP)" :key="r.move" :class="kind(r)">
+                  <th scope="row" class="move">
+                    <span class="move-name"><TypeIcon :type="MOVES[r.move].type" />{{ moveName(r.move) }}</span>
+                  </th>
+                  <td class="num range">{{ r.minPct.toFixed(0) }}–{{ r.maxPct.toFixed(0) }}%</td>
+                  <td class="num ko">{{ chance(r.ohko) }}</td>
+                  <td class="num">{{ chance(r.two) }}</td>
+                  <td class="num">
+                    <span v-if="r.run !== null">{{ percent(r.run) }}</span>
+                    <span v-else class="muted">{{ hasMoves ? '<1%' : '—' }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <MoreToggle v-if="sorted.length > TOP" v-model:all="all" :n="sorted.length" :top="TOP" />
+        </template>
       </template>
     </template>
-  </section>
+  </details>
 </template>
 
 <style scoped>
@@ -276,9 +275,6 @@ const all = shallowRef(false)
   flex-wrap: wrap;
   align-items: center;
   gap: 14px 16px;
-}
-.threats-head h2 {
-  margin: 0;
 }
 .controls {
   display: flex;

@@ -324,8 +324,6 @@ export const messages = {
   'calc.sideLabel': 'This side',
   'calc.meta.title': 'Against the meta',
   'calc.threats.title': 'Threats',
-  'calc.threats.about':
-    'Every damaging move {name} learns against your {yours}, at its sets in the data shown: their spreads, items and abilities, each as often as it’s run, every damage roll alike.',
   'calc.threats.pickBoth': 'Pick both Pokémon to see what the opponent could knock yours out with.',
   'calc.threats.sort': 'Sort by',
   'calc.threats.byThreat': 'Threat',
@@ -335,7 +333,8 @@ export const messages = {
   'calc.threats.sheet': 'Team sheet',
   'calc.threats.sheetTip':
     'Its item, ability, nature and moves as set above, as an open team sheet shows them: only its stat points vary.',
-  'calc.threats.atSets': 'Every move it learns, at its sets.',
+  'calc.threats.atSets':
+    'Every move it learns, at its sets: their spreads, items and abilities, each as often as it’s run.',
   'calc.threats.atSheet': 'Its item, ability, nature and moves as set above; only its stat points vary.',
   'calc.threats.noSheetMoves': 'Its set above has no damaging moves yet.',
   'calc.threats.nothingSet': 'No stages, weather or other conditions set: set them above and they count here.',
