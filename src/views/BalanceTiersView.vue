@@ -195,9 +195,25 @@ const foundIds = computed<PokemonId[]>(() =>
 const foundSet = computed(() => new Set(foundIds.value))
 const finding = computed(() => foundIds.value.length > 0)
 const findQuery = (ids: readonly PokemonId[]) => (ids.length ? ids.join(',') : undefined)
+/** Another Pokémon found, its row (its first) then brought to the middle of the screen, flashing once. */
 function addFound(id: PokemonId | null) {
   if (id === null || foundSet.value.has(id)) return
-  set({ find: findQuery([...foundIds.value, id].slice(-MAX_FOUND)) })
+  void router
+    .replace({ query: { ...query.value, find: findQuery([...foundIds.value, id].slice(-MAX_FOUND)) } })
+    .then(() => nextTick())
+    .then(() => flashRow(rowOfFound(id)))
+}
+const rowOfFound = (id: PokemonId) =>
+  [...document.querySelectorAll<HTMLElement>('.tier[data-key]')].find(
+    (el) => el.dataset.key === id || el.dataset.key!.startsWith(`${id}:`),
+  )
+function flashRow(el: HTMLElement | undefined) {
+  if (!el) return
+  center(el)
+  el.classList.remove('flash')
+  void el.offsetWidth
+  el.classList.add('flash')
+  el.addEventListener('animationend', () => el.classList.remove('flash'), { once: true })
 }
 const removeFound = (id: PokemonId) =>
   set({ find: findQuery(foundIds.value.filter((x) => x !== id)), vs: vsQuery(vsIds.value.filter((x) => x !== id)) })

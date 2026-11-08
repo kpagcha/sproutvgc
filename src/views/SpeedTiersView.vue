@@ -849,7 +849,11 @@ function addFound(id: PokemonId | null) {
   const ids = [...foundIds.value, id].slice(-MAX_FOUND)
   const e = perMon.value && mine.value !== null && id !== mine.value ? topEntry(id) : undefined
   const vs = [...vsKeys.value, ...(e ? [chipKey(e)] : [])].filter((k) => ids.includes(chipId(k)))
-  void router.replace({ query: { ...query.value, ...findQuery(ids), vs: vsQuery(vs) } })
+  // Its row brought into view once the ladder has it.
+  void router
+    .replace({ query: { ...query.value, ...findQuery(ids), vs: vsQuery(vs) } })
+    .then(() => nextTick())
+    .then(() => locateFound(id))
 }
 /** One found no longer, nor measured against. */
 function removeFound(id: PokemonId) {
@@ -1403,7 +1407,7 @@ function flashRow(el: HTMLElement | undefined) {
 }
 // The comparison's Speed finds the row it's against; a chip of the ones found, its first row.
 const locateVersus = (id: PokemonId) => flashRow(rowsOf(id, '.row.versus')[0])
-const locateFound = (id: PokemonId) => flashRow(rowsOf(id, '.tier.hit')[0])
+const locateFound = (id: PokemonId) => flashRow(rowsOf(id, '.tier.hit')[0] ?? rowsOf(id, '.tier')[0])
 function onChip(ev: MouseEvent, e: Entry) {
   if (mine.value === null || ev.ctrlKey || ev.metaKey || ev.shiftKey) return
   ev.preventDefault()

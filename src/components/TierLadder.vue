@@ -492,6 +492,20 @@ onBeforeUnmount(() => {
 .row.versus {
   background: color-mix(in srgb, var(--opponent) 14%, transparent);
 }
+/* The row of a Pokémon just found: a ring pulsing twice, softly, as the speed tiers'. */
+.row.flash {
+  animation: row-flash 0.6s ease-out 2;
+}
+@keyframes row-flash {
+  40% {
+    box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .row.flash {
+    animation: none;
+  }
+}
 /* Shown though the view leaves it out: a dotted rule over it. */
 .row.extra {
   border-top-style: dotted;
