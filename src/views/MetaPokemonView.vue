@@ -410,7 +410,26 @@ interface EventRow {
   cut: number
   cutOf: number
 }
-const tournaments = computed(() => {
+// Whether events where none of its teams had it are listed too (the panel's options, remembered); by default only those
+// with it, and a regulation with none of them left out.
+const ALL_EVENTS_KEY = 'sproutvgc.metaPokemon.allEvents'
+const allEvents = shallowRef(
+  (() => {
+    try {
+      return localStorage.getItem(ALL_EVENTS_KEY) === '1'
+    } catch {
+      return false
+    }
+  })(),
+)
+watch(allEvents, (on) => {
+  try {
+    localStorage.setItem(ALL_EVENTS_KEY, on ? '1' : '0')
+  } catch {
+    // Storage unavailable: the choice lasts until the page reloads.
+  }
+})
+const allRuns = computed(() => {
   const u = eventUsage.value
   if (!u) return []
   const runs: { regulation: string; legal: boolean; events: EventRow[] }[] = []
@@ -448,6 +467,11 @@ const tournaments = computed(() => {
   }
   return runs.some((r) => r.events.some((x) => x.usage > 0)) ? runs : []
 })
+const tournaments = computed(() =>
+  allEvents.value
+    ? allRuns.value
+    : allRuns.value.map((r) => ({ ...r, events: r.events.filter((x) => x.usage > 0) })).filter((r) => r.events.length),
+)
 const topEvent = computed(() =>
   Math.max(...tournaments.value.flatMap((r) => r.events.flatMap((x) => [x.usage, x.before ?? 0])), 0.0001),
 )
@@ -619,7 +643,7 @@ const sections = computed(() =>
     </div>
 
     <div v-if="!m && data" class="panel">
-      <p class="muted">{{ t('usageMon.none', { name: refName(ref_) }) }}</p>
+      <p class="muted no-usage">{{ t('usageMon.none', { name: refName(ref_) }) }}</p>
     </div>
 
     <template v-else-if="m">
@@ -837,7 +861,12 @@ const sections = computed(() =>
     <!-- Its official tournaments, the latest first, by regulation: each event's share of teams with it against the
          events before's, and the top cut's teams with it, each event leading to its standings narrowed to them. -->
     <section v-if="tournaments.length" id="sec-tournaments" class="panel">
-      <h2>{{ t('usageMon.tournaments') }}</h2>
+      <div class="panel-head">
+        <h2>{{ t('usageMon.tournaments') }}</h2>
+        <OptionsMenu :title="t('usageMon.evOptions')">
+          <label><input v-model="allEvents" type="checkbox" />{{ t('usageMon.evAll') }}</label>
+        </OptionsMenu>
+      </div>
       <div class="events-table" role="table" :aria-label="t('usageMon.tournaments')">
         <div class="ev-row ev-head muted small" role="row">
           <!-- Each heading's tooltip on its text, not across its column. -->
@@ -1289,6 +1318,9 @@ const sections = computed(() =>
 }
 h2 {
   margin-top: 0;
+}
+.no-usage {
+  margin-bottom: 0;
 }
 /* A list of shares: what, its bar (out of all of its sets), its number. */
 .bar {
