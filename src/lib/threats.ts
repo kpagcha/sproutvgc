@@ -18,7 +18,17 @@ import { natureEffectOn } from '@/data/natures'
 import { itemBound, POKEMON, STATS } from '@/data/pokemon'
 import { statValue } from '@/lib/stats'
 import { stoneMega } from '@/lib/team'
-import { abilityOf, battlerOf, damaging, hit, SETS_FIELD, type Battlefield, type Fighter, type Hit } from '@/lib/damage'
+import {
+  abilityOf,
+  battlerOf,
+  damaging,
+  type HitOptions,
+  hit,
+  SETS_FIELD,
+  type Battlefield,
+  type Fighter,
+  type Hit,
+} from '@/lib/damage'
 
 /** One move of the opponent's against yours. */
 export interface Threat {
@@ -48,15 +58,19 @@ type Spread = { nature: string | null; points: Fighter['member']['points'] }
 /**
  * Its sets as the threats count them: its spreads, items and abilities, from the meta's entry (`entry`, its battler's:
  * a stone holder's, its Mega's) or its own set where the entry has none. A Pokémon whose item is fixed (a Mega's stone,
- * Ogerpon's mask) keeps it, and a Mega its own ability.
+ * Ogerpon's mask) keeps it, and a Mega its own ability. At its team sheet (`sheet`), its item, ability and nature are
+ * its set's, as an open team sheet shows them: its stat points, which no sheet shows, are what vary, as the spreads of
+ * that nature have them (its set's own, when the entry has none of that nature).
  */
-function setsOf(att: Fighter, entry: PokemonMeta | undefined) {
+function setsOf(att: Fighter, entry: PokemonMeta | undefined, sheet: boolean) {
   const m = att.member
   const spreads = weighted<Spread>(
-    entry?.spreads?.map((s) => ({ value: { nature: s.nature, points: s.points }, share: s.share })),
+    entry?.spreads
+      ?.filter((s) => !sheet || s.nature === m.nature)
+      .map((s) => ({ value: { nature: s.nature, points: s.points }, share: s.share })),
     { nature: m.nature, points: m.points },
   )
-  const fixedItem = !!stoneMega(m) || (!!m.pokemon && itemBound(m.pokemon))
+  const fixedItem = sheet || !!stoneMega(m) || (!!m.pokemon && itemBound(m.pokemon))
   const items = fixedItem
     ? [{ value: m.item, w: 1 }]
     : weighted<ItemId | null>(
@@ -65,12 +79,13 @@ function setsOf(att: Fighter, entry: PokemonMeta | undefined) {
         m.item,
       )
   const megaAbility = att.mega && stoneMega(m)
-  const abilities = megaAbility
-    ? [{ value: m.ability, w: 1 }]
-    : weighted<AbilityId | null>(
-        entry?.abilities?.map((x) => ({ value: x.id, share: x.share })),
-        m.ability,
-      )
+  const abilities =
+    sheet || megaAbility
+      ? [{ value: m.ability, w: 1 }]
+      : weighted<AbilityId | null>(
+          entry?.abilities?.map((x) => ({ value: x.id, share: x.share })),
+          m.ability,
+        )
   return { spreads, items, abilities }
 }
 
@@ -92,8 +107,16 @@ function koChances(h: Hit, def: Fighter, att: Fighter, field: Battlefield): [num
   return [one, Math.max(one, two)]
 }
 
-/** The moves to work out: every damaging one it learns. */
-export const threatMoves = (learnset: readonly MoveId[]) => learnset.filter(damaging)
+/** The moves to work out: every damaging one it learns, or at its team sheet (`sheet`), those of its set. */
+export const threatMoves = (learnset: readonly MoveId[], att: Fighter, sheet: boolean) =>
+  sheet ? att.member.moves.filter(damaging) : learnset.filter(damaging)
+
+/** How the threats are worked out: at its team sheet (`setsOf`), and each move's options as the calc has them set on
+ * its rows (a critical hit, its hits, a doubled move's doubling, Stockpile's layers, one target alone). */
+export interface ThreatOptions {
+  sheet?: boolean
+  moveOpts?: Partial<Record<MoveId, HitOptions>>
+}
 
 /**
  * The attacker's stats a move's damage hangs on, by their place in `STATS`: its attacking stat as its category has it,
@@ -145,8 +168,11 @@ export function* threatSteps(
   field: Battlefield,
   entry: PokemonMeta | undefined,
   moves: readonly MoveId[],
+  options: ThreatOptions = {},
 ): Generator<Threat | null> {
-  const { spreads, items, abilities } = setsOf(att, entry)
+  const { spreads, items, abilities } = setsOf(att, entry, !!options.sheet)
+  // A move's options as the calc has them, lean.
+  const optsOf = (move: MoveId): HitOptions => ({ ...options.moveOpts?.[move], lean: true })
   const runs = new Map((entry?.moves ?? []).map((x) => [x.id, x.share ?? 0]))
   const spreadList = [...spreads].sort((x, y) => y.w - x.w)
   const base = att.member.pokemon ? POKEMON[battlerOf(att)!]!.stats : null
@@ -227,14 +253,14 @@ export function* threatSteps(
     let firstKey: string | null = null
     for (const ab of abilities) {
       const fl = fieldFor(ab.value)
-      const key = keyOf(hit(fighter(first!.si, probe.value, ab.value), def, move, fl, { lean: true }), fl)
+      const key = keyOf(hit(fighter(first!.si, probe.value, ab.value), def, move, fl, optsOf(move)), fl)
       if (firstKey === null) firstKey = key
       const to = key === firstKey ? abilities[0]!.value : ab.value
       abilityW.set(to, (abilityW.get(to) ?? 0) + ab.w)
     }
     for (const [ability, aw] of abilityW) {
       const fl = fieldFor(ability)
-      const tryHit = (item: ItemId | null) => hit(fighter(first!.si, item, ability), def, move, fl, { lean: true })
+      const tryHit = (item: ItemId | null) => hit(fighter(first!.si, item, ability), def, move, fl, optsOf(move))
       let plainHit: Hit | null | undefined
       for (const it of items) {
         const w = it.w * aw
@@ -266,7 +292,7 @@ export function* threatSteps(
       count(g.hit, g.w * first!.w, fighter(first!.si, g.item, g.ability), fl)
       for (const s of rest) {
         const f = fighter(s.si, g.item, g.ability)
-        count(hit(f, def, move, fl, { lean: true }), g.w * s.w, f, fl)
+        count(hit(f, def, move, fl, optsOf(move)), g.w * s.w, f, fl)
       }
     }
     yield minPct === Infinity ? null : { move, run: runs.has(move) ? runs.get(move)! : null, ohko, two, minPct, maxPct }
