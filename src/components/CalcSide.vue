@@ -27,6 +27,7 @@ import {
   usesAttacked,
   usesFainted,
 } from '@/lib/damage'
+import type { Saw } from '@/lib/damageReverse'
 import type { Field, Member } from '@/lib/team'
 import { conditionName, sideOf, SPIKES } from '@/components/calcConditions'
 import CalcConditions from '@/components/CalcConditions.vue'
@@ -60,6 +61,8 @@ const props = defineProps<{
   movesFolded: boolean
   /** What the battle adds to it folded away, its heading alone. */
   battleFolded: boolean
+  /** Read backwards: its moves' rows take what each was seen to do. */
+  reverse?: boolean
 }>()
 const emit = defineEmits<{
   'update:fighter': [f: Fighter]
@@ -95,6 +98,12 @@ defineExpose({ card })
 const opts = computed(() => props.fighter.hitOpts ?? {})
 const setOpt = (mv: MoveId, patch: HitOptions) =>
   set({ hitOpts: { ...opts.value, [mv]: { ...opts.value[mv], ...patch } } })
+const setSaw = (mv: MoveId, saw: Saw | null) => {
+  const next = { ...props.fighter.saw }
+  if (saw) next[mv] = saw
+  else delete next[mv]
+  set({ saw: Object.keys(next).length ? next : undefined })
+}
 const unfolded = shallowRef<Partial<Record<MoveId, boolean>>>({})
 watch(
   () => props.fighter.member.pokemon,
@@ -257,6 +266,9 @@ function setHpPoints(e: Event) {
             :single="!!(h.mv && opts[h.mv]?.single)"
             :doubled="!!(h.mv && opts[h.mv]?.doubled)"
             :stockpile="h.mv ? opts[h.mv]?.stockpile : undefined"
+            :reverse
+            :saw="h.mv ? fighter.saw?.[h.mv] : null"
+            @saw="h.mv && setSaw(h.mv, $event)"
             :open="!!h.mv && !!unfolded[h.mv]"
             @update:open="h.mv && (unfolded = { ...unfolded, [h.mv]: $event })"
             @pick="emit('field', h.i)"

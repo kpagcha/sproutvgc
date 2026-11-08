@@ -8,6 +8,7 @@ import { refName } from '@/i18n/refName'
 import { copy } from '@/lib/clipboard'
 import { follow, metaHref } from '@/lib/links'
 import { DOUBLING, hitChoices, koKind, MAX_STOCKPILE, type Hit } from '@/lib/damage'
+import type { Saw } from '@/lib/damageReverse'
 import CategoryIcon from '@/components/CategoryIcon'
 import TypeIcon from '@/components/TypeIcon'
 
@@ -35,8 +36,13 @@ const props = defineProps<{
   single: boolean
   doubled: boolean
   stockpile: number | undefined
+  /** Read backwards: what it was seen to do, typed on its row (`saw`), the opponent's HP lost in percent or, for the
+   * opponent's moves (`theirs`), yours' in HP; or a knockout, lived, or a knockout on the second hit. */
+  reverse?: boolean
+  saw?: Saw | null
 }>()
 const emit = defineEmits<{
+  saw: [saw: Saw | null]
   pick: []
   crit: [on: boolean]
   hits: [n: number]
@@ -100,6 +106,22 @@ const note = computed(() => {
   return t(`calc.order.${kind}.${h.order}`)
 })
 const blockedText = tSplit('calc.blockedBy', 'what')
+
+// What it was seen to do: a number (the opponent's HP lost in percent; for the opponent's moves, yours' in HP), or one
+// of the outcomes, either clearing the other.
+const sawOn = computed(() => props.reverse && !status.value && !props.idle && !!props.hit)
+const sawUnit = computed(() => (props.theirs ? 'hp' : 'pct'))
+const sawNumber = computed(() => (props.saw && 'n' in props.saw ? props.saw.n : ''))
+const sawMax = computed(() => (props.theirs ? (props.hit?.hp ?? 999) : 100))
+function typed(e: Event) {
+  const el = e.target as HTMLInputElement
+  if (el.value === '') return emit('saw', null)
+  const v = Math.round(Number(el.value))
+  if (!Number.isFinite(v)) return
+  emit('saw', { kind: sawUnit.value, n: Math.min(sawMax.value, Math.max(0, v)) })
+}
+const OUTCOMES = ['ko', 'lived', 'two'] as const
+const outcome = (k: (typeof OUTCOMES)[number]) => emit('saw', props.saw?.kind === k ? null : { kind: k })
 </script>
 
 <template>
@@ -161,6 +183,37 @@ const blockedText = tSplit('calc.blockedBy', 'what')
         <!-- Every row a verdict's line, so they're all as tall. -->
         <span v-else class="verdict" aria-hidden="true">&nbsp;</span>
         <span v-if="note" class="note">{{ note }}</span>
+        <!-- Read backwards, what it was seen to do. -->
+        <span v-if="sawOn" class="saw" @click.stop>
+          <span class="muted saw-label">{{ t('calc.reverse.saw') }}</span>
+          <span class="saw-num">
+            <input
+              class="num-in"
+              type="number"
+              inputmode="numeric"
+              min="0"
+              :max="sawMax"
+              :value="sawNumber"
+              :placeholder="'–'"
+              :aria-label="t(`calc.reverse.${sawUnit}Lost`)"
+              @input="typed"
+            />
+            <span class="muted">{{ t(`calc.reverse.unit.${sawUnit}`) }}</span>
+          </span>
+          <span class="outcomes" role="group" :aria-label="t('calc.reverse.saw')">
+            <button
+              v-for="k in OUTCOMES"
+              :key="k"
+              type="button"
+              class="btn mod"
+              :class="{ on: saw?.kind === k }"
+              :aria-pressed="saw?.kind === k"
+              @click="outcome(k)"
+            >
+              {{ t(`calc.reverse.outcome.${k}`) }}
+            </button>
+          </span>
+        </span>
       </template>
     </div>
     <div v-if="open" class="details">
@@ -264,7 +317,7 @@ const blockedText = tSplit('calc.blockedBy', 'what')
   --icon-scale: 1;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
-  grid-template-areas: 'name range fold' 'bar bar bar' 'verdict note note';
+  grid-template-areas: 'name range fold' 'bar bar bar' 'verdict note note' 'saw saw saw';
   align-items: center;
   gap: 8px 10px;
   padding: 10px 0;
@@ -430,6 +483,39 @@ const blockedText = tSplit('calc.blockedBy', 'what')
   background: var(--panel-alt);
   border: 1px solid var(--border);
 }
+/* What it was seen to do, read backwards: a number and the outcomes on one line. */
+.saw {
+  grid-area: saw;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  font-size: 0.875em;
+  cursor: auto;
+}
+.saw-num {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.saw .num-in {
+  width: 4em;
+  padding: 2px 6px;
+  font: inherit;
+  text-align: right;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.saw .num-in::-webkit-inner-spin-button,
+.saw .num-in::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.outcomes {
+  display: inline-flex;
+  gap: 4px;
+}
 .hp {
   margin-left: auto;
   font-variant-numeric: tabular-nums;
@@ -548,6 +634,11 @@ const blockedText = tSplit('calc.blockedBy', 'what')
     grid-row: 4;
     grid-column: 1 / -1;
     justify-self: start;
+  }
+  .saw {
+    grid-area: auto;
+    grid-row: 5;
+    grid-column: 1 / -1;
   }
   .move-name {
     white-space: normal;
