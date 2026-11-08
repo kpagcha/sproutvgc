@@ -895,11 +895,11 @@ const foundNotes = computed(() => {
   return foundIds.value.flatMap((id) => (m[id] ? [] : [{ id, text: t('speed.findNoData') }]))
 })
 const isHit = (e: Entry) => !e.mine && isFound(e.id)
-// What finding does: mark its chips among the rest, or show only them (and yours, to compare): only them by default;
+// What finding does: mark its chips among the rest, or show only them (and yours, to compare): marked by default;
 // the URL says so (`?findmode=`) only when it differs.
 const FIND_MODES = ['mark', 'only'] as const
 type FindMode = (typeof FIND_MODES)[number]
-const defaultFindMode: FindMode = 'only'
+const defaultFindMode: FindMode = 'mark'
 const findMode = computed<FindMode>({
   get: () =>
     (FIND_MODES as readonly unknown[]).includes(query.value.findmode)

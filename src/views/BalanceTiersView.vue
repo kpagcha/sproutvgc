@@ -183,7 +183,7 @@ const passes = (id: PokemonId, f: TermFilters = filters.value) => passesGroups(f
 const filtersOpen = shallowRef(false)
 const clearFilters = () => set({ f: undefined, fm: undefined })
 
-// Finding Pokémon (`?find=`), as many as a team has: shown alone (the default) or marked among the rest (`?findmode=mark`).
+// Finding Pokémon (`?find=`), as many as a team has: marked among the rest (the default) or shown alone (`?findmode=only`).
 const MAX_FOUND = 6
 /** The found chips' sprites' scale: small enough to sit inside the chip, the sprite filling its cell. */
 const CHIP_ICON = 0.7
@@ -208,8 +208,8 @@ useSlashFocus(() => {
   if (!findPicker.value) return false
   findPicker.value.open()
 })
-const onlyFound = computed(() => finding.value && query.value.findmode !== 'mark')
-const toggleOnly = () => set({ findmode: onlyFound.value ? 'mark' : undefined })
+const onlyFound = computed(() => finding.value && query.value.findmode === 'only')
+const toggleOnly = () => set({ findmode: onlyFound.value ? undefined : 'only' })
 const onlyLabel = computed(() => tSplit('speed.findOnly', 'name'))
 const ranks = computed(() => (data.value ? usageRanks(data.value) : undefined))
 const findIds = computed(() =>
