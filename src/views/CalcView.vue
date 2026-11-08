@@ -12,6 +12,7 @@ import {
   Eraser,
   Plus,
   RotateCcw,
+  ScanSearch,
   SlidersHorizontal,
   Sparkles,
   Undo2,
@@ -45,6 +46,7 @@ import { emptyMember, nextField, pickedAs, setsAs, stoneMega, type Field, type M
 import { conditionName, fieldOf, terrainOf, weatherOf } from '@/components/calcConditions'
 import CalcConditions from '@/components/CalcConditions.vue'
 import CalcMeta from '@/components/CalcMeta.vue'
+import CalcReverse from '@/components/CalcReverse.vue'
 import CalcThreats from '@/components/CalcThreats.vue'
 import CalcSide from '@/components/CalcSide.vue'
 import CalcSummary from '@/components/CalcSummary.vue'
@@ -84,6 +86,9 @@ const wide = useMediaQuery('(min-width: 900px)')
 const sections = computed(() => [
   { id: 'calc-top', label: t('calc.section.field') },
   { id: 'calc-duel', label: t('calc.section.damage') },
+  ...(reverse.value && battlerOf(sides.value.a) && battlerOf(sides.value.b)
+    ? [{ id: 'calc-reverse', label: t('calc.reverse.title') }]
+    : []),
   ...(battlerOf(sides.value.a) && battlerOf(sides.value.b)
     ? [{ id: 'calc-threats', label: t('calc.threats.title') }]
     : []),
@@ -120,6 +125,8 @@ const fromUrl = route.query.a || route.query.b || route.query.f ? route.query : 
 const start = fromUrl ?? readLast()
 /** The threats at the opponent's team sheet (`?sheet=1`), kept with the rest. */
 const sheet = shallowRef(start.sheet === '1')
+/** Read backwards (`?mode=reverse`): its moves' rows take what each was seen to do, and what fits is worked out. */
+const reverse = shallowRef(start.mode === 'reverse')
 sides.value = {
   a: decodeFighter(start.a) ?? emptyFighter(),
   b: decodeFighter(start.b) ?? emptyFighter(),
@@ -153,13 +160,14 @@ const query = computed(() => ({
   b: encodeFighter(sides.value.b) || undefined,
   f: encodeField(field.value) || undefined,
   sheet: sheet.value ? '1' : undefined,
+  mode: reverse.value ? 'reverse' : undefined,
 }))
 watchDebounced(
   query,
   (q) => {
     saveLast(q)
     const next = { ...route.query, ...q }
-    for (const k of ['a', 'b', 'f', 'sheet'] as const) if (!q[k]) delete next[k]
+    for (const k of ['a', 'b', 'f', 'sheet', 'mode'] as const) if (!q[k]) delete next[k]
     void router.replace({ query: next })
   },
   { debounce: 250, immediate: true },
@@ -177,6 +185,15 @@ const setSide = (k: SideKey, f: Fighter) =>
         f.hitOpts === sides.value[k].hitOpts && { hitOpts: undefined }),
     },
   })
+// What was seen is of these two: another Pokémon on either side, or the two swapped, it goes.
+watch(
+  () => [sides.value.a.member.pokemon, sides.value.b.member.pokemon] as const,
+  ([a, b], [wasA, wasB]) => {
+    if (a === wasA && b === wasB) return
+    const { a: fa, b: fb } = sides.value
+    if (fa.saw || fb.saw) sides.value = { a: { ...fa, saw: undefined }, b: { ...fb, saw: undefined } }
+  },
+)
 /** The sides as they battle: at every set, at their sets pooled in the meta shown. */
 const fought = computed(() => ({ a: atSets(sides.value.a, data.value), b: atSets(sides.value.b, data.value) }))
 const patchMember = (k: SideKey, patch: Partial<Member>) =>
@@ -497,6 +514,16 @@ function face(f: Fighter) {
     <section id="calc-top" class="head-panel">
       <div class="head">
         <h1>{{ t('title.calc') }}<SetupStar /></h1>
+        <button
+          v-tip="t('calc.reverse.modeTip')"
+          type="button"
+          class="btn switch mode"
+          :class="{ on: reverse }"
+          :aria-pressed="reverse"
+          @click="reverse = !reverse"
+        >
+          <ScanSearch :size="16" aria-hidden="true" />{{ t('calc.reverse.mode') }}
+        </button>
         <MetaDialog v-if="snapshot" class="head-meta" />
       </div>
     </section>
@@ -606,6 +633,7 @@ function face(f: Fighter) {
             :side-open="sideOpen"
             :moves-folded="movesFolded[k].value"
             :battle-folded="battleFolded[k].value"
+            :reverse
             @battle-folded="battleFolded[k].value = $event"
             @side-open="sideOpen = $event"
             @battlefield="field = $event"
@@ -642,7 +670,17 @@ function face(f: Fighter) {
       </div>
     </div>
 
-    <CalcVerdict :a="fought.a" :b="fought.b" :field />
+    <!-- Read backwards, what fits what was seen, in place of who moves first. -->
+    <CalcReverse
+      v-if="reverse && battlerOf(sides.a) && battlerOf(sides.b)"
+      id="calc-reverse"
+      :yours="fought.a"
+      :theirs="fought.b"
+      :field
+      :data
+      v-model:sheet="sheet"
+    />
+    <CalcVerdict v-else :a="fought.a" :b="fought.b" :field />
 
     <!-- What the opponent could knock yours out with: every move it learns, at its sets. -->
     <CalcThreats
@@ -878,6 +916,13 @@ function face(f: Fighter) {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 12px;
+}
+/* Read backwards: a switch, as the threats' Team sheet. */
+.mode {
+  gap: 6px;
+}
+.mode.on {
+  background: var(--sel);
 }
 /* A row, so its star sits centered on the title's line. */
 .head h1 {

@@ -29,6 +29,7 @@ import {
   type Fighter,
   type Hit,
 } from '@/lib/damage'
+import { runSliced } from '@/lib/slices'
 
 /** One move of the opponent's against yours. */
 export interface Threat {
@@ -125,7 +126,7 @@ export interface ThreatOptions {
  * changes its power (Payback, Bolt Beak, Fishious Rend, or any move from an Analytic user: `ordered`). Spreads alike in
  * them hit alike.
  */
-function statsUsed(move: MoveId, ordered: boolean): readonly number[] {
+export function statsUsed(move: MoveId, ordered: boolean): readonly number[] {
   const own = OWN_STATS[move] ?? (MOVES[move]?.category === 'special' ? [3] : [1])
   return ordered || ORDER_MOVES.has(move) ? [...own, 5] : own
 }
@@ -139,7 +140,7 @@ const OWN_STATS: Partial<Record<string, readonly number[]>> = {
   foulplay: [],
 }
 /** The moves whose power hangs on moving first or last. */
-const ORDER_MOVES = new Set(['payback', 'boltbeak', 'fishiousrend'])
+export const ORDER_MOVES = new Set(['payback', 'boltbeak', 'fishiousrend'])
 /** The moves any item can change: those whose power the held item sets (Fling, Natural Gift), and those hanging on the
  * user's stat stages or Defense, which an item can raise (a Terrain Seed: Stored Power, Power Trip, Body Press). */
 const ITEM_MOVES = new Set(['fling', 'naturalgift', 'storedpower', 'powertrip', 'bodypress'])
@@ -148,7 +149,7 @@ const ITEM_MOVES = new Set(['fling', 'naturalgift', 'storedpower', 'powertrip', 
  * but where Speed changes the move's power, or the order does). An item the regulation doesn't have is tried, as is any
  * other, and every item for a move whose power the item sets.
  */
-function inert(item: ItemId | null, move: MoveId, ordered: boolean): boolean {
+export function inert(item: ItemId | null, move: MoveId, ordered: boolean): boolean {
   if (ITEM_MOVES.has(move)) return false
   const c = item ? ITEMS[item]?.category : 'utility'
   const speedCounts = ordered || ORDER_MOVES.has(move) || move === 'gyroball' || move === 'electroball'
@@ -311,12 +312,9 @@ export function* threatSteps(
   }
 }
 
-/** How long a slice of the work runs before giving the page a frame back, in ms. */
-const SLICE_MS = 6
-
 /**
- * Works out the threats a slice at a time, `onProgress` told how far it's got, `onDone` given them all; the function
- * it returns stops it (the inputs changed, or the page left), nothing called after.
+ * Works out the threats a slice at a time (`runSliced`), `onProgress` told how far it's got, `onDone` given them all; the
+ * function it returns stops it (the inputs changed, or the page left), nothing called after.
  */
 export function runThreats(
   steps: Generator<Threat | null>,
@@ -324,31 +322,13 @@ export function runThreats(
   onProgress: (done: number) => void,
   onDone: (rows: Threat[]) => void,
 ): () => void {
-  const rows: Threat[] = []
-  let done = 0
-  let stopped = false
-  const slice = () => {
-    if (stopped) return
-    const until = performance.now() + SLICE_MS
-    while (performance.now() < until) {
-      const next = steps.next()
-      if (next.done) {
-        channel.port1.close()
-        return onDone(rows)
-      }
-      done++
-      if (next.value) rows.push(next.value)
+  function* collect(): Generator<unknown, Threat[]> {
+    const rows: Threat[] = []
+    for (const r of steps) {
+      if (r) rows.push(r)
+      yield
     }
-    onProgress(done / total)
-    channel.port2.postMessage(0)
+    return rows
   }
-  // The next slice as the next task, the page's input and drawing let in between: a message, not a timer, which the
-  // browser holds back 4ms at a time once timers nest.
-  const channel = new MessageChannel()
-  channel.port1.onmessage = slice
-  channel.port2.postMessage(0)
-  return () => {
-    stopped = true
-    channel.port1.close()
-  }
+  return runSliced(collect(), total, onProgress, onDone)
 }
