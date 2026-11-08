@@ -154,7 +154,8 @@ function setHpPoints(e: Event) {
   if (!stats.value) return
   const points = Number.isFinite(v) ? Math.min(stats.value.hp, Math.max(1, Math.round(v))) : hpOf.value
   el.value = String(points)
-  set({ hp: Math.min(100, Math.max(1, Math.round((points / stats.value.hp) * 100))) })
+  // Kept exactly (not as a whole percent, which would round 150 of 207 HP to 72%, 149 HP).
+  set({ hp: points >= stats.value.hp ? 100 : (points / stats.value.hp) * 100 })
 }
 </script>
 
@@ -307,6 +308,7 @@ function setHpPoints(e: Event) {
             <span class="muted row-label hp-label">{{ t('stat.hp') }}</span>
             <HpBar
               :model-value="fighter.hp"
+              :max="stats.hp"
               :label="t('calc.hpPercent')"
               class="hp-bar"
               @update:model-value="set({ hp: $event })"

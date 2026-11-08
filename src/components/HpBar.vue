@@ -2,55 +2,69 @@
 import { computed, shallowRef, useTemplateRef } from 'vue'
 import { t } from '@/i18n'
 
-// A Pokémon's HP left, in percent, as a slider drawn as the damage calculator's bars of HP are (`DamageRow`): what's
-// left in the HP colors (green over half, yellow over a fifth, red under), what's lost dark, ink-outlined, with a mark
-// at half, where Sitrus Berry and the like kick in. Taller than those, to be held, its percent on it. It works as the
-// stat points' bar (`PointsBar`): dragged or tapped along (sliding sideways on a touch screen; up and down still
-// scroll the page), or with the keys (arrows by one, with Shift or Page Up/Down by ten, Home and End to 1 and full),
-// and stepped by one with the buttons beside it; under a mouse, where it would go shows faded before it's pressed.
-const props = defineProps<{ label: string }>()
+// A Pokémon's HP left, kept in percent (`hp`, not rounded: a whole number of its HP points out of `max`), as a slider
+// drawn as the damage calculator's bars of HP are (`DamageRow`): what's left in the HP colors (green over half, yellow
+// over a fifth, red under), what's lost dark, ink-outlined, with a mark at half, where Sitrus Berry and the like kick
+// in. Taller than those, to be held, its percent on it. It works as the stat points' bar (`PointsBar`), by HP points:
+// dragged or tapped along (sliding sideways on a touch screen; up and down still scroll the page), or with the keys
+// (arrows by one point, with Shift or Page Up/Down by a tenth of its HP, Home and End to 1 and full), and stepped by
+// one point with the buttons beside it; under a mouse, where it would go shows faded before it's pressed.
+const props = defineProps<{ label: string; max: number }>()
 const hp = defineModel<number>({ required: true })
 
-const clamp = (p: number) => Math.max(1, Math.min(100, Math.round(p)))
-const set = (p: number) => (hp.value = clamp(p))
+/** Its HP points left, from 1 to `max`. */
+const points = computed(() => Math.max(1, Math.min(props.max, Math.round((props.max * hp.value) / 100))))
+/** Its percent as the bar says it: whole, not full until it is (99% for its last point short). */
+const shown = (p: number) => (p >= 100 ? 100 : Math.max(1, Math.min(99, Math.round(p))))
+const clampPoints = (n: number) => Math.max(1, Math.min(props.max, Math.round(n)))
+/** Its HP set to `n` points: in percent, exactly (full as 100). */
+const setPoints = (n: number) => {
+  const p = clampPoints(n)
+  hp.value = p >= props.max ? 100 : (p / props.max) * 100
+}
 
 const bar = useTemplateRef<HTMLElement>('bar')
 const dragging = shallowRef(false)
 const hover = shallowRef<number | null>(null)
+/** The HP points under the pointer. */
 function at(e: PointerEvent): number {
   const r = bar.value!.getBoundingClientRect()
-  return clamp(((e.clientX - r.left) / r.width) * 100)
+  return clampPoints(((e.clientX - r.left) / r.width) * props.max)
 }
 function down(e: PointerEvent) {
   if (e.button !== 0) return
   bar.value!.setPointerCapture(e.pointerId)
   dragging.value = true
   hover.value = null
-  set(at(e))
+  setPoints(at(e))
 }
 function move(e: PointerEvent) {
-  if (dragging.value) set(at(e))
+  if (dragging.value) setPoints(at(e))
   else if (e.pointerType === 'mouse') hover.value = at(e)
 }
 const up = () => (dragging.value = false)
 function key(e: KeyboardEvent) {
-  const step = e.shiftKey ? 10 : 1
+  const tenth = Math.max(1, Math.round(props.max / 10))
+  const step = e.shiftKey ? tenth : 1
   const by: Record<string, number> = {
     ArrowRight: step,
     ArrowUp: step,
     ArrowLeft: -step,
     ArrowDown: -step,
-    PageUp: 10,
-    PageDown: -10,
+    PageUp: tenth,
+    PageDown: -tenth,
   }
-  if (e.key in by) set(hp.value + by[e.key]!)
-  else if (e.key === 'Home') set(1)
-  else if (e.key === 'End') set(100)
+  if (e.key in by) setPoints(points.value + by[e.key]!)
+  else if (e.key === 'Home') setPoints(1)
+  else if (e.key === 'End') setPoints(props.max)
   else return
   e.preventDefault()
 }
 
-const preview = computed(() => (hover.value !== null && hover.value !== hp.value ? hover.value : null))
+/** Where it would go, in percent, under a mouse. */
+const preview = computed(() =>
+  hover.value !== null && hover.value !== points.value ? (hover.value / props.max) * 100 : null,
+)
 const color = (p: number) => (p > 50 ? 'var(--hp-high)' : p > 20 ? 'var(--hp-mid)' : 'var(--hp-low)')
 </script>
 
@@ -64,9 +78,9 @@ const color = (p: number) => (p > 50 ? 'var(--hp-high)' : p > 20 ? 'var(--hp-mid
       tabindex="0"
       :aria-label="props.label"
       aria-valuemin="1"
-      aria-valuemax="100"
-      :aria-valuenow="hp"
-      :aria-valuetext="`${hp}%`"
+      :aria-valuemax="props.max"
+      :aria-valuenow="points"
+      :aria-valuetext="`${points} / ${props.max} (${shown(hp)}%)`"
       @pointerdown="down"
       @pointermove="move"
       @pointerup="up"
@@ -77,15 +91,15 @@ const color = (p: number) => (p > 50 ? 'var(--hp-high)' : p > 20 ? 'var(--hp-mid
       <span class="left" :style="{ width: `${hp}%`, background: color(hp) }"></span>
       <span v-if="preview !== null" class="ghost" :style="{ left: `${preview}%` }" aria-hidden="true"></span>
       <span class="half" aria-hidden="true"></span>
-      <span class="pct" :class="{ preview: preview !== null }" aria-hidden="true">{{ preview ?? hp }}%</span>
+      <span class="pct" :class="{ preview: preview !== null }" aria-hidden="true">{{ shown(preview ?? hp) }}%</span>
     </div>
     <button
       type="button"
       class="step"
       tabindex="-1"
-      :disabled="hp <= 1"
+      :disabled="points <= 1"
       :aria-label="t('calc.hpLess')"
-      @click="set(hp - 1)"
+      @click="setPoints(points - 1)"
     >
       −
     </button>
@@ -93,9 +107,9 @@ const color = (p: number) => (p > 50 ? 'var(--hp-high)' : p > 20 ? 'var(--hp-mid
       type="button"
       class="step"
       tabindex="-1"
-      :disabled="hp >= 100"
+      :disabled="points >= props.max"
       :aria-label="t('calc.hpMore')"
-      @click="set(hp + 1)"
+      @click="setPoints(points + 1)"
     >
       +
     </button>

@@ -102,7 +102,9 @@ export function encodeFighter(f: Fighter): string {
   const flags: string[] = []
   // Holding its stone it Mega Evolves unless said otherwise.
   if (stoneMega(m) && !f.mega) flags.push('n')
-  if (f.hp !== 100) flags.push(`h${f.hp}`)
+  // To a hundredth of a percent, enough for a whole number of HP points to come back exactly, its decimal point an
+  // underscore (the flags are dot-separated): `h72_46`.
+  if (f.hp !== 100) flags.push(`h${String(+f.hp.toFixed(2)).replace('.', '_')}`)
   if (f.status) flags.push(`s${f.status}`)
   if (f.boosts.some((b) => b)) flags.push(`b${f.boosts.join('_')}`)
   if (f.abilityOn) flags.push('a')
@@ -144,7 +146,7 @@ export function decodeFighter(s: unknown): Fighter | null {
     if (tok === 'n') f.mega = false
     else if (tok === 'a') f.abilityOn = true
     else if (tok === 'e') f.sets = true
-    else if (/^h\d+$/.test(tok)) f.hp = clamp(Number(tok.slice(1)), 1, 100)
+    else if (/^h\d+(_\d+)?$/.test(tok)) f.hp = clamp(Number(tok.slice(1).replace('_', '.')), 0.01, 100)
     else if (/^f\d$/.test(tok)) f.fainted = clamp(Number(tok.slice(1)), 0, 5)
     else if (/^r\d$/.test(tok)) f.attacked = clamp(Number(tok.slice(1)), 0, MAX_ATTACKED)
     else if (/^k\d$/.test(tok)) f.spikes = clamp(Number(tok.slice(1)), 0, MAX_SPIKES)
