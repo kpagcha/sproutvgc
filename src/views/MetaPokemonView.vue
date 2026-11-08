@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, shallowRef, useTemplateRef, watch } from 'vue'
+import { useIntersectionObserver } from '@vueuse/core'
 import { useRoute } from 'vue-router'
 import { ChevronsDown, ChevronsUp, Info, Swords, Trophy } from '@lucide/vue'
 import { ability, available, availableIds, move, pokemon, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
@@ -25,6 +26,7 @@ import {
   eventsOf,
   loadEventUsage,
   loadRegulationBuilds,
+  loadStandings,
   type EventUsage,
   type RegulationBuilds,
   type TournamentEvent,
@@ -38,7 +40,7 @@ import { FASTEST, type SpeedBuild } from '@/lib/speedBuild'
 import { commonSpeed, odds, reachOf, setSpread, type SpreadPoint } from '@/lib/speedLineup'
 import { MAX_POINTS, statValue } from '@/lib/stats'
 import { percentiles } from '@/lib/statPercentiles'
-import { MIN_MATCHES, pooledUsage } from '@/lib/tournamentStats'
+import { medalOf, MIN_MATCHES, pooledUsage } from '@/lib/tournamentStats'
 import { useListOptions } from '@/composables/useListOptions'
 import { useMeta } from '@/composables/useMeta'
 import { useUnfolded } from '@/composables/useUnfolded'
@@ -409,6 +411,8 @@ interface EventRow {
   beforeLabel: string
   cut: number
   cutOf: number
+  /** Its teams there, whole field. */
+  teams: number
 }
 // Whether events where none of its teams had it are listed too (the panel's options, remembered); by default only those
 // with it, and a regulation with none of them left out.
@@ -459,6 +463,7 @@ const allRuns = computed(() => {
           : t('tournaments.trendBefore', { n: b.events.length }),
       cut,
       cutOf: cutTeams,
+      teams: all,
     })
   }
   for (const r of runs) {
@@ -472,6 +477,55 @@ const tournaments = computed(() =>
     ? allRuns.value
     : allRuns.value.map((r) => ({ ...r, events: r.events.filter((x) => x.usage > 0) })).filter((r) => r.events.length),
 )
+/** Whether there's an event without it to show: the option to show them, only then. */
+const anyWithout = computed(() => allRuns.value.some((r) => r.events.some((x) => x.usage === 0)))
+const teamsText = (n: number) => (n === 1 ? t('usageMon.evTeam') : t('usageMon.evTeams', { n }))
+
+// Its top teams, leading the panel: its best-placed team at each event (its placing from every event's few numbers,
+// `best`), the `TOP_TEAMS` best of them (the latest first among those placed alike), shown the latest first; the player
+// and their six from those events' standings, the few it takes loaded once the panel is near the screen. Each leads to
+// the player's page there.
+const TOP_TEAMS = 3
+const topPicks = computed(() => {
+  const u = eventUsage.value
+  if (!u) return []
+  // `EVENTS` is the latest first, and the sort keeps that order among those placed alike.
+  return EVENTS.flatMap((e) => {
+    const best = e.category === 'official' ? u[e.id]?.pokemon[id.value]?.[3] : undefined
+    return best ? [{ event: e, placing: best }] : []
+  })
+    .sort((a, b) => a.placing - b.placing)
+    .slice(0, TOP_TEAMS)
+    .sort((a, b) => b.event.date.localeCompare(a.event.date))
+})
+const tournamentsEl = useTemplateRef<HTMLElement>('tournamentsEl')
+const tournamentsNear = shallowRef(false)
+useIntersectionObserver(tournamentsEl, ([e]) => e?.isIntersecting && (tournamentsNear.value = true), {
+  rootMargin: '400px 0px',
+})
+const topTeams = shallowRef<
+  { event: TournamentEvent; placing: number; player: string; country: string; team: PokemonId[] }[]
+>([])
+watch(
+  [topPicks, tournamentsNear],
+  async ([picks, near]) => {
+    if (!near) return
+    const all = await Promise.all(
+      picks.map((x) =>
+        loadStandings(x.event.id)
+          .then((list) => ({ x, s: list.find((s) => s.placing === x.placing) }))
+          .catch(() => ({ x, s: undefined })),
+      ),
+    )
+    // Another Pokémon since: not its teams.
+    if (picks !== topPicks.value) return
+    topTeams.value = all.flatMap(({ x, s }) =>
+      s ? [{ ...x, player: s.player, country: s.country, team: s.team.map((slot) => slot[0]) }] : [],
+    )
+  },
+  { immediate: true },
+)
+
 const topEvent = computed(() =>
   Math.max(...tournaments.value.flatMap((r) => r.events.flatMap((x) => [x.usage, x.before ?? 0])), 0.0001),
 )
@@ -860,12 +914,37 @@ const sections = computed(() =>
 
     <!-- Its official tournaments, the latest first, by regulation: each event's share of teams with it against the
          events before's, and the top cut's teams with it, each event leading to its standings narrowed to them. -->
-    <section v-if="tournaments.length" id="sec-tournaments" class="panel">
+    <section v-if="tournaments.length" id="sec-tournaments" ref="tournamentsEl" class="panel">
       <div class="panel-head">
         <h2>{{ t('usageMon.tournaments') }}</h2>
-        <OptionsMenu :title="t('usageMon.evOptions')">
+        <!-- Its one option, only when there are events without it to show. -->
+        <OptionsMenu v-if="anyWithout" :title="t('usageMon.evOptions')">
           <label><input v-model="allEvents" type="checkbox" />{{ t('usageMon.evAll') }}</label>
         </OptionsMenu>
+      </div>
+      <!-- Its top teams, the latest first: a line each, its placing, the player, the event and their six, leading to
+           the player's page there. -->
+      <div v-if="topTeams.length" class="top-teams">
+        <h3 class="top-teams-head muted small">{{ t('usageMon.topTeams') }}</h3>
+        <ol class="top-list">
+          <li v-for="x in topTeams" :key="`${x.event.id}:${x.placing}`">
+            <AppLink
+              :to="{ name: 'tournamentPlayer', params: { id: x.event.id, placing: String(x.placing) } }"
+              class="top-team"
+            >
+              <span class="tt-placing num" :class="medalOf(x.placing)">#{{ x.placing }}</span>
+              <span class="tt-who">
+                <span class="tt-player"><CountryFlag :code="x.country" />{{ x.player }}</span>
+                <span class="tt-event muted small"
+                  >{{ x.event.name }} · <time :datetime="x.event.date">{{ eventDate(x.event.date) }}</time></span
+                >
+              </span>
+              <span class="tt-team">
+                <PokemonIcon v-for="(p, i) in x.team" :key="i" :id="p" :class="{ faded: p !== id }" />
+              </span>
+            </AppLink>
+          </li>
+        </ol>
       </div>
       <div class="events-table" role="table" :aria-label="t('usageMon.tournaments')">
         <div class="ev-row ev-head muted small" role="row">
@@ -898,8 +977,8 @@ const sections = computed(() =>
                 >
                 <span class="muted small"
                   ><time :datetime="x.event.date">{{ eventDate(x.event.date) }}</time> ·
-                  <CountryFlag :code="x.event.country"
-                /></span>
+                  <CountryFlag :code="x.event.country" /> · {{ teamsText(x.teams) }}</span
+                >
               </span>
               <!-- Its usage against the events before, a bar with the numbers on it, then the change in points. -->
               <span
@@ -1519,6 +1598,81 @@ h2 {
 }
 .ev-head .r {
   text-align: right;
+}
+/* Its top teams: a line each, compact, its placing, the player and event, then their six. */
+.top-teams {
+  margin: 6px 0 12px;
+}
+.top-teams-head {
+  margin: 0 0 4px;
+  font-weight: normal;
+}
+.top-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.top-team {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 10px;
+  padding: 4px 6px;
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+}
+.top-team:hover {
+  background: var(--hover);
+}
+.top-team:hover .tt-player {
+  text-decoration: underline;
+}
+.tt-placing {
+  font-weight: bold;
+}
+.tt-who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.tt-player {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  overflow: hidden;
+  font-weight: bold;
+  color: var(--link);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.tt-event {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.tt-team {
+  --icon-scale: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+/* Their six, this one in full, its teammates faded. */
+.tt-team .faded {
+  opacity: 0.45;
+}
+/* Narrow, the six under the player, across the whole width. */
+@media (max-width: 720px) {
+  .top-team {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .tt-team {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
 }
 .ev-what {
   display: grid;
