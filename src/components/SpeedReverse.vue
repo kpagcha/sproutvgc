@@ -35,23 +35,25 @@ const result = computed(() =>
 )
 const nameOf = (s: Side) => (s === 'a' ? sideA.value.name : sideB.value.name)!
 
-/** A side's points in short: any, a stretch, one number. */
+/** A side's points in short: a stretch, or one number. */
 function rangeText(r: PointsRange) {
-  if (r.from === 0 && r.to === MAX_POINTS) return t('reverse.anyPoints')
   if (r.from === r.to) return t('reverse.exactly', { n: r.from, speed: r.speeds[0] })
   if (r.from === 0) return t('reverse.atMost', { n: r.to, speed: r.speeds[1] })
   if (r.to === MAX_POINTS) return t('reverse.atLeast', { n: r.from, speed: r.speeds[0] })
   return t('reverse.between', { from: r.from, to: r.to, speed: `${r.speeds[0]}–${r.speeds[1]}` })
 }
+/** What each one's points can be, but for one that can have any (the table says as much). */
 const lines = computed(() => {
   const r = result.value
   if (!r) return []
-  return (['a', 'b'] as const).map((s) => ({
-    s,
-    id: s === 'a' ? sideA.value.id! : sideB.value.id!,
-    range: s === 'a' ? r.rangeA : r.rangeB,
-    known: r.known[s],
-  }))
+  return (['a', 'b'] as const)
+    .map((s) => ({
+      s,
+      id: s === 'a' ? sideA.value.id! : sideB.value.id!,
+      range: s === 'a' ? r.rangeA : r.rangeB,
+      known: r.known[s],
+    }))
+    .filter((l) => l.range && !(l.range.from === 0 && l.range.to === MAX_POINTS))
 })
 const buildLabel = (b: { points: number; speed: number }) => t('reverse.build', { n: b.points, speed: b.speed })
 </script>
@@ -80,8 +82,8 @@ const buildLabel = (b: { points: number; speed: number }) => t('reverse.build', 
       <template v-if="props.first && result">
         <p v-if="!result.rangeA" class="warn" role="status">{{ t('reverse.impossible') }}</p>
         <template v-else>
-          <!-- What each one's points can be. -->
-          <ul class="lines" role="status">
+          <!-- What each one's points can be, but for one that can have any. -->
+          <ul v-if="lines.length" class="lines" role="status">
             <li v-for="l in lines" :key="l.s" class="line" :class="l.s === 'a' ? 'yours' : 'opponent'">
               <span class="who"><PokemonIcon :id="l.id" />{{ nameOf(l.s) }}</span>
               <span class="range">{{ rangeText(l.range!) }}</span>

@@ -760,7 +760,7 @@ function resetAll() {
           :class="{ opponent: side.s === 'b' }"
         >
           <div class="band">
-            <span>{{ t(side.s === 'a' ? 'reverse.sideA' : 'reverse.sideB') }}</span>
+            <span>{{ side.s === 'a' ? t('speed.yours') : t('compare.opponent') }}</span>
           </div>
           <SpeedEditor
             :ranks
@@ -770,7 +770,7 @@ function resetAll() {
             :speed="side.speed"
             :stat="side.stat"
             :common="[]"
-            :title="t(side.s === 'a' ? 'reverse.sideA' : 'reverse.sideB')"
+            :title="side.s === 'a' ? t('speed.yours') : t('compare.opponent')"
             :tone="side.s === 'a' ? 'yours' : 'opponent'"
             no-points
             @pick="(id: PokemonId) => pick(side.s, id)"
