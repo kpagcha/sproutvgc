@@ -27,7 +27,6 @@ import {
   usesAttacked,
   usesFainted,
 } from '@/lib/damage'
-import type { Saw } from '@/lib/damageReverse'
 import type { Field, Member } from '@/lib/team'
 import { conditionName, sideOf, SPIKES } from '@/components/calcConditions'
 import CalcConditions from '@/components/CalcConditions.vue'
@@ -61,8 +60,11 @@ const props = defineProps<{
   movesFolded: boolean
   /** What the battle adds to it folded away, its heading alone. */
   battleFolded: boolean
-  /** Read backwards: its moves' rows take what each was seen to do. */
-  reverse?: boolean
+  /** The inverse calc's: its moves by name alone, no damage (what was seen is entered apart), no HP left (each hit
+   * seen has its own); the opponent's stat points left out, and off its team sheet (`sheet`) its item and nature too,
+   * those being what's worked out. */
+  inverse?: boolean
+  sheet?: boolean
 }>()
 const emit = defineEmits<{
   'update:fighter': [f: Fighter]
@@ -98,12 +100,6 @@ defineExpose({ card })
 const opts = computed(() => props.fighter.hitOpts ?? {})
 const setOpt = (mv: MoveId, patch: HitOptions) =>
   set({ hitOpts: { ...opts.value, [mv]: { ...opts.value[mv], ...patch } } })
-const setSaw = (mv: MoveId, saw: Saw | null) => {
-  const next = { ...props.fighter.saw }
-  if (saw) next[mv] = saw
-  else delete next[mv]
-  set({ saw: Object.keys(next).length ? next : undefined })
-}
 const unfolded = shallowRef<Partial<Record<MoveId, boolean>>>({})
 watch(
   () => props.fighter.member.pokemon,
@@ -119,7 +115,7 @@ const hits = computed(() =>
     i: i as Field,
     mv,
     hit:
-      !mv || !otherName.value || MOVES[mv]?.category === 'status'
+      !mv || !otherName.value || props.inverse || MOVES[mv]?.category === 'status'
         ? null
         : hit(props.fighter, props.other, mv, props.field, opts.value[mv]),
   })),
@@ -207,6 +203,7 @@ function setHpPoints(e: Event) {
           :evolved="fighter.mega"
           no-moves
           flat
+          :hide="inverse && theirs ? (sheet ? ['points'] : ['points', 'item', 'nature']) : undefined"
           :at-sets="fighter.sets && !!fighter.pooled"
           :pooled
           @mega="set({ mega: !fighter.mega })"
@@ -241,7 +238,7 @@ function setHpPoints(e: Event) {
             @click="emit('movesFolded', !movesFolded)"
           >
             <span class="part-title">
-              <template v-if="otherId"
+              <template v-if="otherId && !inverse"
                 >{{ t('calc.against') }}<PokemonIcon :id="otherId" class="against-icon" /><span class="sr-only">{{
                   otherName
                 }}</span></template
@@ -251,14 +248,14 @@ function setHpPoints(e: Event) {
             <ChevronDown :size="16" class="fold-chev" :class="{ open: !movesFolded }" aria-hidden="true" />
           </button>
         </h3>
-        <p v-if="!otherName && !movesFolded" class="muted hint">{{ t('calc.pickOther') }}</p>
+        <p v-if="!otherName && !movesFolded && !inverse" class="muted hint">{{ t('calc.pickOther') }}</p>
         <ul v-show="!movesFolded" class="damages">
           <DamageRow
             v-for="h in hits"
             :key="h.i"
             :id="h.mv"
             :hit="h.hit"
-            :idle="!otherName"
+            :idle="!otherName || inverse"
             :active="active === h.i"
             :theirs
             :crit="!!(h.mv && opts[h.mv]?.crit)"
@@ -266,9 +263,6 @@ function setHpPoints(e: Event) {
             :single="!!(h.mv && opts[h.mv]?.single)"
             :doubled="!!(h.mv && opts[h.mv]?.doubled)"
             :stockpile="h.mv ? opts[h.mv]?.stockpile : undefined"
-            :reverse
-            :saw="h.mv ? fighter.saw?.[h.mv] : null"
-            @saw="h.mv && setSaw(h.mv, $event)"
             :open="!!h.mv && !!unfolded[h.mv]"
             @update:open="h.mv && (unfolded = { ...unfolded, [h.mv]: $event })"
             @pick="emit('field', h.i)"
@@ -316,7 +310,7 @@ function setHpPoints(e: Event) {
         </h3>
         <div v-show="!battleFolded" class="battle-body">
           <!-- Its HP left: the bar, and its HP exactly, typed. -->
-          <div class="hp-row">
+          <div v-if="!inverse" class="hp-row">
             <span class="muted row-label hp-label">{{ t('stat.hp') }}</span>
             <HpBar
               :model-value="fighter.hp"

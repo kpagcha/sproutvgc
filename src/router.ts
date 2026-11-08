@@ -503,6 +503,24 @@ export const router = createRouter({
       },
     },
     {
+      // The damage calculator read backwards, its other tab: the same Pokémon and field (the URL's), and what of the
+      // opponent's set fits the hits seen.
+      path: '/tools/calc/inverse',
+      name: 'calcInverse',
+      component: () => import('@/views/CalcView.vue'),
+      props: { inverse: true },
+      meta: {
+        titleKey: 'title.calcInverse',
+        descKey: 'desc.calcInverse',
+        headKey: 'head.calcInverse',
+        keywordsKey: 'keywords.calcInverse',
+        dexNames: true,
+        descriptions: ['ability', 'move', 'item', 'condition'],
+        setup: (query) => (query.a || query.b ? stringQuery(query, ['meta']) : null),
+        ...inArea('tools', 'calc'),
+      },
+    },
+    {
       // Pokémon's Speeds compared, yours against opponents or in speed order, linked to and from the speed tiers.
       path: '/tools/compare-speeds',
       name: 'speedCompare',

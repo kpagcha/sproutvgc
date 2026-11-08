@@ -43,7 +43,7 @@ function view(visit: PageVisit) {
   const team = (keys: string[]) => keys.flatMap((k) => mon(q[k]) ?? [])
   // A comparison's icons: each team's, or the speed order's list; a damage calc's, each side's Pokémon.
   const groups =
-    name === 'calc'
+    name === 'calc' || name === 'calcInverse'
       ? ['a', 'b'].flatMap((s) => [calcSide(q[s])].filter((id): id is PokemonId => !!id)).map((id) => [id])
       : !compare
         ? null
@@ -126,7 +126,9 @@ const titled = computed(
 /** A comparison's Pokémon by name, for what reads the chip out: its icons alone say nothing. */
 const label = computed(() => {
   const names = v.value.groups?.map((g) => g.map((id) => refName(pokemon(id))).join(', ')).join(' vs ')
-  return names && v.value.to.name === 'calc' ? `${t(v.value.titleKey!)}: ${names}` : names
+  return names && (v.value.to.name === 'calc' || v.value.to.name === 'calcInverse')
+    ? `${t(v.value.titleKey!)}: ${names}`
+    : names
 })
 /** The most icons a group shows, the rest counted. */
 const GROUP_MAX = 6
@@ -136,7 +138,9 @@ const GROUP_MAX = 6
   <a :href="v.to.href" class="page-chip" :aria-label="label" @click="follow">
     <template v-if="v.groups">
       <!-- A damage calc named, its Pokémon alone looking like a comparison's. -->
-      <template v-if="v.to.name === 'calc' && !untitled">{{ t(v.titleKey!) }}</template>
+      <template v-if="(v.to.name === 'calc' || v.to.name === 'calcInverse') && !untitled">{{
+        t(v.titleKey!)
+      }}</template>
       <template v-for="(g, i) in v.groups" :key="i">
         <span v-if="i" class="muted">vs</span>
         <span class="group"

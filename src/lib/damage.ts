@@ -26,7 +26,6 @@ import { POKEMON, STATS } from '@/data/pokemon'
 import { chart, TYPES, type TypeId } from '@/data/types'
 import { commonMember, isMega, mostUsedForme } from '@/lib/commonSet'
 import { emptyMember, setsAs, stoneMega, type Member } from '@/lib/team'
-import type { Saw } from '@/lib/damageReverse'
 
 const GEN = Generations.get(0)
 
@@ -80,8 +79,6 @@ export interface Fighter {
   hitOpts?: Partial<Record<MoveId, HitOptions>>
   /** Those stats, in `STATS` order, as the page works them out from the meta shown (`atSets`); never kept. */
   pooled?: readonly number[]
-  /** What its moves were seen to do to the other side, by the move, for the calc read backwards (`damageReverse.ts`). */
-  saw?: Partial<Record<MoveId, Saw>>
 }
 
 export const WEATHERS = ['', 'Sun', 'Rain', 'Sand', 'Snow'] as const

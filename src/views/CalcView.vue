@@ -12,7 +12,6 @@ import {
   Eraser,
   Plus,
   RotateCcw,
-  ScanSearch,
   SlidersHorizontal,
   Sparkles,
   Undo2,
@@ -25,7 +24,17 @@ import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { useMeta } from '@/composables/useMeta'
 import { useTeams } from '@/composables/useTeams'
-import { decodeField, decodeFighter, encodeField, encodeFighter, readLast, saveLast } from '@/lib/calcState'
+import {
+  decodeField,
+  decodeFighter,
+  decodeHits,
+  encodeField,
+  encodeFighter,
+  encodeHits,
+  readLast,
+  saveLast,
+} from '@/lib/calcState'
+import type { HitSeen, Observation } from '@/lib/damageReverse'
 import {
   abilityOf,
   atSets,
@@ -47,6 +56,8 @@ import { conditionName, fieldOf, terrainOf, weatherOf } from '@/components/calcC
 import CalcConditions from '@/components/CalcConditions.vue'
 import CalcMeta from '@/components/CalcMeta.vue'
 import CalcReverse from '@/components/CalcReverse.vue'
+import CalcHits, { type HitDraft } from '@/components/CalcHits.vue'
+import FolderTabs from '@/components/FolderTabs.vue'
 import CalcThreats from '@/components/CalcThreats.vue'
 import CalcSide from '@/components/CalcSide.vue'
 import CalcSummary from '@/components/CalcSummary.vue'
@@ -76,19 +87,49 @@ import TeamPicker from '@/components/TeamPicker.vue'
 // used (`CalcMeta`), a row tapped making it the opponent; before it, once both are picked, what the opponent could knock
 // yours out with, every move it learns at its sets (`CalcThreats`). Everything is in the URL, a calc a link to share
 // (`calcState.ts`), and the page opened bare comes back as last left; the first time, empty.
+// Two tabs, one page each over the same Pokémon and field (the URL's, carried from one to the other): the damage, and
+// the inverse (`inverse`, `/tools/calc/inverse`): what was seen (`CalcHits`: the hits, which moved first) and what of
+// the opponent's set fits it (`CalcReverse`), the opponent's panel leaving out what's worked out.
+const props = defineProps<{ inverse?: boolean }>()
 const route = useRoute()
 const router = useRouter()
+// Its address while it was a switch on the damage tab.
+if (!props.inverse && route.query.mode === 'reverse') {
+  const query = { ...route.query }
+  delete query.mode
+  void router.replace({ name: 'calcInverse', query })
+}
+type Tab = 'damage' | 'inverse'
+const tab = computed<Tab>(() => (props.inverse ? 'inverse' : 'damage'))
+const tabs = computed(() => [
+  { value: 'damage' as const, label: t('calc.tab.damage') },
+  { value: 'inverse' as const, label: t('calc.tab.inverse') },
+])
+const toTab = (to: Tab) => {
+  if (to !== tab.value) void router.push({ name: to === 'inverse' ? 'calcInverse' : 'calc', query: route.query })
+}
 const { snapshot, data } = useMeta()
 const { teams } = useTeams()
 const wide = useMediaQuery('(min-width: 900px)')
 // Its sections, a row of links stuck to the top, the one being read marked: the field, the two sides' damage, and
-// yours against the meta once there's yours. On phones the sides' tabs stick under it (`--nav-h`, its height).
+// yours against the meta once there's yours; on the inverse tab, the field, the two, what was seen and what fits. On
+// phones the sides' tabs stick under it (`--nav-h`, its height).
 const sections = computed(() => [
   { id: 'calc-top', label: t('calc.section.field') },
+  ...(props.inverse
+    ? [
+        { id: 'calc-duel', label: t('calc.section.pokemon') },
+        ...(hasBoth.value
+          ? [
+              { id: 'calc-hits', label: t('calc.hits.title') },
+              { id: 'calc-reverse', label: t('calc.reverse.title') },
+            ]
+          : []),
+      ]
+    : damageSections.value),
+])
+const damageSections = computed(() => [
   { id: 'calc-duel', label: t('calc.section.damage') },
-  ...(reverse.value && battlerOf(sides.value.a) && battlerOf(sides.value.b)
-    ? [{ id: 'calc-reverse', label: t('calc.reverse.title') }]
-    : []),
   ...(battlerOf(sides.value.a) && battlerOf(sides.value.b)
     ? [{ id: 'calc-threats', label: t('calc.threats.title') }]
     : []),
@@ -125,10 +166,16 @@ const fromUrl = route.query.a || route.query.b || route.query.f ? route.query : 
 const start = fromUrl ?? readLast()
 /** The threats at the opponent's team sheet (`?sheet=1`), kept with the rest. */
 const sheet = shallowRef(start.sheet === '1')
-/** Read backwards (`?mode=reverse`): its moves' rows take what each was seen to do, and what fits is worked out. */
-const reverse = shallowRef(start.mode === 'reverse')
-/** Read backwards, which was seen moving first (`?first=a|b`). */
+/** The inverse tab's hits seen (`?h=`), those with no result yet kept for the visit alone. */
+const hits = shallowRef<HitDraft[]>(decodeHits(start.h))
+/** Which was seen moving first (`?first=a|b`). */
 const first = shallowRef<'a' | 'b' | null>(start.first === 'a' || start.first === 'b' ? start.first : null)
+/** The hits seen with a move and a result: what's kept and worked out. */
+const seen = computed(() => hits.value.filter((h): h is HitSeen => !!h.move && !!h.saw))
+const observations = computed<Observation[]>(() => [
+  ...(first.value ? [{ by: 'speed' as const, first: first.value }] : []),
+  ...seen.value,
+])
 sides.value = {
   a: decodeFighter(start.a) ?? emptyFighter(),
   b: decodeFighter(start.b) ?? emptyFighter(),
@@ -162,7 +209,7 @@ const query = computed(() => ({
   b: encodeFighter(sides.value.b) || undefined,
   f: encodeField(field.value) || undefined,
   sheet: sheet.value ? '1' : undefined,
-  mode: reverse.value ? 'reverse' : undefined,
+  h: encodeHits(seen.value) || undefined,
   first: first.value ?? undefined,
 }))
 watchDebounced(
@@ -170,7 +217,7 @@ watchDebounced(
   (q) => {
     saveLast(q)
     const next = { ...route.query, ...q }
-    for (const k of ['a', 'b', 'f', 'sheet', 'mode', 'first'] as const) if (!q[k]) delete next[k]
+    for (const k of ['a', 'b', 'f', 'sheet', 'h', 'first'] as const) if (!q[k]) delete next[k]
     void router.replace({ query: next })
   },
   { debounce: 250, immediate: true },
@@ -193,11 +240,22 @@ watch(
   () => [sides.value.a.member.pokemon, sides.value.b.member.pokemon] as const,
   ([a, b], [wasA, wasB]) => {
     if (a === wasA && b === wasB) return
-    const { a: fa, b: fb } = sides.value
-    if (fa.saw || fb.saw) sides.value = { a: { ...fa, saw: undefined }, b: { ...fb, saw: undefined } }
+    hits.value = []
     first.value = null
   },
 )
+/** A spread of What fits used: the opponent set to it (its nature and item unless at its team sheet), the damage tab
+ * shown with it. */
+function useBuild(b: { nature: string | null; points: Member['points']; item?: ItemId | null }) {
+  const f = sides.value.b
+  const member = {
+    ...f.member,
+    points: [...b.points] as Member['points'],
+    ...(!sheet.value && { nature: b.nature, ...(b.item !== undefined && { item: b.item }) }),
+  }
+  setSide('b', { ...f, member, sets: false, mega: !!stoneMega(member) && f.mega })
+  toTab('damage')
+}
 /** The sides as they battle: at every set, at their sets pooled in the meta shown. */
 const fought = computed(() => ({ a: atSets(sides.value.a, data.value), b: atSets(sides.value.b, data.value) }))
 const patchMember = (k: SideKey, patch: Partial<Member>) =>
@@ -509,7 +567,7 @@ function face(f: Fighter) {
     }"
   >
     <!-- Reset all, on the row of the way back to Tools, as on the speed pages (the app's frame has a place for it there). -->
-    <Teleport to="#back-actions-calc" defer>
+    <Teleport :to="`#back-actions-${inverse ? 'calcInverse' : 'calc'}`" defer>
       <button v-if="hasAny" type="button" class="btn inverted" @click="resetAll">
         <RotateCcw :size="16" aria-hidden="true" />{{ t('speed.resetAll') }}
       </button>
@@ -518,19 +576,13 @@ function face(f: Fighter) {
     <section id="calc-top" class="head-panel">
       <div class="head">
         <h1>{{ t('title.calc') }}<SetupStar /></h1>
-        <button
-          v-tip="t('calc.reverse.modeTip')"
-          type="button"
-          class="btn switch mode"
-          :class="{ on: reverse }"
-          :aria-pressed="reverse"
-          @click="reverse = !reverse"
-        >
-          <ScanSearch :size="16" aria-hidden="true" />{{ t('calc.reverse.mode') }}
-        </button>
         <MetaDialog v-if="snapshot" class="head-meta" />
       </div>
     </section>
+    <!-- Its two tabs, folder tabs on a rule across the page, the one shown joined to it. -->
+    <div class="calc-tabs">
+      <FolderTabs :model-value="tab" :label="t('calc.tabs')" :options="tabs" @update:model-value="toTab" />
+    </div>
     <!-- The field's bar and the sides, together: on phones what sticks of them (the bar, the sides' bands) scrolls away
          with them once they're past; on wide screens the bar sticks the whole page down. -->
     <div class="stick-scope">
@@ -610,6 +662,7 @@ function face(f: Fighter) {
               :field
               :theirs="k === 'b'"
               named
+              :no-verdict="inverse"
               class="band-summary"
             />
             <span v-else class="band-empty"
@@ -637,7 +690,8 @@ function face(f: Fighter) {
             :side-open="sideOpen"
             :moves-folded="movesFolded[k].value"
             :battle-folded="battleFolded[k].value"
-            :reverse
+            :inverse
+            :sheet
             @battle-folded="battleFolded[k].value = $event"
             @side-open="sideOpen = $event"
             @battlefield="field = $event"
@@ -674,31 +728,38 @@ function face(f: Fighter) {
       </div>
     </div>
 
-    <!-- Read backwards, what fits what was seen, in place of who moves first. -->
-    <CalcReverse
-      v-if="reverse && battlerOf(sides.a) && battlerOf(sides.b)"
-      id="calc-reverse"
-      :yours="fought.a"
-      :theirs="fought.b"
-      :field
-      :data
-      v-model:sheet="sheet"
-      v-model:first="first"
-    />
-    <CalcVerdict v-else :a="fought.a" :b="fought.b" :field />
+    <!-- The inverse tab: what was seen, and what of the opponent's set fits it. -->
+    <template v-if="inverse">
+      <template v-if="hasBoth">
+        <CalcHits id="calc-hits" v-model:hits="hits" v-model:first="first" :yours="fought.a" :theirs="fought.b" />
+        <CalcReverse
+          id="calc-reverse"
+          :yours="fought.a"
+          :theirs="fought.b"
+          :field
+          :data
+          :obs="observations"
+          v-model:sheet="sheet"
+          @use="useBuild"
+        />
+      </template>
+    </template>
+    <template v-else>
+      <CalcVerdict :a="fought.a" :b="fought.b" :field />
 
-    <!-- What the opponent could knock yours out with: every move it learns, at its sets. -->
-    <CalcThreats
-      v-if="battlerOf(sides.a) && battlerOf(sides.b)"
-      id="calc-threats"
-      :yours="fought.a"
-      :theirs="fought.b"
-      :field
-      :data
-      v-model:sheet="sheet"
-    />
+      <!-- What the opponent could knock yours out with: every move it learns, at its sets. -->
+      <CalcThreats
+        v-if="battlerOf(sides.a) && battlerOf(sides.b)"
+        id="calc-threats"
+        :yours="fought.a"
+        :theirs="fought.b"
+        :field
+        :data
+        v-model:sheet="sheet"
+      />
 
-    <CalcMeta v-if="battlerOf(sides.a)" id="calc-meta" :yours="fought.a" :field :data @pick="face" />
+      <CalcMeta v-if="battlerOf(sides.a)" id="calc-meta" :yours="fought.a" :field :data @pick="face" />
+    </template>
 
     <DefineTeams v-slot="{ side, done }">
       <div v-for="tm in savedTeams" :key="tm.id" class="load-team">
@@ -875,6 +936,7 @@ function face(f: Fighter) {
 /* The sides, who moves first and yours against the meta set apart, a touch less on phones, where the page is short
    of room. */
 .calc > .verdict,
+.calc > #calc-hits,
 .calc > #calc-meta {
   margin-top: 16px;
 }
@@ -922,12 +984,11 @@ function face(f: Fighter) {
   align-items: center;
   gap: 8px 12px;
 }
-/* Read backwards: a switch, as the threats' Team sheet. */
-.mode {
-  gap: 6px;
-}
-.mode.on {
-  background: var(--sel);
+/* The tabs on a rule across the page, the one shown the page's color, joined to it. */
+.calc-tabs {
+  --tab-bg: var(--bg);
+  margin-bottom: -4px;
+  border-bottom: 2px solid var(--ink);
 }
 /* A row, so its star sits centered on the title's line. */
 .head h1 {
