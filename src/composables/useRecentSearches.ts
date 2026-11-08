@@ -4,11 +4,11 @@ import type { Found } from '@/composables/useSearch'
 import type { ItemId, PokemonId } from '@/data/dex'
 import type { TypeId } from '@/data/types'
 
-// The site's search's last results opened (the home page's), the latest first, at most `MAX`, offered as its box is
-// focused empty, each opening again in a tap: what was opened, not what was typed. One opened again moves to the front
-// rather than showing twice. Each as it was shown: its name, what it is (its category, or its area for a page), its
-// icon, and where it leads, as a path.
-const KEY = 'sproutvgc.search.recent.v2'
+// The site's search's last entries opened (the home page's: a Pokémon, move, item, type, condition..., not the site's
+// pages), the latest first, at most `MAX`, offered as its box is focused empty, each opening again in a tap: what was
+// opened, not what was typed. One opened again moves to the front rather than showing twice. Each as it was shown: its
+// name, its icon, whether it's the dex's entry rather than the meta's (the search's first sense), and where it leads.
+const KEY = 'sproutvgc.search.recent.v3'
 const MAX = 10
 
 export type RecentIcon =
@@ -17,17 +17,16 @@ export interface RecentResult {
   /** Where it leads, a path with its query: also what tells two apart. */
   to: string
   name: string
-  /** What it is: "Meta › Pokémon", "Moves", an area's name. */
-  sub: string
   icon?: RecentIcon
+  /** The dex's entry, not the meta's. */
+  dex?: boolean
 }
 
 const isResult = (x: unknown): x is RecentResult =>
   !!x &&
   typeof x === 'object' &&
   typeof (x as RecentResult).to === 'string' &&
-  typeof (x as RecentResult).name === 'string' &&
-  typeof (x as RecentResult).sub === 'string'
+  typeof (x as RecentResult).name === 'string'
 
 function saved(): RecentResult[] {
   try {
@@ -59,9 +58,9 @@ export function useRecentSearches() {
   return { searches, record, remove, clear }
 }
 
-/** Records a result opened, where it leads made a path (in a component's setup, for the router). */
+/** Records an entry opened (a page of the site left out), where it leads made a path (in a component's setup, for the router). */
 export function useRememberFound() {
   const router = useRouter()
   const { record } = useRecentSearches()
-  return (f: Found) => record({ ...f, to: router.resolve(f.to).fullPath })
+  return ({ page, ...f }: Found) => !page && record({ ...f, to: router.resolve(f.to).fullPath })
 }

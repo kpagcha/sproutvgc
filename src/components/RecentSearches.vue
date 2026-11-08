@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { History, X } from '@lucide/vue'
+import { X } from '@lucide/vue'
 import { t } from '@/i18n'
 import { useRecentSearches, type RecentResult } from '@/composables/useRecentSearches'
 import ItemIcon from '@/components/ItemIcon.vue'
@@ -20,6 +20,7 @@ const { searches, remove, clear } = useRecentSearches()
       <span>{{ t('search.recent') }}</span>
       <button type="button" class="link-button" @click="clear">{{ t('search.recentClear') }}</button>
     </div>
+    <!-- Chips, wrapping: each its icon, its name, "Dex" for the dex's entry, and its removal. -->
     <ul role="listbox" :aria-label="t('search.recent')">
       <li
         v-for="(r, i) in searches"
@@ -29,14 +30,11 @@ const { searches, remove, clear } = useRecentSearches()
         :class="{ active: i === active }"
       >
         <RouterLink :to="r.to" class="pick" @click="emit('open', r)">
-          <span class="icon">
-            <PokemonIcon v-if="r.icon?.kind === 'pokemon'" :id="r.icon.id" />
-            <ItemIcon v-else-if="r.icon?.kind === 'item'" :id="r.icon.id" />
-            <TypeIcon v-else-if="r.icon?.kind === 'type'" :type="r.icon.id" />
-            <History v-else :size="14" aria-hidden="true" class="muted" />
-          </span>
+          <PokemonIcon v-if="r.icon?.kind === 'pokemon'" :id="r.icon.id" />
+          <ItemIcon v-else-if="r.icon?.kind === 'item'" :id="r.icon.id" />
+          <TypeIcon v-else-if="r.icon?.kind === 'type'" :type="r.icon.id" />
           <span class="text">{{ r.name }}</span>
-          <span class="sub muted small">{{ r.sub }}</span>
+          <span v-if="r.dex" class="dex-tag">{{ t('search.dexTag') }}</span>
         </RouterLink>
         <button
           type="button"
@@ -44,7 +42,7 @@ const { searches, remove, clear } = useRecentSearches()
           :aria-label="t('search.recentRemove', { q: r.name })"
           @click="remove(r.to)"
         >
-          <X :size="14" aria-hidden="true" />
+          <X :size="12" aria-hidden="true" />
         </button>
       </li>
     </ul>
@@ -59,7 +57,7 @@ const { searches, remove, clear } = useRecentSearches()
   right: 0;
   left: 0;
   z-index: 60;
-  padding: 8px 0 6px;
+  padding: 8px 12px 12px;
   text-align: left;
   /* Soft, not the panels' hard shadow: it lies over panels that have theirs. */
   background: var(--panel);
@@ -71,7 +69,7 @@ const { searches, remove, clear } = useRecentSearches()
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 12px 4px;
+  padding-bottom: 8px;
 }
 .link-button {
   padding: 0;
@@ -85,6 +83,9 @@ const { searches, remove, clear } = useRecentSearches()
   text-decoration: underline;
 }
 ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -92,44 +93,51 @@ ul {
 li {
   display: flex;
   align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 999px;
 }
 li:hover,
 li.active {
   background: var(--sel);
 }
+li.active {
+  border-color: var(--accent);
+}
 .pick {
   display: flex;
-  min-height: 36px;
-  flex: 1;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   min-width: 0;
-  padding: 6px 12px;
+  min-height: 28px;
+  padding: 0 2px 0 10px;
   color: var(--text);
+  font-weight: bold;
   text-decoration: none;
 }
 .pick:hover {
   text-decoration: none;
-}
-.icon {
-  display: inline-flex;
-  flex: none;
-  justify-content: center;
-  /* A Pokémon's icon's width, so every name starts level. */
-  width: 40px;
 }
 .text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.sub {
-  flex: none;
-  margin-left: auto;
+/* The dex's entry, told from the meta's. */
+.dex-tag {
+  padding: 0 4px;
+  font-size: 0.7em;
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 2px;
 }
 .remove {
   display: flex;
-  padding: 6px 12px;
+  padding: 4px 8px 4px 4px;
   background: none;
   border: none;
   cursor: pointer;

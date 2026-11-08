@@ -98,35 +98,32 @@ export interface SearchResults {
   sections: ((typeof SECTIONS)[number] & { hits: Hit[]; more: number })[]
 }
 
-/** A result as the recent searches keep it once opened (`useRecentSearches`), where it leads not yet a path. */
-export type Found = Omit<RecentResult, 'to'> & { to: RouteLocationRaw }
+/** A result as the recent searches keep it once opened (`useRecentSearches`), where it leads not yet a path; a page of
+ * the site (`page`) isn't kept, only entries. */
+export type Found = Omit<RecentResult, 'to'> & { to: RouteLocationRaw; page?: boolean }
 const iconOf = (kind: string, id: string): RecentIcon | undefined =>
   kind === 'pokemon'
     ? { kind: 'pokemon', id: id as PokemonId }
     : kind === 'item'
       ? { kind: 'item', id: id as ItemId }
       : undefined
-export const foundPage = (p: PageHit): Found => ({
-  to: p.to,
-  name: p.name,
-  sub: p.area ? t(p.area) : t('search.pages'),
-})
-export const foundMeta = (s: { kind: MetaKind; title: MessageKey }, h: Hit): Found => ({
+export const foundPage = (p: PageHit): Found => ({ to: p.to, name: p.name, page: true })
+/** A meta entry, the search's first sense of an entry: shown with no tag. */
+export const foundMeta = (s: { kind: MetaKind }, h: Hit): Found => ({
   to: h.to,
   name: h.name,
-  sub: `${t('search.meta')} › ${t(s.title)}`,
   icon: iconOf(s.kind, h.id),
 })
-export const foundDex = (s: { kind: SectionKind; title: MessageKey }, h: Hit): Found => ({
+/** A dex entry, tagged as such to tell it from the meta's. */
+export const foundDex = (s: { kind: SectionKind }, h: Hit): Found => ({
   to: h.to,
   name: h.name,
-  sub: t(s.title),
   icon: iconOf(s.kind, h.id),
+  dex: true,
 })
 export const foundType = (id: TypeId): Found => ({
   to: `/dex/types/${id}`,
   name: typeName(id),
-  sub: t('title.types'),
   icon: { kind: 'type', id },
 })
 

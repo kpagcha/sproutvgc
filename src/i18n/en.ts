@@ -374,6 +374,7 @@ export const messages = {
   'search.clear': 'Clear the search',
   'search.recent': 'Recent searches',
   'search.recentClear': 'Clear',
+  'search.dexTag': 'Dex',
   'search.recentRemove': 'Remove {q} from recent searches',
   'home.none': 'Nothing matches.',
 
