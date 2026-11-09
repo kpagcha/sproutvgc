@@ -50,7 +50,7 @@ import {
 } from '@/lib/damage'
 import { membersPaste, parsePaste } from '@/lib/pokepaste'
 import { copy } from '@/lib/clipboard'
-import { underBand } from '@/lib/scroll'
+import { reveal as bringIntoView, underBand } from '@/lib/scroll'
 import { commonForme, commonMember } from '@/lib/commonSet'
 import { emptyMember, nextField, pickedAs, setsAs, stoneMega, type Field, type Member } from '@/lib/team'
 import { conditionName, fieldOf, terrainOf, weatherOf } from '@/components/calcConditions'
@@ -207,6 +207,11 @@ function tapBand(k: SideKey) {
     return foldBand(k)
   open.value = { ...open.value, [k]: true }
   reveal(k)
+}
+/** Its panel's Close: folded, its band brought into view where the page has moved past it. */
+function closeSide(k: SideKey) {
+  open.value = { ...open.value, [k]: false }
+  void nextTick(() => bringIntoView(document.getElementById(`band-${k}`)))
 }
 /** A band's arrow: its panel folded, or opened and brought into view. */
 function foldBand(k: SideKey) {
@@ -732,6 +737,8 @@ function face(f: Fighter) {
             :battle-folded="battleFolded[k].value"
             :inverse
             :sheet
+            :closable="!wide"
+            @close="closeSide(k)"
             @battle-folded="battleFolded[k].value = $event"
             @side-open="sideOpen = $event"
             @battlefield="field = $event"

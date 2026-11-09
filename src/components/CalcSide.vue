@@ -65,6 +65,8 @@ const props = defineProps<{
    * those being what's worked out; its item optional, worked out until set. */
   inverse?: boolean
   sheet?: boolean
+  /** On phones, under its band: Close at its foot, folding it (`close`), as the speed comparison's Confirm. */
+  closable?: boolean
 }>()
 const emit = defineEmits<{
   'update:fighter': [f: Fighter]
@@ -75,6 +77,7 @@ const emit = defineEmits<{
   battlefield: [f: Battlefield]
   movesFolded: [folded: boolean]
   battleFolded: [folded: boolean]
+  close: []
 }>()
 defineSlots<{ actions(): unknown }>()
 
@@ -424,6 +427,10 @@ function setHpPoints(e: Event) {
         </div>
       </template>
     </div>
+    <!-- On phones, Close at its foot, on its right under a line, folding it under its band. -->
+    <div v-if="closable && fighter.member.pokemon" class="close-row">
+      <button type="button" class="btn" @click="emit('close')">{{ t('speed.close') }}</button>
+    </div>
   </section>
 </template>
 
@@ -438,6 +445,14 @@ function setHpPoints(e: Event) {
 }
 .side.theirs {
   --side: var(--opponent);
+}
+/* Close, at its foot on its right, under a line, as the speed comparison's Confirm. */
+.close-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
 }
 /* Whose it is, a band of its side's color across the panel's top, as the phones' tabs are. */
 .side-head {
