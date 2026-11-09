@@ -12,7 +12,7 @@ import { refName } from '@/i18n/refName'
 import { commonBuilds as common, speedBuilds, speedStat } from '@/lib/speed'
 import { MAX_POINTS } from '@/lib/stats'
 import { buildQuery, buildSpeed, readBuild, toggled, type BuildToggle, type SpeedBuild } from '@/lib/speedBuild'
-import { revealBelow, toTopOf } from '@/lib/scroll'
+import { revealBelow, toTopOf, underBand } from '@/lib/scroll'
 import {
   LIST_MAX,
   commonSpeed,
@@ -265,11 +265,22 @@ const editors: Record<string, InstanceType<typeof SpeedEditor> | undefined> = {}
 const editorRef = (key: string) => (el: unknown) => {
   editors[key] = (el as InstanceType<typeof SpeedEditor> | null) ?? undefined
 }
-function toggleOpen(key: string) {
+/**
+ * A band tapped: with none picked, its picker; else its panel brought into view, opened first if folded. In its place,
+ * its panel open right under it, it folds it instead (as its arrow always does).
+ */
+function tapBand(key: string) {
   if (!entryOf(key)?.id) {
     if (stacked.value) openKey.value = key
     return void nextTick(() => editors[key]?.openPicker())
   }
+  const panel = document.getElementById(stacked.value ? `editor-${key}` : `compare-${key}`)
+  if (openKey.value === key && underBand(document.getElementById(`band-${key}`), panel)) return foldBand(key)
+  openKey.value = key
+  void nextTick(revealOpen)
+}
+/** A band's arrow: its panel folded, or opened and brought into view. */
+function foldBand(key: string) {
   openKey.value = openKey.value === key ? null : key
   if (openKey.value) void nextTick(revealOpen)
 }
@@ -654,7 +665,7 @@ function resetAll() {
 
     <!-- Past a pair, and in speed order: one under the other, in the order they move. -->
     <template v-if="stacked">
-      <SpeedLineup ref="lineupEl" :entries="lineup" :open-key="openKey" @toggle="toggleOpen">
+      <SpeedLineup ref="lineupEl" :entries="lineup" :open-key="openKey" @tap="tapBand" @fold="foldBand">
         <template #editor="{ entry }">
           <SpeedEditor
             :ranks
@@ -824,35 +835,43 @@ function resetAll() {
       <Verdict v-if="!phone" />
 
       <!-- On phones, as the damage calc's sides: one under the other, each a band of its side's color with its Pokémon
-           in short, stuck to the top, the second piling up under the first; tapping one opens its panel under it, its
-           top brought into view, or folds it (one with none picks it). -->
+           in short, stuck to the top, the second piling up under the first, and to the bottom; tapping one brings its
+           panel into view under it, opening it (one with none picks it), or, in its place with its panel open under it,
+           folds it; its arrow opens and folds it. -->
       <div v-if="phone" class="duel">
         <template v-for="side in sides" :key="side.s">
-          <button
+          <div
             :id="`band-${side.s}`"
-            type="button"
             class="side-band"
             :class="{ open: openKey === side.s && !!side.id, theirs: side.s === 'b' }"
-            :aria-expanded="side.id ? openKey === side.s : undefined"
-            :aria-controls="`compare-${side.s}`"
-            @click="toggleOpen(side.s)"
           >
-            <span class="visually-hidden">{{ side.s === 'a' ? t('speed.yours') : t('compare.opponent') }}</span>
-            <BuildSummary
+            <button type="button" class="band-main" :aria-controls="`compare-${side.s}`" @click="tapBand(side.s)">
+              <span class="visually-hidden">{{ side.s === 'a' ? t('speed.yours') : t('compare.opponent') }}</span>
+              <BuildSummary
+                v-if="side.id"
+                :id="side.id"
+                :speed="side.speed!"
+                :build="side.build"
+                :range="side.range"
+                class="band-summary"
+              />
+              <span v-else class="band-empty"
+                ><Plus :size="16" aria-hidden="true" />{{
+                  t(side.s === 'a' ? 'compare.pickYours' : 'compare.pickOpponent')
+                }}</span
+              ></button
+            ><button
               v-if="side.id"
-              :id="side.id"
-              :speed="side.speed!"
-              :build="side.build"
-              :range="side.range"
-              class="band-summary"
-            />
-            <span v-else class="band-empty"
-              ><Plus :size="16" aria-hidden="true" />{{
-                t(side.s === 'a' ? 'compare.pickYours' : 'compare.pickOpponent')
-              }}</span
+              type="button"
+              class="band-fold"
+              :aria-expanded="openKey === side.s"
+              :aria-controls="`compare-${side.s}`"
+              :aria-label="t(openKey === side.s ? 'band.fold' : 'band.unfold')"
+              @click="foldBand(side.s)"
             >
-            <ChevronDown :size="16" class="band-chevron" :class="{ unset: !side.id }" aria-hidden="true" />
-          </button>
+              <ChevronDown :size="16" class="band-chevron" aria-hidden="true" />
+            </button>
+          </div>
           <section
             v-show="openKey === side.s && !!side.id"
             :id="`compare-${side.s}`"
@@ -1256,15 +1275,40 @@ function resetAll() {
   gap: 8px;
   height: var(--band-h);
   min-width: 0;
-  padding: 0 10px 0 8px;
-  font: inherit;
   font-weight: bold;
-  text-align: left;
   color: var(--accent-text);
   background: var(--accent);
   border: 2px solid var(--ink);
+}
+/* Its two buttons, the band's whole height: its Pokémon in short, bringing its panel into view, and its arrow, folding
+   it. */
+.band-main,
+.band-fold {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  min-width: 0;
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  background: none;
+  border: 0;
   cursor: pointer;
   touch-action: manipulation;
+}
+.band-main {
+  flex: 1;
+  gap: 8px;
+  padding: 0 10px 0 8px;
+}
+.band-fold {
+  flex: none;
+  padding: 0 10px 0 6px;
+}
+.band-main:focus-visible,
+.band-fold:focus-visible {
+  outline-offset: -4px;
 }
 .side-band.theirs {
   top: calc(var(--band-h) - 2px);
@@ -1295,14 +1339,10 @@ function resetAll() {
 }
 .band-chevron {
   flex: none;
-  margin-left: auto;
   transition: transform 0.15s;
 }
 .side-band.open .band-chevron {
   transform: rotate(180deg);
-}
-.band-chevron.unset {
-  visibility: hidden;
 }
 .visually-hidden {
   position: absolute;

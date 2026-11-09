@@ -1623,6 +1623,8 @@ export const messages = {
   'speed.vsCompare': 'Compare',
   'speed.vsOpen': 'Show how yours does against them',
   'speed.vsFold': 'Fold',
+  'band.fold': 'Fold its panel',
+  'band.unfold': 'Unfold its panel',
   'speed.vsVerdict.first': 'first',
   'speed.vsVerdict.tie': 'tie',
   'speed.vsVerdict.after': 'after',
