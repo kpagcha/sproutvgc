@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onUnmounted, ref, useTemplateRef, watch } from 'vue'
+import { createReusableTemplate } from '@vueuse/core'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeftRight, ChevronDown, Plus, RotateCcw, Trash2 } from '@lucide/vue'
 import FlatIcon from '@/components/FlatIcon'
@@ -11,7 +12,7 @@ import { refName } from '@/i18n/refName'
 import { commonBuilds as common, speedBuilds, speedStat } from '@/lib/speed'
 import { MAX_POINTS } from '@/lib/stats'
 import { buildQuery, buildSpeed, readBuild, toggled, type BuildToggle, type SpeedBuild } from '@/lib/speedBuild'
-import { reveal, toTopOf } from '@/lib/scroll'
+import { revealBelow, toTopOf } from '@/lib/scroll'
 import {
   LIST_MAX,
   commonSpeed,
@@ -243,8 +244,9 @@ const pair = computed(() => {
 })
 const setPair = (p: [string, string] | null) => replace({ pair: p ? p.join('.') : undefined })
 
-// On phones, a pair is two tabs side by side, each with its Pokémon in short: tapping one opens its panel under them,
-// tapping it again folds it, both folded leaving what each takes to move first in view, under them. Past a pair, the
+// On phones, a pair is two bands one under the other, as the damage calc's sides, each with its Pokémon in short:
+// tapping one opens its panel under it, tapping it again folds it, both folded leaving who moves first and what each
+// takes to move first in view, under them. Past a pair, the
 // same with the bands one under the other, the one tapped opening under its band. At first, the first one without a
 // Pokémon is open, to pick it; with both picked, none.
 const phoneQuery = window.matchMedia('(max-width: 720px)')
@@ -258,7 +260,7 @@ const openKey = ref<string | null>(
   mode.value === 'vs' && stacked.value ? (SLOTS.find((s) => vsSlots.value.includes(s) && !idOf(s)) ?? null) : null,
 )
 // One with none picked goes straight to picking it, its panel opening once it's picked (`pick`): in a pair's tabs on
-// phones, from its tab alone (the picking screen needs no panel under it); in the list, from its editor.
+// phones, from its band alone (the picking screen needs no panel under it); in the list, from its editor.
 const editors: Record<string, InstanceType<typeof SpeedEditor> | undefined> = {}
 const editorRef = (key: string) => (el: unknown) => {
   editors[key] = (el as InstanceType<typeof SpeedEditor> | null) ?? undefined
@@ -399,7 +401,7 @@ function addSecond(s: Side, id: PokemonId) {
   )
 }
 // Wider, a side's panel folds to its Pokémon in short (Confirm, or its band), and opens again from either; a side
-// with none picked is always open. On phones, Confirm folds its tab's panel instead.
+// with none picked is always open. On phones, Confirm folds its band's panel instead.
 const folded = ref(new Set<Side>())
 const isFolded = (s: Side) => !phone.value && folded.value.has(s) && !!idOf(s)
 function toggleFold(s: Side) {
@@ -422,13 +424,14 @@ async function afterPick(picked: Promise<unknown>, then: () => void) {
 }
 /**
  * The open one's panel brought into view under what's stuck over it: in the list, right under its band (and the ones
- * piled over it); on phones' pair of tabs, under them, from the row adding a second over it.
+ * piled over it); on phones' pair, right under its band (and yours', over the opponent's).
  */
-const sideAdds = useTemplateRef<HTMLElement>('sideAdds')
 function revealOpen() {
   if (stacked.value) return lineupEl.value?.revealOpen()
-  const panel = phone.value && openKey.value ? document.getElementById(`compare-${openKey.value}`) : null
-  if (panel) reveal(sideAdds.value ?? panel, panel)
+  const key = phone.value ? openKey.value : null
+  const band = key && document.getElementById(`band-${key}`)
+  if (!band) return
+  revealBelow(document.getElementById(`compare-${key}`), parseFloat(getComputedStyle(band).top) + band.offsetHeight - 2)
 }
 function confirmRow() {
   openKey.value = null
@@ -539,6 +542,9 @@ watch(ladderOpen, (on) => {
 })
 onUnmounted(() => (ladderOpen.value = false))
 
+/** Who moves first, drawn over the two from tablets up, under them on phones. */
+const [DefineVerdict, Verdict] = createReusableTemplate()
+
 const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 
 // The first visit's tour of the page, its guide to reading it: how a Speed is worked out, its two views, what applies to
@@ -549,7 +555,7 @@ const { start: startTour } = useTour('compare', () => [
   { title: 'tour.speedTitle', text: 'tour.speed' },
   { el: '.folder-tabs', title: 'tour.compare.viewsTitle', text: 'tour.compare.views', side: 'bottom' },
   { el: '.toolbar', title: 'tour.compare.toolbarTitle', text: 'tour.compare.toolbar', side: 'bottom' },
-  { el: ['#compare-a', '.side-tabs'], title: 'tour.compare.yoursTitle', text: 'tour.compare.yours', side: 'bottom' },
+  { el: ['#compare-a', '.side-band'], title: 'tour.compare.yoursTitle', text: 'tour.compare.yours', side: 'bottom' },
   { el: '#compare-b', title: 'tour.compare.opponentTitle', text: 'tour.compare.opponent', side: 'bottom' },
   { el: ['.col-add', '.side-adds'], title: 'tour.compare.secondTitle', text: 'tour.compare.second', side: 'top' },
   { el: '.adder', title: 'tour.compare.orderTitle', text: 'tour.compare.order', side: 'bottom' },
@@ -787,69 +793,97 @@ function resetAll() {
            nothing until there are two, the panels saying what to do. -->
       <!-- With either at its sets, how often each moves first, the one that does in most of them outlined, and under
            it the shares split by who moves first. -->
-      <div
-        v-if="verdict"
-        class="verdict panel"
-        :class="{
-          tie: verdict.tie,
-          'first-a': !verdict.tie && verdict.first === 'a',
-          'first-b': !verdict.tie && verdict.first === 'b',
-        }"
-        role="status"
-      >
-        <PokemonIcon v-if="!verdict.tie" :id="sideOf(verdict.first).id!" />
-        <span class="verdict-text">{{ verdict.text }}</span>
-        <span class="verdict-speeds"
-          ><span v-if="trickRoom" class="tr-tag" :aria-label="t('speed.mod.trickroom')">{{ t('speed.trShort') }}</span
-          >{{ speedLabel(sideOf('a')) }} <span class="muted">vs</span> {{ speedLabel(sideOf('b')) }}</span
-        >
-        <SpeedShare
-          v-if="verdict.shares"
-          class="verdict-share"
-          :odds="verdict.shares"
-          :name="sideOf('a').name!"
-          :other="sideOf('b').name!"
-          tone="yours"
-        />
-      </div>
-
-      <!-- On phones, the two side by side as tabs, each with its Pokémon in short, stuck to the top while the page
-           scrolls: tapping one opens its panel under them, tapping it again folds it. Who moves first is marked on the verdict alone.
-           One at its sets says so in its label, rather than beside its Speeds, where it would wrap. -->
-      <div v-if="phone" class="side-tabs" data-top-bar>
-        <button
-          v-for="side in sides"
-          :key="side.s"
-          type="button"
-          class="tab"
+      <DefineVerdict>
+        <div
+          v-if="verdict"
+          class="verdict panel"
           :class="{
-            open: openKey === side.s,
-            opponent: side.s === 'b',
+            tie: verdict.tie,
+            'first-a': !verdict.tie && verdict.first === 'a',
+            'first-b': !verdict.tie && verdict.first === 'b',
           }"
-          :aria-expanded="side.id ? openKey === side.s : undefined"
-          :aria-controls="`compare-${side.s}`"
-          @click="toggleOpen(side.s)"
+          role="status"
         >
-          <span class="tab-label"
-            ><span
-              >{{ side.s === 'a' ? t('speed.yours') : t('compare.opponent')
-              }}<span v-if="side.id && side.range" class="tab-sets">{{ t('compare.setsTag') }}</span></span
-            ><ChevronDown :size="16" class="tab-chevron" :class="{ unset: !side.id }" aria-hidden="true"
-          /></span>
-          <BuildSummary
-            v-if="side.id"
-            :id="side.id"
-            :speed="side.speed!"
-            :build="side.build"
-            :range="side.range"
-            sets-said
-            class="tab-summary"
+          <PokemonIcon v-if="!verdict.tie" :id="sideOf(verdict.first).id!" />
+          <span class="verdict-text">{{ verdict.text }}</span>
+          <span class="verdict-speeds"
+            ><span v-if="trickRoom" class="tr-tag" :aria-label="t('speed.mod.trickroom')">{{ t('speed.trShort') }}</span
+            >{{ speedLabel(sideOf('a')) }} <span class="muted">vs</span> {{ speedLabel(sideOf('b')) }}</span
+          >
+          <SpeedShare
+            v-if="verdict.shares"
+            class="verdict-share"
+            :odds="verdict.shares"
+            :name="sideOf('a').name!"
+            :other="sideOf('b').name!"
+            tone="yours"
           />
-          <span v-else class="tab-empty"><Plus :size="16" aria-hidden="true" />{{ t('compare.pick') }}</span>
-        </button>
+        </div>
+      </DefineVerdict>
+      <!-- Over the two from tablets up; on phones, under them. -->
+      <Verdict v-if="!phone" />
+
+      <!-- On phones, as the damage calc's sides: one under the other, each a band of its side's color with its Pokémon
+           in short, stuck to the top, the second piling up under the first; tapping one opens its panel under it, its
+           top brought into view, or folds it (one with none picks it). -->
+      <div v-if="phone" class="duel">
+        <template v-for="side in sides" :key="side.s">
+          <button
+            :id="`band-${side.s}`"
+            type="button"
+            class="side-band"
+            :class="{ open: openKey === side.s && !!side.id, theirs: side.s === 'b' }"
+            :aria-expanded="side.id ? openKey === side.s : undefined"
+            :aria-controls="`compare-${side.s}`"
+            @click="toggleOpen(side.s)"
+          >
+            <span class="visually-hidden">{{ side.s === 'a' ? t('speed.yours') : t('compare.opponent') }}</span>
+            <BuildSummary
+              v-if="side.id"
+              :id="side.id"
+              :speed="side.speed!"
+              :build="side.build"
+              :range="side.range"
+              class="band-summary"
+            />
+            <span v-else class="band-empty"
+              ><Plus :size="16" aria-hidden="true" />{{
+                t(side.s === 'a' ? 'compare.pickYours' : 'compare.pickOpponent')
+              }}</span
+            >
+            <ChevronDown :size="16" class="band-chevron" :class="{ unset: !side.id }" aria-hidden="true" />
+          </button>
+          <section
+            v-show="openKey === side.s && !!side.id"
+            :id="`compare-${side.s}`"
+            class="panel side band-panel"
+            :class="{ opponent: side.s === 'b' }"
+          >
+            <SpeedEditor
+              :ranks
+              :ref="editorRef(side.s)"
+              :id="side.id"
+              :build="side.build"
+              :speed="side.speed"
+              :stat="side.stat"
+              :common="commonBuilds(side.id)"
+              :title="side.s === 'a' ? t('speed.yours') : t('compare.opponent')"
+              :tone="side.s === 'a' ? 'yours' : 'opponent'"
+              :taken="takenFor(side.s)"
+              :at-sets="side.sets"
+              :range="side.range"
+              confirmable
+              @sets="(on: boolean) => setSets(side.s, on)"
+              @confirm="confirmSide(side.s)"
+              @pick="(id: PokemonId) => pick(side.s, id)"
+              @build="(b: Partial<SpeedBuild>) => setBuild(side.s, b)"
+              @clear="clear(side.s)"
+            />
+          </section>
+        </template>
       </div>
-      <!-- On phones, under each tab, a second for its team, greyed out until its first is picked. -->
-      <div v-if="phone" ref="sideAdds" class="side-adds">
+      <!-- On phones, under the two, a second for each team, greyed out until its first is picked. -->
+      <div v-if="phone" class="side-adds">
         <SpeedAddSecond
           :ranks
           v-for="side in sides"
@@ -861,21 +895,21 @@ function resetAll() {
           @pick="(id: PokemonId) => addSecond(side.s, id)"
         />
       </div>
+      <!-- On phones, who moves first under them. -->
+      <Verdict v-if="phone" />
 
-      <div class="sides">
+      <div v-if="!phone" class="sides">
         <div
           v-for="side in sides"
-          v-show="!phone || openKey === side.s"
           :key="side.s"
           class="side-col"
           :class="{ folded: isFolded(side.s), empty: !sideOf(side.s).id }"
         >
           <section :id="`compare-${side.s}`" class="panel banded side" :class="{ opponent: side.s === 'b' }">
-            <!-- Yours, and its opponent, red as on the speed tiers; on phones, its tab stands for it. Once picked, it
+            <!-- Yours, and its opponent, red as on the speed tiers. Once picked, it
                  opens and folds the panel, an arrow at its end saying so. -->
             <component
               :is="side.id ? 'button' : 'div'"
-              v-if="!phone"
               :type="side.id ? 'button' : undefined"
               class="band"
               :class="{ toggle: side.id }"
@@ -895,7 +929,7 @@ function resetAll() {
             <button v-if="isFolded(side.s)" type="button" class="folded-summary" @click="toggleFold(side.s)">
               <BuildSummary :id="side.id!" :speed="side.speed!" :build="side.build" :range="side.range" />
             </button>
-            <!-- Confirm at its end folds it: under its tab on phones, to its short form wider. -->
+            <!-- Confirm at its end folds it to its short form. -->
             <SpeedEditor
               :ranks
               v-else
@@ -918,20 +952,17 @@ function resetAll() {
               @clear="clear(side.s)"
             />
           </section>
-          <!-- What it takes to move before the other, in panels of their own under its side's, open or folded; on
-               phones, under the two instead. -->
+          <!-- What it takes to move before the other, in panels of their own under its side's, open or folded. -->
           <SpeedVersus
-            v-if="!phone && vsPair(side.s)"
+            v-if="vsPair(side.s)"
             v-bind="vsPair(side.s)!"
             class="col-insight"
             :tone="teamOf(side.s)"
             :trick-room="trickRoom"
           />
-          <!-- Under its panel, a second for its team, greyed out until its first is picked; on phones, under its tab
-             instead. -->
+          <!-- Under its panel, a second for its team, greyed out until its first is picked. -->
           <SpeedAddSecond
             :ranks
-            v-if="!phone"
             class="col-add"
             :team="teamOf(side.s)"
             :label="t(side.s === 'a' ? 'compare.addYours' : 'compare.addOpponent')"
@@ -942,7 +973,7 @@ function resetAll() {
         </div>
       </div>
 
-      <!-- On phones, what each takes to move first, side by side under the two (and the panel open, if one is). -->
+      <!-- On phones, what each takes to move first, side by side under who moves first. -->
       <!-- With either at its sets, one under the other, full width: its Speeds need the room. -->
       <div v-if="phone && verdict" class="insights" :class="{ wide: verdict.shares }">
         <SpeedVersus
@@ -1124,7 +1155,7 @@ function resetAll() {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
-/* On phones, not the Speeds: the tabs right under it have them. */
+/* On phones, not the Speeds: the bands right over it have them. */
 @media (max-width: 720px) {
   .verdict-speeds {
     display: none;
@@ -1205,98 +1236,78 @@ function resetAll() {
   gap: 4px;
   margin-left: auto;
 }
-/* On phones, the two tabs: each a band of its side's color over its Pokémon in short, side by side, stuck to the top
-   on a strip of the page's background. The open one flat, lined up with its panel under it, its arrow turned. */
-.side-tabs {
-  position: sticky;
-  top: 0;
-  z-index: 4;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  /* Clear of the open panel's outline (its width and offset), which the strip would otherwise cover. */
-  margin-bottom: 6px;
-  padding: 6px 0 8px;
-  background: var(--bg);
-}
-.tab {
+/* On phones, each side's band, as the damage calc's: one row of its side's color, its Pokémon in short and its arrow,
+   stuck to the top, the second piling up under the first (their shared lines overlapping), over the panels scrolling
+   under them; all of it scrolling away once past the two. Its panel right under it, their lines shared too. */
+.duel {
+  --band-h: 44px;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  margin-bottom: 8px;
+}
+.side-band {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--band-h);
   min-width: 0;
-  padding: 0;
+  padding: 0 10px 0 8px;
   font: inherit;
   font-weight: bold;
   text-align: left;
-  color: var(--text);
-  background: var(--panel);
+  color: var(--accent-text);
+  background: var(--accent);
   border: 2px solid var(--ink);
-  box-shadow: var(--hard);
   cursor: pointer;
   touch-action: manipulation;
 }
-.tab.open {
-  box-shadow: none;
-}
-.tab-label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 4px;
-  padding: 3px 8px;
-  font-size: 0.875em;
-  color: var(--accent-text);
-  background: var(--accent);
-  border-bottom: 2px solid var(--ink);
-}
-/* At its sets: "Sets" in a badge outlined in the label's color, as beside the Speeds elsewhere, within the label's
-   height. */
-.tab-sets {
-  display: inline-flex;
-  align-items: center;
-  height: 16px;
-  margin: -2px 0 -2px 6px;
-  padding: 0 4px;
-  font-size: 0.875em;
-  font-weight: normal;
-  vertical-align: middle;
-  border: 1px solid currentColor;
-}
-.tab.opponent .tab-label {
+.side-band.theirs {
+  top: calc(var(--band-h) - 2px);
+  z-index: 39;
   color: var(--opponent-text);
   background: var(--opponent);
 }
-.tab-chevron {
-  flex: none;
-  transition: transform 0.15s;
+.duel > .band-panel,
+.duel > .side-band.theirs {
+  margin-top: -2px;
 }
-.tab.open .tab-chevron {
-  transform: rotate(180deg);
+.band-panel {
+  margin-bottom: 0;
+  box-shadow: none;
 }
-/* With none picked there's nothing to fold: the tab picks one. Hidden, its room kept, so both tabs stay as tall. */
-.tab-chevron.unset {
-  visibility: hidden;
+.band-summary {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
-/* Its icon standing for its name (still read out), its modifiers under the rest when they don't fit beside it. */
-.tab-summary {
-  flex: none;
-  flex-wrap: wrap;
-  row-gap: 6px;
-}
-.tab-summary :deep(.name) {
-  display: none;
-}
-.tab-summary,
-.tab-empty {
-  min-height: 40px;
-  padding: 4px 8px;
-}
-.tab-empty {
+.band-empty {
   display: flex;
+  flex: 1;
   align-items: center;
   gap: 6px;
   font-weight: normal;
-  color: var(--muted);
+}
+.band-chevron {
+  flex: none;
+  margin-left: auto;
+  transition: transform 0.15s;
+}
+.side-band.open .band-chevron {
+  transform: rotate(180deg);
+}
+.band-chevron.unset {
+  visibility: hidden;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 /* On phones, what each takes to move first, side by side, each topped by its side's color. */
 .insights {
@@ -1439,7 +1450,7 @@ function resetAll() {
 .col-insight {
   margin-top: 12px;
 }
-/* A team's second, added: under its panel; on phones, under its tab; past a pair, under the list. */
+/* A team's second, added: under its panel; on phones, under the two bands; past a pair, under the list. */
 .col-add {
   margin-top: 8px;
 }
@@ -1447,7 +1458,7 @@ function resetAll() {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  margin: -2px 0 10px;
+  margin: 0 0 16px;
   font-size: 0.875em;
 }
 .row-add {
