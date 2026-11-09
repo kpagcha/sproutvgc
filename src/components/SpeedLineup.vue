@@ -12,7 +12,7 @@ import BuildSummary from '@/components/BuildSummary.vue'
 // with its place in the move order, numbered (one tied with another sharing its number, marked `=`), and its Pokémon
 // in short. Tapping one opens what changes it under it (the `editor` slot), tapping it again folds it. While one is
 // open the bands keep their order, so what's being changed stays put; once none is, they move to the order they move
-// in, sliding there. The bands stick to the top, piling up as the page scrolls, so every one stays in view; a list too
+// in, sliding there. The bands stick to the top and the bottom, piling up as the page scrolls, so every one stays in view; a list too
 // long for that keeps the open one alone in view. Under them, what the page adds (the `after` slot: rows adding one).
 export interface LineupEntry {
   key: string
@@ -112,7 +112,7 @@ const teamLabel = (e: LineupEntry) =>
         type="button"
         class="row"
         :class="[e.team ?? 'neutral', { open: openKey === e.key, stuck: pile || openKey === e.key }]"
-        :style="{ '--i': pile ? i : 0 }"
+        :style="{ '--i': pile ? i : 0, '--after': pile ? shown.length - 1 - i : 0 }"
         :aria-expanded="e.id ? openKey === e.key : undefined"
         :aria-controls="`editor-${e.key}`"
         @click="emit('toggle', e.key)"
@@ -174,10 +174,12 @@ const teamLabel = (e: LineupEntry) =>
   background: var(--opponent);
 }
 /* Stuck to the top, piled up: each under the ones before it (their shared lines overlapping), and over the ones
-   after, which scroll in under it. */
+   after, which scroll in under it; and to the bottom of the screen while its place is still under it, each over the
+   ones after it. A long list's open one alone sticks, to the very top and bottom. */
 .row.stuck {
   position: sticky;
   top: calc(var(--i) * (var(--band-h) - 2px));
+  bottom: calc(var(--after) * (var(--band-h) - 2px));
   z-index: calc(40 - var(--i));
 }
 /* Its place: a badge in ink on the band; one tied with another hatched, its number after `=`. */

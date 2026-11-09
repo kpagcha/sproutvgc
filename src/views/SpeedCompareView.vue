@@ -1238,7 +1238,8 @@ function resetAll() {
 }
 /* On phones, each side's band, as the damage calc's: one row of its side's color, its Pokémon in short and its arrow,
    stuck to the top, the second piling up under the first (their shared lines overlapping), over the panels scrolling
-   under them; all of it scrolling away once past the two. Its panel right under it, their lines shared too. */
+   under them, and to the bottom of the screen while their place is still under it, the first over the second; all of
+   it scrolling away once past the two. Its panel right under it, their lines shared too. */
 .duel {
   --band-h: 44px;
   display: flex;
@@ -1248,6 +1249,7 @@ function resetAll() {
 .side-band {
   position: sticky;
   top: 0;
+  bottom: calc(var(--band-h) - 2px);
   z-index: 40;
   display: flex;
   align-items: center;
@@ -1266,6 +1268,7 @@ function resetAll() {
 }
 .side-band.theirs {
   top: calc(var(--band-h) - 2px);
+  bottom: 0;
   z-index: 39;
   color: var(--opponent-text);
   background: var(--opponent);

@@ -1153,10 +1153,12 @@ function face(f: Fighter) {
 }
 /* On phones, each side's band, as the speed comparison's list's: one row of its side's color, its Pokémon in short and
    its arrow, stuck under the field's bar, the second piling up under the first (their shared lines overlapping), over
-   the panels scrolling under them. Its panel right under it, their lines shared too. */
+   the panels scrolling under them; and stuck to the bottom of the screen too, the first over the second, while their
+   place is still under it. Its panel right under it, their lines shared too. */
 .side-band {
   position: sticky;
   top: calc(var(--nav-h, 0px) + var(--bar-h, 0px));
+  bottom: calc(var(--band-h) - 2px);
   z-index: 40;
   display: flex;
   align-items: center;
@@ -1175,6 +1177,7 @@ function face(f: Fighter) {
 }
 .side-band.theirs {
   top: calc(var(--nav-h, 0px) + var(--bar-h, 0px) + var(--band-h) - 2px);
+  bottom: 0;
   z-index: 39;
   color: var(--opponent-text);
   background: var(--opponent);
