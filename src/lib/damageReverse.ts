@@ -222,6 +222,8 @@ export interface ReverseRow {
 export interface ReverseColumn {
   items: (ItemId | null)[]
   share: number | null
+  /** Its items are those that can't change any of the hits seen (`inert`, `takenInert`): "any other item". */
+  inert: boolean
 }
 
 export interface ReverseResult {
@@ -630,10 +632,15 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
         columns[same]!.share = (columns[same]!.share ?? 0) + columnsOf[ci]!.it.w
       } else {
         colOf.push([ci])
-        columns.push({ items: [columnsOf[ci]!.it.value], share: columnsOf[ci]!.it.w })
+        columns.push({ items: [columnsOf[ci]!.it.value], share: columnsOf[ci]!.it.w, inert: false })
       }
     }
     for (const r of rows) r.fits = colOf.map((cols) => r.fits[cols[0]!]!)
+    const inertItem = (it: ItemId | null) =>
+      itemKey(it)
+        .split('|')
+        .every((k) => k === '-')
+    for (const c of columns) c.inert = c.items.every(inertItem)
     if (fixedItem) columns.forEach((c) => (c.share = null))
     return { stats: S, ranges, chance, rows, columns, itemsVary: !fixedItem }
   }

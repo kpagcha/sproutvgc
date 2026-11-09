@@ -19,7 +19,6 @@ import {
 import { runSliced } from '@/lib/slices'
 import { MAX_POINTS } from '@/lib/stats'
 import { setsAs, type Points } from '@/lib/team'
-import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 
 // The inverse damage calc's "What fits": from what was seen (`obs`: the hits and which moved first, `CalcHits`), what
@@ -120,6 +119,36 @@ const rangeText = (r: StatRange) => {
 }
 const itemName = (id: ItemId | null) => (id ? refName(item(id)) : t('builder.noItem'))
 const fitTip = (f: number) => t('calc.reverse.fitTip', { pct: percent(f) })
+/** A row's fits: one, its item known (or no items apart); else the items it fits with, the likeliest first (its fit
+ * by the item's share), each named (those that can't change the hits as "any other item", or "any item" when every
+ * item fits alike), with its share of the rolls and, on hover, its share of the sets. */
+function fitsOf(r: ReverseRow): { key: string; label: string; fit: number; tip: string }[] {
+  const res = result.value
+  if (!res) return []
+  const cols = res.columns.map((c, ci) => ({ c, fit: r.fits[ci]! }))
+  if (!res.itemsVary || cols.length === 1)
+    return cols[0]!.fit > 0 ? [{ key: '-', label: '', fit: cols[0]!.fit, tip: fitTip(cols[0]!.fit) }] : []
+  const fitting = cols.filter((x) => x.fit > 0)
+  if (fitting.length === cols.length && fitting.every((x) => x.fit === fitting[0]!.fit))
+    return [{ key: 'any', label: t('calc.reverse.anyItem'), fit: fitting[0]!.fit, tip: fitTip(fitting[0]!.fit) }]
+  return fitting
+    .sort((x, y) => y.fit * (y.c.share ?? 0) - x.fit * (x.c.share ?? 0))
+    .map(({ c, fit }) => ({
+      key: c.items.join(),
+      label:
+        c.inert && c.items.length > 1
+          ? t('calc.reverse.otherItem')
+          : c.items.length > 2
+            ? t('calc.reverse.itemAndMore', { item: itemName(c.items[0]!), n: c.items.length - 1 })
+            : c.items.map(itemName).join(' / '),
+      fit,
+      tip: [
+        ...c.items.map((it) => itemName(it)),
+        ...(c.share ? [t('calc.reverse.itemShare', { pct: percent(c.share) })] : []),
+        fitTip(fit),
+      ].join(' · '),
+    }))
+}
 /** A spread used: its nature and points, and off its team sheet, the item likeliest to go with it (its fit by the
  * item's share), else its most run. */
 function use(r: ReverseRow) {
@@ -191,24 +220,7 @@ function use(r: ReverseRow) {
             <thead>
               <tr>
                 <th scope="col" class="corner muted">{{ t('calc.reverse.spread') }}</th>
-                <th v-for="(c, ci) in result.columns" :key="ci" scope="col" class="col">
-                  <span v-if="!result.itemsVary || result.columns.length === 1" class="muted">{{
-                    t('calc.reverse.fits')
-                  }}</span>
-                  <template v-else>
-                    <span class="items">
-                      <template v-for="it in c.items" :key="it ?? '-'">
-                        <span v-if="it" v-tip="itemName(it)" class="item" role="img" :aria-label="itemName(it)"
-                          ><ItemIcon :id="it"
-                        /></span>
-                        <span v-else class="muted no-item">{{ itemName(null) }}</span>
-                      </template>
-                    </span>
-                    <span v-if="c.share" v-tip="t('calc.reverse.itemTip')" class="muted share">{{
-                      percent(c.share)
-                    }}</span>
-                  </template>
-                </th>
+                <th scope="col" class="col muted">{{ t('calc.reverse.fits') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -225,18 +237,20 @@ function use(r: ReverseRow) {
                     </button>
                   </span>
                 </th>
-                <td
-                  v-for="(f, ci) in r.fits"
-                  :key="ci"
-                  v-tip="f > 0 ? fitTip(f) : t('reverse.fit.no')"
-                  class="cell"
-                  :class="f > 0 ? 'fits' : 'no'"
-                >
-                  <template v-if="f > 0">
-                    <Check :size="16" :aria-label="t('reverse.fit.fits')" />
-                    <span v-if="f < 1" class="part">{{ percent(f) }}</span>
+                <!-- Whether it fits: with its item known (or none tried apart), on what share of the rolls; with its
+                     items worked out, which it fits with, each by name and the share of the rolls, the likeliest
+                     first. -->
+                <td class="cell" :class="[fitsOf(r).length ? 'fits' : 'no', { named: fitsOf(r).some((w) => w.label) }]">
+                  <template v-if="fitsOf(r).length">
+                    <Check :size="16" class="mark" :aria-label="t('reverse.fit.fits')" />
+                    <span class="with">
+                      <span v-for="w in fitsOf(r)" :key="w.key" v-tip="w.tip" class="fit-item">
+                        <span class="fit-name">{{ w.label }}</span
+                        ><span v-if="w.fit < 1" class="part">{{ percent(w.fit) }}</span>
+                      </span>
+                    </span>
                   </template>
-                  <X v-else :size="16" :aria-label="t('reverse.fit.no')" />
+                  <X v-else :size="16" class="mark" :aria-label="t('reverse.fit.no')" />
                 </td>
               </tr>
             </tbody>
@@ -373,19 +387,6 @@ function use(r: ReverseRow) {
 .corner {
   vertical-align: bottom;
 }
-.items {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2px;
-  max-width: 120px;
-}
-.item {
-  display: inline-flex;
-}
-.no-item {
-  font-size: 0.875em;
-}
 .spread {
   display: block;
   font-weight: bold;
@@ -404,6 +405,29 @@ function use(r: ReverseRow) {
 .cell .lucide {
   display: block;
   margin-inline: auto;
+}
+/* Fitting with items named: the mark at the left, the items one under another, each its share of the rolls. */
+.cell.named {
+  text-align: left;
+  white-space: nowrap;
+}
+.cell.named .mark {
+  display: inline-block;
+  margin: 0 6px 0 0;
+  vertical-align: top;
+}
+.with {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.fit-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.cell.named .part {
+  display: inline;
 }
 .part {
   display: block;
