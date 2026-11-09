@@ -83,6 +83,16 @@ export function toTopOf(el: Element | null | undefined) {
   if (Math.abs(top - MARGIN) > 8) scrollToY(window.scrollY + top - MARGIN)
 }
 
+/**
+ * Whether a panel starts right under its band, the band in its place: not stuck to the top over the panel scrolled
+ * under it, nor to the bottom with the panel further down. Tapping a band in its place folds its panel; stuck away from
+ * it, it brings the panel into view.
+ */
+export function underBand(band: Element | null | undefined, panel: Element | null | undefined) {
+  if (!band || !panel) return false
+  return Math.abs(panel.getBoundingClientRect().top - band.getBoundingClientRect().bottom) <= 4
+}
+
 /** Smoothly scrolls to the top of the page; the user scrolling or touching the screen takes over. */
 export function toTop() {
   scrollToY(0)

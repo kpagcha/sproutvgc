@@ -50,6 +50,7 @@ import {
 } from '@/lib/damage'
 import { membersPaste, parsePaste } from '@/lib/pokepaste'
 import { copy } from '@/lib/clipboard'
+import { underBand } from '@/lib/scroll'
 import { commonForme, commonMember } from '@/lib/commonSet'
 import { emptyMember, nextField, pickedAs, setsAs, stoneMega, type Field, type Member } from '@/lib/team'
 import { conditionName, fieldOf, terrainOf, weatherOf } from '@/components/calcConditions'
@@ -193,12 +194,22 @@ const BAND_H = 44
 function reveal(k: SideKey, behavior: ScrollBehavior = 'auto') {
   void nextTick(() => document.getElementById(`calc-${k}`)?.scrollIntoView({ behavior, block: 'start' }))
 }
-/** A band tapped: with no Pokémon yet, its picker; else its panel opened, its top brought into view, or folded. */
-function toggleBand(k: SideKey) {
+/**
+ * A band tapped: with no Pokémon yet, its picker; else its panel brought into view, opened first if folded. In its place,
+ * its panel open right under it, it folds it instead (as its arrow always does).
+ */
+function tapBand(k: SideKey) {
   if (!battlerOf(sides.value[k])) {
     picking.value = { side: k, field: 'pokemon' }
     return
   }
+  if (open.value[k] && underBand(document.getElementById(`band-${k}`), document.getElementById(`calc-${k}`)))
+    return foldBand(k)
+  open.value = { ...open.value, [k]: true }
+  reveal(k)
+}
+/** A band's arrow: its panel folded, or opened and brought into view. */
+function foldBand(k: SideKey) {
   const on = !open.value[k]
   open.value = { ...open.value, [k]: on }
   if (on) reveal(k)
@@ -662,36 +673,45 @@ function face(f: Fighter) {
         }"
       >
         <!-- On phones, as the speed comparison's list past a pair: each side a band of its color, its Pokémon in short,
-           stuck to the top under the field's bar, the second piling up under the first; tapping it opens its panel under
-           it, its top brought into view, or folds it (one with none picks it). -->
+           stuck to the top under the field's bar, the second piling up under the first, and to the bottom; tapping it
+           brings its panel into view under it, opening it (one with none picks it), or, in its place with its panel open
+           under it, folds it; its arrow opens and folds it. -->
         <template v-for="k in ['a', 'b'] as const" :key="k">
-          <button
+          <div
             v-if="!wide"
-            type="button"
+            :id="`band-${k}`"
             class="side-band"
             :class="[`band-${k}`, { open: open[k] && !!battlerOf(sides[k]), theirs: k === 'b' }]"
-            :aria-expanded="battlerOf(sides[k]) ? open[k] : undefined"
-            :aria-controls="`calc-${k}`"
-            @click="toggleBand(k)"
           >
-            <span class="sr-only">{{ labels[k] }}</span>
-            <CalcSummary
+            <button type="button" class="band-main" :aria-controls="`calc-${k}`" @click="tapBand(k)">
+              <span class="sr-only">{{ labels[k] }}</span>
+              <CalcSummary
+                v-if="battlerOf(sides[k])"
+                :fighter="fought[k]"
+                :other="fought[k === 'a' ? 'b' : 'a']"
+                :field
+                :theirs="k === 'b'"
+                named
+                :no-verdict="inverse"
+                class="band-summary"
+              />
+              <span v-else class="band-empty"
+                ><Plus :size="16" aria-hidden="true" />{{
+                  t(k === 'a' ? 'compare.pickYours' : 'compare.pickOpponent')
+                }}</span
+              ></button
+            ><button
               v-if="battlerOf(sides[k])"
-              :fighter="fought[k]"
-              :other="fought[k === 'a' ? 'b' : 'a']"
-              :field
-              :theirs="k === 'b'"
-              named
-              :no-verdict="inverse"
-              class="band-summary"
-            />
-            <span v-else class="band-empty"
-              ><Plus :size="16" aria-hidden="true" />{{
-                t(k === 'a' ? 'compare.pickYours' : 'compare.pickOpponent')
-              }}</span
+              type="button"
+              class="band-fold"
+              :aria-expanded="open[k]"
+              :aria-controls="`calc-${k}`"
+              :aria-label="t(open[k] ? 'band.fold' : 'band.unfold')"
+              @click="foldBand(k)"
             >
-            <ChevronDown :size="16" class="band-chevron" :class="{ unset: !battlerOf(sides[k]) }" aria-hidden="true" />
-          </button>
+              <ChevronDown :size="16" class="band-chevron" aria-hidden="true" />
+            </button>
+          </div>
           <CalcSide
             :id="`calc-${k}`"
             :ref="(el) => setSideEl(k, el)"
@@ -1153,28 +1173,56 @@ function face(f: Fighter) {
 }
 /* On phones, each side's band, as the speed comparison's list's: one row of its side's color, its Pokémon in short and
    its arrow, stuck under the field's bar, the second piling up under the first (their shared lines overlapping), over
-   the panels scrolling under them. Its panel right under it, their lines shared too. */
+   the panels scrolling under them; and stuck to the bottom of the screen too, the first over the second, while their
+   place is still under it. Its panel right under it, their lines shared too. */
 .side-band {
   position: sticky;
   top: calc(var(--nav-h, 0px) + var(--bar-h, 0px));
+  bottom: calc(var(--band-h) - 2px);
   z-index: 40;
   display: flex;
   align-items: center;
   gap: 8px;
   height: var(--band-h);
   min-width: 0;
-  padding: 0 10px 0 8px;
-  font: inherit;
   font-weight: bold;
-  text-align: left;
   color: var(--accent-text);
   background: var(--accent);
   border: 2px solid var(--ink);
+}
+/* Its two buttons, the band's whole height: its Pokémon in short, bringing its panel into view, and its arrow, folding
+   it. */
+.band-main,
+.band-fold {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  min-width: 0;
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  background: none;
+  border: 0;
   cursor: pointer;
   touch-action: manipulation;
 }
+.band-main {
+  flex: 1;
+  gap: 8px;
+  padding: 0 10px 0 8px;
+}
+.band-fold {
+  flex: none;
+  padding: 0 10px 0 6px;
+}
+.band-main:focus-visible,
+.band-fold:focus-visible {
+  outline-offset: -4px;
+}
 .side-band.theirs {
   top: calc(var(--nav-h, 0px) + var(--bar-h, 0px) + var(--band-h) - 2px);
+  bottom: 0;
   z-index: 39;
   color: var(--opponent-text);
   background: var(--opponent);
@@ -1212,14 +1260,10 @@ function face(f: Fighter) {
 }
 .band-chevron {
   flex: none;
-  margin-left: auto;
   transition: transform 0.15s;
 }
 .side-band.open .band-chevron {
   transform: rotate(180deg);
-}
-.band-chevron.unset {
-  visibility: hidden;
 }
 .sr-only {
   position: absolute;
