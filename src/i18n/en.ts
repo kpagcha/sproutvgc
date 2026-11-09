@@ -2020,7 +2020,7 @@ export const messages = {
   'usage.setsDesc': "Each Pokémon's most common item, ability and moves",
   'usage.noMatch': 'No Pokémon matches.',
   'usage.termShareTip': 'How often its sets run {name}',
-  'usage.termSets': 'A move or item counts when at least {share} of its sets run it.',
+  'usage.termSets': 'An item counts when at least {share} of its sets hold it.',
   'usage.rare': 'Faded: under {share} usage.',
   'usage.filteredSets': 'Filtering by item, ability or move counts what at least {share} of its sets run.',
   'usage.none': 'There are no usage stats for Regulation {reg} yet.',

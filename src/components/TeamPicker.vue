@@ -20,7 +20,7 @@ import { RULES } from '@/data/rules'
 import { t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
 import { refName } from '@/i18n/refName'
-import { noFilters, passesGroups } from '@/lib/filterGroups'
+import { allFilters, noFilters, passesGroups } from '@/lib/filterGroups'
 import { monMatches, MON_TERM_KINDS, SET_LIST } from '@/lib/monTerms'
 import { parseDexText } from '@/lib/dexText'
 import { fold, split } from '@/lib/search'
@@ -181,7 +181,18 @@ const megaRows = (base: PokemonId, f: TermFilters, named: boolean) =>
 const monKinds = computed(() =>
   MON_TERM_KINDS.filter((k) => k === 'type' || k === 'ability' || (props.snapshot && has(props.snapshot, SET_LIST[k]))),
 )
-const monPasses = (id: PokemonId, f: TermFilters) => passesGroups(f, (x) => monMatches(props.data, id, x))
+// Filtering Pokémon by move needs every learnset, loaded once there's a move to filter by, or text that could find one.
+const allLearnsets = shallowRef<Record<PokemonId, MoveId[]> | null>(null)
+watch(
+  [q, filters],
+  async () => {
+    if (!allLearnsets.value && (q.value || allFilters(filters.value).some((f) => f.kind === 'move')))
+      allLearnsets.value = await loadLearnsets()
+  },
+  { immediate: true },
+)
+const monPasses = (id: PokemonId, f: TermFilters) =>
+  passesGroups(f, (x) => monMatches(props.data, id, x, allLearnsets.value))
 const monCount = (f: TermFilters) =>
   monRows.value.reduce((n, r) => n + (monPasses(r.id, f) ? 1 : megaRows(r.id, f, false).length), 0)
 const monShown = computed(() =>

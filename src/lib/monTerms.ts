@@ -1,10 +1,10 @@
 // What filtering a list of Pokémon from the meta by a term means (the Pokémon rankings, an ability's, item's or move's
-// meta page): of a type, able to have an ability, or with sets running a move or item, on at least `MIN_SHARE` of them
-// (what a few sets run doesn't make it one that runs it).
+// meta page): of a type, able to have an ability, able to learn a move, or with sets running an item, on at least
+// `MIN_SHARE` of them (what a few sets hold doesn't make it one that holds it; any Pokémon can hold any item).
 
-import type { PokemonId } from '@/data/dex'
+import type { MoveId, PokemonId } from '@/data/dex'
 import type { MetaData } from '@/data/meta'
-import { POKEMON } from '@/data/pokemon'
+import { movesOf, POKEMON } from '@/data/pokemon'
 import type { Term } from '@/lib/searchTerms'
 
 export const MIN_SHARE = 0.05
@@ -23,10 +23,17 @@ export function setShare(data: MetaData | null | undefined, id: PokemonId, term:
   return list?.find((x) => x.id === term.id)?.share
 }
 
-/** Whether a Pokémon matches a term. */
-export function monMatches(data: MetaData | null | undefined, id: PokemonId, term: Term): boolean {
+/** Whether a Pokémon matches a term. A move by its learnset (`loadLearnsets`); until it's in, by its sets running it. */
+export function monMatches(
+  data: MetaData | null | undefined,
+  id: PokemonId,
+  term: Term,
+  learnsets?: Record<PokemonId, MoveId[]> | null,
+): boolean {
   if (term.kind === 'type') return POKEMON[id].types.includes(term.id)
   if (term.kind === 'ability') return POKEMON[id].abilities.includes(term.id)
-  if (term.kind !== 'move' && term.kind !== 'item') return false
+  if (term.kind === 'move')
+    return learnsets ? movesOf(learnsets, id).includes(term.id) : (setShare(data, id, term) ?? 0) > 0
+  if (term.kind !== 'item') return false
   return (setShare(data, id, term) ?? 0) >= MIN_SHARE
 }

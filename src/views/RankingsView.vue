@@ -2,9 +2,9 @@
 import { computed, onBeforeUnmount, onDeactivated, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import tippy, { type Instance } from 'tippy.js'
 import { useRouter } from 'vue-router'
-import { ability, item, move, pokemon, type PokemonId } from '@/data/dex'
+import { ability, item, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
-import { gameStats, gameTotal, POKEMON, splitForme, STATS, type StatId } from '@/data/pokemon'
+import { gameStats, gameTotal, loadLearnsets, POKEMON, splitForme, STATS, type StatId } from '@/data/pokemon'
 import { sinceLabel, GENERATED_SNAPSHOTS, has, percent } from '@/data/meta'
 import { baselineOf, eventsOf, loadEventUsage, type EventUsage } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
@@ -69,8 +69,8 @@ const setCan = (c: Parameters<typeof has>[1]) =>
 const showItem = setCan('items')
 const showAbility = setCan('abilities')
 const showMoves = setCan('moves')
-/** A move or item is filtered by: its share counts the sets running it from `MIN_SHARE`, said under the table. */
-const termSets = computed(() => allFilters(filters.value).some((x) => x.kind === 'move' || x.kind === 'item'))
+/** An item is filtered by: its share counts the sets holding it from `MIN_SHARE`, said under the table. */
+const termSets = computed(() => allFilters(filters.value).some((x) => x.kind === 'item'))
 
 // Trends: against the dataset before the one shown (`previous`, the month before), each Pokémon's rank and usage then: a
 // mark by its rank (up, down or new), and the panel of those that rose and fell the most (`RankingTrends`). None for the
@@ -231,8 +231,8 @@ function pickStat(k: StatKey) {
 }
 
 // The search and filters (`FilterSearch`): its text finds the list's Pokémon by name, and its filters (`?f=`, `?fm=`)
-// narrow it to those of a type, that can have an ability, or whose sets run a move or item, on at least `MIN_SHARE` of
-// them (`monTerms.ts`: what a few sets run doesn't make it one that runs it). With a filter of what sets run (an ability, a move, an
+// narrow it to those of a type, that can have an ability or learn a move, or whose sets hold an item, on at least
+// `MIN_SHARE` of them (`monTerms.ts`: what a few sets hold doesn't make it one that holds it). With a filter of what sets run (an ability, a move, an
 // item), not negated, each Pokémon's share of its sets running it is a column of its own. The list stays by usage.
 // While a term is highlighted in the search's options (`preview`), the list shows it added, rather than the text's
 // search by name, faded a little: what picking it would do.
@@ -253,7 +253,7 @@ const preview = shallowRef<TermFilters | null>(null)
 /** The filters the list shows: the search's, or with the term highlighted in its options. */
 const shownFilters = computed(() => preview.value ?? filters.value)
 const shareOf = (id: PokemonId, term: Term) => setShare(data.value, id, term)
-const matches = (id: PokemonId, term: Term) => monMatches(data.value, id, term)
+const matches = (id: PokemonId, term: Term) => monMatches(data.value, id, term, learnsets.value)
 /** Whether a Pokémon passes the filters. Pokémon filters pick which, apart from the groups: any of those not negated
  * (two of them are both shown, not none), none of those negated; the rest as their groups join them. */
 function passes(id: PokemonId, f: TermFilters = filters.value) {
@@ -280,6 +280,16 @@ useSlashFocus(() => {
   termSearch.value.focus({ preventScroll: true })
 })
 const search = shallowRef(typeof query.value.q === 'string' ? query.value.q : '')
+// Filtering by move needs the learnsets, which load once there's a move to filter by, or text that could find one.
+const learnsets = shallowRef<Record<PokemonId, MoveId[]> | null>(null)
+watch(
+  [search, filters],
+  async () => {
+    if (!learnsets.value && (search.value.trim() || allFilters(filters.value).some((f) => f.kind === 'move')))
+      learnsets.value = await loadLearnsets()
+  },
+  { immediate: true },
+)
 /** How many the text finds by name, with the terms. */
 const named = computed(() => {
   const q = fold(search.value.trim())
