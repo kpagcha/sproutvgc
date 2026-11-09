@@ -196,13 +196,22 @@ function use(r: ReverseRow) {
                     t('calc.reverse.fits')
                   }}</span>
                   <template v-else>
+                    <!-- Its items' icons; three or more alike, its most common's and how many more, every one named on
+                         hover. -->
                     <span class="items">
-                      <template v-for="it in c.items" :key="it ?? '-'">
+                      <template v-for="it in c.items.length > 2 ? c.items.slice(0, 1) : c.items" :key="it ?? '-'">
                         <span v-if="it" v-tip="itemName(it)" class="item" role="img" :aria-label="itemName(it)"
                           ><ItemIcon :id="it"
                         /></span>
                         <span v-else class="muted no-item">{{ itemName(null) }}</span>
                       </template>
+                      <span
+                        v-if="c.items.length > 2"
+                        v-tip="c.items.map(itemName).join(', ')"
+                        class="more-items"
+                        :aria-label="c.items.map(itemName).join(', ')"
+                        >+{{ c.items.length - 1 }}</span
+                      >
                     </span>
                     <span v-if="c.share" v-tip="t('calc.reverse.itemTip')" class="muted share">{{
                       percent(c.share)
@@ -385,6 +394,15 @@ function use(r: ReverseRow) {
 }
 .no-item {
   font-size: 0.875em;
+}
+/* How many more items, alike, after the most common one's icon: a small badge, every one named on hover. */
+.more-items {
+  padding: 0 4px;
+  font-size: 0.8em;
+  font-weight: bold;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  cursor: help;
 }
 .spread {
   display: block;
