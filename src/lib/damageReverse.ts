@@ -300,9 +300,10 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
     return i >= 0 ? i : 0
   }
 
-  // Its items: at its team sheet, or one it can't be without (a Mega's stone, Ogerpon's mask), its own; else those run
-  // on `ITEM_MIN` of its sets or more, its own too. Those alike for every hit (none changes them) as one.
-  const fixedItem = sheet || !!stoneMega(m) || (!!m.pokemon && itemBound(m.pokemon))
+  // Its items: one set (known, or a guess to test) or one it can't be without (a Mega's stone, Ogerpon's mask), alone;
+  // unset, those run on `ITEM_MIN` of its sets or more (none, no item). Those alike for every hit (none changes them)
+  // as one.
+  const fixedItem = !!m.item || !!stoneMega(m) || (!!m.pokemon && itemBound(m.pokemon))
   const itemPrior = fixedItem
     ? [{ value: m.item, w: 1 }]
     : weighted<ItemId | null>(
@@ -310,7 +311,7 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
           .filter((x) => !ITEMS[x.id]?.megas && (x.share ?? 0) >= ITEM_MIN)
           .map((x) => ({ value: x.id, share: x.share ?? 0 })),
       )
-  if (!itemPrior.some((x) => x.value === m.item)) itemPrior.push({ value: m.item, w: 0 })
+  if (!itemPrior.length) itemPrior.push({ value: null, w: 1 })
   const analytic = abilityOf(theirs) === 'analytic'
   const itemKey = (it: ItemId | null) =>
     plans

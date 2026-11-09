@@ -149,7 +149,7 @@ function use(r: ReverseRow) {
         <span :style="{ width: `${progress * 100}%` }"></span>
       </div>
       <button
-        v-tip="t('calc.threats.sheetTip')"
+        v-tip="t('calc.reverse.sheetTip')"
         type="button"
         class="btn switch sheet"
         :class="{ on: sheet }"
@@ -158,7 +158,10 @@ function use(r: ReverseRow) {
       >
         {{ t('calc.threats.sheet') }}
       </button>
-      <span class="muted at">{{ sheet ? t('calc.threats.atSheet') : t('calc.reverse.atSets') }}</span>
+      <span class="muted at"
+        >{{ sheet ? t('calc.reverse.atSheet') : t('calc.reverse.atSets') }}
+        {{ theirs.member.item ? t('calc.reverse.itemSet') : t('calc.reverse.itemVaries') }}</span
+      >
     </div>
     <p v-if="!theirId || !yourId" class="muted intro">{{ t('calc.threats.pickBoth') }}</p>
     <p v-else-if="!obs.length" class="muted intro">{{ t('calc.reverse.hint') }}</p>

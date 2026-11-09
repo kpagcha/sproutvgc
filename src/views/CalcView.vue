@@ -244,14 +244,15 @@ watch(
     first.value = null
   },
 )
-/** A spread of What fits used: the opponent set to it (its nature and item unless at its team sheet), the damage tab
- * shown with it. */
+/** A spread of What fits used: the opponent set to it (its nature unless at its team sheet, and the item likeliest to
+ * go with it where its item was worked out), the damage tab shown with it. */
 function useBuild(b: { nature: string | null; points: Member['points']; item?: ItemId | null }) {
   const f = sides.value.b
   const member = {
     ...f.member,
     points: [...b.points] as Member['points'],
-    ...(!sheet.value && { nature: b.nature, ...(b.item !== undefined && { item: b.item }) }),
+    ...(!sheet.value && { nature: b.nature }),
+    ...(b.item !== undefined && { item: b.item }),
   }
   setSide('b', { ...f, member, sets: false, mega: !!stoneMega(member) && f.mega })
   toTab('damage')
@@ -304,20 +305,16 @@ function choose(k: SideKey, id: PokemonId) {
     item: item ?? null,
     ability: abilities.length === 1 ? abilities[0]! : null,
   }
-  // The inverse tab's opponent off its team sheet: its most common ability and item, which aren't asked for (the item
-  // is worked out; the ability counts as set, and can be changed on its card).
-  if (props.inverse && k === 'b' && !sheet.value) {
-    const common = commonMember(id, data.value)
-    member.ability ??= common.ability
-    member.item ??= common.item
-  }
+  // The inverse tab's opponent off its team sheet: its most common ability, which isn't asked for (it counts as set,
+  // and can be changed on its card). Its item is left unknown, worked out until set.
+  if (props.inverse && k === 'b' && !sheet.value) member.ability ??= commonMember(id, data.value).ability
   setSide(k, { ...emptyFighter(member), side: sides.value[k].side, sets: sides.value[k].sets })
 }
 /**
  * The part to pick next: on the damage tab, the next the set lacks (`nextField`). On the inverse tab, a move picked
  * closes the picker (a hit's move is picked where the hit is, any the attacker learns, so its set needs none, or one or
  * two), and none follows another; the opponent's stat points aren't asked for, nor off its team sheet its item,
- * ability and nature (worked out, or its most common).
+ * ability and nature (its item optional, worked out until set; its nature worked out; its ability its most common).
  */
 function nextStep(k: SideKey, member: Member, after: Field): Field | null {
   if (!props.inverse) return nextField(member, after)

@@ -61,8 +61,8 @@ const props = defineProps<{
   /** What the battle adds to it folded away, its heading alone. */
   battleFolded: boolean
   /** The inverse calc's: its moves by name alone, no damage (what was seen is entered apart), no HP left (each hit
-   * seen has its own); the opponent's stat points left out, and off its team sheet (`sheet`) its item and nature too,
-   * those being what's worked out. */
+   * seen has its own); the opponent's stat points left out, and off its team sheet (`sheet`) its nature too,
+   * those being what's worked out; its item optional, worked out until set. */
   inverse?: boolean
   sheet?: boolean
 }>()
@@ -208,7 +208,8 @@ function setHpPoints(e: Event) {
           :evolved="fighter.mega"
           no-moves
           flat
-          :hide="inverse && theirs ? (sheet ? ['points'] : ['points', 'item', 'nature']) : undefined"
+          :hide="inverse && theirs ? (sheet ? ['points'] : ['points', 'nature']) : undefined"
+          :item-placeholder="inverse && theirs ? t('calc.reverse.itemUnknown') : undefined"
           :at-sets="fighter.sets && !!fighter.pooled"
           :pooled
           @mega="set({ mega: !fighter.mega })"

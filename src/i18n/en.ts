@@ -335,7 +335,14 @@ export const messages = {
   'calc.reverse.first': 'Moved first',
   'calc.reverse.firstTip':
     'With moves of the same priority. Narrows its Speed in the same spread, within its 66 points; stages, Tailwind, paralysis and Trick Room as set count.',
-  'calc.reverse.atSets': 'Every nature and its common items tried, weighed by its sets; its ability as set above.',
+  'calc.reverse.atSets': 'Every nature tried, weighed by its sets; its ability as set above.',
+  'calc.reverse.atSheet': 'Its nature and ability as set above, as an open team sheet shows them.',
+  'calc.reverse.itemSet': 'Its item as set above.',
+  'calc.reverse.itemVaries':
+    'Its common items tried, its item unknown: set it above if you know it, or to test a guess.',
+  'calc.reverse.sheetTip':
+    'Its nature and ability as set above, as an open team sheet shows them: its stat points vary.',
+  'calc.reverse.itemUnknown': 'Item: unknown',
   'calc.reverse.working': 'Working out what fits…',
   'calc.reverse.impossible':
     "No spread fits what you saw: check the field, both sides' HP and stages, and the moves' options.",

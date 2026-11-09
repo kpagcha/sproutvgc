@@ -60,6 +60,8 @@ const props = defineProps<{
   pooled?: { points: readonly number[]; stats: readonly number[] }
   /** Parts left out, being what's worked out (the inverse damage calc's opponent): its stat points, item, nature. */
   hide?: readonly ('points' | 'item' | 'nature')[]
+  /** What its item's placeholder says, when not "Item" (the inverse damage calc's opponent: unknown until set). */
+  itemPlaceholder?: string
 }>()
 const emit = defineEmits<{
   field: [field: Field]
@@ -172,7 +174,7 @@ const chipText = computed(() =>
             @click="go('item')"
           >
             <template v-if="member.item"><ItemIcon :id="member.item" />{{ refName(item(member.item)) }}</template>
-            <template v-else>{{ t('builder.item') }}</template>
+            <template v-else>{{ itemPlaceholder ?? t('builder.item') }}</template>
           </button>
         </span>
       </span>
