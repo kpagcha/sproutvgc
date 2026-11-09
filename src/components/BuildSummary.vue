@@ -11,9 +11,9 @@ import PokemonIcon from '@/components/PokemonIcon'
 // A Pokémon at a Speed build, in short, on one line: its icon, its name, its Speed, its build (but for a neutral nature
 // and no points, which go without saying) and its modifiers, items by their icon. Its name only where it fits whole
 // beside the rest: cut, it goes, its icon standing for it (the name still read out); gone, it comes back once the room
-// left at the line's end takes it, as measured when it was there. On the speed tiers' bar and, on phones, the comparison's tabs.
+// left at the line's end takes it, as measured when it was there. On the speed tiers' bar and, on phones, the comparison's bands.
 // At its sets (`range`), its Speeds from the slowest to the fastest, and "Sets" for its build (but where what's around
-// says so, `setsSaid`: the comparison's tabs on phones, their label).
+// says so, `setsSaid`).
 const props = defineProps<{
   id: PokemonId
   speed: number
