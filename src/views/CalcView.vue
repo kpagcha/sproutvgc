@@ -50,7 +50,7 @@ import {
 } from '@/lib/damage'
 import { membersPaste, parsePaste } from '@/lib/pokepaste'
 import { copy } from '@/lib/clipboard'
-import { commonForme } from '@/lib/commonSet'
+import { commonForme, commonMember } from '@/lib/commonSet'
 import { emptyMember, nextField, pickedAs, setsAs, stoneMega, type Field, type Member } from '@/lib/team'
 import { conditionName, fieldOf, terrainOf, weatherOf } from '@/components/calcConditions'
 import CalcConditions from '@/components/CalcConditions.vue'
@@ -304,7 +304,30 @@ function choose(k: SideKey, id: PokemonId) {
     item: item ?? null,
     ability: abilities.length === 1 ? abilities[0]! : null,
   }
+  // The inverse tab's opponent off its team sheet: its most common ability and item, which aren't asked for (the item
+  // is worked out; the ability counts as set, and can be changed on its card).
+  if (props.inverse && k === 'b' && !sheet.value) {
+    const common = commonMember(id, data.value)
+    member.ability ??= common.ability
+    member.item ??= common.item
+  }
   setSide(k, { ...emptyFighter(member), side: sides.value[k].side, sets: sides.value[k].sets })
+}
+/**
+ * The part to pick next: on the damage tab, the next the set lacks (`nextField`). On the inverse tab, a move picked
+ * closes the picker (a hit's move is picked where the hit is, any the attacker learns, so its set needs none, or one or
+ * two), and none follows another; the opponent's stat points aren't asked for, nor off its team sheet its item,
+ * ability and nature (worked out, or its most common).
+ */
+function nextStep(k: SideKey, member: Member, after: Field): Field | null {
+  if (!props.inverse) return nextField(member, after)
+  if (typeof after === 'number') return null
+  const skip = (f: Field) =>
+    typeof f === 'number' ||
+    (k === 'b' && (f === 'points' || (!sheet.value && (f === 'item' || f === 'ability' || f === 'nature'))))
+  let f = nextField(member, after)
+  while (f !== null && skip(f)) f = nextField(member, f)
+  return f
 }
 /** The set being put together skipped: the most common set loaded, the picker closed. */
 function loadCommon() {
@@ -351,7 +374,7 @@ function pick(value: string) {
     patchMember(p.side, { moves })
   }
   const now = sides.value[p.side].member
-  const next = p.back ?? nextField(now, p.field)
+  const next = p.back ?? nextStep(p.side, now, p.field)
   picking.value = next === null ? null : { side: p.side, field: next, ...(common && { common }) }
 }
 

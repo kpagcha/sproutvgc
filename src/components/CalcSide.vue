@@ -110,16 +110,21 @@ const otherId = computed(() => battlerOf(props.other))
 const otherName = computed(() => (otherId.value ? refName(pokemon(otherId.value)) : null))
 // Each of its four moves a row, in its place (the set's card leaving them out): a status move's as the rest's, dimmed,
 // with no damage; one not picked yet a placeholder picking it; with no other side, their names alone.
-const hits = computed(() =>
-  props.fighter.member.moves.map((mv, i) => ({
+// On the inverse tab, its moves picked so far and one placeholder for another, not four: a hit's move is picked where
+// the hit is, so its set needs none, or one or two.
+const hits = computed(() => {
+  const rows = props.fighter.member.moves.map((mv, i) => ({
     i: i as Field,
     mv,
     hit:
       !mv || !otherName.value || props.inverse || MOVES[mv]?.category === 'status'
         ? null
         : hit(props.fighter, props.other, mv, props.field, opts.value[mv]),
-  })),
-)
+  }))
+  if (!props.inverse) return rows
+  const empty = rows.find((r) => !r.mv)
+  return rows.filter((r) => r.mv || r === empty)
+})
 
 const shown = computed(() => battlerOf(props.fighter))
 /** At every set, its pooled points and the stats they give, for its compact row to show. */

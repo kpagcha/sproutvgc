@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, shallowRef } from 'vue'
 import { Crosshair, Plus, X, Zap } from '@lucide/vue'
 import { move, type MoveId } from '@/data/dex'
 import { isSpread, MOVES } from '@/data/moves'
+import { loadLearnsets, movesOf as learnsetOf } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { battlerOf, damaging, statsOf, type Fighter, type HitOptions } from '@/lib/damage'
@@ -33,6 +34,24 @@ const name = (k: 'a' | 'b') => t(k === 'a' ? 'calc.yours' : 'calc.theirs')
 /** The attacker's damaging moves, from its set. */
 const movesOf = (k: 'a' | 'b') =>
   sideOf(k).member.moves.filter((mv, i, all): mv is MoveId => damaging(mv) && all.indexOf(mv) === i)
+// Every damaging move each learns, so a hit's move needn't be in its set (one or two entered, or none): its set's
+// first, then the rest by name.
+const learnsets = shallowRef<Awaited<ReturnType<typeof loadLearnsets>> | null>(null)
+void loadLearnsets().then((l) => (learnsets.value = l))
+const othersOf = computed(() => {
+  const of = (k: 'a' | 'b') => {
+    const id = ids.value[k]
+    if (!id || !learnsets.value) return []
+    const set = new Set(movesOf(k))
+    return learnsetOf(learnsets.value, id)
+      .filter((mv) => damaging(mv) && !set.has(mv))
+      .map((mv) => ({ mv, name: refName(move(mv)) }))
+      .sort((x, y) => x.name.localeCompare(y.name))
+  }
+  return { a: of('a'), b: of('b') }
+})
+/** A move to start a hit with: its set's first, else none (picked from the list). */
+const canAdd = (k: 'a' | 'b') => !!movesOf(k).length || !!othersOf.value[k].length
 const yourMaxHp = computed(() => statsOf(props.yours)?.hp ?? 0)
 
 const patch = (i: number, p: Partial<HitDraft>) =>
@@ -105,8 +124,18 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
           @change="patch(i, { move: (($event.target as HTMLSelectElement).value || null) as MoveId | null })"
         >
           <option v-if="!h.move" value="" disabled>{{ t('calc.pickMove') }}</option>
-          <option v-if="h.move && !movesOf(h.by).includes(h.move)" :value="h.move">{{ refName(move(h.move)) }}</option>
-          <option v-for="mv in movesOf(h.by)" :key="mv" :value="mv">{{ refName(move(mv)) }}</option>
+          <option
+            v-if="h.move && !movesOf(h.by).includes(h.move) && !othersOf[h.by].some((o) => o.mv === h.move)"
+            :value="h.move"
+          >
+            {{ refName(move(h.move)) }}
+          </option>
+          <optgroup v-if="movesOf(h.by).length" :label="t('calc.hits.setMoves')">
+            <option v-for="mv in movesOf(h.by)" :key="mv" :value="mv">{{ refName(move(mv)) }}</option>
+          </optgroup>
+          <optgroup v-if="othersOf[h.by].length" :label="t('calc.hits.otherMoves')">
+            <option v-for="o in othersOf[h.by]" :key="o.mv" :value="o.mv">{{ o.name }}</option>
+          </optgroup>
         </select>
         <span class="mods">
           <button
@@ -200,7 +229,7 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
           type="button"
           class="btn add"
           :class="k === 'a' ? 'yours' : 'opponent'"
-          :disabled="!movesOf(k).length"
+          :disabled="!canAdd(k)"
           @click="add(k)"
         >
           <Plus :size="14" aria-hidden="true" /><PokemonIcon :id="ids[k]!" />→<PokemonIcon

@@ -381,6 +381,8 @@ export const messages = {
   'calc.hits.beforePct': "The opponent's HP before it, in percent",
   'calc.hits.beforeHp': 'Your HP before it',
   'calc.hits.remove': 'Remove this hit',
+  'calc.hits.setMoves': 'Its set',
+  'calc.hits.otherMoves': 'Other moves it learns',
   'calc.hits.addYours': 'Your hit',
   'calc.hits.addTheirs': 'Its hit',
   'calc.reverse.note':
