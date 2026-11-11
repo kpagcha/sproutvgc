@@ -426,8 +426,10 @@ const optionId = (i: number) => `${listId}-${i}`
 .picker :deep(.search-box) {
   margin: 0;
 }
+/* The placeholder's Pikachu sits low and right in its cell: nudged to the box's middle. */
 .unknown {
   filter: brightness(0);
+  translate: -3px -3px;
 }
 /* The options: a card under the field, as the site's surfaces are. */
 .options {
