@@ -16,7 +16,8 @@ import PokemonIcon from '@/components/PokemonIcon'
 // move, hit one target alone, what it did (the opponent's HP lost in whole percent, as the game shows it, or yours' in
 // HP; or a knockout, survived, or a knockout on the second hit) and the defender's HP before it (full unless said: the
 // opponent's in percent, yours' in HP); the same move as often as it was seen. Then which of the two moved first, with
-// moves of the same priority. A row with no result yet counts for nothing (and isn't kept in the URL).
+// moves of the same priority. A row with no result yet counts for nothing (and isn't kept in the URL). What fits it
+// (`CalcReverse`, the default slot) is its readout, across its foot; before both are picked, a line on what it's for.
 export interface HitDraft {
   by: 'a' | 'b'
   move: MoveId | null
@@ -29,6 +30,7 @@ const hits = defineModel<HitDraft[]>('hits', { required: true })
 const first = defineModel<'a' | 'b' | null>('first', { default: null })
 
 const ids = computed(() => ({ a: battlerOf(props.yours), b: battlerOf(props.theirs) }))
+const both = computed(() => !!ids.value.a && !!ids.value.b)
 const sideOf = (k: 'a' | 'b') => (k === 'a' ? props.yours : props.theirs)
 const name = (k: 'a' | 'b') => t(k === 'a' ? 'calc.yours' : 'calc.theirs')
 /** The attacker's damaging moves, from its set. */
@@ -106,8 +108,9 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
 <template>
   <section class="panel banded hits">
     <h2 class="band">{{ t('calc.hits.title') }}</h2>
-    <p v-if="!hits.length" class="muted intro">{{ t('calc.hits.hint') }}</p>
-    <ol v-else class="hit-list">
+    <p v-if="!both" class="muted intro">{{ t('calc.reverse.pickBoth') }}</p>
+    <p v-else-if="!hits.length" class="muted intro">{{ t('calc.hits.hint') }}</p>
+    <ol v-if="both && hits.length" class="hit-list">
       <li v-for="(h, i) in hits" :key="i" class="hit" :class="h.by === 'a' ? 'yours' : 'opponent'">
         <!-- Who hit whom, as their icons. -->
         <span
@@ -220,7 +223,7 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
         </button>
       </li>
     </ol>
-    <div class="foot">
+    <div v-if="both" class="foot">
       <!-- A hit added, yours on the opponent or its on yours. -->
       <span class="adds">
         <button
@@ -255,6 +258,7 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
         </button>
       </span>
     </div>
+    <slot v-if="both" />
   </section>
 </template>
 
@@ -291,6 +295,9 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
 .intro {
   margin: 0 0 12px;
   font-size: 0.875em;
+}
+.intro:last-child {
+  margin-bottom: 0;
 }
 .hit-list {
   display: flex;

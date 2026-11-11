@@ -333,7 +333,7 @@ export const messages = {
   'calc.reverse.title': 'What fits',
   'calc.reverse.pickBoth':
     "Pick both Pokémon, then add the hits you saw and which moved first, to work out the opponent's stat points, nature and item.",
-  'calc.reverse.hint': 'Add a hit you saw above, or which moved first.',
+  'calc.reverse.hint': 'Nothing to work out yet: add a hit above, or which moved first.',
   'calc.reverse.first': 'Moved first',
   'calc.reverse.firstTip':
     'With moves of the same priority. Narrows its Speed in the same spread, within its 66 points; stages, Tailwind, paralysis and Trick Room as set count.',

@@ -28,7 +28,8 @@ import PokemonIcon from '@/components/PokemonIcon'
 // (on what share of the damage rolls) or ruled out; joined by the nearest that fits when none of them does. At its team
 // sheet (`sheet`, shared with the threats), its item and nature as set, only its points varying. A spread used (`use`)
 // sets the opponent to it, with the item likeliest to go with it. Worked out a slice at a time once the sides have
-// settled, what it showed kept, faded, until the new one's in.
+// settled, what it showed kept, faded, until the new one's in. It's the readout of "What you saw" (in its slot, both
+// picked): a sunken tray across that panel's foot, the answer under what it's worked out from.
 const props = defineProps<{
   yours: Fighter
   theirs: Fighter
@@ -136,9 +137,9 @@ function use(r: ReverseRow) {
 </script>
 
 <template>
-  <section class="panel banded reverse">
-    <h2 class="band">{{ t('calc.reverse.title') }}</h2>
-    <div v-if="theirId && yourId" class="reverse-head">
+  <section class="reverse">
+    <div class="reverse-head">
+      <h3 class="title">{{ t('calc.reverse.title') }}</h3>
       <!-- Working it out, past a moment: how far it's got, a line over the row's top, moving nothing. -->
       <div
         v-if="slow && progress !== null"
@@ -159,8 +160,7 @@ function use(r: ReverseRow) {
         {{ t('calc.threats.sheet') }}
       </button>
     </div>
-    <p v-if="!theirId || !yourId" class="muted intro">{{ t('calc.reverse.pickBoth') }}</p>
-    <p v-else-if="!obs.length" class="muted intro">{{ t('calc.reverse.hint') }}</p>
+    <p v-if="!obs.length" class="muted intro">{{ t('calc.reverse.hint') }}</p>
     <template v-if="theirId && yourId && obs.length && result">
       <div class="body" :class="{ stale: slow }">
         <p v-if="!result.ranges.length" class="warn" role="status">{{ t('calc.reverse.impossible') }}</p>
@@ -275,11 +275,16 @@ function use(r: ReverseRow) {
   border-color: var(--ink);
   font-weight: bold;
 }
+/* The readout: a tray across the panel's foot, to its edges, sunk under the hits it's worked out from. */
 .reverse {
-  margin: 0;
+  position: relative;
+  margin: var(--panel-pad) calc(-1 * var(--panel-pad)) calc(-1 * var(--panel-pad));
+  padding: 10px var(--panel-pad) var(--panel-pad);
+  background: color-mix(in srgb, var(--ink) 6%, var(--panel));
+  border-top: 2px solid var(--ink);
+  box-shadow: inset 0 3px 0 color-mix(in srgb, var(--ink) 8%, transparent);
 }
 .reverse-head {
-  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -292,6 +297,10 @@ function use(r: ReverseRow) {
   gap: 8px;
   font-size: 0.875em;
 }
+.title {
+  margin: 0 auto 0 0;
+  font-size: 1em;
+}
 .use {
   min-height: 0;
   padding: 0 8px;
@@ -301,7 +310,7 @@ function use(r: ReverseRow) {
 }
 .progress {
   position: absolute;
-  top: -8px;
+  top: 0;
   left: 0;
   right: 0;
   height: 3px;
