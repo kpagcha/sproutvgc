@@ -196,4 +196,31 @@ onBeforeUnmount(() => {
   color: var(--muted);
   font-size: 0.85em;
 }
+/* Something to do rather than an option (`menu-item`, a button or a link): a line of text, its icon before it, in the
+   accent when pointed at (`danger`, one that undoes, in the warning's). */
+.pop :slotted(.menu-item) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+  font: inherit;
+  color: var(--text);
+  white-space: nowrap;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.pop :slotted(.menu-item:hover) {
+  color: var(--accent);
+  text-decoration: none;
+}
+.pop :slotted(.menu-item.danger:hover) {
+  color: var(--bad);
+}
+.pop :slotted(.menu-item:disabled) {
+  color: var(--muted);
+  opacity: 0.6;
+  cursor: default;
+}
 </style>

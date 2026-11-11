@@ -27,6 +27,7 @@ import {
   teamIssues,
   type Field,
   type Member,
+  type Points,
   type Team,
   type TeamIssue,
 } from '@/lib/team'
@@ -241,6 +242,41 @@ async function applyCommonSets() {
     if (!ok) return
   }
   for (const { slot, set } of sets) update(slot, set)
+  picking.value = null
+}
+
+// Every slot's most common spread at once, its stat points and the nature they go with: the most common of the
+// nature it has (`keep`: its nature kept; with none yet, as the other), or the most common whatever its nature (`any`:
+// its nature set too). Those the meta has such a spread of, the rest left as they are, whatever they have: there to
+// pick at any time, over what's there; `lost`, those with something of their own it replaces: points spent, or a
+// nature it changes.
+const SPREAD_MODES = ['keep', 'any'] as const
+type SpreadMode = (typeof SPREAD_MODES)[number]
+function spreadChanges(mode: SpreadMode) {
+  return members.value.flatMap((m, slot) => {
+    if (!m.pokemon) return []
+    const spreads = spreadsOf(m)
+    const to = mode === 'keep' && m.nature ? spreads.find((s) => s.nature === m.nature) : spreads[0]
+    if (!to) return []
+    const lost = m.points.some(Boolean) || (!!m.nature && m.nature !== to.nature)
+    return [{ slot, lost, patch: { nature: to.nature, points: [...to.points] as Points } }]
+  })
+}
+const commonSpreads = computed(() => ({ keep: spreadChanges('keep'), any: spreadChanges('any') }))
+/** Puts every slot's most common spread in it, once confirmed: as replacing what some have, or, none having any, as
+ * filling them in. */
+async function applyCommonSpreads(mode: SpreadMode) {
+  const changes = commonSpreads.value[mode]
+  if (!changes.length) return
+  const lost = changes.filter((c) => c.lost).length
+  const n = lost || changes.length
+  const ok = await confirmDialog({
+    message: t(`builder.spreads.${lost ? 'replace' : 'fill'}.${mode}${n === 1 ? 'One' : ''}`, { n }),
+    confirm: t(lost ? 'builder.commonAllGo' : 'builder.spreads.fillGo'),
+    danger: !!lost,
+  })
+  if (!ok) return
+  for (const { slot, patch } of changes) update(slot, patch)
   picking.value = null
 }
 const [DefinePinned, ReusePinned] = createReusableTemplate()
@@ -529,16 +565,38 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
             :aria-label="t('builder.name')"
           />
           <CopyPaste v-if="hasAny" :text="paste" />
-          <button
-            v-if="hasAny"
-            v-tip="t('builder.commonAllTip')"
-            type="button"
-            class="btn common-all"
-            :disabled="!commonSets.length"
-            @click="applyCommonSets"
-          >
-            <Sparkles :size="14" aria-hidden="true" />{{ t('builder.commonAll') }}
-          </button>
+          <!-- What the meta shown runs most, put in every slot at once: their sets, or their spreads alone. -->
+          <OptionsMenu v-if="hasAny" :title="t('builder.common')">
+            <template #button="{ open: on, toggle }">
+              <button type="button" class="btn common-all" :aria-expanded="on" @click="toggle">
+                <Sparkles :size="14" aria-hidden="true" />{{ t('builder.common') }}
+                <ChevronDown class="chevron" :class="{ open: on }" :size="14" aria-hidden="true" />
+              </button>
+            </template>
+            <template #default="{ close }">
+              <button
+                type="button"
+                class="menu-item"
+                :disabled="!commonSets.length"
+                @click="(close(), applyCommonSets())"
+              >
+                {{ t('builder.commonSets') }}
+              </button>
+              <fieldset>
+                <legend>{{ t('builder.commonSpreads') }}</legend>
+                <button
+                  v-for="mode in SPREAD_MODES"
+                  :key="mode"
+                  type="button"
+                  class="menu-item"
+                  :disabled="!commonSpreads[mode].length"
+                  @click="(close(), applyCommonSpreads(mode))"
+                >
+                  {{ t(`builder.commonSpreads.${mode}`) }}
+                </button>
+              </fieldset>
+            </template>
+          </OptionsMenu>
         </div>
         <ul v-if="issues.length" class="issues" aria-live="polite">
           <li v-for="(i, n) in issues" :key="n">{{ issueText(i) }}</li>
@@ -791,10 +849,11 @@ section {
   box-shadow: 0 0 0 1px var(--accent);
   cursor: pointer;
 }
-.saved-toggle > .chevron {
+/* A drop-down's button's chevron, turned over while it's open. */
+.chevron {
   transition: transform 0.15s;
 }
-.saved-toggle > .chevron.open {
+.chevron.open {
   transform: rotate(180deg);
 }
 .saved-count {
@@ -1091,7 +1150,7 @@ section {
   gap: 8px;
   margin-bottom: 10px;
 }
-/* As the paste's copy beside it. */
+/* As the paste's copy beside it, its drop-down's chevron at its end. */
 .common-all {
   font-size: 0.875em;
   font-weight: bold;

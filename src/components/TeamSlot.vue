@@ -446,26 +446,6 @@ const chipText = computed(() =>
   margin-top: 4px;
   margin-left: auto;
 }
-.menu-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 2px 0;
-  font: inherit;
-  color: var(--text);
-  white-space: nowrap;
-  text-align: left;
-  background: none;
-  border: 0;
-  cursor: pointer;
-}
-.menu-item:hover {
-  color: var(--accent);
-  text-decoration: none;
-}
-.menu-item.danger:hover {
-  color: var(--bad);
-}
 .set-facts {
   display: flex;
   flex-wrap: wrap;
