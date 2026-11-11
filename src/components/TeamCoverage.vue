@@ -19,8 +19,9 @@ import TypeIcon from '@/components/TypeIcon'
 // with a super effective move against the type, marked when it's STAB, and below for each whose every move it resists
 // or is immune to. Each block holds its Pokémon's icon: the one by the line whole, the rest slivers behind it, so a
 // bar still grows with its count, until its column is hovered (tapped, where nothing hovers), when they open out
-// whole, an accordion. Narrow, the columns keep an icon's width, the chart scrolling sideways. A block's tooltip
-// names its Pokémon with its types, defending, or its moves with theirs, attacking.
+// whole, an accordion. Narrow (a phone), the chart stands: a row per type down the line, the blocks below it to its
+// left and those above it to its right, every one whole, nothing to open out. A block's tooltip names its Pokémon
+// with its types, defending, or its moves with theirs, attacking.
 const props = defineProps<{ members: readonly Battler[]; side: 'def' | 'atk' }>()
 
 interface Block {
@@ -228,7 +229,8 @@ const colLabel = (c: Chart, col: Column) =>
           </div>
           <p class="legend muted">
             <span v-for="(side, s) in [c.legend.up, c.legend.down]" :key="s" class="legend-side">
-              <span class="arrow" aria-hidden="true">{{ s ? '▼' : '▲' }}</span>
+              <span class="arrow lying" aria-hidden="true">{{ s ? '▼' : '▲' }}</span>
+              <span class="arrow stood" aria-hidden="true">{{ s ? '◀' : '▶' }}</span>
               <template v-for="l in side" :key="l.m">
                 <span v-if="l.m >= 0" class="mult-tag" :class="c.id === 'def' ? defClass(l.m) : multClass(l.m)">{{
                   formatMult(l.m)
@@ -408,17 +410,88 @@ const colLabel = (c: Chart, col: Column) =>
     --icon-scale: 0.85;
   }
 }
-/* Narrow (a phone), the columns an icon's width whole, the chart scrolling sideways, room under it for the shadow of
-   a bar opened out. */
+/* Narrow (a phone), standing: the types down the line, a row each, the blocks below it to its left and those above it
+   to its right, nearest the line first, every one whole (as wide as an icon, or cropped to its middle where a row's
+   don't fit), so nothing opens out nor dims. */
+.arrow.stood {
+  display: none;
+}
 @container (max-width: 480px) {
+  /* Its icons at their full size, with the room rows leave: drawn at three quarters, scaled back up. */
+  .chart {
+    --icon-w: 40px;
+    --whole: 30px;
+    --axis: 46px;
+  }
+  .block :deep(.sheet-icon) {
+    transform: scale(calc(4 / 3));
+  }
   .cols {
-    overflow-x: auto;
-    padding-bottom: 4px;
-    scrollbar-width: thin;
+    flex-direction: column;
+    gap: 4px;
   }
   .col {
     flex: none;
-    width: var(--icon-w);
+    grid-template-rows: auto;
+    grid-template-columns: minmax(0, 1fr) var(--axis) minmax(0, 1fr);
+    grid-template-areas: 'down axis up';
+    justify-items: stretch;
+    align-items: center;
+  }
+  .col.open {
+    background: none;
+  }
+  .focused :is(.legend, .col:not(.open)) {
+    opacity: 1;
+  }
+  .side {
+    width: auto;
+    min-width: 0;
+  }
+  .open .side {
+    filter: none;
+  }
+  .up {
+    flex-direction: row;
+  }
+  .down {
+    flex-direction: row-reverse;
+  }
+  .block {
+    flex: 0 1 var(--icon-w);
+    min-width: 0;
+    height: var(--whole);
+  }
+  .col:not(.open) .block:not(:first-child) :deep(.sheet-icon) {
+    opacity: 1;
+  }
+  .up .block + .block {
+    margin: 0 0 0 -1px;
+  }
+  .down .block + .block {
+    margin: 0 -1px 0 0;
+  }
+  .axis {
+    --icon-scale: 1.5;
+  }
+  /* The line down the rows, a stretch per row behind its badge and across the gap to the next. */
+  .axis::before {
+    top: -2px;
+    bottom: -2px;
+    left: calc(50% - 1px);
+    right: auto;
+    width: 2px;
+    height: auto;
+  }
+  /* The legend's sides as the chart's: below the line first, at its left. */
+  .arrow.lying {
+    display: none;
+  }
+  .arrow.stood {
+    display: inline;
+  }
+  .legend-side:nth-child(2) {
+    order: -1;
   }
 }
 </style>
