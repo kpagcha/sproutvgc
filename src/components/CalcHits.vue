@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, shallowRef } from 'vue'
-import { Crosshair, Plus, X, Zap } from '@lucide/vue'
+import { Crosshair, Plus, Trash2, X, Zap } from '@lucide/vue'
 import { move, type MoveId } from '@/data/dex'
 import { isSpread, MOVES } from '@/data/moves'
 import { loadLearnsets, movesOf as learnsetOf } from '@/data/pokemon'
@@ -290,7 +290,7 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
           <span class="muted">{{ h.by === 'a' ? '%' : t('calc.hits.unit.hpOf', { max: yourMaxHp }) }}</span>
         </span>
         <button type="button" class="remove" :aria-label="t('calc.hits.remove')" @click="remove(i)">
-          <X :size="16" aria-hidden="true" />
+          <Trash2 :size="16" aria-hidden="true" />
         </button>
       </li>
     </ol>
@@ -448,17 +448,19 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
   appearance: none;
   -webkit-appearance: none;
 }
+/* Taking a hit off: destructive, in the bad color, as the side's Clear is, a wash of it when pointed at. */
 .remove {
   display: inline-flex;
   margin-left: auto;
   padding: 4px;
-  color: var(--muted);
+  color: var(--bad);
   background: none;
   border: 0;
   cursor: pointer;
 }
-.remove:hover {
-  color: var(--bad);
+.remove:hover,
+.remove:focus-visible {
+  background: color-mix(in srgb, var(--bad) 14%, var(--panel));
 }
 .controls {
   display: flex;
