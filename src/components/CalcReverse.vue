@@ -100,6 +100,11 @@ const spreadLabel = (r: ReverseRow, stats: readonly number[]) =>
       return `${r.points[s]}${e === 'up' ? '+' : e === 'down' ? '−' : ''} ${statName(s)}`
     })
     .join(' / ')
+/** The widest a build of those stats is written, with a nature's mark: every point in each, all but HP marked. Unseen
+ * in the table's corner, one per mark, it keeps the spreads' column as wide from one answer to the next. */
+const MARKS = ['+', '−'] as const
+const widestLabel = (stats: readonly number[], mark: string) =>
+  stats.map((s) => `${MAX_POINTS}${s ? mark : ''} ${statName(s)}`).join(' / ')
 /** A stat's points where something fits, but for one that can be anything (the table says as much). */
 const shownRanges = computed(() =>
   (result.value?.ranges ?? []).filter(
@@ -186,7 +191,12 @@ function use(r: ReverseRow) {
           <table class="builds">
             <thead>
               <tr>
-                <th scope="col" class="corner muted">{{ t('calc.reverse.spread') }}</th>
+                <th scope="col" class="corner muted">
+                  {{ t('calc.reverse.spread') }}
+                  <span v-for="m in MARKS" :key="m" class="spread sizer" aria-hidden="true">{{
+                    widestLabel(result.stats, m)
+                  }}</span>
+                </th>
                 <th v-for="(c, ci) in result.columns" :key="ci" scope="col" class="col">
                   <span v-if="!result.itemsVary || result.columns.length === 1" class="muted">{{
                     t('calc.reverse.fits')
@@ -378,8 +388,19 @@ function use(r: ReverseRow) {
 .builds thead th.col {
   border-top: 3px solid var(--opponent);
 }
+/* A spread's cell as wide whatever its row ends with (its share, "Nearest fit"). */
 .builds tbody th {
+  min-width: 10.5em;
   border-left: 3px solid var(--opponent);
+}
+/* An item's column: one width whatever it's of (an icon or two, how many more, its share), its content centered as
+   its cells' is. */
+.builds .col,
+.builds .cell {
+  width: 72px;
+  min-width: 72px;
+  max-width: 72px;
+  text-align: center;
 }
 .corner {
   vertical-align: bottom;
@@ -388,8 +409,9 @@ function use(r: ReverseRow) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 2px;
-  max-width: 120px;
+  white-space: normal;
 }
 .item {
   display: inline-flex;
@@ -411,13 +433,17 @@ function use(r: ReverseRow) {
   font-weight: bold;
   font-variant-numeric: tabular-nums;
 }
+/* The widest a spread is written, in the corner: taking its width, no height, unseen. */
+.sizer {
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
 .share {
   display: block;
   font-size: 0.875em;
 }
 .cell {
-  min-width: 56px;
-  text-align: center;
   vertical-align: middle;
   font-weight: bold;
 }
