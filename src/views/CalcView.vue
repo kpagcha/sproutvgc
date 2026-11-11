@@ -704,7 +704,7 @@ function face(f: Fighter) {
           searching: searchOpen,
         }"
       >
-        <!-- One row: the toggle, the search, and those on named while folded, sliding sideways where they don't fit. -->
+        <!-- One row: the toggle, and those on named while folded, sliding sideways where they don't fit. -->
         <button
           type="button"
           class="btn field-toggle"
@@ -717,32 +717,25 @@ function face(f: Fighter) {
           }}<span class="on-count" :class="{ none: !fieldOn.length }">{{ fieldOn.length }}</span
           ><ChevronDown :size="14" class="fold-chev" :class="{ open: fieldOpen }" aria-hidden="true" />
         </button>
-        <!-- Any condition found by name, the field's or a side's: a button as its Clear, right after the toggle (not in
-             the sliding row, which would clip its box). -->
-        <CalcConditionSearch
-          v-model:open="searchOpen"
-          class="field-search"
-          :field
-          :sides
-          @field="field = $event"
-          @side="setSide"
-        />
         <ScrollRow v-if="!fieldOpen && fieldOn.length" class="toolbar">
           <span v-for="c in fieldOn" :key="c!.key" class="field-on">
             <component :is="c!.icon" v-if="c!.icon" :size="14" aria-hidden="true" />{{ conditionName(c!) }}
           </span>
         </ScrollRow>
-        <!-- Unfolded, its Clear on the toggle's row, after the search (on phones at the row's end). -->
-        <button
-          v-if="fieldOpen"
-          type="button"
-          class="btn quiet small field-clear"
-          :disabled="!fieldOn.length"
-          @click="field = { ...field, weather: '', terrain: '', effects: [] }"
-        >
-          <Eraser :size="14" aria-hidden="true" />{{ t('calc.clearConditions') }}
-        </button>
         <div v-if="fieldOpen" id="calc-field" class="field-conditions">
+          <!-- Unfolded, a row of its own over the conditions: any found by name, the field's or a side's (a drop-down,
+               on phones a dialog), and its Clear at the row's end. -->
+          <div class="field-tools">
+            <CalcConditionSearch v-model:open="searchOpen" :field :sides @field="field = $event" @side="setSide" />
+            <button
+              type="button"
+              class="btn quiet small field-clear"
+              :disabled="!fieldOn.length"
+              @click="field = { ...field, weather: '', terrain: '', effects: [] }"
+            >
+              <Eraser :size="14" aria-hidden="true" />{{ t('calc.clearConditions') }}
+            </button>
+          </div>
           <CalcConditions :field :data no-clear :rows="fieldCompact" @field="field = $event" />
         </div>
       </div>
@@ -1207,7 +1200,7 @@ function face(f: Fighter) {
   flex: none;
   margin-bottom: 4px;
 }
-/* The conditions' search, a button as its Clear: its box drops out of the bar, which doesn't clip it while it's open. */
+/* The conditions' search: its box drops out of the bar, which doesn't clip it while it's open. */
 .field-bar.searching {
   overflow: visible;
 }
@@ -1234,14 +1227,19 @@ function face(f: Fighter) {
   flex: 0 1 auto;
   min-width: 0;
 }
-/* Its Clear beside the toggle; on phones at the row's end. */
+/* Over the unfolded conditions, the search and, at the row's end, the Clear. */
+.field-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.field-bar.compact .field-tools {
+  margin-bottom: 8px;
+}
 .field-clear {
   flex: none;
-}
-@media (max-width: 899px) {
-  .field-clear {
-    margin-left: auto;
-  }
+  margin-left: auto;
 }
 /* What's unfolded, in a soft box of its own under the toggle (no panel's ink nor shadow): the toggle stays on the
    page. */

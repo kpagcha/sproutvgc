@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, shallowRef, useTemplateRef, watch, type Component } from 'vue'
-import { Circle, Search, Square } from '@lucide/vue'
+import { createReusableTemplate, useMediaQuery } from '@vueuse/core'
+import { Circle, Search, Square, X } from '@lucide/vue'
 import { t } from '@/i18n'
 import { MAX_SPIKES, type Battlefield, type Fighter } from '@/lib/damage'
 import {
@@ -12,10 +13,11 @@ import {
   terrains,
   weathers,
 } from '@/components/calcConditions'
+import ModalDialog from '@/components/ModalDialog.vue'
 import OptionsMenu from '@/components/OptionsMenu.vue'
 
-// The damage calculator's battle conditions found by name: a quiet magnifier on the field's bar dropping a small box
-// to type in, over every condition there is (the weather, the terrain, the field's, each side's), each row saying
+// The damage calculator's battle conditions found by name: a quiet magnifier over the unfolded conditions dropping a
+// small box to type in (on phones, a dialog in the middle of the screen, its list as tall as the screen leaves), over every condition there is (the weather, the terrain, the field's, each side's), each row saying
 // where it applies and whether it's on, toggled by a click or Enter (the keys' one, the first until moved), the box
 // staying open with its text selected, so the next one is typed over it. Spikes' row adds a layer, back to none past
 // the most.
@@ -28,6 +30,9 @@ const emit = defineEmits<{
   side: [key: 'a' | 'b', f: Fighter]
 }>()
 const open = defineModel<boolean>('open', { default: false })
+const phone = useMediaQuery('(max-width: 899px)')
+// The box and its list, drawn once, in the drop-down or the dialog.
+const [DefineBody, Body] = createReusableTemplate()
 
 interface Row {
   id: string
@@ -146,13 +151,7 @@ function pick(r: Row | undefined) {
 </script>
 
 <template>
-  <OptionsMenu
-    v-model:open="open"
-    :title="t('calc.searchConditions')"
-    :icon="Search"
-    :label="t('calc.searchConditions.short')"
-    align="left"
-  >
+  <DefineBody>
     <input
       ref="input"
       v-model="query"
@@ -190,10 +189,76 @@ function pick(r: Row | undefined) {
       </button>
     </div>
     <p v-else class="muted none">{{ t('calc.searchConditions.none') }}</p>
+  </DefineBody>
+  <template v-if="phone">
+    <button type="button" class="btn quiet small" :aria-expanded="open" @click="open = !open">
+      <Search :size="14" aria-hidden="true" />{{ t('calc.searchConditions.short') }}
+    </button>
+    <ModalDialog v-model:open="open" :label="t('calc.searchConditions')" fill>
+      <div class="panel banded search-card">
+        <div class="band">
+          <span>{{ t('calc.searchConditions') }}</span>
+          <button type="button" class="btn on-band close" :aria-label="t('picker.close')" @click="open = false">
+            <X :size="16" aria-hidden="true" />
+          </button>
+        </div>
+        <div class="card-body"><Body /></div>
+      </div>
+    </ModalDialog>
+  </template>
+  <OptionsMenu
+    v-else
+    v-model:open="open"
+    :title="t('calc.searchConditions')"
+    :icon="Search"
+    :label="t('calc.searchConditions.short')"
+    align="left"
+  >
+    <Body />
   </OptionsMenu>
 </template>
 
 <style scoped>
+/* On phones, the dialog's card: its band, then the box and the list scrolling under it, as tall as the screen leaves. */
+.search-card {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+:root:root .search-card.banded > .band {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 0;
+  font-weight: bold;
+}
+.close {
+  min-height: 0;
+  padding: 2px 4px;
+}
+.card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  padding-top: 10px;
+}
+.card-body .box {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 1em;
+}
+.card-body .list {
+  flex: 1;
+  max-height: none;
+  min-height: 0;
+}
+.card-body .row {
+  padding: 8px 6px;
+  font-size: 1em;
+}
 .box {
   width: 15em;
   max-width: 100%;
