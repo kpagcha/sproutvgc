@@ -368,8 +368,11 @@ export const messages = {
   'calc.band.fainted': '{n} fainted',
   'calc.band.attacked': 'Hit {n}×',
   'calc.hits.title': 'What you saw',
-  'calc.hits.hint':
-    "Add each hit you saw: the move, the opponent's HP lost in percent (or yours in HP), or whether it knocked out. The opponent's stat points, nature and item are worked out from them.",
+  'calc.hits.howTo': 'How to use it',
+  'calc.hits.step.add': 'Add each hit you saw, {yours} on the opponent or {theirs} on yours, and pick its move.',
+  'calc.hits.step.saw':
+    "Say what it did: the opponent's HP lost in percent, as the game shows it, or yours in HP; or {ko}, {lived} or {two} when that's all you know. Set the HP it had before if it wasn't full.",
+  'calc.hits.step.first': 'If both used moves of the same priority, tap the one that went first under {first}.',
   'calc.hits.who': '{from} hit {to}',
   'calc.hits.move': 'Move',
   'calc.hits.saw': 'What it did',

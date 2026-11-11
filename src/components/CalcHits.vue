@@ -4,12 +4,13 @@ import { Crosshair, Plus, X, Zap } from '@lucide/vue'
 import { move, type MoveId } from '@/data/dex'
 import { isSpread, MOVES } from '@/data/moves'
 import { loadLearnsets, movesOf as learnsetOf } from '@/data/pokemon'
-import { t } from '@/i18n'
+import { t, tSlots, type MessageKey } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { battlerOf, damaging, statsOf, type Fighter, type HitOptions } from '@/lib/damage'
 import type { Saw } from '@/lib/damageReverse'
 import HpBar from '@/components/HpBar.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import { useOpenState } from '@/composables/useOpenState'
 
 // The inverse damage calc's "What you saw": the hits seen, in the order entered, each a row: who hit whom (yours the
 // opponent, or the opponent yours), the move (one of the attacker's), whether it was a critical hit or, for a spread
@@ -17,7 +18,7 @@ import PokemonIcon from '@/components/PokemonIcon'
 // HP; or a knockout, survived, or a knockout on the second hit) and the defender's HP before it (full unless said: the
 // opponent's in percent, yours' in HP); the same move as often as it was seen. Then which of the two moved first, with
 // moves of the same priority. A row with no result yet counts for nothing (and isn't kept in the URL). What fits it
-// (`CalcReverse`, the default slot) is its readout, across its foot; before both are picked, a line on what it's for.
+// (`CalcReverse`, the default slot) is its readout, across its foot. Adding a hit and which moved first lead, over the hits; before both are picked, a line on what it's for.
 export interface HitDraft {
   by: 'a' | 'b'
   move: MoveId | null
@@ -102,6 +103,21 @@ const OUTCOMES = ['ko', 'lived', 'two'] as const
 const outcome = (i: number, k: (typeof OUTCOMES)[number]) =>
   patch(i, { saw: hits.value[i]!.saw?.kind === k ? null : { kind: k } })
 const numberOf = (h: HitDraft) => (h.saw && 'n' in h.saw ? h.saw.n : '')
+/** How to use it, folding: open at first, then as last left. */
+const { open: howToOpen, onToggle: onHowTo } = useOpenState('sproutvgc.calc.hitsHowTo', true)
+/** Its steps: each step's message, the controls it names in bold, as they're labeled. */
+const STEPS = ['calc.hits.step.add', 'calc.hits.step.saw', 'calc.hits.step.first'] as const satisfies MessageKey[]
+const LABELS: Record<string, MessageKey> = {
+  yours: 'calc.hits.addYours',
+  theirs: 'calc.hits.addTheirs',
+  ko: 'calc.hits.outcome.ko',
+  lived: 'calc.hits.outcome.lived',
+  two: 'calc.hits.outcome.two',
+  first: 'calc.reverse.first',
+}
+const steps = computed(() =>
+  STEPS.map((k) => tSlots(k).map((p) => (typeof p === 'string' ? { text: p } : { text: t(LABELS[p.slot]!), b: true }))),
+)
 const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
 </script>
 
@@ -109,7 +125,52 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
   <section class="panel banded hits">
     <h2 class="band">{{ t('calc.hits.title') }}</h2>
     <p v-if="!both" class="muted intro">{{ t('calc.reverse.pickBoth') }}</p>
-    <p v-else-if="!hits.length" class="muted intro">{{ t('calc.hits.hint') }}</p>
+    <details v-else class="intro how-to" :open="howToOpen" @toggle="onHowTo">
+      <summary class="muted">{{ t('calc.hits.howTo') }}</summary>
+      <ol class="muted steps">
+        <li v-for="(parts, i) in steps" :key="i">
+          <template v-for="(p, j) in parts" :key="j"
+            ><b v-if="p.b">{{ p.text }}</b
+            ><template v-else>{{ p.text }}</template></template
+          >
+        </li>
+      </ol>
+    </details>
+    <div v-if="both" class="controls">
+      <!-- A hit added, yours on the opponent or its on yours. -->
+      <span class="adds">
+        <button
+          v-for="k in ['a', 'b'] as const"
+          :key="k"
+          type="button"
+          class="btn add"
+          :class="k === 'a' ? 'yours' : 'opponent'"
+          :disabled="!canAdd(k)"
+          @click="add(k)"
+        >
+          <Plus :size="14" aria-hidden="true" /><PokemonIcon :id="ids[k]!" />→<PokemonIcon
+            :id="ids[k === 'a' ? 'b' : 'a']!"
+          /><span>{{ t(k === 'a' ? 'calc.hits.addYours' : 'calc.hits.addTheirs') }}</span>
+        </button>
+      </span>
+      <!-- Which moved first, the two as their icons; tapped again, not seen. -->
+      <span class="first" role="group" :aria-label="t('calc.reverse.first')">
+        <span v-tip="t('calc.reverse.firstTip')" class="muted about" tabindex="0">{{ t('calc.reverse.first') }}</span>
+        <button
+          v-for="k in ['a', 'b'] as const"
+          :key="k"
+          v-tip="name(k)"
+          type="button"
+          class="btn choice"
+          :class="[k === 'a' ? 'yours' : 'opponent', { on: first === k }]"
+          :aria-pressed="first === k"
+          :aria-label="name(k)"
+          @click="first = first === k ? null : k"
+        >
+          <PokemonIcon :id="ids[k]!" />
+        </button>
+      </span>
+    </div>
     <ol v-if="both && hits.length" class="hit-list">
       <li v-for="(h, i) in hits" :key="i" class="hit" :class="h.by === 'a' ? 'yours' : 'opponent'">
         <!-- Who hit whom, as their icons. -->
@@ -223,41 +284,6 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
         </button>
       </li>
     </ol>
-    <div v-if="both" class="foot">
-      <!-- A hit added, yours on the opponent or its on yours. -->
-      <span class="adds">
-        <button
-          v-for="k in ['a', 'b'] as const"
-          :key="k"
-          type="button"
-          class="btn add"
-          :class="k === 'a' ? 'yours' : 'opponent'"
-          :disabled="!canAdd(k)"
-          @click="add(k)"
-        >
-          <Plus :size="14" aria-hidden="true" /><PokemonIcon :id="ids[k]!" />→<PokemonIcon
-            :id="ids[k === 'a' ? 'b' : 'a']!"
-          /><span>{{ t(k === 'a' ? 'calc.hits.addYours' : 'calc.hits.addTheirs') }}</span>
-        </button>
-      </span>
-      <!-- Which moved first, the two as their icons; tapped again, not seen. -->
-      <span class="first" role="group" :aria-label="t('calc.reverse.first')">
-        <span v-tip="t('calc.reverse.firstTip')" class="muted about" tabindex="0">{{ t('calc.reverse.first') }}</span>
-        <button
-          v-for="k in ['a', 'b'] as const"
-          :key="k"
-          v-tip="name(k)"
-          type="button"
-          class="btn choice"
-          :class="[k === 'a' ? 'yours' : 'opponent', { on: first === k }]"
-          :aria-pressed="first === k"
-          :aria-label="name(k)"
-          @click="first = first === k ? null : k"
-        >
-          <PokemonIcon :id="ids[k]!" />
-        </button>
-      </span>
-    </div>
     <slot v-if="both" />
   </section>
 </template>
@@ -296,13 +322,28 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
   margin: 0 0 12px;
   font-size: 0.875em;
 }
+.how-to summary {
+  width: fit-content;
+  font-weight: bold;
+  cursor: pointer;
+}
+.steps {
+  margin: 6px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 1.4em;
+}
+.steps b {
+  color: var(--text);
+}
 .intro:last-child {
   margin-bottom: 0;
 }
 .hit-list {
   display: flex;
   flex-direction: column;
-  margin: 0 0 12px;
+  margin: 12px 0 0;
   padding: 0;
   list-style: none;
 }
@@ -386,7 +427,7 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
 .remove:hover {
   color: var(--bad);
 }
-.foot {
+.controls {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
