@@ -12,7 +12,7 @@ import { PRESETS } from '@/components/SpreadPresets.vue'
 import { natureTip } from '@/components/natureTip'
 
 // A slot's stat points in the picker's drawer, its set's last step (`TeamPicker`, `points`): its common spreads listed
-// (the meta's, the first `PRESETS` until unfolded), each setting its points and nature; then, after a rule, its own, cleared
+// (the meta's, the first `PRESETS` until unfolded), each setting its points and nature and closing it; then, after a rule, its own, cleared
 // from a bin by its heading, its nature named
 // (tapped, the natures' picker, coming back here: `nature`) over its sliders (`PointsEditor`), what's left to spend
 // across from its heading; and, after a rule, where it can be (the damage calculator's, `canPool`), at every set, its sets pooled by
@@ -36,6 +36,11 @@ const isAt = (s: Spread) =>
 const effects = computed(() => (props.member.nature ? natureEffects(props.member.nature) : null))
 const left = computed(() => pointsLeft(props.member))
 const locked = computed(() => (props.atSets ? props.pooled : undefined))
+/** A common spread picked: its points and nature set, and the step closed, nothing left to set. */
+function pickSpread(sp: Spread) {
+  emit('change', { points: [...sp.points], nature: sp.nature })
+  emit('done')
+}
 const points = computed({
   get: () => props.member.points,
   set: (p: Points) => emit('change', { points: p }),
@@ -53,7 +58,7 @@ const points = computed({
           type="button"
           class="spread"
           :class="{ on: isAt(sp), same: sp.nature === member.nature }"
-          @click="emit('change', { points: [...sp.points], nature: sp.nature })"
+          @click="pickSpread(sp)"
         >
           <span v-tip="natureTip(sp.nature)" class="spread-nature">{{ natureName(sp.nature) }}</span>
           <span class="spread-points">{{ sp.points.join('/') }}</span>
