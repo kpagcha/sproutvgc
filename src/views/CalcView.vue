@@ -359,6 +359,7 @@ function loadCommon() {
   picking.value = null
 }
 const [DefineCommon, ReuseCommon] = createReusableTemplate()
+const [DefineSteps, ReuseSteps] = createReusableTemplate()
 // The reader's teams, a side loading one of their Pokémon: in the side's Load menu and in its picker's.
 const [DefineTeams, ReuseTeams] = createReusableTemplate<{ side: SideKey; done: () => void }>()
 const commonPreview = computed(() => (picking.value?.common ? commonSet(picking.value.common, data.value) : null))
@@ -583,7 +584,7 @@ const labels = computed(() => ({ a: t('calc.yours'), b: t('calc.theirs') }))
 const hasAny = computed(() => !!(battlerOf(sides.value.a) || battlerOf(sides.value.b)))
 const hasBoth = computed(() => !!(battlerOf(sides.value.a) && battlerOf(sides.value.b)))
 
-// The inverse tab's What you saw, once both are picked: on wide screens a drawer over the page, opening on its own as
+// The inverse tab's What you saw, once both are picked: on wide screens a drawer over the page (on phones a dialog), opening on its own as
 // the second one's in (once its picker has closed), the panel still on the page: first the opponent's moves seen
 // (`CalcMovesSeen`; skipped when its set has them all), then the hits, closed by Done. On any screen, a button floating
 // at the screen's foot leading to the panel while it's below, over the sides' bands stuck there on phones.
@@ -599,7 +600,6 @@ let hitsPending = false
 function openHitsSoon() {
   if (!hitsPending || picking.value) return
   hitsPending = false
-  if (!wide.value) return
   hitsStep.value = sides.value.b.member.moves.every(Boolean) ? 'hits' : 'moves'
   hitsDrawer.value = true
 }
@@ -610,8 +610,16 @@ function hitsDone() {
 }
 function toStep(step: 'moves' | 'hits') {
   hitsStep.value = step
-  drawer.value?.el?.scrollTo({ top: 0 })
+  ;(wide.value ? drawer.value?.el : hitsBox.value)?.scrollTo({ top: 0 })
 }
+const hitsBox = shallowRef<HTMLElement | null>(null)
+/** Phones' dialog of What you saw: open while its steps show; closed, the drawer's state with it. */
+const hitsDialogOpen = computed({
+  get: () => !wide.value && hitsShown.value,
+  set: (on) => {
+    if (!on) hitsDrawer.value = false
+  },
+})
 watch(hasBoth, (now, before) => {
   hitsPending = !!(props.inverse && now && !before)
   if (!now) hitsDrawer.value = false
@@ -947,6 +955,39 @@ function face(f: Fighter) {
       </AnimatePresence>
     </Teleport>
 
+    <!-- The inverse tab's What you saw, step by step: the opponent's moves seen, then the hits; in the drawer on wide
+         screens, a dialog on phones. -->
+    <DefineSteps>
+      <CalcMovesSeen
+        v-if="hitsStep === 'moves'"
+        :member="sides.b.member"
+        :data
+        @moves="patchMember('b', { moves: $event })"
+        :can-back="canReopen()"
+        @continue="toStep('hits')"
+        @back="reopen"
+        @close="hitsDrawer = false"
+      />
+      <template v-else>
+        <CalcHits
+          v-model:hits="hits"
+          v-model:first="first"
+          :yours="fought.a"
+          :theirs="fought.b"
+          bare
+          can-back
+          @back="toStep('moves')"
+          @close="hitsDrawer = false"
+        />
+        <!-- Done, leading to What fits once there's something to work out: stuck to the drawer's foot. -->
+        <div class="drawer-foot">
+          <span v-if="observations.length" class="muted done-hint">{{ t('calc.seen.doneHint') }}</span>
+          <button type="button" class="btn primary" :disabled="!observations.length" @click="hitsDone">
+            {{ t('picker.done') }}
+          </button>
+        </div>
+      </template>
+    </DefineSteps>
     <!-- On wide screens, the picker as a drawer over the page, the side's card left clear. -->
     <SideDrawer
       ref="drawer"
@@ -973,40 +1014,14 @@ function face(f: Fighter) {
         @nature="natureAgain"
         ><ReuseCommon
       /></TeamPicker>
-      <!-- The inverse tab's What you saw, going on from the picker in the same drawer once both are picked: the
-           opponent's moves seen, then the hits. -->
-      <template v-else-if="hitsShown">
-        <CalcMovesSeen
-          v-if="hitsStep === 'moves'"
-          :member="sides.b.member"
-          :data
-          @moves="patchMember('b', { moves: $event })"
-          :can-back="canReopen()"
-          @continue="toStep('hits')"
-          @back="reopen"
-          @close="hitsDrawer = false"
-        />
-        <template v-else>
-          <CalcHits
-            v-model:hits="hits"
-            v-model:first="first"
-            :yours="fought.a"
-            :theirs="fought.b"
-            bare
-            can-back
-            @back="toStep('moves')"
-            @close="hitsDrawer = false"
-          />
-          <!-- Done, leading to What fits once there's something to work out: stuck to the drawer's foot. -->
-          <div class="drawer-foot">
-            <span v-if="observations.length" class="muted done-hint">{{ t('calc.seen.doneHint') }}</span>
-            <button type="button" class="btn primary" :disabled="!observations.length" @click="hitsDone">
-              {{ t('picker.done') }}
-            </button>
-          </div>
-        </template>
-      </template>
+      <!-- The inverse tab's What you saw, going on from the picker in the same drawer once both are picked. -->
+      <ReuseSteps v-else-if="hitsShown" />
     </SideDrawer>
+
+    <!-- On phones, What you saw's steps over the page, as the drawer has them. -->
+    <ModalDialog v-if="!wide" v-model:open="hitsDialogOpen" :label="t('calc.hits.title')" fill>
+      <div v-if="hitsShown" ref="hitsBox" class="panel picker-dialog steps-dialog"><ReuseSteps /></div>
+    </ModalDialog>
 
     <!-- On phones, the picker over the page. -->
     <ModalDialog v-if="!wide" v-model:open="pickerOpen" :label="t('builder.picker')" fill>
@@ -1656,6 +1671,14 @@ word, as the common set's offer has. */
   padding: 10px var(--panel-pad);
   background: var(--panel);
   border-top: 1px solid var(--border);
+}
+/* On phones, What you saw's dialog as tall as the screen leaves, its Done at the foot however little is over it. */
+.steps-dialog {
+  display: flex;
+  flex-direction: column;
+}
+.steps-dialog > .drawer-foot {
+  margin-top: auto;
 }
 .done-hint {
   flex: 1;
