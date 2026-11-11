@@ -64,6 +64,7 @@ import { commonForme, commonMember } from '@/lib/commonSet'
 import { emptyMember, nextField, pickedAs, setsAs, stoneMega, type Field, type Member } from '@/lib/team'
 import { conditionName, fieldOf, terrainOf, weatherOf } from '@/components/calcConditions'
 import CalcConditions from '@/components/CalcConditions.vue'
+import CalcConditionSearch from '@/components/CalcConditionSearch.vue'
 import CalcMeta from '@/components/CalcMeta.vue'
 import CalcReverse from '@/components/CalcReverse.vue'
 import CalcHits, { type HitDraft } from '@/components/CalcHits.vue'
@@ -522,6 +523,8 @@ const battleFolded = {
 // Unfolded while stuck to the top, it stays stuck, its conditions in rows (`compact`), until folded; unfolded where
 // it is on the page, it scrolls away with it, its conditions in groups.
 const fieldCompact = shallowRef(false)
+/** The conditions' search open: its box drops out of the bar, which then doesn't clip it. */
+const searchOpen = shallowRef(false)
 function toggleField() {
   fieldCompact.value = !fieldOpen.value && barStuck.value
   fieldOpen.value = !fieldOpen.value
@@ -698,29 +701,38 @@ function face(f: Fighter) {
           stuck: barStuck && (!fieldOpen || fieldCompact),
           open: fieldOpen && !fieldCompact,
           compact: fieldOpen && fieldCompact,
+          searching: searchOpen,
         }"
       >
-        <!-- One row, sliding sideways where it doesn't fit: the toggle, and those on named while folded. -->
-        <ScrollRow class="toolbar">
-          <button
-            type="button"
-            class="btn"
-            :class="{ on: fieldOpen }"
-            :aria-expanded="fieldOpen"
-            aria-controls="calc-field"
-            @click="toggleField"
-          >
-            <SlidersHorizontal :size="16" aria-hidden="true" />{{ t('calc.conditions')
-            }}<span class="on-count" :class="{ none: !fieldOn.length }">{{ fieldOn.length }}</span
-            ><ChevronDown :size="14" class="fold-chev" :class="{ open: fieldOpen }" aria-hidden="true" />
-          </button>
-          <template v-if="!fieldOpen">
-            <span v-for="c in fieldOn" :key="c!.key" class="field-on">
-              <component :is="c!.icon" v-if="c!.icon" :size="14" aria-hidden="true" />{{ conditionName(c!) }}
-            </span>
-          </template>
+        <!-- One row: the toggle, the search, and those on named while folded, sliding sideways where they don't fit. -->
+        <button
+          type="button"
+          class="btn field-toggle"
+          :class="{ on: fieldOpen }"
+          :aria-expanded="fieldOpen"
+          aria-controls="calc-field"
+          @click="toggleField"
+        >
+          <SlidersHorizontal :size="16" aria-hidden="true" />{{ t('calc.conditions')
+          }}<span class="on-count" :class="{ none: !fieldOn.length }">{{ fieldOn.length }}</span
+          ><ChevronDown :size="14" class="fold-chev" :class="{ open: fieldOpen }" aria-hidden="true" />
+        </button>
+        <!-- Any condition found by name, the field's or a side's: a button as its Clear, right after the toggle (not in
+             the sliding row, which would clip its box). -->
+        <CalcConditionSearch
+          v-model:open="searchOpen"
+          class="field-search"
+          :field
+          :sides
+          @field="field = $event"
+          @side="setSide"
+        />
+        <ScrollRow v-if="!fieldOpen && fieldOn.length" class="toolbar">
+          <span v-for="c in fieldOn" :key="c!.key" class="field-on">
+            <component :is="c!.icon" v-if="c!.icon" :size="14" aria-hidden="true" />{{ conditionName(c!) }}
+          </span>
         </ScrollRow>
-        <!-- Unfolded, its Clear on the toggle's row, beside it (on phones at the row's end). -->
+        <!-- Unfolded, its Clear on the toggle's row, after the search (on phones at the row's end). -->
         <button
           v-if="fieldOpen"
           type="button"
@@ -1174,6 +1186,9 @@ function face(f: Fighter) {
   position: sticky;
   top: var(--nav-h, 0px);
   z-index: 41;
+  display: flex;
+  align-items: center;
+  gap: 8px 12px;
   max-height: calc(100dvh - var(--nav-h, 0px) - 12px);
   margin: -8px -6px 0;
   /* Less under it than over it: the row in it already keeps 4px under its buttons for their shadows. */
@@ -1182,6 +1197,19 @@ function face(f: Fighter) {
   background: var(--bg);
   border-bottom: 1px solid transparent;
   transition: border-color 0.15s ease;
+}
+.field-bar > .toolbar {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+/* The toggle, with the room under it for its shadow that the sliding row kept while it was in it. */
+.field-toggle {
+  flex: none;
+  margin-bottom: 4px;
+}
+/* The conditions' search, a button as its Clear: its box drops out of the bar, which doesn't clip it while it's open. */
+.field-bar.searching {
+  overflow: visible;
 }
 /* Unfolded, on the page as the rest is, scrolling away with it: stuck, taller than the room it'd leave, it took the
    scrolling and the page under it couldn't be scrolled. */
@@ -1243,6 +1271,10 @@ function face(f: Fighter) {
 }
 .toolbar {
   --gap: 10px;
+}
+/* Names alone in it, no buttons: no room kept for shadows. */
+.toolbar :deep(.track) {
+  padding: 0;
 }
 .toolbar .btn {
   flex: none;
