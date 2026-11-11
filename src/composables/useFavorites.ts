@@ -92,6 +92,8 @@ export function useFavorites() {
   const toggle = (ref: Ref) => flip(keyOf(ref))
   const isMetaFavorite = (id: string) => set.value.has(META + id)
   const toggleMeta = (id: string) => flip(META + id)
+  /** Whether a Pokémon is starred, its dex entry or its meta entry: the ones the pickers list first. */
+  const isFavoritePokemon = (id: string) => set.value.has(`pokemon:${id}`) || set.value.has(META + id)
   const isSetupFavorite = (v: PageVisit) => set.value.has(setupKey(v))
   const toggleSetup = (v: PageVisit) => flip(v)
   /** Unstars everything, the entries the regulation doesn't have included. */
@@ -114,6 +116,7 @@ export function useFavorites() {
     toggle,
     isMetaFavorite,
     toggleMeta,
+    isFavoritePokemon,
     isSetupFavorite,
     toggleSetup,
     clear,

@@ -57,9 +57,9 @@ export interface PokemonOption {
 /**
  * The Pokémon a search's text finds, by name, each with the match marked (`parts`, as `split` marks it): every one
  * (of `ids`, else the regulation's) while the text is empty or is the name of the one `picked`, to browse, the ones
- * picked lately first (with `withRecent`), then the reader's favorites, each group its first `GROUP_CAP` unless asked
- * for all and folding away, then every one in its place; the favorites first among those found while typing; none
- * while it's not `open`. By name, or given `ranks` (the meta's usage ranks), by usage: the ranked first, most used
+ * picked lately first (with `withRecent`), then the reader's favorites (its dex entry starred, or its meta entry), each
+ * group its first `GROUP_CAP` unless asked for all and folding away, then every one in its place; the favorites first
+ * among those found while typing; none while it's not `open`. By name, or given `ranks` (the meta's usage ranks), by usage: the ranked first, most used
  * first, then the rest by name. With `bySpeedAbility` (the speed pages'), typing the name of an ability that changes
  * Speed (Unburden, Chlorophyll) also finds, after those found by name, the Pokémon that can have it, under its name.
  * For the Pokémon pickers: the drop-down and the dialog's panel.
@@ -73,13 +73,13 @@ export function usePokemonSearch(
   withRecent: () => boolean = () => false,
   bySpeedAbility: () => boolean = () => false,
 ) {
-  const { isFavorite } = useFavorites()
+  const { isFavoritePokemon } = useFavorites()
   const { recent, folded, expanded } = usePickerGroups()
   const all = computed(() => {
     const r = ranks()
     return (ids() ?? availableIds('pokemon'))
       .filter((id) => !POKEMON[id].cosmetic)
-      .map((id) => ({ id, name: refName(pokemon(id)), fav: isFavorite(pokemon(id)), rank: r?.[id] }))
+      .map((id) => ({ id, name: refName(pokemon(id)), fav: isFavoritePokemon(id), rank: r?.[id] }))
       .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity) || a.name.localeCompare(b.name, locale.value))
   })
   const rest = computed(() => (ranks() ? ('usage' as const) : ('all' as const)))

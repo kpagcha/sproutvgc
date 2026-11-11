@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, shallowRef, useId, useTemplateRef, watch } from 'vue'
-import { ChevronsDown, ChevronsUp, X } from '@lucide/vue'
+import { ChevronDown, ChevronUp, ChevronsDown, ChevronsUp, Star, X } from '@lucide/vue'
 import {
   ability,
   availableIds,
@@ -23,9 +23,11 @@ import { refName } from '@/i18n/refName'
 import { allFilters, noFilters, passesGroups } from '@/lib/filterGroups'
 import { monMatches, MON_TERM_KINDS, SET_LIST } from '@/lib/monTerms'
 import { parseDexText } from '@/lib/dexText'
-import { fold, split } from '@/lib/search'
+import { fold, split, type Marks } from '@/lib/search'
 import type { TermFilters } from '@/lib/searchTerms'
 import { clashesOf, setsAs, type Field, type Member } from '@/lib/team'
+import { useFavorites } from '@/composables/useFavorites'
+import { GROUP_CAP, usePickerGroups } from '@/composables/usePickerGroups'
 import FilterSearch from '@/components/FilterSearch.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import Marked from '@/components/Marked'
@@ -37,8 +39,8 @@ import TypeIcon from '@/components/TypeIcon'
 
 // What fills one part of a slot in the team builder, searched as the meta's pages search it, each entry with its share
 // of the Pokémon's sets where the meta shown has them, the most used first: a Pokémon from the rankings' list (by usage,
-// searched by name and filtered by type, ability, move or item, `monTerms.ts`), then every other one the regulation has;
-// a move from its whole movepool (`MoveTable`, its sets' moves first); an item, searched by name and filtered by
+// searched by name and filtered by type, ability, move or item, `monTerms.ts`), then every other one the regulation has,
+// the reader's favorites a group over them while there's no text; a move from its whole movepool (`MoveTable`, its sets' moves first); an item, searched by name and filtered by
 // category, its sets' first; an ability it can have; a nature, each with what it raises and lowers. Picking one hands
 // it on (`pick`). What would break the team's rules with the other slots (`others`): a Pokémon whose species is on the
 // team, an item another holds or a Mega Stone past the most Megas, faded with a note saying so, still there to pick.
@@ -205,11 +207,78 @@ const monShown = computed(() =>
     const named = !!q.value && !preview.value
     if (monPasses(r.id, f)) {
       const parts = named ? split(r.name, q.value) : null
-      if (!named || parts) return [{ ...r, parts, clash: monClash(r.id) }]
+      if (!named || parts) return [{ ...r, parts }]
     }
-    return megaRows(r.id, f, named).map((m) => ({ ...m, clash: monClash(m.id) }))
+    return megaRows(r.id, f, named)
   }),
 )
+// The reader's favorite Pokémon (its dex entry starred, or its meta entry) lead the list while there's no text, those
+// passing the filters: a group over it, as the other pickers have theirs and folded with them (`usePickerGroups`: its
+// first `GROUP_CAP` until asked for all), a Mega starred a row of its own there, picked holding its stone. Each is in
+// its place in the list too, a star after its name.
+const { isFavoritePokemon } = useFavorites()
+const { folded, expanded, toggleFold, toggleExpanded } = usePickerGroups()
+const favRows = computed(() => {
+  if (q.value) return []
+  const f = preview.value ?? filters.value
+  return monRows.value.flatMap((r) => [
+    ...(isFavoritePokemon(r.id) && monPasses(r.id, f) ? [{ ...r, parts: null }] : []),
+    ...(megasOf.value.get(r.id) ?? [])
+      .filter((id) => isFavoritePokemon(id) && monPasses(id, f))
+      .map((id) => ({ id, name: refName(pokemon(id)), usage: props.data?.[id]?.usage, megas: '', parts: null })),
+  ])
+})
+/** A group's heading in the list: the favorites', a toggle folding them, or the rest's. */
+interface Head {
+  group: 'favorites' | 'usage' | 'all'
+  count?: number
+  folded?: boolean
+}
+const GROUPS = { favorites: 'favorites.title', usage: 'picker.byUsage', all: 'picker.all' } as const
+/** A Pokémon's row: with the headings before it (a group's on its first; the favorites' folded, on the list's first)
+ * and, on the favorites' last when there are more, the link to them all (`mark`: both, for the row's memo). */
+interface MonRow {
+  id: PokemonId
+  name: string
+  usage: number | undefined
+  megas: string
+  parts: Marks | null
+  clash: string | undefined
+  fav: boolean
+  key: string
+  heads?: Head[]
+  more?: { total: number; all: boolean }
+  mark: string
+}
+const monList = computed((): MonRow[] => {
+  const listed = (
+    r: Pick<MonRow, 'id' | 'name' | 'usage' | 'megas' | 'parts'>,
+    key: string,
+    heads?: Head[],
+    more?: MonRow['more'],
+  ): MonRow => ({
+    ...r,
+    clash: monClash(r.id),
+    fav: isFavoritePokemon(r.id),
+    key,
+    heads,
+    more,
+    mark: heads || more ? JSON.stringify([heads, more]) : '',
+  })
+  const favs = favRows.value
+  const main = monShown.value
+  if (!favs.length) return main.map((r) => listed(r, r.id))
+  const isFolded = folded.value.has('favorites')
+  const all = expanded.value.has('favorites')
+  const shown = isFolded ? [] : all ? favs : favs.slice(0, GROUP_CAP)
+  const fav: Head = { group: 'favorites', count: favs.length, folded: isFolded }
+  const rest: Head = { group: props.data ? 'usage' : 'all' }
+  const more = favs.length > GROUP_CAP ? { total: favs.length, all } : undefined
+  return [
+    ...shown.map((r, i) => listed(r, `fav:${r.id}`, i ? undefined : [fav], i === shown.length - 1 ? more : undefined)),
+    ...main.map((r, i) => listed(r, r.id, i ? undefined : isFolded ? [fav, rest] : [rest])),
+  ]
+})
 /** How many the text finds by name, with the filters picked: not the preview's, which the options show over it. */
 const monNamed = computed(() =>
   q.value
@@ -354,16 +423,44 @@ const termRows = useId()
       />
       <div :id="termRows" class="term-rows"></div>
       <ul class="rows" :class="{ previewing: preview }">
-        <li v-for="r in monShown" :key="r.id" v-memo="[r.id, r.name, r.parts?.join(' '), r.usage, r.clash, r.megas]">
+        <li
+          v-for="r in monList"
+          :key="r.key"
+          v-memo="[r.id, r.name, r.parts?.join(' '), r.usage, r.clash, r.megas, r.fav, r.mark]"
+        >
+          <!-- Its group's heading (the favorites' folds them away when tapped, with how many they are), and before
+               it the favorites' while folded. -->
+          <template v-for="h in r.heads" :key="h.group">
+            <button
+              v-if="h.group === 'favorites'"
+              type="button"
+              class="group foldable"
+              :aria-expanded="!h.folded"
+              @click="toggleFold('favorites')"
+            >
+              <span class="fold" aria-hidden="true">{{ h.folded ? '▸' : '▾' }}</span
+              >{{ t(GROUPS[h.group]) }}<span class="count">{{ h.count }}</span>
+            </button>
+            <div v-else class="group">{{ t(GROUPS[h.group]) }}</div>
+          </template>
           <button type="button" class="row" :class="{ clash: r.clash }" @click="emit('pick', r.id)">
             <PokemonIcon :id="r.id" />
             <span class="row-name"
               ><Marked v-if="r.parts" :p="r.parts" /><template v-else>{{ r.name }}</template
-              ><span v-if="r.megas" class="mega-note">{{ r.megas }}</span
+              ><Star v-if="r.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" /><span
+                v-if="r.megas"
+                class="mega-note"
+                >{{ r.megas }}</span
               ><span v-if="r.clash" class="clash-note">{{ r.clash }}</span></span
             >
             <span class="types"><TypeIcon v-for="ty in POKEMON[r.id].types" :key="ty" :type="ty" /></span>
             <span class="share">{{ r.usage === undefined ? '' : percent(r.usage) }}</span>
+          </button>
+          <!-- After the favorites' last shown, when there are more: all of them, or back to the first few. -->
+          <button v-if="r.more" type="button" class="more-link" @click="toggleExpanded('favorites')">
+            <component :is="r.more.all ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />{{
+              r.more.all ? t('picker.showFewer') : t('picker.showAll', { n: r.more.total })
+            }}
           </button>
         </li>
       </ul>
@@ -518,6 +615,64 @@ const termRows = useId()
   font-weight: bold;
   color: var(--link);
   overflow-wrap: anywhere;
+}
+/* A favorite's star, after its name. */
+.row-name .fav-star {
+  margin-left: 4px;
+  vertical-align: -1px;
+}
+/* A group's heading, while the reader's favorites lead the list: small and muted, as the other pickers' are. */
+.group {
+  display: block;
+  width: 100%;
+  padding: 10px 6px 4px;
+  font: inherit;
+  font-size: 0.75em;
+  font-weight: bold;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+}
+/* The favorites': a toggle folding them, how many they are after its name. */
+.group.foldable {
+  cursor: pointer;
+  user-select: none;
+}
+.group.foldable:hover,
+.group.foldable:focus-visible {
+  color: var(--text);
+}
+.fold {
+  display: inline-block;
+  width: 1em;
+}
+.count {
+  margin-left: 6px;
+  font-weight: normal;
+}
+/* Showing every favorite, or the first few: a row after the last shown, quiet as the headings are. */
+.more-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 4px 6px 6px;
+  font: inherit;
+  font-size: 0.8em;
+  font-weight: bold;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.more-link:hover,
+.more-link:focus-visible {
+  color: var(--text);
+  background: var(--hover);
 }
 /* What would break the team's rules: faded, a note under its name saying why. */
 .row.clash > :not(.row-name) {

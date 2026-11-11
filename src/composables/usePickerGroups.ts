@@ -4,7 +4,9 @@ import { POKEMON } from '@/data/pokemon'
 
 // What the Pokémon pickers share: the Pokémon picked lately in any of them (with `recent`), most recent first, saved
 // in this browser; and their groups browsed with an empty search (Recent, Favorites), each folded away or not
-// (remembered too) and showing all its Pokémon or its first `GROUP_CAP` (for as long as the page is open).
+// (remembered too) and showing all its Pokémon or its first `GROUP_CAP` (for as long as the page is open). The team
+// builder's and the damage calculator's picker (`TeamPicker`) has the Favorites group too, folded and unfolded with
+// theirs.
 
 const RECENT_KEY = 'sproutvgc.picker.recent.v1'
 const FOLDED_KEY = 'sproutvgc.picker.folded.v1'
