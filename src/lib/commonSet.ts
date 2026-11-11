@@ -33,26 +33,7 @@ export function commonMember(id: PokemonId, data: MetaData | null | undefined): 
   return m
 }
 
-/** The meta's entry most players run of a Pokémon picked from a list (as a team sheet has it, no Megas): itself or one
- * of its Megas, whichever is used most. */
-export function mostUsedForme(id: PokemonId, data: MetaData | null | undefined): PokemonId {
-  if (!data) return id
-  let best = id
-  let usage = data[id]?.usage ?? -1
-  for (const it of Object.values(ITEMS)) {
-    const mega = it.megas?.[id]
-    const u = mega ? (data[mega]?.usage ?? -1) : -1
-    if (mega && u > usage) {
-      best = mega
-      usage = u
-    }
-  }
-  return best
-}
-
-/** The meta's entry for a Pokémon just picked whose most common set there is to load: its Mega's when that's what most
- * run; none when the meta has no sets of it. */
-export function commonForme(id: PokemonId, data: MetaData | null | undefined): PokemonId | undefined {
-  const forme = POKEMON[id].mega ? id : mostUsedForme(id, data)
-  return data?.[forme]?.moves?.length ? forme : undefined
-}
+/** The meta's entry for a Pokémon just picked whose most common set there is to load: its own, a Mega's apart from the
+ * Pokémon it changes from's, as the meta counts them and the pickers list them; none when the meta has no sets of it. */
+export const commonForme = (id: PokemonId, data: MetaData | null | undefined): PokemonId | undefined =>
+  data?.[id]?.moves?.length ? id : undefined

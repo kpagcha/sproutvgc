@@ -15,7 +15,7 @@ import { ITEMS } from '@/data/items'
 import { has, percent, type MetaData, type MetaSnapshot, type PokemonMeta, type Spread } from '@/data/meta'
 import { MOVES } from '@/data/moves'
 import { NATURE_IDS, natureEffects, natureName } from '@/data/natures'
-import { loadLearnsets, movesOf, POKEMON, splitForme } from '@/data/pokemon'
+import { loadLearnsets, movesOf, POKEMON } from '@/data/pokemon'
 import { RULES } from '@/data/rules'
 import { t } from '@/i18n'
 import { description } from '@/i18n/descriptions'
@@ -25,7 +25,7 @@ import { monMatches, MON_TERM_KINDS, SET_LIST } from '@/lib/monTerms'
 import { parseDexText } from '@/lib/dexText'
 import { fold, split, type Marks } from '@/lib/search'
 import type { TermFilters } from '@/lib/searchTerms'
-import { clashesOf, setsAs, type Field, type Member } from '@/lib/team'
+import { clashesOf, pickedAs, setsAs, type Field, type Member } from '@/lib/team'
 import { useFavorites } from '@/composables/useFavorites'
 import { GROUP_CAP, usePickerGroups } from '@/composables/usePickerGroups'
 import FilterSearch from '@/components/FilterSearch.vue'
@@ -39,11 +39,13 @@ import TypeIcon from '@/components/TypeIcon'
 
 // What fills one part of a slot in the team builder, searched as the meta's pages search it, each entry with its share
 // of the Pokémon's sets where the meta shown has them, the most used first: a Pokémon from the rankings' list (by usage,
-// searched by name and filtered by type, ability, move or item, `monTerms.ts`), then every other one the regulation has,
-// the reader's favorites a group over them while there's no text; a move from its whole movepool (`MoveTable`, its sets' moves first); an item, searched by name and filtered by
-// category, its sets' first; an ability it can have; a nature, each with what it raises and lowers. Picking one hands
-// it on (`pick`). What would break the team's rules with the other slots (`others`): a Pokémon whose species is on the
-// team, an item another holds or a Mega Stone past the most Megas, faded with a note saying so, still there to pick.
+// searched by name and filtered by type, ability, move or item, `monTerms.ts`; a Mega a row of its own, apart from the
+// Pokémon it changes from, the one the slot is marked), then every other one the regulation has, the reader's favorites
+// a group over them while there's no text; a move from its whole movepool (`MoveTable`, its sets' moves first); an item,
+// searched by name and filtered by category, its sets' first; an ability it can have; a nature, each with what it raises
+// and lowers. Picking one hands it on (`pick`). What would break the team's rules with the other slots (`others`): a
+// Pokémon whose species is on the team, an item another holds, a Mega or its stone past the most Megas, faded with a
+// note saying so, still there to pick.
 const props = defineProps<{
   member: Member
   others: readonly Member[]
@@ -84,9 +86,10 @@ const shareMap = <T extends string>(list: readonly { id: T; share?: number }[] |
   Object.fromEntries((list ?? []).map((x) => [x.id, x.share])) as Partial<Record<T, number>>
 
 const clash = computed(() => clashesOf(props.others))
-/** Why a Pokémon would clash with the team, if it would. */
+/** Why a Pokémon would clash with the team, if it would: its species is on it, or it's a Mega past the most Megas. */
 const monClash = (id: PokemonId): string | undefined => {
   if (clash.value.species(id)) return t('builder.taken')
+  if (clash.value.megasFull && pickedAs(id).item) return t('builder.megasFull', { max: RULES.megas })
 }
 /** Why an item would clash with the team, if it would: another holds it, or it's a Mega Stone past the most Megas. */
 const itemClash = (id: ItemId): string | undefined => {
@@ -128,62 +131,23 @@ watch(
 )
 const q = computed(() => fold(text.value.trim()))
 
-// Pokémon as a team sheet has them: no Megas, which a Pokémon becomes holding its stone. Each by its usage with its
-// Megas' added (the meta counts a Mega apart), the most used first, its Megas' own shares noted; then every other
-// Pokémon the regulation has, by name.
-const isMega = (id: PokemonId) => !!POKEMON[id].mega && !!POKEMON[id].battleOnly
-const megaLabel = (id: PokemonId) => {
-  const { forme } = splitForme(id, refName(pokemon(id)))
-  return (forme ?? refName(pokemon(id))).replace(/-/g, ' ')
-}
+// Each Pokémon the meta shown has, a Mega apart from the Pokémon it changes from, as the meta counts them, each at its
+// own usage, the most used first; then every other one the regulation has, by name. A Mega picked is that Pokémon
+// holding its stone (`pickedAs`), so one more Mega than the team takes clashes as its stone would.
 const monRows = computed(() => {
   const d = props.data
-  const usage = new Map<PokemonId, number>()
-  const megas = new Map<PokemonId, { id: PokemonId; usage: number }[]>()
-  for (const id of d ? (Object.keys(d) as PokemonId[]) : []) {
-    const u = d![id]?.usage
-    if (!u || !POKEMON[id]) continue
-    const base = isMega(id) ? POKEMON[id].battleOnly! : id
-    usage.set(base, (usage.get(base) ?? 0) + u)
-    if (isMega(id)) megas.set(base, [...(megas.get(base) ?? []), { id, usage: u }])
-  }
-  const row = (id: PokemonId) => {
-    const own = (megas.get(id) ?? []).sort((a, b) => b.usage - a.usage)
-    return {
-      id,
-      name: refName(pokemon(id)),
-      usage: usage.get(id),
-      megas: own.map((m) => `${megaLabel(m.id)} ${percent(m.usage)}`).join(' · '),
-    }
-  }
-  const ranked = [...usage.keys()]
-    .filter((id) => POKEMON[id] && !POKEMON[id].cosmetic)
-    .sort((a, b) => usage.get(b)! - usage.get(a)!)
+  const listable = (id: PokemonId) => POKEMON[id] && !POKEMON[id].cosmetic
+  const row = (id: PokemonId) => ({ id, name: refName(pokemon(id)), usage: d?.[id]?.usage || undefined })
+  const ranked = (d ? (Object.keys(d) as PokemonId[]) : [])
+    .filter((id) => d![id]?.usage && listable(id))
+    .sort((x, y) => d![y]!.usage! - d![x]!.usage!)
   const seen = new Set(ranked)
   const rest = availableIds('pokemon')
-    .filter((id) => !seen.has(id) && !POKEMON[id].cosmetic && !isMega(id))
+    .filter((id) => !seen.has(id) && listable(id))
     .map(row)
-    .sort((a, b) => a.name.localeCompare(b.name))
+    .sort((x, y) => x.name.localeCompare(y.name))
   return [...ranked.map(row), ...rest]
 })
-// A Mega found where the Pokémon it changes from isn't, by its own name ("Mega Sceptile"), which no Pokémon's name has,
-// or by a filter only it passes (Mega Sceptile's Dragon type): a row of its own, under that Pokémon, picking it holding
-// its stone (`pickedAs`).
-const megasOf = computed(() => {
-  const by = new Map<PokemonId, PokemonId[]>()
-  for (const id of availableIds('pokemon')) {
-    if (isMega(id)) by.set(POKEMON[id].battleOnly!, [...(by.get(POKEMON[id].battleOnly!) ?? []), id])
-  }
-  return by
-})
-/** A Pokémon's Megas passing the filters (`f`) and, when `named`, found by the text. */
-const megaRows = (base: PokemonId, f: TermFilters, named: boolean) =>
-  (megasOf.value.get(base) ?? []).flatMap((id) => {
-    const name = refName(pokemon(id))
-    const parts = named ? split(name, q.value) : null
-    if (named && !parts) return []
-    return monPasses(id, f) ? [{ id, name, usage: props.data?.[id]?.usage, megas: '', parts }] : []
-  })
 const monKinds = computed(() =>
   MON_TERM_KINDS.filter((k) => k === 'type' || k === 'ability' || (props.snapshot && has(props.snapshot, SET_LIST[k]))),
 )
@@ -199,34 +163,25 @@ watch(
 )
 const monPasses = (id: PokemonId, f: TermFilters) =>
   passesGroups(f, (x) => monMatches(props.data, id, x, allLearnsets.value))
-const monCount = (f: TermFilters) =>
-  monRows.value.reduce((n, r) => n + (monPasses(r.id, f) ? 1 : megaRows(r.id, f, false).length), 0)
-const monShown = computed(() =>
-  monRows.value.flatMap((r) => {
-    const f = preview.value ?? filters.value
-    const named = !!q.value && !preview.value
-    if (monPasses(r.id, f)) {
-      const parts = named ? split(r.name, q.value) : null
-      if (!named || parts) return [{ ...r, parts }]
-    }
-    return megaRows(r.id, f, named)
-  }),
-)
+const monCount = (f: TermFilters) => monRows.value.filter((r) => monPasses(r.id, f)).length
+const monShown = computed(() => {
+  const f = preview.value ?? filters.value
+  const named = !!q.value && !preview.value
+  return monRows.value.flatMap((r) => {
+    if (!monPasses(r.id, f)) return []
+    const parts = named ? split(r.name, q.value) : null
+    return !named || parts ? [{ ...r, parts }] : []
+  })
+})
 // The reader's favorite Pokémon (its dex entry starred, or its meta entry) lead the list while there's no text, those
 // passing the filters: a group over it, as the other pickers have theirs and folded with them (`usePickerGroups`: its
-// first `GROUP_CAP` until asked for all), a Mega starred a row of its own there, picked holding its stone. Each is in
-// its place in the list too, a star after its name.
+// first `GROUP_CAP` until asked for all). Each is in its place in the list too, a star after its name.
 const { isFavoritePokemon } = useFavorites()
 const { folded, expanded, toggleFold, toggleExpanded } = usePickerGroups()
 const favRows = computed(() => {
   if (q.value) return []
   const f = preview.value ?? filters.value
-  return monRows.value.flatMap((r) => [
-    ...(isFavoritePokemon(r.id) && monPasses(r.id, f) ? [{ ...r, parts: null }] : []),
-    ...(megasOf.value.get(r.id) ?? [])
-      .filter((id) => isFavoritePokemon(id) && monPasses(id, f))
-      .map((id) => ({ id, name: refName(pokemon(id)), usage: props.data?.[id]?.usage, megas: '', parts: null })),
-  ])
+  return monRows.value.filter((r) => isFavoritePokemon(r.id) && monPasses(r.id, f)).map((r) => ({ ...r, parts: null }))
 })
 /** A group's heading in the list: the favorites', a toggle folding them, or the rest's. */
 interface Head {
@@ -235,16 +190,17 @@ interface Head {
   folded?: boolean
 }
 const GROUPS = { favorites: 'favorites.title', usage: 'picker.byUsage', all: 'picker.all' } as const
-/** A Pokémon's row: with the headings before it (a group's on its first; the favorites' folded, on the list's first)
- * and, on the favorites' last when there are more, the link to them all (`mark`: both, for the row's memo). */
+/** A Pokémon's row: whether it's the one the slot has (`on`: its Mega's while it holds its stone), with the headings
+ * before it (a group's on its first; the favorites' folded, on the list's first) and, on the favorites' last when there
+ * are more, the link to them all (`mark`: both, for the row's memo). */
 interface MonRow {
   id: PokemonId
   name: string
   usage: number | undefined
-  megas: string
   parts: Marks | null
   clash: string | undefined
   fav: boolean
+  on: boolean
   key: string
   heads?: Head[]
   more?: { total: number; all: boolean }
@@ -252,7 +208,7 @@ interface MonRow {
 }
 const monList = computed((): MonRow[] => {
   const listed = (
-    r: Pick<MonRow, 'id' | 'name' | 'usage' | 'megas' | 'parts'>,
+    r: Pick<MonRow, 'id' | 'name' | 'usage' | 'parts'>,
     key: string,
     heads?: Head[],
     more?: MonRow['more'],
@@ -260,6 +216,7 @@ const monList = computed((): MonRow[] => {
     ...r,
     clash: monClash(r.id),
     fav: isFavoritePokemon(r.id),
+    on: shown.value === r.id,
     key,
     heads,
     more,
@@ -270,25 +227,18 @@ const monList = computed((): MonRow[] => {
   if (!favs.length) return main.map((r) => listed(r, r.id))
   const isFolded = folded.value.has('favorites')
   const all = expanded.value.has('favorites')
-  const shown = isFolded ? [] : all ? favs : favs.slice(0, GROUP_CAP)
+  const led = isFolded ? [] : all ? favs : favs.slice(0, GROUP_CAP)
   const fav: Head = { group: 'favorites', count: favs.length, folded: isFolded }
   const rest: Head = { group: props.data ? 'usage' : 'all' }
   const more = favs.length > GROUP_CAP ? { total: favs.length, all } : undefined
   return [
-    ...shown.map((r, i) => listed(r, `fav:${r.id}`, i ? undefined : [fav], i === shown.length - 1 ? more : undefined)),
+    ...led.map((r, i) => listed(r, `fav:${r.id}`, i ? undefined : [fav], i === led.length - 1 ? more : undefined)),
     ...main.map((r, i) => listed(r, r.id, i ? undefined : isFolded ? [fav, rest] : [rest])),
   ]
 })
 /** How many the text finds by name, with the filters picked: not the preview's, which the options show over it. */
 const monNamed = computed(() =>
-  q.value
-    ? monRows.value.reduce(
-        (n, r) =>
-          n +
-          (split(r.name, q.value) && monPasses(r.id, filters.value) ? 1 : megaRows(r.id, filters.value, true).length),
-        0,
-      )
-    : 0,
+  q.value ? monRows.value.filter((r) => split(r.name, q.value) && monPasses(r.id, filters.value)).length : 0,
 )
 
 // Moves: its sets' first, then the rest of its movepool.
@@ -426,7 +376,7 @@ const termRows = useId()
         <li
           v-for="r in monList"
           :key="r.key"
-          v-memo="[r.id, r.name, r.parts?.join(' '), r.usage, r.clash, r.megas, r.fav, r.mark]"
+          v-memo="[r.id, r.name, r.parts?.join(' '), r.usage, r.clash, r.fav, r.on, r.mark]"
         >
           <!-- Its group's heading (the favorites' folds them away when tapped, with how many they are), and before
                it the favorites' while folded. -->
@@ -443,15 +393,15 @@ const termRows = useId()
             </button>
             <div v-else class="group">{{ t(GROUPS[h.group]) }}</div>
           </template>
-          <button type="button" class="row" :class="{ clash: r.clash }" @click="emit('pick', r.id)">
+          <button type="button" class="row" :class="{ on: r.on, clash: r.clash }" @click="emit('pick', r.id)">
             <PokemonIcon :id="r.id" />
             <span class="row-name"
               ><Marked v-if="r.parts" :p="r.parts" /><template v-else>{{ r.name }}</template
               ><Star v-if="r.fav" class="fav-star" :size="12" :stroke-width="2.5" aria-hidden="true" /><span
-                v-if="r.megas"
-                class="mega-note"
-                >{{ r.megas }}</span
-              ><span v-if="r.clash" class="clash-note">{{ r.clash }}</span></span
+                v-if="r.clash"
+                class="clash-note"
+                >{{ r.clash }}</span
+              ></span
             >
             <span class="types"><TypeIcon v-for="ty in POKEMON[r.id].types" :key="ty" :type="ty" /></span>
             <span class="share">{{ r.usage === undefined ? '' : percent(r.usage) }}</span>
@@ -679,13 +629,6 @@ const termRows = useId()
   opacity: 0.45;
 }
 .row.clash .row-name {
-  color: var(--muted);
-}
-/* Its Megas' own shares, under its name. */
-.mega-note {
-  display: block;
-  font-size: 0.8em;
-  font-weight: normal;
   color: var(--muted);
 }
 .clash-note {

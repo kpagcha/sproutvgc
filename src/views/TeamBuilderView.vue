@@ -159,9 +159,10 @@ function pick(value: string) {
   const m = team.members[p.slot]!
   let common: PokemonId | undefined
   if (p.field === 'pokemon') {
-    const { pokemon, item } = pickedAs(value as PokemonId)
+    const id = value as PokemonId
+    const { pokemon, item } = pickedAs(id)
     if (pokemon !== m.pokemon) {
-      common = commonForme(value as PokemonId, data.value)
+      common = commonForme(id, data.value)
       // Another Pokémon: a set of its own. One with a single ability has it already.
       const abilities = POKEMON[pokemon].abilities
       update(p.slot, {
@@ -170,7 +171,12 @@ function pick(value: string) {
         item: item ?? null,
         ability: abilities.length === 1 ? abilities[0]! : null,
       })
-    } else if (item) update(p.slot, { item })
+    } else if (id !== setsAs(m)) {
+      // Another forme of the one it has, the list having a Mega apart: its Mega, holding its stone, or back from it,
+      // without it; the rest of its set kept, that forme's most common one offered.
+      common = commonForme(id, data.value)
+      update(p.slot, { item: item ?? null })
+    }
   } else if (p.field === 'item') update(p.slot, { item: (value || null) as ItemId | null })
   else if (p.field === 'ability') update(p.slot, { ability: value as AbilityId })
   else if (p.field === 'nature') update(p.slot, { nature: value })
@@ -208,13 +214,12 @@ function loadCommon() {
 }
 const [DefineCommon, ReuseCommon] = createReusableTemplate()
 
-// Every slot's most common set at once, each as picking its Pokémon would offer it (its Mega's when that's what most
-// run; one holding its Mega Stone, the Mega's): those the meta has sets of, the rest left as they are.
+// Every slot's most common set at once, each as picking its Pokémon would offer it (one holding its Mega Stone, the
+// Mega's; else its own, no Mega's): those the meta has sets of, the rest left as they are.
 const commonSets = computed(() =>
   members.value.flatMap((m, slot) => {
-    if (!m.pokemon) return []
-    const forme = stoneMega(m) ?? commonForme(m.pokemon, data.value)
-    return forme && data.value?.[forme]?.moves?.length ? [{ slot, set: commonMember(forme, data.value) }] : []
+    const forme = m.pokemon && commonForme(setsAs(m)!, data.value)
+    return forme ? [{ slot, set: commonMember(forme, data.value) }] : []
   }),
 )
 /** Whether a slot has anything of its own past its Pokémon (an ability it had a choice of, an item, a nature, a move,

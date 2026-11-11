@@ -368,12 +368,16 @@ function pick(value: string) {
   const m = sides.value[p.side].member
   let common: PokemonId | undefined
   if (p.field === 'pokemon') {
-    if (pickedAs(value as PokemonId).pokemon !== m.pokemon) {
-      choose(p.side, value as PokemonId)
-      common = commonForme(value as PokemonId, data.value)
-    } else {
-      const { item } = pickedAs(value as PokemonId)
-      if (item) patchMember(p.side, { item })
+    const id = value as PokemonId
+    if (pickedAs(id).pokemon !== m.pokemon) {
+      choose(p.side, id)
+      common = commonForme(id, data.value)
+    } else if (id !== setsAs(m)) {
+      // Another forme of the one it has, the list having a Mega apart: its Mega, holding its stone and Mega Evolving,
+      // or back from it, without it; the rest of its set kept, that forme's most common one offered.
+      const member = { ...m, item: pickedAs(id).item ?? null }
+      setSide(p.side, { ...sides.value[p.side], member, mega: !!stoneMega(member) })
+      common = commonForme(id, data.value)
     }
   } else if (p.field === 'item') {
     // Its Mega Stone given, it Mega Evolves.
@@ -420,8 +424,10 @@ async function mayReplace(k: SideKey, setOnly = false): Promise<boolean> {
 async function common(k: SideKey) {
   const id = sides.value[k].member.pokemon
   if (!id || !(await mayReplace(k, true))) return
-  const forme = sides.value[k].mega ? setsAs(sides.value[k].member)! : id
-  setSide(k, { ...commonSet(forme, data.value), side: sides.value[k].side, sets: sides.value[k].sets })
+  // Holding its Mega Stone it's its Mega, whether it has Mega Evolved yet or not (left as it was): the Mega's set.
+  const { mega, side, sets } = sides.value[k]
+  const forme = setsAs(sides.value[k].member)!
+  setSide(k, { ...commonSet(forme, data.value), side, sets, ...(forme !== id && { mega }) })
 }
 function clearSide(k: SideKey) {
   menuSide.value = null

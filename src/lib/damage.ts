@@ -24,7 +24,7 @@ import type { MetaData } from '@/data/meta'
 import { isSpread, MOVES } from '@/data/moves'
 import { POKEMON, STATS } from '@/data/pokemon'
 import { chart, TYPES, type TypeId } from '@/data/types'
-import { commonMember, isMega, mostUsedForme } from '@/lib/commonSet'
+import { commonMember, isMega } from '@/lib/commonSet'
 import { emptyMember, setsAs, stoneMega, type Member } from '@/lib/team'
 
 const GEN = Generations.get(0)
@@ -650,8 +650,6 @@ export const commonSet = (id: PokemonId, data: MetaData | null | undefined): Fig
   ...emptyFighter(commonMember(id, data)),
   mega: isMega(id),
 })
-
-export { mostUsedForme }
 
 /** The meta's most used Pokémon, at their most common sets, up to `n`, each with its usage. */
 export function metaFoes(
