@@ -1,4 +1,4 @@
-import { computed, ref, watch, type Ref } from 'vue'
+import { computed, onScopeDispose, ref, watch, type Ref } from 'vue'
 import { useSearch, type SectionKind } from '@/composables/useSearch'
 import { t, type MessageKey } from '@/i18n'
 import { refName } from '@/i18n/refName'
@@ -21,6 +21,8 @@ export interface TermGroup {
 const PER_KIND = 5
 /** What's typed names a kind (its name's start) from this many characters, or the whole name if it's shorter. */
 const KIND_CHARS = 3
+/** How long the pointer rests on an option before it's highlighted, in milliseconds. */
+const HOVER_DWELL = 120
 /** The dex entries a term can be, as the dex's search finds them. */
 const SECTION_KINDS: readonly SectionKind[] = ['pokemon', 'ability', 'move', 'item']
 
@@ -31,7 +33,8 @@ const SECTION_KINDS: readonly SectionKind[] = ['pokemon', 'ability', 'move', 'it
  * entry ("reach", "prio": the start of its name) finds all of that kind whatever their names: what one can be needn't
  * be known to search by it. Not types, whose names everyone knows. `lead` options come before them (a
  * search by name), highlighted at first; the arrow keys move through them all, Enter picks (`onPick`, the lead's index
- * for one of those), Escape closes them until the text changes.
+ * for one of those), Escape closes them until the text changes. The pointer resting on one highlights it meanwhile
+ * (`hover`, `current`), not one it only crosses.
  */
 export function useTermPicker(opts: {
   text: Ref<string>
@@ -95,12 +98,39 @@ export function useTermPicker(opts: {
   const focused = ref(false)
   const dismissed = ref(false)
   const open = computed(() => focused.value && !dismissed.value && options.value.length + lead.value > 0)
+  /** The option the keys are at. */
   const active = ref(0)
-  watch(options, () => (active.value = 0))
+  // The option the pointer rests on, highlighted over the keys' for as long as it's there: once it has stayed on it a
+  // moment (`HOVER_DWELL`), so a pointer only crossing the options on its way to the list changes nothing, and gone as
+  // it leaves them (`hover(null)`), the highlight back at the keys'.
+  const hovered = ref<number | null>(null)
+  let dwelling: ReturnType<typeof setTimeout> | undefined
+  let dwellingOn: number | null = null
+  function hover(index: number | null) {
+    if (index !== null && index === (dwelling ? dwellingOn : hovered.value)) return
+    clearTimeout(dwelling)
+    dwelling = undefined
+    if (index === null) hovered.value = null
+    else {
+      dwellingOn = index
+      dwelling = setTimeout(() => {
+        dwelling = undefined
+        hovered.value = index
+      }, HOVER_DWELL)
+    }
+  }
+  onScopeDispose(() => clearTimeout(dwelling))
+  /** The option highlighted: the pointer's while it rests on one, else the keys'. */
+  const current = computed(() => hovered.value ?? active.value)
+  watch(options, () => {
+    active.value = 0
+    hover(null)
+  })
+  watch(open, (on) => !on && hover(null))
   watch(opts.text, () => (dismissed.value = false))
   /** The term highlighted while the options are open; undefined otherwise, or with a lead option highlighted. */
   const highlighted = computed(() =>
-    open.value && active.value >= lead.value ? options.value[active.value - lead.value]?.term : undefined,
+    open.value && current.value >= lead.value ? options.value[current.value - lead.value]?.term : undefined,
   )
   /** Each option's place in the flat list, for the arrow keys. */
   const indexOf = (o: TermOption) => options.value.indexOf(o) + lead.value
@@ -109,13 +139,15 @@ export function useTermPicker(opts: {
     if (!open.value) return
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault()
+      // From the one highlighted, the pointer's included, which the keys then take over from.
       const n = options.value.length + lead.value
-      active.value = (active.value + (e.key === 'ArrowDown' ? 1 : n - 1)) % n
+      active.value = (current.value + (e.key === 'ArrowDown' ? 1 : n - 1)) % n
+      hover(null)
     } else if (e.key === 'Enter') {
       e.preventDefault()
-      opts.onPick(active.value < lead.value ? active.value : options.value[active.value - lead.value]!)
+      opts.onPick(current.value < lead.value ? current.value : options.value[current.value - lead.value]!)
     } else if (e.key === 'Escape') dismissed.value = true
   }
 
-  return { groups, options, open, focused, dismissed, active, highlighted, indexOf, onKey }
+  return { groups, options, open, focused, dismissed, active, current, hover, highlighted, indexOf, onKey }
 }

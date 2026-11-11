@@ -40,6 +40,8 @@ import TypeIcon from '@/components/TypeIcon'
 // The list behind shows what Enter would do: while the options are open, the one highlighted makes `preview` the
 // filters with it added, for the page to show. When the text finds some of the list by name too (`nameCount`), the
 // options lead with that, highlighted at first, which keeps the text as a search, as Escape or leaving the box does.
+// The pointer highlights an option only while it rests on it (`useTermPicker`'s `hover`): crossing them on the way from
+// the box to the list changes nothing, and leaving them puts the highlight, and the list, back where the keys had it.
 // On a list of teams (`details`), a Pokémon's chip, its name tapped, narrows it to a build: the one Pokémon with an
 // item, ability or moves its sets run (`DetailMenu`), its chip then naming them after it.
 // Without `subject` there's no search by text: it only finds terms. A magnifying glass leads the box, and the key the
@@ -172,7 +174,7 @@ const picker = useTermPicker({
   lead: () => lead.value.length,
   onPick: (o) => pick(o),
 })
-const { groups, open, focused, dismissed, active, highlighted, indexOf } = picker
+const { groups, open, focused, dismissed, active, current, hover, highlighted, indexOf } = picker
 watch(highlighted, (term) => (preview.value = term ? withFilter(filters.value, term) : null), { immediate: true })
 
 function pick(o: TermOption | number) {
@@ -205,6 +207,7 @@ async function onKey(e: KeyboardEvent) {
     }
     dismissed.value = false
     active.value = 0
+    hover(null)
   }
   picker.onKey(e)
 }
@@ -288,7 +291,7 @@ watch(
           autocomplete="off"
           :aria-expanded="open"
           :aria-controls="listId"
-          :aria-activedescendant="open ? `${listId}-${active}` : undefined"
+          :aria-activedescendant="open ? `${listId}-${current}` : undefined"
           @focus="enter"
           @blur="leave"
           @keydown="onKey"
@@ -303,11 +306,11 @@ watch(
           :id="listId"
           floating
           :groups
-          :active
+          :active="current"
           :index-of="indexOf"
           :lead
           @pick="pick"
-          @hover="active = $event"
+          @hover="hover"
         />
       </div>
       <button
@@ -332,11 +335,11 @@ watch(
         :id="listId"
         :inline="!!rowsEl"
         :groups
-        :active
+        :active="current"
         :index-of="indexOf"
         :lead
         @pick="pick"
-        @hover="active = $event"
+        @hover="hover"
       />
     </Teleport>
     <p v-if="!fits" class="hint muted" aria-hidden="true">{{ placeholder }}</p>

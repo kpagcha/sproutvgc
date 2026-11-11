@@ -11,10 +11,12 @@ import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
 
 // The terms a filter search's text finds (`useTermPicker`), under its box: by kind, each with how many of the list it'd
-// leave, after the `lead` options (a search by name). Picking one, by clicking it, is the box's to do. A panel in the
-// page's flow, pushing the list down rather than covering it, so the list it previews stays in sight; `floating`, a
-// card over what's under the box; `inline`, the list's own first rows (in its spot, `TermRowsAt`), set apart from its
-// entries by a wash of the accent and a rule under them, each picked with a plus at its end.
+// leave, after the `lead` options (a search by name). Picking one, by clicking it, is the box's to do, as is which one
+// is highlighted (`active`): it's told the option the pointer is on, or that it left them (`hover`), the one under it
+// tinted at once, more faintly. A panel in the page's flow, pushing the list down rather than covering it, so the list
+// it previews stays in sight; `floating`, a card over what's under the box; `inline`, the list's own first rows (in its
+// spot, `TermRowsAt`), set apart from its entries by a wash of the accent and a rule under them, each picked with a
+// plus at its end.
 defineProps<{
   floating?: boolean
   inline?: boolean
@@ -24,7 +26,7 @@ defineProps<{
   indexOf: (o: TermOption) => number
   lead?: { label: string; n: number }[]
 }>()
-const emit = defineEmits<{ pick: [option: TermOption | number]; hover: [index: number] }>()
+const emit = defineEmits<{ pick: [option: TermOption | number]; hover: [index: number | null] }>()
 const optionId = (id: string, i: number) => `${id}-${i}`
 
 const KIND_LABEL: Record<TermKind, MessageKey> = {
@@ -43,7 +45,7 @@ const KIND_LABEL: Record<TermKind, MessageKey> = {
 </script>
 
 <template>
-  <ul :id class="term-options" :class="{ floating, inline }" role="listbox">
+  <ul :id class="term-options" :class="{ floating, inline }" role="listbox" @mouseleave="emit('hover', null)">
     <li
       v-for="(l, i) in lead"
       :id="optionId(id, i)"
@@ -125,6 +127,15 @@ const KIND_LABEL: Record<TermKind, MessageKey> = {
   min-height: 30px;
   padding: 0 6px;
   cursor: pointer;
+}
+/* Under the pointer, before it has rested there long enough to be the one highlighted. */
+@media (hover: hover) {
+  .option:hover {
+    background: var(--hover);
+  }
+  .inline .option:hover {
+    background: color-mix(in srgb, var(--accent) 12%, var(--panel));
+  }
 }
 .option.active {
   background: var(--sel);
