@@ -186,6 +186,7 @@ const chipText = computed(() =>
         class="slot-menu"
         :title="t('builder.slotMenu')"
         :icon="EllipsisVertical"
+        no-tip
       >
         <button v-if="pinnable" type="button" class="menu-item" @click="(close(), emit('pin'))">
           <component :is="pinned ? PinOff : Pin" :size="14" aria-hidden="true" />{{

@@ -3,10 +3,15 @@ import { nextTick, onBeforeUnmount, ref, useTemplateRef, watch, type Component }
 import { Settings2 } from '@lucide/vue'
 
 // At the top right of a panel, a quiet button opening a drop-down of how the panel shows: the options are its slot.
-// Closed by a press outside it or Escape, or by what's in it (its slot's `close`: a pick that's done with it). Its icon a gear unless given (`icon`).
+// Closed by a press outside it or Escape, or by what's in it (its slot's `close`: a pick that's done with it). Its icon
+// a gear unless given (`icon`); or a button of the page's own, its `button` slot (given `open` and `toggle`), for a
+// drop-down of something else: the team builder's saved teams. Whether it's open can be the page's too (`v-model:open`).
+// It drops from its button as it opens, and goes back up to it.
 defineProps<{
   /** What the options are of, the button's tooltip and label. */
   title: string
+  /** No tooltip, the label alone: a button plain enough without one (a slot's "⋮"). */
+  noTip?: boolean
   icon?: Component
   /** Shown beside the icon: a small quiet button rather than the icon alone (`btn quiet small`). */
   label?: string
@@ -18,7 +23,7 @@ defineProps<{
 
 // Its tooltip only where there's hovering: a tap opens the drop-down, its label saying the same.
 const canHover = window.matchMedia('(hover: hover)').matches
-const open = ref(false)
+const open = defineModel<boolean>('open', { default: false })
 const root = useTemplateRef<HTMLElement>('root')
 const pop = useTemplateRef<HTMLElement>('pop')
 // No taller than the screen leaves under it: a long one scrolls within itself rather than the page.
@@ -31,12 +36,17 @@ async function fitPop() {
   shift.value = 0
   await nextTick()
   const el = pop.value
-  if (!el) return
-  const box = el.getBoundingClientRect()
-  maxHeight.value = `${Math.max(160, window.innerHeight - box.top - GAP)}px`
+  const parent = el?.offsetParent
+  if (!el || !parent) return
+  // Where it's laid out, from the box it's placed in (its button's, unless the page says another): its own is of it
+  // mid-way in, smaller and higher.
+  const from = parent.getBoundingClientRect()
+  const left = from.left + parent.clientLeft + el.offsetLeft
+  const top = from.top + parent.clientTop + el.offsetTop
+  maxHeight.value = `${Math.max(160, window.innerHeight - top - GAP)}px`
   const width = document.documentElement.clientWidth
-  let dx = Math.min(0, width - SIDE - box.right)
-  if (box.left + dx < SIDE) dx = SIDE - box.left
+  let dx = Math.min(0, width - SIDE - left - el.offsetWidth)
+  if (left + dx < SIDE) dx = SIDE - left
   shift.value = Math.round(dx)
 }
 function onPointerDown(e: PointerEvent) {
@@ -48,18 +58,26 @@ watch(open, (on) => {
     void fitPop()
     document.addEventListener('pointerdown', onPointerDown)
     document.addEventListener('keydown', onKey)
-  } else {
-    document.removeEventListener('pointerdown', onPointerDown)
-    document.removeEventListener('keydown', onKey)
-  }
+  } else unlisten()
 })
-onBeforeUnmount(() => (open.value = false))
+function unlisten() {
+  document.removeEventListener('pointerdown', onPointerDown)
+  document.removeEventListener('keydown', onKey)
+}
+// Taken out while open (the saved teams', once they fit their row again): its listeners with it, there being no
+// later for the watcher above.
+onBeforeUnmount(() => {
+  unlisten()
+  open.value = false
+})
 </script>
 
 <template>
   <div ref="root" class="options-menu">
+    <slot v-if="$slots.button" name="button" :open :toggle="() => (open = !open)" />
     <button
-      v-tip="canHover && !label && title"
+      v-else
+      v-tip="canHover && !label && !noTip && title"
       type="button"
       :class="
         onBand
@@ -75,15 +93,17 @@ onBeforeUnmount(() => (open.value = false))
       <component :is="icon ?? Settings2" :size="label ? 14 : 16" aria-hidden="true" />
       <span v-if="label">{{ label }}</span>
     </button>
-    <div
-      v-if="open"
-      ref="pop"
-      class="pop panel"
-      :class="{ left: align === 'left' }"
-      :style="{ maxHeight, transform: shift ? `translateX(${shift}px)` : undefined }"
-    >
-      <slot :close="() => (open = false)" />
-    </div>
+    <Transition name="drop">
+      <div
+        v-if="open"
+        ref="pop"
+        class="pop panel"
+        :class="{ left: align === 'left' }"
+        :style="{ maxHeight, '--shift': `${shift}px` }"
+      >
+        <slot :close="() => (open = false)" />
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -121,11 +141,38 @@ onBeforeUnmount(() => (open.value = false))
   overflow-y: auto;
   overscroll-behavior: contain;
   font-weight: normal;
+  transform: translateX(var(--shift, 0px));
+  transform-origin: top right;
 }
 /* From the button's left edge. */
 .pop.left {
   right: auto;
   left: 0;
+  transform-origin: top left;
+}
+/* Dropping from its button, a touch smaller at first, and back up to it, quicker, as it goes (as the dialogs' cards
+   rise and sink); hardly a fade: solid almost at once, the drop what's seen. */
+.drop-enter-active {
+  transition:
+    opacity 0.07s linear,
+    transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.drop-leave-active {
+  pointer-events: none;
+  transition:
+    opacity 0.1s linear,
+    transform 0.1s ease-in;
+}
+.drop-enter-from,
+.drop-leave-to {
+  opacity: 0;
+  transform: translate(var(--shift, 0px), -6px) scale(0.97);
+}
+@media (prefers-reduced-motion: reduce) {
+  .drop-enter-active,
+  .drop-leave-active {
+    transition: none;
+  }
 }
 /* A checkbox or radio with its label, and a group of them under a heading of its own. */
 .pop :slotted(label) {

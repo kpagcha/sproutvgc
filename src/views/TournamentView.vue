@@ -1260,6 +1260,7 @@ h1 {
 .chart-options :deep(.pop) {
   right: auto;
   left: 0;
+  transform-origin: top left;
 }
 /* Where the row doesn't fit, two: the day's label with the button at the row's end, then the day's choice; the
    drop-down opening leftward from the button, kept on the screen. */
@@ -1284,6 +1285,7 @@ h1 {
   .chart-options :deep(.pop) {
     right: 0;
     left: auto;
+    transform-origin: top right;
     max-width: calc(100vw - 32px);
   }
   .chart-n input[type='range'] {

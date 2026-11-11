@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, shallowRef, useTemplateRef, watch, type ComponentPublicInstance } from 'vue'
-import { createReusableTemplate, useElementSize, useEventListener, useMediaQuery } from '@vueuse/core'
+import { createReusableTemplate, useElementSize, useMediaQuery } from '@vueuse/core'
 import { ChevronDown, ClipboardPaste, Copy, PinOff, Plus, Sparkles, Star, Trash2 } from '@lucide/vue'
 import { ability, item, move, pokemon, type AbilityId, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
 import { natureName } from '@/data/natures'
@@ -34,6 +34,7 @@ import CommonSetOffer from '@/components/CommonSetOffer.vue'
 import CopyPaste from '@/components/CopyPaste.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
+import OptionsMenu from '@/components/OptionsMenu.vue'
 import PointsEditor from '@/components/PointsEditor.vue'
 import SectionNav from '@/components/SectionNav.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
@@ -400,8 +401,9 @@ const clashes = computed(() =>
 const othersOf = (slot: number) => members.value.filter((_, i) => i !== slot)
 // The meta's side of the team's Defense and Offense, worked out once per dataset when the browser is idle.
 const balance = useMetaBalance(snapshot, data)
-// The saved teams on one row while they fit; past it, a drop-down showing the open one, every team in it. The row is
-// kept laid out (hidden) while folded, measured to know when it fits again; a team's chip drawn once for both.
+// The saved teams on one row while they fit; past it, a drop-down showing the open one, every team in it (the app's,
+// `OptionsMenu`, its button ours; closed as a team opens). The row is kept laid out (hidden) while folded, measured to
+// know when it fits again; a team's chip drawn once for both.
 const [DefineTeam, ReuseTeam] = createReusableTemplate<{ team: Team }>()
 const savedBox = useTemplateRef<HTMLElement>('savedBox')
 const savedRow = useTemplateRef<HTMLElement>('savedRow')
@@ -413,12 +415,6 @@ watch(
   () => current.value?.id,
   () => (menuOpen.value = false),
 )
-useEventListener(document, 'pointerdown', (e: PointerEvent) => {
-  if (menuOpen.value && !savedBox.value?.contains(e.target as Node)) menuOpen.value = false
-})
-useEventListener(document, 'keydown', (e: KeyboardEvent) => {
-  if (e.key === 'Escape') menuOpen.value = false
-})
 const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon ? [m.pokemon] : []))
 </script>
 
@@ -501,23 +497,25 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
         <ul ref="savedRow" class="saved" :aria-label="t('builder.saved')" :inert="folded">
           <ReuseTeam v-for="team in teams" :key="team.id" :team />
         </ul>
-        <div v-if="folded" class="saved-menu">
-          <button type="button" class="saved-toggle" :aria-expanded="menuOpen" @click="menuOpen = !menuOpen">
-            <span class="saved-name">{{ current?.name || t('builder.untitled') }}</span>
-            <!-- Its six slots, an empty one a placeholder, so on phones the row under its name is never blank. -->
-            <span class="saved-icons">
-              <template v-for="(m, i) in members" :key="i">
-                <PokemonIcon v-if="m.pokemon" :id="m.pokemon" />
-                <span v-else class="icon-blank" aria-hidden="true"></span>
-              </template>
-            </span>
-            <span class="muted saved-count">{{ t('builder.teamsCount', { n: teams.length }) }}</span>
-            <ChevronDown :size="16" aria-hidden="true" />
-          </button>
-          <ul v-if="menuOpen" class="saved-list panel" :aria-label="t('builder.saved')">
+        <OptionsMenu v-if="folded" v-model:open="menuOpen" class="saved-menu" :title="t('builder.saved')" align="left">
+          <template #button="{ toggle }">
+            <button type="button" class="saved-toggle" :aria-expanded="menuOpen" @click="toggle">
+              <span class="saved-name">{{ current?.name || t('builder.untitled') }}</span>
+              <!-- Its six slots, an empty one a placeholder, so on phones the row under its name is never blank. -->
+              <span class="saved-icons">
+                <template v-for="(m, i) in members" :key="i">
+                  <PokemonIcon v-if="m.pokemon" :id="m.pokemon" />
+                  <span v-else class="icon-blank" aria-hidden="true"></span>
+                </template>
+              </span>
+              <span class="muted saved-count">{{ t('builder.teamsCount', { n: teams.length }) }}</span>
+              <ChevronDown class="chevron" :class="{ open: menuOpen }" :size="16" aria-hidden="true" />
+            </button>
+          </template>
+          <ul class="saved-list" :aria-label="t('builder.saved')">
             <ReuseTeam v-for="team in teams" :key="team.id" :team />
           </ul>
-        </div>
+        </OptionsMenu>
       </div>
     </section>
 
@@ -793,12 +791,28 @@ section {
   box-shadow: 0 0 0 1px var(--accent);
   cursor: pointer;
 }
+.saved-toggle > .chevron {
+  transition: transform 0.15s;
+}
+.saved-toggle > .chevron.open {
+  transform: rotate(180deg);
+}
 .saved-count {
   font-size: 0.85em;
   white-space: nowrap;
 }
+/* Its menu as wide as its button, so a press beside it is one outside it; the drop-down laid out against the box
+   instead, to be capped at its width. */
+.saved-box > .saved-menu {
+  position: static;
+  width: fit-content;
+  max-width: 100%;
+}
 /* On phones, the open one's name and how many teams over its Pokémon, so the button keeps to the screen. */
 @media (max-width: 720px) {
+  .saved-box > .saved-menu {
+    width: auto;
+  }
   .saved-toggle {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto auto;
@@ -837,21 +851,18 @@ section {
     margin-left: -6px;
   }
 }
+/* The drop-down, across the box and no wider than it: each team's Pokémon go under its name where they don't fit
+   beside it. */
+.saved-menu :deep(.pop) {
+  max-width: 100%;
+  padding: 8px;
+}
 .saved-list {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  z-index: 60;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  width: max-content;
-  /* No wider than the box it drops from: each team's Pokémon go under its name where they don't fit beside it. */
-  max-width: 100%;
-  max-height: 60vh;
   margin: 0;
-  padding: 8px;
-  overflow: auto;
+  padding: 0;
   list-style: none;
 }
 .saved-team {
