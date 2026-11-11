@@ -78,6 +78,7 @@ import MetaDialog from '@/components/MetaDialog.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
 import OptionsMenu from '@/components/OptionsMenu.vue'
 import { confirmDialog } from '@/composables/useConfirm'
+import { useStepBack } from '@/composables/useStepBack'
 import PokemonIcon from '@/components/PokemonIcon'
 import ScrollRow from '@/components/ScrollRow.vue'
 import SectionNav from '@/components/SectionNav.vue'
@@ -294,6 +295,8 @@ function resetAll() {
 // right after a Pokémon's picked, the meta's entry whose most common set can be loaded instead of going on (`common`);
 // its nature picked again from its stat points' step, the step to come back to once picked (`back`).
 const picking = shallowRef<{ side: SideKey; field: Field; common?: PokemonId; back?: Field } | null>(null)
+// Its steps, the way back through them; the opponent's moves step going back into the picker it went on from.
+const { canBack: pickerCanBack, back: pickerBack, canReopen, reopen } = useStepBack(picking, (p) => p.side)
 const pickerOpen = computed({
   get: () => !!picking.value,
   set: (on) => {
@@ -940,7 +943,7 @@ function face(f: Fighter) {
       :anchor="picking ? drawerAnchor : hitsAnchor"
       :label="picking ? t('builder.picker') : t('calc.hits.title')"
       defer
-      @close="picking ? (picking = null) : (hitsDrawer = false)"
+      @close="((picking = null), (hitsDrawer = false))"
     >
       <TeamPicker
         v-if="picking && pickerMember"
@@ -950,7 +953,9 @@ function face(f: Fighter) {
         :data
         :snapshot
         v-bind="pickerPoints"
+        :can-back="pickerCanBack"
         @pick="pick"
+        @back="pickerBack"
         @close="picking = null"
         @change="pointsChange"
         @sets="pointsSets"
@@ -965,7 +970,9 @@ function face(f: Fighter) {
           :member="sides.b.member"
           :data
           @moves="patchMember('b', { moves: $event })"
+          :can-back="canReopen()"
           @continue="toStep('hits')"
+          @back="reopen"
           @close="hitsDrawer = false"
         />
         <template v-else>
@@ -975,12 +982,12 @@ function face(f: Fighter) {
             :yours="fought.a"
             :theirs="fought.b"
             bare
+            can-back
+            @back="toStep('moves')"
             @close="hitsDrawer = false"
           />
-          <!-- Back to its moves, and Done, leading to What fits once there's something to work out: stuck to the drawer's
-             foot. -->
+          <!-- Done, leading to What fits once there's something to work out: stuck to the drawer's foot. -->
           <div class="drawer-foot">
-            <button type="button" class="btn quiet" @click="toStep('moves')">{{ t('calc.seen.back') }}</button>
             <span v-if="observations.length" class="muted done-hint">{{ t('calc.seen.doneHint') }}</span>
             <button type="button" class="btn primary" :disabled="!observations.length" @click="hitsDone">
               {{ t('picker.done') }}
@@ -1000,7 +1007,9 @@ function face(f: Fighter) {
           :data
           :snapshot
           v-bind="pickerPoints"
+          :can-back="pickerCanBack"
           @pick="pick"
+          @back="pickerBack"
           @close="picking = null"
           @change="pointsChange"
           @sets="pointsSets"
@@ -1598,14 +1607,14 @@ word, as the common set's offer has. */
   font-weight: bold;
   pointer-events: auto;
 }
-/* The hits drawer's foot, stuck to its bottom across its padding: back to the opponent's moves, and Done. */
+/* The hits drawer's foot, stuck to its bottom across its padding: Done. */
 .drawer-foot {
   position: sticky;
   bottom: calc(-1 * var(--panel-pad));
   z-index: 3;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 8px;
   margin: 16px calc(-1 * var(--panel-pad)) calc(-1 * var(--panel-pad));
   padding: 10px var(--panel-pad);

@@ -10,12 +10,13 @@ import { refName } from '@/i18n/refName'
 import { MOVE_SLOTS, setsAs, type Member } from '@/lib/team'
 import MoveTable from '@/components/MoveTable.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import StepBack from '@/components/StepBack.vue'
 
 // The inverse damage calc's drawer, its first step: the opponent's moves seen, picked from its movepool (its sets'
 // first, by share), a tap adding one or, picked, taking it off. Those picked are chips over the list, with the way on to
 // what was seen (`continue`) whenever, with none or some; the last of the set's slots filled, it goes on by itself.
-const props = defineProps<{ member: Member; data: MetaData | null }>()
-const emit = defineEmits<{ moves: [moves: (MoveId | null)[]]; continue: []; close: [] }>()
+const props = defineProps<{ member: Member; data: MetaData | null; canBack?: boolean }>()
+const emit = defineEmits<{ moves: [moves: (MoveId | null)[]]; continue: []; close: []; back: [] }>()
 
 const MOVE_KINDS = ['type', 'category', 'flag', 'reach', 'priority'] as const
 const learnset = shallowRef<MoveId[] | null>(null)
@@ -54,6 +55,7 @@ function toggle(id: MoveId) {
 <template>
   <div class="moves-seen">
     <div class="head">
+      <StepBack v-if="canBack" @back="emit('back')" />
       <h2><PokemonIcon v-if="member.pokemon" :id="member.pokemon" />{{ t('calc.seen.moves') }}</h2>
       <button type="button" class="close" :aria-label="t('calc.hits.close')" @click="emit('close')">
         <X :size="20" aria-hidden="true" />
@@ -89,6 +91,8 @@ function toggle(id: MoveId) {
   gap: 8px;
 }
 .head h2 {
+  flex: 1;
+  font-size: calc(13px * var(--display-scale, 1) * var(--text-scale));
   display: inline-flex;
   align-items: center;
   gap: 4px;

@@ -12,6 +12,7 @@ import { confirmDialog } from '@/composables/useConfirm'
 import { useMeta } from '@/composables/useMeta'
 import { useMetaBalance } from '@/composables/useMetaBalance'
 import { useTeams } from '@/composables/useTeams'
+import { useStepBack } from '@/composables/useStepBack'
 import { commonForme, commonMember } from '@/lib/commonSet'
 import { membersPaste, parsePaste, type PasteProblem } from '@/lib/pokepaste'
 import {
@@ -72,6 +73,8 @@ const members = computed(() => current.value?.members ?? [])
 // one the drawer leaves clear); right after a Pokémon's picked, the meta's entry whose most common set can be loaded
 // instead of going on (`common`), as the damage calculator's sides can.
 const picking = shallowRef<{ slot: number; field: Field; pin?: boolean; common?: PokemonId; back?: Field } | null>(null)
+// Its steps, the way back through them.
+const { canBack: pickerCanBack, back: pickerBack } = useStepBack(picking, (p) => p.slot)
 // The slot pinned beside the insights, to edit it there as they follow; none once it's emptied or another team opens.
 // On wide screens a column stuck beside them. Narrower, in a dialog over the page (`ModalDialog`, closing it unpinning
 // it), all there is on screen: one of the charts on top, picked from a row of them (`dockChart`, remembered), and
@@ -680,7 +683,9 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
         :data
         :snapshot
         v-bind="pickerPoints"
+        :can-back="pickerCanBack"
         @pick="pick"
+        @back="pickerBack"
         @close="picking = null"
         @change="pointsChange"
         @nature="natureAgain"
@@ -698,7 +703,9 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
           :data
           :snapshot
           v-bind="pickerPoints"
+          :can-back="pickerCanBack"
           @pick="pick"
+          @back="pickerBack"
           @close="picking = null"
           @change="pointsChange"
           @nature="natureAgain"

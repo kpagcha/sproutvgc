@@ -10,6 +10,7 @@ import { battlerOf, damaging, statsOf, type Fighter, type HitOptions } from '@/l
 import type { Saw } from '@/lib/damageReverse'
 import HpBar from '@/components/HpBar.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import StepBack from '@/components/StepBack.vue'
 import { useOpenState } from '@/composables/useOpenState'
 
 // The inverse damage calc's "What you saw": the hits seen, in the order entered, each a row: who hit whom (yours the
@@ -27,8 +28,8 @@ export interface HitDraft {
   before?: number
   opts?: HitOptions
 }
-const props = defineProps<{ yours: Fighter; theirs: Fighter; bare?: boolean }>()
-const emit = defineEmits<{ close: [] }>()
+const props = defineProps<{ yours: Fighter; theirs: Fighter; bare?: boolean; canBack?: boolean }>()
+const emit = defineEmits<{ close: []; back: [] }>()
 const hits = defineModel<HitDraft[]>('hits', { required: true })
 const first = defineModel<'a' | 'b' | null>('first', { default: null })
 
@@ -126,6 +127,7 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
 <template>
   <section class="hits" :class="bare ? 'bare' : 'panel banded'">
     <div v-if="bare" class="bare-head">
+      <StepBack v-if="canBack" @back="emit('back')" />
       <h2>{{ t('calc.hits.title') }}</h2>
       <button type="button" class="close" :aria-label="t('calc.hits.close')" @click="emit('close')">
         <X :size="20" aria-hidden="true" />
@@ -334,7 +336,9 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
   margin-bottom: 12px;
 }
 .bare-head h2 {
+  flex: 1;
   margin: 0;
+  font-size: calc(13px * var(--display-scale, 1) * var(--text-scale));
 }
 .close {
   display: inline-flex;

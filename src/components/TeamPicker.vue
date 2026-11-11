@@ -31,6 +31,7 @@ import ItemIcon from '@/components/ItemIcon.vue'
 import Marked from '@/components/Marked'
 import MoveTable from '@/components/MoveTable.vue'
 import PointsPicker from '@/components/PointsPicker.vue'
+import StepBack from '@/components/StepBack.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
 
@@ -54,10 +55,13 @@ const props = defineProps<{
   canPool?: boolean
   atSets?: boolean
   pooled?: { points: readonly number[]; stats: readonly number[] }
+  /** There's a step before this one to go back to (`back`). */
+  canBack?: boolean
 }>()
 const emit = defineEmits<{
   pick: [value: string]
   close: []
+  back: []
   /** Its stat points' step: the set changed in place, at every set or not, its nature to be picked again. */
   change: [patch: Partial<Member>]
   sets: [on: boolean]
@@ -315,6 +319,7 @@ const termRows = useId()
 <template>
   <div ref="root" class="picker">
     <div class="picker-head">
+      <StepBack v-if="canBack" @back="emit('back')" />
       <h2>{{ title }}</h2>
       <button type="button" class="close" :aria-label="t('builder.closePicker')" @click="emit('close')">
         <X :size="18" aria-hidden="true" />
@@ -461,7 +466,9 @@ const termRows = useId()
   gap: 8px;
 }
 .picker-head h2 {
+  flex: 1;
   margin: 0;
+  font-size: calc(13px * var(--display-scale, 1) * var(--text-scale));
 }
 .close {
   padding: 2px;
