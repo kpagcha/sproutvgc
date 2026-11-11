@@ -138,7 +138,7 @@ function use(r: ReverseRow) {
 <template>
   <section class="panel banded reverse">
     <h2 class="band">{{ t('calc.reverse.title') }}</h2>
-    <div class="reverse-head">
+    <div v-if="theirId && yourId" class="reverse-head">
       <!-- Working it out, past a moment: how far it's got, a line over the row's top, moving nothing. -->
       <div
         v-if="slow && progress !== null"
@@ -163,7 +163,7 @@ function use(r: ReverseRow) {
         {{ theirs.member.item ? t('calc.reverse.itemSet') : t('calc.reverse.itemVaries') }}</span
       >
     </div>
-    <p v-if="!theirId || !yourId" class="muted intro">{{ t('calc.threats.pickBoth') }}</p>
+    <p v-if="!theirId || !yourId" class="muted intro">{{ t('calc.reverse.pickBoth') }}</p>
     <p v-else-if="!obs.length" class="muted intro">{{ t('calc.reverse.hint') }}</p>
     <template v-if="theirId && yourId && obs.length && result">
       <div class="body" :class="{ stale: slow }">

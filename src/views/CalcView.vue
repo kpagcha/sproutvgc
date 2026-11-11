@@ -120,12 +120,8 @@ const sections = computed(() => [
   ...(props.inverse
     ? [
         { id: 'calc-duel', label: t('calc.section.pokemon') },
-        ...(hasBoth.value
-          ? [
-              { id: 'calc-hits', label: t('calc.hits.title') },
-              { id: 'calc-reverse', label: t('calc.reverse.title') },
-            ]
-          : []),
+        ...(hasBoth.value ? [{ id: 'calc-hits', label: t('calc.hits.title') }] : []),
+        { id: 'calc-reverse', label: t('calc.reverse.title') },
       ]
     : damageSections.value),
 ])
@@ -770,19 +766,25 @@ function face(f: Fighter) {
 
     <!-- The inverse tab: what was seen, and what of the opponent's set fits it. -->
     <template v-if="inverse">
-      <template v-if="hasBoth">
-        <CalcHits id="calc-hits" v-model:hits="hits" v-model:first="first" :yours="fought.a" :theirs="fought.b" />
-        <CalcReverse
-          id="calc-reverse"
-          :yours="fought.a"
-          :theirs="fought.b"
-          :field
-          :data
-          :obs="observations"
-          v-model:sheet="sheet"
-          @use="useBuild"
-        />
-      </template>
+      <CalcHits
+        v-if="hasBoth"
+        id="calc-hits"
+        v-model:hits="hits"
+        v-model:first="first"
+        :yours="fought.a"
+        :theirs="fought.b"
+      />
+      <!-- Shown before the two are picked too, saying what the tab is for. -->
+      <CalcReverse
+        id="calc-reverse"
+        :yours="fought.a"
+        :theirs="fought.b"
+        :field
+        :data
+        :obs="observations"
+        v-model:sheet="sheet"
+        @use="useBuild"
+      />
     </template>
     <template v-else>
       <CalcVerdict :a="fought.a" :b="fought.b" :field />

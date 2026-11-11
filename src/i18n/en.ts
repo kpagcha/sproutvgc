@@ -331,6 +331,8 @@ export const messages = {
   'calc.meta.title': 'Against the meta',
   'calc.threats.title': 'Threats',
   'calc.reverse.title': 'What fits',
+  'calc.reverse.pickBoth':
+    "Pick both Pokémon, then add the hits you saw and which moved first, to work out the opponent's stat points, nature and item.",
   'calc.reverse.hint': 'Add a hit you saw above, or which moved first.',
   'calc.reverse.first': 'Moved first',
   'calc.reverse.firstTip':
