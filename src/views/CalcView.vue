@@ -1048,7 +1048,7 @@ function face(f: Fighter) {
           </button>
           <button
             type="button"
-            class="load-row"
+            class="load-row danger"
             :disabled="!sides[menuSide].member.pokemon"
             @click="clearSide(menuSide)"
           >
@@ -1475,6 +1475,13 @@ function face(f: Fighter) {
 }
 .load-row.copied {
   color: var(--good);
+}
+/* Clearing the side: destructive, in the bad color. */
+.load-row.danger {
+  color: var(--bad);
+}
+.load-row.danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--bad) 12%, var(--panel));
 }
 .load-label {
   margin-top: 6px;
