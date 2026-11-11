@@ -266,6 +266,23 @@ export function seoPages(): Plugin {
         searched('tools/calc', 'calc'),
         searched('tools/calc/inverse', 'calcInverse'),
         searched('tools/compare-speeds', 'speedCompare'),
+        // Its other views, a page each, named as their tabs are.
+        {
+          path: 'tools/compare-speeds/order',
+          title: 'compare.mode.order',
+          head: 'head.speedOrder',
+          desc: 'desc.speedOrder',
+          keywords: 'keywords.speedOrder',
+          schema: 'WebApplication',
+        },
+        {
+          path: 'tools/compare-speeds/moved-first',
+          title: 'compare.mode.reverse',
+          head: 'head.speedMovedFirst',
+          desc: 'desc.speedMovedFirst',
+          keywords: 'keywords.speedMovedFirst',
+          schema: 'WebApplication',
+        },
         searched('tools/team-builder', 'teamBuilder'),
         searched('tools/matchups', 'matchups'),
         searched('tools/type-chart', 'chart', 'WebPage'),

@@ -15,7 +15,7 @@ const route = useRoute()
 const { isSetupFavorite, toggleSetup } = useFavorites()
 
 const setup = computed((): PageVisit | null => {
-  const query = route.meta.setup?.(route.query)
+  const query = route.meta.setup?.(route.query, route.params)
   return query ? { page: String(route.name), path: route.path, query } : null
 })
 const on = computed(() => !!setup.value && isSetupFavorite(setup.value))

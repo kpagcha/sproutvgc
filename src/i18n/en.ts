@@ -161,6 +161,12 @@ export const messages = {
   'head.bulkTiers': 'Bulk tiers: physical and special bulk',
   'head.powerTiers': 'Power tiers: physical and special power',
   'head.speedCompare': 'Speed calculator: compare Pokémon speeds',
+  'head.speedOrder': 'Speed order: which Pokémon moves first',
+  'head.speedMovedFirst': 'Who moved first: the Speed spreads that fit the turn order',
+  'desc.speedOrder':
+    'Any Pokémon of {game}, Regulation {reg}, in the order they move: each at its own nature, stat points and modifiers, with Trick Room, Tailwind and Speed ties.',
+  'desc.speedMovedFirst':
+    "The turn order you saw, read backwards: the Speed stat points your Pokémon and the opponent's can have given which moved first, from the sets the meta runs.",
   'head.pokedex': 'Pokédex: every Pokémon, its stats and moves',
   'head.chart': 'Type chart: type effectiveness',
   'head.matchups': 'Type calculator: weaknesses and coverage',
@@ -206,6 +212,10 @@ export const messages = {
     'power tiers, power tier list, strongest Pokémon, attack tiers, special attack tiers, damage, Choice Band, Choice Specs, VGC, {game}, Regulation {reg}',
   'keywords.speedCompare':
     'speed calculator, calculate speed, speed calc, compare speeds, speed comparison, outspeed, speed tiers, speed chart, Pokémon speed, Trick Room, Tailwind, VGC, {game}, Regulation {reg}',
+  'keywords.speedOrder':
+    'speed order, turn order, who moves first, speed list, speed ties, Trick Room, Tailwind, Pokémon speed, VGC, {game}, Regulation {reg}',
+  'keywords.speedMovedFirst':
+    'who moved first, turn order, speed guesser, speed spread finder, speed creep, stat points, Pokémon speed, VGC, {game}, Regulation {reg}',
   'title.calcInverse': 'Inverse damage calculator',
   'desc.calcInverse':
     "The damage you saw, read backwards: the opponent's stat points, nature and item that fit the hits you saw and which moved first, from the sets the meta runs.",

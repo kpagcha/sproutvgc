@@ -24,7 +24,15 @@ import {
   setSpread,
   type ListEntry,
 } from '@/lib/speedLineup'
-import { TIERS_PICKS, lastCompareQuery, lastTiersQuery, withoutMeta } from '@/lib/tiersState'
+import {
+  TIERS_PICKS,
+  compareMode,
+  compareParams,
+  lastCompareQuery,
+  lastTiersQuery,
+  withoutMeta,
+  type CompareMode,
+} from '@/lib/tiersState'
 import { confirmDialog } from '@/composables/useConfirm'
 import { useMeta } from '@/composables/useMeta'
 import { useTour } from '@/composables/useTour'
@@ -47,16 +55,18 @@ import SpeedVersus from '@/components/SpeedVersus.vue'
 import TourToggle from '@/components/TourToggle.vue'
 
 // Pokémon's Speeds compared, each with a build of its own (its nature's effect, its stat points, its modifiers), in
-// one of two views (`mode`). Yours against opponents (the default): up to a team's six a side, yours `a`, `a2` to
-// `a6`, the opponents `b` to `b6` (each build under its letters: `anat`, `apts`, `amods`, `astage`…); a pair side by side,
-// which moves first and the points each needs to move before the other; more, one under the other in the order they
-// move, with how each of yours does against each opponent, and any two of them alone (`pair`). Or the speed order
-// (`mode=order`): any Pokémon, up to `LIST_MAX`, in the order they move (`list`). Everything in the URL, with
-// `trickroom`; the speed tiers link here with yours and the Pokémon it's measured against, and back with either as
-// yours. Yours against opponents, one can be at its sets rather than at one build (`bsets=1`, an opponent's Speed not
-// being known): at every Speed its sets in the meta reach, each counting as often as it's run, with its own modifiers;
-// an opponent picked here starts so, when the meta has its sets. Or read backwards (`mode=reverse`, "Who moved first"):
-// the two of `a` and `b` with their natures and modifiers, their points unknown, and which of them was seen moving first
+// one of three views (`mode`), a page each, the view the last part of its path (the route's `view`,
+// `COMPARE_VIEWS`), the rest of the URL carried from one to another. Yours against opponents (the page itself,
+// `/tools/compare-speeds`): up to a team's six a side, yours `a`, `a2` to `a6`, the opponents `b` to `b6` (each build
+// under its letters: `anat`, `apts`, `amods`, `astage`…); a pair side by side, which moves first and the points each
+// needs to move before the other; more, one under the other in the order they move, with how each of yours does
+// against each opponent, and any two of them alone (`pair`). Or the speed order (`/tools/compare-speeds/order`): any
+// Pokémon, up to `LIST_MAX`, in the order they move (`list`). Everything in the URL, with `trickroom`; the speed tiers
+// link here with yours and the Pokémon it's measured against, and back with either as yours. Yours against opponents,
+// one can be at its sets rather than at one build (`bsets=1`, an opponent's Speed not being known): at every Speed its
+// sets in the meta reach, each counting as often as it's run, with its own modifiers; an opponent picked here starts
+// so, when the meta has its sets. Or read backwards (`/tools/compare-speeds/moved-first`, "Who moved first"): the two
+// of `a` and `b` with their natures and modifiers, their points unknown, and which of them was seen moving first
 // (`first`): the points each could have then, and those most likely.
 const route = useRoute()
 const router = useRouter()
@@ -68,20 +78,32 @@ const metaSpeeds = computed(() => !!snapshot.value && has(snapshot.value, 'speed
 const ranks = computed(() => (data.value ? usageRanks(data.value) : undefined))
 
 const MODES = ['vs', 'order', 'reverse'] as const
-type Mode = (typeof MODES)[number]
-const mode = computed<Mode>(() =>
-  route.query.mode === 'order' ? 'order' : route.query.mode === 'reverse' ? 'reverse' : 'vs',
-)
-// The page opened bare (from the menu, nothing in its URL) comes as it was left (`lastCompareQuery`), put in the URL,
-// so the URL always says what's shown and links (the speed tiers', with yours and an opponent) open as they were made.
-// Bare but for the data shown, which a link may carry: kept.
-if (!Object.keys(withoutMeta(route.query)).length && Object.keys(lastCompareQuery.value).length)
-  void router.replace({ query: { ...lastCompareQuery.value, meta: route.query.meta } })
+type Mode = CompareMode
+const mode = computed<Mode>(() => compareMode(route.params.view))
+// The page opened bare (from the menu, nothing in its URL) comes as it was left (`lastCompareQuery`: its query, and the
+// view it was left at as `mode`), put in the URL, so the URL always says what's shown and links (the speed tiers', with
+// yours and an opponent) open as they were made: at the view it was left at, or, a view's own page opened bare, only
+// when it was left there. Bare but for the data shown, which a link may carry: kept.
+{
+  const { mode: leftAt, ...left } = lastCompareQuery.value
+  const leftMode = compareMode(leftAt)
+  const bare = !Object.keys(withoutMeta(route.query)).length
+  if (bare && Object.keys(left).length && (!route.params.view || leftMode === mode.value))
+    void router.replace({
+      name: 'speedCompare',
+      params: compareParams(leftMode),
+      query: { ...left, meta: route.query.meta },
+    })
+}
 // Remembered as left: while it's the page shown, not as it leaves (still there, fading out, as the next page's query
-// comes in).
+// comes in). With nothing in its URL there's nothing to remember, whatever the view.
 watch(
-  () => route.query,
-  (q) => route.name === 'speedCompare' && (lastCompareQuery.value = withoutMeta(q)),
+  () => [route.query, mode.value] as const,
+  ([q, m]) => {
+    if (route.name !== 'speedCompare') return
+    const left = withoutMeta(q)
+    lastCompareQuery.value = Object.keys(left).length && m !== 'vs' ? { ...left, mode: m } : left
+  },
   { immediate: true },
 )
 const trickRoom = computed(() => route.query.trickroom === '1')
@@ -480,14 +502,20 @@ function add(id: PokemonId | null) {
   )
 }
 
-// Switching to the speed order with its list empty brings the Pokémon compared over, to go on from them.
+// Another view: its page, the URL carried over. Switching to the speed order with its list empty brings the Pokémon
+// compared over, to go on from them.
 function setMode(m: Mode) {
+  if (m === mode.value) return
   openKey.value = null
   const carried =
     m === 'order' && !list.value.length
       ? listQuery(picked.value.map((e) => ({ id: e.id, build: e.build })))
       : route.query.list
-  replace({ mode: m === 'vs' ? undefined : m, list: typeof carried === 'string' ? carried : undefined })
+  void router.push({
+    name: 'speedCompare',
+    params: compareParams(m),
+    query: { ...route.query, list: typeof carried === 'string' ? carried : undefined },
+  })
 }
 
 /**
@@ -573,8 +601,8 @@ const { start: startTour } = useTour('compare', () => [
   { el: '.to-ladder', title: 'tour.compare.ladderTitle', text: 'tour.compare.ladder', side: 'top' },
   { el: '.head-tour', title: 'tour.againTitle', text: 'tour.again', side: 'bottom' },
 ])
-// Everything back as the page comes with nothing set, as the speed tiers' Reset all: its whole URL cleared (the
-// Pokémon, their builds, the view, Trick Room).
+// Everything back as the page comes with nothing set, as the speed tiers' Reset all: its whole query cleared (the
+// Pokémon, their builds, Trick Room), the view, a page of its own, staying.
 // The data shown (`?meta=`) isn't the page's to reset: it's the reader's choice on every page.
 const allChanged = computed(() => Object.keys(withoutMeta(route.query)).length > 0)
 function resetAll() {

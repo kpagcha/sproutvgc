@@ -41,13 +41,14 @@ function view(visit: PageVisit) {
   const name = String(to.name ?? '')
   const compare = name === 'speedCompare'
   const team = (keys: string[]) => keys.flatMap((k) => mon(q[k]) ?? [])
-  // A comparison's icons: each team's, or the speed order's list; a damage calc's, each side's Pokémon.
+  // A comparison's icons: each team's, or the speed order's list (a setup saved says its view as `mode`, a page left
+  // has it in its path); a damage calc's, each side's Pokémon.
   const groups =
     name === 'calc' || name === 'calcInverse'
       ? ['a', 'b'].flatMap((s) => [calcSide(q[s])].filter((id): id is PokemonId => !!id)).map((id) => [id])
       : !compare
         ? null
-        : q.mode === 'order'
+        : q.mode === 'order' || to.params.view === 'order'
           ? [readList(q.list).map((e) => e.id)]
           : ['a', 'b'].map((s) => team([s, ...[2, 3, 4, 5, 6].map((n) => `${s}${n}`)]))
   return {

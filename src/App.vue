@@ -4,6 +4,7 @@ import { useRoute, useRouter, type RouteLocationNormalizedLoaded, type RouteLoca
 import { AnimatePresence, MotionConfig, motion } from 'motion-v'
 import { FADE, PAGE } from '@/lib/motion'
 import { pageEntered, pageEntering, pageExited, pageKey, setPageWaits } from '@/lib/pageExit'
+import { compareMode } from '@/lib/tiersState'
 import { LOCALES, locale, setLocale, t, typeName, type Locale, type MessageKey } from '@/i18n'
 import { isType } from '@/data/types'
 import { generatedName, refName } from '@/i18n/refName'
@@ -91,11 +92,16 @@ watchEffect(() => {
   // A tournament's Pokémon and its rounds, a page each of their own.
   const tournamentMons = route.name === 'tournament' && route.params.tab === 'pokemon'
   const tournamentRounds = route.name === 'tournament' && route.params.tab === 'rounds'
+  // The speed comparison's other views, a page each too: the speed order, and who moved first.
+  const compareView = route.name === 'speedCompare' ? compareMode(route.params.view) : 'vs'
+  const compared = compareView === 'order' ? 'speedOrder' : compareView === 'reverse' ? 'speedMovedFirst' : null
   const key = tournamentMons
     ? 'head.tournamentPokemon'
     : tournamentRounds
       ? 'head.tournamentRounds'
-      : (route.meta.headKey ?? route.meta.titleKey)
+      : compared
+        ? (`head.${compared}` as const)
+        : (route.meta.headKey ?? route.meta.titleKey)
   const name = key ? t(key) : null
   const lead = type ? typeName(type) : entry
   const title = name ? `${lead ? `${lead} · ` : ''}${name} · ${GAME_NAME} · sproutvgc` : `sproutvgc · ${GAME_NAME} dex`
@@ -122,10 +128,14 @@ watchEffect(() => {
             name: entry,
           },
         )
-      : t(route.meta.descKey ?? 'desc.home', params)
+      : t(compared ? (`desc.${compared}` as const) : (route.meta.descKey ?? 'desc.home'), params)
   document.title = title
   setMeta('meta[name="description"]', desc)
-  const keywords = tournamentMons ? 'keywords.tournamentPokemon' : route.meta.keywordsKey
+  const keywords = tournamentMons
+    ? 'keywords.tournamentPokemon'
+    : compared
+      ? (`keywords.${compared}` as const)
+      : route.meta.keywordsKey
   setKeywords(keywords ? t(keywords, { ...params, ...(entry && { name: entry }) }) : null)
   setMeta('meta[property="og:title"]', title)
   setMeta('meta[property="og:description"]', desc)

@@ -9,6 +9,7 @@ import { hasFavorites } from '@/composables/useFavorites'
 import { hasRecent, visitPage } from '@/composables/useRecent'
 import { endVisit, recordSetup } from '@/composables/usePageHistory'
 import { loadDescriptions, type DescribedKind } from '@/i18n/descriptions'
+import { compareMode, compareParams } from '@/lib/tiersState'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -32,11 +33,14 @@ declare module 'vue-router' {
      * the same visit (one per page, or a comparison per pair), or nothing while there's nothing to record. */
     recent?: (to: RouteLocationNormalized) => string | null
     /** A page whose setup can be starred: what of its query is the setup (the rest only a moment of it, as what's
-     * found), or nothing while there's none to star. */
-    setup?: (query: LocationQuery) => Record<string, string> | null
+     * found), or nothing while there's none to star. Given its params too, for a page whose view is in its path. */
+    setup?: (query: LocationQuery, params: RouteLocationNormalized['params']) => Record<string, string> | null
     /** A page whose setup can be starred, in its own recently viewed (`usePageHistory`): what counts as one visit (the
      * Pokémon it's of) and what of its query is kept, or nothing while there's none worth keeping. */
-    history?: (query: LocationQuery) => { visit: string; query: Record<string, string> } | null
+    history?: (
+      query: LocationQuery,
+      params: RouteLocationNormalized['params'],
+    ) => { visit: string; query: Record<string, string> } | null
     /** The data the page loads first, started as navigation does (beside its code and the names it waits for) rather
      * than once the page is set up. */
     prefetch?: (to: RouteLocationNormalized) => void
@@ -71,12 +75,13 @@ function prefetchEvent(to: RouteLocationNormalized) {
 // The page's one visit among the recently viewed, whatever its view.
 const once = (page: string) => () => page
 
-// The comparison's visit: yours against the opponents, one per matchup (the two teams, up to six each), once each team
-// has one; the speed order, one whatever its list, once there's one in it; read backwards (who moved first), one per
-// pair.
+// The comparison's visit, by its view (its path's last part, the route's `view`): yours against the opponents, one per
+// matchup (the two teams, up to six each), once each team has one; the speed order, one whatever its list, once there's
+// one in it; read backwards (who moved first), one per pair.
 const TEAM_KEYS = ['a', 'b'].flatMap((s) => [s, ...[2, 3, 4, 5, 6].map((n) => `${s}${n}`)])
-function compareVisit(query: LocationQuery) {
-  const { a, b, mode, list } = query
+function compareVisit(query: LocationQuery, view: unknown) {
+  const { a, b, list } = query
+  const mode = compareMode(view)
   if (mode === 'order') return typeof list === 'string' && list ? 'speedCompare:order' : null
   if (mode === 'reverse')
     return typeof a === 'string' && typeof b === 'string' ? `speedCompare:reverse:${a}:${b}` : null
@@ -85,6 +90,15 @@ function compareVisit(query: LocationQuery) {
         .filter((x) => typeof x === 'string')
         .join(':')}`
     : null
+}
+
+/** The comparison's setup, to star and to keep among its recently viewed: the Pokémon and their builds, but for the two
+ * tapped among the matchups and the data shown, and its view as `mode` (none for yours against opponents), as its URL
+ * had it while the view was in its query: so one starred then is still the one shown now, and the same Pokémon in two
+ * views are two setups. */
+function compareSetup(query: LocationQuery, view: unknown) {
+  const mode = compareMode(view)
+  return { ...stringQuery(query, ['pair', 'meta', 'mode']), ...(mode !== 'vs' && { mode }) }
 }
 
 // The meta of a page in an area's section.
@@ -521,8 +535,10 @@ export const router = createRouter({
       },
     },
     {
-      // Pokémon's Speeds compared, yours against opponents or in speed order, linked to and from the speed tiers.
-      path: '/tools/compare-speeds',
+      // Pokémon's Speeds compared, linked to and from the speed tiers: yours against opponents, in speed order
+      // (`/tools/compare-speeds/order`) or read backwards, who moved first (`/tools/compare-speeds/moved-first`), a
+      // page each, one route: the view is its path's last part (`view`), so going from one to another is the same page.
+      path: '/tools/compare-speeds/:view(order|moved-first)?',
       name: 'speedCompare',
       component: () => import('@/views/SpeedCompareView.vue'),
       meta: {
@@ -533,15 +549,16 @@ export const router = createRouter({
         dexNames: true,
         // Yours against the opponents: one per matchup (the two, or the four), once each team has one. The speed order:
         // one, whatever its list, once there's one in it.
-        recent: ({ query }) => compareVisit(query),
-        // The Pokémon and their builds, once each team has one (in speed order, once there's one), but for the two
-        // tapped among the matchups and the data shown.
-        setup: (query) => (compareVisit(query) ? stringQuery(query, ['pair', 'meta']) : null),
+        recent: ({ query, params }) => compareVisit(query, params.view),
+        // The Pokémon and their builds, once each team has one (in speed order, once there's one).
+        setup: (query, params) => (compareVisit(query, params.view) ? compareSetup(query, params.view) : null),
         // Its own recently viewed: a visit per matchup, as the home page's.
-        history: (query) => {
-          const visit = compareVisit(query)
-          return visit ? { visit, query: stringQuery(query, ['pair', 'meta']) } : null
+        history: (query, params) => {
+          const visit = compareVisit(query, params.view)
+          return visit ? { visit, query: compareSetup(query, params.view) } : null
         },
+        // Its views' tabs head the page: going from one to another leaves it where it is.
+        keepScroll: true,
         ...inArea('tools', 'speedCompare'),
       },
     },
@@ -668,6 +685,15 @@ router.beforeEach((to) =>
     : undefined,
 )
 
+// The comparison's views are pages of their own, the view in the path: its address while it was in the query
+// (`?mode=order`, `?mode=reverse`), as older links and the setups starred have it, leads there, the query left without it.
+router.beforeEach((to) => {
+  if (to.name !== 'speedCompare' || to.query.mode === undefined) return
+  const { mode, ...query } = to.query
+  const params = to.params.view ? to.params : compareParams(compareMode(mode))
+  return { name: 'speedCompare', params, query, hash: to.hash, replace: true }
+})
+
 // What a page loads first, started as navigation does.
 router.beforeEach((to) => {
   to.meta.prefetch?.(to)
@@ -686,7 +712,7 @@ router.afterEach((to, _from, failure) => {
 router.afterEach((to, from, failure) => {
   if (failure) return
   if (from.name !== to.name && from.meta.history) endVisit(String(from.name))
-  const kept = to.meta.history?.(to.query)
+  const kept = to.meta.history?.(to.query, to.params)
   if (!to.meta.history) return
   const page = String(to.name)
   if (from.name !== to.name) endVisit(page)

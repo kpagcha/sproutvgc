@@ -17,7 +17,7 @@ import PageChip, { shownVisit } from '@/components/PageChip.vue'
 const route = useRoute()
 const page = computed(() => String(route.name))
 const current = computed((): PageVisit | null => {
-  const query = route.meta.history?.(route.query)?.query
+  const query = route.meta.history?.(route.query, route.params)?.query
   return query ? { page: page.value, path: route.path, query } : null
 })
 const { items: all, clear } = usePageHistory(page, current)

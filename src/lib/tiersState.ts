@@ -65,7 +65,19 @@ export const lastTiersQuery = remembered(
   (v) => (v === 'all' ? {} : Object.fromEntries(new URLSearchParams(v))),
   'sproutvgc.speedTiers.view',
 )
-/** The speed comparison as last left. Its view, kept before: 'order', or nothing for yours against opponents. */
+// The speed comparison's views, each a page of its own under it: the last part of its path (`/tools/compare-speeds`,
+// `…/order`, `…/moved-first`), none for yours against opponents. What's saved of the page (as last left, a setup
+// starred) says which as `mode`, as its URL did while the view was in its query.
+export const COMPARE_VIEWS = { vs: '', order: 'order', reverse: 'moved-first' } as const
+export type CompareMode = keyof typeof COMPARE_VIEWS
+/** The view a path's last part is of (the route's `view`), or one saved as `mode`. */
+export const compareMode = (view: unknown): CompareMode =>
+  view === 'order' ? 'order' : view === 'moved-first' || view === 'reverse' ? 'reverse' : 'vs'
+/** A view's page: the route's params for it. */
+export const compareParams = (mode: CompareMode) => (mode === 'vs' ? {} : { view: COMPARE_VIEWS[mode] })
+
+/** The speed comparison as last left, the view it was left at as `mode` (none for yours against opponents). Its view,
+ * kept before: 'order', or nothing. */
 export const lastCompareQuery = remembered(
   'sproutvgc.compare.last',
   (v): LocationQuery => (v === 'order' ? { mode: 'order' } : {}),
