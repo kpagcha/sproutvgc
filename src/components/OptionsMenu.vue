@@ -24,10 +24,20 @@ const pop = useTemplateRef<HTMLElement>('pop')
 // No taller than the screen leaves under it: a long one scrolls within itself rather than the page.
 const maxHeight = ref<string | undefined>()
 const GAP = 12
+// Nor past the screen's sides: from a button mid-line (a phone's), slid back in by what it'd stick out.
+const shift = ref(0)
+const SIDE = 8
 async function fitPop() {
+  shift.value = 0
   await nextTick()
   const el = pop.value
-  if (el) maxHeight.value = `${Math.max(160, window.innerHeight - el.getBoundingClientRect().top - GAP)}px`
+  if (!el) return
+  const box = el.getBoundingClientRect()
+  maxHeight.value = `${Math.max(160, window.innerHeight - box.top - GAP)}px`
+  const width = document.documentElement.clientWidth
+  let dx = Math.min(0, width - SIDE - box.right)
+  if (box.left + dx < SIDE) dx = SIDE - box.left
+  shift.value = Math.round(dx)
 }
 function onPointerDown(e: PointerEvent) {
   if (!root.value?.contains(e.target as Node)) open.value = false
@@ -65,7 +75,13 @@ onBeforeUnmount(() => (open.value = false))
       <component :is="icon ?? Settings2" :size="label ? 14 : 16" aria-hidden="true" />
       <span v-if="label">{{ label }}</span>
     </button>
-    <div v-if="open" ref="pop" class="pop panel" :class="{ left: align === 'left' }" :style="{ maxHeight }">
+    <div
+      v-if="open"
+      ref="pop"
+      class="pop panel"
+      :class="{ left: align === 'left' }"
+      :style="{ maxHeight, transform: shift ? `translateX(${shift}px)` : undefined }"
+    >
       <slot :close="() => (open = false)" />
     </div>
   </div>
@@ -101,6 +117,7 @@ onBeforeUnmount(() => (open.value = false))
   flex-direction: column;
   gap: 6px;
   width: max-content;
+  max-width: calc(100vw - 16px);
   overflow-y: auto;
   overscroll-behavior: contain;
   font-weight: normal;
