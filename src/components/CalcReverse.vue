@@ -158,10 +158,6 @@ function use(r: ReverseRow) {
       >
         {{ t('calc.threats.sheet') }}
       </button>
-      <span class="muted at"
-        >{{ sheet ? t('calc.reverse.atSheet') : t('calc.reverse.atSets') }}
-        {{ theirs.member.item ? t('calc.reverse.itemSet') : t('calc.reverse.itemVaries') }}</span
-      >
     </div>
     <p v-if="!theirId || !yourId" class="muted intro">{{ t('calc.reverse.pickBoth') }}</p>
     <p v-else-if="!obs.length" class="muted intro">{{ t('calc.reverse.hint') }}</p>
@@ -288,9 +284,6 @@ function use(r: ReverseRow) {
   flex-wrap: wrap;
   align-items: center;
   gap: 6px 12px;
-}
-.at {
-  font-size: 0.85em;
 }
 .row-foot {
   display: flex;
