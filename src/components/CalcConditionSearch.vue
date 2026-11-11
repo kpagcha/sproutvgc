@@ -318,18 +318,26 @@ function pick(r: Row | undefined) {
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
-/* Where it applies, at the row's end; a side's underlined in its color. */
+/* Where it applies, at the row's end; a side's led by a small square of its color, as its band's. */
 .scope {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
   margin-left: auto;
   padding-left: 12px;
   font-size: 0.85em;
   color: var(--muted);
 }
-.scope.side-a {
-  border-bottom: 2px solid var(--accent);
+.scope.side-a::before,
+.scope.side-b::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
 }
-.scope.side-b {
-  border-bottom: 2px solid var(--opponent);
+.scope.side-b::before {
+  background: var(--opponent);
 }
 .none {
   margin: 0;
