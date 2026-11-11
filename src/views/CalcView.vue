@@ -1,7 +1,15 @@
 <script setup lang="ts">
 import { computed, nextTick, shallowRef, useTemplateRef, watch } from 'vue'
+import { AnimatePresence, motion } from 'motion-v'
 import { useRoute, useRouter } from 'vue-router'
-import { createReusableTemplate, useElementSize, useEventListener, useMediaQuery, watchDebounced } from '@vueuse/core'
+import {
+  createReusableTemplate,
+  useElementSize,
+  useEventListener,
+  useMediaQuery,
+  useResizeObserver,
+  watchDebounced,
+} from '@vueuse/core'
 import {
   ArrowLeftRight,
   Check,
@@ -50,7 +58,8 @@ import {
 } from '@/lib/damage'
 import { membersPaste, parsePaste } from '@/lib/pokepaste'
 import { copy } from '@/lib/clipboard'
-import { underBand } from '@/lib/scroll'
+import { reveal as revealEl, underBand } from '@/lib/scroll'
+import { FADE, PRESS } from '@/lib/motion'
 import { commonForme, commonMember } from '@/lib/commonSet'
 import { emptyMember, nextField, pickedAs, setsAs, stoneMega, type Field, type Member } from '@/lib/team'
 import { conditionName, fieldOf, terrainOf, weatherOf } from '@/components/calcConditions'
@@ -58,6 +67,7 @@ import CalcConditions from '@/components/CalcConditions.vue'
 import CalcMeta from '@/components/CalcMeta.vue'
 import CalcReverse from '@/components/CalcReverse.vue'
 import CalcHits, { type HitDraft } from '@/components/CalcHits.vue'
+import CalcMovesSeen from '@/components/CalcMovesSeen.vue'
 import FolderTabs from '@/components/FolderTabs.vue'
 import CalcThreats from '@/components/CalcThreats.vue'
 import CalcSide from '@/components/CalcSide.vue'
@@ -561,6 +571,63 @@ const labels = computed(() => ({ a: t('calc.yours'), b: t('calc.theirs') }))
 const hasAny = computed(() => !!(battlerOf(sides.value.a) || battlerOf(sides.value.b)))
 const hasBoth = computed(() => !!(battlerOf(sides.value.a) && battlerOf(sides.value.b)))
 
+// The inverse tab's What you saw, once both are picked: on wide screens a drawer over the page, opening on its own as
+// the second one's in (once its picker has closed), the panel still on the page: first the opponent's moves seen
+// (`CalcMovesSeen`; skipped when its set has them all), then the hits, closed by Done. On any screen, a button floating
+// at the screen's foot leading to the panel while it's below, over the sides' bands stuck there on phones.
+const hitsDrawer = shallowRef(false)
+const hitsStep = shallowRef<'moves' | 'hits'>('moves')
+// It goes on from the picker it follows: anchored on the card of the side last picked for, so it comes from the same
+// edge, that card left clear.
+const lastPicked = shallowRef<SideKey>('b')
+watch(picking, (p) => p && (lastPicked.value = p.side))
+const hitsAnchor = computed(() => sideEls.value[lastPicked.value]?.card ?? null)
+const hitsShown = computed(() => props.inverse && hitsDrawer.value && hasBoth.value)
+let hitsPending = false
+function openHitsSoon() {
+  if (!hitsPending || picking.value) return
+  hitsPending = false
+  if (!wide.value) return
+  hitsStep.value = sides.value.b.member.moves.every(Boolean) ? 'hits' : 'moves'
+  hitsDrawer.value = true
+}
+/** Done: the drawer closed, What fits brought into view. */
+function hitsDone() {
+  hitsDrawer.value = false
+  void nextTick(() => revealEl(document.getElementById('calc-reverse')))
+}
+function toStep(step: 'moves' | 'hits') {
+  hitsStep.value = step
+  drawer.value?.el?.scrollTo({ top: 0 })
+}
+watch(hasBoth, (now, before) => {
+  hitsPending = !!(props.inverse && now && !before)
+  if (!now) hitsDrawer.value = false
+  openHitsSoon()
+})
+watch(picking, openHitsSoon)
+const hitsBelow = shallowRef(false)
+/** The room the sides' bands stuck to the screen's foot take, for the button to float over them. */
+const bandsInset = shallowRef(0)
+function checkHits() {
+  const el = props.inverse && hasBoth.value ? document.getElementById('calc-hits') : null
+  if (!el) return void (hitsBelow.value = false)
+  const vh = window.innerHeight
+  hitsBelow.value = el.getBoundingClientRect().top > vh * 0.6
+  let top = vh
+  for (const band of document.querySelectorAll('.side-band')) {
+    const r = band.getBoundingClientRect()
+    if (r.bottom >= vh - 2 && r.top < vh) top = Math.min(top, r.top)
+  }
+  bandsInset.value = vh - top
+}
+useEventListener(window, 'scroll', checkHits, { passive: true })
+useEventListener(window, 'resize', checkHits)
+// What's over it changing size (a panel folded or opened, a hit added) moves it without a scroll.
+useResizeObserver(document.body, checkHits)
+watch([hasBoth, wide], () => nextTick(checkHits))
+const toHits = () => revealEl(document.getElementById('calc-hits'))
+
 /** A meta row tapped: the opponent, the page scrolled back to it. */
 // The opponents a row of the meta's list took the place of, the latest last (up to `PREVIOUS_MAX`): the way back to
 // each in turn, a button before the opponent's Load. Swapping or resetting the sides forgets them.
@@ -845,14 +912,35 @@ function face(f: Fighter) {
       </div>
     </DefineCommon>
 
+    <!-- The way to the inverse tab's What you saw: a button at the screen's foot leading to it. Outside the page, so the
+         page transition's transform can't move it. -->
+    <Teleport v-if="inverse" to="body">
+      <AnimatePresence>
+        <motion.div
+          v-if="hitsBelow"
+          key="to-hits"
+          class="float-dock"
+          :style="{ bottom: `calc(${bandsInset + 12}px + env(safe-area-inset-bottom))` }"
+          :initial="{ opacity: 0, y: 8 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :exit="{ opacity: 0, y: 8 }"
+          :transition="FADE"
+        >
+          <motion.button type="button" class="btn primary to-hits" :while-press="PRESS" @click="toHits">
+            {{ t('calc.hits.title') }} ↓
+          </motion.button>
+        </motion.div>
+      </AnimatePresence>
+    </Teleport>
+
     <!-- On wide screens, the picker as a drawer over the page, the side's card left clear. -->
     <SideDrawer
       ref="drawer"
-      :open="wide && !!picking"
-      :anchor="drawerAnchor"
-      :label="t('builder.picker')"
+      :open="wide && (!!picking || hitsShown)"
+      :anchor="picking ? drawerAnchor : hitsAnchor"
+      :label="picking ? t('builder.picker') : t('calc.hits.title')"
       defer
-      @close="picking = null"
+      @close="picking ? (picking = null) : (hitsDrawer = false)"
     >
       <TeamPicker
         v-if="picking && pickerMember"
@@ -869,6 +957,37 @@ function face(f: Fighter) {
         @nature="natureAgain"
         ><ReuseCommon
       /></TeamPicker>
+      <!-- The inverse tab's What you saw, going on from the picker in the same drawer once both are picked: the
+           opponent's moves seen, then the hits. -->
+      <template v-else-if="hitsShown">
+        <CalcMovesSeen
+          v-if="hitsStep === 'moves'"
+          :member="sides.b.member"
+          :data
+          @moves="patchMember('b', { moves: $event })"
+          @continue="toStep('hits')"
+          @close="hitsDrawer = false"
+        />
+        <template v-else>
+          <CalcHits
+            v-model:hits="hits"
+            v-model:first="first"
+            :yours="fought.a"
+            :theirs="fought.b"
+            bare
+            @close="hitsDrawer = false"
+          />
+          <!-- Back to its moves, and Done, leading to What fits once there's something to work out: stuck to the drawer's
+             foot. -->
+          <div class="drawer-foot">
+            <button type="button" class="btn quiet" @click="toStep('moves')">{{ t('calc.seen.back') }}</button>
+            <span v-if="observations.length" class="muted done-hint">{{ t('calc.seen.doneHint') }}</span>
+            <button type="button" class="btn primary" :disabled="!observations.length" @click="hitsDone">
+              {{ t('picker.done') }}
+            </button>
+          </div>
+        </template>
+      </template>
     </SideDrawer>
 
     <!-- On phones, the picker over the page. -->
@@ -1454,5 +1573,41 @@ word, as the common set's offer has. */
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+/* The way to What you saw, floating at the foot of the screen as the matchups page's to its results; over the
+   sides' bands when they're stuck there (its `bottom` set inline). */
+.float-dock {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  z-index: 45;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+.to-hits {
+  min-height: 40px;
+  padding: 6px 16px;
+  font-weight: bold;
+  pointer-events: auto;
+}
+/* The hits drawer's foot, stuck to its bottom across its padding: back to the opponent's moves, and Done. */
+.drawer-foot {
+  position: sticky;
+  bottom: calc(-1 * var(--panel-pad));
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 16px calc(-1 * var(--panel-pad)) calc(-1 * var(--panel-pad));
+  padding: 10px var(--panel-pad);
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+}
+.done-hint {
+  flex: 1;
+  font-size: 0.875em;
+  text-align: right;
 }
 </style>

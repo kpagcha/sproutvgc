@@ -18,7 +18,8 @@ import { useOpenState } from '@/composables/useOpenState'
 // HP; or a knockout, survived, or a knockout on the second hit) and the defender's HP before it (full unless said: the
 // opponent's in percent, yours' in HP); the same move as often as it was seen. Then which of the two moved first, with
 // moves of the same priority. A row with no result yet counts for nothing (and isn't kept in the URL). What fits it
-// (`CalcReverse`, the default slot) is its readout, across its foot. Adding a hit and which moved first lead, over the hits; before both are picked, a line on what it's for.
+// With `bare`, it's the drawer's (`SideDrawer`, wide screens, opening once both are picked): its hits alone, its
+// heading plain with a way to close it, no panel of its own. Else (`CalcReverse`, the default slot) is its readout, across its foot. Adding a hit and which moved first lead, over the hits; before both are picked, a line on what it's for.
 export interface HitDraft {
   by: 'a' | 'b'
   move: MoveId | null
@@ -26,7 +27,8 @@ export interface HitDraft {
   before?: number
   opts?: HitOptions
 }
-const props = defineProps<{ yours: Fighter; theirs: Fighter }>()
+const props = defineProps<{ yours: Fighter; theirs: Fighter; bare?: boolean }>()
+const emit = defineEmits<{ close: [] }>()
 const hits = defineModel<HitDraft[]>('hits', { required: true })
 const first = defineModel<'a' | 'b' | null>('first', { default: null })
 
@@ -122,8 +124,14 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
 </script>
 
 <template>
-  <section class="panel banded hits">
-    <h2 class="band">{{ t('calc.hits.title') }}</h2>
+  <section class="hits" :class="bare ? 'bare' : 'panel banded'">
+    <div v-if="bare" class="bare-head">
+      <h2>{{ t('calc.hits.title') }}</h2>
+      <button type="button" class="close" :aria-label="t('calc.hits.close')" @click="emit('close')">
+        <X :size="20" aria-hidden="true" />
+      </button>
+    </div>
+    <h2 v-else class="band">{{ t('calc.hits.title') }}</h2>
     <p v-if="!both" class="muted intro">{{ t('calc.reverse.pickBoth') }}</p>
     <details v-else class="intro how-to" :open="howToOpen" @toggle="onHowTo">
       <summary class="muted">{{ t('calc.hits.howTo') }}</summary>
@@ -284,7 +292,7 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
         </button>
       </li>
     </ol>
-    <slot v-if="both" />
+    <slot v-if="both && !bare" />
   </section>
 </template>
 
@@ -317,6 +325,27 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
 }
 .hits {
   margin: 0;
+}
+.bare-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.bare-head h2 {
+  margin: 0;
+}
+.close {
+  display: inline-flex;
+  padding: 4px;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.close:hover {
+  color: var(--text);
 }
 .intro {
   margin: 0 0 12px;
