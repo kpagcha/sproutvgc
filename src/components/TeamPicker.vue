@@ -443,9 +443,14 @@ const termRows = useId()
       />
       <div :id="termRows" class="term-rows"></div>
       <ul class="rows" :class="{ previewing: preview }">
-        <li v-if="member.item">
-          <button type="button" class="row" @click="emit('pick', '')">
-            <span class="row-name muted">{{ t('builder.noItem') }}</span>
+        <!-- Always there: no item is a pick of its own, going on to the next part, as any item does. -->
+        <li>
+          <!-- As an item's row: a blank where its icon goes, its name, what it means. -->
+          <button type="button" class="row stacked" @click="emit('pick', '')">
+            <span class="no-icon" aria-hidden="true"></span>
+            <span class="row-name">{{ t('builder.noItem') }}</span>
+            <span class="share"></span>
+            <span class="desc muted">{{ t('builder.noItemDesc') }}</span>
           </button>
         </li>
         <li
@@ -560,6 +565,11 @@ const termRows = useId()
 /* Ability and nature rows have no icon: their name starts the row. */
 .rows > li > .row > .row-name:first-child {
   grid-column: 1 / 3;
+}
+/* No item's blank, an item icon's size. */
+.no-icon {
+  width: 24px;
+  height: 24px;
 }
 .row-name {
   font-weight: bold;

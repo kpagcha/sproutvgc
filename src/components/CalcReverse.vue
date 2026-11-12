@@ -9,6 +9,7 @@ import { STATS } from '@/data/pokemon'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { battlerOf, type Battlefield, type Fighter } from '@/lib/damage'
+import { goalDamage, THRESHOLDS, type GoalBuild, type GoalResult } from '@/lib/damageGoal'
 import {
   reverseDamage,
   type Observation,
@@ -30,8 +31,12 @@ import PokemonIcon from '@/components/PokemonIcon'
 // worked out of it is the opponent's card's Work out (`work`: its nature, item and points, each given or not; its
 // points given, a row per nature it could have at them). A build used (`use`) sets the opponent to what was worked out
 // of it, with the item likeliest to go with it. Worked out a slice at a time once the sides have
-// settled, what it showed kept, faded, until the new one's in. It's the readout of "What you saw" (in its slot, both
-// picked): a sunken tray across that panel's foot, the answer under what it's worked out from.
+// settled, what it showed kept, faded, until the new one's in. It's the readout of Hits (in its slot, both picked): a
+// sunken tray across that panel's foot, the answer under what it's worked out from. With something of yours worked out
+// too (`workYours`, `damageGoal.ts`), two answers side by side: yours, for each of your items the fewest points getting
+// what the hits say against half, nine in ten and all of the opponent's sets (or rolls, it being one set), and the most
+// it gets, each a build to use (`useYours`); and, something of it worked out, the opponent's common builds against your
+// sets.
 const props = defineProps<{
   yours: Fighter
   theirs: Fighter
@@ -39,13 +44,19 @@ const props = defineProps<{
   data: MetaData | null
   obs: readonly Observation[]
   work: OpponentUnknowns
+  /** What of yours is worked out; null with nothing. */
+  workYours: OpponentUnknowns | null
 }>()
-const emit = defineEmits<{ use: [build: { nature: string | null; points: Points; item?: ItemId | null }] }>()
+const emit = defineEmits<{
+  use: [build: { nature: string | null; points: Points; item?: ItemId | null }]
+  useYours: [build: { nature: string | null; points: Points; item: ItemId | null }]
+}>()
 
 const theirId = computed(() => battlerOf(props.theirs))
 const yourId = computed(() => battlerOf(props.yours))
 
 const result = shallowRef<ReverseResult | null>(null)
+const goal = shallowRef<GoalResult | null>(null)
 const progress = shallowRef<number | null>(null)
 /** Past `SLOW_MS`, its progress shown and what's there faded, so a quick one swaps in one step. */
 const slow = shallowRef(false)
@@ -62,17 +73,32 @@ function start() {
   const id = theirId.value
   if (!id || !yourId.value || !props.obs.length) {
     result.value = null
+    goal.value = null
     progress.value = null
     return
   }
-  const { total, steps } = reverseDamage({
-    yours: props.yours,
-    theirs: props.theirs,
-    field: props.field,
-    entry: props.data?.[setsAs(props.theirs.member) ?? id] ?? undefined,
-    work: props.work,
-    obs: props.obs,
-  })
+  const entryTheirs = props.data?.[setsAs(props.theirs.member) ?? id] ?? undefined
+  const job = props.workYours
+    ? goalDamage({
+        yours: props.yours,
+        theirs: props.theirs,
+        field: props.field,
+        entryYours: props.data?.[setsAs(props.yours.member) ?? yourId.value] ?? undefined,
+        entryTheirs,
+        workYours: props.workYours,
+        workTheirs: props.work,
+        obs: props.obs,
+      })
+    : reverseDamage({
+        yours: props.yours,
+        theirs: props.theirs,
+        field: props.field,
+        entry: entryTheirs,
+        work: props.work,
+        obs: props.obs,
+      })
+  const { total } = job
+  const steps = job.steps as Generator<unknown, ReverseResult | GoalResult | null>
   progress.value = 0
   clearTimeout(slowTimer)
   slowTimer = window.setTimeout(() => (slow.value = true), SLOW_MS)
@@ -81,7 +107,9 @@ function start() {
     total,
     (p) => (progress.value = p),
     (r) => {
-      result.value = r
+      const g = r && 'ours' in r ? r : null
+      goal.value = g
+      result.value = g ? g.theirs : (r as ReverseResult | null)
       progress.value = null
       clearTimeout(slowTimer)
       slow.value = false
@@ -89,17 +117,22 @@ function start() {
     },
   )
 }
-watch(() => [props.work, props.obs, props.data] as const, start, { immediate: true })
+watch(() => [props.work, props.workYours, props.obs, props.data] as const, start, { immediate: true })
 watchDebounced(() => [props.yours, props.theirs, props.field] as const, start, { debounce: 150 })
 
-/** What's being answered, in a line: the parts of the opponent's set worked out, or none (whether what's set fits). */
-const asks = computed(() => {
+/** What's being answered, in a line: the parts of each set worked out, or none (whether what's set fits). */
+const partsOf = (w: OpponentUnknowns | null) => {
   const parts = (['nature', 'item', 'points'] as const)
-    .filter((k) => props.work[k])
+    .filter((k) => w?.[k])
     .map((k) => t(k === 'nature' ? 'builder.nature' : k === 'item' ? 'builder.item' : 'builder.points').toLowerCase())
-  return parts.length
-    ? t('calc.reverse.asks', { parts: new Intl.ListFormat(locale.value).format(parts) })
-    : t('calc.reverse.asksNone')
+  return parts.length ? new Intl.ListFormat(locale.value).format(parts) : null
+}
+const asks = computed(() => {
+  const mine = partsOf(props.workYours)
+  const theirs = partsOf(props.work)
+  if (mine && theirs) return t('calc.reverse.asksBoth', { mine, theirs })
+  if (mine) return t('calc.reverse.asksYours', { parts: mine })
+  return theirs ? t('calc.reverse.asks', { parts: theirs }) : t('calc.reverse.asksNone')
 })
 const statName = (s: number) => t(`stat.${STATS[s]!}`)
 /** A build in Showdown's short way, its points in the stats in play, `+` or `−` after those its nature raises or
@@ -135,6 +168,15 @@ const rangeText = (r: StatRange) => {
   const e = r.effects.length === 1 ? r.effects[0]! : 'neutral'
   return props.work.nature && r.stat && e !== 'neutral' ? `${pts}, ${t(`calc.reverse.nature.${e}`)}` : pts
 }
+/** Your build in short, as the opponent's spreads are: "28+ Atk". */
+const buildLabel = (b: GoalBuild, stats: readonly number[]) =>
+  spreadLabel({ nature: b.nature, points: b.points, share: null, fits: [] }, stats)
+/** A threshold's heading: of its sets, or of its rolls, the opponent being one set. */
+const thresholdLabel = (th: (typeof THRESHOLDS)[number]) => {
+  const pct = th === 0.5 ? '50' : th === 0.9 ? '90' : '100'
+  return t(goal.value?.againstSets ? (`calc.goal.sets.${pct}` as const) : (`calc.goal.rolls.${pct}` as const))
+}
+const useYours = (b: GoalBuild) => emit('useYours', { nature: b.nature, points: b.points, item: b.item })
 const itemName = (id: ItemId | null) => (id ? refName(item(id)) : t('builder.noItem'))
 const fitTip = (f: number) => t('calc.reverse.fitTip', { pct: percent(f) })
 /** A build used: its nature and points, and its item worked out, the item likeliest to go with it (its fit by the
@@ -168,100 +210,165 @@ function use(r: ReverseRow) {
     </div>
     <p class="muted small asks">{{ asks }}</p>
     <p v-if="!obs.length" class="muted intro">{{ t('calc.reverse.hint') }}</p>
-    <template v-if="theirId && yourId && obs.length && result">
-      <div class="body" :class="{ stale: slow }">
-        <p v-if="!result.possible" class="warn" role="status">{{ t('calc.reverse.impossible') }}</p>
-        <template v-else>
-          <!-- What its points can be, where the hits bind them (none bound, the table says which fit). -->
-          <p v-if="shownRanges.length" class="lines" role="status">
-            <PokemonIcon :id="theirId" class="who" />
-            <span v-for="r in shownRanges" :key="r.stat" class="line">
-              <b>{{ statName(r.stat) }}</b> {{ rangeText(r) }}
-            </span>
-          </p>
-          <p v-if="result.chance !== null" class="muted small">
-            {{
-              result.chance
-                ? t(props.work.nature ? 'calc.reverse.chance' : 'calc.reverse.chanceSheet', {
-                    pct: percent(result.chance),
-                  })
-                : t('calc.reverse.noneRun')
-            }}
-          </p>
-        </template>
-
-        <!-- Its common spreads down, its items across (merged where alike), each pair fitting or not. -->
-        <div class="table-wrap">
-          <table class="builds">
-            <thead>
-              <tr>
-                <th scope="col" class="corner muted">
-                  {{ t('calc.reverse.spread') }}
-                  <span v-for="m in MARKS" :key="m" class="spread sizer" aria-hidden="true">{{
-                    widestLabel(result.stats, m)
-                  }}</span>
-                </th>
-                <th v-for="(c, ci) in result.columns" :key="ci" scope="col" class="col">
-                  <span v-if="!result.itemsVary || result.columns.length === 1" class="muted">{{
-                    t('calc.reverse.fits')
-                  }}</span>
-                  <template v-else>
-                    <!-- Its items' icons; three or more alike, its most common's and how many more, every one named on
-                         hover. -->
+    <template v-if="theirId && yourId && obs.length && (result || goal)">
+      <div class="body answers" :class="{ stale: slow, two: goal && result }">
+        <!-- Yours: for each of your items, the fewest points getting what the hits say against half, nine in ten and all
+             of the opponent, and the most it gets; each a build to use. -->
+        <div v-if="goal" class="answer yours">
+          <h4 class="answer-head"><PokemonIcon :id="yourId!" />{{ t('calc.goal.yoursHead') }}</h4>
+          <p v-if="goal.tooMany" class="warn" role="status">{{ t('calc.goal.tooMany') }}</p>
+          <p v-else-if="!goal.rows.some((r) => r.best)" class="warn" role="status">{{ t('calc.goal.never') }}</p>
+          <div v-else class="table-wrap">
+            <table class="builds goal">
+              <thead>
+                <tr>
+                  <th scope="col" class="corner muted">{{ t(goal.itemsVary ? 'calc.goal.item' : 'calc.goal.its') }}</th>
+                  <th v-for="th in THRESHOLDS" :key="th" scope="col" class="col muted">{{ thresholdLabel(th) }}</th>
+                  <th scope="col" class="col muted">{{ t('calc.goal.most') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(r, ri) in goal.rows" :key="ri">
+                  <th scope="row">
                     <span class="items">
-                      <template v-for="it in c.items.length > 2 ? c.items.slice(0, 1) : c.items" :key="it ?? '-'">
+                      <template v-for="it in r.items.slice(0, 1)" :key="it ?? '-'">
                         <span v-if="it" v-tip="itemName(it)" class="item" role="img" :aria-label="itemName(it)"
                           ><ItemIcon :id="it"
                         /></span>
                         <span v-else class="muted no-item">{{ itemName(null) }}</span>
                       </template>
                       <span
-                        v-if="c.items.length > 2"
-                        v-tip="c.items.map(itemName).join(', ')"
+                        v-if="r.items.length > 1"
+                        v-tip="r.items.map(itemName).join(', ')"
                         class="more-items"
-                        :aria-label="c.items.map(itemName).join(', ')"
-                        >+{{ c.items.length - 1 }}</span
+                        :aria-label="r.items.map(itemName).join(', ')"
+                        >+{{ r.items.length - 1 }}</span
                       >
                     </span>
-                    <span v-if="c.share" v-tip="t('calc.reverse.itemTip')" class="muted share">{{
-                      percent(c.share)
+                    <span v-if="r.share" v-tip="t('calc.goal.itemTip')" class="muted share">{{
+                      percent(r.share)
                     }}</span>
-                  </template>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(r, ri) in result.rows" :key="ri">
-                <th scope="row">
-                  <span class="spread">{{ spreadLabel(r, result.stats) }}</span>
-                  <!-- Its share, and the way to set the opponent to it. -->
-                  <span class="row-foot">
-                    <span v-if="r.share" v-tip="t('calc.reverse.shareTip')" class="muted">{{ percent(r.share) }}</span>
-                    <span v-else-if="r.nearest" class="muted">{{ t('calc.reverse.nearest') }}</span>
-                    <span v-else class="muted">{{ t('calc.reverse.ownSet') }}</span>
-                    <button v-tip="t('calc.reverse.useTip')" type="button" class="btn small use" @click="use(r)">
-                      {{ t('calc.reverse.use') }}
+                  </th>
+                  <td v-for="(c, ci) in [...r.cells, r.best]" :key="ci" class="goal-cell">
+                    <button
+                      v-if="c"
+                      v-tip="t('calc.goal.useTip', { pct: percent(c.coverage) })"
+                      type="button"
+                      class="btn small pick"
+                      @click="useYours(c)"
+                    >
+                      <span class="spread">{{ buildLabel(c, goal.ours) }}</span>
+                      <span v-if="ci === r.cells.length" class="muted share">{{ percent(c.coverage) }}</span>
                     </button>
-                  </span>
-                </th>
-                <td
-                  v-for="(f, ci) in r.fits"
-                  :key="ci"
-                  v-tip="f > 0 ? fitTip(f) : t('reverse.fit.no')"
-                  class="cell"
-                  :class="f > 0 ? 'fits' : 'no'"
-                >
-                  <template v-if="f > 0">
-                    <Check :size="16" :aria-label="t('reverse.fit.fits')" />
-                    <span v-if="f < 1" class="part">{{ percent(f) }}</span>
-                  </template>
-                  <X v-else :size="16" :aria-label="t('reverse.fit.no')" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                    <span v-else class="muted">–</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p v-if="!goal.tooMany" class="muted small">
+            {{ t(goal.againstSets ? 'calc.goal.noteSets' : 'calc.goal.noteSet') }}
+          </p>
         </div>
-        <p class="muted small">{{ t('calc.reverse.note') }}</p>
+        <div v-if="result" class="answer theirs">
+          <h4 v-if="goal" class="answer-head"><PokemonIcon :id="theirId!" />{{ t('calc.goal.theirsHead') }}</h4>
+          <p v-if="!result.possible" class="warn" role="status">{{ t('calc.reverse.impossible') }}</p>
+          <template v-else>
+            <!-- What its points can be, where the hits bind them (none bound, the table says which fit). -->
+            <p v-if="shownRanges.length" class="lines" role="status">
+              <PokemonIcon :id="theirId" class="who" />
+              <span v-for="r in shownRanges" :key="r.stat" class="line">
+                <b>{{ statName(r.stat) }}</b> {{ rangeText(r) }}
+              </span>
+            </p>
+            <p v-if="result.chance !== null" class="muted small">
+              {{
+                result.chance
+                  ? t(props.work.nature ? 'calc.reverse.chance' : 'calc.reverse.chanceSheet', {
+                      pct: percent(result.chance),
+                    })
+                  : t('calc.reverse.noneRun')
+              }}
+            </p>
+          </template>
+
+          <!-- Its common spreads down, its items across (merged where alike), each pair fitting or not. -->
+          <div class="table-wrap">
+            <table class="builds">
+              <thead>
+                <tr>
+                  <th scope="col" class="corner muted">
+                    {{ t('calc.reverse.spread') }}
+                    <span v-for="m in MARKS" :key="m" class="spread sizer" aria-hidden="true">{{
+                      widestLabel(result.stats, m)
+                    }}</span>
+                  </th>
+                  <th v-for="(c, ci) in result.columns" :key="ci" scope="col" class="col">
+                    <span v-if="!result.itemsVary || result.columns.length === 1" class="muted">{{
+                      t('calc.reverse.fits')
+                    }}</span>
+                    <template v-else>
+                      <!-- Its items' icons; three or more alike, its most common's and how many more, every one named on
+                         hover. -->
+                      <span class="items">
+                        <template v-for="it in c.items.length > 2 ? c.items.slice(0, 1) : c.items" :key="it ?? '-'">
+                          <span v-if="it" v-tip="itemName(it)" class="item" role="img" :aria-label="itemName(it)"
+                            ><ItemIcon :id="it"
+                          /></span>
+                          <span v-else class="muted no-item">{{ itemName(null) }}</span>
+                        </template>
+                        <span
+                          v-if="c.items.length > 2"
+                          v-tip="c.items.map(itemName).join(', ')"
+                          class="more-items"
+                          :aria-label="c.items.map(itemName).join(', ')"
+                          >+{{ c.items.length - 1 }}</span
+                        >
+                      </span>
+                      <span v-if="c.share" v-tip="t('calc.reverse.itemTip')" class="muted share">{{
+                        percent(c.share)
+                      }}</span>
+                    </template>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(r, ri) in result.rows" :key="ri">
+                  <th scope="row">
+                    <span class="spread">{{ spreadLabel(r, result.stats) }}</span>
+                    <!-- Its share, and the way to set the opponent to it. -->
+                    <span class="row-foot">
+                      <span v-if="r.share" v-tip="t('calc.reverse.shareTip')" class="muted">{{
+                        percent(r.share)
+                      }}</span>
+                      <span v-else-if="r.nearest" class="muted">{{ t('calc.reverse.nearest') }}</span>
+                      <span v-else class="muted">{{ t('calc.reverse.ownSet') }}</span>
+                      <button v-tip="t('calc.reverse.useTip')" type="button" class="btn small use" @click="use(r)">
+                        {{ t('calc.reverse.use') }}
+                      </button>
+                    </span>
+                  </th>
+                  <td
+                    v-for="(f, ci) in r.fits"
+                    :key="ci"
+                    v-tip="
+                      f > 0 ? (goal ? t('calc.goal.theirTip', { pct: percent(f) }) : fitTip(f)) : t('reverse.fit.no')
+                    "
+                    class="cell"
+                    :class="f > 0 ? 'fits' : 'no'"
+                  >
+                    <template v-if="f > 0">
+                      <Check :size="16" :aria-label="t('reverse.fit.fits')" />
+                      <span v-if="f < 1" class="part">{{ percent(f) }}</span>
+                    </template>
+                    <X v-else :size="16" :aria-label="t('reverse.fit.no')" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p v-if="!goal" class="muted small">{{ t('calc.reverse.note') }}</p>
+        </div>
       </div>
     </template>
     <p v-else-if="theirId && yourId && obs.length" class="muted intro">{{ t('calc.reverse.working') }}</p>
@@ -345,8 +452,50 @@ function use(r: ReverseRow) {
   gap: 10px;
   margin-top: 12px;
 }
-.body > p {
+.body > p,
+.answer > p {
   margin: 0;
+}
+/* Two answers, yours and the opponent's, side by side where there's room, each headed by whose it is. */
+.answers.two {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.answer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding-left: 8px;
+  border-left: 4px solid var(--opponent);
+}
+.answer.yours {
+  border-left-color: var(--accent);
+}
+.answer:only-child {
+  padding-left: 0;
+  border-left: 0;
+}
+.answer-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  font-size: 0.95em;
+}
+.goal-cell {
+  text-align: center;
+  vertical-align: middle;
+}
+.pick {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+  padding: 2px 8px;
+  white-space: nowrap;
 }
 .small {
   font-size: 0.85em;

@@ -251,6 +251,8 @@ export interface CalcQuery {
   sheet?: string
   /** What the inverse calc works out of the opponent: `nat`, `item`, `pts`, comma-separated, or `none`. */
   work?: string
+  /** What it works out of yours, the same way; nothing unless said. */
+  awork?: string
   /** The inverse calc's hits seen (`encodeHits`). */
   h?: string
   /** Read backwards, which was seen moving first: `a` or `b`. */
@@ -277,7 +279,8 @@ export function saveLast(q: CalcQuery) {
       now.f === q.f &&
       now.h === q.h &&
       now.first === q.first &&
-      now.work === q.work
+      now.work === q.work &&
+      now.awork === q.awork
     )
       return
     localStorage.setItem(KEY, JSON.stringify({ at: Date.now(), q }))

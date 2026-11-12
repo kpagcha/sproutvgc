@@ -57,9 +57,9 @@ export interface SpeedSeen {
 }
 export type Observation = HitSeen | SpeedSeen
 
-const POINT_VALUES = [...Array(MAX_POINTS + 1).keys()]
+export const POINT_VALUES = [...Array(MAX_POINTS + 1).keys()]
 /** A nature changing no stat, for one given as none. */
-const NEUTRAL = 'serious'
+export const NEUTRAL = 'serious'
 const BREAKERS = new Set(['moldbreaker', 'teravolt', 'turboblaze'])
 
 /** What the defender has that the calc's rolls don't show: Focus Sash or Sturdy holding it at 1 HP from full (`saved`),
@@ -144,7 +144,7 @@ const ON_USER_HP = new Set(['eruption', 'waterspout', 'dragonenergy', 'flail', '
 
 /** The opponent's stats a hit on it hangs on (`calc`), and those that what it was seen to do hangs on (`used`: its HP
  * too, which what's left is of). */
-function takenStats(move: MoveId, att: Fighter, field: Battlefield): { calc: number[]; used: number[] } {
+export function takenStats(move: MoveId, att: Fighter, field: Battlefield): { calc: number[]; used: number[] } {
   const m = MOVES[move]
   const calc = new Set<number>()
   if (ON_BOTH.has(move) || field.effects.includes('wonderRoom')) {
@@ -158,28 +158,28 @@ function takenStats(move: MoveId, att: Fighter, field: Battlefield): { calc: num
   return { calc: c, used: [...new Set([0, ...c])].sort() }
 }
 /** The opponent's stats its hit on yours hangs on. */
-function dealtStats(move: MoveId, att: Fighter): number[] {
+export function dealtStats(move: MoveId, att: Fighter): number[] {
   const own = new Set(statsUsed(move, abilityOf(att) === 'analytic'))
   if (ON_USER_HP.has(move)) own.add(0)
   return [...own].sort()
 }
 /** Whether a defender's item can't change a hit on it: what it's for is attacking, or Speed where the order doesn't
  * change the move's power. */
-function takenInert(item: ItemId | null, move: MoveId, calc: readonly number[]): boolean {
+export function takenInert(item: ItemId | null, move: MoveId, calc: readonly number[]): boolean {
   const c = item ? ITEMS[item]?.category : 'utility'
   return c === 'offense' || (c === 'speed' && !calc.includes(5))
 }
 
 /** A share of what it can be, by weight, adding up to 1. */
-type Weighted<T> = { value: T; w: number }[]
-function weighted<T>(list: readonly { value: T; share: number }[]): Weighted<T> {
+export type Weighted<T> = { value: T; w: number }[]
+export function weighted<T>(list: readonly { value: T; share: number }[]): Weighted<T> {
   const kept = list.filter((x) => x.share > 0)
   const total = kept.reduce((s, x) => s + x.share, 0)
   return total ? kept.map((x) => ({ value: x.value, w: x.share / total })) : []
 }
 
 /** The least share of the opponent's sets an item needs to be tried. */
-const ITEM_MIN = 0.03
+export const ITEM_MIN = 0.03
 /** The least share of the opponent's sets a spread needs to be in the table, and the most it takes of them. */
 const TABLE_MIN = 0.03
 const TABLE_MAX = 4

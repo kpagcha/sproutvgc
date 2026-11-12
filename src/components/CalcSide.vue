@@ -67,10 +67,9 @@ const props = defineProps<{
   /** The inverse calc's: its moves by name alone, no damage (what was seen is entered apart), no HP left (each hit
    * seen has its own). */
   inverse?: boolean
-  /** What of its set its card leaves out: on the inverse calc, the opponent's worked out. */
+  /** What of its set its card leaves out: on the inverse calc, what's worked out of it. */
   hide?: readonly ('points' | 'nature' | 'item')[]
-  /** The inverse calc's opponent: what of its set is worked out, a row of toggles under its card (`WorkOutToggles`),
-   * with Team sheet setting them as an open team sheet has it: its points alone. */
+  /** The inverse calc's: what of its set is worked out, a row of toggles under its card (`WorkOutToggles`). */
   work?: OpponentUnknowns
 }>()
 const emit = defineEmits<{
@@ -105,8 +104,6 @@ const workOptions = computed(() => {
     { key: 'points' as const, label: t('builder.points'), on: w.points },
   ]
 })
-/** Whether it's as an open team sheet has it: its points alone worked out. */
-const atSheet = computed(() => !!props.work && !props.work.nature && !props.work.item && props.work.points)
 
 const uid = useId()
 const [DefineFainted, ReuseFainted] = createReusableTemplate()
@@ -258,25 +255,14 @@ function setHpPoints(e: Event) {
       >
         <Plus :size="18" aria-hidden="true" />{{ t(theirs ? 'compare.pickOpponent' : 'compare.pickYours') }}
       </button>
-      <!-- The inverse calc's opponent: what of its set is worked out, and Team sheet setting it as an open one has it. -->
+      <!-- The inverse calc's: what of its set is worked out. -->
       <WorkOutToggles
         v-if="work && fighter.member.pokemon"
         class="work"
         :options="workOptions"
-        :example="t('calc.reverse.workExample')"
+        :example="t(theirs ? 'calc.reverse.workExample' : 'calc.reverse.workExampleYours')"
         @toggle="(k: keyof OpponentUnknowns) => emit('work', { ...work!, [k]: !work![k] })"
-      >
-        <button
-          v-tip="t('calc.reverse.sheetTip')"
-          type="button"
-          class="btn sheet"
-          :class="{ on: atSheet }"
-          :aria-pressed="atSheet"
-          @click="emit('work', { nature: false, item: false, points: true })"
-        >
-          {{ t('calc.threats.sheet') }}
-        </button>
-      </WorkOutToggles>
+      />
     </div>
 
     <!-- Its moves against the other side. -->
@@ -482,12 +468,9 @@ function setHpPoints(e: Event) {
 </template>
 
 <style scoped>
-/* The inverse calc's Work out, under the opponent's card; Team sheet among its toggles, lit when it's as one has it. */
+/* The inverse calc's Work out, under the opponent's card. */
 .work {
   margin-top: 10px;
-}
-.sheet.on {
-  background: var(--sel);
 }
 .side {
   --side: var(--accent);

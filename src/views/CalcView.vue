@@ -207,14 +207,23 @@ function readWork(v: unknown): OpponentUnknowns {
 }
 const workQuery = (w: OpponentUnknowns) =>
   [w.nature && 'nat', w.item && 'item', w.points && 'pts'].filter(Boolean).join(',') || 'none'
-/** What of the opponent's set its card leaves out on the inverse tab: what's worked out (its item not, one it can't be
+/** What of yours the inverse tab works out (`?awork=`, as `?work=`): nothing unless said, yours being known; worked
+ * out, what of it gets what the hits say. */
+const NOTHING: OpponentUnknowns = { nature: false, item: false, points: false }
+const workYours = shallowRef<OpponentUnknowns>(typeof start.awork === 'string' ? readWork(start.awork) : NOTHING)
+const yoursWorked = computed(
+  () => props.inverse && (workYours.value.nature || workYours.value.item || workYours.value.points),
+)
+/** What of a side's set its card leaves out on the inverse tab: what's worked out (its item not, one it can't be
  * without). */
-const hidden = computed(() => {
+const hiddenOf = (k: SideKey) => {
   if (!props.inverse) return []
-  const m = sides.value.b.member
+  const m = sides.value[k].member
+  const w = k === 'a' ? workYours.value : work.value
   const fixed = !!stoneMega(m) || (!!m.pokemon && itemBound(m.pokemon))
-  return (['points', 'nature', 'item'] as const).filter((k) => work.value[k] && !(k === 'item' && fixed))
-})
+  return (['points', 'nature', 'item'] as const).filter((p) => w[p] && !(p === 'item' && fixed))
+}
+const hidden = computed(() => ({ a: hiddenOf('a'), b: hiddenOf('b') }))
 // On phones, the two one under the other, each a band of its side's color with its panel under it, opened or folded
 // apart, so both can be open at once: yours open at first.
 const open = shallowRef<Record<SideKey, boolean>>({ a: true, b: false })
@@ -255,6 +264,13 @@ const query = computed(() => ({
   sheet: sheet.value ? '1' : undefined,
   // The inverse tab's alone; the damage tab keeping what was there.
   work: props.inverse ? workQuery(work.value) : typeof route.query.work === 'string' ? route.query.work : undefined,
+  awork: props.inverse
+    ? yoursWorked.value
+      ? workQuery(workYours.value)
+      : undefined
+    : typeof route.query.awork === 'string'
+      ? route.query.awork
+      : undefined,
   h: encodeHits(seen.value) || undefined,
   first: first.value ?? undefined,
 }))
@@ -263,7 +279,7 @@ watchDebounced(
   (q) => {
     saveLast(q)
     const next = { ...route.query, ...q }
-    for (const k of ['a', 'b', 'f', 'sheet', 'work', 'h', 'first'] as const) if (!q[k]) delete next[k]
+    for (const k of ['a', 'b', 'f', 'sheet', 'work', 'awork', 'h', 'first'] as const) if (!q[k]) delete next[k]
     void router.replace({ query: next })
   },
   { debounce: 250, immediate: true },
@@ -303,8 +319,25 @@ function useBuild(b: { nature: string | null; points: Member['points']; item?: I
   setSide('b', { ...f, member, sets: false, mega: !!stoneMega(member) && f.mega })
   toTab('damage')
 }
-/** The sides as they battle: at every set, at their sets pooled in the meta shown. */
-const fought = computed(() => ({ a: atSets(sides.value.a, data.value), b: atSets(sides.value.b, data.value) }))
+/** A build of yours from What fits used: yours set to what was worked out of it, the damage tab shown with it. */
+function useYours(b: { nature: string | null; points: Member['points']; item: ItemId | null }) {
+  const f = sides.value.a
+  const w = workYours.value
+  const member = {
+    ...f.member,
+    ...(w.points && { points: [...b.points] as Member['points'] }),
+    ...(w.nature && { nature: b.nature }),
+    ...(w.item && { item: b.item }),
+  }
+  setSide('a', { ...f, member, sets: false, mega: !!stoneMega(member) && f.mega })
+  toTab('damage')
+}
+/** The sides as they battle: at every set, at their sets pooled in the meta shown; yours not, with something of it
+ * worked out (what it is being the question). */
+const fought = computed(() => ({
+  a: atSets(yoursWorked.value ? { ...sides.value.a, sets: false } : sides.value.a, data.value),
+  b: atSets(sides.value.b, data.value),
+}))
 const patchMember = (k: SideKey, patch: Partial<Member>) =>
   setSide(k, { ...sides.value[k], member: { ...sides.value[k].member, ...patch } })
 function swap() {
@@ -369,13 +402,13 @@ const offSheet = computed(() => work.value.nature || work.value.item)
 function nextStep(k: SideKey, member: Member, after: Field): Field | null {
   if (!props.inverse) return nextField(member, after)
   if (typeof after === 'number') return null
+  const w = k === 'a' ? workYours.value : work.value
   const skip = (f: Field) =>
     typeof f === 'number' ||
-    (k === 'b' &&
-      ((f === 'points' && work.value.points) ||
-        (f === 'nature' && work.value.nature) ||
-        (f === 'item' && work.value.item) ||
-        (f === 'ability' && offSheet.value)))
+    (f === 'points' && w.points) ||
+    (f === 'nature' && w.nature) ||
+    (f === 'item' && w.item) ||
+    (k === 'b' && f === 'ability' && offSheet.value)
   let f = nextField(member, after)
   while (f !== null && skip(f)) f = nextField(member, f)
   return f
@@ -432,6 +465,21 @@ function pick(value: string) {
   const now = sides.value[p.side].member
   const next = p.back ?? nextStep(p.side, now, p.field)
   picking.value = next === null ? null : { side: p.side, field: next, ...(common && { common }) }
+}
+
+/** The parts of a set the inverse tab can work out, by the picker's step. */
+const WORKABLE = { item: 'item', nature: 'nature', points: 'points' } as const
+const workableOf = (f: Field | undefined) =>
+  props.inverse && typeof f === 'string' && f in WORKABLE ? WORKABLE[f as keyof typeof WORKABLE] : null
+/** On the inverse tab, a part's step left for it to be worked out: on in the side's Work out, and on to the next. */
+function workOutStep() {
+  const p = picking.value
+  const part = workableOf(p?.field)
+  if (!p || !part) return
+  if (p.side === 'a') workYours.value = { ...workYours.value, [part]: true }
+  else work.value = { ...work.value, [part]: true }
+  const next = p.back ?? nextStep(p.side, sides.value[p.side].member, p.field)
+  picking.value = next === null ? null : { side: p.side, field: next }
 }
 
 // Loading a side: its common set, one of the reader's teams' Pokémon, or a paste.
@@ -849,9 +897,9 @@ function face(f: Fighter) {
             :moves-folded="movesFolded[k].value"
             :battle-folded="battleFolded[k].value"
             :inverse
-            :hide="k === 'b' ? hidden : undefined"
-            :work="k === 'b' && inverse ? work : undefined"
-            @work="work = $event"
+            :hide="hidden[k]"
+            :work="inverse ? (k === 'b' ? work : workYours) : undefined"
+            @work="k === 'b' ? (work = $event) : (workYours = $event)"
             @battle-folded="battleFolded[k].value = $event"
             @side-open="sideOpen = $event"
             @battlefield="field = $event"
@@ -900,7 +948,9 @@ function face(f: Fighter) {
           :data
           :obs="observations"
           :work
+          :work-yours="yoursWorked ? workYours : null"
           @use="useBuild"
+          @use-yours="useYours"
         />
       </CalcHits>
     </template>
@@ -945,6 +995,16 @@ function face(f: Fighter) {
     Pokémon, the side's Load's other ways side by side over the list: a paste, and one of the reader's teams' Pokémon
     from a drop-down, when they have a team. -->
     <DefineCommon>
+      <!-- On the inverse tab, its item, nature or stat points left to be worked out rather than picked: first, over the
+           most common set's offer when there's one too. -->
+      <div v-if="workableOf(picking?.field)" class="quick work-step">
+        <div class="quick-load">
+          <button type="button" class="btn quiet small" @click="workOutStep">
+            {{ t('calc.workOutStep') }}
+          </button>
+        </div>
+        <p v-if="!commonPreview" class="or muted">{{ t('calc.orPick') }}</p>
+      </div>
       <CommonSetOffer v-if="commonPreview" :id="picking!.common!" :set="commonPreview.member" @load="loadCommon" />
       <div v-else-if="picking?.field === 'pokemon'" class="quick">
         <div class="quick-load">
@@ -1617,6 +1677,10 @@ word, as the common set's offer has. */
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+/* Over the most common set's offer, apart from it. */
+.work-step:has(+ *) {
+  margin-bottom: 10px;
 }
 .or {
   display: flex;
