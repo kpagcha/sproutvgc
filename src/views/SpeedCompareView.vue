@@ -10,7 +10,7 @@ import { has, percent } from '@/data/meta'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { commonBuilds as common, speedBuilds, speedStat } from '@/lib/speed'
-import { MAX_POINTS } from '@/lib/stats'
+import { MAX_POINTS, type NatureEffect } from '@/lib/stats'
 import { buildQuery, buildSpeed, readBuild, toggled, type BuildToggle, type SpeedBuild } from '@/lib/speedBuild'
 import { revealBelow, toTopOf, underBand } from '@/lib/scroll'
 import {
@@ -190,6 +190,18 @@ function workOf(s: Side): Unknowns {
   if (typeof v !== 'string') return { nature: false, points: true }
   const parts = v.split(',')
   return { nature: parts.includes('nat'), points: parts.includes('pts') }
+}
+/** Read backwards, with its nature or points worked out: its Speed from the slowest it could be to the fastest. */
+function spanOf(s: Side): [number, number] | null {
+  const id = idOf(s)
+  const w = workOf(s)
+  if (!id || !(w.nature || w.points)) return null
+  const b = slotBuild(s)
+  const at = (effect: NatureEffect, points: number) => buildSpeed(id, { ...b, effect, points })
+  return [
+    at(w.nature ? 'down' : b.effect, w.points ? 0 : b.points),
+    at(w.nature ? 'up' : b.effect, w.points ? MAX_POINTS : b.points),
+  ]
 }
 const setWork = (s: Side, w: Unknowns) =>
   replace({
@@ -613,6 +625,7 @@ onUnmounted(() => (ladderOpen.value = false))
 
 /** Who moves first, drawn over the two from tablets up, under them on phones. */
 const [DefineVerdict, Verdict] = createReusableTemplate()
+const [DefineDuel, Duel] = createReusableTemplate<{ reverse: boolean }>()
 
 const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 
@@ -721,6 +734,76 @@ function resetAll() {
       </button>
     </div>
 
+    <!-- On phones, the two as bands, each opening its panel under it, as in a pair; read backwards too (`reverse`),
+         where what's worked out makes its band's Speed the range it allows. -->
+    <DefineDuel v-slot="{ reverse }">
+      <div class="duel">
+        <template v-for="side in sides" :key="side.s">
+          <div
+            :id="`band-${side.s}`"
+            class="side-band"
+            :class="{ open: openKey === side.s && !!side.id, theirs: side.s === 'b' }"
+          >
+            <button type="button" class="band-main" :aria-controls="`compare-${side.s}`" @click="tapBand(side.s)">
+              <span class="visually-hidden">{{ side.s === 'a' ? t('speed.yours') : t('compare.opponent') }}</span>
+              <BuildSummary
+                v-if="side.id"
+                :id="side.id"
+                :speed="side.speed!"
+                :build="side.build"
+                :range="reverse ? spanOf(side.s) : side.range"
+                :sets-said="reverse"
+                class="band-summary"
+              />
+              <span v-else class="band-empty"
+                ><Plus :size="16" aria-hidden="true" />{{
+                  t(side.s === 'a' ? 'compare.pickYours' : 'compare.pickOpponent')
+                }}</span
+              ></button
+            ><button
+              v-if="side.id"
+              type="button"
+              class="band-fold"
+              :aria-expanded="openKey === side.s"
+              :aria-controls="`compare-${side.s}`"
+              :aria-label="t(openKey === side.s ? 'band.fold' : 'band.unfold')"
+              @click="foldBand(side.s)"
+            >
+              <ChevronDown :size="16" class="band-chevron" aria-hidden="true" />
+            </button>
+          </div>
+          <section
+            v-show="openKey === side.s && !!side.id"
+            :id="`compare-${side.s}`"
+            class="panel side band-panel"
+            :class="{ opponent: side.s === 'b' }"
+          >
+            <SpeedEditor
+              :ref="editorRef(side.s)"
+              :id="side.id"
+              :build="side.build"
+              :speed="side.speed"
+              :stat="side.stat"
+              :common="commonBuilds(side.id)"
+              :title="side.s === 'a' ? t('speed.yours') : t('compare.opponent')"
+              :tone="side.s === 'a' ? 'yours' : 'opponent'"
+              :taken="takenFor(side.s)"
+              :at-sets="reverse ? undefined : side.sets"
+              :range="side.range"
+              :work="reverse ? workOf(side.s) : undefined"
+              confirmable
+              @sets="(on: boolean) => setSets(side.s, on)"
+              @work="(w: Unknowns) => setWork(side.s, w)"
+              @confirm="confirmSide(side.s)"
+              @pick="(id: PokemonId, b?: SpeedBuild) => pick(side.s, id, b)"
+              @build="(b: Partial<SpeedBuild>) => setBuild(side.s, b)"
+              @clear="clear(side.s)"
+            />
+          </section>
+        </template>
+      </div>
+    </DefineDuel>
+
     <!-- Past a pair, and in speed order: one under the other, in the order they move. -->
     <template v-if="stacked">
       <SpeedLineup ref="lineupEl" :entries="lineup" :open-key="openKey" @tap="tapBand" @fold="foldBand">
@@ -826,7 +909,8 @@ function resetAll() {
     <!-- Read backwards: the two with their modifiers and what's given of them (what's worked out has no control), and
          under them which one moves first, and what they could have; a floating button down to it while it's below. -->
     <template v-else-if="mode === 'reverse'">
-      <div class="reverse-sides">
+      <Duel v-if="phone" :reverse="true" />
+      <div v-else class="reverse-sides">
         <section
           v-for="side in sides"
           :id="`compare-${side.s}`"
@@ -897,68 +981,7 @@ function resetAll() {
            in short, stuck to the top, the second piling up under the first, and to the bottom; tapping one brings its
            panel into view under it, opening it (one with none picks it), or, in its place with its panel open under it,
            folds it; its arrow opens and folds it. -->
-      <div v-if="phone" class="duel">
-        <template v-for="side in sides" :key="side.s">
-          <div
-            :id="`band-${side.s}`"
-            class="side-band"
-            :class="{ open: openKey === side.s && !!side.id, theirs: side.s === 'b' }"
-          >
-            <button type="button" class="band-main" :aria-controls="`compare-${side.s}`" @click="tapBand(side.s)">
-              <span class="visually-hidden">{{ side.s === 'a' ? t('speed.yours') : t('compare.opponent') }}</span>
-              <BuildSummary
-                v-if="side.id"
-                :id="side.id"
-                :speed="side.speed!"
-                :build="side.build"
-                :range="side.range"
-                class="band-summary"
-              />
-              <span v-else class="band-empty"
-                ><Plus :size="16" aria-hidden="true" />{{
-                  t(side.s === 'a' ? 'compare.pickYours' : 'compare.pickOpponent')
-                }}</span
-              ></button
-            ><button
-              v-if="side.id"
-              type="button"
-              class="band-fold"
-              :aria-expanded="openKey === side.s"
-              :aria-controls="`compare-${side.s}`"
-              :aria-label="t(openKey === side.s ? 'band.fold' : 'band.unfold')"
-              @click="foldBand(side.s)"
-            >
-              <ChevronDown :size="16" class="band-chevron" aria-hidden="true" />
-            </button>
-          </div>
-          <section
-            v-show="openKey === side.s && !!side.id"
-            :id="`compare-${side.s}`"
-            class="panel side band-panel"
-            :class="{ opponent: side.s === 'b' }"
-          >
-            <SpeedEditor
-              :ref="editorRef(side.s)"
-              :id="side.id"
-              :build="side.build"
-              :speed="side.speed"
-              :stat="side.stat"
-              :common="commonBuilds(side.id)"
-              :title="side.s === 'a' ? t('speed.yours') : t('compare.opponent')"
-              :tone="side.s === 'a' ? 'yours' : 'opponent'"
-              :taken="takenFor(side.s)"
-              :at-sets="side.sets"
-              :range="side.range"
-              confirmable
-              @sets="(on: boolean) => setSets(side.s, on)"
-              @confirm="confirmSide(side.s)"
-              @pick="(id: PokemonId, b?: SpeedBuild) => pick(side.s, id, b)"
-              @build="(b: Partial<SpeedBuild>) => setBuild(side.s, b)"
-              @clear="clear(side.s)"
-            />
-          </section>
-        </template>
-      </div>
+      <Duel v-if="phone" :reverse="false" />
       <!-- On phones, under the two, a second for each team, greyed out until its first is picked. -->
       <div v-if="phone" class="side-adds">
         <SpeedAddSecond
