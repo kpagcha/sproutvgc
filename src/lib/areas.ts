@@ -19,6 +19,8 @@ export interface Section {
   desc: MessageKey
   /** Not built yet: its page says so. */
   soon?: boolean
+  /** Its page's other tabs, each a page of its own, found by the search by name too. */
+  tabs?: { key: string; route: string; label: MessageKey }[]
 }
 
 export interface Area {
@@ -59,8 +61,13 @@ export const AREAS: Area[] = [
         desc: 'desc.speedCompare',
       },
       { key: 'teamBuilder', route: 'teamBuilder', label: 'nav.teamBuilder', desc: 'desc.teamBuilder' },
-      { key: 'matchups', route: 'matchups', label: 'title.matchups', desc: 'desc.matchups' },
-      { key: 'chart', route: 'chart', label: 'title.chart', desc: 'desc.chart' },
+      {
+        key: 'matchups',
+        route: 'matchups',
+        label: 'title.matchups',
+        desc: 'desc.matchups',
+        tabs: [{ key: 'chart', route: 'chart', label: 'title.chart' }],
+      },
     ],
   },
   {

@@ -146,7 +146,16 @@ function searchPages(q: string): PageHit[] {
       }
       return []
     })
-    return [...area, ...sections]
+    // Its pages' other tabs, a page each.
+    const tabs = a.sections.flatMap((s) =>
+      (s.tabs ?? []).flatMap((tab): PageHit[] => {
+        const parts = split(t(tab.label), q)
+        return parts
+          ? [{ key: `${a.id}.${s.key}.${tab.key}`, name: t(tab.label), parts, to: { name: tab.route }, area: a.label }]
+          : []
+      }),
+    )
+    return [...area, ...sections, ...tabs]
   })
 }
 

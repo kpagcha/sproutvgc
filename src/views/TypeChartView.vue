@@ -74,9 +74,9 @@ onMounted(async () => {
 </script>
 
 <template>
+  <!-- Titled by its tabs' page (`TypeToolsView`). -->
   <div class="panel">
-    <h1>{{ t('title.chart') }}</h1>
-    <p class="muted">{{ t('chart.intro') }}</p>
+    <p class="muted intro">{{ t('chart.intro') }}</p>
   </div>
 
   <div class="scroller">
@@ -87,7 +87,7 @@ onMounted(async () => {
             <span>{{ t('chart.atk') }} ↓</span><span>{{ t('chart.def') }} →</span>
           </th>
           <th v-for="(def, j) in TYPES" :key="def" :class="{ hl: hc === j }">
-            <RouterLink :to="{ path: '/tools/matchups', query: { def } }">
+            <RouterLink :to="{ name: 'matchups', query: { def } }">
               <TypeIcon :type="def" />
             </RouterLink>
           </th>
@@ -96,7 +96,7 @@ onMounted(async () => {
       <tbody>
         <tr v-for="(atk, i) in TYPES" :key="atk" :class="{ hl: hr === i }">
           <th class="rowh">
-            <RouterLink :to="{ path: '/tools/matchups', query: { mode: 'atk', atk } }">
+            <RouterLink :to="{ name: 'matchups', query: { mode: 'atk', atk } }">
               <TypeIcon :type="atk" />
             </RouterLink>
           </th>
@@ -122,6 +122,9 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.intro {
+  margin: 0;
+}
 .download {
   display: inline-flex;
   align-items: center;

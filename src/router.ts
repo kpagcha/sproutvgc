@@ -577,34 +577,45 @@ export const router = createRouter({
       },
     },
     {
-      path: '/tools/matchups',
-      name: 'matchups',
-      component: () => import('@/views/TypeMatchupsView.vue'),
-      meta: {
-        titleKey: 'title.matchups',
-        descKey: 'desc.matchups',
-        headKey: 'head.matchups',
-        keywordsKey: 'keywords.matchups',
-        dexNames: true,
-        recent: once('matchups'),
-        ...inArea('tools', 'matchups'),
-      },
+      // The type matchups and the type chart, one page with a tab each (`TypeToolsView`, the tab its child route), each
+      // its own URL, title and description, for search; one page, so going from one tab to the other doesn't slide it.
+      path: '/tools/types',
+      component: () => import('@/views/TypeToolsView.vue'),
+      children: [
+        { path: '', redirect: { name: 'matchups' } },
+        {
+          path: 'matchups',
+          name: 'matchups',
+          component: () => import('@/views/TypeMatchupsView.vue'),
+          meta: {
+            titleKey: 'title.matchups',
+            descKey: 'desc.matchups',
+            headKey: 'head.matchups',
+            keywordsKey: 'keywords.matchups',
+            dexNames: true,
+            recent: once('matchups'),
+            keepScroll: true,
+            ...inArea('tools', 'matchups'),
+          },
+        },
+        {
+          path: 'chart',
+          name: 'chart',
+          component: () => import('@/views/TypeChartView.vue'),
+          meta: {
+            titleKey: 'title.chart',
+            descKey: 'desc.chart',
+            headKey: 'head.chart',
+            keywordsKey: 'keywords.chart',
+            keepScroll: true,
+            ...inArea('tools', 'matchups'),
+          },
+        },
+      ],
     },
     {
-      path: '/tools/type-chart',
-      name: 'chart',
-      component: () => import('@/views/TypeChartView.vue'),
-      meta: {
-        titleKey: 'title.chart',
-        descKey: 'desc.chart',
-        headKey: 'head.chart',
-        keywordsKey: 'keywords.chart',
-        ...inArea('tools', 'chart'),
-      },
-    },
-    {
-      // One side of the matchups page on its own, linked from the side-by-side headings.
-      path: '/tools/matchups/:side(def|atk)',
+      // One side of the matchups on its own, linked from the side-by-side headings: no tabs.
+      path: '/tools/types/matchups/:side(def|atk)',
       name: 'matchupsSide',
       component: () => import('@/views/TypeMatchupsView.vue'),
       meta: {
@@ -617,6 +628,13 @@ export const router = createRouter({
         ...inArea('tools', 'matchups'),
       },
     },
+    // Their addresses before.
+    { path: '/tools/matchups', redirect: (to) => ({ name: 'matchups', query: to.query }) },
+    {
+      path: '/tools/matchups/:side(def|atk)',
+      redirect: (to) => ({ name: 'matchupsSide', params: to.params, query: to.query }),
+    },
+    { path: '/tools/type-chart', redirect: (to) => ({ name: 'chart', query: to.query }) },
     area('quizzes', 'title.quizzes', 'desc.quizzes'),
     {
       path: '/quizzes/speed',

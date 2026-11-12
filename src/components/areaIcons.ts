@@ -5,7 +5,6 @@ import {
   ChartColumn,
   ChartColumnBig,
   GraduationCap,
-  Grid3x3,
   Scale,
   Swords,
   TrendingUp,
@@ -35,5 +34,4 @@ export const SECTION_ICONS: Record<string, Component> = {
   calc: Calculator,
   teamBuilder: Users,
   matchups: Swords,
-  chart: Grid3x3,
 }

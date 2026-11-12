@@ -3,8 +3,8 @@ import { t, type MessageKey } from '@/i18n'
 
 // Links to the type chart and the type matchups (in Tools) and the type quiz (in Quizzes), as a row of cards.
 const LINKS: { to: string; label: MessageKey }[] = [
-  { to: '/tools/type-chart', label: 'nav.chart' },
-  { to: '/tools/matchups', label: 'nav.matchups' },
+  { to: '/tools/types/chart', label: 'nav.chart' },
+  { to: '/tools/types/matchups', label: 'nav.matchups' },
   { to: '/quizzes/types', label: 'title.quiz' },
 ]
 </script>

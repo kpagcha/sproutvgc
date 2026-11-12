@@ -18,7 +18,7 @@ function parseTypes(v: unknown, max: number): TypeId[] {
   return [...new Set(s.split(',').filter(isType))].slice(0, max)
 }
 
-// `/tools/matchups/def` and `/tools/matchups/atk` show just that side, with no tabs or columns.
+// `/tools/types/matchups/def` and `/tools/types/matchups/atk` show just that side, with no tabs or columns.
 const single = computed(() => {
   const s = route.params.side
   return s === 'def' || s === 'atk' ? s : null
@@ -36,7 +36,10 @@ wideQuery.addEventListener('change', onWide)
 onScopeDispose(() => wideQuery.removeEventListener('change', onWide))
 const cols = computed(() => wide.value && !single.value)
 // The column headings open their side on its own, keeping the picks.
-const sideLink = (s: 'def' | 'atk') => ({ path: `/tools/matchups/${s}`, query: { ...route.query, mode: undefined } })
+const sideLink = (s: 'def' | 'atk') => ({
+  path: `/tools/types/matchups/${s}`,
+  query: { ...route.query, mode: undefined },
+})
 
 function setQuery(patch: Record<string, string | undefined>) {
   const q: Record<string, string> = {}
@@ -89,8 +92,9 @@ const toResults = () => reveal(results.value)
 
 <template>
   <div class="panel">
-    <!-- One side on its own is titled by that side: the back link already names the matchups page. -->
-    <h1>{{ t(single ? (single === 'def' ? 'matchups.tabDef' : 'matchups.tabAtk') : 'title.matchups') }}</h1>
+    <!-- One side on its own is titled by that side: the back link already names the matchups page. The whole page is
+         titled by its tabs' page (`TypeToolsView`). -->
+    <h1 v-if="single">{{ t(single === 'def' ? 'matchups.tabDef' : 'matchups.tabAtk') }}</h1>
     <div v-if="cols" class="cols">
       <section>
         <h2>
