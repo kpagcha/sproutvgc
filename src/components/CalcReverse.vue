@@ -6,12 +6,13 @@ import { item, type ItemId } from '@/data/dex'
 import { percent, type MetaData } from '@/data/meta'
 import { natureEffectOn } from '@/data/natures'
 import { STATS } from '@/data/pokemon'
-import { t } from '@/i18n'
+import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { battlerOf, type Battlefield, type Fighter } from '@/lib/damage'
 import {
   reverseDamage,
   type Observation,
+  type OpponentUnknowns,
   type ReverseResult,
   type ReverseRow,
   type StatRange,
@@ -25,9 +26,10 @@ import PokemonIcon from '@/components/PokemonIcon'
 // The inverse damage calc's "What fits": from what was seen (`obs`: the hits and which moved first, `CalcHits`), what
 // the opponent's set could then be (`damageReverse.ts`): each stat in play's points where some build fits, how
 // likely what was seen was at its sets, and its common spreads against its common items, each pair marked as fitting
-// (on what share of the damage rolls) or ruled out; joined by the nearest that fits when none of them does. At its team
-// sheet (`sheet`, shared with the threats), its item and nature as set, only its points varying. A spread used (`use`)
-// sets the opponent to it, with the item likeliest to go with it. Worked out a slice at a time once the sides have
+// (on what share of the damage rolls) or ruled out; joined by the nearest that fits when none of them does. What's
+// worked out of it is the opponent's card's Work out (`work`: its nature, item and points, each given or not; its
+// points given, a row per nature it could have at them). A build used (`use`) sets the opponent to what was worked out
+// of it, with the item likeliest to go with it. Worked out a slice at a time once the sides have
 // settled, what it showed kept, faded, until the new one's in. It's the readout of "What you saw" (in its slot, both
 // picked): a sunken tray across that panel's foot, the answer under what it's worked out from.
 const props = defineProps<{
@@ -36,8 +38,8 @@ const props = defineProps<{
   field: Battlefield
   data: MetaData | null
   obs: readonly Observation[]
+  work: OpponentUnknowns
 }>()
-const sheet = defineModel<boolean>('sheet', { default: false })
 const emit = defineEmits<{ use: [build: { nature: string | null; points: Points; item?: ItemId | null }] }>()
 
 const theirId = computed(() => battlerOf(props.theirs))
@@ -68,7 +70,7 @@ function start() {
     theirs: props.theirs,
     field: props.field,
     entry: props.data?.[setsAs(props.theirs.member) ?? id] ?? undefined,
-    sheet: sheet.value,
+    work: props.work,
     obs: props.obs,
   })
   progress.value = 0
@@ -87,9 +89,18 @@ function start() {
     },
   )
 }
-watch(() => [sheet.value, props.obs, props.data] as const, start, { immediate: true })
+watch(() => [props.work, props.obs, props.data] as const, start, { immediate: true })
 watchDebounced(() => [props.yours, props.theirs, props.field] as const, start, { debounce: 150 })
 
+/** What's being answered, in a line: the parts of the opponent's set worked out, or none (whether what's set fits). */
+const asks = computed(() => {
+  const parts = (['nature', 'item', 'points'] as const)
+    .filter((k) => props.work[k])
+    .map((k) => t(k === 'nature' ? 'builder.nature' : k === 'item' ? 'builder.item' : 'builder.points').toLowerCase())
+  return parts.length
+    ? t('calc.reverse.asks', { parts: new Intl.ListFormat(locale.value).format(parts) })
+    : t('calc.reverse.asksNone')
+})
 const statName = (s: number) => t(`stat.${STATS[s]!}`)
 /** A build in Showdown's short way, its points in the stats in play, `+` or `−` after those its nature raises or
  * lowers: "32 HP / 20+ Def". */
@@ -108,7 +119,7 @@ const widestLabel = (stats: readonly number[], mark: string) =>
 /** A stat's points where something fits, but for one that can be anything (the table says as much). */
 const shownRanges = computed(() =>
   (result.value?.ranges ?? []).filter(
-    (r) => !(r.from === 0 && r.to === MAX_POINTS && (r.stat === 0 || sheet.value || r.effects.length === 3)),
+    (r) => !(r.from === 0 && r.to === MAX_POINTS && (r.stat === 0 || !props.work.nature || r.effects.length === 3)),
   ),
 )
 const rangeText = (r: StatRange) => {
@@ -120,13 +131,13 @@ const rangeText = (r: StatRange) => {
         : r.to === MAX_POINTS
           ? t('calc.reverse.atLeast', { n: r.from })
           : t('calc.reverse.between', { from: r.from, to: r.to })
-  // Off its team sheet, a nature it must have for it, when only one effect fits.
+  // Its nature worked out, one it must have for it, when only one effect fits.
   const e = r.effects.length === 1 ? r.effects[0]! : 'neutral'
-  return !sheet.value && r.stat && e !== 'neutral' ? `${pts}, ${t(`calc.reverse.nature.${e}`)}` : pts
+  return props.work.nature && r.stat && e !== 'neutral' ? `${pts}, ${t(`calc.reverse.nature.${e}`)}` : pts
 }
 const itemName = (id: ItemId | null) => (id ? refName(item(id)) : t('builder.noItem'))
 const fitTip = (f: number) => t('calc.reverse.fitTip', { pct: percent(f) })
-/** A spread used: its nature and points, and off its team sheet, the item likeliest to go with it (its fit by the
+/** A build used: its nature and points, and its item worked out, the item likeliest to go with it (its fit by the
  * item's share), else its most run. */
 function use(r: ReverseRow) {
   const res = result.value
@@ -154,21 +165,12 @@ function use(r: ReverseRow) {
       >
         <span :style="{ width: `${progress * 100}%` }"></span>
       </div>
-      <button
-        v-tip="t('calc.reverse.sheetTip')"
-        type="button"
-        class="btn switch sheet"
-        :class="{ on: sheet }"
-        :aria-pressed="sheet"
-        @click="sheet = !sheet"
-      >
-        {{ t('calc.threats.sheet') }}
-      </button>
     </div>
+    <p class="muted small asks">{{ asks }}</p>
     <p v-if="!obs.length" class="muted intro">{{ t('calc.reverse.hint') }}</p>
     <template v-if="theirId && yourId && obs.length && result">
       <div class="body" :class="{ stale: slow }">
-        <p v-if="!result.ranges.length" class="warn" role="status">{{ t('calc.reverse.impossible') }}</p>
+        <p v-if="!result.possible" class="warn" role="status">{{ t('calc.reverse.impossible') }}</p>
         <template v-else>
           <!-- What its points can be, where the hits bind them (none bound, the table says which fit). -->
           <p v-if="shownRanges.length" class="lines" role="status">
@@ -180,7 +182,9 @@ function use(r: ReverseRow) {
           <p v-if="result.chance !== null" class="muted small">
             {{
               result.chance
-                ? t(sheet ? 'calc.reverse.chanceSheet' : 'calc.reverse.chance', { pct: percent(result.chance) })
+                ? t(props.work.nature ? 'calc.reverse.chance' : 'calc.reverse.chanceSheet', {
+                    pct: percent(result.chance),
+                  })
                 : t('calc.reverse.noneRun')
             }}
           </p>
@@ -315,9 +319,6 @@ function use(r: ReverseRow) {
   min-height: 0;
   padding: 0 8px;
 }
-.sheet.on {
-  background: var(--sel);
-}
 .progress {
   position: absolute;
   top: 0;
@@ -330,6 +331,9 @@ function use(r: ReverseRow) {
   display: block;
   height: 100%;
   background: var(--accent);
+}
+.asks {
+  margin: 4px 0 0;
 }
 .intro {
   margin: 10px 0 0;

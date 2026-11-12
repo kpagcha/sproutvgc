@@ -27,7 +27,7 @@ import {
   X,
 } from '@lucide/vue'
 import { pokemon, type AbilityId, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
-import { POKEMON } from '@/data/pokemon'
+import { itemBound, POKEMON } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { useMeta } from '@/composables/useMeta'
@@ -42,7 +42,7 @@ import {
   readLast,
   saveLast,
 } from '@/lib/calcState'
-import type { HitSeen, Observation } from '@/lib/damageReverse'
+import type { HitSeen, Observation, OpponentUnknowns } from '@/lib/damageReverse'
 import {
   abilityOf,
   atSets,
@@ -190,6 +190,31 @@ sides.value = {
   b: decodeFighter(start.b) ?? emptyFighter(),
 }
 field.value = decodeField(start.f)
+/**
+ * What of the opponent's set the inverse tab works out (`?work=`: `nat`, `item`, `pts`, comma-separated, or `none`).
+ * Unsaid, as it was before it could be picked: at its team sheet (`?sheet=1`) its points alone; else its nature, its
+ * points, and its item unless set.
+ */
+const work = shallowRef<OpponentUnknowns>(readWork(start.work))
+function readWork(v: unknown): OpponentUnknowns {
+  if (typeof v === 'string') {
+    const parts = v.split(',')
+    return { nature: parts.includes('nat'), item: parts.includes('item'), points: parts.includes('pts') }
+  }
+  return sheet.value
+    ? { nature: false, item: false, points: true }
+    : { nature: true, item: !sides.value.b.member.item, points: true }
+}
+const workQuery = (w: OpponentUnknowns) =>
+  [w.nature && 'nat', w.item && 'item', w.points && 'pts'].filter(Boolean).join(',') || 'none'
+/** What of the opponent's set its card leaves out on the inverse tab: what's worked out (its item not, one it can't be
+ * without). */
+const hidden = computed(() => {
+  if (!props.inverse) return []
+  const m = sides.value.b.member
+  const fixed = !!stoneMega(m) || (!!m.pokemon && itemBound(m.pokemon))
+  return (['points', 'nature', 'item'] as const).filter((k) => work.value[k] && !(k === 'item' && fixed))
+})
 // On phones, the two one under the other, each a band of its side's color with its panel under it, opened or folded
 // apart, so both can be open at once: yours open at first.
 const open = shallowRef<Record<SideKey, boolean>>({ a: true, b: false })
@@ -228,6 +253,8 @@ const query = computed(() => ({
   b: encodeFighter(sides.value.b) || undefined,
   f: encodeField(field.value) || undefined,
   sheet: sheet.value ? '1' : undefined,
+  // The inverse tab's alone; the damage tab keeping what was there.
+  work: props.inverse ? workQuery(work.value) : typeof route.query.work === 'string' ? route.query.work : undefined,
   h: encodeHits(seen.value) || undefined,
   first: first.value ?? undefined,
 }))
@@ -236,7 +263,7 @@ watchDebounced(
   (q) => {
     saveLast(q)
     const next = { ...route.query, ...q }
-    for (const k of ['a', 'b', 'f', 'sheet', 'h', 'first'] as const) if (!q[k]) delete next[k]
+    for (const k of ['a', 'b', 'f', 'sheet', 'work', 'h', 'first'] as const) if (!q[k]) delete next[k]
     void router.replace({ query: next })
   },
   { debounce: 250, immediate: true },
@@ -263,14 +290,14 @@ watch(
     first.value = null
   },
 )
-/** A spread of What fits used: the opponent set to it (its nature unless at its team sheet, and the item likeliest to
- * go with it where its item was worked out), the damage tab shown with it. */
+/** A build of What fits used: the opponent set to what was worked out of it (its points, its nature, and the item
+ * likeliest to go with it), the damage tab shown with it. */
 function useBuild(b: { nature: string | null; points: Member['points']; item?: ItemId | null }) {
   const f = sides.value.b
   const member = {
     ...f.member,
-    points: [...b.points] as Member['points'],
-    ...(!sheet.value && { nature: b.nature }),
+    ...(work.value.points && { points: [...b.points] as Member['points'] }),
+    ...(work.value.nature && { nature: b.nature }),
     ...(b.item !== undefined && { item: b.item }),
   }
   setSide('b', { ...f, member, sets: false, mega: !!stoneMega(member) && f.mega })
@@ -326,23 +353,29 @@ function choose(k: SideKey, id: PokemonId) {
     item: item ?? null,
     ability: abilities.length === 1 ? abilities[0]! : null,
   }
-  // The inverse tab's opponent off its team sheet: its most common ability, which isn't asked for (it counts as set,
-  // and can be changed on its card). Its item is left unknown, worked out until set.
-  if (props.inverse && k === 'b' && !sheet.value) member.ability ??= commonMember(id, data.value).ability
+  // The inverse tab's opponent with its nature or item worked out (off its team sheet): its most common ability, which
+  // isn't asked for (it counts as set, and can be changed on its card).
+  if (props.inverse && k === 'b' && offSheet.value) member.ability ??= commonMember(id, data.value).ability
   setSide(k, { ...emptyFighter(member), side: sides.value[k].side, sets: sides.value[k].sets })
 }
+/** The inverse tab's opponent off its team sheet: its nature or item worked out. */
+const offSheet = computed(() => work.value.nature || work.value.item)
 /**
  * The part to pick next: on the damage tab, the next the set lacks (`nextField`). On the inverse tab, a move picked
  * closes the picker (a hit's move is picked where the hit is, any the attacker learns, so its set needs none, or one or
- * two), and none follows another; the opponent's stat points aren't asked for, nor off its team sheet its item,
- * ability and nature (its item optional, worked out until set; its nature worked out; its ability its most common).
+ * two), and none follows another; what's worked out of the opponent isn't asked for, nor off its team sheet its
+ * ability (its most common).
  */
 function nextStep(k: SideKey, member: Member, after: Field): Field | null {
   if (!props.inverse) return nextField(member, after)
   if (typeof after === 'number') return null
   const skip = (f: Field) =>
     typeof f === 'number' ||
-    (k === 'b' && (f === 'points' || (!sheet.value && (f === 'item' || f === 'ability' || f === 'nature'))))
+    (k === 'b' &&
+      ((f === 'points' && work.value.points) ||
+        (f === 'nature' && work.value.nature) ||
+        (f === 'item' && work.value.item) ||
+        (f === 'ability' && offSheet.value)))
   let f = nextField(member, after)
   while (f !== null && skip(f)) f = nextField(member, f)
   return f
@@ -816,7 +849,9 @@ function face(f: Fighter) {
             :moves-folded="movesFolded[k].value"
             :battle-folded="battleFolded[k].value"
             :inverse
-            :sheet
+            :hide="k === 'b' ? hidden : undefined"
+            :work="k === 'b' && inverse ? work : undefined"
+            @work="work = $event"
             @battle-folded="battleFolded[k].value = $event"
             @side-open="sideOpen = $event"
             @battlefield="field = $event"
@@ -864,7 +899,7 @@ function face(f: Fighter) {
           :field
           :data
           :obs="observations"
-          v-model:sheet="sheet"
+          :work
           @use="useBuild"
         />
       </CalcHits>

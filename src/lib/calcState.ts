@@ -249,6 +249,8 @@ export interface CalcQuery {
   f?: string
   /** The threats at the opponent's team sheet (`CalcThreats`), `1`. */
   sheet?: string
+  /** What the inverse calc works out of the opponent: `nat`, `item`, `pts`, comma-separated, or `none`. */
+  work?: string
   /** The inverse calc's hits seen (`encodeHits`). */
   h?: string
   /** Read backwards, which was seen moving first: `a` or `b`. */
@@ -269,7 +271,15 @@ export function saveLast(q: CalcQuery) {
     if (!(q.a || q.b || q.f)) return localStorage.removeItem(KEY)
     // The same setup written again (the page opened on it) isn't a change: its time stays.
     const now = readLast()
-    if (now.a === q.a && now.b === q.b && now.f === q.f && now.h === q.h && now.first === q.first) return
+    if (
+      now.a === q.a &&
+      now.b === q.b &&
+      now.f === q.f &&
+      now.h === q.h &&
+      now.first === q.first &&
+      now.work === q.work
+    )
+      return
     localStorage.setItem(KEY, JSON.stringify({ at: Date.now(), q }))
   } catch {
     // Storage unavailable: the URL has it.

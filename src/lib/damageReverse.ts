@@ -1,5 +1,5 @@
 // The damage calculator read backwards: what was seen each move do, and what the opponent's set could then be. Yours is
-// known; the opponent's stat points, and its nature and item unless at its team sheet, are what's worked out. Your hits
+// known; of the opponent, what's worked out (`work`: its stat points, nature and item, each given or not). Your hits
 // on it narrow its bulk (its HP and the defense each move hits), its hits on yours its power (the stat each move uses).
 // Every build it could have is checked against every hit seen: a hit fits a build on the share of its damage rolls that
 // give what was seen (the opponent's HP as the game shows it, a whole percent, or yours' exactly in HP, or a knockout or
@@ -58,6 +58,8 @@ export interface SpeedSeen {
 export type Observation = HitSeen | SpeedSeen
 
 const POINT_VALUES = [...Array(MAX_POINTS + 1).keys()]
+/** A nature changing no stat, for one given as none. */
+const NEUTRAL = 'serious'
 const BREAKERS = new Set(['moldbreaker', 'teravolt', 'turboblaze'])
 
 /** What the defender has that the calc's rolls don't show: Focus Sash or Sturdy holding it at 1 HP from full (`saved`),
@@ -188,18 +190,24 @@ const LIKELY_MAX = 2
 export interface ReverseInput {
   /** Yours, as the calc has it. */
   yours: Fighter
-  /** The opponent, as the calc has it: its HP, stages, side and the rest kept; its points (and nature and item but at
-   * its team sheet) what's worked out. */
+  /** The opponent, as the calc has it: its HP, stages, side and the rest kept; what's worked out of it (`work`) not. */
   theirs: Fighter
   field: Battlefield
   /** The meta's entry of the opponent's battler (a stone holder's, its Mega's). */
   entry: PokemonMeta | undefined
-  /** At its team sheet: its item, ability and nature as set; only its stat points vary. */
-  sheet: boolean
+  /** What of the opponent's set is worked out; what isn't is as set (no nature, a neutral one; no item, none). */
+  work: OpponentUnknowns
   obs: readonly Observation[]
 }
 
-/** A stat's points where some build fits, and, off its team sheet, the natures' effects on it that can (`effects`). */
+/** What of the opponent's set is worked out rather than given. */
+export interface OpponentUnknowns {
+  nature: boolean
+  item: boolean
+  points: boolean
+}
+
+/** A stat's points where some build fits, and, its nature worked out, the natures' effects on it that can (`effects`). */
 export interface StatRange {
   stat: number
   from: number
@@ -227,13 +235,15 @@ export interface ReverseColumn {
 export interface ReverseResult {
   /** The stats the hits hang on, in `STATS` order. */
   stats: number[]
-  /** Each one's points where some build fits; empty when none does. */
+  /** Each one's points where some build fits (its points worked out); empty when none does, or they're given. */
   ranges: StatRange[]
+  /** Whether some build fits. */
+  possible: boolean
   /** How likely what was seen was, at the meta's sets; null with none. */
   chance: number | null
   rows: ReverseRow[]
   columns: ReverseColumn[]
-  /** Whether its items vary (not at its team sheet nor fixed): the table's columns are items. */
+  /** Whether its items vary (worked out, and not one it can't be without): the table's columns are items. */
   itemsVary: boolean
 }
 
@@ -245,7 +255,7 @@ type Build = { nature: string | null; points: readonly number[]; item: ItemId | 
  * many steps, for the progress shown.
  */
 export function reverseDamage(input: ReverseInput): { total: number; steps: Generator<unknown, ReverseResult | null> } {
-  const { field, entry, sheet, obs } = input
+  const { field, entry, work, obs } = input
   // Each at full HP but as a hit seen says it was (`before`), the defender's.
   const yours: Fighter = { ...input.yours, hp: 100 }
   const theirs: Fighter = { ...input.theirs, hp: 100 }
@@ -283,9 +293,11 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
   })
   const S = [...new Set(plans.flatMap((p) => p.used))].sort()
 
-  // Its natures, by what they do to the stats in play: at its team sheet its own; else every one.
+  // Its natures, by what they do to the stats in play: every one, worked out; else its own (none, a neutral one).
   const effectOf = (n: string | null, s: number): NatureEffect => (!s || !n ? 'neutral' : natureEffectOn(n, STATS[s]!))
-  const natures = sheet && m.nature ? [m.nature] : NATURE_IDS
+  const natures = work.nature ? NATURE_IDS : [m.nature ?? NEUTRAL]
+  /** Its points tried in a stat: every number, worked out; else its own. */
+  const pointsOf = (s: number) => (work.points ? POINT_VALUES : [m.points[s]!])
   const groups = new Map<string, { rep: string; natures: string[] }>()
   for (const n of natures) {
     const key = S.map((s) => effectOf(n, s)).join()
@@ -300,10 +312,10 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
     return i >= 0 ? i : 0
   }
 
-  // Its items: one set (known, or a guess to test) or one it can't be without (a Mega's stone, Ogerpon's mask), alone;
-  // unset, those run on `ITEM_MIN` of its sets or more (none, no item). Those alike for every hit (none changes them)
-  // as one.
-  const fixedItem = !!m.item || !!stoneMega(m) || (!!m.pokemon && itemBound(m.pokemon))
+  // Its items: given (as set, none for none) or one it can't be without (a Mega's stone, Ogerpon's mask), alone;
+  // worked out, those run on `ITEM_MIN` of its sets or more (none, no item). Those alike for every hit (none changes
+  // them) as one.
+  const fixedItem = !work.item || !!stoneMega(m) || (!!m.pokemon && itemBound(m.pokemon))
   const itemPrior = fixedItem
     ? [{ value: m.item, w: 1 }]
     : weighted<ItemId | null>(
@@ -381,7 +393,7 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
   for (const { pi, ii, gi } of jobs) {
     const calc = plans[pi]!.calc
     const rep = groupList[gi]!.rep
-    for (const pts of assignments(calc.length))
+    for (const pts of assignments(calc.map(pointsOf)))
       toHit.add(`${pi}|${ii}|${calc.map((s, k) => valueOf(s, pts[k]!, effectOf(rep, s))).join()}`)
   }
   total = toHit.size + groupList.length * itemList.length
@@ -396,7 +408,7 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
       const table = new Float64Array(radix ** used.length)
       // The order seen: at each of its Speed points, moving first fits, a tie half the time.
       if (o.by === 'speed') {
-        for (const p of POINT_VALUES) {
+        for (const p of pointsOf(5)) {
           const key = `${pi}|${ii}|${valueOf(5, p, effectOf(rep, 5))}`
           let fit = speedMemo.get(key)
           if (fit === undefined) {
@@ -414,7 +426,7 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
         continue
       }
       // Each value of what the calc reads, worked out once.
-      for (const pts of assignments(calc.length)) {
+      for (const pts of assignments(calc.map(pointsOf))) {
         const vals = calc.map((s, k) => valueOf(s, pts[k]!, effectOf(rep, s)))
         const memoKey = `${pi}|${ii}|${vals.join()}`
         let r = rollMemo.get(memoKey)
@@ -436,7 +448,7 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
         }
         // Every point of the stats in `used` the value stands for: HP's, where the calc doesn't read it, its own.
         const hpFree = used.includes(0) && !calc.includes(0)
-        for (const hp of hpFree ? POINT_VALUES : [0]) {
+        for (const hp of hpFree ? pointsOf(0) : [0]) {
           let fit = 1
           if (r) {
             let d = r.d
@@ -502,10 +514,10 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
       if (!e) effects.set(s, (e = new Set()))
       e.add(effectOf(groupList[gi]!.rep, s))
     }
-    // The meta's spreads (at its team sheet, those of its nature), merged where alike in the stats in play.
+    // The meta's spreads (its nature given, those of its nature), merged where alike in the stats in play.
     const spreads = weighted(
       (entry?.spreads ?? [])
-        .filter((s) => !sheet || !m.nature || s.nature === m.nature)
+        .filter((s) => work.nature || !m.nature || s.nature === m.nature)
         .map((s) => ({ value: { nature: s.nature, points: s.points }, share: s.share ?? 0 })),
     )
     const merged = new Map<string, { nature: string | null; points: Points; w: number }>()
@@ -518,6 +530,9 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
     const columnsOf = itemList.flatMap((g, ii) => g.items.map((it) => ({ ii, it })))
     const rowFits = (b: { nature: string | null; points: readonly number[] }) =>
       columnsOf.map((c) => fitAt(groupOf(b.nature), c.ii, b.points))
+    // Its points given: a row per nature it could have at them (one, its nature given), each with its share of the
+    // spreads, its items across; nothing to range over.
+    if (!work.points) return givenPoints(merged, columnsOf, rowFits)
     let chance: number | null = null
     const all = [...merged.values()].map((s) => {
       const fits = rowFits(s)
@@ -547,7 +562,7 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
           if (hpPlans.length && !fitAt(gi, ii, points, hpPlans)) continue
           const options = comps.map((stats, ci) => {
             const list: { pts: number[]; cost: number; d: number }[] = []
-            for (const pts of assignments(stats.length)) {
+            for (const pts of assignments(stats.map(() => POINT_VALUES))) {
               for (let k = 0; k < stats.length; k++) points[stats[k]!] = pts[k]!
               if (!fitAt(gi, ii, points, compPlans[ci])) continue
               let cost = 0
@@ -618,7 +633,15 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
       const b = nearest.build
       rows.push({ nature: b.nature, points: [...b.points] as Points, share: null, fits: rowFits(b), nearest: true })
     }
-    // The items as columns, those alike in every row merged; the most run first.
+    return table(rows, columnsOf, { ranges, chance, possible: ranges.length > 0 })
+  }
+
+  /** The table's columns, the items, those alike in every row merged, the most run first; and the result. */
+  function table(
+    rows: ReverseRow[],
+    columnsOf: { ii: number; it: Weighted<ItemId | null>[number] }[],
+    rest: Pick<ReverseResult, 'ranges' | 'chance' | 'possible'>,
+  ): ReverseResult {
     const order = columnsOf.map((_, ci) => ci).sort((x, y) => columnsOf[y]!.it.w - columnsOf[x]!.it.w)
     const columns: ReverseColumn[] = []
     const colOf: number[][] = []
@@ -635,13 +658,39 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
     }
     for (const r of rows) r.fits = colOf.map((cols) => r.fits[cols[0]!]!)
     if (fixedItem) columns.forEach((c) => (c.share = null))
-    return { stats: S, ranges, chance, rows, columns, itemsVary: !fixedItem }
+    return { stats: S, ...rest, rows, columns, itemsVary: !fixedItem }
+  }
+
+  /** Its points given: a row per nature group at them, by the share of its spreads at each (none, as many as there
+   * are), how likely what was seen was by them and its items. */
+  function givenPoints(
+    merged: Map<string, { nature: string | null; points: Points; w: number }>,
+    columnsOf: { ii: number; it: Weighted<ItemId | null>[number] }[],
+    rowFits: (b: { nature: string | null; points: readonly number[] }) => number[],
+  ): ReverseResult {
+    const shares = groupList.map(() => 0)
+    for (const s of merged.values()) shares[groupOf(s.nature)]! += s.w
+    const total = shares.reduce((n, x) => n + x, 0)
+    const rows: ReverseRow[] = groupList.map((g, gi) => {
+      const nature = m.nature && g.natures.includes(m.nature) ? m.nature : g.rep
+      return { nature, points: [...m.points] as Points, share: total ? shares[gi]! / total : null, fits: [] }
+    })
+    for (const r of rows) r.fits = rowFits(r)
+    const likes = rows.map((r) => r.fits.reduce((n, f, ci) => n + f * columnsOf[ci]!.it.w, 0))
+    const chance = total ? likes.reduce((n, l, gi) => n + l * (shares[gi]! / total), 0) : null
+    // The natures most run first; those with no sets after.
+    const order = rows.map((_, i) => i).sort((x, y) => (rows[y]!.share ?? 0) - (rows[x]!.share ?? 0))
+    return table(
+      order.map((i) => rows[i]!),
+      columnsOf,
+      { ranges: [], chance, possible: likes.some((l) => l > 0) || rows.some((r) => r.fits.some((f) => f > 0)) },
+    )
   }
 
   /** The build the nearest is measured from: its most common spread and item, or its own set. */
   function topBuild(): Build {
     const s = [...(entry?.spreads ?? [])]
-      .filter((x) => !sheet || !m.nature || x.nature === m.nature)
+      .filter((x) => work.nature || !m.nature || x.nature === m.nature)
       .sort((x, y) => (y.share ?? 0) - (x.share ?? 0))[0]
     const it = [...itemPrior].sort((x, y) => y.w - x.w)[0]?.value ?? m.item
     return s ? { nature: s.nature, points: s.points, item: it } : { nature: m.nature, points: m.points, item: m.item }
@@ -650,9 +699,12 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
   return { total, steps: steps() }
 }
 
-/** Every assignment of points to `n` stats, each 0 to `MAX_POINTS`. */
-function* assignments(n: number): Generator<number[]> {
-  const pts = Array<number>(n).fill(0)
+/** Every assignment of points to stats, each from its own list (every number, or one given); the array yielded is
+ * reused, so copied to be kept. */
+function* assignments(lists: readonly (readonly number[])[]): Generator<number[]> {
+  const n = lists.length
+  const at = Array<number>(n).fill(0)
+  const pts = lists.map((l) => l[0]!)
   if (!n) {
     yield pts
     return
@@ -660,9 +712,13 @@ function* assignments(n: number): Generator<number[]> {
   for (;;) {
     yield pts
     let k = n - 1
-    while (k >= 0 && pts[k] === MAX_POINTS) pts[k--] = 0
+    while (k >= 0 && at[k] === lists[k]!.length - 1) {
+      at[k] = 0
+      pts[k] = lists[k]![0]!
+      k--
+    }
     if (k < 0) return
-    pts[k]!++
+    pts[k] = lists[k]![++at[k]!]!
   }
 }
 

@@ -27,7 +27,7 @@ import {
   usesAttacked,
   usesFainted,
 } from '@/lib/damage'
-import type { Field, Member } from '@/lib/team'
+import { stoneMega, type Field, type Member } from '@/lib/team'
 import { conditionName, sideOf, SPIKES } from '@/components/calcConditions'
 import CalcConditions from '@/components/CalcConditions.vue'
 import CalcConditionSearch from '@/components/CalcConditionSearch.vue'
@@ -37,6 +37,9 @@ import PokemonIcon from '@/components/PokemonIcon'
 import HpBar from '@/components/HpBar.vue'
 import StageStepper from '@/components/StageStepper.vue'
 import TeamSlot from '@/components/TeamSlot.vue'
+import WorkOutToggles from '@/components/WorkOutToggles.vue'
+import type { OpponentUnknowns } from '@/lib/damageReverse'
+import { itemBound } from '@/data/pokemon'
 
 // One side of the damage calculator (with no Pokémon yet, one button picking it), a panel in five parts, each on a row the other side's shares on wide screens (so
 // both sides' parts line up whatever each holds): its heading (whose it is, by its color, opening its Pokémon's picker;
@@ -62,12 +65,16 @@ const props = defineProps<{
   /** What the battle adds to it folded away, its heading alone. */
   battleFolded: boolean
   /** The inverse calc's: its moves by name alone, no damage (what was seen is entered apart), no HP left (each hit
-   * seen has its own); the opponent's stat points left out, and off its team sheet (`sheet`) its nature too,
-   * those being what's worked out; its item optional, worked out until set. */
+   * seen has its own). */
   inverse?: boolean
-  sheet?: boolean
+  /** What of its set its card leaves out: on the inverse calc, the opponent's worked out. */
+  hide?: readonly ('points' | 'nature' | 'item')[]
+  /** The inverse calc's opponent: what of its set is worked out, a row of toggles under its card (`WorkOutToggles`),
+   * with Team sheet setting them as an open team sheet has it: its points alone. */
+  work?: OpponentUnknowns
 }>()
 const emit = defineEmits<{
+  work: [w: OpponentUnknowns]
   'update:fighter': [f: Fighter]
   field: [f: Field]
   clear: []
@@ -78,6 +85,28 @@ const emit = defineEmits<{
   battleFolded: [folded: boolean]
 }>()
 defineSlots<{ actions(): unknown }>()
+
+/** The inverse calc's opponent's Work out toggles: its nature, item and stat points; its item not, one it can't be
+ * without (a Mega's stone, Ogerpon's mask). */
+const workOptions = computed(() => {
+  const w = props.work
+  if (!w) return []
+  const m = props.fighter.member
+  const fixed = !!stoneMega(m) || (!!m.pokemon && itemBound(m.pokemon))
+  return [
+    { key: 'nature' as const, label: t('builder.nature'), on: w.nature },
+    {
+      key: 'item' as const,
+      label: t('builder.item'),
+      on: w.item && !fixed,
+      disabled: fixed,
+      tip: fixed ? t('calc.reverse.itemFixed') : undefined,
+    },
+    { key: 'points' as const, label: t('builder.points'), on: w.points },
+  ]
+})
+/** Whether it's as an open team sheet has it: its points alone worked out. */
+const atSheet = computed(() => !!props.work && !props.work.nature && !props.work.item && props.work.points)
 
 const uid = useId()
 const [DefineFainted, ReuseFainted] = createReusableTemplate()
@@ -209,8 +238,7 @@ function setHpPoints(e: Event) {
           :evolved="fighter.mega"
           no-moves
           flat
-          :hide="inverse && theirs ? (sheet ? ['points'] : ['points', 'nature']) : undefined"
-          :item-placeholder="inverse && theirs ? t('calc.reverse.itemUnknown') : undefined"
+          :hide
           :at-sets="fighter.sets && !!fighter.pooled"
           :pooled
           @mega="set({ mega: !fighter.mega })"
@@ -230,6 +258,25 @@ function setHpPoints(e: Event) {
       >
         <Plus :size="18" aria-hidden="true" />{{ t(theirs ? 'compare.pickOpponent' : 'compare.pickYours') }}
       </button>
+      <!-- The inverse calc's opponent: what of its set is worked out, and Team sheet setting it as an open one has it. -->
+      <WorkOutToggles
+        v-if="work && fighter.member.pokemon"
+        class="work"
+        :options="workOptions"
+        :example="t('calc.reverse.workExample')"
+        @toggle="(k: keyof OpponentUnknowns) => emit('work', { ...work!, [k]: !work![k] })"
+      >
+        <button
+          v-tip="t('calc.reverse.sheetTip')"
+          type="button"
+          class="btn sheet"
+          :class="{ on: atSheet }"
+          :aria-pressed="atSheet"
+          @click="emit('work', { nature: false, item: false, points: true })"
+        >
+          {{ t('calc.threats.sheet') }}
+        </button>
+      </WorkOutToggles>
     </div>
 
     <!-- Its moves against the other side. -->
@@ -435,6 +482,13 @@ function setHpPoints(e: Event) {
 </template>
 
 <style scoped>
+/* The inverse calc's Work out, under the opponent's card; Team sheet among its toggles, lit when it's as one has it. */
+.work {
+  margin-top: 10px;
+}
+.sheet.on {
+  background: var(--sel);
+}
 .side {
   --side: var(--accent);
   display: flex;
