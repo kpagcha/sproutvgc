@@ -7,7 +7,8 @@ import { hpShown } from '@/lib/damage'
 // drawn as the damage calculator's bars of HP are (`DamageRow`): what's left in the HP colors (green over half, yellow
 // over a fifth, red under), what's lost dark, ink-outlined, with a mark at half, where Sitrus Berry and the like kick
 // in. Taller than those, to be held, its percent on it. It works as the stat points' bar (`PointsBar`), by HP points:
-// dragged or tapped along (sliding sideways on a touch screen; up and down still scroll the page), or with the keys
+// dragged or clicked along (on a touch screen only dragged, sliding sideways, a tap setting nothing; up and down still
+// scroll the page), or with the keys
 // (arrows by one point, with Shift or Page Up/Down by a tenth of its HP, Home and End to 1 and full), and stepped by
 // one point with the buttons beside it; under a mouse, where it would go shows faded before it's pressed.
 const props = defineProps<{
@@ -37,18 +38,34 @@ function at(e: PointerEvent): number {
   const r = bar.value!.getBoundingClientRect()
   return clampPoints(((e.clientX - r.left) / r.width) * props.max)
 }
+/** Where a touch went down, until it has slid far enough sideways to be a drag: a tap alone sets nothing, as it's
+ *  easily one made scrolling the page. */
+let touchFrom: number | null = null
+/** How far a touch slides sideways, in pixels, before it drags. */
+const SLOP = 6
 function down(e: PointerEvent) {
   if (e.button !== 0) return
   bar.value!.setPointerCapture(e.pointerId)
-  dragging.value = true
   hover.value = null
+  if (e.pointerType !== 'mouse') {
+    touchFrom = e.clientX
+    return
+  }
+  dragging.value = true
   setPoints(at(e))
 }
 function move(e: PointerEvent) {
+  if (touchFrom !== null && Math.abs(e.clientX - touchFrom) >= SLOP) {
+    touchFrom = null
+    dragging.value = true
+  }
   if (dragging.value) setPoints(at(e))
   else if (e.pointerType === 'mouse') hover.value = at(e)
 }
-const up = () => (dragging.value = false)
+const up = () => {
+  touchFrom = null
+  dragging.value = false
+}
 function key(e: KeyboardEvent) {
   const tenth = Math.max(1, Math.round(props.max / 10))
   const step = e.shiftKey ? tenth : 1
