@@ -1289,6 +1289,13 @@ function resetAll() {
   .side :deep(.speed-editor > :nth-last-child(2)) {
     margin-bottom: 12px;
   }
+  /* Read backwards, the two as tall as the taller, the shorter one's modifiers at its foot, level with the other's. */
+  .reverse-sides {
+    align-items: stretch;
+  }
+  .reverse-sides .side :deep(.speed-editor > section.part:last-of-type) {
+    margin-top: auto;
+  }
 }
 /* Its side's color, for what's marked in it. */
 .side {
