@@ -9,7 +9,7 @@ import { STATS } from '@/data/pokemon'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { battlerOf, type Battlefield, type Fighter } from '@/lib/damage'
-import { goalDamage, THRESHOLDS, type GoalBuild, type GoalResult } from '@/lib/damageGoal'
+import { goalDamage, THRESHOLDS, type GoalBuild, type GoalResult, type GoalRow } from '@/lib/damageGoal'
 import {
   reverseDamage,
   type Observation,
@@ -176,6 +176,36 @@ const thresholdLabel = (th: (typeof THRESHOLDS)[number]) => {
   const pct = th === 0.5 ? '50' : th === 0.9 ? '90' : '100'
   return t(goal.value?.againstSets ? (`calc.goal.sets.${pct}` as const) : (`calc.goal.rolls.${pct}` as const))
 }
+/** Whether a strip's cell is one of the row's goals' (a threshold's fewest points, or the most's). */
+const marked = (r: GoalRow, p: number) => [...r.cells, r.best].some((c) => c && c.points[goal.value!.ours[0]!] === p)
+/**
+ * A strip's goals, by the number of points they're at, the fewest first: those at one as one label ("Half its sets ·
+ * 90%"), the build covering the most among them; near the strip's ends, held inside it. On phones, under the strip.
+ */
+function marksOf(r: GoalRow) {
+  const s = goal.value!.ours[0]!
+  const named = [
+    ...r.cells.map((c, ci) => c && { c, name: thresholdLabel(THRESHOLDS[ci]!) }),
+    r.best && { c: r.best, name: t('calc.goal.mostAt', { pct: percent(r.best.coverage) }) },
+  ].filter((x): x is { c: GoalBuild; name: string } => !!x)
+  const byP = new Map<number, { p: number; names: string[]; build: GoalBuild }>()
+  for (const { c, name } of named) {
+    const p = c.points[s]!
+    const was = byP.get(p)
+    if (!was) byP.set(p, { p, names: [name], build: c })
+    else {
+      was.names.push(name)
+      if (c.coverage > was.build.coverage) was.build = c
+    }
+  }
+  return [...byP.values()]
+    .sort((x, y) => x.p - y.p)
+    .map((m) => ({
+      ...m,
+      label: `${m.names.map((n) => n.replace(/:$/, '')).join(' · ')}:`,
+      edge: m.p <= 10 ? 'start' : m.p >= MAX_POINTS - 10 ? 'end' : '',
+    }))
+}
 const useYours = (b: GoalBuild) => emit('useYours', { nature: b.nature, points: b.points, item: b.item })
 const itemName = (id: ItemId | null) => (id ? refName(item(id)) : t('builder.noItem'))
 const fitTip = (f: number) => t('calc.reverse.fitTip', { pct: percent(f) })
@@ -218,54 +248,85 @@ function use(r: ReverseRow) {
           <h4 class="answer-head"><PokemonIcon :id="yourId!" />{{ t('calc.goal.yoursHead') }}</h4>
           <p v-if="goal.tooMany" class="warn" role="status">{{ t('calc.goal.tooMany') }}</p>
           <p v-else-if="!goal.rows.some((r) => r.best)" class="warn" role="status">{{ t('calc.goal.never') }}</p>
-          <div v-else class="table-wrap">
-            <table class="builds goal">
-              <thead>
-                <tr>
-                  <th scope="col" class="corner muted">{{ t(goal.itemsVary ? 'calc.goal.item' : 'calc.goal.its') }}</th>
-                  <th v-for="th in THRESHOLDS" :key="th" scope="col" class="col muted">{{ thresholdLabel(th) }}</th>
-                  <th scope="col" class="col muted">{{ t('calc.goal.most') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(r, ri) in goal.rows" :key="ri">
-                  <th scope="row">
-                    <span class="items">
-                      <template v-for="it in r.items.slice(0, 1)" :key="it ?? '-'">
-                        <span v-if="it" v-tip="itemName(it)" class="item" role="img" :aria-label="itemName(it)"
-                          ><ItemIcon :id="it"
-                        /></span>
-                        <span v-else class="muted no-item">{{ itemName(null) }}</span>
-                      </template>
-                      <span
-                        v-if="r.items.length > 1"
-                        v-tip="r.items.map(itemName).join(', ')"
-                        class="more-items"
-                        :aria-label="r.items.map(itemName).join(', ')"
-                        >+{{ r.items.length - 1 }}</span
-                      >
-                    </span>
-                    <span v-if="r.share" v-tip="t('calc.goal.itemTip')" class="muted share">{{
-                      percent(r.share)
-                    }}</span>
-                  </th>
-                  <td v-for="(c, ci) in [...r.cells, r.best]" :key="ci" class="goal-cell">
+          <!-- A line per item: what it reaches of the thresholds and the most, each a build to use. -->
+          <ul v-else class="goal-list">
+            <li v-for="(r, ri) in goal.rows" :key="ri" class="goal-row">
+              <span class="goal-item">
+                <ItemIcon v-if="r.items[0]" :id="r.items[0]" />
+                <span v-else class="no-icon" aria-hidden="true"></span>
+                <span v-tip="r.items.length > 1 ? r.items.map(itemName).join(', ') : undefined" class="goal-item-name"
+                  >{{ itemName(r.items[0] ?? null)
+                  }}<template v-if="r.items.length > 1"> +{{ r.items.length - 1 }}</template></span
+                >
+                <span v-if="r.share" v-tip="t('calc.goal.itemTip')" class="muted share">{{ percent(r.share) }}</span>
+              </span>
+              <span class="goal-main">
+                <!-- With one stat of yours in play: a cell per number of its points, none to all, colored by how much of
+                   the opponent it gets there; tapped, that build used; the goals' outlined. -->
+                <span v-if="r.curve" class="strip-wrap">
+                  <span class="strip" role="group" :aria-label="t('calc.goal.stripLabel')">
                     <button
-                      v-if="c"
-                      v-tip="t('calc.goal.useTip', { pct: percent(c.coverage) })"
+                      v-for="(c, p) in r.curve"
+                      :key="p"
+                      v-tip:group="t('calc.goal.stripTip', { n: p, pct: percent(c.coverage) })"
+                      type="button"
+                      class="strip-cell"
+                      :class="{ mark: marked(r, p) }"
+                      :style="{ '--cov': `${Math.round(c.coverage * 100)}%` }"
+                      :aria-label="t('calc.goal.stripTip', { n: p, pct: percent(c.coverage) })"
+                      @click="useYours(c)"
+                    ></button>
+                  </span>
+                  <span class="strip-ends muted"
+                    ><span>0</span><span>{{ statName(goal.ours[0]!) }}</span
+                    ><span>{{ MAX_POINTS }}</span></span
+                  >
+                  <!-- On phones, where the cells' tooltips don't show, its goals under their cells, a line each, those
+                       at one number of points as one; each the build to use. Wider, the row of them under it does. -->
+                  <span class="marks" :style="{ '--lanes': marksOf(r).length }">
+                    <button
+                      v-for="(m, mi) in marksOf(r)"
+                      :key="m.p"
+                      type="button"
+                      class="btn small pick mark-label"
+                      :class="m.edge"
+                      :style="{ '--at': `${((m.p + 0.5) / (MAX_POINTS + 1)) * 100}%`, '--lane': mi }"
+                      @click="useYours(m.build)"
+                    >
+                      <span class="muted">{{ m.label }}</span> {{ buildLabel(m.build, goal.ours) }}
+                    </button>
+                  </span>
+                </span>
+                <span class="goal-picks" :class="{ curved: r.curve }">
+                  <template v-for="(c, ci) in r.cells" :key="ci">
+                    <span v-if="c" class="goal-pick">
+                      <span class="muted">{{ thresholdLabel(THRESHOLDS[ci]!) }}</span>
+                      <button
+                        v-tip="t('calc.goal.useTip', { pct: percent(c.coverage) })"
+                        type="button"
+                        class="btn small pick"
+                        @click="useYours(c)"
+                      >
+                        {{ buildLabel(c, goal.ours) }}
+                      </button>
+                    </span>
+                  </template>
+                  <span v-if="r.best" class="goal-pick">
+                    <span class="muted">{{ t('calc.goal.mostAt', { pct: percent(r.best.coverage) }) }}</span>
+                    <button
+                      v-tip="t('calc.goal.useTip', { pct: percent(r.best.coverage) })"
                       type="button"
                       class="btn small pick"
-                      @click="useYours(c)"
+                      @click="useYours(r.best)"
                     >
-                      <span class="spread">{{ buildLabel(c, goal.ours) }}</span>
-                      <span v-if="ci === r.cells.length" class="muted share">{{ percent(c.coverage) }}</span>
+                      {{ buildLabel(r.best, goal.ours) }}
                     </button>
-                    <span v-else class="muted">–</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                  </span>
+                  <span v-else class="muted">{{ t('calc.goal.none') }}</span>
+                </span>
+              </span>
+            </li>
+          </ul>
           <p v-if="!goal.tooMany" class="muted small">
             {{ t(goal.againstSets ? 'calc.goal.noteSets' : 'calc.goal.noteSet') }}
           </p>
@@ -456,27 +517,19 @@ function use(r: ReverseRow) {
 .answer > p {
   margin: 0;
 }
-/* Two answers, yours and the opponent's, side by side where there's room, each headed by whose it is. */
+/* Two answers, yours over the opponent's, each headed by whose it is, a rule between them. */
 .answers.two {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
   gap: 16px;
-  align-items: start;
+}
+.answers.two > .answer + .answer {
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
 }
 .answer {
   display: flex;
   flex-direction: column;
   gap: 10px;
   min-width: 0;
-  padding-left: 8px;
-  border-left: 4px solid var(--opponent);
-}
-.answer.yours {
-  border-left-color: var(--accent);
-}
-.answer:only-child {
-  padding-left: 0;
-  border-left: 0;
 }
 .answer-head {
   display: flex;
@@ -485,17 +538,132 @@ function use(r: ReverseRow) {
   margin: 0;
   font-size: 0.95em;
 }
-.goal-cell {
-  text-align: center;
-  vertical-align: middle;
+/* Yours: a line per item, its name and share, then what it reaches, each a label over its build, wrapping. */
+.goal-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.goal-row {
+  display: grid;
+  grid-template-columns: minmax(9em, max-content) minmax(0, 1fr);
+  align-items: start;
+  gap: 4px 16px;
+  padding: 8px 0;
+}
+.goal-row + .goal-row {
+  border-top: 1px solid var(--border);
+}
+.goal-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: bold;
+}
+.goal-item .share {
+  font-weight: normal;
+  font-size: 0.85em;
+}
+.no-icon {
+  width: 24px;
+  height: 24px;
+}
+.goal-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+/* The strip: a cell per point, none to all, filled with the fits' green as far as it gets the opponent. */
+.strip-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.strip {
+  display: grid;
+  grid-template-columns: repeat(33, minmax(0, 1fr));
+  height: 22px;
+  border: 1px solid var(--border);
+}
+.strip-cell {
+  min-width: 0;
+  padding: 0;
+  background: color-mix(in srgb, var(--m2-bg) var(--cov), var(--panel-alt));
+  border: 0;
+  cursor: pointer;
+}
+.strip-cell + .strip-cell {
+  border-left: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+}
+.strip-cell:hover,
+.strip-cell:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+.strip-cell.mark {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.strip-ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75em;
+}
+/* On phones, the goals under their cells: each centered on its cell (near the ends, held inside the strip), a line
+   each; the row of them under it then not shown. Wider, the row, not them. */
+.marks {
+  display: none;
+  position: relative;
+  height: calc(var(--lanes) * 28px);
+  font-size: 0.875em;
+}
+.mark-label {
+  position: absolute;
+  top: calc(var(--lane) * 28px);
+  left: var(--at);
+  translate: -50% 0;
+}
+.mark-label.start {
+  left: 0;
+  translate: 0 0;
+}
+.mark-label.end {
+  left: auto;
+  right: 0;
+  translate: 0 0;
+}
+@media (max-width: 720px) {
+  .marks {
+    display: block;
+  }
+  .goal-picks.curved {
+    display: none;
+  }
+}
+.goal-picks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  font-size: 0.875em;
+}
+.goal-pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 .pick {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
   min-height: 0;
-  padding: 2px 8px;
+  padding: 1px 8px;
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 720px) {
+  .goal-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 .small {
   font-size: 0.85em;
@@ -508,14 +676,12 @@ function use(r: ReverseRow) {
   opacity: 0.5;
   transition: opacity 0.15s;
 }
-/* Its points where they're bound, after its icon, edged in the opponent's color. */
+/* Its points where they're bound, after its icon. */
 .lines {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 14px;
-  padding-left: 8px;
-  border-left: 4px solid var(--opponent);
 }
 .line {
   white-space: nowrap;
@@ -538,13 +704,9 @@ function use(r: ReverseRow) {
   white-space: nowrap;
   text-align: left;
 }
-.builds thead th.col {
-  border-top: 3px solid var(--opponent);
-}
 /* A spread's cell as wide whatever its row ends with (its share, "Nearest fit"). */
 .builds tbody th {
   min-width: 10.5em;
-  border-left: 3px solid var(--opponent);
 }
 /* An item's column: one width whatever it's of (an icon or two, how many more, its share), its content centered as
    its cells' is. */

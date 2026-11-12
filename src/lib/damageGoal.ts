@@ -75,6 +75,9 @@ export interface GoalRow {
   share: number | null
   cells: (GoalBuild | null)[]
   best: GoalBuild | null
+  /** With one stat of yours in play and its points worked out: at each number of them, from none to all, the most it
+   * covers (at its best nature), and that build; for the strip drawn along them. */
+  curve: GoalBuild[] | null
 }
 export interface GoalResult {
   /** Your stats the hits hang on, in `STATS` order: what a build's points are shown in. */
@@ -409,6 +412,8 @@ export function goalDamage(input: GoalInput): { total: number; steps: Generator<
     for (let mi = 0; mi < myItemList.length; mi++) {
       const cells: (GoalBuild | null)[] = THRESHOLDS.map(() => null)
       let best: GoalBuild | null = null
+      const curved = ours.length === 1 && workYours.points
+      const curve: (GoalBuild | null)[] = curved ? POINT_VALUES.map(() => null) : []
       for (let gi = 0; gi < myGroups.length; gi++) {
         yield
         for (const pts of product(ours.map(myPoints))) {
@@ -438,11 +443,21 @@ export function goalDamage(input: GoalInput): { total: number; steps: Generator<
             (Math.abs(coverage - best.coverage) <= 1e-9 && cost < best.cost)
           )
             best = b()
+          if (curved) {
+            const at = curve[pts[0]!]
+            if (!at || coverage > at.coverage + 1e-9) curve[pts[0]!] = b()
+          }
         }
       }
       const items = myItemList[mi]!
       const share = myFixed ? null : items.reduce((n, it) => n + (myItemPrior.find((x) => x.value === it)?.w ?? 0), 0)
-      rows.push({ items, share, cells, best: best && best.coverage > 0 ? best : null })
+      rows.push({
+        items,
+        share,
+        cells,
+        best: best && best.coverage > 0 ? best : null,
+        curve: curved && curve.every(Boolean) ? (curve as GoalBuild[]) : null,
+      })
     }
     // Those your sets run first, then by the most they cover, those covering nothing left out (no item kept).
     rows.sort((x, y) => (y.share ?? 0) - (x.share ?? 0) || (y.best?.coverage ?? 0) - (x.best?.coverage ?? 0))
@@ -468,14 +483,28 @@ export function goalDamage(input: GoalInput): { total: number; steps: Generator<
         for (let j = 0; j < J; j++) share[j] = share[j]! + b.w * row[j]!
       }
       if (mineTotal) for (let j = 0; j < J; j++) share[j] = share[j]! / mineTotal
-      const spreadsShown = theirSpreadsAll.map((s, si) => ({ s, si })).slice(0, TABLE_MAX)
-      const rowsTheirs: ReverseRow[] = spreadsShown.map(({ s, si }) => ({
-        nature: s.nature,
-        points: [...s.points] as Points,
-        share: againstSets && (workTheirs.points || workTheirs.nature) ? s.w : null,
-        fits: theirItemPrior.map((_, ii) => share[others.findIndex((x) => x.spread === si && x.itemIdx === ii)]!),
-      }))
+      // Its spreads alike in what the hits hang on (each stat's nature effect and points) one row, their fits by how
+      // often each is run; the most run first.
       const statsTheirs = [...new Set(plans.flatMap((p) => p.theirs.used))].sort()
+      const groups = new Map<string, { s: (typeof theirSpreadsAll)[number]; w: number; fits: number[] }>()
+      theirSpreadsAll.forEach((sp, si) => {
+        const key = statsTheirs.map((st) => `${theirEffect(sp.nature, st)}${sp.points[st]}`).join()
+        let g = groups.get(key)
+        if (!g) groups.set(key, (g = { s: sp, w: 0, fits: theirItemPrior.map(() => 0) }))
+        g.w += sp.w
+        theirItemPrior.forEach((_, ii) => {
+          g.fits[ii]! += sp.w * share[others.findIndex((x) => x.spread === si && x.itemIdx === ii)]!
+        })
+      })
+      const rowsTheirs: ReverseRow[] = [...groups.values()]
+        .sort((x, y) => y.w - x.w)
+        .slice(0, TABLE_MAX)
+        .map((g) => ({
+          nature: g.s.nature,
+          points: [...g.s.points] as Points,
+          share: workTheirs.points || workTheirs.nature ? g.w : null,
+          fits: g.fits.map((f) => (g.w ? f / g.w : 0)),
+        }))
       const chance = others.reduce((n, x, j) => n + x.w * share[j]!, 0)
       theirsResult = {
         stats: statsTheirs,
