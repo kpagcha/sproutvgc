@@ -306,14 +306,29 @@ const buildLabel = (b: TableBuild) => t('reverse.build', { n: b.points, speed: b
   max-width: 100%;
   overflow-x: auto;
 }
+/* Its left column stuck as it scrolls sideways: borders drawn per cell (collapsed ones would scroll away from it), its
+   cells opaque over those passing under them. */
 .builds {
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   font-size: 0.875em;
 }
 .builds th,
 .builds td {
   padding: 4px 8px;
-  border: 1px solid var(--border);
+  border: 0 solid var(--border);
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+}
+.builds thead th {
+  border-top-width: 1px;
+}
+.builds tr > :first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--panel);
+  border-left-width: 1px;
 }
 .builds th {
   font-weight: normal;
