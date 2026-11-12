@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { shallowRef, useTemplateRef } from 'vue'
 import { Plus } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
-import { t } from '@/i18n'
-import type { Ranks } from '@/composables/usePokemonSearch'
-import PokemonPicker from '@/components/PokemonPicker.vue'
+import type { SpeedBuild } from '@/lib/speedBuild'
+import SpeedPickDrawer from '@/components/SpeedPickDrawer.vue'
 
-// The comparison's slot adding a team's second Pokémon: a dashed field in its team's color that picks one straight away
-// (a list under it, or on phones a screen of its own), nothing changing until one is picked; left without one, it's as
-// it was. Greyed out while the team's first isn't picked.
+// The comparison's slot adding a team's second Pokémon: a dashed button in its team's color that picks one straight
+// away, as the damage calculator does (a drawer beside it, or on phones a dialog: `SpeedPickDrawer`), nothing changing
+// until one is picked (the page then going on to its Speed); left without one, it's as it was. Greyed out while the
+// team's first isn't picked.
 const props = defineProps<{
   team: 'yours' | 'opponent'
   /** What it says: adding a second Pokémon, or which team's. */
@@ -16,37 +16,33 @@ const props = defineProps<{
   disabled?: boolean
   /** The team's first, which it can't be (nor one of its species). */
   taken?: readonly PokemonId[]
-  /** The meta's usage ranks, for its picker to list by. */
-  ranks?: Ranks
 }>()
-const emit = defineEmits<{ pick: [id: PokemonId] }>()
+const emit = defineEmits<{ pick: [id: PokemonId, build?: SpeedBuild] }>()
 
-// The field emptied after each pick, for the next time.
-const round = ref(0)
-function pick(id: PokemonId | null) {
-  round.value++
-  if (id) emit('pick', id)
-}
+defineOptions({ inheritAttrs: false })
+const step = shallowRef<'pokemon' | 'speed' | null>(null)
+const button = useTemplateRef<HTMLElement>('button')
 </script>
 
 <template>
-  <button v-if="props.disabled" type="button" class="add-second" :class="props.team" disabled>
+  <button
+    ref="button"
+    v-bind="$attrs"
+    type="button"
+    class="add-second"
+    :class="props.team"
+    :disabled="props.disabled"
+    @click="step = 'pokemon'"
+  >
     <Plus :size="16" aria-hidden="true" />{{ props.label }}
   </button>
-  <PokemonPicker
-    v-else
-    :key="round"
-    recent
-    :model-value="null"
-    :placeholder="`+ ${props.label}`"
-    :title="props.team === 'yours' ? t('speed.yours') : t('compare.opponent')"
-    :tone="props.team"
+  <SpeedPickDrawer
+    v-model:step="step"
+    :id="null"
     :taken="props.taken"
-    :ranks="props.ranks"
-    speed
-    class="add-second add-picker"
-    :class="props.team"
-    @update:model-value="pick"
+    :anchor="button"
+    @pick="(id: PokemonId) => emit('pick', id)"
+    @team="(id: PokemonId, b: SpeedBuild) => emit('pick', id, b)"
   />
 </template>
 
@@ -76,25 +72,5 @@ button.add-second {
 button.add-second:disabled {
   cursor: default;
   opacity: 0.4;
-}
-/* The field itself the slot: as wide as what it's in, dashed until it's in use. */
-.add-picker.add-picker :deep(.search-box) {
-  max-width: none;
-}
-.add-picker.add-picker :deep(input.search[type='search']) {
-  padding-block: 8px;
-  font-weight: bold;
-  color: var(--text);
-  background: var(--tint);
-  border: 2px dashed var(--team);
-  cursor: pointer;
-}
-.add-picker.add-picker :deep(input.search[type='search']):focus {
-  border-style: solid;
-  cursor: text;
-}
-.add-picker :deep(input.search::placeholder) {
-  color: var(--team);
-  opacity: 1;
 }
 </style>

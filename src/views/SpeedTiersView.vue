@@ -102,7 +102,9 @@ import SpeedOdds, { type OddsRow } from '@/components/SpeedOdds.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
 import PointsBar from '@/components/PointsBar.vue'
+import PickField from '@/components/PickField.vue'
 import PokemonPicker from '@/components/PokemonPicker.vue'
+import SpeedPickDrawer from '@/components/SpeedPickDrawer.vue'
 import ScrollRow from '@/components/ScrollRow.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 import VersusPanel, { type VersusItem } from '@/components/VersusPanel.vue'
@@ -390,12 +392,21 @@ const mySpeed = computed(() =>
  * Picks your Pokémon, at the meta's most common build of it when there is one, else the fastest. The page stays where
  * it is, so the ladder's opponents band is the first of it you see; the Speed's button shows where it landed.
  */
-function pickMine(id: PokemonId | null) {
+/** Yours picked: at the meta's most common build, or one of the reader's teams' Pokémon at its build there (its
+ * nature's effect, its points, its Speed item), its modifiers then its own. */
+function pickMine(id: PokemonId | null, given?: SpeedBuild) {
   if (!id) return
-  void router.replace({ query: { ...query.value, mine: id, ...buildOf(id), mymods: keptMods(), vs: undefined } })
+  const build = given
+    ? { mynat: given.effect, mypts: String(given.points), mymods: given.toggles.join(',') || undefined }
+    : { ...buildOf(id), mymods: keptMods() }
+  void router.replace({ query: { ...query.value, mine: id, ...build, mystage: undefined, vs: undefined } })
   // On phones, picked from the bar: its card opens, for its build and modifiers.
   if (phone.value) yoursOpen.value = true
 }
+// Yours picked as the damage calculator's are, in a drawer beside its card (a dialog on phones), then its Speed: the
+// card's build (`MyBuild`) there too.
+const yoursStep = shallowRef<'pokemon' | 'speed' | null>(null)
+const [DefineMyBuild, MyBuild] = createReusableTemplate()
 /** Your modifiers for another Pokémon: its abilities aren't yours' (nor the weather they'd bring). */
 function keptMods() {
   const kept = [...myToggles.value].filter((k) => k !== 'doubled' && k !== 'doubled2')
@@ -1697,10 +1708,9 @@ watch(
 onBeforeUnmount(() => sidebarObserver?.disconnect())
 const barShown = computed(() => !side.value || !sidebarSeen.value)
 // On phones with none picked, the bar goes straight to picking one: the card would only ask for it.
-const yoursPicker = useTemplateRef<InstanceType<typeof PokemonPicker>>('yoursPicker')
 function onBarYours() {
   if (side.value) reveal(yoursCard.value)
-  else if (phone.value && !mine.value) yoursPicker.value?.open()
+  else if (phone.value && !mine.value) yoursStep.value = 'pokemon'
   else toggleYours()
 }
 // The bar's height, for what sticks to the top under it (the controls' heading, the ladder's bar), and where its card
@@ -2437,47 +2447,10 @@ const { start: startTour } = useTour(
            floats at the foot of the screen. -->
       <div class="side-col">
         <Teleport :to="phone ? '#yours-sheet' : '#yours-drop'" :disabled="side" defer>
-          <details
-            ref="yoursCard"
-            class="panel banded yours instant"
-            :open="side || yoursOpen"
-            @toggle="!side && (yoursOpen = isOpen($event))"
-          >
-            <!-- A heading that closes the card dropped from the bar; beside the ladder it's always open. -->
-            <summary class="yours-title" @click.prevent="!side && toggleYours()">
-              <span class="marker yours-marker" aria-hidden="true">{{ yoursOpen ? '▾' : '▸' }}</span>
-              <span v-tip="t('speed.yoursIntro')" class="tipped">{{ t('speed.yours') }}</span>
-              <!-- Unpicking yours, at the band's end: its own click, not the heading's. -->
-              <button
-                v-if="mine"
-                v-tip="t('speed.clear')"
-                type="button"
-                class="btn on-band band-clear"
-                :aria-label="t('speed.clear')"
-                @click.stop.prevent="clearMine"
-              >
-                <Trash2 :size="16" aria-hidden="true" />
-              </button>
-            </summary>
-            <div class="yours-pick">
-              <PokemonPicker
-                recent
-                :model-value="mine"
-                ref="yoursPicker"
-                :placeholder="t('speed.yoursPick')"
-                :title="t('speed.yours')"
-                tone="yours"
-                :caret="!mine"
-                list-width-of=".yours-pick"
-                speed
-                icon
-                :ranks
-                class="yours-picker"
-                @update:model-value="pickMine"
-              />
-            </div>
+          <!-- Its build: the meta's builds of it, its nature's effect and its points; on the card and in its picking's
+               Speed step. -->
+          <DefineMyBuild>
             <template v-if="mine">
-              <!-- Its build and modifiers, then what they come to: each a section of its own, labeled above. -->
               <!-- The meta's builds of it, to pick one in a tap, as the comparison has them. -->
               <section v-if="myCommon.length" class="yours-section">
                 <span class="muted small">{{ t('compare.common') }}</span>
@@ -2535,6 +2508,51 @@ const { start: startTour } = useTour(
                   />
                 </div>
               </section>
+            </template>
+          </DefineMyBuild>
+          <details
+            ref="yoursCard"
+            class="panel banded yours instant"
+            :open="side || yoursOpen"
+            @toggle="!side && (yoursOpen = isOpen($event))"
+          >
+            <!-- A heading that closes the card dropped from the bar; beside the ladder it's always open. -->
+            <summary class="yours-title" @click.prevent="!side && toggleYours()">
+              <span class="marker yours-marker" aria-hidden="true">{{ yoursOpen ? '▾' : '▸' }}</span>
+              <span v-tip="t('speed.yoursIntro')" class="tipped">{{ t('speed.yours') }}</span>
+              <!-- Unpicking yours, at the band's end: its own click, not the heading's. -->
+              <button
+                v-if="mine"
+                v-tip="t('speed.clear')"
+                type="button"
+                class="btn on-band band-clear"
+                :aria-label="t('speed.clear')"
+                @click.stop.prevent="clearMine"
+              >
+                <Trash2 :size="16" aria-hidden="true" />
+              </button>
+            </summary>
+            <div class="yours-pick">
+              <PickField
+                :id="mine"
+                :placeholder="t('speed.yoursPick')"
+                class="yours-picker"
+                @click="yoursStep = 'pokemon'"
+              />
+              <SpeedPickDrawer
+                v-model:step="yoursStep"
+                :id="mine"
+                :anchor="yoursCard"
+                :speed-title="t('speedPick.speed')"
+                @pick="(id: PokemonId) => pickMine(id)"
+                @team="(id: PokemonId, b: SpeedBuild) => pickMine(id, b)"
+              >
+                <template #speed><MyBuild /></template>
+              </SpeedPickDrawer>
+            </div>
+            <template v-if="mine">
+              <!-- Its build and modifiers, then what they come to: each a section of its own, labeled above. -->
+              <MyBuild />
               <section class="yours-section">
                 <!-- The modifiers' disclosure; the modifiers, opened, in a tray under it. -->
                 <div class="mods-head">
