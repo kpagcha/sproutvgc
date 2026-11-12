@@ -276,7 +276,7 @@ export function seoPages(): Plugin {
           schema: 'WebApplication',
         },
         {
-          path: 'tools/compare-speeds/moved-first',
+          path: 'tools/compare-speeds/moves-first',
           title: 'compare.mode.reverse',
           head: 'head.speedMovedFirst',
           desc: 'desc.speedMovedFirst',

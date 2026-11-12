@@ -92,7 +92,7 @@ watchEffect(() => {
   // A tournament's Pokémon and its rounds, a page each of their own.
   const tournamentMons = route.name === 'tournament' && route.params.tab === 'pokemon'
   const tournamentRounds = route.name === 'tournament' && route.params.tab === 'rounds'
-  // The speed comparison's other views, a page each too: the speed order, and who moved first.
+  // The speed comparison's other views, a page each too: the speed order, and who moves first.
   const compareView = route.name === 'speedCompare' ? compareMode(route.params.view) : 'vs'
   const compared = compareView === 'order' ? 'speedOrder' : compareView === 'reverse' ? 'speedMovedFirst' : null
   const key = tournamentMons

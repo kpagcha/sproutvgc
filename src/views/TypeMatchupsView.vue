@@ -1,14 +1,12 @@
 <script setup lang="ts">
-import { computed, onScopeDispose, ref, useTemplateRef, watch } from 'vue'
+import { computed, onScopeDispose, ref, useTemplateRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { AnimatePresence, motion } from 'motion-v'
 import { isType, type TypeId } from '@/data/types'
 import { t } from '@/i18n'
-import { reveal } from '@/lib/scroll'
-import { FADE, PRESS } from '@/lib/motion'
 import TypePicker from '@/components/TypePicker.vue'
 import DefenseResults from '@/components/DefenseResults.vue'
 import OffenseResults from '@/components/OffenseResults.vue'
+import JumpButton from '@/components/JumpButton.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -65,29 +63,6 @@ function pick(which: 'def' | 'atk', v: TypeId[]) {
 }
 const setDef = (v: TypeId[]) => pick('def', v)
 const setAtk = (v: TypeId[]) => pick('atk', v)
-
-// The button shows while the results start low on the screen (below 40%) and run off its bottom edge.
-const resultsBelow = ref(false)
-watch(results, (el, _, onCleanup) => {
-  resultsBelow.value = false
-  if (!el) return
-  const check = () => {
-    const r = el.getBoundingClientRect()
-    const vh = window.innerHeight
-    resultsBelow.value = r.top > vh * 0.4 && r.bottom > vh
-  }
-  // Scrolling, resizing, and the results changing size (more picks) can all change the answer.
-  const ro = new ResizeObserver(check)
-  ro.observe(el)
-  window.addEventListener('scroll', check, { passive: true })
-  window.addEventListener('resize', check)
-  onCleanup(() => {
-    ro.disconnect()
-    window.removeEventListener('scroll', check)
-    window.removeEventListener('resize', check)
-  })
-})
-const toResults = () => reveal(results.value)
 </script>
 
 <template>
@@ -151,24 +126,7 @@ const toResults = () => reveal(results.value)
     <p v-else class="muted hint">{{ t('matchups.selectHint') }}</p>
   </template>
 
-  <!-- Outside the page so the page transition's transform can't move it. -->
-  <Teleport to="body">
-    <AnimatePresence>
-      <motion.button
-        v-if="resultsBelow"
-        type="button"
-        class="btn primary to-results"
-        :initial="{ opacity: 0, y: 8 }"
-        :animate="{ opacity: 1, y: 0 }"
-        :exit="{ opacity: 0, y: 8 }"
-        :transition="FADE"
-        :while-press="PRESS"
-        @click="toResults"
-      >
-        {{ t('matchups.toResults') }} ↓
-      </motion.button>
-    </AnimatePresence>
-  </Teleport>
+  <JumpButton :target="results" :label="t('matchups.toResults')" />
 </template>
 
 <style scoped>
@@ -196,16 +154,5 @@ const toResults = () => reveal(results.value)
 
 .hint {
   text-align: center;
-}
-
-.to-results {
-  position: fixed;
-  left: 50%;
-  bottom: calc(16px + env(safe-area-inset-bottom));
-  z-index: 10;
-  translate: -50% 0;
-  min-height: 40px;
-  padding: 6px 16px;
-  font-weight: bold;
 }
 </style>

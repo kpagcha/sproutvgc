@@ -77,7 +77,7 @@ const once = (page: string) => () => page
 
 // The comparison's visit, by its view (its path's last part, the route's `view`): yours against the opponents, one per
 // matchup (the two teams, up to six each), once each team has one; the speed order, one whatever its list, once there's
-// one in it; read backwards (who moved first), one per pair.
+// one in it; read backwards (who moves first), one per pair.
 const TEAM_KEYS = ['a', 'b'].flatMap((s) => [s, ...[2, 3, 4, 5, 6].map((n) => `${s}${n}`)])
 function compareVisit(query: LocationQuery, view: unknown) {
   const { a, b, list } = query
@@ -536,9 +536,14 @@ export const router = createRouter({
     },
     {
       // Pokémon's Speeds compared, linked to and from the speed tiers: yours against opponents, in speed order
-      // (`/tools/compare-speeds/order`) or read backwards, who moved first (`/tools/compare-speeds/moved-first`), a
+      // (`/tools/compare-speeds/order`) or read backwards, who moves first (`/tools/compare-speeds/moves-first`), a
       // page each, one route: the view is its path's last part (`view`), so going from one to another is the same page.
-      path: '/tools/compare-speeds/:view(order|moved-first)?',
+      // Its address before, `…/moved-first`, leads there.
+      path: '/tools/compare-speeds/:view(order|moves-first|moved-first)?',
+      beforeEnter: (to) =>
+        to.params.view === 'moved-first'
+          ? { name: 'speedCompare', params: { view: 'moves-first' }, query: to.query, hash: to.hash }
+          : undefined,
       name: 'speedCompare',
       component: () => import('@/views/SpeedCompareView.vue'),
       meta: {

@@ -50,6 +50,8 @@ import SpeedEditor from '@/components/SpeedEditor.vue'
 import SpeedLineup, { type LineupEntry } from '@/components/SpeedLineup.vue'
 import SpeedMatchups from '@/components/SpeedMatchups.vue'
 import SpeedReverse from '@/components/SpeedReverse.vue'
+import JumpButton from '@/components/JumpButton.vue'
+import type { Unknowns } from '@/lib/speedReverse'
 import SpeedShare from '@/components/SpeedShare.vue'
 import SpeedVersus from '@/components/SpeedVersus.vue'
 import TourToggle from '@/components/TourToggle.vue'
@@ -65,9 +67,9 @@ import TourToggle from '@/components/TourToggle.vue'
 // link here with yours and the Pokémon it's measured against, and back with either as yours. Yours against opponents,
 // one can be at its sets rather than at one build (`bsets=1`, an opponent's Speed not being known): at every Speed its
 // sets in the meta reach, each counting as often as it's run, with its own modifiers; an opponent picked here starts
-// so, when the meta has its sets. Or read backwards (`/tools/compare-speeds/moved-first`, "Who moved first"): the two
-// of `a` and `b` with their natures and modifiers, their points unknown, and which of them was seen moving first
-// (`first`): the points each could have then, and those most likely.
+// so, when the meta has its sets. Or read backwards (`/tools/compare-speeds/moves-first`, "Who moves first"): the two
+// of `a` and `b` with their modifiers, each one's nature and points given or worked out (`awork`, `bwork`), and which
+// of them moves first, seen or wanted (`first`): what each could have then, and what most likely.
 const route = useRoute()
 const router = useRouter()
 const replace = (q: Record<string, string | undefined>) => router.replace({ query: { ...route.query, ...q } })
@@ -120,7 +122,7 @@ const slotsOf = (s: Side) => Array.from({ length: TEAM_MAX }, (_, i) => (i ? `${
 const SLOTS: readonly Slot[] = SIDES.flatMap(slotsOf)
 const other = (s: Side): Side => (s === 'a' ? 'b' : 'a')
 const teamOf = (s: string) => (s.startsWith('a') ? ('yours' as const) : ('opponent' as const))
-const BUILD_KEYS = ['', 'nat', 'pts', 'mods', 'stage', 'sets'] as const
+const BUILD_KEYS = ['', 'nat', 'pts', 'mods', 'stage', 'sets', 'work'] as const
 
 const idOf = (s: Slot) => {
   const id = route.query[s]
@@ -182,14 +184,33 @@ const sides = computed(() =>
 // Read backwards: which of the two was seen moving first, and each one's builds in the meta to weigh its points by.
 const first = computed(() => (route.query.first === 'a' || route.query.first === 'b' ? route.query.first : null))
 const setFirst = (s: Side) => replace({ first: s })
+/** What of a side is worked out (`awork`, `bwork`: `nat`, `pts`, both comma-separated, or `none`): its points alone
+ * unless said, as the page always had it. */
+function workOf(s: Side): Unknowns {
+  const v = route.query[`${s}work`]
+  if (typeof v !== 'string') return { nature: false, points: true }
+  const parts = v.split(',')
+  return { nature: parts.includes('nat'), points: parts.includes('pts') }
+}
+const setWork = (s: Side, w: Unknowns) =>
+  replace({
+    [`${s}work`]:
+      w.points && !w.nature ? undefined : [w.nature && 'nat', w.points && 'pts'].filter(Boolean).join(',') || 'none',
+  })
 const reverseSides = computed(() =>
   sides.value.map((x) => ({
     s: x.s,
     id: x.id,
     name: x.name,
     build: x.build,
+    work: workOf(x.s),
     builds: x.id ? speedBuilds(data.value?.[x.id]?.speeds ?? []) : [],
   })),
+)
+const reversePanel = useTemplateRef<InstanceType<typeof SpeedReverse>>('reversePanel')
+/** Once both are picked, the way down to what's worked out from them, while it's below the screen. */
+const reverseTarget = computed(() =>
+  mode.value === 'reverse' && sides.value.every((x) => x.id) ? (reversePanel.value?.$el as HTMLElement) : null,
 )
 const sideOf = (s: Side) => sides.value[SIDES.indexOf(s)]!
 
@@ -793,8 +814,8 @@ function resetAll() {
       </section>
     </template>
 
-    <!-- Read backwards: the two with their natures and modifiers (no points: those are what's worked out), and under
-         them which moved first, and what their points could be. -->
+    <!-- Read backwards: the two with their modifiers and what's given of them (what's worked out has no control), and
+         under them which one moves first, and what they could have; a floating button down to it while it's below. -->
     <template v-else-if="mode === 'reverse'">
       <div class="reverse-sides">
         <section
@@ -814,17 +835,19 @@ function resetAll() {
             :build="side.build"
             :speed="side.speed"
             :stat="side.stat"
-            :common="[]"
+            :common="commonBuilds(side.id)"
             :title="side.s === 'a' ? t('speed.yours') : t('compare.opponent')"
             :tone="side.s === 'a' ? 'yours' : 'opponent'"
-            no-points
+            :work="workOf(side.s)"
+            @work="(w: Unknowns) => setWork(side.s, w)"
             @pick="(id: PokemonId) => pick(side.s, id)"
             @build="(b: Partial<SpeedBuild>) => setBuild(side.s, b)"
             @clear="clear(side.s)"
           />
         </section>
       </div>
-      <SpeedReverse :sides="reverseSides" :first="first" :trick-room="trickRoom" @first="setFirst" />
+      <SpeedReverse ref="reversePanel" :sides="reverseSides" :first="first" :trick-room="trickRoom" @first="setFirst" />
+      <JumpButton :target="reverseTarget" :label="t('reverse.title')" />
     </template>
 
     <template v-else>
