@@ -30,6 +30,7 @@ import {
 import type { Field, Member } from '@/lib/team'
 import { conditionName, sideOf, SPIKES } from '@/components/calcConditions'
 import CalcConditions from '@/components/CalcConditions.vue'
+import CalcConditionSearch from '@/components/CalcConditionSearch.vue'
 import CalcCounter from '@/components/CalcCounter.vue'
 import DamageRow from '@/components/DamageRow.vue'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -401,16 +402,22 @@ function setHpPoints(e: Event) {
               <template v-if="!sideOpen">
                 <span v-for="c in onSide" :key="c.key" class="side-item">{{ c.name }}</span>
               </template>
-              <!-- Unfolded, its Clear on its row, as the field's: beside it (on phones at the row's end). -->
-              <button
-                v-else
-                type="button"
-                class="btn quiet small side-clear"
-                :disabled="!onSide.length"
-                @click="emit('update:fighter', { ...fighter, side: [], spikes: 0 })"
-              >
-                <Eraser :size="14" aria-hidden="true" />{{ t('calc.clearConditions') }}
-              </button>
+              <!-- Unfolded, its search (its own conditions alone) and Clear on its row, as the field's: beside it (on
+                   phones at the row's end). -->
+              <span v-else class="side-tools">
+                <CalcConditionSearch
+                  :sides="{ [theirs ? 'b' : 'a']: fighter }"
+                  @side="(_k, f) => emit('update:fighter', f)"
+                />
+                <button
+                  type="button"
+                  class="btn quiet small"
+                  :disabled="!onSide.length"
+                  @click="emit('update:fighter', { ...fighter, side: [], spikes: 0 })"
+                >
+                  <Eraser :size="14" aria-hidden="true" />{{ t('calc.clearConditions') }}
+                </button>
+              </span>
             </div>
             <CalcConditions
               v-if="sideOpen"
@@ -746,11 +753,14 @@ function setHpPoints(e: Event) {
 .side-box-head {
   flex: none;
 }
-.side-clear {
+.side-tools {
+  display: flex;
   flex: none;
+  align-items: center;
+  gap: 8px;
 }
 @media (max-width: 899px) {
-  .side-clear {
+  .side-tools {
     margin-left: auto;
   }
 }

@@ -17,13 +17,15 @@ import ModalDialog from '@/components/ModalDialog.vue'
 import OptionsMenu from '@/components/OptionsMenu.vue'
 
 // The damage calculator's battle conditions found by name: a quiet magnifier over the unfolded conditions dropping a
-// small box to type in (on phones, a dialog in the middle of the screen, its list as tall as the screen leaves), over every condition there is (the weather, the terrain, the field's, each side's), each row saying
-// where it applies and whether it's on, toggled by a click or Enter (the keys' one, the first until moved), the box
+// small box to type in (on phones, a dialog in the middle of the screen, its list as tall as the screen leaves), over
+// every condition there is (the weather, the terrain, the field's, each side's; with no `field`, the sides given alone:
+// a side's own search, in its This side box), each row saying where it applies and whether it's on, toggled by a click or Enter (the keys' one, the first until moved), the box
 // staying open with its text selected, so the next one is typed over it. Spikes' row adds a layer, back to none past
 // the most.
 const props = defineProps<{
-  field: Battlefield
-  sides: Record<'a' | 'b', Fighter>
+  /** The field, its conditions searched too; left out for a side's own search. */
+  field?: Battlefield
+  sides: Partial<Record<'a' | 'b', Fighter>>
 }>()
 const emit = defineEmits<{
   field: [f: Battlefield]
@@ -52,36 +54,40 @@ interface Row {
 const rows = computed<Row[]>(() => {
   const f = props.field
   const out: Row[] = []
-  for (const kind of ['weather', 'terrain'] as const)
-    for (const c of kind === 'weather' ? weathers : terrains) {
-      if (!c.key) continue
-      const on = f[kind] === c.key
+  const keys = (['a', 'b'] as const).filter((k) => props.sides[k])
+  if (f) {
+    for (const kind of ['weather', 'terrain'] as const)
+      for (const c of kind === 'weather' ? weathers : terrains) {
+        if (!c.key) continue
+        const on = f[kind] === c.key
+        out.push({
+          id: `${kind}:${c.key}`,
+          name: conditionName(c),
+          icon: c.icon,
+          scope: t(`calc.${kind}`),
+          round: true,
+          on,
+          toggle: () => emit('field', { ...f, [kind]: on ? '' : c.key }),
+        })
+      }
+    for (const c of fieldEffects) {
+      const on = f.effects.includes(c.key)
       out.push({
-        id: `${kind}:${c.key}`,
+        id: `field:${c.key}`,
         name: conditionName(c),
         icon: c.icon,
-        scope: t(`calc.${kind}`),
-        round: true,
+        scope: t('calc.fieldLabel'),
         on,
-        toggle: () => emit('field', { ...f, [kind]: on ? '' : c.key }),
+        toggle: () =>
+          emit('field', { ...f, effects: on ? f.effects.filter((x) => x !== c.key) : [...f.effects, c.key] }),
       })
     }
-  for (const c of fieldEffects) {
-    const on = f.effects.includes(c.key)
-    out.push({
-      id: `field:${c.key}`,
-      name: conditionName(c),
-      icon: c.icon,
-      scope: t('calc.fieldLabel'),
-      on,
-      toggle: () => emit('field', { ...f, effects: on ? f.effects.filter((x) => x !== c.key) : [...f.effects, c.key] }),
-    })
   }
   // Each side's, yours and the opponent's of one condition together.
   const whose = { a: t('calc.yours'), b: t('calc.theirs') }
   for (const c of sideEffects)
-    for (const k of ['a', 'b'] as const) {
-      const s = props.sides[k]
+    for (const k of keys) {
+      const s = props.sides[k]!
       const on = s.side.includes(c.key)
       out.push({
         id: `${k}:${c.key}`,
@@ -94,8 +100,8 @@ const rows = computed<Row[]>(() => {
       })
     }
   if (spikesOn)
-    for (const k of ['a', 'b'] as const) {
-      const s = props.sides[k]
+    for (const k of keys) {
+      const s = props.sides[k]!
       out.push({
         id: `${k}:spikes`,
         name: conditionName(SPIKES),
@@ -185,7 +191,12 @@ function pick(r: Row | undefined) {
         <component :is="r.icon" v-if="r.icon" :size="14" aria-hidden="true" />
         <span class="name">{{ r.name }}</span>
         <span v-if="r.count !== undefined" class="count">{{ r.count }}/{{ MAX_SPIKES }}</span>
-        <span class="scope" :class="r.side && `side-${r.side}`">{{ r.scope }}</span>
+        <!-- Where it applies at the row's end: a side's a square of its color alone, as its band's (none on a side's
+             own search, whose side is known). -->
+        <template v-if="field">
+          <span v-if="r.side" v-tip="r.scope" class="side-mark" :class="`side-${r.side}`" :aria-label="r.scope"></span>
+          <span v-else class="scope">{{ r.scope }}</span>
+        </template>
       </button>
     </div>
     <p v-else class="muted none">{{ t('calc.searchConditions.none') }}</p>
@@ -318,26 +329,27 @@ function pick(r: Row | undefined) {
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
-/* Where it applies, at the row's end; a side's led by a small square of its color, as its band's. */
+/* Where it applies, at the row's end: the field's its kind, a side's a small square of its color, as its band's. */
 .scope {
-  display: inline-flex;
   flex: none;
-  align-items: center;
-  gap: 6px;
   margin-left: auto;
   padding-left: 12px;
   font-size: 0.85em;
   color: var(--muted);
 }
-.scope.side-a::before,
-.scope.side-b::before {
-  content: '';
+.side-mark {
+  flex: none;
   width: 8px;
   height: 8px;
+  margin-left: auto;
   background: var(--accent);
 }
-.scope.side-b::before {
+.side-mark.side-b {
   background: var(--opponent);
+}
+.side-mark,
+.scope {
+  margin-right: 2px;
 }
 .none {
   margin: 0;
