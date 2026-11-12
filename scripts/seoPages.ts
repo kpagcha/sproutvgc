@@ -264,7 +264,7 @@ export function seoPages(): Plugin {
         searched('meta/power-tiers', 'powerTiers'),
         { path: 'tools', title: 'title.tools', desc: 'desc.tools', schema: 'CollectionPage' },
         searched('tools/calc', 'calc'),
-        searched('tools/calc/inverse', 'calcInverse'),
+        searched('tools/calc/solver', 'calcInverse'),
         searched('tools/compare-speeds', 'speedCompare'),
         // Its other views, a page each, named as their tabs are.
         {
@@ -276,8 +276,8 @@ export function seoPages(): Plugin {
           schema: 'WebApplication',
         },
         {
-          path: 'tools/compare-speeds/moves-first',
-          title: 'compare.mode.reverse',
+          path: 'tools/compare-speeds/solver',
+          title: 'nav.speedSolver',
           head: 'head.speedMovedFirst',
           desc: 'desc.speedMovedFirst',
           keywords: 'keywords.speedMovedFirst',

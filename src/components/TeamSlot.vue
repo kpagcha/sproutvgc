@@ -165,8 +165,13 @@ const chipText = computed(() =>
         <span class="set-types">
           <template v-if="shown"><TypeIcon v-for="ty in POKEMON[shown]?.types ?? []" :key="ty" :type="ty" /></template>
           <span v-else class="type-blank" aria-hidden="true"></span>
+          <!-- Left out (worked out, the inverse calc's), its place kept unseen: the line as tall as with an item, so
+               what's under it is level with a set beside it that has one. -->
+          <span v-if="hide?.includes('item')" class="slot-btn set-item ghost" aria-hidden="true"
+            ><span class="ghost-icon"></span>{{ t('builder.item') }}</span
+          >
           <button
-            v-if="!hide?.includes('item')"
+            v-else
             v-tip="clashes?.item"
             type="button"
             class="slot-btn set-item"
@@ -432,6 +437,14 @@ const chipText = computed(() =>
   align-items: center;
   gap: 4px;
   min-width: 0;
+}
+.set-item.ghost {
+  visibility: hidden;
+}
+/* An item icon's room. */
+.ghost-icon {
+  width: 24px;
+  height: 24px;
 }
 .set-item {
   margin-left: 6px;

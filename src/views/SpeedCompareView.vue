@@ -847,7 +847,7 @@ function resetAll() {
         </section>
       </div>
       <SpeedReverse ref="reversePanel" :sides="reverseSides" :first="first" :trick-room="trickRoom" @first="setFirst" />
-      <JumpButton :target="reverseTarget" :label="t('reverse.title')" />
+      <JumpButton :target="reverseTarget" :label="t('matchups.toResults')" />
     </template>
 
     <template v-else>

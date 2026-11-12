@@ -45,7 +45,7 @@ onMounted(() => searchable.value && preloadSearch())
     />
     <SearchResults v-if="results" :query :results />
     <div v-else class="cards">
-      <RouterLink v-for="s in area.sections" :key="s.key" :to="{ name: s.route }" class="panel card">
+      <RouterLink v-for="s in area.sections" :key="s.key" :to="{ name: s.route, params: s.params }" class="panel card">
         <span class="card-title font-display">
           {{ t(s.label) }} <span class="arrow" aria-hidden="true">›</span>
           <SectionDecor v-if="area.id === 'dex'" :section="s.key" class="decor" />

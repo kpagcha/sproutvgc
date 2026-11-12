@@ -175,7 +175,7 @@ const shownReg = computed(() => ({ reg: unbroken(snapshot.value?.regulation ?? R
             <li v-for="sec in c.sections" :key="sec.key">
               <!-- Usage: its name a row's, its lists' links chips beside it (a link can't hold links). -->
               <div v-if="sec.key === 'rankings'" class="row usage">
-                <RouterLink :to="{ name: sec.route }" class="row-label usage-name"
+                <RouterLink :to="{ name: sec.route, params: sec.params }" class="row-label usage-name"
                   ><component :is="SECTION_ICONS[sec.key]" :size="16" aria-hidden="true" />{{
                     t(sec.label)
                   }}</RouterLink
@@ -186,7 +186,7 @@ const shownReg = computed(() => ({ reg: unbroken(snapshot.value?.regulation ?? R
                   </li>
                 </ul>
               </div>
-              <RouterLink v-else :to="{ name: sec.route }" class="row" :class="{ soon: sec.soon }"
+              <RouterLink v-else :to="{ name: sec.route, params: sec.params }" class="row" :class="{ soon: sec.soon }"
                 ><span class="row-label"
                   ><component :is="SECTION_ICONS[sec.key]" :size="16" aria-hidden="true" />{{ t(sec.label) }}</span
                 >

@@ -468,9 +468,11 @@ function setHpPoints(e: Event) {
 </template>
 
 <style scoped>
-/* The inverse calc's Work out, under the opponent's card. */
+/* The inverse calc's Work out, under its card, at the foot of its set's row: level with the other side's, the two
+   sharing their rows. */
 .work {
-  margin-top: 10px;
+  margin-top: auto;
+  padding-top: 10px;
 }
 .side {
   --side: var(--accent);
@@ -517,6 +519,8 @@ function setHpPoints(e: Event) {
 }
 /* Its set, set apart from what follows: on the panel's grey across it, right under the band, a rule under it. */
 .body {
+  display: flex;
+  flex-direction: column;
   margin: -28px calc(-1 * var(--panel-pad)) 0;
   padding: 14px var(--panel-pad);
   background: var(--panel-alt);

@@ -106,6 +106,8 @@ export const messages = {
   'nav.powerTiers': 'Power tiers',
   'nav.speedCompare': 'Compare speeds',
   'nav.calc': 'Damage calc',
+  'nav.damageSolver': 'Damage solver',
+  'nav.speedSolver': 'Speed solver',
   'nav.teamBuilder': 'Team builder',
   'title.rankings': 'Usage',
   'title.pokemonRankings': 'Pokémon',
@@ -162,11 +164,11 @@ export const messages = {
   'head.powerTiers': 'Power tiers: physical and special power',
   'head.speedCompare': 'Speed calculator: compare Pokémon speeds',
   'head.speedOrder': 'Speed order: which Pokémon moves first',
-  'head.speedMovedFirst': 'Who moves first: the Speed spreads that fit a turn order',
+  'head.speedMovedFirst': 'Speed solver: the Speed spreads that fit a turn order',
   'desc.speedOrder':
     'Any Pokémon of {game}, Regulation {reg}, in the order they move: each at its own nature, stat points and modifiers, with Trick Room, Tailwind and Speed ties.',
   'desc.speedMovedFirst':
-    "A turn order read backwards, seen or wanted: the Speed stat points and natures your Pokémon and the opponent's can have given which moves first, from the sets the meta runs.",
+    "Which one moves first, from a battle or as a goal: the Speed stat points and natures your Pokémon and the opponent's can have for it, from the sets the meta runs.",
   'head.pokedex': 'Pokédex: every Pokémon, its stats and moves',
   'head.chart': 'Type chart: type effectiveness',
   'head.matchups': 'Type calculator: weaknesses and coverage',
@@ -215,13 +217,13 @@ export const messages = {
   'keywords.speedOrder':
     'speed order, turn order, who moves first, speed list, speed ties, Trick Room, Tailwind, Pokémon speed, VGC, {game}, Regulation {reg}',
   'keywords.speedMovedFirst':
-    'who moves first, who moved first, turn order, speed guesser, speed spread finder, speed creep, stat points, Pokémon speed, VGC, {game}, Regulation {reg}',
-  'title.calcInverse': 'Inverse damage calculator',
+    'speed solver, who moves first, who moved first, turn order, speed guesser, speed spread finder, speed creep, stat points, Pokémon speed, VGC, {game}, Regulation {reg}',
+  'title.calcInverse': 'Damage solver',
   'desc.calcInverse':
-    "The damage you saw, read backwards: the opponent's stat points, nature and item that fit the hits you saw and which moved first, from the sets the meta runs.",
-  'head.calcInverse': 'Inverse damage calculator: what spread fits the damage seen',
+    "Hits from a battle or as a goal: the stat points, nature and item, yours or the opponent's, that get them, from the sets the meta runs.",
+  'head.calcInverse': 'Damage solver: the spreads that get a hit, or fit the damage seen',
   'keywords.calcInverse':
-    'inverse damage calculator, reverse damage calc, EV guesser, spread finder, stat points, damage rolls, VGC, {game}, Regulation {reg}',
+    'damage solver, inverse damage calculator, reverse damage calc, OHKO spread, EV guesser, spread finder, stat points, damage rolls, VGC, {game}, Regulation {reg}',
   'desc.calc':
     'The damage any Pokémon deals to any other in {game}, both ways at once, from the sets the meta runs, and how yours fares against the most used.',
   'head.calc': 'Damage calculator: damage calc for VGC',
@@ -404,7 +406,7 @@ export const messages = {
   'calc.reverse.useTip': 'Set the opponent to this spread, with the item likeliest to go with it, and see its damage',
   'calc.tabs': 'Damage calculator',
   'calc.tab.damage': 'Damage',
-  'calc.tab.inverse': 'Inverse',
+  'calc.tab.inverse': 'Solver',
   'calc.section.pokemon': 'Pokémon',
   'calc.band.fainted': '{n} fainted',
   'calc.band.attacked': 'Hit {n}×',
@@ -1639,7 +1641,7 @@ export const messages = {
     '<p>Yours against opponents, or any Pokémon in the order they move.</p><p>A quick look around; close it at any time.</p>',
   'tour.compare.viewsTitle': 'Three views',
   'tour.compare.views':
-    '<p><strong>Yours vs opponents</strong>: up to six a side.</p><p><strong>Speed order</strong>: up to 20 Pokémon, lined up in the order they move.</p><p><strong>Who moves first</strong>: two Pokémon, what you know of each, and which one moves first, seen or wanted; you get the natures and Speed points each could have, and those most likely.</p>',
+    '<p><strong>Yours vs opponents</strong>: up to six a side.</p><p><strong>Speed order</strong>: up to 20 Pokémon, lined up in the order they move.</p><p><strong>Solver</strong>: two Pokémon, what you know of each, and which one moves first, seen or wanted; you get the natures and Speed points each could have, and those most likely.</p>',
   'tour.compare.toolbarTitle': 'For every one',
   'tour.compare.toolbar':
     "<p><strong>Trick Room</strong> turns the order over. <strong>Swap</strong> trades the teams' places, and <strong>Clear teams</strong> empties them.</p>",
@@ -1818,9 +1820,9 @@ export const messages = {
   'compare.mode.vsShort': 'Versus',
   'compare.mode.order': 'Speed order',
   'compare.mode.orderShort': 'Speed order',
-  'compare.mode.reverse': 'Who moves first',
-  'compare.mode.reverseShort': 'Moves first',
-  'reverse.title': 'Who moves first',
+  'compare.mode.reverse': 'Solver',
+  'compare.mode.reverseShort': 'Solver',
+  'reverse.title': 'Speed solver',
   'reverse.span': 'Slowest to fastest it could be',
   'reverse.workOut': 'Work out',
   'reverse.workTip.onLabel': 'On:',

@@ -142,7 +142,17 @@ function searchPages(q: string): PageHit[] {
       const names = [t(s.label), ...(s.title ? [t(s.title)] : [])]
       for (const name of names) {
         const parts = split(name, q)
-        if (parts) return [{ key: `${a.id}.${s.key}`, name, parts, to: { name: s.route }, area: a.label, soon: s.soon }]
+        if (parts)
+          return [
+            {
+              key: `${a.id}.${s.key}`,
+              name,
+              parts,
+              to: { name: s.route, params: s.params },
+              area: a.label,
+              soon: s.soon,
+            },
+          ]
       }
       return []
     })

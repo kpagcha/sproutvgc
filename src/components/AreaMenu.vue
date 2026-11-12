@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { t } from '@/i18n'
-import { AREAS, type AreaId } from '@/lib/areas'
+import { AREAS, type AreaId, sectionOf } from '@/lib/areas'
 
 // The header's one drop-down of an area's sections, under the area link hovered (`anchor`, `current`). Moving from one
 // area to the next, it glides there and takes the next one's size, the next one's sections sliding in from the side it
@@ -86,8 +86,8 @@ const sideOf = (i: number) => {
         <RouterLink
           v-for="s in a.sections"
           :key="s.key"
-          :to="{ name: s.route }"
-          :class="{ active: route.meta.section === s.key, soon: s.soon }"
+          :to="{ name: s.route, params: s.params }"
+          :class="{ active: sectionOf(route) === s.key, soon: s.soon }"
         >
           {{ t(s.label) }}
         </RouterLink>

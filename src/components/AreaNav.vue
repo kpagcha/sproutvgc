@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { t } from '@/i18n'
-import { areaOf } from '@/lib/areas'
+import { areaOf, sectionOf } from '@/lib/areas'
 
 // The header's second row: the current area's sections, the one the page is in underlined. It scrolls sideways when
 // they don't fit (phones).
@@ -15,8 +15,8 @@ const area = computed(() => areaOf(route.meta.area))
     <RouterLink
       v-for="s in area.sections"
       :key="s.key"
-      :to="{ name: s.route }"
-      :class="{ active: route.meta.section === s.key, soon: s.soon }"
+      :to="{ name: s.route, params: s.params }"
+      :class="{ active: sectionOf(route) === s.key, soon: s.soon }"
     >
       {{ t(s.label) }}
     </RouterLink>

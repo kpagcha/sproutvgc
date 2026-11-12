@@ -3,7 +3,7 @@ import { onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Menu, Moon, Settings, Sun, X } from '@lucide/vue'
 import { t } from '@/i18n'
-import { AREAS } from '@/lib/areas'
+import { AREAS, sectionOf } from '@/lib/areas'
 import { useTheme } from '@/composables/useTheme'
 import { AREA_ICONS, SECTION_ICONS } from '@/components/areaIcons'
 
@@ -66,9 +66,9 @@ const toggleTheme = () => setMode(theme.value === 'dark' ? 'light' : 'dark')
               <RouterLink
                 v-for="s in a.sections"
                 :key="s.key"
-                :to="{ name: s.route }"
+                :to="{ name: s.route, params: s.params }"
                 class="section-link"
-                :class="{ active: route.meta.section === s.key, soon: s.soon }"
+                :class="{ active: sectionOf(route) === s.key, soon: s.soon }"
               >
                 <component :is="SECTION_ICONS[s.key]" v-if="SECTION_ICONS[s.key]" :size="16" aria-hidden="true" />
                 {{ t(s.label) }}

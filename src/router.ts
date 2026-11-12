@@ -28,7 +28,7 @@ declare module 'vue-router' {
     keepScroll?: boolean
     /** The area the page belongs to (`src/lib/areas.ts`), and its section there: the header highlights them. */
     area?: AreaId
-    section?: string
+    section?: string | ((params: Record<string, unknown>) => string)
     /** Recorded among the home page's recently viewed, as it's left, a page whose view is in its URL: what counts as
      * the same visit (one per page, or a comparison per pair), or nothing while there's nothing to record. */
     recent?: (to: RouteLocationNormalized) => string | null
@@ -102,7 +102,7 @@ function compareSetup(query: LocationQuery, view: unknown) {
 }
 
 // The meta of a page in an area's section.
-const inArea = (area: AreaId, section?: string) => ({ area, section })
+const inArea = (area: AreaId, section?: string | ((params: Record<string, unknown>) => string)) => ({ area, section })
 
 // The abilities' or items' rankings: one view, the list its prop.
 const usageRankings = (
@@ -517,9 +517,10 @@ export const router = createRouter({
       },
     },
     {
-      // The damage calculator read backwards, its other tab: the same Pokémon and field (the URL's), and what of the
-      // opponent's set fits the hits seen.
-      path: '/tools/calc/inverse',
+      // The damage calculator read backwards, the damage solver, its other tab and a section of its own: the same
+      // Pokémon and field (the URL's), and what of either set gets what the hits say. Its address before,
+      // `/tools/calc/inverse`, leads there.
+      path: '/tools/calc/solver',
       name: 'calcInverse',
       component: () => import('@/views/CalcView.vue'),
       props: { inverse: true },
@@ -531,18 +532,19 @@ export const router = createRouter({
         dexNames: true,
         descriptions: ['ability', 'move', 'item', 'condition'],
         setup: (query) => (query.a || query.b ? stringQuery(query, ['meta']) : null),
-        ...inArea('tools', 'calc'),
+        ...inArea('tools', 'damageSolver'),
       },
     },
+    { path: '/tools/calc/inverse', redirect: (to) => ({ name: 'calcInverse', query: to.query, hash: to.hash }) },
     {
       // Pokémon's Speeds compared, linked to and from the speed tiers: yours against opponents, in speed order
-      // (`/tools/compare-speeds/order`) or read backwards, who moves first (`/tools/compare-speeds/moves-first`), a
-      // page each, one route: the view is its path's last part (`view`), so going from one to another is the same page.
-      // Its address before, `…/moved-first`, leads there.
-      path: '/tools/compare-speeds/:view(order|moves-first|moved-first)?',
+      // (`/tools/compare-speeds/order`) or read backwards, the speed solver (`/tools/compare-speeds/solver`, a section of
+      // its own too), a page each, one route: the view is its path's last part (`view`), so going from one to another is
+      // the same page. Its addresses before, `…/moves-first` and `…/moved-first`, lead there.
+      path: '/tools/compare-speeds/:view(order|solver|moves-first|moved-first)?',
       beforeEnter: (to) =>
-        to.params.view === 'moved-first'
-          ? { name: 'speedCompare', params: { view: 'moves-first' }, query: to.query, hash: to.hash }
+        to.params.view === 'moves-first' || to.params.view === 'moved-first'
+          ? { name: 'speedCompare', params: { view: 'solver' }, query: to.query, hash: to.hash }
           : undefined,
       name: 'speedCompare',
       component: () => import('@/views/SpeedCompareView.vue'),
@@ -564,7 +566,7 @@ export const router = createRouter({
         },
         // Its views' tabs head the page: going from one to another leaves it where it is.
         keepScroll: true,
-        ...inArea('tools', 'speedCompare'),
+        ...inArea('tools', (params) => (compareMode(params.view) === 'reverse' ? 'speedSolver' : 'speedCompare')),
       },
     },
     {
