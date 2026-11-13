@@ -6,11 +6,11 @@ import { ArrowLeftRight, ChevronDown, Plus, RotateCcw, Trash2 } from '@lucide/vu
 import FlatIcon from '@/components/FlatIcon'
 import { pokemon, type PokemonId } from '@/data/dex'
 import { POKEMON } from '@/data/pokemon'
-import { has, percent, usageRanks } from '@/data/meta'
+import { has, percent } from '@/data/meta'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { commonBuilds as common, speedBuilds, speedStat } from '@/lib/speed'
-import { MAX_POINTS } from '@/lib/stats'
+import { MAX_POINTS, type NatureEffect } from '@/lib/stats'
 import { buildQuery, buildSpeed, readBuild, toggled, type BuildToggle, type SpeedBuild } from '@/lib/speedBuild'
 import { revealBelow, toTopOf, underBand } from '@/lib/scroll'
 import {
@@ -41,7 +41,8 @@ import BuildSummary from '@/components/BuildSummary.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import FolderTabs from '@/components/FolderTabs.vue'
 import PokemonIcon from '@/components/PokemonIcon'
-import PokemonPicker from '@/components/PokemonPicker.vue'
+import PickField from '@/components/PickField.vue'
+import SpeedPickDrawer from '@/components/SpeedPickDrawer.vue'
 import SetupStar from '@/components/SetupStar.vue'
 import PageHistory from '@/components/PageHistory.vue'
 import { RECENT_ON } from '@/composables/useRecent'
@@ -76,8 +77,6 @@ const replace = (q: Record<string, string | undefined>) => router.replace({ quer
 
 const { snapshot, data } = useMeta()
 const metaSpeeds = computed(() => !!snapshot.value && has(snapshot.value, 'speeds'))
-/** Usage ranks, for the pickers to list by, most used first. */
-const ranks = computed(() => (data.value ? usageRanks(data.value) : undefined))
 
 const MODES = ['vs', 'order', 'reverse'] as const
 type Mode = CompareMode
@@ -191,6 +190,18 @@ function workOf(s: Side): Unknowns {
   if (typeof v !== 'string') return { nature: false, points: true }
   const parts = v.split(',')
   return { nature: parts.includes('nat'), points: parts.includes('pts') }
+}
+/** Read backwards, with its nature or points worked out: its Speed from the slowest it could be to the fastest. */
+function spanOf(s: Side): [number, number] | null {
+  const id = idOf(s)
+  const w = workOf(s)
+  if (!id || !(w.nature || w.points)) return null
+  const b = slotBuild(s)
+  const at = (effect: NatureEffect, points: number) => buildSpeed(id, { ...b, effect, points })
+  return [
+    at(w.nature ? 'down' : b.effect, w.points ? 0 : b.points),
+    at(w.nature ? 'up' : b.effect, w.points ? MAX_POINTS : b.points),
+  ]
 }
 const setWork = (s: Side, w: Unknowns) =>
   replace({
@@ -376,17 +387,19 @@ const setSets = (key: string, on: boolean) => replace({ [`${key}sets`]: on ? '1'
 /** Whether a slot starts at its sets when picked: an opponent, when the meta has its sets. */
 const startsAtSets = (key: string, id: PokemonId) =>
   teamOf(key) === 'opponent' && commonBuilds(id).length ? '1' : undefined
-function pick(key: string, id: PokemonId) {
+function pick(key: string, id: PokemonId, given?: SpeedBuild) {
   const e = entryOf(key)
   if (!e) return
   if (phone.value || stacked.value) openKey.value = key
-  const build = pickedBuild(id, e.build)
+  const build = given ?? pickedBuild(id, e.build)
   const done =
     mode.value === 'order'
       ? setList(list.value.map((x, i) => (i === listIndex(key) ? { id, build } : x)))
-      : replace({ [key]: id, ...buildQuery(build, key), [`${key}sets`]: startsAtSets(key, id) })
+      : replace({ [key]: id, ...buildQuery(build, key), [`${key}sets`]: given ? undefined : startsAtSets(key, id) })
   if (stacked.value) void toListTop(done)
   else void afterPick(done, revealOpen)
+  // Its picking on to its Speed, from the editor the page then has (on phones its panel's, made as it opens).
+  if (!given) void toSpeed(done, key)
 }
 /** A slot's keys in the URL, each as `from`'s (none when it's empty). */
 const moveSlot = (to: Slot, from: Slot | null) =>
@@ -441,18 +454,25 @@ function swap() {
 }
 /** The slot a team's next goes in: its first empty one after its first. */
 const nextSlot = (s: Side) => slotsOf(s).find((x, i) => i > 0 && !idOf(x)) ?? null
-/** Another of a team, picked (only then does the page show the list): its panel opens, to set its build. */
-function addSecond(s: Side, id: PokemonId) {
+/** Another of a team, picked (only then does the page show the list): its panel opens, and its picking goes on to its
+ * Speed, to set its build (one of the reader's teams' Pokémon comes at its build there). */
+function addSecond(s: Side, id: PokemonId, given?: SpeedBuild) {
   const key = nextSlot(s)
   if (!key) return
   openKey.value = key
-  void toListTop(
-    replace({
-      [key]: id,
-      ...buildQuery(pickedBuild(id, slotBuild(key)), key),
-      [`${key}sets`]: startsAtSets(key, id),
-    }),
-  )
+  const done = replace({
+    [key]: id,
+    ...buildQuery(given ?? pickedBuild(id, slotBuild(key)), key),
+    [`${key}sets`]: given ? undefined : startsAtSets(key, id),
+  })
+  void toListTop(done)
+  if (!given) void toSpeed(done, key)
+}
+/** Once what was picked is on the page, its editor's picking at its Speed. */
+async function toSpeed(picked: Promise<unknown>, key: string) {
+  await picked
+  await nextTick()
+  editors[key]?.openPicker('speed')
 }
 // Wider, a side's panel folds to its Pokémon in short (Confirm, or its band), and opens again from either; a side
 // with none picked is always open. On phones, Confirm folds its band's panel instead.
@@ -507,21 +527,22 @@ const takenFor = (key: string) =>
 
 // In speed order, one added at the end of the list (at its common build), the field emptied for the next; past the
 // most it takes, a message saying so in its place, until one goes.
-const adderKey = ref(0)
 const full = computed(() => list.value.length >= LIST_MAX)
 const limitShown = ref(false)
 watch(full, (f) => !f && (limitShown.value = false))
-function add(id: PokemonId | null) {
-  adderKey.value++
-  if (!id) return
+function add(id: PokemonId, given?: SpeedBuild) {
   if (full.value) return void (limitShown.value = true)
-  void toListTop(
-    setList([
-      ...list.value,
-      { id, build: pickedBuild(id, { effect: 'up', points: MAX_POINTS, toggles: [], stage: 0 }) },
-    ]),
-  )
+  const key = `p${list.value.length}`
+  openKey.value = key
+  const done = setList([
+    ...list.value,
+    { id, build: given ?? pickedBuild(id, { effect: 'up', points: MAX_POINTS, toggles: [], stage: 0 }) },
+  ])
+  void toListTop(done)
+  if (!given) void toSpeed(done, key)
 }
+const adderStep = ref<'pokemon' | 'speed' | null>(null)
+const adderButton = useTemplateRef<InstanceType<typeof PickField>>('adderButton')
 
 // Another view: its page, the URL carried over. Switching to the speed order with its list empty brings the Pokémon
 // compared over, to go on from them.
@@ -604,6 +625,7 @@ onUnmounted(() => (ladderOpen.value = false))
 
 /** Who moves first, drawn over the two from tablets up, under them on phones. */
 const [DefineVerdict, Verdict] = createReusableTemplate()
+const [DefineDuel, Duel] = createReusableTemplate<{ reverse: boolean }>()
 
 const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 
@@ -712,12 +734,81 @@ function resetAll() {
       </button>
     </div>
 
+    <!-- On phones, the two as bands, each opening its panel under it, as in a pair; read backwards too (`reverse`),
+         where what's worked out makes its band's Speed the range it allows. -->
+    <DefineDuel v-slot="{ reverse }">
+      <div class="duel">
+        <template v-for="side in sides" :key="side.s">
+          <div
+            :id="`band-${side.s}`"
+            class="side-band"
+            :class="{ open: openKey === side.s && !!side.id, theirs: side.s === 'b' }"
+          >
+            <button type="button" class="band-main" :aria-controls="`compare-${side.s}`" @click="tapBand(side.s)">
+              <span class="visually-hidden">{{ side.s === 'a' ? t('speed.yours') : t('compare.opponent') }}</span>
+              <BuildSummary
+                v-if="side.id"
+                :id="side.id"
+                :speed="side.speed!"
+                :build="side.build"
+                :range="reverse ? spanOf(side.s) : side.range"
+                :sets-said="reverse"
+                class="band-summary"
+              />
+              <span v-else class="band-empty"
+                ><Plus :size="16" aria-hidden="true" />{{
+                  t(side.s === 'a' ? 'compare.pickYours' : 'compare.pickOpponent')
+                }}</span
+              ></button
+            ><button
+              v-if="side.id"
+              type="button"
+              class="band-fold"
+              :aria-expanded="openKey === side.s"
+              :aria-controls="`compare-${side.s}`"
+              :aria-label="t(openKey === side.s ? 'band.fold' : 'band.unfold')"
+              @click="foldBand(side.s)"
+            >
+              <ChevronDown :size="16" class="band-chevron" aria-hidden="true" />
+            </button>
+          </div>
+          <section
+            v-show="openKey === side.s && !!side.id"
+            :id="`compare-${side.s}`"
+            class="panel side band-panel"
+            :class="{ opponent: side.s === 'b' }"
+          >
+            <SpeedEditor
+              :ref="editorRef(side.s)"
+              :id="side.id"
+              :build="side.build"
+              :speed="side.speed"
+              :stat="side.stat"
+              :common="commonBuilds(side.id)"
+              :title="side.s === 'a' ? t('speed.yours') : t('compare.opponent')"
+              :tone="side.s === 'a' ? 'yours' : 'opponent'"
+              :taken="takenFor(side.s)"
+              :at-sets="reverse ? undefined : side.sets"
+              :range="side.range"
+              :work="reverse ? workOf(side.s) : undefined"
+              confirmable
+              @sets="(on: boolean) => setSets(side.s, on)"
+              @work="(w: Unknowns) => setWork(side.s, w)"
+              @confirm="confirmSide(side.s)"
+              @pick="(id: PokemonId, b?: SpeedBuild) => pick(side.s, id, b)"
+              @build="(b: Partial<SpeedBuild>) => setBuild(side.s, b)"
+              @clear="clear(side.s)"
+            />
+          </section>
+        </template>
+      </div>
+    </DefineDuel>
+
     <!-- Past a pair, and in speed order: one under the other, in the order they move. -->
     <template v-if="stacked">
       <SpeedLineup ref="lineupEl" :entries="lineup" :open-key="openKey" @tap="tapBand" @fold="foldBand">
         <template #editor="{ entry }">
           <SpeedEditor
-            :ranks
             :ref="editorRef(entry.key)"
             :id="entry.id"
             :build="entry.build"
@@ -733,7 +824,7 @@ function resetAll() {
             confirmable
             @sets="(on: boolean) => setSets(entry.key, on)"
             @confirm="confirmRow"
-            @pick="(id: PokemonId) => pick(entry.key, id)"
+            @pick="(id: PokemonId, b?: SpeedBuild) => pick(entry.key, id, b)"
             @build="(b: Partial<SpeedBuild>) => setBuild(entry.key, b)"
             @clear="clear(entry.key)"
           />
@@ -743,14 +834,13 @@ function resetAll() {
         <template v-if="mode === 'vs'" #after>
           <template v-for="s in SIDES" :key="s">
             <SpeedAddSecond
-              :ranks
               v-if="!teamFull(s)"
               class="row-add"
               :team="teamOf(s)"
               :label="t(s === 'a' ? 'compare.addYours' : 'compare.addOpponent')"
               :disabled="!canAdd(s)"
               :taken="takenFor(nextSlot(s) ?? s)"
-              @pick="(id: PokemonId) => addSecond(s, id)"
+              @pick="(id: PokemonId, b?: SpeedBuild) => addSecond(s, id, b)"
             />
           </template>
         </template>
@@ -760,18 +850,13 @@ function resetAll() {
       <div v-if="mode === 'order'" class="panel adder">
         <p v-if="!list.length" class="muted small adder-empty">{{ t('compare.emptyOrder') }}</p>
         <div class="adder-row">
-          <PokemonPicker
+          <PickField
             v-if="!full"
-            :key="adderKey"
-            recent
-            :model-value="null"
+            ref="adderButton"
+            :id="null"
             :placeholder="t('compare.add')"
-            :title="t('compare.add')"
-            icon
-            speed
-            :ranks
             class="picker"
-            @update:model-value="add"
+            @click="adderStep = 'pokemon'"
           />
           <button
             v-else
@@ -784,6 +869,13 @@ function resetAll() {
           </button>
           <span class="muted small count">{{ list.length }}/{{ LIST_MAX }}</span>
         </div>
+        <SpeedPickDrawer
+          v-model:step="adderStep"
+          :id="null"
+          :anchor="adderButton?.$el"
+          @pick="(id: PokemonId) => add(id)"
+          @team="(id: PokemonId, b: SpeedBuild) => add(id, b)"
+        />
         <p v-if="limitShown" id="compare-limit" class="limit" role="alert">{{ t('compare.limit', { n: LIST_MAX }) }}</p>
       </div>
 
@@ -817,7 +909,8 @@ function resetAll() {
     <!-- Read backwards: the two with their modifiers and what's given of them (what's worked out has no control), and
          under them which one moves first, and what they could have; a floating button down to it while it's below. -->
     <template v-else-if="mode === 'reverse'">
-      <div class="reverse-sides">
+      <Duel v-if="phone" :reverse="true" />
+      <div v-else class="reverse-sides">
         <section
           v-for="side in sides"
           :id="`compare-${side.s}`"
@@ -829,7 +922,6 @@ function resetAll() {
             <span>{{ side.s === 'a' ? t('speed.yours') : t('compare.opponent') }}</span>
           </div>
           <SpeedEditor
-            :ranks
             :ref="editorRef(side.s)"
             :id="side.id"
             :build="side.build"
@@ -840,7 +932,7 @@ function resetAll() {
             :tone="side.s === 'a' ? 'yours' : 'opponent'"
             :work="workOf(side.s)"
             @work="(w: Unknowns) => setWork(side.s, w)"
-            @pick="(id: PokemonId) => pick(side.s, id)"
+            @pick="(id: PokemonId, b?: SpeedBuild) => pick(side.s, id, b)"
             @build="(b: Partial<SpeedBuild>) => setBuild(side.s, b)"
             @clear="clear(side.s)"
           />
@@ -889,80 +981,17 @@ function resetAll() {
            in short, stuck to the top, the second piling up under the first, and to the bottom; tapping one brings its
            panel into view under it, opening it (one with none picks it), or, in its place with its panel open under it,
            folds it; its arrow opens and folds it. -->
-      <div v-if="phone" class="duel">
-        <template v-for="side in sides" :key="side.s">
-          <div
-            :id="`band-${side.s}`"
-            class="side-band"
-            :class="{ open: openKey === side.s && !!side.id, theirs: side.s === 'b' }"
-          >
-            <button type="button" class="band-main" :aria-controls="`compare-${side.s}`" @click="tapBand(side.s)">
-              <span class="visually-hidden">{{ side.s === 'a' ? t('speed.yours') : t('compare.opponent') }}</span>
-              <BuildSummary
-                v-if="side.id"
-                :id="side.id"
-                :speed="side.speed!"
-                :build="side.build"
-                :range="side.range"
-                class="band-summary"
-              />
-              <span v-else class="band-empty"
-                ><Plus :size="16" aria-hidden="true" />{{
-                  t(side.s === 'a' ? 'compare.pickYours' : 'compare.pickOpponent')
-                }}</span
-              ></button
-            ><button
-              v-if="side.id"
-              type="button"
-              class="band-fold"
-              :aria-expanded="openKey === side.s"
-              :aria-controls="`compare-${side.s}`"
-              :aria-label="t(openKey === side.s ? 'band.fold' : 'band.unfold')"
-              @click="foldBand(side.s)"
-            >
-              <ChevronDown :size="16" class="band-chevron" aria-hidden="true" />
-            </button>
-          </div>
-          <section
-            v-show="openKey === side.s && !!side.id"
-            :id="`compare-${side.s}`"
-            class="panel side band-panel"
-            :class="{ opponent: side.s === 'b' }"
-          >
-            <SpeedEditor
-              :ranks
-              :ref="editorRef(side.s)"
-              :id="side.id"
-              :build="side.build"
-              :speed="side.speed"
-              :stat="side.stat"
-              :common="commonBuilds(side.id)"
-              :title="side.s === 'a' ? t('speed.yours') : t('compare.opponent')"
-              :tone="side.s === 'a' ? 'yours' : 'opponent'"
-              :taken="takenFor(side.s)"
-              :at-sets="side.sets"
-              :range="side.range"
-              confirmable
-              @sets="(on: boolean) => setSets(side.s, on)"
-              @confirm="confirmSide(side.s)"
-              @pick="(id: PokemonId) => pick(side.s, id)"
-              @build="(b: Partial<SpeedBuild>) => setBuild(side.s, b)"
-              @clear="clear(side.s)"
-            />
-          </section>
-        </template>
-      </div>
+      <Duel v-if="phone" :reverse="false" />
       <!-- On phones, under the two, a second for each team, greyed out until its first is picked. -->
       <div v-if="phone" class="side-adds">
         <SpeedAddSecond
-          :ranks
           v-for="side in sides"
           :key="side.s"
           :team="teamOf(side.s)"
           :label="t('compare.addSecondShort')"
           :disabled="!canAdd(side.s)"
           :taken="takenFor(nextSlot(side.s) ?? side.s)"
-          @pick="(id: PokemonId) => addSecond(side.s, id)"
+          @pick="(id: PokemonId, b?: SpeedBuild) => addSecond(side.s, id, b)"
         />
       </div>
       <!-- On phones, who moves first under them. -->
@@ -1001,7 +1030,6 @@ function resetAll() {
             </button>
             <!-- Confirm at its end folds it to its short form. -->
             <SpeedEditor
-              :ranks
               v-else
               :ref="editorRef(side.s)"
               :id="side.id"
@@ -1017,7 +1045,7 @@ function resetAll() {
               confirmable
               @sets="(on: boolean) => setSets(side.s, on)"
               @confirm="confirmSide(side.s)"
-              @pick="(id: PokemonId) => pick(side.s, id)"
+              @pick="(id: PokemonId, b?: SpeedBuild) => pick(side.s, id, b)"
               @build="(b: Partial<SpeedBuild>) => setBuild(side.s, b)"
               @clear="clear(side.s)"
             />
@@ -1032,13 +1060,12 @@ function resetAll() {
           />
           <!-- Under its panel, a second for its team, greyed out until its first is picked. -->
           <SpeedAddSecond
-            :ranks
             class="col-add"
             :team="teamOf(side.s)"
             :label="t(side.s === 'a' ? 'compare.addYours' : 'compare.addOpponent')"
             :disabled="!canAdd(side.s)"
             :taken="takenFor(nextSlot(side.s) ?? side.s)"
-            @pick="(id: PokemonId) => addSecond(side.s, id)"
+            @pick="(id: PokemonId, b?: SpeedBuild) => addSecond(side.s, id, b)"
           />
         </div>
       </div>

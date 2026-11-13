@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, useTemplateRef, type Component } from 'vue'
+import { computed, shallowRef, useTemplateRef, type Component } from 'vue'
+import { createReusableTemplate } from '@vueuse/core'
 import { ChevronsDown, ChevronsUp, Trash2, Wind, Zap } from '@lucide/vue'
 import type { PokemonId } from '@/data/dex'
 import { percent } from '@/data/meta'
 import { POKEMON } from '@/data/pokemon'
-import type { Ranks } from '@/composables/usePokemonSearch'
 import { natureName } from '@/data/natures'
 import { t } from '@/i18n'
 import { NATURE_EFFECTS, NATURES_BY_EFFECT } from '@/lib/speed'
@@ -13,15 +13,16 @@ import type { Unknowns } from '@/lib/speedReverse'
 import { buildSpeed, modButtons, toggled, type BuildToggle, type SpeedBuild } from '@/lib/speedBuild'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PointsBar from '@/components/PointsBar.vue'
-import PokemonPicker from '@/components/PokemonPicker.vue'
+import PickField from '@/components/PickField.vue'
+import SpeedPickDrawer from '@/components/SpeedPickDrawer.vue'
 import ScrollRow from '@/components/ScrollRow.vue'
 import WorkOutToggles from '@/components/WorkOutToggles.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 import StageStepper from '@/components/StageStepper.vue'
 
 // One of the comparison's Pokémon and its Speed build, to change (its buttons as the speed tiers' yours has them):
-// the Pokémon, with Clear beside it, its Speed, the
-// meta's common builds of it, its nature's effect, its points, its modifiers and its stage; where it folds away
+// the Pokémon (picked as the damage calculator's are, then its Speed, `SpeedPickDrawer`), with Clear beside it, its
+// Speed, the meta's common builds of it, its nature's effect, its points, its modifiers and its stage; where it folds away
 // (`confirmable`), Confirm at its end, folding it as it is. In a side's panel, and under its band in the comparison's
 // list. Where it can be at its sets (`atSets` given), the first of the common builds is "Every set": on, its Speed is
 // its sets' range, and its nature and points are theirs, their controls giving way to a note.
@@ -42,8 +43,6 @@ const props = withDefaults(
     confirmable?: boolean
     /** Pokémon already on its team, which it can't be (nor one of their species). */
     taken?: readonly PokemonId[]
-    /** The meta's usage ranks, for its picker to list by. */
-    ranks?: Ranks
     /** Whether it's at its sets, where it can be; and then, its Speeds from the slowest to the fastest. */
     atSets?: boolean
     range?: readonly [number, number] | null
@@ -55,7 +54,8 @@ const props = withDefaults(
   { atSets: undefined },
 )
 const emit = defineEmits<{
-  pick: [id: PokemonId]
+  /** A Pokémon picked: at the build given (one of the reader's teams' Pokémon), else as the page picks one. */
+  pick: [id: PokemonId, build?: SpeedBuild]
   build: [b: Partial<SpeedBuild>]
   sets: [on: boolean]
   clear: []
@@ -77,9 +77,14 @@ const span = computed(() => {
 const setWork = (k: keyof Unknowns) => props.work && emit('work', { ...props.work, [k]: !props.work[k] })
 const uninvested = computed(() => (props.id ? benchmark(POKEMON[props.id].stats[5], 'none') : 0))
 
-const picker = useTemplateRef<InstanceType<typeof PokemonPicker>>('picker')
-// A page can open the picking straight away (a slot just added, or tapped with none picked).
-defineExpose({ openPicker: () => picker.value?.open() })
+// Its picking, as the damage calculator's: a drawer beside it (a dialog on phones), the Pokémon and then its Speed, the
+// build's controls below (`Build`) there too. A page can open it straight away (a slot tapped with none picked), or at
+// its Speed (a slot just added).
+const step = shallowRef<'pokemon' | 'speed' | null>(null)
+const root = useTemplateRef<HTMLElement>('root')
+const anchor = computed(() => (step.value ? (root.value?.closest<HTMLElement>('.panel') ?? root.value) : null))
+const [DefineBuild, Build] = createReusableTemplate()
+defineExpose({ openPicker: (at: 'pokemon' | 'speed' = 'pokemon') => (step.value = at) })
 
 const toggle = (k: BuildToggle) => emit('build', { toggles: toggled(props.build.toggles, k) })
 
@@ -98,48 +103,10 @@ const canHover = window.matchMedia('(hover: hover)').matches
 </script>
 
 <template>
-  <div class="speed-editor">
-    <div class="pick-row">
-      <PokemonPicker
-        ref="picker"
-        recent
-        :model-value="props.id"
-        :placeholder="props.placeholder ?? t('compare.pick')"
-        :title="props.title"
-        :tone="props.tone"
-        :taken="props.taken"
-        :ranks="props.ranks"
-        icon
-        speed
-        class="picker"
-        @update:model-value="(id: PokemonId | null) => id && emit('pick', id)"
-      />
-      <button v-if="props.id" type="button" class="btn inverted pick-clear" @click="emit('clear')">
-        <Trash2 :size="14" aria-hidden="true" />{{ t('speed.clear') }}
-      </button>
-    </div>
+  <!-- Its build: what of it is worked out, the meta's builds of it, its nature's effect and its points; on the editor
+       and in its picking's Speed step. -->
+  <DefineBuild>
     <template v-if="props.id">
-      <!-- Its Speed, large, with its stat as built when modifiers change it, and its Speed uninvested (no points, a
-           neutral nature: a stat, rather than its base). -->
-      <p v-if="unknown" class="speed">
-        <span class="speed-number">{{ span![0] }}–{{ span![1] }}</span>
-        <span class="muted small">{{ t('reverse.span') }}</span>
-      </p>
-      <p v-else-if="sets" class="speed">
-        <span class="speed-number">{{
-          props.range![0] === props.range![1] ? props.range![0] : `${props.range![0]}–${props.range![1]}`
-        }}</span>
-        <span class="muted small">{{ t('compare.setsRange', { speed: props.speed! }) }}</span>
-        <span v-tip="t('speed.benchTip.none')" class="muted small">{{ t('compare.base', { n: uninvested }) }}</span>
-      </p>
-      <p v-else class="speed">
-        <span class="speed-number">{{ props.speed }}</span>
-        <span v-if="props.stat !== props.speed" class="muted small">{{
-          t('compare.stat', { stat: props.stat! })
-        }}</span>
-        <span v-tip="t('speed.benchTip.none')" class="muted small">{{ t('compare.base', { n: uninvested }) }}</span>
-      </p>
-
       <!-- Read backwards, what of it is worked out rather than given: its nature, its points. -->
       <section v-if="props.work" class="part">
         <WorkOutToggles
@@ -159,7 +126,7 @@ const canHover = window.matchMedia('(hover: hover)').matches
       <section v-if="props.common.length && !props.work?.points" class="part">
         <span class="muted small">{{ t('compare.common') }}</span>
         <!-- On one line, scrolling sideways when they don't fit; on phones, wrapping. Each Pokémon's from its start,
-             not where the last one's was left. -->
+           not where the last one's was left. -->
         <ScrollRow :key="props.id" wrap-on-phones class="builds">
           <button
             v-if="props.atSets !== undefined"
@@ -212,7 +179,7 @@ const canHover = window.matchMedia('(hover: hover)').matches
 
       <section v-if="!sets && !props.work?.points" class="part">
         <!-- The team builder's bar: the Speed its points give, and where its nature's rounding makes a point add 2 or
-             nothing. -->
+           nothing. -->
         <div class="field">
           <span class="muted small">{{ t('speed.pointsLabel') }}</span>
           <PointsBar
@@ -226,6 +193,54 @@ const canHover = window.matchMedia('(hover: hover)').matches
           />
         </div>
       </section>
+    </template>
+  </DefineBuild>
+  <div ref="root" class="speed-editor">
+    <div class="pick-row">
+      <PickField
+        :id="props.id"
+        :placeholder="props.placeholder ?? t('compare.pick')"
+        class="picker"
+        @click="step = 'pokemon'"
+      />
+      <SpeedPickDrawer
+        v-model:step="step"
+        :id="props.id"
+        :taken="props.taken"
+        :anchor
+        :speed-title="t(props.work ? 'speedPick.speedWork' : 'speedPick.speed')"
+        @pick="(id: PokemonId) => emit('pick', id)"
+        @team="(id: PokemonId, b: SpeedBuild) => emit('pick', id, b)"
+      >
+        <template #speed><Build /></template>
+      </SpeedPickDrawer>
+      <button v-if="props.id" type="button" class="btn inverted pick-clear" @click="emit('clear')">
+        <Trash2 :size="14" aria-hidden="true" />{{ t('speed.clear') }}
+      </button>
+    </div>
+    <template v-if="props.id">
+      <!-- Its Speed, large, with its stat as built when modifiers change it, and its Speed uninvested (no points, a
+           neutral nature: a stat, rather than its base). -->
+      <p v-if="unknown" class="speed">
+        <span class="speed-number">{{ span![0] }}–{{ span![1] }}</span>
+        <span class="muted small">{{ t('reverse.span') }}</span>
+      </p>
+      <p v-else-if="sets" class="speed">
+        <span class="speed-number">{{
+          props.range![0] === props.range![1] ? props.range![0] : `${props.range![0]}–${props.range![1]}`
+        }}</span>
+        <span class="muted small">{{ t('compare.setsRange', { speed: props.speed! }) }}</span>
+        <span v-tip="t('speed.benchTip.none')" class="muted small">{{ t('compare.base', { n: uninvested }) }}</span>
+      </p>
+      <p v-else class="speed">
+        <span class="speed-number">{{ props.speed }}</span>
+        <span v-if="props.stat !== props.speed" class="muted small">{{
+          t('compare.stat', { stat: props.stat! })
+        }}</span>
+        <span v-tip="t('speed.benchTip.none')" class="muted small">{{ t('compare.base', { n: uninvested }) }}</span>
+      </p>
+
+      <Build />
 
       <section class="part">
         <span class="muted small">{{ t('speed.modifiers') }}</span>

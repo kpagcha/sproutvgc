@@ -27,7 +27,7 @@ import { fold, split, type Marks } from '@/lib/search'
 import type { TermFilters } from '@/lib/searchTerms'
 import { clashesOf, pickedAs, setsAs, type Field, type Member } from '@/lib/team'
 import { useFavorites } from '@/composables/useFavorites'
-import { GROUP_CAP, usePickerGroups } from '@/composables/usePickerGroups'
+import { GROUP_CAP, usePickerGroups, type PickerGroup } from '@/composables/usePickerGroups'
 import FilterSearch from '@/components/FilterSearch.vue'
 import ItemIcon from '@/components/ItemIcon.vue'
 import Marked from '@/components/Marked'
@@ -40,7 +40,7 @@ import TypeIcon from '@/components/TypeIcon'
 // What fills one part of a slot in the team builder, searched as the meta's pages search it, each entry with its share
 // of the Pokémon's sets where the meta shown has them, the most used first: a Pokémon from the rankings' list (by usage,
 // searched by name and filtered by type, ability, move or item, `monTerms.ts`; a Mega a row of its own, apart from the
-// Pokémon it changes from, the one the slot is marked), then every other one the regulation has, the reader's favorites
+// Pokémon it changes from, the one the slot is marked), then every other one the regulation has, the Pokémon picked lately and the reader's favorites
 // a group over them while there's no text; a move from its whole movepool (`MoveTable`, its sets' moves first); an item,
 // searched by name and filtered by category, its sets' first; an ability it can have; a nature, each with what it raises
 // and lowers. Picking one hands it on (`pick`). What would break the team's rules with the other slots (`others`): a
@@ -177,19 +177,40 @@ const monShown = computed(() => {
 // passing the filters: a group over it, as the other pickers have theirs and folded with them (`usePickerGroups`: its
 // first `GROUP_CAP` until asked for all). Each is in its place in the list too, a star after its name.
 const { isFavoritePokemon } = useFavorites()
-const { folded, expanded, toggleFold, toggleExpanded } = usePickerGroups()
+const { recent, folded, expanded, toggleFold, toggleExpanded, recordPick } = usePickerGroups()
 const favRows = computed(() => {
   if (q.value) return []
   const f = preview.value ?? filters.value
   return monRows.value.filter((r) => isFavoritePokemon(r.id) && monPasses(r.id, f)).map((r) => ({ ...r, parts: null }))
 })
+// The Pokémon picked lately, in this picker or any other with `recent` (the speed pages'), most recent first: a group
+// over the favorites while there's no text, those passing the filters, folding as they do. A Pokémon picked here is
+// recorded for them.
+const recentRows = computed(() => {
+  if (q.value) return []
+  const f = preview.value ?? filters.value
+  const byId = new Map(monRows.value.map((r) => [r.id, r]))
+  return recent.value.flatMap((id) => {
+    const r = byId.get(id)
+    return r && monPasses(id, f) ? [{ ...r, parts: null }] : []
+  })
+})
+function pickRow(id: PokemonId) {
+  recordPick(id)
+  emit('pick', id)
+}
 /** A group's heading in the list: the favorites', a toggle folding them, or the rest's. */
 interface Head {
-  group: 'favorites' | 'usage' | 'all'
+  group: 'recent' | 'favorites' | 'usage' | 'all'
   count?: number
   folded?: boolean
 }
-const GROUPS = { favorites: 'favorites.title', usage: 'picker.byUsage', all: 'picker.all' } as const
+const GROUPS = {
+  recent: 'picker.recent',
+  favorites: 'favorites.title',
+  usage: 'picker.byUsage',
+  all: 'picker.all',
+} as const
 /** A Pokémon's row: whether it's the one the slot has (`on`: its Mega's while it holds its stone), with the headings
  * before it (a group's on its first; the favorites' folded, on the list's first) and, on the favorites' last when there
  * are more, the link to them all (`mark`: both, for the row's memo). */
@@ -203,7 +224,7 @@ interface MonRow {
   on: boolean
   key: string
   heads?: Head[]
-  more?: { total: number; all: boolean }
+  more?: { total: number; all: boolean; group: PickerGroup }
   mark: string
 }
 const monList = computed((): MonRow[] => {
@@ -222,19 +243,31 @@ const monList = computed((): MonRow[] => {
     more,
     mark: heads || more ? JSON.stringify([heads, more]) : '',
   })
-  const favs = favRows.value
   const main = monShown.value
-  if (!favs.length) return main.map((r) => listed(r, r.id))
-  const isFolded = folded.value.has('favorites')
-  const all = expanded.value.has('favorites')
-  const led = isFolded ? [] : all ? favs : favs.slice(0, GROUP_CAP)
-  const fav: Head = { group: 'favorites', count: favs.length, folded: isFolded }
+  // Each group leading the list (Recent, then Favorites): its heading, folding it, over its first `GROUP_CAP` (or all
+  // of them); a folded one's heading carried on to the next row drawn, so it's still there to unfold.
+  const out: MonRow[] = []
+  let pending: Head[] = []
+  for (const [group, rows] of [
+    ['recent', recentRows.value],
+    ['favorites', favRows.value],
+  ] as const) {
+    if (!rows.length) continue
+    const isFolded = folded.value.has(group)
+    const all = expanded.value.has(group)
+    const led = isFolded ? [] : all ? rows : rows.slice(0, GROUP_CAP)
+    const head: Head = { group, count: rows.length, folded: isFolded }
+    const more = rows.length > GROUP_CAP ? { total: rows.length, all, group } : undefined
+    if (isFolded) pending.push(head)
+    led.forEach((r, i) => {
+      const heads = i ? undefined : [...pending, head]
+      if (!i) pending = []
+      out.push(listed(r, `${group}:${r.id}`, heads, i === led.length - 1 ? more : undefined))
+    })
+  }
+  if (!out.length && !pending.length) return main.map((r) => listed(r, r.id))
   const rest: Head = { group: props.data ? 'usage' : 'all' }
-  const more = favs.length > GROUP_CAP ? { total: favs.length, all } : undefined
-  return [
-    ...led.map((r, i) => listed(r, `fav:${r.id}`, i ? undefined : [fav], i === led.length - 1 ? more : undefined)),
-    ...main.map((r, i) => listed(r, r.id, i ? undefined : isFolded ? [fav, rest] : [rest])),
-  ]
+  return [...out, ...main.map((r, i) => listed(r, r.id, i ? undefined : [...pending, rest]))]
 })
 /** How many the text finds by name, with the filters picked: not the preview's, which the options show over it. */
 const monNamed = computed(() =>
@@ -378,22 +411,22 @@ const termRows = useId()
           :key="r.key"
           v-memo="[r.id, r.name, r.parts?.join(' '), r.usage, r.clash, r.fav, r.on, r.mark]"
         >
-          <!-- Its group's heading (the favorites' folds them away when tapped, with how many they are), and before
-               it the favorites' while folded. -->
+          <!-- Its group's heading (Recent's and the favorites' fold them away when tapped, with how many they are),
+               and before it those of the groups folded. -->
           <template v-for="h in r.heads" :key="h.group">
             <button
-              v-if="h.group === 'favorites'"
+              v-if="h.group === 'favorites' || h.group === 'recent'"
               type="button"
               class="group foldable"
               :aria-expanded="!h.folded"
-              @click="toggleFold('favorites')"
+              @click="toggleFold(h.group)"
             >
               <span class="fold" aria-hidden="true">{{ h.folded ? '▸' : '▾' }}</span
               >{{ t(GROUPS[h.group]) }}<span class="count">{{ h.count }}</span>
             </button>
             <div v-else class="group">{{ t(GROUPS[h.group]) }}</div>
           </template>
-          <button type="button" class="row" :class="{ on: r.on, clash: r.clash }" @click="emit('pick', r.id)">
+          <button type="button" class="row" :class="{ on: r.on, clash: r.clash }" @click="pickRow(r.id)">
             <PokemonIcon :id="r.id" />
             <span class="row-name"
               ><Marked v-if="r.parts" :p="r.parts" /><template v-else>{{ r.name }}</template
@@ -406,8 +439,8 @@ const termRows = useId()
             <span class="types"><TypeIcon v-for="ty in POKEMON[r.id].types" :key="ty" :type="ty" /></span>
             <span class="share">{{ r.usage === undefined ? '' : percent(r.usage) }}</span>
           </button>
-          <!-- After the favorites' last shown, when there are more: all of them, or back to the first few. -->
-          <button v-if="r.more" type="button" class="more-link" @click="toggleExpanded('favorites')">
+          <!-- After a group's last shown, when there are more: all of them, or back to the first few. -->
+          <button v-if="r.more" type="button" class="more-link" @click="toggleExpanded(r.more.group)">
             <component :is="r.more.all ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />{{
               r.more.all ? t('picker.showFewer') : t('picker.showAll', { n: r.more.total })
             }}
