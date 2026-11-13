@@ -1325,7 +1325,7 @@ export const messages = {
   'builder.noItemDesc': 'Holds nothing.',
   'builder.noMove': 'No move',
   'builder.noMoveDesc': 'Leaves this move slot empty.',
-  'builder.inSet': 'In its set',
+  'builder.inSet': 'Already in its set',
   'builder.neutral': 'Neutral',
   'builder.points': 'Stat points',
   'builder.pointsLeft': '{n} points left',

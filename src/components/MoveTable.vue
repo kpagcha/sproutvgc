@@ -56,12 +56,29 @@ const props = defineProps<{
   pick?: (id: MoveId) => void
   /** No move picked, leaving the slot empty: a row of its own before the moves, as the items' No item. */
   pickNone?: () => void
-  /** Moves already picked, marked as in the set and not to be picked again (but the one being replaced). */
+  /** Moves already picked, not to be picked again (but the one being replaced): picked anyway, its row flashes red with
+   * a note saying so (`refused`), nothing picked. */
   picked?: readonly MoveId[]
   /** The move being replaced (the slot the picker opened from has it): marked apart, and scrolled to once its row is
    * drawn. */
   current?: MoveId | null
 }>()
+
+// A move the set has already, picked again: its row lit red a moment, saying why, nothing picked.
+const REFUSED_MS = 2000
+const refused = shallowRef<MoveId | null>(null)
+let refusedTimer: ReturnType<typeof setTimeout> | undefined
+function tryPick(id: MoveId) {
+  if (!(props.picked?.includes(id) && props.current !== id)) return props.pick?.(id)
+  // Off and on again, so a second tap while it's lit starts it over.
+  refused.value = null
+  clearTimeout(refusedTimer)
+  requestAnimationFrame(() => {
+    refused.value = id
+    refusedTimer = setTimeout(() => (refused.value = null), REFUSED_MS)
+  })
+}
+onUnmounted(() => clearTimeout(refusedTimer))
 
 // Its links are `AppLink`s and its icons and descriptions functional components: RouterLinks and full components in
 // each of hundreds of rows take a while to mount.
@@ -270,20 +287,15 @@ const termRows = useId()
             locale,
             picked,
             current,
+            refused === r.id,
           ]"
           class="row"
-          :class="{ picked: picked?.includes(r.id), current: current === r.id }"
+          :class="{ picked: picked?.includes(r.id), current: current === r.id, refused: refused === r.id }"
           :data-move="r.id"
           role="row"
         >
           <div role="cell" class="grow">
-            <button
-              v-if="pick"
-              type="button"
-              class="name pick"
-              :disabled="picked?.includes(r.id) && current !== r.id"
-              @click="pick(r.id)"
-            >
+            <button v-if="pick" type="button" class="name pick" @click="tryPick(r.id)">
               <Marked v-if="r.parts" :p="r.parts" />
               <template v-else>{{ r.name }}</template>
             </button>
@@ -291,9 +303,7 @@ const termRows = useId()
               <Marked v-if="r.parts" :p="r.parts" />
               <template v-else>{{ r.name }}</template>
             </AppLink>
-            <span v-if="pick && picked?.includes(r.id) && current !== r.id" class="in-set">{{
-              t('builder.inSet')
-            }}</span>
+            <span v-if="refused === r.id" class="refused-note" role="alert">{{ t('builder.inSet') }}</span>
             <MoveTag v-if="r.tag" v-tip:group="moveTagTip(r.tag)" class="tag" :tag="r.tag" />
             <div v-if="descriptions && below && !stacked" class="muted below">
               <DexText :text="shortOf(r.id)" />
@@ -384,25 +394,32 @@ const termRows = useId()
 .pick:hover {
   text-decoration: underline;
 }
-/* A move the set already has: not to be picked again, said so after its name. */
+/* A move the set already has: greyed out, not to be picked again. */
 .row.picked {
   background: var(--panel-alt);
 }
-.row.picked .pick {
+.row.picked:not(.current) .pick {
   color: var(--muted);
-}
-.pick:disabled {
   cursor: default;
   text-decoration: none;
 }
-.in-set {
-  margin-left: 6px;
-  padding: 0 4px;
-  font-size: 0.75em;
+/* A move the set already has, picked again: its row lit red, outlined, fading back, the note why after its name. */
+.row.refused {
+  animation: refused 2s ease-out;
+}
+@keyframes refused {
+  0%,
+  60% {
+    background: color-mix(in srgb, var(--bad) 16%, var(--panel));
+    box-shadow: inset 0 0 0 1px var(--bad);
+  }
+}
+.refused-note {
+  margin-left: 8px;
+  font-size: 0.8em;
   font-weight: bold;
-  color: var(--muted);
+  color: var(--bad);
   white-space: nowrap;
-  border: 1px solid var(--border);
 }
 /* No move: a row across the table. */
 .none-row > .span-all {
