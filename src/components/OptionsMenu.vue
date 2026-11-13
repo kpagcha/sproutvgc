@@ -197,7 +197,8 @@ onBeforeUnmount(() => {
   font-size: 0.85em;
 }
 /* Something to do rather than an option (`menu-item`, a button or a link): a line of text, its icon before it, in the
-   accent when pointed at (`danger`, one that undoes, in the warning's). */
+   accent when pointed at (`danger`, one that undoes, in the bad color throughout, tinted when pointed at, as the
+   calc's Clear in its set's dialog). */
 .pop :slotted(.menu-item) {
   display: flex;
   align-items: center;
@@ -215,8 +216,15 @@ onBeforeUnmount(() => {
   color: var(--accent);
   text-decoration: none;
 }
+.pop :slotted(.menu-item.danger) {
+  /* Its tint reaching past the text on both sides, the text kept in line with the rest. */
+  margin: 0 -6px;
+  padding: 2px 6px;
+  color: var(--bad);
+}
 .pop :slotted(.menu-item.danger:hover) {
   color: var(--bad);
+  background: color-mix(in srgb, var(--bad) 12%, var(--panel));
 }
 .pop :slotted(.menu-item:disabled) {
   color: var(--muted);
