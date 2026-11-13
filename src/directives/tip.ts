@@ -69,8 +69,14 @@ function quietFocus(instance: Instance): false | void {
   const el = instance.reference as HTMLElement
   if (!noHover && el.matches(':focus') && !el.matches(':focus-visible') && !el.matches(':hover')) return false
 }
+/**
+ * Where a tooltip goes: in the modal dialog its reference is in, if any (a modal dialog is drawn over everything else
+ * on the page, the body's tooltips under it), else the body.
+ */
+const appendTo = (ref: Element): Element => ref.closest('dialog[open]') ?? document.body
 tippy.setDefaultProps({
   theme: 'sproutvgc',
+  appendTo,
   delay: [200, 0],
   duration: [120, 80],
   plugins: [tapToggle],
