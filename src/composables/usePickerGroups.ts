@@ -47,6 +47,11 @@ export function usePickerGroups() {
     recent.value = [id, ...recent.value.filter((x) => x !== id)].slice(0, RECENT_LIMIT)
     save(RECENT_KEY, recent.value)
   }
+  /** Forgets every pick. */
+  function clearRecent() {
+    recent.value = []
+    save(RECENT_KEY, [])
+  }
   function toggleFold(g: PickerGroup) {
     const next = new Set(folded.value)
     if (!next.delete(g)) next.add(g)
@@ -58,5 +63,5 @@ export function usePickerGroups() {
     if (!next.delete(g)) next.add(g)
     expanded.value = next
   }
-  return { recent, folded, expanded, recordPick, toggleFold, toggleExpanded }
+  return { recent, folded, expanded, recordPick, clearRecent, toggleFold, toggleExpanded }
 }

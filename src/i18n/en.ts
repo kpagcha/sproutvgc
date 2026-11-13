@@ -1794,6 +1794,7 @@ export const messages = {
   'picker.all': 'All Pokémon',
   'picker.taken': 'On the team',
   'picker.recent': 'Recent',
+  'picker.clearRecent': 'Clear',
   'speedPick.speed': 'Its Speed: nature and points',
   'speedPick.speedWork': 'Its Speed: nature and points, or work them out',
   'speedPick.done': 'Done',

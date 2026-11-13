@@ -56,7 +56,7 @@ const { results, showsPicked } = usePokemonSearch(
   () => !!props.speed,
 )
 // Folding a group or showing all of it keeps the list where it is, rather than going back to the one picked.
-const { toggleFold, toggleExpanded } = usePickerGroups()
+const { clearRecent, toggleFold, toggleExpanded } = usePickerGroups()
 let regrouping = false
 function regroup(change: () => void) {
   regrouping = true
@@ -192,7 +192,15 @@ const optionId = (i: number) => `${listId}-${i}`
           @click="foldable(h.group) && regroup(() => toggleFold(h.group as PickerGroup))"
         >
           <span v-if="foldable(h.group)" class="fold" aria-hidden="true">{{ h.folded ? '▸' : '▾' }}</span
-          >{{ groupLabel(h) }}<span v-if="foldable(h.group)" class="count">{{ h.count }}</span>
+          >{{ groupLabel(h) }}<span v-if="foldable(h.group)" class="count">{{ h.count }}</span
+          ><button
+            v-if="h.group === 'recent'"
+            type="button"
+            class="btn quiet small group-clear"
+            @click.prevent.stop="regroup(clearRecent)"
+          >
+            {{ t('picker.clearRecent') }}
+          </button>
         </li>
         <li
           :id="optionId(i)"
@@ -335,6 +343,8 @@ const optionId = (i: number) => `${listId}-${i}`
 }
 /* A group's heading, while browsing with favorites: small, muted, not an option. */
 .group {
+  display: flex;
+  align-items: baseline;
   padding: 10px 6px 4px;
   font-size: 0.75em;
   font-weight: bold;
@@ -342,6 +352,17 @@ const optionId = (i: number) => `${listId}-${i}`
   letter-spacing: 0.04em;
   color: var(--muted);
   border-bottom: 1px solid var(--border);
+}
+/* Recent's Clear: the calc's field's Clear (`btn quiet small`) without its border, padding nor icon, at the
+   heading's size, not uppercase, on its text's line, a wash on hover. */
+.btn.group-clear {
+  flex: none;
+  margin-left: auto;
+  padding: 0 4px;
+  font-size: 1em;
+  text-transform: none;
+  letter-spacing: normal;
+  border: 0;
 }
 /* A group that folds: its heading a toggle, its count after its name. */
 .group.foldable {

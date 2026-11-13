@@ -177,7 +177,7 @@ const monShown = computed(() => {
 // passing the filters: a group over it, as the other pickers have theirs and folded with them (`usePickerGroups`: its
 // first `GROUP_CAP` until asked for all). Each is in its place in the list too, a star after its name.
 const { isFavoritePokemon } = useFavorites()
-const { recent, folded, expanded, toggleFold, toggleExpanded, recordPick } = usePickerGroups()
+const { recent, folded, expanded, toggleFold, toggleExpanded, recordPick, clearRecent } = usePickerGroups()
 const favRows = computed(() => {
   if (q.value) return []
   const f = preview.value ?? filters.value
@@ -414,16 +414,20 @@ const termRows = useId()
           <!-- Its group's heading (Recent's and the favorites' fold them away when tapped, with how many they are),
                and before it those of the groups folded. -->
           <template v-for="h in r.heads" :key="h.group">
-            <button
-              v-if="h.group === 'favorites' || h.group === 'recent'"
-              type="button"
-              class="group foldable"
-              :aria-expanded="!h.folded"
-              @click="toggleFold(h.group)"
-            >
-              <span class="fold" aria-hidden="true">{{ h.folded ? '▸' : '▾' }}</span
-              >{{ t(GROUPS[h.group]) }}<span class="count">{{ h.count }}</span>
-            </button>
+            <div v-if="h.group === 'favorites' || h.group === 'recent'" class="group-row">
+              <button type="button" class="group foldable" :aria-expanded="!h.folded" @click="toggleFold(h.group)">
+                <span class="fold" aria-hidden="true">{{ h.folded ? '▸' : '▾' }}</span
+                >{{ t(GROUPS[h.group]) }}<span class="count">{{ h.count }}</span>
+              </button>
+              <button
+                v-if="h.group === 'recent'"
+                type="button"
+                class="btn quiet small group-clear"
+                @click="clearRecent"
+              >
+                {{ t('picker.clearRecent') }}
+              </button>
+            </div>
             <div v-else class="group">{{ t(GROUPS[h.group]) }}</div>
           </template>
           <button type="button" class="row" :class="{ on: r.on, clash: r.clash }" @click="pickRow(r.id)">
@@ -630,6 +634,25 @@ const termRows = useId()
   background: none;
   border: 0;
   border-bottom: 1px solid var(--border);
+}
+/* Recent's and the favorites' heading: a toggle folding them, and Recent's Clear at its end, on one rule. */
+.group-row {
+  display: flex;
+  align-items: baseline;
+  border-bottom: 1px solid var(--border);
+}
+.group-row .group {
+  border-bottom: 0;
+}
+/* Recent's Clear: the calc's field's Clear (`btn quiet small`) without its border, padding nor icon, at the
+   heading's size, on its text's line, a wash on hover. */
+.btn.group-clear {
+  flex: none;
+  align-self: baseline;
+  margin: 0 2px 0 auto;
+  padding: 0 4px;
+  font-size: 0.75em;
+  border: 0;
 }
 /* The favorites': a toggle folding them, how many they are after its name. */
 .group.foldable {
