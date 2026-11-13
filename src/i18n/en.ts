@@ -1301,6 +1301,7 @@ export const messages = {
   'builder.openCalc': 'Open in the damage calc',
   'builder.openSpeedTiers': 'Open in the speed tiers',
   'builder.pinned': 'Pinned',
+  'builder.toPinned': 'Pinned',
   'builder.pinChart': 'Chart',
   'builder.pinEdit': 'Edit',
   'builder.pinSet': 'Set',

@@ -93,6 +93,13 @@ export function underBand(band: Element | null | undefined, panel: Element | nul
   return Math.abs(panel.getBoundingClientRect().top - band.getBoundingClientRect().bottom) <= 4
 }
 
+/** Smoothly scrolls the page to bring `el`'s top to `edge` px down the screen (for something sticky, where it sticks,
+ * its `top`: under what's stuck over it, as it will sit); the user scrolling or touching it takes over. */
+export function toTopAt(el: Element | null | undefined, edge: number) {
+  if (!el) return
+  scrollToY(window.scrollY + el.getBoundingClientRect().top - edge)
+}
+
 /** Smoothly scrolls to the top of the page; the user scrolling or touching the screen takes over. */
 export function toTop() {
   scrollToY(0)

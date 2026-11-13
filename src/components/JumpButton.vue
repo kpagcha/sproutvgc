@@ -1,20 +1,44 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { AnimatePresence, motion } from 'motion-v'
-import { reveal } from '@/lib/scroll'
+import { reveal, toTopAt, toTopOf } from '@/lib/scroll'
 import { FADE, PRESS } from '@/lib/motion'
 
 // A floating button at the bottom of the screen jumping to what a page works out (`target`) while it's below the
 // screen: starting low on it (below 40%) and running off its bottom edge. The type matchups' results, the speed
-// comparison's Who moves first.
-const props = defineProps<{ target: HTMLElement | null | undefined; label: string }>()
+// comparison's Who moves first, the team builder's slot just pinned beside its charts. `dismissible`: gone for good
+// (until `target` is set again) once tapped or once the reader scrolls by hand (wheel, touch, keys; not its own
+// scrolling there), a nudge rather than a way there. `top`: tapped, its target's top brought to the screen's top (under
+// any bar stuck there; a sticky one where it sticks, its own `top`, so what's beside it starts there too) rather than
+// the least scroll that shows it, which would leave it at the screen's bottom.
+const props = defineProps<{
+  target: HTMLElement | null | undefined
+  label: string
+  dismissible?: boolean
+  top?: boolean
+}>()
 
 const below = ref(false)
+const dismissed = ref(false)
+const SCROLL_KEYS = new Set(['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '])
 watch(
   () => props.target,
   (el, _, onCleanup) => {
     below.value = false
+    dismissed.value = false
     if (!el) return
+    if (props.dismissible) {
+      const dismiss = () => (dismissed.value = true)
+      const onKey = (e: KeyboardEvent) => SCROLL_KEYS.has(e.key) && dismiss()
+      window.addEventListener('wheel', dismiss, { passive: true })
+      window.addEventListener('touchmove', dismiss, { passive: true })
+      window.addEventListener('keydown', onKey)
+      onCleanup(() => {
+        window.removeEventListener('wheel', dismiss)
+        window.removeEventListener('touchmove', dismiss)
+        window.removeEventListener('keydown', onKey)
+      })
+    }
     const check = () => {
       const r = el.getBoundingClientRect()
       const vh = window.innerHeight
@@ -33,6 +57,15 @@ watch(
   },
   { immediate: true },
 )
+
+function go() {
+  const el = props.target
+  const stuck = el && getComputedStyle(el).position === 'sticky' ? parseFloat(getComputedStyle(el).top) : NaN
+  if (props.top && !Number.isNaN(stuck)) toTopAt(el, stuck)
+  else if (props.top) toTopOf(el)
+  else reveal(props.target)
+  if (props.dismissible) dismissed.value = true
+}
 </script>
 
 <template>
@@ -40,7 +73,7 @@ watch(
   <Teleport to="body">
     <AnimatePresence>
       <motion.button
-        v-if="below"
+        v-if="below && !dismissed"
         type="button"
         class="btn primary jump"
         :initial="{ opacity: 0, y: 8 }"
@@ -48,7 +81,7 @@ watch(
         :exit="{ opacity: 0, y: 8 }"
         :transition="FADE"
         :while-press="PRESS"
-        @click="reveal(props.target)"
+        @click="go"
       >
         {{ props.label }} ↓
       </motion.button>

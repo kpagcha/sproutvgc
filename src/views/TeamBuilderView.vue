@@ -33,6 +33,7 @@ import {
 } from '@/lib/team'
 import CommonSetOffer from '@/components/CommonSetOffer.vue'
 import CopyPaste from '@/components/CopyPaste.vue'
+import JumpButton from '@/components/JumpButton.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
 import OptionsMenu from '@/components/OptionsMenu.vue'
@@ -85,8 +86,19 @@ const pinnedAt = shallowRef<number | null>(null)
 const pinned = computed(() =>
   pinnedAt.value !== null && members.value[pinnedAt.value]?.pokemon ? pinnedAt.value : null,
 )
-const togglePin = (i: number) => (pinnedAt.value = pinnedAt.value === i ? null : i)
 const pinSide = useMediaQuery('(min-width: 1100px)')
+// Pinned beside the charts (wide), a floating button down to them while they're below the screen (`JumpButton`,
+// `dismissible`): gone once tapped, once the page is scrolled by hand, or as the pin is toggled again.
+const pinColEl = useTemplateRef<HTMLElement>('pinCol')
+const pinJump = shallowRef<HTMLElement | null>(null)
+async function togglePin(i: number) {
+  pinnedAt.value = pinnedAt.value === i ? null : i
+  pinJump.value = null
+  if (pinnedAt.value === null || !pinSide.value) return
+  await nextTick()
+  pinJump.value = pinColEl.value
+}
+watch(pinned, (p) => p === null && (pinJump.value = null))
 type DockChart = 'speed' | 'defense' | 'offense'
 const DOCK_CHARTS: readonly DockChart[] = ['speed', 'defense', 'offense']
 const DOCK_KEY = 'sproutvgc.builder.pinChart'
@@ -647,7 +659,7 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
             />
           </ul>
         </DefinePinned>
-        <aside v-if="pinned !== null && pinSide" class="pin-col side" :aria-label="t('builder.pinned')">
+        <aside v-if="pinned !== null && pinSide" ref="pinCol" class="pin-col side" :aria-label="t('builder.pinned')">
           <ReusePinned />
         </aside>
         <!-- Narrower, in a dialog over the page, the page dimmed and still behind it: a bar naming it, unpinning it;
@@ -791,6 +803,7 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
         </div>
       </div>
     </ModalDialog>
+    <JumpButton :target="pinJump" :label="t('builder.toPinned')" dismissible top />
   </div>
 </template>
 
