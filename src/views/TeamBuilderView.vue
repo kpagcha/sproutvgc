@@ -319,6 +319,8 @@ async function clearSlot(i: number) {
   if (!ok) return
   update(i, emptyMember())
   if (picking.value?.slot === i) picking.value = null
+  // Unpinned too, so a Pokémon picked for it later isn't pinned again.
+  if (pinnedAt.value === i) pinnedAt.value = null
 }
 
 // The team's name, edited in place.
