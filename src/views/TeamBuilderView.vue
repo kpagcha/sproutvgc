@@ -1,11 +1,26 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, shallowRef, useTemplateRef, watch, type ComponentPublicInstance } from 'vue'
 import { createReusableTemplate, useElementSize, useMediaQuery } from '@vueuse/core'
-import { ChevronDown, ClipboardPaste, Copy, PinOff, Plus, Sparkles, Star, Trash2 } from '@lucide/vue'
+import {
+  Check,
+  ChevronDown,
+  ClipboardCopy,
+  ClipboardPaste,
+  Copy,
+  ImageDown,
+  PinOff,
+  Plus,
+  Share2,
+  Sparkles,
+  Star,
+  Trash2,
+} from '@lucide/vue'
 import { ability, item, move, pokemon, type AbilityId, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
 import { natureName } from '@/data/natures'
 import { loadLearnsets, POKEMON, splitForme } from '@/data/pokemon'
 import { RULES } from '@/data/rules'
+import type { Slot } from '@/data/tournaments'
+import { copy } from '@/lib/clipboard'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { confirmDialog } from '@/composables/useConfirm'
@@ -32,7 +47,7 @@ import {
   type TeamIssue,
 } from '@/lib/team'
 import CommonSetOffer from '@/components/CommonSetOffer.vue'
-import CopyPaste from '@/components/CopyPaste.vue'
+import ShareTeamImage from '@/components/ShareTeamImage.vue'
 import JumpButton from '@/components/JumpButton.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
@@ -371,6 +386,23 @@ watch(importing, (on) => {
 })
 
 const paste = computed(() => membersPaste(members.value))
+// Shared as an image: its Pokémon as a tournament team's sets, with their stat points.
+const shared = computed(() => members.value.filter((m) => m.pokemon))
+const shareSlots = computed(() =>
+  shared.value.map((m): Slot => [m.pokemon!, m.item, m.ability, m.nature, m.moves.filter((x) => x !== null)]),
+)
+const sharePoints = computed(() => shared.value.map((m) => m.points))
+const shareImage = useTemplateRef<InstanceType<typeof ShareTeamImage>>('shareImage')
+// Copied from the Share menu: said so on its item a moment, the menu then closing.
+const pasteCopied = shallowRef(false)
+async function copyPaste(close: () => void) {
+  if (!(await copy(paste.value))) return
+  pasteCopied.value = true
+  setTimeout(() => {
+    close()
+    pasteCopied.value = false
+  }, 700)
+}
 const hasAny = computed(() => members.value.some((m) => m.pokemon))
 // Which slot Mega Evolves in the insights (one at most, as in a battle), and the slots as they battle for them;
 // toggling a slot's Mega makes it the one, or none when it was.
@@ -583,7 +615,34 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
             :placeholder="t('builder.untitled')"
             :aria-label="t('builder.name')"
           />
-          <CopyPaste v-if="hasAny" :text="paste" />
+          <!-- Out of the team: copied as a paste, or shared as an image (its dialog outside the menu, which closes). -->
+          <OptionsMenu v-if="hasAny" :title="t('builder.share')">
+            <template #button="{ open: on, toggle }">
+              <button type="button" class="btn common-all" :aria-expanded="on" @click="toggle">
+                <Share2 :size="14" aria-hidden="true" />{{ t('builder.share') }}
+                <ChevronDown class="chevron" :class="{ open: on }" :size="14" aria-hidden="true" />
+              </button>
+            </template>
+            <template #default="{ close }">
+              <button type="button" class="menu-item" @click="copyPaste(close)">
+                <component :is="pasteCopied ? Check : ClipboardCopy" :size="14" aria-hidden="true" />{{
+                  t(pasteCopied ? 'tournaments.pasteCopied' : 'tournaments.copyPaste')
+                }}
+              </button>
+              <button type="button" class="menu-item" @click="(close(), shareImage?.show())">
+                <ImageDown :size="14" aria-hidden="true" />{{ t('share.button') }}
+              </button>
+            </template>
+          </OptionsMenu>
+          <ShareTeamImage
+            v-if="hasAny"
+            ref="shareImage"
+            no-button
+            :team="shareSlots"
+            :points="sharePoints"
+            :title="name || t('builder.untitled')"
+            :file="name || 'team'"
+          />
           <!-- What the meta shown runs most, put in every slot at once: their sets, or their spreads alone. -->
           <OptionsMenu v-if="hasAny" :title="t('builder.common')">
             <template #button="{ open: on, toggle }">

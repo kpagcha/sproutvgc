@@ -2,7 +2,7 @@
 import { ability, item, move, pokemon } from '@/data/dex'
 import { MOVES } from '@/data/moves'
 import { natureName } from '@/data/natures'
-import { POKEMON, spriteUrl } from '@/data/pokemon'
+import { POKEMON, spriteUrl, STATS } from '@/data/pokemon'
 import { listed, type Slot } from '@/data/tournaments'
 import DexRef from '@/components/DexRef'
 import ItemIcon from '@/components/ItemIcon.vue'
@@ -10,13 +10,26 @@ import PokemonIcon from '@/components/PokemonIcon'
 import TypeIcon from '@/components/TypeIcon'
 import { natureTip } from '@/components/natureTip'
 import { t } from '@/i18n'
+import type { Points } from '@/lib/team'
 
 // A tournament team's whole sets, a card each, each entry leading to its meta page: its sprite and types in a band,
 // its item after the types, then its ability and nature (the stats it raises and lowers on hover) on a line, and its
 // moves two by two (on phones, one under another), each with its type's badge. A Pokémon whose team list isn't there
 // is the Pokémon alone. On a tournament's standings, a player's row unfolded, and on a player's page; there, the sets
-// the standings are filtered to marked (`marked`: a Pokémon narrowed to a build).
-defineProps<{ team: Slot[]; marked?: (slot: Slot) => boolean }>()
+// the standings are filtered to marked (`marked`: a Pokémon narrowed to a build). Each set's stat points, where known
+// (`points`: a team builder's team, shared as an image), a line under its ability and nature, Showdown's short way.
+// `still`: drawn to be an image (`TeamShareCard`), its sprites loaded at once rather than as they near the screen.
+const props = defineProps<{
+  team: Slot[]
+  marked?: (slot: Slot) => boolean
+  points?: readonly (Points | null)[]
+  still?: boolean
+}>()
+const spread = (i: number) =>
+  (props.points?.[i] ?? [])
+    .map((n, k) => (n ? `${n} ${t(`stat.${STATS[k]!}`)}` : ''))
+    .filter(Boolean)
+    .join(' / ')
 </script>
 
 <template>
@@ -35,7 +48,7 @@ defineProps<{ team: Slot[]; marked?: (slot: Slot) => boolean }>()
           alt=""
           width="96"
           height="96"
-          loading="lazy"
+          :loading="still ? 'eager' : 'lazy'"
           draggable="false"
         />
         <span v-else class="set-sprite icon-sprite"><PokemonIcon :id="mon" /></span>
@@ -58,6 +71,7 @@ defineProps<{ team: Slot[]; marked?: (slot: Slot) => boolean }>()
         <span v-if="ab && nature" class="muted" aria-hidden="true">·</span>
         <span v-if="nature" v-tip:group="natureTip(nature)" class="muted">{{ natureName(nature) }}</span>
       </div>
+      <div v-if="spread(i)" class="set-points">{{ spread(i) }}</div>
       <ul v-if="moves.length" class="set-moves">
         <li v-for="mv in moves" :key="mv" class="set-move">
           <TypeIcon v-if="MOVES[mv]" :type="MOVES[mv].type" /><DexRef :to="move(mv)" meta />
@@ -164,6 +178,14 @@ defineProps<{ team: Slot[]; marked?: (slot: Slot) => boolean }>()
   gap: 2px 6px;
   padding: 8px 10px 4px;
   font-weight: bold;
+}
+/* Its stat points, under them: small, muted, in the numbers' font. */
+.set-points {
+  margin: 0;
+  padding: 2px 10px 0;
+  font-family: var(--font-num, inherit);
+  font-size: 0.8em;
+  color: var(--muted);
 }
 /* Its moves, two by two: each a chip, its type's badge and its name. */
 .set-moves {

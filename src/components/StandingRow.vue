@@ -5,6 +5,7 @@ import { t } from '@/i18n'
 import { medalOf } from '@/lib/tournamentStats'
 import AppLink from '@/components/AppLink'
 import CopyPaste from '@/components/CopyPaste.vue'
+import ShareTeamImage from '@/components/ShareTeamImage.vue'
 import CountryFlag from '@/components/CountryFlag'
 import OpenInBuilder from '@/components/OpenInBuilder.vue'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -82,13 +83,20 @@ const champion = () => props.s.placing === 1 && !underWay(props.event)
     <!-- Their whole sets, a card each. -->
     <template v-if="open && s.team.length">
       <TeamSets :team="s.team" :marked />
-      <!-- The ways to copy the team as a paste or open it in the team builder, under its sets at their right. -->
+      <!-- The ways to copy the team as a paste, share it as an image or open it in the team builder, under its sets at
+           their right. -->
       <p class="team-tools">
+        <CopyPaste :team="s.team" />
+        <ShareTeamImage
+          :team="s.team"
+          :title="s.player"
+          :subtitle="`#${s.placing} · ${s.wins}–${s.losses} · ${eventName() ?? ''}`"
+          :file="`${s.player} ${eventName() ?? ''}`"
+        />
         <OpenInBuilder
           :team="s.team"
           :name="t('builder.fromTournament', { player: s.player, event: eventName() ?? '' })"
         />
-        <CopyPaste :team="s.team" />
       </p>
     </template>
   </div>
@@ -233,6 +241,17 @@ const champion = () => props.s.placing === 1 && !underWay(props.event)
   gap: 8px;
   margin: 0;
   padding: 0 4px 12px;
+}
+/* On phones, the three as a grid, by importance: copying its paste across, sharing it as an image and opening it in the
+   team builder two equal halves under it, rather than wrapping one alone. */
+@media (max-width: 560px) {
+  .team-tools {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .team-tools > :first-child {
+    grid-column: 1 / -1;
+  }
 }
 /* On phones, the team under the name: across the whole row, indented to the name, so its six fit on one line however
    wide the record is. */
