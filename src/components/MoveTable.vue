@@ -262,11 +262,10 @@ const termRows = useId()
       </div>
       <SkeletonRows v-if="!entered" :cells="skeleton" height="2.05em" />
       <template v-else>
-        <!-- No move: the slot left empty, across the whole row, as the items' No item. -->
+        <!-- No move: the slot left empty, a placeholder across the whole row rather than a move. -->
         <div v-if="pickNone" class="row none-row" role="row">
           <div role="cell" class="span-all">
-            <button type="button" class="name pick" @click="pickNone()">{{ t('builder.noMove') }}</button>
-            <span class="muted none-desc">{{ t('builder.noMoveDesc') }}</span>
+            <button type="button" class="none-pick" @click="pickNone()">{{ t('builder.noMove') }}</button>
           </div>
         </div>
         <!-- Each row drawn again only when what it shows changes, not with every change to the page (the search's text, its
@@ -425,9 +424,24 @@ const termRows = useId()
 .none-row > .span-all {
   grid-column: 1 / -1;
 }
-.none-desc {
-  margin-left: 8px;
+/* A placeholder, not a move: a dashed box, muted, its whole width the button; outlined in the text's color when
+   pointed at. */
+.none-pick {
+  display: block;
+  width: 100%;
+  padding: 3px 8px;
+  font: inherit;
   font-size: 0.875em;
+  color: var(--muted);
+  text-align: left;
+  background: none;
+  border: 1px dashed var(--border-strong);
+  cursor: pointer;
+}
+.none-pick:hover,
+.none-pick:focus-visible {
+  color: var(--text);
+  border-color: var(--text);
 }
 /* The move being replaced: tinted with the accent. */
 .row.current {
