@@ -160,7 +160,7 @@ const label = computed(() =>
   <SideDrawer v-if="wide" ref="drawer" :open :anchor="props.anchor" :label defer @close="step = null">
     <ReuseStep />
   </SideDrawer>
-  <ModalDialog v-else v-model:open="open" :label :fill="step === 'pokemon'">
+  <ModalDialog v-else v-model:open="open" :label fill>
     <div v-if="step" ref="box" class="panel picker-dialog"><ReuseStep /></div>
   </ModalDialog>
 </template>

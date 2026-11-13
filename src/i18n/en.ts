@@ -1835,7 +1835,8 @@ export const messages = {
   'reverse.workTip.example': 'E.g. your Speed points on: the points yours needs to move first.',
   'reverse.question': 'Which one moves first?',
   'reverse.intro':
-    "Pick your Pokémon and the opponent's, set what you know of each and choose what to work out, then tap the one that moves first, from a battle or as a goal. You get the natures and Speed points each could have, and how likely their common builds are.",
+    'Tap the one that moved first in your battle, or the one you want to move first. You get the natures and Speed points each could have to make it so, and how likely their common builds are.',
+  'reverse.introEmpty': "Pick your Pokémon and the opponent's above first.",
   'reverse.speed.exactly': 'Speed {n} exactly',
   'reverse.speed.atMost': 'Speed {n} or less',
   'reverse.speed.atLeast': 'Speed {n} or more',

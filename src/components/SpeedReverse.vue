@@ -111,7 +111,7 @@ const buildLabel = (b: TableBuild) => t('reverse.build', { n: b.points, speed: b
 <template>
   <section class="panel reverse" :aria-label="t('reverse.title')">
     <h2 class="heading">{{ t('reverse.question') }}</h2>
-    <p class="muted small">{{ t('reverse.intro') }}</p>
+    <p class="muted small">{{ t(ready ? 'reverse.intro' : 'reverse.introEmpty') }}</p>
     <template v-if="ready">
       <!-- The order: which of the two moves first. -->
       <div class="choices" role="radiogroup" :aria-label="t('reverse.question')">
