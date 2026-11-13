@@ -181,11 +181,11 @@ function pick(value: string) {
   else if (p.field === 'ability') update(p.slot, { ability: value as AbilityId })
   else if (p.field === 'nature') update(p.slot, { nature: value })
   else if (typeof p.field === 'number') {
-    // A move it has in another place trades places with the one it replaces.
     const moves = [...m.moves]
-    const was = moves.indexOf(value as MoveId)
-    if (was >= 0) moves[was] = moves[p.field]!
-    moves[p.field] = value as MoveId
+    // No move, the slot left empty; a move the set has elsewhere can't be picked again (the picker greys it out).
+    const mv = (value || null) as MoveId | null
+    if (mv && moves.includes(mv) && moves[p.field] !== mv) return
+    moves[p.field] = mv
     update(p.slot, { moves })
   }
   // Its nature picked again from its stat points' step: back to that step.

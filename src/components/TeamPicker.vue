@@ -455,6 +455,7 @@ const termRows = useId()
       :shares="moveShares"
       :kinds="MOVE_KINDS"
       :pick="(id) => emit('pick', id)"
+      :pick-none="() => emit('pick', '')"
       :picked="pickedMoves"
       :current="member.moves[field]"
       under="—"

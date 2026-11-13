@@ -180,7 +180,7 @@ const thresholdLabel = (th: (typeof THRESHOLDS)[number]) => {
 const marked = (r: GoalRow, p: number) => [...r.cells, r.best].some((c) => c && c.points[goal.value!.ours[0]!] === p)
 /**
  * A strip's goals, by the number of points they're at, the fewest first: those at one as one label ("Half its sets ·
- * 90%"), the build covering the most among them; near the strip's ends, held inside it. On phones, under the strip.
+ * 90%"), the build covering the most among them. On phones, under the strip, each under its cell, held inside it.
  */
 function marksOf(r: GoalRow) {
   const s = goal.value!.ours[0]!
@@ -203,7 +203,6 @@ function marksOf(r: GoalRow) {
     .map((m) => ({
       ...m,
       label: `${m.names.map((n) => n.replace(/:$/, '')).join(' · ')}:`,
-      edge: m.p <= 10 ? 'start' : m.p >= MAX_POINTS - 10 ? 'end' : '',
     }))
 }
 const useYours = (b: GoalBuild) => emit('useYours', { nature: b.nature, points: b.points, item: b.item })
@@ -283,18 +282,17 @@ function use(r: ReverseRow) {
                   >
                   <!-- On phones, where the cells' tooltips don't show, its goals under their cells, a line each, those
                        at one number of points as one; each the build to use. Wider, the row of them under it does. -->
-                  <span class="marks" :style="{ '--lanes': marksOf(r).length }">
-                    <button
-                      v-for="(m, mi) in marksOf(r)"
+                  <span class="marks">
+                    <span
+                      v-for="m in marksOf(r)"
                       :key="m.p"
-                      type="button"
-                      class="btn small pick mark-label"
-                      :class="m.edge"
-                      :style="{ '--at': `${((m.p + 0.5) / (MAX_POINTS + 1)) * 100}%`, '--lane': mi }"
-                      @click="useYours(m.build)"
+                      class="mark-lane"
+                      :style="{ '--at': (m.p + 0.5) / (MAX_POINTS + 1) }"
                     >
-                      <span class="muted">{{ m.label }}</span> {{ buildLabel(m.build, goal.ours) }}
-                    </button>
+                      <button type="button" class="btn small pick mark-label" @click="useYours(m.build)">
+                        <span class="muted">{{ m.label }}</span> {{ buildLabel(m.build, goal.ours) }}
+                      </button>
+                    </span>
                   </span>
                 </span>
                 <span class="goal-picks" :class="{ curved: r.curve }">
@@ -611,32 +609,37 @@ function use(r: ReverseRow) {
   justify-content: space-between;
   font-size: 0.75em;
 }
-/* On phones, the goals under their cells: each centered on its cell (near the ends, held inside the strip), a line
-   each; the row of them under it then not shown. Wider, the row, not them. */
+/* On phones, the goals under their cells, a line each: the space beside each label shared out as its cell's place along
+   the strip, so it sits under its cell (the start's at the left, the end's at the right) yet never past the strip's
+   edges, wrapping where it's wider than the strip. The row of them under it then not shown. Wider, the row, not them. */
 .marks {
   display: none;
-  position: relative;
-  height: calc(var(--lanes) * 28px);
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
   font-size: 0.875em;
 }
-.mark-label {
-  position: absolute;
-  top: calc(var(--lane) * 28px);
-  left: var(--at);
-  translate: -50% 0;
+.mark-lane {
+  display: flex;
 }
-.mark-label.start {
-  left: 0;
-  translate: 0 0;
+.mark-lane::before,
+.mark-lane::after {
+  content: '';
+  flex: var(--at) 1 0;
 }
-.mark-label.end {
-  left: auto;
-  right: 0;
-  translate: 0 0;
+.mark-lane::after {
+  flex-grow: calc(1 - var(--at));
+}
+.pick.mark-label {
+  display: block;
+  flex: none;
+  max-width: 100%;
+  white-space: normal;
+  text-align: left;
 }
 @media (max-width: 720px) {
   .marks {
-    display: block;
+    display: flex;
   }
   .goal-picks.curved {
     display: none;

@@ -54,7 +54,9 @@ const props = defineProps<{
   remember?: string
   panels?: boolean
   pick?: (id: MoveId) => void
-  /** Moves already picked, marked. */
+  /** No move picked, leaving the slot empty: a row of its own before the moves, as the items' No item. */
+  pickNone?: () => void
+  /** Moves already picked, marked as in the set and not to be picked again (but the one being replaced). */
   picked?: readonly MoveId[]
   /** The move being replaced (the slot the picker opened from has it): marked apart, and scrolled to once its row is
    * drawn. */
@@ -243,6 +245,13 @@ const termRows = useId()
       </div>
       <SkeletonRows v-if="!entered" :cells="skeleton" height="2.05em" />
       <template v-else>
+        <!-- No move: the slot left empty, across the whole row, as the items' No item. -->
+        <div v-if="pickNone" class="row none-row" role="row">
+          <div role="cell" class="span-all">
+            <button type="button" class="name pick" @click="pickNone()">{{ t('builder.noMove') }}</button>
+            <span class="muted none-desc">{{ t('builder.noMoveDesc') }}</span>
+          </div>
+        </div>
         <!-- Each row drawn again only when what it shows changes, not with every change to the page (the search's text, its
              options, the count it shows): hundreds of rows take a while. -->
         <div
@@ -268,7 +277,13 @@ const termRows = useId()
           role="row"
         >
           <div role="cell" class="grow">
-            <button v-if="pick" type="button" class="name pick" @click="pick(r.id)">
+            <button
+              v-if="pick"
+              type="button"
+              class="name pick"
+              :disabled="picked?.includes(r.id) && current !== r.id"
+              @click="pick(r.id)"
+            >
               <Marked v-if="r.parts" :p="r.parts" />
               <template v-else>{{ r.name }}</template>
             </button>
@@ -276,6 +291,9 @@ const termRows = useId()
               <Marked v-if="r.parts" :p="r.parts" />
               <template v-else>{{ r.name }}</template>
             </AppLink>
+            <span v-if="pick && picked?.includes(r.id) && current !== r.id" class="in-set">{{
+              t('builder.inSet')
+            }}</span>
             <MoveTag v-if="r.tag" v-tip:group="moveTagTip(r.tag)" class="tag" :tag="r.tag" />
             <div v-if="descriptions && below && !stacked" class="muted below">
               <DexText :text="shortOf(r.id)" />
@@ -366,12 +384,33 @@ const termRows = useId()
 .pick:hover {
   text-decoration: underline;
 }
-/* A move the set already has. */
+/* A move the set already has: not to be picked again, said so after its name. */
 .row.picked {
   background: var(--panel-alt);
 }
 .row.picked .pick {
   color: var(--muted);
+}
+.pick:disabled {
+  cursor: default;
+  text-decoration: none;
+}
+.in-set {
+  margin-left: 6px;
+  padding: 0 4px;
+  font-size: 0.75em;
+  font-weight: bold;
+  color: var(--muted);
+  white-space: nowrap;
+  border: 1px solid var(--border);
+}
+/* No move: a row across the table. */
+.none-row > .span-all {
+  grid-column: 1 / -1;
+}
+.none-desc {
+  margin-left: 8px;
+  font-size: 0.875em;
 }
 /* The move being replaced: tinted with the accent. */
 .row.current {

@@ -183,11 +183,12 @@ const sides = computed(() =>
 // Read backwards: which of the two was seen moving first, and each one's builds in the meta to weigh its points by.
 const first = computed(() => (route.query.first === 'a' || route.query.first === 'b' ? route.query.first : null))
 const setFirst = (s: Side) => replace({ first: s })
-/** What of a side is worked out (`awork`, `bwork`: `nat`, `pts`, both comma-separated, or `none`): its points alone
- * unless said, as the page always had it. */
+/** What of a side is worked out (`awork`, `bwork`: `nat`, `pts`, both comma-separated, or `none`) unless said: of
+ * yours nothing, its nature and points being known; of the opponent its points alone. */
+const defaultWork = (s: Side): Unknowns => ({ nature: false, points: s === 'b' })
 function workOf(s: Side): Unknowns {
   const v = route.query[`${s}work`]
-  if (typeof v !== 'string') return { nature: false, points: true }
+  if (typeof v !== 'string') return defaultWork(s)
   const parts = v.split(',')
   return { nature: parts.includes('nat'), points: parts.includes('pts') }
 }
@@ -203,11 +204,15 @@ function spanOf(s: Side): [number, number] | null {
     at(w.nature ? 'up' : b.effect, w.points ? MAX_POINTS : b.points),
   ]
 }
-const setWork = (s: Side, w: Unknowns) =>
+const setWork = (s: Side, w: Unknowns) => {
+  const d = defaultWork(s)
   replace({
     [`${s}work`]:
-      w.points && !w.nature ? undefined : [w.nature && 'nat', w.points && 'pts'].filter(Boolean).join(',') || 'none',
+      w.points === d.points && w.nature === d.nature
+        ? undefined
+        : [w.nature && 'nat', w.points && 'pts'].filter(Boolean).join(',') || 'none',
   })
+}
 const reverseSides = computed(() =>
   sides.value.map((x) => ({
     s: x.s,
