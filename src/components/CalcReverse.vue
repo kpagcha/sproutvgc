@@ -205,6 +205,14 @@ function marksOf(r: GoalRow) {
       label: `${m.names.map((n) => n.replace(/:$/, '')).join(' · ')}:`,
     }))
 }
+/** An item's row's tooltip: those alike merged into it, and its share of your sets. */
+const itemTip = (r: GoalRow) =>
+  [
+    r.items.length > 1 ? r.items.map(itemName).join(', ') : '',
+    r.share ? t('calc.goal.itemTip', { pct: percent(r.share) }) : '',
+  ]
+    .filter(Boolean)
+    .join(' · ') || undefined
 const useYours = (b: GoalBuild) => emit('useYours', { nature: b.nature, points: b.points, item: b.item })
 const itemName = (id: ItemId | null) => (id ? refName(item(id)) : t('builder.noItem'))
 const fitTip = (f: number) => t('calc.reverse.fitTip', { pct: percent(f) })
@@ -245,19 +253,23 @@ function use(r: ReverseRow) {
              of the opponent, and the most it gets; each a build to use. -->
         <div v-if="goal" class="answer yours">
           <h4 class="answer-head"><PokemonIcon :id="yourId!" />{{ t('calc.goal.yoursHead') }}</h4>
+          <!-- What its rows say, before them. -->
+          <p v-if="!goal.tooMany" class="muted small">
+            {{ t(goal.againstSets ? 'calc.goal.noteSets' : 'calc.goal.noteSet') }}
+          </p>
           <p v-if="goal.tooMany" class="warn" role="status">{{ t('calc.goal.tooMany') }}</p>
           <p v-else-if="!goal.rows.some((r) => r.best)" class="warn" role="status">{{ t('calc.goal.never') }}</p>
           <!-- A line per item: what it reaches of the thresholds and the most, each a build to use. -->
           <ul v-else class="goal-list">
-            <li v-for="(r, ri) in goal.rows" :key="ri" class="goal-row">
+            <li v-for="(r, ri) in goal.rows" :key="ri" class="goal-row" :class="{ curved: r.curve }">
               <span class="goal-item">
                 <ItemIcon v-if="r.items[0]" :id="r.items[0]" />
                 <span v-else class="no-icon" aria-hidden="true"></span>
-                <span v-tip="r.items.length > 1 ? r.items.map(itemName).join(', ') : undefined" class="goal-item-name"
+                <!-- Its share of your sets, and those alike merged into it, on hover. -->
+                <span v-tip="itemTip(r)" class="goal-item-name"
                   >{{ itemName(r.items[0] ?? null)
                   }}<template v-if="r.items.length > 1"> +{{ r.items.length - 1 }}</template></span
                 >
-                <span v-if="r.share" v-tip="t('calc.goal.itemTip')" class="muted share">{{ percent(r.share) }}</span>
               </span>
               <span class="goal-main">
                 <!-- With one stat of yours in play: a cell per number of its points, none to all, colored by how much of
@@ -325,9 +337,6 @@ function use(r: ReverseRow) {
               </span>
             </li>
           </ul>
-          <p v-if="!goal.tooMany" class="muted small">
-            {{ t(goal.againstSets ? 'calc.goal.noteSets' : 'calc.goal.noteSet') }}
-          </p>
         </div>
         <div v-if="result" class="answer theirs">
           <h4 v-if="goal" class="answer-head"><PokemonIcon :id="theirId!" />{{ t('calc.goal.theirsHead') }}</h4>
@@ -547,7 +556,7 @@ function use(r: ReverseRow) {
 .goal-row {
   display: grid;
   grid-template-columns: minmax(9em, max-content) minmax(0, 1fr);
-  align-items: start;
+  align-items: center;
   gap: 4px 16px;
   padding: 8px 0;
 }
@@ -560,9 +569,9 @@ function use(r: ReverseRow) {
   gap: 6px;
   font-weight: bold;
 }
-.goal-item .share {
-  font-weight: normal;
-  font-size: 0.85em;
+/* With the strip, the item level with it, its top line, rather than the middle of the strip and the picks under it. */
+.goal-row.curved {
+  align-items: start;
 }
 .no-icon {
   width: 24px;
