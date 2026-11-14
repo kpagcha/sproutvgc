@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, shallowRef } from 'vue'
-import { Crosshair, Plus, Trash2, X, Zap } from '@lucide/vue'
+import { ChevronDown, Crosshair, Plus, Trash2, X, Zap } from '@lucide/vue'
 import { move, type MoveId } from '@/data/dex'
 import { isSpread, MOVES } from '@/data/moves'
 import { loadLearnsets, movesOf as learnsetOf } from '@/data/pokemon'
@@ -29,7 +29,7 @@ export interface HitDraft {
   opts?: HitOptions
 }
 const props = defineProps<{ yours: Fighter; theirs: Fighter; bare?: boolean; canBack?: boolean }>()
-const emit = defineEmits<{ close: []; back: [] }>()
+const emit = defineEmits<{ close: []; back: []; pickMove: [i: number] }>()
 const hits = defineModel<HitDraft[]>('hits', { required: true })
 const first = defineModel<'a' | 'b' | null>('first', { default: null })
 
@@ -208,26 +208,17 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
         >
           <PokemonIcon :id="ids[h.by]!" />→<PokemonIcon :id="ids[h.by === 'a' ? 'b' : 'a']!" />
         </span>
-        <select
+        <!-- Its move: a field opening the drawer's move list, searched and filtered as the team builder's. -->
+        <button
+          type="button"
           class="move"
-          :value="h.move ?? ''"
-          :aria-label="t('calc.hits.move')"
-          @change="patch(i, { move: (($event.target as HTMLSelectElement).value || null) as MoveId | null })"
+          :class="{ empty: !h.move }"
+          :aria-label="`${t('calc.hits.move')}: ${h.move ? refName(move(h.move)) : t('calc.pickMove')}`"
+          @click="emit('pickMove', i)"
         >
-          <option v-if="!h.move" value="" disabled>{{ t('calc.pickMove') }}</option>
-          <option
-            v-if="h.move && !movesOf(h.by).includes(h.move) && !othersOf[h.by].some((o) => o.mv === h.move)"
-            :value="h.move"
-          >
-            {{ refName(move(h.move)) }}
-          </option>
-          <optgroup v-if="movesOf(h.by).length" :label="t('calc.hits.setMoves')">
-            <option v-for="mv in movesOf(h.by)" :key="mv" :value="mv">{{ refName(move(mv)) }}</option>
-          </optgroup>
-          <optgroup v-if="othersOf[h.by].length" :label="t('calc.hits.otherMoves')">
-            <option v-for="o in othersOf[h.by]" :key="o.mv" :value="o.mv">{{ o.name }}</option>
-          </optgroup>
-        </select>
+          <span class="move-name">{{ h.move ? refName(move(h.move)) : t('calc.pickMove') }}</span>
+          <ChevronDown :size="16" class="caret" aria-hidden="true" />
+        </button>
         <span class="mods">
           <button
             v-tip="t('calc.crit')"
@@ -437,10 +428,38 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
   align-items: center;
   color: var(--muted);
 }
+/* Its move, drawn as a field: its type and name, an arrow at its end; none yet, what it asks for, muted. */
 .move {
-  max-width: 11em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: 12em;
+  max-width: 100%;
   padding: 3px 6px;
   font: inherit;
+  color: inherit;
+  text-align: left;
+  background: var(--panel);
+  border: 1px solid var(--border-strong, var(--border));
+  cursor: pointer;
+}
+.move:hover,
+.move:focus-visible {
+  background: var(--panel-alt);
+}
+.move.empty {
+  color: var(--muted);
+}
+.move-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.move .caret {
+  flex: none;
+  color: var(--muted);
 }
 .mods,
 .saw,

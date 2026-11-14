@@ -62,6 +62,9 @@ const props = defineProps<{
   /** The move being replaced (the slot the picker opened from has it): marked apart, and scrolled to once its row is
    * drawn. */
   current?: MoveId | null
+  /** Its moves in groups, in this order, each under a heading across the table and sorted as the table is (the damage
+   * solver's hit: its set, then the rest it learns); a move in none, last, under none. */
+  groups?: readonly { label: string; ids: readonly MoveId[] }[]
 }>()
 
 // A move the set has already, picked again: its row lit red a moment, saying why, nothing picked.
@@ -190,7 +193,28 @@ const below = computed(() => phone.value || props.stacked)
 
 // The rows render once the page is in, with a skeleton until then: all of them can take over 100ms.
 const { entered, restoring } = usePageEntered()
-const drawn = useGradualRows(sorted)
+/** With `groups`, the rows grouped in their order, each group led by its heading (a row of its own, `head`). */
+const groupOf = computed(() => {
+  const at = new Map<MoveId, number>()
+  props.groups?.forEach((g, i) => g.ids.forEach((id) => at.has(id) || at.set(id, i)))
+  return at
+})
+type Listed = (typeof sorted.value)[number] | { id: string; head: string; name: ''; parts: null }
+const listed = computed((): readonly Listed[] => {
+  const groups = props.groups
+  if (!groups) return sorted.value
+  const rank = (id: MoveId) => groupOf.value.get(id) ?? groups.length
+  const out: Listed[] = []
+  let last = -1
+  for (const r of [...sorted.value].sort((a, b) => rank(a.id) - rank(b.id))) {
+    const g = rank(r.id)
+    if (g !== last && g < groups.length) out.push({ id: `head:${g}`, head: groups[g]!.label, name: '', parts: null })
+    last = g
+    out.push(r)
+  }
+  return out
+})
+const drawn = useGradualRows(listed)
 // The move being replaced brought into view, once, as soon as its row is drawn (the rows come in a chunk a frame), in
 // whatever scrolls the table (the picker's drawer or dialog), after it's put back at its top for the part picked.
 const tableEl = useTemplateRef<HTMLElement>('tableEl')
@@ -289,49 +313,56 @@ const termRows = useId()
             refused === r.id,
           ]"
           class="row"
-          :class="{ picked: picked?.includes(r.id), current: current === r.id, refused: refused === r.id }"
+          :class="
+            'head' in r
+              ? 'group-head'
+              : { picked: picked?.includes(r.id), current: current === r.id, refused: refused === r.id }
+          "
           :data-move="r.id"
           role="row"
         >
-          <div role="cell" class="grow">
-            <button v-if="pick" type="button" class="name pick" @click="tryPick(r.id)">
-              <Marked v-if="r.parts" :p="r.parts" />
-              <template v-else>{{ r.name }}</template>
-            </button>
-            <AppLink v-else :to="{ name: shares ? 'metaMove' : 'move', params: { id: r.id } }" class="name">
-              <Marked v-if="r.parts" :p="r.parts" />
-              <template v-else>{{ r.name }}</template>
-            </AppLink>
-            <span v-if="refused === r.id" class="refused-note" role="alert">{{ t('builder.inSet') }}</span>
-            <MoveTag v-if="r.tag" v-tip:group="moveTagTip(r.tag)" class="tag" :tag="r.tag" />
-            <div v-if="descriptions && below && !stacked" class="muted below">
+          <div v-if="'head' in r" role="cell" class="span-all">{{ r.head }}</div>
+          <template v-else>
+            <div role="cell" class="grow">
+              <button v-if="pick" type="button" class="name pick" @click="tryPick(r.id)">
+                <Marked v-if="r.parts" :p="r.parts" />
+                <template v-else>{{ r.name }}</template>
+              </button>
+              <AppLink v-else :to="{ name: shares ? 'metaMove' : 'move', params: { id: r.id } }" class="name">
+                <Marked v-if="r.parts" :p="r.parts" />
+                <template v-else>{{ r.name }}</template>
+              </AppLink>
+              <span v-if="refused === r.id" class="refused-note" role="alert">{{ t('builder.inSet') }}</span>
+              <MoveTag v-if="r.tag" v-tip:group="moveTagTip(r.tag)" class="tag" :tag="r.tag" />
+              <div v-if="descriptions && below && !stacked" class="muted below">
+                <DexText :text="shortOf(r.id)" />
+              </div>
+            </div>
+            <div role="cell">
+              <TypeIcon v-if="pick" :type="r.data.type" />
+              <AppLink v-else :to="{ name: 'types', params: { type: r.data.type } }"
+                ><TypeIcon :type="r.data.type"
+              /></AppLink>
+            </div>
+            <div role="cell" class="category">
+              <CategoryIcon v-if="pick" :category="r.data.category" />
+              <AppLink v-else :to="{ name: 'moves', query: { f: `category:${r.data.category}` } }"
+                ><CategoryIcon :category="r.data.category"
+              /></AppLink>
+            </div>
+            <div role="cell" class="r num">{{ r.data.power || '—' }}</div>
+            <div role="cell" class="wide-only r num">{{ r.data.accuracy === true ? '—' : r.data.accuracy }}</div>
+            <div v-if="!noPp" role="cell" class="wide-only r num">{{ r.data.pp }}</div>
+            <div v-if="shares" role="cell" class="r num meter" :style="{ '--share': shares[r.id] ?? 0 }">
+              {{ shares[r.id] === undefined ? (under ?? '—') : percent(shares[r.id]!) }}
+            </div>
+            <div v-if="descriptions && stacked && shortOf(r.id)" role="cell" class="muted span-desc">
               <DexText :text="shortOf(r.id)" />
             </div>
-          </div>
-          <div role="cell">
-            <TypeIcon v-if="pick" :type="r.data.type" />
-            <AppLink v-else :to="{ name: 'types', params: { type: r.data.type } }"
-              ><TypeIcon :type="r.data.type"
-            /></AppLink>
-          </div>
-          <div role="cell" class="category">
-            <CategoryIcon v-if="pick" :category="r.data.category" />
-            <AppLink v-else :to="{ name: 'moves', query: { f: `category:${r.data.category}` } }"
-              ><CategoryIcon :category="r.data.category"
-            /></AppLink>
-          </div>
-          <div role="cell" class="r num">{{ r.data.power || '—' }}</div>
-          <div role="cell" class="wide-only r num">{{ r.data.accuracy === true ? '—' : r.data.accuracy }}</div>
-          <div v-if="!noPp" role="cell" class="wide-only r num">{{ r.data.pp }}</div>
-          <div v-if="shares" role="cell" class="r num meter" :style="{ '--share': shares[r.id] ?? 0 }">
-            {{ shares[r.id] === undefined ? (under ?? '—') : percent(shares[r.id]!) }}
-          </div>
-          <div v-if="descriptions && stacked && shortOf(r.id)" role="cell" class="muted span-desc">
-            <DexText :text="shortOf(r.id)" />
-          </div>
-          <div v-if="descriptions && !below" role="cell" class="grow muted">
-            <DexText :text="shortOf(r.id)" />
-          </div>
+            <div v-if="descriptions && !below" role="cell" class="grow muted">
+              <DexText :text="shortOf(r.id)" />
+            </div>
+          </template>
         </div>
       </template>
     </div>
@@ -421,8 +452,18 @@ const termRows = useId()
   white-space: nowrap;
 }
 /* No move: a row across the table. */
-.none-row > .span-all {
+.none-row > .span-all,
+.group-head > .span-all {
   grid-column: 1 / -1;
+}
+/* A group's heading (`groups`), as the picker's groups' (`TeamPicker`): small, muted, bold, across the table. */
+.row.group-head > .span-all {
+  padding: 10px 6px 4px;
+  font-size: 0.75em;
+  font-weight: bold;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 /* A placeholder, not a move: a dashed box, muted, its whole width the button; outlined in the text's color when
    pointed at. */

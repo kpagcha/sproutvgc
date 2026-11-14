@@ -69,6 +69,7 @@ import CalcMeta from '@/components/CalcMeta.vue'
 import CalcReverse from '@/components/CalcReverse.vue'
 import CalcHits, { type HitDraft } from '@/components/CalcHits.vue'
 import CalcMovesSeen from '@/components/CalcMovesSeen.vue'
+import CalcHitMove from '@/components/CalcHitMove.vue'
 import FolderTabs from '@/components/FolderTabs.vue'
 import CalcThreats from '@/components/CalcThreats.vue'
 import CalcSide from '@/components/CalcSide.vue'
@@ -672,6 +673,28 @@ const hasBoth = computed(() => !!(battlerOf(sides.value.a) && battlerOf(sides.va
 // at the screen's foot leading to the panel while it's below, over the sides' bands stuck there on phones.
 const hitsDrawer = shallowRef(false)
 const hitsStep = shallowRef<'moves' | 'hits'>('moves')
+/** A hit's move being picked, a step of its own over the hits: from the drawer's hits (back to them once picked), or
+ * from the panel's (the drawer opening for it and closing again). */
+const hitMove = shallowRef<{ i: number; from: 'drawer' | 'page' } | null>(null)
+function pickHitMove(i: number, from: 'drawer' | 'page') {
+  hitMove.value = { i, from }
+  hitsStep.value = 'hits'
+  hitsDrawer.value = true
+  ;(wide.value ? drawer.value?.el : hitsBox.value)?.scrollTo({ top: 0 })
+}
+function hitMovePicked(mv: MoveId) {
+  const at = hitMove.value
+  if (!at) return
+  hits.value = hits.value.map((h, j) => (j === at.i ? { ...h, move: mv } : h))
+  hitMoveBack()
+}
+function hitMoveBack() {
+  const from = hitMove.value?.from
+  hitMove.value = null
+  if (from === 'page') hitsDrawer.value = false
+  else void nextTick(() => (wide.value ? drawer.value?.el : hitsBox.value)?.scrollTo({ top: 0 }))
+}
+watch(hitsDrawer, (on) => !on && (hitMove.value = null))
 // It goes on from the picker it follows: anchored on the card of the side last picked for, so it comes from the same
 // edge, that card left clear.
 const lastPicked = shallowRef<SideKey>('b')
@@ -945,7 +968,14 @@ function face(f: Fighter) {
     <!-- The inverse tab: what was seen, and what of the opponent's set fits it. -->
     <template v-if="inverse">
       <!-- One panel: the hits seen, and what fits them as its readout. Before both are picked, what it's for. -->
-      <CalcHits id="calc-hits" v-model:hits="hits" v-model:first="first" :yours="fought.a" :theirs="fought.b">
+      <CalcHits
+        id="calc-hits"
+        v-model:hits="hits"
+        v-model:first="first"
+        :yours="fought.a"
+        :theirs="fought.b"
+        @pick-move="pickHitMove($event, 'page')"
+      >
         <CalcReverse
           id="calc-reverse"
           :yours="fought.a"
@@ -1059,8 +1089,19 @@ function face(f: Fighter) {
     <!-- The inverse tab's What you saw, step by step: the opponent's moves seen, then the hits; in the drawer on wide
          screens, a dialog on phones. -->
     <DefineSteps>
+      <CalcHitMove
+        v-if="hitMove && hits[hitMove.i]"
+        :attacker="sides[hits[hitMove.i]!.by].member"
+        :defender="battlerOf(sides[hits[hitMove.i]!.by === 'a' ? 'b' : 'a'])!"
+        :data
+        :current="hits[hitMove.i]!.move"
+        :can-back="hitMove.from === 'drawer'"
+        @pick="hitMovePicked"
+        @back="hitMoveBack"
+        @close="hitsDrawer = false"
+      />
       <CalcMovesSeen
-        v-if="hitsStep === 'moves'"
+        v-else-if="hitsStep === 'moves'"
         :member="sides.b.member"
         :data
         @moves="patchMember('b', { moves: $event })"
@@ -1078,6 +1119,7 @@ function face(f: Fighter) {
           bare
           can-back
           @back="toStep('moves')"
+          @pick-move="pickHitMove($event, 'drawer')"
           @close="hitsDrawer = false"
         />
         <!-- Done, leading to What fits once there's something to work out: stuck to the drawer's foot. -->
