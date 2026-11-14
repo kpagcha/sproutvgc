@@ -86,6 +86,8 @@ import ScrollRow from '@/components/ScrollRow.vue'
 import SectionNav from '@/components/SectionNav.vue'
 import SetupStar from '@/components/SetupStar.vue'
 import SideDrawer from '@/components/SideDrawer.vue'
+import SolverBands from '@/components/SolverBands.vue'
+import SolverGoal from '@/components/SolverGoal.vue'
 import TeamPicker from '@/components/TeamPicker.vue'
 
 // The damage calculator: two Pokémon, yours and the opponent's, each a team builder's slot (`CalcSide`, `TeamSlot`:
@@ -680,6 +682,32 @@ const hasBoth = computed(() => !!(battlerOf(sides.value.a) && battlerOf(sides.va
 // (`CalcMovesSeen`; skipped when its set has them all), then the hits, closed by Done. On any screen, a button floating
 // at the screen's foot leading to the panel while it's below, over the sides' bands stuck there on phones.
 const hitsDrawer = shallowRef(false)
+/** The solver's setup, a step of its own in the drawer: what to work out (`SolverGoal`). Mock: `?mock=goal`. */
+const flow = shallowRef<'goal' | null>(null)
+if (props.inverse && route.query.mock === 'goal') setTimeout(() => (flow.value = 'goal'), 300)
+const itemFixed = (k: SideKey) => {
+  const m = sides.value[k].member
+  return !!stoneMega(m) || (!!m.pokemon && itemBound(m.pokemon))
+}
+const flowShown = computed(() => props.inverse && !!flow.value && hasBoth.value)
+// The solver's bands, stuck to the top once the sides are past (on wide screens; phones' bands already stick): what
+// they open anchored on them, so the page stays where it is.
+const bandsDock = shallowRef<HTMLElement | null>(null)
+const duelPast = shallowRef(false)
+const fromBands = shallowRef<SideKey | null>(null)
+watch([picking, flow], ([p, f]) => !p && !f && (fromBands.value = null))
+/** The band tapped, which the drawer leaves clear. */
+const bandAnchor = computed(() =>
+  fromBands.value ? (bandsDock.value?.querySelector<HTMLElement>(`.band-${fromBands.value}`) ?? null) : null,
+)
+function bandPart(k: SideKey, f: Field) {
+  fromBands.value = k
+  picking.value = { side: k, field: f }
+}
+function bandGoal(k: SideKey) {
+  fromBands.value = k
+  flow.value = 'goal'
+}
 const hitsStep = shallowRef<'moves' | 'hits'>('moves')
 /** A hit's move being picked, a step of its own over the hits: from the drawer's hits (back to them once picked), or
  * from the panel's (the drawer opening for it and closing again). */
@@ -750,6 +778,9 @@ const hitsBelow = shallowRef(false)
 /** The room the sides' bands stuck to the screen's foot take, for the button to float over them. */
 const bandsInset = shallowRef(0)
 function checkHits() {
+  // Shown once stuck: its top at the line it sticks at, rather than where the page has it.
+  const dock = bandsDock.value
+  duelPast.value = !!dock && dock.getBoundingClientRect().top <= parseFloat(getComputedStyle(dock).top) + 0.5
   const el = props.inverse && hasBoth.value ? document.getElementById('calc-hits') : null
   if (!el) return void (hitsBelow.value = false)
   const vh = window.innerHeight
@@ -982,6 +1013,18 @@ function face(f: Fighter) {
 
     <!-- The inverse tab: what was seen, and what of the opponent's set fits it. -->
     <template v-if="inverse">
+      <!-- The two sides in short, stuck to the top once they're past (wide screens). -->
+      <div v-if="wide && hasBoth" ref="bandsDock" class="bands-dock" :class="{ shown: duelPast }">
+        <SolverBands
+          :a="fought.a"
+          :b="fought.b"
+          :work="{ a: workYours, b: work }"
+          :fixed="{ a: itemFixed('a'), b: itemFixed('b') }"
+          :inert="!duelPast"
+          @part="bandPart"
+          @goal="bandGoal"
+        />
+      </div>
       <!-- One panel: the hits seen, and what fits them as its readout. Before both are picked, what it's for. -->
       <CalcHits
         id="calc-hits"
@@ -1151,11 +1194,11 @@ function face(f: Fighter) {
     <!-- On wide screens, the picker as a drawer over the page, the side's card left clear. -->
     <SideDrawer
       ref="drawer"
-      :open="wide && (!!picking || hitsShown)"
-      :anchor="picking ? drawerAnchor : hitsAnchor"
+      :open="wide && (!!picking || hitsShown || flowShown)"
+      :anchor="bandAnchor ? bandAnchor : picking ? drawerAnchor : flowShown ? (sideEls.a?.card ?? null) : hitsAnchor"
       :label="picking ? t('builder.picker') : t('calc.hits.title')"
       defer
-      @close="((picking = null), (hitsDrawer = false))"
+      @close="((picking = null), (hitsDrawer = false), (flow = null))"
     >
       <TeamPicker
         v-if="picking && pickerMember"
@@ -1174,6 +1217,17 @@ function face(f: Fighter) {
         @nature="natureAgain"
         ><ReuseCommon
       /></TeamPicker>
+      <SolverGoal
+        v-else-if="flowShown"
+        v-model:work="work"
+        v-model:work-yours="workYours"
+        :yours="battlerOf(sides.a)!"
+        :theirs="battlerOf(sides.b)!"
+        :fixed="{ a: itemFixed('a'), b: itemFixed('b') }"
+        can-back
+        @next="flow = null"
+        @close="flow = null"
+      />
       <!-- The inverse tab's What you saw, going on from the picker in the same drawer once both are picked. -->
       <ReuseSteps v-else-if="hitsShown" />
     </SideDrawer>
@@ -1821,6 +1875,28 @@ word, as the common set's offer has. */
   padding: 6px 16px;
   font-weight: bold;
   pointer-events: auto;
+}
+/* The solver's bands: no room of their own in the page, stuck under the bars at the top, sliding in once the sides
+   are past. */
+.bands-dock {
+  position: sticky;
+  top: calc(var(--nav-h, 0px) + var(--bar-h, 0px));
+  z-index: 45;
+  height: 0;
+}
+/* On the page's own color, across the gap between them and a little under, so what scrolls under doesn't show. */
+.bands-dock > * {
+  padding: 6px 0 10px;
+  background: var(--bg);
+  opacity: 0;
+  transform: translateY(-8px);
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
+}
+.bands-dock.shown > * {
+  opacity: 1;
+  transform: none;
 }
 /* The hits drawer's foot, stuck to its bottom across its padding: Done. */
 .drawer-foot {
