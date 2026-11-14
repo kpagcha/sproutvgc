@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, shallowRef } from 'vue'
-import { Check, X } from '@lucide/vue'
+import { X } from '@lucide/vue'
 import { pokemon, type PokemonId } from '@/data/dex'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
@@ -17,6 +17,8 @@ const props = defineProps<{
   /** Whether a side's item is fixed (a Mega's stone, Ogerpon's mask), never worked out. */
   fixed: { a: boolean; b: boolean }
   canBack?: boolean
+  /** Opened on its own, from the bands, rather than as a step of the setup: its way on is Done. */
+  alone?: boolean
 }>()
 const work = defineModel<OpponentUnknowns>('work', { required: true })
 const workYours = defineModel<OpponentUnknowns>('workYours', { required: true })
@@ -98,31 +100,21 @@ const youGet = computed(() =>
   }),
 )
 const nothing = computed(() => !youGet.value.length)
-
-const STEPS = ['calc.flow.yours', 'calc.flow.theirs', 'calc.flow.goal', 'calc.flow.known', 'calc.flow.hits'] as const
-const AT = 2
 </script>
 
 <template>
   <div class="goal">
     <div class="head">
       <StepBack v-if="canBack" @back="emit('back')" />
-      <!-- Where the setup's at: the steps done ticked, this one marked. -->
-      <ol class="steps" :aria-label="t('calc.flow.steps')">
-        <li v-for="(s, i) in STEPS" :key="s" :class="{ done: i < AT, at: i === AT }">
-          <span class="dot"
-            ><Check v-if="i < AT" :size="12" aria-hidden="true" /><template v-else>{{ i + 1 }}</template></span
-          ><span class="label">{{ t(s) }}</span>
-        </li>
-      </ol>
+      <h2 class="title">
+        <PokemonIcon :id="yours" /><span class="vs muted">vs</span><PokemonIcon :id="theirs" />{{
+          t('calc.goal.title')
+        }}
+      </h2>
       <button type="button" class="close" :aria-label="t('calc.hits.close')" @click="emit('close')">
         <X :size="20" aria-hidden="true" />
       </button>
     </div>
-
-    <h2 class="title">
-      <PokemonIcon :id="yours" /><span class="vs muted">vs</span><PokemonIcon :id="theirs" />{{ t('calc.goal.title') }}
-    </h2>
     <p class="muted intro">{{ t('calc.goal.intro') }}</p>
 
     <div class="cards" role="radiogroup" :aria-label="t('calc.goal.title')">
@@ -209,7 +201,7 @@ const AT = 2
 
     <div class="foot">
       <button type="button" class="btn primary" :disabled="nothing" @click="emit('next')">
-        {{ t('calc.flow.next', { step: t('calc.flow.known') }) }} →
+        {{ alone ? t('picker.done') : `${t('calc.flow.next', { step: t('calc.flow.known') })} →` }}
       </button>
     </div>
   </div>
@@ -220,58 +212,6 @@ const AT = 2
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
-}
-.steps {
-  flex: 1;
-  display: flex;
-  gap: 4px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  min-width: 0;
-}
-.steps li {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.75em;
-  color: var(--muted);
-  white-space: nowrap;
-}
-.steps li + li::before {
-  content: '';
-  width: 10px;
-  height: 1px;
-  background: var(--border);
-}
-.steps .dot {
-  display: inline-grid;
-  place-items: center;
-  width: 18px;
-  height: 18px;
-  font-size: 0.875em;
-  font-weight: bold;
-  border: 1px solid var(--border);
-}
-.steps .done .dot {
-  color: var(--accent-text);
-  background: var(--accent);
-  border-color: var(--ink);
-}
-.steps .at {
-  color: var(--text);
-  font-weight: bold;
-}
-.steps .at .dot {
-  border: 2px solid var(--ink);
-  background: var(--sel);
-}
-/* Only the step being read named where they don't fit. */
-@media (max-width: 520px) {
-  .steps li:not(.at) .label {
-    display: none;
-  }
 }
 .close {
   display: inline-flex;
@@ -282,6 +222,7 @@ const AT = 2
   cursor: pointer;
 }
 .title {
+  flex: 1;
   display: flex;
   align-items: center;
   flex-wrap: wrap;

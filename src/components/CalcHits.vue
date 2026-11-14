@@ -38,7 +38,7 @@ const props = defineProps<{
   /** Something of yours is worked out: a hit added then has its number as a goal at first. */
   goal?: boolean
 }>()
-const emit = defineEmits<{ close: []; back: []; pickMove: [i: number] }>()
+const emit = defineEmits<{ close: []; back: []; pickMove: [i: number]; start: [] }>()
 const hits = defineModel<HitDraft[]>('hits', { required: true })
 const first = defineModel<'a' | 'b' | null>('first', { default: null })
 
@@ -176,7 +176,12 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
       </button>
     </div>
     <h2 v-else class="band">{{ t('calc.hits.title') }}</h2>
-    <p v-if="!both" class="muted intro">{{ t('calc.reverse.pickBoth') }}</p>
+    <!-- Before both are picked, what it's for and the way into its setup, step by step. -->
+    <div v-if="!both" class="start">
+      <p class="start-title">{{ t('calc.start.title') }}</p>
+      <p class="muted">{{ t('calc.start.about') }}</p>
+      <button type="button" class="btn primary" @click="emit('start')">{{ t('calc.start.go') }} →</button>
+    </div>
     <details v-else class="intro how-to" :open="howToOpen" @toggle="onHowTo">
       <summary class="muted">{{ t('calc.hits.howTo') }}</summary>
       <ol class="muted steps">
@@ -366,6 +371,23 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
 </template>
 
 <style scoped>
+.start {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 4px 0 6px;
+}
+.start p {
+  margin: 0;
+  max-width: 60ch;
+}
+.start-title {
+  font-weight: bold;
+}
+.start .btn {
+  margin-top: 4px;
+}
 /* Its buttons soft, as many as there are: a thin outline, no hard shadow nor lift; one on filled, outlined in ink. */
 :root:root .hits .btn {
   border-width: 1px;

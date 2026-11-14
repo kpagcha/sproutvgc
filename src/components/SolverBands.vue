@@ -2,8 +2,7 @@
 import { computed } from 'vue'
 import { HelpCircle } from '@lucide/vue'
 import { ability, item, pokemon } from '@/data/dex'
-import { natureEffectOn, natureName } from '@/data/natures'
-import { STATS } from '@/data/pokemon'
+import { natureName } from '@/data/natures'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { battlerOf, type Fighter } from '@/lib/damage'
@@ -11,6 +10,7 @@ import type { OpponentUnknowns } from '@/lib/damageReverse'
 import type { Field } from '@/lib/team'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
+import { partLabel, pointsLabel } from '@/components/solverText'
 
 // The damage solver's two sides in short, a band each in its side's color, side by side, stuck to the top while what
 // was seen and what fits are read: each one's Pokémon, then its set as chips, what's set solid (a tap opening its
@@ -24,20 +24,6 @@ const props = defineProps<{
 const emit = defineEmits<{ part: [side: 'a' | 'b', field: Field]; goal: [side: 'a' | 'b'] }>()
 
 type Chip = { field: Field; label: string; item?: string; muted?: boolean }
-
-const partLabel = (p: keyof OpponentUnknowns) =>
-  t(p === 'nature' ? 'builder.nature' : p === 'item' ? 'builder.item' : 'builder.points')
-
-/** Its points in Showdown's short way, the stats with some alone, its nature's marks: "2 HP / 32+ Atk / 32 Spe". */
-function pointsLabel(f: Fighter): string {
-  const m = f.member
-  const parts = m.points.flatMap((n, i) => {
-    if (!n) return []
-    const e = i && m.nature ? natureEffectOn(m.nature, STATS[i]!) : 'neutral'
-    return [`${n}${e === 'up' ? '+' : e === 'down' ? '−' : ''} ${t(`stat.${STATS[i]!}`)}`]
-  })
-  return parts.join(' / ') || t('calc.bands.noPoints')
-}
 
 function chipsOf(k: 'a' | 'b'): Chip[] {
   const f = k === 'a' ? props.a : props.b
@@ -58,7 +44,7 @@ function chipsOf(k: 'a' | 'b'): Chip[] {
       label: m.nature ? natureName(m.nature) : t('calc.bands.noNature'),
       muted: !m.nature,
     })
-  if (!w.points) list.push({ field: 'points', label: f.sets ? t('compare.atSets') : pointsLabel(f), muted: f.sets })
+  if (!w.points) list.push({ field: 'points', label: pointsLabel(f), muted: f.sets })
   return list
 }
 /** What's worked out of a side, in one chip: "Nature · Item · Stat points". */
@@ -140,6 +126,19 @@ const sides = computed(() =>
   background: var(--accent);
   border: 2px solid var(--ink);
   box-shadow: 3px 3px 0 var(--ink);
+}
+/* On phones, one under the other, a row each, as the sides' own bands. */
+@media (max-width: 899px) {
+  .bands {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .band {
+    box-shadow: none;
+  }
+  .band + .band {
+    margin-top: -2px;
+  }
 }
 .band-b {
   color: var(--opponent-text);

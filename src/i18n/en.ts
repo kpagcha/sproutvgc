@@ -379,6 +379,16 @@ export const messages = {
   'calc.goal.getNeed': 'the fewest points that do it half the time, 9 in 10 and always',
   'calc.goal.getNeedItem': 'how often each does it',
   'calc.bands.label': 'The two sides',
+  'calc.known.title': 'What you know',
+  'calc.known.intro':
+    'Filled in from each one’s most common set. Tap a part to change it; what’s worked out is left blank.',
+  'calc.known.noMeta': 'Tap a part to set it; what’s worked out is left blank.',
+  'calc.known.worked': 'Worked out',
+  'calc.known.none': 'None',
+  'calc.start.title': 'Work out a set from the damage you saw',
+  'calc.start.about':
+    'Pick your Pokémon and the opponent, choose what to work out, then say what happened: the hits, how much each did, and who moved first.',
+  'calc.start.go': 'Start',
   'calc.bands.edit': 'Change its {part}',
   'calc.bands.worked': 'Worked out: {part}. Tap to change what to work out',
   'calc.bands.pokemon': 'Change the Pokémon',
@@ -396,8 +406,6 @@ export const messages = {
   'calc.reverse.how':
     'The chances take in every set the opponent runs in the meta, the popular ones counting more, and every damage roll. If you enter its set yourself, only the damage rolls count.',
   'calc.reverse.howYours': 'For your Pokémon, every item, nature and number of stat points is tried.',
-  'calc.reverse.pickBoth':
-    'Pick both Pokémon, set what you know of each and choose what to work out, then add the hits, from a battle or as a goal, and which one moves first if you know it.',
   'calc.reverse.hint': 'Nothing to work out yet: add a hit above, or which moves first.',
   'calc.reverse.first': 'Moves first',
   'calc.reverse.firstTip':

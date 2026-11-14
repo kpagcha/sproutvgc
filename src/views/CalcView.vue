@@ -88,6 +88,8 @@ import SetupStar from '@/components/SetupStar.vue'
 import SideDrawer from '@/components/SideDrawer.vue'
 import SolverBands from '@/components/SolverBands.vue'
 import SolverGoal from '@/components/SolverGoal.vue'
+import SolverKnown from '@/components/SolverKnown.vue'
+import SolverSteps from '@/components/SolverSteps.vue'
 import TeamPicker from '@/components/TeamPicker.vue'
 
 // The damage calculator: two Pokémon, yours and the opponent's, each a team builder's slot (`CalcSide`, `TeamSlot`:
@@ -249,7 +251,8 @@ function reveal(k: SideKey, behavior: ScrollBehavior = 'auto') {
  */
 function tapBand(k: SideKey) {
   if (!battlerOf(sides.value[k])) {
-    picking.value = { side: k, field: 'pokemon' }
+    if (props.inverse) startFlow(k)
+    else picking.value = { side: k, field: 'pokemon' }
     return
   }
   if (open.value[k] && underBand(document.getElementById(`band-${k}`), document.getElementById(`calc-${k}`)))
@@ -370,7 +373,7 @@ const picking = shallowRef<{ side: SideKey; field: Field; common?: PokemonId; ba
 // Its steps, the way back through them; the opponent's moves step going back into the picker it went on from.
 const { canBack: pickerCanBack, back: pickerBack, canReopen, reopen } = useStepBack(picking, (p) => p.side)
 const pickerOpen = computed({
-  get: () => !!picking.value,
+  get: () => !!picking.value && !(props.inverse && flow.value && !flowAlone.value),
   set: (on) => {
     if (!on) picking.value = null
   },
@@ -437,6 +440,7 @@ function loadCommon() {
 }
 const [DefineCommon, ReuseCommon] = createReusableTemplate()
 const [DefineSteps, ReuseSteps] = createReusableTemplate()
+const [DefineBody, ReuseBody] = createReusableTemplate()
 // The reader's teams, a side loading one of their Pokémon: in the side's Load menu and in its picker's.
 const [DefineTeams, ReuseTeams] = createReusableTemplate<{ side: SideKey; done: () => void }>()
 const commonPreview = computed(() => (picking.value?.common ? commonSet(picking.value.common, data.value) : null))
@@ -474,9 +478,13 @@ function pick(value: string) {
     moves[p.field] = mv
     patchMember(p.side, { moves })
   }
+  // The setup's first steps: the Pokémon alone, on to the next step.
+  if (p.field === 'pokemon' && choosingInFlow.value) return flowAfterPick(p.side)
   const now = sides.value[p.side].member
-  const next = p.back ?? nextStep(p.side, now, p.field)
+  // In the setup, a part picked from What you know: back to it (another Pokémon there filled in again).
+  const next = p.back ?? (flow.value ? null : nextStep(p.side, now, p.field))
   picking.value = next === null ? null : { side: p.side, field: next, ...(common && { common }) }
+  if (next === null && flow.value === 'known' && p.field === 'pokemon') fillKnown()
 }
 
 /** The parts of a set the inverse tab can work out, by the picker's step. */
@@ -490,7 +498,7 @@ function workOutStep() {
   if (!p || !part) return
   if (p.side === 'a') workYours.value = { ...workYours.value, [part]: true }
   else work.value = { ...work.value, [part]: true }
-  const next = p.back ?? nextStep(p.side, sides.value[p.side].member, p.field)
+  const next = p.back ?? (flow.value ? null : nextStep(p.side, sides.value[p.side].member, p.field))
   picking.value = next === null ? null : { side: p.side, field: next }
 }
 
@@ -535,7 +543,9 @@ function fromTeam(k: SideKey, m: Member) {
 /** One of the reader's teams' Pokémon loaded into a side, once confirmed where it replaces one. */
 async function loadFromTeam(k: SideKey, m: Member, done: () => void) {
   done()
-  if (await mayReplace(k)) fromTeam(k, m)
+  if (!(await mayReplace(k))) return
+  fromTeam(k, m)
+  if (choosingInFlow.value) flowAfterPick(k)
 }
 // A side's set copied as a paste (Showdown's format, which pokepast.es takes), stat points and all, saying so a moment.
 const copiedSide = shallowRef<SideKey | null>(null)
@@ -576,7 +586,10 @@ async function importPaste() {
   if (!k || !first) return void (pasteFailed.value = true)
   pasteFrom = null
   pasting.value = null
-  if (await mayReplace(k)) fromTeam(k, first)
+  if (!(await mayReplace(k))) return
+  fromTeam(k, first)
+  if (choosingInFlow.value) flowAfterPick(k)
+  else if (flow.value) picking.value = null
 }
 
 // The battle's conditions where they apply, folded at first and then as last left: the whole field's in the heading's
@@ -682,18 +695,122 @@ const hasBoth = computed(() => !!(battlerOf(sides.value.a) && battlerOf(sides.va
 // (`CalcMovesSeen`; skipped when its set has them all), then the hits, closed by Done. On any screen, a button floating
 // at the screen's foot leading to the panel while it's below, over the sides' bands stuck there on phones.
 const hitsDrawer = shallowRef(false)
-/** The solver's setup, a step of its own in the drawer: what to work out (`SolverGoal`). Mock: `?mock=goal`. */
-const flow = shallowRef<'goal' | null>(null)
-if (props.inverse && route.query.mock === 'goal') setTimeout(() => (flow.value = 'goal'), 300)
+const hitsStep = shallowRef<'moves' | 'hits'>('moves')
+
+// The solver's setup, one step after another in one drawer (on phones one dialog), its steps a row atop it
+// (`SolverSteps`): your Pokémon, the opponent (the picker's first step alone, the rest of their sets left for later),
+// what to work out (`SolverGoal`), what you know of each, filled in from its most common set (`SolverKnown`, each part
+// opening its picker step and coming back), then the hits as before (the opponent's moves seen, the hits), closed by
+// Done. Started from the Hits panel's Start or a side's pick while one's missing; everything changed later where it is,
+// on the side panels or the bands stuck over the results.
+type FlowStep = 'yours' | 'theirs' | 'goal' | 'known' | 'hits'
+const FLOW_STEPS: readonly FlowStep[] = ['yours', 'theirs', 'goal', 'known', 'hits']
+const flow = shallowRef<FlowStep | null>(null)
+/** What to work out opened on its own, from a band: no steps, Done closing it. */
+const flowAlone = shallowRef(false)
+const flowAt = computed(() => (flow.value ? FLOW_STEPS.indexOf(flow.value) : -1))
+const flowReach = computed(() => (hasBoth.value ? FLOW_STEPS.length - 1 : flowAt.value))
+/** A Pokémon being picked as the setup's first or second step. */
+const choosingInFlow = computed(() => flow.value === 'yours' || flow.value === 'theirs')
+const flowShown = computed(
+  () => props.inverse && (flow.value === 'goal' || flow.value === 'known') && hasBoth.value && !picking.value,
+)
 const itemFixed = (k: SideKey) => {
   const m = sides.value[k].member
   return !!stoneMega(m) || (!!m.pokemon && itemBound(m.pokemon))
 }
-const flowShown = computed(() => props.inverse && !!flow.value && hasBoth.value)
-// The solver's bands, stuck to the top once the sides are past (on wide screens; phones' bands already stick): what
-// they open anchored on them, so the page stays where it is.
+function startFlow(k?: SideKey) {
+  flowAlone.value = false
+  fromBands.value = null
+  toFlow((k ?? (battlerOf(sides.value.a) ? 'b' : 'a')) === 'a' ? 'yours' : 'theirs')
+}
+function toFlow(step: FlowStep) {
+  hitMove.value = null
+  if (step === 'known') fillKnown()
+  flow.value = step
+  if (step === 'yours' || step === 'theirs') {
+    hitsDrawer.value = false
+    picking.value = { side: step === 'yours' ? 'a' : 'b', field: 'pokemon' }
+  } else if (step === 'hits') {
+    picking.value = null
+    hitsStep.value = sides.value.b.member.moves.every(Boolean) ? 'hits' : 'moves'
+    hitsDrawer.value = true
+  } else {
+    picking.value = null
+    hitsDrawer.value = false
+  }
+}
+/** What to work out, opened from a band, done: what's now yours to set filled in as the setup's What you know is. */
+function goalDone() {
+  fillKnown()
+  endFlow()
+}
+function endFlow() {
+  flow.value = null
+  flowAlone.value = false
+}
+/** A side's Pokémon in: the other's next while it has none, else what to work out. */
+function flowAfterPick(k: SideKey) {
+  const other: SideKey = k === 'a' ? 'b' : 'a'
+  toFlow(battlerOf(sides.value[other]) ? 'goal' : other === 'a' ? 'yours' : 'theirs')
+}
+// The picker closed while picking a Pokémon for the setup (its X): the setup with it, but while a paste is asked for.
+watch(picking, (p) => !p && choosingInFlow.value && !pasting.value && endFlow())
+watch(hitsDrawer, (on) => !on && flow.value === 'hits' && endFlow())
+/** What's left to set of each side, filled in from its most common set as What you know opens: what's missing of it
+ * alone, never a Mega Stone (a Pokémon picked as itself stays itself), nothing worked out. */
+function fillKnown() {
+  for (const k of ['a', 'b'] as const) {
+    const f = sides.value[k]
+    const m = f.member
+    const id = setsAs(m)
+    if (!id || !data.value?.[id]) continue
+    const c = commonMember(id, data.value)
+    const w = k === 'a' ? workYours.value : work.value
+    const member = { ...m }
+    let built = false
+    if (!member.ability && c.ability) member.ability = c.ability
+    if (!member.item && !w.item && c.item && !stoneMega({ ...member, item: c.item })) member.item = c.item
+    if (!member.nature && !w.nature && c.nature) {
+      member.nature = c.nature
+      built = true
+    }
+    if (!w.points && !f.sets && member.points.every((n) => !n) && c.points.some(Boolean)) {
+      member.points = [...c.points] as typeof member.points
+      built = true
+    }
+    if (member.ability !== m.ability || member.item !== m.item || built)
+      setSide(k, { ...f, member, ...(built && { sets: false }) })
+  }
+}
+const flowBox = shallowRef<HTMLElement | null>(null)
+watch(flow, async () => {
+  await nextTick()
+  ;(wide.value ? drawer.value?.el : flowBox.value)?.scrollTo({ top: 0 })
+})
+/** The picker's way back: its own steps, else in the setup, the step before. */
+const flowPickerCanBack = computed(() => pickerCanBack.value || flow.value === 'theirs')
+const flowPickerBack = () => (pickerCanBack.value ? pickerBack() : toFlow('yours'))
+/** Phones' dialog of the setup: open while any of its steps shows. */
+const flowDialogOpen = computed({
+  get: () =>
+    !wide.value &&
+    props.inverse &&
+    !flowAlone.value &&
+    !!flow.value &&
+    (!!picking.value || flowShown.value || hitsShown.value),
+  set: (on) => {
+    if (!on) closeDrawer()
+  },
+})
+const closeDrawer = () => ((picking.value = null), (hitsDrawer.value = false), endFlow())
+
+// The solver's bands, stuck to the top once the sides are past: what they open anchored on them, so the page stays
+// where it is.
 const bandsDock = shallowRef<HTMLElement | null>(null)
 const duelPast = shallowRef(false)
+/** The room the bands take where they stick, under the bars stuck over them, for what's scrolled to under them. */
+const BANDS_H = 60
 const fromBands = shallowRef<SideKey | null>(null)
 watch([picking, flow], ([p, f]) => !p && !f && (fromBands.value = null))
 /** The band tapped, which the drawer leaves clear. */
@@ -706,9 +823,17 @@ function bandPart(k: SideKey, f: Field) {
 }
 function bandGoal(k: SideKey) {
   fromBands.value = k
+  flowAlone.value = true
   flow.value = 'goal'
 }
-const hitsStep = shallowRef<'moves' | 'hits'>('moves')
+/** On phones, the goal opened on its own from a band: a dialog of its own. */
+const goalDialogOpen = computed({
+  get: () => !wide.value && flowAlone.value && flowShown.value,
+  set: (on) => {
+    if (!on) endFlow()
+  },
+})
+
 /** A hit's move being picked, a step of its own over the hits: from the drawer's hits (back to them once picked), or
  * from the panel's (the drawer opening for it and closing again). */
 const hitMove = shallowRef<{ i: number; from: 'drawer' | 'page' } | null>(null)
@@ -746,7 +871,7 @@ const hitsAnchor = computed(() =>
 const hitsShown = computed(() => props.inverse && hitsDrawer.value && hasBoth.value)
 let hitsPending = false
 function openHitsSoon() {
-  if (!hitsPending || picking.value) return
+  if (!hitsPending || picking.value || flow.value) return
   hitsPending = false
   hitsStep.value = sides.value.b.member.moves.every(Boolean) ? 'hits' : 'moves'
   hitsDrawer.value = true
@@ -763,7 +888,7 @@ function toStep(step: 'moves' | 'hits') {
 const hitsBox = shallowRef<HTMLElement | null>(null)
 /** Phones' dialog of What you saw: open while its steps show; closed, the drawer's state with it. */
 const hitsDialogOpen = computed({
-  get: () => !wide.value && hitsShown.value,
+  get: () => !wide.value && hitsShown.value && !flow.value,
   set: (on) => {
     if (!on) hitsDrawer.value = false
   },
@@ -801,7 +926,7 @@ const toHits = () => toTopAt(document.getElementById('calc-hits'), stuckEdge())
 /** How far down the screen what stays stuck past the sides reaches, plus a gap. */
 function stuckEdge() {
   const bar = wide.value && !(fieldOpen.value && !fieldCompact.value) ? barH.value : 0
-  return navH.value + bar + 12
+  return navH.value + bar + (props.inverse && hasBoth.value ? BANDS_H : 0) + 12
 }
 
 /** A meta row tapped: the opponent, the page scrolled back to it. */
@@ -834,6 +959,7 @@ function face(f: Fighter) {
       '--nav-h': `${navH}px`,
       '--bar-h': `${fieldOpen && !fieldCompact ? 0 : barH}px`,
       '--band-h': `${BAND_H}px`,
+      '--bands-h': `${inverse && hasBoth ? BANDS_H : 0}px`,
     }"
   >
     <!-- Reset all, on the row of the way back to Tools, as on the speed pages (the app's frame has a place for it there). -->
@@ -965,7 +1091,7 @@ function face(f: Fighter) {
             v-show="shows(k)"
             :class="`side-${k}`"
             @update:fighter="setSide(k, $event)"
-            @field="picking = { side: k, field: $event }"
+            @field="inverse && $event === 'pokemon' && !hasBoth ? startFlow(k) : (picking = { side: k, field: $event })"
             @clear="setSide(k, { ...emptyFighter(), side: sides[k].side, sets: sides[k].sets })"
             :data
             :side-open="sideOpen"
@@ -1013,8 +1139,8 @@ function face(f: Fighter) {
 
     <!-- The inverse tab: what was seen, and what of the opponent's set fits it. -->
     <template v-if="inverse">
-      <!-- The two sides in short, stuck to the top once they're past (wide screens). -->
-      <div v-if="wide && hasBoth" ref="bandsDock" class="bands-dock" :class="{ shown: duelPast }">
+      <!-- The two sides in short, stuck to the top once they're past. -->
+      <div v-if="hasBoth" ref="bandsDock" class="bands-dock" :class="{ shown: duelPast }">
         <SolverBands
           :a="fought.a"
           :b="fought.b"
@@ -1034,6 +1160,7 @@ function face(f: Fighter) {
         :theirs="fought.b"
         :goal="yoursWorked"
         @pick-move="pickHitMove($event, 'page')"
+        @start="startFlow()"
       >
         <CalcReverse
           id="calc-reverse"
@@ -1164,9 +1291,9 @@ function face(f: Fighter) {
         :member="sides.b.member"
         :data
         @moves="patchMember('b', { moves: $event })"
-        :can-back="canReopen()"
+        :can-back="flow === 'hits' || canReopen()"
         @continue="toStep('hits')"
-        @back="reopen"
+        @back="flow === 'hits' ? toFlow('known') : reopen()"
         @close="hitsDrawer = false"
       />
       <template v-else>
@@ -1191,15 +1318,10 @@ function face(f: Fighter) {
         </div>
       </template>
     </DefineSteps>
-    <!-- On wide screens, the picker as a drawer over the page, the side's card left clear. -->
-    <SideDrawer
-      ref="drawer"
-      :open="wide && (!!picking || hitsShown || flowShown)"
-      :anchor="bandAnchor ? bandAnchor : picking ? drawerAnchor : flowShown ? (sideEls.a?.card ?? null) : hitsAnchor"
-      :label="picking ? t('builder.picker') : t('calc.hits.title')"
-      defer
-      @close="((picking = null), (hitsDrawer = false), (flow = null))"
-    >
+    <!-- What the drawer (on phones the setup's dialog) holds: the setup's steps atop while it's under way, then the
+         picker, what to work out, what you know, or what was seen. -->
+    <DefineBody>
+      <SolverSteps v-if="flow && !flowAlone" :at="flowAt" :reach="flowReach" @go="toFlow(FLOW_STEPS[$event]!)" />
       <TeamPicker
         v-if="picking && pickerMember"
         :member="pickerMember"
@@ -1208,9 +1330,9 @@ function face(f: Fighter) {
         :data
         :snapshot
         v-bind="pickerPoints"
-        :can-back="pickerCanBack"
+        :can-back="flowPickerCanBack"
         @pick="pick"
-        @back="pickerBack"
+        @back="flowPickerBack"
         @close="picking = null"
         @change="pointsChange"
         @sets="pointsSets"
@@ -1218,19 +1340,57 @@ function face(f: Fighter) {
         ><ReuseCommon
       /></TeamPicker>
       <SolverGoal
-        v-else-if="flowShown"
+        v-else-if="flowShown && flow === 'goal'"
         v-model:work="work"
         v-model:work-yours="workYours"
         :yours="battlerOf(sides.a)!"
         :theirs="battlerOf(sides.b)!"
         :fixed="{ a: itemFixed('a'), b: itemFixed('b') }"
-        can-back
-        @next="flow = null"
-        @close="flow = null"
+        :alone="flowAlone"
+        :can-back="!flowAlone"
+        @back="toFlow('theirs')"
+        @next="flowAlone ? goalDone() : toFlow('known')"
+        @close="endFlow"
+      />
+      <SolverKnown
+        v-else-if="flowShown && flow === 'known'"
+        :a="fought.a"
+        :b="fought.b"
+        :work="{ a: workYours, b: work }"
+        :fixed="{ a: itemFixed('a'), b: itemFixed('b') }"
+        :filled="!!data"
+        @edit="(k: SideKey, f: Field) => (picking = { side: k, field: f })"
+        @goal="toFlow('goal')"
+        @back="toFlow('goal')"
+        @next="toFlow('hits')"
+        @close="endFlow"
       />
       <!-- The inverse tab's What you saw, going on from the picker in the same drawer once both are picked. -->
       <ReuseSteps v-else-if="hitsShown" />
+    </DefineBody>
+    <!-- On wide screens, the picker as a drawer over the page, the side's card left clear; the setup's steps on the
+         right, your card left clear. -->
+    <SideDrawer
+      ref="drawer"
+      :open="wide && (!!picking || hitsShown || flowShown)"
+      :anchor="
+        bandAnchor ? bandAnchor : flow && !flowAlone ? (sideEls.a?.card ?? null) : picking ? drawerAnchor : hitsAnchor
+      "
+      :label="picking ? t('builder.picker') : flow ? t('calc.flow.steps') : t('calc.hits.title')"
+      defer
+      @close="closeDrawer"
+    >
+      <ReuseBody />
     </SideDrawer>
+
+    <!-- On phones, the setup over the page, one dialog through its steps. -->
+    <ModalDialog v-if="!wide && inverse" v-model:open="flowDialogOpen" :label="t('calc.flow.steps')" fill>
+      <div v-if="flowDialogOpen" ref="flowBox" class="panel picker-dialog steps-dialog"><ReuseBody /></div>
+    </ModalDialog>
+    <!-- On phones, what to work out opened from a band. -->
+    <ModalDialog v-if="!wide && inverse" v-model:open="goalDialogOpen" :label="t('calc.goal.title')" fill>
+      <div v-if="goalDialogOpen" class="panel picker-dialog"><ReuseBody /></div>
+    </ModalDialog>
 
     <!-- On phones, What you saw's steps over the page, as the drawer has them. -->
     <ModalDialog v-if="!wide" v-model:open="hitsDialogOpen" :label="t('calc.hits.title')" fill>
@@ -1376,6 +1536,11 @@ function face(f: Fighter) {
 #calc-duel,
 #calc-meta {
   scroll-margin-top: calc(var(--nav-h, 0px) + var(--bar-h, 0px) + 8px);
+}
+/* The solver's results, clear of its bands stuck over them too. */
+#calc-hits,
+#calc-reverse {
+  scroll-margin-top: calc(var(--nav-h, 0px) + var(--bar-h, 0px) + var(--bands-h, 0px) + 8px);
 }
 /* The heading on the page, no panel: a title's line needs no box. */
 .head-panel {
@@ -1883,6 +2048,8 @@ word, as the common set's offer has. */
   top: calc(var(--nav-h, 0px) + var(--bar-h, 0px));
   z-index: 45;
   height: 0;
+  /* No gap of its own in the page's column. */
+  margin-bottom: -16px;
 }
 /* On the page's own color, across the gap between them and a little under, so what scrolls under doesn't show. */
 .bands-dock > * {
