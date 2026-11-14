@@ -58,7 +58,7 @@ import {
 } from '@/lib/damage'
 import { membersPaste, parsePaste } from '@/lib/pokepaste'
 import { copy } from '@/lib/clipboard'
-import { reveal as revealEl, underBand } from '@/lib/scroll'
+import { toTopAt, underBand } from '@/lib/scroll'
 import { FADE, PRESS } from '@/lib/motion'
 import { commonForme, commonMember } from '@/lib/commonSet'
 import { emptyMember, nextField, pickedAs, setsAs, stoneMega, type Field, type Member } from '@/lib/team'
@@ -685,10 +685,10 @@ function openHitsSoon() {
   hitsStep.value = sides.value.b.member.moves.every(Boolean) ? 'hits' : 'moves'
   hitsDrawer.value = true
 }
-/** Done: the drawer closed, What fits brought into view. */
+/** Done: the drawer closed, the Hits panel's top brought under the bars stuck to the top, What fits under it. */
 function hitsDone() {
   hitsDrawer.value = false
-  void nextTick(() => revealEl(document.getElementById('calc-reverse')))
+  void nextTick(() => toTopAt(document.getElementById('calc-hits'), stuckEdge()))
 }
 function toStep(step: 'moves' | 'hits') {
   hitsStep.value = step
@@ -728,7 +728,12 @@ useEventListener(window, 'resize', checkHits)
 // What's over it changing size (a panel folded or opened, a hit added) moves it without a scroll.
 useResizeObserver(document.body, checkHits)
 watch([hasBoth, wide], () => nextTick(checkHits))
-const toHits = () => revealEl(document.getElementById('calc-hits'))
+const toHits = () => toTopAt(document.getElementById('calc-hits'), stuckEdge())
+/** How far down the screen what stays stuck past the sides reaches, plus a gap. */
+function stuckEdge() {
+  const bar = wide.value && !(fieldOpen.value && !fieldCompact.value) ? barH.value : 0
+  return navH.value + bar + 12
+}
 
 /** A meta row tapped: the opponent, the page scrolled back to it. */
 // The opponents a row of the meta's list took the place of, the latest last (up to `PREVIOUS_MAX`): the way back to
