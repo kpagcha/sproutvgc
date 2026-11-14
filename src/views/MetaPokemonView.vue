@@ -68,7 +68,6 @@ import SpeedSpread from '@/components/SpeedSpread.vue'
 import TeammateList from '@/components/TeammateList.vue'
 import TypeIcon from '@/components/TypeIcon'
 import { natureTip } from '@/components/natureTip'
-import UsageShift from '@/components/UsageShift.vue'
 
 // One Pokémon in the meta shown (`useMeta`, picked on the back row). Its heading has what matters most to a player: its
 // stats as the game shows them, set against the Pokémon it'll face, each marked when its most common nature raises or
@@ -555,6 +554,8 @@ watch(
 const topEvent = computed(() =>
   Math.max(...tournaments.value.flatMap((r) => r.events.flatMap((x) => [x.usage, x.before ?? 0])), 0.0001),
 )
+/** Which way its usage went since the events before, for its bar and change. */
+const shiftOf = (x: EventRow) => (x.before === null || x.before === x.usage ? '' : x.usage > x.before ? 'rise' : 'fall')
 const eventDate = (date: string) =>
   new Date(`${date}T00:00:00Z`).toLocaleDateString(locale.value, {
     day: 'numeric',
@@ -980,9 +981,6 @@ const sections = computed(() =>
             ><span v-tip="t('usageMon.evUsageTip')" class="tipped">{{ t('tournaments.col.usage') }}</span></span
           >
           <span role="columnheader" class="r"
-            ><span v-tip="t('usageMon.evChangeTip')" class="tipped">{{ t('usageMon.evChange') }}</span></span
-          >
-          <span role="columnheader" class="r"
             ><span v-tip="t('usageMon.evCutTip')" class="tipped">{{ t('tournaments.day.cut') }}</span></span
           >
         </div>
@@ -994,7 +992,7 @@ const sections = computed(() =>
             >
           </div>
           <template v-if="r.legal">
-            <div v-for="x in r.events" :key="x.event.id" class="ev-row" role="row">
+            <div v-for="x in r.events" :key="x.event.id" class="ev-row" :class="{ missed: !x.cut }" role="row">
               <span role="cell" class="ev-what">
                 <AppLink
                   :to="{ name: 'tournament', params: { id: x.event.id }, query: { f: `pokemon:${id}` } }"
@@ -1006,25 +1004,48 @@ const sections = computed(() =>
                   <CountryFlag :code="x.event.country" /> · {{ teamsText(x.teams) }}</span
                 >
               </span>
-              <!-- Its usage against the events before, a bar with the numbers on it, then the change in points. -->
+              <!-- Its usage there, the row's lead number, its change in points beside it, and under them a thin bar on
+                   one scale for every event, what it gained or lost since the events before in the good or bad color. -->
               <span
-                v-tip="x.before === null ? undefined : t('usageMon.evShiftTip', { before: x.beforeLabel })"
+                v-tip="
+                  x.before === null
+                    ? undefined
+                    : t('usageMon.evUsageAt', {
+                        usage: percent(x.usage),
+                        prev: percent(x.before),
+                        before: x.beforeLabel,
+                      })
+                "
                 role="cell"
                 class="ev-usage"
+                :class="shiftOf(x)"
+                :style="{
+                  '--lo': Math.min(x.before ?? x.usage, x.usage) / topEvent,
+                  '--hi': Math.max(x.before ?? x.usage, x.usage) / topEvent,
+                }"
               >
-                <UsageShift :before="x.before" :usage="x.usage" :max="topEvent" />
+                <span class="ev-pct num">{{ percent(x.usage) }}</span>
+                <span v-if="x.before !== null" class="ev-delta num">{{
+                  !x.before && x.usage ? t('usage.new') : points(x.usage - x.before)
+                }}</span>
+                <span class="ev-bar"><span class="ev-kept"></span><span class="ev-moved"></span></span>
               </span>
-              <span
-                role="cell"
-                class="num ev-change"
-                :class="x.before === null || x.usage === x.before ? '' : x.usage > x.before ? 'up' : 'down'"
-                ><template v-if="x.before !== null"
-                  ><span class="ev-label muted">{{ t('usageMon.evChange') }} </span
-                  >{{ points(x.usage - x.before) }}</template
-                ></span
-              >
+              <!-- The top cut's teams with it, in the text's color when it made it; a faded dash when it didn't. -->
               <span role="cell" class="num ev-cut"
-                ><span class="ev-label muted">{{ t('tournaments.day.cut') }} </span>{{ x.cut }}/{{ x.cutOf }}</span
+                ><span class="ev-label muted">{{ t('tournaments.day.cut') }} </span
+                ><span
+                  v-if="x.cut"
+                  v-tip="
+                    t('usageMon.evCutBadgeTip', {
+                      cut: x.cut,
+                      of: x.cutOf,
+                      share: percent(x.cut / x.cutOf),
+                      usage: percent(x.usage),
+                    })
+                  "
+                  class="cut-made"
+                  >{{ x.cut }}/{{ x.cutOf }}</span
+                ><span v-else v-tip="t('usageMon.evCutNone', { of: x.cutOf })" class="muted">—</span></span
               >
             </div>
           </template>
@@ -1627,12 +1648,13 @@ h2 {
 .month-rank {
   font-size: 0.8em;
 }
-/* Its official tournaments: a row per event, its name and date, its share of the teams against the events before's,
-   a bar on one scale for every event, the change in points, and the top cut's teams with it; each regulation's run
-   under a divider. On phones, the name across, and its bar, change and top cut under it, the top cut labeled. */
+/* Its official tournaments: a row per event, its name and date, the top cut's teams with it, its share of the teams
+   against the events before's, a dumbbell on one scale for every event, and the change in points; each regulation's run
+   under a divider with its usage across them as a sparkline. An event it missed the top cut at is faded but its name.
+   On phones, the name and top cut across, its dumbbell and change under them. */
 .events-table {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(7rem, 14rem) 3.5em 4.5em;
+  grid-template-columns: minmax(0, 1fr) minmax(7rem, 10rem) 4.5em;
   gap: 6px 14px;
   align-items: center;
 }
@@ -1734,28 +1756,82 @@ h2 {
 .ev-what > * {
   grid-column: 1;
 }
-/* A dotted leader from its name and date to its bar, at the bar's height, so the eye keeps to the row across. */
+/* A dotted leader from its name and date to its usage, so the eye keeps to the row across. */
 .ev-what::after {
   content: '';
   grid-row: 1 / 3;
   grid-column: 2;
   align-self: center;
   min-width: 12px;
-  border-bottom: 1px dotted color-mix(in srgb, var(--muted) 55%, transparent);
+  border-bottom: 1px dotted color-mix(in srgb, var(--muted) 30%, transparent);
 }
 .ev-name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.ev-change.up {
-  color: var(--good);
-}
-.ev-change.down {
-  color: var(--bad);
-}
 .ev-label {
   display: none;
+}
+/* Its usage: the number in the text's size, its change small beside it, a thin bar under them. */
+.ev-usage {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  column-gap: 8px;
+  row-gap: 4px;
+}
+.ev-pct {
+  color: var(--text);
+}
+.ev-delta {
+  font-size: 0.8em;
+  color: var(--muted);
+}
+.rise .ev-delta {
+  color: var(--good);
+}
+.fall .ev-delta {
+  color: var(--bad);
+}
+.ev-bar {
+  position: relative;
+  grid-column: 1 / -1;
+  height: 3px;
+  background: color-mix(in srgb, var(--border) 50%, transparent);
+}
+.ev-kept,
+.ev-moved {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+.ev-kept {
+  left: 0;
+  width: calc(var(--lo) * 100%);
+  background: color-mix(in srgb, var(--text) 45%, transparent);
+}
+.ev-moved {
+  left: calc(var(--lo) * 100%);
+  width: calc((var(--hi) - var(--lo)) * 100%);
+}
+.rise .ev-moved {
+  background: var(--good);
+}
+.fall .ev-moved {
+  background: color-mix(in srgb, var(--bad) 45%, transparent);
+}
+.ev-cut {
+  text-align: right;
+}
+/* Made the top cut: in the text's color, against the faded dash of those that didn't. */
+.cut-made {
+  color: var(--text);
+}
+/* Missed the top cut: all but its name and usage faded. */
+.missed > .ev-what > .muted,
+.missed .ev-bar {
+  opacity: 0.5;
 }
 @media (max-width: 560px) {
   .events-table {
@@ -1764,13 +1840,14 @@ h2 {
   .ev-row.ev-head {
     display: none;
   }
-  /* A row per event, ruled off from the next: its name (wrapping rather than clipped) and date, its bar across, then
-     its change and top cut, labeled, on a line of their own. */
+  /* A row per event, ruled off from the next: its name (wrapping rather than clipped) and date with its usage beside
+     them, then its top cut, labeled, under them. */
   .ev-row {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    grid-template-areas: 'what what' 'bar bar' 'change cut';
-    gap: 6px 20px;
+    grid-template-columns: minmax(0, 1fr) 7rem;
+    grid-template-areas: 'what usage' 'cut .';
+    gap: 4px 16px;
+    align-items: center;
     padding: 10px 0;
     border-bottom: 1px solid var(--border);
   }
@@ -1778,7 +1855,9 @@ h2 {
   .ev-row:has(+ .ev-reg) {
     border-bottom: 0;
   }
-  .ev-reg,
+  .ev-reg {
+    display: block;
+  }
   .ev-reg > span {
     display: block;
     margin-top: 12px;
@@ -1795,24 +1874,14 @@ h2 {
     white-space: normal;
   }
   .ev-usage {
-    grid-area: bar;
-  }
-  .ev-change {
-    grid-area: change;
-    text-align: left;
+    grid-area: usage;
   }
   .ev-cut {
     grid-area: cut;
     text-align: left;
+    font-size: 0.9em;
   }
-  /* The first event of all, with no change: its top cut where the change would be. */
-  .ev-change:empty {
-    display: none;
-  }
-  .ev-change:empty + .ev-cut {
-    grid-area: change;
-  }
-  .ev-label {
+  .ev-cut .ev-label {
     display: inline;
     margin-right: 6px;
   }
