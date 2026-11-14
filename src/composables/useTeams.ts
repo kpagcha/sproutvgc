@@ -1,5 +1,5 @@
 import { computed, ref, watch } from 'vue'
-import { emptyMember, MOVE_SLOTS, newTeam, TEAM_SIZE, type Member, type Team } from '@/lib/team'
+import { emptyMember, MOVE_SLOTS, newTeam, NOTES_MAX, TEAM_SIZE, type Member, type Team } from '@/lib/team'
 
 // The team builder's teams, saved in this browser as they're edited, and the one open. The starred ones first, then
 // the latest changed. A team saved by an older shape is read as far as it goes, the rest of each slot left empty.
@@ -39,6 +39,7 @@ function read(): Stored {
               starred: !!t.starred,
               // Which slot Mega Evolves in its insights: a slot, none (null), or unset (the first with its stone).
               ...((t.mega === null || Number.isInteger(t.mega)) && { mega: t.mega }),
+              ...(typeof t.notes === 'string' && t.notes && { notes: t.notes.slice(0, NOTES_MAX) }),
               updated: Number(t.updated) || 0,
             },
           ]
@@ -104,6 +105,7 @@ export function useTeams() {
     if (!t) return
     const copy = create(name, JSON.parse(JSON.stringify(t.members)) as Member[])
     if (t.mega !== undefined) copy.mega = t.mega
+    if (t.notes) copy.notes = t.notes
   }
   function star(id: string) {
     const t = state.value.teams.find((x) => x.id === id)

@@ -36,6 +36,7 @@ import {
   pickedAs,
   battlers,
   evolvingSlot,
+  NOTES_MAX,
   pointsLeft,
   setsAs,
   stoneMega,
@@ -86,6 +87,18 @@ onMounted(() => {
   }
 })
 const members = computed(() => current.value?.members ?? [])
+
+// The reader's notes on the open team, saved with it, at most `NOTES_MAX` characters; how many are left said as it
+// nears them.
+const notes = computed({
+  get: () => current.value?.notes ?? '',
+  set: (v: string) => {
+    if (!current.value) return
+    current.value.notes = v.slice(0, NOTES_MAX)
+    touch()
+  },
+})
+const notesLeft = computed(() => NOTES_MAX - notes.value.length)
 
 // The part being picked: its slot and field, and whether from the slot pinned beside the insights (`pin`, its card the
 // one the drawer leaves clear); right after a Pokémon's picked, the meta's entry whose most common set can be loaded
@@ -429,6 +442,7 @@ const spreadsOf = (m: Member) => {
 const sections = computed(() => [
   { id: 'sec-teams', label: t('builder.section.teams') },
   { id: 'sec-team', label: t('builder.section.team') },
+  { id: 'sec-notes', label: t('builder.section.notes') },
   ...(hasAny.value
     ? [
         { id: 'sec-speed', label: t('builder.section.speed') },
@@ -698,6 +712,14 @@ const icons = (members: readonly Member[]) => members.flatMap((m) => (m.pokemon 
             @clear="clearSlot(i)"
           />
         </ul>
+      </section>
+      <!-- The reader's own notes on it: its plan, leads, weaknesses. -->
+      <section id="sec-notes" class="notes">
+        <label for="team-notes" class="notes-label muted">{{ t('builder.section.notes') }}</label>
+        <textarea id="team-notes" v-model="notes" rows="3" :maxlength="NOTES_MAX"></textarea>
+        <p v-if="notesLeft <= NOTES_MAX / 5" class="notes-left" :class="{ out: !notesLeft }" aria-live="polite">
+          {{ t('builder.notesLeft', { n: notesLeft }) }}
+        </p>
       </section>
       <div v-if="hasAny" class="insights" :class="{ pinning: pinned !== null && pinSide }">
         <!-- The slot pinned: beside the insights, stuck as they scroll. -->
@@ -1250,6 +1272,39 @@ section {
   .team-name {
     flex-basis: 100%;
   }
+}
+/* The notes: a soft box rather than a panel, no ink nor shadow, its label small; closer to the team's panel than the
+   panels are to each other (half as far), going with it, and the margin under it a panel's. */
+.notes {
+  margin-top: -12px;
+  margin-bottom: 12px;
+  padding: 8px 10px 10px;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+}
+.notes-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.8em;
+  font-weight: bold;
+}
+.notes textarea {
+  display: block;
+  width: 100%;
+  min-height: 4.5em;
+  padding: 6px 8px;
+  font: inherit;
+  line-height: 1.45;
+  resize: vertical;
+}
+.notes-left {
+  margin: 4px 0 0;
+  font-size: 0.85em;
+  text-align: right;
+  color: var(--warn);
+}
+.notes-left.out {
+  color: var(--bad);
 }
 .issues {
   margin: -4px 0 10px;

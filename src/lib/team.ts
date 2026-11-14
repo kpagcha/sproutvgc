@@ -38,9 +38,15 @@ export interface Team {
   starred?: boolean
   /** The slot that Mega Evolves in its insights, null for none; unset, the first holding its stone. */
   mega?: number | null
+  /** The reader's own notes on it: its plan, leads, what beats it. At most `NOTES_MAX` characters. */
+  notes?: string
   /** When last changed, in milliseconds. */
   updated: number
 }
+
+/** The most a team's notes take: room for a plan, its leads and its weaknesses, yet small enough to store anywhere,
+ *  a server's column included, once teams are kept there. */
+export const NOTES_MAX = 2000
 
 export const emptyMember = (): Member => ({
   pokemon: null,

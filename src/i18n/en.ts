@@ -1362,6 +1362,8 @@ export const messages = {
   'builder.section.defense': 'Bulk',
   'builder.section.offense': 'Power',
   'builder.section.speed': 'Speed',
+  'builder.section.notes': 'Notes',
+  'builder.notesLeft': '{n} characters left',
   'builder.balance.physical': 'Physical',
   'builder.balance.special': 'Special',
   'builder.balance.types': 'Types',
