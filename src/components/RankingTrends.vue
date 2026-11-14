@@ -10,7 +10,7 @@ import { useUnfolded } from '@/composables/useUnfolded'
 
 // The rankings' trends, a panel of their own after the list (the list's rank keeps only a mark of them: up, down or
 // new): of the entries the list shows (its search and filters), those whose usage rose and fell the most since the
-// dataset before (`since`), in percentage points, and those new to it, by usage, a column each, every entry leading
+// dataset before (`since`, said leading its content, as `about` is), in percentage points, and those new to it, by usage, a column each, every entry leading
 // where its row does. A snapshot with no usage measures the change in places (`climb`). Other trends take its shape
 // with a title of their own (`title`), what they're against in place of the dates (`about`), and the columns' tooltips
 // saying so (`tips`): the tournaments'.
@@ -88,10 +88,8 @@ const longest = computed(() => Math.max(0, ...groups.value.map((g) => g.list.len
 
 <template>
   <section class="panel banded trends">
-    <h2 class="band">
-      {{ title ?? t('trends.title')
-      }}<span class="since">{{ about ?? t('trends.since', { dates: since ?? '' }) }}</span>
-    </h2>
+    <h2 class="band">{{ title ?? t('trends.title') }}</h2>
+    <p class="muted about">{{ about ?? t('trends.since', { dates: since ?? '' }) }}</p>
     <div v-if="any" class="groups">
       <section v-for="g in groups" :key="g.key" :class="g.key">
         <h3
@@ -121,15 +119,12 @@ const longest = computed(() => Math.max(0, ...groups.value.map((g) => g.list.len
 </template>
 
 <style scoped>
-/* The dates after the heading, smaller and lighter. */
 .band {
   font-size: 1rem;
 }
-.since {
-  margin-left: 8px;
-  font-size: 0.8em;
-  font-weight: normal;
-  opacity: 0.85;
+/* What they're against, leading the panel's content. */
+.about {
+  margin: 0 0 10px;
 }
 /* Rising, falling and new side by side, one under the other on phones. */
 .groups {

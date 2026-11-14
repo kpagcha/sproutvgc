@@ -544,12 +544,24 @@ export const datasetDates = (d: Pick<MetaDataset, 'from' | 'to'>) =>
     timeZone: 'UTC',
   }).formatRange(new Date(`${d.from}T00:00:00Z`), new Date(`${d.to}T00:00:00Z`))
 
-/** The dataset a snapshot's trends are against (its `previous`), for "since …": its dates, and its regulation when
- * it's another's (a regulation's first month is against the last of the one before it). */
+/** The month a dataset covers whole, by name, its year only when it isn't this one's ("September"); else its dates. */
+function sinceDates(d: Pick<MetaDataset, 'from' | 'to'>): string {
+  const from = new Date(`${d.from}T00:00:00Z`)
+  const end = new Date(Date.UTC(from.getUTCFullYear(), from.getUTCMonth() + 1, 0)).toISOString().slice(0, 10)
+  if (from.getUTCDate() !== 1 || d.to !== end) return datasetDates(d)
+  return from.toLocaleDateString(locale.value, {
+    month: 'long',
+    ...(from.getUTCFullYear() === new Date().getFullYear() ? {} : { year: 'numeric' }),
+    timeZone: 'UTC',
+  })
+}
+
+/** The dataset a snapshot's trends are against (its `previous`), for "since …": its month (or dates), and its
+ * regulation when it's another's (a regulation's first month is against the last of the one before it). */
 export const sinceLabel = (previous: MetaSnapshot, shown: MetaSnapshot | undefined) =>
   previous.regulation === shown?.regulation
-    ? datasetDates(previous)
-    : `${t('meta.regulation', { reg: previous.regulation })}, ${datasetDates(previous)}`
+    ? sinceDates(previous)
+    : `${t('meta.regulation', { reg: previous.regulation })}, ${sinceDates(previous)}`
 
 /** Whose teams a cutoff counts most: "Strong players (1760+)". */
 export const players = (c: Cutoff) =>
