@@ -35,8 +35,9 @@ import {
 import { inert, ORDER_MOVES, statsUsed } from '@/lib/threats'
 
 /** What a move was seen to do: the opponent's HP lost, in whole percent as the game shows it (`pct`), yours' in HP
- * (`hp`), or that it knocked out (`ko`), didn't (`lived`), or did on the second hit (`two`). */
-export type Saw = { kind: 'pct' | 'hp'; n: number } | { kind: 'ko' | 'lived' | 'two' }
+ * (`hp`), or that it knocked out (`ko`), didn't (`lived`), or did on the second hit (`two`). A number `bound` is a goal
+ * rather than what was seen: that or better for yours, the opponent losing at least it, yours at most it. */
+export type Saw = { kind: 'pct' | 'hp'; n: number; bound?: boolean } | { kind: 'ko' | 'lived' | 'two' }
 export type SawKind = Saw['kind']
 
 /** One hit seen: whose move (`a` yours, hitting the opponent; `b` the opponent's, hitting yours), what it did, and the
@@ -98,15 +99,21 @@ export function fitOf(rolls: readonly number[], saw: Saw, d: Defended): number {
       for (const r of rolls) if (!knocks(r)) n++
       return n / rolls.length
     case 'hp':
-      for (const r of rolls) if (dealt(r) === saw.n) n++
+      // Bound, yours losing at most it.
+      for (const r of rolls) if (saw.bound ? dealt(r) <= saw.n : dealt(r) === saw.n) n++
       return n / rolls.length
     case 'pct': {
       // The HP bar a whole percent, before and after, however the game rounds it: what's left within a point of what
-      // was shown; none left, a knockout.
+      // was shown; none left, a knockout. Bound, the opponent losing at least it: what's left under a point over it, a
+      // knockout always.
       const target = hpShown((d.hp / d.maxHp) * 100) - saw.n
       for (const r of rolls) {
         const left = d.hp - dealt(r)
-        if (left <= 0 ? target <= 0 : target > 0 && Math.abs((left / d.maxHp) * 100 - target) < 1) n++
+        const pct = (left / d.maxHp) * 100
+        if (
+          saw.bound ? left <= 0 || pct < target + 1 : left <= 0 ? target <= 0 : target > 0 && Math.abs(pct - target) < 1
+        )
+          n++
       }
       return n / rolls.length
     }

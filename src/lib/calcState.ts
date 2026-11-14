@@ -193,7 +193,8 @@ export function decodeField(s: unknown): Battlefield {
 // The inverse calc's hits seen (`?h=`), in the order entered: `adragonclaw-p42.bflareblitz-h51-b120-c`, each whose move
 // (`a` yours, `b` the opponent's) and its ID, then what it did (`p<n>` the opponent's HP lost in percent, `h<n>` yours'
 // in HP, `k` a knockout, `l` survived, `t` knocked out on the second hit), then `b<n>` the defender's HP before (the
-// opponent's in percent, yours' in HP; full unless given), `c` a critical hit, `s` one target alone.
+// opponent's in percent, yours' in HP; full unless given), `o` a number as a goal, that or better for yours (`bound`),
+// `c` a critical hit, `s` one target alone.
 const SAW_CODES = { ko: 'k', lived: 'l', two: 't' } as const
 export function encodeHits(hits: readonly HitSeen[]): string {
   return hits
@@ -204,6 +205,7 @@ export function encodeHits(hits: readonly HitSeen[]): string {
         `${h.by}${h.move}`,
         saw,
         h.before !== undefined && `b${h.before}`,
+        'n' in w && w.bound && 'o',
         h.opts?.crit && 'c',
         h.opts?.single && 's',
       ]
@@ -223,12 +225,14 @@ export function decodeHits(s: unknown): HitSeen[] {
     let before: number | undefined
     let crit = false
     let single = false
+    let bound = false
     for (const c of codes) {
       const num = /^([phb])(\d+)$/.exec(c)
       if (num?.[1] === 'b') before = clamp(Number(num[2]), 1, by === 'a' ? 100 : 9999)
       else if (num)
         saw = { kind: num[1] === 'p' ? 'pct' : 'hp', n: clamp(Number(num[2]), 0, num[1] === 'p' ? 100 : 9999) }
       else if (c === 'c') crit = true
+      else if (c === 'o') bound = true
       else if (c === 's') single = true
       else {
         const kind = (Object.keys(SAW_CODES) as (keyof typeof SAW_CODES)[]).find((k) => SAW_CODES[k] === c)
@@ -236,6 +240,7 @@ export function decodeHits(s: unknown): HitSeen[] {
       }
     }
     if (!saw) return []
+    if (bound && 'n' in saw) saw = { ...saw, bound }
     const opts: HitOptions = { ...(crit && { crit }), ...(single && { single }) }
     return [{ by, move, saw, ...(before !== undefined && { before }), ...(Object.keys(opts).length && { opts }) }]
   })

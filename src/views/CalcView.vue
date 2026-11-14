@@ -177,7 +177,9 @@ const start = fromUrl ?? readLast()
 /** The threats at the opponent's team sheet (`?sheet=1`), kept with the rest. */
 const sheet = shallowRef(start.sheet === '1')
 /** The inverse tab's hits seen (`?h=`), those with no result yet kept for the visit alone. */
-const hits = shallowRef<HitDraft[]>(decodeHits(start.h))
+const hits = shallowRef<HitDraft[]>(
+  decodeHits(start.h).map((h) => ('n' in h.saw && h.saw.bound ? { ...h, bound: true } : h)),
+)
 /** Which was seen moving first (`?first=a|b`). */
 const first = shallowRef<'a' | 'b' | null>(start.first === 'a' || start.first === 'b' ? start.first : null)
 /** The hits seen with a move and a result: what's kept and worked out. */
@@ -974,6 +976,7 @@ function face(f: Fighter) {
         v-model:first="first"
         :yours="fought.a"
         :theirs="fought.b"
+        :goal="yoursWorked"
         @pick-move="pickHitMove($event, 'page')"
       >
         <CalcReverse
@@ -1116,6 +1119,7 @@ function face(f: Fighter) {
           v-model:first="first"
           :yours="fought.a"
           :theirs="fought.b"
+          :goal="yoursWorked"
           bare
           can-back
           @back="toStep('moves')"

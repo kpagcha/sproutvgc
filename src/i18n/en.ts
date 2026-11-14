@@ -422,7 +422,7 @@ export const messages = {
   'calc.hits.step.add':
     'Add each hit, seen or wanted, {yours} on the opponent or {theirs} on yours, and pick its move.',
   'calc.hits.step.saw':
-    "Say what it did: the opponent's HP lost in percent, as the game shows it, or yours in HP; or {ko}, {lived} or {two} when that's all you know. Set the HP it had before if it wasn't full: a new hit starts where the last one on the same Pokémon left it.",
+    "Say what it did: the opponent's HP lost in percent, as the game shows it, or yours in HP; or {ko}, {lived} or {two} when that's all you know. Set the HP it had before if it wasn't full: a new hit starts where the last one on the same Pokémon left it. Tap ≥ (≤ on yours) by the number to make it a goal rather than what you saw.",
   'calc.hits.step.first': 'If both use moves of the same priority, tap the one that goes first under {first}.',
   'calc.hits.who': '{from} hit {to}',
   'calc.hits.move': 'Move',
@@ -430,6 +430,10 @@ export const messages = {
   'calc.hits.pctLost': 'HP lost, in percent',
   'calc.hits.hpLost': 'HP lost',
   'calc.hits.less': 'One less',
+  'calc.hits.bound.a': 'A goal: at least this much lost (what you want, not what you saw)',
+  'calc.hits.bound.b': 'A goal: at most this much lost (what you want, not what you saw)',
+  'calc.hits.exact.a': 'Exactly this much, as seen. Tap to make it a goal: at least this much',
+  'calc.hits.exact.b': 'Exactly this much, as seen. Tap to make it a goal: at most this much',
   'calc.hits.more': 'One more',
   'calc.hits.unit.pct': '% lost',
   'calc.hits.unit.hp': 'HP lost',

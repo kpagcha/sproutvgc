@@ -27,8 +27,17 @@ export interface HitDraft {
   saw: Saw | null
   before?: number
   opts?: HitOptions
+  /** Its number a goal, that or better for yours (`Saw`'s `bound`), kept while it has none or an outcome instead. */
+  bound?: boolean
 }
-const props = defineProps<{ yours: Fighter; theirs: Fighter; bare?: boolean; canBack?: boolean }>()
+const props = defineProps<{
+  yours: Fighter
+  theirs: Fighter
+  bare?: boolean
+  canBack?: boolean
+  /** Something of yours is worked out: a hit added then has its number as a goal at first. */
+  goal?: boolean
+}>()
 const emit = defineEmits<{ close: []; back: []; pickMove: [i: number] }>()
 const hits = defineModel<HitDraft[]>('hits', { required: true })
 const first = defineModel<'a' | 'b' | null>('first', { default: null })
@@ -70,7 +79,10 @@ function add(by: 'a' | 'b') {
   const lost = last?.saw && 'n' in last.saw ? last.saw.n : null
   const left = last && lost !== null ? (last.before ?? maxOf(last)) - lost : null
   const before = left !== null && left > 0 && left < maxOf(last!) ? left : undefined
-  hits.value = [...hits.value, { by, move: movesOf(by)[0] ?? null, saw: null, ...(before && { before }) }]
+  hits.value = [
+    ...hits.value,
+    { by, move: movesOf(by)[0] ?? null, saw: null, ...(before && { before }), ...(props.goal && { bound: true }) },
+  ]
 }
 function setOpt(i: number, key: 'crit' | 'single', on: boolean) {
   const opts = { ...hits.value[i]!.opts, [key]: on || undefined }
@@ -84,7 +96,20 @@ function typed(i: number, e: Event) {
   const v = Math.round(Number(el.value))
   if (!Number.isFinite(v)) return
   const max = h.by === 'a' ? 100 : yourMaxHp.value || 9999
-  patch(i, { saw: { kind: h.by === 'a' ? 'pct' : 'hp', n: Math.min(max, Math.max(0, v)) } })
+  patch(i, { saw: numberSaw(h, Math.min(max, Math.max(0, v))) })
+}
+/** A number it did: the opponent's percent or yours' HP, a goal while the hit's is. */
+const numberSaw = (h: HitDraft, n: number): Saw => ({
+  kind: h.by === 'a' ? 'pct' : 'hp',
+  n,
+  ...(h.bound && { bound: true }),
+})
+/** Its number a goal or what was seen, toggled; its number following. */
+function toggleBound(i: number) {
+  const h = hits.value[i]!
+  const bound = !h.bound
+  const saw = h.saw && 'n' in h.saw ? numberSaw({ ...h, bound }, h.saw.n) : h.saw
+  patch(i, { bound: bound || undefined, saw })
 }
 /** The defender's HP before it; cleared or full, full. */
 function typedBefore(i: number, e: Event) {
@@ -116,7 +141,7 @@ function stepLost(i: number, d: 1 | -1, e: MouseEvent) {
   const now = h.saw && 'n' in h.saw ? h.saw.n : null
   if (now === null && d < 0) return
   const n = Math.min(max, Math.max(0, (now ?? 0) + d * by))
-  patch(i, { saw: { kind: h.by === 'a' ? 'pct' : 'hp', n } })
+  patch(i, { saw: numberSaw(h, n) })
 }
 const lostMax = (h: HitDraft) => (h.by === 'a' ? 100 : yourMaxHp.value || 9999)
 const OUTCOMES = ['ko', 'lived', 'two'] as const
@@ -249,6 +274,18 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
         <span class="saw" :class="{ needed: !h.saw }">
           <span class="choices" role="group" :aria-label="t('calc.hits.saw')">
             <span class="seg num" :class="{ on: !!h.saw && 'n' in h.saw }">
+              <!-- Exactly as seen, or a goal: at least that lost from the opponent, at most from yours. -->
+              <button
+                v-tip="t(h.bound ? `calc.hits.bound.${h.by}` : `calc.hits.exact.${h.by}`)"
+                type="button"
+                class="bound"
+                :class="{ lit: h.bound }"
+                :aria-pressed="!!h.bound"
+                :aria-label="t(`calc.hits.bound.${h.by}`)"
+                @click="toggleBound(i)"
+              >
+                {{ h.by === 'a' ? '≥' : '≤' }}
+              </button>
               <button
                 type="button"
                 class="step"
@@ -546,6 +583,28 @@ button.seg:hover {
 }
 .seg.on .unit {
   color: inherit;
+}
+/* Its number a goal or exact: a sign, faint until on, then in the accent, bold. */
+.bound {
+  flex: none;
+  width: 18px;
+  padding: 0;
+  font: inherit;
+  font-weight: bold;
+  line-height: 1;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  opacity: 0.55;
+  cursor: pointer;
+}
+.bound:hover,
+.bound:focus-visible {
+  opacity: 1;
+}
+.bound.lit {
+  color: var(--accent);
+  opacity: 1;
 }
 /* As the HP bar's steps beside it, compact. */
 .step {
