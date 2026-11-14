@@ -671,9 +671,9 @@ function use(r: ReverseRow) {
 .small {
   font-size: 0.85em;
 }
+/* In the bad color alone: bold, it shifts what's around it as it comes and goes. */
 .warn {
   color: var(--bad);
-  font-weight: bold;
 }
 .stale {
   opacity: 0.5;

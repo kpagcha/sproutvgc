@@ -421,13 +421,15 @@ export const messages = {
   'calc.hits.step.add':
     'Add each hit, seen or wanted, {yours} on the opponent or {theirs} on yours, and pick its move.',
   'calc.hits.step.saw':
-    "Say what it did: the opponent's HP lost in percent, as the game shows it, or yours in HP; or {ko}, {lived} or {two} when that's all you know. Set the HP it had before if it wasn't full.",
+    "Say what it did: the opponent's HP lost in percent, as the game shows it, or yours in HP; or {ko}, {lived} or {two} when that's all you know. Set the HP it had before if it wasn't full: a new hit starts where the last one on the same Pokémon left it.",
   'calc.hits.step.first': 'If both use moves of the same priority, tap the one that goes first under {first}.',
   'calc.hits.who': '{from} hit {to}',
   'calc.hits.move': 'Move',
   'calc.hits.saw': 'What it did',
   'calc.hits.pctLost': 'HP lost, in percent',
   'calc.hits.hpLost': 'HP lost',
+  'calc.hits.less': 'One less',
+  'calc.hits.more': 'One more',
   'calc.hits.unit.pct': '% lost',
   'calc.hits.unit.hp': 'HP lost',
   'calc.hits.unit.hpOf': '/ {max} HP',

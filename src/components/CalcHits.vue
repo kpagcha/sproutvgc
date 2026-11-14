@@ -63,8 +63,14 @@ const yourMaxHp = computed(() => statsOf(props.yours)?.hp ?? 0)
 const patch = (i: number, p: Partial<HitDraft>) =>
   (hits.value = hits.value.map((h, j) => (j === i ? { ...h, ...p } : h)))
 const remove = (i: number) => (hits.value = hits.value.filter((_, j) => j !== i))
+/** A hit added: its defender's HP before it where the last hit on it left it (its HP before less what it lost), else
+ * full (none before, a KO, or only Survived or 2 hits known). */
 function add(by: 'a' | 'b') {
-  hits.value = [...hits.value, { by, move: movesOf(by)[0] ?? null, saw: null }]
+  const last = hits.value.filter((h) => h.by === by).at(-1)
+  const lost = last?.saw && 'n' in last.saw ? last.saw.n : null
+  const left = last && lost !== null ? (last.before ?? maxOf(last)) - lost : null
+  const before = left !== null && left > 0 && left < maxOf(last!) ? left : undefined
+  hits.value = [...hits.value, { by, move: movesOf(by)[0] ?? null, saw: null, ...(before && { before }) }]
 }
 function setOpt(i: number, key: 'crit' | 'single', on: boolean) {
   const opts = { ...hits.value[i]!.opts, [key]: on || undefined }
@@ -102,6 +108,17 @@ function slid(i: number, pct: number) {
   const pts = Math.max(1, Math.round((max * pct) / 100))
   patch(i, { before: pts >= max ? undefined : pts })
 }
+/** Stepped by one (with Shift, a tenth of its HP): the HP lost, from none set starting at the step up. */
+function stepLost(i: number, d: 1 | -1, e: MouseEvent) {
+  const h = hits.value[i]!
+  const max = h.by === 'a' ? 100 : yourMaxHp.value || 9999
+  const by = e.shiftKey ? Math.max(1, Math.round(max / 10)) : 1
+  const now = h.saw && 'n' in h.saw ? h.saw.n : null
+  if (now === null && d < 0) return
+  const n = Math.min(max, Math.max(0, (now ?? 0) + d * by))
+  patch(i, { saw: { kind: h.by === 'a' ? 'pct' : 'hp', n } })
+}
+const lostMax = (h: HitDraft) => (h.by === 'a' ? 100 : yourMaxHp.value || 9999)
 const OUTCOMES = ['ko', 'lived', 'two'] as const
 const outcome = (i: number, k: (typeof OUTCOMES)[number]) =>
   patch(i, { saw: hits.value[i]!.saw?.kind === k ? null : { kind: k } })
@@ -236,27 +253,48 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
             <Crosshair :size="14" aria-hidden="true" />
           </button>
         </span>
-        <!-- What it did: a number, or one of the outcomes, either clearing the other. -->
-        <span class="saw">
-          <span class="num">
-            <input
-              class="num-in"
-              type="number"
-              inputmode="numeric"
-              min="0"
-              :value="numberOf(h)"
-              placeholder="–"
-              :aria-label="t(h.by === 'a' ? 'calc.hits.pctLost' : 'calc.hits.hpLost')"
-              @input="typed(i, $event)"
-            />
-            <span class="muted">{{ t(h.by === 'a' ? 'calc.hits.unit.pct' : 'calc.hits.unit.hp') }}</span>
-          </span>
-          <span class="outcomes" role="group" :aria-label="t('calc.hits.saw')">
+        <!-- What it did: a number, or one of the outcomes, either clearing the other; one group of joined choices, the one
+             picked lit. Until one is, its outline pulses, softly, in the warning's color. -->
+        <span class="saw" :class="{ needed: !h.saw }">
+          <span class="choices" role="group" :aria-label="t('calc.hits.saw')">
+            <span class="seg num" :class="{ on: !!h.saw && 'n' in h.saw }">
+              <button
+                type="button"
+                class="step"
+                tabindex="-1"
+                :disabled="numberOf(h) === '' || numberOf(h) === 0"
+                :aria-label="t('calc.hits.less')"
+                @click="stepLost(i, -1, $event)"
+              >
+                −
+              </button>
+              <input
+                class="num-in"
+                type="number"
+                inputmode="numeric"
+                min="0"
+                :max="lostMax(h)"
+                :value="numberOf(h)"
+                :aria-label="t(h.by === 'a' ? 'calc.hits.pctLost' : 'calc.hits.hpLost')"
+                @input="typed(i, $event)"
+              />
+              <button
+                type="button"
+                class="step"
+                tabindex="-1"
+                :disabled="numberOf(h) === lostMax(h)"
+                :aria-label="t('calc.hits.more')"
+                @click="stepLost(i, 1, $event)"
+              >
+                +
+              </button>
+              <span class="unit">{{ t(h.by === 'a' ? 'calc.hits.unit.pct' : 'calc.hits.unit.hp') }}</span>
+            </span>
             <button
               v-for="k in OUTCOMES"
               :key="k"
               type="button"
-              class="btn mod"
+              class="seg"
               :class="{ on: h.saw?.kind === k }"
               :aria-pressed="h.saw?.kind === k"
               @click="outcome(i, k)"
@@ -288,10 +326,11 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
             @change="typedBefore(i, $event)"
           />
           <span class="muted">{{ h.by === 'a' ? '%' : t('calc.hits.unit.hpOf', { max: yourMaxHp }) }}</span>
+          <!-- In the HP's group, so it never wraps onto a line of its own. -->
+          <button type="button" class="remove" :aria-label="t('calc.hits.remove')" @click="remove(i)">
+            <Trash2 :size="16" aria-hidden="true" />
+          </button>
         </span>
-        <button type="button" class="remove" :aria-label="t('calc.hits.remove')" @click="remove(i)">
-          <Trash2 :size="16" aria-hidden="true" />
-        </button>
       </li>
     </ol>
     <slot v-if="both && !bare" />
@@ -317,7 +356,6 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
 }
 :root:root .hits .btn.on {
   border-color: var(--ink);
-  font-weight: bold;
 }
 :root:root .hits .add.yours {
   border-left: 3px solid var(--accent);
@@ -405,9 +443,7 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
   font: inherit;
 }
 .mods,
-.outcomes,
 .saw,
-.num,
 .before {
   display: inline-flex;
   align-items: center;
@@ -422,8 +458,100 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
   flex: 1;
   min-width: 90px;
 }
+/* What it did: its choices joined, the one picked lit in the selection's color, its border ink; none picked, a dashed
+   outline in the warning's color pulsing softly, so it's clear it's wanted. Picked or not, the same weight, nothing
+   shifting. */
 .saw {
-  gap: 8px;
+  flex-wrap: wrap;
+}
+.choices {
+  display: inline-flex;
+  align-items: stretch;
+  outline: 2px dashed transparent;
+  outline-offset: 2px;
+}
+.saw.needed .choices {
+  outline-color: var(--warn);
+  animation: wanted 1.6s ease-in-out infinite;
+}
+@keyframes wanted {
+  50% {
+    outline-color: color-mix(in srgb, var(--warn) 25%, transparent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .saw.needed .choices {
+    animation: none;
+  }
+}
+.seg {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font: inherit;
+  color: inherit;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+.seg + .seg {
+  margin-left: -1px;
+}
+button.seg:hover {
+  z-index: 1;
+  border-color: var(--ink);
+}
+.seg.on {
+  z-index: 2;
+  background: var(--sel);
+  border-color: var(--ink);
+}
+/* The number: its box, steps either side, and its unit, one choice of the group, lit once a number's in. */
+.seg.num {
+  padding: 2px 6px 2px 2px;
+  cursor: default;
+}
+/* Its box no box of its own within the group's: the number alone between its steps. */
+:root:root .seg.num .num-in {
+  width: 2.8em;
+  padding: 0 4px;
+  border: 0;
+  outline-offset: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.unit {
+  color: var(--muted);
+}
+.seg.on .unit {
+  color: inherit;
+}
+/* As the HP bar's steps beside it, compact. */
+.step {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  font: inherit;
+  font-size: 0.85em;
+  font-weight: bold;
+  line-height: 1;
+  color: inherit;
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+.step:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+@media (pointer: coarse) {
+  .step {
+    width: 24px;
+    height: 24px;
+  }
 }
 .mod {
   min-height: 0;

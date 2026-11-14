@@ -237,9 +237,9 @@ const buildLabel = (b: TableBuild) => t('reverse.build', { n: b.points, speed: b
   color: var(--opponent-text);
   background: var(--opponent);
 }
+/* In the bad color alone: bold, it shifts what's around it as it comes and goes. */
 .warn {
   color: var(--bad);
-  font-weight: bold;
 }
 .lines {
   display: flex;
