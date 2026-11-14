@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onUnmounted, shallowRef, watch } from 'vue'
 import { watchDebounced } from '@vueuse/core'
-import { Check, X } from '@lucide/vue'
+import { Check, Info, X } from '@lucide/vue'
 import { item, pokemon, type ItemId } from '@/data/dex'
 import { percent, type MetaData } from '@/data/meta'
 import { natureEffectOn } from '@/data/natures'
@@ -53,6 +53,7 @@ const emit = defineEmits<{
 }>()
 
 const theirId = computed(() => battlerOf(props.theirs))
+const theirName = computed(() => (theirId.value ? refName(pokemon(theirId.value)) : ''))
 const yourId = computed(() => battlerOf(props.yours))
 
 const result = shallowRef<ReverseResult | null>(null)
@@ -171,11 +172,9 @@ const rangeText = (r: StatRange) => {
 /** Your build in short, as the opponent's spreads are: "28+ Atk". */
 const buildLabel = (b: GoalBuild, stats: readonly number[]) =>
   spreadLabel({ nature: b.nature, points: b.points, share: null, fits: [] }, stats)
-/** A threshold's heading: of its sets, or of its rolls, the opponent being one set. */
-const thresholdLabel = (th: (typeof THRESHOLDS)[number]) => {
-  const pct = th === 0.5 ? '50' : th === 0.9 ? '90' : '100'
-  return t(goal.value?.againstSets ? (`calc.goal.sets.${pct}` as const) : (`calc.goal.rolls.${pct}` as const))
-}
+/** A threshold's label: how often the hits come out as entered ("Half the time with"). */
+const thresholdLabel = (th: (typeof THRESHOLDS)[number]) =>
+  t(`calc.goal.sets.${th === 0.5 ? '50' : th === 0.9 ? '90' : '100'}` as const)
 /** Whether a strip's cell is one of the row's goals' (a threshold's fewest points, or the most's). */
 const marked = (r: GoalRow, p: number) => [...r.cells, r.best].some((c) => c && c.points[goal.value!.ours[0]!] === p)
 /**
@@ -216,18 +215,7 @@ const goalRows = computed(() =>
       : goal.value.rows,
 )
 /** What the rows say, a sentence before them, naming the opponent. */
-const goalNote = computed(() =>
-  t(
-    itemOnly.value
-      ? goal.value?.againstSets
-        ? 'calc.goal.noteItemSets'
-        : 'calc.goal.noteItemSet'
-      : goal.value?.againstSets
-        ? 'calc.goal.noteSets'
-        : 'calc.goal.noteSet',
-    { mon: theirId.value ? refName(pokemon(theirId.value)) : '' },
-  ),
-)
+const goalNote = computed(() => t(itemOnly.value ? 'calc.goal.noteItemSets' : 'calc.goal.noteSets'))
 /** An item's row's tooltip: those alike merged into it, and its share of your sets. */
 const itemTip = (r: GoalRow) =>
   [
@@ -257,7 +245,19 @@ function use(r: ReverseRow) {
 <template>
   <section class="reverse">
     <div class="reverse-head">
-      <h3 class="title">{{ t('calc.reverse.title') }}</h3>
+      <!-- How it works, the method behind every answer, on hover of the ⓘ by the heading, so the lines under it can just
+           say what they show. -->
+      <h3 class="title">
+        {{ t('calc.reverse.title')
+        }}<span
+          v-tip="goal ? `${t('calc.reverse.how')} ${t('calc.reverse.howYours')}` : t('calc.reverse.how')"
+          class="how"
+          tabindex="0"
+          role="img"
+          :aria-label="t('calc.reverse.howLabel')"
+          ><Info :size="14" aria-hidden="true"
+        /></span>
+      </h3>
       <!-- Working it out, past a moment: how far it's got, a line over the row's top, moving nothing. -->
       <div
         v-if="slow && progress !== null"
@@ -292,10 +292,13 @@ function use(r: ReverseRow) {
                   }}<template v-if="r.items.length > 1"> +{{ r.items.length - 1 }}</template></span
                 >
               </span>
-              <!-- Only the item worked out: how likely what was entered is with it, its percent alone. -->
-              <span v-if="itemOnly" class="goal-chance" :class="{ muted: !r.best }">{{
-                percent(r.best?.coverage ?? 0)
-              }}</span>
+              <!-- Only the item worked out: how likely what was entered is with it, and the way to hold it. -->
+              <span v-if="itemOnly" class="goal-picks">
+                <span class="goal-chance" :class="{ muted: !r.best }">{{ percent(r.best?.coverage ?? 0) }}</span>
+                <button v-if="r.best" type="button" class="btn small pick" @click="useYours(r.best)">
+                  {{ t('calc.goal.useItem') }}
+                </button>
+              </span>
               <span v-else class="goal-main">
                 <!-- With one stat of yours in play: a cell per number of its points, none to all, colored by how much of
                    the opponent it gets there; tapped, that build used; the goals' outlined. -->
@@ -379,8 +382,9 @@ function use(r: ReverseRow) {
                 result.chance
                   ? t(props.work.nature ? 'calc.reverse.chance' : 'calc.reverse.chanceSheet', {
                       pct: percent(result.chance),
+                      mon: theirName,
                     })
-                  : t('calc.reverse.noneRun')
+                  : t('calc.reverse.noneRun', { mon: theirName })
               }}
             </p>
           </template>
@@ -512,8 +516,20 @@ function use(r: ReverseRow) {
   font-size: 0.875em;
 }
 .title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   margin: 0 auto 0 0;
   font-size: 1em;
+}
+.how {
+  display: inline-flex;
+  color: var(--muted);
+  cursor: help;
+}
+.how:hover,
+.how:focus-visible {
+  color: var(--text);
 }
 .use {
   min-height: 0;

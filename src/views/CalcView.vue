@@ -119,8 +119,10 @@ const tabs = computed(() => [
   { value: 'damage' as const, label: t('calc.tab.damage') },
   { value: 'inverse' as const, label: t('calc.tab.inverse') },
 ])
+/** The other tab, carrying the setup as it is now: the URL is written once the edits pause, so a change made just before
+ * (a build of What fits used) would be left behind. */
 const toTab = (to: Tab) => {
-  if (to !== tab.value) void router.push({ name: to === 'inverse' ? 'calcInverse' : 'calc', query: route.query })
+  if (to !== tab.value) void router.push({ name: to === 'inverse' ? 'calcInverse' : 'calc', query: urlOf(query.value) })
 }
 const { snapshot, data } = useMeta()
 const { teams } = useTeams()
@@ -277,13 +279,17 @@ const query = computed(() => ({
   h: encodeHits(seen.value) || undefined,
   first: first.value ?? undefined,
 }))
+/** The URL's query with the setup in it, the rest of it kept. */
+function urlOf(q: typeof query.value) {
+  const next = { ...route.query, ...q }
+  for (const k of ['a', 'b', 'f', 'sheet', 'work', 'awork', 'h', 'first'] as const) if (!q[k]) delete next[k]
+  return next
+}
 watchDebounced(
   query,
   (q) => {
     saveLast(q)
-    const next = { ...route.query, ...q }
-    for (const k of ['a', 'b', 'f', 'sheet', 'work', 'awork', 'h', 'first'] as const) if (!q[k]) delete next[k]
-    void router.replace({ query: next })
+    void router.replace({ query: urlOf(q) })
   },
   { debounce: 250, immediate: true },
 )
