@@ -2,7 +2,7 @@
 import { computed, onUnmounted, shallowRef, watch } from 'vue'
 import { watchDebounced } from '@vueuse/core'
 import { Check, X } from '@lucide/vue'
-import { item, type ItemId } from '@/data/dex'
+import { item, pokemon, type ItemId } from '@/data/dex'
 import { percent, type MetaData } from '@/data/meta'
 import { natureEffectOn } from '@/data/natures'
 import { STATS } from '@/data/pokemon'
@@ -202,9 +202,32 @@ function marksOf(r: GoalRow) {
     .sort((x, y) => x.p - y.p)
     .map((m) => ({
       ...m,
-      label: `${m.names.map((n) => n.replace(/:$/, '')).join(' · ')}:`,
+      label: m.names.join(' · '),
     }))
 }
+/** Only your item worked out, its points and nature as set: each item's row how often it gives what was entered, the
+ * likeliest first, rather than the points it needs. */
+const itemOnly = computed(() => !!props.workYours?.item && !props.workYours.points && !props.workYours.nature)
+const goalRows = computed(() =>
+  !goal.value
+    ? []
+    : itemOnly.value
+      ? [...goal.value.rows].sort((x, y) => (y.best?.coverage ?? 0) - (x.best?.coverage ?? 0))
+      : goal.value.rows,
+)
+/** What the rows say, a sentence before them, naming the opponent. */
+const goalNote = computed(() =>
+  t(
+    itemOnly.value
+      ? goal.value?.againstSets
+        ? 'calc.goal.noteItemSets'
+        : 'calc.goal.noteItemSet'
+      : goal.value?.againstSets
+        ? 'calc.goal.noteSets'
+        : 'calc.goal.noteSet',
+    { mon: theirId.value ? refName(pokemon(theirId.value)) : '' },
+  ),
+)
 /** An item's row's tooltip: those alike merged into it, and its share of your sets. */
 const itemTip = (r: GoalRow) =>
   [
@@ -254,14 +277,12 @@ function use(r: ReverseRow) {
         <div v-if="goal" class="answer yours">
           <h4 class="answer-head"><PokemonIcon :id="yourId!" />{{ t('calc.goal.yoursHead') }}</h4>
           <!-- What its rows say, before them. -->
-          <p v-if="!goal.tooMany" class="muted small">
-            {{ t(goal.againstSets ? 'calc.goal.noteSets' : 'calc.goal.noteSet') }}
-          </p>
+          <p v-if="!goal.tooMany" class="muted small">{{ goalNote }}</p>
           <p v-if="goal.tooMany" class="warn" role="status">{{ t('calc.goal.tooMany') }}</p>
           <p v-else-if="!goal.rows.some((r) => r.best)" class="warn" role="status">{{ t('calc.goal.never') }}</p>
           <!-- A line per item: what it reaches of the thresholds and the most, each a build to use. -->
           <ul v-else class="goal-list">
-            <li v-for="(r, ri) in goal.rows" :key="ri" class="goal-row" :class="{ curved: r.curve }">
+            <li v-for="(r, ri) in goalRows" :key="ri" class="goal-row" :class="{ curved: r.curve }">
               <span class="goal-item">
                 <ItemIcon v-if="r.items[0]" :id="r.items[0]" />
                 <span v-else class="no-icon" aria-hidden="true"></span>
@@ -271,7 +292,11 @@ function use(r: ReverseRow) {
                   }}<template v-if="r.items.length > 1"> +{{ r.items.length - 1 }}</template></span
                 >
               </span>
-              <span class="goal-main">
+              <!-- Only the item worked out: how likely what was entered is with it, its percent alone. -->
+              <span v-if="itemOnly" class="goal-chance" :class="{ muted: !r.best }">{{
+                percent(r.best?.coverage ?? 0)
+              }}</span>
+              <span v-else class="goal-main">
                 <!-- With one stat of yours in play: a cell per number of its points, none to all, colored by how much of
                    the opponent it gets there; tapped, that build used; the goals' outlined. -->
                 <span v-if="r.curve" class="strip-wrap">
@@ -546,22 +571,28 @@ function use(r: ReverseRow) {
   font-size: 0.95em;
 }
 /* Yours: a line per item, its name and share, then what it reaches, each a label over its build, wrapping. */
+/* One grid for all of them, each row its subgrid: the items' column as wide as the widest, so what follows lines up. */
 .goal-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(9em, max-content) minmax(0, 1fr);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 .goal-row {
   display: grid;
-  grid-template-columns: minmax(9em, max-content) minmax(0, 1fr);
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
   align-items: center;
   gap: 4px 16px;
   padding: 8px 0;
 }
 .goal-row + .goal-row {
   border-top: 1px solid var(--border);
+}
+.goal-chance {
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
 }
 .goal-item {
   display: flex;
@@ -673,7 +704,7 @@ function use(r: ReverseRow) {
   font-variant-numeric: tabular-nums;
 }
 @media (max-width: 720px) {
-  .goal-row {
+  .goal-list {
     grid-template-columns: minmax(0, 1fr);
   }
 }
