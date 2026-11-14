@@ -678,7 +678,12 @@ const hitsStep = shallowRef<'moves' | 'hits'>('moves')
 /** A hit's move being picked, a step of its own over the hits: from the drawer's hits (back to them once picked), or
  * from the panel's (the drawer opening for it and closing again). */
 const hitMove = shallowRef<{ i: number; from: 'drawer' | 'page' } | null>(null)
+/** The hit's move field it was opened from on the page: the drawer's anchor then, already on screen, so the page doesn't
+ * scroll to a side's card for it; at the row's left, so the drawer comes in from the right. */
+const hitRow = shallowRef<HTMLElement | null>(null)
 function pickHitMove(i: number, from: 'drawer' | 'page') {
+  hitRow.value =
+    from === 'page' ? (document.querySelectorAll<HTMLElement>('#calc-hits .hit-list > li > .move')[i] ?? null) : null
   hitMove.value = { i, from }
   hitsStep.value = 'hits'
   hitsDrawer.value = true
@@ -701,7 +706,9 @@ watch(hitsDrawer, (on) => !on && (hitMove.value = null))
 // edge, that card left clear.
 const lastPicked = shallowRef<SideKey>('b')
 watch(picking, (p) => p && (lastPicked.value = p.side))
-const hitsAnchor = computed(() => sideEls.value[lastPicked.value]?.card ?? null)
+const hitsAnchor = computed(() =>
+  hitMove.value?.from === 'page' && hitRow.value ? hitRow.value : (sideEls.value[lastPicked.value]?.card ?? null),
+)
 const hitsShown = computed(() => props.inverse && hitsDrawer.value && hasBoth.value)
 let hitsPending = false
 function openHitsSoon() {
