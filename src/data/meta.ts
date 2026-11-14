@@ -368,18 +368,25 @@ const HISTORIES = import.meta.glob<Partial<Record<PokemonId, ([number, number] |
   { import: 'default' },
 )
 
-/** A series' history: its snapshots, in order, and each Pokémon's rank and usage in each, null where it wasn't. */
+/** A family's history (its series across M-A, M-B and M-C): its snapshots, a run per regulation in the order they
+ * began, and each Pokémon's rank and usage in each, null where it wasn't. */
 export interface MetaHistory {
   snapshots: MetaSnapshot[]
   pokemon: Partial<Record<PokemonId, ([number, number] | null)[]>>
 }
 
-/** The history of the series `s` is in, loaded on demand; null when it's alone in its series. */
+/** The history `s` is in, loaded on demand; null when it's alone in it. In the generator's order (`histories`). */
 export async function loadHistory(s: MetaSnapshot): Promise<MetaHistory | null> {
   const file = s.history && HISTORIES[`./generated/meta/history/${s.history}.json`]
   if (!file) return null
-  const snapshots = GENERATED_SNAPSHOTS.filter((x) => x.history === s.history).sort((a, b) =>
-    a.from.localeCompare(b.from),
+  const list = GENERATED_SNAPSHOTS.filter((x) => x.history === s.history)
+  const began = new Map<string, string>()
+  for (const x of list) if (!(began.get(x.regulation)! <= x.from)) began.set(x.regulation, x.from)
+  const snapshots = list.sort(
+    (a, b) =>
+      began.get(a.regulation)!.localeCompare(began.get(b.regulation)!) ||
+      a.regulation.localeCompare(b.regulation) ||
+      a.from.localeCompare(b.from),
   )
   return { snapshots, pokemon: await file() }
 }

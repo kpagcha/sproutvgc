@@ -333,13 +333,25 @@ function seriesOf(index: Record<string, Snapshot>): Map<string, Snapshot[]> {
 }
 
 /**
- * Each series' history (`meta/history/<key>.json`): every Pokémon's rank and usage in each of its snapshots, in order,
- * null where it wasn't, for a Pokémon's page to draw. Each snapshot is given its series' key (`history`); one alone in
- * its series has none to draw, and no history.
+ * Each family's history (`meta/history/<key>.json`): every Pokémon's rank and usage in each snapshot of its series
+ * across the family's regulations (M-A's, M-B's and M-C's months, one run each, the regulations in the order they
+ * began), null where it wasn't, for a Pokémon's page to draw. Each snapshot is given its history's key (`history`); one
+ * alone in it has none to draw, and no history.
  */
 export function histories(index: Record<string, Snapshot>, data: Record<string, Record<string, MetaEntry>>) {
+  const families = new Map<string, Snapshot[][]>()
+  for (const list of seriesOf(index).values()) {
+    const s = list[0]!
+    const key = [s.provider.name, family(s.regulation), s.cutoff, s.period]
+      .join('-')
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, '')
+    families.set(key, [...(families.get(key) ?? []), list])
+  }
   const files: Record<string, Record<string, ([number, number] | null)[]>> = {}
-  for (const [key, list] of seriesOf(index)) {
+  for (const [key, lists] of families) {
+    lists.sort((a, b) => a[0]!.from.localeCompare(b[0]!.from) || a[0]!.regulation.localeCompare(b[0]!.regulation))
+    const list = lists.flat()
     if (list.length < 2) continue
     const ids = new Set(list.flatMap((s) => Object.keys(data[s.id]!)))
     files[key] = Object.fromEntries(

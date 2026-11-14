@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, shallowRef, useTemplateRef, watch } from 'vue'
 import { useIntersectionObserver } from '@vueuse/core'
 import { useRoute } from 'vue-router'
 import { ChevronsDown, ChevronsUp, Info, Swords, Trophy } from '@lucide/vue'
@@ -364,18 +364,44 @@ watch(
   },
   { immediate: true },
 )
+// Every regulation of its family it was legal in (M-A's, M-B's and M-C's months), a run each.
 const months = computed(() => {
   const h = history.value
   const row = h?.pokemon[id.value]
   if (!h || !row) return []
-  return h.snapshots.map((s, i) => ({
-    id: s.id,
-    label: new Date(`${s.from}T00:00:00Z`).toLocaleDateString(locale.value, { month: 'short', timeZone: 'UTC' }),
-    dates: datasetDates(s),
-    rank: row[i]?.[0],
-    usage: row[i]?.[1],
-    current: s.id === snapshot.value?.id,
-  }))
+  const used = new Set(h.snapshots.filter((_, i) => row[i]).map((s) => s.regulation))
+  const legal = (reg: string) => used.has(reg) || (pastRoster(reg)?.includes(id.value) ?? true)
+  return h.snapshots
+    .map((s, i) => ({
+      id: s.id,
+      regulation: s.regulation,
+      label: new Date(`${s.from}T00:00:00Z`).toLocaleDateString(locale.value, { month: 'short', timeZone: 'UTC' }),
+      dates: datasetDates(s),
+      rank: row[i]?.[0],
+      usage: row[i]?.[1],
+      current: s.id === snapshot.value?.id,
+    }))
+    .filter((x) => legal(x.regulation))
+})
+const monthRuns = computed(() => {
+  const runs: { regulation: string; months: typeof months.value }[] = []
+  for (const x of months.value) {
+    const last = runs.at(-1)
+    if (last?.regulation === x.regulation) last.months.push(x)
+    else runs.push({ regulation: x.regulation, months: [x] })
+  }
+  // The latest first, at the left: the regulations and each one's months.
+  return runs.reverse().map((r) => ({ ...r, months: r.months.reverse() }))
+})
+// Sliding sideways once it outgrows the panel, the latest at the left: an older month shown brought into view.
+const monthRunsEl = useTemplateRef<HTMLElement>('monthRunsEl')
+watch([monthRunsEl, months], async () => {
+  await nextTick()
+  const box = monthRunsEl.value
+  const li = box?.querySelector<HTMLElement>('li.current')
+  if (!box || !li) return
+  const left = li.getBoundingClientRect().left - box.getBoundingClientRect().left + box.scrollLeft
+  box.scrollLeft = Math.max(0, left + li.offsetWidth - box.clientWidth + 24)
 })
 const topMonth = computed(() => Math.max(...months.value.map((x) => x.usage ?? 0), 0.0001))
 
@@ -1009,23 +1035,28 @@ const sections = computed(() =>
     <!-- Its usage over the months of the dataset's series. -->
     <section v-if="months.length > 1" id="sec-history" class="panel">
       <h2>{{ t('usageMon.history') }}</h2>
-      <ol class="months" :aria-label="t('usageMon.history')">
-        <li
-          v-for="x in months"
-          :key="x.id"
-          v-tip="
-            x.usage === undefined
-              ? t('usageMon.monthNone', { dates: x.dates })
-              : t('usageMon.month', { dates: x.dates, usage: percent(x.usage), rank: x.rank ?? '' })
-          "
-          :class="{ current: x.current }"
-        >
-          <span class="month-value">{{ x.usage === undefined ? '—' : percent(x.usage) }}</span>
-          <span class="month-bar" :style="{ '--share': (x.usage ?? 0) / topMonth }"></span>
-          <span class="month-label">{{ x.label }}</span>
-          <span class="month-rank muted">{{ x.rank ? `#${x.rank}` : '' }}</span>
-        </li>
-      </ol>
+      <div ref="monthRunsEl" class="month-runs">
+        <div v-for="run in monthRuns" :key="run.regulation" class="month-run">
+          <span v-if="monthRuns.length > 1" class="month-reg">{{ t('meta.regulation', { reg: run.regulation }) }}</span>
+          <ol class="months" :aria-label="`${t('usageMon.history')}, ${t('meta.regulation', { reg: run.regulation })}`">
+            <li
+              v-for="x in run.months"
+              :key="x.id"
+              v-tip="
+                x.usage === undefined
+                  ? t('usageMon.monthNone', { dates: x.dates })
+                  : t('usageMon.month', { dates: x.dates, usage: percent(x.usage), rank: x.rank ?? '' })
+              "
+              :class="{ current: x.current }"
+            >
+              <span class="month-value">{{ x.usage === undefined ? '—' : percent(x.usage) }}</span>
+              <span class="month-bar" :style="{ '--share': (x.usage ?? 0) / topMonth }"></span>
+              <span class="month-label">{{ x.label }}</span>
+              <span class="month-rank muted">{{ x.rank ? `#${x.rank}` : '' }}</span>
+            </li>
+          </ol>
+        </div>
+      </div>
     </section>
 
     <!-- Its types' matchups defending, last: not of the meta, so shown with or without its data. -->
@@ -1541,8 +1572,28 @@ h2 {
   font-weight: bold;
 }
 /* Its usage by month: a bar each, from a common floor, as tall as its usage against its best month's; the month shown
-   marked. */
+   marked. Each regulation's months a run under its name, the latest first, side by side, sliding sideways where they
+   don't fit. */
+.month-runs {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+}
+.month-run {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 6px;
+}
+.month-reg {
+  padding: 3px 8px;
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+  font-size: 0.85em;
+  font-weight: bold;
+  white-space: nowrap;
+}
 .months {
+  flex: 1;
   display: flex;
   gap: 8px;
   align-items: flex-end;
@@ -1552,7 +1603,8 @@ h2 {
 }
 .months li {
   display: flex;
-  flex: 0 1 72px;
+  flex: none;
+  width: 56px;
   flex-direction: column;
   align-items: center;
   gap: 4px;
