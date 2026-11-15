@@ -420,7 +420,6 @@ export const messages = {
   'calc.reverse.spread': 'Spread',
   'calc.reverse.fits': 'Fits',
   'calc.reverse.shareTip': 'How often the meta runs this spread',
-  'calc.reverse.otherItems': 'Other items',
   'calc.reverse.itemTip': 'on {pct} of its sets',
   'calc.reverse.nearest': 'Nearest fit',
   'calc.reverse.ownSet': 'As set',

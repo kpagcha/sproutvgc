@@ -232,13 +232,6 @@ const itemTip = (r: GoalRow) =>
     .join(' · ') || undefined
 const useYours = (b: GoalBuild) => emit('useYours', { nature: b.nature, points: b.points, item: b.item })
 const itemName = (id: ItemId | null) => (id ? refName(item(id)) : t('builder.noItem'))
-/** The column of the items alike that aren't one or two: the most of them, three or more, beside others. */
-const restColumn = computed(() => {
-  const cols = result.value?.columns ?? []
-  if (cols.length < 2) return -1
-  const n = Math.max(...cols.map((c) => c.items.length))
-  return n > 2 ? cols.findIndex((c) => c.items.length === n) : -1
-})
 /** A column's tooltip: its items by name, and how often its Pokémon's sets run them. */
 const columnTip = (c: ReverseColumn) =>
   [c.items.map(itemName).join(', '), c.share ? t('calc.reverse.itemTip', { pct: percent(c.share) }) : '']
@@ -429,19 +422,11 @@ function use(r: ReverseRow) {
                          are and how often they're run on hover (a tap on phones), so no number here reads as how
                          likely what was entered is. -->
                     <span v-else v-tip="columnTip(c)" class="items" role="img" tabindex="0" :aria-label="columnTip(c)">
-                      <!-- The rest, those changing nothing apart, not one of them: no icon to read as the one that
-                           matters. -->
-                      <span v-if="ci === restColumn" class="muted rest">{{ t('calc.reverse.otherItems') }}</span>
-                      <template
-                        v-for="it in ci === restColumn ? [] : c.items.length > 2 ? c.items.slice(0, 1) : c.items"
-                        :key="it ?? '-'"
-                      >
+                      <template v-for="it in c.items.length > 2 ? c.items.slice(0, 1) : c.items" :key="it ?? '-'">
                         <span v-if="it" class="item"><ItemIcon :id="it" /></span>
                         <span v-else class="muted no-item">{{ itemName(null) }}</span>
                       </template>
-                      <span v-if="ci !== restColumn && c.items.length > 2" class="more-items"
-                        >+{{ c.items.length - 1 }}</span
-                      >
+                      <span v-if="c.items.length > 2" class="more-items">+{{ c.items.length - 1 }}</span>
                     </span>
                   </th>
                 </tr>
@@ -831,11 +816,6 @@ function use(r: ReverseRow) {
   font-size: 0.875em;
 }
 /* How many more items, alike, after the most common one's icon: a small badge, every one named on hover. */
-.rest {
-  font-size: 0.875em;
-  text-decoration: underline dotted;
-  text-underline-offset: 3px;
-}
 .more-items {
   padding: 0 4px;
   font-size: 0.8em;
