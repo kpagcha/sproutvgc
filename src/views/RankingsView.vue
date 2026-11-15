@@ -150,8 +150,8 @@ const typesShown = computed(() => !!(snapshot.value && data.value && has(snapsho
 const sections = computed(() => [
   { id: 'sec-list', label: t('trends.list') },
   ...(trendsShown.value ? [{ id: 'sec-trends', label: t('trends.title') }] : []),
-  ...(typesShown.value ? [{ id: 'sec-types', label: t('metaTypes.title') }] : []),
   ...(tournamentTrends.value ? [{ id: 'sec-tournament-trends', label: t('trends.tournamentTitle') }] : []),
+  ...(typesShown.value ? [{ id: 'sec-types', label: t('metaTypes.title') }] : []),
 ])
 const since = computed(() => (previous.value ? sinceLabel(previous.value, snapshot.value) : ''))
 /** The rank's mark's tooltip: the places gained or lost since the dataset before, or new to it. */
@@ -754,7 +754,6 @@ const termRows = useId()
         ><span v-if="row.forme" class="forme">{{ row.forme }}</span></template
       >
     </RankingTrends>
-    <MetaTypes v-if="typesShown" id="sec-types" class="section" :data="data!" :prev-data="prevData" :since />
     <!-- The tournaments' trends: the latest weekend of official events against the events before it. -->
     <RankingTrends
       v-if="tournamentTrends"
@@ -771,6 +770,7 @@ const termRows = useId()
         ><span v-if="row.forme" class="forme">{{ row.forme }}</span></template
       >
     </RankingTrends>
+    <MetaTypes v-if="typesShown" id="sec-types" class="section" :data="data!" :prev-data="prevData" :since />
   </div>
 </template>
 

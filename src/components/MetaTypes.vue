@@ -131,37 +131,39 @@ const pressureMost = (list: readonly Pressure[]) => Math.max(1e-9, ...list.map((
           <MoreToggle v-model:all="monAll" :n="types.single.length" :top="FOLDED" />
         </template>
         <template v-else-if="monMode === 'dual'">
-          <div class="grid" role="table" :aria-label="t('metaTypes.dual')">
-            <div class="row" role="row">
-              <span class="corner" role="columnheader"></span>
-              <span
-                v-for="ty in TYPES"
-                :key="ty"
-                class="hd"
-                :data-type="ty"
-                role="columnheader"
-                :aria-label="typeName(ty)"
-                ><TypeGlyph :type="ty"
-              /></span>
-            </div>
-            <div v-for="(ty, i) in TYPES" :key="ty" class="row" role="row">
-              <span class="hd" :data-type="ty" role="rowheader" :aria-label="typeName(ty)"
-                ><TypeGlyph :type="ty"
-              /></span>
-              <template v-for="(_, j) in TYPES" :key="j">
+          <div class="grid-scroll">
+            <div class="grid" role="table" :aria-label="t('metaTypes.dual')">
+              <div class="row" role="row">
+                <span class="corner" role="columnheader"></span>
                 <span
-                  v-if="j <= i"
-                  v-tip:group="cellTip(cell(i, j), i, j)"
-                  class="cell"
-                  :class="{ mono: i === j, empty: !cell(i, j), strong: shade(cell(i, j)) > 0.6 }"
-                  :style="{ '--v': shade(cell(i, j)) }"
-                  role="cell"
-                  ><span v-if="cell(i, j) && cell(i, j)!.share >= 0.005" class="cell-num">{{
-                    Math.round(cell(i, j)!.share * 100)
-                  }}</span></span
-                >
-                <span v-else class="blank" role="cell"></span>
-              </template>
+                  v-for="ty in TYPES"
+                  :key="ty"
+                  class="hd colh"
+                  :data-type="ty"
+                  role="columnheader"
+                  :aria-label="typeName(ty)"
+                  ><TypeGlyph :type="ty"
+                /></span>
+              </div>
+              <div v-for="(ty, i) in TYPES" :key="ty" class="row" role="row">
+                <span class="hd rowh" :data-type="ty" role="rowheader" :aria-label="typeName(ty)"
+                  ><TypeGlyph :type="ty"
+                /></span>
+                <template v-for="(_, j) in TYPES" :key="j">
+                  <span
+                    v-if="j <= i"
+                    v-tip:group="cellTip(cell(i, j), i, j)"
+                    class="cell"
+                    :class="{ mono: i === j, empty: !cell(i, j), strong: shade(cell(i, j)) > 0.6 }"
+                    :style="{ '--v': shade(cell(i, j)) }"
+                    role="cell"
+                    ><span v-if="cell(i, j) && cell(i, j)!.share >= 0.005" class="cell-num">{{
+                      Math.round(cell(i, j)!.share * 100)
+                    }}</span></span
+                  >
+                  <span v-else class="blank" role="cell"></span>
+                </template>
+              </div>
             </div>
           </div>
           <p class="fine">{{ t('metaTypes.dualKey') }}</p>
@@ -508,9 +510,46 @@ const pressureMost = (list: readonly Pressure[]) => Math.max(1e-9, ...list.map((
 .cell.strong .cell-num {
   color: #ffffff;
 }
-@container (max-width: 380px) {
+/* Phones: cells and headers big enough to read and tap, the chart scrolling within a box of its own, its headers
+   stuck to its top and left (and covering the gaps between them, so what scrolls under them doesn't show through). */
+@media (max-width: 720px) {
+  .grid-scroll {
+    max-height: 70vh;
+    overflow: auto;
+    overscroll-behavior: contain;
+    border: 1px solid var(--border);
+    background: var(--panel-alt);
+  }
+  .grid {
+    grid-template-columns: repeat(19, 34px);
+    width: max-content;
+    max-width: none;
+  }
+  .hd :deep(.type-glyph) {
+    width: 22px;
+    height: 22px;
+  }
+  .colh,
+  .rowh,
+  .corner {
+    position: sticky;
+    z-index: 1;
+    box-shadow: 0 0 0 1px var(--panel-alt);
+  }
+  .colh {
+    top: 0;
+  }
+  .rowh {
+    left: 0;
+  }
+  .corner {
+    top: 0;
+    left: 0;
+    z-index: 2;
+    background: var(--panel-alt);
+  }
   .cell-num {
-    display: none;
+    font-size: 0.72em;
   }
 }
 @container (max-width: 360px) {
