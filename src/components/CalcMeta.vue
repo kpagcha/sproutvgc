@@ -17,7 +17,7 @@ import TypeIcon from '@/components/TypeIcon'
 // Your Pokémon against the meta, the calculator's Meta tab: the most used Pokémon of the data shown, each at its most
 // common set (`metaFoes`), on the calculator's field, theirs as they come in (the weather or terrain their ability sets
 // over it). Two views: the matchups, a row each (your hardest hit on it, its hardest on yours, who moves first, and who
-// wins trading them one on one, as a threat meter: `src/lib/metaMatchups.ts`), sorted by usage, by threat, by prey or
+// wins trading them one on one, as a threat meter: `src/lib/metaMatchups.ts`), sorted by usage, by threat, by target or
 // by danger (threat times usage); or your moves, a column each headed by how much of the meta, by usage, it knocks out
 // in one hit and in two. Over them, how yours does against the whole of it. A row taps into the damage tab as the
 // opponent. Its first 15 until unfolded.
@@ -25,7 +25,7 @@ const props = defineProps<{ yours: Fighter; field: Battlefield; data: MetaData |
 const emit = defineEmits<{ pick: [f: Fighter] }>()
 
 type View = 'matchups' | 'moves'
-type Sort = 'usage' | 'threat' | 'prey' | 'danger'
+type Sort = 'usage' | 'threat' | 'target' | 'danger'
 const TOPS = ['25', '50', '100'] as const
 const VIEW_KEY = 'sproutvgc.calc.metaMode'
 const TOP_KEY = 'sproutvgc.calc.metaTop'
@@ -39,7 +39,7 @@ try {
   const n = localStorage.getItem(TOP_KEY)
   if ((TOPS as readonly (string | null)[]).includes(n)) top.value = n as (typeof TOPS)[number]
   const s = localStorage.getItem(SORT_KEY)
-  if (s === 'usage' || s === 'threat' || s === 'prey' || s === 'danger') sort.value = s
+  if (s === 'usage' || s === 'threat' || s === 'target' || s === 'danger') sort.value = s
 } catch {
   // Storage unavailable: as it is.
 }
@@ -60,7 +60,7 @@ const tops = computed(() => TOPS.map((n) => ({ value: n, label: n })))
 const sorts = computed(() => [
   { value: 'danger' as const, label: t('calc.meta.sort.danger') },
   { value: 'threat' as const, label: t('calc.meta.sort.threat') },
-  { value: 'prey' as const, label: t('calc.meta.sort.prey') },
+  { value: 'target' as const, label: t('calc.meta.sort.target') },
   { value: 'usage' as const, label: t('calc.meta.sort.usage') },
 ])
 
@@ -103,7 +103,7 @@ const sorted = computed(() => {
   const by: Record<Sort, (a: Matchup, b: Matchup) => number> = {
     usage: (a, b) => b.usage - a.usage,
     threat: (a, b) => b.threat - a.threat || b.usage - a.usage,
-    prey: (a, b) => a.threat - b.threat || b.usage - a.usage,
+    target: (a, b) => a.threat - b.threat || b.usage - a.usage,
     danger: (a, b) => dangerOf(b) - dangerOf(a) || b.usage - a.usage,
   }
   return [...r].sort(by[sort.value])
@@ -143,15 +143,15 @@ const pct = (x: number) => `${Math.round(x * 100)}%`
 const ORDER = { a: 'calc.meta.first', b: 'calc.meta.last', tie: 'calc.meta.tie' } as const
 /** The meter in words, and its side to color it by. */
 const VERDICTS = {
-  prey: 'calc.meta.wins',
-  preyLikely: 'calc.meta.winsLikely',
+  target: 'calc.meta.wins',
+  targetLikely: 'calc.meta.winsLikely',
   even: 'calc.meta.even',
   threatLikely: 'calc.meta.losesLikely',
   threat: 'calc.meta.loses',
 } as const
 const verdict = (m: Matchup) => t(VERDICTS[leanOf(m.threat)])
-const lean = (m: Matchup) => (m.threat > 0.55 ? 'threat' : m.threat < 0.45 ? 'prey' : 'even')
-/** The meter's bar, from its middle: toward the right a threat, toward the left prey. */
+const lean = (m: Matchup) => (m.threat > 0.55 ? 'threat' : m.threat < 0.45 ? 'target' : 'even')
+/** The meter's bar, from its middle: toward the right a threat, toward the left a target. */
 const meterStyle = (m: Matchup) => {
   const w = Math.abs(m.threat - 0.5) * 100
   return m.threat >= 0.5 ? { left: '50%', width: `${w}%` } : { left: `${50 - w}%`, width: `${w}%` }
@@ -161,14 +161,6 @@ const TOP = 15
 const all = shallowRef(false)
 const name = (id: PokemonId) => refName(pokemon(id))
 const moveName = (id: MoveId) => refName(move(id))
-const intro = computed(() =>
-  yourId.value
-    ? t(view.value === 'matchups' ? 'calc.meta.introMatchups' : 'calc.meta.introAttack', {
-        name: name(yourId.value),
-        n: rows.value?.length ?? Number(top.value),
-      })
-    : '',
-)
 </script>
 
 <template>
@@ -178,7 +170,7 @@ const intro = computed(() =>
       <SegmentedControl v-model="view" class="soft" :label="t('calc.meta.show')" :options="views" />
       <SegmentedControl v-model="top" class="soft" :label="t('calc.meta.top')" :options="tops" />
     </div>
-    <p class="muted intro">{{ yourId ? `${intro} ${t('calc.meta.tap')}` : t('calc.meta.pickYours') }}</p>
+    <p v-if="!yourId" class="muted intro">{{ t('calc.meta.pickYours') }}</p>
     <template v-if="yourId && rows">
       <!-- How yours does against the whole of it, by usage: one on one, its hits, theirs. -->
       <div class="summary">
@@ -209,10 +201,9 @@ const intro = computed(() =>
             ><span class="bad-light" :style="{ width: pct(Math.max(0, summary.theirTwo - summary.theirOne)) }"></span
           ></span>
           <span class="stat-text">{{
-            t('calc.meta.koYou', { one: percent(summary.theirOne), two: percent(summary.theirTwo) })
+            t('calc.meta.koShare', { one: percent(summary.theirOne), two: percent(summary.theirTwo) })
           }}</span>
         </div>
-        <p class="muted by-usage">{{ t('calc.meta.byUsage') }}</p>
       </div>
 
       <!-- The matchups, a row each. -->
@@ -345,6 +336,7 @@ const intro = computed(() =>
 }
 /* Its choices on one row where they fit. */
 .meta-head {
+  margin-bottom: 12px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -374,11 +366,6 @@ const intro = computed(() =>
 .stat-text {
   font-size: 0.85em;
   color: var(--muted);
-}
-.by-usage {
-  grid-column: 1 / -1;
-  margin: 0;
-  font-size: 0.8em;
 }
 .sort {
   margin-bottom: 8px;
@@ -524,7 +511,7 @@ const intro = computed(() =>
 .cell.theirs.two {
   background: color-mix(in srgb, var(--bad) 9%, transparent);
 }
-/* The threat meter: a bar from its middle, toward the right a threat, toward the left prey. */
+/* The threat meter: a bar from its middle, toward the right a threat, toward the left a target. */
 .meter-col {
   width: 6.5em;
   min-width: 6.5em;
@@ -560,7 +547,7 @@ const intro = computed(() =>
 .threat .meter-fill {
   background: var(--bad);
 }
-.prey .meter-fill {
+.target .meter-fill {
   background: var(--good);
 }
 .meter-text {
@@ -572,7 +559,7 @@ const intro = computed(() =>
   color: var(--bad);
   font-weight: bold;
 }
-.prey .meter-text {
+.target .meter-text {
   color: var(--good);
   font-weight: bold;
 }

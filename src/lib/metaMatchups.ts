@@ -1,6 +1,6 @@
 // Your Pokémon against the meta, one matchup a row: your moves on each of its most used Pokémon (at its most common
 // set), its hardest hits on yours, who moves first, and the two trading their hardest hits one on one (`duelOf`). From
-// those, how much of a threat it is to yours (`threatOf`): 0 it's prey, yours knocking it out well before it does
+// those, how much of a threat it is to yours (`threatOf`): 0 it's a target, yours knocking it out well before it does
 // yours; 1 it's a threat, the other way round; a half even. Weighted by how much it's used, the danger it is
 // (`dangerOf`), the meter the list can be sorted by.
 import type { MetaData } from '@/data/meta'
@@ -32,7 +32,7 @@ export interface Matchup {
   next: Hit | null
   /** The two trading their hardest hits one on one, yours as `a`. */
   duel: OneOnOne | null
-  /** How much of a threat it is to yours, 0 (prey) to 1 (threat). */
+  /** How much of a threat it is to yours, 0 (a target) to 1 (threat). */
   threat: number
 }
 
@@ -65,11 +65,11 @@ export function threatOf(duel: OneOnOne | null): number {
   return 1 / (1 + Math.exp(STEEP * (theirs - yours)))
 }
 
-/** A threat in words: prey (yours surely ahead), likely prey, even, a likely threat, a threat (it surely ahead). */
-export type Lean = 'prey' | 'preyLikely' | 'even' | 'threatLikely' | 'threat'
+/** A threat in words: a target (yours surely ahead), a likely target, even, a likely threat, a threat (it surely ahead). */
+export type Lean = 'target' | 'targetLikely' | 'even' | 'threatLikely' | 'threat'
 export function leanOf(threat: number): Lean {
-  if (threat < 0.15) return 'prey'
-  if (threat < 0.45) return 'preyLikely'
+  if (threat < 0.15) return 'target'
+  if (threat < 0.45) return 'targetLikely'
   if (threat <= 0.55) return 'even'
   return threat <= 0.85 ? 'threatLikely' : 'threat'
 }
