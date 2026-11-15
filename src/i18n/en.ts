@@ -397,7 +397,7 @@ export const messages = {
   'calc.goal.mostAt': 'Best chance, {pct}:',
   'calc.goal.none': 'Never',
   'calc.goal.useItem': 'Hold it',
-  'calc.goal.stripLabel': 'The chance of the hits you entered at each spread',
+  'calc.goal.stripLabel': 'The chance of the hits you entered at each number of {stat} points',
   'calc.goal.stripTip': '{n} points: {pct} chance',
   'calc.goal.useTip': '{pct} chance of the hits you entered. Set yours to this build and see its damage',
   'calc.goal.theirTip': "Gives what you entered against {pct} of your Pokémon's likely sets",
@@ -405,6 +405,10 @@ export const messages = {
     'For each item, the chance of the hits you entered at each {stat} spread, against the {mon} sets the meta runs and every damage roll. Tap or slide along the bars to see one.',
   'calc.goal.noteSetsOne':
     'The chance of the hits you entered at each {stat} spread, against the {mon} sets the meta runs and every damage roll. Tap or slide along the bars to see one.',
+  'calc.goal.noteSetsTwo':
+    'The chance of the hits you entered, against the {mon} sets the meta runs and every damage roll: a strip for {a} and one for {b}, each bar the best chance at that many points. Tap or slide along the bars to see one.',
+  'calc.goal.noteSetsTwoItems':
+    'For each item, the chance of the hits you entered, against the {mon} sets the meta runs and every damage roll: a strip for {a} and one for {b}, each bar the best chance at that many points. Tap or slide along the bars to see one.',
   'calc.goal.noteFlat':
     'The chance of the hits you entered, against the {mon} sets the meta runs and every damage roll: the fewest stat points for it to be at least 50%, 90% or 100%.',
   'calc.goal.noteFlatItems':

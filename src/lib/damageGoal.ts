@@ -76,9 +76,10 @@ export interface GoalRow {
   share: number | null
   cells: (GoalBuild | null)[]
   best: GoalBuild | null
-  /** With one stat of yours in play and its points worked out: at each number of them, from none to all, the most it
-   * covers (at its best nature), and that build; for the strip drawn along them. */
-  curve: GoalBuild[] | null
+  /** With your points worked out, a strip per stat of yours in play (in `ours` order): at each number of its points,
+   * from none to all, the most it covers (the other stat in play, and its nature, at their best for it, the fewest
+   * points at a tie), and that build; for the strip drawn along them. */
+  curves: GoalBuild[][] | null
 }
 export interface GoalResult {
   /** Your stats the hits hang on, in `STATS` order: what a build's points are shown in. */
@@ -413,8 +414,8 @@ export function goalDamage(input: GoalInput): { total: number; steps: Generator<
     for (let mi = 0; mi < myItemList.length; mi++) {
       const cells: (GoalBuild | null)[] = THRESHOLDS.map(() => null)
       let best: GoalBuild | null = null
-      const curved = ours.length === 1 && workYours.points
-      const curve: (GoalBuild | null)[] = curved ? POINT_VALUES.map(() => null) : []
+      const curved = workYours.points
+      const curves: (GoalBuild | null)[][] = curved ? ours.map(() => POINT_VALUES.map(() => null)) : []
       for (let gi = 0; gi < myGroups.length; gi++) {
         yield
         for (const pts of product(ours.map(myPoints))) {
@@ -444,10 +445,12 @@ export function goalDamage(input: GoalInput): { total: number; steps: Generator<
             (Math.abs(coverage - best.coverage) <= 1e-9 && cost < best.cost)
           )
             best = b()
-          if (curved) {
-            const at = curve[pts[0]!]
-            if (!at || coverage > at.coverage + 1e-9) curve[pts[0]!] = b()
-          }
+          if (curved)
+            curves.forEach((curve, k) => {
+              const at = curve[pts[k]!]
+              if (!at || coverage > at.coverage + 1e-9 || (Math.abs(coverage - at.coverage) <= 1e-9 && cost < at.cost))
+                curve[pts[k]!] = b()
+            })
         }
       }
       const items = myItemList[mi]!
@@ -457,7 +460,7 @@ export function goalDamage(input: GoalInput): { total: number; steps: Generator<
         share,
         cells,
         best: best && best.coverage > 0 ? best : null,
-        curve: curved && curve.every(Boolean) ? (curve as GoalBuild[]) : null,
+        curves: curved && curves.every((c) => c.every(Boolean)) ? (curves as GoalBuild[][]) : null,
       })
     }
     // Those your sets run first, then by the most they cover, those covering nothing left out (no item kept).

@@ -167,15 +167,17 @@ const rangeText = (r: StatRange) => {
 /** A threshold's label: how often the hits come out as entered ("Half the time with"). */
 const thresholdLabel = (th: (typeof THRESHOLDS)[number]) =>
   t(`calc.goal.sets.${th === 0.5 ? '50' : th === 0.9 ? '90' : '100'}` as const)
-/** Whether a strip's cell is one of the row's goals' (a threshold's fewest points, or the most's). */
-const marked = (r: GoalRow, p: number) => [...r.cells, r.best].some((c) => c && c.points[goal.value!.ours[0]!] === p)
+/** Whether a strip's cell (its `k`th stat in play's) is one of the row's goals' (a threshold's fewest points, or the
+ * most's). */
+const marked = (r: GoalRow, k: number, p: number) =>
+  [...r.cells, r.best].some((c) => c && c.points[goal.value!.ours[k]!] === p)
 /**
  * A strip's goals as tags over their cells ("50%", "90%", "Always", "Best"), those at one number of points as one
  * ("50% · 90%"). A tag too near the one before (its cells too few to keep the two apart) goes up a level, so none
  * overlap; `levels` the most there are.
  */
-function marksOf(r: GoalRow) {
-  const s = goal.value!.ours[0]!
+function marksOf(r: GoalRow, k: number) {
+  const s = goal.value!.ours[k]!
   const named = [
     ...r.cells.map(
       (c, ci) => c && { c, name: t(`calc.goal.tag.${ci === 0 ? '50' : ci === 1 ? '90' : '100'}` as const) },
@@ -215,30 +217,36 @@ const oneRow = computed(() => !itemOnly.value && goalRows.value.length === 1)
 const goalNote = computed(() => {
   if (itemOnly.value) return t('calc.goal.noteItemSets')
   const mon = theirName.value
-  // With a strip (one stat of yours in play), its bars said; else the fewest points alone.
-  const strip = goalRows.value.find((r) => r.curve)
+  // With strips (your points worked out), their bars said; else the fewest points alone.
+  const strip = goalRows.value.find((r) => r.curves)
   if (!strip) return t(oneRow.value ? 'calc.goal.noteFlat' : 'calc.goal.noteFlatItems', { mon })
-  const stat = statName(goal.value!.ours[0]!)
-  return t(oneRow.value ? 'calc.goal.noteSetsOne' : 'calc.goal.noteSets', { mon, stat })
+  const [s0, s1] = goal.value!.ours.map(statName)
+  if (s1) return t(oneRow.value ? 'calc.goal.noteSetsTwo' : 'calc.goal.noteSetsTwoItems', { mon, a: s0!, b: s1 })
+  return t(oneRow.value ? 'calc.goal.noteSetsOne' : 'calc.goal.noteSets', { mon, stat: s0! })
 })
-/** A strip's bar tapped (its row and points): its chance said under it, with the way to use it, rather than used at
- * once, so a phone, with no tooltips, can read one. Gone with a new answer. */
-const pickedBar = shallowRef<{ ri: number; p: number } | null>(null)
+/** A strip's bar tapped (its row, its strip and points): its chance said under it, with the way to use it, rather
+ * than used at once, so a phone, with no tooltips, can read one. One at a time; gone with a new answer. */
+const pickedBar = shallowRef<{ ri: number; k: number; p: number } | null>(null)
 watch(goal, () => (pickedBar.value = null))
-function pickBar(ri: number, p: number) {
+const isPicked = (ri: number, k: number, p: number) =>
+  pickedBar.value?.ri === ri && pickedBar.value.k === k && pickedBar.value.p === p
+/** The bar picked on a strip, if it's on that one. */
+const pickedOn = (ri: number, k: number, curve: GoalBuild[]) =>
+  pickedBar.value?.ri === ri && pickedBar.value.k === k ? (curve[pickedBar.value.p] ?? null) : null
+function pickBar(ri: number, k: number, p: number) {
   // A drag along the strip just ended on it: picked already, not unpicked by the click that follows.
   if (dragged) return void (dragged = false)
-  pickedBar.value = pickedBar.value?.ri === ri && pickedBar.value.p === p ? null : { ri, p }
+  pickedBar.value = isPicked(ri, k, p) ? null : { ri, k, p }
 }
 /** Dragged along the strip (a finger can't land on a cell a few px wide), the bar under it picked as it goes. It takes
  * over once it's moved sideways a few px; a tap alone is the cell's click, a vertical move the page's scroll
  * (`touch-action: pan-y`). */
-let drag: { ri: number; x: number; id: number; on: boolean } | null = null
+let drag: { ri: number; k: number; x: number; id: number; on: boolean } | null = null
 let dragged = false
-function stripDown(ri: number, e: PointerEvent) {
+function stripDown(ri: number, k: number, e: PointerEvent) {
   if (e.button !== 0) return
   dragged = false
-  drag = { ri, x: e.clientX, id: e.pointerId, on: false }
+  drag = { ri, k, x: e.clientX, id: e.pointerId, on: false }
 }
 function stripMove(e: PointerEvent) {
   if (!drag || e.pointerId !== drag.id) return
@@ -250,7 +258,7 @@ function stripMove(e: PointerEvent) {
   }
   const r = strip.getBoundingClientRect()
   const p = Math.max(0, Math.min(MAX_POINTS, Math.floor(((e.clientX - r.left) / r.width) * (MAX_POINTS + 1))))
-  if (pickedBar.value?.ri !== drag.ri || pickedBar.value.p !== p) pickedBar.value = { ri: drag.ri, p }
+  if (!isPicked(drag.ri, drag.k, p)) pickedBar.value = { ri: drag.ri, k: drag.k, p }
 }
 function stripUp() {
   // Its click lands on the strip, not a cell, once captured: nothing to swallow then.
@@ -332,7 +340,7 @@ function use(r: ReverseRow) {
           <p v-else-if="!goal.rows.some((r) => r.best)" class="warn" role="status">{{ t('calc.goal.never') }}</p>
           <!-- A line per item: what it reaches of the thresholds and the most, each a build to use. -->
           <ul v-else class="goal-list">
-            <li v-for="(r, ri) in goalRows" :key="ri" class="goal-row" :class="{ curved: r.curve }">
+            <li v-for="(r, ri) in goalRows" :key="ri" class="goal-row" :class="{ curved: r.curves }">
               <span v-if="!oneRow" class="goal-item">
                 <ItemIcon v-if="r.items[0]" :id="r.items[0]" />
                 <span v-else class="no-icon" aria-hidden="true"></span>
@@ -350,17 +358,18 @@ function use(r: ReverseRow) {
                 </button>
               </span>
               <span v-else class="goal-main">
-                <!-- With one stat of yours in play: a cell per number of its points, none to all, colored by how much of
-                   the opponent it gets there; tapped, that build used; the goals' outlined. -->
-                <span v-if="r.curve" class="strip-wrap">
+                <!-- Your points worked out: a strip per stat of yours in play, a cell per number of its points, none to
+                   all, filled to the best chance there (the other stat at its best for it); tapped or slid to, that
+                   build said under it with its Use; the goals' outlined. -->
+                <span v-for="(curve, k) in r.curves ?? []" :key="k" class="strip-wrap">
                   <!-- Its goals as tags over their cells, so the line under it reads off the strip. -->
                   <span
                     class="ticks"
                     aria-hidden="true"
-                    :style="{ '--levels': Math.max(1, ...marksOf(r).map((m) => m.level + 1)) }"
+                    :style="{ '--levels': Math.max(1, ...marksOf(r, k).map((m) => m.level + 1)) }"
                   >
                     <span
-                      v-for="m in marksOf(r)"
+                      v-for="m in marksOf(r, k)"
                       :key="m.p"
                       class="tick"
                       :style="{ '--at': (m.p + 0.5) / (MAX_POINTS + 1), '--lv': m.level }"
@@ -370,44 +379,44 @@ function use(r: ReverseRow) {
                   <span
                     class="strip"
                     role="group"
-                    :aria-label="t('calc.goal.stripLabel')"
-                    @pointerdown="stripDown(ri, $event)"
+                    :aria-label="t('calc.goal.stripLabel', { stat: statName(goal.ours[k]!) })"
+                    @pointerdown="stripDown(ri, k, $event)"
                     @pointermove="stripMove"
                     @pointerup="stripUp"
                     @pointercancel="stripUp"
                   >
                     <button
-                      v-for="(c, p) in r.curve"
+                      v-for="(c, p) in curve"
                       :key="p"
                       type="button"
                       class="strip-cell"
-                      :class="{ mark: marked(r, p), picked: pickedBar?.ri === ri && pickedBar.p === p }"
+                      :class="{ mark: marked(r, k, p), picked: isPicked(ri, k, p) }"
                       :style="{ '--cov': `${Math.round(c.coverage * 100)}%` }"
                       :aria-label="t('calc.goal.stripTip', { n: p, pct: percent(c.coverage) })"
-                      :aria-pressed="pickedBar?.ri === ri && pickedBar.p === p"
-                      @click="pickBar(ri, p)"
+                      :aria-pressed="isPicked(ri, k, p)"
+                      @click="pickBar(ri, k, p)"
                     ></button>
                   </span>
                   <span class="strip-ends muted"
-                    ><span>0</span><span>{{ statName(goal.ours[0]!) }}</span
+                    ><span>0</span><span>{{ statName(goal.ours[k]!) }}</span
                     ><span>{{ MAX_POINTS }}</span></span
                   >
                   <!-- The bar tapped: its chance, and the way to set yours to it. -->
-                  <span v-if="pickedBar?.ri === ri && r.curve[pickedBar.p]" class="picked-line" role="status"
-                    >{{ pickedText[0] }}<SpreadText :parts="spreadOf(r.curve[pickedBar.p]!, goal.ours)" />{{
-                      pickedText[1].replace('{pct}', percent(r.curve[pickedBar.p]!.coverage))
+                  <span v-if="pickedOn(ri, k, curve)" class="picked-line" role="status"
+                    >{{ pickedText[0] }}<SpreadText :parts="spreadOf(pickedOn(ri, k, curve)!, goal.ours)" />{{
+                      pickedText[1].replace('{pct}', percent(pickedOn(ri, k, curve)!.coverage))
                     }}
                     <button
-                      v-tip="t('calc.goal.useTip', { pct: percent(r.curve[pickedBar.p]!.coverage) })"
+                      v-tip="t('calc.goal.useTip', { pct: percent(pickedOn(ri, k, curve)!.coverage) })"
                       type="button"
                       class="btn small pick"
-                      @click="useYours(r.curve[pickedBar.p]!)"
+                      @click="useYours(pickedOn(ri, k, curve)!)"
                     >
                       {{ t('calc.reverse.use') }}
                     </button></span
                   >
                 </span>
-                <span class="goal-picks" :class="{ curved: r.curve }">
+                <span class="goal-picks" :class="{ curved: r.curves }">
                   <template v-for="(c, ci) in r.cells" :key="ci">
                     <span v-if="c" class="goal-pick">
                       <span class="muted">{{ thresholdLabel(THRESHOLDS[ci]!) }}</span>
@@ -697,6 +706,10 @@ function use(r: ReverseRow) {
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+/* A second strip (two of your stats in play) set apart from the first's line under it. */
+.strip-wrap + .strip-wrap {
+  margin-top: 10px;
 }
 .strip {
   position: relative;
