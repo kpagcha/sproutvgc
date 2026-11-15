@@ -5,7 +5,7 @@ import { Check, Info, X } from '@lucide/vue'
 import { item, pokemon, type ItemId } from '@/data/dex'
 import { percent, type MetaData } from '@/data/meta'
 import { STATS } from '@/data/pokemon'
-import { locale, t } from '@/i18n'
+import { locale, t, tSplit } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { battlerOf, type Battlefield, type Fighter } from '@/lib/damage'
 import { goalDamage, THRESHOLDS, type GoalBuild, type GoalResult, type GoalRow } from '@/lib/damageGoal'
@@ -181,7 +181,7 @@ function marksOf(r: GoalRow) {
       (c, ci) => c && { c, name: t(`calc.goal.tag.${ci === 0 ? '50' : ci === 1 ? '90' : '100'}` as const) },
     ),
     // The best only short of always: there, the same build.
-    r.best && !r.cells.at(-1) && { c: r.best, name: t('calc.goal.tag.best') },
+    r.best && !r.cells.at(-1) && { c: r.best, name: t('calc.goal.tag.best', { pct: percent(r.best.coverage) }) },
   ].filter((x): x is { c: GoalBuild; name: string } => !!x)
   const byP = new Map<number, { p: number; names: string[] }>()
   for (const { c, name } of named) {
@@ -212,9 +212,22 @@ const goalRows = computed(() =>
 /** One row alone: your item as set (its Mega Stone, or one it holds), or none of them changing the hits; then the item
  * has nothing to do with the answer, and goes unsaid. */
 const oneRow = computed(() => !itemOnly.value && goalRows.value.length === 1)
-const goalNote = computed(() =>
-  t(itemOnly.value ? 'calc.goal.noteItemSets' : oneRow.value ? 'calc.goal.noteSetsOne' : 'calc.goal.noteSets'),
-)
+const goalNote = computed(() => {
+  if (itemOnly.value) return t('calc.goal.noteItemSets')
+  const mon = theirName.value
+  // With a strip (one stat of yours in play), its bars said; else the fewest points alone.
+  const strip = goalRows.value.find((r) => r.curve)
+  if (!strip) return t(oneRow.value ? 'calc.goal.noteFlat' : 'calc.goal.noteFlatItems', { mon })
+  const stat = statName(goal.value!.ours[0]!)
+  return t(oneRow.value ? 'calc.goal.noteSetsOne' : 'calc.goal.noteSets', { mon, stat })
+})
+/** A strip's bar tapped (its row and points): its chance said under it, with the way to use it, rather than used at
+ * once, so a phone, with no tooltips, can read one. Gone with a new answer. */
+const pickedBar = shallowRef<{ ri: number; p: number } | null>(null)
+watch(goal, () => (pickedBar.value = null))
+const pickBar = (ri: number, p: number) =>
+  (pickedBar.value = pickedBar.value?.ri === ri && pickedBar.value.p === p ? null : { ri, p })
+const pickedText = computed(() => tSplit('calc.goal.picked', 'build'))
 /** An item's row's tooltip: those alike merged into it, and its share of your sets. */
 const itemTip = (r: GoalRow) =>
   [
@@ -328,18 +341,32 @@ function use(r: ReverseRow) {
                     <button
                       v-for="(c, p) in r.curve"
                       :key="p"
-                      v-tip:group="t('calc.goal.stripTip', { n: p, pct: percent(c.coverage) })"
                       type="button"
                       class="strip-cell"
-                      :class="{ mark: marked(r, p) }"
+                      :class="{ mark: marked(r, p), picked: pickedBar?.ri === ri && pickedBar.p === p }"
                       :style="{ '--cov': `${Math.round(c.coverage * 100)}%` }"
                       :aria-label="t('calc.goal.stripTip', { n: p, pct: percent(c.coverage) })"
-                      @click="useYours(c)"
+                      :aria-pressed="pickedBar?.ri === ri && pickedBar.p === p"
+                      @click="pickBar(ri, p)"
                     ></button>
                   </span>
                   <span class="strip-ends muted"
                     ><span>0</span><span>{{ statName(goal.ours[0]!) }}</span
                     ><span>{{ MAX_POINTS }}</span></span
+                  >
+                  <!-- The bar tapped: its chance, and the way to set yours to it. -->
+                  <span v-if="pickedBar?.ri === ri && r.curve[pickedBar.p]" class="picked-line" role="status"
+                    >{{ pickedText[0] }}<SpreadText :parts="spreadOf(r.curve[pickedBar.p]!, goal.ours)" />{{
+                      pickedText[1].replace('{pct}', percent(r.curve[pickedBar.p]!.coverage))
+                    }}
+                    <button
+                      v-tip="t('calc.goal.useTip', { pct: percent(r.curve[pickedBar.p]!.coverage) })"
+                      type="button"
+                      class="btn small pick"
+                      @click="useYours(r.curve[pickedBar.p]!)"
+                    >
+                      {{ t('calc.reverse.use') }}
+                    </button></span
                   >
                 </span>
                 <span class="goal-picks" :class="{ curved: r.curve }">
@@ -634,6 +661,7 @@ function use(r: ReverseRow) {
   gap: 2px;
 }
 .strip {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(33, minmax(0, 1fr));
   height: 40px;
@@ -649,6 +677,29 @@ function use(r: ReverseRow) {
 }
 .strip-cell + .strip-cell {
   border-left: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+}
+/* Faint lines across at 50% and 90%, so a tag's bar is seen as the first to cross its line. */
+.strip::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: '';
+  background:
+    linear-gradient(to top, transparent calc(50% - 1px), var(--guide) calc(50% - 1px) 50%, transparent 50%),
+    linear-gradient(to top, transparent calc(90% - 1px), var(--guide) calc(90% - 1px) 90%, transparent 90%);
+  --guide: color-mix(in srgb, var(--text) 35%, transparent);
+}
+.strip-cell.picked {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+.picked-line {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.875em;
+}
+.picked-line .pick {
+  margin-left: 8px;
 }
 .strip-cell:hover,
 .strip-cell:focus-visible {
