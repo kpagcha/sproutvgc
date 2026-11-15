@@ -401,12 +401,13 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
   padding: 0;
   list-style: none;
 }
-/* A hit: its parts on one line where they fit, edged in the attacker's color. */
+/* A hit: its parts on one line where they fit, edged in the attacker's color; its lines as far apart as its parts, so
+   the outlines of what's still wanted (4px out each) never touch. */
 .hit {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px 12px;
+  gap: 12px;
   padding: 8px 0 8px 8px;
   font-size: 0.9em;
   border-left: 4px solid var(--accent);
