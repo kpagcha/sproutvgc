@@ -395,13 +395,13 @@ export const messages = {
   'calc.goal.useTip': '{pct} of the time. Set yours to this build and see its damage',
   'calc.goal.theirTip': "Gives what you entered against {pct} of your Pokémon's likely sets",
   'calc.goal.noteSets':
-    'For each item, each bar is your Pokémon at that many {stat} points, and its height is how often the hits you entered happen, across the damage rolls and the {mon} sets the meta runs (weighted by how often each is run). The tags mark the fewest points for at least 50%, at least 90% and every time; tap a bar to see its chance.',
+    'For each item, how often your hits happen at each number of {stat} points, against the {mon} sets the meta runs and every damage roll. Tap a bar for its chance.',
   'calc.goal.noteSetsOne':
-    'Each bar is your Pokémon at that many {stat} points, and its height is how often the hits you entered happen, across the damage rolls and the {mon} sets the meta runs (weighted by how often each is run). The tags mark the fewest points for at least 50%, at least 90% and every time; tap a bar to see its chance.',
+    'How often your hits happen at each number of {stat} points, against the {mon} sets the meta runs and every damage roll. Tap a bar for its chance.',
   'calc.goal.noteFlat':
-    'The fewest stat points for the hits you entered to happen at least 50%, at least 90% and every time, counting the damage rolls and the {mon} sets the meta runs (weighted by how often each is run); or the most you can get.',
+    'The fewest stat points for your hits to happen at least 50%, 90% or every time, against the {mon} sets the meta runs and every damage roll.',
   'calc.goal.noteFlatItems':
-    'For each item, the fewest stat points for the hits you entered to happen at least 50%, at least 90% and every time, counting the damage rolls and the {mon} sets the meta runs (weighted by how often each is run); or the most you can get.',
+    'For each item, the fewest stat points for your hits to happen at least 50%, 90% or every time, against the {mon} sets the meta runs and every damage roll.',
   'calc.goal.picked': 'At {build}: {pct} of the time',
   'calc.goal.noteItemSets': 'How likely the hits you entered are with each item, given your nature and stat points.',
   'calc.goal.never': 'No item or stat points of yours give what you entered.',
