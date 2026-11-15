@@ -1080,6 +1080,7 @@ function face(f: Fighter) {
             :moves-folded="movesFolded[k].value"
             :battle-folded="battleFolded[k].value"
             :inverse
+            :alone="against"
             :hide="hidden[k]"
             :work="inverse ? (k === 'b' ? work : workYours) : undefined"
             @work="k === 'b' ? (work = $event) : (workYours = $event)"

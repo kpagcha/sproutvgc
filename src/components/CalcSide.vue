@@ -67,6 +67,8 @@ const props = defineProps<{
   /** The inverse calc's: its moves by name alone, no damage (what was seen is entered apart), no HP left (each hit
    * seen has its own). */
   inverse?: boolean
+  /** The Meta tab's: yours alone, no other side to pick, so no hint to pick it. */
+  alone?: boolean
   /** What of its set its card leaves out: on the inverse calc, what's worked out of it. */
   hide?: readonly ('points' | 'nature' | 'item')[]
   /** The inverse calc's: what of its set is worked out, a row of toggles under its card (`WorkOutToggles`). */
@@ -288,7 +290,7 @@ function setHpPoints(e: Event) {
             <ChevronDown :size="16" class="fold-chev" :class="{ open: !movesFolded }" aria-hidden="true" />
           </button>
         </h3>
-        <p v-if="!otherName && !movesFolded && !inverse" class="muted hint">{{ t('calc.pickOther') }}</p>
+        <p v-if="!otherName && !movesFolded && !inverse && !alone" class="muted hint">{{ t('calc.pickOther') }}</p>
         <ul v-show="!movesFolded" class="damages">
           <DamageRow
             v-for="h in hits"
