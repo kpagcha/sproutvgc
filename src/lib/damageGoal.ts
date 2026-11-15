@@ -20,6 +20,7 @@ import {
   defendedOf,
   fitOf,
   ITEM_MIN,
+  mergeColumns,
   NEUTRAL,
   POINT_VALUES,
   takenInert,
@@ -512,7 +513,11 @@ export function goalDamage(input: GoalInput): { total: number; steps: Generator<
         possible: chance > 0,
         chance: mineTotal ? chance : null,
         rows: rowsTheirs,
-        columns: theirItemPrior.map((x) => ({ items: [x.value], share: theirFixed ? null : x.w })),
+        // Its items alike against every row one column, so only those changing what was entered stand apart.
+        columns: mergeColumns(
+          rowsTheirs,
+          theirItemPrior.map((x) => ({ items: [x.value], share: theirFixed ? null : x.w })),
+        ),
         itemsVary: !theirFixed,
       }
     }

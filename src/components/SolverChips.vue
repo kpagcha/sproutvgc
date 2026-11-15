@@ -10,7 +10,8 @@ import type { Field } from '@/lib/team'
 import ItemIcon from '@/components/ItemIcon.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import ScrollRow from '@/components/ScrollRow.vue'
-import { partLabel, pointsLabel } from '@/components/solverText'
+import SpreadText from '@/components/SpreadText.vue'
+import { partLabel, pointsLabel, pointsParts, type SpreadPart } from '@/components/solverText'
 
 // A damage solver side in short, on a band of its side's color: its Pokémon, then its set as chips in the order it's
 // set (item, ability, nature, stat points) on a row sliding sideways where they don't fit (`ScrollRow`), what's set
@@ -25,7 +26,15 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ part: [field: Field] }>()
 
-type Chip = { field: Field; label: string; item?: string; muted?: boolean; worked?: boolean }
+type Chip = {
+  field: Field
+  label: string
+  item?: string
+  muted?: boolean
+  worked?: boolean
+  /** Its stat points drawn, its nature's effect as chevrons (`SpreadText`); `label` read out. */
+  parts?: SpreadPart[] | null
+}
 
 const id = computed(() => battlerOf(props.fighter))
 const chips = computed((): Chip[] => {
@@ -50,7 +59,7 @@ const chips = computed((): Chip[] => {
       muted: !m.nature,
     })
   if (w.points) list.push({ field: 'points', label: partLabel('points'), worked: true })
-  else list.push({ field: 'points', label: pointsLabel(f), muted: f.sets })
+  else list.push({ field: 'points', label: pointsLabel(f), muted: f.sets, parts: f.sets ? null : pointsParts(f) })
   return list
 })
 const partName = (f: Field) =>
@@ -84,13 +93,15 @@ const monTip = computed(() => t(props.compact ? 'calc.bands.toPanel' : 'calc.ban
         type="button"
         class="chip"
         :class="{ muted: c.muted, worked: c.worked, icon: compactItem(c) }"
-        :aria-label="compactItem(c) ? c.label : undefined"
+        :aria-label="compactItem(c) || c.parts ? c.label : undefined"
         @click="emit('part', c.field)"
       >
         <span v-if="c.worked" class="q" aria-hidden="true">?</span
-        ><ItemIcon v-else-if="c.item" :id="c.item as never" class="chip-item" /><template v-if="!compactItem(c)">{{
-          c.label
-        }}</template>
+        ><ItemIcon v-else-if="c.item" :id="c.item as never" class="chip-item" /><SpreadText
+          v-if="c.parts"
+          :parts="c.parts"
+          aria-hidden="true"
+        /><template v-else-if="!compactItem(c)">{{ c.label }}</template>
       </button>
     </ScrollRow>
   </span>

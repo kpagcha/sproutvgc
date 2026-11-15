@@ -4,9 +4,8 @@ import { watchDebounced } from '@vueuse/core'
 import { Check, Info, X } from '@lucide/vue'
 import { item, pokemon, type ItemId } from '@/data/dex'
 import { percent, type MetaData } from '@/data/meta'
-import { natureEffectOn } from '@/data/natures'
 import { STATS } from '@/data/pokemon'
-import { locale, t } from '@/i18n'
+import { locale, t, tSplit } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { battlerOf, type Battlefield, type Fighter } from '@/lib/damage'
 import { goalDamage, THRESHOLDS, type GoalBuild, type GoalResult, type GoalRow } from '@/lib/damageGoal'
@@ -14,6 +13,7 @@ import {
   reverseDamage,
   type Observation,
   type OpponentUnknowns,
+  type ReverseColumn,
   type ReverseResult,
   type ReverseRow,
   type StatRange,
@@ -22,6 +22,8 @@ import { runSliced } from '@/lib/slices'
 import { MAX_POINTS } from '@/lib/stats'
 import { setsAs, type Points } from '@/lib/team'
 import ItemIcon from '@/components/ItemIcon.vue'
+import SpreadText from '@/components/SpreadText.vue'
+import { spreadParts } from '@/components/solverText'
 import PokemonIcon from '@/components/PokemonIcon'
 
 // The inverse damage calc's "What fits": from what was seen (`obs`: the hits and which moved first, `CalcHits`), what
@@ -136,20 +138,13 @@ const asks = computed(() => {
   return theirs ? t('calc.reverse.asks', { parts: theirs }) : t('calc.reverse.asksNone')
 })
 const statName = (s: number) => t(`stat.${STATS[s]!}`)
-/** A build in Showdown's short way, its points in the stats in play, `+` or `−` after those its nature raises or
- * lowers: "32 HP / 20+ Def". */
-const spreadLabel = (r: ReverseRow, stats: readonly number[]) =>
-  stats
-    .map((s) => {
-      const e = s && r.nature ? natureEffectOn(r.nature, STATS[s]!) : 'neutral'
-      return `${r.points[s]}${e === 'up' ? '+' : e === 'down' ? '−' : ''} ${statName(s)}`
-    })
-    .join(' / ')
-/** The widest a build of those stats is written, with a nature's mark: every point in each, all but HP marked. Unseen
- * in the table's corner, one per mark, it keeps the spreads' column as wide from one answer to the next. */
-const MARKS = ['+', '−'] as const
-const widestLabel = (stats: readonly number[], mark: string) =>
-  stats.map((s) => `${MAX_POINTS}${s ? mark : ''} ${statName(s)}`).join(' / ')
+/** A build's spread in the stats in play, its nature's effect on each (`SpreadText`): "32 HP / 20⏶⏶ Def". */
+const spreadOf = (r: { nature: string | null; points: readonly number[] }, stats: readonly number[]) =>
+  spreadParts(r.nature, r.points, stats)
+/** The widest a spread of those stats is written: every point in each, all but HP marked. Unseen in the table's corner,
+ * it keeps the spreads' column as wide from one answer to the next. */
+const widestOf = (stats: readonly number[]) =>
+  stats.map((s) => ({ n: MAX_POINTS, stat: s, effect: s ? ('up' as const) : ('neutral' as const) }))
 /** A stat's points where something fits, but for one that can be anything (the table says as much). */
 const shownRanges = computed(() =>
   (result.value?.ranges ?? []).filter(
@@ -169,40 +164,39 @@ const rangeText = (r: StatRange) => {
   const e = r.effects.length === 1 ? r.effects[0]! : 'neutral'
   return props.work.nature && r.stat && e !== 'neutral' ? `${pts}, ${t(`calc.reverse.nature.${e}`)}` : pts
 }
-/** Your build in short, as the opponent's spreads are: "28+ Atk". */
-const buildLabel = (b: GoalBuild, stats: readonly number[]) =>
-  spreadLabel({ nature: b.nature, points: b.points, share: null, fits: [] }, stats)
 /** A threshold's label: how often the hits come out as entered ("Half the time with"). */
 const thresholdLabel = (th: (typeof THRESHOLDS)[number]) =>
   t(`calc.goal.sets.${th === 0.5 ? '50' : th === 0.9 ? '90' : '100'}` as const)
 /** Whether a strip's cell is one of the row's goals' (a threshold's fewest points, or the most's). */
 const marked = (r: GoalRow, p: number) => [...r.cells, r.best].some((c) => c && c.points[goal.value!.ours[0]!] === p)
 /**
- * A strip's goals, by the number of points they're at, the fewest first: those at one as one label ("Half its sets ·
- * 90%"), the build covering the most among them. On phones, under the strip, each under its cell, held inside it.
+ * A strip's goals as tags over their cells ("50%", "90%", "Always", "Best"), those at one number of points as one
+ * ("50% · 90%"). A tag too near the one before (its cells too few to keep the two apart) goes up a level, so none
+ * overlap; `levels` the most there are.
  */
 function marksOf(r: GoalRow) {
   const s = goal.value!.ours[0]!
   const named = [
-    ...r.cells.map((c, ci) => c && { c, name: thresholdLabel(THRESHOLDS[ci]!) }),
-    r.best && { c: r.best, name: t('calc.goal.mostAt', { pct: percent(r.best.coverage) }) },
+    ...r.cells.map(
+      (c, ci) => c && { c, name: t(`calc.goal.tag.${ci === 0 ? '50' : ci === 1 ? '90' : '100'}` as const) },
+    ),
+    // The best only short of always: there, the same build.
+    r.best && !r.cells.at(-1) && { c: r.best, name: t('calc.goal.tag.best', { pct: percent(r.best.coverage) }) },
   ].filter((x): x is { c: GoalBuild; name: string } => !!x)
-  const byP = new Map<number, { p: number; names: string[]; build: GoalBuild }>()
+  const byP = new Map<number, { p: number; names: string[] }>()
   for (const { c, name } of named) {
     const p = c.points[s]!
     const was = byP.get(p)
-    if (!was) byP.set(p, { p, names: [name], build: c })
-    else {
-      was.names.push(name)
-      if (c.coverage > was.build.coverage) was.build = c
-    }
+    if (was) was.names.push(name)
+    else byP.set(p, { p, names: [name] })
   }
-  return [...byP.values()]
-    .sort((x, y) => x.p - y.p)
-    .map((m) => ({
-      ...m,
-      label: m.names.join(' · '),
-    }))
+  const marks = [...byP.values()].sort((x, y) => x.p - y.p).map((m) => ({ ...m, label: m.names.join(' · '), level: 0 }))
+  // Apart by about a tag's width in cells (a phone's strip a few px a cell), else up a level from the one before.
+  marks.forEach((m, i) => {
+    const prev = marks[i - 1]
+    if (prev && prev.level === 0 && m.p - prev.p < 4 + 3 * (prev.names.length - 1)) m.level = 1
+  })
+  return marks
 }
 /** Only your item worked out, its points and nature as set: each item's row how often it gives what was entered, the
  * likeliest first, rather than the points it needs. */
@@ -215,7 +209,25 @@ const goalRows = computed(() =>
       : goal.value.rows,
 )
 /** What the rows say, a sentence before them, naming the opponent. */
-const goalNote = computed(() => t(itemOnly.value ? 'calc.goal.noteItemSets' : 'calc.goal.noteSets'))
+/** One row alone: your item as set (its Mega Stone, or one it holds), or none of them changing the hits; then the item
+ * has nothing to do with the answer, and goes unsaid. */
+const oneRow = computed(() => !itemOnly.value && goalRows.value.length === 1)
+const goalNote = computed(() => {
+  if (itemOnly.value) return t('calc.goal.noteItemSets')
+  const mon = theirName.value
+  // With a strip (one stat of yours in play), its bars said; else the fewest points alone.
+  const strip = goalRows.value.find((r) => r.curve)
+  if (!strip) return t(oneRow.value ? 'calc.goal.noteFlat' : 'calc.goal.noteFlatItems', { mon })
+  const stat = statName(goal.value!.ours[0]!)
+  return t(oneRow.value ? 'calc.goal.noteSetsOne' : 'calc.goal.noteSets', { mon, stat })
+})
+/** A strip's bar tapped (its row and points): its chance said under it, with the way to use it, rather than used at
+ * once, so a phone, with no tooltips, can read one. Gone with a new answer. */
+const pickedBar = shallowRef<{ ri: number; p: number } | null>(null)
+watch(goal, () => (pickedBar.value = null))
+const pickBar = (ri: number, p: number) =>
+  (pickedBar.value = pickedBar.value?.ri === ri && pickedBar.value.p === p ? null : { ri, p })
+const pickedText = computed(() => tSplit('calc.goal.picked', 'build'))
 /** An item's row's tooltip: those alike merged into it, and its share of your sets. */
 const itemTip = (r: GoalRow) =>
   [
@@ -226,6 +238,11 @@ const itemTip = (r: GoalRow) =>
     .join(' · ') || undefined
 const useYours = (b: GoalBuild) => emit('useYours', { nature: b.nature, points: b.points, item: b.item })
 const itemName = (id: ItemId | null) => (id ? refName(item(id)) : t('builder.noItem'))
+/** A column's tooltip: its items by name, and how often its Pokémon's sets run them. */
+const columnTip = (c: ReverseColumn) =>
+  [c.items.map(itemName).join(', '), c.share ? t('calc.reverse.itemTip', { pct: percent(c.share) }) : '']
+    .filter(Boolean)
+    .join(' · ')
 const fitTip = (f: number) => t('calc.reverse.fitTip', { pct: percent(f) })
 /** A build used: its nature and points, and its item worked out, the item likeliest to go with it (its fit by the
  * item's share), else its most run. */
@@ -286,7 +303,7 @@ function use(r: ReverseRow) {
           <!-- A line per item: what it reaches of the thresholds and the most, each a build to use. -->
           <ul v-else class="goal-list">
             <li v-for="(r, ri) in goalRows" :key="ri" class="goal-row" :class="{ curved: r.curve }">
-              <span class="goal-item">
+              <span v-if="!oneRow" class="goal-item">
                 <ItemIcon v-if="r.items[0]" :id="r.items[0]" />
                 <span v-else class="no-icon" aria-hidden="true"></span>
                 <!-- Its share of your sets, and those alike merged into it, on hover. -->
@@ -306,37 +323,51 @@ function use(r: ReverseRow) {
                 <!-- With one stat of yours in play: a cell per number of its points, none to all, colored by how much of
                    the opponent it gets there; tapped, that build used; the goals' outlined. -->
                 <span v-if="r.curve" class="strip-wrap">
+                  <!-- Its goals as tags over their cells, so the line under it reads off the strip. -->
+                  <span
+                    class="ticks"
+                    aria-hidden="true"
+                    :style="{ '--levels': Math.max(1, ...marksOf(r).map((m) => m.level + 1)) }"
+                  >
+                    <span
+                      v-for="m in marksOf(r)"
+                      :key="m.p"
+                      class="tick"
+                      :style="{ '--at': (m.p + 0.5) / (MAX_POINTS + 1), '--lv': m.level }"
+                      >{{ m.label }}</span
+                    >
+                  </span>
                   <span class="strip" role="group" :aria-label="t('calc.goal.stripLabel')">
                     <button
                       v-for="(c, p) in r.curve"
                       :key="p"
-                      v-tip:group="t('calc.goal.stripTip', { n: p, pct: percent(c.coverage) })"
                       type="button"
                       class="strip-cell"
-                      :class="{ mark: marked(r, p) }"
+                      :class="{ mark: marked(r, p), picked: pickedBar?.ri === ri && pickedBar.p === p }"
                       :style="{ '--cov': `${Math.round(c.coverage * 100)}%` }"
                       :aria-label="t('calc.goal.stripTip', { n: p, pct: percent(c.coverage) })"
-                      @click="useYours(c)"
+                      :aria-pressed="pickedBar?.ri === ri && pickedBar.p === p"
+                      @click="pickBar(ri, p)"
                     ></button>
                   </span>
                   <span class="strip-ends muted"
                     ><span>0</span><span>{{ statName(goal.ours[0]!) }}</span
                     ><span>{{ MAX_POINTS }}</span></span
                   >
-                  <!-- On phones, where the cells' tooltips don't show, its goals under their cells, a line each, those
-                       at one number of points as one; each the build to use. Wider, the row of them under it does. -->
-                  <span class="marks">
-                    <span
-                      v-for="m in marksOf(r)"
-                      :key="m.p"
-                      class="mark-lane"
-                      :style="{ '--at': (m.p + 0.5) / (MAX_POINTS + 1) }"
+                  <!-- The bar tapped: its chance, and the way to set yours to it. -->
+                  <span v-if="pickedBar?.ri === ri && r.curve[pickedBar.p]" class="picked-line" role="status"
+                    >{{ pickedText[0] }}<SpreadText :parts="spreadOf(r.curve[pickedBar.p]!, goal.ours)" />{{
+                      pickedText[1].replace('{pct}', percent(r.curve[pickedBar.p]!.coverage))
+                    }}
+                    <button
+                      v-tip="t('calc.goal.useTip', { pct: percent(r.curve[pickedBar.p]!.coverage) })"
+                      type="button"
+                      class="btn small pick"
+                      @click="useYours(r.curve[pickedBar.p]!)"
                     >
-                      <button type="button" class="btn small pick mark-label" @click="useYours(m.build)">
-                        <span class="muted">{{ m.label }}</span> {{ buildLabel(m.build, goal.ours) }}
-                      </button>
-                    </span>
-                  </span>
+                      {{ t('calc.reverse.use') }}
+                    </button></span
+                  >
                 </span>
                 <span class="goal-picks" :class="{ curved: r.curve }">
                   <template v-for="(c, ci) in r.cells" :key="ci">
@@ -348,11 +379,11 @@ function use(r: ReverseRow) {
                         class="btn small pick"
                         @click="useYours(c)"
                       >
-                        {{ buildLabel(c, goal.ours) }}
+                        <SpreadText :parts="spreadOf(c, goal.ours)" />
                       </button>
                     </span>
                   </template>
-                  <span v-if="r.best" class="goal-pick">
+                  <span v-if="r.best && !r.cells.at(-1)" class="goal-pick">
                     <span class="muted">{{ t('calc.goal.mostAt', { pct: percent(r.best.coverage) }) }}</span>
                     <button
                       v-tip="t('calc.goal.useTip', { pct: percent(r.best.coverage) })"
@@ -360,10 +391,10 @@ function use(r: ReverseRow) {
                       class="btn small pick"
                       @click="useYours(r.best)"
                     >
-                      {{ buildLabel(r.best, goal.ours) }}
+                      <SpreadText :parts="spreadOf(r.best, goal.ours)" />
                     </button>
                   </span>
-                  <span v-else class="muted">{{ t('calc.goal.none') }}</span>
+                  <span v-else-if="!r.best" class="muted">{{ t('calc.goal.none') }}</span>
                 </span>
               </span>
             </li>
@@ -399,43 +430,29 @@ function use(r: ReverseRow) {
                 <tr>
                   <th scope="col" class="corner muted">
                     {{ t('calc.reverse.spread') }}
-                    <span v-for="m in MARKS" :key="m" class="spread sizer" aria-hidden="true">{{
-                      widestLabel(result.stats, m)
-                    }}</span>
+                    <SpreadText class="spread sizer" aria-hidden="true" :parts="widestOf(result.stats)" />
                   </th>
                   <th v-for="(c, ci) in result.columns" :key="ci" scope="col" class="col">
                     <span v-if="!result.itemsVary || result.columns.length === 1" class="muted">{{
                       t('calc.reverse.fits')
                     }}</span>
-                    <template v-else>
-                      <!-- Its items' icons; three or more alike, its most common's and how many more, every one named on
-                         hover. -->
-                      <span class="items">
-                        <template v-for="it in c.items.length > 2 ? c.items.slice(0, 1) : c.items" :key="it ?? '-'">
-                          <span v-if="it" v-tip="itemName(it)" class="item" role="img" :aria-label="itemName(it)"
-                            ><ItemIcon :id="it"
-                          /></span>
-                          <span v-else class="muted no-item">{{ itemName(null) }}</span>
-                        </template>
-                        <span
-                          v-if="c.items.length > 2"
-                          v-tip="c.items.map(itemName).join(', ')"
-                          class="more-items"
-                          :aria-label="c.items.map(itemName).join(', ')"
-                          >+{{ c.items.length - 1 }}</span
-                        >
-                      </span>
-                      <span v-if="c.share" v-tip="t('calc.reverse.itemTip')" class="muted share">{{
-                        percent(c.share)
-                      }}</span>
-                    </template>
+                    <!-- Its items' icons alone, three or more alike its most common's and how many more; what they
+                         are and how often they're run on hover (a tap on phones), so no number here reads as how
+                         likely what was entered is. -->
+                    <span v-else v-tip="columnTip(c)" class="items" role="img" tabindex="0" :aria-label="columnTip(c)">
+                      <template v-for="it in c.items.length > 2 ? c.items.slice(0, 1) : c.items" :key="it ?? '-'">
+                        <span v-if="it" class="item"><ItemIcon :id="it" /></span>
+                        <span v-else class="muted no-item">{{ itemName(null) }}</span>
+                      </template>
+                      <span v-if="c.items.length > 2" class="more-items">+{{ c.items.length - 1 }}</span>
+                    </span>
                   </th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(r, ri) in result.rows" :key="ri">
                   <th scope="row">
-                    <span class="spread">{{ spreadLabel(r, result.stats) }}</span>
+                    <SpreadText class="spread" :parts="spreadOf(r, result.stats)" />
                     <!-- Its share, and the way to set the opponent to it. -->
                     <span class="row-foot">
                       <span v-if="r.share" v-tip="t('calc.reverse.shareTip')" class="muted">{{
@@ -644,20 +661,45 @@ function use(r: ReverseRow) {
   gap: 2px;
 }
 .strip {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(33, minmax(0, 1fr));
-  height: 22px;
+  height: 40px;
   border: 1px solid var(--border);
 }
+/* Each cell a bar filled up to its chance, so the chance is seen rising with the points. */
 .strip-cell {
   min-width: 0;
   padding: 0;
-  background: color-mix(in srgb, var(--m2-bg) var(--cov), var(--panel-alt));
+  background: linear-gradient(to top, var(--m2-bg) var(--cov), var(--panel-alt) var(--cov));
   border: 0;
   cursor: pointer;
 }
 .strip-cell + .strip-cell {
   border-left: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+}
+/* Faint lines across at 50% and 90%, so a tag's bar is seen as the first to cross its line. */
+.strip::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: '';
+  background:
+    linear-gradient(to top, transparent calc(50% - 1px), var(--guide) calc(50% - 1px) 50%, transparent 50%),
+    linear-gradient(to top, transparent calc(90% - 1px), var(--guide) calc(90% - 1px) 90%, transparent 90%);
+  --guide: color-mix(in srgb, var(--text) 35%, transparent);
+}
+.strip-cell.picked {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+.picked-line {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.875em;
+}
+.picked-line .pick {
+  margin-left: 8px;
 }
 .strip-cell:hover,
 .strip-cell:focus-visible {
@@ -672,40 +714,38 @@ function use(r: ReverseRow) {
   justify-content: space-between;
   font-size: 0.75em;
 }
-/* On phones, the goals under their cells, a line each: the space beside each label shared out as its cell's place along
-   the strip, so it sits under its cell (the start's at the left, the end's at the right) yet never past the strip's
-   edges, wrapping where it's wider than the strip. The row of them under it then not shown. Wider, the row, not them. */
-.marks {
-  display: none;
-  flex-direction: column;
-  gap: 4px;
-  margin-top: 2px;
-  font-size: 0.875em;
+/* Its goals' tags over the strip, each over its cell: its place along the strip both where it's anchored and how far
+   it's shifted back by its own width, so the first is flush left, the last flush right, and none past the edges; a tag
+   too near the one before a level up. A tick under each down to its cell. */
+.ticks {
+  position: relative;
+  height: calc(var(--levels) * 1.5em);
+  font-size: 0.75em;
 }
-.mark-lane {
-  display: flex;
-}
-.mark-lane::before,
-.mark-lane::after {
-  content: '';
-  flex: var(--at) 1 0;
-}
-.mark-lane::after {
-  flex-grow: calc(1 - var(--at));
-}
-.pick.mark-label {
-  display: block;
-  flex: none;
-  max-width: 100%;
-  white-space: normal;
-  text-align: left;
+.tick {
+  position: absolute;
+  bottom: calc(var(--lv) * 1.5em);
+  left: calc(var(--at) * 100%);
+  padding-bottom: 4px;
+  line-height: 1.2;
+  font-weight: bold;
+  white-space: nowrap;
+  color: var(--accent);
+  transform: translateX(calc(var(--at) * -100%));
 }
 @media (max-width: 720px) {
-  .marks {
-    display: flex;
-  }
+  /* Phones: the picks under the strip a line each, what it gets beside the build that gets it. */
   .goal-picks.curved {
-    display: none;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 6px 10px;
+  }
+  .goal-picks.curved .goal-pick {
+    display: contents;
+  }
+  .goal-picks.curved .pick {
+    justify-self: start;
   }
 }
 .goal-picks {
@@ -808,6 +848,7 @@ function use(r: ReverseRow) {
   justify-content: center;
   gap: 2px;
   white-space: normal;
+  cursor: help;
 }
 .item {
   display: inline-flex;
@@ -834,10 +875,6 @@ function use(r: ReverseRow) {
   height: 0;
   overflow: hidden;
   visibility: hidden;
-}
-.share {
-  display: block;
-  font-size: 0.875em;
 }
 .cell {
   vertical-align: middle;

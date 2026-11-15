@@ -174,7 +174,6 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
         <button
           v-for="k in ['a', 'b'] as const"
           :key="k"
-          v-tip="name(k)"
           type="button"
           class="btn choice"
           :class="[k === 'a' ? 'yours' : 'opponent', { on: first === k }]"
@@ -200,7 +199,7 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
         <button
           type="button"
           class="move"
-          :class="{ empty: !h.move }"
+          :class="{ empty: !h.move, needed: !h.move }"
           :aria-label="`${t('calc.hits.move')}: ${h.move ? refName(move(h.move)) : t('calc.pickMove')}`"
           @click="emit('pickMove', i)"
         >
@@ -266,6 +265,7 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
                 min="0"
                 :max="lostMax(h)"
                 :value="numberOf(h)"
+                placeholder="–"
                 :aria-label="t(h.by === 'a' ? 'calc.hits.pctLost' : 'calc.hits.hpLost')"
                 @input="typed(i, $event)"
               />
@@ -325,7 +325,9 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
       </li>
     </ol>
     <!-- Nothing said yet, in the warning's color as the controls pulsing for it; else on to what to work out. -->
-    <p v-if="!said" class="needs" role="status">{{ t('calc.hits.needs') }}</p>
+    <p v-if="!said" class="needs" role="status">
+      {{ t(hits.length ? 'calc.hits.needsParts' : 'calc.hits.needs') }}
+    </p>
     <p v-else class="next">
       <span class="muted">{{ t('calc.hits.another') }}</span
       ><button type="button" class="btn primary small" @click="emit('next')">{{ t('calc.hits.next') }} →</button>
@@ -398,12 +400,13 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
   padding: 0;
   list-style: none;
 }
-/* A hit: its parts on one line where they fit, edged in the attacker's color. */
+/* A hit: its parts on one line where they fit, edged in the attacker's color; its lines as far apart as its parts, so
+   the outlines of what's still wanted (4px out each) never touch. */
 .hit {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px 12px;
+  gap: 12px;
   padding: 8px 0 8px 8px;
   font-size: 0.9em;
   border-left: 4px solid var(--accent);
@@ -438,6 +441,17 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
 }
 .move.empty {
   color: var(--muted);
+}
+/* No move yet: outlined in the warning's color, pulsing softly, as a missing result is; a hit needs both. */
+.move.needed {
+  outline: 2px dashed var(--warn);
+  outline-offset: 2px;
+  animation: wanted 1.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .move.needed {
+    animation: none;
+  }
 }
 .move-name {
   flex: 1;
@@ -521,14 +535,23 @@ button.seg:hover {
   padding: 2px 6px 2px 2px;
   cursor: default;
 }
-/* Its box no box of its own within the group's: the number alone between its steps. */
+/* Its box no box of its own within the group's, the group's lines being enough: a field's wash and an underline
+   under the number, between its steps, so it reads as one to type in; a dash in it while empty. */
 :root:root .seg.num .num-in {
   width: 2.8em;
-  padding: 0 4px;
+  padding: 1px 4px 0;
   border: 0;
+  border-bottom: 2px solid var(--muted);
   outline-offset: 0;
-  background: transparent;
+  background: color-mix(in srgb, var(--text) 7%, var(--panel));
   box-shadow: none;
+  text-align: center;
+}
+:root:root .seg.num .num-in:focus {
+  border-bottom-color: var(--accent);
+}
+.num-in::placeholder {
+  color: var(--muted);
 }
 .unit {
   color: var(--muted);
