@@ -217,13 +217,46 @@ const oneRow = computed(() => !itemOnly.value && goalRows.value.length === 1)
 const goalNote = computed(() => {
   if (itemOnly.value) return t('calc.goal.noteItemSets')
   const mon = theirName.value
-  // With strips (your points worked out), their bars said; else the fewest points alone.
-  const strip = goalRows.value.find((r) => r.curves)
+  // With strips (your points worked out, a stat in play but Speed), their bars said; else the fewest points alone.
+  const strip = goalRows.value.find((r) => r.curves) && stripStats.value.length
   if (!strip) return t(oneRow.value ? 'calc.goal.noteFlat' : 'calc.goal.noteFlatItems', { mon })
-  const [s0, s1] = goal.value!.ours.map(statName)
+  const [s0, s1] = stripStats.value.map((k) => statName(goal.value!.ours[k]!))
   if (s1) return t(oneRow.value ? 'calc.goal.noteSetsTwo' : 'calc.goal.noteSetsTwoItems', { mon, a: s0!, b: s1 })
   return t(oneRow.value ? 'calc.goal.noteSetsOne' : 'calc.goal.noteSets', { mon, stat: s0! })
 })
+/** The stats in play drawn as strips, by their place in `ours`: all but Speed, which only matters at the opponent's
+ * Speeds, a few cut-offs rather than a scale, said in a line instead (`speedLine`). */
+const stripStats = computed(() => (goal.value?.ours ?? []).flatMap((s, k) => (s === 5 ? [] : [k])))
+/**
+ * Speed, when it's in play: whether it changes the chance at all, and if so the points the best chance needs (at
+ * least so many, at most so many, or between), with the share of the opponent's sets the order holds against there.
+ */
+function speedLine(r: GoalRow) {
+  const k = goal.value!.ours.indexOf(5)
+  const curve = k >= 0 ? r.curves?.[k] : null
+  if (!curve || !r.best) return null
+  const top = Math.max(...curve.map((c) => c.coverage))
+  const at = curve.flatMap((c, p) => (c.coverage >= top - 1e-9 ? [p] : []))
+  const lo = at[0]!
+  const hi = at.at(-1)!
+  if (lo === 0 && hi === MAX_POINTS) return { kind: 'any' as const }
+  // Said of the best build itself (the one Best chance under it uses), at its nature: at least so many points where
+  // more never hurt, at most where fewer never do, else its own.
+  // At the strip's end ("at most 0"), its own.
+  const own = r.best.points[5]!
+  const kind =
+    lo === 0 && own > 0
+      ? ('most' as const)
+      : hi === MAX_POINTS && own < MAX_POINTS
+        ? ('least' as const)
+        : ('exact' as const)
+  return { kind, b: r.best, pct: percent(r.best.order ?? 0) }
+}
+const speedText = computed(() => ({
+  least: tSplit('calc.goal.speed.least', 'build'),
+  most: tSplit('calc.goal.speed.most', 'build'),
+  exact: tSplit('calc.goal.speed.exact', 'build'),
+}))
 /** A strip's bar tapped (its row, its strip and points): its chance said under it, with the way to use it, rather
  * than used at once, so a phone, with no tooltips, can read one. One at a time; gone with a new answer. */
 const pickedBar = shallowRef<{ ri: number; k: number; p: number } | null>(null)
@@ -361,61 +394,77 @@ function use(r: ReverseRow) {
                 <!-- Your points worked out: a strip per stat of yours in play, a cell per number of its points, none to
                    all, filled to the best chance there (the other stat at its best for it); tapped or slid to, that
                    build said under it with its Use; the goals' outlined. -->
-                <span v-for="(curve, k) in r.curves ?? []" :key="k" class="strip-wrap">
-                  <!-- Its goals as tags over their cells, so the line under it reads off the strip. -->
-                  <span
-                    class="ticks"
-                    aria-hidden="true"
-                    :style="{ '--levels': Math.max(1, ...marksOf(r, k).map((m) => m.level + 1)) }"
-                  >
+                <template v-for="(curve, k) in r.curves ?? []" :key="k">
+                  <span v-if="stripStats.includes(k)" class="strip-wrap">
+                    <!-- Its goals as tags over their cells, so the line under it reads off the strip. -->
                     <span
-                      v-for="m in marksOf(r, k)"
-                      :key="m.p"
-                      class="tick"
-                      :style="{ '--at': (m.p + 0.5) / (MAX_POINTS + 1), '--lv': m.level }"
-                      >{{ m.label }}</span
+                      class="ticks"
+                      aria-hidden="true"
+                      :style="{ '--levels': Math.max(1, ...marksOf(r, k).map((m) => m.level + 1)) }"
+                    >
+                      <span
+                        v-for="m in marksOf(r, k)"
+                        :key="m.p"
+                        class="tick"
+                        :style="{ '--at': (m.p + 0.5) / (MAX_POINTS + 1), '--lv': m.level }"
+                        >{{ m.label }}</span
+                      >
+                    </span>
+                    <span
+                      class="strip"
+                      role="group"
+                      :aria-label="t('calc.goal.stripLabel', { stat: statName(goal.ours[k]!) })"
+                      @pointerdown="stripDown(ri, k, $event)"
+                      @pointermove="stripMove"
+                      @pointerup="stripUp"
+                      @pointercancel="stripUp"
+                    >
+                      <button
+                        v-for="(c, p) in curve"
+                        :key="p"
+                        type="button"
+                        class="strip-cell"
+                        :class="{ mark: marked(r, k, p), picked: isPicked(ri, k, p) }"
+                        :style="{ '--cov': `${Math.round(c.coverage * 100)}%` }"
+                        :aria-label="t('calc.goal.stripTip', { n: p, pct: percent(c.coverage) })"
+                        :aria-pressed="isPicked(ri, k, p)"
+                        @click="pickBar(ri, k, p)"
+                      ></button>
+                    </span>
+                    <span class="strip-ends muted"
+                      ><span>0</span><span>{{ statName(goal.ours[k]!) }}</span
+                      ><span>{{ MAX_POINTS }}</span></span
+                    >
+                    <!-- The bar tapped: its chance, and the way to set yours to it. -->
+                    <span v-if="pickedOn(ri, k, curve)" class="picked-line" role="status"
+                      >{{ pickedText[0] }}<SpreadText :parts="spreadOf(pickedOn(ri, k, curve)!, goal.ours)" />{{
+                        pickedText[1].replace('{pct}', percent(pickedOn(ri, k, curve)!.coverage))
+                      }}
+                      <button
+                        v-tip="t('calc.goal.useTip', { pct: percent(pickedOn(ri, k, curve)!.coverage) })"
+                        type="button"
+                        class="btn small pick"
+                        @click="useYours(pickedOn(ri, k, curve)!)"
+                      >
+                        {{ t('calc.reverse.use') }}
+                      </button></span
                     >
                   </span>
-                  <span
-                    class="strip"
-                    role="group"
-                    :aria-label="t('calc.goal.stripLabel', { stat: statName(goal.ours[k]!) })"
-                    @pointerdown="stripDown(ri, k, $event)"
-                    @pointermove="stripMove"
-                    @pointerup="stripUp"
-                    @pointercancel="stripUp"
+                </template>
+                <!-- Speed in play: not a strip but a line, what the best chance needs of it, if anything. -->
+                <template v-if="speedLine(r)">
+                  <span v-if="speedLine(r)!.kind === 'any'" class="speed-line muted">{{
+                    t('calc.goal.speed.any')
+                  }}</span>
+                  <span v-else class="speed-line"
+                    >{{ speedText[speedLine(r)!.kind as 'least'][0]
+                    }}<SpreadText :parts="spreadOf(speedLine(r)!.b!, [5])" />{{
+                      speedText[speedLine(r)!.kind as 'least']
+                        [1]!.replace('{pct}', speedLine(r)!.pct!)
+                        .replace('{mon}', theirName)
+                    }}</span
                   >
-                    <button
-                      v-for="(c, p) in curve"
-                      :key="p"
-                      type="button"
-                      class="strip-cell"
-                      :class="{ mark: marked(r, k, p), picked: isPicked(ri, k, p) }"
-                      :style="{ '--cov': `${Math.round(c.coverage * 100)}%` }"
-                      :aria-label="t('calc.goal.stripTip', { n: p, pct: percent(c.coverage) })"
-                      :aria-pressed="isPicked(ri, k, p)"
-                      @click="pickBar(ri, k, p)"
-                    ></button>
-                  </span>
-                  <span class="strip-ends muted"
-                    ><span>0</span><span>{{ statName(goal.ours[k]!) }}</span
-                    ><span>{{ MAX_POINTS }}</span></span
-                  >
-                  <!-- The bar tapped: its chance, and the way to set yours to it. -->
-                  <span v-if="pickedOn(ri, k, curve)" class="picked-line" role="status"
-                    >{{ pickedText[0] }}<SpreadText :parts="spreadOf(pickedOn(ri, k, curve)!, goal.ours)" />{{
-                      pickedText[1].replace('{pct}', percent(pickedOn(ri, k, curve)!.coverage))
-                    }}
-                    <button
-                      v-tip="t('calc.goal.useTip', { pct: percent(pickedOn(ri, k, curve)!.coverage) })"
-                      type="button"
-                      class="btn small pick"
-                      @click="useYours(pickedOn(ri, k, curve)!)"
-                    >
-                      {{ t('calc.reverse.use') }}
-                    </button></span
-                  >
-                </span>
+                </template>
                 <span class="goal-picks" :class="{ curved: r.curves }">
                   <template v-for="(c, ci) in r.cells" :key="ci">
                     <span v-if="c" class="goal-pick">
@@ -710,6 +759,10 @@ function use(r: ReverseRow) {
 /* A second strip (two of your stats in play) set apart from the first's line under it. */
 .strip-wrap + .strip-wrap {
   margin-top: 10px;
+}
+/* What Speed takes, a line under the strips. */
+.speed-line {
+  font-size: 0.875em;
 }
 .strip {
   position: relative;

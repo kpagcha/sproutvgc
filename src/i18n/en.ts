@@ -409,6 +409,13 @@ export const messages = {
     'The chance of the hits you entered, against the {mon} sets the meta runs and every damage roll: a strip for {a} and one for {b}, each bar the best chance at that many points. Tap or slide along the bars to see one.',
   'calc.goal.noteSetsTwoItems':
     'For each item, the chance of the hits you entered, against the {mon} sets the meta runs and every damage roll: a strip for {a} and one for {b}, each bar the best chance at that many points. Tap or slide along the bars to see one.',
+  'calc.goal.speed.any': 'Speed doesn’t matter: the order you entered happens at any Spe.',
+  'calc.goal.speed.least':
+    'The best chance needs at least {build}: the order you entered then happens against {pct} of the {mon} sets.',
+  'calc.goal.speed.most':
+    'The best chance needs at most {build}: the order you entered then happens against {pct} of the {mon} sets.',
+  'calc.goal.speed.exact':
+    'The best chance needs {build}: the order you entered then happens against {pct} of the {mon} sets.',
   'calc.goal.noteFlat':
     'The chance of the hits you entered, against the {mon} sets the meta runs and every damage roll: the fewest stat points for it to be at least 50%, 90% or 100%.',
   'calc.goal.noteFlatItems':

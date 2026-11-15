@@ -67,6 +67,8 @@ export interface GoalBuild {
   item: ItemId | null
   coverage: number
   cost: number
+  /** With the order said: the share of the opponent's sets it holds against at this build (its Speed against theirs). */
+  order?: number
 }
 /** One of your items (or those alike, merged): the fewest points reaching each threshold (null where none does), and
  * the most it covers, at its cheapest. */
@@ -401,6 +403,16 @@ export function goalDamage(input: GoalInput): { total: number; steps: Generator<
       }
       return out
     }
+    // The order alone, where it's said: the share of the opponent's sets it holds against at a build of yours.
+    const orderAt = plans.findIndex((p) => p.o.by === 'speed')
+    const orderOf = (mi: number, gi: number, points: readonly number[]) => {
+      if (orderAt < 0) return undefined
+      const table = fits[orderAt]![mi]![gi]!
+      const off = points[5]! * J
+      let c = 0
+      for (let j = 0; j < J; j++) c += others[j]!.w * table[off + j]!
+      return c
+    }
     const row = new Float64Array(J)
     const coverageOf = (mi: number, gi: number, points: readonly number[]) => {
       fitRow(mi, gi, points, row)
@@ -430,6 +442,7 @@ export function goalDamage(input: GoalInput): { total: number; steps: Generator<
             item: myItemList[mi]![0]!,
             coverage,
             cost,
+            order: orderOf(mi, gi, points),
           })
           THRESHOLDS.forEach((th, k) => {
             const c = cells[k]
