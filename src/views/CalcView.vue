@@ -688,7 +688,11 @@ watch(hasBoth, (now, before) => {
  * the bands). */
 function scrollToSolver(id: string) {
   const bar = wide.value && !(fieldOpen.value && !fieldCompact.value) ? barH.value : 0
-  toTopAt(document.getElementById(id), navH.value + bar + bandsH.value + 12)
+  // Measured now, not by their sizes as last reported: both in, the row of links gains the solver's links and, on
+  // phones, the bands come in, neither's new size reported yet.
+  const navNow = (nav.value?.$el as HTMLElement | undefined)?.offsetHeight ?? navH.value
+  const bands = bandsEl.value?.offsetHeight ?? bandsH.value
+  toTopAt(document.getElementById(id), navNow + bar + bands + 12)
 }
 /** The hits said: on to what to work out, brought into view and lit a moment. */
 const goalLit = shallowRef(false)
