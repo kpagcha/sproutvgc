@@ -233,17 +233,13 @@ const all = shallowRef(false)
       </div>
       <p v-if="!theirId || !yourId" class="muted intro">{{ t('calc.threats.pickBoth') }}</p>
       <template v-else>
-        <!-- What it's at: its sets, or its team sheet (as the rows shown are); and what the calc has set that counts. -->
-        <p class="muted intro">
-          {{ shownSheet ? t('calc.threats.atSheet') : t('calc.threats.atSets') }}
-        </p>
+        <!-- What the calc has set that counts. -->
         <ul v-if="counted.length" class="counted">
           <li v-for="g in counted" :key="g.who" :class="g.tone">
             <span class="counted-who">{{ g.who }}</span>
             <span v-for="x in g.list" :key="x" class="chip">{{ x }}</span>
           </li>
         </ul>
-        <p v-else class="muted small-note">{{ t('calc.threats.nothingSet') }}</p>
         <!-- Until the first rows are in: working them out, rather than nothing. -->
         <p v-if="!rows" class="muted intro">{{ t('calc.threats.working') }}</p>
         <p v-else-if="!rows.length && progress === null" class="muted intro">
@@ -269,6 +265,13 @@ const all = shallowRef(false)
           </p>
           <div class="table-wrap" :class="{ stale: slow }">
             <table class="grid">
+              <colgroup>
+                <col />
+                <col class="w-range" />
+                <col class="w-num" />
+                <col class="w-num" />
+                <col class="w-num" />
+              </colgroup>
               <thead>
                 <tr>
                   <th scope="col">{{ t('calc.threats.move') }}</th>
@@ -318,6 +321,7 @@ const all = shallowRef(false)
   flex-wrap: wrap;
   align-items: center;
   gap: 14px 16px;
+  margin-bottom: 16px;
 }
 .controls {
   display: flex;
@@ -373,12 +377,8 @@ const all = shallowRef(false)
   padding: 0 6px;
   border: 1px solid var(--border);
 }
-.small-note {
-  margin: 0 0 10px;
-  font-size: 0.8em;
-}
 .summary {
-  margin: 0 0 8px;
+  margin: 0 0 14px;
   font-size: 0.9em;
   font-weight: bold;
 }
@@ -421,6 +421,15 @@ const all = shallowRef(false)
   width: 100%;
   border-collapse: collapse;
   font-size: 0.9em;
+  /* Its columns as wide whatever's in them, so it doesn't shift as the numbers change: the numbers' set, the move's
+     the rest. */
+  table-layout: fixed;
+}
+.w-range {
+  width: 7.5em;
+}
+.w-num {
+  width: 5em;
 }
 .grid th,
 .grid td {
@@ -467,7 +476,10 @@ tr.two {
   .controls {
     margin-left: 0;
   }
-  /* Narrow, the table scrolling sideways, each move kept in view at its left. */
+  /* Narrow, the table scrolling sideways (room for the move's name), each move kept in view at its left. */
+  .grid {
+    min-width: 32em;
+  }
   .grid .move,
   .grid thead th:first-child {
     position: sticky;

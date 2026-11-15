@@ -507,11 +507,7 @@ export const messages = {
   'calc.threats.sheet': 'Team sheet',
   'calc.threats.sheetTip':
     'Its item, ability, nature and moves as set above, as an open team sheet shows them: only its stat points vary.',
-  'calc.threats.atSets':
-    'Every move it learns, at its sets: their spreads, items and abilities, each as often as it’s run.',
-  'calc.threats.atSheet': 'Its item, ability, nature and moves as set above; only its stat points vary.',
   'calc.threats.noSheetMoves': 'Its set above has no damaging moves yet.',
-  'calc.threats.nothingSet': 'No stages, weather or other conditions set: set them above and they count here.',
   'calc.threats.moveOpts': 'Set on its moves',
   'calc.threats.hp': '{n}% HP',
   'calc.threats.fainted': '{n} allies fainted',
