@@ -588,8 +588,18 @@ export function oneOnOne(a: Fighter, b: Fighter, field: Battlefield): OneOnOne |
   if (sa === null || sb === null) return null
   const best = (x: Fighter, y: Fighter) =>
     bestHit(x.member.moves.filter((m): m is MoveId => !!m).map((m) => hit(x, y, m, field)))
-  const ha = best(a, b)
-  const hb = best(b, a)
+  return duelOf(a, b, field, best(a, b), best(b, a), sa, sb)
+}
+/** `oneOnOne` from each side's hardest hit and Speed already worked out. */
+export function duelOf(
+  a: Fighter,
+  b: Fighter,
+  field: Battlefield,
+  ha: Hit | null,
+  hb: Hit | null,
+  sa: number,
+  sb: number,
+): OneOnOne {
   const pa = ha ? priorityOf(a, ha.move, field) : 0
   const pb = hb ? priorityOf(b, hb.move, field) : 0
   const first: Lead = pa !== pb ? (pa > pb ? 'a' : 'b') : leadOf(sa, sb, field)

@@ -10,6 +10,8 @@ import { readList } from '@/lib/speedLineup'
 import { eventOf } from '@/data/tournaments'
 
 /** The Pokémon a query names, if the regulation has it. */
+/** The damage calculator's tabs, a page each. */
+const CALC_PAGES = ['calc', 'calcInverse', 'calcMeta']
 const mon = (id: string | undefined) => (id && id in POKEMON ? (id as PokemonId) : null)
 /** A damage calc's side, as its URL has it (`calcState.ts`): its Pokémon, its Mega while it holds its stone and Mega
  * Evolves (unless its flags say it doesn't). */
@@ -43,14 +45,13 @@ function view(visit: PageVisit) {
   const team = (keys: string[]) => keys.flatMap((k) => mon(q[k]) ?? [])
   // A comparison's icons: each team's, or the speed order's list (a setup saved says its view as `mode`, a page left
   // has it in its path); a damage calc's, each side's Pokémon.
-  const groups =
-    name === 'calc' || name === 'calcInverse'
-      ? ['a', 'b'].flatMap((s) => [calcSide(q[s])].filter((id): id is PokemonId => !!id)).map((id) => [id])
-      : !compare
-        ? null
-        : q.mode === 'order' || to.params.view === 'order'
-          ? [readList(q.list).map((e) => e.id)]
-          : ['a', 'b'].map((s) => team([s, ...[2, 3, 4, 5, 6].map((n) => `${s}${n}`)]))
+  const groups = CALC_PAGES.includes(name)
+    ? ['a', 'b'].flatMap((s) => [calcSide(q[s])].filter((id): id is PokemonId => !!id)).map((id) => [id])
+    : !compare
+      ? null
+      : q.mode === 'order' || to.params.view === 'order'
+        ? [readList(q.list).map((e) => e.id)]
+        : ['a', 'b'].map((s) => team([s, ...[2, 3, 4, 5, 6].map((n) => `${s}${n}`)]))
   return {
     to,
     titleKey: to.meta.titleKey,
@@ -127,9 +128,7 @@ const titled = computed(
 /** A comparison's Pokémon by name, for what reads the chip out: its icons alone say nothing. */
 const label = computed(() => {
   const names = v.value.groups?.map((g) => g.map((id) => refName(pokemon(id))).join(', ')).join(' vs ')
-  return names && (v.value.to.name === 'calc' || v.value.to.name === 'calcInverse')
-    ? `${t(v.value.titleKey!)}: ${names}`
-    : names
+  return names && CALC_PAGES.includes(String(v.value.to.name)) ? `${t(v.value.titleKey!)}: ${names}` : names
 })
 /** The most icons a group shows, the rest counted. */
 const GROUP_MAX = 6
@@ -139,9 +138,7 @@ const GROUP_MAX = 6
   <a :href="v.to.href" class="page-chip" :aria-label="label" @click="follow">
     <template v-if="v.groups">
       <!-- A damage calc named, its Pokémon alone looking like a comparison's. -->
-      <template v-if="(v.to.name === 'calc' || v.to.name === 'calcInverse') && !untitled">{{
-        t(v.titleKey!)
-      }}</template>
+      <template v-if="CALC_PAGES.includes(String(v.to.name)) && !untitled">{{ t(v.titleKey!) }}</template>
       <template v-for="(g, i) in v.groups" :key="i">
         <span v-if="i" class="muted">vs</span>
         <span class="group"

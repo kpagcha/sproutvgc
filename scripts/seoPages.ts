@@ -265,6 +265,7 @@ export function seoPages(): Plugin {
         { path: 'tools', title: 'title.tools', desc: 'desc.tools', schema: 'CollectionPage' },
         searched('tools/calc', 'calc'),
         searched('tools/calc/solver', 'calcInverse'),
+        searched('tools/calc/meta', 'calcMeta'),
         searched('tools/compare-speeds', 'speedCompare'),
         // Its other views, a page each, named as their tabs are.
         {

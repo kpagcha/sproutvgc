@@ -100,25 +100,29 @@ import TeamPicker from '@/components/TeamPicker.vue'
 // the solver (`inverse`, `/tools/calc/solver`): the two as bands stuck to the top (`SolverBands`), the Pokémon picked
 // on the page under them while one's missing, then the hits seen (`CalcHits`), then what fits them (`CalcReverse`,
 // what it works out a choice over it, `SolverGoal`), the sides' panels under them for the rest of the battle.
-const props = defineProps<{ inverse?: boolean }>()
+const props = defineProps<{ inverse?: boolean; against?: boolean }>()
 const route = useRoute()
 const router = useRouter()
 // Its address while it was a switch on the damage tab.
-if (!props.inverse && route.query.mode === 'reverse') {
+if (!props.inverse && !props.against && route.query.mode === 'reverse') {
   const query = { ...route.query }
   delete query.mode
   void router.replace({ name: 'calcInverse', query })
 }
-type Tab = 'damage' | 'inverse'
-const tab = computed<Tab>(() => (props.inverse ? 'inverse' : 'damage'))
+type Tab = 'damage' | 'inverse' | 'meta'
+const tab = computed<Tab>(() => (props.inverse ? 'inverse' : props.against ? 'meta' : 'damage'))
 const tabs = computed(() => [
   { value: 'damage' as const, label: t('calc.tab.damage') },
   { value: 'inverse' as const, label: t('calc.tab.inverse') },
+  { value: 'meta' as const, label: t('calc.tab.meta') },
 ])
+/** Each tab's route. */
+const TAB_ROUTES = { damage: 'calc', inverse: 'calcInverse', meta: 'calcMeta' } as const
+const routeName = computed(() => TAB_ROUTES[tab.value])
 /** The other tab, carrying the setup as it is now: the URL is written once the edits pause, so a change made just before
  * (a build of What fits used) would be left behind. */
-const toTab = (to: Tab) => {
-  if (to !== tab.value) void router.push({ name: to === 'inverse' ? 'calcInverse' : 'calc', query: urlOf(query.value) })
+const toTab = (to: Tab, hash?: string) => {
+  if (to !== tab.value) void router.push({ name: TAB_ROUTES[to], query: urlOf(query.value), hash })
 }
 const { snapshot, data } = useMeta()
 const { teams } = useTeams()
@@ -138,14 +142,18 @@ const sections = computed(() => [
             ]
           : []),
       ]
-    : damageSections.value),
+    : props.against
+      ? [
+          { id: 'calc-duel', label: t('calc.yours') },
+          ...(battlerOf(sides.value.a) ? [{ id: 'calc-meta', label: t('calc.meta.title') }] : []),
+        ]
+      : damageSections.value),
 ])
 const damageSections = computed(() => [
   { id: 'calc-duel', label: t('calc.section.damage') },
   ...(battlerOf(sides.value.a) && battlerOf(sides.value.b)
     ? [{ id: 'calc-threats', label: t('calc.threats.title') }]
     : []),
-  ...(battlerOf(sides.value.a) ? [{ id: 'calc-meta', label: t('calc.meta.title') }] : []),
 ])
 const nav = useTemplateRef<InstanceType<typeof SectionNav>>('nav')
 // The field's bar, stuck under the row of links; on phones the sides' tabs stick under it (`--bar-h`, its height).
@@ -864,7 +872,9 @@ function face(f: Fighter) {
   if (battlerOf(sides.value.b)) previous.value = [...previous.value, sides.value.b].slice(-PREVIOUS_MAX)
   setSide('b', { ...f, side: sides.value.b.side, sets: sides.value.b.sets })
   open.value = { ...open.value, b: true }
-  reveal('b', 'smooth')
+  // From the Meta tab, on to the damage tab, at the two.
+  if (props.against) toTab('damage', '#calc-duel')
+  else reveal('b', 'smooth')
 }
 </script>
 
@@ -880,7 +890,7 @@ function face(f: Fighter) {
     }"
   >
     <!-- Reset all, on the row of the way back to Tools, as on the speed pages (the app's frame has a place for it there). -->
-    <Teleport :to="`#back-actions-${inverse ? 'calcInverse' : 'calc'}`" defer>
+    <Teleport :to="`#back-actions-${routeName}`" defer>
       <button v-if="hasAny" type="button" class="btn inverted" @click="resetAll">
         <RotateCcw :size="16" aria-hidden="true" />{{ t('speed.resetAll') }}
       </button>
@@ -987,21 +997,25 @@ function face(f: Fighter) {
       </div>
 
       <!-- On wide screens, the two in short stuck over the sides' panels once their bands are past, and on down. -->
-      <ReuseDock v-if="wide && hasAny" />
+      <ReuseDock v-if="wide && hasAny && !against" />
       <div
         id="calc-duel"
         class="duel"
         :class="{
           aligned:
-            hasBoth && movesFolded.a.value === movesFolded.b.value && battleFolded.a.value === battleFolded.b.value,
+            !against &&
+            hasBoth &&
+            movesFolded.a.value === movesFolded.b.value &&
+            battleFolded.a.value === battleFolded.b.value,
           stacked: !wide,
+          against,
         }"
       >
         <!-- On phones, as the speed comparison's list past a pair: each side a band of its color, its Pokémon in short,
            stuck to the top under the field's bar, the second piling up under the first, and to the bottom; tapping it
            brings its panel into view under it, opening it (one with none picks it), or, in its place with its panel open
            under it, folds it; its arrow opens and folds it. -->
-        <template v-for="k in ['a', 'b'] as const" :key="k">
+        <template v-for="k in against ? (['a'] as const) : (['a', 'b'] as const)" :key="k">
           <div
             v-if="!wide"
             :id="`band-${k}`"
@@ -1102,6 +1116,8 @@ function face(f: Fighter) {
             </template>
           </CalcSide>
         </template>
+        <!-- The Meta tab: yours against the most used, beside yours (under it on phones). -->
+        <CalcMeta v-if="against" id="calc-meta" :yours="fought.a" :field :data @pick="face" />
       </div>
     </div>
 
@@ -1146,7 +1162,7 @@ function face(f: Fighter) {
         </section>
       </div>
     </template>
-    <template v-if="!inverse">
+    <template v-if="!inverse && !against">
       <CalcVerdict :a="fought.a" :b="fought.b" :field />
 
       <!-- What the opponent could knock yours out with: every move it learns, at its sets. -->
@@ -1159,8 +1175,6 @@ function face(f: Fighter) {
         :data
         v-model:sheet="sheet"
       />
-
-      <CalcMeta v-if="battlerOf(sides.a)" id="calc-meta" :yours="fought.a" :field :data @pick="face" />
     </template>
 
     <!-- Right after a Pokémon's picked, its most common set, to load rather than put the set together; picking the
@@ -1354,8 +1368,7 @@ function face(f: Fighter) {
 }
 /* The sides, who moves first and yours against the meta set apart, a touch less on phones, where the page is short
    of room. */
-.calc > .verdict,
-.calc > #calc-meta {
+.calc > .verdict {
   margin-top: 16px;
 }
 /* The field's bar and the sides: their own column on phones, so what sticks of them sticks within it; on wide screens
@@ -1371,8 +1384,7 @@ function face(f: Fighter) {
   }
 }
 @media (max-width: 899px) {
-  .calc > .verdict,
-  .calc > #calc-meta {
+  .calc > .verdict {
     margin-top: 8px;
   }
 }
@@ -1579,9 +1591,18 @@ function face(f: Fighter) {
     align-content: start;
   }
 }
+/* The Meta tab: yours, and beside it its matchups, the wider. */
+@media (min-width: 900px) {
+  .duel.against {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr);
+  }
+}
 @media (max-width: 899px) {
   .duel {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .duel.against > #calc-meta {
+    margin-top: 16px;
   }
 }
 /* On phones, each side's band, as the speed comparison's list's: one row of its side's color, its Pokémon in short and

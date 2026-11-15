@@ -1,78 +1,133 @@
 <script setup lang="ts">
-import { computed, shallowRef, watch } from 'vue'
+import { computed, onUnmounted, shallowRef, watch } from 'vue'
+import { watchDebounced } from '@vueuse/core'
 import { move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
-import type { MetaData } from '@/data/meta'
+import { percent, type MetaData } from '@/data/meta'
 import { MOVES } from '@/data/moves'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
-import {
-  abilityOf,
-  battlerOf,
-  damaging,
-  hit,
-  koKind,
-  metaFoes,
-  SETS_FIELD,
-  type Battlefield,
-  type Fighter,
-  type Hit,
-  type KoKind,
-} from '@/lib/damage'
-import { useOpenState } from '@/composables/useOpenState'
+import { battlerOf, damaging, koKind, type Battlefield, type Fighter, type Hit } from '@/lib/damage'
+import { dangerOf, leanOf, matchupSteps, shareOf, within, type Matchup } from '@/lib/metaMatchups'
+import { runSliced } from '@/lib/slices'
 import MoreToggle from '@/components/MoreToggle.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 import TypeIcon from '@/components/TypeIcon'
 
-// Your Pokémon against the meta: the most used Pokémon of the data shown, each at its most common set (`metaFoes`),
-// on the calculator's field. Two ways round: your moves against each (a column per move, its range and how many hits it
-// takes, each move headed by how much of the meta, by usage, it knocks out in one hit and in two), or each one's
-// hardest hit on yours (its best common move, and how much of the meta knocks yours out in one hit and in two). Your
-// side as it's set (its stages, HP, screens, ally's help); theirs as they come in, the weather or terrain their ability
-// sets over the calculator's (`SETS_FIELD`). A row taps into the calculator as the
+// Your Pokémon against the meta, the calculator's Meta tab: the most used Pokémon of the data shown, each at its most
+// common set (`metaFoes`), on the calculator's field, theirs as they come in (the weather or terrain their ability sets
+// over it). Two views: the matchups, a row each (your hardest hit on it, its hardest on yours, who moves first, and who
+// wins trading them one on one, as a threat meter: `src/lib/metaMatchups.ts`), sorted by usage, by threat, by prey or
+// by danger (threat times usage); or your moves, a column each headed by how much of the meta, by usage, it knocks out
+// in one hit and in two. Over them, how yours does against the whole of it. A row taps into the damage tab as the
 // opponent. Its first 15 until unfolded.
 const props = defineProps<{ yours: Fighter; field: Battlefield; data: MetaData | null }>()
 const emit = defineEmits<{ pick: [f: Fighter] }>()
 
-// Folded at first, then as last left: its numbers worked out only while it's open.
-const { open, onToggle } = useOpenState('sproutvgc.calc.metaOpen', false)
-
-type Mode = 'attack' | 'defend'
-const MODE_KEY = 'sproutvgc.calc.metaMode'
-const mode = shallowRef<Mode>('attack')
-const TOP_KEY = 'sproutvgc.calc.metaTop'
+type View = 'matchups' | 'moves'
+type Sort = 'usage' | 'threat' | 'prey' | 'danger'
 const TOPS = ['25', '50', '100'] as const
+const VIEW_KEY = 'sproutvgc.calc.metaMode'
+const TOP_KEY = 'sproutvgc.calc.metaTop'
+const SORT_KEY = 'sproutvgc.calc.metaSort'
+const view = shallowRef<View>('matchups')
 const top = shallowRef<(typeof TOPS)[number]>('50')
+const sort = shallowRef<Sort>('danger')
 try {
-  const m = localStorage.getItem(MODE_KEY)
-  if (m === 'attack' || m === 'defend') mode.value = m
+  const v = localStorage.getItem(VIEW_KEY)
+  if (v === 'matchups' || v === 'moves') view.value = v
   const n = localStorage.getItem(TOP_KEY)
   if ((TOPS as readonly (string | null)[]).includes(n)) top.value = n as (typeof TOPS)[number]
+  const s = localStorage.getItem(SORT_KEY)
+  if (s === 'usage' || s === 'threat' || s === 'prey' || s === 'danger') sort.value = s
 } catch {
   // Storage unavailable: as it is.
 }
-watch([mode, top], ([m, n]) => {
+watch([view, top, sort], ([v, n, s]) => {
   try {
-    localStorage.setItem(MODE_KEY, m)
+    localStorage.setItem(VIEW_KEY, v)
     localStorage.setItem(TOP_KEY, n)
+    localStorage.setItem(SORT_KEY, s)
   } catch {
     // Storage unavailable: for this visit.
   }
 })
-const modes = computed(() => [
-  { value: 'attack' as const, label: t('calc.meta.attack') },
-  { value: 'defend' as const, label: t('calc.meta.defend') },
+const views = computed(() => [
+  { value: 'matchups' as const, label: t('calc.meta.matchups') },
+  { value: 'moves' as const, label: t('calc.meta.byMove') },
 ])
 const tops = computed(() => TOPS.map((n) => ({ value: n, label: n })))
+const sorts = computed(() => [
+  { value: 'danger' as const, label: t('calc.meta.sort.danger') },
+  { value: 'threat' as const, label: t('calc.meta.sort.threat') },
+  { value: 'prey' as const, label: t('calc.meta.sort.prey') },
+  { value: 'usage' as const, label: t('calc.meta.sort.usage') },
+])
 
 const yourId = computed(() => battlerOf(props.yours))
-const foes = computed(() => metaFoes(props.data, Number(top.value)))
 const yourMoves = computed(() => props.yours.member.moves.filter(damaging))
-/** The field as one of them comes in: its weather or terrain, if its ability sets one, over the calculator's. */
-const fieldWith = (f: Fighter): Battlefield => {
-  const a = abilityOf(f)
-  return { ...props.field, ...(a && SETS_FIELD[a]) }
+
+// Worked out a slice at a time once the inputs settle (a slider dragged doesn't start it over at every step), a run
+// gone stale dropped; the rows shown meanwhile those before, faded.
+const rows = shallowRef<Matchup[] | null>(null)
+const working = shallowRef(false)
+let stop: (() => void) | null = null
+function start() {
+  stop?.()
+  stop = null
+  if (!yourId.value || !props.data) {
+    rows.value = null
+    working.value = false
+    return
+  }
+  const n = Number(top.value)
+  working.value = true
+  stop = runSliced(
+    matchupSteps(props.yours, props.data, n, props.field),
+    n,
+    () => {},
+    (r) => {
+      rows.value = r
+      working.value = false
+      stop = null
+    },
+  )
 }
+watch(yourId, () => (rows.value = null))
+watch(() => [top.value, props.data] as const, start, { immediate: true })
+watchDebounced(() => [props.yours, props.field] as const, start, { debounce: 150 })
+onUnmounted(() => stop?.())
+
+const sorted = computed(() => {
+  const r = rows.value ?? []
+  const by: Record<Sort, (a: Matchup, b: Matchup) => number> = {
+    usage: (a, b) => b.usage - a.usage,
+    threat: (a, b) => b.threat - a.threat || b.usage - a.usage,
+    prey: (a, b) => a.threat - b.threat || b.usage - a.usage,
+    danger: (a, b) => dangerOf(b) - dangerOf(a) || b.usage - a.usage,
+  }
+  return [...r].sort(by[sort.value])
+})
+
+// How yours does against the whole of it, by usage.
+const summary = computed(() => {
+  const r = rows.value ?? []
+  return {
+    wins: shareOf(r, (m) => (m.threat < 0.45 ? 1 : 0)),
+    loses: shareOf(r, (m) => (m.threat > 0.55 ? 1 : 0)),
+    yourOne: shareOf(r, (m) => within(m.mine, 1)),
+    yourTwo: shareOf(r, (m) => within(m.mine, 2)),
+    theirOne: shareOf(r, (m) => within(m.theirs, 1)),
+    theirTwo: shareOf(r, (m) => within(m.theirs, 2)),
+  }
+})
+const moveSummaries = computed(() =>
+  yourMoves.value.map((mv, j) => ({
+    mv,
+    one: shareOf(rows.value ?? [], (m) => within(m.hits[j], 1)),
+    two: shareOf(rows.value ?? [], (m) => within(m.hits[j], 2)),
+  })),
+)
 
 /** A verdict in a few characters: "OHKO", "62% 2HKO", "4HKO"; nothing past 4 hits. */
 function short(h: Hit | null | undefined): string {
@@ -82,84 +137,155 @@ function short(h: Hit | null | undefined): string {
   return h.koChance >= 1 ? n : `${Math.round(h.koChance * 100)}% ${n}`
 }
 const range = (h: Hit | null | undefined) => (h && !h.none ? `${h.minPct.toFixed(0)}–${h.maxPct.toFixed(0)}%` : '')
-
-/** Whether a hit surely or possibly knocks out in `n` hits or fewer, as a share: 1 surely, its chance, else 0. */
-const within = (h: Hit | null | undefined, n: number) =>
-  !h || h.none || !h.koHits ? 0 : h.koHits < n ? 1 : h.koHits === n ? h.koChance : 0
-
-const attackRows = computed(() =>
-  mode.value !== 'attack' || !yourId.value
-    ? []
-    : foes.value.map((f) => ({
-        ...f,
-        hits: yourMoves.value.map((mv) => hit(props.yours, f.set, mv, fieldWith(f.set))),
-      })),
-)
-const defendRows = computed(() =>
-  mode.value !== 'defend' || !yourId.value
-    ? []
-    : foes.value.map((f) => {
-        const all = f.set.member.moves
-          .filter(damaging)
-          .map((mv) => hit(f.set, props.yours, mv, fieldWith(f.set)))
-          .filter((h): h is Hit => !!h && !h.none)
-          .sort((a, b) => b.max - a.max)
-        return { ...f, best: all[0] ?? null, next: all[1] ?? null }
-      }),
-)
-const totalUsage = computed(() => foes.value.reduce((s, f) => s + f.usage, 0) || 1)
-/** Out of the meta shown, by usage, how much one move (or their best hit) knocks out in one hit and in two. */
-const summary = (pick: (row: number) => Hit | null | undefined, rows: number) => {
-  let one = 0
-  let two = 0
-  for (let i = 0; i < rows; i++) {
-    const h = pick(i)
-    const u = foes.value[i]!.usage
-    one += within(h, 1) * u
-    two += within(h, 2) * u
-  }
-  return { one: one / totalUsage.value, two: two / totalUsage.value }
-}
-const moveSummaries = computed(() =>
-  yourMoves.value.map((mv, j) => ({
-    mv,
-    ...summary((i) => attackRows.value[i]?.hits[j], attackRows.value.length),
-  })),
-)
-const defendSummary = computed(() => summary((i) => defendRows.value[i]?.best, defendRows.value.length))
 const pct = (x: number) => `${Math.round(x * 100)}%`
 
-const TOP = 10
+/** Who moves first, yours as `a`. */
+const ORDER = { a: 'calc.meta.first', b: 'calc.meta.last', tie: 'calc.meta.tie' } as const
+/** The meter in words, and its side to color it by. */
+const VERDICTS = {
+  prey: 'calc.meta.wins',
+  preyLikely: 'calc.meta.winsLikely',
+  even: 'calc.meta.even',
+  threatLikely: 'calc.meta.losesLikely',
+  threat: 'calc.meta.loses',
+} as const
+const verdict = (m: Matchup) => t(VERDICTS[leanOf(m.threat)])
+const lean = (m: Matchup) => (m.threat > 0.55 ? 'threat' : m.threat < 0.45 ? 'prey' : 'even')
+/** The meter's bar, from its middle: toward the right a threat, toward the left prey. */
+const meterStyle = (m: Matchup) => {
+  const w = Math.abs(m.threat - 0.5) * 100
+  return m.threat >= 0.5 ? { left: '50%', width: `${w}%` } : { left: `${50 - w}%`, width: `${w}%` }
+}
+
+const TOP = 15
 const all = shallowRef(false)
 const name = (id: PokemonId) => refName(pokemon(id))
-/** What it shows, said in its heading's tooltip. */
+const moveName = (id: MoveId) => refName(move(id))
 const intro = computed(() =>
   yourId.value
-    ? t(mode.value === 'attack' ? 'calc.meta.introAttack' : 'calc.meta.introDefend', {
+    ? t(view.value === 'matchups' ? 'calc.meta.introMatchups' : 'calc.meta.introAttack', {
         name: name(yourId.value),
-        n: foes.value.length,
+        n: rows.value?.length ?? Number(top.value),
       })
-    : undefined,
+    : '',
 )
-const kindOf = (h: Hit | null | undefined): KoKind => koKind(h)
-const moveName = (id: MoveId) => refName(move(id))
 </script>
 
 <template>
-  <details class="panel banded meta" :open @toggle="onToggle">
-    <summary>{{ t('calc.meta.title') }}</summary>
-    <template v-if="open">
-      <div class="meta-head">
-        <SegmentedControl v-model="mode" class="soft" :label="t('calc.meta.show')" :options="modes" />
-        <SegmentedControl v-model="top" class="soft" :label="t('calc.meta.top')" :options="tops" />
+  <section class="panel meta" :class="{ working: working && rows }">
+    <h2 class="meta-title">{{ t('calc.meta.title') }}</h2>
+    <div class="meta-head">
+      <SegmentedControl v-model="view" class="soft" :label="t('calc.meta.show')" :options="views" />
+      <SegmentedControl v-model="top" class="soft" :label="t('calc.meta.top')" :options="tops" />
+    </div>
+    <p class="muted intro">{{ yourId ? `${intro} ${t('calc.meta.tap')}` : t('calc.meta.pickYours') }}</p>
+    <template v-if="yourId && rows">
+      <!-- How yours does against the whole of it, by usage: one on one, its hits, theirs. -->
+      <div class="summary">
+        <div class="stat">
+          <span class="stat-label">{{ t('calc.meta.summary.duel') }}</span>
+          <span class="share-bar" aria-hidden="true"
+            ><span class="good" :style="{ width: pct(summary.wins) }"></span><span class="rest"></span
+            ><span class="bad" :style="{ width: pct(summary.loses) }"></span
+          ></span>
+          <span class="stat-text">{{
+            t('calc.meta.beats', { wins: percent(summary.wins), loses: percent(summary.loses) })
+          }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">{{ t('calc.meta.summary.yours') }}</span>
+          <span class="share-bar" aria-hidden="true"
+            ><span class="good" :style="{ width: pct(summary.yourOne) }"></span
+            ><span class="good-light" :style="{ width: pct(Math.max(0, summary.yourTwo - summary.yourOne)) }"></span
+          ></span>
+          <span class="stat-text">{{
+            t('calc.meta.koShare', { one: percent(summary.yourOne), two: percent(summary.yourTwo) })
+          }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">{{ t('calc.meta.summary.theirs') }}</span>
+          <span class="share-bar" aria-hidden="true"
+            ><span class="bad" :style="{ width: pct(summary.theirOne) }"></span
+            ><span class="bad-light" :style="{ width: pct(Math.max(0, summary.theirTwo - summary.theirOne)) }"></span
+          ></span>
+          <span class="stat-text">{{
+            t('calc.meta.koYou', { one: percent(summary.theirOne), two: percent(summary.theirTwo) })
+          }}</span>
+        </div>
+        <p class="muted by-usage">{{ t('calc.meta.byUsage') }}</p>
       </div>
-      <p class="muted intro">{{ yourId ? `${intro} ${t('calc.meta.tap')}` : t('calc.meta.pickYours') }}</p>
-      <template v-if="yourId && foes.length">
-        <!-- Your moves: a column each, headed by how much of the meta it knocks out. -->
-        <template v-if="mode === 'attack'">
-          <p v-if="!yourMoves.length" class="muted">{{ t('calc.meta.noMoves') }}</p>
-          <div v-else class="table-wrap">
-            <table class="grid">
+
+      <!-- The matchups, a row each. -->
+      <template v-if="view === 'matchups'">
+        <SegmentedControl
+          v-model="sort"
+          class="soft sort"
+          :label="t('calc.meta.sort')"
+          :tip="t('calc.meta.sortTip')"
+          :options="sorts"
+        />
+        <div class="table-wrap">
+          <table class="grid matchups">
+            <thead>
+              <tr>
+                <th class="who-col" scope="col">{{ t('calc.meta.pokemon') }}</th>
+                <th v-tip="t('calc.meta.threatTip')" scope="col" class="meter-col">{{ t('calc.meta.threat') }}</th>
+                <th scope="col" class="speed-col">{{ t('calc.meta.speed') }}</th>
+                <th scope="col">{{ t('calc.meta.yourHit') }}</th>
+                <th scope="col">{{ t('calc.meta.theirHit') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="m in sorted.slice(0, all ? undefined : TOP)" :key="m.id">
+                <th scope="row" class="who-col">
+                  <button type="button" class="who" @click="emit('pick', m.set)">
+                    <PokemonIcon :id="m.id" />
+                    <span class="who-text">
+                      <span class="who-name">{{ name(m.id) }}</span>
+                      <span class="who-usage muted">{{ percent(m.usage) }}</span>
+                    </span>
+                  </button>
+                </th>
+                <td class="meter-col" :class="lean(m)">
+                  <span class="meter" aria-hidden="true"><span class="meter-fill" :style="meterStyle(m)"></span></span>
+                  <span class="meter-text">{{ verdict(m) }}</span>
+                </td>
+                <td class="speed-col" :class="m.duel ? `order-${m.duel.first}` : ''">
+                  {{ m.duel ? t(ORDER[m.duel.first]) : '' }}
+                </td>
+                <td class="cell mine" :class="koKind(m.mine)">
+                  <template v-if="m.mine">
+                    <span class="cell-move"
+                      ><TypeIcon :type="MOVES[m.mine.move].type" />{{ moveName(m.mine.move) }}</span
+                    >
+                    <span class="cell-ko">{{ short(m.mine) }}</span>
+                    <span class="cell-range muted">{{ range(m.mine) }}</span>
+                  </template>
+                  <span v-else class="muted">{{ t('calc.meta.nothing') }}</span>
+                </td>
+                <td class="cell theirs" :class="koKind(m.theirs)">
+                  <template v-if="m.theirs">
+                    <span class="cell-move"
+                      ><TypeIcon :type="MOVES[m.theirs.move].type" />{{ moveName(m.theirs.move) }}</span
+                    >
+                    <span class="cell-ko">{{ short(m.theirs) }}</span>
+                    <span class="cell-range muted">{{ range(m.theirs) }}</span>
+                  </template>
+                  <span v-else class="muted">{{ t('calc.meta.nothing') }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <MoreToggle v-if="sorted.length > TOP" v-model:all="all" :n="sorted.length" :top="TOP" />
+      </template>
+
+      <!-- Your moves: a column each, headed by how much of the meta it knocks out. -->
+      <template v-else>
+        <p v-if="!yourMoves.length" class="muted">{{ t('calc.meta.noMoves') }}</p>
+        <template v-else>
+          <div class="table-wrap">
+            <table class="grid by-move">
               <thead>
                 <tr>
                   <th class="who-col" scope="col">{{ t('calc.meta.pokemon') }}</th>
@@ -167,23 +293,28 @@ const moveName = (id: MoveId) => refName(move(id))
                     <span class="move-head"><TypeIcon :type="MOVES[s.mv].type" />{{ moveName(s.mv) }}</span>
                     <span class="ko-share">
                       <span class="share-bar" aria-hidden="true"
-                        ><span class="one" :style="{ width: pct(s.one) }"></span
-                        ><span class="two" :style="{ width: pct(Math.max(0, s.two - s.one)) }"></span
+                        ><span class="good" :style="{ width: pct(s.one) }"></span
+                        ><span class="good-light" :style="{ width: pct(Math.max(0, s.two - s.one)) }"></span
                       ></span>
-                      <span class="share-text">{{ t('calc.meta.koShare', { one: pct(s.one), two: pct(s.two) }) }}</span>
+                      <span class="share-text">{{
+                        t('calc.meta.koShare', { one: percent(s.one), two: percent(s.two) })
+                      }}</span>
                     </span>
                   </th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="r in attackRows.slice(0, all ? undefined : TOP)" :key="r.id">
+                <tr v-for="m in (rows ?? []).slice(0, all ? undefined : TOP)" :key="m.id">
                   <th scope="row" class="who-col">
-                    <button type="button" class="who" @click="emit('pick', r.set)">
-                      <PokemonIcon :id="r.id" />
-                      <span class="who-name">{{ name(r.id) }}</span>
+                    <button type="button" class="who" @click="emit('pick', m.set)">
+                      <PokemonIcon :id="m.id" />
+                      <span class="who-text">
+                        <span class="who-name">{{ name(m.id) }}</span>
+                        <span class="who-usage muted">{{ percent(m.usage) }}</span>
+                      </span>
                     </button>
                   </th>
-                  <td v-for="(h, j) in r.hits" :key="j" class="cell" :class="kindOf(h)">
+                  <td v-for="(h, j) in m.hits" :key="j" class="cell" :class="koKind(h)">
                     <span class="cell-ko" :class="{ muted: !h || h.none }">{{ short(h) }}</span>
                     <span class="cell-range muted">{{ range(h) }}</span>
                   </td>
@@ -191,71 +322,26 @@ const moveName = (id: MoveId) => refName(move(id))
               </tbody>
             </table>
           </div>
-          <MoreToggle v-if="attackRows.length > TOP" v-model:all="all" :n="attackRows.length" :top="TOP" />
-        </template>
-
-        <!-- Their hardest hits on yours. -->
-        <template v-else>
-          <div class="defend-summary">
-            <span class="share-bar wide" aria-hidden="true"
-              ><span class="one" :style="{ width: pct(defendSummary.one) }"></span
-              ><span class="two" :style="{ width: pct(Math.max(0, defendSummary.two - defendSummary.one)) }"></span
-            ></span>
-            <span>{{ t('calc.meta.koYou', { one: pct(defendSummary.one), two: pct(defendSummary.two) }) }}</span>
-          </div>
-          <div class="table-wrap">
-            <table class="grid theirs">
-              <thead>
-                <tr>
-                  <th class="who-col" scope="col">{{ t('calc.meta.pokemon') }}</th>
-                  <th scope="col">{{ t('calc.meta.best') }}</th>
-                  <th scope="col" class="next-col">{{ t('calc.meta.next') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="r in defendRows.slice(0, all ? undefined : TOP)" :key="r.id">
-                  <th scope="row" class="who-col">
-                    <button type="button" class="who" @click="emit('pick', r.set)">
-                      <PokemonIcon :id="r.id" />
-                      <span class="who-name">{{ name(r.id) }}</span>
-                    </button>
-                  </th>
-                  <td class="cell best" :class="kindOf(r.best)">
-                    <template v-if="r.best">
-                      <span class="cell-move"
-                        ><TypeIcon :type="MOVES[r.best.move].type" />{{ moveName(r.best.move) }}</span
-                      >
-                      <span class="cell-ko" :class="{ muted: !r.best || r.best.none }">{{ short(r.best) }}</span>
-                      <span class="cell-range muted">{{ range(r.best) }}</span>
-                      <!-- On phones, its next hardest under it, in place of a column of its own. -->
-                      <span v-if="r.next" class="next-inline muted"
-                        >{{ t('calc.meta.next') }}: {{ moveName(r.next.move) }} {{ range(r.next) }}</span
-                      >
-                    </template>
-                    <span v-else class="muted">{{ t('calc.meta.nothing') }}</span>
-                  </td>
-                  <td class="cell next-col" :class="kindOf(r.next)">
-                    <template v-if="r.next">
-                      <span class="cell-move"
-                        ><TypeIcon :type="MOVES[r.next.move].type" />{{ moveName(r.next.move) }}</span
-                      >
-                      <span class="cell-range muted">{{ range(r.next) }}</span>
-                    </template>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <MoreToggle v-if="defendRows.length > TOP" v-model:all="all" :n="defendRows.length" :top="TOP" />
+          <MoreToggle v-if="rows.length > TOP" v-model:all="all" :n="rows.length" :top="TOP" />
         </template>
       </template>
     </template>
-  </details>
+    <p v-else-if="yourId && working" class="muted">{{ t('calc.meta.working') }}</p>
+  </section>
 </template>
 
 <style scoped>
 .meta {
   margin: 0;
+  min-width: 0;
+  transition: opacity 0.15s;
+}
+.meta.working {
+  opacity: 0.6;
+}
+.meta-title {
+  margin: 0 0 10px;
+  font-size: 1.1em;
 }
 /* Its choices on one row where they fit. */
 .meta-head {
@@ -265,8 +351,37 @@ const moveName = (id: MoveId) => refName(move(id))
   gap: 8px 16px;
 }
 .intro {
-  margin: 6px 0 10px;
+  margin: 6px 0 12px;
   font-size: 0.85em;
+}
+/* How yours does against the whole of it: three bars side by side, one under the other where they don't fit. */
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 8px 16px;
+  margin-bottom: 14px;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.stat-label {
+  font-weight: bold;
+  font-size: 0.85em;
+}
+.stat-text {
+  font-size: 0.85em;
+  color: var(--muted);
+}
+.by-usage {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.8em;
+}
+.sort {
+  margin-bottom: 8px;
 }
 .table-wrap {
   overflow-x: auto;
@@ -308,8 +423,29 @@ const moveName = (id: MoveId) => refName(move(id))
 .who:hover .who-name {
   text-decoration: underline;
 }
+.who-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
 .who-name {
   font-weight: bold;
+}
+.who-usage {
+  font-size: 0.8em;
+  font-variant-numeric: tabular-nums;
+}
+.speed-col {
+  width: 1%;
+  white-space: nowrap;
+  font-size: 0.85em;
+}
+.order-a {
+  color: var(--good);
+  font-weight: bold;
+}
+.order-b {
+  color: var(--bad);
 }
 .move-col {
   min-width: 9em;
@@ -327,44 +463,36 @@ const moveName = (id: MoveId) => refName(move(id))
   margin-top: 4px;
   font-size: 0.85em;
 }
-/* How much of the meta a move knocks out: in one hit, solid; in two, lighter; the rest empty. */
+/* How much of the meta: in one hit, solid; in two, lighter; the rest empty (one on one, its middle undecided). */
 .share-bar {
   display: flex;
-  height: 6px;
+  height: 8px;
   background: var(--panel-alt);
   border: 1px solid var(--ink);
 }
-.share-bar.wide {
+.share-bar .rest {
   flex: 1;
-  min-width: 120px;
-  height: 10px;
 }
-.share-bar .one {
+.share-bar .good {
   background: var(--good);
 }
-.share-bar .two {
+.share-bar .good-light {
   background: color-mix(in srgb, var(--good) 40%, var(--panel));
 }
-.theirs .share-bar .one,
-.defend-summary .one {
+.share-bar .bad {
   background: var(--bad);
 }
-.defend-summary .two {
+.share-bar .bad-light {
   background: color-mix(in srgb, var(--bad) 40%, var(--panel));
 }
 .share-text {
   color: var(--muted);
 }
-.defend-summary {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 12px;
-  margin-bottom: 8px;
-}
 .cell {
-  white-space: nowrap;
   font-variant-numeric: tabular-nums;
+}
+.by-move .cell {
+  white-space: nowrap;
 }
 .cell-ko {
   font-weight: bold;
@@ -377,10 +505,11 @@ const moveName = (id: MoveId) => refName(move(id))
   font-size: 0.9em;
 }
 .cell-move {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 5px;
-  margin-right: 8px;
+  font-size: 0.85em;
+  white-space: nowrap;
 }
 /* Your knockouts good news, theirs bad: the cell tinted by how many hits it takes. */
 .cell.ohko {
@@ -389,31 +518,67 @@ const moveName = (id: MoveId) => refName(move(id))
 .cell.two {
   background: color-mix(in srgb, var(--good) 9%, transparent);
 }
-.theirs .cell.ohko {
+.cell.theirs.ohko {
   background: color-mix(in srgb, var(--bad) 22%, transparent);
 }
-.theirs .cell.two {
+.cell.theirs.two {
   background: color-mix(in srgb, var(--bad) 9%, transparent);
 }
-.next-inline {
-  display: none;
+/* The threat meter: a bar from its middle, toward the right a threat, toward the left prey. */
+.meter-col {
+  width: 6.5em;
+  min-width: 6.5em;
+}
+/* The matchups' cells their move, then their verdict and range under it. */
+.matchups .cell-ko,
+.matchups .cell-range {
+  display: block;
+  margin: 0;
+}
+.meter {
+  position: relative;
+  display: block;
+  height: 8px;
+  background: var(--panel-alt);
+  border: 1px solid var(--ink);
+}
+.meter::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  left: 50%;
+  width: 1px;
+  background: var(--ink);
+}
+.meter-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--muted);
+}
+.threat .meter-fill {
+  background: var(--bad);
+}
+.prey .meter-fill {
+  background: var(--good);
+}
+.meter-text {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.8em;
+}
+.threat .meter-text {
+  color: var(--bad);
+  font-weight: bold;
+}
+.prey .meter-text {
+  color: var(--good);
+  font-weight: bold;
 }
 @media (max-width: 720px) {
-  .next-col {
-    display: none;
-  }
-  .next-inline {
-    display: block;
-    font-size: 0.85em;
-  }
-  .best {
-    white-space: normal;
-  }
-  .controls {
-    margin-left: 0;
-  }
-  /* Narrow, each Pokémon its icon and each cell's range under its verdict, the Pokémon kept
-  in view as the moves scroll sideways. */
+  /* Narrow, each Pokémon its icon and usage, kept in view as the table scrolls sideways; each cell's range under its
+  verdict. */
   .grid .who-col {
     width: auto;
     position: sticky;
@@ -421,10 +586,12 @@ const moveName = (id: MoveId) => refName(move(id))
     z-index: 1;
     background: var(--panel);
   }
-  /* Its icon alone, its name read out but not shown. */
   .who {
     flex-direction: column;
     gap: 2px;
+  }
+  .who-text {
+    align-items: center;
   }
   .who-name {
     position: absolute;
@@ -437,10 +604,14 @@ const moveName = (id: MoveId) => refName(move(id))
   .move-col {
     min-width: 6.5em;
   }
-  .grid:not(.theirs) .cell-ko,
-  .grid:not(.theirs) .cell-range {
+  .cell-ko,
+  .cell-range {
     display: block;
     margin: 0;
+  }
+  .meter-col {
+    width: 5.5em;
+    min-width: 5.5em;
   }
 }
 </style>

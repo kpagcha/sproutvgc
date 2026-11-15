@@ -535,6 +535,24 @@ export const router = createRouter({
         ...inArea('tools', 'damageSolver'),
       },
     },
+    {
+      // Your Pokémon against the meta, its third tab: the same Pokémon and field (the URL's), yours alone on the page
+      // beside its matchups with the most used, a row tapped making it the opponent on the damage tab.
+      path: '/tools/calc/meta',
+      name: 'calcMeta',
+      component: () => import('@/views/CalcView.vue'),
+      props: { against: true },
+      meta: {
+        titleKey: 'title.calcMeta',
+        descKey: 'desc.calcMeta',
+        headKey: 'head.calcMeta',
+        keywordsKey: 'keywords.calcMeta',
+        dexNames: true,
+        descriptions: ['ability', 'move', 'item', 'condition'],
+        setup: (query) => (query.a || query.b ? stringQuery(query, ['meta']) : null),
+        ...inArea('tools', 'calc'),
+      },
+    },
     { path: '/tools/calc/inverse', redirect: (to) => ({ name: 'calcInverse', query: to.query, hash: to.hash }) },
     {
       // Pokémon's Speeds compared, linked to and from the speed tiers: yours against opponents, in speed order
