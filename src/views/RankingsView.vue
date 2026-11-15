@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router'
 import { ability, item, move, pokemon, type MoveId, type PokemonId } from '@/data/dex'
 import { REGULATION } from '@/data/format'
 import { gameStats, gameTotal, loadLearnsets, POKEMON, splitForme, STATS, type StatId } from '@/data/pokemon'
-import { sinceLabel, GENERATED_SNAPSHOTS, has, percent } from '@/data/meta'
+import { sinceLabel, has, percent } from '@/data/meta'
 import { baselineOf, eventsOf, loadEventUsage, type EventUsage } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
@@ -37,6 +37,8 @@ import RankingsHead from '@/components/RankingsHead.vue'
 import MoreToggle from '@/components/MoreToggle.vue'
 import RankingTrends from '@/components/RankingTrends.vue'
 import RankingsTabs from '@/components/RankingsTabs.vue'
+import MetaTypes from '@/components/MetaTypes.vue'
+import { usePreviousMeta } from '@/composables/usePreviousMeta'
 
 // The regulation's Pokémon by usage, from the meta snapshot shown (`useMeta`: the one picked, on this page or another,
 // when there are several, of any regulation and month generated, `MetaDialog`). Columns come and go with what the snapshot has. Its links are `AppLink`s and its icons
@@ -75,7 +77,8 @@ const termSets = computed(() => allFilters(filters.value).some((x) => x.kind ===
 // Trends: against the dataset before the one shown (`previous`, the month before), each Pokémon's rank and usage then: a
 // mark by its rank (up, down or new), and the panel of those that rose and fell the most (`RankingTrends`). None for the
 // first dataset there is.
-const previous = computed(() => GENERATED_SNAPSHOTS.find((s) => s.id === snapshot.value?.previous))
+// Its data too, for the Types panel's changes (`MetaTypes`), loaded on its own.
+const { previous, prevData } = usePreviousMeta(snapshot)
 /** The trends' panel, once the data before is in. */
 const trendsShown = computed(() => !!(snapshot.value && previous.value && data.value))
 
@@ -141,10 +144,13 @@ const tournamentTips = computed(() => ({
   new: t('trends.tournamentNewTip'),
   none: t('trends.tournamentSteady'),
 }))
+/** The Types panel: how the meta leans by type, from the data shown, whatever the list's search and filters. */
+const typesShown = computed(() => !!(snapshot.value && data.value && has(snapshot.value, 'usage')))
 /** The page's panels, as the row of links under the tabs lists them. */
 const sections = computed(() => [
   { id: 'sec-list', label: t('trends.list') },
   ...(trendsShown.value ? [{ id: 'sec-trends', label: t('trends.title') }] : []),
+  ...(typesShown.value ? [{ id: 'sec-types', label: t('metaTypes.title') }] : []),
   ...(tournamentTrends.value ? [{ id: 'sec-tournament-trends', label: t('trends.tournamentTitle') }] : []),
 ])
 const since = computed(() => (previous.value ? sinceLabel(previous.value, snapshot.value) : ''))
@@ -748,6 +754,7 @@ const termRows = useId()
         ><span v-if="row.forme" class="forme">{{ row.forme }}</span></template
       >
     </RankingTrends>
+    <MetaTypes v-if="typesShown" id="sec-types" class="section" :data="data!" :prev-data="prevData" :since />
     <!-- The tournaments' trends: the latest weekend of official events against the events before it. -->
     <RankingTrends
       v-if="tournamentTrends"

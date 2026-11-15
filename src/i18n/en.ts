@@ -2142,6 +2142,37 @@ export const messages = {
   'tiers.powerNote':
     "With moves: its best common move's power as it typically hits, with STAB and its ability, no item.",
   'overview.monAbout': 'At its most common set, against every Pokémon of the meta at theirs, weighted by usage.',
+  'metaTypes.title': 'Types',
+  'metaTypes.about':
+    'How the meta leans by type, weighted by usage: each Pokémon counts by its share of teams, a Mega apart from the Pokémon it changes from.',
+  'metaTypes.show': 'Show',
+  'metaTypes.pokemon': "The meta's Pokémon",
+  'metaTypes.single': 'Single',
+  'metaTypes.dual': 'Dual',
+  'metaTypes.weakTo': 'Weak to',
+  'metaTypes.singleAbout': "Each type's share of the meta's Pokémon; one with two types counts for both.",
+  'metaTypes.dualAbout': "Each type combination's share of the meta's Pokémon; the diagonal, those of one type alone.",
+  'metaTypes.weakAbout':
+    "Each attacking type against the meta's Pokémon: the share it hits super effectively, and the share resisting it, by their types alone.",
+  'metaTypes.dualKey':
+    'Darker is more common; numbers in percent where they fit. Hover or tap a cell for its share and Pokémon.',
+  'metaTypes.dualTop': 'Most common',
+  'metaTypes.cellTip': '{types}: {share} · {mons}',
+  'metaTypes.cellNone': '{types}: none',
+  'metaTypes.weakShare': 'Weak to it',
+  'metaTypes.resistShare': 'Resist it',
+  'metaTypes.weakToTip': '{type} hits {weak} of the meta super effectively; {resisted} resist it',
+  'metaTypes.attacks': 'Attacks',
+  'metaTypes.attackTypes': 'Types',
+  'metaTypes.against': 'Against',
+  'metaTypes.attacksAbout':
+    "Each type's share of the meta's damaging moves, each Pokémon's by the share of its sets running it.",
+  'metaTypes.againstAbout':
+    "Against each defending type, the share of the meta's attacks super effective on it, and the share it resists, by the type chart alone.",
+  'metaTypes.hitShare': 'Super effective',
+  'metaTypes.resistedShare': 'Resisted',
+  'metaTypes.againstTip': "{weak} of the meta's attacks hit {type} super effectively; it resists {resisted}",
+  'metaTypes.changeSince': 'Changes in percentage points since {dates}.',
   'trends.title': 'Trends',
   'trends.tournamentTitle': 'Tournament trends',
   'trends.tournamentAbout': '{now} against {before}.',
