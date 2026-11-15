@@ -4,6 +4,10 @@ export interface ConfirmOptions {
   message: string
   /** Label of the confirming button. */
   confirm: string
+  /** What the message is about, a line each under it. */
+  details?: string[]
+  /** Label of the other button, Cancel unless given; Esc and a click outside choose it too. */
+  cancel?: string
   /** Style the confirming button as destructive, and focus Cancel first. */
   danger?: boolean
 }
