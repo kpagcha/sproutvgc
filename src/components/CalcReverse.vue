@@ -215,7 +215,12 @@ const goalRows = computed(() =>
       : goal.value.rows,
 )
 /** What the rows say, a sentence before them, naming the opponent. */
-const goalNote = computed(() => t(itemOnly.value ? 'calc.goal.noteItemSets' : 'calc.goal.noteSets'))
+const goalNote = computed(() => {
+  if (itemOnly.value) return t('calc.goal.noteItemSets')
+  // One item alone (its Mega Stone, or one it's set to hold): named, not "each item".
+  const only = goalRows.value.length === 1 ? goalRows.value[0]! : null
+  return only ? t('calc.goal.noteSetsOne', { item: only.items.map(itemName).join(' / ') }) : t('calc.goal.noteSets')
+})
 /** An item's row's tooltip: those alike merged into it, and its share of your sets. */
 const itemTip = (r: GoalRow) =>
   [

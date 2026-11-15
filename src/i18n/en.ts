@@ -391,7 +391,9 @@ export const messages = {
   'calc.goal.useTip': 'Gets it {pct} of the time. Set yours to this build and see its damage',
   'calc.goal.theirTip': "Gives what you entered against {pct} of your Pokémon's likely sets",
   'calc.goal.noteSets':
-    "The fewest stat points each item needs to get the hits you entered half the time, 90% of the time or every time, or its best when it can't.",
+    "The fewest stat points each item needs to get the hits you entered half the time, 90% of the time or every time, or the closest it gets when it can't.",
+  'calc.goal.noteSetsOne':
+    "The fewest stat points needed with {item} to get the hits you entered half the time, 90% of the time or every time, or the closest it gets when it can't.",
   'calc.goal.noteItemSets': 'How likely the hits you entered are with each item, given your nature and stat points.',
   'calc.goal.never': 'No item or stat points of yours give what you entered.',
   'calc.goal.tooMany':
@@ -432,6 +434,7 @@ export const messages = {
   'calc.band.attacked': 'Hit {n}×',
   'calc.hits.title': 'Hits',
   'calc.hits.needs': 'Add the hits you saw, or the outcomes you want.',
+  'calc.hits.needsParts': 'Pick the move and what it did for a hit, or who moved first.',
   'calc.hits.another': 'Add another hit, or',
   'calc.hits.next': 'continue to see what fits',
   'calc.hits.close': 'Close',
