@@ -174,7 +174,6 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
         <button
           v-for="k in ['a', 'b'] as const"
           :key="k"
-          v-tip="name(k)"
           type="button"
           class="btn choice"
           :class="[k === 'a' ? 'yours' : 'opponent', { on: first === k }]"

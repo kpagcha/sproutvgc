@@ -14,6 +14,7 @@ import {
   reverseDamage,
   type Observation,
   type OpponentUnknowns,
+  type ReverseColumn,
   type ReverseResult,
   type ReverseRow,
   type StatRange,
@@ -215,12 +216,12 @@ const goalRows = computed(() =>
       : goal.value.rows,
 )
 /** What the rows say, a sentence before them, naming the opponent. */
-const goalNote = computed(() => {
-  if (itemOnly.value) return t('calc.goal.noteItemSets')
-  // One item alone (its Mega Stone, or one it's set to hold): named, not "each item".
-  const only = goalRows.value.length === 1 ? goalRows.value[0]! : null
-  return only ? t('calc.goal.noteSetsOne', { item: only.items.map(itemName).join(' / ') }) : t('calc.goal.noteSets')
-})
+/** One row alone: your item as set (its Mega Stone, or one it holds), or none of them changing the hits; then the item
+ * has nothing to do with the answer, and goes unsaid. */
+const oneRow = computed(() => !itemOnly.value && goalRows.value.length === 1)
+const goalNote = computed(() =>
+  t(itemOnly.value ? 'calc.goal.noteItemSets' : oneRow.value ? 'calc.goal.noteSetsOne' : 'calc.goal.noteSets'),
+)
 /** An item's row's tooltip: those alike merged into it, and its share of your sets. */
 const itemTip = (r: GoalRow) =>
   [
@@ -231,6 +232,18 @@ const itemTip = (r: GoalRow) =>
     .join(' · ') || undefined
 const useYours = (b: GoalBuild) => emit('useYours', { nature: b.nature, points: b.points, item: b.item })
 const itemName = (id: ItemId | null) => (id ? refName(item(id)) : t('builder.noItem'))
+/** The column of the items alike that aren't one or two: the most of them, three or more, beside others. */
+const restColumn = computed(() => {
+  const cols = result.value?.columns ?? []
+  if (cols.length < 2) return -1
+  const n = Math.max(...cols.map((c) => c.items.length))
+  return n > 2 ? cols.findIndex((c) => c.items.length === n) : -1
+})
+/** A column's tooltip: its items by name, and how often its Pokémon's sets run them. */
+const columnTip = (c: ReverseColumn) =>
+  [c.items.map(itemName).join(', '), c.share ? t('calc.reverse.itemTip', { pct: percent(c.share) }) : '']
+    .filter(Boolean)
+    .join(' · ')
 const fitTip = (f: number) => t('calc.reverse.fitTip', { pct: percent(f) })
 /** A build used: its nature and points, and its item worked out, the item likeliest to go with it (its fit by the
  * item's share), else its most run. */
@@ -291,7 +304,7 @@ function use(r: ReverseRow) {
           <!-- A line per item: what it reaches of the thresholds and the most, each a build to use. -->
           <ul v-else class="goal-list">
             <li v-for="(r, ri) in goalRows" :key="ri" class="goal-row" :class="{ curved: r.curve }">
-              <span class="goal-item">
+              <span v-if="!oneRow" class="goal-item">
                 <ItemIcon v-if="r.items[0]" :id="r.items[0]" />
                 <span v-else class="no-icon" aria-hidden="true"></span>
                 <!-- Its share of your sets, and those alike merged into it, on hover. -->
@@ -412,28 +425,24 @@ function use(r: ReverseRow) {
                     <span v-if="!result.itemsVary || result.columns.length === 1" class="muted">{{
                       t('calc.reverse.fits')
                     }}</span>
-                    <template v-else>
-                      <!-- Its items' icons; three or more alike, its most common's and how many more, every one named on
-                         hover. -->
-                      <span class="items">
-                        <template v-for="it in c.items.length > 2 ? c.items.slice(0, 1) : c.items" :key="it ?? '-'">
-                          <span v-if="it" v-tip="itemName(it)" class="item" role="img" :aria-label="itemName(it)"
-                            ><ItemIcon :id="it"
-                          /></span>
-                          <span v-else class="muted no-item">{{ itemName(null) }}</span>
-                        </template>
-                        <span
-                          v-if="c.items.length > 2"
-                          v-tip="c.items.map(itemName).join(', ')"
-                          class="more-items"
-                          :aria-label="c.items.map(itemName).join(', ')"
-                          >+{{ c.items.length - 1 }}</span
-                        >
-                      </span>
-                      <span v-if="c.share" v-tip="t('calc.reverse.itemTip')" class="muted share">{{
-                        percent(c.share)
-                      }}</span>
-                    </template>
+                    <!-- Its items' icons alone, three or more alike its most common's and how many more; what they
+                         are and how often they're run on hover (a tap on phones), so no number here reads as how
+                         likely what was entered is. -->
+                    <span v-else v-tip="columnTip(c)" class="items" role="img" tabindex="0" :aria-label="columnTip(c)">
+                      <!-- The rest, those changing nothing apart, not one of them: no icon to read as the one that
+                           matters. -->
+                      <span v-if="ci === restColumn" class="muted rest">{{ t('calc.reverse.otherItems') }}</span>
+                      <template
+                        v-for="it in ci === restColumn ? [] : c.items.length > 2 ? c.items.slice(0, 1) : c.items"
+                        :key="it ?? '-'"
+                      >
+                        <span v-if="it" class="item"><ItemIcon :id="it" /></span>
+                        <span v-else class="muted no-item">{{ itemName(null) }}</span>
+                      </template>
+                      <span v-if="ci !== restColumn && c.items.length > 2" class="more-items"
+                        >+{{ c.items.length - 1 }}</span
+                      >
+                    </span>
                   </th>
                 </tr>
               </thead>
@@ -813,6 +822,7 @@ function use(r: ReverseRow) {
   justify-content: center;
   gap: 2px;
   white-space: normal;
+  cursor: help;
 }
 .item {
   display: inline-flex;
@@ -821,6 +831,11 @@ function use(r: ReverseRow) {
   font-size: 0.875em;
 }
 /* How many more items, alike, after the most common one's icon: a small badge, every one named on hover. */
+.rest {
+  font-size: 0.875em;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
 .more-items {
   padding: 0 4px;
   font-size: 0.8em;
@@ -839,10 +854,6 @@ function use(r: ReverseRow) {
   height: 0;
   overflow: hidden;
   visibility: hidden;
-}
-.share {
-  display: block;
-  font-size: 0.875em;
 }
 .cell {
   vertical-align: middle;

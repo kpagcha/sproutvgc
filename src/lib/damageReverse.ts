@@ -254,6 +254,30 @@ export interface ReverseResult {
   itemsVary: boolean
 }
 
+/**
+ * The table's columns, its items, those alike in every row's fit merged into one (their shares added), the most run
+ * first; the rows' fits following. An item that changes nothing of what was entered is no column of its own, so the
+ * columns left are those that matter. Alike within a hair: fits worked out apart can differ in the last bits.
+ */
+export function mergeColumns(rows: ReverseRow[], columns: readonly ReverseColumn[]): ReverseColumn[] {
+  const order = columns.map((_, ci) => ci).sort((x, y) => (columns[y]!.share ?? 0) - (columns[x]!.share ?? 0))
+  const merged: ReverseColumn[] = []
+  const colOf: number[][] = []
+  for (const ci of order) {
+    const same = colOf.findIndex((cols) => rows.every((r) => Math.abs(r.fits[cols[0]!]! - r.fits[ci]!) < 1e-9))
+    if (same >= 0) {
+      colOf[same]!.push(ci)
+      merged[same]!.items.push(...columns[ci]!.items)
+      if (columns[ci]!.share !== null) merged[same]!.share = (merged[same]!.share ?? 0) + columns[ci]!.share
+    } else {
+      colOf.push([ci])
+      merged.push({ items: [...columns[ci]!.items], share: columns[ci]!.share })
+    }
+  }
+  for (const r of rows) r.fits = colOf.map((cols) => r.fits[cols[0]!]!)
+  return merged
+}
+
 /** The opponent at a build, from its set: its nature, points and item. */
 type Build = { nature: string | null; points: readonly number[]; item: ItemId | null }
 
@@ -649,21 +673,10 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
     columnsOf: { ii: number; it: Weighted<ItemId | null>[number] }[],
     rest: Pick<ReverseResult, 'ranges' | 'chance' | 'possible'>,
   ): ReverseResult {
-    const order = columnsOf.map((_, ci) => ci).sort((x, y) => columnsOf[y]!.it.w - columnsOf[x]!.it.w)
-    const columns: ReverseColumn[] = []
-    const colOf: number[][] = []
-    for (const ci of order) {
-      const same = colOf.findIndex((cols) => rows.every((r) => r.fits[cols[0]!] === r.fits[ci]))
-      if (same >= 0) {
-        colOf[same]!.push(ci)
-        columns[same]!.items.push(columnsOf[ci]!.it.value)
-        columns[same]!.share = (columns[same]!.share ?? 0) + columnsOf[ci]!.it.w
-      } else {
-        colOf.push([ci])
-        columns.push({ items: [columnsOf[ci]!.it.value], share: columnsOf[ci]!.it.w })
-      }
-    }
-    for (const r of rows) r.fits = colOf.map((cols) => r.fits[cols[0]!]!)
+    const columns = mergeColumns(
+      rows,
+      columnsOf.map((c) => ({ items: [c.it.value], share: c.it.w })),
+    )
     if (fixedItem) columns.forEach((c) => (c.share = null))
     return { stats: S, ...rest, rows, columns, itemsVary: !fixedItem }
   }

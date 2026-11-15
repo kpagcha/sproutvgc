@@ -393,7 +393,7 @@ export const messages = {
   'calc.goal.noteSets':
     "The fewest stat points each item needs to get the hits you entered half the time, 90% of the time or every time, or the closest it gets when it can't.",
   'calc.goal.noteSetsOne':
-    "The fewest stat points needed with {item} to get the hits you entered half the time, 90% of the time or every time, or the closest it gets when it can't.",
+    "The fewest stat points you need to get the hits you entered half the time, 90% of the time or every time, or the closest you can get when you can't.",
   'calc.goal.noteItemSets': 'How likely the hits you entered are with each item, given your nature and stat points.',
   'calc.goal.never': 'No item or stat points of yours give what you entered.',
   'calc.goal.tooMany':
@@ -420,7 +420,8 @@ export const messages = {
   'calc.reverse.spread': 'Spread',
   'calc.reverse.fits': 'Fits',
   'calc.reverse.shareTip': 'How often the meta runs this spread',
-  'calc.reverse.itemTip': 'How often the meta runs this item, among its common ones',
+  'calc.reverse.otherItems': 'Other items',
+  'calc.reverse.itemTip': 'on {pct} of its sets',
   'calc.reverse.nearest': 'Nearest fit',
   'calc.reverse.ownSet': 'As set',
   'calc.reverse.fitTip': 'Gives what you entered on {pct} of the damage rolls',
