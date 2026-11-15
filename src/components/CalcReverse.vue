@@ -186,7 +186,8 @@ function marksOf(r: GoalRow) {
   const s = goal.value!.ours[0]!
   const named = [
     ...r.cells.map((c, ci) => c && { c, name: thresholdLabel(THRESHOLDS[ci]!) }),
-    r.best && { c: r.best, name: t('calc.goal.mostAt', { pct: percent(r.best.coverage) }) },
+    // The best only short of always: there, the same build.
+    r.best && !r.cells.at(-1) && { c: r.best, name: t('calc.goal.mostAt', { pct: percent(r.best.coverage) }) },
   ].filter((x): x is { c: GoalBuild; name: string } => !!x)
   const byP = new Map<number, { p: number; names: string[]; build: GoalBuild }>()
   for (const { c, name } of named) {
@@ -363,7 +364,7 @@ function use(r: ReverseRow) {
                       </button>
                     </span>
                   </template>
-                  <span v-if="r.best" class="goal-pick">
+                  <span v-if="r.best && !r.cells.at(-1)" class="goal-pick">
                     <span class="muted">{{ t('calc.goal.mostAt', { pct: percent(r.best.coverage) }) }}</span>
                     <button
                       v-tip="t('calc.goal.useTip', { pct: percent(r.best.coverage) })"
@@ -374,7 +375,7 @@ function use(r: ReverseRow) {
                       {{ buildLabel(r.best, goal.ours) }}
                     </button>
                   </span>
-                  <span v-else class="muted">{{ t('calc.goal.none') }}</span>
+                  <span v-else-if="!r.best" class="muted">{{ t('calc.goal.none') }}</span>
                 </span>
               </span>
             </li>
@@ -645,13 +646,14 @@ function use(r: ReverseRow) {
 .strip {
   display: grid;
   grid-template-columns: repeat(33, minmax(0, 1fr));
-  height: 22px;
+  height: 40px;
   border: 1px solid var(--border);
 }
+/* Each cell a bar filled up to its chance, so the chance is seen rising with the points. */
 .strip-cell {
   min-width: 0;
   padding: 0;
-  background: color-mix(in srgb, var(--m2-bg) var(--cov), var(--panel-alt));
+  background: linear-gradient(to top, var(--m2-bg) var(--cov), var(--panel-alt) var(--cov));
   border: 0;
   cursor: pointer;
 }
