@@ -61,6 +61,9 @@ const props = defineProps<{
   pooled?: { points: readonly number[]; stats: readonly number[] }
   /** There's a step before this one to go back to (`back`). */
   canBack?: boolean
+  /** Whose set it is, when that's one of two sides (the damage calculator's): its heading a band in that side's
+   * color, its Pokémon step saying whose. */
+  side?: 'yours' | 'opponent'
 }>()
 const emit = defineEmits<{
   pick: [value: string]
@@ -114,6 +117,7 @@ watch(() => props.field, focusSearch)
 const title = computed(() => {
   const f = props.field
   if (typeof f === 'number') return t('builder.pickMove', { n: f + 1 })
+  if (f === 'pokemon' && props.side) return t(props.side === 'yours' ? 'compare.pickYours' : 'compare.pickOpponent')
   return t(`builder.pick.${f}`)
 })
 
@@ -370,7 +374,7 @@ const termRows = useId()
 
 <template>
   <div ref="root" class="picker">
-    <div class="picker-head">
+    <div class="picker-head" :class="side && `side ${side}`">
       <StepBack v-if="canBack" @back="emit('back')" />
       <h2>{{ title }}</h2>
       <button type="button" class="close" :aria-label="t('builder.closePicker')" @click="emit('close')">
@@ -554,6 +558,21 @@ const termRows = useId()
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+/* A side's: a band across the top in its color, as the side's panel's. */
+.picker-head.side {
+  margin: calc(-1 * var(--panel-pad)) calc(-1 * var(--panel-pad)) 12px;
+  padding: 10px var(--panel-pad);
+  color: var(--accent-text);
+  background: var(--accent);
+  border-bottom: 2px solid var(--ink);
+}
+.picker-head.side.opponent {
+  color: var(--opponent-text);
+  background: var(--opponent);
+}
+.picker-head.side :deep(button) {
+  color: inherit;
 }
 .picker-head h2 {
   flex: 1;

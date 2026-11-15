@@ -685,6 +685,11 @@ function setHpPoints(e: Event) {
   flex-direction: column;
   gap: 16px;
 }
+/* Its body taking the room its part has, so what's on its side, last, sits at its foot: level with the other side's
+   when the two share rows and one has more over it (an ability's condition, allies fainted). */
+.battle-body {
+  flex: 1;
+}
 /* With no Pokémon, its moves' and battle's parts have nothing: no room kept for them. */
 .results:empty,
 .battle:empty {
@@ -778,8 +783,9 @@ function setHpPoints(e: Event) {
 .mod.on {
   font-weight: bold;
 }
-/* What's on its side: a part as the others, its heading folding it. */
+/* What's on its side: a part as the others, its heading folding it; at the foot of In battle. */
 .side-box {
+  margin-top: auto;
   display: flex;
   flex-direction: column;
   gap: 10px;

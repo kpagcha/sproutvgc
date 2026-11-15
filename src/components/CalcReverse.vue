@@ -268,8 +268,11 @@ function use(r: ReverseRow) {
         <span :style="{ width: `${progress * 100}%` }"></span>
       </div>
     </div>
-    <p class="muted small asks">{{ asks }}</p>
-    <p v-if="!obs.length" class="muted intro">{{ t('calc.reverse.hint') }}</p>
+    <!-- What it works out, a choice its page gives it, and what that finds: a rule under them, apart from the answers. -->
+    <div class="choice">
+      <slot />
+      <p class="muted small asks">{{ asks }}</p>
+    </div>
     <template v-if="theirId && yourId && obs.length && (result || goal)">
       <div class="body answers" :class="{ stale: slow, two: goal && result }">
         <!-- Yours: for each of your items, the fewest points getting what the hits say against half, nine in ten and all
@@ -549,7 +552,11 @@ function use(r: ReverseRow) {
   background: var(--accent);
 }
 .asks {
-  margin: 4px 0 0;
+  margin: 10px 0 0;
+}
+.choice {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
 }
 .intro {
   margin: 10px 0 0;

@@ -4,7 +4,7 @@ import { t } from '@/i18n'
 import type { Fighter } from '@/lib/damage'
 import type { OpponentUnknowns } from '@/lib/damageReverse'
 
-// The damage solver's sides in words, for its bands and its setup's What you know.
+// The damage solver's sides in words, for its bands.
 
 /** A part of a set that can be worked out, by name. */
 export const partLabel = (p: keyof OpponentUnknowns) =>

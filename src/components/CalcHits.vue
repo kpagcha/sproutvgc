@@ -1,26 +1,23 @@
 <script setup lang="ts">
 import { computed, shallowRef } from 'vue'
-import { ChevronDown, Crosshair, Plus, Trash2, X, Zap } from '@lucide/vue'
+import { ChevronDown, Crosshair, Plus, Trash2, Zap } from '@lucide/vue'
 import { move, type MoveId } from '@/data/dex'
 import { isSpread, MOVES } from '@/data/moves'
 import { loadLearnsets, movesOf as learnsetOf } from '@/data/pokemon'
-import { t, tSlots, type MessageKey } from '@/i18n'
+import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
 import { battlerOf, damaging, statsOf, type Fighter, type HitOptions } from '@/lib/damage'
 import type { Saw } from '@/lib/damageReverse'
 import HpBar from '@/components/HpBar.vue'
 import PokemonIcon from '@/components/PokemonIcon'
-import StepBack from '@/components/StepBack.vue'
-import { useOpenState } from '@/composables/useOpenState'
 
 // The inverse damage calc's "What you saw": the hits seen, in the order entered, each a row: who hit whom (yours the
 // opponent, or the opponent yours), the move (one of the attacker's), whether it was a critical hit or, for a spread
 // move, hit one target alone, what it did (the opponent's HP lost in whole percent, as the game shows it, or yours' in
 // HP; or a knockout, survived, or a knockout on the second hit) and the defender's HP before it (full unless said: the
 // opponent's in percent, yours' in HP); the same move as often as it was seen. Then which of the two moved first, with
-// moves of the same priority. A row with no result yet counts for nothing (and isn't kept in the URL). What fits it
-// With `bare`, it's the drawer's (`SideDrawer`, wide screens, opening once both are picked): its hits alone, its
-// heading plain with a way to close it, no panel of its own. Else (`CalcReverse`, the default slot) is its readout, across its foot. Adding a hit and which moved first lead, over the hits; before both are picked, a line on what it's for.
+// moves of the same priority. A row with no result yet counts for nothing (and isn't kept in the URL). Adding a hit
+// and which moved first lead, over the hits; with none yet, a line saying what to add. Shown once both are picked.
 export interface HitDraft {
   by: 'a' | 'b'
   move: MoveId | null
@@ -33,17 +30,14 @@ export interface HitDraft {
 const props = defineProps<{
   yours: Fighter
   theirs: Fighter
-  bare?: boolean
-  canBack?: boolean
   /** Something of yours is worked out: a hit added then has its number as a goal at first. */
   goal?: boolean
 }>()
-const emit = defineEmits<{ close: []; back: []; pickMove: [i: number]; start: [] }>()
+const emit = defineEmits<{ pickMove: [i: number]; next: []; added: [] }>()
 const hits = defineModel<HitDraft[]>('hits', { required: true })
 const first = defineModel<'a' | 'b' | null>('first', { default: null })
 
 const ids = computed(() => ({ a: battlerOf(props.yours), b: battlerOf(props.theirs) }))
-const both = computed(() => !!ids.value.a && !!ids.value.b)
 const sideOf = (k: 'a' | 'b') => (k === 'a' ? props.yours : props.theirs)
 const name = (k: 'a' | 'b') => t(k === 'a' ? 'calc.yours' : 'calc.theirs')
 /** The attacker's damaging moves, from its set. */
@@ -83,6 +77,7 @@ function add(by: 'a' | 'b') {
     ...hits.value,
     { by, move: movesOf(by)[0] ?? null, saw: null, ...(before && { before }), ...(props.goal && { bound: true }) },
   ]
+  emit('added')
 }
 function setOpt(i: number, key: 'crit' | 'single', on: boolean) {
   const opts = { ...hits.value[i]!.opts, [key]: on || undefined }
@@ -148,54 +143,17 @@ const OUTCOMES = ['ko', 'lived', 'two'] as const
 const outcome = (i: number, k: (typeof OUTCOMES)[number]) =>
   patch(i, { saw: hits.value[i]!.saw?.kind === k ? null : { kind: k } })
 const numberOf = (h: HitDraft) => (h.saw && 'n' in h.saw ? h.saw.n : '')
-/** How to use it, folding: open at first, then as last left. */
-const { open: howToOpen, onToggle: onHowTo } = useOpenState('sproutvgc.calc.hitsHowTo', true)
-/** Its steps: each step's message, the controls it names in bold, as they're labeled. */
-const STEPS = ['calc.hits.step.add', 'calc.hits.step.saw', 'calc.hits.step.first'] as const satisfies MessageKey[]
-const LABELS: Record<string, MessageKey> = {
-  yours: 'calc.hits.addYours',
-  theirs: 'calc.hits.addTheirs',
-  ko: 'calc.hits.outcome.ko',
-  lived: 'calc.hits.outcome.lived',
-  two: 'calc.hits.outcome.two',
-  first: 'calc.reverse.first',
-}
-const steps = computed(() =>
-  STEPS.map((k) => tSlots(k).map((p) => (typeof p === 'string' ? { text: p } : { text: t(LABELS[p.slot]!), b: true }))),
-)
+/** A hit with its move and what it did, or which moved first: something to work out from. */
+const said = computed(() => !!first.value || hits.value.some((h) => h.move && h.saw))
 const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
 </script>
 
 <template>
-  <section class="hits" :class="bare ? 'bare' : 'panel banded'">
-    <div v-if="bare" class="bare-head">
-      <StepBack v-if="canBack" @back="emit('back')" />
-      <h2>{{ t('calc.hits.title') }}</h2>
-      <button type="button" class="close" :aria-label="t('calc.hits.close')" @click="emit('close')">
-        <X :size="20" aria-hidden="true" />
-      </button>
-    </div>
-    <h2 v-else class="band">{{ t('calc.hits.title') }}</h2>
-    <!-- Before both are picked, what it's for and the way into its setup, step by step. -->
-    <div v-if="!both" class="start">
-      <p class="start-title">{{ t('calc.start.title') }}</p>
-      <p class="muted">{{ t('calc.start.about') }}</p>
-      <button type="button" class="btn primary" @click="emit('start')">{{ t('calc.start.go') }} →</button>
-    </div>
-    <details v-else class="intro how-to" :open="howToOpen" @toggle="onHowTo">
-      <summary class="muted">{{ t('calc.hits.howTo') }}</summary>
-      <ol class="muted steps">
-        <li v-for="(parts, i) in steps" :key="i">
-          <template v-for="(p, j) in parts" :key="j"
-            ><b v-if="p.b">{{ p.text }}</b
-            ><template v-else>{{ p.text }}</template></template
-          >
-        </li>
-      </ol>
-    </details>
-    <div v-if="both" class="controls">
+  <section class="hits panel banded">
+    <h2 class="band">{{ t('calc.hits.title') }}</h2>
+    <div class="controls">
       <!-- A hit added, yours on the opponent or its on yours. -->
-      <span class="adds">
+      <span class="adds" :class="{ needed: !hits.length }">
         <button
           v-for="k in ['a', 'b'] as const"
           :key="k"
@@ -228,7 +186,7 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
         </button>
       </span>
     </div>
-    <ol v-if="both && hits.length" class="hit-list">
+    <ol v-if="hits.length" class="hit-list">
       <li v-for="(h, i) in hits" :key="i" class="hit" :class="h.by === 'a' ? 'yours' : 'opponent'">
         <!-- Who hit whom, as their icons. -->
         <span
@@ -366,41 +324,29 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
         </span>
       </li>
     </ol>
-    <slot v-if="both && !bare" />
+    <!-- Nothing said yet, in the warning's color as the controls pulsing for it; else on to what to work out. -->
+    <p v-if="!said" class="needs" role="status">{{ t('calc.hits.needs') }}</p>
+    <p v-else class="next">
+      <span class="muted">{{ t('calc.hits.another') }}</span
+      ><button type="button" class="btn primary small" @click="emit('next')">{{ t('calc.hits.next') }} →</button>
+    </p>
   </section>
 </template>
 
 <style scoped>
-.start {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
-  padding: 4px 0 6px;
-}
-.start p {
-  margin: 0;
-  max-width: 60ch;
-}
-.start-title {
-  font-weight: bold;
-}
-.start .btn {
-  margin-top: 4px;
-}
 /* Its buttons soft, as many as there are: a thin outline, no hard shadow nor lift; one on filled, outlined in ink. */
-:root:root .hits .btn {
+:root:root .hits .btn:not(.primary) {
   border-width: 1px;
   border-color: var(--border);
   box-shadow: none;
   font-weight: normal;
 }
-:root:root .hits .btn:hover:not(:disabled) {
+:root:root .hits .btn:not(.primary):hover:not(:disabled) {
   transform: none;
   box-shadow: none;
   border-color: var(--ink);
 }
-:root:root .hits .btn:active:not(:disabled) {
+:root:root .hits .btn:not(.primary):active:not(:disabled) {
   transform: none;
   background: color-mix(in srgb, var(--text) 10%, var(--panel));
 }
@@ -416,50 +362,34 @@ const spread = (mv: MoveId | null) => !!mv && !!MOVES[mv] && isSpread(MOVES[mv])
 .hits {
   margin: 0;
 }
-.bare-head {
+.needs {
+  margin: 12px 0 0;
+  font-size: 0.875em;
+  color: color-mix(in srgb, var(--warn) 65%, var(--muted));
+}
+/* No hit yet: the ways to add one outlined in the warning's color, pulsing softly, as a hit's missing result is. */
+.adds.needed .add {
+  outline: 2px dashed var(--warn);
+  outline-offset: 2px;
+  animation: wanted 1.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .adds.needed .add {
+    animation: none;
+  }
+}
+.next {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-.bare-head h2 {
-  flex: 1;
-  margin: 0;
-  font-size: calc(13px * var(--display-scale, 1) * var(--text-scale));
-}
-.close {
-  display: inline-flex;
-  padding: 4px;
-  color: var(--muted);
-  background: none;
-  border: 0;
-  cursor: pointer;
-}
-.close:hover {
-  color: var(--text);
-}
-.intro {
-  margin: 0 0 12px;
+  justify-content: flex-end;
+  gap: 6px 10px;
+  margin: 12px 0 0;
   font-size: 0.875em;
 }
-.how-to summary {
-  width: fit-content;
-  font-weight: bold;
-  cursor: pointer;
-}
-.steps {
-  margin: 6px 0 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding-left: 1.4em;
-}
-.steps b {
-  color: var(--text);
-}
-.intro:last-child {
-  margin-bottom: 0;
+/* Its button in the line's words, as large. */
+:root:root .next .btn {
+  font-size: inherit;
 }
 .hit-list {
   display: flex;
