@@ -4,7 +4,6 @@ import { watchDebounced } from '@vueuse/core'
 import { Check, Info, X } from '@lucide/vue'
 import { item, pokemon, type ItemId } from '@/data/dex'
 import { percent, type MetaData } from '@/data/meta'
-import { natureEffectOn } from '@/data/natures'
 import { STATS } from '@/data/pokemon'
 import { locale, t } from '@/i18n'
 import { refName } from '@/i18n/refName'
@@ -23,6 +22,8 @@ import { runSliced } from '@/lib/slices'
 import { MAX_POINTS } from '@/lib/stats'
 import { setsAs, type Points } from '@/lib/team'
 import ItemIcon from '@/components/ItemIcon.vue'
+import SpreadText from '@/components/SpreadText.vue'
+import { spreadParts } from '@/components/solverText'
 import PokemonIcon from '@/components/PokemonIcon'
 
 // The inverse damage calc's "What fits": from what was seen (`obs`: the hits and which moved first, `CalcHits`), what
@@ -137,20 +138,13 @@ const asks = computed(() => {
   return theirs ? t('calc.reverse.asks', { parts: theirs }) : t('calc.reverse.asksNone')
 })
 const statName = (s: number) => t(`stat.${STATS[s]!}`)
-/** A build in Showdown's short way, its points in the stats in play, `+` or `−` after those its nature raises or
- * lowers: "32 HP / 20+ Def". */
-const spreadLabel = (r: ReverseRow, stats: readonly number[]) =>
-  stats
-    .map((s) => {
-      const e = s && r.nature ? natureEffectOn(r.nature, STATS[s]!) : 'neutral'
-      return `${r.points[s]}${e === 'up' ? '+' : e === 'down' ? '−' : ''} ${statName(s)}`
-    })
-    .join(' / ')
-/** The widest a build of those stats is written, with a nature's mark: every point in each, all but HP marked. Unseen
- * in the table's corner, one per mark, it keeps the spreads' column as wide from one answer to the next. */
-const MARKS = ['+', '−'] as const
-const widestLabel = (stats: readonly number[], mark: string) =>
-  stats.map((s) => `${MAX_POINTS}${s ? mark : ''} ${statName(s)}`).join(' / ')
+/** A build's spread in the stats in play, its nature's effect on each (`SpreadText`): "32 HP / 20⏶⏶ Def". */
+const spreadOf = (r: { nature: string | null; points: readonly number[] }, stats: readonly number[]) =>
+  spreadParts(r.nature, r.points, stats)
+/** The widest a spread of those stats is written: every point in each, all but HP marked. Unseen in the table's corner,
+ * it keeps the spreads' column as wide from one answer to the next. */
+const widestOf = (stats: readonly number[]) =>
+  stats.map((s) => ({ n: MAX_POINTS, stat: s, effect: s ? ('up' as const) : ('neutral' as const) }))
 /** A stat's points where something fits, but for one that can be anything (the table says as much). */
 const shownRanges = computed(() =>
   (result.value?.ranges ?? []).filter(
@@ -170,41 +164,39 @@ const rangeText = (r: StatRange) => {
   const e = r.effects.length === 1 ? r.effects[0]! : 'neutral'
   return props.work.nature && r.stat && e !== 'neutral' ? `${pts}, ${t(`calc.reverse.nature.${e}`)}` : pts
 }
-/** Your build in short, as the opponent's spreads are: "28+ Atk". */
-const buildLabel = (b: GoalBuild, stats: readonly number[]) =>
-  spreadLabel({ nature: b.nature, points: b.points, share: null, fits: [] }, stats)
 /** A threshold's label: how often the hits come out as entered ("Half the time with"). */
 const thresholdLabel = (th: (typeof THRESHOLDS)[number]) =>
   t(`calc.goal.sets.${th === 0.5 ? '50' : th === 0.9 ? '90' : '100'}` as const)
 /** Whether a strip's cell is one of the row's goals' (a threshold's fewest points, or the most's). */
 const marked = (r: GoalRow, p: number) => [...r.cells, r.best].some((c) => c && c.points[goal.value!.ours[0]!] === p)
 /**
- * A strip's goals, by the number of points they're at, the fewest first: those at one as one label ("Half its sets ·
- * 90%"), the build covering the most among them. On phones, under the strip, each under its cell, held inside it.
+ * A strip's goals as tags over their cells ("50%", "90%", "Always", "Best"), those at one number of points as one
+ * ("50% · 90%"). A tag too near the one before (its cells too few to keep the two apart) goes up a level, so none
+ * overlap; `levels` the most there are.
  */
 function marksOf(r: GoalRow) {
   const s = goal.value!.ours[0]!
   const named = [
-    ...r.cells.map((c, ci) => c && { c, name: thresholdLabel(THRESHOLDS[ci]!) }),
+    ...r.cells.map(
+      (c, ci) => c && { c, name: t(`calc.goal.tag.${ci === 0 ? '50' : ci === 1 ? '90' : '100'}` as const) },
+    ),
     // The best only short of always: there, the same build.
-    r.best && !r.cells.at(-1) && { c: r.best, name: t('calc.goal.mostAt', { pct: percent(r.best.coverage) }) },
+    r.best && !r.cells.at(-1) && { c: r.best, name: t('calc.goal.tag.best') },
   ].filter((x): x is { c: GoalBuild; name: string } => !!x)
-  const byP = new Map<number, { p: number; names: string[]; build: GoalBuild }>()
+  const byP = new Map<number, { p: number; names: string[] }>()
   for (const { c, name } of named) {
     const p = c.points[s]!
     const was = byP.get(p)
-    if (!was) byP.set(p, { p, names: [name], build: c })
-    else {
-      was.names.push(name)
-      if (c.coverage > was.build.coverage) was.build = c
-    }
+    if (was) was.names.push(name)
+    else byP.set(p, { p, names: [name] })
   }
-  return [...byP.values()]
-    .sort((x, y) => x.p - y.p)
-    .map((m) => ({
-      ...m,
-      label: m.names.join(' · '),
-    }))
+  const marks = [...byP.values()].sort((x, y) => x.p - y.p).map((m) => ({ ...m, label: m.names.join(' · '), level: 0 }))
+  // Apart by about a tag's width in cells (a phone's strip a few px a cell), else up a level from the one before.
+  marks.forEach((m, i) => {
+    const prev = marks[i - 1]
+    if (prev && prev.level === 0 && m.p - prev.p < 4 + 3 * (prev.names.length - 1)) m.level = 1
+  })
+  return marks
 }
 /** Only your item worked out, its points and nature as set: each item's row how often it gives what was entered, the
  * likeliest first, rather than the points it needs. */
@@ -318,6 +310,20 @@ function use(r: ReverseRow) {
                 <!-- With one stat of yours in play: a cell per number of its points, none to all, colored by how much of
                    the opponent it gets there; tapped, that build used; the goals' outlined. -->
                 <span v-if="r.curve" class="strip-wrap">
+                  <!-- Its goals as tags over their cells, so the line under it reads off the strip. -->
+                  <span
+                    class="ticks"
+                    aria-hidden="true"
+                    :style="{ '--levels': Math.max(1, ...marksOf(r).map((m) => m.level + 1)) }"
+                  >
+                    <span
+                      v-for="m in marksOf(r)"
+                      :key="m.p"
+                      class="tick"
+                      :style="{ '--at': (m.p + 0.5) / (MAX_POINTS + 1), '--lv': m.level }"
+                      >{{ m.label }}</span
+                    >
+                  </span>
                   <span class="strip" role="group" :aria-label="t('calc.goal.stripLabel')">
                     <button
                       v-for="(c, p) in r.curve"
@@ -335,20 +341,6 @@ function use(r: ReverseRow) {
                     ><span>0</span><span>{{ statName(goal.ours[0]!) }}</span
                     ><span>{{ MAX_POINTS }}</span></span
                   >
-                  <!-- On phones, where the cells' tooltips don't show, its goals under their cells, a line each, those
-                       at one number of points as one; each the build to use. Wider, the row of them under it does. -->
-                  <span class="marks">
-                    <span
-                      v-for="m in marksOf(r)"
-                      :key="m.p"
-                      class="mark-lane"
-                      :style="{ '--at': (m.p + 0.5) / (MAX_POINTS + 1) }"
-                    >
-                      <button type="button" class="btn small pick mark-label" @click="useYours(m.build)">
-                        <span class="muted">{{ m.label }}</span> {{ buildLabel(m.build, goal.ours) }}
-                      </button>
-                    </span>
-                  </span>
                 </span>
                 <span class="goal-picks" :class="{ curved: r.curve }">
                   <template v-for="(c, ci) in r.cells" :key="ci">
@@ -360,7 +352,7 @@ function use(r: ReverseRow) {
                         class="btn small pick"
                         @click="useYours(c)"
                       >
-                        {{ buildLabel(c, goal.ours) }}
+                        <SpreadText :parts="spreadOf(c, goal.ours)" />
                       </button>
                     </span>
                   </template>
@@ -372,7 +364,7 @@ function use(r: ReverseRow) {
                       class="btn small pick"
                       @click="useYours(r.best)"
                     >
-                      {{ buildLabel(r.best, goal.ours) }}
+                      <SpreadText :parts="spreadOf(r.best, goal.ours)" />
                     </button>
                   </span>
                   <span v-else-if="!r.best" class="muted">{{ t('calc.goal.none') }}</span>
@@ -411,9 +403,7 @@ function use(r: ReverseRow) {
                 <tr>
                   <th scope="col" class="corner muted">
                     {{ t('calc.reverse.spread') }}
-                    <span v-for="m in MARKS" :key="m" class="spread sizer" aria-hidden="true">{{
-                      widestLabel(result.stats, m)
-                    }}</span>
+                    <SpreadText class="spread sizer" aria-hidden="true" :parts="widestOf(result.stats)" />
                   </th>
                   <th v-for="(c, ci) in result.columns" :key="ci" scope="col" class="col">
                     <span v-if="!result.itemsVary || result.columns.length === 1" class="muted">{{
@@ -435,7 +425,7 @@ function use(r: ReverseRow) {
               <tbody>
                 <tr v-for="(r, ri) in result.rows" :key="ri">
                   <th scope="row">
-                    <span class="spread">{{ spreadLabel(r, result.stats) }}</span>
+                    <SpreadText class="spread" :parts="spreadOf(r, result.stats)" />
                     <!-- Its share, and the way to set the opponent to it. -->
                     <span class="row-foot">
                       <span v-if="r.share" v-tip="t('calc.reverse.shareTip')" class="muted">{{
@@ -673,40 +663,38 @@ function use(r: ReverseRow) {
   justify-content: space-between;
   font-size: 0.75em;
 }
-/* On phones, the goals under their cells, a line each: the space beside each label shared out as its cell's place along
-   the strip, so it sits under its cell (the start's at the left, the end's at the right) yet never past the strip's
-   edges, wrapping where it's wider than the strip. The row of them under it then not shown. Wider, the row, not them. */
-.marks {
-  display: none;
-  flex-direction: column;
-  gap: 4px;
-  margin-top: 2px;
-  font-size: 0.875em;
+/* Its goals' tags over the strip, each over its cell: its place along the strip both where it's anchored and how far
+   it's shifted back by its own width, so the first is flush left, the last flush right, and none past the edges; a tag
+   too near the one before a level up. A tick under each down to its cell. */
+.ticks {
+  position: relative;
+  height: calc(var(--levels) * 1.5em);
+  font-size: 0.75em;
 }
-.mark-lane {
-  display: flex;
-}
-.mark-lane::before,
-.mark-lane::after {
-  content: '';
-  flex: var(--at) 1 0;
-}
-.mark-lane::after {
-  flex-grow: calc(1 - var(--at));
-}
-.pick.mark-label {
-  display: block;
-  flex: none;
-  max-width: 100%;
-  white-space: normal;
-  text-align: left;
+.tick {
+  position: absolute;
+  bottom: calc(var(--lv) * 1.5em);
+  left: calc(var(--at) * 100%);
+  padding-bottom: 4px;
+  line-height: 1.2;
+  font-weight: bold;
+  white-space: nowrap;
+  color: var(--accent);
+  transform: translateX(calc(var(--at) * -100%));
 }
 @media (max-width: 720px) {
-  .marks {
-    display: flex;
-  }
+  /* Phones: the picks under the strip a line each, what it gets beside the build that gets it. */
   .goal-picks.curved {
-    display: none;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 6px 10px;
+  }
+  .goal-picks.curved .goal-pick {
+    display: contents;
+  }
+  .goal-picks.curved .pick {
+    justify-self: start;
   }
 }
 .goal-picks {
