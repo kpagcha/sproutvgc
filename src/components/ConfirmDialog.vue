@@ -28,8 +28,13 @@ function onClick(e: MouseEvent) {
   <dialog ref="dialog" class="confirm" @close="onClose" @click="onClick">
     <form v-if="pending" method="dialog" class="panel">
       <p>{{ pending.message }}</p>
+      <ul v-if="pending.details?.length" class="details">
+        <li v-for="d in pending.details" :key="d">{{ d }}</li>
+      </ul>
       <div class="buttons">
-        <button value="cancel" class="btn" :autofocus="pending.danger">{{ t('confirm.cancel') }}</button>
+        <button value="cancel" class="btn" :autofocus="pending.danger">
+          {{ pending.cancel ?? t('confirm.cancel') }}
+        </button>
         <button value="confirm" class="btn" :class="pending.danger ? 'danger' : 'primary'" :autofocus="!pending.danger">
           {{ pending.confirm }}
         </button>
@@ -80,6 +85,21 @@ function onClick(e: MouseEvent) {
 }
 p {
   margin-bottom: 16px;
+}
+/* Its details right under the message, the buttons' room after them. */
+p:has(+ .details) {
+  margin-bottom: 6px;
+}
+.details {
+  margin: 0 0 16px;
+  padding-left: 1.25em;
+}
+.details li + li {
+  margin-top: 2px;
+}
+/* Two buttons with words of their own may not fit on a line. */
+.buttons {
+  flex-wrap: wrap;
 }
 .buttons {
   display: flex;

@@ -80,6 +80,7 @@ import SideDrawer from '@/components/SideDrawer.vue'
 import SolverBands from '@/components/SolverBands.vue'
 import SolverChips from '@/components/SolverChips.vue'
 import SolverGoal from '@/components/SolverGoal.vue'
+import { goalDiff, goalOf, GOALS, type Goal } from '@/lib/solverGoal'
 import TeamPicker from '@/components/TeamPicker.vue'
 
 // The damage calculator: two Pokémon, yours and the opponent's, each a team builder's slot (`CalcSide`, `TeamSlot`:
@@ -694,10 +695,44 @@ function scrollToSolver(id: string) {
   const bands = bandsEl.value?.offsetHeight ?? bandsH.value
   toTopAt(document.getElementById(id), navNow + bar + bands + 12)
 }
+/** Whether a side's item can't be another: a Mega's stone, Ogerpon's mask. */
+const itemFixed = (k: SideKey) => {
+  const m = sides.value[k].member
+  return !!stoneMega(m) || (!!m.pokemon && itemBound(m.pokemon))
+}
+/** What's worked out of each side as the goal reads it. */
+const goalWork = () => ({ a: workYours.value, b: work.value, fixed: { a: itemFixed('a'), b: itemFixed('b') } })
+/** The goal picked, what it is at first: it stays as parts are set or worked out from the bands and panels, which
+ * moving on to what fits then asks to tidy up (`tidyGoal`). */
+const goal = shallowRef<Goal>(goalOf(goalWork()))
+/** Moving on to what fits with what's worked out not the goal's: what differs said, then either the goal's put back
+ * (Tidy up) or the goal taken to be what's worked out (Continue as is). */
+async function tidyGoal() {
+  const g = goal.value
+  if (g === 'custom') return
+  const diff = goalDiff(g, goalWork())
+  if (!diff.length) return
+  const tidy = await confirmDialog({
+    message: t('calc.goal.tidy', { goal: t(`calc.goal.${g}`) }),
+    details: diff.map((d) =>
+      t(d.worked ? 'calc.goal.diffWorked' : 'calc.goal.diffSet', {
+        part: t(`calc.goal.part.${d.side}.${d.part}`),
+      }),
+    ),
+    confirm: t('calc.goal.tidyUp'),
+    cancel: t('calc.goal.asIs'),
+  })
+  if (tidy) {
+    workYours.value = { ...GOALS[g].a }
+    work.value = { ...GOALS[g].b }
+    fillKnown()
+  } else goal.value = goalOf(goalWork())
+}
 /** The hits said: on to what to work out, brought into view and lit a moment. */
 const goalLit = shallowRef(false)
 let goalTimer: ReturnType<typeof setTimeout> | undefined
-function toGoal() {
+async function toGoal() {
+  await tidyGoal()
   scrollToSolver('calc-goal')
   goalLit.value = false
   void nextTick(() => {
@@ -718,10 +753,6 @@ function litParts() {
     clearTimeout(partsTimer)
     partsTimer = setTimeout(() => (partsLit.value = false), 1400)
   })
-}
-const itemFixed = (k: SideKey) => {
-  const m = sides.value[k].member
-  return !!stoneMega(m) || (!!m.pokemon && itemBound(m.pokemon))
 }
 /** What's left to set of each side, once the goal changes: what's missing of it filled in from its most common set,
  * never a Mega Stone (a Pokémon picked as itself stays itself), nothing worked out. */
@@ -1104,9 +1135,9 @@ function face(f: Fighter) {
           >
             <div id="calc-goal" class="goal-step" :class="{ lit: goalLit }">
               <SolverGoal
+                v-model:goal="goal"
                 v-model:work="work"
                 v-model:work-yours="workYours"
-                :fixed="{ a: itemFixed('a'), b: itemFixed('b') }"
                 @changed="fillKnown"
                 @custom="litParts"
               />
