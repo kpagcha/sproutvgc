@@ -2143,8 +2143,6 @@ export const messages = {
     "With moves: its best common move's power as it typically hits, with STAB and its ability, no item.",
   'overview.monAbout': 'At its most common set, against every Pokémon of the meta at theirs, weighted by usage.',
   'metaTypes.title': 'Types',
-  'metaTypes.about':
-    'How the meta leans by type, weighted by usage: each Pokémon counts by its share of teams, a Mega apart from the Pokémon it changes from.',
   'metaTypes.show': 'Show',
   'metaTypes.pokemon': "The meta's Pokémon",
   'metaTypes.single': 'Single',

@@ -54,6 +54,18 @@ const atkModes = computed(() => [
   { value: 'against' as const, label: t('metaTypes.against') },
 ])
 
+/** What each card's numbers are, for the choice shown: its heading's tooltip. */
+const monAbout = computed(() =>
+  t(
+    monMode.value === 'single'
+      ? 'metaTypes.singleAbout'
+      : monMode.value === 'dual'
+        ? 'metaTypes.dualAbout'
+        : 'metaTypes.weakAbout',
+  ),
+)
+const atkAbout = computed(() => t(atkMode.value === 'types' ? 'metaTypes.attacksAbout' : 'metaTypes.againstAbout'))
+
 const types = computed(() => metaTypes(props.data, props.prevData))
 const hasChange = computed(() => !!props.prevData)
 
@@ -93,25 +105,13 @@ const pressureMost = (list: readonly Pressure[]) => Math.max(1e-9, ...list.map((
 <template>
   <section class="panel banded meta-types">
     <h2 class="band">{{ t('metaTypes.title') }}</h2>
-    <p class="muted about">{{ t('metaTypes.about') }}</p>
     <div class="cards">
       <!-- The meta's Pokémon by their types. -->
       <section class="card">
         <header class="card-head">
-          <h3>{{ t('metaTypes.pokemon') }}</h3>
+          <h3 v-tip="monAbout" class="tipped" tabindex="0">{{ t('metaTypes.pokemon') }}</h3>
           <SegmentedControl v-model="monMode" class="soft mode" :label="t('metaTypes.show')" :options="monModes" />
         </header>
-        <p class="card-sub">
-          {{
-            t(
-              monMode === 'single'
-                ? 'metaTypes.singleAbout'
-                : monMode === 'dual'
-                  ? 'metaTypes.dualAbout'
-                  : 'metaTypes.weakAbout',
-            )
-          }}
-        </p>
         <template v-if="monMode === 'single'">
           <ol class="bars">
             <li v-for="x in fold(types.single, monAll)" :key="x.key" class="bar-row">
@@ -222,12 +222,9 @@ const pressureMost = (list: readonly Pressure[]) => Math.max(1e-9, ...list.map((
       <!-- Its attacks. -->
       <section class="card">
         <header class="card-head">
-          <h3>{{ t('metaTypes.attacks') }}</h3>
+          <h3 v-tip="atkAbout" class="tipped" tabindex="0">{{ t('metaTypes.attacks') }}</h3>
           <SegmentedControl v-model="atkMode" class="soft mode" :label="t('metaTypes.show')" :options="atkModes" />
         </header>
-        <p class="card-sub">
-          {{ t(atkMode === 'types' ? 'metaTypes.attacksAbout' : 'metaTypes.againstAbout') }}
-        </p>
         <template v-if="atkMode === 'types'">
           <ol class="bars">
             <li v-for="x in fold(types.attacks, atkAll)" :key="x.key" class="bar-row">
@@ -288,9 +285,6 @@ const pressureMost = (list: readonly Pressure[]) => Math.max(1e-9, ...list.map((
 .band {
   font-size: 1rem;
 }
-.about {
-  margin: 0 0 10px;
-}
 .cards {
   container-type: inline-size;
   display: grid;
@@ -315,7 +309,7 @@ const pressureMost = (list: readonly Pressure[]) => Math.max(1e-9, ...list.map((
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 12px;
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 .card-head h3 {
   margin: 0;
@@ -329,10 +323,11 @@ const pressureMost = (list: readonly Pressure[]) => Math.max(1e-9, ...list.map((
   margin-left: auto;
   font-size: 0.9em;
 }
-.card-sub {
-  margin: 0 0 10px;
-  font-size: 0.85em;
-  color: var(--muted);
+/* A card's heading: what its numbers are, for the choice shown, on hover (tapped on phones). */
+.tipped {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: help;
 }
 .fine {
   margin: 8px 0 0;
