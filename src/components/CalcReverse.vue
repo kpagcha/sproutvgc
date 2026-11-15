@@ -225,8 +225,38 @@ const goalNote = computed(() => {
  * once, so a phone, with no tooltips, can read one. Gone with a new answer. */
 const pickedBar = shallowRef<{ ri: number; p: number } | null>(null)
 watch(goal, () => (pickedBar.value = null))
-const pickBar = (ri: number, p: number) =>
-  (pickedBar.value = pickedBar.value?.ri === ri && pickedBar.value.p === p ? null : { ri, p })
+function pickBar(ri: number, p: number) {
+  // A drag along the strip just ended on it: picked already, not unpicked by the click that follows.
+  if (dragged) return void (dragged = false)
+  pickedBar.value = pickedBar.value?.ri === ri && pickedBar.value.p === p ? null : { ri, p }
+}
+/** Dragged along the strip (a finger can't land on a cell a few px wide), the bar under it picked as it goes. It takes
+ * over once it's moved sideways a few px; a tap alone is the cell's click, a vertical move the page's scroll
+ * (`touch-action: pan-y`). */
+let drag: { ri: number; x: number; id: number; on: boolean } | null = null
+let dragged = false
+function stripDown(ri: number, e: PointerEvent) {
+  if (e.button !== 0) return
+  dragged = false
+  drag = { ri, x: e.clientX, id: e.pointerId, on: false }
+}
+function stripMove(e: PointerEvent) {
+  if (!drag || e.pointerId !== drag.id) return
+  const strip = e.currentTarget as HTMLElement
+  if (!drag.on) {
+    if (Math.abs(e.clientX - drag.x) < 4) return
+    drag.on = dragged = true
+    strip.setPointerCapture(e.pointerId)
+  }
+  const r = strip.getBoundingClientRect()
+  const p = Math.max(0, Math.min(MAX_POINTS, Math.floor(((e.clientX - r.left) / r.width) * (MAX_POINTS + 1))))
+  if (pickedBar.value?.ri !== drag.ri || pickedBar.value.p !== p) pickedBar.value = { ri: drag.ri, p }
+}
+function stripUp() {
+  // Its click lands on the strip, not a cell, once captured: nothing to swallow then.
+  if (drag?.on) setTimeout(() => (dragged = false))
+  drag = null
+}
 const pickedText = computed(() => tSplit('calc.goal.picked', 'build'))
 /** An item's row's tooltip: those alike merged into it, and its share of your sets. */
 const itemTip = (r: GoalRow) =>
@@ -337,7 +367,15 @@ function use(r: ReverseRow) {
                       >{{ m.label }}</span
                     >
                   </span>
-                  <span class="strip" role="group" :aria-label="t('calc.goal.stripLabel')">
+                  <span
+                    class="strip"
+                    role="group"
+                    :aria-label="t('calc.goal.stripLabel')"
+                    @pointerdown="stripDown(ri, $event)"
+                    @pointermove="stripMove"
+                    @pointerup="stripUp"
+                    @pointercancel="stripUp"
+                  >
                     <button
                       v-for="(c, p) in r.curve"
                       :key="p"
@@ -666,6 +704,9 @@ function use(r: ReverseRow) {
   grid-template-columns: repeat(33, minmax(0, 1fr));
   height: 40px;
   border: 1px solid var(--border);
+  /* Dragged sideways, the bars picked in turn; vertically, the page scrolls. */
+  touch-action: pan-y;
+  user-select: none;
 }
 /* Each cell a bar filled up to its chance, so the chance is seen rising with the points. */
 .strip-cell {
@@ -689,9 +730,12 @@ function use(r: ReverseRow) {
     linear-gradient(to top, transparent calc(90% - 1px), var(--guide) calc(90% - 1px) 90%, transparent 90%);
   --guide: color-mix(in srgb, var(--text) 35%, transparent);
 }
+/* Picked, hovered or focused: an outline around the cell, over its neighbours, so a goal's mark inside it stays whole,
+   the two nested rather than drawn over each other. */
 .strip-cell.picked {
+  position: relative;
+  z-index: 1;
   outline: 2px solid var(--ink);
-  outline-offset: -2px;
 }
 .picked-line {
   display: block;
@@ -701,10 +745,18 @@ function use(r: ReverseRow) {
 .picked-line .pick {
   margin-left: 8px;
 }
-.strip-cell:hover,
+/* Hover only where there's a pointer that hovers: a tap's would stay on the cell once it's unpicked. */
+@media (hover: hover) {
+  .strip-cell:hover {
+    position: relative;
+    z-index: 1;
+    outline: 2px solid var(--ink);
+  }
+}
 .strip-cell:focus-visible {
+  position: relative;
+  z-index: 1;
   outline: 2px solid var(--ink);
-  outline-offset: -2px;
 }
 .strip-cell.mark {
   box-shadow: inset 0 0 0 2px var(--accent);
