@@ -734,6 +734,46 @@ details > summary {
   }
 }
 
+/* What's worked out or loaded into a panel, as it first shows: rising into place and fading in, rather than appearing
+   all at once. Put on the element shown once its content is in (`v-if`), so it plays as it mounts; its children each a
+   beat after the one before with `loads-in-stagger`. Transform and opacity alone, off the main thread. */
+.loads-in,
+.loads-in-stagger > * {
+  animation: loads-in 0.32s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+.loads-in-stagger > :nth-child(2) {
+  animation-delay: 0.05s;
+}
+.loads-in-stagger > :nth-child(3) {
+  animation-delay: 0.1s;
+}
+.loads-in-stagger > :nth-child(n + 4) {
+  animation-delay: 0.15s;
+}
+@keyframes loads-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loads-in,
+  .loads-in-stagger > * {
+    animation-name: loads-in-fade;
+  }
+  @keyframes loads-in-fade {
+    from {
+      opacity: 0;
+    }
+  }
+}
+
+/* A heading or label with a tooltip: underlined dotted, as text with more to it is. */
+.tipped {
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+}
+
 /* A tournament's top 8's placings as medals (`medalOf`), the site's ink-outlined squares with a hard shadow: gold,
    silver, bronze for the semifinals, in the panel's color for the quarterfinals. Starting with `:root:root`, as
    `retro.css`'s rules do, to win over the placing's own scoped style. */

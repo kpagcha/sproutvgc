@@ -128,7 +128,7 @@ const text = (n: number) => (props.unsigned ? String(n) : n > 0 ? `+${n}` : n < 
    shadow, the label muted), as one of several set alongside other things. */
 .stepper.compact {
   display: inline-grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   grid-template-areas: 'label label label' 'down value up';
   min-height: 0;
   min-width: 0;
@@ -159,9 +159,14 @@ const text = (n: number) => (props.unsigned ? String(n) : n > 0 ? `+${n}` : n < 
 }
 .compact .value {
   grid-area: value;
-  min-width: 0;
+  /* As wide bold or not, whatever the stage, so stepping it moves nothing. */
+  width: 3.2ch;
 }
+/* Its steps each half of what the stage leaves, the sign centered in it, so a stage of two characters ("+2") has room
+   and a step's hover never runs over it. */
 .compact .step {
-  padding: 2px 3px;
+  justify-content: center;
+  min-width: 0;
+  padding: 2px 0;
 }
 </style>

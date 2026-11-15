@@ -19,7 +19,7 @@ const id = useId()
 
 <template>
   <div class="segmented" role="radiogroup" :aria-labelledby="id">
-    <span :id v-tip="tip" class="muted">{{ label }}</span>
+    <span :id v-tip="tip" class="muted" :class="{ tipped: tip }" :tabindex="tip ? 0 : undefined">{{ label }}</span>
     <span class="segments">
       <label
         v-for="o in options"

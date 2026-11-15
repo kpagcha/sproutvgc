@@ -259,6 +259,8 @@ const blockedText = tSplit('calc.blockedBy', 'what')
   --dmg: var(--accent);
   /* No wider than the list it's in, whatever it unfolds to. */
   min-width: 0;
+  /* Laid out by its own width, not the screen's: the Meta tab's side is narrow on any screen. */
+  container-type: inline-size;
 }
 .head {
   --icon-scale: 1;
@@ -540,9 +542,9 @@ const blockedText = tSplit('calc.blockedBy', 'what')
   border: 1px solid var(--border);
   overflow-wrap: anywhere;
 }
-/* Narrow, its name across the top, the range at the verdict's end, and what the order does to it under them, so the
-   name isn't cut short. */
-@media (max-width: 480px) {
+/* Narrow (a phone, or the Meta tab's side beside its matchups), its name across the top, the range at the verdict's
+   end, and what the order does to it under them, so the name isn't cut short. */
+@container (max-width: 520px) {
   .head {
     grid-template-columns: minmax(0, 1fr) auto auto;
     grid-template-areas: 'name name fold' 'bar bar bar' 'verdict range range';
