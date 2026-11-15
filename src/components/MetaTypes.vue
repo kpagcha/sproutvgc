@@ -8,8 +8,6 @@ import { refName } from '@/i18n/refName'
 import { pokemon } from '@/data/dex'
 import { points, STEADY } from '@/lib/entryUsage'
 import { metaTypes, type Pressure, type TypeShare } from '@/lib/metaTypes'
-import { useUnfolded } from '@/composables/useUnfolded'
-import MoreToggle from '@/components/MoreToggle.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import SegmentedControl from '@/components/SegmentedControl.vue'
 import TypeGlyph from '@/components/TypeGlyph'
@@ -54,26 +52,8 @@ const atkModes = computed(() => [
   { value: 'against' as const, label: t('metaTypes.against') },
 ])
 
-/** What each card's numbers are, for the choice shown: its heading's tooltip. */
-const monAbout = computed(() =>
-  t(
-    monMode.value === 'single'
-      ? 'metaTypes.singleAbout'
-      : monMode.value === 'dual'
-        ? 'metaTypes.dualAbout'
-        : 'metaTypes.weakAbout',
-  ),
-)
-const atkAbout = computed(() => t(atkMode.value === 'types' ? 'metaTypes.attacksAbout' : 'metaTypes.againstAbout'))
-
 const types = computed(() => metaTypes(props.data, props.prevData))
 const hasChange = computed(() => !!props.prevData)
-
-/** Each list's first rows until unfolded, remembered for the visit. */
-const FOLDED = 10
-const monAll = useUnfolded('rankings:types:pokemon')
-const atkAll = useUnfolded('rankings:types:attacks')
-const fold = <T,>(list: readonly T[], all: boolean) => (all ? list : list.slice(0, FOLDED))
 
 /** The longest bar of a list, the full width. */
 const most = (list: readonly { share: number }[]) => Math.max(1e-9, ...list.map((x) => x.share))
@@ -109,12 +89,12 @@ const pressureMost = (list: readonly Pressure[]) => Math.max(1e-9, ...list.map((
       <!-- The meta's Pokémon by their types. -->
       <section class="card">
         <header class="card-head">
-          <h3 v-tip="monAbout" class="tipped" tabindex="0">{{ t('metaTypes.pokemon') }}</h3>
+          <h3>{{ t('metaTypes.pokemon') }}</h3>
           <SegmentedControl v-model="monMode" class="soft mode" :label="t('metaTypes.show')" :options="monModes" />
         </header>
         <template v-if="monMode === 'single'">
           <ol class="bars">
-            <li v-for="x in fold(types.single, monAll)" :key="x.key" class="bar-row">
+            <li v-for="x in types.single" :key="x.key" class="bar-row">
               <span class="badges"><TypeIcon :type="x.key" /></span>
               <span class="track"
                 ><span class="fill" :data-type="x.key" :style="{ '--w': x.share / most(types.single) }"></span
@@ -128,7 +108,6 @@ const pressureMost = (list: readonly Pressure[]) => Math.max(1e-9, ...list.map((
               /></span>
             </li>
           </ol>
-          <MoreToggle v-model:all="monAll" :n="types.single.length" :top="FOLDED" />
         </template>
         <template v-else-if="monMode === 'dual'">
           <div class="grid-scroll">
@@ -166,7 +145,6 @@ const pressureMost = (list: readonly Pressure[]) => Math.max(1e-9, ...list.map((
               </div>
             </div>
           </div>
-          <p class="fine">{{ t('metaTypes.dualKey') }}</p>
           <h4 class="sub">{{ t('metaTypes.dualTop') }}</h4>
           <ol class="bars pairs">
             <li v-for="x in types.dual.slice(0, DUAL_LISTED)" :key="x.key" class="bar-row">
@@ -191,7 +169,7 @@ const pressureMost = (list: readonly Pressure[]) => Math.max(1e-9, ...list.map((
             <span><i class="sw resisted"></i>{{ t('metaTypes.resistShare') }}</span>
           </div>
           <ol class="bars press-list">
-            <li v-for="p in fold(types.weakTo, monAll)" :key="p.type" class="bar-row press">
+            <li v-for="p in types.weakTo" :key="p.type" class="bar-row press">
               <span class="badges"><TypeIcon :type="p.type" /></span>
               <span
                 v-tip:group="
@@ -215,19 +193,18 @@ const pressureMost = (list: readonly Pressure[]) => Math.max(1e-9, ...list.map((
               }}</span>
             </li>
           </ol>
-          <MoreToggle v-model:all="monAll" :n="types.weakTo.length" :top="FOLDED" />
         </template>
       </section>
 
       <!-- Its attacks. -->
       <section class="card">
         <header class="card-head">
-          <h3 v-tip="atkAbout" class="tipped" tabindex="0">{{ t('metaTypes.attacks') }}</h3>
+          <h3>{{ t('metaTypes.attacks') }}</h3>
           <SegmentedControl v-model="atkMode" class="soft mode" :label="t('metaTypes.show')" :options="atkModes" />
         </header>
         <template v-if="atkMode === 'types'">
           <ol class="bars">
-            <li v-for="x in fold(types.attacks, atkAll)" :key="x.key" class="bar-row">
+            <li v-for="x in types.attacks" :key="x.key" class="bar-row">
               <span class="badges"><TypeIcon :type="x.key" /></span>
               <span class="track"
                 ><span class="fill" :data-type="x.key" :style="{ '--w': x.share / most(types.attacks) }"></span
@@ -241,7 +218,6 @@ const pressureMost = (list: readonly Pressure[]) => Math.max(1e-9, ...list.map((
               /></span>
             </li>
           </ol>
-          <MoreToggle v-model:all="atkAll" :n="types.attacks.length" :top="FOLDED" />
         </template>
         <template v-else>
           <div class="legend">
@@ -249,7 +225,7 @@ const pressureMost = (list: readonly Pressure[]) => Math.max(1e-9, ...list.map((
             <span><i class="sw resisted"></i>{{ t('metaTypes.resistedShare') }}</span>
           </div>
           <ol class="bars press-list">
-            <li v-for="p in fold(types.pressure, atkAll)" :key="p.type" class="bar-row press">
+            <li v-for="p in types.pressure" :key="p.type" class="bar-row press">
               <span class="badges"><TypeIcon :type="p.type" /></span>
               <span
                 v-tip:group="
@@ -273,7 +249,6 @@ const pressureMost = (list: readonly Pressure[]) => Math.max(1e-9, ...list.map((
               }}</span>
             </li>
           </ol>
-          <MoreToggle v-model:all="atkAll" :n="types.pressure.length" :top="FOLDED" />
         </template>
       </section>
     </div>
@@ -322,12 +297,6 @@ const pressureMost = (list: readonly Pressure[]) => Math.max(1e-9, ...list.map((
 .mode {
   margin-left: auto;
   font-size: 0.9em;
-}
-/* A card's heading: what its numbers are, for the choice shown, on hover (tapped on phones). */
-.tipped {
-  text-decoration: underline dotted;
-  text-underline-offset: 3px;
-  cursor: help;
 }
 .fine {
   margin: 8px 0 0;
