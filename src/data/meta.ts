@@ -326,15 +326,26 @@ export function setMetaCutoff(c: Cutoff) {
   if (s) selectSnapshot(s.id)
 }
 
-/** The snapshot every page shows: the one the reader picked, while it's still shown, or else the latest's first. */
+/** `s`'s dataset at the players the settings pick, when it has them: the settings are whose teams count, whatever a
+ * link or an earlier pick said (a page come back to, its URL naming the players before they were changed). */
+const atPlayers = (s: MetaSnapshot): MetaSnapshot =>
+  (s.cutoff !== undefined &&
+    s.cutoff !== metaCutoff.value &&
+    snapshots.value.find((x) => x.cutoff === metaCutoff.value && datasetKey(x) === datasetKey(s))) ||
+  s
+
+/** The snapshot every page shows: the one the reader picked, while it's still shown, or else the latest's first; at
+ * the players the settings pick. */
 export const selectedSnapshot = computed<MetaSnapshot | undefined>(() => {
   const latest = latestSnapshots.value
   const p = picked.value
   if (p?.startsWith(LATEST)) {
     const subset = p.slice(LATEST.length)
-    return latest.find((s) => subsetKey(s) === subset || String(s.cutoff) === subset) ?? latest[0]
+    const s = latest.find((s) => subsetKey(s) === subset || String(s.cutoff) === subset) ?? latest[0]
+    return s && atPlayers(s)
   }
-  return findSnapshot(p) ?? latest.find((s) => s.cutoff === metaCutoff.value) ?? latest[0]
+  const s = findSnapshot(p) ?? latest.find((s) => s.cutoff === metaCutoff.value) ?? latest[0]
+  return s && atPlayers(s)
 })
 
 /** Shows `id`'s snapshot on every page, remembered in this browser. */
