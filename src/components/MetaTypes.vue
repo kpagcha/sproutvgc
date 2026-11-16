@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { computed, shallowRef, watch } from 'vue'
+import { computed, shallowRef, useTemplateRef, watch } from 'vue'
+import { useEventListener } from '@vueuse/core'
+import { hideAll } from 'tippy.js'
 import type { PokemonId } from '@/data/dex'
 import { percent, type MetaData } from '@/data/meta'
 import { TYPES, type TypeId } from '@/data/types'
@@ -79,6 +81,19 @@ const cellTip = (x: TypeShare<string> | undefined, i: number, j: number) => {
 }
 const DUAL_LISTED = 8
 
+// A cell's tooltip hides as the chart scrolls, its own box on phones or the page under the pointer, rather than riding
+// along over the stuck headers or away from the cell.
+const gridBox = useTemplateRef<HTMLElement>('gridBox')
+useEventListener(
+  document,
+  'scroll',
+  (e) => {
+    const box = gridBox.value
+    if (box && (e.target === box || box.matches(':hover'))) hideAll({ duration: 0 })
+  },
+  { capture: true, passive: true },
+)
+
 const pressureMost = (list: readonly Pressure[]) => Math.max(1e-9, ...list.map((p) => Math.max(p.weak, p.resisted)))
 </script>
 
@@ -110,7 +125,7 @@ const pressureMost = (list: readonly Pressure[]) => Math.max(1e-9, ...list.map((
           </ol>
         </template>
         <template v-else-if="monMode === 'dual'">
-          <div class="grid-scroll">
+          <div ref="gridBox" class="grid-scroll">
             <div class="grid" role="table" :aria-label="t('metaTypes.dual')">
               <div class="row" role="row">
                 <span class="corner" role="columnheader"></span>
