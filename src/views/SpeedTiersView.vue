@@ -1407,7 +1407,13 @@ function flashRow(el: HTMLElement | undefined) {
 }
 // The comparison's Speed finds the row it's against; a chip of the ones found, its first row.
 const locateVersus = (id: PokemonId) => flashRow(rowsOf(id, '.row.versus')[0])
-const locateFound = (id: PokemonId) => flashRow(rowsOf(id, '.tier.hit')[0] ?? rowsOf(id, '.tier')[0])
+// Yours found, its own row rather than the first of its Pokémon's.
+const locateFound = (id: PokemonId) =>
+  flashRow(
+    (id === mine.value ? ladder.value?.querySelector<HTMLElement>('.tier.has-mine') : null) ??
+      rowsOf(id, '.tier.hit')[0] ??
+      rowsOf(id, '.tier')[0],
+  )
 function onChip(ev: MouseEvent, e: Entry) {
   if (mine.value === null || ev.ctrlKey || ev.metaKey || ev.shiftKey) return
   ev.preventDefault()
@@ -1587,7 +1593,10 @@ watch(
 const match = shallowRef<{ el: Element; up: boolean; name: string } | null>(null)
 function checkMatch() {
   const el = ladder.value
-  const hits = foundIds.value.length === 1 && el ? [...el.querySelectorAll('.tier.hit')] : []
+  const one = foundIds.value.length === 1 ? foundIds.value[0] : undefined
+  // Yours found, its own row: not the first of its Pokémon's others (its builds, its boosts).
+  const sel = one && one === mine.value ? '.tier.has-mine' : '.tier.hit'
+  const hits = one && el ? [...el.querySelectorAll(sel)] : []
   const vh = window.innerHeight
   let nearest: { el: Element; up: boolean; d: number } | null = null
   for (const hit of hits) {
@@ -1599,7 +1608,12 @@ function checkMatch() {
   }
   // Named after its Pokémon found, whatever the view.
   const k = nearest?.el instanceof HTMLElement ? nearest.el.dataset.key : undefined
-  const id = k ? chipId(k) : (nearest?.el.querySelector<HTMLElement>('.mon.hit')?.dataset.id as PokemonId | undefined)
+  const id =
+    k === 'mine'
+      ? mine.value
+      : k
+        ? chipId(k)
+        : (nearest?.el.querySelector<HTMLElement>('.mon.hit')?.dataset.id as PokemonId | undefined)
   const who = id && id in POKEMON ? named(id) : null
   match.value = nearest && {
     el: nearest.el,
