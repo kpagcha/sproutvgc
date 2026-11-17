@@ -632,6 +632,8 @@ function abilityTag(id: PokemonId): string {
 const boostName = (b: TierBoost) => refName(b.kind === 'item' ? itemRef(b.id as ItemId) : abilityRef(b.id as never))
 const EFFECT_ICONS = { up: ChevronsUp, neutral: undefined, down: ChevronsDown }
 const yoursOpen = shallowRef(false)
+/** Whether yours' band says it in short: folded over the ladder, narrower, with one picked. */
+const brief = computed(() => !wide.value && !yoursOpen.value && !!mine.value)
 /** To yours' row on the ladder, centered on the screen (the card, folded over the ladder, folded away). */
 function toMine() {
   if (!wide.value) yoursOpen.value = false
@@ -930,11 +932,27 @@ onBeforeUnmount(() => wideQuery.removeEventListener('change', onWide))
       <!-- Your Pokémon: beside the ladder on wide screens, stuck as it scrolls; over it, folded, narrower. -->
       <div class="side-col">
         <details class="panel banded yours instant" :open="wide || yoursOpen">
-          <summary class="yours-title" @click.prevent="!wide && (yoursOpen = !yoursOpen)">
+          <summary class="yours-title" :class="{ short: brief }" @click.prevent="!wide && (yoursOpen = !yoursOpen)">
             <span class="marker yours-marker" aria-hidden="true">{{ yoursOpen ? '▾' : '▸' }}</span>
-            <span>{{ t('speed.yours') }}</span>
+            <!-- Folded over the ladder, yours in short, as the speed tiers' bar has it: its icon, its name (giving way
+                 first), its value and its build; its arrow at the band's end. -->
+            <span v-if="brief && mine" class="yours-brief">
+              <PokemonIcon :id="mine" />
+              <span class="brief-name">{{ refName(pokemon(mine)) }}</span>
+              <span class="brief-value">{{ myValue !== null ? label(myValue) : '' }}</span>
+              <span class="brief-build"
+                ><template v-if="isBulk">{{ t('tiers.statBrief', { n: myHp, stat: t('stat.hp') }) }} · </template
+                ><component
+                  :is="EFFECT_ICONS[myNature]"
+                  v-if="EFFECT_ICONS[myNature]"
+                  :size="14"
+                  aria-hidden="true"
+                />{{ t('tiers.statBrief', { n: myPoints, stat: t(`stat.${stat}`) }) }}</span
+              >
+            </span>
+            <span v-else>{{ t('speed.yours') }}</span>
             <button
-              v-if="mine"
+              v-if="mine && !brief"
               v-tip="t('speed.clear')"
               type="button"
               class="btn on-band band-clear"
@@ -2038,6 +2056,39 @@ onBeforeUnmount(() => wideQuery.removeEventListener('change', onWide))
   list-style: none;
   font-weight: bold;
   cursor: pointer;
+}
+/* Yours in short on the folded band, its arrow at the end, as the speed tiers' bar: the name giving way first. */
+.yours-title.short .yours-marker {
+  order: 1;
+  margin-left: auto;
+}
+.yours-brief {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  white-space: nowrap;
+}
+.yours-brief :deep(.sheet-icon) {
+  flex: none;
+  margin-block: -6px;
+}
+.brief-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.brief-value {
+  flex: none;
+  font-size: 1.15em;
+}
+.brief-build {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+  font-weight: normal;
+  opacity: 0.85;
 }
 /* Clear, at the band's end. */
 /* Its clearing, the icon alone, flat on the band: a wash of it on hover. */

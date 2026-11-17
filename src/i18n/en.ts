@@ -2139,6 +2139,7 @@ export const messages = {
   'tiers.boostsDesc.power': 'The items their sets run that multiply their power outright, as rows of their own',
   'tiers.hpPoints': 'HP {n} pts',
   'tiers.statPoints': '{stat} {n} pts',
+  'tiers.statBrief': '{stat} {n}',
   'tiers.hpLabel': 'HP points',
   'tiers.pointsLabel': '{stat} points',
   'tiers.effect.up': 'Raises {stat}',
