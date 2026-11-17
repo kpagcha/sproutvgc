@@ -552,66 +552,6 @@ export function offenseVerdict(o: Offense): OffenseVerdict | null {
   }
 }
 
-// A meta Pokémon on the lanes (a Pokémon's meta page's bulk and power), at its most common spread, with its most
-// common ability and item; attacking, on each side it attacks on (a move's worth of its sets at least).
-
-/** A meta Pokémon placed on a lane at its most common set, with what it's placed by: its nature, its ability and
- * item, and the stats that make its value (bulk: HP and the defending stat; attacking: the stat), as the game shows
- * them, before what multiplies them. */
-export interface Placed extends Plotted {
-  /** Its usage: the share of teams with it. */
-  usage: number
-  nature: string | null
-  stats: number[]
-  ability: AbilityId | null
-  item: ItemId | null
-}
-
-/** A meta Pokémon on each lane, at its most common set; on an attacking lane only where it attacks on that side (and,
- * with moves, has a move with power of its own there). */
-export function metaPlace(
-  id: PokemonId,
-  d: PokemonMeta,
-  meta: MetaBalance,
-  mode: 'defense' | OffenseMode,
-): Record<Side, Placed | null> {
-  const placed: Record<Side, Placed | null> = { physical: null, special: null }
-  const mon = metaMon(id, d)
-  const spread = d.spreads?.[0]
-  const points = spread?.points ?? [0, 0, 0, 0, 0, 0]
-  const nature = spread?.nature || null
-  const at = strengthAt(id, points, nature)
-  const a = (mon.ability && ABILITY_MODS[mon.ability]) || {}
-  const item = topOf(d.items)
-  const i = (item && ITEM_MODS[item]) || {}
-  const value = (k: Key) => at[k] * (a[k] ?? 1) * (i[k] ?? 1)
-  const base = { usage: d.usage ?? 0, nature, ability: mon.ability, item }
-  if (mode === 'defense') {
-    const b = POKEMON[id].stats
-    const stat = (k: number) =>
-      statValue(b[k]!, points[k]!, k && nature ? natureEffectOn(nature, STATS[k]!) : 'neutral', !k)
-    for (const side of ['physical', 'special'] as const) {
-      const key = LANE_KEYS.defense[side]
-      const stats = [stat(0), stat(side === 'physical' ? 2 : 4)]
-      placed[side] = { pokemon: id, value: value(key), rank: meta[key].dist.rank(value(key)), ...base, stats }
-    }
-    return placed
-  }
-  const sides = (['physical', 'special'] as const).filter((side) => mon.attacks[side] >= 1)
-  for (const side of sides) {
-    const key = LANE_KEYS.stats[side]
-    const stat = value(key)
-    const where =
-      mode === 'moves'
-        ? withPeak(stat, (how) => mon.best(side, how, item), meta[LANE_KEYS.peak[side]])
-        : { value: stat }
-    if (!where) continue
-    const rank = meta[LANE_KEYS[mode][side]].dist.rank(where.value)
-    placed[side] = { pokemon: id, ...where, rank, mixed: sides.length === 2, ...base, stats: [at[key]] }
-  }
-  return placed
-}
-
 /** How much a meta Pokémon attacks on a side (its moves' shares of its sets there: four a set, up to 4), and its best
  * common move's power on it as it typically hits, with its most common ability and no item (the bulk and power tiers',
  * whose items are boosts of their own); null with none. */
