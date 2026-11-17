@@ -40,6 +40,7 @@ import { FASTEST, type SpeedBuild } from '@/lib/speedBuild'
 import { commonSpeed, odds, reachOf, setSpread, type SpreadPoint } from '@/lib/speedLineup'
 import { MAX_POINTS, statValue } from '@/lib/stats'
 import { percentiles } from '@/lib/statPercentiles'
+import { attackOf } from '@/lib/teamBalance'
 import { medalOf, MIN_MATCHES, pooledUsage } from '@/lib/tournamentStats'
 import { useListOptions } from '@/composables/useListOptions'
 import { useMeta } from '@/composables/useMeta'
@@ -56,7 +57,6 @@ import DexRef from '@/components/DexRef'
 import DexText from '@/components/DexText'
 import EntryTitle from '@/components/EntryTitle.vue'
 import MetaDialog from '@/components/MetaDialog.vue'
-import MonBalance from '@/components/MonBalance.vue'
 import PokemonChips from '@/components/PokemonChips.vue'
 import PokemonIcon from '@/components/PokemonIcon'
 import ListOptions from '@/components/ListOptions.vue'
@@ -315,6 +315,13 @@ const commonBuild = computed(() => m.value?.speeds && speedBuilds(m.value.speeds
 const tiersQuery = computed(() => {
   const b = commonBuild.value
   return { mine: id.value, ...(b && { mynat: b.effect, mypts: String(b.points) }) }
+})
+// The bulk and power tiers with it as yours (at its most common build there, as picking it there puts it); power on the
+// side its sets attack on more (the page's default, physical, otherwise).
+const powerQuery = computed(() => {
+  const d = m.value
+  const special = !!d && attackOf(id.value, d, 'special').attacks > attackOf(id.value, d, 'physical').attacks
+  return { mine: id.value, ...(special && { side: 'special' }) }
 })
 // The comparison with it as yours, at its most common build too.
 const compareQuery = computed(() => {
@@ -585,7 +592,6 @@ const sections = computed(() =>
     { id: 'sec-teammates', label: t('usageMon.teammates'), shown: teammates.value.length > 0 },
     { id: 'sec-tournaments', label: t('usageMon.secTournaments'), shown: tournaments.value.length > 0 },
     { id: 'sec-history', label: t('usageMon.secHistory'), shown: months.value.length > 1 },
-    { id: 'sec-balance', label: t('overview.section'), shown: true },
     { id: 'sec-matchups', label: t('pokemon.defense'), shown: true },
   ].filter((x) => x.shown),
 )
@@ -925,6 +931,11 @@ const sections = computed(() =>
             </div>
           </div>
         </div>
+        <!-- The ways to the bulk and power tiers, with it as yours there, as the Speed panel's to the speed tiers. -->
+        <p class="links">
+          <AppLink :to="{ name: 'bulkTiers', query: { mine: id } }">{{ t('usageMon.toBulk') }} ›</AppLink>
+          <AppLink :to="{ name: 'powerTiers', query: powerQuery }">{{ t('usageMon.toPower') }} ›</AppLink>
+        </p>
       </section>
 
       <!-- Its teammates, each a link to its own page here. -->
@@ -1076,9 +1087,6 @@ const sections = computed(() =>
         </div>
       </div>
     </section>
-
-    <!-- Its bulk and power against the meta's, both sides on one chart each, it alone on them. -->
-    <MonBalance v-if="m" id="sec-balance" :key="id" :mon="id" :snapshot :data :class="{ 'meta-stale': loading }" />
 
     <!-- Its types' matchups defending, last: not of the meta, so shown with or without its data. -->
     <section id="sec-matchups" class="panel">
