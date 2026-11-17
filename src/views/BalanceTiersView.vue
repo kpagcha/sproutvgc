@@ -639,6 +639,17 @@ function toMine() {
   if (!wide.value) yoursOpen.value = false
   void nextTick(() => center(document.querySelector('.tier.has-mine')))
 }
+// Narrower, the folded card sticks to the top of the screen; opened, it's back in its place over the ladder, brought
+// into view, as it may have been tapped far down the page.
+const sideCol = useTemplateRef<HTMLElement>('sideCol')
+function toggleYours() {
+  yoursOpen.value = !yoursOpen.value
+  if (!yoursOpen.value) return
+  void nextTick(() => {
+    const el = sideCol.value
+    if (el && el.getBoundingClientRect().top < 0) el.scrollIntoView({ block: 'start' })
+  })
+}
 // Wide, yours' card is beside the ladder, always open; narrower, over it, folded until opened.
 const wideQuery = window.matchMedia('(min-width: 1100px)')
 const wide = shallowRef(wideQuery.matches)
@@ -930,9 +941,15 @@ onBeforeUnmount(() => wideQuery.removeEventListener('change', onWide))
         </div>
       </div>
       <!-- Your Pokémon: beside the ladder on wide screens, stuck as it scrolls; over it, folded, narrower. -->
-      <div class="side-col">
+      <!-- Narrower, folded, it sticks to the top of the screen as the speed tiers' bar does; opened, it's back in place. -->
+      <div
+        ref="sideCol"
+        class="side-col"
+        :class="{ stuck: !wide && !yoursOpen }"
+        :data-top-bar="!wide && !yoursOpen ? '' : undefined"
+      >
         <details class="panel banded yours instant" :open="wide || yoursOpen">
-          <summary class="yours-title" :class="{ short: brief }" @click.prevent="!wide && (yoursOpen = !yoursOpen)">
+          <summary class="yours-title" :class="{ short: brief }" @click.prevent="!wide && toggleYours()">
             <span class="marker yours-marker" aria-hidden="true">{{ yoursOpen ? '▾' : '▸' }}</span>
             <!-- Folded over the ladder, yours in short, as the speed tiers' bar has it: its icon, its name (giving way
                  first), its value and its build; its arrow at the band's end. -->
@@ -2297,11 +2314,20 @@ onBeforeUnmount(() => wideQuery.removeEventListener('change', onWide))
     grid-row: 1 / span 3;
   }
 }
-/* Narrower, yours' card over the ladder, folded until opened. */
+/* Narrower, yours' card over the ladder, folded until opened; folded, stuck to the top of the screen on the page's own
+   color, as the speed tiers' bar: room above it, none under, so nothing but the band covers what scrolls under. */
 @media (max-width: 1099px) {
   .side-col {
     order: -1;
     margin-bottom: 12px;
+  }
+  .side-col.stuck {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    margin-top: -6px;
+    padding-top: 6px;
+    background: var(--bg);
   }
 }
 /* Yours against those tapped: a line each, its icon and name, how much stronger or weaker, the share of its sets yours
