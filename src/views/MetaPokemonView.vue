@@ -582,10 +582,10 @@ const sections = computed(() =>
     { id: 'sec-builds', label: t('usageMon.secBuilds'), shown: builds.value.length > 0 },
     { id: 'sec-speed', label: t('usageMon.speed'), shown: spread.value.length > 0 },
     { id: 'sec-spreads', label: t('usageMon.secSpreads'), shown: spreads.value.length > 0 || natures.value.length > 0 },
-    { id: 'sec-balance', label: t('overview.section'), shown: true },
     { id: 'sec-teammates', label: t('usageMon.teammates'), shown: teammates.value.length > 0 },
     { id: 'sec-tournaments', label: t('usageMon.secTournaments'), shown: tournaments.value.length > 0 },
     { id: 'sec-history', label: t('usageMon.secHistory'), shown: months.value.length > 1 },
+    { id: 'sec-balance', label: t('overview.section'), shown: true },
     { id: 'sec-matchups', label: t('pokemon.defense'), shown: true },
   ].filter((x) => x.shown),
 )
@@ -927,10 +927,7 @@ const sections = computed(() =>
         </div>
       </section>
 
-      <!-- Its bulk and power against the meta's, both sides on one chart each, it alone on them. -->
-      <MonBalance id="sec-balance" :key="id" :mon="id" :snapshot :data :class="{ 'meta-stale': loading }" />
-
-      <!-- Its teammates, each a link to its own page here: the least of it, last. -->
+      <!-- Its teammates, each a link to its own page here. -->
       <section v-if="teammates.length" id="sec-teammates" class="panel" :class="{ 'meta-stale': loading }">
         <h2 v-tip="t('usageMon.teammatesTip', { share: percent(TEAMMATE_MIN) })" class="tipped-head">
           {{ t('usageMon.teammates') }}
@@ -1079,6 +1076,9 @@ const sections = computed(() =>
         </div>
       </div>
     </section>
+
+    <!-- Its bulk and power against the meta's, both sides on one chart each, it alone on them. -->
+    <MonBalance v-if="m" id="sec-balance" :key="id" :mon="id" :snapshot :data :class="{ 'meta-stale': loading }" />
 
     <!-- Its types' matchups defending, last: not of the meta, so shown with or without its data. -->
     <section id="sec-matchups" class="panel">
