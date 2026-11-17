@@ -201,7 +201,9 @@ const offenseHow = useTemplateRef<HTMLElement>('offenseHow')
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
   gap: 10px;
 }
+/* Placed, for the chart's legend icon at its top right corner. */
 .card {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -218,6 +220,8 @@ const offenseHow = useTemplateRef<HTMLElement>('offenseHow')
   align-items: center;
   gap: 4px 12px;
   margin-bottom: 4px;
+  /* Clear of the legend's icon at the card's corner. */
+  padding-right: 20px;
 }
 .card-head h3 {
   margin: 0;

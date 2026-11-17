@@ -14,8 +14,9 @@ import PokemonIcon from '@/components/PokemonIcon'
 // meta's at its peak a dashed curve. The Pokémon on it each a solid line through the plot at its value in its side's
 // color, its icon on the line, the physical side's toward the top and the special side's toward the bottom, so the two
 // don't cover each other where they're close; attacking with moves, a line from it to what it hits for at its peak.
-// What each mark is, and where it stands, in a tooltip (`tip`); the legend an icon's tooltip at the plot's corner. While the meta's side is worked out (`state`
-// 'pending') the plot is a placeholder, and with no meta (`state` 'none') it says so.
+// What each mark is, and where it stands, in a tooltip (`tip`); the legend an icon's tooltip at the top right corner of
+// the card the chart is in (placed, `position: relative`). While the meta's side is worked out (`state` 'pending') the
+// plot is a placeholder, and with no meta (`state` 'none') it says so.
 export interface SideView {
   side: Side
   shape: Shape | null
@@ -90,16 +91,10 @@ function setMarkTip(key: string, el: unknown) {
       <span v-if="state === 'none'" class="muted">{{ t('builder.balance.noMeta') }}</span>
     </div>
     <template v-else>
+      <span v-tip="legendBody" class="info" tabindex="0" role="img" :aria-label="legendBody?.textContent ?? undefined">
+        <Info :size="14" aria-hidden="true" />
+      </span>
       <div class="plot">
-        <span
-          v-tip="legendBody"
-          class="info"
-          tabindex="0"
-          role="img"
-          :aria-label="legendBody?.textContent ?? undefined"
-        >
-          <Info :size="14" aria-hidden="true" />
-        </span>
         <svg class="meta" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true">
           <template v-for="l in sides" :key="l.side">
             <path v-if="l.shape" class="ridge" :data-side="l.side" :d="ridge(l.shape)" />
@@ -180,11 +175,11 @@ function setMarkTip(key: string, el: unknown) {
 [data-side='special'] {
   --c: var(--special);
 }
-/* The legend's icon, at the plot's top right. */
+/* The legend's icon, at the top right corner of the card the chart is in. */
 .info {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 8px;
+  right: 10px;
   z-index: 3;
   display: inline-flex;
   color: var(--muted);
