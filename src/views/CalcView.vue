@@ -714,7 +714,8 @@ function loadSolverSide(k: SideKey, id: PokemonId) {
 }
 /** Both in: the page taken down to the hits, the next thing to say. */
 watch(hasBoth, (now, before) => {
-  if (props.inverse && now && !before) void nextTick(() => scrollToSolver('calc-hits'))
+  // Not for the tour's example: the tour places each step itself.
+  if (props.inverse && now && !before && !inExample.value) void nextTick(() => scrollToSolver('calc-hits'))
 })
 /** One of the solver's parts brought under what's stuck to the top (the row of links, the field's bar on wide screens,
  * the bands). */
@@ -1067,7 +1068,8 @@ async function stageExample(o: {
   work.value = { ...GOALS[g].b }
   workYours.value = { ...GOALS[g].a }
   goal.value = g
-  open.value = { a: true, b: true }
+  // On phones the two folded to their bands, which the steps point at; on wide screens their cards are always shown.
+  open.value = { a: wide.value, b: wide.value }
   // Other Pokémon clear what was seen of the two before (its watch, before the next render): the example's after.
   await nextTick()
   hits.value = o.hits ?? []
@@ -1124,7 +1126,7 @@ const { start: startTour } = props.inverse
           {
             el: '#calc-duel',
             title: 'tour.solver.sidesTitle',
-            text: 'tour.solver.sides',
+            text: wide.value ? 'tour.solver.sides' : 'tour.solver.sidesPhone',
             params,
             side: 'top',
             stage: () => stageExample({ sides: true }),

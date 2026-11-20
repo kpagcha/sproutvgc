@@ -1801,6 +1801,8 @@ export const messages = {
   'tour.solver.sidesTitle': 'Check their sets',
   'tour.solver.sides':
     "<p>Each one loads with its most common set. Here, your {a} faces {b}.</p><p>Below each card, use the <strong>Work out</strong> toggles to mark what you don't know about that Pokémon: its nature, item or stat points. The solver finds those for you, so the card stops showing them.</p>",
+  'tour.solver.sidesPhone':
+    "<p>Each one loads with its most common set. Here, your {a} faces {b}.</p><p>The dashed chips, such as <strong>? Item</strong>, mark what you don't know about that Pokémon. The solver finds those for you. Tap any chip to set it, or to mark it as unknown.</p>",
   'tour.solver.addTitle': 'Add a hit',
   'tour.solver.add':
     '<p>Add a hit you saw. Tap <strong>Your hit</strong> for one of your moves on the opponent, or <strong>Its hit</strong> for one of its moves on yours.</p>',

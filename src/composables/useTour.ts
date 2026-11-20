@@ -73,40 +73,44 @@ async function waitFor(sel: string, ms: number) {
 // On phones the popover is a sheet at the screen's foot (`retro.css`): its part goes in the room over it.
 const PHONE = '(max-width: 720px)'
 const GAP = 8
-/** The foot of whatever is stuck over the top of a part (a page's bands, its row of links), else the screen's top. */
+/** The foot of what's stuck across the top of the screen over a part (a page's bands, its row of links, but not the
+ * part's own: a part whose bands stick inside it keeps them), else the screen's top. */
 function coverOf(el: Element): number {
   const r = el.getBoundingClientRect()
   const x = Math.min(Math.max(r.left + r.width / 2, 1), window.innerWidth - 1)
-  let y = Math.max(r.top, 0) + 1
-  for (let i = 0; i < 6 && y < window.innerHeight; i++) {
+  let y = 0
+  for (let i = 0; i < 8 && y < window.innerHeight / 2; i++) {
     const hit = document
-      .elementsFromPoint(x, y)
+      .elementsFromPoint(x, y + 1)
       .find((e) => !e.closest('.driver-popover, .driver-overlay, #driver-dummy-element'))
-    if (!hit || el.contains(hit) || hit.contains(el)) return y - 1
-    // Its own stuck box, rather than a chip in it.
-    let box: Element = hit
-    for (let up = hit.parentElement; up && up !== document.body; up = up.parentElement) {
-      if (/sticky|fixed/.test(getComputedStyle(box).position)) break
-      box = up
-    }
-    y = box.getBoundingClientRect().bottom + 1
+    // Its stuck box, rather than a chip in it; none, or the part's own, and nothing more is stuck over it.
+    let box: Element | null = hit ?? null
+    while (box && box !== document.body && !/sticky|fixed/.test(getComputedStyle(box).position)) box = box.parentElement
+    if (!box || box === document.body || el.contains(box)) break
+    y = Math.max(y + 1, box.getBoundingClientRect().bottom)
   }
-  return y - 1
+  return y
 }
 /**
  * A step's part scrolled into the room left for it: under what's stuck to the top and, on phones, over the popover's
- * sheet, centered there when it fits, else its top at the top of that room. Whether it moved.
+ * sheet, centered there when it fits, else its top at the top of that room. What's stuck changes as the page scrolls
+ * (a bar sticks once past its place), so it's measured again until the part stays put. Whether it moved.
  */
 function fitOnScreen(el: Element): boolean {
   const before = window.scrollY
-  // Its top at the screen's, then under what's stuck there now.
-  window.scrollBy(0, el.getBoundingClientRect().top - GAP)
-  window.scrollBy(0, -(coverOf(el) - el.getBoundingClientRect().top + GAP))
-  const sheet = matchMedia(PHONE).matches ? document.querySelector('.driver-popover.tour') : null
-  const floor = (sheet?.getBoundingClientRect().top ?? window.innerHeight) - GAP
-  const r = el.getBoundingClientRect()
-  const room = floor - r.top
-  if (r.height < room) window.scrollBy(0, -(room - r.height) / 2)
+  for (let i = 0; i < 4; i++) {
+    const sheet = matchMedia(PHONE).matches ? document.querySelector('.driver-popover.tour') : null
+    const ceil = coverOf(el) + GAP
+    const floor = (sheet?.getBoundingClientRect().top ?? window.innerHeight) - GAP
+    const r = el.getBoundingClientRect()
+    const room = floor - ceil
+    const to = r.height < room ? ceil + (room - r.height) / 2 : ceil
+    if (Math.abs(r.top - to) < 1) break
+    const at = window.scrollY
+    window.scrollBy(0, r.top - to)
+    // At the page's end (or its top): it can't go further.
+    if (window.scrollY === at) break
+  }
   return window.scrollY !== before
 }
 const selsOf = (s: TourStep) => (s.el ? (Array.isArray(s.el) ? s.el : [s.el]) : [])
