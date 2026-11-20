@@ -73,6 +73,8 @@ async function waitFor(sel: string, ms: number) {
 // On phones the popover is a sheet at the screen's foot (`retro.css`): its part goes in the room over it.
 const PHONE = '(max-width: 720px)'
 const GAP = 8
+/** The room around a step's part in its stage. */
+const STAGE_PAD = 6
 // How long what slides in as the page scrolls takes to arrive (the solver's bands).
 const SLIDE_IN = 350
 /** The foot of what's stuck across the top of the screen over a part (a page's bands, its row of links, but not the
@@ -184,6 +186,33 @@ export function useTour(
     example!.leave()
   }
 
+  /**
+   * The stage (the hole in the overlay its part shows through) trimmed to what's under what's stuck to the top: scrolled
+   * under the page's bands, the part goes behind them, and the bands stay dimmed over it rather than lit with it.
+   */
+  function clipStage() {
+    const el = tour?.getActiveElement()
+    const path = document.querySelector('.driver-overlay path')
+    const at = tour?.getState('__activeStagePosition') as DOMRect | undefined
+    if (!el || el.id === 'driver-dummy-element' || !path || !at) return
+    const w = window.innerWidth
+    const h = window.innerHeight
+    const top = Math.max(at.y - STAGE_PAD, coverOf(el))
+    const bottom = at.y + at.height + STAGE_PAD
+    const left = at.x - STAGE_PAD
+    const width = at.width + 2 * STAGE_PAD
+    // As driver.js draws it, a rectangle over the screen with the stage cut out of it (its fill rule even-odd).
+    let d = `M${w},0L0,0L0,${h}L${w},${h}L${w},0Z`
+    if (bottom > top) d += ` M${left},${top} h${width} v${bottom - top} h${-width} z`
+    path.setAttribute('d', d)
+  }
+  // In the frame driver.js draws the stage again, after it.
+  let moveFrame = 0
+  const onMove = () => {
+    cancelAnimationFrame(moveFrame)
+    moveFrame = requestAnimationFrame(clipStage)
+  }
+
   async function start() {
     stop()
     const id = ++run
@@ -254,7 +283,7 @@ export function useTour(
       showProgress: true,
       allowClose: true,
       overlayOpacity: 0.55,
-      stagePadding: 6,
+      stagePadding: STAGE_PAD,
       stageRadius: 0,
       popoverClass: 'tour',
       progressText: t('tour.progress', { current: '{{current}}', total: '{{total}}' }),
@@ -274,14 +303,19 @@ export function useTour(
       onHighlighted: (el) => {
         if (!el) return
         if (fitOnScreen(el)) tour?.refresh()
+        clipStage()
         setTimeout(() => {
-          if (tour?.getActiveElement() === el && fitOnScreen(el)) tour.refresh()
+          if (tour?.getActiveElement() !== el) return
+          if (fitOnScreen(el)) tour.refresh()
+          clipStage()
         }, SLIDE_IN)
       },
       onDeselected: () => lock(undefined),
       onDestroyed: () => {
         lock(undefined)
         roomAtFoot(false)
+        window.removeEventListener('scroll', onMove)
+        window.removeEventListener('resize', onMove)
         if (!leaving) markSeen(page)
         tour = undefined
         leaveExample()
@@ -289,6 +323,10 @@ export function useTour(
     })
     roomAtFoot(true)
     tour.drive()
+    // As the page scrolls, the stage kept under what's stuck: after driver.js's own handler, so its redrawing, a frame
+    // queued on the same event, comes first and this one right after it.
+    window.addEventListener('scroll', onMove, { passive: true })
+    window.addEventListener('resize', onMove)
   }
 
   function stop() {
