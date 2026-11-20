@@ -70,6 +70,45 @@ async function waitFor(sel: string, ms: number) {
   const until = performance.now() + ms
   while (!shown(sel) && performance.now() < until) await new Promise((r) => setTimeout(r, 60))
 }
+// On phones the popover is a sheet at the screen's foot (`retro.css`): its part goes in the room over it.
+const PHONE = '(max-width: 720px)'
+const GAP = 8
+/** The foot of whatever is stuck over the top of a part (a page's bands, its row of links), else the screen's top. */
+function coverOf(el: Element): number {
+  const r = el.getBoundingClientRect()
+  const x = Math.min(Math.max(r.left + r.width / 2, 1), window.innerWidth - 1)
+  let y = Math.max(r.top, 0) + 1
+  for (let i = 0; i < 6 && y < window.innerHeight; i++) {
+    const hit = document
+      .elementsFromPoint(x, y)
+      .find((e) => !e.closest('.driver-popover, .driver-overlay, #driver-dummy-element'))
+    if (!hit || el.contains(hit) || hit.contains(el)) return y - 1
+    // Its own stuck box, rather than a chip in it.
+    let box: Element = hit
+    for (let up = hit.parentElement; up && up !== document.body; up = up.parentElement) {
+      if (/sticky|fixed/.test(getComputedStyle(box).position)) break
+      box = up
+    }
+    y = box.getBoundingClientRect().bottom + 1
+  }
+  return y - 1
+}
+/**
+ * A step's part scrolled into the room left for it: under what's stuck to the top and, on phones, over the popover's
+ * sheet, centered there when it fits, else its top at the top of that room. Whether it moved.
+ */
+function fitOnScreen(el: Element): boolean {
+  const before = window.scrollY
+  // Its top at the screen's, then under what's stuck there now.
+  window.scrollBy(0, el.getBoundingClientRect().top - GAP)
+  window.scrollBy(0, -(coverOf(el) - el.getBoundingClientRect().top + GAP))
+  const sheet = matchMedia(PHONE).matches ? document.querySelector('.driver-popover.tour') : null
+  const floor = (sheet?.getBoundingClientRect().top ?? window.innerHeight) - GAP
+  const r = el.getBoundingClientRect()
+  const room = floor - r.top
+  if (r.height < room) window.scrollBy(0, -(room - r.height) / 2)
+  return window.scrollY !== before
+}
 const selsOf = (s: TourStep) => (s.el ? (Array.isArray(s.el) ? s.el : [s.el]) : [])
 
 export function useTour(
@@ -186,6 +225,10 @@ export function useTour(
       // itself is inert (no clicks, no keyboard focus), so nothing opens over or under the tour.
       disableActiveInteraction: true,
       onHighlightStarted: (el) => lock(el),
+      // Its part brought into the room left on screen, then the stage and popover drawn again where it ends up.
+      onHighlighted: (el) => {
+        if (el && fitOnScreen(el)) tour?.refresh()
+      },
       onDeselected: () => lock(undefined),
       onDestroyed: () => {
         lock(undefined)

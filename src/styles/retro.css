@@ -581,6 +581,23 @@
   border: 2px solid var(--ink);
   box-shadow: 6px 6px 0 var(--ink);
 }
+/* On phones, a sheet at the screen's foot rather than beside its part, which the tour scrolls into the room over it
+   (`useTour`'s `fitOnScreen`): placed by the screen, not by the part, so it never covers it. Its text scrolls when
+   long. */
+@media (max-width: 720px) {
+  :root:root .driver-popover.tour {
+    top: auto !important;
+    right: 8px !important;
+    bottom: 8px !important;
+    left: 8px !important;
+    max-width: none;
+    max-height: 45vh;
+    overflow-y: auto;
+  }
+  :root:root .driver-popover.tour .driver-popover-arrow {
+    display: none;
+  }
+}
 :root:root .driver-popover.tour .driver-popover-title {
   padding-right: 24px;
   font-family: var(--font-display, inherit);
