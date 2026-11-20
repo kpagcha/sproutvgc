@@ -5,6 +5,9 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import { router } from './router'
 import { vTip } from './directives/tip'
+import { retryFailedStylesheets } from './lib/cssRetry'
+
+retryFailedStylesheets()
 
 const app = createApp(App)
 // Dev-only profiler, switched on with VITE_PROFILE (see .env.development).
