@@ -11,7 +11,10 @@ import {
   type UpcomingEvent,
 } from '@/data/tournaments'
 import { locale, t } from '@/i18n'
+import type { NamedLocation } from '@/lib/links'
 import AppLink from '@/components/AppLink'
+import BandTabs from '@/components/BandTabs.vue'
+import TournamentPlayersList from '@/components/TournamentPlayersList.vue'
 import CountryFlag from '@/components/CountryFlag'
 import LiveTag from '@/components/LiveTag.vue'
 import PokemonIcon from '@/components/PokemonIcon'
@@ -25,7 +28,14 @@ import PokemonIcon from '@/components/PokemonIcon'
 // but the soonest first, each card leading to its official page (else its page on Limitless VGC), those whose
 // regulation isn't announced yet a run of their own. An event under way (`LIVE_EVENTS`) is among the rest, marked live,
 // with who leads it for now in place of who won.
-const props = defineProps<{ upcoming?: boolean }>()
+// With `players`, its Players tab instead of the timeline (`/meta/tournaments/players`): every player across the events
+// (`TournamentPlayersList`), the two tabs heading the page's panel.
+const props = defineProps<{ upcoming?: boolean; players?: boolean }>()
+
+const tabs = computed((): { value: 'events' | 'players'; label: string; to: NamedLocation }[] => [
+  { value: 'events', label: t('tournaments.events'), to: { name: 'tournaments' } },
+  { value: 'players', label: t('tournaments.playersTab'), to: { name: 'tournamentPlayers' } },
+])
 
 type Listed = TournamentEvent | UpcomingEvent
 const MAJOR: readonly (EventType | undefined)[] = ['worlds', 'international']
@@ -110,10 +120,15 @@ const count = (n: number) => n.toLocaleString(locale.value)
         >{{ t('tournaments.toUpcoming', { n: count(UPCOMING.length) }) }} ›</AppLink
       >
     </div>
-    <p v-if="!runs.length" class="panel muted">
+    <section v-if="players" class="panel banded">
+      <BandTabs :label="t('tournaments.pages')" current="players" :tabs />
+      <TournamentPlayersList />
+    </section>
+    <p v-else-if="!runs.length" class="panel muted">
       {{ t(upcoming ? 'tournaments.noneUpcoming' : 'tournaments.none') }}
     </p>
-    <section v-else class="panel">
+    <section v-else class="panel" :class="{ banded: !upcoming }">
+      <BandTabs v-if="!upcoming" :label="t('tournaments.pages')" current="events" :tabs />
       <ol class="timeline">
         <li v-for="r in runs" :key="r.key" class="run">
           <div class="regulation">

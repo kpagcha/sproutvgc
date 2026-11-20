@@ -23,6 +23,7 @@ import AreaMenu from '@/components/AreaMenu.vue'
 import AreaNav from '@/components/AreaNav.vue'
 import { AREAS, type AreaId } from '@/lib/areas'
 import { eventOf, playerOf } from '@/data/tournaments'
+import { loadedPlayers } from '@/data/tournamentPlayers'
 import logoUrl from '@/assets/logo.png'
 import { searchFocus } from '@/composables/useSearch'
 import { useSlashSearch } from '@/composables/useSlashFocus'
@@ -89,7 +90,9 @@ watchEffect(() => {
           ? playerTitle(id, Number(route.params.placing))
           : route.name === 'metaBuild'
             ? generatedName('pokemon', id)
-            : undefined
+            : route.name === 'playerRecord'
+              ? loadedPlayers.get(String(route.params.player))?.name
+              : undefined
   // A tournament's Pokémon and its rounds, a page each of their own.
   const tournamentMons = route.name === 'tournament' && route.params.tab === 'pokemon'
   const tournamentRounds = route.name === 'tournament' && route.params.tab === 'rounds'
@@ -122,7 +125,9 @@ watchEffect(() => {
                     ? 'desc.tournamentPlayer'
                     : route.name === 'metaBuild'
                       ? 'desc.metaBuild'
-                      : 'desc.condition'),
+                      : route.name === 'playerRecord'
+                        ? 'desc.playerRecord'
+                        : 'desc.condition'),
           {
             ...params,
             ability: entry,
@@ -173,6 +178,8 @@ function backLink(r: RouteLocationNormalizedLoaded): { to: RouteLocationRaw; lab
   // A tournament's player leads back to its standings.
   if (r.name === 'tournamentPlayer')
     return { to: { name: 'tournament', params: { id: r.params.id } }, label: 'tournaments.standings' }
+  // A player's page leads back to every player.
+  if (r.name === 'playerRecord') return { to: { name: 'tournamentPlayers' }, label: 'players.allPlayers' }
   // A build leads back to its Pokémon's meta page.
   if (r.name === 'metaBuild')
     return {

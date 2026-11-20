@@ -231,6 +231,7 @@ export function seoPages(): Plugin {
         })),
         searched('meta/tournaments', 'tournaments', 'CollectionPage'),
         searched('meta/tournaments/upcoming', 'upcomingTournaments', 'CollectionPage'),
+        searched('meta/tournaments/players', 'tournamentPlayers', 'CollectionPage'),
         ...Object.entries(events).flatMap(([id, e]): Page[] => [
           {
             path: `meta/tournaments/${id}`,

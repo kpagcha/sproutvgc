@@ -47,6 +47,7 @@ import {
   type TournamentEvent,
   type UpcomingEvent,
 } from './limitlessVgc.ts'
+import { playersOf } from './tournamentPlayers.ts'
 import { ITEM_ICONS, POKEMON_ICONS, SpriteSource, iconIndexes, sheetLayout, trimSheet } from './sprites.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -992,6 +993,8 @@ async function main() {
       }
     }
   }
+  // Every event's standings, for its players across them (`tournaments/players.json`, `tournamentPlayers.ts`).
+  const playerEvents: Parameters<typeof playersOf>[0][number][] = []
   const regulations = new Set([reg, ...Object.keys(sources.smogon), ...Object.keys(sources.limitlessvgc)])
   for (const r of regulations) {
     if (!sources.limitlessvgc[r] || updateTournaments) {
@@ -1014,6 +1017,7 @@ async function main() {
           JSON.parse(kept.files[`${kept.event.id}.rounds.json`]!) as Record<string, Round>,
         )
         addBuilds(r, standings)
+        playerEvents.push({ n: kept.event.n, date: kept.event.date, standings })
         continue
       }
       const found = await limitless.event(n, r, knownSets, r === reg)
@@ -1029,10 +1033,16 @@ async function main() {
       await writeJson(`tournaments/${event.id}.rounds.json`, rounds)
       addUsage(event.id, Object.fromEntries(standings.map((s) => [s.placing, s])), rounds)
       addBuilds(r, Object.fromEntries(standings.map((s) => [s.placing, s])))
+      playerEvents.push({
+        n: event.n,
+        date: event.date,
+        standings: Object.fromEntries(standings.map(({ placing, ...s }) => [placing, s])),
+      })
     }
   }
   await writeJson('tournaments/index.json', events)
   await writeJson('tournaments/usage.json', usage)
+  await writeJson('tournaments/players.json', playersOf(playerEvents))
   // Its most common builds, as many as a tournament snapshot keeps (`BUILDS` in `tournaments.ts`), those on under 1% of
   // its sets left out: `[sets, [[item, ability, nature, moves, share], …]]`, the Pokémon by their sets.
   for (const [r, byMon] of builds) {

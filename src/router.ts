@@ -76,6 +76,11 @@ function prefetchEvent(to: RouteLocationNormalized) {
   })
 }
 
+/** Every tournament player, for the Players tab and a player's page to find on its way. */
+function prefetchPlayers() {
+  void import('@/data/tournamentPlayers').then((p) => void p.loadPlayers().catch(() => {}))
+}
+
 /** The meta's data a page shows (`meta.metaData`), on its way as navigation starts: the snapshot its URL names, else the
  * one picked, and for its trends the dataset before. A failed load is the page's to show. */
 function prefetchMeta(to: RouteLocationNormalized, kind: 'shown' | 'trends') {
@@ -422,6 +427,34 @@ export const router = createRouter({
         headKey: 'head.tournaments',
         keywordsKey: 'keywords.tournaments',
         recent: once('tournaments'),
+        ...inArea('meta', 'tournaments'),
+      },
+    },
+    // Every player across the events, the Events' tab beside it; and each player's page, all their events.
+    {
+      path: '/meta/tournaments/players',
+      name: 'tournamentPlayers',
+      component: () => import('@/views/TournamentsView.vue'),
+      props: { players: true },
+      meta: {
+        titleKey: 'title.tournamentPlayers',
+        descKey: 'desc.tournamentPlayers',
+        headKey: 'head.tournamentPlayers',
+        keywordsKey: 'keywords.tournamentPlayers',
+        recent: once('tournamentPlayers'),
+        prefetch: prefetchPlayers,
+        ...inArea('meta', 'tournaments'),
+      },
+    },
+    {
+      path: '/meta/tournaments/players/:player',
+      name: 'playerRecord',
+      component: () => import('@/views/PlayerRecordView.vue'),
+      meta: {
+        titleKey: 'title.playerRecord',
+        dexNames: true,
+        descriptions: ['ability', 'move', 'item'],
+        prefetch: prefetchPlayers,
         ...inArea('meta', 'tournaments'),
       },
     },

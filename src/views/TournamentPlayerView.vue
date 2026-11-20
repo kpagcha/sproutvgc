@@ -3,6 +3,7 @@ import { computed, provide, shallowRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { datasetDates, regulationSnapshot } from '@/data/meta'
 import { eventOf, loadRounds, loadStandings, underWay, type Round, type Standing } from '@/data/tournaments'
+import { loadPlayers, slugOfPlayer } from '@/data/tournamentPlayers'
 import { locale, t } from '@/i18n'
 import { META_LINKS } from '@/lib/links'
 import { cutMarks, medalOf, playerMatches, type CutMark, type PlayerMatch } from '@/lib/tournamentStats'
@@ -47,6 +48,16 @@ watch(
 )
 const byPlacing = computed(() => new Map((standings.value ?? []).map((s) => [s.placing, s])))
 const player = computed(() => byPlacing.value.get(placing.value))
+
+/** Their page across every event (the Players tab's), once the players are in: none for an event not generated yet. */
+const playersIn = shallowRef(false)
+void loadPlayers().then(
+  () => (playersIn.value = true),
+  () => {},
+)
+const allEvents = computed(() =>
+  playersIn.value && player.value ? slugOfPlayer(player.value.player, player.value.country) : undefined,
+)
 
 /** How far they made it: the top cut, Day 2, or Day 1. */
 const reached = computed(() => (player.value?.topCut ? 'topCut' : player.value?.day2 ? 'day2' : 'day1'))
@@ -137,6 +148,9 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
           <h1>{{ player.player }}</h1>
           <CountryFlag :code="player.country" />
           <span v-if="player.placing === 1 && !underWay(id)" class="champion">{{ t('tournaments.champion') }}</span>
+          <AppLink v-if="allEvents" :to="{ name: 'playerRecord', params: { player: allEvents } }" class="all-events"
+            >{{ t('players.allTheirEvents') }} ›</AppLink
+          >
         </div>
         <p class="facts">
           <span class="record num">{{ record(player.wins, player.losses) }}</span>
@@ -255,6 +269,10 @@ const record = (w: number, l: number, ties = 0) => `${w}–${l}${ties ? `–${ti
 }
 .title h1 {
   margin: 0;
+}
+.all-events {
+  margin-left: auto;
+  font-weight: bold;
 }
 .placing {
   font-weight: bold;

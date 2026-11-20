@@ -121,6 +121,7 @@ const FILES = import.meta.glob<Record<string, Standing>>(
     '!./generated/tournaments/index.json',
     '!./generated/tournaments/usage.json',
     '!./generated/tournaments/upcoming.json',
+    '!./generated/tournaments/players.json',
     '!./generated/tournaments/*.rounds.json',
     './generated/live/*.json',
     '!./generated/live/index.json',
