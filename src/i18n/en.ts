@@ -1837,7 +1837,7 @@ export const messages = {
     '<p>Pick <em>Custom</em> to choose each part to work out yourself, with the <strong>Work out</strong> toggles or the chips on the bands.</p>',
   'tour.speedSolver.introTitle': 'Speed solver',
   'tour.speedSolver.intro':
-    "<p>Use the solver to work backwards from who moved first. Enter which one moved first, and it finds the opponent's possible Speed points. Or enter the order you want, and it finds what your Pokémon needs.</p><p>This tour walks you through two examples.</p>",
+    "<p>Use the solver to work backwards from who moved first. Enter which one moved first, and it finds the opponent's possible Speed points. Or enter the order you want, and it finds what your Pokémon needs.</p><p>This tour walks you through an example.</p>",
   'tour.speedSolver.pickTitle': 'Pick the two Pokémon',
   'tour.speedSolver.pick': "<p>Pick your Pokémon and the opponent's.</p>",
   'tour.speedSolver.sidesTitle': 'Check their builds',
@@ -1854,12 +1854,9 @@ export const messages = {
   'tour.speedSolver.tableTitle': 'Check their common builds',
   'tour.speedSolver.table':
     '<p>Check each common build of one against each of the other: it fits, ties or is ruled out. The likeliest are marked.</p>',
-  'tour.speedSolver.wantTitle': 'Second example: an order you want',
-  'tour.speedSolver.want':
-    "<p>Now turn on <strong>Work out</strong> for your Pokémon's points, and pick yours as the one to move first. Here, your {a} wants to move before {b} at its most common build.</p>",
-  'tour.speedSolver.needTitle': 'Read what yours needs',
-  'tour.speedSolver.need':
-    "<p>Read the Speed and points your Pokémon needs to move first, and how often that works against the opponent's builds in the meta.</p>",
+  'tour.speedSolver.yoursTitle': 'Work out yours instead',
+  'tour.speedSolver.yours':
+    '<p>To find what your Pokémon needs to move first, turn on <strong>Work out</strong> for yours and pick it as the one that moves first. You get its Speed and points the same way.</p>',
   'speed.help': 'How to read this',
   'speed.yours': 'Your Pokémon',
   'speed.yoursPick': 'Pick a Pokémon',

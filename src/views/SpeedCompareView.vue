@@ -658,11 +658,11 @@ const { start: startCompareTour } = useTour(
   () => mode.value !== 'reverse',
 )
 
-// The speed solver's tour, walked through on examples (`useTour`'s `example`), the page set up step by step through its
-// URL as the reader would: the two picked at their most common builds, what's worked out, the opponent seen moving
-// first, and what fits; then yours wanted to move first, its points worked out. From the meta shown: two of the most
-// used where the order says something, the opponent's Speed at no points under yours' and its most common over it (so it
-// moved first, and its points are bound), and yours able to outspeed it with more points. The reader's URL put back once
+// The speed solver's tour, walked through on an example (`useTour`'s `example`), the page set up step by step through
+// its URL as the reader would: the two picked at their most common builds, what's worked out, the opponent seen moving
+// first, and what fits; then, said rather than walked through, yours worked out instead (the same answer, read the same
+// way). From the meta shown: two of the most used where the order says something, the opponent's Speed at no points
+// under yours' and its most common over it (so it moved first, and its points are bound). The reader's URL put back once
 // the tour ends; meanwhile nothing of it remembered as the page last left (`inExample`).
 interface SpeedSolverExample {
   a: { id: PokemonId; effect: NatureEffect; points: number }
@@ -706,7 +706,7 @@ function enterSpeedExample() {
   return true
 }
 /** One of the tour's steps on the page, through its URL. */
-async function stageSpeed(o: { sides: boolean; first?: Side; wantMine?: boolean }) {
+async function stageSpeed(o: { sides: boolean; first?: Side }) {
   const ex = speedExample.value
   if (!ex) return
   const q: Record<string, string | undefined> = { meta: keptQuery?.meta as string | undefined }
@@ -719,7 +719,6 @@ async function stageSpeed(o: { sides: boolean; first?: Side; wantMine?: boolean 
       bnat: ex.b.effect,
       bpts: String(ex.b.points),
       first: o.first,
-      ...(o.wantMine && { awork: 'pts', bwork: 'none' }),
     })
   }
   await router.replace({ query: q })
@@ -791,20 +790,12 @@ const { start: startSolverTour } = useTour(
         text: 'tour.speedSolver.table',
         side: 'top',
       },
+      // Yours worked out instead, said rather than walked through: the same answer, read the same way.
       {
-        el: ['#compare-a .work-out', '.duel'],
-        title: 'tour.speedSolver.wantTitle',
-        text: 'tour.speedSolver.want',
-        params,
+        el: ['#compare-a .work-out', '#band-a', '.duel'],
+        title: 'tour.speedSolver.yoursTitle',
+        text: 'tour.speedSolver.yours',
         side: 'bottom',
-        stage: () => stageSpeed({ sides: true, first: 'a', wantMine: true }),
-      },
-      {
-        el: ['.reverse .lines', '.reverse'],
-        title: 'tour.speedSolver.needTitle',
-        text: 'tour.speedSolver.need',
-        params,
-        side: 'top',
       },
       { el: '.head-tour', title: 'tour.againTitle', text: 'tour.again', side: 'bottom' },
     ]
