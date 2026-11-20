@@ -1795,29 +1795,38 @@ export const messages = {
   'tour.example': 'Example',
   'tour.solver.introTitle': 'Damage solver',
   'tour.solver.intro':
-    "<p>The calculator read backwards: from what you saw a move do, what the opponent's set could be.</p><p>Here's an example from the meta shown: your {a}'s {move} took {pct}% of the HP off the opponent's {b}. Your own setup comes back when the tour ends.</p>",
-  'tour.solver.introBare':
-    "<p>The calculator read backwards: from what you saw a move do, what the opponent's set could be.</p><p>Pick the two Pokémon, then add the hits you saw.</p>",
-  'tour.solver.sidesTitle': 'The two Pokémon',
+    "<p>The calculator in reverse: from what happened in a battle, the opponent's possible sets. Or, from the outcome you want, what your Pokémon needs.</p><p>Here's a worked example.</p>",
+  'tour.solver.pickTitle': 'The two Pokémon',
+  'tour.solver.pick': "<p>Start by picking yours and the opponent's.</p>",
+  'tour.solver.sidesTitle': 'Their sets',
   'tour.solver.sides':
-    "<p><strong>Yours</strong> as you built it. <strong>The opponent</strong> at its most common set, minus what's being worked out (here its nature, item and stat points), which stays off its card. The <strong>Work out</strong> toggles under each card pick what.</p>",
-  'tour.solver.hitsTitle': 'What you saw',
-  'tour.solver.hits':
-    "<p>A row per hit: whose move, which one, and what it did. The opponent's HP is in whole percent, as the game shows it; yours is in HP. Here, {move} took {pct}%.</p><p>Under the hits is which Pokémon <strong>moved first</strong> (here {first}). That narrows the opponent's Speed too.</p>",
-  'tour.solver.hitsNoOrder':
-    "<p>A row per hit: whose move, which one, and what it did. The opponent's HP is in whole percent, as the game shows it; yours is in HP. Here, {move} took {pct}%.</p><p>Under the hits you can also say which Pokémon <strong>moved first</strong>, which narrows the opponent's Speed.</p>",
+    "<p>Both come in at their most common set. Here, your {a} against {b}.</p><p><strong>Work out</strong>, under each card, marks what's unknown. It's left off the card.</p>",
+  'tour.solver.addTitle': 'Add a hit',
+  'tour.solver.add':
+    '<p>Add each hit you saw: <strong>Your hit</strong> on the opponent, or <strong>Its hit</strong> on yours.</p>',
+  'tour.solver.hitTitle': 'The move',
+  'tour.solver.hit': '<p>Pick the move, here {move}, and mark it if it was a critical hit.</p>',
+  'tour.solver.sawTitle': 'What it did',
+  'tour.solver.saw':
+    "<p>Here it took {pct}% of {b}'s HP. For a hit on yours, enter the HP it lost. Or pick <em>KO</em>, <em>Survived</em> or <em>2 hits</em>.</p><p>If it wasn't at full HP, set its HP before the hit.</p>",
+  'tour.solver.firstTitle': 'Who moved first',
+  'tour.solver.first':
+    "<p>If both used moves of the same priority, say which moved first, here {first}. That narrows the opponent's Speed.</p>",
   'tour.solver.goalTitle': 'What to work out',
   'tour.solver.goal':
-    '<p><em>Opponent build</em> works out its nature, item and stat points, the default. <em>Opponent spread</em> works out its points alone, and <em>Your spread</em> what yours needs to get the hits you want. <em>Custom</em> lets you pick part by part.</p>',
-  'tour.solver.rangesTitle': 'What fits',
-  'tour.solver.ranges':
-    '<p>The points each stat in play could have for something to fit, within the 66 a set has, and how likely what you saw was at the sets players run.</p>',
-  'tour.solver.buildsTitle': 'Its common builds',
-  'tour.solver.builds':
-    '<p>Its common spreads down the side, and across the top its items, where they change the answer. Each cell is the share of damage rolls that fit, or ruled out; the likeliest are marked.</p><p><strong>Use</strong> sets the opponent to that build and opens the damage tab.</p>',
-  'tour.solver.yoursTitle': 'Your turn',
+    "<p>The opponent's <em>spread</em>, or its whole <em>build</em> (nature, item and points); <em>your spread</em> for an outcome you want; or <em>Custom</em>.</p>",
+  'tour.solver.theirsTitle': 'What fits',
+  'tour.solver.theirs':
+    '<p>The points each stat could have, and its common spreads against its items, with the share of damage rolls that fit.</p><p><strong>Use</strong> loads one into the calculator.</p>',
+  'tour.solver.wantTitle': 'An outcome you want',
+  'tour.solver.want':
+    "<p>With <em>Your spread</em>, hits are what you want to happen. Here, {a} survives {b}'s {theirMove}.</p>",
+  'tour.solver.yoursTitle': 'What yours needs',
   'tour.solver.yours':
-    '<p>Pick the two Pokémon, add the hits you saw, then <strong>continue to see what fits</strong>. The more hits, the narrower the answer.</p>',
+    '<p>For each item, the fewest points to get it half the time, 9 times in 10, or always, against the sets players run.</p><p>Tap a bar for its chance, then <strong>Use</strong> it.</p>',
+  'tour.solver.customTitle': 'Custom',
+  'tour.solver.custom':
+    "<p>Pick part by part what's worked out, with the <strong>Work out</strong> toggles or the chips on the bands.</p>",
   'speed.help': 'How to read this',
   'speed.yours': 'Your Pokémon',
   'speed.yoursPick': 'Pick a Pokémon',

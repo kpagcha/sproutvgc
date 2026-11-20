@@ -206,7 +206,7 @@ const hits = shallowRef<HitDraft[]>(
 )
 /** Which was seen moving first (`?first=a|b`). */
 const first = shallowRef<'a' | 'b' | null>(start.first === 'a' || start.first === 'b' ? start.first : null)
-/** The tour's example on the page (`solverExample`, below), kept out of the URL. */
+/** The tour's example on the page (`solverExample`), kept out of the URL. */
 const example = shallowRef<SolverExample | null>(null)
 const inExample = computed(() => !!example.value)
 /** The hits seen with a move and a result: what's kept and worked out. */
@@ -831,16 +831,20 @@ watch([hasAny, hasBoth, wide], () => nextTick(checkDock))
 const fromBands = shallowRef<SideKey | null>(null)
 watch(picking, (p) => !p && (fromBands.value = null))
 
-// The solver's tour, an example walked through (`useTour`'s `example`): from the meta shown, the most used Pokémon as
-// the opponent and another of the most used as yours, at their most common sets, one of yours' moves seen hitting it
-// (its middle roll at the opponent's most common set, so what fits has that set among its answers) and which of the two
-// moved first; its build worked out, the default goal. The reader's own setup put back once the tour ends; meanwhile
-// nothing of the example goes into the URL nor what's remembered of the page (`inExample`).
+// The solver's tour, walked through on an example (`useTour`'s `example`), the page set up step by step as the reader
+// would: the two picked, a hit added and said, which moved first, what to work out, and what fits; then what yours needs
+// for an outcome wanted, and Custom. From the meta shown: two of the most used at their most common sets, one of yours'
+// moves seen hitting the opponent (its middle roll at the opponent's most common set, so that set fits), and one of its
+// moves that could knock yours out or not, to survive. Nothing of it goes into the URL nor what's remembered of the page
+// (`inExample`); the reader's setup put back once the tour ends.
 interface SolverExample {
   a: Fighter
   b: Fighter
-  hit: HitSeen
+  /** Yours' hit seen on the opponent. */
+  seen: HitSeen
   first: 'a' | 'b' | null
+  /** The opponent's hit yours wants to survive. */
+  wanted: HitSeen | null
 }
 /** A move whose damage is plain to read off one hit: fixed power and hits, nothing hanging on what came before. */
 const plainMove = (mv: MoveId | null): mv is MoveId =>
@@ -851,35 +855,58 @@ const plainMove = (mv: MoveId | null): mv is MoveId =>
   !ORDER_MOVES.has(mv) &&
   !usesFainted(mv) &&
   !usesAttacked(mv)
+/** A plain, single-target hit of one on the other at their most common sets. */
+const plainHit = (att: Fighter, def: Fighter, mv: MoveId | null) => {
+  if (!plainMove(mv)) return null
+  const h = hit(att, def, mv, emptyField())
+  return h && !h.none && !h.spread && h.rolls.length ? h : null
+}
+/** Its moves without the moves: the solver's sides, a hit's move picked where the hit is. */
+const noMoves = (f: Fighter): Fighter => ({
+  ...f,
+  member: { ...f.member, moves: f.member.moves.map(() => null) as Member['moves'] },
+})
 function solverExample(): SolverExample | null {
   const foes = metaFoes(data.value, 12)
   const none = emptyField()
+  let fallback: SolverExample | null = null
   for (const them of foes) {
     for (const you of foes) {
       if (you.id === them.id) continue
+      let seen: HitSeen | null = null
       for (const mv of you.set.member.moves) {
-        if (!plainMove(mv)) continue
-        const h = hit(you.set, them.set, mv, none)
-        if (!h || h.none || h.spread || !h.rolls.length) continue
+        const h = plainHit(you.set, them.set, mv)
+        if (!h) continue
         const roll = h.rolls[Math.floor(h.rolls.length / 2)]!
         const lost = 100 - hpShown(((h.maxHp - roll) / h.maxHp) * 100)
         // A hit that leaves a good part of its HP, nowhere near a knockout.
-        if (lost < 30 || lost > 75) continue
-        const sa = speedOf(you.set, none)
-        const sb = speedOf(them.set, none)
-        const lead = sa !== null && sb !== null ? leadOf(sa, sb, none) : 'tie'
-        const a = { ...you.set, member: { ...you.set.member, moves: [mv, null, null, null] as Member['moves'] } }
-        const bm = them.set.member
-        const fixed = !!stoneMega(bm) || (!!bm.pokemon && itemBound(bm.pokemon))
-        const b = {
-          ...them.set,
-          member: { ...bm, item: fixed ? bm.item : null, moves: bm.moves.map(() => null) as Member['moves'] },
+        if (lost >= 30 && lost <= 75) {
+          seen = { by: 'a', move: mv as MoveId, saw: { kind: 'pct', n: lost } }
+          break
         }
-        return { a, b, hit: { by: 'a', move: mv, saw: { kind: 'pct', n: lost } }, first: lead === 'tie' ? null : lead }
       }
+      if (!seen) continue
+      // Its hit on yours that knocks it out at its most common set, but not by far: points could make it survive.
+      let wanted: HitSeen | null = null
+      for (const mv of them.set.member.moves) {
+        const h = plainHit(them.set, you.set, mv)
+        if (h && h.max >= h.hp && h.min <= h.hp * 1.3) {
+          wanted = { by: 'b', move: mv as MoveId, saw: { kind: 'lived' } }
+          break
+        }
+      }
+      const sa = speedOf(you.set, none)
+      const sb = speedOf(them.set, none)
+      const lead = sa !== null && sb !== null ? leadOf(sa, sb, none) : 'tie'
+      const bm = them.set.member
+      const fixed = !!stoneMega(bm) || (!!bm.pokemon && itemBound(bm.pokemon))
+      const b = noMoves({ ...them.set, member: { ...bm, item: fixed ? bm.item : null } })
+      const ex = { a: noMoves(you.set), b, seen, first: lead === 'tie' ? null : lead, wanted }
+      if (wanted) return ex
+      fallback ??= ex
     }
   }
-  return null
+  return fallback
 }
 let kept: {
   sides: Record<SideKey, Fighter>
@@ -891,7 +918,7 @@ let kept: {
   goal: Goal
   open: Record<SideKey, boolean>
 } | null = null
-async function enterExample() {
+function enterExample() {
   const ex = solverExample()
   if (!ex) return false
   kept ??= {
@@ -905,17 +932,28 @@ async function enterExample() {
     open: open.value,
   }
   example.value = ex
-  sides.value = { a: ex.a, b: ex.b }
-  field.value = emptyField()
-  work.value = { ...GOALS.build.b }
-  workYours.value = NOTHING
-  goal.value = 'build'
-  open.value = { a: true, b: true }
-  // Another two Pokémon clear what was seen of the two before (its watch, before the next render): the example's after.
-  await nextTick()
-  hits.value = [ex.hit]
-  first.value = ex.first
   return true
+}
+/** One of the tour's steps on the page: the two (or none yet), the hits and the order, and what's worked out. */
+async function stageExample(o: {
+  sides: boolean
+  hits?: HitDraft[]
+  first?: 'a' | 'b' | null
+  goal?: 'build' | 'need'
+}) {
+  const ex = example.value
+  if (!ex) return
+  const g = o.goal ?? 'build'
+  sides.value = o.sides ? { a: ex.a, b: ex.b } : { a: emptyFighter(), b: emptyFighter() }
+  field.value = emptyField()
+  work.value = { ...GOALS[g].b }
+  workYours.value = { ...GOALS[g].a }
+  goal.value = g
+  open.value = { a: true, b: true }
+  // Other Pokémon clear what was seen of the two before (its watch, before the next render): the example's after.
+  await nextTick()
+  hits.value = o.hits ?? []
+  first.value = o.first ?? null
 }
 async function leaveExample() {
   const k = kept
@@ -944,42 +982,89 @@ const { start: startTour } = props.inverse
       'calcSolver',
       () => {
         const ex = example.value
-        const lost = ex?.hit.saw.kind === 'pct' ? ex.hit.saw.n : 0
+        const seen = ex?.seen
+        const wanted = ex?.wanted
         const params = {
           a: exName('a'),
           b: exName('b'),
-          move: ex ? refName(move(ex.hit.move)) : '',
-          pct: lost,
+          move: seen ? refName(move(seen.move)) : '',
+          pct: seen?.saw.kind === 'pct' ? seen.saw.n : 0,
           first: ex?.first ? exName(ex.first) : '',
+          theirMove: wanted ? refName(move(wanted.move)) : '',
         }
+        const blank = { ...seen!, saw: null } as HitDraft
         return [
-          { title: 'tour.solver.introTitle', text: ex ? 'tour.solver.intro' : 'tour.solver.introBare', params },
-          { el: '#calc-duel', title: 'tour.solver.sidesTitle', text: 'tour.solver.sides', params, side: 'top' },
+          { title: 'tour.solver.introTitle', text: 'tour.solver.intro', stage: () => stageExample({ sides: false }) },
+          { el: '#calc-duel', title: 'tour.solver.pickTitle', text: 'tour.solver.pick', side: 'top' },
           {
-            el: '#calc-hits',
-            title: 'tour.solver.hitsTitle',
-            text: ex?.first ? 'tour.solver.hits' : 'tour.solver.hitsNoOrder',
+            el: '#calc-duel',
+            title: 'tour.solver.sidesTitle',
+            text: 'tour.solver.sides',
             params,
             side: 'top',
+            stage: () => stageExample({ sides: true }),
           },
-          { el: '#calc-goal', title: 'tour.solver.goalTitle', text: 'tour.solver.goal', params, side: 'top' },
+          { el: '#calc-hits .adds', title: 'tour.solver.addTitle', text: 'tour.solver.add', side: 'bottom' },
           {
-            el: ['#calc-reverse .lines', '#calc-reverse'],
-            late: true,
-            title: 'tour.solver.rangesTitle',
-            text: 'tour.solver.ranges',
+            el: '#calc-hits .hit',
+            title: 'tour.solver.hitTitle',
+            text: 'tour.solver.hit',
             params,
+            side: 'bottom',
+            stage: () => stageExample({ sides: true, hits: [blank] }),
+          },
+          {
+            el: '#calc-hits .saw',
+            title: 'tour.solver.sawTitle',
+            text: 'tour.solver.saw',
+            params,
+            side: 'bottom',
+            stage: () => stageExample({ sides: true, hits: [seen!] }),
+          },
+          ...(ex?.first
+            ? [
+                {
+                  el: '#calc-hits .first',
+                  title: 'tour.solver.firstTitle' as const,
+                  text: 'tour.solver.first' as const,
+                  params,
+                  side: 'bottom' as const,
+                  stage: () => stageExample({ sides: true, hits: [seen!], first: ex.first }),
+                },
+              ]
+            : []),
+          { el: '#calc-goal', title: 'tour.solver.goalTitle', text: 'tour.solver.goal', side: 'top' },
+          {
+            el: ['#calc-reverse .answer.theirs', '#calc-reverse'],
+            title: 'tour.solver.theirsTitle',
+            text: 'tour.solver.theirs',
             side: 'top',
           },
+          ...(wanted
+            ? [
+                {
+                  el: '#calc-hits .hit',
+                  title: 'tour.solver.wantTitle' as const,
+                  text: 'tour.solver.want' as const,
+                  params,
+                  side: 'bottom' as const,
+                  stage: () => stageExample({ sides: true, hits: [wanted], goal: 'need' }),
+                },
+                {
+                  el: ['#calc-reverse .answer.yours', '#calc-reverse'],
+                  title: 'tour.solver.yoursTitle' as const,
+                  text: 'tour.solver.yours' as const,
+                  params,
+                  side: 'top' as const,
+                },
+              ]
+            : []),
           {
-            el: ['#calc-reverse .builds', '#calc-reverse'],
-            late: true,
-            title: 'tour.solver.buildsTitle',
-            text: 'tour.solver.builds',
-            params,
+            el: '#calc-goal .card:last-child',
+            title: 'tour.solver.customTitle',
+            text: 'tour.solver.custom',
             side: 'top',
           },
-          { title: 'tour.solver.yoursTitle', text: 'tour.solver.yours' },
           { el: '.head-tour', title: 'tour.againTitle', text: 'tour.again', side: 'bottom' },
         ]
       },

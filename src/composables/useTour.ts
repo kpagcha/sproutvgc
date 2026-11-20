@@ -6,8 +6,9 @@ import { t, type MessageKey } from '@/i18n'
 // A page's first-visit tour (driver.js): a few steps, each a popover over a part of the page, dismissable at any time,
 // and not shown again once dismissed or finished (saved under `sproutvgc.tour.<page>`): the page's guide to reading it,
 // taken again from the icon by its heading (`start`, `TourToggle`). A page that takes some learning can walk through an
-// example (`example`): set up on the page before the steps are worked out (so they can point at what it fills in and
-// name it), each popover tagged as one, and the reader's own setup put back once the tour ends, however it ends.
+// example (`example`): the page set up as each step says (its `stage`, from the step itself or the nearest before it,
+// so Back sets it up again too), before the steps are worked out and as each one shows, each popover tagged as one, and
+// the reader's own setup put back once the tour ends, however it ends.
 
 export interface TourStep {
   // What the step points at: the first of these selectors with an element on screen (so a step can point at yours'
@@ -21,14 +22,14 @@ export interface TourStep {
   /** The text's placeholders. */
   params?: Record<string, string | number>
   side?: Side
-  /** Pointed at as the step shows rather than as the tour starts, for a part that comes in on its own a moment later
-   * (what's worked out of the example): the first of `el` on screen then, its last always there, the step left out
-   * only when that one isn't. */
-  late?: boolean
+  /** In an example: the page as this step and those after it show it, set up before it shows. Its `el` is pointed at
+   * once it's there (waited for a moment, for what comes in on its own: what's worked out), else the first of the
+   * others there, else nothing (the popover in the middle). */
+  stage?: () => void | Promise<void>
 }
 
-/** A tour's example: `enter` sets it up on the page (false when there's none to set up, the tour going on without it),
- * `leave` puts back what was there. */
+/** A tour's example: `enter` keeps what's on the page (false when there's no example to show, the tour going on
+ * without it: the steps with no stage alone), `leave` puts it back. */
 export interface TourExample {
   enter: () => boolean | Promise<boolean>
   leave: () => void
@@ -63,6 +64,13 @@ function shown(sel: string | string[]): Element | undefined {
 const SETTLE = 450
 
 const frame = () => new Promise((r) => requestAnimationFrame(r))
+// A stage's part, waited for while what's worked out comes in.
+const WAIT = 1500
+async function waitFor(sel: string, ms: number) {
+  const until = performance.now() + ms
+  while (!shown(sel) && performance.now() < until) await new Promise((r) => setTimeout(r, 60))
+}
+const selsOf = (s: TourStep) => (s.el ? (Array.isArray(s.el) ? s.el : [s.el]) : [])
 
 export function useTour(
   page: string,
@@ -88,26 +96,56 @@ export function useTour(
   async function start() {
     stop()
     const id = ++run
-    if (example && (await example.enter())) {
-      inExample = true
-      // Drawn, and laid out, before the steps look for their parts.
-      await nextTick()
-      await frame()
-      await frame()
-      if (id !== run) return leaveExample()
+    if (example && (await example.enter())) inExample = true
+    const all = steps()
+    const staged = inExample ? all : all.filter((x) => !x.stage)
+    // Each step's stage: its own, or the nearest before it.
+    const stageOf: number[] = []
+    staged.forEach((x, i) => stageOf.push(x.stage ? i : (stageOf[i - 1] ?? -1)))
+    let applied = -1
+    async function setUp(i: number) {
+      const k = stageOf[i]!
+      if (k >= 0 && k !== applied) {
+        applied = k
+        await staged[k]!.stage!()
+        // Drawn, and laid out, before the step looks for its part.
+        await nextTick()
+        await frame()
+        await frame()
+      }
+      const first = selsOf(staged[i]!)[0]
+      if (first && inExample) await waitFor(first, WAIT)
     }
+    if (inExample) await setUp(0)
+    if (id !== run) return leaveExample()
     const tag = inExample ? `<p class="tour-tag">${t('tour.example')}</p>` : ''
     const list: DriveStep[] = []
-    for (const s of steps()) {
-      const sels = s.el ? (Array.isArray(s.el) ? s.el : [s.el]) : []
-      const element = sels.length ? shown(s.late ? sels.at(-1)! : sels) : undefined
+    for (const s of staged) {
+      const sels = selsOf(s)
+      const popover = {
+        title: t(s.title),
+        description: tag + t(s.text, s.params),
+        side: s.side,
+        align: 'start' as const,
+      }
+      // In an example, pointed at as it shows (the page set up for it then); else left out when not on screen.
+      if (inExample) {
+        list.push({ element: (() => shown(sels)) as () => Element, popover })
+        continue
+      }
+      const element = sels.length ? shown(sels) : undefined
       if (sels.length && !element) continue
-      list.push({
-        element: s.late ? () => shown(sels) ?? shown(sels.at(-1)!) ?? element! : element,
-        popover: { title: t(s.title), description: tag + t(s.text, s.params), side: s.side, align: 'start' },
-      })
+      list.push({ element, popover })
     }
     if (!list.length) return leaveExample()
+    // Moving between steps, the page set up for the next first.
+    const go = async (i: number) => {
+      if (i < 0) return
+      if (i >= list.length) return tour?.destroy()
+      await setUp(i)
+      if (id === run) tour?.moveTo(i)
+    }
+    const index = () => tour?.getActiveIndex() ?? 0
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
     tour = driver({
       steps: list,
@@ -124,6 +162,10 @@ export function useTour(
       nextBtnText: t('tour.next'),
       prevBtnText: t('tour.prev'),
       doneBtnText: t('tour.done'),
+      ...(inExample && {
+        onNextClick: () => void go(index() + 1),
+        onPrevClick: () => void go(index() - 1),
+      }),
       onDestroyed: () => {
         if (!leaving) markSeen(page)
         tour = undefined
