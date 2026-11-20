@@ -73,9 +73,23 @@ async function waitFor(sel: string, ms: number) {
 // On phones the popover is a sheet at the screen's foot (`retro.css`): its part goes in the room over it.
 const PHONE = '(max-width: 720px)'
 const GAP = 8
+// How long what slides in as the page scrolls takes to arrive (the solver's bands).
+const SLIDE_IN = 350
 /** The foot of what's stuck across the top of the screen over a part (a page's bands, its row of links, but not the
  * part's own: a part whose bands stick inside it keeps them), else the screen's top. */
 function coverOf(el: Element): number {
+  // The tour takes the page's pointer events away (driver.js's `driver-active`), which hides it from hit testing:
+  // given back for the measuring alone, nothing drawn meanwhile.
+  const body = document.body
+  const active = body.classList.contains('driver-active')
+  body.classList.remove('driver-active')
+  try {
+    return coverAt(el)
+  } finally {
+    if (active) body.classList.add('driver-active')
+  }
+}
+function coverAt(el: Element): number {
   const r = el.getBoundingClientRect()
   const x = Math.min(Math.max(r.left + r.width / 2, 1), window.innerWidth - 1)
   let y = 0
@@ -87,7 +101,11 @@ function coverOf(el: Element): number {
     let box: Element | null = hit ?? null
     while (box && box !== document.body && !/sticky|fixed/.test(getComputedStyle(box).position)) box = box.parentElement
     if (!box || box === document.body || el.contains(box)) break
-    y = Math.max(y + 1, box.getBoundingClientRect().bottom)
+    // Its foot, or that of what's in it at that point, for a box drawn past its own height (a dock of bands).
+    let foot = box.getBoundingClientRect().bottom
+    for (let e: Element | null = hit!; e && e !== box; e = e.parentElement)
+      foot = Math.max(foot, e.getBoundingClientRect().bottom)
+    y = Math.max(y + 1, foot)
   }
   return y
 }
@@ -113,6 +131,28 @@ function fitOnScreen(el: Element): boolean {
   }
   return window.scrollY !== before
 }
+// A tour's example, worked out once per what it's made from (the meta's data shown) and kept: taking the tour again
+// starts at once. One per page that has one (each makes its own), by the function that makes it.
+const examples = new WeakMap<object, Map<unknown, Promise<unknown>>>()
+export function exampleFor<T>(from: object, make: () => Promise<T>): Promise<T> {
+  let byMaker = examples.get(from)
+  if (!byMaker) examples.set(from, (byMaker = new Map()))
+  let p = byMaker.get(make.toString()) as Promise<T> | undefined
+  if (!p) byMaker.set(make.toString(), (p = make()))
+  return p
+}
+/** A tour's example worked out ahead, when the browser is idle, so the tour starts at once. */
+export function warmExample<T>(from: object, make: () => Promise<T>) {
+  const go = () => void exampleFor(from, make)
+  if ('requestIdleCallback' in window) requestIdleCallback(go, { timeout: 3000 })
+  else setTimeout(go, 500)
+}
+
+// On phones, room at the page's foot while a tour is on, so a part at its end can still be scrolled over the sheet.
+function roomAtFoot(on: boolean) {
+  document.documentElement.classList.toggle('touring', on && matchMedia(PHONE).matches)
+}
+
 const selsOf = (s: TourStep) => (s.el ? (Array.isArray(s.el) ? s.el : [s.el]) : [])
 
 export function useTour(
@@ -230,17 +270,24 @@ export function useTour(
       disableActiveInteraction: true,
       onHighlightStarted: (el) => lock(el),
       // Its part brought into the room left on screen, then the stage and popover drawn again where it ends up.
+      // Again once what scrolling brought in has arrived (bands that slide in once the page is past their place).
       onHighlighted: (el) => {
-        if (el && fitOnScreen(el)) tour?.refresh()
+        if (!el) return
+        if (fitOnScreen(el)) tour?.refresh()
+        setTimeout(() => {
+          if (tour?.getActiveElement() === el && fitOnScreen(el)) tour.refresh()
+        }, SLIDE_IN)
       },
       onDeselected: () => lock(undefined),
       onDestroyed: () => {
         lock(undefined)
+        roomAtFoot(false)
         if (!leaving) markSeen(page)
         tour = undefined
         leaveExample()
       },
     })
+    roomAtFoot(true)
     tour.drive()
   }
 

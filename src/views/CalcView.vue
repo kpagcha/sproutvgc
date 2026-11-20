@@ -97,7 +97,7 @@ import { goalDiff, goalOf, GOALS, type Goal } from '@/lib/solverGoal'
 import { MAX_POINTS } from '@/lib/stats'
 import { ORDER_MOVES } from '@/lib/threats'
 import { MOVES } from '@/data/moves'
-import { useTour } from '@/composables/useTour'
+import { exampleFor, useTour, warmExample } from '@/composables/useTour'
 import TourToggle from '@/components/TourToggle.vue'
 import TeamPicker from '@/components/TeamPicker.vue'
 
@@ -969,14 +969,17 @@ async function buildExample(until: number) {
       const r = buildAnswer(a, b, [...(first ? [{ by: 'speed' as const, first }] : []), seen, seen2])
       if (!r?.possible) continue
       const pattern = (row: (typeof r.rows)[number]) => row.fits.map((f) => (f > 0 ? 1 : 0)).join('')
+      const itemsApart = r.itemsVary && r.columns.length >= 2
+      const rowsUnalike = new Set(r.rows.map(pattern)).size >= 2
       let score = 0
-      if (r.itemsVary && r.columns.length >= 2) score += 3
-      if (new Set(r.rows.map(pattern)).size >= 2) score += 2
+      if (itemsApart) score += 3
+      if (rowsUnalike) score += 2
       if ((r.chance ?? 0) >= 0.05) score += 2
       if (lead === 'a') score += 1
       const ex = { a, b, seen, seen2, first }
       if (!best || score > best.score) best = { ex, score }
-      if (score >= 8) return ex
+      // Good enough to stop at: the opponent's items apart and its rows unalike, what the table is there to show.
+      if (itemsApart && rowsUnalike) return ex
     }
   }
   return best?.ex ?? null
@@ -1036,7 +1039,7 @@ let kept: {
   open: Record<SideKey, boolean>
 } | null = null
 async function enterExample() {
-  const ex = await solverExample()
+  const ex = data.value ? await exampleFor(data.value, solverExample) : null
   if (!ex) return false
   kept ??= {
     sides: sides.value,
@@ -1098,6 +1101,8 @@ const nameOf = (f: Fighter | undefined) => {
 const exName = (k: SideKey) => nameOf(example.value?.[k])
 // Its first visit's, unless it came with hits of its own to read.
 const cameWithHits = hits.value.length > 0
+// Picked ahead, once the page is in and the browser idle, so the tour starts at once.
+if (props.inverse) watch(data, (d) => d && warmExample(d, solverExample), { immediate: true })
 const { start: startTour } = props.inverse
   ? useTour(
       'calcSolver',
