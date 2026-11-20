@@ -1825,7 +1825,8 @@ export const messages = {
   'tour.solver.needGoal':
     '<p>Now pick <em>Your spread</em> to find what your Pokémon needs. The hits you enter become outcomes you want, rather than things you saw.</p>',
   'tour.solver.wantTitle': 'Your spread: enter the outcome',
-  'tour.solver.want': "<p>Enter the outcome you want. Here, your {a} survives {b}'s {theirMove}.</p>",
+  'tour.solver.want':
+    "<p>Enter the outcome you want. This example has two other Pokémon: here, your {a2} survives {b2}'s {theirMove}.</p>",
   'tour.solver.yoursTitle': 'Your spread: read the result',
   'tour.solver.yours':
     "<p>For each item, read the fewest stat points that get you the outcome half the time, 9 times in 10, or always, against the opponent's sets in the meta.</p><p>Tap a bar to see its chance, then tap <strong>Use</strong> to apply it.</p>",

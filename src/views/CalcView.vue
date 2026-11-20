@@ -35,7 +35,8 @@ import {
   readLast,
   saveLast,
 } from '@/lib/calcState'
-import type { HitSeen, Observation, OpponentUnknowns } from '@/lib/damageReverse'
+import { goalDamage, type GoalBuild } from '@/lib/damageGoal'
+import { NEUTRAL, reverseDamage, type HitSeen, type Observation, type OpponentUnknowns } from '@/lib/damageReverse'
 import {
   abilityOf,
   atSets,
@@ -52,12 +53,14 @@ import {
   leadOf,
   metaFoes,
   pooledView,
+  priorityOf,
   speedOf,
   usesAttacked,
   usesFainted,
   SETS_FIELD,
   type Battlefield,
   type Fighter,
+  type Hit,
 } from '@/lib/damage'
 import { membersPaste, parsePaste } from '@/lib/pokepaste'
 import { copy } from '@/lib/clipboard'
@@ -91,6 +94,7 @@ import SolverBands from '@/components/SolverBands.vue'
 import SolverChips from '@/components/SolverChips.vue'
 import SolverGoal from '@/components/SolverGoal.vue'
 import { goalDiff, goalOf, GOALS, type Goal } from '@/lib/solverGoal'
+import { MAX_POINTS } from '@/lib/stats'
 import { ORDER_MOVES } from '@/lib/threats'
 import { MOVES } from '@/data/moves'
 import { useTour } from '@/composables/useTour'
@@ -845,80 +849,180 @@ interface SolverExample {
   first: 'a' | 'b' | null
   /** Its hit seen on yours, a second hit: the HP it took off. */
   seen2: HitSeen | null
-  /** The opponent's hit yours wants to survive. */
-  wanted: HitSeen | null
+  /** The second example, Your spread: two of its own, and the opponent's hit yours wants to survive. */
+  need: { a: Fighter; b: Fighter; wanted: HitSeen } | null
 }
-/** A move whose damage is plain to read off one hit: fixed power and hits, nothing hanging on what came before. */
+/** A move whose damage is plain to read off one hit: fixed power and hits, nothing hanging on what came before, and
+ * no priority (a hit entered after another then reads as it would happen: Fake Out can't come second). */
 const plainMove = (mv: MoveId | null): mv is MoveId =>
   damaging(mv) &&
   MOVES[mv].power > 0 &&
+  MOVES[mv].priority === 0 &&
   !hitChoices(mv) &&
   !(mv in DOUBLING) &&
   !ORDER_MOVES.has(mv) &&
   !usesFainted(mv) &&
   !usesAttacked(mv)
-/** A plain, single-target hit of one on the other at their most common sets. */
+/** A plain, single-target hit of one on the other, with no priority in the battle either (Prankster, Gale Wings). */
 const plainHit = (att: Fighter, def: Fighter, mv: MoveId | null) => {
-  if (!plainMove(mv)) return null
+  if (!plainMove(mv) || priorityOf(att, mv, emptyField()) !== 0) return null
   const h = hit(att, def, mv, emptyField())
   return h && !h.none && !h.spread && h.rolls.length ? h : null
 }
+const middle = (rolls: readonly number[]) => rolls[Math.floor(rolls.length / 2)]!
 /** Its moves without the moves: the solver's sides, a hit's move picked where the hit is. */
 const noMoves = (f: Fighter): Fighter => ({
   ...f,
   member: { ...f.member, moves: f.member.moves.map(() => null) as Member['moves'] },
 })
-function solverExample(): SolverExample | null {
-  const foes = metaFoes(data.value, 12)
+/** Yours' bulk on the side a move hits: its HP points and its defense's (with a nature raising it) all in, or none
+ * (a neutral nature). */
+function bulkOf(f: Fighter, mv: MoveId, hp: boolean, def: boolean): Fighter {
+  const special = MOVES[mv].category === 'special'
+  const points = [...f.member.points] as Member['points']
+  points[0] = hp ? MAX_POINTS : 0
+  points[special ? 4 : 2] = def ? MAX_POINTS : 0
+  return { ...f, member: { ...f.member, points, nature: def ? (special ? 'calm' : 'bold') : NEUTRAL } }
+}
+/** A solver's run of the page's own, drained at once (the tour's example checked against what the page will show). */
+function drain<T>(job: { steps: Generator<unknown, T> }): T {
+  for (;;) {
+    const r = job.steps.next()
+    if (r.done) return r.value
+  }
+}
+const idle = () => new Promise((r) => setTimeout(r, 0))
+/** How long the example is looked for, before the best one found so far is taken. */
+const EXAMPLE_BUDGET = 1500
+/** The solver's own answer, worked out at once, for the tour's example to be checked against what the page will show. */
+const entryOf = (f: Fighter) => data.value?.[setsAs(f.member) ?? battlerOf(f)!] ?? undefined
+/** The opponent's build from what was seen, as the page works it out at its default goal. */
+const buildAnswer = (a: Fighter, b: Fighter, obs: Observation[]) =>
+  drain(reverseDamage({ yours: a, theirs: b, field: emptyField(), entry: entryOf(b), work: { ...GOALS.build.b }, obs }))
+/** What yours needs for a hit of the opponent's to be survived, as the page works it out with Your spread. */
+const needAnswer = (a: Fighter, b: Fighter, wanted: HitSeen) =>
+  drain(
+    goalDamage({
+      yours: a,
+      theirs: b,
+      field: emptyField(),
+      entryYours: entryOf(a),
+      entryTheirs: entryOf(b),
+      workYours: { ...GOALS.need.a },
+      workTheirs: { ...GOALS.need.b },
+      obs: [wanted],
+    }),
+  )
+/** Its ability sets the weather or terrain as it comes in (`SETS_FIELD`), which the page then has: left out of the
+ * examples, kept to a plain field. */
+const setsField = (f: Fighter) => {
+  const ab = abilityOf(f)
+  return !!ab && !!SETS_FIELD[ab]
+}
+/** The two as the solver has them: their most common sets but their moves, the opponent's item left to work out. */
+function solverPair(you: Fighter, them: Fighter) {
+  const bm = them.member
+  const fixed = !!stoneMega(bm) || (!!bm.pokemon && itemBound(bm.pokemon))
+  return { a: noMoves(you), b: noMoves({ ...them, member: { ...bm, item: fixed ? bm.item : null } }) }
+}
+/**
+ * The tour's first example, Opponent build, from the meta shown: two of the most used, at their most common sets. Yours'
+ * hit on the opponent (its middle roll at the opponent's most common set, so that set fits) leaving a good part of its
+ * HP, its hit on yours leaving yours standing, neither a priority move; yours moving first, so the two hits read in
+ * order. Checked against the page's own answer, so its table is worth reading: the opponent's items changing what fits
+ * (columns of their own), its rows not all alike, and what was seen not a fluke. The first such, else the best found
+ * within a while.
+ */
+async function buildExample(until: number) {
+  const foes = metaFoes(data.value, 15)
   const none = emptyField()
-  let fallback: SolverExample | null = null
+  let best: { ex: Omit<SolverExample, 'need'>; score: number } | null = null
   for (const them of foes) {
     for (const you of foes) {
-      if (you.id === them.id) continue
-      let seen: HitSeen | null = null
-      for (const mv of you.set.member.moves) {
-        const h = plainHit(you.set, them.set, mv)
-        if (!h) continue
-        const roll = h.rolls[Math.floor(h.rolls.length / 2)]!
-        const lost = 100 - hpShown(((h.maxHp - roll) / h.maxHp) * 100)
-        // A hit that leaves a good part of its HP, nowhere near a knockout.
-        if (lost >= 30 && lost <= 75) {
-          seen = { by: 'a', move: mv as MoveId, saw: { kind: 'pct', n: lost } }
-          break
-        }
-      }
-      if (!seen) continue
-      // Its hit on yours that knocks it out at its most common set, but not by far: points could make it survive.
-      let wanted: HitSeen | null = null
-      for (const mv of them.set.member.moves) {
-        const h = plainHit(them.set, you.set, mv)
-        if (h && h.max >= h.hp && h.min <= h.hp * 1.3) {
-          wanted = { by: 'b', move: mv as MoveId, saw: { kind: 'lived' } }
-          break
-        }
-      }
-      // Its hit seen on yours, one that left it standing: the HP it took off, its middle roll.
-      let seen2: HitSeen | null = null
-      for (const mv of them.set.member.moves) {
-        const h = plainHit(them.set, you.set, mv)
-        const roll = h?.rolls[Math.floor(h.rolls.length / 2)]
-        if (h && roll !== undefined && roll < h.hp * 0.8) {
-          seen2 = { by: 'b', move: mv as MoveId, saw: { kind: 'hp', n: roll } }
-          break
-        }
-      }
+      if (you.id === them.id || setsField(you.set) || setsField(them.set)) continue
+      if (performance.now() > until) return best?.ex ?? null
       const sa = speedOf(you.set, none)
       const sb = speedOf(them.set, none)
       const lead = sa !== null && sb !== null ? leadOf(sa, sb, none) : 'tie'
-      const bm = them.set.member
-      const fixed = !!stoneMega(bm) || (!!bm.pokemon && itemBound(bm.pokemon))
-      const b = noMoves({ ...them.set, member: { ...bm, item: fixed ? bm.item : null } })
-      const ex = { a: noMoves(you.set), b, seen, seen2, first: lead === 'tie' ? null : lead, wanted }
-      if (wanted && seen2) return ex
-      fallback ??= ex
+      let seen: HitSeen | null = null
+      for (const mv of you.set.member.moves) {
+        const h = plainHit(you.set, them.set, mv)
+        const lost = h ? 100 - hpShown(((h.maxHp - middle(h.rolls)) / h.maxHp) * 100) : 0
+        if (h && lost >= 30 && lost <= 75) {
+          seen = { by: 'a', move: h.move, saw: { kind: 'pct', n: lost } }
+          break
+        }
+      }
+      let seen2: HitSeen | null = null
+      for (const mv of them.set.member.moves) {
+        const h = plainHit(them.set, you.set, mv)
+        if (h && middle(h.rolls) < h.hp * 0.8) {
+          seen2 = { by: 'b', move: h.move, saw: { kind: 'hp', n: middle(h.rolls) } }
+          break
+        }
+      }
+      if (!seen || !seen2) continue
+      const { a, b } = solverPair(you.set, them.set)
+      const first = lead === 'tie' ? null : lead
+      await idle()
+      const r = buildAnswer(a, b, [...(first ? [{ by: 'speed' as const, first }] : []), seen, seen2])
+      if (!r?.possible) continue
+      const pattern = (row: (typeof r.rows)[number]) => row.fits.map((f) => (f > 0 ? 1 : 0)).join('')
+      let score = 0
+      if (r.itemsVary && r.columns.length >= 2) score += 3
+      if (new Set(r.rows.map(pattern)).size >= 2) score += 2
+      if ((r.chance ?? 0) >= 0.05) score += 2
+      if (lead === 'a') score += 1
+      const ex = { a, b, seen, seen2, first }
+      if (!best || score > best.score) best = { ex, score }
+      if (score >= 8) return ex
+    }
+  }
+  return best?.ex ?? null
+}
+/**
+ * The tour's second example, Your spread: two of the most used, yours wanting to survive a hit of the opponent's that
+ * it always survives with all its bulk on that side and never with none (no Focus Sash nor Sturdy, which would make it
+ * sure whatever its points). Checked against the page's own answer, so its strips go from unlikely to sure.
+ */
+async function needExample(until: number) {
+  const foes = metaFoes(data.value, 25)
+  let fallback: SolverExample['need'] = null
+  for (const them of foes) {
+    for (const you of foes) {
+      if (you.id === them.id || setsField(you.set) || setsField(them.set)) continue
+      if (performance.now() > until) return fallback
+      if (you.set.member.item === 'focussash' || abilityOf(you.set) === 'sturdy') continue
+      for (const mv of them.set.member.moves) {
+        if (!plainMove(mv) || priorityOf(them.set, mv, emptyField()) !== 0) continue
+        // At its most common set's numbers: surely knocked out with no bulk, likely with all its HP or all its defense
+        // alone, and never with both; so both strips climb.
+        const at = (hp: boolean, def: boolean) => plainHit(them.set, bulkOf(you.set, mv, hp, def), mv)
+        const [frail, hpOnly, defOnly, bulky] = [at(false, false), at(true, false), at(false, true), at(true, true)]
+        if (!frail || !hpOnly || !defOnly || !bulky) continue
+        const ko = (h: Hit) => h.rolls.filter((r) => r >= h.hp).length / h.rolls.length
+        if (ko(frail) < 1 || ko(hpOnly) < 0.5 || ko(defOnly) < 0.5 || ko(bulky) > 0) continue
+        const { a, b } = solverPair(you.set, them.set)
+        const wanted: HitSeen = { by: 'b', move: mv, saw: { kind: 'lived' } }
+        await idle()
+        const g = needAnswer(a, b, wanted)
+        // Strips going from unlikely to sure: all of them, else, kept in case none does, one.
+        const rises = (c: GoalBuild[]) =>
+          Math.min(...c.map((x) => x.coverage)) < 0.35 && Math.max(...c.map((x) => x.coverage)) >= 0.9
+        const curves = g?.rows.flatMap((row) => row.curves ?? []) ?? []
+        if (g?.theirs?.possible === false || !curves.some(rises)) break
+        if (curves.every(rises)) return { a, b, wanted }
+        fallback ??= { a, b, wanted }
+        break
+      }
     }
   }
   return fallback
+}
+async function solverExample(): Promise<SolverExample | null> {
+  const ex = await buildExample(performance.now() + EXAMPLE_BUDGET)
+  if (!ex) return null
+  return { ...ex, need: await needExample(performance.now() + EXAMPLE_BUDGET) }
 }
 let kept: {
   sides: Record<SideKey, Fighter>
@@ -930,8 +1034,8 @@ let kept: {
   goal: Goal
   open: Record<SideKey, boolean>
 } | null = null
-function enterExample() {
-  const ex = solverExample()
+async function enterExample() {
+  const ex = await solverExample()
   if (!ex) return false
   kept ??= {
     sides: sides.value,
@@ -956,7 +1060,9 @@ async function stageExample(o: {
   const ex = example.value
   if (!ex) return
   const g = o.goal ?? 'build'
-  sides.value = o.sides ? { a: ex.a, b: ex.b } : { a: emptyFighter(), b: emptyFighter() }
+  // The second example, Your spread, on two of its own.
+  const pair = g === 'need' && ex.need ? ex.need : ex
+  sides.value = o.sides ? { a: pair.a, b: pair.b } : { a: emptyFighter(), b: emptyFighter() }
   field.value = emptyField()
   work.value = { ...GOALS[g].b }
   workYours.value = { ...GOALS[g].a }
@@ -983,10 +1089,11 @@ async function leaveExample() {
   example.value = null
   window.scrollTo({ top: 0 })
 }
-const exName = (k: SideKey) => {
-  const id = example.value && battlerOf(example.value[k])
+const nameOf = (f: Fighter | undefined) => {
+  const id = f && battlerOf(f)
   return id ? refName(pokemon(id)) : ''
 }
+const exName = (k: SideKey) => nameOf(example.value?.[k])
 // Its first visit's, unless it came with hits of its own to read.
 const cameWithHits = hits.value.length > 0
 const { start: startTour } = props.inverse
@@ -995,7 +1102,7 @@ const { start: startTour } = props.inverse
       () => {
         const ex = example.value
         const seen = ex?.seen
-        const wanted = ex?.wanted
+        const wanted = ex?.need?.wanted
         const params = {
           a: exName('a'),
           b: exName('b'),
@@ -1003,6 +1110,8 @@ const { start: startTour } = props.inverse
           pct: seen?.saw.kind === 'pct' ? seen.saw.n : 0,
           first: ex?.first ? exName(ex.first) : '',
           theirMove: wanted ? refName(move(wanted.move)) : '',
+          a2: nameOf(ex?.need?.a),
+          b2: nameOf(ex?.need?.b),
           move2: ex?.seen2 ? refName(move(ex.seen2.move)) : '',
           hp2: ex?.seen2?.saw.kind === 'hp' ? ex.seen2.saw.n : 0,
         }
