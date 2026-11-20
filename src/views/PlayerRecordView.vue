@@ -22,7 +22,7 @@ import TeamSets from '@/components/TeamSets.vue'
 // Day 2s, top cuts, best placing); their tournaments, the latest first, a row each: its placing (a medal in the top 8),
 // the event (leading to their page there, `TournamentPlayerView`, with their matches), its date and regulation, how far
 // they made it, their record and six, unfolding to their whole sets (`TeamSets`, the event's standings loaded then) with
-// the ways to copy them as a paste and open them in the team builder; and, before them, the Pokémon they brought, their
+// the ways to copy them as a paste and open them in the team builder; and, after them, the Pokémon they brought, their
 // icons alone on shelves by how many of their events (`shelves`), a tap narrowing the tournaments to those they brought
 // it to (`?mon=`, one at a time: tapped again, or another, undoing it; the filter named atop the tournaments, its chip
 // undoing it too). Its two sections a row of links stuck to the top (`SectionNav`).
@@ -96,8 +96,8 @@ const monTip = (id: PokemonId) =>
   `${refName(pokemonRef(id))} · ${t('players.timesBrought', { n: num(countOf(id)), of: num(player.value?.runs.length ?? 0) })}`
 
 const sections = computed(() => [
-  { id: 'sec-pokemon', label: t('players.pokemon') },
   { id: 'sec-history', label: t('players.history') },
+  { id: 'sec-pokemon', label: t('players.pokemon') },
 ])
 
 const num = (n: number) => n.toLocaleString(locale.value)
@@ -148,39 +148,6 @@ const dateOf = (r: PlayerRun) => datasetDates({ from: r.event.date, to: r.event.
       </ul>
     </div>
 
-    <section id="sec-pokemon" class="panel">
-      <h2>{{ t('players.pokemon') }}</h2>
-      <ol class="shelves">
-        <li v-for="sh in shelves" :key="sh.n" class="shelf" :class="{ big: sh.big }">
-          <span
-            class="shelf-label"
-            :aria-label="t('players.timesBrought', { n: num(sh.n), of: num(player.runs.length) })"
-          >
-            <strong class="num">{{ sh.n }}×</strong>
-            <span v-if="player.runs.length <= PIPS" class="pips" aria-hidden="true"
-              ><span v-for="i in player.runs.length" :key="i" class="pip" :class="{ on: i <= sh.n }"
-            /></span>
-            <span v-else class="meter" :style="{ '--share': sh.share }" aria-hidden="true" />
-          </span>
-          <span class="shelf-mons">
-            <button
-              v-for="id in sh.ids"
-              :key="id"
-              v-tip="canHover && monTip(id)"
-              type="button"
-              class="mon"
-              :class="{ on: picked === id, off: picked && picked !== id }"
-              :aria-pressed="picked === id"
-              :aria-label="monTip(id)"
-              @click="pick(id)"
-            >
-              <PokemonIcon :id :scale="sh.big ? 1.5 : 1" />
-            </button>
-          </span>
-        </li>
-      </ol>
-    </section>
-
     <section id="sec-history" class="panel">
       <h2>{{ t('players.history') }}</h2>
       <p class="muted small about">{{ t('players.historyAbout') }}</p>
@@ -190,9 +157,6 @@ const dateOf = (r: PlayerRun) => datasetDates({ from: r.event.date, to: r.event.
           {{ refName(pokemonRef(picked)) }}
           <X :size="12" aria-hidden="true" />
         </button>
-        <span class="muted small">{{
-          t('players.withMon', { n: num(runs.length), of: num(player.runs.length) })
-        }}</span>
       </p>
       <ol class="runs">
         <li v-for="r in runs" :key="r.event.id" class="run" :class="{ open: open.has(r.event.id) }">
@@ -240,6 +204,39 @@ const dateOf = (r: PlayerRun) => datasetDates({ from: r.event.date, to: r.event.
             </template>
             <p v-else class="muted">{{ t('tournaments.noTeam') }}</p>
           </div>
+        </li>
+      </ol>
+    </section>
+
+    <section id="sec-pokemon" class="panel">
+      <h2>{{ t('players.pokemon') }}</h2>
+      <ol class="shelves">
+        <li v-for="sh in shelves" :key="sh.n" class="shelf" :class="{ big: sh.big }">
+          <span
+            class="shelf-label"
+            :aria-label="t('players.timesBrought', { n: num(sh.n), of: num(player.runs.length) })"
+          >
+            <strong class="num">{{ sh.n }}×</strong>
+            <span v-if="player.runs.length <= PIPS" class="pips" aria-hidden="true"
+              ><span v-for="i in player.runs.length" :key="i" class="pip" :class="{ on: i <= sh.n }"
+            /></span>
+            <span v-else class="meter" :style="{ '--share': sh.share }" aria-hidden="true" />
+          </span>
+          <span class="shelf-mons">
+            <button
+              v-for="id in sh.ids"
+              :key="id"
+              v-tip="canHover && monTip(id)"
+              type="button"
+              class="mon"
+              :class="{ on: picked === id, off: picked && picked !== id }"
+              :aria-pressed="picked === id"
+              :aria-label="monTip(id)"
+              @click="pick(id)"
+            >
+              <PokemonIcon :id :scale="sh.big ? 1.5 : 1" />
+            </button>
+          </span>
         </li>
       </ol>
     </section>
@@ -431,7 +428,7 @@ h2 {
 .mon.off {
   opacity: 0.35;
 }
-/* The Pokémon the tournaments are narrowed to, its chip undoing it, and how many are left. */
+/* The Pokémon the tournaments are narrowed to, its chip undoing it. */
 .picked {
   display: flex;
   flex-wrap: wrap;

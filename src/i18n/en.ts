@@ -1356,7 +1356,6 @@ export const messages = {
   'players.historyAbout': 'Every official tournament they played, the latest first. Unfold one for their whole team.',
   'players.pokemon': 'Their Pokémon',
   'players.timesBrought': '{n} of {of} events',
-  'players.withMon': '{n} of {of} events with it',
   'players.eventRow': 'Their team at {event}',
   'players.toEventPage': 'Their matches at this event',
   'tournaments.noPlayer': "There's no such player in this tournament.",

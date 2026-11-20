@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, shallowRef, watch } from 'vue'
+import { computed, onBeforeUnmount, shallowRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ChevronDown, ListFilter } from '@lucide/vue'
 import { EVENTS } from '@/data/tournaments'
@@ -12,6 +12,8 @@ import AppLink from '@/components/AppLink'
 import CountryFlag from '@/components/CountryFlag'
 import PokemonIcon from '@/components/PokemonIcon'
 import SearchBox from '@/components/SearchBox.vue'
+import ChoiceCard from '@/components/ChoiceCard.vue'
+import ModalDialog from '@/components/ModalDialog.vue'
 import OptionsMenu from '@/components/OptionsMenu.vue'
 import SortHeader from '@/components/SortHeader.vue'
 
@@ -46,6 +48,16 @@ const regulationOptions = computed(() => [
   ...REGULATIONS.map((r) => ({ value: r, label: r })),
 ])
 const regulationOpen = shallowRef(false)
+// On phones a dialog over the page rather than a drop-down (as `ChoiceDialog`'s), opened from the same icon.
+const phoneQuery = window.matchMedia('(max-width: 720px)')
+const phone = shallowRef(phoneQuery.matches)
+const onPhone = (e: MediaQueryListEvent) => (phone.value = e.matches)
+phoneQuery.addEventListener('change', onPhone)
+onBeforeUnmount(() => phoneQuery.removeEventListener('change', onPhone))
+function pickRegulation(r: string) {
+  regulation.value = r
+  regulationOpen.value = false
+}
 
 // The search, the URL following it.
 const text = shallowRef(typeof query.value.q === 'string' ? query.value.q : '')
@@ -172,8 +184,30 @@ const headers = computed(() => [
               : t('players.countIn', { n: num(found.length), reg: regulation })
           }}
         </p>
+        <template v-if="REGULATIONS.length > 1 && phone">
+          <button
+            type="button"
+            class="reg-toggle"
+            :class="{ open: regulationOpen, picked: regulation !== 'all' }"
+            :aria-expanded="regulationOpen"
+            aria-haspopup="dialog"
+            :aria-label="t('players.regulation')"
+            @click="regulationOpen = true"
+          >
+            <ListFilter :size="16" aria-hidden="true" />
+          </button>
+          <ModalDialog v-model:open="regulationOpen" :label="t('players.regulation')">
+            <ChoiceCard
+              :label="t('players.regulation')"
+              :options="regulationOptions"
+              :picked="regulation"
+              @pick="pickRegulation"
+              @close="regulationOpen = false"
+            />
+          </ModalDialog>
+        </template>
         <OptionsMenu
-          v-if="REGULATIONS.length > 1"
+          v-else-if="REGULATIONS.length > 1"
           v-model:open="regulationOpen"
           class="reg-menu"
           :class="{ picked: regulation !== 'all' }"
@@ -188,7 +222,7 @@ const headers = computed(() => [
                 name="players-regulation"
                 :value="o.value"
                 :checked="regulation === o.value"
-                @change="((regulation = o.value), (regulationOpen = false))"
+                @change="pickRegulation(o.value)"
               />{{ o.label }}
             </label>
           </fieldset>
@@ -266,8 +300,23 @@ const headers = computed(() => [
 .count {
   margin: 0;
 }
-/* The regulation's icon in the accent while one is picked. */
-.reg-menu.picked :deep(.toggle) {
+/* The regulation's icon (on phones a button of its own, drawn as `OptionsMenu`'s), in the accent while one is picked. */
+.reg-toggle {
+  display: inline-flex;
+  padding: 2px;
+  color: var(--muted);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  box-shadow: none;
+  cursor: pointer;
+}
+.reg-toggle.open {
+  color: var(--text);
+  border-color: var(--border);
+}
+.reg-menu.picked :deep(.toggle),
+.reg-toggle.picked {
   color: var(--accent);
 }
 /* The table: the player and their numbers, their latest six at the end. */
