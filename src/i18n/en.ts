@@ -1857,6 +1857,8 @@ export const messages = {
   'tour.speedSolver.yoursTitle': 'Work out yours instead',
   'tour.speedSolver.yours':
     '<p>To find what your Pokémon needs to move first, turn on <strong>Work out</strong> for yours and pick it as the one that moves first. You get its Speed and points the same way.</p>',
+  'tour.speedSolver.yoursPhone':
+    '<p>To find what your Pokémon needs to move first, tap its band, turn on <strong>Work out</strong> for it, and pick it as the one that moves first. You get its Speed and points the same way.</p>',
   'speed.help': 'How to read this',
   'speed.yours': 'Your Pokémon',
   'speed.yoursPick': 'Pick a Pokémon',

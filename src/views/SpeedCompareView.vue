@@ -794,7 +794,8 @@ const { start: startSolverTour } = useTour(
       {
         el: ['#compare-a .work-out', '#band-a', '.duel'],
         title: 'tour.speedSolver.yoursTitle',
-        text: 'tour.speedSolver.yours',
+        // On phones its toggles are in its card, folded under its band.
+        text: phone.value ? 'tour.speedSolver.yoursPhone' : 'tour.speedSolver.yours',
         side: 'bottom',
       },
       { el: '.head-tour', title: 'tour.againTitle', text: 'tour.again', side: 'bottom' },
