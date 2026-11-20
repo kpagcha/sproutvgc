@@ -147,7 +147,6 @@ const dateOf = (r: PlayerRun) => datasetDates({ from: r.event.date, to: r.event.
 
     <section id="sec-history" class="panel">
       <h2>{{ t('players.history') }}</h2>
-      <p class="muted small about">{{ t('players.historyAbout') }}</p>
       <p v-if="picked" class="picked">
         <button type="button" class="btn chip" @click="pick(null)">
           <PokemonIcon :id="picked" />
@@ -268,10 +267,7 @@ const dateOf = (r: PlayerRun) => datasetDates({ from: r.event.date, to: r.event.
   gap: 6px;
 }
 h2 {
-  margin: 0 0 2px;
-}
-.about {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
 }
 .placing {
   display: inline-block;

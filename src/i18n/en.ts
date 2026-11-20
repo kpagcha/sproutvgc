@@ -1353,7 +1353,6 @@ export const messages = {
   'players.fact.day2s': '{n} Day 2s',
   'players.fact.best': 'Best: {placing} at {event}',
   'players.history': 'Tournaments',
-  'players.historyAbout': 'Every official tournament they played, the latest first. Unfold one for their whole team.',
   'players.pokemon': 'Their Pokémon',
   'players.timesBrought': '{n} of {of} events',
   'players.eventRow': 'Their team at {event}',
