@@ -19,7 +19,7 @@ import {
   Users,
   X,
 } from '@lucide/vue'
-import { pokemon, type AbilityId, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
+import { move, pokemon, type AbilityId, type ItemId, type MoveId, type PokemonId } from '@/data/dex'
 import { itemBound, POKEMON } from '@/data/pokemon'
 import { t } from '@/i18n'
 import { refName } from '@/i18n/refName'
@@ -42,9 +42,19 @@ import {
   battlerOf,
   canPool,
   commonSet,
+  damaging,
+  DOUBLING,
   emptyField,
   emptyFighter,
+  hit,
+  hitChoices,
+  hpShown,
+  leadOf,
+  metaFoes,
   pooledView,
+  speedOf,
+  usesAttacked,
+  usesFainted,
   SETS_FIELD,
   type Battlefield,
   type Fighter,
@@ -81,6 +91,10 @@ import SolverBands from '@/components/SolverBands.vue'
 import SolverChips from '@/components/SolverChips.vue'
 import SolverGoal from '@/components/SolverGoal.vue'
 import { goalDiff, goalOf, GOALS, type Goal } from '@/lib/solverGoal'
+import { ORDER_MOVES } from '@/lib/threats'
+import { MOVES } from '@/data/moves'
+import { useTour } from '@/composables/useTour'
+import TourToggle from '@/components/TourToggle.vue'
 import TeamPicker from '@/components/TeamPicker.vue'
 
 // The damage calculator: two Pokémon, yours and the opponent's, each a team builder's slot (`CalcSide`, `TeamSlot`:
@@ -192,6 +206,9 @@ const hits = shallowRef<HitDraft[]>(
 )
 /** Which was seen moving first (`?first=a|b`). */
 const first = shallowRef<'a' | 'b' | null>(start.first === 'a' || start.first === 'b' ? start.first : null)
+/** The tour's example on the page (`solverExample`, below), kept out of the URL. */
+const example = shallowRef<SolverExample | null>(null)
+const inExample = computed(() => !!example.value)
 /** The hits seen with a move and a result: what's kept and worked out. */
 const seen = computed(() => hits.value.filter((h): h is HitSeen => !!h.move && !!h.saw))
 const observations = computed<Observation[]>(() => [
@@ -293,6 +310,8 @@ function urlOf(q: typeof query.value) {
 watchDebounced(
   query,
   (q) => {
+    // The tour's example is the tour's, not the reader's.
+    if (inExample.value) return
     saveLast(q)
     void router.replace({ query: urlOf(q) })
   },
@@ -811,6 +830,163 @@ watch([hasAny, hasBoth, wide], () => nextTick(checkDock))
 /** The band a part was picked from, which the drawer leaves clear. */
 const fromBands = shallowRef<SideKey | null>(null)
 watch(picking, (p) => !p && (fromBands.value = null))
+
+// The solver's tour, an example walked through (`useTour`'s `example`): from the meta shown, the most used Pokémon as
+// the opponent and another of the most used as yours, at their most common sets, one of yours' moves seen hitting it
+// (its middle roll at the opponent's most common set, so what fits has that set among its answers) and which of the two
+// moved first; its build worked out, the default goal. The reader's own setup put back once the tour ends; meanwhile
+// nothing of the example goes into the URL nor what's remembered of the page (`inExample`).
+interface SolverExample {
+  a: Fighter
+  b: Fighter
+  hit: HitSeen
+  first: 'a' | 'b' | null
+}
+/** A move whose damage is plain to read off one hit: fixed power and hits, nothing hanging on what came before. */
+const plainMove = (mv: MoveId | null): mv is MoveId =>
+  damaging(mv) &&
+  MOVES[mv].power > 0 &&
+  !hitChoices(mv) &&
+  !(mv in DOUBLING) &&
+  !ORDER_MOVES.has(mv) &&
+  !usesFainted(mv) &&
+  !usesAttacked(mv)
+function solverExample(): SolverExample | null {
+  const foes = metaFoes(data.value, 12)
+  const none = emptyField()
+  for (const them of foes) {
+    for (const you of foes) {
+      if (you.id === them.id) continue
+      for (const mv of you.set.member.moves) {
+        if (!plainMove(mv)) continue
+        const h = hit(you.set, them.set, mv, none)
+        if (!h || h.none || h.spread || !h.rolls.length) continue
+        const roll = h.rolls[Math.floor(h.rolls.length / 2)]!
+        const lost = 100 - hpShown(((h.maxHp - roll) / h.maxHp) * 100)
+        // A hit that leaves a good part of its HP, nowhere near a knockout.
+        if (lost < 30 || lost > 75) continue
+        const sa = speedOf(you.set, none)
+        const sb = speedOf(them.set, none)
+        const lead = sa !== null && sb !== null ? leadOf(sa, sb, none) : 'tie'
+        const a = { ...you.set, member: { ...you.set.member, moves: [mv, null, null, null] as Member['moves'] } }
+        const bm = them.set.member
+        const fixed = !!stoneMega(bm) || (!!bm.pokemon && itemBound(bm.pokemon))
+        const b = {
+          ...them.set,
+          member: { ...bm, item: fixed ? bm.item : null, moves: bm.moves.map(() => null) as Member['moves'] },
+        }
+        return { a, b, hit: { by: 'a', move: mv, saw: { kind: 'pct', n: lost } }, first: lead === 'tie' ? null : lead }
+      }
+    }
+  }
+  return null
+}
+let kept: {
+  sides: Record<SideKey, Fighter>
+  field: Battlefield
+  hits: HitDraft[]
+  first: 'a' | 'b' | null
+  work: OpponentUnknowns
+  workYours: OpponentUnknowns
+  goal: Goal
+  open: Record<SideKey, boolean>
+} | null = null
+async function enterExample() {
+  const ex = solverExample()
+  if (!ex) return false
+  kept ??= {
+    sides: sides.value,
+    field: field.value,
+    hits: hits.value,
+    first: first.value,
+    work: work.value,
+    workYours: workYours.value,
+    goal: goal.value,
+    open: open.value,
+  }
+  example.value = ex
+  sides.value = { a: ex.a, b: ex.b }
+  field.value = emptyField()
+  work.value = { ...GOALS.build.b }
+  workYours.value = NOTHING
+  goal.value = 'build'
+  open.value = { a: true, b: true }
+  // Another two Pokémon clear what was seen of the two before (its watch, before the next render): the example's after.
+  await nextTick()
+  hits.value = [ex.hit]
+  first.value = ex.first
+  return true
+}
+async function leaveExample() {
+  const k = kept
+  if (!k) return
+  kept = null
+  sides.value = k.sides
+  field.value = k.field
+  work.value = k.work
+  workYours.value = k.workYours
+  goal.value = k.goal
+  open.value = k.open
+  await nextTick()
+  hits.value = k.hits
+  first.value = k.first
+  example.value = null
+  window.scrollTo({ top: 0 })
+}
+const exName = (k: SideKey) => {
+  const id = example.value && battlerOf(example.value[k])
+  return id ? refName(pokemon(id)) : ''
+}
+// Its first visit's, unless it came with hits of its own to read.
+const cameWithHits = hits.value.length > 0
+const { start: startTour } = props.inverse
+  ? useTour(
+      'calcSolver',
+      () => {
+        const ex = example.value
+        const lost = ex?.hit.saw.kind === 'pct' ? ex.hit.saw.n : 0
+        const params = {
+          a: exName('a'),
+          b: exName('b'),
+          move: ex ? refName(move(ex.hit.move)) : '',
+          pct: lost,
+          first: ex?.first ? exName(ex.first) : '',
+        }
+        return [
+          { title: 'tour.solver.introTitle', text: ex ? 'tour.solver.intro' : 'tour.solver.introBare', params },
+          { el: '#calc-duel', title: 'tour.solver.sidesTitle', text: 'tour.solver.sides', params, side: 'top' },
+          {
+            el: '#calc-hits',
+            title: 'tour.solver.hitsTitle',
+            text: ex?.first ? 'tour.solver.hits' : 'tour.solver.hitsNoOrder',
+            params,
+            side: 'top',
+          },
+          { el: '#calc-goal', title: 'tour.solver.goalTitle', text: 'tour.solver.goal', params, side: 'top' },
+          {
+            el: ['#calc-reverse .lines', '#calc-reverse'],
+            late: true,
+            title: 'tour.solver.rangesTitle',
+            text: 'tour.solver.ranges',
+            params,
+            side: 'top',
+          },
+          {
+            el: ['#calc-reverse .builds', '#calc-reverse'],
+            late: true,
+            title: 'tour.solver.buildsTitle',
+            text: 'tour.solver.builds',
+            params,
+            side: 'top',
+          },
+          { title: 'tour.solver.yoursTitle', text: 'tour.solver.yours' },
+          { el: '.head-tour', title: 'tour.againTitle', text: 'tour.again', side: 'bottom' },
+        ]
+      },
+      () => !!data.value && !cameWithHits,
+      { enter: enterExample, leave: () => void leaveExample() },
+    )
+  : { start: () => {} }
 const bandAnchor = computed(() =>
   fromBands.value ? (bandsEl.value?.querySelector<HTMLElement>(`.band-${fromBands.value}`) ?? null) : null,
 )
@@ -938,6 +1114,7 @@ function face(f: Fighter) {
     <section id="calc-top" class="head-panel">
       <div class="head">
         <h1>{{ t('title.calc') }}<SetupStar /></h1>
+        <TourToggle v-if="inverse" class="head-tour" @start="startTour" />
         <MetaDialog v-if="snapshot" class="head-meta" />
       </div>
     </section>

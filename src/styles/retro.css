@@ -595,6 +595,16 @@
 :root:root .driver-popover.tour .driver-popover-description p {
   margin: 0;
 }
+:root:root .driver-popover.tour .driver-popover-description p.tour-tag {
+  display: inline-block;
+  padding: 0 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+  background: var(--accent);
+}
 :root:root .driver-popover.tour .driver-popover-description p + p {
   margin-top: 8px;
 }
