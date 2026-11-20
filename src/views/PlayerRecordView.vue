@@ -279,12 +279,22 @@ h2 {
 .team {
   display: flex;
 }
+/* Quiet, as the standings' rows' (`StandingRow`): the chevron alone, the row itself what's clicked. */
 .chevron {
   display: grid;
   place-items: center;
   width: 28px;
   height: 28px;
   padding: 0;
+  color: var(--muted);
+  background: none;
+  border: none;
+  box-shadow: none;
+  cursor: pointer;
+}
+.run-row:hover .chevron,
+.run.open .chevron {
+  color: var(--text);
 }
 .sets {
   padding: 4px 4px 12px;

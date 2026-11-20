@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, shallowRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { ChevronDown, ListFilter } from '@lucide/vue'
 import { EVENTS } from '@/data/tournaments'
 import { loadPlayers, type PlayerRun, type TournamentPlayer } from '@/data/tournamentPlayers'
 import { locale, t } from '@/i18n'
@@ -11,7 +12,7 @@ import AppLink from '@/components/AppLink'
 import CountryFlag from '@/components/CountryFlag'
 import PokemonIcon from '@/components/PokemonIcon'
 import SearchBox from '@/components/SearchBox.vue'
-import SegmentedControl from '@/components/SegmentedControl.vue'
+import OptionsMenu from '@/components/OptionsMenu.vue'
 import SortHeader from '@/components/SortHeader.vue'
 
 // The official tournaments' players, across every event generated (`tournamentPlayers.ts`): each a row with their name
@@ -44,6 +45,7 @@ const regulationOptions = computed(() => [
   { value: 'all', label: t('players.allRegulations') },
   ...REGULATIONS.map((r) => ({ value: r, label: r })),
 ])
+const regulationOpen = shallowRef(false)
 
 // The search, the URL following it.
 const text = shallowRef(typeof query.value.q === 'string' ? query.value.q : '')
@@ -136,21 +138,20 @@ const more = computed(() => Math.min(PAGE * 2, sorted.value.length - shown.value
 const num = (n: number) => n.toLocaleString(locale.value)
 const pct = (r: Row) =>
   (r.wins + r.losses ? rate(r) : 0).toLocaleString(locale.value, { style: 'percent', maximumFractionDigits: 0 })
-const header = (k: Key, label: string, tip?: string, right = true) => ({
+const header = (k: Key, label: string, right = true) => ({
   label,
-  tip,
   right,
   active: key.value === k,
   desc: desc.value,
   k,
 })
 const headers = computed(() => [
-  header('name', t('players.col.player'), undefined, false),
-  header('events', t('players.col.events'), t('players.col.eventsTip')),
-  header('topCuts', t('players.col.topCuts'), t('players.col.topCutsTip')),
-  header('day2s', t('players.col.day2s'), t('players.col.day2sTip')),
-  header('record', t('players.col.record'), t('players.col.recordTip')),
-  header('best', t('players.col.best'), t('players.col.bestTip')),
+  header('name', t('players.col.player'), false),
+  header('events', t('players.col.events')),
+  header('topCuts', t('players.col.topCuts')),
+  header('day2s', t('players.col.day2s')),
+  header('record', t('players.col.record')),
+  header('best', t('players.col.best')),
 ])
 </script>
 
@@ -158,17 +159,41 @@ const headers = computed(() => [
   <div class="players">
     <div class="controls">
       <SearchBox v-model="text" icon :placeholder="t('players.search')" :aria-label="t('players.search')" />
-      <SegmentedControl
-        v-if="REGULATIONS.length > 1"
-        v-model="regulation"
-        :label="t('players.regulation')"
-        :options="regulationOptions"
-      />
     </div>
     <p v-if="failed" class="muted">{{ t('players.none') }}</p>
     <p v-else-if="!all" class="muted">{{ t('players.loading') }}</p>
     <template v-else>
-      <p class="muted small count">{{ t('players.count', { n: num(found.length) }) }}</p>
+      <!-- How many, and the regulation they're of: all of them, or one picked from the drop-down at the line's end. -->
+      <div class="count-row">
+        <p class="muted small count">
+          {{
+            regulation === 'all'
+              ? t('players.count', { n: num(found.length) })
+              : t('players.countIn', { n: num(found.length), reg: regulation })
+          }}
+        </p>
+        <OptionsMenu
+          v-if="REGULATIONS.length > 1"
+          v-model:open="regulationOpen"
+          class="reg-menu"
+          :class="{ picked: regulation !== 'all' }"
+          :title="t('players.regulation')"
+          :icon="ListFilter"
+        >
+          <fieldset>
+            <legend>{{ t('players.regulation') }}</legend>
+            <label v-for="o in regulationOptions" :key="o.value">
+              <input
+                type="radio"
+                name="players-regulation"
+                :value="o.value"
+                :checked="regulation === o.value"
+                @change="((regulation = o.value), (regulationOpen = false))"
+              />{{ o.label }}
+            </label>
+          </fieldset>
+        </OptionsMenu>
+      </div>
       <p v-if="!found.length" class="muted">{{ t('players.none') }}</p>
       <div v-else role="table" class="dex-table" :aria-label="t('title.tournamentPlayers')">
         <div role="row" class="row head">
@@ -177,7 +202,6 @@ const headers = computed(() => [
             :key="h.k"
             :class="[`col-${h.k}`, { r: h.right, 'wide-only': h.k === 'day2s' || h.k === 'events' }]"
             :label="h.label"
-            :tip="h.tip"
             :right="h.right"
             :active="h.active"
             :desc="h.desc"
@@ -211,7 +235,7 @@ const headers = computed(() => [
         </AppLink>
       </div>
       <button v-if="more > 0" type="button" class="more" @click="shown += PAGE * 2">
-        {{ t('players.more', { n: num(more) }) }}
+        <ChevronDown :size="14" aria-hidden="true" />{{ t('players.more', { n: num(more) }) }}
       </button>
     </template>
   </div>
@@ -232,8 +256,19 @@ const headers = computed(() => [
   flex: 1 1 220px;
   margin: 0;
 }
+.count-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
 .count {
-  margin: 0 0 6px;
+  margin: 0;
+}
+/* The regulation's icon in the accent while one is picked. */
+.reg-menu.picked :deep(.toggle) {
+  color: var(--accent);
 }
 /* The table: the player and their numbers, their latest six at the end. */
 .dex-table {
@@ -278,9 +313,27 @@ a.row:hover {
   display: flex;
   justify-content: flex-end;
 }
+/* More rows: quiet, as the folded lists' way to unfold (`MoreToggle`), across the table's foot. */
 .more {
-  display: block;
-  margin: 12px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px;
+  font: inherit;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: var(--muted);
+  background: none;
+  border: none;
+  box-shadow: none;
+  cursor: pointer;
+}
+.more:hover {
+  color: var(--text);
+  background: var(--hover);
 }
 /* Narrower: no Day 2s nor team, the rest closer. */
 @media (max-width: 720px) {
