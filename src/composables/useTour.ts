@@ -75,6 +75,52 @@ const PHONE = '(max-width: 720px)'
 const GAP = 8
 /** The room around a step's part in its stage. */
 const STAGE_PAD = 6
+/** The phone's sheet at its tallest, a share of the screen, and its room under it (`retro.css`'s 45vh and 8px). */
+const SHEET = 0.45 + 0.02
+/** How long the page takes to glide to a step's part: within driver.js's own transition (400 ms), which follows its
+ * part's place at every frame until it ends, so the part arrives first and the stage with it, nothing left to catch up. */
+const GLIDE = 320
+
+/** Where the page would sit with a step's part in place: placed, then the page put back, nothing drawn between. */
+function placeFor(el: Element): number {
+  const from = window.scrollY
+  fitOnScreen(el)
+  const to = window.scrollY
+  window.scrollTo(0, from)
+  return to
+}
+/**
+ * The page glided to a place, eased, as driver.js glides the stage: driver.js reads its part's place at every frame
+ * of its own, so the two arrive together, in one move. At once under reduced motion.
+ */
+let glideFrame = 0
+function glideTo(y: number) {
+  cancelAnimationFrame(glideFrame)
+  const from = window.scrollY
+  const to = Math.max(0, Math.min(document.documentElement.scrollHeight - window.innerHeight, y))
+  if (Math.abs(to - from) < 1) return
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return window.scrollTo(0, to)
+  const start = performance.now()
+  const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
+  const frame = (now: number) => {
+    const t = Math.min(1, (now - start) / GLIDE)
+    window.scrollTo(0, from + (to - from) * ease(t))
+    if (t < 1) glideFrame = requestAnimationFrame(frame)
+  }
+  glideFrame = requestAnimationFrame(frame)
+}
+/** The page held at its height, the tallest it's been while held, or let go. */
+function holdHeight(on: boolean) {
+  const style = document.body.style
+  if (!on) return void (style.minHeight = '')
+  style.minHeight = `${Math.max(document.documentElement.scrollHeight, parseFloat(style.minHeight) || 0)}px`
+}
+/** driver.js's own scrolling (its part, then its popover, into view at once) left out while a tour is on: the tour
+ * glides the page itself, and the page can't be used meanwhile, so nothing else of it scrolls that way. */
+const ownScroll = Element.prototype.scrollIntoView
+function quietScrolls(on: boolean) {
+  Element.prototype.scrollIntoView = on ? () => {} : ownScroll
+}
 // How long what slides in as the page scrolls takes to arrive (the solver's bands).
 const SLIDE_IN = 350
 /** The foot of what's stuck across the top of the screen over a part (a page's bands, its row of links, but not the
@@ -119,9 +165,9 @@ function coverAt(el: Element): number {
 function fitOnScreen(el: Element): boolean {
   const before = window.scrollY
   for (let i = 0; i < 4; i++) {
-    const sheet = matchMedia(PHONE).matches ? document.querySelector('.driver-popover.tour') : null
     const ceil = coverOf(el) + GAP
-    const floor = (sheet?.getBoundingClientRect().top ?? window.innerHeight) - GAP
+    // On phones over the sheet at its tallest (`retro.css`): known before the step's own popover is drawn.
+    const floor = window.innerHeight * (matchMedia(PHONE).matches ? 1 - SHEET : 1) - GAP
     const r = el.getBoundingClientRect()
     const room = floor - ceil
     const to = r.height < room ? ceil + (room - r.height) / 2 : ceil
@@ -187,24 +233,51 @@ export function useTour(
   }
 
   /**
-   * The stage (the hole in the overlay its part shows through) trimmed to what's under what's stuck to the top: scrolled
-   * under the page's bands, the part goes behind them, and the bands stay dimmed over it rather than lit with it.
+   * The stage, the hole in the overlay its part shows through, drawn here rather than by driver.js (its animation off:
+   * it eases from where the stage last was toward a part the page is moving, so it trails and snaps at its end). From
+   * one step's part to the next it glides with the page (`move`, the two parts' places eased between, on the page's
+   * glide's timing, so the two arrive together), and it's trimmed to under what's stuck to the top: scrolled under the
+   * page's bands, the part goes behind them, the bands dimmed over it rather than lit with it.
    */
+  let move: { from: Element | null; at: DOMRect | null; start: number } | null = null
+  const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
   function clipStage() {
     const el = tour?.getActiveElement()
     const path = document.querySelector('.driver-overlay path')
-    const at = tour?.getState('__activeStagePosition') as DOMRect | undefined
-    if (!el || el.id === 'driver-dummy-element' || !path || !at) return
+    if (!el || el.id === 'driver-dummy-element' || !path) return
+    let r = el.getBoundingClientRect()
+    const t = move ? (performance.now() - move.start) / GLIDE : 1
+    if (move && t < 1 && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      // From the part before, where it is now (it moves with the page too), or where it was.
+      const a = move.from?.isConnected ? move.from.getBoundingClientRect() : move.at
+      if (a) {
+        const k = ease(Math.max(0, t))
+        const mix = (x: number, y: number) => x + (y - x) * k
+        r = new DOMRect(mix(a.x, r.x), mix(a.y, r.y), mix(a.width, r.width), mix(a.height, r.height))
+      }
+    } else move = null
     const w = window.innerWidth
     const h = window.innerHeight
-    const top = Math.max(at.y - STAGE_PAD, coverOf(el))
-    const bottom = at.y + at.height + STAGE_PAD
-    const left = at.x - STAGE_PAD
-    const width = at.width + 2 * STAGE_PAD
+    const top = Math.max(r.y - STAGE_PAD, coverOf(el))
+    const bottom = r.y + r.height + STAGE_PAD
+    const left = r.x - STAGE_PAD
+    const width = r.width + 2 * STAGE_PAD
     // As driver.js draws it, a rectangle over the screen with the stage cut out of it (its fill rule even-odd).
     let d = `M${w},0L0,0L0,${h}L${w},${h}L${w},0Z`
     if (bottom > top) d += ` M${left},${top} h${width} v${bottom - top} h${-width} z`
     path.setAttribute('d', d)
+  }
+  // Every frame while a step's move lasts: driver.js draws the stage at a scroll, a frame asked for before this one's,
+  // so this one comes after it and has the last word.
+  let clipFrame = 0
+  function clipWhile(ms: number) {
+    cancelAnimationFrame(clipFrame)
+    const until = performance.now() + ms
+    const frame = () => {
+      clipStage()
+      if (performance.now() < until) clipFrame = requestAnimationFrame(frame)
+    }
+    clipFrame = requestAnimationFrame(frame)
   }
   // In the frame driver.js draws the stage again, after it.
   let moveFrame = 0
@@ -267,17 +340,32 @@ export function useTour(
       if (i >= list.length) return tour?.destroy()
       busy = true
       try {
+        // The page never shorter while the tour is on (let go as it ends): shorter, as a step sets it up, the browser
+        // would pull it up at once, the glide's place gone from under it.
+        holdHeight(true)
         await setUp(i)
-        if (id === run) tour?.moveTo(i)
+        if (id !== run || !tour) return
+        const from = tour.getActiveElement() ?? null
+        const real = from && from.id !== 'driver-dummy-element' ? from : null
+        move = { from: real, at: real?.getBoundingClientRect() ?? null, start: performance.now() }
+        tour.moveTo(i)
+        const el = partOf(i)
+        if (el) glideTo(placeFor(el))
+        clipWhile(GLIDE + 100)
       } finally {
         busy = false
       }
     }
     const index = () => tour?.getActiveIndex() ?? 0
-    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+    /** A step's part as it is on the page now. */
+    const partOf = (i: number) => {
+      const e = list[i]?.element
+      return (typeof e === 'function' ? e() : typeof e === 'string' ? document.querySelector(e) : e) ?? null
+    }
     tour = driver({
       steps: list,
-      animate: !reduced,
+      // The stage is drawn and glided here (`clipStage`); driver.js's own easing trails a moving part.
+      animate: false,
       // Scrolled to at once: scrolled smoothly, the popover is placed mid-scroll and then chases its part as it moves.
       smoothScroll: false,
       showProgress: true,
@@ -290,30 +378,32 @@ export function useTour(
       nextBtnText: t('tour.next'),
       prevBtnText: t('tour.prev'),
       doneBtnText: t('tour.done'),
-      ...(inExample && {
-        onNextClick: () => void go(index() + 1),
-        onPrevClick: () => void go(index() - 1),
-      }),
+      // Moving between steps ourselves, every tour: the page set up for the next where it has an example, and glided to it.
+      onNextClick: () => void go(index() + 1),
+      onPrevClick: () => void go(index() - 1),
       // The page can't be used while the tour is on: the overlay takes the clicks around the part shown, and the part
       // itself is inert (no clicks, no keyboard focus), so nothing opens over or under the tour.
       disableActiveInteraction: true,
       onHighlightStarted: (el) => lock(el),
-      // Its part brought into the room left on screen, then the stage and popover drawn again where it ends up.
-      // Again once what scrolling brought in has arrived (bands that slide in once the page is past their place).
+      // Its part glided to again, if need be, once what scrolling brought in has arrived (bands that slide in once the
+      // page is past their place).
       onHighlighted: (el) => {
         if (!el) return
-        if (fitOnScreen(el)) tour?.refresh()
         clipStage()
         setTimeout(() => {
           if (tour?.getActiveElement() !== el) return
-          if (fitOnScreen(el)) tour.refresh()
-          clipStage()
+          glideTo(placeFor(el))
+          clipWhile(GLIDE + 100)
         }, SLIDE_IN)
       },
       onDeselected: () => lock(undefined),
       onDestroyed: () => {
         lock(undefined)
         roomAtFoot(false)
+        quietScrolls(false)
+        holdHeight(false)
+        cancelAnimationFrame(glideFrame)
+        cancelAnimationFrame(clipFrame)
         window.removeEventListener('scroll', onMove)
         window.removeEventListener('resize', onMove)
         if (!leaving) markSeen(page)
@@ -322,7 +412,11 @@ export function useTour(
       },
     })
     roomAtFoot(true)
+    quietScrolls(true)
     tour.drive()
+    const first = partOf(0)
+    if (first) glideTo(placeFor(first))
+    clipWhile(GLIDE + 100)
     // As the page scrolls, the stage kept under what's stuck: after driver.js's own handler, so its redrawing, a frame
     // queued on the same event, comes first and this one right after it.
     window.addEventListener('scroll', onMove, { passive: true })
