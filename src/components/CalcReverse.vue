@@ -167,27 +167,35 @@ const rangeText = (r: StatRange) => {
 /** A threshold's label: how often the hits come out as entered ("Half the time with"). */
 const thresholdLabel = (th: (typeof THRESHOLDS)[number]) =>
   t(`calc.goal.sets.${th === 0.5 ? '50' : th === 0.9 ? '90' : '100'}` as const)
-/** Whether a strip's cell (its `k`th stat in play's) is one of the row's goals' (a threshold's fewest points, or the
- * most's). */
-const marked = (r: GoalRow, k: number, p: number) =>
-  [...r.cells, r.best].some((c) => c && c.points[goal.value!.ours[k]!] === p)
+/**
+ * A strip's goals, each at the first of its bars reaching it (the fewest of its stat's points that can, the other stat
+ * at its best for it): where the strip itself shows it, so the marks read off the bars and come in order. The fewest
+ * points in all for each, which can put more in the other stat and fewer in this one, are the line under the strips.
+ * The best only short of always: at the first bar reaching the strip's most.
+ */
+function goalsOn(r: GoalRow, k: number): { p: number; name: string }[] {
+  const curve = r.curves?.[k]
+  if (!curve) return []
+  const first = (min: number) => curve.findIndex((c) => c.coverage >= min - 1e-9)
+  const out = THRESHOLDS.flatMap((th, ci) => {
+    const p = first(th)
+    return p < 0 ? [] : [{ p, name: t(`calc.goal.tag.${ci === 0 ? '50' : ci === 1 ? '90' : '100'}` as const) }]
+  })
+  const top = Math.max(...curve.map((c) => c.coverage))
+  if (top < 1 - 1e-9 && top > 0) out.push({ p: first(top), name: t('calc.goal.tag.best', { pct: percent(top) }) })
+  return out
+}
+/** Whether a strip's cell (its `k`th stat in play's) is one of its goals'. */
+const marked = (r: GoalRow, k: number, p: number) => goalsOn(r, k).some((g) => g.p === p)
 /**
  * A strip's goals as tags over their cells ("50%", "90%", "Always", "Best"), those at one number of points as one
  * ("50% · 90%"). A tag too near the one before (its cells too few to keep the two apart) goes up a level, so none
  * overlap; `levels` the most there are.
  */
 function marksOf(r: GoalRow, k: number) {
-  const s = goal.value!.ours[k]!
-  const named = [
-    ...r.cells.map(
-      (c, ci) => c && { c, name: t(`calc.goal.tag.${ci === 0 ? '50' : ci === 1 ? '90' : '100'}` as const) },
-    ),
-    // The best only short of always: there, the same build.
-    r.best && !r.cells.at(-1) && { c: r.best, name: t('calc.goal.tag.best', { pct: percent(r.best.coverage) }) },
-  ].filter((x): x is { c: GoalBuild; name: string } => !!x)
+  const named = goalsOn(r, k)
   const byP = new Map<number, { p: number; names: string[] }>()
-  for (const { c, name } of named) {
-    const p = c.points[s]!
+  for (const { p, name } of named) {
     const was = byP.get(p)
     if (was) was.names.push(name)
     else byP.set(p, { p, names: [name] })
@@ -396,7 +404,7 @@ function use(r: ReverseRow) {
                    build said under it with its Use; the goals' outlined. -->
                 <template v-for="(curve, k) in r.curves ?? []" :key="k">
                   <span v-if="stripStats.includes(k)" class="strip-wrap">
-                    <!-- Its goals as tags over their cells, so the line under it reads off the strip. -->
+                    <!-- Its goals as tags over the first of its bars reaching each. -->
                     <span
                       class="ticks"
                       aria-hidden="true"
