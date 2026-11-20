@@ -313,15 +313,13 @@ a.row:hover {
   display: flex;
   justify-content: flex-end;
 }
-/* More rows: quiet, as the folded lists' way to unfold (`MoreToggle`), across the table's foot. */
+/* More rows: quiet, as the folded lists' way to unfold (`MoreToggle`), at the table's foot on the left. */
 .more {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 4px;
-  width: 100%;
-  margin-top: 4px;
-  padding: 8px;
+  margin-top: 8px;
+  padding: 2px 6px 2px 2px;
   font: inherit;
   font-size: 0.9em;
   font-weight: bold;
