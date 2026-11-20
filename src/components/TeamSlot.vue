@@ -85,8 +85,12 @@ useResizeObserver([facts, natureBtn], measure)
 const mega = computed(() => stoneMega(props.member))
 /** The Pokémon the card shows: its Mega while it's the one that Mega Evolves, else itself. */
 const shown = computed(() => (props.evolved && mega.value) || props.member.pokemon)
-/** Its Mega's ability, shown after its sheet's while it Mega Evolves. */
-const megaAbility = computed(() => (props.evolved && mega.value ? (POKEMON[mega.value]?.abilities[0] ?? null) : null))
+/** Its Mega's ability, shown after its sheet's while it Mega Evolves, its room kept while it doesn't (so the switch
+ *  doesn't wrap the line and move the card); none when it's the sheet's own, saying nothing new. */
+const megaAbility = computed(() => {
+  const id = mega.value ? (POKEMON[mega.value]?.abilities[0] ?? null) : null
+  return id === props.member.ability ? null : id
+})
 /** Opens a part's picker: the Pokémon's, until there's one. */
 const go = (f: Field) => emit('field', shown.value ? f : 'pokemon')
 const left = computed(() => pointsLeft(props.member))
@@ -219,7 +223,12 @@ const chipText = computed(() =>
       >
         {{ member.ability ? refName(ability(member.ability)) : t('builder.ability') }}
       </button>
-      <span v-if="megaAbility" v-tip="t('builder.megaAbility')" class="mega-ability muted"
+      <span
+        v-if="megaAbility"
+        v-tip="evolved ? t('builder.megaAbility') : undefined"
+        class="mega-ability muted"
+        :class="{ unseen: !evolved }"
+        :aria-hidden="!evolved"
         >→ {{ refName(ability(megaAbility)) }}</span
       >
       <span v-if="!hide?.includes('nature')" ref="dot" class="muted" :class="{ wrapped }" aria-hidden="true">·</span>
@@ -523,6 +532,11 @@ const chipText = computed(() =>
 }
 .mega-ability {
   font-size: 0.9em;
+}
+/* Not Mega Evolving, its room kept unseen, at the line's end rather than a gap between the ability and the nature. */
+.mega-ability.unseen {
+  order: 1;
+  visibility: hidden;
 }
 .wrapped {
   visibility: hidden;
