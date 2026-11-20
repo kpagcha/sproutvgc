@@ -1827,6 +1827,31 @@ export const messages = {
   'tour.solver.customTitle': 'Custom',
   'tour.solver.custom':
     "<p>Pick part by part what's worked out, with the <strong>Work out</strong> toggles or the chips on the bands.</p>",
+  'tour.speedSolver.introTitle': 'Speed solver',
+  'tour.speedSolver.intro':
+    "<p>The comparison in reverse: from who moved first, the opponent's possible Speed points. Or, for the order you want, what yours needs.</p><p>Here's a worked example.</p>",
+  'tour.speedSolver.pickTitle': 'The two Pokémon',
+  'tour.speedSolver.pick': "<p>Start by picking yours and the opponent's.</p>",
+  'tour.speedSolver.sidesTitle': 'Their builds',
+  'tour.speedSolver.sides':
+    '<p>Both come in at their most common Speed build. Here, your {a} with {pts} points against {b}.</p><p>Set the modifiers in play too: Tailwind, a Choice Scarf, paralysis, stages.</p>',
+  'tour.speedSolver.workTitle': "What you don't know",
+  'tour.speedSolver.work':
+    "<p><strong>Work out</strong> marks what's unknown. By default, the opponent's points; turn on its nature too if you're not sure of it.</p>",
+  'tour.speedSolver.firstTitle': 'Who moved first',
+  'tour.speedSolver.first': '<p>Then pick who moved first. Here {b} outsped your {a}.</p>',
+  'tour.speedSolver.linesTitle': 'What fits',
+  'tour.speedSolver.lines':
+    '<p>The Speed and points it must have for that, and how often that happens across its builds in the meta.</p>',
+  'tour.speedSolver.tableTitle': 'Their common builds',
+  'tour.speedSolver.table':
+    '<p>Each common build of one against each of the other: whether it fits, ties or is ruled out. The likeliest are marked.</p>',
+  'tour.speedSolver.wantTitle': 'An order you want',
+  'tour.speedSolver.want':
+    '<p>Turn <strong>Work out</strong> on for yours to find what it needs. Here, its points, with {b} at its most common build, and your {a} moving first.</p>',
+  'tour.speedSolver.needTitle': 'What yours needs',
+  'tour.speedSolver.need':
+    '<p>The Speed and points yours needs to move first, and how often that works against its builds in the meta.</p>',
   'speed.help': 'How to read this',
   'speed.yours': 'Your Pokémon',
   'speed.yoursPick': 'Pick a Pokémon',

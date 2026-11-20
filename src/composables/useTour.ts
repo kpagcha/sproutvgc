@@ -113,8 +113,9 @@ export function useTour(
         await frame()
         await frame()
       }
-      const first = selsOf(staged[i]!)[0]
-      if (first && inExample) await waitFor(first, WAIT)
+      // Its part waited for; one of the others there already (the phone's layout has another) is enough.
+      const [first, ...rest] = selsOf(staged[i]!)
+      if (first && inExample && !rest.some((x) => shown(x))) await waitFor(first, WAIT)
     }
     if (inExample) await setUp(0)
     if (id !== run) return leaveExample()
@@ -139,11 +140,18 @@ export function useTour(
     }
     if (!list.length) return leaveExample()
     // Moving between steps, the page set up for the next first.
+    // One at a time: Next or Back pressed again while the page is set up for the step is ignored.
+    let busy = false
     const go = async (i: number) => {
-      if (i < 0) return
+      if (i < 0 || busy) return
       if (i >= list.length) return tour?.destroy()
-      await setUp(i)
-      if (id === run) tour?.moveTo(i)
+      busy = true
+      try {
+        await setUp(i)
+        if (id === run) tour?.moveTo(i)
+      } finally {
+        busy = false
+      }
     }
     const index = () => tour?.getActiveIndex() ?? 0
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches

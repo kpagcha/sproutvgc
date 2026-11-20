@@ -74,6 +74,8 @@ import TourToggle from '@/components/TourToggle.vue'
 const route = useRoute()
 const router = useRouter()
 const replace = (q: Record<string, string | undefined>) => router.replace({ query: { ...route.query, ...q } })
+/** The reader's URL while the solver's tour shows its example (below), to put back once it ends. */
+let keptQuery: typeof route.query | null = null
 
 const { snapshot, data } = useMeta()
 const metaSpeeds = computed(() => !!snapshot.value && has(snapshot.value, 'speeds'))
@@ -101,7 +103,8 @@ const mode = computed<Mode>(() => compareMode(route.params.view))
 watch(
   () => [route.query, mode.value] as const,
   ([q, m]) => {
-    if (route.name !== 'speedCompare') return
+    // Nor the tour's example, the tour's rather than the reader's.
+    if (route.name !== 'speedCompare' || keptQuery) return
     const left = withoutMeta(q)
     lastCompareQuery.value = Object.keys(left).length && m !== 'vs' ? { ...left, mode: m } : left
   },
@@ -637,18 +640,179 @@ const anyPicked = computed(() => !!sideOf('a').id || !!sideOf('b').id)
 // The first visit's tour of the page, its guide to reading it: how a Speed is worked out, its two views, what applies to
 // every one, yours and the opponent (or the list in speed order), more a side and how each fares, the way to the
 // ladder, and taking it again.
-const { start: startTour } = useTour('compare', () => [
-  { title: 'tour.compare.introTitle', text: 'tour.compare.intro' },
-  { title: 'tour.speedTitle', text: 'tour.speed' },
-  { el: '.folder-tabs', title: 'tour.compare.viewsTitle', text: 'tour.compare.views', side: 'bottom' },
-  { el: '.toolbar', title: 'tour.compare.toolbarTitle', text: 'tour.compare.toolbar', side: 'bottom' },
-  { el: ['#compare-a', '.side-band'], title: 'tour.compare.yoursTitle', text: 'tour.compare.yours', side: 'bottom' },
-  { el: '#compare-b', title: 'tour.compare.opponentTitle', text: 'tour.compare.opponent', side: 'bottom' },
-  { el: ['.col-add', '.side-adds'], title: 'tour.compare.secondTitle', text: 'tour.compare.second', side: 'top' },
-  { el: '.adder', title: 'tour.compare.orderTitle', text: 'tour.compare.order', side: 'bottom' },
-  { el: '.to-ladder', title: 'tour.compare.ladderTitle', text: 'tour.compare.ladder', side: 'top' },
-  { el: '.head-tour', title: 'tour.againTitle', text: 'tour.again', side: 'bottom' },
-])
+const { start: startCompareTour } = useTour(
+  'compare',
+  () => [
+    { title: 'tour.compare.introTitle', text: 'tour.compare.intro' },
+    { title: 'tour.speedTitle', text: 'tour.speed' },
+    { el: '.folder-tabs', title: 'tour.compare.viewsTitle', text: 'tour.compare.views', side: 'bottom' },
+    { el: '.toolbar', title: 'tour.compare.toolbarTitle', text: 'tour.compare.toolbar', side: 'bottom' },
+    { el: ['#compare-a', '.side-band'], title: 'tour.compare.yoursTitle', text: 'tour.compare.yours', side: 'bottom' },
+    { el: '#compare-b', title: 'tour.compare.opponentTitle', text: 'tour.compare.opponent', side: 'bottom' },
+    { el: ['.col-add', '.side-adds'], title: 'tour.compare.secondTitle', text: 'tour.compare.second', side: 'top' },
+    { el: '.adder', title: 'tour.compare.orderTitle', text: 'tour.compare.order', side: 'bottom' },
+    { el: '.to-ladder', title: 'tour.compare.ladderTitle', text: 'tour.compare.ladder', side: 'top' },
+    { el: '.head-tour', title: 'tour.againTitle', text: 'tour.again', side: 'bottom' },
+  ],
+  // The solver has a tour of its own.
+  () => mode.value !== 'reverse',
+)
+
+// The speed solver's tour, walked through on examples (`useTour`'s `example`), the page set up step by step through its
+// URL as the reader would: the two picked at their most common builds, what's worked out, the opponent seen moving
+// first, and what fits; then yours wanted to move first, its points worked out. From the meta shown: two of the most
+// used where the order says something, the opponent's Speed at no points under yours' and its most common over it (so it
+// moved first, and its points are bound), and yours able to outspeed it with more points. The reader's URL put back once
+// the tour ends; meanwhile nothing of it remembered as the page last left (`inExample`).
+interface SpeedSolverExample {
+  a: { id: PokemonId; effect: NatureEffect; points: number }
+  b: { id: PokemonId; effect: NatureEffect; points: number }
+}
+function speedSolverExample(): SpeedSolverExample | null {
+  const d = data.value
+  if (!d) return null
+  const top = (Object.keys(d) as PokemonId[])
+    .filter((id) => POKEMON[id] && d[id]?.usage && d[id]?.speeds?.length)
+    .sort((x, y) => d[y]!.usage! - d[x]!.usage!)
+    .slice(0, 15)
+  const at = (id: PokemonId, effect: NatureEffect, points: number) =>
+    buildSpeed(id, { effect, points, toggles: [], stage: 0 })
+  for (const them of top) {
+    const tb = speedBuilds(d[them]!.speeds!)[0]!
+    const st = at(them, tb.effect, tb.points)
+    for (const you of top) {
+      if (you === them) continue
+      const yb = speedBuilds(d[you]!.speeds!)[0]!
+      const sy = at(you, yb.effect, yb.points)
+      // It moved first, but not at any points: the order binds them. And yours could move first with more.
+      if (
+        yb.effect !== 'down' &&
+        st > sy &&
+        at(them, tb.effect, 0) < sy &&
+        at(you, yb.effect, MAX_POINTS) > st &&
+        yb.points < MAX_POINTS
+      )
+        return { a: { id: you, ...yb }, b: { id: them, ...tb } }
+    }
+  }
+  return null
+}
+const speedExample = ref<SpeedSolverExample | null>(null)
+function enterSpeedExample() {
+  const ex = speedSolverExample()
+  if (!ex) return false
+  keptQuery ??= { ...route.query }
+  speedExample.value = ex
+  return true
+}
+/** One of the tour's steps on the page, through its URL. */
+async function stageSpeed(o: { sides: boolean; first?: Side; wantMine?: boolean }) {
+  const ex = speedExample.value
+  if (!ex) return
+  const q: Record<string, string | undefined> = { meta: keptQuery?.meta as string | undefined }
+  if (o.sides) {
+    Object.assign(q, {
+      a: ex.a.id,
+      anat: ex.a.effect,
+      apts: String(ex.a.points),
+      b: ex.b.id,
+      bnat: ex.b.effect,
+      bpts: String(ex.b.points),
+      first: o.first,
+      ...(o.wantMine && { awork: 'pts', bwork: 'none' }),
+    })
+  }
+  await router.replace({ query: q })
+}
+async function leaveSpeedExample() {
+  const q = keptQuery
+  keptQuery = null
+  speedExample.value = null
+  if (q) await router.replace({ query: q })
+  window.scrollTo({ top: 0 })
+}
+const exName = (k: Side) => {
+  const id = speedExample.value?.[k].id
+  return id ? refName(pokemon(id)) : ''
+}
+const { start: startSolverTour } = useTour(
+  'speedSolver',
+  () => {
+    const ex = speedExample.value
+    const params = {
+      a: exName('a'),
+      b: exName('b'),
+      pts: ex?.a.points ?? 0,
+    }
+    return [
+      {
+        title: 'tour.speedSolver.introTitle',
+        text: 'tour.speedSolver.intro',
+        stage: () => stageSpeed({ sides: false }),
+      },
+      {
+        el: ['.reverse-sides', '.duel'],
+        title: 'tour.speedSolver.pickTitle',
+        text: 'tour.speedSolver.pick',
+        side: 'bottom',
+      },
+      {
+        el: ['.reverse-sides', '.duel'],
+        title: 'tour.speedSolver.sidesTitle',
+        text: 'tour.speedSolver.sides',
+        params,
+        side: 'bottom',
+        stage: () => stageSpeed({ sides: true }),
+      },
+      {
+        el: ['#compare-b .work-out', '.duel'],
+        title: 'tour.speedSolver.workTitle',
+        text: 'tour.speedSolver.work',
+        side: 'bottom',
+      },
+      {
+        el: ['.reverse .choices', '.reverse'],
+        title: 'tour.speedSolver.firstTitle',
+        text: 'tour.speedSolver.first',
+        params,
+        side: 'top',
+        stage: () => stageSpeed({ sides: true, first: 'b' }),
+      },
+      {
+        el: ['.reverse .lines', '.reverse'],
+        title: 'tour.speedSolver.linesTitle',
+        text: 'tour.speedSolver.lines',
+        params,
+        side: 'top',
+      },
+      {
+        el: ['.reverse .table-wrap', '.reverse'],
+        title: 'tour.speedSolver.tableTitle',
+        text: 'tour.speedSolver.table',
+        side: 'top',
+      },
+      {
+        el: ['#compare-a .work-out', '.duel'],
+        title: 'tour.speedSolver.wantTitle',
+        text: 'tour.speedSolver.want',
+        params,
+        side: 'bottom',
+        stage: () => stageSpeed({ sides: true, first: 'a', wantMine: true }),
+      },
+      {
+        el: ['.reverse .lines', '.reverse'],
+        title: 'tour.speedSolver.needTitle',
+        text: 'tour.speedSolver.need',
+        params,
+        side: 'top',
+      },
+      { el: '.head-tour', title: 'tour.againTitle', text: 'tour.again', side: 'bottom' },
+    ]
+  },
+  () => mode.value === 'reverse' && !!data.value && !route.query.first,
+  { enter: enterSpeedExample, leave: () => void leaveSpeedExample() },
+)
+const startTour = () => (mode.value === 'reverse' ? startSolverTour() : startCompareTour())
 // Everything back as the page comes with nothing set, as the speed tiers' Reset all: its whole query cleared (the
 // Pokémon, their builds, Trick Room), the view, a page of its own, staying.
 // The data shown (`?meta=`) isn't the page's to reset: it's the reader's choice on every page.
