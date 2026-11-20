@@ -64,8 +64,7 @@ const rate = computed(() => {
 })
 
 // The Pokémon on their teams, by how many of their events they brought it to, then by how recently: a shelf per count,
-// the most first, each with its share of their events as pips (a bar past `PIPS` events), the Pokémon on half their
-// teams or more drawn bigger.
+// the most first, each with its share of their events as pips (a bar past `PIPS` events).
 const PIPS = 12
 const shelves = computed(() => {
   const counts = new Map<PokemonId, number>()
@@ -73,9 +72,7 @@ const shelves = computed(() => {
   const total = player.value?.runs.length ?? 0
   const byCount = new Map<number, PokemonId[]>()
   for (const [id, n] of counts) byCount.set(n, [...(byCount.get(n) ?? []), id])
-  return [...byCount]
-    .sort((a, b) => b[0] - a[0])
-    .map(([n, ids]) => ({ n, ids, share: total ? n / total : 0, big: total > 1 && n * 2 >= total }))
+  return [...byCount].sort((a, b) => b[0] - a[0]).map(([n, ids]) => ({ n, ids, share: total ? n / total : 0 }))
 })
 const countOf = (id: PokemonId) => shelves.value.find((s) => s.ids.includes(id))?.n ?? 0
 
@@ -211,7 +208,7 @@ const dateOf = (r: PlayerRun) => datasetDates({ from: r.event.date, to: r.event.
     <section id="sec-pokemon" class="panel">
       <h2>{{ t('players.pokemon') }}</h2>
       <ol class="shelves">
-        <li v-for="sh in shelves" :key="sh.n" class="shelf" :class="{ big: sh.big }">
+        <li v-for="sh in shelves" :key="sh.n" class="shelf">
           <span
             class="shelf-label"
             :aria-label="t('players.timesBrought', { n: num(sh.n), of: num(player.runs.length) })"
@@ -234,7 +231,7 @@ const dateOf = (r: PlayerRun) => datasetDates({ from: r.event.date, to: r.event.
               :aria-label="monTip(id)"
               @click="pick(id)"
             >
-              <PokemonIcon :id :scale="sh.big ? 1.5 : 1" />
+              <PokemonIcon :id />
             </button>
           </span>
         </li>
@@ -382,9 +379,6 @@ h2 {
   flex-direction: column;
   gap: 3px;
   width: 3.5em;
-}
-.shelf.big .shelf-label strong {
-  font-size: 1.25em;
 }
 .pips {
   display: flex;
