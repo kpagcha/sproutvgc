@@ -234,7 +234,10 @@ const headers = computed(() => [
           <SortHeader
             v-for="h in headers"
             :key="h.k"
-            :class="[`col-${h.k}`, { r: h.right, 'wide-only': h.k === 'day2s' || h.k === 'events' }]"
+            :class="[
+              `col-${h.k}`,
+              { r: h.right, 'wide-only': h.k === 'day2s' || h.k === 'events' || h.k === 'topCuts' },
+            ]"
             :label="h.label"
             :right="h.right"
             :active="h.active"
@@ -255,13 +258,15 @@ const headers = computed(() => [
             ><span class="name">{{ r.name }}</span> <CountryFlag :code="r.country"
           /></span>
           <span role="cell" class="col-events num wide-only">{{ r.events }}</span>
-          <span role="cell" class="col-topCuts num" :class="{ zero: !r.topCuts }">{{ r.topCuts }}</span>
+          <span role="cell" class="col-topCuts num wide-only" :class="{ zero: !r.topCuts }">{{ r.topCuts }}</span>
           <span role="cell" class="col-day2s num wide-only" :class="{ zero: !r.day2s }">{{ r.day2s }}</span>
           <span role="cell" class="col-record num"
             >{{ r.wins }}–{{ r.losses }} <span class="muted small pct">{{ pct(r) }}</span></span
           >
           <span v-tip="r.best.event.name" role="cell" class="col-best num"
-            ><span class="placing" :class="medalOf(r.best.placing)">#{{ r.best.placing }}</span></span
+            ><span class="placing" :class="[medalOf(r.best.placing), { soft: r.best.placing <= 8 }]"
+              >#{{ r.best.placing }}</span
+            ></span
           >
           <span role="cell" class="col-team team wide-only" :aria-label="t('players.col.team')">
             <PokemonIcon v-for="(p, i) in r.latest.team" :id="p" :key="i" />
@@ -382,10 +387,10 @@ a.row:hover {
   color: var(--text);
   background: var(--hover);
 }
-/* Narrower: no Day 2s nor team, the rest closer. */
+/* Narrower: no events, top cuts, Day 2s nor team, the rest closer. */
 @media (max-width: 720px) {
   .dex-table {
-    --cols: minmax(0, 1fr) 4.75em 4.25em 3.75em;
+    --cols: minmax(0, 1fr) 4.25em 3.75em;
   }
   .col-team,
   .pct {
