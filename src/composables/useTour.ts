@@ -87,6 +87,14 @@ export function useTour(
   // A start superseded by another (or by the page going away) while its example was being set up.
   let run = 0
 
+  // The part shown, made inert while it is.
+  let locked: Element | undefined
+  function lock(el: Element | undefined) {
+    locked?.removeAttribute('inert')
+    locked = el && !el.hasAttribute('inert') ? el : undefined
+    locked?.setAttribute('inert', '')
+  }
+
   function leaveExample() {
     if (!inExample) return
     inExample = false
@@ -174,7 +182,13 @@ export function useTour(
         onNextClick: () => void go(index() + 1),
         onPrevClick: () => void go(index() - 1),
       }),
+      // The page can't be used while the tour is on: the overlay takes the clicks around the part shown, and the part
+      // itself is inert (no clicks, no keyboard focus), so nothing opens over or under the tour.
+      disableActiveInteraction: true,
+      onHighlightStarted: (el) => lock(el),
+      onDeselected: () => lock(undefined),
       onDestroyed: () => {
+        lock(undefined)
         if (!leaving) markSeen(page)
         tour = undefined
         leaveExample()

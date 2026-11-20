@@ -843,6 +843,8 @@ interface SolverExample {
   /** Yours' hit seen on the opponent. */
   seen: HitSeen
   first: 'a' | 'b' | null
+  /** Its hit seen on yours, a second hit: the HP it took off. */
+  seen2: HitSeen | null
   /** The opponent's hit yours wants to survive. */
   wanted: HitSeen | null
 }
@@ -895,14 +897,24 @@ function solverExample(): SolverExample | null {
           break
         }
       }
+      // Its hit seen on yours, one that left it standing: the HP it took off, its middle roll.
+      let seen2: HitSeen | null = null
+      for (const mv of them.set.member.moves) {
+        const h = plainHit(them.set, you.set, mv)
+        const roll = h?.rolls[Math.floor(h.rolls.length / 2)]
+        if (h && roll !== undefined && roll < h.hp * 0.8) {
+          seen2 = { by: 'b', move: mv as MoveId, saw: { kind: 'hp', n: roll } }
+          break
+        }
+      }
       const sa = speedOf(you.set, none)
       const sb = speedOf(them.set, none)
       const lead = sa !== null && sb !== null ? leadOf(sa, sb, none) : 'tie'
       const bm = them.set.member
       const fixed = !!stoneMega(bm) || (!!bm.pokemon && itemBound(bm.pokemon))
       const b = noMoves({ ...them.set, member: { ...bm, item: fixed ? bm.item : null } })
-      const ex = { a: noMoves(you.set), b, seen, first: lead === 'tie' ? null : lead, wanted }
-      if (wanted) return ex
+      const ex = { a: noMoves(you.set), b, seen, seen2, first: lead === 'tie' ? null : lead, wanted }
+      if (wanted && seen2) return ex
       fallback ??= ex
     }
   }
@@ -991,8 +1003,12 @@ const { start: startTour } = props.inverse
           pct: seen?.saw.kind === 'pct' ? seen.saw.n : 0,
           first: ex?.first ? exName(ex.first) : '',
           theirMove: wanted ? refName(move(wanted.move)) : '',
+          move2: ex?.seen2 ? refName(move(ex.seen2.move)) : '',
+          hp2: ex?.seen2?.saw.kind === 'hp' ? ex.seen2.saw.n : 0,
         }
+        const seen2 = ex?.seen2
         const blank = { ...seen!, saw: null } as HitDraft
+        const both = seen2 ? [seen!, seen2] : [seen!]
         return [
           { title: 'tour.solver.introTitle', text: 'tour.solver.intro', stage: () => stageExample({ sides: false }) },
           { el: '#calc-duel', title: 'tour.solver.pickTitle', text: 'tour.solver.pick', side: 'top' },
@@ -1021,6 +1037,18 @@ const { start: startTour } = props.inverse
             side: 'bottom',
             stage: () => stageExample({ sides: true, hits: [seen!] }),
           },
+          ...(seen2
+            ? [
+                {
+                  el: '#calc-hits .hit-list',
+                  title: 'tour.solver.moreTitle' as const,
+                  text: 'tour.solver.more' as const,
+                  params,
+                  side: 'bottom' as const,
+                  stage: () => stageExample({ sides: true, hits: both }),
+                },
+              ]
+            : []),
           ...(ex?.first
             ? [
                 {
@@ -1029,7 +1057,7 @@ const { start: startTour } = props.inverse
                   text: 'tour.solver.first' as const,
                   params,
                   side: 'bottom' as const,
-                  stage: () => stageExample({ sides: true, hits: [seen!], first: ex.first }),
+                  stage: () => stageExample({ sides: true, hits: both, first: ex.first }),
                 },
               ]
             : []),
@@ -1043,18 +1071,23 @@ const { start: startTour } = props.inverse
           ...(wanted
             ? [
                 {
+                  el: '#calc-goal',
+                  title: 'tour.solver.needGoalTitle' as const,
+                  text: 'tour.solver.needGoal' as const,
+                  side: 'top' as const,
+                  stage: () => stageExample({ sides: true, hits: [wanted], goal: 'need' }),
+                },
+                {
                   el: '#calc-hits .hit',
                   title: 'tour.solver.wantTitle' as const,
                   text: 'tour.solver.want' as const,
                   params,
                   side: 'bottom' as const,
-                  stage: () => stageExample({ sides: true, hits: [wanted], goal: 'need' }),
                 },
                 {
                   el: ['#calc-reverse .answer.yours', '#calc-reverse'],
                   title: 'tour.solver.yoursTitle' as const,
                   text: 'tour.solver.yours' as const,
-                  params,
                   side: 'top' as const,
                 },
               ]

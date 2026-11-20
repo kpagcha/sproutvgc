@@ -3,13 +3,15 @@ import { Footprints } from '@lucide/vue'
 import { t } from '@/i18n'
 
 // Taking a page's tour again, its guide to reading it: its icon alone, at the end of the heading's row, its words its
-// tooltip.
+// tooltip where there's hover.
 const emit = defineEmits<{ start: [] }>()
+// Its words a tooltip only where there's hover: tapped, it would stay open over the tour.
+const hover = window.matchMedia('(hover: hover)').matches
 </script>
 
 <template>
   <button
-    v-tip="t('tour.start')"
+    v-tip="hover ? t('tour.start') : undefined"
     type="button"
     class="tour-toggle"
     :aria-label="t('tour.start')"
