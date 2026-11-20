@@ -105,12 +105,12 @@ export function usePokemonSearch(
         waiting.push({ group, count: list.length, folded: isFolded })
         if (isFolded) continue
         const showsAll = expanded.value.has(group)
-        const shown = showsAll ? list : list.slice(0, GROUP_CAP)
+        const shown = showsAll ? list : list.slice(0, GROUP_CAP[group])
         for (const m of shown) {
           out.push({ ...whole(m), key: `${group}:${m.id}`, headings: waiting.length ? waiting : undefined })
           waiting = []
         }
-        if (list.length > GROUP_CAP) out[out.length - 1]!.more = { group, total: list.length, all: showsAll }
+        if (list.length > GROUP_CAP[group]) out[out.length - 1]!.more = { group, total: list.length, all: showsAll }
       }
       waiting.push({ group: rest.value, count: all.value.length, folded: false })
       return [...out, ...all.value.map((m, i) => ({ ...whole(m), key: m.id, headings: i ? undefined : waiting }))]

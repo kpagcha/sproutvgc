@@ -1888,7 +1888,7 @@ export const messages = {
   'speedPick.speedWork': 'Its Speed: nature and points, or work them out',
   'speedPick.done': 'Done',
   'picker.ability': 'With {name}',
-  'picker.showAll': 'Show all ({n})',
+  'picker.showAll': 'Show all',
   'picker.showFewer': 'Show fewer',
   'compare.pick': 'Pick a Pokémon',
   'compare.pickYours': 'Pick your Pokémon',

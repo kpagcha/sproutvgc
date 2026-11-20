@@ -224,7 +224,7 @@ const optionId = (i: number) => `${listId}-${i}`
         <li v-if="r.more" role="presentation" class="more">
           <span class="more-link" @click="regroup(() => toggleExpanded(r.more!.group))"
             ><component :is="r.more.all ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />{{
-              r.more.all ? t('picker.showFewer') : t('picker.showAll', { n: r.more.total })
+              r.more.all ? t('picker.showFewer') : t('picker.showAll')
             }}</span
           >
         </li>

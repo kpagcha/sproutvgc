@@ -259,9 +259,9 @@ const monList = computed((): MonRow[] => {
     if (!rows.length) continue
     const isFolded = folded.value.has(group)
     const all = expanded.value.has(group)
-    const led = isFolded ? [] : all ? rows : rows.slice(0, GROUP_CAP)
+    const led = isFolded ? [] : all ? rows : rows.slice(0, GROUP_CAP[group])
     const head: Head = { group, count: rows.length, folded: isFolded }
-    const more = rows.length > GROUP_CAP ? { total: rows.length, all, group } : undefined
+    const more = rows.length > GROUP_CAP[group] ? { total: rows.length, all, group } : undefined
     if (isFolded) pending.push(head)
     led.forEach((r, i) => {
       const heads = i ? undefined : [...pending, head]
@@ -450,7 +450,7 @@ const termRows = useId()
           <!-- After a group's last shown, when there are more: all of them, or back to the first few. -->
           <button v-if="r.more" type="button" class="more-link" @click="toggleExpanded(r.more.group)">
             <component :is="r.more.all ? ChevronUp : ChevronDown" :size="14" aria-hidden="true" />{{
-              r.more.all ? t('picker.showFewer') : t('picker.showAll', { n: r.more.total })
+              r.more.all ? t('picker.showFewer') : t('picker.showAll')
             }}
           </button>
         </li>

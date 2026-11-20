@@ -4,18 +4,19 @@ import { POKEMON } from '@/data/pokemon'
 
 // What the Pokémon pickers share: the Pokémon picked lately in any of them (with `recent`), most recent first, saved
 // in this browser; and their groups browsed with an empty search (Recent, Favorites), each folded away or not
-// (remembered too) and showing all its Pokémon or its first `GROUP_CAP` (for as long as the page is open). The drawer's
+// (remembered too) and showing all its Pokémon or its first few, `GROUP_CAP` (for as long as the page is open). The drawer's
 // picker (`TeamPicker`: the team builder's, the damage calculator's, the speed pages') has both groups too, recording
 // its picks and folded and unfolded with theirs.
+
+export type PickerGroup = 'recent' | 'favorites'
 
 const RECENT_KEY = 'sproutvgc.picker.recent.v1'
 const FOLDED_KEY = 'sproutvgc.picker.folded.v1'
 /** The most picks kept. */
 const RECENT_LIMIT = 24
-/** The most a group shows until it's asked for all. */
-export const GROUP_CAP = 8
+/** The most a group shows until it's asked for all: the last pick alone of Recent, the rest a tap away. */
+export const GROUP_CAP: Record<PickerGroup, number> = { recent: 1, favorites: 8 }
 
-export type PickerGroup = 'recent' | 'favorites'
 const GROUPS: readonly PickerGroup[] = ['recent', 'favorites']
 
 function load<T>(key: string, valid: (v: unknown) => v is T): T[] {
