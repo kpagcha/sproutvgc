@@ -1,6 +1,7 @@
 import { nextTick } from 'vue'
 import { createRouter, createWebHistory, type LocationQuery, type RouteLocationNormalized } from 'vue-router'
 import { afterPageExit } from '@/lib/pageExit'
+import { navEnded, navStarted } from '@/lib/navProgress'
 import { TYPES } from '@/data/types'
 import type { MessageKey } from '@/i18n'
 import type { AreaId } from '@/lib/areas'
@@ -41,6 +42,9 @@ declare module 'vue-router' {
       query: LocationQuery,
       params: RouteLocationNormalized['params'],
     ) => { visit: string; query: Record<string, string> } | null
+    /** The page shows the meta's data (`useMeta`): the snapshot it'll show, loaded as navigation starts rather than once
+     * the page is set up; `trends`, the dataset before it too (`usePreviousMeta`). */
+    metaData?: 'shown' | 'trends'
     /** The data the page loads first, started as navigation does (beside its code and the names it waits for) rather
      * than once the page is set up. */
     prefetch?: (to: RouteLocationNormalized) => void
@@ -69,6 +73,26 @@ function prefetchEvent(to: RouteLocationNormalized) {
     const m = await import('@/data/meta')
     const ladder = m.regulationSnapshot(event.regulation)
     if (ladder) quiet(m.loadRanks(ladder))
+  })
+}
+
+/** The meta's data a page shows (`meta.metaData`), on its way as navigation starts: the snapshot its URL names, else the
+ * one picked, and for its trends the dataset before. A failed load is the page's to show. */
+function prefetchMeta(to: RouteLocationNormalized, kind: 'shown' | 'trends') {
+  void import('@/data/meta').then((m) => {
+    const id = to.query.meta
+    const s = (typeof id === 'string' && m.findSnapshot(id)) || m.selectedSnapshot.value
+    const quiet = (load: () => Promise<unknown>) => {
+      try {
+        void load().catch(() => {})
+      } catch {
+        // No data for it: the page says so.
+      }
+    }
+    if (!s) return
+    quiet(() => m.loadMeta(s))
+    const before = kind === 'trends' && m.GENERATED_SNAPSHOTS.find((p) => p.id === s.previous)
+    if (before) quiet(() => m.loadMeta(before))
   })
 }
 
@@ -121,6 +145,7 @@ const usageRankings = (
     keywordsKey: `keywords.${name}` as const,
     dexNames: true,
     descriptions: [kind],
+    metaData: 'trends' as const,
     recent: once(name),
     ...inArea('meta', 'rankings'),
   },
@@ -137,6 +162,7 @@ const metaEntry = (
   component: () => import('@/views/MetaEntryView.vue'),
   props: { kind },
   meta: {
+    metaData: 'trends' as const,
     titleKey: `title.${name}` as const,
     descKey: `desc.${name}` as const,
     headKey: `head.${name}` as const,
@@ -164,7 +190,12 @@ export const router = createRouter({
       name: 'home',
       component: () => import('@/views/HomeView.vue'),
       // Its favorites and recently viewed show dex entries.
-      meta: { descKey: 'desc.home', keywordsKey: 'keywords.home', dexNames: () => hasFavorites() || hasRecent() },
+      meta: {
+        metaData: 'shown',
+        descKey: 'desc.home',
+        keywordsKey: 'keywords.home',
+        dexNames: () => hasFavorites() || hasRecent(),
+      },
     },
 
     // The dex: what exists in the regulation.
@@ -319,6 +350,7 @@ export const router = createRouter({
       name: 'rankings',
       component: () => import('@/views/RankingsView.vue'),
       meta: {
+        metaData: 'trends',
         titleKey: 'title.pokemonRankings',
         descKey: 'desc.pokemonRankings',
         headKey: 'head.pokemonRankings',
@@ -334,6 +366,7 @@ export const router = createRouter({
       name: 'metaBuild',
       component: () => import('@/views/MetaBuildView.vue'),
       meta: {
+        metaData: 'shown',
         titleKey: 'title.metaBuild',
         dexNames: true,
         descriptions: ['ability', 'move', 'item'],
@@ -345,6 +378,7 @@ export const router = createRouter({
       name: 'metaPokemon',
       component: () => import('@/views/MetaPokemonView.vue'),
       meta: {
+        metaData: 'shown',
         titleKey: 'title.metaPokemon',
         descKey: 'desc.metaPokemon',
         headKey: 'head.metaPokemon',
@@ -360,6 +394,7 @@ export const router = createRouter({
       name: 'moveRankings',
       component: () => import('@/views/MoveRankingsView.vue'),
       meta: {
+        metaData: 'trends',
         titleKey: 'title.moveRankings',
         descKey: 'desc.moveRankings',
         headKey: 'head.moveRankings',
@@ -440,6 +475,7 @@ export const router = createRouter({
       name: 'speedTiers',
       component: () => import('@/views/SpeedTiersView.vue'),
       meta: {
+        metaData: 'shown',
         titleKey: 'title.speedTiers',
         descKey: 'desc.speedTiers',
         headKey: 'head.speedTiers',
@@ -467,6 +503,7 @@ export const router = createRouter({
       component: () => import('@/views/BalanceTiersView.vue'),
       props: { measure: 'bulk' },
       meta: {
+        metaData: 'shown',
         titleKey: 'title.bulkTiers',
         descKey: 'desc.bulkTiers',
         headKey: 'head.bulkTiers',
@@ -485,6 +522,7 @@ export const router = createRouter({
       component: () => import('@/views/BalanceTiersView.vue'),
       props: { measure: 'power' },
       meta: {
+        metaData: 'shown',
         titleKey: 'title.powerTiers',
         descKey: 'desc.powerTiers',
         headKey: 'head.powerTiers',
@@ -505,6 +543,7 @@ export const router = createRouter({
       name: 'calc',
       component: () => import('@/views/CalcView.vue'),
       meta: {
+        metaData: 'shown',
         titleKey: 'title.calc',
         descKey: 'desc.calc',
         headKey: 'head.calc',
@@ -525,6 +564,7 @@ export const router = createRouter({
       component: () => import('@/views/CalcView.vue'),
       props: { inverse: true },
       meta: {
+        metaData: 'shown',
         titleKey: 'title.calcInverse',
         descKey: 'desc.calcInverse',
         headKey: 'head.calcInverse',
@@ -543,6 +583,7 @@ export const router = createRouter({
       component: () => import('@/views/CalcView.vue'),
       props: { against: true },
       meta: {
+        metaData: 'shown',
         titleKey: 'title.calcMeta',
         descKey: 'desc.calcMeta',
         headKey: 'head.calcMeta',
@@ -567,6 +608,7 @@ export const router = createRouter({
       name: 'speedCompare',
       component: () => import('@/views/SpeedCompareView.vue'),
       meta: {
+        metaData: 'shown',
         titleKey: 'title.speedCompare',
         descKey: 'desc.speedCompare',
         headKey: 'head.speedCompare',
@@ -592,6 +634,7 @@ export const router = createRouter({
       name: 'teamBuilder',
       component: () => import('@/views/TeamBuilderView.vue'),
       meta: {
+        metaData: 'shown',
         titleKey: 'title.teamBuilder',
         descKey: 'desc.teamBuilder',
         headKey: 'head.teamBuilder',
@@ -666,6 +709,7 @@ export const router = createRouter({
       name: 'speedQuiz',
       component: () => import('@/views/SpeedQuizView.vue'),
       meta: {
+        metaData: 'shown',
         titleKey: 'title.speedQuiz',
         descKey: 'desc.speedQuiz',
         headKey: 'head.speedQuiz',
@@ -737,9 +781,19 @@ router.beforeEach((to) => {
   return { name: 'speedCompare', params, query, hash: to.hash, replace: true }
 })
 
-// What a page loads first, started as navigation does.
+// A page change slow to show, said by a bar at the top (`NavProgress`): from its start until it's shown, or fails.
+router.beforeEach((to) => {
+  navStarted(to)
+})
+router.afterEach((to) => navEnded(to))
+router.onError(() => navEnded())
+
+// What a page loads first, started as navigation does, beside its code rather than after it: its own data, the meta's
+// it shows, and the names and descriptions navigation waits for (`beforeResolve`, below, once the code is in).
 router.beforeEach((to) => {
   to.meta.prefetch?.(to)
+  if (to.meta.metaData) prefetchMeta(to, to.meta.metaData)
+  void startNames(to)
 })
 
 // Pages whose view is in their URL go among the recently viewed as they're opened, each change to the view (a
@@ -764,9 +818,12 @@ router.afterEach((to, from, failure) => {
 
 // Pages showing dex entries render with their names (and descriptions) in place, rather than filling them in once
 // they load.
-router.beforeResolve(async (to) => {
-  await Promise.all([
+function startNames(to: RouteLocationNormalized) {
+  return Promise.all([
     (typeof to.meta.dexNames === 'function' ? to.meta.dexNames() : to.meta.dexNames) && loadDexNames(),
     to.meta.descriptions && loadDescriptions(to.meta.descriptions),
   ])
+}
+router.beforeResolve(async (to) => {
+  await startNames(to)
 })

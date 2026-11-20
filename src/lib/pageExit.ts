@@ -1,7 +1,7 @@
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 
-// Where the page transition (App.vue) and the router's scrolling meet. On desktop the leaving page fades out before
-// the next one mounts, so scrolling waits for it: scrolling at once would jump the leaving page mid-fade, and a saved
+// Where the page transition (App.vue) and the router's scrolling meet. On desktop the leaving page goes before the next
+// one mounts (at once, with no fade of its own, so the next one isn't kept waiting), and scrolling waits for it: a saved
 // position (going back) can't be restored on a page that isn't there yet. On phones the two pages slide side by side,
 // the next one mounted from the start, so nothing waits.
 
@@ -53,9 +53,13 @@ export function pageEntered() {
   for (const done of entered.splice(0)) done()
 }
 
-/** Resolves once the page coming in is in place (or after a second, should it never say so), or at once if none is. */
+/** Resolves once the page coming in is in place (or after a second, should it never say so), or at once if none is.
+ * On desktop, where it only fades in (`opacity` and `transform`, which the browser animates off the main thread, so a
+ * page rendering doesn't stall it), as soon as its first frame (its skeleton) is painted: its fade needn't be waited
+ * for. Phones' pages slide a whole screen, and still wait for it. */
 export function afterPageEnter(): Promise<void> {
   if (!entering) return Promise.resolve()
+  if (waits) return new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve)))
   return new Promise((resolve) => {
     const timer = setTimeout(resolve, 1000)
     entered.push(() => {

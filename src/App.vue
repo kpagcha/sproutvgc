@@ -16,6 +16,7 @@ import { useTheme } from '@/composables/useTheme'
 import FavoritesMenu from '@/components/FavoritesMenu.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import NavPill from '@/components/NavPill.vue'
+import NavProgress from '@/components/NavProgress.vue'
 import { KeptPage, Page } from '@/components/PageFrame'
 import NavDrawer from '@/components/NavDrawer.vue'
 import AreaMenu from '@/components/AreaMenu.vue'
@@ -266,17 +267,20 @@ const pageVariants = {
   center: { transform: 'translateX(0vw)' },
   exit: (dir: number) => ({ transform: `translateX(${dir > 0 ? -100 : 100}vw)` }),
 }
-// On desktop, the old page fades out, then the new one fades in from slightly below.
+// On desktop, the old page goes at once (a fade out would only keep the new one waiting), and the new one fades in
+// from slightly below.
 const fadeVariants = {
   enter: { opacity: 0, transform: 'translateY(6px)' },
   center: { opacity: 1, transform: 'translateY(0px)' },
-  exit: { opacity: 0, transform: 'translateY(-4px)' },
+  exit: { opacity: 0, transition: { duration: 0 } },
 }
 </script>
 
 <template>
   <!-- Motion respects the OS "reduce motion" setting everywhere below. -->
   <MotionConfig reduced-motion="user">
+    <!-- A page change slow to show, a bar across the top of the window. -->
+    <NavProgress />
     <header class="site-header">
       <div class="wrap bar">
         <RouterLink to="/" class="logo font-display"
