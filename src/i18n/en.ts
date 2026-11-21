@@ -1793,6 +1793,35 @@ export const messages = {
   'tour.compare.ladder':
     '<p>Opens the speed tiers with yours there, its build kept, and the opponent found on the ladder. With two on a team, you choose which.</p>',
   'tour.example': 'Example',
+  'tour.calc.introTitle': 'Damage calculator',
+  'tour.calc.intro':
+    '<p>Use the calculator to see how much damage two Pokémon deal each other, with everything in the battle that changes it.</p><p>This tour walks you through an example.</p>',
+  'tour.calc.pickTitle': 'Pick the two Pokémon',
+  'tour.calc.pick':
+    "<p>Pick your Pokémon and the opponent's. Once picked, load its most common set in one tap, or build the set part by part.</p>",
+  'tour.calc.sidesTitle': 'Check their sets',
+  'tour.calc.sides':
+    "<p>Here, your {a} faces {b}, each at its most common set. Tap any part of a set to change it.</p><p>Use the <strong>…</strong> button on a side's band to apply its most common set, paste or copy a set, load one of your teams' Pokémon, or swap the two sides.</p>",
+  'tour.calc.sidesPhone':
+    "<p>Here, your {a} faces {b}, each at its most common set. Tap any part of a set to change it, and a side's band to open or fold its card.</p><p>Use the <strong>…</strong> button at the set's top right to apply its most common set, paste or copy a set, load one of your teams' Pokémon, or swap the two sides.</p>",
+  'tour.calc.movesTitle': 'Read the damage',
+  'tour.calc.moves':
+    "<p>Each row is one of its moves against the other: the damage as a share of the target's HP, and how many hits it takes to knock it out. Here, {move} deals {range} to {b}.</p><p>Tap a row for every roll and the move's options, such as a critical hit. Tap its name to pick another move.</p><p>The opponent's card shows its moves on yours the same way.</p>",
+  'tour.calc.battleTitle': 'Set what happened in battle',
+  'tour.calc.battle':
+    "<p>Set what the battle has changed: HP left, status, stat stages and, under <strong>This side</strong>, what's on its side, such as screens, Tailwind or Helping Hand.</p>",
+  'tour.calc.fieldTitle': 'Set the field',
+  'tour.calc.field':
+    '<p>Open <strong>Battle conditions</strong> to set the weather, the terrain, Trick Room and the rest of the field. Use its search to find any condition by name.</p>',
+  'tour.calc.verdictTitle': 'Who moves first',
+  'tour.calc.verdict':
+    '<p>Read who moves first, at their Speeds, and who wins if the two trade their hardest hits one on one. The links take you to the speed tiers and the speed comparison with them.</p>',
+  'tour.calc.threatsTitle': 'Check the threats',
+  'tour.calc.threats':
+    '<p>Check every damaging move {b} learns against your {a}, at its sets in the meta: its damage, its chance to knock yours out in one hit or two, and how many of its sets run it.</p><p>Turn on <strong>Team sheet</strong> to use its set as entered instead.</p>',
+  'tour.calc.tabsTitle': 'Solver and Meta',
+  'tour.calc.tabs':
+    '<p>Open <strong>Solver</strong> to work backwards from what you saw in battle, or <strong>Meta</strong> to check your Pokémon against the most used ones.</p>',
   'tour.solver.introTitle': 'Damage solver',
   'tour.solver.intro':
     "<p>Use the solver to work backwards from a battle. Enter what you saw a move do, and it finds the opponent's sets that explain it. Or enter an outcome you want, and it finds what your Pokémon needs.</p><p>This tour walks you through two examples.</p>",

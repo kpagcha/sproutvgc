@@ -212,7 +212,9 @@ const hits = shallowRef<HitDraft[]>(
 const first = shallowRef<'a' | 'b' | null>(start.first === 'a' || start.first === 'b' ? start.first : null)
 /** The tour's example on the page (`solverExample`), kept out of the URL. */
 const example = shallowRef<SolverExample | null>(null)
-const inExample = computed(() => !!example.value)
+/** The damage tab's tour's example on the page (`damageExample`), kept out of the URL too. */
+const damageEx = shallowRef<DamageExample | null>(null)
+const inExample = computed(() => !!example.value || !!damageEx.value)
 /** The hits seen with a move and a result: what's kept and worked out. */
 const seen = computed(() => hits.value.filter((h): h is HitSeen => !!h.move && !!h.saw))
 const observations = computed<Observation[]>(() => [
@@ -1037,10 +1039,10 @@ let kept: {
   workYours: OpponentUnknowns
   goal: Goal
   open: Record<SideKey, boolean>
+  folded: { moves: Record<SideKey, boolean>; battle: Record<SideKey, boolean> }
 } | null = null
-async function enterExample() {
-  const ex = data.value ? await exampleFor(data.value, solverExample) : null
-  if (!ex) return false
+/** What a tour's example takes the place of, kept to put back once it ends. */
+function keepPage() {
   kept ??= {
     sides: sides.value,
     field: field.value,
@@ -1050,7 +1052,16 @@ async function enterExample() {
     workYours: workYours.value,
     goal: goal.value,
     open: open.value,
+    folded: {
+      moves: { a: movesFolded.a.value, b: movesFolded.b.value },
+      battle: { a: battleFolded.a.value, b: battleFolded.b.value },
+    },
   }
+}
+async function enterExample() {
+  const ex = data.value ? await exampleFor(data.value, solverExample) : null
+  if (!ex) return false
+  keepPage()
   example.value = ex
   return true
 }
@@ -1088,10 +1099,15 @@ async function leaveExample() {
   workYours.value = k.workYours
   goal.value = k.goal
   open.value = k.open
+  for (const s of ['a', 'b'] as const) {
+    movesFolded[s].value = k.folded.moves[s]
+    battleFolded[s].value = k.folded.battle[s]
+  }
   await nextTick()
   hits.value = k.hits
   first.value = k.first
   example.value = null
+  damageEx.value = null
   window.scrollTo({ top: 0 })
 }
 const nameOf = (f: Fighter | undefined) => {
@@ -1101,6 +1117,7 @@ const nameOf = (f: Fighter | undefined) => {
 const exName = (k: SideKey) => nameOf(example.value?.[k])
 // Its first visit's, unless it came with hits of its own to read.
 const cameWithHits = hits.value.length > 0
+const cameWithCalc = !!fromUrl?.a && !!fromUrl.b
 // Picked ahead, once the page is in and the browser idle, so the tour starts at once.
 if (props.inverse) watch(data, (d) => d && warmExample(d, solverExample), { immediate: true })
 const { start: startTour } = props.inverse
@@ -1220,7 +1237,93 @@ const { start: startTour } = props.inverse
       () => !!data.value && !cameWithHits,
       { enter: enterExample, leave: () => void leaveExample() },
     )
-  : { start: () => {} }
+  : props.against
+    ? { start: () => {} }
+    : useTour(
+        'calc',
+        () => {
+          const ex = damageEx.value
+          const params = {
+            a: nameOf(ex?.a),
+            b: nameOf(ex?.b),
+            move: ex ? refName(move(ex.move)) : '',
+            range: ex ? `${Math.round(ex.hit.minPct)}–${Math.round(ex.hit.maxPct)}%` : '',
+          }
+          return [
+            { title: 'tour.calc.introTitle', text: 'tour.calc.intro', stage: () => stageDamage(false) },
+            { el: '#calc-duel', title: 'tour.calc.pickTitle', text: 'tour.calc.pick', side: 'top' },
+            {
+              el: '#calc-a .body',
+              title: 'tour.calc.sidesTitle',
+              text: wide.value ? 'tour.calc.sides' : 'tour.calc.sidesPhone',
+              params,
+              side: wide.value ? 'right' : 'bottom',
+              stage: () => stageDamage(true),
+            },
+            { el: '#calc-a .damages', title: 'tour.calc.movesTitle', text: 'tour.calc.moves', params, side: 'top' },
+            { el: '#calc-a .battle', title: 'tour.calc.battleTitle', text: 'tour.calc.battle', side: 'top' },
+            { el: '.field-bar', title: 'tour.calc.fieldTitle', text: 'tour.calc.field', side: 'bottom' },
+            { el: '.verdict.panel', title: 'tour.calc.verdictTitle', text: 'tour.calc.verdict', params, side: 'top' },
+            { el: '#calc-threats', title: 'tour.calc.threatsTitle', text: 'tour.calc.threats', params, side: 'top' },
+            { el: '.calc-tabs', title: 'tour.calc.tabsTitle', text: 'tour.calc.tabs', side: 'bottom' },
+            { el: '.head-tour', title: 'tour.againTitle', text: 'tour.again', side: 'bottom' },
+          ]
+        },
+        // Its first visit's, unless it came with a calc of its own to read.
+        () => !!data.value && !cameWithCalc,
+        { enter: enterDamageExample, leave: () => void leaveExample() },
+      )
+// The damage tab's tour, walked through on an example as the solver's is: two of the most used at their most common
+// sets, yours with a plain move that takes a good part of the opponent's HP (two hits, ideally), so its row reads at a
+// glance. Nothing of it in the URL nor what's remembered (`inExample`); the reader's setup put back once the tour ends.
+interface DamageExample {
+  a: Fighter
+  b: Fighter
+  move: MoveId
+  hit: Hit
+}
+async function damageExample(): Promise<DamageExample | null> {
+  const foes = metaFoes(data.value, 12)
+  let best: DamageExample | null = null
+  for (const them of foes) {
+    for (const you of foes) {
+      if (you.id === them.id || setsField(you.set) || setsField(them.set)) continue
+      // The opponent hitting back, so its moves' rows and the threats have something to show.
+      if (!them.set.member.moves.some((mv) => plainHit(them.set, you.set, mv))) continue
+      for (const mv of you.set.member.moves) {
+        const h = plainHit(you.set, them.set, mv)
+        if (!h || h.maxPct < 25 || h.minPct >= 100) continue
+        const ex = { a: you.set, b: them.set, move: h.move, hit: h }
+        if (h.koHits === 2) return ex
+        best ??= ex
+      }
+    }
+  }
+  return best
+}
+async function enterDamageExample() {
+  const ex = data.value ? await exampleFor(data.value, damageExample) : null
+  if (!ex) return false
+  keepPage()
+  damageEx.value = ex
+  return true
+}
+/** One of the damage tab's tour's steps on the page: the two (or none yet), their moves and In battle unfolded. */
+async function stageDamage(withSides: boolean) {
+  const ex = damageEx.value
+  if (!ex) return
+  sides.value = withSides ? { a: ex.a, b: ex.b } : { a: emptyFighter(), b: emptyFighter() }
+  field.value = emptyField()
+  // On phones yours open under its band, the opponent's folded to its own.
+  open.value = { a: true, b: wide.value }
+  for (const s of ['a', 'b'] as const) {
+    movesFolded[s].value = false
+    battleFolded[s].value = false
+  }
+  await nextTick()
+}
+// Picked ahead, once the page is in and the browser idle, so the tour starts at once.
+if (!props.inverse && !props.against) watch(data, (d) => d && warmExample(d, damageExample), { immediate: true })
 const bandAnchor = computed(() =>
   fromBands.value ? (bandsEl.value?.querySelector<HTMLElement>(`.band-${fromBands.value}`) ?? null) : null,
 )
@@ -1348,7 +1451,7 @@ function face(f: Fighter) {
     <section id="calc-top" class="head-panel">
       <div class="head">
         <h1>{{ t('title.calc') }}<SetupStar /></h1>
-        <TourToggle v-if="inverse" class="head-tour" @start="startTour" />
+        <TourToggle v-if="!against" class="head-tour" @start="startTour" />
         <MetaDialog v-if="snapshot" class="head-meta" />
       </div>
     </section>
