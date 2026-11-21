@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onUnmounted, shallowRef, watch } from 'vue'
+import { computed, onUnmounted, shallowRef, watch, type Directive } from 'vue'
 import { watchDebounced } from '@vueuse/core'
 import { Check, Info, X } from '@lucide/vue'
 import { item, pokemon, type ItemId } from '@/data/dex'
@@ -189,8 +189,7 @@ function goalsOn(r: GoalRow, k: number): { p: number; name: string }[] {
 const marked = (r: GoalRow, k: number, p: number) => goalsOn(r, k).some((g) => g.p === p)
 /**
  * A strip's goals as tags over their cells ("50%", "90%", "Always", "Best"), those at one number of points as one
- * ("50% · 90%"). A tag too near the one before (its cells too few to keep the two apart) goes up a level, so none
- * overlap; `levels` the most there are.
+ * ("50% · 90%"). How they're stacked so none overlap is `vStackTicks`', measured as drawn.
  */
 function marksOf(r: GoalRow, k: number) {
   const named = goalsOn(r, k)
@@ -200,13 +199,41 @@ function marksOf(r: GoalRow, k: number) {
     if (was) was.names.push(name)
     else byP.set(p, { p, names: [name] })
   }
-  const marks = [...byP.values()].sort((x, y) => x.p - y.p).map((m) => ({ ...m, label: m.names.join(' · '), level: 0 }))
-  // Apart by about a tag's width in cells (a phone's strip a few px a cell), else up a level from the one before.
-  marks.forEach((m, i) => {
-    const prev = marks[i - 1]
-    if (prev && prev.level === 0 && m.p - prev.p < 4 + 3 * (prev.names.length - 1)) m.level = 1
-  })
-  return marks
+  return [...byP.values()].sort((x, y) => x.p - y.p).map((m) => ({ ...m, label: m.names.join(' · ') }))
+}
+/**
+ * The goals' tags stacked as drawn: each on the lowest level where it clears, by a few pixels, those already there,
+ * left to right; their widths (a "Best, 98.4%" far wider than a "50%") and how far each is shifted back by its own
+ * width being what a count of cells can't tell. Again as the tags change and as the strip is resized.
+ */
+const TICK_GAP = 6
+function stackTicks(el: HTMLElement) {
+  const tags = [...el.children] as HTMLElement[]
+  for (const tag of tags) tag.style.setProperty('--lv', '0')
+  const spans = tags
+    .map((tag) => ({ tag, rect: tag.getBoundingClientRect() }))
+    .sort((a, b) => a.rect.left - b.rect.left)
+  const rights: number[] = []
+  for (const { tag, rect } of spans) {
+    let lv = rights.findIndex((right) => rect.left >= right + TICK_GAP)
+    if (lv < 0) lv = rights.length
+    rights[lv] = rect.right
+    tag.style.setProperty('--lv', String(lv))
+  }
+  el.style.setProperty('--levels', String(Math.max(1, rights.length)))
+}
+const tickObservers = new WeakMap<HTMLElement, ResizeObserver>()
+const vStackTicks: Directive<HTMLElement> = {
+  mounted(el) {
+    stackTicks(el)
+    const ro = new ResizeObserver(() => stackTicks(el))
+    ro.observe(el)
+    tickObservers.set(el, ro)
+  },
+  updated: stackTicks,
+  unmounted(el) {
+    tickObservers.get(el)?.disconnect()
+  },
 }
 /** Only your item worked out, its points and nature as set: each item's row how often it gives what was entered, the
  * likeliest first, rather than the points it needs. */
@@ -405,16 +432,12 @@ function use(r: ReverseRow) {
                 <template v-for="(curve, k) in r.curves ?? []" :key="k">
                   <span v-if="stripStats.includes(k)" class="strip-wrap">
                     <!-- Its goals as tags over the first of its bars reaching each. -->
-                    <span
-                      class="ticks"
-                      aria-hidden="true"
-                      :style="{ '--levels': Math.max(1, ...marksOf(r, k).map((m) => m.level + 1)) }"
-                    >
+                    <span v-stack-ticks class="ticks" aria-hidden="true">
                       <span
                         v-for="m in marksOf(r, k)"
                         :key="m.p"
                         class="tick"
-                        :style="{ '--at': (m.p + 0.5) / (MAX_POINTS + 1), '--lv': m.level }"
+                        :style="{ '--at': (m.p + 0.5) / (MAX_POINTS + 1) }"
                         >{{ m.label }}</span
                       >
                     </span>
@@ -842,15 +865,15 @@ function use(r: ReverseRow) {
 }
 /* Its goals' tags over the strip, each over its cell: its place along the strip both where it's anchored and how far
    it's shifted back by its own width, so the first is flush left, the last flush right, and none past the edges; a tag
-   too near the one before a level up. A tick under each down to its cell. */
+   that would overlap one a level up (`vStackTicks`). A tick under each down to its cell. */
 .ticks {
   position: relative;
-  height: calc(var(--levels) * 1.5em);
+  height: calc(var(--levels, 1) * 1.5em);
   font-size: 0.75em;
 }
 .tick {
   position: absolute;
-  bottom: calc(var(--lv) * 1.5em);
+  bottom: calc(var(--lv, 0) * 1.5em);
   left: calc(var(--at) * 100%);
   padding-bottom: 4px;
   line-height: 1.2;
