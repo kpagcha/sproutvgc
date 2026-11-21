@@ -1743,55 +1743,61 @@ export const messages = {
     '<p class="tour-formula">(base + points + 20) × nature</p><p>Points go up to 32. A nature that raises Speed is ×1.1, one that lowers it ×0.9. Rounded down.</p>',
   'tour.tiers.introTitle': 'Speed tiers',
   'tour.tiers.intro':
-    "<p>Who moves first: the regulation's Pokémon in Speed order, at the Speeds players actually run.</p><p>A quick look around; close it at any time.</p>",
-  'tour.tiers.choicesTitle': 'Who and how',
+    "<p>Use the speed tiers to see who moves first: the regulation's Pokémon in Speed order, at the Speeds players actually run, and yours among them.</p><p>This tour walks you through an example.</p>",
+  'tour.tiers.choicesTitle': 'Choose who and how',
   'tour.tiers.choices':
-    "<p><strong>Show</strong> picks who's on the ladder: the most used, or every Pokémon of the regulation.</p><p><strong>View</strong> picks what a row is:</p><ul><li><em>By Pokémon</em>: a Pokémon at its most common Speed, its builds marked on it</li><li><em>By build</em>: a build its sets run</li><li><em>Fastest possible</em>: a Pokémon at its fastest</li></ul>",
-  'tour.tiers.optionsTitle': 'Options',
-  'tour.tiers.options':
-    "<p><strong>Boosts</strong> add the Speed items and abilities their sets run (Choice Scarf, Unburden, Swift Swim…) as rows of their own. <strong>Megas</strong> are at their Mega's Speed.</p><p><strong>Trick Room</strong> turns the order over, and <strong>Modifiers</strong> apply to everyone shown: Tailwind, a Choice Scarf, paralysis, stat stages.</p>",
+    "<p>Use <strong>Show</strong> to pick who's on the ladder: the most used, or every Pokémon of the regulation.</p><p>Use <strong>View</strong> to pick what a row is:</p><ul><li><em>By Pokémon</em>: a Pokémon at its most common Speed, its builds marked on it.</li><li><em>By build</em>: a build its sets run.</li><li><em>Fastest possible</em>: a Pokémon at its fastest.</li></ul>",
   'tour.tiers.findTitle': 'Find a Pokémon',
   'tour.tiers.find':
-    '<p>Finds a Pokémon on the ladder. Up to six at once, and <strong>Only</strong> shows them alone.</p><p>Press <kbd>/</kbd> to jump here.</p>',
-  'tour.tiers.findSets':
-    "<p>Finds a Pokémon on the ladder. Up to six at once, and <strong>Only</strong> shows them alone.</p><p>Builds and boosts on under {pct} of a Pokémon's sets are left out, except for the ones you find. Press <kbd>/</kbd> to jump here.</p>",
-  'tour.tiers.filtersTitle': 'Filters',
-  'tour.tiers.filters': '<p>Only the Pokémon of a type, or running an ability or item.</p>',
-  'tour.tiers.rowTitle': 'A row',
+    "<p>Find a Pokémon on the ladder, up to six at once. Turn on <strong>Only</strong> to show them alone. Press <kbd>/</kbd> to jump here.</p><p>Builds and boosts on under {pct} of a Pokémon's sets are left out, except for the ones you find.</p>",
+  'tour.tiers.rowTitle': 'Read a row',
   'tour.tiers.row':
-    '<p>Its <strong>Speed</strong> is at the left: tap it to pick it, and copy it.</p><p>The <strong>marks</strong> are the Speeds its sets run, taller the more common, over the stretch it could reach.</p><p>In <em>By build</em>, each row is one build, spelled out under the name: whether its nature raises or lowers Speed, its points in Speed, and the share of the sets running it.</p>',
-  'tour.tiers.rowRanges':
-    '<p>A row per base Speed: its Pokémon, and a bar from the slowest they can be to the fastest.</p>',
-  'tour.tiers.yoursTitle': 'Your Pokémon',
+    '<p>Here, {b} is found: its row is at its most common Speed, {bspeed}, shown at the left. Tap the number to pick that Speed and copy it.</p><p>Read the <strong>marks</strong>: each is a Speed its sets run, taller the more common, over the stretch it could reach.</p>',
+  'tour.tiers.optionsTitle': 'Set the options',
+  'tour.tiers.options':
+    "<p>Turn on <strong>Boosts</strong> to add the Speed items and abilities their sets run, such as Choice Scarf or Unburden, as rows of their own. <strong>Megas</strong> puts Megas at their Mega's Speed.</p><p>Turn on <strong>Trick Room</strong> to turn the order over. Open <strong>Modifiers</strong> to apply Tailwind, a Choice Scarf, paralysis or stat stages to everyone shown.</p>",
+  'tour.tiers.filtersTitle': 'Filter the ladder',
+  'tour.tiers.filters': '<p>Show only the Pokémon of a type, or those running an ability or item.</p>',
+  'tour.tiers.yoursTitle': 'Pick your Pokémon',
   'tour.tiers.yours':
-    '<p>Pick yours and its build: a nature and points, or one of the builds players run in a tap.</p><p>It goes on the ladder with how often it moves first, weighted by usage.</p>',
-  'tour.tiers.vsTitle': 'Against one',
+    '<p>Pick yours and its build: one of the builds players run in a tap, or a nature and points, plus modifiers of its own.</p><p>Here, your {a} with {pts} points in Speed is at {aspeed}. Read how often it moves first against those shown, weighted by usage.</p>',
+  'tour.tiers.mineRowTitle': 'Find yours on the ladder',
+  'tour.tiers.mineRow':
+    '<p>Yours gets a row of its own, and a line down the ladder at its Speed. Everyone over the line moves first; everyone under it, after yours.</p>',
+  'tour.tiers.vsTitle': 'Check against one',
   'tour.tiers.vs':
-    "<p>Tap a row's Pokémon, or one of its marks, to see whether yours moves first and the points it needs to.</p><p><strong>Compare side by side</strong>, on yours' card, puts the two on a page of their own.</p>",
+    "<p>Tap a row's Pokémon, or one of its marks, to check yours against it. Here, {b} at {bspeed} moves before your {a} at {aspeed}: read the points yours needs to move first.</p><p>Tap <strong>Compare</strong> to put the two side by side on a page of their own.</p>",
   'tour.compare.introTitle': 'Compare speeds',
   'tour.compare.intro':
-    '<p>Yours against opponents, or any Pokémon in the order they move.</p><p>A quick look around; close it at any time.</p>',
-  'tour.compare.viewsTitle': 'Three views',
+    '<p>Use the comparison to see who moves first: yours against opponents, or any Pokémon in the order they move.</p><p>This tour walks you through an example.</p>',
+  'tour.compare.viewsTitle': 'Choose a view',
   'tour.compare.views':
-    '<p><strong>Yours vs opponents</strong>: up to six a side.</p><p><strong>Speed order</strong>: up to 20 Pokémon, lined up in the order they move.</p><p><strong>Solver</strong>: two Pokémon, what you know of each, and which one moves first, seen or wanted; you get the natures and Speed points each could have, and those most likely.</p>',
+    '<ul><li><em>Yours vs opponents</em>: up to six a side.</li><li><em>Speed order</em>: up to 20 Pokémon, lined up in the order they move.</li><li><em>Solver</em>: work backwards from who moved first, to the natures and Speed points each could have.</li></ul><p>This example uses <em>Yours vs opponents</em>.</p>',
+  'tour.compare.pickTitle': 'Pick the two Pokémon',
+  'tour.compare.pick': "<p>Pick your Pokémon and the opponent's.</p>",
+  'tour.compare.yoursTitle': 'Set your build',
+  'tour.compare.yours':
+    '<p>Here, your {a} with {pts} points in Speed is at {aspeed}. Set its nature and points, or tap one of its common builds, and add modifiers of its own, such as Tailwind or a Choice Scarf.</p>',
+  'tour.compare.yoursPhone':
+    '<p>Here, your {a} with {pts} points in Speed is at {aspeed}. Tap its band to set its nature and points, or one of its common builds, and add modifiers of its own, such as Tailwind or a Choice Scarf.</p>',
+  'tour.compare.opponentTitle': 'The opponent at its sets',
+  'tour.compare.opponent':
+    "<p>The opponent's Speed isn't known, so {b} is at every set players run, each counting as often as it's run. Pick one of its builds to set it to that one.</p>",
+  'tour.compare.verdictTitle': 'Read who moves first',
+  'tour.compare.verdict':
+    "<p>Read how often yours moves first against the opponent's sets. Here, {b}'s most common Speed, {bspeed}, moves before your {a}.</p>",
+  'tour.compare.needsTitle': 'Check what yours needs',
+  'tour.compare.needs':
+    "<p>Read the chart of the opponent's Speeds against yours, and the points yours needs to move before its most common Speed, or before all of them.</p>",
   'tour.compare.toolbarTitle': 'For every one',
   'tour.compare.toolbar':
-    "<p><strong>Trick Room</strong> turns the order over. <strong>Swap</strong> trades the teams' places, and <strong>Clear teams</strong> empties them.</p>",
-  'tour.compare.yoursTitle': 'Yours',
-  'tour.compare.yours':
-    '<p>Pick yours and its build: a nature and points, or one of its common builds in a tap, plus modifiers of its own.</p><p>Under them, the points each side needs to move first, for each kind of nature.</p>',
-  'tour.compare.opponentTitle': 'The opponent',
-  'tour.compare.opponent':
-    "<p>Its Speed isn't known, so it's at every set players run, each counting as often as it's run.</p><p>You get how often yours moves first, a chart of their Speeds, and the points yours needs to beat the most common one, or all of them. Pick one of its builds to set it to that one.</p>",
-  'tour.compare.secondTitle': 'Up to six a side',
+    "<p>Turn on <strong>Trick Room</strong> to turn the order over. Use <strong>Swap</strong> to trade the teams' places, and <strong>Clear teams</strong> to empty them.</p>",
+  'tour.compare.secondTitle': 'Add more, up to six a side',
   'tour.compare.second':
-    '<p>Add more to either team, up to six, one of each species. They line up in the order they move.</p><p><strong>Matchups</strong> puts each of yours against each opponent; tap one to see the two alone.</p>',
-  'tour.compare.orderTitle': 'The list',
-  'tour.compare.order':
-    '<p>Up to 20 Pokémon, each at a build of its own; the same one twice, if you like.</p><p>They line up in the order they move. Those tied share a number, marked <strong>=</strong>.</p>',
-  'tour.compare.ladderTitle': 'On the ladder',
+    '<p>Add more to either team, up to six, one of each species. They line up in the order they move.</p><p>Open <strong>Matchups</strong> to put each of yours against each opponent; tap one to see the two alone.</p>',
+  'tour.compare.ladderTitle': 'See them on the ladder',
   'tour.compare.ladder':
-    '<p>Opens the speed tiers with yours there, its build kept, and the opponent found on the ladder. With two on a team, you choose which.</p>',
+    '<p>Open the speed tiers with yours there, its build kept, and the opponent found on the ladder. With two on a team, choose which.</p>',
   'tour.example': 'Example',
   'tour.calc.introTitle': 'Damage calculator',
   'tour.calc.intro':

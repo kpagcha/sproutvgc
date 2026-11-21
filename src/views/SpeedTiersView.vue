@@ -88,6 +88,7 @@ import { useMeta } from '@/composables/useMeta'
 import { useOpenState } from '@/composables/useOpenState'
 import { usePageEntered } from '@/composables/usePageEntered'
 import { useTour } from '@/composables/useTour'
+import { speedExample, type SpeedExample } from '@/lib/speedExample'
 import { useSlashFocus } from '@/composables/useSlashFocus'
 import AppLink from '@/components/AppLink'
 import BuildSummary from '@/components/BuildSummary.vue'
@@ -1741,39 +1742,115 @@ watch(yoursOpen, (open) => {
 // Remembered as left, for the page opened bare and the comparison's way back: while it's the page shown, not as it
 // leaves (still there, fading out, as the next page's query comes in).
 const route = useRoute()
-watch(query, (q) => route.name === 'speedTiers' && (lastTiersQuery.value = withoutMeta(q)), { immediate: true })
+/** The reader's URL while the tour shows its example (below), to put back once it ends. */
+let kept: typeof query.value | null = null
+// Nor the tour's example, the tour's rather than the reader's (`kept`).
+watch(query, (q) => route.name === 'speedTiers' && !kept && (lastTiersQuery.value = withoutMeta(q)), {
+  immediate: true,
+})
 
 const { entered } = usePageEntered()
 
-// The first visit's tour of the page, its guide to reading it: what it shows and how a Speed is worked out, its choices
-// and options, finding one (and what's left out but for those found), the filters, a row of the ladder and a boost's,
-// yours and tapping a row (and the comparison), and taking it again.
+// The first visit's tour of the page, walked through on an example (`useTour`'s `example`) as the speed solver's is,
+// the page set up step by step through its URL as the reader would: two of the most used at their most common Speed
+// builds, the opponent moving first at its (`speedExample`). How a Speed is worked out, its choices, the opponent found
+// and its row, the options and filters, yours placed among them, and against the one found, the way to the comparison.
+// The reader's URL put back once the tour ends; meanwhile nothing of it remembered as the page last left (`kept`).
+const example = shallowRef<SpeedExample | null>(null)
+/** The versus panel as the reader left it: the example unfolds it. */
+let keptVersus: boolean | null = null
+function enterExample() {
+  const ex = speedExample(data.value)
+  if (!ex) return false
+  keptVersus ??= versusOpen.value
+  kept ??= { ...query.value }
+  example.value = ex
+  return true
+}
+/** One of the tour's steps on the page, through its URL: the default view, the opponent found, yours. */
+async function stageExample(o: { find?: boolean; mine?: boolean }) {
+  const ex = example.value
+  if (!ex) return
+  yoursOpen.value = false
+  versusOpen.value = true
+  await router.replace({
+    query: {
+      meta: kept?.meta,
+      ...(o.find && { find: ex.b.id }),
+      ...(o.mine && { mine: ex.a.id, mynat: ex.a.effect, mypts: String(ex.a.points) }),
+    },
+  })
+}
+async function leaveExample() {
+  const q = kept
+  kept = null
+  example.value = null
+  if (keptVersus !== null) versusOpen.value = keptVersus
+  keptVersus = null
+  if (q) await router.replace({ query: q })
+  window.scrollTo({ top: 0 })
+}
+const exName = (k: 'a' | 'b') => {
+  const id = example.value?.[k].id
+  return id ? refName(pokemon(id)) : ''
+}
+// Its first visit's, unless it came with yours of its own to read.
+const cameWith = !!query.value.mine
 const { start: startTour } = useTour(
   'speedTiers',
-  () => [
-    { title: 'tour.tiers.introTitle', text: 'tour.tiers.intro' },
-    { title: 'tour.speedTitle', text: 'tour.speed' },
-    { el: '.choices-band', title: 'tour.tiers.choicesTitle', text: 'tour.tiers.choices', side: 'bottom' },
-    { el: '.options-line > .options', title: 'tour.tiers.optionsTitle', text: 'tour.tiers.options', side: 'bottom' },
-    {
-      el: '.find-row > .picker',
-      title: 'tour.tiers.findTitle',
-      text: bySets.value ? 'tour.tiers.findSets' : 'tour.tiers.find',
-      params: { pct: percent(MIN_SHARE) },
-      side: 'bottom',
-    },
-    { el: '.filters-toggle', title: 'tour.tiers.filtersTitle', text: 'tour.tiers.filters', side: 'bottom' },
-    {
-      el: ['.ranges-wrap .row', '.ranges-wrap'],
-      title: 'tour.tiers.rowTitle',
-      text: bySets.value ? 'tour.tiers.row' : 'tour.tiers.rowRanges',
-      side: 'bottom',
-    },
-    { el: ['details.yours', '.bar-yours'], title: 'tour.tiers.yoursTitle', text: 'tour.tiers.yours', side: 'left' },
-    { title: 'tour.tiers.vsTitle', text: 'tour.tiers.vs' },
-    { el: '.head-tour', title: 'tour.againTitle', text: 'tour.again', side: 'bottom' },
-  ],
-  () => entered.value && (!needsData.value || !!data.value),
+  () => {
+    const ex = example.value
+    const params = {
+      a: exName('a'),
+      b: exName('b'),
+      pts: ex?.a.points ?? 0,
+      aspeed: ex?.a.speed ?? 0,
+      bspeed: ex?.b.speed ?? 0,
+      pct: percent(MIN_SHARE),
+    }
+    return [
+      { title: 'tour.tiers.introTitle', text: 'tour.tiers.intro', stage: () => stageExample({}) },
+      { title: 'tour.speedTitle', text: 'tour.speed' },
+      { el: '.choices-band', title: 'tour.tiers.choicesTitle', text: 'tour.tiers.choices', side: 'bottom' },
+      { el: '.find-row > .picker', title: 'tour.tiers.findTitle', text: 'tour.tiers.find', params, side: 'bottom' },
+      {
+        el: ['.ranges-wrap .row.hit', '.ranges-wrap .row'],
+        title: 'tour.tiers.rowTitle',
+        text: 'tour.tiers.row',
+        params,
+        side: 'bottom',
+        stage: () => stageExample({ find: true }),
+      },
+      { el: '.options-line > .options', title: 'tour.tiers.optionsTitle', text: 'tour.tiers.options', side: 'bottom' },
+      { el: '.filters-toggle', title: 'tour.tiers.filtersTitle', text: 'tour.tiers.filters', side: 'bottom' },
+      {
+        el: ['details.yours', '.bar-yours'],
+        title: 'tour.tiers.yoursTitle',
+        text: 'tour.tiers.yours',
+        params,
+        side: side.value ? 'left' : 'bottom',
+        stage: () => stageExample({ mine: true }),
+      },
+      {
+        el: ['.ranges-wrap .row.has-mine', '.ranges-wrap'],
+        title: 'tour.tiers.mineRowTitle',
+        text: 'tour.tiers.mineRow',
+        params,
+        side: 'bottom',
+      },
+      {
+        el: ['.versus-panel', '.versus-row', '.ranges-wrap .row.versus'],
+        title: 'tour.tiers.vsTitle',
+        text: 'tour.tiers.vs',
+        params,
+        side: side.value ? 'left' : 'top',
+        stage: () => stageExample({ find: true, mine: true }),
+      },
+      { el: '.head-tour', title: 'tour.againTitle', text: 'tour.again', side: 'bottom' },
+    ]
+  },
+  () => entered.value && !!data.value && !cameWith,
+  { enter: enterExample, leave: () => void leaveExample() },
 )
 </script>
 
