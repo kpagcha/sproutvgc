@@ -191,6 +191,30 @@
       "team": ["gholdengo", "excadrill", "tyranitarmega", "staraptormega", "sinistcha", "milotic"]
     }
   },
+  "laic-2026-27": {
+    "id": "laic-2026-27",
+    "n": 450,
+    "name": "LAIC 2026–27, São Paulo",
+    "date": "2026-11-20",
+    "country": "BR",
+    "players": 652,
+    "type": "international",
+    "category": "official",
+    "regulation": "M-C",
+    "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
+    "url": "https://standings.limitlessvgc.com/46/standings",
+    "t": 46,
+    "format": 3,
+    "day2": 93,
+    "topCut": 13,
+    "rounds": 16,
+    "teams": 652,
+    "winner": {
+      "player": "Masahiro Taoka",
+      "country": "JP",
+      "team": ["swampertmega", "archaludon", "politoed", "incineroar", "rillaboom", "gengarmega"]
+    }
+  },
   "worlds-2026": {
     "id": "worlds-2026",
     "n": 437,
