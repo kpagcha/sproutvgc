@@ -1,7 +1,9 @@
 # Regulation change checklist
 
 Written 2026-10-11. Run through this every time a regulation starts (or a patch changes
-one). Most of the dex follows the data; what's below is what doesn't, or what needs a human eye.
+one). Most of the dex follows the data; what's below is what doesn't, or what needs a human eye. The weekly upstream
+check (`.github/workflows/upstream-check.yml`) opens an issue when Showdown has a new regulation or changed the
+Champions mod since the pin; close it once done here.
 
 ## 1. Repin and regenerate
 

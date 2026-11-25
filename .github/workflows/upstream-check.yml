@@ -1,0 +1,49 @@
+name: Check Showdown for changes
+
+# The dex is pinned to one commit of Pokémon Showdown (`scripts/sources.json`) and never repinned on its own: a new
+# regulation or a balance patch takes a person running `gen-data --update` and reading what it warns about
+# (`docs/regulation-change.md`). This only tells them it's time: every Monday it checks Showdown for a Champions VGC
+# regulation we don't have and for commits to the Champions mod since the pin (`scripts/upstreamCheck.ts`), and opens an
+# issue assigned to the repository's owner (GitHub emails them) with what changed and what to run. While that issue is
+# open, new findings update it and add a comment (another email); the same findings aren't reported twice.
+on:
+  schedule:
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/upstreamCheck.ts
+      - name: Open or update the issue
+        if: steps.check.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STATE: ${{ steps.check.outputs.state }}
+          TITLE: ${{ steps.check.outputs.title }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          gh label create upstream-change --color FBCA04 --description 'Showdown changed since the pinned commit' --force
+          issue=$(gh issue list --label upstream-change --state open --json number --jq '.[0].number // empty')
+          if [ -z "$issue" ]; then
+            gh issue create --title "$TITLE" --body-file upstream-report.md --label upstream-change --assignee "$OWNER"
+            exit 0
+          fi
+          if gh issue view "$issue" --json body --jq .body | grep -q "upstream-state: $STATE"; then
+            echo "Already reported in #$issue."
+            exit 0
+          fi
+          gh issue edit "$issue" --title "$TITLE" --body-file upstream-report.md
+          gh issue comment "$issue" --body "Showdown changed again since this was opened: $TITLE. The description is up to date."

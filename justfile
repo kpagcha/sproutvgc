@@ -38,6 +38,10 @@ live-tournaments:
 check-text:
     npm run check-text
 
+# What Showdown changed since the pinned commit (a new regulation, the Champions mod), into upstream-report.md
+upstream-check:
+    npm run upstream-check
+
 # Time the search's matching over every language's names, at 1×, 10× and 50× the dex (`just bench-search 1 100` for others)
 bench-search *args:
     npm run bench-search -- {{args}}

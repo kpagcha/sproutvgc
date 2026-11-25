@@ -8,6 +8,7 @@
     "gen-data": "node scripts/gen-data.ts",
     "live-tournaments": "node scripts/liveTournaments.ts",
     "check-text": "node scripts/check-text.ts",
+    "upstream-check": "node scripts/upstreamCheck.ts",
     "flaticons": "node scripts/flaticons.ts",
     "bench-search": "node scripts/bench-search.ts",
     "build": "run-p check-text type-check \"build-only {@}\" --",

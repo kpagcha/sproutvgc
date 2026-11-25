@@ -44,3 +44,6 @@ CLAUDE.local.md
 
 # The tournaments under way, read before each deploy (scripts/liveTournaments.ts), never committed
 src/data/generated/live/
+
+# The upstream check's report (scripts/upstreamCheck.ts)
+upstream-report.md
