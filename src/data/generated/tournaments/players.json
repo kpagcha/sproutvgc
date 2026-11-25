@@ -161,6 +161,7 @@
     "US",
     [
       [450, 45, 8, 4, 1, ["venusaur", "charizardmegay", "incineroar", "clefable", "kingambit", "garchomp"]],
+      [-45, 55, 4, 3, 0, ["salamencemega", "kingambit", "delphoxmega", "sneasler", "rillaboom", "clefable"]],
       [437, 365, 1, 3, 0, ["venusaurmega", "charizardmegay", "incineroar", "clefable", "kingambit", "garchomp"]],
       [434, 407, 4, 4, 0, ["delphoxmega", "floettemega", "sinistcha", "vivillon", "incineroar", "maushold"]]
     ]
@@ -687,9 +688,17 @@
   "agustin-de-cicco": [
     "Agustin De Cicco",
     "AR",
-    [[450, 113, 5, 3, 0, ["rillaboom", "salamencemega", "garchomp", "kingambit", "glimmoramega", "volcarona"]]]
+    [
+      [450, 113, 5, 3, 0, ["rillaboom", "salamencemega", "garchomp", "kingambit", "glimmoramega", "volcarona"]],
+      [-45, 24, 6, 3, 1, ["glimmoramega", "kingambit", "salamencemega", "rillaboom", "volcarona", "garchomp"]]
+    ]
   ],
-  "agustin-marinucci": [
+  "agustin-federico-cedres-ibarra": [
+    "Agustin Federico Cedrés Ibarra",
+    "AR",
+    [[-45, 48, 4, 3, 0, ["kingambit", "salamencemega", "charizardmegay", "whimsicott", "basculegion", "sneasler"]]]
+  ],
+  "agustin-marinucci-uy": [
     "Agustín Marinucci",
     "UY",
     [
@@ -697,10 +706,18 @@
       [437, 347, 1, 4, 0, ["torkoal", "farigiraf", "sneasler", "whimsicott", "staraptormega", "malamarmega"]]
     ]
   ],
+  "agustin-marinucci-uy-2": [
+    "Agustin Marinucci",
+    "UY",
+    [[-45, 15, 6, 3, 1, ["raichumegay", "rillaboom", "farigiraf", "cameruptmega", "sylveon", "incineroar"]]]
+  ],
   "agustin-pomies": [
     "Agustin Pomies",
     "UY",
-    [[450, 122, 5, 3, 0, ["basculegion", "rillaboom", "salamencemega", "floettemega", "sneasler", "incineroar"]]]
+    [
+      [450, 122, 5, 3, 0, ["basculegion", "rillaboom", "salamencemega", "floettemega", "sneasler", "incineroar"]],
+      [-45, 81, 3, 4, 0, ["floettemega", "basculegion", "rillaboom", "sneasler", "salamencemega", "incineroar"]]
+    ]
   ],
   "ahad-din": [
     "Ahad Din",
@@ -3967,13 +3984,18 @@
       [435, 143, 5, 3, 0, ["garchomp", "kingambit", "sneasler", "maushold", "basculegion", "floettemega"]]
     ]
   ],
-  "antonio-marco-rodrigo-jimenez": [
+  "antonio-marco-rodrigo-jimenez-es": [
     "Antonio Marco Rodrigo Jiménez",
     "ES",
     [
       [450, 103, 5, 3, 0, ["basculegion", "gardevoirmega", "garchomp", "charizardmegay", "whimsicott", "indeedeef"]],
       [437, 264, 3, 5, 0, ["basculegion", "floettemega", "incineroar", "garchomp", "charizardmegay", "whimsicott"]]
     ]
+  ],
+  "antonio-marco-rodrigo-jimenez-es-2": [
+    "Antonio Marco Rodrigo Jimenez",
+    "ES",
+    [[-45, 17, 6, 3, 1, ["indeedeef", "charizardmegay", "gardevoirmega", "garchomp", "basculegion", "whimsicott"]]]
   ],
   "antonio-mata-salgado": [
     "Antonio Mata Salgado",
@@ -6331,6 +6353,7 @@
     "AR",
     [
       [450, 287, 4, 4, 0, ["sylveon", "charizardmegay", "kingambit", "garchomp", "farigiraf", "aerodactylmega"]],
+      [-45, 2, 10, 3, 2, ["charizardmegay", "aerodactylmega", "garchomp", "sylveon", "kingambit", "farigiraf"]],
       [444, 202, 1, 4, 0, ["volcarona", "gholdengo", "rillaboom", "raichumegay", "incineroar", "garchompmegaz"]]
     ]
   ],
@@ -6748,6 +6771,7 @@
     "CL",
     [
       [450, 78, 7, 5, 1, ["staraptormega", "armarouge", "kingambit", "rillaboom", "torkoal", "indeedeef"]],
+      [-45, 27, 5, 4, 1, ["torkoal", "indeedeef", "kingambit", "armarouge", "staraptormega", "rillaboom"]],
       [444, 33, 5, 3, 0, ["glimmoramega", "staraptormega", "armarouge", "kingambit", "torkoal", "indeedeef"]],
       [
         436,
@@ -7436,6 +7460,7 @@
     "US",
     [
       [450, 40, 8, 4, 1, ["grimmsnarl", "pelipper", "venusaur", "archaludon", "charizardmegay", "swampertmega"]],
+      [-45, 44, 4, 3, 0, ["pelipper", "venusaurmega", "annihilape", "archaludon", "charizardmegay", "grimmsnarl"]],
       [447, 7, 10, 3, 2, ["grimmsnarl", "pelipper", "garchomp", "venusaur", "archaludon", "charizardmegay"]],
       [445, 191, 5, 3, 0, ["sneasler", "pelipper", "archaludon", "floettemega", "basculegion", "incineroar"]]
     ]
@@ -10810,6 +10835,16 @@
       [436, 331, 5, 3, 0, ["farigiraf", "tinkaton", "tyranitarmega", "blastoisemega", "sneasler", "incineroar"]]
     ]
   ],
+  "diego-ferreira-silva": [
+    "Diego Ferreira Silva",
+    "CL",
+    [[-45, 4, 9, 3, 2, ["kingambit", "armarouge", "rillaboom", "indeedeef", "staraptormega", "torkoal"]]]
+  ],
+  "diego-figueroa": [
+    "Diego Figueroa",
+    "PE",
+    [[-45, 73, 3, 4, 0, ["staraptormega", "gholdengo", "primarina", "incineroar", "rillaboom", "raichumegay"]]]
+  ],
   "diego-francisco": [
     "Diego Francisco",
     "BR",
@@ -11226,6 +11261,7 @@
     "PE",
     [
       [450, 182, 5, 3, 0, ["garchompmegaz", "kingambit", "sneasler", "floettemega", "basculegion", "incineroar"]],
+      [-45, 26, 5, 4, 1, ["garchompmegaz", "kingambit", "sneasler", "basculegion", "incineroar", "floettemega"]],
       [437, 49, 7, 4, 1, ["dragonite", "sneasler", "incineroar", "kingambit", "ninetalesalola", "gengarmega"]]
     ]
   ],
@@ -11795,7 +11831,12 @@
     "BR",
     [[450, 268, 4, 4, 0, ["garchomp", "charizardmegay", "ninetalesalola", "whimsicott", "indeedee", "basculegion"]]]
   ],
-  "eduardo-garcia": [
+  "eduardo-garcia-ar": [
+    "Eduardo Garcia",
+    "AR",
+    [[-45, 92, 2, 5, 0, ["gengarmega", "incineroar", "politoed", "rillaboom", "archaludon", "swampertmega"]]]
+  ],
+  "eduardo-garcia-us": [
     "Eduardo Garcia",
     "US",
     [[441, 1042, 0, 1, 0, ["gardevoirmega", "indeedeef", "whimsicott", "basculegion", "arcaninehisui", "kommoo"]]]
@@ -12136,7 +12177,7 @@
       [434, 873, 2, 6, 0, ["aegislash", "farigiraf", "charizardmegay", "tyranitar", "sneasler", "primarina"]]
     ]
   ],
-  "ellie-homen": [
+  "ellie-homen-us": [
     "Ellie Homen",
     "US",
     [
@@ -12146,6 +12187,11 @@
       [436, 461, 4, 4, 0, ["whimsicott", "sinistcha", "charizardmegay", "floettemega", "incineroar", "garchomp"]],
       [434, 393, 4, 4, 0, ["whimsicott", "incineroar", "garchomp", "sneasler", "basculegion", "floettemega"]]
     ]
+  ],
+  "ellie-homen-xx": [
+    "Ellie Homen",
+    "",
+    [[-45, 75, 3, 4, 0, ["basculegion", "kingambit", "whimsicott", "garchompmegaz", "charizardmegay", "sneasler"]]]
   ],
   "elliot-holland-barrett": [
     "Elliot Holland-Barrett",
@@ -13403,7 +13449,10 @@
   "ezequiel-bustamante": [
     "Ezequiel Bustamante",
     "AR",
-    [[450, 86, 7, 5, 1, ["raichumegay", "volcarona", "rillaboom", "incineroar", "salamencemega", "milotic"]]]
+    [
+      [450, 86, 7, 5, 1, ["raichumegay", "volcarona", "rillaboom", "incineroar", "salamencemega", "milotic"]],
+      [-45, 1, 12, 1, 2, ["baxcaliburmega", "raichumegay", "volcarona", "milotic", "incineroar", "rillaboom"]]
+    ]
   ],
   "ezequiel-cordero": [
     "Ezequiel Cordero",
@@ -13416,12 +13465,18 @@
   "ezequiel-jerez": [
     "Ezequiel Jerez",
     "AR",
-    [[450, 606, 1, 4, 0, ["floettemega", "salamencemega", "incineroar", "basculegion", "rillaboom", "sneasler"]]]
+    [
+      [450, 606, 1, 4, 0, ["floettemega", "salamencemega", "incineroar", "basculegion", "rillaboom", "sneasler"]],
+      [-45, 128, 0, 4, 0, ["delphoxmega", "floettemega", "kingambit", "sneasler", "sinistcha", "incineroar"]]
+    ]
   ],
   "ezequiel-kupferberg": [
     "Ezequiel Kupferberg",
     "AR",
-    [[450, 535, 2, 5, 0, ["salamencemega", "milotic", "gholdengo", "arcaninehisui", "raichumegay", "rillaboom"]]]
+    [
+      [450, 535, 2, 5, 0, ["salamencemega", "milotic", "gholdengo", "arcaninehisui", "raichumegay", "rillaboom"]],
+      [-45, 34, 4, 3, 0, ["basculegionf", "archaludon", "raichumegax", "pelipper", "sneasler", "golisopodmega"]]
+    ]
   ],
   "faaiz-ashfaq": [
     "Faaiz Ashfaq",
@@ -13592,6 +13647,7 @@
     "BR",
     [
       [450, 360, 4, 4, 0, ["tyranitarmega", "gholdengo", "sinistcha", "milotic", "staraptormega", "excadrill"]],
+      [-45, 88, 3, 4, 0, ["tyranitarmega", "excadrill", "gholdengo", "milotic", "sinistcha", "staraptormega"]],
       [444, 194, 2, 6, 0, ["sirfetchd", "tyranitarmega", "golisopodmega", "aerodactyl", "indeedeef", "gholdengo"]],
       [436, 891, 2, 6, 0, ["altaria", "mimikyu", "tyranitarmega", "rotomwash", "corviknight", "excadrill"]],
       [435, 767, 2, 6, 0, ["kleavor", "floettemega", "basculegion", "whimsicott", "blastoisemega", "kingambit"]]
@@ -13601,6 +13657,11 @@
     "Fábio Souza",
     "BR",
     [[450, 226, 5, 3, 0, ["sneasler", "rillaboom", "basculegion", "froslassmega", "volcarona", "salamencemega"]]]
+  ],
+  "fabricio-mandola": [
+    "Fabricio Mandola",
+    "AR",
+    [[-45, 87, 3, 4, 0, ["gholdengo", "incineroar", "garchompmegaz", "rillaboom", "floettemega", "volcarona"]]]
   ],
   "fabrizio-mostallino": [
     "Fabrizio Mostallino",
@@ -13647,6 +13708,11 @@
     "DE",
     [[443, 820, 3, 5, 0, ["garchomp", "farigiraf", "charizardmegay", "kingambit", "sylveon", "aerodactylmega"]]]
   ],
+  "fausto-gomez": [
+    "Fausto Gomez",
+    "CO",
+    [[-45, 117, 1, 4, 0, ["froslassmega", "whimsicott", "kingambit", "sneasler", "charizardmegay", "garchomp"]]]
+  ],
   "fausto-gomez-nieto": [
     "Fausto GOMEZ NIETO",
     "CO",
@@ -13688,6 +13754,11 @@
     "IT",
     [[435, 664, 3, 5, 0, ["garchomp", "floettemega", "charizardmegay", "incineroar", "sinistcha", "venusaur"]]]
   ],
+  "federico-buosi": [
+    "Federico Buosi",
+    "AR",
+    [[-45, 86, 3, 4, 0, ["staraptormega", "raichumegay", "primarina", "gholdengo", "arcaninehisui", "rillaboom"]]]
+  ],
   "federico-camporesi": [
     "Federico Camporesi",
     "IT",
@@ -13704,6 +13775,11 @@
     "Federico Ciancarella",
     "IT",
     [[435, 187, 5, 3, 0, ["glimmora", "garchomp", "kingambit", "scizormega", "floettemega", "talonflame"]]]
+  ],
+  "federico-guitin": [
+    "Federico Guitin",
+    "AR",
+    [[-45, 72, 3, 4, 0, ["charizardmegay", "venusaur", "pelipper", "archaludon", "annihilape", "swampertmega"]]]
   ],
   "federico-isola": [
     "Federico Isola",
@@ -13752,7 +13828,10 @@
   "federico-turano": [
     "Federico Turano",
     "AR",
-    [[450, 57, 8, 4, 1, ["salamencemega", "sneasler", "incineroar", "espathra", "floettemega", "rillaboom"]]]
+    [
+      [450, 57, 8, 4, 1, ["salamencemega", "sneasler", "incineroar", "espathra", "floettemega", "rillaboom"]],
+      [-45, 80, 3, 4, 0, ["salamencemega", "sneasler", "rillaboom", "incineroar", "espathra", "floettemega"]]
+    ]
   ],
   "felipe-augusto-ferreira": [
     "Felipe Augusto Ferreira",
@@ -13783,6 +13862,7 @@
     "Felipe Fredes",
     "CL",
     [
+      [-45, 20, 6, 3, 1, ["charizardmegay", "whimsicott", "garchomp", "kingambit", "sylveon", "farigiraf"]],
       [444, 85, 4, 4, 0, ["grimmsnarl", "archaludon", "venusaur", "pelipper", "charizardmegay", "garchomp"]],
       [436, 286, 5, 3, 0, ["archaludon", "venusaurmega", "sableye", "aegislash", "rotomheat", "pelipper"]]
     ]
@@ -13857,6 +13937,7 @@
     "BR",
     [
       [450, 409, 3, 5, 0, ["basculegion", "gardevoirmega", "charizardmegay", "indeedeef", "whimsicott", "garchomp"]],
+      [-45, 66, 3, 4, 0, ["gardevoirmega", "indeedeef", "basculegion", "sneasler", "raichumegay", "arcaninehisui"]],
       [444, 63, 5, 3, 0, ["basculegion", "sneasler", "gardevoirmega", "indeedeef", "staraptormega", "incineroar"]]
     ]
   ],
@@ -13937,13 +14018,24 @@
     "MX",
     [[447, 276, 3, 5, 0, ["rillaboom", "charizardmegay", "pelipper", "basculegion", "pikachu", "venusaurmega"]]]
   ],
+  "fernando-ciarmiello": [
+    "Fernando Ciarmiello",
+    "AR",
+    [[-45, 94, 2, 4, 0, ["metagrossmega", "garchomp", "indeedeef", "whimsicott", "incineroar", "charizardmegay"]]]
+  ],
   "fernando-ferreira": [
     "Fernando Ferreira",
     "AR",
     [
       [450, 258, 4, 4, 0, ["rillaboom", "floettemega", "sneasler", "kingambit", "salamencemega", "incineroar"]],
+      [-45, 43, 4, 3, 0, ["rillaboom", "floettemega", "sneasler", "kingambit", "incineroar", "salamencemega"]],
       [444, 218, 0, 3, 0, ["charizardmegay", "farigiraf", "dragapult", "venusaur", "incineroar", "sylveon"]]
     ]
+  ],
+  "fernando-gabriel-valle": [
+    "Fernando Gabriel Valle",
+    "AR",
+    [[-45, 124, 0, 3, 0, ["rillaboom", "sylveon", "charizardmegay", "incineroar", "farigiraf", "garchomp"]]]
   ],
   "fernando-giacomini-ferreira": [
     "Fernando Giacomini Ferreira",
@@ -14260,6 +14352,11 @@
     "IT",
     [[435, 834, 1, 4, 0, ["archaludon", "dragonitemega", "basculegion", "pelipper", "sableye", "scizormega"]]]
   ],
+  "francesco-anceschi": [
+    "Francesco Anceschi",
+    "AR",
+    [[-45, 104, 2, 3, 0, ["gallade", "cameruptmega", "incineroar", "indeedeef", "gardevoirmega", "sneasler"]]]
+  ],
   "francesco-angileri": [
     "Francesco Angileri",
     "IT",
@@ -14473,6 +14570,7 @@
     "PE",
     [
       [450, 624, 0, 1, 0, ["rillaboom", "basculegion", "garchompmegaz", "volcarona", "incineroar", "raichumegay"]],
+      [-45, 35, 4, 3, 0, ["tyranitarmega", "gholdengo", "staraptormega", "excadrill", "sinistcha", "milotic"]],
       [447, 140, 4, 4, 0, ["rillaboom", "basculegion", "garchompmegaz", "volcarona", "incineroar", "raichumegay"]],
       [437, 300, 2, 4, 0, ["archaludon", "incineroar", "vivillon", "gengarmega", "swampertmega", "politoed"]]
     ]
@@ -14499,7 +14597,15 @@
   "francisco-gribaudo": [
     "Francisco Gribaudo",
     "AR",
-    [[450, 639, 0, 3, 0, ["kingambit", "garchomp", "charizardmegay", "sneasler", "basculegion", "whimsicott"]]]
+    [
+      [450, 639, 0, 3, 0, ["kingambit", "garchomp", "charizardmegay", "sneasler", "basculegion", "whimsicott"]],
+      [-45, 37, 4, 3, 0, ["basculegion", "charizardmegay", "garchomp", "kingambit", "sneasler", "whimsicott"]]
+    ]
+  ],
+  "francisco-kinaszuk": [
+    "Francisco Kinaszuk",
+    "AR",
+    [[-45, 16, 6, 3, 1, ["delphoxmega", "dragonitemega", "basculegion", "sneasler", "kingambit", "garchomp"]]]
   ],
   "francisco-leite": [
     "Francisco Leite",
@@ -15031,6 +15137,16 @@
     "IT",
     [[435, 706, 2, 3, 0, ["kingambit", "garchomp", "whimsicott", "charizardmegay", "sneasler", "basculegion"]]]
   ],
+  "gaby-abib": [
+    "Gaby Abib",
+    "UY",
+    [[-45, 111, 1, 3, 0, ["raichumegax", "golisopodmega", "sneasler", "basculegionf", "pelipper", "archaludon"]]]
+  ],
+  "gael-mendoza": [
+    "Gael Mendoza",
+    "AR",
+    [[-45, 121, 0, 3, 0, ["garchompmegaz", "charizardmegay", "incineroar", "rillaboom", "basculegion", "umbreon"]]]
+  ],
   "gaetan-capelle": [
     "Gaëtan CAPELLE",
     "FR",
@@ -15467,6 +15583,7 @@
     "AR",
     [
       [450, 272, 4, 4, 0, ["incineroar", "rillaboom", "raichumegay", "floettemega", "basculegion", "volcarona"]],
+      [-45, 57, 4, 3, 0, ["basculegion", "floettemega", "incineroar", "raichumegay", "rillaboom", "volcarona"]],
       [444, 84, 4, 4, 0, ["incineroar", "garchompmegaz", "rillaboom", "raichumegay", "gholdengo", "volcarona"]]
     ]
   ],
@@ -15806,13 +15923,22 @@
     "PE",
     [
       [450, 127, 5, 3, 0, ["floettemega", "basculegion", "sneasler", "kingambit", "incineroar", "garchompmegaz"]],
+      [-45, 21, 6, 3, 1, ["kingambit", "sneasler", "garchompmegaz", "incineroar", "basculegion", "floettemega"]],
       [437, 297, 2, 4, 0, ["staraptormega", "arcaninehisui", "sylveon", "kingambit", "raichumegay", "farigiraf"]]
     ]
+  ],
+  "gonzalo-bosso": [
+    "Gonzalo Bosso",
+    "AR",
+    [[-45, 65, 3, 4, 0, ["charizardmegay", "staraptormega", "whimsicott", "incineroar", "venusaur", "basculegion"]]]
   ],
   "gonzalo-bureau": [
     "Gonzalo Bureau",
     "AR",
-    [[450, 167, 5, 3, 0, ["whimsicott", "salamencemega", "charizardmegay", "sneasler", "basculegion", "kingambit"]]]
+    [
+      [450, 167, 5, 3, 0, ["whimsicott", "salamencemega", "charizardmegay", "sneasler", "basculegion", "kingambit"]],
+      [-45, 90, 2, 3, 0, ["milotic", "charizardmegay", "rillaboom", "whimsicott", "garchomp", "sneasler"]]
+    ]
   ],
   "gonzalo-hernandez": [
     "Gonzalo Hernández",
@@ -15824,6 +15950,7 @@
     "UY",
     [
       [450, 163, 5, 3, 0, ["milotic", "raichumegay", "salamencemega", "arcaninehisui", "gholdengo", "rillaboom"]],
+      [-45, 47, 4, 3, 0, ["salamencemega", "raichumegay", "arcaninehisui", "rillaboom", "gholdengo", "milotic"]],
       [436, 445, 4, 4, 0, ["sinistcha", "gengarmega", "kommoo", "floettemega", "maushold", "incineroar"]]
     ]
   ],
@@ -16048,7 +16175,7 @@
       [444, 31, 6, 4, 1, ["rillaboom", "dragonitemega", "basculegion", "kingambit", "sneasler", "delphoxmega"]]
     ]
   ],
-  "guilherme-schilling": [
+  "guilherme-schilling-nz": [
     "Guilherme Schilling",
     "NZ",
     [
@@ -16056,6 +16183,11 @@
       [442, 115, 5, 3, 0, ["kommoo", "gengarmega", "rillaboom", "ninetalesalola", "incineroar", "kingambit"]],
       [437, 260, 3, 5, 0, ["metagrossmega", "incineroar", "sinistcha", "kommoo", "tyranitarmega", "sneasler"]]
     ]
+  ],
+  "guilherme-schilling-xx": [
+    "Guilherme Schilling",
+    "",
+    [[-45, 9, 7, 3, 2, ["rillaboom", "sneasler", "lycanrocdusk", "volcarona", "froslassmega", "garchompmegaz"]]]
   ],
   "guillaume-camelin": [
     "Guillaume Camelin",
@@ -16081,6 +16213,11 @@
     "Guillermo Alonso Perez",
     "MX",
     [[447, 288, 2, 6, 0, ["hydrapple", "slowbrogalar", "feraligatrmega", "incineroar", "oranguru", "farigiraf"]]]
+  ],
+  "guillermo-ascanio": [
+    "Guillermo Ascanio",
+    "VE",
+    [[-45, 64, 3, 4, 0, ["tyranitarmega", "staraptormega", "gholdengo", "excadrill", "sinistcha", "milotic"]]]
   ],
   "guillermo-bermudez-campoamor": [
     "Guillermo Bermúdez Campoamor",
@@ -16152,6 +16289,11 @@
     "Gustavo Barboza",
     "BR",
     [[450, 463, 3, 5, 0, ["politoed", "archaludon", "rillaboom", "incineroar", "froslassmega", "gengarmega"]]]
+  ],
+  "gustavo-bruno": [
+    "Gustavo Bruno",
+    "AR",
+    [[-45, 100, 2, 5, 0, ["gholdengo", "garchompmegaz", "incineroar", "raichumegay", "volcarona", "rillaboom"]]]
   ],
   "gustavo-david-duarte-yza": [
     "Gustavo David Duarte Yza",
@@ -16544,6 +16686,11 @@
     "Hector Barone",
     "BR",
     [[450, 157, 5, 3, 0, ["milotic", "staraptormega", "gholdengo", "excadrill", "tyranitarmega", "sinistcha"]]]
+  ],
+  "hector-barone-filho": [
+    "Hector Barone Filho",
+    "BR",
+    [[-45, 68, 3, 4, 0, ["tyranitarmega", "excadrill", "milotic", "sinistcha", "staraptormega", "gholdengo"]]]
   ],
   "hector-bernabe-acuna-robles": [
     "Hector Bernabe Acuña Robles",
@@ -16939,6 +17086,7 @@
     "BR",
     [
       [450, 317, 4, 4, 0, ["delphoxmega", "incineroar", "sneasler", "kingambit", "sinistcha", "floettemega"]],
+      [-45, 32, 4, 3, 0, ["sinistcha", "delphoxmega", "incineroar", "kingambit", "sneasler", "floettemega"]],
       [444, 73, 5, 3, 0, ["blastoisemega", "maushold", "delphoxmega", "incineroar", "sneasler", "sinistcha"]]
     ]
   ],
@@ -17134,6 +17282,11 @@
       [441, 429, 4, 4, 0, ["raichumegay", "arcaninehisui", "rillaboom", "sylveon", "staraptormega", "gholdengo"]]
     ]
   ],
+  "iara-martinez": [
+    "Iara Martinez",
+    "AR",
+    [[-45, 103, 2, 5, 0, ["dragonitemega", "rillaboom", "sneasler", "floettemega", "incineroar", "gholdengo"]]]
+  ],
   "iason-vidalis": [
     "Iason Vidalis",
     "GR",
@@ -17218,6 +17371,11 @@
     "ES",
     [[435, 889, 0, 1, 0, ["incineroar", "torkoal", "farigiraf", "golurkmega", "sneasler", "venusaur"]]]
   ],
+  "ignacio-sabate": [
+    "Ignacio Sabate",
+    "AR",
+    [[-45, 46, 4, 3, 0, ["espathra", "indeedeef", "pelipper", "archaludon", "sneasler", "charizardmegay"]]]
+  ],
   "ignasi-estarlich": [
     "Ignasi Estarlich",
     "ES",
@@ -17276,6 +17434,11 @@
     "Ilan Petit-Khacem",
     "FR",
     [[446, 599, 3, 5, 0, ["pelipper", "grimmsnarl", "garchompmegaz", "venusaur", "archaludon", "charizardmegay"]]]
+  ],
+  "inaki-alonso-guarrochena": [
+    "Iñaki Alonso Guarrochena",
+    "AR",
+    [[-45, 78, 3, 4, 0, ["gengarmega", "incineroar", "rillaboom", "kingambit", "hippowdon", "sneasler"]]]
   ],
   "inder-gill": [
     "inder gill",
@@ -17503,6 +17666,11 @@
     "BG",
     [[443, 404, 4, 4, 0, ["talonflame", "ninetalesalola", "raichumegay", "arcanine", "garchomp", "empoleon"]]]
   ],
+  "ivan-charles": [
+    "Ivan Charles",
+    "AR",
+    [[-45, 11, 7, 3, 2, ["venusaur", "archaludon", "garchompmegaz", "grimmsnarl", "pelipper", "charizardmegay"]]]
+  ],
   "ivan-de-falco": [
     "Ivan De falco",
     "IT",
@@ -17578,6 +17746,11 @@
     "Iverson Amador",
     "US",
     [[441, 90, 9, 4, 1, ["sneasler", "excadrill", "indeedee", "salamencemega", "tyranitarmega", "gholdengo"]]]
+  ],
+  "ivo-giorgini": [
+    "Ivo Giorgini",
+    "AR",
+    [[-45, 107, 1, 3, 0, ["charizardmegay", "garchomp", "venusaur", "incineroar", "sylveon", "farigiraf"]]]
   ],
   "ivo-vulpiani": [
     "Ivo Vulpiani",
@@ -18334,6 +18507,7 @@
     "AU",
     [
       [450, 119, 5, 3, 0, ["incineroar", "garchomp", "basculegion", "floettemega", "whimsicott", "charizardmegay"]],
+      [-45, 58, 4, 3, 0, ["charizardmegay", "whimsicott", "basculegion", "floettemega", "garchomp", "incineroar"]],
       [442, 163, 4, 4, 0, ["gardevoirmega", "indeedeef", "torkoal", "armarouge", "golisopodmega", "annihilape"]]
     ]
   ],
@@ -19086,6 +19260,7 @@
     "CL",
     [
       [450, 118, 5, 3, 0, ["milotic", "rillaboom", "incineroar", "volcarona", "raichumegay", "salamencemega"]],
+      [-45, 49, 4, 3, 0, ["salamencemega", "sneasler", "rillaboom", "incineroar", "basculegion", "floettemega"]],
       [447, 38, 7, 4, 1, ["venusaur", "charizardmegay", "toxapex", "garchomp", "sylveon", "incineroar"]],
       [437, 129, 5, 3, 0, ["sneasler", "samurotthisui", "incineroar", "floettemega", "sinistcha", "delphoxmega"]]
     ]
@@ -19527,6 +19702,11 @@
     "DE",
     [[443, 715, 3, 5, 0, ["gholdengo", "raichumegay", "ceruledge", "rillaboom", "staraptormega", "milotic"]]]
   ],
+  "jeronimo-stupenengo-pefaur": [
+    "Jerónimo Stupenengo Pefaur",
+    "AR",
+    [[-45, 84, 3, 4, 0, ["delphoxmega", "floettemega", "kingambit", "sneasler", "incineroar", "sinistcha"]]]
+  ],
   "jerry-woods-iii": [
     "Jerry Woods III",
     "US",
@@ -19744,6 +19924,11 @@
       [436, 558, 4, 4, 0, ["sableye", "sylveon", "basculegion", "archaludon", "venusaurmega", "pelipper"]]
     ]
   ],
+  "jimmy-espitia": [
+    "Jimmy Espitia",
+    "CO",
+    [[-45, 12, 7, 3, 2, ["raichumegay", "rillaboom", "floettemega", "incineroar", "volcarona", "basculegion"]]]
+  ],
   "jimmy-friedle": [
     "Jimmy Friedle",
     "US",
@@ -19942,6 +20127,11 @@
     "Joao Vitor Andrade Paixao",
     "BR",
     [[450, 531, 2, 5, 0, ["basculegion", "rillaboom", "floettemega", "sneasler", "salamencemega", "incineroar"]]]
+  ],
+  "joaquin-andres-osinaga": [
+    "Joaquin Andres Osinaga",
+    "AR",
+    [[-45, 123, 0, 3, 0, ["sinistcha", "kingambit", "sneasler", "incineroar", "delphoxmega", "garchomp"]]]
   ],
   "joaquin-blanch": [
     "Joaquín Blanch",
@@ -20952,7 +21142,10 @@
   "jorge-coria": [
     "Jorge Coria",
     "AR",
-    [[435, 895, 0, 1, 0, ["glaceon", "kangaskhanmega", "basculegion", "sneasler", "pelipper", "froslassmega"]]]
+    [
+      [-45, 95, 2, 4, 0, ["staraptormega", "raichumegay", "garchomp", "incineroar", "sylveon", "farigiraf"]],
+      [435, 895, 0, 1, 0, ["glaceon", "kangaskhanmega", "basculegion", "sneasler", "pelipper", "froslassmega"]]
+    ]
   ],
   "jorge-de-santiago-rodriguez": [
     "Jorge de Santiago Rodríguez",
@@ -21105,6 +21298,11 @@
     "US",
     [[450, 60, 8, 4, 1, ["kingambit", "whimsicott", "garchomp", "charizardmegay", "basculegion", "floettemega"]]]
   ],
+  "jose-fernando-hurtado-cuba": [
+    "José Fernando Hurtado Cuba",
+    "PE",
+    [[-45, 101, 2, 5, 0, ["incineroar", "politoed", "rillaboom", "archaludon", "gengarmega", "garchompmega"]]]
+  ],
   "jose-francisco-galvez-prior": [
     "José Francisco Gálvez Prior",
     "ES",
@@ -21191,6 +21389,11 @@
     "MX",
     [[447, 50, 5, 3, 0, ["farigiraf", "incineroar", "sylveon", "kingambit", "garchompmegaz", "charizardmegay"]]]
   ],
+  "jose-mena": [
+    "Jose Mena",
+    "CR",
+    [[-45, 82, 3, 4, 0, ["garchompmegaz", "golisopodmega", "indeedeef", "sneasler", "incineroar", "milotic"]]]
+  ],
   "jose-neto": [
     "José Neto",
     "BR",
@@ -21246,6 +21449,11 @@
     "Jose Sanchez",
     "US",
     [[436, 528, 4, 4, 0, ["sylveon", "aerodactylmega", "basculegion", "kingambit", "charizardmegay", "garchomp"]]]
+  ],
+  "jose-vaccaloni": [
+    "Jose Vaccaloni",
+    "AR",
+    [[-45, 28, 5, 4, 1, ["floettemega", "basculegion", "kingambit", "whimsicott", "charizardmegay", "garchomp"]]]
   ],
   "jose-wilton-arruda": [
     "José Wilton Arruda",
@@ -21809,6 +22017,11 @@
     "ES",
     [[448, 564, 3, 5, 0, ["talonflame", "farigiraf", "rillaboom", "glimmoramega", "araquanid", "garchompmegaz"]]]
   ],
+  "juan-aquino": [
+    "Juan Aquino",
+    "AR",
+    [[-45, 99, 2, 4, 0, ["tyranitarmega", "excadrill", "sinistcha", "gholdengo", "staraptormega", "milotic"]]]
+  ],
   "juan-benitez-lopez": [
     "Juan Benitez Lopez",
     "ES",
@@ -21854,10 +22067,20 @@
       [435, 898, 0, 1, 0, ["floettemega", "garchomp", "delphoxmega", "aerodactyl", "aegislash", "rotomwash"]]
     ]
   ],
+  "juan-francisco-salerno": [
+    "Juan Francisco Salerno",
+    "AR",
+    [[-45, 10, 7, 3, 2, ["charizardmegay", "venusaur", "incineroar", "sylveon", "aegislash", "garchomp"]]]
+  ],
   "juan-guzman": [
     "Juan Guzman",
     "US",
     [[445, 1012, 0, 5, 0, ["dragonitemega", "mimikyu", "rotomheat", "gholdengo", "gliscor", "lopunnymega"]]]
+  ],
+  "juan-isidro-chazarreta": [
+    "Juan Isidro Chazarreta",
+    "AR",
+    [[-45, 30, 4, 3, 0, ["floettemega", "delphoxmega", "sinistcha", "incineroar", "sneasler", "kingambit"]]]
   ],
   "juan-jose-mejia-tasayco": [
     "Juan José Mejia Tasayco",
@@ -21927,12 +22150,20 @@
   "juan-pablo-cambon": [
     "Juan Pablo Cambon",
     "AR",
-    [[450, 34, 9, 3, 1, ["farigiraf", "cameruptmega", "sylveon", "incineroar", "rillaboom", "raichumegay"]]]
+    [
+      [450, 34, 9, 3, 1, ["farigiraf", "cameruptmega", "sylveon", "incineroar", "rillaboom", "raichumegay"]],
+      [-45, 13, 6, 3, 1, ["incineroar", "raichumegay", "sylveon", "farigiraf", "rillaboom", "cameruptmega"]]
+    ]
   ],
   "juan-pablo-gonzalez-olvera": [
     "Juan Pablo González Olvera",
     "MX",
     [[447, 202, 4, 4, 0, ["farigiraf", "charizardmegay", "sylveon", "garchompmegaz", "incineroar", "rillaboom"]]]
+  ],
+  "juan-patricio-nunez": [
+    "Juan Patricio Nuñez",
+    "AR",
+    [[-45, 120, 1, 3, 0, ["rillaboom", "dragonitemega", "sneasler", "floettemega", "incineroar", "gholdengo"]]]
   ],
   "juan-pescador": [
     "Juan Pescador",
@@ -21977,7 +22208,10 @@
   "juan-velasco": [
     "Juan Velasco",
     "AR",
-    [[450, 343, 4, 4, 0, ["floettemega", "basculegion", "garchomp", "charizardmegay", "kingambit", "whimsicott"]]]
+    [
+      [450, 343, 4, 4, 0, ["floettemega", "basculegion", "garchomp", "charizardmegay", "kingambit", "whimsicott"]],
+      [-45, 6, 8, 3, 2, ["charizardmegay", "garchomp", "whimsicott", "floettemega", "basculegion", "kingambit"]]
+    ]
   ],
   "juanma-luque": [
     "Juanma Luque",
@@ -22167,7 +22401,7 @@
     "DE",
     [[443, 735, 3, 4, 0, ["basculegion", "rillaboom", "pelipper", "salamencemega", "archaludon", "incineroar"]]]
   ],
-  "julio-eller": [
+  "julio-eller-br": [
     "Júlio Eller",
     "BR",
     [
@@ -22178,10 +22412,20 @@
       [436, 281, 5, 3, 0, ["farigiraf", "basculegion", "kleavor", "floettemega", "whimsicott", "blastoisemega"]]
     ]
   ],
+  "julio-eller-br-2": [
+    "Julio Eller",
+    "BR",
+    [[-45, 56, 4, 3, 0, ["garchompmegaz", "whimsicott", "sneasler", "floettemega", "basculegion", "kingambit"]]]
+  ],
   "julio-guzman": [
     "Julio Guzman",
     "US",
     [[436, 405, 4, 4, 0, ["farigiraf", "vivillon", "kangaskhanmega", "basculegion", "blastoisemega", "torkoal"]]]
+  ],
+  "julio-huerfano": [
+    "Julio Huerfano",
+    "CO",
+    [[-45, 53, 4, 3, 0, ["raichumegay", "staraptormega", "arcaninehisui", "sylveon", "gholdengo", "rillaboom"]]]
   ],
   "julio-montalvao": [
     "Julio Montalvão",
@@ -24007,6 +24251,11 @@
     "US",
     [[445, 299, 5, 3, 0, ["grimmsnarl", "politoed", "charizardmegay", "archaludon", "farigiraf", "golisopodmega"]]]
   ],
+  "leandro-agustin-campagno": [
+    "Leandro Agustin Campagno",
+    "AR",
+    [[-45, 105, 2, 5, 0, ["tyranitarmega", "excadrill", "indeedeef", "sceptilemega", "sneasler", "rotomheat"]]]
+  ],
   "leandro-ferreira": [
     "Leandro Ferreira",
     "BR",
@@ -24060,6 +24309,7 @@
     "US",
     [
       [450, 32, 9, 3, 1, ["salamencemega", "tyranitarmega", "sneasler", "excadrill", "clefable", "gholdengo"]],
+      [-45, 5, 9, 2, 2, ["tyranitarmega", "excadrill", "sneasler", "clefable", "salamencemega", "gholdengo"]],
       [437, 254, 3, 5, 0, ["basculegion", "sinistcha", "politoed", "venusaurmega", "grimmsnarl", "dragonitemega"]]
     ]
   ],
@@ -25004,6 +25254,11 @@
       [435, 659, 3, 5, 0, ["archaludon", "pelipper", "basculegion", "scizormega", "sneasler", "dragonitemega"]]
     ]
   ],
+  "lorenzo-villafane": [
+    "Lorenzo Villafañe",
+    "AR",
+    [[-45, 59, 4, 3, 0, ["kangaskhanmega", "kingambit", "torkoal", "farigiraf", "dragonitemega", "sylveon"]]]
+  ],
   "loris-di-mella": [
     "Loris Di Mella",
     "IT",
@@ -25109,6 +25364,7 @@
     "AR",
     [
       [450, 130, 5, 3, 0, ["floettemega", "rillaboom", "volcarona", "incineroar", "basculegion", "raichumegay"]],
+      [-45, 29, 5, 4, 1, ["raichumegay", "floettemega", "incineroar", "rillaboom", "basculegion", "volcarona"]],
       [437, 282, 2, 5, 0, ["delphoxmega", "incineroar", "sneasler", "sinistcha", "blastoisemega", "maushold"]]
     ]
   ],
@@ -25420,6 +25676,7 @@
     "AR",
     [
       [450, 594, 1, 4, 0, ["kingambit", "charizardmegay", "garchomp", "farigiraf", "aerodactylmega", "sylveon"]],
+      [-45, 127, 0, 4, 0, ["charizardmegay", "kingambit", "sylveon", "farigiraf", "garchomp", "aerodactylmega"]],
       [444, 114, 4, 4, 0, ["milotic", "kingambit", "raichumegay", "salamencemega", "rillaboom", "arcaninehisui"]]
     ]
   ],
@@ -25499,6 +25756,11 @@
     "BR",
     [[450, 396, 3, 3, 0, ["garchompmegaz", "volcarona", "floettemega", "gholdengo", "incineroar", "rillaboom"]]]
   ],
+  "lucas-ortega-macedo": [
+    "Lucas Ortega Macedo",
+    "AR",
+    [[-45, 96, 2, 4, 0, ["golisopodmega", "archaludon", "pelipper", "raichumegax", "basculegionf", "sneasler"]]]
+  ],
   "lucas-perez": [
     "Lucas PEREZ",
     "FR",
@@ -25550,6 +25812,11 @@
       [444, 205, 1, 5, 0, ["rillaboom", "gholdengo", "kingambit", "incineroar", "salamencemega", "sneasler"]]
     ]
   ],
+  "lucas-tourino": [
+    "Lucas Touriño",
+    "AR",
+    [[-45, 126, 0, 3, 0, ["aerodactylmega", "sylveon", "garchomp", "charizardmegay", "kingambit", "venusaur"]]]
+  ],
   "lucas-veiga-de-aquino-souza-leite": [
     "Lucas Veiga De Aquino Souza Leite",
     "BR",
@@ -25591,6 +25858,11 @@
       [444, 2, 12, 2, 2, ["garchompmegaz", "politoed", "incineroar", "archaludon", "farigiraf", "golisopodmega"]],
       [437, 257, 3, 4, 0, ["kingambit", "sneasler", "lycanrocdusk", "froslassmega", "basculegion", "scovillainmega"]]
     ]
+  ],
+  "luciano-capello-ingold": [
+    "Luciano Capello Ingold",
+    "AR",
+    [[-45, 70, 3, 4, 0, ["dragonitemega", "basculegion", "sneasler", "kingambit", "rillaboom", "floettemega"]]]
   ],
   "luciano-munoz-placencia": [
     "Luciano Muñoz Placencia",
@@ -25712,6 +25984,11 @@
     "Luis Antonio Pérez Martín",
     "MX",
     [[447, 95, 5, 3, 0, ["golisopodmega", "archaludon", "raichumegax", "basculegionf", "sneasler", "pelipper"]]]
+  ],
+  "luis-araos": [
+    "Luis Araos",
+    "CL",
+    [[-45, 85, 3, 4, 0, ["charizardmegay", "whimsicott", "garchomp", "kingambit", "sylveon", "farigiraf"]]]
   ],
   "luis-araos-vera": [
     "Luis Araos Vera",
@@ -25871,7 +26148,10 @@
   "luis-roquet": [
     "Luis Roquet",
     "VE",
-    [[450, 61, 8, 4, 1, ["indeedeef", "basculegion", "armarouge", "raichumegay", "staraptormega", "kingambit"]]]
+    [
+      [450, 61, 8, 4, 1, ["indeedeef", "basculegion", "armarouge", "raichumegay", "staraptormega", "kingambit"]],
+      [-45, 8, 8, 3, 2, ["raichumegay", "armarouge", "indeedeef", "basculegion", "kingambit", "staraptormega"]]
+    ]
   ],
   "luis-sanchez-marin": [
     "Luis Sanchez Marin",
@@ -25919,7 +26199,10 @@
   "luka-weihmuller": [
     "Luka Weihmüller",
     "AR",
-    [[450, 153, 5, 3, 0, ["volcarona", "incineroar", "rillaboom", "floettemega", "raichumegay", "basculegion"]]]
+    [
+      [450, 153, 5, 3, 0, ["volcarona", "incineroar", "rillaboom", "floettemega", "raichumegay", "basculegion"]],
+      [-45, 52, 4, 3, 0, ["floettemega", "raichumegay", "incineroar", "rillaboom", "basculegion", "volcarona"]]
+    ]
   ],
   "lukas-amon": [
     "Lukas Amon",
@@ -26356,6 +26639,11 @@
     "ES",
     [[435, 155, 5, 3, 0, ["sinistcha", "incineroar", "charizardmegax", "milotic", "sneasler", "floettemega"]]]
   ],
+  "manuel-bochini": [
+    "Manuel Bochini",
+    "AR",
+    [[-45, 67, 3, 4, 0, ["salamencemega", "basculegion", "charizardmegay", "whimsicott", "kingambit", "sneasler"]]]
+  ],
   "manuel-bongini": [
     "Manuel Bongini",
     "IT",
@@ -26405,6 +26693,11 @@
     "MX",
     [[447, 332, 0, 4, 0, ["charizardmegay", "swampertmega", "archaludon", "grimmsnarl", "pelipper", "venusaur"]]]
   ],
+  "manuel-nowosad": [
+    "Manuel Nowosad",
+    "AR",
+    [[-45, 33, 4, 3, 0, ["arcaninehisui", "gardevoirmega", "indeedeef", "milotic", "sneasler", "gengarmega"]]]
+  ],
   "manuel-ortuno": [
     "Manuel Ortuño",
     "ES",
@@ -26435,6 +26728,7 @@
     "AR",
     [
       [450, 545, 2, 6, 0, ["farigiraf", "garchomp", "venusaur", "incineroar", "sylveon", "charizardmegay"]],
+      [-45, 39, 4, 3, 0, ["charizardmegay", "garchomp", "sylveon", "incineroar", "venusaur", "farigiraf"]],
       [444, 58, 5, 3, 0, ["garchomp", "aerodactylmega", "farigiraf", "kingambit", "charizardmegay", "sylveon"]]
     ]
   ],
@@ -26575,7 +26869,10 @@
   "marcelo-langaro": [
     "Marcelo Langaro",
     "BR",
-    [[450, 330, 4, 4, 0, ["gardevoirmega", "pyroarmega", "sneasler", "whimsicott", "indeedeef", "basculegion"]]]
+    [
+      [450, 330, 4, 4, 0, ["gardevoirmega", "pyroarmega", "sneasler", "whimsicott", "indeedeef", "basculegion"]],
+      [-45, 63, 3, 4, 0, ["gardevoirmega", "pyroarmega", "whimsicott", "indeedeef", "kommoo", "basculegion"]]
+    ]
   ],
   "marcin-kwiatkowski": [
     "Marcin Kwiatkowski",
@@ -27232,6 +27529,11 @@
     "FR",
     [[446, 390, 4, 4, 0, ["araquanid", "froslassmega", "rillaboom", "kingambit", "raichumegay", "arcaninehisui"]]]
   ],
+  "martin-chiaravini": [
+    "Martín Chiaravini",
+    "AR",
+    [[-45, 62, 3, 4, 0, ["salamencemega", "sneasler", "kingambit", "basculegion", "whimsicott", "charizardmegay"]]]
+  ],
   "martin-cruz-anaya": [
     "Martin Cruz Anaya",
     "MX",
@@ -27525,6 +27827,11 @@
     "BR",
     [[444, 188, 2, 6, 0, ["gholdengo", "sylveon", "arcaninehisui", "staraptormega", "raichumegay", "rillaboom"]]]
   ],
+  "matheus-furlani-carretta": [
+    "Matheus Furlani Carretta",
+    "BR",
+    [[-45, 31, 4, 3, 0, ["dragonitemega", "sneasler", "basculegion", "kingambit", "garchomp", "floettemega"]]]
+  ],
   "matheus-ladislau-ribeiro": [
     "Matheus Ladislau Ribeiro",
     "BR",
@@ -27627,10 +27934,25 @@
       [437, 363, 1, 4, 0, ["basculegion", "kingambit", "sinistcha", "incineroar", "floettemega", "sneasler"]]
     ]
   ],
+  "matias-g-hernandez": [
+    "Matías G. Hernández",
+    "AR",
+    [[-45, 98, 2, 3, 0, ["charizardmegay", "garchomp", "whimsicott", "basculegion", "kingambit", "floettemega"]]]
+  ],
   "matias-kurti": [
     "Matias Kurti",
     "IT",
     [[435, 589, 3, 5, 0, ["mamoswine", "basculegion", "glimmoramega", "kingambit", "whimsicott", "dragonitemega"]]]
+  ],
+  "matias-mansilla": [
+    "Matias Mansilla",
+    "AR",
+    [[-45, 89, 2, 4, 0, ["froslassmega", "glimmoramega", "kommoo", "rillaboom", "kingambit", "talonflame"]]]
+  ],
+  "matias-morales": [
+    "Matias Morales",
+    "AR",
+    [[-45, 14, 6, 3, 1, ["charizardmegay", "pelipper", "archaludon", "venusaur", "grimmsnarl", "garchomp"]]]
   ],
   "matias-wikstrom": [
     "Matias Wikström",
@@ -28061,7 +28383,10 @@
   "matthew-cecil": [
     "Matthew Cecil",
     "US",
-    [[450, 76, 7, 5, 1, ["vivillon", "politoed", "rillaboom", "archaludon", "gengarmega", "incineroar"]]]
+    [
+      [450, 76, 7, 5, 1, ["vivillon", "politoed", "rillaboom", "archaludon", "gengarmega", "incineroar"]],
+      [-45, 38, 4, 3, 0, ["gengarmega", "politoed", "rillaboom", "incineroar", "archaludon", "vivillon"]]
+    ]
   ],
   "matthew-coldhill-smink": [
     "Matthew Coldhill-Smink",
@@ -28737,6 +29062,11 @@
     "MX",
     [[447, 135, 4, 4, 0, ["archaludon", "grimmsnarl", "charizardmegay", "garchomp", "venusaur", "politoed"]]]
   ],
+  "maximiliano-yacante": [
+    "Maximiliano Yacante",
+    "AR",
+    [[-45, 113, 1, 4, 0, ["staraptormega", "gholdengo", "milotic", "ceruledge", "rillaboom", "raichumegay"]]]
+  ],
   "maximo-beas-martinez": [
     "Máximo Beas Martínez",
     "ES",
@@ -29403,6 +29733,11 @@
       [443, 538, 4, 4, 0, ["farigiraf", "golisopodmega", "primarina", "arcaninehisui", "raichumegay", "rillaboom"]]
     ]
   ],
+  "miguel-alfredo-aguiar-medina": [
+    "Miguel Alfredo Aguiar Medina",
+    "AR",
+    [[-45, 112, 1, 6, 0, ["rillaboom", "sylveon", "sneasler", "volcarona", "starmiemega", "aerodactyl"]]]
+  ],
   "miguel-angel-cano-bosque": [
     "Miguel Ángel Caño Bosque",
     "ES",
@@ -30013,6 +30348,16 @@
       [434, 501, 4, 4, 0, ["aegislash", "incineroar", "charizardmegay", "sinistcha", "garchomp", "floettemega"]]
     ]
   ],
+  "nahuel-emiliano-barrera": [
+    "Nahuel Emiliano Barrera",
+    "AR",
+    [[-45, 71, 3, 4, 0, ["charizardmegay", "whimsicott", "basculegion", "farigiraf", "incineroar", "mawilemega"]]]
+  ],
+  "nahuel-godoy": [
+    "Nahuel Godoy",
+    "AR",
+    [[-45, 97, 2, 4, 0, ["delphoxmega", "floettemega", "sinistcha", "kingambit", "incineroar", "sneasler"]]]
+  ],
   "naim-khan": [
     "Naim Khan",
     "UK",
@@ -30359,6 +30704,11 @@
       [437, 13, 9, 3, 2, ["whimsicott", "arcaninehisui", "raichumegay", "kingambit", "staraptormega", "sylveon"]],
       [436, 233, 5, 3, 0, ["floettemega", "sneasler", "incineroar", "delphoxmega", "kingambit", "sinistcha"]]
     ]
+  ],
+  "nazareno-rodriguez": [
+    "Nazareno Rodríguez",
+    "AR",
+    [[-45, 19, 6, 3, 1, ["salamencemega", "floettemega", "incineroar", "rillaboom", "sneasler", "basculegion"]]]
   ],
   "ned-nosek": [
     "Ned Nosek",
@@ -30952,10 +31302,25 @@
     "US",
     [[436, 728, 3, 5, 0, ["talonflame", "glimmora", "scizormega", "kingambit", "dragonitemega", "garchomp"]]]
   ],
+  "nicolas-gruning": [
+    "Nicolás Gruning",
+    "AR",
+    [[-45, 122, 0, 4, 0, ["tyranitarmega", "excadrill", "milotic", "sinistcha", "staraptormega", "gholdengo"]]]
+  ],
   "nicolas-legoux": [
     "Nicolas LEGOUX",
     "FR",
     [[446, 292, 5, 3, 0, ["charizardmegay", "pelipper", "garchompmegaz", "archaludon", "venusaur", "grimmsnarl"]]]
+  ],
+  "nicolas-leon-nieto-ferrari": [
+    "Nicolás León Nieto Ferrari",
+    "AR",
+    [[-45, 118, 1, 5, 0, ["tyranitarmega", "excadrill", "corviknight", "indeedeef", "sneasler", "swampert"]]]
+  ],
+  "nicolas-lerman": [
+    "Nicolas Lerman",
+    "AR",
+    [[-45, 41, 4, 3, 0, ["raichumegay", "staraptormega", "gholdengo", "rillaboom", "arcaninehisui", "primarina"]]]
   ],
   "nicolas-maligoj": [
     "Nicolas Maligoj",
@@ -30967,6 +31332,7 @@
     "AR",
     [
       [450, 429, 3, 4, 0, ["sneasler", "dragonitemega", "kingambit", "gengarmega", "garchomp", "basculegion"]],
+      [-45, 42, 4, 3, 0, ["basculegion", "charizardmegay", "floettemega", "garchomp", "kingambit", "whimsicott"]],
       [444, 199, 1, 4, 0, ["sylveon", "farigiraf", "torkoal", "garchompmegaz", "incineroar", "sneasler"]],
       [437, 230, 3, 4, 0, ["delphoxmega", "sneasler", "sinistcha", "floettemega", "incineroar", "samurotthisui"]]
     ]
@@ -30999,7 +31365,10 @@
   "nicolas-romano": [
     "Nicolas Romano",
     "AR",
-    [[450, 209, 5, 3, 0, ["garchomp", "kingambit", "incineroar", "raichumegay", "delphoxmega", "sinistcha"]]]
+    [
+      [450, 209, 5, 3, 0, ["garchomp", "kingambit", "incineroar", "raichumegay", "delphoxmega", "sinistcha"]],
+      [-45, 54, 4, 3, 0, ["floettemega", "salamencemega", "basculegion", "rillaboom", "sneasler", "incineroar"]]
+    ]
   ],
   "nicolas-scapin": [
     "Nicolas Scapin",
@@ -31977,6 +32346,11 @@
     "FI",
     [[448, 609, 2, 6, 0, ["basculegion", "incineroar", "raichumegay", "floettemega", "volcarona", "rillaboom"]]]
   ],
+  "pablo-agustin-fiorini": [
+    "Pablo Agustin Fiorini",
+    "AR",
+    [[-45, 125, 0, 4, 0, ["sneasler", "salamencemega", "floettemega", "basculegion", "incineroar", "rillaboom"]]]
+  ],
   "pablo-arredondo": [
     "Pablo Arredondo",
     "ES",
@@ -32044,6 +32418,7 @@
     "PE",
     [
       [450, 453, 3, 4, 0, ["venusaur", "garchomp", "incineroar", "sylveon", "farigiraf", "charizardmegay"]],
+      [-45, 110, 1, 5, 0, ["sylveon", "farigiraf", "garchomp", "venusaur", "charizardmegay", "incineroar"]],
       [436, 637, 3, 5, 0, ["venusaur", "floettemega", "garchomp", "sinistcha", "incineroar", "charizardmegay"]]
     ]
   ],
@@ -32086,7 +32461,10 @@
   "paolo-aguilera": [
     "Paolo Aguilera",
     "CL",
-    [[450, 354, 4, 4, 0, ["primarina", "gholdengo", "staraptormega", "arcaninehisui", "rillaboom", "raichumegay"]]]
+    [
+      [450, 354, 4, 4, 0, ["primarina", "gholdengo", "staraptormega", "arcaninehisui", "rillaboom", "raichumegay"]],
+      [-45, 74, 3, 4, 0, ["raichumegay", "arcaninehisui", "rillaboom", "primarina", "gholdengo", "staraptormega"]]
+    ]
   ],
   "paolo-amirante": [
     "Paolo Amirante",
@@ -32636,6 +33014,11 @@
     "Pedro Façanha",
     "BR",
     [[444, 186, 2, 6, 0, ["armarouge", "kingambit", "sneasler", "torkoal", "gardevoirmega", "indeedeef"]]]
+  ],
+  "pedro-guarini": [
+    "Pedro Guarini",
+    "AR",
+    [[-45, 91, 2, 5, 0, ["garchompmegaz", "volcarona", "incineroar", "rillaboom", "gholdengo", "raichumegay"]]]
   ],
   "pedro-h-soares-feitosa": [
     "Pedro H Soares Feitosa",
@@ -33428,6 +33811,11 @@
     "LB",
     [[435, 445, 4, 4, 0, ["rotomwash", "gengarmega", "skarmorymega", "politoed", "incineroar", "archaludon"]]]
   ],
+  "ramiro-d-agnone": [
+    "Ramiro D'Agnone",
+    "AR",
+    [[-45, 119, 1, 3, 0, ["garchompmegaz", "metagrossmega", "rillaboom", "sneasler", "milotic", "incineroar"]]]
+  ],
   "ramon-ambert": [
     "Ramon Ambert",
     "US",
@@ -33699,7 +34087,10 @@
   "renata-eskiavetty": [
     "Renata Eskiavetty",
     "CL",
-    [[444, 170, 3, 5, 0, ["sneasler", "kingambit", "indeedeef", "typhlosionhisui", "gardevoirmega", "torkoal"]]]
+    [
+      [-45, 114, 1, 4, 0, ["raichumegay", "staraptormega", "rillaboom", "arcaninehisui", "milotic", "gholdengo"]],
+      [444, 170, 3, 5, 0, ["sneasler", "kingambit", "indeedeef", "typhlosionhisui", "gardevoirmega", "torkoal"]]
+    ]
   ],
   "renata-francesca-guidugli-eskiavetty": [
     "Renata Francesca Guidugli Eskiavetty",
@@ -33765,6 +34156,11 @@
     "Rens Heylen",
     "BE",
     [[443, 296, 5, 3, 0, ["torkoal", "blazikenmega", "glimmoramega", "rillaboom", "kingambit", "farigiraf"]]]
+  ],
+  "renzo-chiappa": [
+    "Renzo Chiappa",
+    "AR",
+    [[-45, 108, 1, 3, 0, ["cameruptmega", "raichumegay", "rillaboom", "incineroar", "sylveon", "farigiraf"]]]
   ],
   "renzo-navarro": [
     "Renzo Navarro",
@@ -33863,7 +34259,10 @@
   "ricardo-torrijos": [
     "Ricardo Torrijos",
     "CL",
-    [[444, 86, 4, 4, 0, ["politoed", "incineroar", "gengarmega", "golisopodmega", "rillaboom", "archaludon"]]]
+    [
+      [-45, 60, 4, 3, 0, ["incineroar", "volcarona", "garchomp", "staraptormega", "rillaboom", "floettemega"]],
+      [444, 86, 4, 4, 0, ["politoed", "incineroar", "gengarmega", "golisopodmega", "rillaboom", "archaludon"]]
+    ]
   ],
   "ricardo-zamudio": [
     "Ricardo Zamudio",
@@ -34452,6 +34851,11 @@
     "DE",
     [[443, 1015, 2, 6, 0, ["salamencemega", "basculegion", "lucariomegaz", "incineroar", "espathra", "weavile"]]]
   ],
+  "robson-hamilton": [
+    "Robson Hamilton",
+    "BR",
+    [[-45, 7, 8, 3, 2, ["hippowdon", "staraptormega", "whimsicott", "glimmoramega", "kingambit", "houndstone"]]]
+  ],
   "robson-hamilton-carrea-filho": [
     "Robson Hamilton Carréa Filho",
     "BR",
@@ -34530,6 +34934,11 @@
     "MX",
     [[447, 147, 4, 4, 0, ["armarouge", "torkoal", "sneasler", "golisopodmega", "garchomp", "indeedeef"]]]
   ],
+  "rodrigo-casucci": [
+    "Rodrigo Casucci",
+    "AR",
+    [[-45, 79, 3, 4, 0, ["incineroar", "kingambit", "sinistcha", "sneasler", "floettemega", "delphoxmega"]]]
+  ],
   "rodrigo-cordero-martinez": [
     "Rodrigo Cordero Martínez",
     "MX",
@@ -34543,7 +34952,10 @@
   "rodrigo-gutierrez": [
     "Rodrigo Gutierrez",
     "AR",
-    [[447, 261, 3, 5, 0, ["kommoo", "sneasler", "kingambit", "meowsticmmega", "indeedee", "charizardmegay"]]]
+    [
+      [-45, 51, 4, 3, 0, ["kingambit", "basculegion", "charizardmegay", "sneasler", "garchomp", "whimsicott"]],
+      [447, 261, 3, 5, 0, ["kommoo", "sneasler", "kingambit", "meowsticmmega", "indeedee", "charizardmegay"]]
+    ]
   ],
   "rodrigo-jesus": [
     "Rodrigo Jesus",
@@ -34666,7 +35078,7 @@
       [434, 467, 4, 4, 0, ["garchomp", "sneasler", "vivillon", "ninetalesalola", "delphoxmega", "scizor"]]
     ]
   ],
-  "roi-gomez-garcia": [
+  "roi-gomez-garcia-es": [
     "Roi Gómez García",
     "ES",
     [
@@ -34677,6 +35089,11 @@
       [437, 287, 2, 4, 0, ["garchomp", "aerodactylmega", "sylveon", "charizardmegay", "farigiraf", "kingambit"]],
       [435, 119, 7, 5, 1, ["aegislash", "garchomp", "aerodactylmega", "sylveon", "charizardmegay", "kingambit"]]
     ]
+  ],
+  "roi-gomez-garcia-es-2": [
+    "Roi Gomez Garcia",
+    "ES",
+    [[-45, 36, 4, 3, 0, ["basculegion", "floettemega", "incineroar", "raichumegay", "rillaboom", "volcarona"]]]
   ],
   "roland-barbaza": [
     "Roland Barbaza",
@@ -35690,6 +36107,11 @@
     "UK",
     [[443, 899, 3, 5, 0, ["arcaninehisui", "rillaboom", "gholdengo", "raichumegay", "salamencemega", "sylveon"]]]
   ],
+  "samuel-honorio-ribeiro": [
+    "Samuel Honorio Ribeiro",
+    "BR",
+    [[-45, 25, 5, 4, 1, ["dragonitemega", "sneasler", "basculegion", "kingambit", "garchomp", "floettemega"]]]
+  ],
   "samuel-kidane": [
     "Samuel Kidane",
     "US",
@@ -35756,6 +36178,11 @@
       [436, 37, 10, 3, 1, ["kingambit", "basculegion", "whimsicott", "charizardmegay", "floettemega", "garchomp"]],
       [435, 21, 9, 3, 1, ["kingambit", "basculegion", "whimsicott", "charizardmegay", "floettemega", "garchomp"]]
     ]
+  ],
+  "samuel-pereira-marante": [
+    "Samuel Pereira Marante",
+    "ES",
+    [[-45, 3, 10, 2, 2, ["staraptormega", "raichumegay", "arcaninehisui", "gholdengo", "rillaboom", "milotic"]]]
   ],
   "samuel-raspino": [
     "Samuel Raspino",
@@ -35910,6 +36337,11 @@
     "US",
     [[441, 1023, 1, 7, 0, ["golisopodmega", "rillaboom", "salamencemega", "farigiraf", "arcaninehisui", "sylveon"]]]
   ],
+  "santiago-barbero-renkine": [
+    "Santiago Barbero Renkine",
+    "AR",
+    [[-45, 45, 4, 3, 0, ["floettemega", "rillaboom", "incineroar", "raichumegay", "basculegion", "volcarona"]]]
+  ],
   "santiago-campos": [
     "Santiago Campos",
     "MX",
@@ -35948,6 +36380,11 @@
     "VE",
     [[436, 428, 4, 3, 0, ["sylveon", "charizardmegay", "garchomp", "basculegion", "aerodactylmega", "farigiraf"]]]
   ],
+  "santiago-sempe": [
+    "Santiago Sempe",
+    "AR",
+    [[-45, 61, 4, 3, 0, ["indeedeef", "gardevoirmega", "sneasler", "basculegion", "whimsicott", "salamencemega"]]]
+  ],
   "santino-tarquinio": [
     "Santino Tarquinio",
     "US",
@@ -35973,6 +36410,11 @@
       [448, 308, 4, 4, 0, ["golisopodmega", "raichumegay", "archaludon", "pelipper", "sneasler", "grimmsnarl"]],
       [443, 109, 8, 5, 1, ["golisopodmega", "raichumegay", "archaludon", "pelipper", "rillaboom", "grimmsnarl"]]
     ]
+  ],
+  "sara-paz": [
+    "Sara Paz",
+    "AR",
+    [[-45, 76, 3, 3, 0, ["glimmoramega", "kingambit", "salamencemega", "rillaboom", "volcarona", "garchomp"]]]
   ],
   "sara-sabo": [
     "Sara Sabo",
@@ -36274,6 +36716,7 @@
     "AR",
     [
       [450, 295, 4, 4, 0, ["vivillon", "kommoo", "incineroar", "kingambit", "rillaboom", "gengarmega"]],
+      [-45, 69, 3, 4, 0, ["gengarmega", "incineroar", "kommoo", "rillaboom", "ninetalesalola", "kingambit"]],
       [444, 45, 5, 3, 0, ["farigiraf", "charizardmegay", "incineroar", "sylveon", "venusaur", "dragapult"]],
       [437, 178, 4, 4, 0, ["sneasler", "kingambit", "incineroar", "gengarmega", "ninetalesalola", "dragonite"]]
     ]
@@ -36312,7 +36755,10 @@
   "sebastian-lobos": [
     "Sebastian Lobos",
     "CL",
-    [[437, 225, 3, 5, 0, ["floettemega", "kingambit", "basculegion", "garchomp", "charizardmegay", "whimsicott"]]]
+    [
+      [-45, 23, 6, 3, 1, ["sneasler", "salamencemega", "basculegion", "kingambit", "delphoxmega", "rillaboom"]],
+      [437, 225, 3, 5, 0, ["floettemega", "kingambit", "basculegion", "garchomp", "charizardmegay", "whimsicott"]]
+    ]
   ],
   "sebastian-manuel-alvarez-mercado": [
     "Sebastian Manuel Alvarez Mercado",
@@ -36322,6 +36768,11 @@
       [446, 487, 4, 4, 0, ["volcarona", "floettemega", "indeedeef", "basculegion", "raichumegay", "rillaboom"]],
       [443, 725, 3, 5, 0, ["raichumegay", "gholdengo", "ceruledge", "milotic", "staraptormega", "rillaboom"]]
     ]
+  ],
+  "sebastian-matias-herrera-espinoza": [
+    "Sebastian Matias Herrera Espinoza",
+    "AR",
+    [[-45, 109, 1, 3, 0, ["excadrill", "staraptormega", "sinistcha", "milotic", "gholdengo", "tyranitarmega"]]]
   ],
   "sebastian-mendoza": [
     "Sebastián Mendoza",
@@ -36346,6 +36797,7 @@
     "PE",
     [
       [450, 253, 4, 4, 0, ["incineroar", "froslassmega", "sneasler", "garchomp", "toxapex", "kingambit"]],
+      [-45, 50, 4, 3, 0, ["gengarmega", "incineroar", "rillaboom", "kommoo", "kingambit", "ninetalesalola"]],
       [444, 32, 5, 3, 0, ["grimmsnarl", "charizardmegay", "pelipper", "garchompmegaz", "archaludon", "venusaur"]],
       [437, 139, 4, 4, 0, ["staraptormega", "whimsicott", "delphoxmega", "garchomp", "glimmora", "kingambit"]],
       [436, 303, 5, 3, 0, ["whimsicott", "froslassmega", "sneasler", "basculegion", "arcaninehisui", "kingambit"]]
@@ -36481,6 +36933,7 @@
     "BR",
     [
       [450, 447, 3, 5, 0, ["garchompmegaz", "sneasler", "torkoal", "incineroar", "sylveon", "farigiraf"]],
+      [-45, 93, 2, 4, 0, ["garchompmegaz", "torkoal", "incineroar", "sneasler", "farigiraf", "sylveon"]],
       [444, 11, 8, 3, 2, ["charizardmegay", "farigiraf", "sylveon", "aerodactylmega", "garchomp", "kingambit"]],
       [436, 308, 5, 3, 0, ["garchomp", "whimsicott", "charizardmegay", "kingambit", "basculegion", "floettemega"]]
     ]
@@ -36875,6 +37328,7 @@
     "BR",
     [
       [450, 173, 5, 3, 0, ["sneasler", "floettemega", "gengarmega", "rillaboom", "garchomp", "incineroar"]],
+      [-45, 77, 3, 4, 0, ["salamencemega", "floettemega", "incineroar", "rillaboom", "sneasler", "basculegion"]],
       [444, 60, 5, 3, 0, ["rillaboom", "salamencemega", "arcaninehisui", "raichumegay", "sneasler", "gholdengo"]]
     ]
   ],
@@ -38222,6 +38676,11 @@
       [444, 9, 8, 3, 2, ["sneasler", "armarouge", "gardevoirmega", "indeedeef", "kommoo", "talonflame"]]
     ]
   ],
+  "thiago-lopez": [
+    "Thiago Lopez",
+    "AR",
+    [[-45, 106, 2, 4, 0, ["froslassmega", "kingambit", "scovillainmega", "sneasler", "lycanrocdusk", "basculegion"]]]
+  ],
   "thierry-small": [
     "Thierry Small",
     "UK",
@@ -38292,6 +38751,7 @@
     "AU",
     [
       [450, 292, 4, 4, 0, ["aerodactylmega", "sneasler", "incineroar", "froslassmega", "volcarona", "rillaboom"]],
+      [-45, 83, 3, 4, 0, ["raichumegay", "rillaboom", "pelipper", "sneasler", "archaludon", "garchompmegaz"]],
       [442, 124, 4, 4, 0, ["grimmsnarl", "rillaboom", "golisopodmega", "pelipper", "sneasler", "kingambit"]],
       [437, 314, 2, 6, 0, ["garchompmega", "incineroar", "floettemega", "sinistcha", "kingambit", "sneasler"]]
     ]
@@ -38519,7 +38979,10 @@
   "tianzi-alvarez": [
     "tianzi alvarez",
     "CL",
-    [[450, 436, 3, 5, 0, ["gardevoirmega", "basculegion", "raichumegay", "indeedeef", "incineroar", "whimsicott"]]]
+    [
+      [450, 436, 3, 5, 0, ["gardevoirmega", "basculegion", "raichumegay", "indeedeef", "incineroar", "whimsicott"]],
+      [-45, 102, 2, 5, 0, ["archaludon", "pelipper", "raichumegay", "charizardmegay", "venusaur", "garchomp"]]
+    ]
   ],
   "tidiane-polo": [
     "Tidiane Polo",
@@ -38727,6 +39190,11 @@
     "Tobias Hofmann",
     "DE",
     [[443, 1087, 1, 5, 0, ["basculegion", "gholdengo", "staraptormega", "typhlosionhisui", "garchomp", "whimsicott"]]]
+  ],
+  "tobias-soto": [
+    "Tobias Soto",
+    "AR",
+    [[-45, 115, 1, 5, 0, ["annihilape", "maushold", "archaludon", "rillaboom", "pelipper", "swampertmega"]]]
   ],
   "tobias-zeuch": [
     "Tobias Zeuch",
@@ -40060,6 +40528,7 @@
     "UY",
     [
       [450, 437, 3, 5, 0, ["rillaboom", "volcarona", "raichumegay", "sharpedomega", "milotic", "incineroar"]],
+      [-45, 116, 1, 4, 0, ["floettemega", "garchompmegaz", "rillaboom", "incineroar", "farigiraf", "torkoal"]],
       [444, 213, 0, 1, 0, ["incineroar", "farigiraf", "sylveon", "rillaboom", "charizardmegay", "garchompmegaz"]]
     ]
   ],
@@ -40128,6 +40597,11 @@
       [446, 208, 5, 3, 0, ["pelipper", "archaludon", "garchompmegaz", "golisopodmega", "basculegion", "grimmsnarl"]],
       [443, 77, 9, 4, 1, ["pelipper", "archaludon", "rillaboom", "garchompmegaz", "golisopodmega", "basculegion"]]
     ]
+  ],
+  "weslei-henrique": [
+    "Weslei Henrique",
+    "BR",
+    [[-45, 22, 6, 3, 1, ["sneasler", "dragonitemega", "basculegion", "kingambit", "garchomp", "floettemega"]]]
   ],
   "weslei-henrique-almeida-silva": [
     "Weslei Henrique Almeida Silva",
@@ -40658,6 +41132,7 @@
     "AR",
     [
       [450, 313, 4, 4, 0, ["sneasler", "floettemega", "espathra", "salamencemega", "rillaboom", "incineroar"]],
+      [-45, 18, 6, 3, 1, ["espathra", "incineroar", "rillaboom", "floettemega", "salamencemega", "sneasler"]],
       [444, 125, 4, 4, 0, ["arcaninehisui", "garchompmegaz", "metagrossmega", "sneasler", "milotic", "indeedee"]]
     ]
   ],
@@ -40741,6 +41216,11 @@
       [448, 33, 9, 3, 1, ["garchomp", "charizardmegay", "basculegion", "whimsicott", "sneasler", "kingambit"]],
       [443, 76, 9, 4, 1, ["klefki", "garchomp", "volcarona", "glimmoramega", "archaludon", "salamencemega"]]
     ]
+  ],
+  "yannick-zelaya": [
+    "Yannick Zelaya",
+    "AR",
+    [[-45, 40, 4, 3, 0, ["charizardmegay", "aerodactylmega", "farigiraf", "kingambit", "sylveon", "garchomp"]]]
   ],
   "yash-kale": [
     "Yash Kale",

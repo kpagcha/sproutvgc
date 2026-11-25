@@ -18,10 +18,10 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
   LimitlessVgc,
-  PROVIDER,
   slugOf,
+  standingsInfo,
+  TYPE_OF,
   type ApiListed,
-  type EventType,
   type Known,
   type LiveEvent,
   type Standing,
@@ -75,37 +75,24 @@ function known(): Known {
   }
 }
 
-const TYPES: Record<string, EventType> = {
-  regional: 'regional',
-  international: 'international',
-  worlds: 'worlds',
-  special: 'special',
-  national: 'national',
-}
-
 /** What's known of an event on the standings site before its standings: from the list of those to come (generated
  * before it started, which has its name, number and regulation), matched by its city and start, else from the standings
- * site alone, named after its type and city, of the current regulation. */
+ * site alone (`standingsInfo`), of the current regulation. */
 function infoOf(l: ApiListed, upcoming: UpcomingEvent[], regulation: string) {
-  const start = l.utc_start.slice(0, 10)
+  const alone = standingsInfo(l, regulation)
   const day = (d: string) => Date.parse(`${d}T00:00:00Z`) / 86400000
   const city = toId(l.city)
-  const u = upcoming.find((e) => Math.abs(day(e.date) - day(start)) <= 2 && toId(e.name).includes(city))
-  const type = u?.type ?? TYPES[l.type] ?? 'regional'
-  const name = u?.name ?? `${l.type.charAt(0).toUpperCase()}${l.type.slice(1)} ${l.city}`
-  const date = u?.date ?? start
+  const u = upcoming.find((e) => Math.abs(day(e.date) - day(alone.date)) <= 2 && toId(e.name).includes(city))
+  if (!u) return alone
   return {
-    id: slugOf(name, date),
-    n: u?.n ?? -l.id,
-    name,
-    date,
-    country: l.country ?? u?.country ?? '',
-    players: 0,
-    type,
-    category: 'official' as const,
-    regulation: u?.regulation ?? regulation,
-    provider: PROVIDER,
-    url: `https://standings.limitlessvgc.com/${l.id}/standings`,
+    ...alone,
+    id: slugOf(u.name, u.date),
+    n: u.n,
+    name: u.name,
+    date: u.date,
+    country: l.country ?? u.country,
+    type: u.type ?? TYPE_OF[l.type] ?? 'regional',
+    regulation: u.regulation ?? regulation,
   }
 }
 

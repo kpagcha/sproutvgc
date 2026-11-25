@@ -191,6 +191,30 @@
       "team": ["gholdengo", "excadrill", "tyranitarmega", "staraptormega", "sinistcha", "milotic"]
     }
   },
+  "special-event-buenos-aires-2026": {
+    "id": "special-event-buenos-aires-2026",
+    "n": -45,
+    "name": "Special Event Buenos Aires",
+    "date": "2026-11-14",
+    "country": "AR",
+    "players": 128,
+    "type": "special",
+    "category": "official",
+    "regulation": "M-C",
+    "provider": { "name": "Limitless VGC", "url": "https://limitlessvgc.com/" },
+    "url": "https://standings.limitlessvgc.com/45/standings",
+    "t": 45,
+    "format": 3,
+    "day2": 29,
+    "topCut": 12,
+    "rounds": 13,
+    "teams": 128,
+    "winner": {
+      "player": "Ezequiel Bustamante",
+      "country": "AR",
+      "team": ["baxcaliburmega", "raichumegay", "volcarona", "milotic", "incineroar", "rillaboom"]
+    }
+  },
   "laic-2026-27": {
     "id": "laic-2026-27",
     "n": 450,

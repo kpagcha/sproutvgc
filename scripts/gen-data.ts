@@ -998,7 +998,11 @@ async function main() {
   const regulations = new Set([reg, ...Object.keys(sources.smogon), ...Object.keys(sources.limitlessvgc)])
   for (const r of regulations) {
     if (!sources.limitlessvgc[r] || updateTournaments) {
-      sources.limitlessvgc[r] = await limitless.events(r)
+      sources.limitlessvgc[r] = await limitless.events(
+        r,
+        [...regulations],
+        new Map([...before].map(([n, { event }]) => [n, event.t])),
+      )
       console.log(
         `Pinned Limitless VGC's events of Regulation ${r}: ${sources.limitlessvgc[r].join(', ') || 'none yet'}`,
       )

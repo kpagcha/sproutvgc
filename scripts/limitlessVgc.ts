@@ -2,7 +2,9 @@
 // standings (every player's placing, record, whether they made Day 2 and the top cut, and when they dropped), the team
 // each one brought, as whole sets (Pokémon, item, ability, nature, moves; no stat points, which team lists don't have),
 // and every round's matches. Which events a regulation has, and of what type, comes from limitlessvgc.com's lists, whose
-// event pages link their standings; the standings, matches and team lists come from the JSON its standings site
+// event pages link their standings, and from the standings site's own list for an event over there that limitlessvgc.com
+// lists under no regulation (it can take weeks to, or never, for one not run on RK9: Special Event Buenos Aires 2026,
+// PlayLatam's), by date (`events`); the standings, matches and team lists come from the JSON its standings site
 // (standings.limitlessvgc.com) loads, undocumented (`mew.limitlesstcg.com/labs/data/vgc`): one request for the
 // standings, one per round for its matches, and one per player for their team list, about a thousand for a Regional.
 // So the requests are paced (a few at once, at most 8 a second), say who's asking (`get`'s User-Agent, set by the generator), and are made
@@ -40,7 +42,8 @@ export const FORMAT = 3
 export interface TournamentEvent {
   /** Its name as a slug, with its year (`slugOf`): its page's address. */
   id: string
-  /** Its number on Limitless VGC, short, for the IDs of several events picked together. */
+  /** Its number on Limitless VGC, short, for the IDs of several events picked together; for one limitlessvgc.com
+   * doesn't list, its number on the standings site negated. */
   n: number
   /** Its number on the standings site. */
   t: number
@@ -166,6 +169,8 @@ export interface ApiListed {
   type: string
   city: string
   country: string | null
+  /** Its days, where it's held ("October 31–November 1, 2026"). */
+  date?: string
   /** When it started, in UTC ("2026-10-24 14:30:00"). */
   utc_start: string
   started: number
@@ -254,9 +259,56 @@ export class LimitlessVgc {
     return body.message
   }
 
-  /** Every event of a regulation, oldest first, by its number on limitlessvgc.com. */
-  async events(regulation: string): Promise<number[]> {
-    return [...(await this.listed(regulation)).keys()].sort((a, b) => a - b)
+  /**
+   * Every event of a regulation, oldest first: those limitlessvgc.com lists under it, by their number there, and those
+   * over on the standings site that it lists under none of `regulations` (theirs told by the standings their pages
+   * link: `generated`'s, by their number there, else read from the page), by their number there negated, each under
+   * the regulation of `regulations` started last by its start (each one's first listed event).
+   */
+  async events(
+    regulation: string,
+    regulations: readonly string[],
+    generated: ReadonlyMap<number, number>,
+  ): Promise<number[]> {
+    const lists = new Map<string, Map<number, EventInfo>>()
+    for (const r of regulations) lists.set(r, await this.listed(r))
+    if (!this.covered) {
+      this.covered = new Set()
+      for (const list of lists.values())
+        for (const [n, info] of list) {
+          const t = generated.get(n) ?? (await this.standingsNumber(n, info))
+          if (t) this.covered.add(t)
+        }
+    }
+    const covered = this.covered
+    const starts = [...lists]
+      .flatMap(([r, list]) => (list.size ? [[r, [...list.values()].map((e) => e.date).sort()[0]!] as const] : []))
+      .sort((a, b) => b[1].localeCompare(a[1]))
+    const unlisted = (await this.standingsList())
+      .filter((l) => l.completed && !covered.has(l.id) && TYPE_OF[l.type])
+      .map((l) => standingsInfo(l, regulation))
+      .filter((info) => starts.find(([, start]) => start <= info.date)?.[0] === regulation)
+    for (const info of unlisted)
+      console.log(`Limitless VGC's ${info.name} is on the standings site alone: taken from there`)
+    return [...lists.get(regulation)!.values(), ...unlisted]
+      .sort((a, b) => a.date.localeCompare(b.date) || a.n - b.n)
+      .map((e) => e.n)
+  }
+
+  /** The standings site's events limitlessvgc.com lists, by their number there, once read (`events`). */
+  private covered?: Set<number>
+
+  /** The standings site's list of its events: read again when updating, else through the cache. */
+  private async standingsList(): Promise<ApiListed[]> {
+    return this.api<ApiListed[]>('tournaments', 'lists/standings.json', this.update)
+  }
+
+  /** The number on the standings site of an event limitlessvgc.com lists, from the link on its page, if it has one. */
+  private async standingsNumber(n: number, info: Pick<EventInfo, 'name'>): Promise<number | undefined> {
+    const page = await this.cached(`${SITE}/tournaments/${n}`, `events/${n}.html`)
+    const t = Number(page.match(/standings\.limitlessvgc\.com\/(\d+)\/standings/)?.[1])
+    if (!t) console.warn(`Limitless VGC's ${info.name} links no standings yet`)
+    return t || undefined
   }
 
   /** The events still to come, soonest first, from its list of them: read again when updating, else through the cache;
@@ -305,21 +357,28 @@ export class LimitlessVgc {
     known: Known,
     strict: boolean,
   ): Promise<{ event: TournamentEvent; standings: Standing[]; rounds: Record<number, Round> } | null> {
-    const info = (await this.listed(regulation)).get(n)
-    if (!info) throw new Error(`Limitless VGC doesn't list event ${n} under Regulation ${regulation}`)
+    let info: EventInfo | undefined
     try {
+      // One limitlessvgc.com doesn't list (`events`), from the standings site's list.
+      if (n < 0) {
+        const l = (await this.standingsList()).find((e) => e.id === -n)
+        if (!l) throw new Error(`Limitless VGC's standings site has no event ${-n}`)
+        info = standingsInfo(l, regulation)
+      } else {
+        info = (await this.listed(regulation)).get(n)
+        if (!info) throw new Error(`Limitless VGC doesn't list event ${n} under Regulation ${regulation}`)
+      }
       return await this.read(n, info, regulation, known, strict)
     } catch (error) {
       if (!(error instanceof Offline)) throw error
-      console.warn(`Limitless VGC's ${info.name} isn't all in the cache: left out (offline)`)
+      console.warn(`Limitless VGC's ${info?.name ?? `event ${n}`} isn't all in the cache: left out (offline)`)
       return null
     }
   }
 
   private async read(n: number, info: EventInfo, regulation: string, known: Known, strict: boolean) {
-    // Its page links its standings, by their number there.
-    const page = await this.cached(`${SITE}/tournaments/${n}`, `events/${n}.html`)
-    const t = Number(page.match(/standings\.limitlessvgc\.com\/(\d+)\/standings/)?.[1])
+    // Its page links its standings, by their number there; one it doesn't list is by that number already.
+    const t = n < 0 ? -n : await this.standingsNumber(n, info)
     if (!t) throw new Error(`Limitless VGC's ${info.name} links no standings`)
     // Until it's over, its state is read again each run; once it is, what's cached is final.
     const cachedOver = (() => {
@@ -602,6 +661,69 @@ function typeOf(name: string): EventType | undefined {
   if (/master ball league/i.test(name)) return 'masterBallLeague'
   if (/national/i.test(name)) return 'national'
   return undefined
+}
+
+/** An event's type by the standings site's. */
+export const TYPE_OF: Partial<Record<string, EventType>> = {
+  regional: 'regional',
+  international: 'international',
+  worlds: 'worlds',
+  special: 'special',
+  national: 'national',
+}
+
+/** How the standings site's types are named, for an event it alone names (it has its city alone). */
+const TYPE_NAMES: Partial<Record<string, string>> = {
+  regional: 'Regional',
+  special: 'Special Event',
+  international: 'International',
+  national: 'National Championships',
+  worlds: 'World Championships',
+}
+
+const MONTHS = [
+  'january',
+  'february',
+  'march',
+  'april',
+  'may',
+  'june',
+  'july',
+  'august',
+  'september',
+  'october',
+  'november',
+  'december',
+]
+
+/** The day an event on the standings site starts where it's held, from its days ("October 31–November 1, 2026"), else
+ * its start in UTC (a day early for one held east of it). */
+function startOf(l: ApiListed): string {
+  const m = l.date?.match(/^([A-Za-z]+) (\d{1,2})\b.*\b(\d{4})$/)
+  const month = m ? MONTHS.indexOf(m[1]!.toLowerCase()) : -1
+  return m && month >= 0
+    ? `${m[3]}-${String(month + 1).padStart(2, '0')}-${m[2]!.padStart(2, '0')}`
+    : l.utc_start.slice(0, 10)
+}
+
+/** What's known of an event from the standings site's list alone (one limitlessvgc.com doesn't list): named after its
+ * type and city ("Special Event Buenos Aires"), its `n` its number there negated, its page its standings. */
+export function standingsInfo(l: ApiListed, regulation: string): EventInfo {
+  const name = `${TYPE_NAMES[l.type] ?? `${l.type.charAt(0).toUpperCase()}${l.type.slice(1)}`} ${l.city}`
+  const date = startOf(l)
+  return {
+    id: slugOf(name, date),
+    n: -l.id,
+    name,
+    date,
+    country: l.country ?? '',
+    players: 0,
+    type: TYPE_OF[l.type] ?? 'regional',
+    category: 'official',
+    regulation,
+    provider: PROVIDER,
+    url: `${STANDINGS}/${l.id}/standings`,
+  }
 }
 
 /** `task` on each of `items`, `PARALLEL` at a time, failing as soon as one does. */

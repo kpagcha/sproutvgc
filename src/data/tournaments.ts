@@ -390,7 +390,7 @@ export function tournamentSnapshot(
 
 /** The snapshot an ID names (`tournaments-mc`, `tournaments-mc~445.446@day2`), if its regulation has those events. */
 export function tournamentSnapshotOf(id: string): MetaSnapshot | undefined {
-  const m = id.match(/^tournaments-([a-z0-9]+)(?:~([\d.]+))?(@day2|@topcut)?$/)
+  const m = id.match(/^tournaments-([a-z0-9]+)(?:~([\d.-]+))?(@day2|@topcut)?$/)
   if (!m) return undefined
   const regulation = EVENTS.find((e) => regulationKey(e.regulation) === m[1])?.regulation
   if (!regulation) return undefined
