@@ -125,7 +125,8 @@ watch(
   () => (unfolded.value = {}),
 )
 
-const otherId = computed(() => battlerOf(props.other))
+// On the Meta tab yours stands alone: the opponent the URL still keeps (`?b=`) isn't on it.
+const otherId = computed(() => (props.alone ? null : battlerOf(props.other)))
 const otherName = computed(() => (otherId.value ? refName(pokemon(otherId.value)) : null))
 // Each of its four moves a row, in its place (the set's card leaving them out): a status move's as the rest's, dimmed,
 // with no damage; one not picked yet a placeholder picking it; with no other side, their names alone.
