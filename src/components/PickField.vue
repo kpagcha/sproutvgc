@@ -1,20 +1,21 @@
 <script setup lang="ts">
-import { ChevronDown, CircleHelp } from '@lucide/vue'
+import { ChevronDown, Plus } from '@lucide/vue'
 import { pokemon, type PokemonId } from '@/data/dex'
 import { refName } from '@/i18n/refName'
 import PokemonIcon from '@/components/PokemonIcon'
 
 // What opens a drawer's picking (the speed pages', `SpeedPickDrawer`): drawn as a field, the one picked's icon and name
-// in it, or none picked a silhouette and what it asks for, an arrow at its end.
+// in it and an arrow at its end, or none picked a plus and what it asks for in a dashed box, as the damage calculator's
+// (`CalcSide`'s `pick-mon`).
 defineProps<{ id: PokemonId | null; placeholder: string }>()
 </script>
 
 <template>
   <button type="button" class="pick-field" :class="{ empty: !id }">
     <PokemonIcon v-if="id" :id />
-    <CircleHelp v-else class="who" :size="20" aria-hidden="true" />
+    <Plus v-else class="who" :size="18" aria-hidden="true" />
     <span class="pick-name">{{ id ? refName(pokemon(id)) : placeholder }}</span>
-    <ChevronDown class="caret" :size="16" aria-hidden="true" />
+    <ChevronDown v-if="id" class="caret" :size="16" aria-hidden="true" />
   </button>
 </template>
 
@@ -40,12 +41,19 @@ defineProps<{ id: PokemonId | null; placeholder: string }>()
   background: var(--panel-alt);
 }
 .pick-field.empty {
-  font-weight: normal;
+  gap: 8px;
+  padding: 6px 12px;
   color: var(--muted);
+  border: 2px dashed var(--border);
+}
+.pick-field.empty:hover,
+.pick-field.empty:focus-visible {
+  color: var(--link);
+  background: var(--panel);
+  border-color: var(--link);
 }
 .who {
   flex: none;
-  margin: 0 4px;
 }
 .pick-name {
   flex: 1;
