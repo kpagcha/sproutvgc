@@ -104,7 +104,9 @@ type Theirs = Build & { w: number; spread: number; itemIdx: number }
 type Rolled = { rolls: readonly number[]; saved: boolean; sitrus: boolean } | null
 
 export function goalDamage(input: GoalInput): { total: number; steps: Generator<unknown, GoalResult | null> } {
-  const { field, obs, workYours, workTheirs } = input
+  const { field, workYours, workTheirs } = input
+  // Yours and the opponent alone: what was seen with a partner (`with`) is the opponent's build's to narrow, not yours'.
+  const obs = input.obs.filter((o) => !o.with)
   const none = {
     total: 0,
     steps: (function* () {

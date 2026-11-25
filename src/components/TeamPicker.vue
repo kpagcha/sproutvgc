@@ -64,6 +64,8 @@ const props = defineProps<{
   /** Whose set it is, when that's one of two sides (the damage calculator's): its heading a band in that side's
    * color, its Pokémon step saying whose. */
   side?: 'yours' | 'opponent'
+  /** What would break the rules can't be picked (the damage solver's two of a side), rather than only faded. */
+  strict?: boolean
 }>()
 const emit = defineEmits<{
   pick: [value: string]
@@ -200,6 +202,7 @@ const recentRows = computed(() => {
   })
 })
 function pickRow(id: PokemonId) {
+  if (props.strict && monClash(id)) return
   recordPick(id)
   emit('pick', id)
 }
@@ -434,7 +437,13 @@ const termRows = useId()
             </div>
             <div v-else class="group">{{ t(GROUPS[h.group]) }}</div>
           </template>
-          <button type="button" class="row" :class="{ on: r.on, clash: r.clash }" @click="pickRow(r.id)">
+          <button
+            type="button"
+            class="row"
+            :class="{ on: r.on, clash: r.clash }"
+            :disabled="strict && !!r.clash"
+            @click="pickRow(r.id)"
+          >
             <PokemonIcon :id="r.id" />
             <span class="row-name"
               ><Marked v-if="r.parts" :p="r.parts" /><template v-else>{{ r.name }}</template
@@ -504,6 +513,7 @@ const termRows = useId()
             type="button"
             class="row stacked"
             :class="{ on: member.item === r.id, clash: r.clash }"
+            :disabled="strict && !!r.clash"
             @click="emit('pick', r.id)"
           >
             <ItemIcon :id="r.id" />
@@ -716,6 +726,9 @@ const termRows = useId()
 }
 .row.clash .row-name {
   color: var(--muted);
+}
+.row.clash:disabled {
+  cursor: not-allowed;
 }
 .clash-note {
   display: block;

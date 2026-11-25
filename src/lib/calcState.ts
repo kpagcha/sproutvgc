@@ -31,7 +31,7 @@ import {
 import { emptyMember, MOVE_SLOTS, stoneMega, type Points } from '@/lib/team'
 import { MAX_POINTS } from '@/lib/stats'
 import { TTL } from '@/lib/tiersState'
-import type { HitSeen, Saw } from '@/lib/damageReverse'
+import type { HitSeen, Partner, Saw } from '@/lib/damageReverse'
 
 const SIDE_CODES: Record<SideEffect, string> = {
   reflect: 'R',
@@ -194,7 +194,8 @@ export function decodeField(s: unknown): Battlefield {
 // (`a` yours, `b` the opponent's) and its ID, then what it did (`p<n>` the opponent's HP lost in percent, `h<n>` yours'
 // in HP, `k` a knockout, `l` survived, `t` knocked out on the second hit), then `b<n>` the defender's HP before (the
 // opponent's in percent, yours' in HP; full unless given), `o` a number as a goal, that or better for yours (`bound`),
-// `c` a critical hit, `s` one target alone.
+// `c` a critical hit, `s` one target alone, `wc` or `wd` against a partner rather than yours (`HitSeen`'s `with`:
+// yours', `c`, or the opponent's, `d`).
 const SAW_CODES = { ko: 'k', lived: 'l', two: 't' } as const
 export function encodeHits(hits: readonly HitSeen[]): string {
   return hits
@@ -208,6 +209,7 @@ export function encodeHits(hits: readonly HitSeen[]): string {
         'n' in w && w.bound && 'o',
         h.opts?.crit && 'c',
         h.opts?.single && 's',
+        h.with && `w${h.with}`,
       ]
         .filter(Boolean)
         .join('-')
@@ -226,6 +228,7 @@ export function decodeHits(s: unknown): HitSeen[] {
     let crit = false
     let single = false
     let bound = false
+    let partner: Partner | undefined
     for (const c of codes) {
       const num = /^([phb])(\d+)$/.exec(c)
       if (num?.[1] === 'b') before = clamp(Number(num[2]), 1, by === 'a' ? 100 : 9999)
@@ -234,6 +237,7 @@ export function decodeHits(s: unknown): HitSeen[] {
       else if (c === 'c') crit = true
       else if (c === 'o') bound = true
       else if (c === 's') single = true
+      else if (c === 'wc' || c === 'wd') partner = c[1] as Partner
       else {
         const kind = (Object.keys(SAW_CODES) as (keyof typeof SAW_CODES)[]).find((k) => SAW_CODES[k] === c)
         if (kind) saw = { kind }
@@ -242,7 +246,16 @@ export function decodeHits(s: unknown): HitSeen[] {
     if (!saw) return []
     if (bound && 'n' in saw) saw = { ...saw, bound }
     const opts: HitOptions = { ...(crit && { crit }), ...(single && { single }) }
-    return [{ by, move, saw, ...(before !== undefined && { before }), ...(Object.keys(opts).length && { opts }) }]
+    return [
+      {
+        by,
+        move,
+        saw,
+        ...(before !== undefined && { before }),
+        ...(Object.keys(opts).length && { opts }),
+        ...(partner && { with: partner }),
+      },
+    ]
   })
 }
 
@@ -262,6 +275,12 @@ export interface CalcQuery {
   h?: string
   /** Read backwards, which was seen moving first: `a` or `b`. */
   first?: string
+  /** The solver's partners on the field (`encodeFighter`): yours' (`c`) and the opponent's (`d`). */
+  c?: string
+  d?: string
+  /** Which was seen moving first between each partner (`a`) and the opponent (`b`). */
+  firstc?: string
+  firstd?: string
 }
 export function readLast(): CalcQuery {
   try {
@@ -284,6 +303,10 @@ export function saveLast(q: CalcQuery) {
       now.f === q.f &&
       now.h === q.h &&
       now.first === q.first &&
+      now.c === q.c &&
+      now.d === q.d &&
+      now.firstc === q.firstc &&
+      now.firstd === q.firstd &&
       now.work === q.work &&
       now.awork === q.awork
     )

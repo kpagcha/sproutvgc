@@ -10,6 +10,10 @@
 // What the hits hang on of the opponent are a few stats, so each is worked out once per value they can have (at every
 // nature and point, their values repeat), not per build; and the items that can't change a move's damage (`inert`,
 // `takenInert`) count as one.
+//
+// In doubles there are two more on the field, each known as yours is (`partners`): your partner and the opponent's. A
+// hit or order seen with one (`with`) is against it rather than yours: its hits on the opponent narrow its bulk too, the
+// opponent's on it its power, and which of the two moved first its Speed. The opponent alone is worked out.
 
 import type { ItemId, MoveId } from '@/data/dex'
 import type { PokemonMeta } from '@/data/meta'
@@ -49,12 +53,21 @@ export interface HitSeen {
   opts?: HitOptions
   /** The defender's HP before it: the opponent's in percent (as the game shows it), yours' in HP; full unless said. */
   before?: number
+  /** Another on the field in yours' place (`Partner`): your partner, or the opponent's own partner (its hits on the
+   * opponent, `a`, and the opponent's on it, `b`, its HP in percent as the opponent's is). */
+  with?: Partner
 }
+/** The two more on the field in doubles: your partner (`c`) and the opponent's (`d`), each known, as yours is. */
+export type Partner = 'c' | 'd'
+/** Whether a hit's defender is shown in percent (the opponent's side: the opponent, or its partner), not in HP. */
+export const inPercent = (h: { by: 'a' | 'b'; with?: Partner }) => h.by === 'a' || h.with === 'd'
 /** Which of the two was seen moving first, with moves of the same priority: its Speed against yours, as the calc has
  * them (stages, item, ability, Tailwind, paralysis; Trick Room turning it over), a tie fitting half the time. */
 export interface SpeedSeen {
   by: 'speed'
+  /** `a` the other (yours, or the partner `with`), `b` the opponent. */
   first: 'a' | 'b'
+  with?: Partner
 }
 export type Observation = HitSeen | SpeedSeen
 
@@ -200,6 +213,8 @@ export interface ReverseInput {
   /** The opponent, as the calc has it: its HP, stages, side and the rest kept; what's worked out of it (`work`) not. */
   theirs: Fighter
   field: Battlefield
+  /** The partners on the field, as the calc has them: a hit or order `with` one is against it rather than yours. */
+  partners?: Partial<Record<Partner, Fighter>>
   /** The meta's entry of the opponent's battler (a stone holder's, its Mega's). */
   entry: PokemonMeta | undefined
   /** What of the opponent's set is worked out; what isn't is as set (no nature, a neutral one; no item, none). */
@@ -286,23 +301,38 @@ type Build = { nature: string | null; points: readonly number[]; item: ItemId | 
  * many steps, for the progress shown.
  */
 export function reverseDamage(input: ReverseInput): { total: number; steps: Generator<unknown, ReverseResult | null> } {
-  const { field, entry, work, obs } = input
+  const { field, entry, work } = input
   // Each at full HP but as a hit seen says it was (`before`), the defender's.
   const yours: Fighter = { ...input.yours, hp: 100 }
   const theirs: Fighter = { ...input.theirs, hp: 100 }
-  const yourMaxHp = statsOf(yours)?.hp ?? 1
-  const yoursAt = new Map<number, Fighter>()
-  /** Yours with `points` HP left, made once per number. */
-  const yoursWith = (points: number | undefined) => {
-    if (points === undefined || points >= yourMaxHp) return yours
-    let f = yoursAt.get(points)
-    if (!f) yoursAt.set(points, (f = { ...yours, hp: (Math.max(1, points) / yourMaxHp) * 100 }))
-    return f
+  // The partners, at full HP; one missing, the hits with it count for nothing (left out below).
+  const partners: Partial<Record<Partner, Fighter>> = {}
+  for (const k of ['c', 'd'] as const) {
+    const f = input.partners?.[k]
+    if (f && battlerOf(f)) partners[k] = { ...f, hp: 100 }
+  }
+  /** The one a hit or order is against, in the opponent's place's other end: yours, or the partner it's with. */
+  const otherOf = (o: HitSeen | SpeedSeen) => (o.with ? partners[o.with] : yours)
+  const atHp = new Map<string, Fighter>()
+  /** The other with what it had left before a hit (yours' and your partner's in HP, the opponent's partner's in
+   * percent), made once per number. */
+  const otherWith = (o: HitSeen) => {
+    const f = otherOf(o)!
+    if (o.before === undefined) return f
+    const pct = inPercent(o)
+    const max = pct ? 100 : (statsOf(f)?.hp ?? 1)
+    if (o.before >= max) return f
+    const key = `${o.with ?? 'a'}|${o.before}`
+    let g = atHp.get(key)
+    if (!g) atHp.set(key, (g = { ...f, hp: (Math.max(pct ? 0.01 : 1, o.before) / max) * 100 }))
+    return g
   }
   /** The opponent's HP before a hit, in percent. */
   const theirHp = (o: Observation) => (o.by === 'a' ? Math.min(100, Math.max(0.01, o.before ?? 100)) : 100)
   const id = battlerOf(theirs)
   const m = theirs.member
+  // What was seen with a partner not on the field, left out.
+  const obs = input.obs.filter((o) => !o.with || partners[o.with])
   if (!id || !battlerOf(yours) || !obs.length)
     return {
       total: 0,
@@ -316,7 +346,7 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
   const plans = obs.map((o) => {
     if (o.by === 'speed') return { o, calc: [5], used: [5] }
     if (o.by === 'a') {
-      const { calc, used } = takenStats(o.move, yours, field)
+      const { calc, used } = takenStats(o.move, otherOf(o)!, field)
       return { o, calc, used }
     }
     const calc = dealtStats(o.move, theirs)
@@ -429,7 +459,13 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
   }
   total = toHit.size + groupList.length * itemList.length
 
-  const yourSpeed = speedOf(yours, field)
+  const otherSpeed = new Map<Partner | 'a', number | null>()
+  /** The Speed of the one an order was seen against, as the calc has it. */
+  const speedAgainst = (o: SpeedSeen) => {
+    const k = o.with ?? 'a'
+    if (!otherSpeed.has(k)) otherSpeed.set(k, speedOf(otherOf(o)!, field))
+    return otherSpeed.get(k)!
+  }
   const speedMemo = new Map<string, number>()
   function* steps(): Generator<unknown, ReverseResult | null> {
     for (const { pi, ii, gi } of jobs) {
@@ -446,7 +482,8 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
             const points = [...m.points]
             points[5] = p
             const theirSpeed = speedOf(fighterAt({ nature: rep, points, item }), field)
-            const lead = yourSpeed === null || theirSpeed === null ? null : leadOf(yourSpeed, theirSpeed, field)
+            const mine = speedAgainst(o)
+            const lead = mine === null || theirSpeed === null ? null : leadOf(mine, theirSpeed, field)
             fit = lead === null ? 1 : lead === 'tie' ? 0.5 : (lead === 'a') === (o.first === 'a') ? 1 : 0
             speedMemo.set(key, fit)
             yield
@@ -465,11 +502,11 @@ export function reverseDamage(input: ReverseInput): { total: number; steps: Gene
           const points = [...m.points]
           calc.forEach((s, k) => (points[s] = pts[k]!))
           const cand = fighterAt({ nature: rep, points, item }, theirHp(o))
-          const def = o.by === 'b' ? yoursWith(o.before) : yours
+          const other = o.by === 'b' ? otherWith(o) : otherOf(o)!
           try {
             const opts = { ...o.opts, lean: true }
-            const h = o.by === 'a' ? hit(yours, cand, o.move, field, opts) : hit(cand, def, o.move, field, opts)
-            r = h && { h, d: o.by === 'a' ? defendedOf(h, cand, yours, field) : defendedOf(h, def, cand, field) }
+            const h = o.by === 'a' ? hit(other, cand, o.move, field, opts) : hit(cand, other, o.move, field, opts)
+            r = h && { h, d: o.by === 'a' ? defendedOf(h, cand, other, field) : defendedOf(h, other, cand, field) }
           } catch (e) {
             console.error(`Reverse: ${o.move} left out`, e)
             r = null

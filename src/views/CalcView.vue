@@ -36,7 +36,14 @@ import {
   saveLast,
 } from '@/lib/calcState'
 import { goalDamage, type GoalBuild } from '@/lib/damageGoal'
-import { NEUTRAL, reverseDamage, type HitSeen, type Observation, type OpponentUnknowns } from '@/lib/damageReverse'
+import {
+  NEUTRAL,
+  reverseDamage,
+  type HitSeen,
+  type Observation,
+  type OpponentUnknowns,
+  type Partner,
+} from '@/lib/damageReverse'
 import {
   abilityOf,
   atSets,
@@ -58,6 +65,7 @@ import {
   usesAttacked,
   usesFainted,
   SETS_FIELD,
+  SIDE_GROUPS,
   type Battlefield,
   type Fighter,
   type Hit,
@@ -66,7 +74,8 @@ import { membersPaste, parsePaste } from '@/lib/pokepaste'
 import { copy } from '@/lib/clipboard'
 import { toTopAt, underBand } from '@/lib/scroll'
 import { commonForme, commonMember } from '@/lib/commonSet'
-import { emptyMember, nextField, pickedAs, setsAs, stoneMega, type Field, type Member } from '@/lib/team'
+import { clashesOf, emptyMember, nextField, pickedAs, setsAs, stoneMega, type Field, type Member } from '@/lib/team'
+import { RULES } from '@/data/rules'
 import { conditionName, fieldOf, terrainOf, weatherOf } from '@/components/calcConditions'
 import CalcConditions from '@/components/CalcConditions.vue'
 import CalcConditionSearch from '@/components/CalcConditionSearch.vue'
@@ -197,6 +206,17 @@ const { height: navH } = useElementSize(() => nav.value?.$el as HTMLElement | un
 
 type SideKey = 'a' | 'b'
 const sides = shallowRef<Record<SideKey, Fighter>>({ a: emptyFighter(), b: emptyFighter() })
+/** The solver's partners on the field, as doubles has them: yours' (`c`) and the opponent's (`d`), each known as yours
+ * is, so what was seen with them (their hits on the opponent, its on them, which moved first) narrows the opponent too.
+ * Added from the dashed slots over the hits (`?c=`, `?d=`). */
+const partners = shallowRef<Partial<Record<Partner, Fighter>>>({})
+const PARTNERS = ['c', 'd'] as const
+/** Anyone on the solver's field: the two sides, and the partners. */
+type Slot = SideKey | Partner
+const NO_ONE = emptyFighter()
+const fighterOf = (k: Slot): Fighter => (k === 'a' || k === 'b' ? sides.value[k] : (partners.value[k] ?? NO_ONE))
+/** Whose side one is on: yours and your partner, or the opponent and its. */
+const toneOf = (k: Slot) => (k === 'a' || k === 'c' ? 'yours' : 'opponent')
 const field = shallowRef<Battlefield>(emptyField())
 
 // Its setup: the URL's, else as last left; with neither, empty.
@@ -210,15 +230,27 @@ const hits = shallowRef<HitDraft[]>(
 )
 /** Which was seen moving first (`?first=a|b`). */
 const first = shallowRef<'a' | 'b' | null>(start.first === 'a' || start.first === 'b' ? start.first : null)
+const firstOf = (v: unknown) => (v === 'a' || v === 'b' ? v : null)
+/** Which was seen moving first between each partner (`a`) and the opponent (`b`) (`?firstc=`, `?firstd=`). */
+const firsts = shallowRef<Partial<Record<Partner, 'a' | 'b' | null>>>({
+  c: firstOf(start.firstc),
+  d: firstOf(start.firstd),
+})
 /** The tour's example on the page (`solverExample`), kept out of the URL. */
 const example = shallowRef<SolverExample | null>(null)
 /** The damage tab's tour's example on the page (`damageExample`), kept out of the URL too. */
 const damageEx = shallowRef<DamageExample | null>(null)
 const inExample = computed(() => !!example.value || !!damageEx.value)
-/** The hits seen with a move and a result: what's kept and worked out. */
-const seen = computed(() => hits.value.filter((h): h is HitSeen => !!h.move && !!h.saw))
+/** The hits seen with a move and a result: what's kept and worked out (a partner's while it's on the field). */
+const seen = computed(() =>
+  hits.value.filter((h): h is HitSeen => !!h.move && !!h.saw && (!h.with || !!partners.value[h.with])),
+)
 const observations = computed<Observation[]>(() => [
   ...(first.value ? [{ by: 'speed' as const, first: first.value }] : []),
+  ...PARTNERS.flatMap((k) => {
+    const f = firsts.value[k]
+    return f && partners.value[k] ? [{ by: 'speed' as const, first: f, with: k }] : []
+  }),
   ...seen.value,
 ])
 sides.value = {
@@ -226,6 +258,12 @@ sides.value = {
   b: decodeFighter(start.b) ?? emptyFighter(),
 }
 field.value = decodeField(start.f)
+partners.value = Object.fromEntries(
+  PARTNERS.flatMap((k) => {
+    const f = decodeFighter(start[k])
+    return f && battlerOf(f) ? [[k, f]] : []
+  }),
+)
 /**
  * What of the opponent's set the inverse tab works out (`?work=`: `nat`, `item`, `pts`, comma-separated, or `none`).
  * Unsaid, as it was before it could be picked: at its team sheet (`?sheet=1`) its points alone; else its nature, its
@@ -306,11 +344,16 @@ const query = computed(() => ({
       : undefined,
   h: encodeHits(seen.value) || undefined,
   first: first.value ?? undefined,
+  c: (partners.value.c && encodeFighter(partners.value.c)) || undefined,
+  d: (partners.value.d && encodeFighter(partners.value.d)) || undefined,
+  firstc: (partners.value.c && firsts.value.c) || undefined,
+  firstd: (partners.value.d && firsts.value.d) || undefined,
 }))
 /** The URL's query with the setup in it, the rest of it kept. */
 function urlOf(q: typeof query.value) {
   const next = { ...route.query, ...q }
-  for (const k of ['a', 'b', 'f', 'sheet', 'work', 'awork', 'h', 'first'] as const) if (!q[k]) delete next[k]
+  for (const k of ['a', 'b', 'f', 'sheet', 'work', 'awork', 'h', 'first', 'c', 'd', 'firstc', 'firstd'] as const)
+    if (!q[k]) delete next[k]
   return next
 }
 watchDebounced(
@@ -326,16 +369,16 @@ watchDebounced(
 
 // The pooled stats a side at every set battles with are the page's, from the meta shown (`fought`), never kept.
 // Another Pokémon, its moves' options (crit, single target…) start over.
-const setSide = (k: SideKey, f: Fighter) =>
-  (sides.value = {
-    ...sides.value,
-    [k]: {
-      ...f,
-      pooled: undefined,
-      ...(f.member.pokemon !== sides.value[k].member.pokemon &&
-        f.hitOpts === sides.value[k].hitOpts && { hitOpts: undefined }),
-    },
-  })
+function setSide(k: Slot, f: Fighter) {
+  const was = fighterOf(k)
+  const next = {
+    ...f,
+    pooled: undefined,
+    ...(f.member.pokemon !== was.member.pokemon && f.hitOpts === was.hitOpts && { hitOpts: undefined }),
+  }
+  if (k === 'a' || k === 'b') sides.value = { ...sides.value, [k]: next }
+  else partners.value = { ...partners.value, [k]: next }
+}
 // What was seen is of these two: another Pokémon on either side, or the two swapped, it goes.
 watch(
   () => [sides.value.a.member.pokemon, sides.value.b.member.pokemon] as const,
@@ -343,8 +386,26 @@ watch(
     if (a === wasA && b === wasB) return
     hits.value = []
     first.value = null
+    firsts.value = {}
   },
 )
+// A partner gone or another in its place: what was seen with it goes.
+watch(
+  () => PARTNERS.map((k) => partners.value[k]?.member.pokemon ?? null),
+  (now, was) =>
+    PARTNERS.forEach((k, i) => {
+      if (now[i] === was[i]) return
+      hits.value = hits.value.filter((h) => h.with !== k)
+      firsts.value = { ...firsts.value, [k]: null }
+    }),
+)
+/** A partner taken off the field, with what was seen of it. */
+function removePartner(k: Partner) {
+  const next = { ...partners.value }
+  delete next[k]
+  partners.value = next
+  if (picking.value?.side === k) picking.value = null
+}
 /** A build of What fits used: the opponent set to what was worked out of it (its points, its nature, and the item
  * likeliest to go with it), the damage tab shown with it. */
 function useBuild(b: { nature: string | null; points: Member['points']; item?: ItemId | null }) {
@@ -377,15 +438,50 @@ const fought = computed(() => ({
   a: atSets(yoursWorked.value ? { ...sides.value.a, sets: false } : sides.value.a, data.value),
   b: atSets(sides.value.b, data.value),
 }))
-const patchMember = (k: SideKey, patch: Partial<Member>) =>
-  setSide(k, { ...sides.value[k], member: { ...sides.value[k].member, ...patch } })
+/** The partners as they battle: under their side's screens and Tailwind (what's on the whole side, yours' for yours',
+ * the opponent's for its), not what's on the Pokémon alone. */
+const TEAM_WIDE = new Set<string>(SIDE_GROUPS.side)
+const foughtPartners = computed(() => {
+  const out: Partial<Record<Partner, Fighter>> = {}
+  for (const k of PARTNERS) {
+    const f = partners.value[k]
+    if (!f || !battlerOf(f)) continue
+    const team = sides.value[k === 'c' ? 'a' : 'b'].side.filter((e) => TEAM_WIDE.has(e))
+    out[k] = atSets({ ...f, side: [...f.side.filter((e) => !TEAM_WIDE.has(e)), ...team] }, data.value)
+  }
+  return out
+})
+/** A partner changed from its In battle: what's on the whole side (screens, Tailwind) its side's too, as it is in a
+ * battle, so the two never disagree. */
+function setPartner(k: Partner, f: Fighter) {
+  const main = k === 'c' ? 'a' : 'b'
+  const team = f.side.filter((e) => TEAM_WIDE.has(e))
+  const was = sides.value[main]
+  const wasTeam = was.side.filter((e) => TEAM_WIDE.has(e))
+  if ([...team].sort().join() !== [...wasTeam].sort().join())
+    setSide(main, { ...was, side: [...was.side.filter((e) => !TEAM_WIDE.has(e)), ...team] })
+  setSide(k, f)
+}
+/** Each partner's moves and In battle folded or not, for the visit: its moves open, its battle folded at first. */
+const partnerFolded = shallowRef<{ moves: Record<Partner, boolean>; battle: Record<Partner, boolean> }>({
+  moves: { c: false, d: false },
+  battle: { c: true, d: true },
+})
+const foughtOf = (k: Slot) => (k === 'a' || k === 'b' ? fought.value[k] : (foughtPartners.value[k] ?? NO_ONE))
+const patchMember = (k: Slot, patch: Partial<Member>) =>
+  setSide(k, { ...fighterOf(k), member: { ...fighterOf(k).member, ...patch } })
 function swap() {
   sides.value = { a: sides.value.b, b: sides.value.a }
+  partners.value = {
+    ...(partners.value.d && { c: partners.value.d }),
+    ...(partners.value.c && { d: partners.value.c }),
+  }
   picking.value = null
   previous.value = []
 }
 function resetAll() {
   sides.value = { a: emptyFighter(), b: emptyFighter() }
+  partners.value = {}
   field.value = emptyField()
   picking.value = null
   previous.value = []
@@ -394,7 +490,7 @@ function resetAll() {
 // The part being picked: its side and field, as in the team builder (a drawer on wide screens, a dialog on phones);
 // right after a Pokémon's picked, the meta's entry whose most common set can be loaded instead of going on (`common`);
 // its nature picked again from its stat points' step, the step to come back to once picked (`back`).
-const picking = shallowRef<{ side: SideKey; field: Field; common?: PokemonId; back?: Field } | null>(null)
+const picking = shallowRef<{ side: Slot; field: Field; common?: PokemonId; back?: Field } | null>(null)
 // Its steps, the way back through them; the opponent's moves step going back into the picker it went on from.
 const { canBack: pickerCanBack, back: pickerBack } = useStepBack(picking, (p) => p.side)
 const pickerOpen = computed({
@@ -407,7 +503,21 @@ const sideEls = shallowRef<Partial<Record<SideKey, InstanceType<typeof CalcSide>
 const setSideEl = (k: SideKey, el: unknown) => {
   sideEls.value[k] = el as InstanceType<typeof CalcSide> | null
 }
-const drawerAnchor = computed(() => (picking.value ? (sideEls.value[picking.value.side]?.card ?? null) : null))
+// A partner's slot over the hits, its card or the dashed button adding it: the drawer anchored on it.
+const partnerEls = shallowRef<Partial<Record<Partner, HTMLElement | InstanceType<typeof CalcSide> | null>>>({})
+const setPartnerEl = (k: Partner, el: unknown) => {
+  partnerEls.value[k] = el as HTMLElement | InstanceType<typeof CalcSide> | null
+}
+/** A partner's slot as an element: its panel's card, or the button adding it. */
+const partnerEl = (k: Partner): HTMLElement | null => {
+  const el = partnerEls.value[k]
+  return el && 'card' in el ? el.card : (el ?? null)
+}
+const drawerAnchor = computed(() => {
+  const k = picking.value?.side
+  if (!k) return null
+  return k === 'a' || k === 'b' ? (sideEls.value[k]?.card ?? null) : partnerEl(k)
+})
 const drawer = shallowRef<InstanceType<typeof SideDrawer> | null>(null)
 const pickerBox = shallowRef<HTMLElement | null>(null)
 watch(picking, async () => {
@@ -416,7 +526,7 @@ watch(picking, async () => {
 })
 
 /** A Pokémon picked: the rest of its set to be put together (its only ability given), the side's field effects kept. */
-function choose(k: SideKey, id: PokemonId) {
+function choose(k: Slot, id: PokemonId) {
   const { pokemon, item } = pickedAs(id)
   const abilities = POKEMON[pokemon].abilities
   const member = {
@@ -425,32 +535,32 @@ function choose(k: SideKey, id: PokemonId) {
     item: item ?? null,
     ability: abilities.length === 1 ? abilities[0]! : null,
   }
-  setSide(k, { ...emptyFighter(member), side: sides.value[k].side, sets: sides.value[k].sets })
+  setSide(k, { ...emptyFighter(member), side: fighterOf(k).side, sets: fighterOf(k).sets })
 }
 /** The set being put together skipped: the most common set loaded, the picker closed. */
 function loadCommon() {
   const p = picking.value
   if (!p?.common) return
-  setSide(p.side, {
-    ...commonSet(p.common, data.value),
-    side: sides.value[p.side].side,
-    sets: sides.value[p.side].sets,
-  })
-  picking.value = null
+  const f = clearOfMate(p.side, commonSet(p.common, data.value))
+  setSide(p.side, { ...f, side: fighterOf(p.side).side, sets: fighterOf(p.side).sets })
+  // Its item taken by its mate, that step next, to pick another.
+  picking.value = f.member.item || !commonSet(p.common, data.value).member.item ? null : { side: p.side, field: 'item' }
 }
 const [DefineCommon, ReuseCommon] = createReusableTemplate()
 const [DefineBody, ReuseBody] = createReusableTemplate()
 const [DefineDock, ReuseDock] = createReusableTemplate()
 // The reader's teams, a side loading one of their Pokémon: in the side's Load menu and in its picker's.
-const [DefineTeams, ReuseTeams] = createReusableTemplate<{ side: SideKey; done: () => void }>()
+const [DefineTeams, ReuseTeams] = createReusableTemplate<{ side: Slot; done: () => void }>()
 const commonPreview = computed(() => (picking.value?.common ? commonSet(picking.value.common, data.value) : null))
 
 function pick(value: string) {
   const p = picking.value
   if (!p) return
-  const m = sides.value[p.side].member
+  const m = fighterOf(p.side).member
   let common: PokemonId | undefined
-  if (p.field === 'pokemon' && props.inverse) {
+  // The solver's two main ones; its partners, known, are put together as the damage tab's are.
+  const solverMain = props.inverse && (p.side === 'a' || p.side === 'b')
+  if (p.field === 'pokemon' && solverMain) {
     // The solver's: another Pokémon at its most common set, nothing more asked.
     if (value !== setsAs(m)) loadSolverSide(p.side, value as PokemonId)
     picking.value = null
@@ -465,17 +575,16 @@ function pick(value: string) {
       // Another forme of the one it has, the list having a Mega apart: its Mega, holding its stone and Mega Evolving,
       // or back from it, without it; the rest of its set kept, that forme's most common one offered.
       const member = { ...m, item: pickedAs(id).item ?? null }
-      setSide(p.side, { ...sides.value[p.side], member, mega: !!stoneMega(member) })
+      setSide(p.side, { ...fighterOf(p.side), member, mega: !!stoneMega(member) })
       common = commonForme(id, data.value)
     }
   } else if (p.field === 'item') {
     // Its Mega Stone given, it Mega Evolves.
     const member = { ...m, item: (value || null) as ItemId | null }
-    setSide(p.side, { ...sides.value[p.side], member, mega: !!stoneMega(member) })
+    setSide(p.side, { ...fighterOf(p.side), member, mega: !!stoneMega(member) })
   } else if (p.field === 'ability') patchMember(p.side, { ability: value as AbilityId })
   // A nature picked, it's at its own rather than at every set.
-  else if (p.field === 'nature')
-    setSide(p.side, { ...sides.value[p.side], member: { ...m, nature: value }, sets: false })
+  else if (p.field === 'nature') setSide(p.side, { ...fighterOf(p.side), member: { ...m, nature: value }, sets: false })
   else if (typeof p.field === 'number') {
     const moves = [...m.moves]
     // No move, the slot left empty; a move the set has elsewhere can't be picked again (the picker greys it out).
@@ -487,20 +596,25 @@ function pick(value: string) {
   // On the solver, what's set no longer worked out, and nothing after it asked for: one part, from its band.
   if (props.inverse) unwork(p.side, p.field)
   // From a band, that part alone (but a Pokémon, its set still to put together).
-  const alone = props.inverse || (!!fromBands.value && p.field !== 'pokemon')
-  const next = p.back ?? (alone ? null : nextField(sides.value[p.side].member, p.field))
+  const alone = solverMain || (!!fromBands.value && p.field !== 'pokemon')
+  const next = p.back ?? (alone ? null : nextField(fighterOf(p.side).member, p.field))
   picking.value = next === null ? null : { side: p.side, field: next, ...(common && { common }) }
 }
 
 /** The parts of a set the inverse tab can work out, by the picker's step. */
 const WORKABLE = { item: 'item', nature: 'nature', points: 'points' } as const
 const workableOf = (f: Field | undefined) =>
-  props.inverse && typeof f === 'string' && f in WORKABLE ? WORKABLE[f as keyof typeof WORKABLE] : null
+  props.inverse &&
+  (picking.value?.side === 'a' || picking.value?.side === 'b') &&
+  typeof f === 'string' &&
+  f in WORKABLE
+    ? WORKABLE[f as keyof typeof WORKABLE]
+    : null
 /** On the inverse tab, a part's step left for it to be worked out: on in the side's Work out, and on to the next. */
 function workOutStep() {
   const p = picking.value
   const part = workableOf(p?.field)
-  if (!p || !part) return
+  if (!p || !part || (p.side !== 'a' && p.side !== 'b')) return
   setWork(p.side, part, true)
   picking.value = p.back ? { side: p.side, field: p.back } : null
 }
@@ -509,7 +623,8 @@ function setWork(k: SideKey, part: keyof OpponentUnknowns, on: boolean) {
   else work.value = { ...work.value, [part]: on }
 }
 /** A part set on the solver: no longer worked out. */
-function unwork(k: SideKey, f: Field | undefined) {
+function unwork(k: Slot, f: Field | undefined) {
+  if (k !== 'a' && k !== 'b') return
   const part = workableOf(f)
   if (part && (k === 'a' ? workYours : work).value[part]) setWork(k, part, false)
 }
@@ -527,9 +642,9 @@ const menuOpen = computed({
 })
 /** Whether a side's set may be replaced: at once with no Pokémon there, else once confirmed (the actions' dialog closed
  * first, the confirmation over the page). */
-async function mayReplace(k: SideKey, setOnly = false): Promise<boolean> {
+async function mayReplace(k: Slot, setOnly = false): Promise<boolean> {
   menuSide.value = null
-  const id = sides.value[k].member.pokemon
+  const id = fighterOf(k).member.pokemon
   if (!id) return true
   return confirmDialog({
     message: t(setOnly ? 'calc.replaceSetConfirm' : 'calc.replaceConfirm', { name: refName(pokemon(id)) }),
@@ -542,18 +657,35 @@ async function common(k: SideKey) {
   // Holding its Mega Stone it's its Mega, whether it has Mega Evolved yet or not (left as it was): the Mega's set.
   const { mega, side, sets } = sides.value[k]
   const forme = setsAs(sides.value[k].member)!
-  setSide(k, { ...commonSet(forme, data.value), side, sets, ...(forme !== id && { mega }) })
+  setSide(k, { ...clearOfMate(k, commonSet(forme, data.value)), side, sets, ...(forme !== id && { mega }) })
 }
 function clearSide(k: SideKey) {
   menuSide.value = null
   setSide(k, { ...emptyFighter(), side: sides.value[k].side, sets: sides.value[k].sets })
 }
 const savedTeams = computed(() => teams.value.filter((tm) => tm.members.some((m) => m.pokemon)))
-function fromTeam(k: SideKey, m: Member) {
-  setSide(k, { ...emptyFighter(JSON.parse(JSON.stringify(m)) as Member), side: sides.value[k].side })
+/** A most common set loaded where its mate holds its item already, or a Mega Stone past the most Megas: without it. */
+function clearOfMate(k: Slot, f: Fighter): Fighter {
+  const item = f.member.item
+  if (!item) return f
+  const c = clashesOf(mateOf(k))
+  if (!c.item(item) && !(c.megasFull && stoneMega(f.member))) return f
+  const member = { ...f.member, item: null }
+  return { ...f, member, mega: false }
+}
+function fromTeam(k: Slot, m: Member) {
+  const clash = loadClash(k, m)
+  if (clash) {
+    void confirmDialog({
+      message: t('calc.partners.cantLoad', { name: m.pokemon ? refName(pokemon(m.pokemon)) : '', reason: clash }),
+      confirm: t('calc.partners.ok'),
+    })
+    return
+  }
+  setSide(k, { ...emptyFighter(JSON.parse(JSON.stringify(m)) as Member), side: fighterOf(k).side })
 }
 /** One of the reader's teams' Pokémon loaded into a side, once confirmed where it replaces one. */
-async function loadFromTeam(k: SideKey, m: Member, done: () => void) {
+async function loadFromTeam(k: Slot, m: Member, done: () => void) {
   done()
   if (!(await mayReplace(k))) return
   fromTeam(k, m)
@@ -567,7 +699,7 @@ async function copySet(k: SideKey) {
   clearTimeout(copiedTimer)
   copiedTimer = setTimeout(() => (copiedSide.value = null), 1500)
 }
-const pasting = shallowRef<SideKey | null>(null)
+const pasting = shallowRef<Slot | null>(null)
 const pasted = shallowRef('')
 const pasteFailed = shallowRef(false)
 const pasteOpen = computed({
@@ -655,7 +787,12 @@ const fieldOn = computed(() =>
 // A Pokémon coming in with an ability that sets the weather or terrain sets it, as it would in battle (not a setup
 // opened from a link, whose field is as it was left, nor the two swapping places).
 watch(
-  () => [abilityOf(sides.value.a), abilityOf(sides.value.b)] as const,
+  () =>
+    [
+      abilityOf(sides.value.a),
+      abilityOf(sides.value.b),
+      ...PARTNERS.map((k) => (partners.value[k] ? abilityOf(partners.value[k]) : null)),
+    ] as const,
   (now, before) => {
     now.forEach((a) => {
       const sets = a && !before.includes(a) ? SETS_FIELD[a] : undefined
@@ -668,19 +805,35 @@ const spreadsOf = (f: Fighter) => {
   const id = setsAs(f.member)
   return (id && data.value?.[id]?.spreads) || []
 }
-/** The calc's sides aren't a team: nothing clashes. */
-const otherMembers: Member[] = []
-const pickerMember = computed(() => (picking.value ? sides.value[picking.value.side].member : null))
+/** On the solver, each side two on the field, a team's two: the other of the side (yours and your partner, the opponent
+ * and its), the team's rules kept between them (Species and Item Clause, the most Megas: `clashesOf`), what would
+ * break them not picked (`TeamPicker`'s `strict`). On the damage tab, the two sides aren't a team: nothing clashes. */
+const MATE = { a: 'c', c: 'a', b: 'd', d: 'b' } as const
+const mateOf = (k: Slot): Member[] => {
+  if (!props.inverse) return []
+  const m = fighterOf(MATE[k]).member
+  return m.pokemon ? [m] : []
+}
+const otherMembers = computed(() => (picking.value ? mateOf(picking.value.side) : []))
+/** Why a whole set can't go into a slot (loaded from a team or a paste), breaking the rules with its mate; if so. */
+function loadClash(k: Slot, m: Member): string | null {
+  const c = clashesOf(mateOf(k))
+  if (m.pokemon && c.species(m.pokemon)) return t('builder.taken')
+  if (m.item && c.item(m.item)) return t('builder.heldBy', { name: nameOf(fighterOf(MATE[k])) })
+  if (c.megasFull && stoneMega(m)) return t('builder.megasFull', { max: RULES.megas })
+  return null
+}
+const pickerMember = computed(() => (picking.value ? fighterOf(picking.value.side).member : null))
 /** The side being picked for's stat points' step: the Pokémon its stats are of, its spreads, every set. */
 const pickerPoints = computed(() => {
   const k = picking.value?.side
   if (!k) return null
-  const f = sides.value[k]
+  const f = fighterOf(k)
   return {
     battler: battlerOf(f),
     spreads: spreadsOf(f),
     canPool: canPool(f, data.value),
-    atSets: !!f.sets && !!fought.value[k].pooled,
+    atSets: !!f.sets && !!foughtOf(k).pooled,
     pooled: pooledView(f, data.value),
   }
 })
@@ -688,13 +841,13 @@ const pickerPoints = computed(() => {
 function pointsChange(patch: Partial<Member>) {
   const k = picking.value?.side
   if (!k) return
-  setSide(k, { ...sides.value[k], member: { ...sides.value[k].member, ...patch }, sets: false })
+  setSide(k, { ...fighterOf(k), member: { ...fighterOf(k).member, ...patch }, sets: false })
   if (props.inverse) unwork(k, 'points')
 }
 function pointsSets(on: boolean) {
   const k = picking.value?.side
   if (!k) return
-  setSide(k, { ...sides.value[k], sets: on })
+  setSide(k, { ...fighterOf(k), sets: on })
   if (props.inverse) unwork(k, 'points')
 }
 const natureAgain = () =>
@@ -709,10 +862,15 @@ const hasBoth = computed(() => !!(battlerOf(sides.value.a) && battlerOf(sides.va
 // hits; the two as bands again, stuck to the top on every screen once the panels are past, each part of a set on its
 // band opening its picker step (`bandPart`), the drawer from the side the band leaves clear.
 /** A Pokémon picked on the solver: its most common set but its moves, which the hits fill in as they're picked. */
-function loadSolverSide(k: SideKey, id: PokemonId) {
-  const f = commonSet(id, data.value)
+function loadSolverSide(k: Slot, id: PokemonId) {
+  const f = clearOfMate(k, commonSet(id, data.value))
   const member = { ...f.member, moves: f.member.moves.map(() => null) as Member['moves'] }
-  setSide(k, { ...f, member, side: sides.value[k].side, sets: sides.value[k].sets })
+  setSide(k, { ...f, member, side: fighterOf(k).side, sets: fighterOf(k).sets })
+}
+/** A partner's slot: with none, the picker's Pokémon step for it; its card's parts, their steps. */
+function partnerPart(k: Partner, f: Field) {
+  hitMove.value = null
+  picking.value = { side: k, field: f }
 }
 /** Both in: the page taken down to the hits, the next thing to say. */
 watch(hasBoth, (now, before) => {
@@ -1035,6 +1193,8 @@ let kept: {
   field: Battlefield
   hits: HitDraft[]
   first: 'a' | 'b' | null
+  partners: Partial<Record<Partner, Fighter>>
+  firsts: Partial<Record<Partner, 'a' | 'b' | null>>
   work: OpponentUnknowns
   workYours: OpponentUnknowns
   goal: Goal
@@ -1048,6 +1208,8 @@ function keepPage() {
     field: field.value,
     hits: hits.value,
     first: first.value,
+    partners: partners.value,
+    firsts: firsts.value,
     work: work.value,
     workYours: workYours.value,
     goal: goal.value,
@@ -1078,6 +1240,8 @@ async function stageExample(o: {
   // The second example, Your spread, on two of its own.
   const pair = g === 'need' && ex.need ? ex.need : ex
   sides.value = o.sides ? { a: pair.a, b: pair.b } : { a: emptyFighter(), b: emptyFighter() }
+  // The examples are of the two alone.
+  partners.value = {}
   field.value = emptyField()
   work.value = { ...GOALS[g].b }
   workYours.value = { ...GOALS[g].a }
@@ -1094,6 +1258,7 @@ async function leaveExample() {
   if (!k) return
   kept = null
   sides.value = k.sides
+  partners.value = k.partners
   field.value = k.field
   work.value = k.work
   workYours.value = k.workYours
@@ -1106,6 +1271,7 @@ async function leaveExample() {
   await nextTick()
   hits.value = k.hits
   first.value = k.first
+  firsts.value = k.firsts
   example.value = null
   damageEx.value = null
   window.scrollTo({ top: 0 })
@@ -1335,6 +1501,9 @@ function bandPart(k: SideKey, f: Field) {
   picking.value = { side: k, field: f }
 }
 
+/** A hit's attacker and defender: the other (yours, or the partner it's with) and the opponent. */
+const hitAttacker = (h: HitDraft): Slot => (h.by === 'a' ? (h.with ?? 'a') : 'b')
+const hitDefender = (h: HitDraft): Slot => (h.by === 'a' ? 'b' : (h.with ?? 'a'))
 /** A hit's move being picked, from its row on the page: the drawer anchored on its move field (on phones a dialog). */
 const hitMove = shallowRef<number | null>(null)
 const hitRow = shallowRef<HTMLElement | null>(null)
@@ -1346,11 +1515,11 @@ function pickHitMove(i: number) {
 function hitMovePicked(mv: MoveId) {
   const i = hitMove.value
   if (i === null) return
-  const by = hits.value[i]!.by
+  const by = hitAttacker(hits.value[i]!)
   hits.value = hits.value.map((h, j) => (j === i ? { ...h, move: mv } : h))
   hitMove.value = null
   // Into the attacker's set, in its first empty slot, while it has one.
-  const moves = [...sides.value[by].member.moves]
+  const moves = [...fighterOf(by).member.moves]
   const free = moves.indexOf(null)
   if (!moves.includes(mv) && free >= 0) {
     moves[free] = mv
@@ -1641,12 +1810,68 @@ function face(f: Fighter) {
       <ReuseDock v-if="!wide" />
       <!-- Both in: the hits seen, then what fits them. -->
       <div class="solver">
+        <!-- The partners on the field, as doubles has them: each a band of its side's color with its set as chips (each
+             opening its picker step) and the way to take it off, or, not added yet, a dashed slot adding it. -->
+        <div class="partners">
+          <template v-for="k in PARTNERS" :key="k">
+            <div v-if="partners[k]" class="partner" :class="toneOf(k)">
+              <!-- On phones, where a side's panel has no band of its own, whose it is over it. -->
+              <p v-if="!wide" class="partner-label">{{ t(`calc.partner.${k}`) }}</p>
+              <!-- A side's panel as the two main ones have: its set, its moves, what the battle adds to it. -->
+              <CalcSide
+                :ref="(el) => setPartnerEl(k, el)"
+                :fighter="foughtOf(k)"
+                :other="fought.b"
+                :field
+                :theirs="k === 'd'"
+                :label="t(`calc.partner.${k}`)"
+                :active="picking?.side === k ? picking.field : null"
+                :data
+                :side-open="sideOpen"
+                :moves-folded="partnerFolded.moves[k]"
+                :battle-folded="partnerFolded.battle[k]"
+                inverse
+                @update:fighter="setPartner(k, $event)"
+                @field="partnerPart(k, $event)"
+                @clear="removePartner(k)"
+                @side-open="sideOpen = $event"
+                @battlefield="field = $event"
+                @moves-folded="partnerFolded = { ...partnerFolded, moves: { ...partnerFolded.moves, [k]: $event } }"
+                @battle-folded="partnerFolded = { ...partnerFolded, battle: { ...partnerFolded.battle, [k]: $event } }"
+              >
+                <template #actions>
+                  <button
+                    v-tip="t('calc.partners.remove', { name: nameOf(partners[k]) })"
+                    type="button"
+                    :class="wide ? ['btn', 'on-band'] : 'set-menu'"
+                    :aria-label="t('calc.partners.remove', { name: nameOf(partners[k]) })"
+                    @click="removePartner(k)"
+                  >
+                    <X :size="16" aria-hidden="true" />
+                  </button>
+                </template>
+              </CalcSide>
+            </div>
+            <button
+              v-else
+              :ref="(el) => setPartnerEl(k, el)"
+              type="button"
+              class="add-partner"
+              :class="toneOf(k)"
+              @click="partnerPart(k, 'pokemon')"
+            >
+              <Plus :size="16" aria-hidden="true" />{{ t(k === 'c' ? 'calc.partners.addC' : 'calc.partners.addD') }}
+            </button>
+          </template>
+        </div>
         <CalcHits
           id="calc-hits"
           v-model:hits="hits"
           v-model:first="first"
+          v-model:firsts="firsts"
           :yours="fought.a"
           :theirs="fought.b"
+          :partners="foughtPartners"
           :goal="yoursWorked"
           @pick-move="pickHitMove"
           @next="toGoal"
@@ -1659,6 +1884,7 @@ function face(f: Fighter) {
             :field
             :data
             :obs="observations"
+            :partners="foughtPartners"
             :work
             :work-yours="yoursWorked ? workYours : null"
             @use="useBuild"
@@ -1738,7 +1964,8 @@ function face(f: Fighter) {
         v-if="picking && pickerMember"
         :member="pickerMember"
         :others="otherMembers"
-        :side="picking.side === 'a' ? 'yours' : 'opponent'"
+        :strict="inverse"
+        :side="toneOf(picking.side)"
         :field="picking.field"
         :data
         :snapshot
@@ -1754,8 +1981,8 @@ function face(f: Fighter) {
       /></TeamPicker>
       <CalcHitMove
         v-else-if="hitMove !== null && hits[hitMove]"
-        :attacker="sides[hits[hitMove]!.by].member"
-        :defender="battlerOf(sides[hits[hitMove]!.by === 'a' ? 'b' : 'a'])!"
+        :attacker="fighterOf(hitAttacker(hits[hitMove]!)).member"
+        :defender="battlerOf(fighterOf(hitDefender(hits[hitMove]!)))!"
         :data
         :current="hits[hitMove]!.move"
         @pick="hitMovePicked"
@@ -1786,7 +2013,8 @@ function face(f: Fighter) {
         <TeamPicker
           :member="pickerMember"
           :others="otherMembers"
-          :side="picking.side === 'a' ? 'yours' : 'opponent'"
+          :strict="inverse"
+          :side="toneOf(picking.side)"
           :field="picking.field"
           :data
           :snapshot
@@ -2477,6 +2705,55 @@ word, as the common set's offer has. */
 .solver > * {
   margin: 0;
 }
+/* The partners, side by side (one under the other on phones): yours' first, as the sides are. */
+.partners {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 16px;
+  align-items: start;
+}
+@media (max-width: 899px) {
+  .partners {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* A partner added: a side's panel, as the main two; on phones whose it is over it. */
+.partner {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.partner > :deep(section) {
+  margin: 0;
+}
+.partner-label {
+  margin: 0 0 4px;
+  font-size: 0.875em;
+  font-weight: bold;
+  color: var(--accent);
+}
+.partner.opponent .partner-label {
+  color: var(--opponent);
+}
+/* Not added yet: a dashed slot in its side's color, as the speed comparison's way to add another. */
+.add-partner {
+  --team: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 8px 10px;
+  font: inherit;
+  font-weight: bold;
+  text-align: left;
+  color: var(--team);
+  background: color-mix(in srgb, var(--team) 8%, var(--panel));
+  border: 2px dashed var(--team);
+  cursor: pointer;
+}
+.add-partner.opponent {
+  --team: var(--opponent);
+}
 /* Both in, the bands stuck under the bars at the top, no room of their own in the page, sliding in once the sides'
    panels are past. */
 .bands-dock {
@@ -2550,8 +2827,12 @@ word, as the common set's offer has. */
   border-top: 0;
   box-shadow: none;
 }
-/* The hits and what fits set apart from the sides' panels over them. */
+/* The hits and what fits set apart from the sides' panels over them: the partners, first, as close to the sides as
+   the two are to each other, so they read as theirs, and the room under them instead. */
 .calc > .solver {
-  margin-top: 16px;
+  margin-top: 0;
+}
+.solver > .partners {
+  margin-bottom: 16px;
 }
 </style>

@@ -13,6 +13,7 @@ import {
   reverseDamage,
   type Observation,
   type OpponentUnknowns,
+  type Partner,
   type ReverseColumn,
   type ReverseResult,
   type ReverseRow,
@@ -45,6 +46,8 @@ const props = defineProps<{
   field: Battlefield
   data: MetaData | null
   obs: readonly Observation[]
+  /** The partners on the field, those picked: what was seen with one (`with`) is against it rather than yours. */
+  partners?: Partial<Record<Partner, Fighter>>
   work: OpponentUnknowns
   /** What of yours is worked out; null with nothing. */
   workYours: OpponentUnknowns | null
@@ -97,6 +100,7 @@ function start() {
         theirs: props.theirs,
         field: props.field,
         entry: entryTheirs,
+        partners: props.partners,
         work: props.work,
         obs: props.obs,
       })
@@ -121,7 +125,10 @@ function start() {
   )
 }
 watch(() => [props.work, props.workYours, props.obs, props.data] as const, start, { immediate: true })
-watchDebounced(() => [props.yours, props.theirs, props.field] as const, start, { debounce: 150 })
+watchDebounced(() => [props.yours, props.theirs, props.partners, props.field] as const, start, { debounce: 150 })
+/** Something of yours worked out, what was seen with a partner isn't counted (`goalDamage` is yours' and the
+ * opponent's alone): said under what it works out. */
+const partnersLeftOut = computed(() => !!props.workYours && props.obs.some((o) => !!o.with))
 
 /** What's being answered, in a line: the parts of each set worked out, or none (whether what's set fits). */
 const partsOf = (w: OpponentUnknowns | null) => {
@@ -395,6 +402,7 @@ function use(r: ReverseRow) {
     <div class="choice">
       <slot />
       <p class="muted small asks">{{ asks }}</p>
+      <p v-if="partnersLeftOut" class="muted small asks">{{ t('calc.reverse.partnersLeftOut') }}</p>
     </div>
     <template v-if="theirId && yourId && obs.length && (result || goal)">
       <div class="body answers" :class="{ stale: slow, two: goal && result }">
