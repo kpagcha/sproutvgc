@@ -107,6 +107,7 @@
     "long": "Holder's partial-trapping moves deal 1/6 max HP per turn instead of 1/8."
   },
   "bitterberry": { "available": false },
+  "blackaugurite": { "available": false },
   "blackbelt": {
     "available": true,
     "short": "Holder's Fighting-type attacks have 1.2× power.",
@@ -118,6 +119,7 @@
     "long": "Holder's Dark-type attacks have 1.2× power."
   },
   "blacksludge": { "available": false },
+  "blankplate": { "available": false },
   "blastoisinite": {
     "available": true,
     "short": "If held by a Blastoise, this item allows it to Mega Evolve in battle.",
@@ -574,6 +576,7 @@
     "short": "At the end of every turn, holder restores 1/16 of its max HP.",
     "long": "At the end of every turn, holder restores 1/16 of its max HP."
   },
+  "legendplate": { "available": false },
   "leppaberry": {
     "available": true,
     "short": "Restores 10 PP to the first of the holder's moves to reach 0 PP. Single use.",
@@ -768,6 +771,7 @@
     "short": "Halves damage taken from a supereffective Psychic-type attack. Single use.",
     "long": "Halves damage taken from a supereffective Psychic-type attack. Single use."
   },
+  "peatblock": { "available": false },
   "pechaberry": {
     "available": true,
     "short": "Holder is cured if it is poisoned. Single use.",

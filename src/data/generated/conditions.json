@@ -246,7 +246,7 @@
   "toxicspikes": { "kind": "side", "sources": { "move": ["toxicspikes"], "ability": ["toxicdebris"], "item": [] } },
   "trapped": {
     "kind": "volatile",
-    "sources": { "move": ["block", "jawlock", "meanlook", "spiritshackle"], "ability": [], "item": [] }
+    "sources": { "move": ["block", "jawlock", "meanlook", "noretreat", "spiritshackle"], "ability": [], "item": [] }
   },
   "trickroom": { "kind": "field", "sources": { "move": ["trickroom"], "ability": [], "item": [] } },
   "twoturnmove": {
