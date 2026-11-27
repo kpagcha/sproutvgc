@@ -166,12 +166,17 @@ const MOVE_KINDS = ['type', 'category', 'flag', 'reach', 'priority'] as const
 const SETS_MOVES = 10
 const learnset = shallowRef<MoveId[] | null>(null)
 watch(id, () => (learnset.value = null))
-watch(movepool, async (on) => {
-  if (!on || learnset.value) return
-  const current = id.value
-  const sets = await loadLearnsets()
-  if (id.value === current) learnset.value = movesOf(sets, current)
-})
+// At once too, and on another Pokémon: the page can open on it unfolded (`useUnfolded`, coming back to it).
+watch(
+  [movepool, id],
+  async ([on]) => {
+    if (!on || learnset.value) return
+    const current = id.value
+    const sets = await loadLearnsets()
+    if (id.value === current) learnset.value = movesOf(sets, current)
+  },
+  { immediate: true },
+)
 const moveIds = computed(() => {
   const used = moves.value.map((x) => x.ref.id)
   if (!movepool.value || !learnset.value) return used.slice(0, SETS_MOVES)
